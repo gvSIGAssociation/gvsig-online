@@ -692,7 +692,6 @@ class Geoserver():
         
         elif r.status_code==404:
             return False
-        
         raise FailedRequestError(r.status_code, r.content)
     
     def get_fonts(self, user=None, password=None):

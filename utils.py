@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from django.http import response
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -35,8 +36,11 @@ from gvsigol.settings import MEDIA_ROOT
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
-    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup
+    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace
 from models import LayerReadGroup, LayerWriteGroup
+from gvsigol_core import utils as core_utils
+import ast
+from django.utils.crypto import get_random_string
 
 
 def get_all_user_groups_checked_by_layer(layer):
@@ -81,9 +85,40 @@ def get_write_roles(layer):
 
     return roles
 
-#TODO: llevar al paquete del core
-def create_datastore(request, username, ds_name, ws):
+ 
+def add_datastore(workspace, type, name, description, connection_params, username):
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    # first create the datastore on the backend
+    if gs.createDatastore(workspace,
+                          type,
+                          name,
+                          description,
+                          connection_params):
+        
+        # save it on DB if successfully created
+        datastore = Datastore(
+            workspace=workspace,
+            type=type,
+            name=name,
+            description=description,
+            connection_params=connection_params,
+            created_by=username
+        )
+        datastore.save()
+        return datastore
 
+def create_workspace(server_id, ws_name, uri, values, username):
+    # first create the ws on the backend
+    gs = geographic_servers.get_instance().get_server_by_id(server_id)
+    if gs.createWorkspace(ws_name, uri):
+        # save it on DB if successfully created
+        newWs = Workspace(**values)
+        newWs.created_by = username
+        newWs.save()
+        gs.reload_nodes()
+        return newWs
+
+def create_datastore(username, ds_name, ws):
     ds_type = 'v_PostGIS'
     description = 'BBDD ' + ds_name
 
@@ -95,20 +130,7 @@ def create_datastore(request, username, ds_name, ws):
     connection_params = '{ "host": "' + dbhost + '", "port": "' + dbport + '", "database": "' + dbname + '", "schema": "' + ds_name + '", "user": "' + dbuser + '", "passwd": "' + dbpassword + '", "dbtype": "postgis" }'
 
     if create_schema(ds_name):
-        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
-        if gs.createDatastore(ws, ds_type, ds_name, description, connection_params):
-            # save it on DB if successfully created
-            datastore = Datastore(
-                workspace = ws,
-                type = ds_type,
-                name = ds_name,
-                description = description,
-                connection_params = connection_params,
-                created_by=username
-            )
-            datastore.save()
-
-            return datastore
+        return add_datastore(ws, ds_type, ds_name, description, connection_params, username)
 
 #TODO: llevar al paquete del core
 def create_schema(ds_name):
@@ -402,4 +424,112 @@ def get_db_connect_from_layer(layer_id):
 def get_exception(code, msg):
     response = HttpResponse(msg)
     response.status_code = code
-    return response    
+    return response
+
+def check_schema_exists(schema):
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+    i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
+    exists = i.schema_exists(schema)
+    i.close()
+    return exists
+
+
+def setLayerExtent(layer, ds_type, layer_info, server):
+    try:
+        if ds_type == 'imagemosaic':
+            ds_type = 'coverage'
+        layer.native_srs = layer_info[ds_type]['srs']
+        layer.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
+        layer.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+        
+    except Exception as e:
+        layer.default_srs = 'EPSG:4326'
+        layer.native_extent = '-180,-90,180,90'
+        layer.latlong_extent = '-180,-90,180,90' 
+        
+
+def setTimeEnabled(server, layer):
+        time_resolution = 0
+        if (layer.time_resolution_year != None and layer.time_resolution_year > 0) or (layer.time_resolution_month != None and layer.time_resolution_month > 0) or (layer.time_resolution_week != None and layer.time_resolution_week > 0) or (layer.time_resolution_day != None and layer.time_resolution_day > 0):
+            if (layer.time_resolution_year != None and layer.time_resolution_year > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_year) * 3600 * 24 * 365)
+            if (layer.time_resolution_month != None and layer.time_resolution_month > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_month) * 3600 * 24 * 31)
+            if (layer.time_resolution_week != None and layer.time_resolution_week > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_week) * 3600 * 24 * 7)
+            if (layer.time_resolution_day != None and layer.time_resolution_day > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_day) * 3600 * 24 * 1)
+        if (layer.time_resolution_hour != None and layer.time_resolution_hour > 0) or (layer.time_resolution_minute != None and layer.time_resolution_minute > 0) or (layer.time_resolution_second != None and layer.time_resolution_second > 0):
+            if (layer.time_resolution_hour != None and layer.time_resolution_hour > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_hour) * 3600)
+            if (layer.time_resolution_minute != None and layer.time_resolution_minute > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_minute) * 60)
+            if (layer.time_resolution_second != None and layer.time_resolution_second > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_second))
+        server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
+
+
+def cloneLayer(target_datastore, layer, layer_group):
+    if layer.type == 'v_PostGIS': # operation not defined for the rest of types
+        # create the table
+        dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+        dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+        dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+        dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+        dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+        i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
+        table_name = layer.source_name if layer.source_name else layer.name
+        i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name)
+        i.close()
+
+        from gvsigol_services import views
+        server = geographic_servers.get_instance().get_server_by_id(target_datastore.workspace.server.id)
+
+        layerConf = ast.literal_eval(layer.conf) if layer.conf else {}
+        extraParams = {
+            "max_features": layerConf.get('featuretype', {}).get('', 0)
+        }
+        # add layer to Geoserver
+        views.do_add_layer(server, target_datastore, table_name, layer.title, layer.queryable, extraParams)
+        
+        new_name = layer.name
+        if Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
+            new_name = target_datastore.workspace.name + "_" + layer.name
+            i = 1
+            salt = ''
+            while Layer.objects.filter(name=layer.name, datastore=target_datastore).exists():
+                new_name = new_name + '_' + str(i) + salt
+                i = i + 1
+                if (i%1000) == 0:
+                    salt = '_' + get_random_string(3)
+        
+        # clone layer
+        layer.pk = None
+        layer.name = new_name
+        layer.datastore = target_datastore
+        if layer_group is not None:
+            layer.layer_group = layer_group
+        layer.save()
+        
+        new_layer_instance = Layer.objects.get(id=layer.pk)
+        
+        setTimeEnabled(server, new_layer_instance)
+        views.create_symbology(server, new_layer_instance)
+        """
+        TODO:
+        - clonar simbología en lugar de crearla!!
+        - enumeraciones
+        - ¿recursos de capa? ¿metadatos? etc
+        """
+        
+        server.updateThumbnail(new_layer_instance, 'create')
+    
+        core_utils.toc_add_layer(new_layer_instance)
+        server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
+        server.reload_nodes()
+        return new_layer_instance
+    return layer

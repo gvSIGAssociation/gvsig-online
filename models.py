@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 '''
     gvSIG Online.
@@ -18,12 +18,15 @@ from __future__ import unicode_literals
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gevent.tests.test___ident import Target
+from gvsigol_services.backend_postgis import Introspect
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from django.db import models
 from gvsigol_auth.models import UserGroup
 from gvsigol import settings
+from django.utils.crypto import get_random_string
 
 class Server(models.Model):
     TYPE_CHOICES = (
@@ -58,7 +61,7 @@ class Server(models.Model):
             return self.frontend_url + "/wcs"
     
     def getWmtsEndpoint(self, workspace=None):
-        return self.frontend_url + "/wmts"
+        return self.frontend_url + "/gwc/service/wmts"
     
     def getCacheEndpoint(self, workspace=None):
         return self.frontend_url + "/gwc/service/wms"
@@ -109,8 +112,7 @@ class Datastore(models.Model):
     
     def __unicode__(self):
         return self.workspace.name + ":" + self.name
- 
-    
+
 class LayerGroup(models.Model):
     server_id = models.IntegerField(null=True, default=get_default_server)
     name = models.CharField(max_length=150) 
@@ -121,6 +123,26 @@ class LayerGroup(models.Model):
     
     def __unicode__(self):
         return self.name
+    
+    def clone(self, recursive=True, target_datastore=None):
+        old_id = self.pk
+        new_name = target_datastore.workspace.name + "_" + self.name
+        i = 1
+        salt = ''
+        while LayerGroup.objects.filter(name=new_name, server_id=target_datastore.workspace.server.id).exists():
+            new_name = new_name + '_' + str(i) + salt
+            i = i + 1
+            if (i%1000) == 0:
+                salt = '_' + get_random_string(3)
+        self.pk = None
+        self.name = new_name
+        self.save()
+        
+        new_instance =  LayerGroup.objects.get(id=self.pk)
+        if recursive:
+            for lyr in LayerGroup.objects.get(id=old_id).layer_set.all():
+                lyr.clone(target_datastore=target_datastore, layer_group=new_instance)
+        return new_instance
 
 def get_default_layer_thumbnail():
     return settings.STATIC_URL + 'img/no_thumbnail.jpg'
@@ -164,12 +186,17 @@ class Layer(models.Model):
     native_srs = models.CharField(max_length=100, default='EPSG:4326')
     native_extent = models.CharField(max_length=250, default='-180,-90,180,90')
     latlong_extent = models.CharField(max_length=250, default='-180,-90,180,90')
+    source_name = models.TextField(null=True, blank=True) # table name for postgis layers, not defined for the rest
     
     def __unicode__(self):
         return self.name
     
     def get_qualified_name(self):
         return self.datastore.workspace.name + ":" + self.name
+    
+    def clone(self, target_datastore, recursive=True, layer_group=None):
+        from gvsigol_services.utils import cloneLayer
+        return cloneLayer(target_datastore, self, layer_group)
 
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer)
