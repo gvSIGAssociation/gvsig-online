@@ -212,7 +212,6 @@ class Geonetwork():
         
     def layer_updated_handler(self, sender, **kwargs):
         try:
-            logger.debug(u'layer_updated_handler')
             layer = kwargs['layer']
             lm = LayerMetadata.objects.get(layer=layer)
             

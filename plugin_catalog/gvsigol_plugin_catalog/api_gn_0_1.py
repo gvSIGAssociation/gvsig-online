@@ -556,6 +556,8 @@ class Geonetwork():
         raise FailedRequestError(md_response.status_code, md_response.content)
 
     def get_extent(self, layer_info, ds_type):
+        if ds_type == 'imagemosaic':
+            ds_type = 'coverage'
         minx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'])
         miny = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'])
         maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['maxx'])
