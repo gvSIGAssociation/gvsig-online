@@ -4,6 +4,7 @@ from django.db import models
 from gvsigol import settings
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup
+from django.utils.translation import ugettext as _
 
 def get_default_logo_image():
     return settings.STATIC_URL + 'img/logo_principal.png'
@@ -35,6 +36,20 @@ class Project(models.Model):
     def __unicode__(self):
         return self.name + ' - ' + self.description
     
+    def clone(self, target_datastore, name, title, recursive=True):
+        old_pid = self.pk
+        self.pk = None
+        self.name = name
+        self.title = title
+        self.save()
+        new_project_instance = Project.objects.get(id=self.pk)
+
+        if recursive:
+            old_project = Project.objects.get(id=old_pid)
+            for plg in old_project.projectlayergroup_set.all():
+                plg.clone(project=new_project_instance, target_datastore=target_datastore)
+            # TODO: user groups (ProjectUserGroup)
+        return new_project_instance
     
 class ProjectUserGroup(models.Model):
     project = models.ForeignKey(Project, default=None)
@@ -53,6 +68,16 @@ class ProjectLayerGroup(models.Model):
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
+    
+    def clone(self, recursive=True, project=None, target_datastore=None):
+        if recursive:
+            if not self.baselayer_group:
+                self.layer_group = self.layer_group.clone(target_datastore=target_datastore)
+        self.pk = None
+        if project:
+            self.project = project
+        self.save()
+        return ProjectLayerGroup.objects.get(id=self.pk)
 
 class SharedView(models.Model):
     name = models.CharField(max_length=40, unique=True)

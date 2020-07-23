@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-20 13:40+0200\n"
+"POT-Creation-Date: 2020-07-23 11:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,6 +19,50 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: es_ES\n"
 "X-Source-Language: C\n"
+
+#: gvsigol_core/forms.py:17
+msgid "New project title"
+msgstr "Proyecto del nuevo proyecto"
+
+#: gvsigol_core/forms.py:22 gvsigol_core/forms.py:29 gvsigol_core/forms.py:37
+msgid ""
+"must start by a lower case alphanumeric and contain lower case alphanumerics "
+"or underscores"
+msgstr ""
+"debe comenzar por una minúscula alfanumérica y contener minúsculas "
+"alfanuméricas o subrayados"
+
+#: gvsigol_core/forms.py:24 gvsigol_core/templates/project_list.html:100
+msgid "New project name"
+msgstr "Nombre del nuevo proyecto"
+
+#: gvsigol_core/forms.py:32 gvsigol_core/templates/project_list.html:106
+msgid "Target workspace name"
+msgstr "Nombre del espacio de trabajo de destino"
+
+#: gvsigol_core/forms.py:40 gvsigol_core/templates/project_list.html:112
+msgid "Target datastore and database schema name"
+msgstr "Almacén de datos y esquema de base de datos de destino"
+
+#: gvsigol_core/forms.py:45
+msgid "numeric value required"
+msgstr "valor numérico requerido"
+
+#: gvsigol_core/forms.py:52
+msgid "Project exists"
+msgstr "Lista de proyectos"
+
+#: gvsigol_core/forms.py:57
+msgid "Workspace exists"
+msgstr "El espacio de trabajo existe"
+
+#: gvsigol_core/forms.py:62
+msgid "Database schema exists"
+msgstr "El esquema de base de datos existe"
+
+#: gvsigol_core/forms.py:69
+msgid "Server does not exist"
+msgstr "El servidor no existe"
 
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
@@ -160,11 +204,11 @@ msgstr ""
 "Aprenda a administrar la información geográfica desde un dispositivo móvil o "
 "una tableta"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:451
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:450
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:454
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:453
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -188,8 +232,8 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:455
-#: gvsigol_core/utils.py:467
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:454
+#: gvsigol_core/utils.py:466
 msgid "Password"
 msgstr "Contraseña"
 
@@ -206,7 +250,7 @@ msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:463
+#: gvsigol_core/utils.py:462
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -269,7 +313,7 @@ msgid "Save"
 msgstr "Guardar"
 
 #: gvsigol_core/templates/project_add.html:26
-#: gvsigol_core/templates/project_update.html:26
+#: gvsigol_core/templates/project_update.html:40
 msgid "General"
 msgstr ""
 
@@ -278,47 +322,50 @@ msgid "Base layers"
 msgstr "Capas base"
 
 #: gvsigol_core/templates/project_add.html:28
-#: gvsigol_core/templates/project_update.html:27
+#: gvsigol_core/templates/project_update.html:41
 msgid "Layer groups"
 msgstr "Grupo de capas"
 
 #: gvsigol_core/templates/project_add.html:29
-#: gvsigol_core/templates/project_update.html:28
+#: gvsigol_core/templates/project_update.html:42
 #: gvsigol_core/templates/viewer.html:117
 #: gvsigol_core/templates/viewer_compress.html:117
 msgid "Tools"
 msgstr "Herramientas"
 
 #: gvsigol_core/templates/project_add.html:30
-#: gvsigol_core/templates/project_update.html:29
+#: gvsigol_core/templates/project_update.html:43
 msgid "User groups"
 msgstr "Grupos de usuarios"
 
 #: gvsigol_core/templates/project_add.html:43
-#: gvsigol_core/templates/project_update.html:45
+#: gvsigol_core/templates/project_update.html:59
 msgid "Select main logo"
 msgstr "Seleccionar logo principal"
 
 #: gvsigol_core/templates/project_add.html:43
 #: gvsigol_core/templates/project_add.html:120
-#: gvsigol_core/templates/project_update.html:45
-#: gvsigol_core/templates/project_update.html:145
+#: gvsigol_core/templates/project_update.html:59
+#: gvsigol_core/templates/project_update.html:159
 msgid "Supported formats"
 msgstr "Formatos soportados"
 
 #: gvsigol_core/templates/project_add.html:48
-#: gvsigol_core/templates/project_update.html:50
+#: gvsigol_core/templates/project_update.html:64
 msgid "Link for logo"
 msgstr "Enlace para el logo"
 
 #: gvsigol_core/templates/project_add.html:54
 #: gvsigol_core/templates/project_list.html:27
-#: gvsigol_core/templates/project_update.html:57
+#: gvsigol_core/templates/project_update.html:71
 msgid "Is public?"
 msgstr "¿Es público?"
 
 #: gvsigol_core/templates/project_add.html:60
+#: gvsigol_core/templates/project_clone.html:43
 #: gvsigol_core/templates/project_list.html:24
+#: gvsigol_core/templates/project_list.html:99
+#: gvsigol_core/templates/project_list.html:229
 msgid "Name"
 msgstr "Nombre"
 
@@ -327,8 +374,9 @@ msgid "Project name"
 msgstr "Nombre del proyecto"
 
 #: gvsigol_core/templates/project_add.html:66
+#: gvsigol_core/templates/project_clone.html:37
 #: gvsigol_core/templates/project_list.html:25
-#: gvsigol_core/templates/project_update.html:68
+#: gvsigol_core/templates/project_update.html:82
 #: gvsigol_core/templates/services_view.html:64
 #: gvsigol_core/templates/services_view.html:84
 #: gvsigol_core/templates/services_view.html:103
@@ -337,134 +385,135 @@ msgid "Title"
 msgstr "Título"
 
 #: gvsigol_core/templates/project_add.html:67
-#: gvsigol_core/templates/project_update.html:69
+#: gvsigol_core/templates/project_update.html:83
 msgid "Project title"
 msgstr "Título del proyecto"
 
 #: gvsigol_core/templates/project_add.html:72
 #: gvsigol_core/templates/project_list.html:26
-#: gvsigol_core/templates/project_update.html:75
+#: gvsigol_core/templates/project_update.html:89
 msgid "Description"
 msgstr "Descripción"
 
 #: gvsigol_core/templates/project_add.html:73
-#: gvsigol_core/templates/project_update.html:76
+#: gvsigol_core/templates/project_update.html:90
 msgid "Project description"
 msgstr "Descripción del proyecto"
 
 #: gvsigol_core/templates/project_add.html:78
-#: gvsigol_core/templates/project_update.html:82
+#: gvsigol_core/templates/project_update.html:96
 msgid "Toc panel presentation"
 msgstr "Presentación TOC"
 
 #: gvsigol_core/templates/project_add.html:80
-#: gvsigol_core/templates/project_update.html:85
-#: gvsigol_core/templates/project_update.html:87
+#: gvsigol_core/templates/project_update.html:99
+#: gvsigol_core/templates/project_update.html:101
 msgid "Toc hidden"
 msgstr "No mostrar TOC al inicio"
 
 #: gvsigol_core/templates/project_add.html:81
-#: gvsigol_core/templates/project_update.html:90
-#: gvsigol_core/templates/project_update.html:92
+#: gvsigol_core/templates/project_update.html:104
+#: gvsigol_core/templates/project_update.html:106
 msgid "Show toc and groups"
 msgstr "Mostrar TOC"
 
 #: gvsigol_core/templates/project_add.html:82
-#: gvsigol_core/templates/project_update.html:95
-#: gvsigol_core/templates/project_update.html:97
+#: gvsigol_core/templates/project_update.html:109
+#: gvsigol_core/templates/project_update.html:111
 msgid "Show toc, groups and layers"
 msgstr "Mostrar TOC y capas"
 
 #: gvsigol_core/templates/project_add.html:86
-#: gvsigol_core/templates/project_update.html:102
+#: gvsigol_core/templates/project_update.html:116
 msgid "Selectable layer groups"
 msgstr "Grupos de capas seleccionables"
 
 #: gvsigol_core/templates/project_add.html:92
-#: gvsigol_core/templates/project_update.html:113
+#: gvsigol_core/templates/project_update.html:127
 msgid "Restricted extent"
-msgstr ""
+msgstr "Extensión restringida"
 
 #: gvsigol_core/templates/project_add.html:101
-#: gvsigol_core/templates/project_update.html:126
+#: gvsigol_core/templates/project_update.html:140
 msgid "Locate place..."
 msgstr "Buscar lugar..."
 
 #: gvsigol_core/templates/project_add.html:120
-#: gvsigol_core/templates/project_update.html:145
+#: gvsigol_core/templates/project_update.html:159
 msgid "Change image?"
 msgstr "¿Cambiar imagen?"
 
 #: gvsigol_core/templates/project_add.html:127
-#: gvsigol_core/templates/project_update.html:153
+#: gvsigol_core/templates/project_update.html:167
 msgid "Show project icon in TOC"
 msgstr "Mostrar icono del proyecto en el TOC"
 
 #: gvsigol_core/templates/project_add.html:141
-#: gvsigol_core/templates/project_update.html:176
+#: gvsigol_core/templates/project_update.html:190
 msgid "Add layer group"
 msgstr "Asignar grupo de capas"
 
 #: gvsigol_core/templates/project_add.html:142
-#: gvsigol_core/templates/project_update.html:177
+#: gvsigol_core/templates/project_update.html:191
 msgid "Search layer group..."
 msgstr "Buscar grupo de capas..."
 
 #: gvsigol_core/templates/project_add.html:156
-#: gvsigol_core/templates/project_update.html:192
-#: gvsigol_core/templates/project_update.html:194
+#: gvsigol_core/templates/project_update.html:206
+#: gvsigol_core/templates/project_update.html:208
 msgid "Base group"
 msgstr "Grupos base"
 
 #: gvsigol_core/templates/project_add.html:161
-#: gvsigol_core/templates/project_update.html:201
-#: gvsigol_core/templates/project_update.html:203
+#: gvsigol_core/templates/project_update.html:215
+#: gvsigol_core/templates/project_update.html:217
 msgid "Add"
 msgstr "Añadir"
 
 #: gvsigol_core/templates/project_add.html:178
-#: gvsigol_core/templates/project_update.html:226
-#: gvsigol_core/templates/project_update.html:228
+#: gvsigol_core/templates/project_update.html:240
+#: gvsigol_core/templates/project_update.html:242
 msgid "Mark as default"
 msgstr "Marcar por defecto"
 
 #: gvsigol_core/templates/project_add.html:224
-#: gvsigol_core/templates/project_update.html:277
+#: gvsigol_core/templates/project_update.html:291
 msgid "Search tool..."
 msgstr "Herramienta de búsqueda..."
 
 #: gvsigol_core/templates/project_add.html:238
 #: gvsigol_core/templates/project_add.html:240
-#: gvsigol_core/templates/project_update.html:291
-#: gvsigol_core/templates/project_update.html:293
+#: gvsigol_core/templates/project_update.html:305
+#: gvsigol_core/templates/project_update.html:307
 msgid "Assign tool"
 msgstr "Asignar herramienta"
 
 #: gvsigol_core/templates/project_add.html:263
-#: gvsigol_core/templates/project_update.html:316
+#: gvsigol_core/templates/project_update.html:330
 msgid "Search user group..."
 msgstr "Buscar grupo de usuarios..."
 
 #: gvsigol_core/templates/project_add.html:277
 #: gvsigol_core/templates/project_add.html:279
-#: gvsigol_core/templates/project_update.html:330
-#: gvsigol_core/templates/project_update.html:332
+#: gvsigol_core/templates/project_update.html:344
+#: gvsigol_core/templates/project_update.html:346
 msgid "Assign user group"
 msgstr "Asignar grupo de usuarios"
 
 #: gvsigol_core/templates/project_add.html:311
-#: gvsigol_core/templates/project_update.html:454
+#: gvsigol_core/templates/project_update.html:466
 msgid "Create new layer group"
 msgstr "Crear nuevo grupo de capas"
 
 #: gvsigol_core/templates/project_add.html:314
-#: gvsigol_core/templates/project_update.html:457
+#: gvsigol_core/templates/project_update.html:469
 msgid "Is needed to save this project first, Do you want continue?"
 msgstr "Es necesario guardar el proyecto primero, ¿Desea continuar?"
 
 #: gvsigol_core/templates/project_add.html:317
-#: gvsigol_core/templates/project_list.html:70
-#: gvsigol_core/templates/project_update.html:460
+#: gvsigol_core/templates/project_list.html:72
+#: gvsigol_core/templates/project_list.html:123
+#: gvsigol_core/templates/project_update.html:472
 #: gvsigol_core/templates/shared_view_list.html:53
 #: gvsigol_core/templates/viewer.html:278
 #: gvsigol_core/templates/viewer_compress.html:279
@@ -472,8 +521,8 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #: gvsigol_core/templates/project_add.html:318
-#: gvsigol_core/templates/project_list.html:71
-#: gvsigol_core/templates/project_update.html:461
+#: gvsigol_core/templates/project_list.html:73
+#: gvsigol_core/templates/project_update.html:473
 #: gvsigol_core/templates/shared_view_list.html:54
 #: gvsigol_core/templates/viewer.html:279
 #: gvsigol_core/templates/viewer.html:301
@@ -482,99 +531,133 @@ msgstr "Cancelar"
 msgid "Accept"
 msgstr "Aceptar"
 
+#: gvsigol_core/templates/project_clone.html:12
+#: gvsigol_core/templates/project_list.html:124
+msgid "Clone"
+msgstr "Clonar"
+
+#: gvsigol_core/templates/project_clone.html:49
+#: gvsigol_core/templates/project_list.html:105
+#: gvsigol_core/templates/project_list.html:232
+msgid "Workspace"
+msgstr "Espacio de trabajo"
+
+#: gvsigol_core/templates/project_clone.html:55
+#: gvsigol_core/templates/project_list.html:111
+#: gvsigol_core/templates/project_list.html:235
+msgid "Datastore"
+msgstr "Almacén de datos"
+
+#: gvsigol_core/templates/project_clone.html:61
+msgid "Select server"
+msgstr "Seleccionar servidor"
+
 #: gvsigol_core/templates/project_list.html:17
 #: gvsigol_core/templates/select_public_project.html:51
 msgid "Projects list"
 msgstr "Lista de proyectos"
 
-#: gvsigol_core/templates/project_list.html:64
-#: gvsigol_core/templates/project_list.html:112
+#: gvsigol_core/templates/project_list.html:66
+#: gvsigol_core/templates/project_list.html:165
 msgid "Delete project"
 msgstr "Eliminar proyecto"
 
-#: gvsigol_core/templates/project_list.html:67
+#: gvsigol_core/templates/project_list.html:69
 msgid "The project will be removed, Do you want continue?"
 msgstr "El proyecto será eliminado, ¿Desea continuar?"
 
 #: gvsigol_core/templates/project_list.html:88
+#: gvsigol_core/templates/project_list.html:170
+msgid "Clone project"
+msgstr "Clonar proyecto"
+
+#: gvsigol_core/templates/project_list.html:117
+msgid "Server"
+msgstr "Servidor"
+
+#: gvsigol_core/templates/project_list.html:118
+msgid "Target server"
+msgstr "Servidor de destino"
+
+#: gvsigol_core/templates/project_list.html:141
 #: gvsigol_core/templates/shared_view_list.html:71
 msgid "Processing request..."
 msgstr "Procesando petición..."
 
-#: gvsigol_core/templates/project_list.html:89
+#: gvsigol_core/templates/project_list.html:142
 #: gvsigol_core/templates/shared_view_list.html:72
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Buscar%(sep)s"
 
-#: gvsigol_core/templates/project_list.html:90
+#: gvsigol_core/templates/project_list.html:143
 #: gvsigol_core/templates/shared_view_list.html:73
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
 
-#: gvsigol_core/templates/project_list.html:91
+#: gvsigol_core/templates/project_list.html:144
 #: gvsigol_core/templates/shared_view_list.html:74
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
 
-#: gvsigol_core/templates/project_list.html:92
+#: gvsigol_core/templates/project_list.html:145
 #: gvsigol_core/templates/shared_view_list.html:75
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando desde 0 a 0 de 0 registros"
 
-#: gvsigol_core/templates/project_list.html:93
+#: gvsigol_core/templates/project_list.html:146
 #: gvsigol_core/templates/shared_view_list.html:76
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrando %(max)s registros"
 
-#: gvsigol_core/templates/project_list.html:95
+#: gvsigol_core/templates/project_list.html:148
 #: gvsigol_core/templates/shared_view_list.html:78
 msgid "Loading..."
 msgstr "Cargando..."
 
-#: gvsigol_core/templates/project_list.html:96
-#: gvsigol_core/templates/project_list.html:97
+#: gvsigol_core/templates/project_list.html:149
+#: gvsigol_core/templates/project_list.html:150
 #: gvsigol_core/templates/shared_view_list.html:79
 #: gvsigol_core/templates/shared_view_list.html:80
 msgid "No records available"
 msgstr "No hay registros disponibles"
 
-#: gvsigol_core/templates/project_list.html:99
+#: gvsigol_core/templates/project_list.html:152
 #: gvsigol_core/templates/shared_view_list.html:82
 msgid "First"
 msgstr "Primero"
 
-#: gvsigol_core/templates/project_list.html:100
+#: gvsigol_core/templates/project_list.html:153
 #: gvsigol_core/templates/shared_view_list.html:83
 msgid "Previous"
 msgstr "Anterior"
 
-#: gvsigol_core/templates/project_list.html:101
+#: gvsigol_core/templates/project_list.html:154
 #: gvsigol_core/templates/shared_view_list.html:84
 msgid "Next"
 msgstr "Siguiente"
 
-#: gvsigol_core/templates/project_list.html:102
+#: gvsigol_core/templates/project_list.html:155
 #: gvsigol_core/templates/shared_view_list.html:85
 msgid "Last"
 msgstr "Último"
 
-#: gvsigol_core/templates/project_list.html:105
+#: gvsigol_core/templates/project_list.html:158
 #: gvsigol_core/templates/shared_view_list.html:88
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrden ascendente"
 
-#: gvsigol_core/templates/project_list.html:106
+#: gvsigol_core/templates/project_list.html:159
 #: gvsigol_core/templates/shared_view_list.html:89
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrden descendente"
 
-#: gvsigol_core/templates/project_list.html:116
+#: gvsigol_core/templates/project_list.html:176
 msgid "Update project"
 msgstr "Actualizar proyecto"
 
@@ -582,67 +665,67 @@ msgstr "Actualizar proyecto"
 msgid "Update"
 msgstr "Actualizar"
 
-#: gvsigol_core/templates/project_update.html:30
+#: gvsigol_core/templates/project_update.html:44
 msgid "Package the base layer"
 msgstr "Empaquetar capa base"
 
-#: gvsigol_core/templates/project_update.html:360
+#: gvsigol_core/templates/project_update.html:374
 msgid "Process running"
 msgstr "Procesando"
 
-#: gvsigol_core/templates/project_update.html:365
+#: gvsigol_core/templates/project_update.html:379
 msgid "Processed"
 msgstr "Procesados"
 
-#: gvsigol_core/templates/project_update.html:367
+#: gvsigol_core/templates/project_update.html:381
 msgid "of"
 msgstr "de"
 
-#: gvsigol_core/templates/project_update.html:374
+#: gvsigol_core/templates/project_update.html:388
 msgid "Estimated Time"
 msgstr "Tiempo estimado"
 
-#: gvsigol_core/templates/project_update.html:384
+#: gvsigol_core/templates/project_update.html:398
 msgid "Download version"
 msgstr "Descargar versión"
 
-#: gvsigol_core/templates/project_update.html:389
+#: gvsigol_core/templates/project_update.html:403
 msgid "Download"
 msgstr "Descarga"
 
-#: gvsigol_core/templates/project_update.html:396
+#: gvsigol_core/templates/project_update.html:410
 msgid "Niveles de zoom"
 msgstr "Niveles de zoom"
 
-#: gvsigol_core/templates/project_update.html:399
+#: gvsigol_core/templates/project_update.html:413
 msgid "Tiles per side"
 msgstr "Tiles por lado"
 
-#: gvsigol_core/templates/project_update.html:405
+#: gvsigol_core/templates/project_update.html:419
 msgid "Format"
 msgstr "Formato"
 
-#: gvsigol_core/templates/project_update.html:408
+#: gvsigol_core/templates/project_update.html:422
 msgid "PNG"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:411
+#: gvsigol_core/templates/project_update.html:425
 msgid "JPG"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:417
+#: gvsigol_core/templates/project_update.html:431
 msgid "Tilematrixset (WMTS)"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:420
+#: gvsigol_core/templates/project_update.html:434
 msgid "Tilematrixset"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:436
+#: gvsigol_core/templates/project_update.html:450
 msgid "Create layer"
 msgstr "Empaquetar capa"
 
-#: gvsigol_core/templates/project_update.html:439
+#: gvsigol_core/templates/project_update.html:451
 msgid "Stop Process"
 msgstr "Parar proceso"
 
@@ -659,8 +742,6 @@ msgid "WFS Services"
 msgstr "Servicios WFS"
 
 #: gvsigol_core/templates/services_view.html:54
-#, fuzzy
-#| msgid "WMS Service"
 msgid "CSW Services"
 msgstr "Servicios CSW"
 
@@ -725,7 +806,7 @@ msgstr "Leyenda"
 #: gvsigol_core/templates/viewer.html:198
 #: gvsigol_core/templates/viewer_compress.html:198
 msgid "Filters"
-msgstr ""
+msgstr "Filtros"
 
 #: gvsigol_core/templates/viewer.html:199
 #: gvsigol_core/templates/viewer_compress.html:199
@@ -752,103 +833,103 @@ msgstr "Los cambios que no se hayan salvado se perdarán. ¿Continuar?"
 msgid "Error loading layers"
 msgstr "Error cargando capas"
 
-#: gvsigol_core/utils.py:434
+#: gvsigol_core/utils.py:433
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: gvsigol_core/utils.py:450
+#: gvsigol_core/utils.py:449
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: gvsigol_core/utils.py:452
+#: gvsigol_core/utils.py:451
 msgid "First name"
 msgstr "Nombre"
 
-#: gvsigol_core/utils.py:453
+#: gvsigol_core/utils.py:452
 msgid "Last name"
 msgstr "Apellidos"
 
-#: gvsigol_core/utils.py:465
+#: gvsigol_core/utils.py:464
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
-#: gvsigol_core/views.py:179
+#: gvsigol_core/views.py:186
 msgid "Navigation history"
 msgstr "Historial de navegación"
 
-#: gvsigol_core/views.py:180
+#: gvsigol_core/views.py:187
 msgid "Browse the view forward and backward"
 msgstr "Navega por la vista hacia adelante y hacia atrás"
 
-#: gvsigol_core/views.py:184
+#: gvsigol_core/views.py:191
 msgid "Zoom tools"
 msgstr "Herramientas de zoom"
 
-#: gvsigol_core/views.py:185
+#: gvsigol_core/views.py:192
 msgid "Zoom in, zoom out, ..."
 msgstr "Zoom más, zoom menos, ..."
 
-#: gvsigol_core/views.py:189
+#: gvsigol_core/views.py:196
 msgid "Feature info"
 msgstr "Herramienta de información"
 
-#: gvsigol_core/views.py:190
+#: gvsigol_core/views.py:197
 msgid "Map information at point"
 msgstr "Información del mapa en el punto"
 
-#: gvsigol_core/views.py:194
+#: gvsigol_core/views.py:201
 msgid "Measure tools"
 msgstr "Herramientas de medida"
 
-#: gvsigol_core/views.py:195
+#: gvsigol_core/views.py:202
 msgid "It allows to measure areas and distances"
 msgstr "Permite medir áreas y distancias"
 
-#: gvsigol_core/views.py:199
+#: gvsigol_core/views.py:206
 msgid "Search coordinates"
 msgstr "Buscar coordenadas"
 
-#: gvsigol_core/views.py:200
+#: gvsigol_core/views.py:207
 msgid "Center the map at given coordinates"
 msgstr "Centra el mapa en unas coordenadas dadas"
 
-#: gvsigol_core/views.py:204
+#: gvsigol_core/views.py:211
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenadas"
 
-#: gvsigol_core/views.py:205
+#: gvsigol_core/views.py:212
 msgid "Transform coordinates between different systems"
 msgstr "Transforma las coordenadas entre diferentes sistemas"
 
-#: gvsigol_core/views.py:209
+#: gvsigol_core/views.py:216
 msgid "Geolocation"
 msgstr "Geolocalización"
 
-#: gvsigol_core/views.py:210
+#: gvsigol_core/views.py:217
 msgid "Center the map in the current position"
 msgstr "Centra el mapa en la posición actual"
 
-#: gvsigol_core/views.py:214
+#: gvsigol_core/views.py:221
 msgid "Share view"
 msgstr "Compartir vista"
 
-#: gvsigol_core/views.py:215
+#: gvsigol_core/views.py:222
 msgid "Allows you to share the view in its current state"
 msgstr "Permite compartir la vista en su estado actual"
 
-#: gvsigol_core/views.py:219
+#: gvsigol_core/views.py:226
 msgid "Select feature"
 msgstr "Seleccionar elemento"
 
-#: gvsigol_core/views.py:220
+#: gvsigol_core/views.py:227
 msgid "Select features from current layers"
 msgstr "Seleccionar elementos de las capas actuales"
 
-#: gvsigol_core/views.py:351
+#: gvsigol_core/views.py:358
 msgid "You must enter an project name"
 msgstr "Debe introducir un nombre de proyecto"
 
-#: gvsigol_core/views.py:355
+#: gvsigol_core/views.py:362
 #, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
@@ -858,17 +939,25 @@ msgstr ""
 "con una letra oguión bajo (_). Los siguientes caracteres pueden ser letras, "
 "guión bajo o números"
 
-#: gvsigol_core/views.py:425
+#: gvsigol_core/views.py:432
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
-#: gvsigol_core/views.py:1315 gvsigol_core/views.py:1317
+#: gvsigol_core/views.py:1327 gvsigol_core/views.py:1329
 msgid "Shared view"
 msgstr "Vista compartida"
 
-#: gvsigol_core/views.py:1318
+#: gvsigol_core/views.py:1330
 msgid "Link"
 msgstr "Enlace"
+
+#: gvsigol_core/views.py:1433 gvsigol_core/views.py:1465
+msgid "Operation not allowed on project: "
+msgstr "Operación no permitida sobre el proyecto: "
+
+#: gvsigol_core/views.py:1460
+msgid "The project was successfully cloned."
+msgstr "El proyecto se clonó con éxito."
 
 #~ msgid "Create"
 #~ msgstr "Crear"
