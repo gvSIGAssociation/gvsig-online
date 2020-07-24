@@ -59,9 +59,7 @@ class RequestError(Exception):
 class InvalidValue(RequestError):
     pass
 
-def add_symbol(request, json_rule, library_id, symbol_type):
-    gs = geographic_servers.get_instance().get_default_server()
-    
+def add_symbol(request, json_rule, library_id, symbol_type, gs):
     name = json_rule.get('name')
     title = json_rule.get('title')
     
@@ -170,10 +168,8 @@ def add_symbol(request, json_rule, library_id, symbol_type):
         gs.updateStyle(None, style.name, sld_body)
         return True
     
-def update_symbol(request, json_rule, rule, library_rule):
+def update_symbol(request, json_rule, rule, library_rule, gs):
     try:
-        gs = geographic_servers.get_instance().get_default_server()
-        
         name = json_rule.get('name')
         title = json_rule.get('title')
         
@@ -271,9 +267,8 @@ def update_symbol(request, json_rule, rule, library_rule):
     except Exception as e:
         raise e
     
-def delete_symbol(rule, library_rule):
+def delete_symbol(rule, library_rule, gs):
     try:
-        gs = geographic_servers.get_instance().get_default_server()
         style = Style.objects.get(id=rule.style.id)
 
         if gs.deleteStyle(style.name):

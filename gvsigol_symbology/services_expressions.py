@@ -31,35 +31,10 @@ import utils, sld_builder
 import json
 import ast
 
-def create_style(request, json_data, layer_id, is_preview=False):
-
-    layer = Layer.objects.get(id=int(layer_id))
-    datastore = layer.datastore
-    workspace = datastore.workspace
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-
-    layer_styles = StyleLayer.objects.filter(layer=layer)
-    is_default = False
-    if not is_preview:
-        is_default = json_data.get('is_default')
-    if is_default:
-        for ls in layer_styles:
-            s = Style.objects.get(id=ls.style.id)
-            s.is_default = False
-            s.save()
-    else:
-        has_default_style = False
-        for ls in layer_styles:
-            s = Style.objects.get(id=ls.style.id)
-            if s.is_default:
-                has_default_style = True
-        if not has_default_style:
-            is_default = True
-
+def create_style(request, json_data, layer, gs, is_preview=False):
     name = json_data.get('name')
-    if is_preview:
-        name = name + '__tmp'
-        is_default = False
+    is_default = json_data.get('is_default', False)
+    is_default = utils.set_default_style(layer, gs,is_preview=is_preview, is_default=is_default)
 
     style = Style(
         name = name,
@@ -181,47 +156,16 @@ def create_style(request, json_data, layer_id, is_preview=False):
     sld_body = sld_builder.build_sld(layer, style)
     if is_preview:
         if gs.createOverwrittenStyle(style.name, sld_body, True): 
-            return True
-        else:
-            return False
+            return style
     else:
         if gs.createStyle(style.name, sld_body): 
             if not is_preview:
                 gs.setLayerStyle(layer, style.name, style.is_default)
-            return True
+            return style
 
-        else:
-            return False
-
-def update_style(request, json_data, layer_id, style_id, is_preview=False):
-    style = Style.objects.get(id=int(style_id))
-    layer = Layer.objects.get(id=int(layer_id))
-    datastore = layer.datastore
-    workspace = datastore.workspace
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-
-    layer_styles = StyleLayer.objects.filter(layer=layer)
-    style_is_default = False
-    if not is_preview:
-        style_is_default = json_data.get('is_default')
-
-    if style_is_default:
-        for ls in layer_styles:
-            s = Style.objects.get(id=ls.style.id)
-            s.is_default = False
-            s.save()
-        gs.setLayerStyle(layer, style.name, style.is_default)
-
-    else:
-        has_default_style = False
-        for ls in layer_styles:
-            s = Style.objects.get(id=ls.style.id)
-            if s != style and s.is_default:
-                has_default_style = True
-        if not has_default_style:
-            style_is_default = True
-            gs.setLayerStyle(layer, style.name, True)
-
+def update_style(request, json_data, layer, gs, style, is_preview=False):
+    is_default = json_data.get('is_default', False)
+    is_default = utils.set_default_style(layer, gs, style=style, is_preview=is_preview, is_default=is_default)
 
     style.title = json_data.get('title')
     if json_data.get('minscale') != '':
@@ -232,7 +176,7 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False):
         style.maxscale = json_data.get('maxscale')
     else:
         style.maxscale = -1
-    style.is_default = style_is_default
+    style.is_default = is_default
     style.save()
 
     rules = Rule.objects.filter(style=style)
@@ -352,35 +296,19 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False):
 
     if is_preview:
         if gs.createOverwrittenStyle(style.name, sld_body, True): 
-            return True
-        else:
-            return False
+            return style
     else:
         if gs.updateStyle(layer, style.name, sld_body): 
             gs.setLayerStyle(layer, style.name, style.is_default)
-            return True
-        else:
-            return False
+            return style
 
 def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    index = utils.get_next_index(layer)
 
-    index = len(StyleLayer.objects.filter(layer=layer))
-    styleLayers = StyleLayer.objects.filter(layer=layer)
-    for style_layer in styleLayers:
-        aux_name = style_layer.style.name
-        aux_name = aux_name.replace(workspace.name + '_' + layer.name + '_' , '')
-
-        try:
-            aux_index = int(aux_name)
-            if index < aux_index+1:
-                index = aux_index + 1
-        except ValueError:
-            print "Error getting index"
-            
     (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
     fields = utils.get_fields(resource)
     if layer.conf:
