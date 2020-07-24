@@ -58,7 +58,7 @@ class Server(models.Model):
             return self.frontend_url + "/wcs"
     
     def getWmtsEndpoint(self, workspace=None):
-        return self.frontend_url + "/wmts"
+        return self.frontend_url + "/gwc/service/wmts"
     
     def getCacheEndpoint(self, workspace=None):
         return self.frontend_url + "/gwc/service/wms"
