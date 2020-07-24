@@ -21,7 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import  StyleLayer, Symbolizer
+from gvsigol_symbology.models import  StyleLayer, Symbolizer, Style
 from gvsigol_services.backend_postgis import Introspect
 from django.core import serializers
 from gvsigol import settings
@@ -408,3 +408,49 @@ def get_geometry_field(layer):
                     'field_type': geom_fields[0][5],
                     } 
     return ''
+
+def get_next_index(layer):
+    index = len(StyleLayer.objects.filter(layer=layer))
+    styleLayers = StyleLayer.objects.filter(layer=layer)
+    for style_layer in styleLayers:
+        aux_name = style_layer.style.name
+        aux_name = aux_name.replace(layer.datastore.workspace.name + '_' + layer.name + '_' , '')
+        
+        try:
+            aux_index = int(aux_name)
+            if index < aux_index+1:
+                index = aux_index + 1
+        except ValueError:
+            pass
+    return index
+
+
+def has_default_style(layer, style=None):
+    layer_styles = StyleLayer.objects.filter(layer=layer)
+    has_default_style = False
+    for ls in layer_styles:
+        s = Style.objects.get(id=ls.style.id)
+        if s != style and s.is_default:
+            return True
+    return False
+
+    
+def set_not_default_styles(layer):
+    layer_styles = StyleLayer.objects.filter(layer=layer)
+    for ls in layer_styles:
+        s = Style.objects.get(id=ls.style.id)
+        s.is_default = False
+        s.save()
+    
+def set_default_style(layer, gs, style=None, is_preview=False, is_default=False):
+    if is_preview:
+        is_default = False
+    else:
+        if is_default:
+            set_not_default_styles(layer)
+        elif not has_default_style(layer):
+            is_default = True
+        
+        if is_default and style:
+            gs.setLayerStyle(layer, style.name, style.is_default)
+    return is_default

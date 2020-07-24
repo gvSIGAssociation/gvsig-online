@@ -59,11 +59,9 @@ def get_raster_statistics(request, layer_id):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-def delete_preview_style(request, name, layer_id):
+def delete_preview_style(request, name, gs):
     styles = Style.objects.filter(name=name+'__tmp')
     success = True
-    layer = Layer.objects.get(id=int(layer_id))
-    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     for style in styles:
         try:
             services.delete_style(style.id, gs)
@@ -147,7 +145,7 @@ def style_layer_delete(request):
                     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
                     services.delete_style(style_id, gs)
                     success = True
-                    
+                    gs.reload_nodes()
                 except Exception as e:
                     message = e.message
                     pass
@@ -203,12 +201,17 @@ def custom_add(request, layer_id):
         style_title = request.POST.get('style_title')
         sld = request.POST.get('sld')
         
-        is_default = False
-        if request.POST.get('is_default') == 'true':
-            is_default = True  
-        
-        if services_custom.create_style(style_name, style_title, is_default, sld, layer_id):   
-            delete_preview_style(request, style_name, layer_id)            
+        is_default = request.POST.get('is_default') == 'true'
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_custom.create_style(style_name, style_title, is_default, sld, layer, server)
+        if style:
+            delete_preview_style(request, style_name, server)
+            server.reload_nodes()
+            if style.is_default:
+                server.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -226,12 +229,18 @@ def custom_update(request, layer_id, style_id):
         style_title = request.POST.get('style_title')
         sld = request.POST.get('sld')
             
-        is_default = False
-        if request.POST.get('is_default') == 'true':
-            is_default = True
-        
-        if services_custom.update_style(style_title, is_default, sld, layer_id, style_id):  
-            delete_preview_style(request, style_name, layer_id)             
+        is_default = request.POST.get('is_default') == 'true'
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_custom.update_style(style_title, is_default, sld, layer, gs, style)
+        if style:
+            delete_preview_style(request, style_name, gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -252,8 +261,16 @@ def unique_symbol_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_symbol.create_style(request, json_data, layer_id):   
-            delete_preview_style(request, json_data.get('name'), layer_id)            
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_unique_symbol.create_style(request, json_data, layer, gs)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -269,9 +286,16 @@ def unique_symbol_update(request, layer_id, style_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
-        
-        if services_unique_symbol.update_style(request, json_data, layer_id, style_id):  
-            delete_preview_style(request, json_data.get('name'), layer_id)             
+
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        style = services_unique_symbol.update_style(request, json_data, layer, gs, style)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -331,8 +355,16 @@ def unique_values_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_values.create_style(request, json_data, layer_id):      
-            delete_preview_style(request, json_data.get('name'), layer_id)         
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_unique_values.create_style(request, json_data, layer, gs)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -352,8 +384,17 @@ def unique_values_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_values.update_style(request, json_data, layer_id, style_id):  
-            delete_preview_style(request, json_data.get('name'), layer_id)             
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_unique_values.update_style(request, json_data, layer, gs, style)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -434,7 +475,10 @@ def remove_temporal_preview(request):
     if request.method == 'POST':
         name = request.POST['name']
         layer_id = request.POST['layer_id']
-        delete_preview_style(request, name, layer_id)
+        layer = Layer.objects.get(id=int(layer_id))
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        delete_preview_style(request, name, gs)
+        gs.reload_nodes()
         
     return HttpResponse(json.dumps({'success': 'OK'}, indent=4), content_type='application/json')
     
@@ -444,9 +488,17 @@ def intervals_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
-        
-        if services_intervals.create_style(request, json_data, layer_id): 
-            delete_preview_style(request, json_data.get('name'), layer_id)           
+
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_intervals.create_style(request, json_data, layer, gs)
+        if style: 
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -462,7 +514,7 @@ def intervals_add(request, layer_id):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
-def update_preview(request, layer_id):  
+def update_preview(request, layer_id):
     if request.method == 'POST':
         style_type = request.POST['style']
         if style_type == 'CS':
@@ -470,10 +522,7 @@ def update_preview(request, layer_id):
             style_title = request.POST.get('style_title')
             sld = request.POST.get('sld')
             
-            is_default = False
-            if request.POST.get('is_default') == 'true':
-                is_default = True 
-            
+            is_default = request.POST.get('is_default') == 'true'
             layer = Layer.objects.get(id=layer_id)
             layer_styles = StyleLayer.objects.filter(layer_id=layer.id)
             style = None
@@ -482,11 +531,16 @@ def update_preview(request, layer_id):
                 if stl.name == style_name + '__tmp':
                     style = stl
             
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             if not style:
-                if services_custom.create_style(style_name, style_title, is_default, sld, layer_id, True):            
+                style = services_custom.create_style(style_name, style_title, is_default, sld, layer, gs, True)
+                if style:
+                    gs.reload_nodes()
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:    
-                if services_custom.update_style(style_title, is_default, sld, layer_id, style.id, True):            
+                style = services_custom.update_style(style_title, is_default, sld, layer. gs, style, True)
+                if style:
+                    gs.reload_nodes()
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -517,11 +571,16 @@ def update_preview(request, layer_id):
                     if stl.name == name + '__tmp':
                         style = stl
                 
+                gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
                 if not style:
-                    if services.create_style(request, json_data, layer_id, True):            
+                    style = services.create_style(request, json_data, layer, gs, True)
+                    if style:
+                        gs.reload_nodes()
                         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
                 else:    
-                    if services.update_style(request, json_data, layer_id, style.id, True):            
+                    style = services.update_style(request, json_data, layer, gs, style, True)
+                    if style:
+                        gs.reload_nodes()
                         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
     return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
@@ -534,8 +593,17 @@ def intervals_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_intervals.update_style(request, json_data, layer_id, style_id):
-            delete_preview_style(request, json_data.get('name'), layer_id)            
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_intervals.update_style(request, json_data, layer, gs, style)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -622,8 +690,17 @@ def clustered_points_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_clustered_points.create_style(request, json_data, layer_id):     
-            delete_preview_style(request, json_data.get('name'), layer_id)          
+
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_clustered_points.create_style(request, json_data, layer, gs)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -640,8 +717,16 @@ def clustered_points_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_clustered_points.update_style(request, json_data, layer_id, style_id):     
-            delete_preview_style(request, json_data.get('name'), layer_id)          
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+    
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        style = services_clustered_points.update_style(request, json_data, layer, gs, style)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -688,9 +773,15 @@ def expressions_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
-        
-        if services_expressions.create_style(request, json_data, layer_id): 
-            delete_preview_style(request, json_data.get('name'), layer_id)              
+
+        layer = Layer.objects.get(id=int(layer_id))
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        style =services_expressions.create_style(request, json_data, layer, gs)
+        if style: 
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -725,8 +816,15 @@ def expressions_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_expressions.update_style(request, json_data, layer_id, style_id):  
-            delete_preview_style(request, json_data.get('name'), layer_id)             
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        style = services_expressions.update_style(request, json_data, layer, gs, style)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -775,8 +873,17 @@ def color_table_add(request, layer_id):
         has_custom_legend = request.POST['has_custom_legend']
         json_data = json.loads(style_data)
         
-        if services_color_table.create_style(request, json_data, layer_id, False, has_custom_legend):   
-            delete_preview_style(request, json_data.get('name'), layer_id)           
+
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_color_table.create_style(request, json_data, layer, gs, False, has_custom_legend)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -796,8 +903,15 @@ def color_table_update(request, layer_id, style_id):
         has_custom_legend = request.POST['has_custom_legend']
         json_data = json.loads(style_data)
         
-        if services_color_table.update_style(request, json_data, layer_id, style_id, False, has_custom_legend):         
-            delete_preview_style(request, json_data.get('name'), layer_id)     
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        style = services_color_table.update_style(request, json_data, layer, gs, style, False, has_custom_legend)
+        if style:
+            delete_preview_style(request, json_data.get('name'), gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -848,10 +962,9 @@ def sld_import(request, layer_id):
         
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    if request.method == 'POST':
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         
-    if request.method == 'POST': 
         style_name = request.POST.get('sld-name')
         
         is_default = False
@@ -859,7 +972,8 @@ def sld_import(request, layer_id):
             is_default = True
         
         if 'sld-file' in request.FILES: 
-            if services.sld_import(style_name, is_default, layer_id, request.FILES['sld-file'], request, gs):        
+            if services.sld_import(style_name, is_default, layer_id, request.FILES['sld-file'], request, gs):
+                gs.reload_nodes()
                 return redirect('style_layer_list')
             else:
                 response = {
@@ -1231,7 +1345,7 @@ def library_update(request, library_id):
             rules.append(rule)
         
         gs = geographic_servers.get_instance().get_default_server()
-        master = geographic_servers.get_instance().get_master_node(gs.id)    
+        master = geographic_servers.get_instance().get_master_node(gs.id)
         response = {
             'library': library,
             'rules': rules,
@@ -1391,8 +1505,9 @@ def symbol_add(request, library_id, symbol_type):
             if not 'name' in json_rule or json_rule['name'] == '' or not re.match("^[a-z0-9_]*$", json_rule['name']):
                 message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
                 return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
-                
-            if services_library.add_symbol(request, json_rule, library_id, symbol_type):
+            gs = geographic_servers.get_instance().get_default_server()
+            if services_library.add_symbol(request, json_rule, library_id, symbol_type, gs):
+                gs.reload_nodes()
                 return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:
                 return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
@@ -1429,7 +1544,9 @@ def symbol_update(request, symbol_id):
         library_rule = LibraryRule.objects.get(rule=rule)
         
         try:
-            if services_library.update_symbol(request, json_rule, rule, library_rule):
+            gs = geographic_servers.get_instance().get_default_server()
+            if services_library.update_symbol(request, json_rule, rule, library_rule, gs):
+                gs.reload_nodes()
                 return HttpResponse(json.dumps({'library_id': library_rule.library.id, 'success': True}, indent=4), content_type='application/json')
         
         except Exception as e:
@@ -1468,7 +1585,9 @@ def symbol_delete(request):
             rule = Rule.objects.get(id=int(symbol_id))
             library_rule = LibraryRule.objects.get(rule=rule)
             library_id = library_rule.library.id
-            services_library.delete_symbol(rule, library_rule)
+            gs = geographic_servers.get_instance().get_default_server()
+            services_library.delete_symbol(rule, library_rule, gs)
+            gs.reload_nodes()
             return HttpResponse(json.dumps({'library_id': library_id, 'success': True}, indent=4), content_type='application/json')
         
         except Exception as e:
