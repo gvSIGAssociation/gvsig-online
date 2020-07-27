@@ -871,9 +871,9 @@ class Geoserver():
                 return self.rest_catalog.get_wmsresources(workspace.name, datastore.name, self.user, self.password)
                 #return store.get_resources(available=available)
             
-        except:
+        except Exception as ex:
             logger.exception("Error getting resources")
-            e = sys.exc_info()[0]
+            print str(ex)
             pass 
     
          
