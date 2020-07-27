@@ -162,7 +162,7 @@ class Geoserver():
                     us =  self.rest_catalog.get_update_sequence(node, user=self.user, password=self.password)
                     if us != us_master:
                         print  "INFO: Reloading ... " + node + " with updatedSequence " + str(us) 
-                        self.rest_catalog.reload(node, user=self.user, password=self.password)                        
+                        self.rest_catalog.reload(node, user=self.user, password=self.password)
             return True
         
         except Exception as e:
@@ -565,7 +565,7 @@ class Geoserver():
             logger.exception('Updating style: ' + style_name)
         return False
         
-    def updateThumbnail(self, layer, mode):
+    def updateThumbnail(self, layer, mode='update'):
         if not 'no_thumbnail.jpg' in layer.thumbnail.name:
             if os.path.isfile(layer.thumbnail.path):
                 os.remove(layer.thumbnail.path)
