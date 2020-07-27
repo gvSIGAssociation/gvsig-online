@@ -18,8 +18,6 @@ from __future__ import unicode_literals
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gevent.tests.test___ident import Target
-from gvsigol_services.backend_postgis import Introspect
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
