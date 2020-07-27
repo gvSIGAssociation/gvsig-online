@@ -49,7 +49,7 @@ pygdaltools==1.2.1
 
 ## Other
 xmltodict
-six==1.15.0
+six==1.13.0
 pytz==2016.3
 python-dateutil==2.5.2
 
