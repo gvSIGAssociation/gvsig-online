@@ -343,35 +343,36 @@ def get_resource_type(lr):
 
     return [type, url]
 
-def is_field_enumerated(column_name, table_name, datastore):    
+def is_field_enumerated(layer, column_name):
     """
     Returns true if the field is enumerated and false if not. The second parameter is true if the enumeration is multiple
     """
-    enums = LayerFieldEnumeration.objects.filter(layername=table_name, schema=datastore, field=column_name)
+    enums = LayerFieldEnumeration.objects.filter(layer=layer, field=column_name)
     if len(enums) > 0:
         return True, enums[0].multiple
     return False, False
 
-def get_enum_item_list(column_name, lyr_name, workspace_name):    
+def get_enum_item_list(layer, column_name, enum=None):
     """
     Gets the list of items of a enumerated field
     """
-    lyr_obj = Layer.objects.get(name=lyr_name, datastore__workspace__name=workspace_name)
-    if(lyr_obj is not None):
-        enums = LayerFieldEnumeration.objects.filter(layername=lyr_name, schema=lyr_obj.datastore.name, field=column_name)
-        if len(enums) > 0:
-            return EnumerationItem.objects.filter(enumeration_id=enums[0].enumeration_id)
+    try:
+        if not enum:
+            enum = LayerFieldEnumeration.objects.get(layer=layer, field=column_name).enumeration
+        return enum.enumerationitem_set.all()
+    except:
+        pass
+    return []
         
-def get_enum_entry(column_name, lyr_name, workspace_name):    
+def get_enum_entry(layer, column_name):
     """
     Gets the list of items of a enumerated field
     """
-    lyr_obj = Layer.objects.get(name=lyr_name, datastore__workspace__name=workspace_name)
-    if(lyr_obj is not None):
-        enums = LayerFieldEnumeration.objects.filter(layername=lyr_name, schema=lyr_obj.datastore.name, field=column_name)
-        if len(enums) > 0:
-            return Enumeration.objects.get(id=enums[0].enumeration_id)
-            
+    try:
+        return LayerFieldEnumeration.objects.get(layer=layer, field=column_name).enumeration
+    except:
+        pass
+    
 def get_layer_img(layerid, filename):
     """
     Devuelve la ruta y la URL de un icono asociado a una capa. 
@@ -438,7 +439,7 @@ def check_schema_exists(schema):
     return exists
 
 
-def setLayerExtent(layer, ds_type, layer_info, server):
+def set_layer_extent(layer, ds_type, layer_info, server):
     try:
         if ds_type == 'imagemosaic':
             ds_type = 'coverage'
@@ -452,7 +453,7 @@ def setLayerExtent(layer, ds_type, layer_info, server):
         layer.latlong_extent = '-180,-90,180,90' 
         
 
-def setTimeEnabled(server, layer):
+def set_time_enabled(server, layer):
         time_resolution = 0
         if (layer.time_resolution_year != None and layer.time_resolution_year > 0) or (layer.time_resolution_month != None and layer.time_resolution_month > 0) or (layer.time_resolution_week != None and layer.time_resolution_week > 0) or (layer.time_resolution_day != None and layer.time_resolution_day > 0):
             if (layer.time_resolution_year != None and layer.time_resolution_year > 0):
@@ -473,7 +474,7 @@ def setTimeEnabled(server, layer):
         server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
 
 
-def cloneLayer(target_datastore, layer, layer_group):
+def clone_layer(target_datastore, layer, layer_group):
     if layer.type == 'v_PostGIS': # operation not defined for the rest of types
         # create the table
         dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
@@ -508,6 +509,7 @@ def cloneLayer(target_datastore, layer, layer_group):
                     salt = '_' + get_random_string(3)
         
         # clone layer
+        old_id = layer.pk
         layer.pk = None
         layer.name = new_name
         layer.datastore = target_datastore
@@ -516,16 +518,23 @@ def cloneLayer(target_datastore, layer, layer_group):
         layer.save()
         
         new_layer_instance = Layer.objects.get(id=layer.pk)
+        old_instance = Layer.objects.get(id=old_id)
         
-        setTimeEnabled(server, new_layer_instance)
-        views.create_symbology(server, new_layer_instance)
+        set_time_enabled(server, new_layer_instance)
+        
+        for enum in LayerFieldEnumeration.objects.filter(layer=old_instance):
+            enum.pk = None
+            enum.layername = new_layer_instance.name
+            enum.schema = new_layer_instance.datastore.name
+            enum.save()
+            
+        from gvsigol_symbology.services import clone_layer_styles
+        clone_layer_styles(server, old_instance, new_layer_instance)
+        #views.create_symbology(server, new_layer_instance)
         """
         TODO:
-        - clonar simbología en lugar de crearla!!
-        - enumeraciones
         - ¿recursos de capa? ¿metadatos? etc
         """
-        
         server.updateThumbnail(new_layer_instance, 'create')
     
         core_utils.toc_add_layer(new_layer_instance)
