@@ -46,8 +46,11 @@ class Project(models.Model):
 
         if recursive:
             old_project = Project.objects.get(id=old_pid)
-            for plg in old_project.projectlayergroup_set.all():
-                plg.clone(project=new_project_instance, target_datastore=target_datastore)
+            for prj_lg in old_project.projectlayergroup_set.all():
+                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore)
+            
+            for prj_ug in old_project.projectusergroup_set.all():
+                prj_ug.clone(project=new_project_instance)
             # TODO: user groups (ProjectUserGroup)
         return new_project_instance
     
@@ -56,9 +59,14 @@ class ProjectUserGroup(models.Model):
     user_group = models.ForeignKey(UserGroup, default=None)
     
     def __unicode__(self):
-        return self.project.name + ' - ' + self.user_group.name  
- 
+        return self.project.name + ' - ' + self.user_group.name
     
+    def clone(self, project):
+        self.pk = None
+        self.project = project
+        self.save()
+        return ProjectUserGroup.objects.get(id=self.pk)
+        
 class ProjectLayerGroup(models.Model):
     project = models.ForeignKey(Project, default=None)
     layer_group = models.ForeignKey(LayerGroup, default=None)
