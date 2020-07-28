@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-23 11:21+0000\n"
+"POT-Creation-Date: 2020-07-28 17:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -551,6 +551,22 @@ msgstr "Almacén de datos"
 #: gvsigol_core/templates/project_clone.html:61
 msgid "Select server"
 msgstr "Seleccionar servidor"
+
+#: gvsigol_core/templates/project_clone.html:75
+msgid "Notes:"
+msgstr "Notas:"
+
+#: gvsigol_core/templates/project_clone.html:77
+msgid "Vector layers will be cloned"
+msgstr "Las capas vectoriales se clonarán"
+
+#: gvsigol_core/templates/project_clone.html:78
+msgid "Base layer groups will be referenced instead of cloned"
+msgstr "Los grupos de capas base se referenciarán en lugar de ser clonados"
+
+#: gvsigol_core/templates/project_clone.html:79
+msgid "Raster layers will be excluded (except base layers)"
+msgstr "Las capas ráster serán exluidas (excepto las capas base)"
 
 #: gvsigol_core/templates/project_list.html:17
 #: gvsigol_core/templates/select_public_project.html:51
