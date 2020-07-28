@@ -80,6 +80,7 @@ import rest_geowebcache as geowebcache
 import signals
 import utils
 import psycopg2
+from psycopg2 import sql
 
 from actstream import action
 from actstream.models import Action
@@ -666,7 +667,7 @@ def layer_refresh_extent(request, layer_id):
     #server.updateBoundingBoxFromData(layer)
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
-    utils.setLayerExtent(layer, ds_type, layer_info, server)
+    utils.set_layer_extent(layer, ds_type, layer_info, server)
     layer.save()
     return redirect('layer_list')
 
@@ -944,7 +945,7 @@ def do_config_layer(server, layer, featuretype):
     if layer.datastore.type != 'e_WMS':
         if layer.datastore.type == 'c_ImageMosaic':
             server.updateImageMosaicTemporal(layer.datastore, layer)
-        utils.setTimeEnabled(server, layer)
+        utils.set_time_enabled(server, layer)
         create_symbology(server, layer)
         server.updateThumbnail(layer, 'create')
 
@@ -1293,7 +1294,7 @@ def layer_update(request, layer_id):
             if ds.type != 'e_WMS':
                 gs.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
                 if ds.type == 'v_PostGIS':
-                    utils.setTimeEnabled(gs, layer)
+                    utils.set_time_enabled(gs, layer)
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 
@@ -1412,7 +1413,7 @@ def layer_autoconfig(layer, featuretype):
     workspace = datastore.workspace
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
-    utils.setLayerExtent(layer, ds_type, layer_info, server)
+    utils.set_layer_extent(layer, ds_type, layer_info, server)
     resource_fields = utils.get_alphanumeric_fields(utils.get_fields(layer_info))
     for f in resource_fields:
         field = {}
@@ -1626,15 +1627,18 @@ def convert_to_enumerate(request):
     layer = Layer.objects.get(id=layer_id)
     datastore_name = layer.datastore.name
        
-    is_enum, _ = utils.is_field_enumerated(field, layer_name, datastore_name)         
+    is_enum, _ = utils.is_field_enumerated(layer, field)
     if is_enum:
         return utils.get_exception(405, 'The field is already enumerated')
     
     if autogen:
         params = json.loads(layer.datastore.connection_params)
         con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-        sql = "SELECT " + field + " FROM " + datastore_name + "." + layer_name + " GROUP BY " + field 
-        con.cursor.execute(sql)
+        query = sql.SQL("SELECT {field} FROM {schema}.{table} GROUP BY {field}").format(
+            field=sql.Identifier(field),
+            schema=sql.Identifier(datastore_name),
+            table=sql.Identifier(layer_name))
+        con.cursor.execute(query, [])
         rows = con.cursor.fetchall()
         enum_table = Enumeration()
         enum_table.name =  layer_name + "_" + field 
@@ -1656,8 +1660,7 @@ def convert_to_enumerate(request):
         return utils.get_exception(400, 'We cannot find a enumerated with this name')
     
     field_enum = LayerFieldEnumeration()
-    field_enum.layername = layer
-    field_enum.schema = datastore_name
+    field_enum.layer = layer
     field_enum.field = field
     field_enum.enumeration_id = enum_id
     field_enum.multiple = False
@@ -2392,8 +2395,7 @@ def layer_create_with_group(request, layergroup_id):
                 for i in form.cleaned_data['fields']:
                     if 'enumkey' in i:
                         field_enum = LayerFieldEnumeration()
-                        field_enum.layername = form.cleaned_data['name']
-                        field_enum.schema = form.cleaned_data['datastore'].name
+                        field_enum.layer = newRecord
                         field_enum.field = i['name']
                         field_enum.enumeration_id = int(i['enumkey']) 
                         field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
@@ -2658,10 +2660,11 @@ def get_enumeration(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         if enum_names.__len__() > 0:
+            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
             enum_names_array = enum_names.split(',')
             for enum_name in enum_names_array:
-                enum_items = utils.get_enum_item_list(enum_name, layer_name, workspace)
-                enum = utils.get_enum_entry(enum_name, layer_name, workspace)
+                enum = utils.get_enum_entry(layer, enum_name)
+                enum_items = utils.get_enum_item_list(layer, enum_name, enum=enum)
                 title = enum.title if enum is not None else 'No title defined'
                 items = []
                 for i in enum_items:
@@ -3523,7 +3526,7 @@ def _describeFeatureType(lyr, workspace, skip_pks):
             for pk_def in pk_defs:
                 if layer_def['name'] == pk_def:
                     layer_defs.remove(layer_def)
-            enum, multiple = utils.is_field_enumerated(layer_def['name'], lyr, layer.datastore.name)
+            enum, multiple = utils.is_field_enumerated(layer, layer_def['name'])
             if enum:
                 if multiple:
                     layer_def['type'] = 'multiple_enumeration'
@@ -3582,7 +3585,7 @@ def describe_feature_type(lyr, workspace):
                     layer_def['type'] = geom_def[5]
                     layer_def['length'] = geom_def[4]
         for layer_def in layer_defs:
-            enum, multiple = utils.is_field_enumerated(layer_def['name'], lyr, layer.datastore.name)
+            enum, multiple = utils.is_field_enumerated(layer, layer_def['name'])
             if enum:
                 if multiple:
                     layer_def['type'] = 'multiple_enumeration'

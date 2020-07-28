@@ -193,8 +193,8 @@ class Layer(models.Model):
         return self.datastore.workspace.name + ":" + self.name
     
     def clone(self, target_datastore, recursive=True, layer_group=None):
-        from gvsigol_services.utils import cloneLayer
-        return cloneLayer(target_datastore, self, layer_group)
+        from gvsigol_services.utils import clone_layer
+        return clone_layer(target_datastore, self, layer_group)
 
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer)
@@ -277,11 +277,10 @@ class EnumerationItem(models.Model):
     
     def __unicode__(self):
         return self.name
-    
+
 class LayerFieldEnumeration(models.Model):
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE, null=True)
     enumeration = models.ForeignKey(Enumeration, on_delete=models.CASCADE)
-    layername = models.CharField(max_length=150)
-    schema = models.CharField(max_length=150)
     field = models.CharField(max_length=150) 
     multiple = models.BooleanField(default=False)
     
