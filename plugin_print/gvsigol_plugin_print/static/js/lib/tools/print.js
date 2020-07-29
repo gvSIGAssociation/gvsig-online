@@ -29,6 +29,9 @@ var print = function(printProvider, conf, map) {
 	this.conf = conf;
 	this.map = map;
 
+	this.origin = window.location.origin;
+	//this.origin = 'http://localhost:8080';
+
 	this.id = "print";
 	this.$button = $("#print");
 
@@ -300,10 +303,13 @@ print.prototype.createPrintJob = function(template) {
 				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 						});
 					}
-
+					var url = mapLayers[i].getSource().getUrls()[0];
+					if (url.indexOf('http') == -1) {
+						url = self.origin + url;
+					}
 					layer = {
 							"type": "WMTS",
-					        "baseURL":mapLayers[i].getSource().getUrls()[0],
+					        "baseURL": url,
 					        "opacity": mapLayers[i].getOpacity(),
 					        "layer": mapLayers[i].getSource().getLayer(),
 					        "version": "1.0.0",
@@ -329,8 +335,12 @@ print.prototype.createPrintJob = function(template) {
 //						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
 //					}
 				} else if (mapLayers[i].getSource() instanceof ol.source.XYZ) {
+					var url = mapLayers[i].getSource().getUrls()[0];
+					if (url.indexOf('http') == -1) {
+						url = self.origin + url;
+					}
 					printLayers.push({
-						"baseURL": mapLayers[i].getSource().getUrls()[0],
+						"baseURL": url,
 					    "type": "OSM",
 					    "tileSize": [256, 256],
 					    "imageExtension": "png"
@@ -347,11 +357,15 @@ print.prototype.createPrintJob = function(template) {
 					
 				} else {
 					var wms_url = mapLayers[i].wms_url_no_auth;
-					if (wms_url === undefined)
+					if (wms_url === undefined) {
 						wms_url = mapLayers[i].wms_url;
+					}
+					var url = wms_url;
+					if (url.indexOf('http') == -1) {
+						url = self.origin + url;
+					}
 					layer = {
-							//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
-							"baseURL": wms_url,
+							"baseURL": url,
 					  	    "opacity": mapLayers[i].getOpacity(),
 					  	    "type": "WMS",
 				  			"imageFormat": "image/png",
@@ -379,19 +393,22 @@ print.prototype.createPrintJob = function(template) {
 				if(layer){
 					printLayers.push(layer);
 				}
-
+				var legendUrl = mapLayers[i].legend_no_auth;
+				if (legendUrl) {
+					if (legendUrl.indexOf('http') == -1) {
+						legendUrl = self.origin + legendUrl;
+					}
+				}
 				var legend = {
 					"name": mapLayers[i].title,
-		            "icons": [mapLayers[i].legend_no_auth]
+		            "icons": [legendUrl]
 		        };
-				/*var legend = {
-					"name": mapLayers[i].title,
-			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=lista_repetidores&REQUEST=getlegendgraphic&FORMAT=image/png"]
-			    };*/
 				legends.push(legend);
 			}
 		}
 	}
+
+	console.log(window.location.hostname);
 
 	var baseLayers = this.map.getLayers().getArray();
 	for (var i=0; i<baseLayers.length; i++) {
@@ -445,9 +462,13 @@ print.prototype.createPrintJob = function(template) {
 						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 								});
 							}
+							var url = mapLayers[i].getSource().getUrls()[0];
+							if (url.indexOf('http') == -1) {
+								url = self.origin + url;
+							}
 							printLayers.push({
 								"type": "WMTS",
-						        "baseURL": baseLayers[i].getSource().getUrls()[0],
+						        "baseURL": url,
 						        "opacity": 1.0,
 						        "layer": baseLayers[i].getSource().getLayer(),
 						        "version": "1.0.0",
@@ -460,10 +481,14 @@ print.prototype.createPrintJob = function(template) {
 							});
 
 						} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
+							var url = mapLayers[i].getSource().getUrls()[0];
+							if (url.indexOf('http') == -1) {
+								url = self.origin + url;
+							}
 							printLayers.push({
 								"type": "WMS",
 						        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
-						        "baseURL": baseLayers[i].getSource().getUrls()[0],
+						        "baseURL": url,
 						        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
 						        "version": baseLayers[i].getSource().getParams()['VERSION'],
 						        "customParams": {
@@ -472,8 +497,12 @@ print.prototype.createPrintJob = function(template) {
 							});
 
 						} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
+							var url = mapLayers[i].getSource().getUrls()[0];
+							if (url.indexOf('http') == -1) {
+								url = self.origin + url;
+							}
 							printLayers.push({
-								"baseURL": baseLayers[i].getSource().getUrls()[0],
+								"baseURL": url,
 							    "type": "OSM",
 							    "tileSize": [256, 256],
 							    "imageExtension": "png"
@@ -505,8 +534,8 @@ print.prototype.createPrintJob = function(template) {
 		  			"layers": printLayers,
 		  			"bbox": f.getGeometry().getExtent()
 		  	    },
-		  	    "logo_url": self.conf.project_image,
-		  	    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
+		  	    "logo_url": self.origin + self.conf.project_image,
+		  	    //"logo_url": 'http://localhost' + self.conf.project_image,
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": legends
