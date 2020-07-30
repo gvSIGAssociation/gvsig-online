@@ -1161,6 +1161,7 @@ def layer_update(request, layer_id):
         datastore = request.POST.get('datastore')
         name = request.POST.get('name')
         title = request.POST.get('title')
+        abstract = request.POST.get('md-abstract')
         updatedParams['title'] = title
         #style = request.POST.get('style')
         layer_group_id = request.POST.get('layer_group')
@@ -1248,6 +1249,7 @@ def layer_update(request, layer_id):
             layer.title = title
             layer.cached = cached
             layer.visible = is_visible
+            layer.abstract = abstract
             layer.queryable = is_queryable
             layer.allow_download = allow_download
             layer.single_image = single_image
