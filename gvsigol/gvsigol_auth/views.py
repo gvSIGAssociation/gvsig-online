@@ -405,7 +405,7 @@ def user_add(request):
                             newWs.save()
                             
                             ds_name = 'ds_' + form.data['username'].lower()
-                            services_utils.create_datastore(request, user.username, ds_name, newWs)
+                            services_utils.create_datastore(user.username, ds_name, newWs)
                             
                             gs.reload_nodes()
                         
