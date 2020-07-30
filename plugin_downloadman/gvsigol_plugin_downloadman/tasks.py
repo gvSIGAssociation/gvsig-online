@@ -28,6 +28,7 @@ from billiard.compat import resource
 
 from celery import shared_task, task
 from celery.exceptions import Retry
+from celery.utils.log import get_task_logger
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
 from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time, get_max_public_download_size
 from datetime import date, timedelta, datetime
@@ -83,7 +84,8 @@ except:
 
 
 #logger = logging.getLogger("gvsigol-celery")
-logger = logging.getLogger("gvsigol")
+#logger = get_task_loggerlogging.getLogger("gvsigol")
+logger = get_task_logger(__name__)
 
 
 __TMP_DIR = None
@@ -916,6 +918,7 @@ class WFSClient():
                     info_str = gdaltools.ogrinfo(virtual_path, layer_name, summary=True, readonly=True)
                 except:
                     # for ogr version < 2.2
+                    logger.debug('Falling back to ogr < 2.2 command')
                     virtual_path = '/vsizip/' + local_path + '/' + layer_name + ".shp"
                     info_str = gdaltools.ogrinfo(virtual_path, layer_name, summary=True, readonly=True)
             else:
@@ -962,6 +965,21 @@ class WFSClient():
         if r.status_code != 200:
             raise PreparationError("Error retrieving hits")
         return self.parseHits(r.content)
+    
+    def _addDownloadWarningFile(self, count, url):
+        out_file = os.path.join(self.output_dir, _('wfs_download_warning')+'.txt')
+        with open(out_file, "w") as thefile:
+            thefile.write(_(u"Could not check the last file of the WFS download. Maybe the result is incomplete.").encode("utf-8"))
+            thefile.write(u"\n".encode("utf-8"))
+            thefile.write(_(u"Layer name: ").encode("utf-8"))
+            thefile.write(text(self.layer_name).encode("utf-8"))
+            thefile.write(u"\n".encode("utf-8"))
+            thefile.write(_(u"Total downloaded geometries: ").encode("utf-8"))
+            thefile.write(text(count).encode("utf-8"))
+            thefile.write(u"\n".encode("utf-8"))
+            thefile.write(_(u"Url of last downloaded file: ").encode("utf-8"))
+            thefile.write(text(url).encode("utf-8"))
+            thefile.write(u"\n".encode("utf-8"))
 
     def retrieveResources(self):
         """
@@ -997,7 +1015,14 @@ class WFSClient():
                 local_path = self._retrieveResource(url, suffix)
                 returnedCount = self.getFileRecordsCount(local_path, self.layer_name, self.file_format)
                 if returnedCount is None:
-                    raise PreparationError('The downloaded resource could not be checked')
+                    if partCount > 1:
+                        logger.debug('The downloaded resource could not be checked')
+                        logger.debug(url)
+                        self._addDownloadWarningFile(totalReturnedCount, url)
+                        break
+                    else:
+                        logger.debug(url)
+                        raise PreparationError('The downloaded resource could not be checked')
                 elif partCount == 1 or returnedCount > 0:
                     totalReturnedCount += returnedCount
                     paramDict['count'] = paramDict.get('count', returnedCount) # maxFeatures
@@ -1451,8 +1476,9 @@ def processLocators(request, zipobj=None, zip_path=None):
                         if resourceLocator.canceled:
                             continue 
                         #_addResource(zipobj, resource_descriptor, resourceLocator.resolved_url, count)
-                        resource_desc_list = retrieveResources(resource_descriptor)
-                        _addResources(zipobj, resource_desc_list, count)
+                        with override(get_language(request)):
+                            resource_desc_list = retrieveResources(resource_descriptor)
+                            _addResources(zipobj, resource_desc_list, count)
                         count += 1
                         packaged_locators.append(resourceLocator)
                         completed_locators += 1

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-11 16:46+0000\n"
+"POT-Creation-Date: 2020-07-30 17:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgstr "Completado"
 msgid "Completed with errors"
 msgstr "Completado con errores"
 
-#: models.py:46 models.py:249
+#: models.py:46 models.py:250
 msgid "Rejected"
 msgstr "Rechazado"
 
@@ -70,7 +70,7 @@ msgstr "Archivado"
 msgid "Awaiting approval"
 msgstr "Esperando aprobación"
 
-#: models.py:119 tasks.py:939 tasks.py:942 views.py:575 views.py:581
+#: models.py:119 tasks.py:1303 tasks.py:1306 views.py:571 views.py:577
 msgid "Multiresource package"
 msgstr "Paquete multi-recurso"
 
@@ -86,64 +86,89 @@ msgstr "Cancelado por el usuario"
 msgid "Cancelled by the administrator"
 msgstr "Cancelado por el administrador"
 
-#: models.py:171 models.py:233
+#: models.py:171 models.py:234
 msgid "Processed"
 msgstr "Procesado"
 
-#: models.py:173 models.py:260
+#: models.py:173 models.py:261
 msgid "Canceled"
 msgstr "Cancelado"
 
-#: models.py:175 views.py:557
+#: models.py:175 views.py:553
 msgid "Expired"
 msgstr "Caducado"
 
-#: models.py:231
+#: models.py:232
 msgid "Resource queued"
 msgstr "Recurso en la cola"
 
-#: models.py:232
+#: models.py:233
 msgid "Queued, waiting for free space"
 msgstr "En cola, esperando espacio libre"
 
-#: models.py:234
+#: models.py:235
 msgid "On hold"
 msgstr "Suspendido"
 
-#: models.py:235
+#: models.py:236
 msgid "Temporal error"
 msgstr "Error temporal"
 
-#: models.py:236
+#: models.py:237
 msgid "Permanent error"
 msgstr "Error permanente"
 
-#: models.py:245
+#: models.py:246
 msgid "Not processed"
 msgstr "No procesado"
 
-#: models.py:246
+#: models.py:247
 msgid "Not required"
 msgstr "No requerida"
 
-#: models.py:247
+#: models.py:248
 msgid "Pending"
 msgstr "Pendiente"
 
-#: models.py:248
+#: models.py:249
 msgid "Accepted"
 msgstr "Aceptado"
 
-#: models.py:270
+#: models.py:271
 msgid "Approval: "
 msgstr "Aprobación"
 
-#: tasks.py:847 tasks.py:1010
+#: tasks.py:970
+msgid "wfs_download_warning"
+msgstr "aviso_descarga_wfs"
+
+#: tasks.py:972
+msgid ""
+"Could not check the last file of the WFS download. Maybe the result is "
+"incomplete."
+msgstr ""
+"No se pudo comprobar el último fichero de la descarga WFS. Puede que el "
+"resultado esté incompleto."
+
+#: tasks.py:974
+msgid "Layer name: "
+msgstr "Nombre de la capa: "
+
+#: tasks.py:977
+msgid "Total downloaded geometries: "
+msgstr "Total geometrías descargadas: "
+
+#: tasks.py:980
+msgid "Url of last downloaded file: "
+msgstr ""
+"Url del último fichero descargado: "
+
+#: tasks.py:1211 tasks.py:1374
 #, python-format
 msgid "Download service: your request has been received - %(requestid)s"
 msgstr "Servicio de descargas: se ha recibido su petición - %(requestid)s"
 
-#: tasks.py:848
+#: tasks.py:1212
 #, python-brace-format
 msgid ""
 "\n"
@@ -153,24 +178,24 @@ msgstr ""
 "Puede usar este enlace de seguimiento para comprobar el estado de su "
 "petición: {0}"
 
-#: tasks.py:854
+#: tasks.py:1218
 msgid "Your download request has been received."
 msgstr "Se ha recibido su petición de descarga."
 
-#: tasks.py:856 templates/request_received_email.html:14
+#: tasks.py:1220 templates/request_received_email.html:14
 msgid "Included resources:"
 msgstr "Recursos incluidos"
 
-#: tasks.py:903 tasks.py:906
+#: tasks.py:1267 tasks.py:1270
 #, python-format
 msgid "Download service: your request is ready - %(requestid)s"
 msgstr "Servicio de descargas: su petición está lista - %(requestid)s"
 
-#: tasks.py:904
+#: tasks.py:1268
 msgid "Your download request is ready."
 msgstr "Su petición de descarga está lista"
 
-#: tasks.py:907
+#: tasks.py:1271
 msgid ""
 "Your download request is ready. Some resources failed to be processed and "
 "are not available for download at the moment."
@@ -178,67 +203,67 @@ msgstr ""
 "Su petición de descarga está lista. Algunos recursos no se pudieron procesar "
 "y no están disponibles para descargar en este momento."
 
-#: tasks.py:909
+#: tasks.py:1273
 #, python-format
 msgid "Download service: request progress - %(requestid)s"
 msgstr "Servicio de descargas: progreso de la petición - %(requestid)s"
 
-#: tasks.py:910
+#: tasks.py:1274
 msgid "Your download request has been partially processed."
 msgstr "Su petición de descarga se ha procesado parcialmente"
 
-#: tasks.py:913 templates/progress_notif_email.html:14
+#: tasks.py:1277 templates/progress_notif_email.html:14
 msgid "You can use the following links to download the requested resources:"
 msgstr ""
 "Puede usar los siguientes enlaces para descargar los recursos solicitados:"
 
-#: tasks.py:916
+#: tasks.py:1280
 #, python-brace-format
 msgid "Download service: request progress - {0}"
 msgstr "Servicio de descargas: progreso de la petición - {0}"
 
-#: tasks.py:940
+#: tasks.py:1304
 msgid "    -- Link valid until {0!s}:\n"
 msgstr "    -- Enlace válido hasta {0!s}:\n"
 
-#: tasks.py:941
+#: tasks.py:1305
 msgid "    -- Contents:"
 msgstr "    -- Contenidos:"
 
-#: tasks.py:946
+#: tasks.py:1310
 msgid "     -- {0!s} [{1!s}]\n"
 msgstr "     -- {0!s} [{1!s}]\n"
 
-#: tasks.py:947
+#: tasks.py:1311
 msgid "{0!s} [{1!s}]\n"
 msgstr "{0!s} [{1!s}]\n"
 
-#: tasks.py:954 templates/progress_notif_email.html:35
+#: tasks.py:1318 templates/progress_notif_email.html:35
 msgid "The following resources are still being processed:"
 msgstr "Los siguientes recursos se están procesando todavía:"
 
-#: tasks.py:957 tasks.py:966
+#: tasks.py:1321 tasks.py:1330
 msgid "Status:"
 msgstr "Estado:"
 
-#: tasks.py:963 templates/progress_notif_email.html:47
+#: tasks.py:1327 templates/progress_notif_email.html:47
 msgid "The following resources could not be processed:"
 msgstr "Los siguientes recursos no se pudieron procesar"
 
-#: tasks.py:969 tasks.py:1017 templates/progress_notif_email.html:58
+#: tasks.py:1333 tasks.py:1381 templates/progress_notif_email.html:58
 msgid ""
 "You can also use this tracking link to check the status of your request:"
 msgstr ""
 "También puede usar este enlace de descarga para comprobar el estado de su "
 "peticion:"
 
-#: tasks.py:1011
+#: tasks.py:1375
 msgid "Our team will contact you when your request has been analysed."
 msgstr ""
 "Nuestro equipo se pondrá en contacto con usted cuando su petición se haya "
 "analizado"
 
-#: tasks.py:1014
+#: tasks.py:1378
 #, python-brace-format
 msgid "Download service: received request - {0}"
 msgstr "Servicio de descargas: petición recibida - {0}"
@@ -609,61 +634,61 @@ msgstr ""
 msgid "Download request: "
 msgstr "Petición de descarga: "
 
-#: views.py:182
+#: views.py:183
 msgid "File format"
 msgstr "Formato de fichero"
 
-#: views.py:189
+#: views.py:190
 msgid "Spatial filter"
 msgstr "Filtro espacial"
 
-#: views.py:284
+#: views.py:278
 msgid ""
 "Include only geometries that intersect the bounding box of the selected area"
 msgstr ""
 "Sólo incluir geometrías que intersecten el bounding box del área seleccionada"
 
-#: views.py:285 views.py:290
+#: views.py:279 views.py:285
 msgid "Do not filter output"
 msgstr "No filtrar la salida"
 
-#: views.py:289
+#: views.py:284
 msgid "Trim result using the bounding box of the selected area"
 msgstr "Recortar el resultado usando el bounding box del área seleccionada"
 
-#: views.py:321 views.py:417
+#: views.py:317 views.py:414
 msgid "Vector data"
 msgstr "Datos vectoriales"
 
-#: views.py:333 views.py:343 views.py:414
+#: views.py:329 views.py:339 views.py:411
 msgid "Raster data"
 msgstr "Datos ráster"
 
-#: views.py:562
+#: views.py:558
 msgid "Approved"
 msgstr "Aprobado"
 
-#: views.py:625
+#: views.py:621
 msgid "Your download request could not be found"
 msgstr "Su petición de descarga no se pudo encontrar"
 
-#: views.py:663
+#: views.py:659
 msgid "Your download request has expired"
 msgstr "Su petición de descarga ha caducado"
 
-#: views.py:663 views.py:665
+#: views.py:659 views.py:661
 msgid "You can start a new request using the Download Service"
 msgstr "Puede comenzar una nueva petición usando el Servicio de Descargas"
 
-#: views.py:665
+#: views.py:661
 msgid "Your download request has been cancelled"
 msgstr "Su petición de descarga se ha cancelado"
 
-#: views.py:717
+#: views.py:716
 msgid "The resource could not be found"
 msgstr "No se pudo encontrar el recurso"
 
-#: views.py:717
+#: views.py:716
 msgid "Contact the service administrators if you believe this is an error"
 msgstr ""
 "Contacte a los administradores del servicio si cree que se trata de un error"
