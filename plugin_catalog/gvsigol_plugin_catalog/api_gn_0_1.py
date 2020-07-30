@@ -415,6 +415,19 @@ class Geonetwork():
                 
                 image_url = self.service_url + '/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=osm&geomsrs=EPSG:4326&geom=Polygon(('+coords_w+' '+coords_s+','+coords_e+' '+coords_s+','+coords_e+' '+coords_n+','+coords_w+' '+coords_n+','+coords_w+' '+coords_s+'))'
                 
+                thumbnails = []
+                for browseGraphic in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', ns):
+                    url_node = browseGraphic.find('gmd:fileName/gco:CharacterString', ns)
+                    if url_node is not None and url_node.text:
+                        url = sanitizeXmlText(url_node.text)
+                        desc_node = browseGraphic.find('gmd:fileDescription/gco:CharacterString', ns)
+                        name = sanitizeXmlText(desc_node.text) if desc_node is not None else ''
+                        thumbnail = {
+                            'url' : url,
+                            'name': name
+                        }
+                        thumbnails.append(thumbnail)
+                """
                 #thumbnails
                 thumbnails_urls = []
                 for thumbnail_url in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/', ns):
@@ -432,7 +445,7 @@ class Geonetwork():
                             'name': sanitizeXmlText(thumbnail_names[i])
                         }
                         thumbnails.append(thumbnail)
-                
+                """
                 
                 resource_constraints = self._getXMLConstraints(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints', ns)
                 metadata_constraints = self._getXMLConstraints(tree, './gmd:metadataConstraints', ns)
