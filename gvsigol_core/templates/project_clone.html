@@ -58,7 +58,7 @@
 					</div>
 					<div class="row">
 						<div class="col-md-12 form-group">
-							<label for="layergroup_server_id">{% trans "Select server" %}</label>
+							<label for="target_server">{% trans "Select server" %}</label>
 							<select class="form-control" id="target_server" name="target_server">
 								{% for server in servers %}
 									{% if forloop.first %}
@@ -68,6 +68,19 @@
 									{% endif %}
 								{% endfor %}
 							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<span>{% trans "Options:" %}.</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4 form-group">
+							{{form.copy_data}}
+							<label for="copy_data">{% trans "Copy data" %}</label>
+						</div>
+						<div class="col-md-8 form-group">
 						</div>
 					</div>
 					<div class="row">
@@ -94,7 +107,6 @@ $('#menu-manage-projects').addClass("active");
 $('#submenu-projects').addClass("active");
 
 	$('#id_project_title').change(function(event) {
-		console.log($('#id_project_title').val());
 		var normalizedVal = $('#id_project_title').val().toLowerCase().replace(/[^a-z0-9_]/gm, '');
 		if ($('#id_project_name').val() == '') {
 			$('#id_project_name').val(normalizedVal);
@@ -105,6 +117,10 @@ $('#submenu-projects').addClass("active");
 		if ($('#id_target_datastore').val() == '') {
 			$('#id_target_datastore').val('wds_' + normalizedVal);
 		}
+	});
+	
+	$('#save_button').click(function(event) {
+		$('#save_button i').removeClass('fa-clone').addClass('fa-spinner fa-spin');
 	});
 </script>
 {% endblock %}

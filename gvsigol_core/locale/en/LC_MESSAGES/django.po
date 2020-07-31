@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-23 11:21+0000\n"
+"POT-Creation-Date: 2020-07-31 17:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,29 +17,29 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: gvsigol_core/forms.py:17
+#: gvsigol_core/forms.py:16
 msgid "New project title"
 msgstr ""
 
-#: gvsigol_core/forms.py:22 gvsigol_core/forms.py:29 gvsigol_core/forms.py:37
+#: gvsigol_core/forms.py:21 gvsigol_core/forms.py:28 gvsigol_core/forms.py:36
 msgid ""
 "must start by a lower case alphanumeric and contain lower case alphanumerics "
 "or underscores"
 msgstr ""
 
-#: gvsigol_core/forms.py:24 gvsigol_core/templates/project_list.html:100
+#: gvsigol_core/forms.py:23 gvsigol_core/templates/project_list.html:100
 msgid "New project name"
 msgstr ""
 
-#: gvsigol_core/forms.py:32 gvsigol_core/templates/project_list.html:106
+#: gvsigol_core/forms.py:31 gvsigol_core/templates/project_list.html:106
 msgid "Target workspace name"
 msgstr ""
 
-#: gvsigol_core/forms.py:40 gvsigol_core/templates/project_list.html:112
+#: gvsigol_core/forms.py:39 gvsigol_core/templates/project_list.html:112
 msgid "Target datastore and database schema name"
 msgstr ""
 
-#: gvsigol_core/forms.py:45
+#: gvsigol_core/forms.py:44
 msgid "numeric value required"
 msgstr ""
 
@@ -185,11 +185,11 @@ msgid ""
 "Learn how to manage geographic information from a mobile device or tablet"
 msgstr ""
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:450
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:473
 msgid "Username"
 msgstr ""
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:453
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:476
 msgid "Email"
 msgstr ""
 
@@ -213,8 +213,8 @@ msgstr ""
 msgid "Last login"
 msgstr ""
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:454
-#: gvsigol_core/utils.py:466
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:477
+#: gvsigol_core/utils.py:489
 msgid "Password"
 msgstr ""
 
@@ -231,7 +231,7 @@ msgid "Passwords doesn't match"
 msgstr ""
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:462
+#: gvsigol_core/utils.py:485
 msgid "New password"
 msgstr ""
 
@@ -533,6 +533,30 @@ msgstr ""
 msgid "Select server"
 msgstr ""
 
+#: gvsigol_core/templates/project_clone.html:75
+msgid "Options:"
+msgstr ""
+
+#: gvsigol_core/templates/project_clone.html:81
+msgid "Copy data"
+msgstr ""
+
+#: gvsigol_core/templates/project_clone.html:88
+msgid "Notes:"
+msgstr ""
+
+#: gvsigol_core/templates/project_clone.html:90
+msgid "Vector layers will be cloned"
+msgstr ""
+
+#: gvsigol_core/templates/project_clone.html:91
+msgid "Base layer groups will be referenced instead of cloned"
+msgstr ""
+
+#: gvsigol_core/templates/project_clone.html:92
+msgid "Raster layers will be excluded (except base layers)"
+msgstr ""
+
 #: gvsigol_core/templates/project_list.html:17
 #: gvsigol_core/templates/select_public_project.html:51
 msgid "Projects list"
@@ -814,23 +838,23 @@ msgstr ""
 msgid "Error loading layers"
 msgstr ""
 
-#: gvsigol_core/utils.py:433
+#: gvsigol_core/utils.py:456
 msgid "New user account"
 msgstr ""
 
-#: gvsigol_core/utils.py:449
+#: gvsigol_core/utils.py:472
 msgid "Account data"
 msgstr ""
 
-#: gvsigol_core/utils.py:451
+#: gvsigol_core/utils.py:474
 msgid "First name"
 msgstr ""
 
-#: gvsigol_core/utils.py:452
+#: gvsigol_core/utils.py:475
 msgid "Last name"
 msgstr ""
 
-#: gvsigol_core/utils.py:464
+#: gvsigol_core/utils.py:487
 msgid "This is your new temporary password"
 msgstr ""
 
@@ -921,19 +945,19 @@ msgstr ""
 msgid "Project name already exists"
 msgstr ""
 
-#: gvsigol_core/views.py:1327 gvsigol_core/views.py:1329
+#: gvsigol_core/views.py:1331 gvsigol_core/views.py:1333
 msgid "Shared view"
 msgstr ""
 
-#: gvsigol_core/views.py:1330
+#: gvsigol_core/views.py:1334
 msgid "Link"
 msgstr ""
 
-#: gvsigol_core/views.py:1433 gvsigol_core/views.py:1465
+#: gvsigol_core/views.py:1439 gvsigol_core/views.py:1471
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1460
+#: gvsigol_core/views.py:1466
 msgid "The project was successfully cloned."
 msgstr ""
 
