@@ -524,16 +524,19 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
         
         for enum in LayerFieldEnumeration.objects.filter(layer=old_instance):
             enum.pk = None
-            enum.layername = new_layer_instance.name
-            enum.schema = new_layer_instance.datastore.name
+            enum.layer = new_layer_instance
             enum.save()
             
         from gvsigol_symbology.services import clone_layer_styles
         clone_layer_styles(server, old_instance, new_layer_instance)
-        #views.create_symbology(server, new_layer_instance)
+        
+        for lyr_res in LayerResource.objects.filter(layer=old_instance):
+            lyr_res.pk = None
+            lyr_res.layer = new_layer_instance
+            lyr_res.save()
         """
         TODO:
-        - ¿recursos de capa? ¿metadatos? etc
+        - ¿metadatos? etc
         """
         server.updateThumbnail(new_layer_instance, 'create')
     
