@@ -539,14 +539,15 @@ class Introspect:
         )
         self.cursor.execute(query)
     
-    def clone_table(self, schema, table_name, target_schema, new_table_name, clone_data=True):
-        query = sqlbuilder.SQL("CREATE TABLE {target_schema}.{new_table} AS TABLE {schema}.{table}").format(
+    def clone_table(self, schema, table_name, target_schema, new_table_name, copy_data=True):
+        query_tpl = "CREATE TABLE {target_schema}.{new_table} AS TABLE {schema}.{table}"
+        if not copy_data:
+            query_tpl += " WITH NO DATA"
+        query = sqlbuilder.SQL(query_tpl).format(
             target_schema=sqlbuilder.Identifier(target_schema),
             new_table=sqlbuilder.Identifier(new_table_name),
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table_name))
-        if not clone_data:
-            query += " WITH NO DATA"
         self.cursor.execute(query)
         
         for (column, _, schema, seq_name) in self.get_sequences(table_name, schema):

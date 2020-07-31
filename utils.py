@@ -474,7 +474,7 @@ def set_time_enabled(server, layer):
         server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
 
 
-def clone_layer(target_datastore, layer, layer_group):
+def clone_layer(target_datastore, layer, layer_group, copy_data=True):
     if layer.type == 'v_PostGIS': # operation not defined for the rest of types
         # create the table
         dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
@@ -484,7 +484,7 @@ def clone_layer(target_datastore, layer, layer_group):
         dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
         i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
         table_name = layer.source_name if layer.source_name else layer.name
-        i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name)
+        i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=copy_data)
         i.close()
 
         from gvsigol_services import views

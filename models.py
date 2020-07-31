@@ -122,7 +122,7 @@ class LayerGroup(models.Model):
     def __unicode__(self):
         return self.name
     
-    def clone(self, recursive=True, target_datastore=None):
+    def clone(self, recursive=True, target_datastore=None, copy_layer_data=True):
         old_id = self.pk
         new_name = target_datastore.workspace.name + "_" + self.name
         i = 1
@@ -139,7 +139,7 @@ class LayerGroup(models.Model):
         new_instance =  LayerGroup.objects.get(id=self.pk)
         if recursive:
             for lyr in LayerGroup.objects.get(id=old_id).layer_set.all():
-                lyr.clone(target_datastore=target_datastore, layer_group=new_instance)
+                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, copy_data=copy_layer_data)
         return new_instance
 
 def get_default_layer_thumbnail():
@@ -192,9 +192,9 @@ class Layer(models.Model):
     def get_qualified_name(self):
         return self.datastore.workspace.name + ":" + self.name
     
-    def clone(self, target_datastore, recursive=True, layer_group=None):
+    def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True):
         from gvsigol_services.utils import clone_layer
-        return clone_layer(target_datastore, self, layer_group)
+        return clone_layer(target_datastore, self, layer_group, copy_data=copy_data)
 
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer)
