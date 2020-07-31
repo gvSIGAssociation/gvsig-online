@@ -427,25 +427,6 @@ class Geonetwork():
                             'name': name
                         }
                         thumbnails.append(thumbnail)
-                """
-                #thumbnails
-                thumbnails_urls = []
-                for thumbnail_url in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/', ns):
-                    thumbnails_urls.append(thumbnail_url.text)
-                    
-                thumbnail_names = []
-                for thumbnail_name in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileDescription/', ns):
-                    thumbnail_names.append(thumbnail_name.text)
-                
-                thumbnails = []
-                if thumbnails_urls.__len__() == thumbnail_names.__len__():
-                    for i in range(0,thumbnails_urls.__len__()):
-                        thumbnail = {
-                            'url' : sanitizeXmlText(thumbnails_urls[i]),
-                            'name': sanitizeXmlText(thumbnail_names[i])
-                        }
-                        thumbnails.append(thumbnail)
-                """
                 
                 resource_constraints = self._getXMLConstraints(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints', ns)
                 metadata_constraints = self._getXMLConstraints(tree, './gmd:metadataConstraints', ns)
