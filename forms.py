@@ -8,8 +8,7 @@ from django import forms
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
 from gvsigol_core.models import Project
-from gvsigol_services.models import Workspace, Datastore, Server
-from gvsigol_core import utils
+from gvsigol_services.models import Workspace, Server
 from gvsigol_services import utils as services_utils
 
 class CloneProjectForm(forms.Form):
@@ -45,6 +44,7 @@ class CloneProjectForm(forms.Form):
                                     message=_('numeric value required')
                                 ),
                             ])
+    copy_data = forms.BooleanField(required=False, initial=False)
 
     def clean_project_name(self):
         data = self.cleaned_data['project_name']
