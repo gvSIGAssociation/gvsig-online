@@ -98,16 +98,16 @@ def home(request):
             if not exists:
                 projects_by_user.append(project_group)
 
+    media_url = settings.MEDIA_URL[:-1]
     projects = []
     public_projects = []
     if request.user.is_superuser:
         for p in Project.objects.all():
             image = ''
             if "no_project.png" in p.image.url:
-                media_url = settings.MEDIA_URL[:-1]
                 image = p.image.url.replace(media_url, '')
             else:
-                image = p.image.url
+                image = p.image.url.replace(settings.BASE_URL, '')
 
             project = {}
             project['id'] = p.id
@@ -127,7 +127,7 @@ def home(request):
                 media_url = settings.MEDIA_URL[:-1]
                 image = p.image.url.replace(media_url, '')
             else:
-                image = p.image.url
+                image = p.image.url.replace(settings.BASE_URL, '')
                 
             project = {}
             project['id'] = p.id
@@ -724,6 +724,8 @@ def load_project(request, project_name):
             'has_image': has_image,
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
+            'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
+            'project_image': project.image.url.replace(settings.BASE_URL, ''),
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
@@ -761,6 +763,8 @@ def load_public_project(request, project_name):
         'has_image': has_image,
         'supported_crs': core_utils.get_supported_crs(),
         'project': project,
+        'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
+        'project_image': project.image.url.replace(settings.BASE_URL, ''),
         'pid': project.id,
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
@@ -1359,6 +1363,8 @@ def load_shared_view(request, view_name):
             'has_image': has_image,
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
+            'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
+            'project_image': project.image.url.replace(settings.BASE_URL, ''),
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
