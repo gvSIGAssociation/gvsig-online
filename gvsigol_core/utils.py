@@ -36,6 +36,9 @@ import gvsigol
 from iso639 import languages
 from future.utils import string_types
 from future.builtins import int
+from django.core.validators import URLValidator
+import logging
+logger = logging.getLogger("gvsigol")
 
 
 def can_read_project(user, project):
@@ -336,7 +339,27 @@ def toc_remove_layer(layer):
         except Exception:
             #Si json.loads da error en el parseo no se hace nada, se pasa al siguiente e impedimos que pete y se corte la ejecucíón
             pass
-        
+
+def get_absolute_url(url, headers):
+    try:
+        # first check if it is an absolute url
+        validate = URLValidator(schemes=['https','http'])
+        validate(url)
+        return url
+    except:
+        # relative URL
+        pass
+    base_url = settings.BASE_URL
+    try:
+        origin = headers.get('HTTP_ORIGIN')
+        if origin != base_url and origin in settings.ALLOWED_HOST_NAMES:
+            base_url = origin
+        else:
+            logger.warning("Not allowed HTTP_ORIGIN: " + origin)
+    except:
+        pass
+    return base_url + url
+
 def get_geoserver_base_url(request, url):
     return url
    
