@@ -36,7 +36,7 @@ class Project(models.Model):
     def __unicode__(self):
         return self.name + ' - ' + self.description
     
-    def clone(self, target_datastore, name, title, recursive=True):
+    def clone(self, target_datastore, name, title, recursive=True, copy_layer_data=True):
         old_pid = self.pk
         self.pk = None
         self.name = name
@@ -47,7 +47,7 @@ class Project(models.Model):
         if recursive:
             old_project = Project.objects.get(id=old_pid)
             for prj_lg in old_project.projectlayergroup_set.all():
-                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore)
+                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, copy_layer_data=copy_layer_data)
             
             for prj_ug in old_project.projectusergroup_set.all():
                 prj_ug.clone(project=new_project_instance)
@@ -77,10 +77,10 @@ class ProjectLayerGroup(models.Model):
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
     
-    def clone(self, recursive=True, project=None, target_datastore=None):
+    def clone(self, recursive=True, project=None, target_datastore=None, copy_layer_data=True):
         if recursive:
             if not self.baselayer_group:
-                self.layer_group = self.layer_group.clone(target_datastore=target_datastore)
+                self.layer_group = self.layer_group.clone(target_datastore=target_datastore, copy_layer_data=copy_layer_data)
         self.pk = None
         if project:
             self.project = project
