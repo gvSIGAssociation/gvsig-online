@@ -261,6 +261,12 @@ class LayerResource(models.Model):
     title = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'feature']),
+            models.Index(fields=['path']),
+        ]
+    
 class Enumeration(models.Model):
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=500, null=True, blank=True)
