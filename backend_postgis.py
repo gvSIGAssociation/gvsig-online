@@ -17,7 +17,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from django.contrib.gis.db.models import sql
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -31,7 +30,12 @@ specific table, the available geometry columns, etc.
 """
 
 import psycopg2
-import json
+from psycopg2 import sql as sqlbuilder
+from psycopg2.extensions import quote_ident
+import re
+
+plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
+plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
 
 class Introspect:
     def __init__(self, database, host='localhost', port='5432', user='postgres', password='postgres'):
@@ -189,16 +193,18 @@ class Introspect:
     
 
     def get_pk_columns(self, table, schema='public'):
-        self.cursor.execute("""
+        qualified_table = quote_ident(schema, self.conn) + "." + quote_ident(table, self.conn) 
+
+        query = sqlbuilder.SQL("""
         SELECT a.attname AS field_name
                         FROM pg_index i
                         JOIN pg_attribute a ON a.attrelid = i.indrelid
                         AND a.attnum = ANY(i.indkey)
                         WHERE
-                        i.indrelid = ('"'||replace(%s, '"', '""')||'"."'||replace(%s, '"', '""')||'"')::regclass
+                        i.indrelid = ({schema_table})::regclass
                         AND i.indisprimary
-        """, [schema, table])
-        
+        """).format(schema_table=sqlbuilder.Literal(qualified_table))
+        self.cursor.execute(query)
         return [r[0] for r in self.cursor.fetchall()]
     
     def get_fields(self, table, schema='public'):
@@ -209,7 +215,65 @@ class Introspect:
         
         return [r[0] for r in self.cursor.fetchall()]
 
+    def _parse_sql_identifier(self, s, expected_next_char, pattern=plainIdentifierPattern):
+        """
+        Parses the provided string an returns a tuple with the parsed identifier and the rest of the string.
+        Returns a tuple of empty strings if the provided string could not be properly parsed
+        """
+        if len(s) > 0 and s[0] != '"':
+            # unquoted, normal identifier
+            
+            pos = s.find(expected_next_char)
+            if pos > 0:
+                identifier = s[:pos]
+                if pattern.match(identifier):
+                    return (identifier, s[pos+1:])
+        else:
+            s = s[1:]
+            prev_escape_char = ''
+            seq_name_list = []
+            for idx, c in enumerate(s):
+                if c == '"':
+                    if prev_escape_char == '"':
+                        seq_name_list.append('"')
+                        prev_escape_char = ''
+                    else:
+                        prev_escape_char = '"'
+                elif prev_escape_char != '"':
+                    seq_name_list.append(c)
+                else:
+                    seq_name = u''.join(seq_name_list)
+                    str_end = s[idx:]
+                    break
+            if len(str_end) > 0 and str_end[0] == expected_next_char:
+                return (seq_name, str_end[1:])
+        return ('', '')
+    
+    def _parse_sequence_name(self, default_value_def):
+        s = default_value_def[9:]
+        
+        # faster check for plain unquoted identifiers (common case)
+        (schema_seq_name, str_end) =  self._parse_sql_identifier(s, "'", plainSchemaIdentifierPattern)
+        if len(schema_seq_name) > 0:
+            parts = schema_seq_name.split(".")
+            if len(parts) > 1:
+                return (parts[0], parts[1])
+            else:
+                return ('', parts[0])
+
+        # deep check for quoted identifiers
+        (schema, str_end) =  self._parse_sql_identifier(s, '.')
+        if schema != '':
+            (seq_name, str_end) =  self._parse_sql_identifier(str_end, "'")
+        else:
+            (seq_name, str_end) =  self._parse_sql_identifier(s, "'")
+        return (schema, seq_name)
+        
     def get_sequences(self, table, schema='public'):
+        """
+        Returns a list of tuples, each tuple containing:
+        (col_name, full_sequence_name, schema, sequence_name)
+        """
         self.cursor.execute("""
         SELECT column_name, column_default FROM information_schema.columns
         WHERE table_schema = %s AND table_name = %s
@@ -219,9 +283,12 @@ class Introspect:
         result = []
         for (col, col_default) in self.cursor.fetchall():
             try:
-              s = col_default[9:]
-              seq = s[:s.find("'")]
-              result.append((col, seq))
+                schema, seq_name = self._parse_sequence_name(col_default)
+                if seq_name != '':
+                    if schema != '':
+                        result.append((col, schema + u'.' + seq_name, schema, seq_name))
+                    else:
+                        result.append((col, seq_name, schema, seq_name))
             except:
               pass
 
@@ -239,7 +306,7 @@ class Introspect:
         seqs = self.get_sequences(table, schema)
         pks = self.get_pk_columns(table, schema)
         result = []
-        for (col, seq) in seqs:
+        for (col, seq, _, _) in seqs:
             if col in pks:
               result.append((col, seq))
         return result
@@ -416,9 +483,80 @@ class Introspect:
         self.cursor.execute(query)
         
     
-    def clone_table(self, schema, table_name, new_schema, new_name):
-        query = "CREATE TABLE " + new_schema + "." + new_name + " AS (SELECT * FROM " + schema + "." + table_name + ")"
+    def clone_sequence(self, target_schema, target_table, column, seq_name, source_schema, source_table):
+        query = sqlbuilder.SQL("CREATE SEQUENCE {target_schema}.{seq_name} OWNED BY {target_schema}.{target_table}.{column}").format(
+            target_schema=sqlbuilder.Identifier(target_schema),
+            seq_name=sqlbuilder.Identifier(seq_name),
+            target_table=sqlbuilder.Identifier(target_table),
+            column=sqlbuilder.Identifier(column))
+        print query.as_string(self.conn)
+        self.cursor.execute(query,  [])
+        
+        full_sequence = quote_ident(target_schema, self.conn) + "." + quote_ident(seq_name, self.conn) 
+        query = sqlbuilder.SQL("ALTER TABLE {target_schema}.{target_table} ALTER COLUMN  {column} SET DEFAULT nextval({full_sequence})").format(
+            target_schema=sqlbuilder.Identifier(target_schema),
+            target_table=sqlbuilder.Identifier(target_table),
+            column=sqlbuilder.Identifier(column),
+            full_sequence=sqlbuilder.Literal(full_sequence))
+        self.cursor.execute(query, [])
+
+        query = sqlbuilder.SQL("ALTER TABLE {target_schema}.{target_table} ALTER COLUMN  {column} SET NOT NULL").format(
+            target_schema=sqlbuilder.Identifier(target_schema),
+            target_table=sqlbuilder.Identifier(target_table),
+            column=sqlbuilder.Identifier(column))
+        self.cursor.execute(query, [])
+        """
+        CREATE SEQUENCE wds_testclonado43.countries4326_ogc_fid_seq OWNED BY wds_testclonado43.countries4326.ogc_fid;  
+        ALTER TABLE wds_testclonado43.countries4326 ALTER COLUMN  ogc_fid SET DEFAULT nextval('wds_testclonado43.countries4326_ogc_fid_seq');
+        ALTER TABLE wds_testclonado43.countries4326 ALTER COLUMN  ogc_fid SET NOT NULL;
+        ALTER SEQUENCE wds_testclonado43.countries4326_ogc_fid_seq OWNED BY wds_testclonado43.countries4326.ogc_fid;    -- 8.2 or later
+        """
+    
+    def clone_pks(self, target_schema, target_table, source_schema, source_table):
+        pks = self.get_pk_columns(source_table, source_schema)
+        if len(pks) > 0:
+            pk_fields = [sqlbuilder.Identifier(pk) for pk in pks]
+            query = sqlbuilder.SQL("ALTER TABLE {schema}.{table}  ADD PRIMARY KEY ({fields})").format(
+                schema=sqlbuilder.Identifier(target_schema),
+                table=sqlbuilder.Identifier(target_table),
+                fields=sqlbuilder.SQL(',').join(pk_fields)
+            )
+            self.cursor.execute(query)
+        
+    
+    def clone_spatial_index(self, target_schema, target_table, geom_col):
+        idx_name = target_table + "_" + geom_col + "_geom_idx"
+        query = sqlbuilder.SQL("""
+            CREATE INDEX {idx_name}
+            ON {schema}.{table}
+            USING gist
+            ({geom_col});
+            """).format(
+            schema=sqlbuilder.Identifier(target_schema),
+            table=sqlbuilder.Identifier(target_table),
+            geom_col=sqlbuilder.Identifier(geom_col),
+            idx_name=sqlbuilder.Identifier(idx_name)
+        )
         self.cursor.execute(query)
+    
+    def clone_table(self, schema, table_name, target_schema, new_table_name, clone_data=True):
+        query = sqlbuilder.SQL("CREATE TABLE {target_schema}.{new_table} AS TABLE {schema}.{table}").format(
+            target_schema=sqlbuilder.Identifier(target_schema),
+            new_table=sqlbuilder.Identifier(new_table_name),
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name))
+        if not clone_data:
+            query += " WITH NO DATA"
+        self.cursor.execute(query)
+        
+        for (column, _, schema, seq_name) in self.get_sequences(table_name, schema):
+            self.clone_sequence(target_schema, new_table_name, column, seq_name, schema, table_name)
+        
+        self.clone_pks(target_schema, new_table_name, schema, table_name)
+        
+        geom_cols = self.get_geometry_columns(table_name, schema)
+        for geom_col in geom_cols:
+            self.clone_spatial_index(target_schema, new_table_name, geom_col)
         
     def delete_table(self, schema, table_name):
         query = "DROP TABLE IF EXISTS " + schema + "." + table_name + ";"
