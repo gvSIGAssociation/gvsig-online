@@ -28,6 +28,7 @@ from os import path
 from shutil import copyfile
 
 logger = logging.getLogger(__name__)
+from gvsigol_services.models import LayerResource
 
 class UnsupportedRequestError(Exception):
     pass
@@ -55,7 +56,9 @@ class GvsigolRM():
             path = os.path.join(settings.MEDIA_ROOT, resource.path) 
             if os.path.exists(path):
                 url, media_path = self.store_historical(path, resource.layer.id, resource.feature)
-                os.remove(path)  
+                if not LayerResource.objects.filter(path=resource.path).exists():
+                    # only deleted if there are no cloned resources that share the same path
+                    os.remove(path)  
                 return url, media_path
         except Exception as e:
             raise e
