@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
     gvSIG Online.
     Copyright (C) 2010-2017 SCOLAB.
@@ -3125,6 +3126,8 @@ def get_feature_wfs(request):
             layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
             if wfs_url == None:
                 wfs_url = layer.datastore.workspace.wfs_endpoint
+            else:
+                wfs_url = core_utils.get_absolute_url(wfs_url, request.META)
               
             cql_filter = None  
             if operator == 'equal_to':
@@ -3174,6 +3177,7 @@ def get_feature_wfs(request):
             }
 
         except Exception as e:
+            logger.exception("Error getting WFS feature")
             response = {
                 'data': []
             }
