@@ -352,10 +352,11 @@ def get_absolute_url(url, headers):
     base_url = settings.BASE_URL
     try:
         origin = headers.get('HTTP_ORIGIN')
-        if origin != base_url and origin in settings.ALLOWED_HOST_NAMES:
-            base_url = origin
-        else:
-            logger.warning("Not allowed HTTP_ORIGIN: " + origin)
+        if origin != base_url:
+            if origin in settings.ALLOWED_HOST_NAMES:
+                base_url = origin
+            else:
+                logger.warning("Not allowed HTTP_ORIGIN: " + origin)
     except:
         pass
     return base_url + url

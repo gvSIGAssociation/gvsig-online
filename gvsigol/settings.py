@@ -142,31 +142,42 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
+
+    ############# CORE ################
     'gvsigol_statistics',
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_librapicassa',
-    #'gvsigol_plugin_edition',
-    #'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_print',
-    #'gvsigol_statistics',
-    #'gvsigol_app_repsol',
+
+    ############# APPS ################
+    'gvsigol_app_dev',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
-    #'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_print',
-    #'gvsigol_plugin_geocoding',
+
+    ############# PLUGINS ################
     #'gvsigol_plugin_catalog',
+    #'gvsigol_plugin_catastro',
+    #'gvsigol_plugin_catastrouy',
+    #'gvsigol_plugin_charts',
     #'gvsigol_plugin_downloadman',
-    #'gvsigol_app_libraregepa',
-    #'gvsigol_plugin_regepa',
-    'actstream',
+    #'gvsigol_plugin_draw',
+    #'gvsigol_plugin_edition',
+    #'gvsigol_plugin_elevation',
+    #'gvsigol_plugin_emergencies',
+    #'gvsigol_plugin_geocoding',
+    #'gvsigol_plugin_importfromservice',
+    #'gvsigol_plugin_importvector',
+    #'gvsigol_plugin_manageaddresses',
+    'gvsigol_plugin_opensea2',
     #'gvsigol_plugin_picassa',
-    #'gvsigol_plugin_uampp',
+    #'gvsigol_plugin_print',
+    #'gvsigol_plugin_restapi',
+    #'gvsigol_plugin_streetview',
+    #'gvsigol_plugin_turiscan',
+    #'gvsigol_plugin_worldwind',
+    'actstream'
 ]
 
 try:
@@ -400,9 +411,10 @@ MOSAIC_DB = {
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 },
 
-OGR2OGR_PATH = '/usr/local/bin/ogr2ogr'
-SHP2PGSQL_PATH = '/Library/PostgreSQL/9.6/bin/shp2pgsql'
 GDALTOOLS_BASEPATH = '/usr/local/bin'
+GDALSRSINFO_PATH = GDALTOOLS_BASEPATH + '/gdalsrsinfo'
+GDALINFO_PATH = GDALTOOLS_BASEPATH + '/gdalinfo'
+OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 18 
@@ -610,3 +622,5 @@ PUSH_NOTIFICATIONS_SETTINGS = {
 }
 
 RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
+
+ALLOWED_HOST_NAMES = ['http://localhost']
