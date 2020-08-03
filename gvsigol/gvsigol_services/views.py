@@ -2768,7 +2768,8 @@ def get_feature_info(request):
                     rs.append(is_grouped_symbology_request(request, layer_array['url'], aux_response, styles, fut_session))
                     
                 else:
-                    url = request.META['HTTP_ORIGIN'] + layer_array['url']
+                    #url = request.META['HTTP_ORIGIN'] + layer_array['url']
+                    url = core_utils.get_absolute_url(layer_array['url'], request.META)
                     styles = []
                     if 'styles' in layer_array:
                         styles = layer_array['styles']
@@ -2799,7 +2800,8 @@ def get_feature_info(request):
 
             i=0
             for layer_array in layers_array:
-                url = request.META['HTTP_ORIGIN'] + layer_array['url']
+                #url = request.META['HTTP_ORIGIN'] + layer_array['url']
+                url = core_utils.get_absolute_url(layer_array['url'], request.META)
                 query_layer = layer_array['query_layer']
                 ws= None
                 if 'workspace' in layer_array:
@@ -3001,9 +3003,8 @@ def get_datatable_data(request):
             sortby_field = str(pk_defs[0])
         '''
         
-        wfs_url = request.META['HTTP_ORIGIN'] + wfs_url
-        if wfs_url == None:
-            wfs_url = request.META['HTTP_ORIGIN'] + wfs_url
+        #wfs_url = request.META['HTTP_ORIGIN'] + wfs_url
+        wfs_url = core_utils.get_absolute_url(wfs_url, request.META)
         try:
             if search_value == '':
                 values = {
