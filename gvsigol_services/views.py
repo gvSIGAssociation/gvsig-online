@@ -4447,6 +4447,9 @@ def register_action(request):
         workspace = request.POST.get('workspace')
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
         
-        action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
-        
+        if request.user.is_anonymous:
+            action.send(layer, verb="gvsigol_services/layer_activate", action_object=layer)
+        else:
+            action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
+
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
