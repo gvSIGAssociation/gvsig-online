@@ -729,7 +729,7 @@ viewer.core = {
 			wmsLayer.setOpacity(layerConf.opacity);
 			this.map.addLayer(wmsLayer);
 			
-			/*wmsLayer.getSource().loadend = false;
+			wmsLayer.getSource().loadend = false;
 			wmsLayer.getSource().layer_name = layerConf.name;
 			wmsLayer.getSource().on('tileloadstart', function() {
 				var time = 0;
@@ -778,6 +778,10 @@ viewer.core = {
 			
 			});
 			wmsLayer.getSource().on('tileloaderror', function(e){
+				var aux = self._check_error_is_TileOutOfRange(e.tile);
+				if (aux){
+					return;
+				}
 				var iLayer = null;
 				self.map.getLayers().forEach(function(layer){
 					if (layer.layer_name) {
@@ -785,23 +789,44 @@ viewer.core = {
 							iLayer = layer;
 						}
 					}						
-				}, this);
-				
+				}, this);								
 				if (iLayer) {
 					$('#' + iLayer.id).parent().css('color', '#ff0000');
 					$('#' + iLayer.id).parent().children('input').prop( "checked", false );
 					$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
 					$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
 					self.map.removeLayer(iLayer);
-				}
-				
-				
-			});*/
-			
-			
+				}								
+			});						
 		}
 	},
-
+	//check if tile error is caused by a TileOutOfRange
+	_check_error_is_TileOutOfRange: function(tile){
+		var is_tileoutofrange;
+		var tile_url = tile.getImage().src;
+		$.ajax({
+			url: tile_url,
+			async: false,
+			timeout: 1000,
+			method: 'GET',
+			headers: {
+				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+			},
+			error: function(error){
+				if (error.responseText.indexOf("TileOutOfRange") == -1){
+					is_tileoutofrange =  false;
+					//TileState.ERROR = 3
+					tile.setState(3);
+				}else{
+					is_tileoutofrange = true;
+				}
+			},
+			success: function(resp){
+				is_tileoutofrange = false;
+			}
+		});
+		return is_tileoutofrange;		
+	},
 	_loadLayerGroups: function() {
 		var self = this;
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
