@@ -807,7 +807,7 @@ viewer.core = {
 		$.ajax({
 			url: tile_url,
 			async: false,
-			timeout: 1000,
+			timeout: 2000,
 			method: 'GET',
 			headers: {
 				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
