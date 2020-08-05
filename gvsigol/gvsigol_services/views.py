@@ -946,7 +946,8 @@ def do_config_layer(server, layer, featuretype):
     if layer.datastore.type != 'e_WMS':
         if layer.datastore.type == 'c_ImageMosaic':
             server.updateImageMosaicTemporal(layer.datastore, layer)
-        utils.set_time_enabled(server, layer)
+        if layer.datastore.type != 'c_GeoTIFF':
+            utils.set_time_enabled(server, layer)
         create_symbology(server, layer)
         server.updateThumbnail(layer, 'create')
 
@@ -1417,22 +1418,23 @@ def layer_autoconfig(layer, featuretype):
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
-    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(layer_info))
-    for f in resource_fields:
-        field = {}
-        field['name'] = f['name']
-        for id, language in LANGUAGES:
-            field['title-'+id] = f['name']
-        field['visible'] = True
-        field['editableactive'] = True
-        field['editable'] = True
-        for control_field in settings.CONTROL_FIELDS:
-            if field['name'] == control_field['name']:
-                field['editableactive'] = False
-                field['editable'] = False
-        field['infovisible'] = False
-        field['mandatory'] = False
-        fields.append(field)
+    if (ds_type != 'coverage'):
+        resource_fields = utils.get_alphanumeric_fields(utils.get_fields(layer_info))    
+        for f in resource_fields:
+            field = {}
+            field['name'] = f['name']
+            for id, language in LANGUAGES:
+                field['title-'+id] = f['name']
+            field['visible'] = True
+            field['editableactive'] = True
+            field['editable'] = True
+            for control_field in settings.CONTROL_FIELDS:
+                if field['name'] == control_field['name']:
+                    field['editableactive'] = False
+                    field['editable'] = False
+            field['infovisible'] = False
+            field['mandatory'] = False
+            fields.append(field)
 
     layer_conf = {
         'fields': fields,
