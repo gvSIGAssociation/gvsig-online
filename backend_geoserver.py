@@ -243,8 +243,8 @@ class Geoserver():
                 
             elif format_nature == "c": # coverage (raster)
                 if driver == "GeoTIFF":
-                    ds = catalog.create_coveragestore2(name, workspace.name)
-                    ds.url = params_dict.get('url')
+                    ds = catalog.create_coveragestore(name, workspace=workspace, path=params_dict.get('url'),create_layer=False)
+                    #ds.url = params_dict.get('url')
                 if driver == "ImageMosaic":
                     ele_regex = params_dict.get('ele_regex', '')
                     date_regex = params_dict.get('date_regex', '')
@@ -252,7 +252,7 @@ class Geoserver():
                     date_format = params_dict.get('date_format', '')
                     file_path = params_dict.get('url')
                     self.__process_image_mosaic_folder(name, file_path, date_regex, date_format, ele_regex, ele_format)
-                    ds = catalog.create_coveragestore2(name, workspace.name)
+                    ds = catalog.create_coveragestore(name, workspace.name, path=file_path,create_layer=False)
                     ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
                 wmsuser = None
