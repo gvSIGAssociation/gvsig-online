@@ -343,6 +343,30 @@ print.prototype.createPrintJob = function(template) {
 						"baseURL": url,
 					    "type": "OSM",
 					    "tileSize": [256, 256],
+					    "resolutions": [156543.03390625,
+				            78271.516953125,
+				            39135.7584765625,
+				            19567.87923828125,
+				            9783.939619140625,
+				            4891.9698095703125,
+				            2445.9849047851562,
+				            1222.9924523925781,
+				            611.4962261962891,
+				            305.74811309814453,
+				            152.87405654907226,
+				            76.43702827453613,
+				            38.218514137268066,
+				            19.109257068634033,
+				            9.554628534317017,
+				            4.777314267158508,
+				            2.388657133579254,
+				            1.194328566789627,
+				            0.5971642833948135,
+				            0.2984505969011938,
+				            0.1492252984505969,
+				            0.0746455354243517,
+				            0.0373227677121758
+				           ],
 					    "imageExtension": "png"
 					});
 					
@@ -398,12 +422,12 @@ print.prototype.createPrintJob = function(template) {
 					if (legendUrl.indexOf('http') == -1) {
 						legendUrl = self.origin + legendUrl;
 					}
+					var legend = {
+							"name": mapLayers[i].title,
+				            "icons": [legendUrl]
+				        };
+					legends.push(legend);
 				}
-				var legend = {
-					"name": mapLayers[i].title,
-		            "icons": [legendUrl]
-		        };
-				legends.push(legend);
 			}
 		}
 	}
@@ -504,11 +528,48 @@ print.prototype.createPrintJob = function(template) {
 							printLayers.push({
 								"baseURL": url,
 							    "type": "OSM",
+							    "dpi": parseInt(dpi),
+							    "resolutions": [156543.03390625,
+						            78271.516953125,
+						            39135.7584765625,
+						            19567.87923828125,
+						            9783.939619140625,
+						            4891.9698095703125,
+						            2445.9849047851562,
+						            1222.9924523925781,
+						            611.4962261962891,
+						            305.74811309814453,
+						            152.87405654907226,
+						            76.43702827453613,
+						            38.218514137268066,
+						            19.109257068634033,
+						            9.554628534317017,
+						            4.777314267158508,
+						            2.388657133579254,
+						            1.194328566789627,
+						            0.5971642833948135,
+						            0.2984505969011938,
+						            0.1492252984505969,
+						            0.0746455354243517,
+						            0.0373227677121758
+						           ],		
+						          "resolutionTolerance": 0.1,
 							    "tileSize": [256, 256],
 							    "imageExtension": "png"
 							});
 						}
 					}
+					var legendUrl = baseLayers[i].legend_no_auth;
+					if (legendUrl) {
+						if (legendUrl.indexOf('http') == -1) {
+							legendUrl = self.origin + legendUrl;
+						}
+						var legend = {
+							"name": baseLayers[i].title,
+							"icons": [legendUrl]
+						};
+						legends.push(legend);	
+					}					
 				}
 			}
 		}
@@ -534,7 +595,7 @@ print.prototype.createPrintJob = function(template) {
 		  			"layers": printLayers,
 		  			"bbox": f.getGeometry().getExtent()
 		  	    },
-		  	    "logo_url": self.origin + self.conf.project_image,
+//		  	    "logo_url": self.origin + self.conf.project_image,
 		  	    //"logo_url": 'http://localhost' + self.conf.project_image,
 		  	    "legend": {
 		  	    	"name": "",
