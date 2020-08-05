@@ -424,7 +424,7 @@ print.prototype.createPrintJob = function(template) {
 					}
 					var legend = {
 							"name": mapLayers[i].title,
-				            "icons": [legendUrl]
+				            "icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000')]
 				        };
 					legends.push(legend);
 				}
@@ -566,7 +566,7 @@ print.prototype.createPrintJob = function(template) {
 						}
 						var legend = {
 							"name": baseLayers[i].title,
-							"icons": [legendUrl]
+							"icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000')]
 						};
 						legends.push(legend);	
 					}					
