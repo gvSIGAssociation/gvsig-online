@@ -551,21 +551,22 @@
 			updateResourceList(id_datastore);
 			updateLayerGroupList(id_datastore);
 			
-			if(id_datastore in datastore_types){
+			if (id_datastore in datastore_types) {
 				if(datastore_types[id_datastore].startsWith('v_')){
 					$(".vector_fields").css("display", "block");
 				}
 				else {
 					$(".vector_fields").css("display", "none");
 				}
-				if(datastore_types[id_datastore] == 'c_ImageMosaic'){
+				if(datastore_types[id_datastore].startsWith('c_')){
 					$(".image_mosaic_tmp_fields").css("display", "none");
 				}else{
 					$(".image_mosaic_tmp_fields").css("display", "block");
 				}
-			}else{
+
+			}/* else {
 				$(".image_mosaic_tmp_fields").css("display", "block");
-			}
+			}*/
 			
 		});
 		
