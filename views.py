@@ -629,7 +629,8 @@ def layer_list(request):
         projects = []
         project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=l.layer_group.id)
         for lg in project_layergroups:
-            projects.append(lg.project.title)
+            if lg.project.title is not None:
+                projects.append(lg.project.title)
         layer = {
             'id': l.id,
             'type': l.type,
