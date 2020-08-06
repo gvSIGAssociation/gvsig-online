@@ -152,8 +152,11 @@ print.prototype.handler = function(e) {
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Resolution') + '</label>';
 		ui += 				'<select id="print-dpi" class="form-control">';
+		ui += 					'<option value="72">72 dpi</option>';
+		ui += 					'<option selected value="96">96 dpi</option>';		
+		ui += 					'<option value="128">128 dpi</option>';		
 		ui += 					'<option value="180">180 dpi</option>';
-		ui += 					'<option selected value="240">240 dpi</option>';
+		ui += 					'<option value="240">240 dpi</option>';
 		ui += 					'<option value="320">320 dpi</option>';
 //		ui += 					'<option value="400">400 dpi</option>';
 		ui += 				'</select>';
@@ -588,8 +591,9 @@ print.prototype.createPrintJob = function(template) {
 		  		"map": {
 		  			"projection": "EPSG:3857",
 		  			"dpi": parseInt(dpi),
+		  			"dpiSensitiveStyle":true,
 		  			"rotation": rotation,
-		  			//"center": self.map.getView().getCenter(),
+		  			// "center": self.map.getView().getCenter(),
 		  			"scale": scaleToSet,
 		  			"useNearestScale": false, //useNearestScale,
 		  			"layers": printLayers,
