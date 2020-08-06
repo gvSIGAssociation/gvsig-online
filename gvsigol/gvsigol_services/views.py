@@ -917,7 +917,8 @@ def backend_fields_list(request):
 
 def do_add_layer(server, datastore, name, title, is_queryable, extraParams):
     workspace = datastore.workspace
-    name = prepare_string(name)
+    if datastore.type != 'c_GeoTIFF':
+        name = prepare_string(name)
     """
     server.createTable(form.cleaned_data)
     """
