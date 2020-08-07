@@ -701,3 +701,7 @@ html, body {
     padding-bottom: 5px;
     padding-right: 5px;
   }
+
+.ol-popup .closeBox {
+	display: block;
+}
