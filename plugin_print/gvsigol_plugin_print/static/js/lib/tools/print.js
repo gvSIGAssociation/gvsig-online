@@ -174,7 +174,7 @@ print.prototype.handler = function(e) {
 //		ui += 					'<option value="jpeg">.jpeg</option>';
 		ui += 					'<option selected value="pdf">.pdf</option>';
 		ui += 					'<option value="png">.png</option>';
-//		ui += 					'<option value="svg">.svg</option>';
+		ui += 					'<option value="svg">.svg</option>';
 		ui += 				'</select>';
 		ui += 			'</div>';
 		
