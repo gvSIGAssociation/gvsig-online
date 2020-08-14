@@ -379,7 +379,8 @@ def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tile
         min_y = float(bbox[1])
         max_x = float(bbox[2])
         max_y = float(bbox[3])
-        
+        min_x, min_y, max_x, max_y = adjustExtent(min_x, min_y, max_x, max_y)
+
         url = None
         if base_lyr.datastore is not None:
             url = base_lyr.datastore.workspace.wmts_endpoint
@@ -478,3 +479,21 @@ def exists_base_layer_tiled(prj_id):
     file_ =  os.path.join(layers_dir, prj.name) + "_prj.zip"
     return os.path.isfile(file_)
                 
+
+def adjustExtent(minx, miny, maxx, maxy):
+    """
+    Hay ocasiones en que el extent puede ser mayor o menor que el max/min del planeta. Esto es porque OSM
+    es un mapa corrido y sin querer puedes centrar el extent del proyecto en el mapa de la derecha o la izda
+    Cuando esto pasa te vuelves loco para saber porque los tiles no se están generando por lo que meto está
+    función para asegurar que el extent es correcto y si no lo es lo rectifica.
+    """
+    while minx > 20037508.34 and maxx > 20037508.34:
+        minx = minx - 40075016.68
+        maxx = maxx - 40075016.68
+
+    while minx < -20037508.34 and maxx < -20037508.34:
+        minx = minx + 40075016.68
+        maxx = maxx + 40075016.68
+
+    return minx, miny, maxx, maxy
+
