@@ -196,6 +196,15 @@ ChangeToWWControl.prototype.initWW = function() {
     //new WorldWind.GestureRecognizer(this.wwd, this.onWWGesture);
     this.wwd.addLayer(new WorldWind.AtmosphereLayer());
     this.wwd.addLayer(new WorldWind.StarFieldLayer());
+    var compassLayer = new WorldWind.CompassLayer();
+    var wWidth  = window.innerWidth;
+    var wHeight = window.innerHeight;
+    
+    compassLayer.compass.screenOffset = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.52, WorldWind.OFFSET_FRACTION, 0.9900);
+    var pixelSize = 75;
+    var desiredScale =  pixelSize / wWidth;
+    compassLayer.compass.size = desiredScale;
+    this.wwd.addLayer( compassLayer );
     
     if (viewer.core.ifToolInConf('gvsigol_tool_measure')) {
 		this.tools3d.push(new measureLength3d(this.wwd));
@@ -290,6 +299,11 @@ ChangeToWWControl.prototype.getElevationModel = function() {
 			maxElevation: 8850,
 			urlBuilder: new WorldWind.WmsUrlBuilder(heightUrl, provider.provider_layers /*'mdt_nacional'*/, "", provider.provider_version)
 		});
+		customCoverage.lastLevel = 20;
+		customCoverage.numLevels = 20;
+		customCoverage.levels = new WorldWind.LevelSet(customCoverage.coverageSector, new WorldWind.Location(45, 45),
+				customCoverage.numLevels, 256, 256);
+
 
 //		var customCoverage = new WorldWind.TiledElevationCoverage({
 //			coverageSector: WorldWind.Sector.FULL_SPHERE,
