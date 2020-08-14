@@ -435,6 +435,12 @@
 											</div>
 										</div>
 
+										<div class="row">
+											<div class="col-md-3" style="top:25px;padding-bottom: 25px">
+												<button type="button" id="button-create-base-layer"> {% trans "Create layer" %}</button>	
+												<button type="button" id="button-stop-process"> {% trans "Stop Process" %}</button>														
+											</div>
+										</div>
 										
 									</div>
 								</div>
@@ -445,12 +451,7 @@
               		
           		</div>
           	</form>
-          	<div class="row">
-				<div class="col-md-3" style="top:25px;padding-bottom: 25px">
-					<button id="button-create-base-layer"> {% trans "Create layer" %}</button>	
-					<button id="button-stop-process"> {% trans "Stop Process" %}</button>														
-				</div>
-			</div>
+          	
 		</div>
 	</div>
 	
@@ -548,10 +549,13 @@
 		
 		
 		$('#project-update-tabs').on("click", function (e) {
+			//Al pulsar cualquier tab desactiva la llamada de actualización de progreso de la capa base
 			var target = $(e.target).attr("data-id");
 			if(process_status) {
 				clearInterval(process_status);
 			}
+
+			//Al pulsar el tab de Empaquetar capa base se manda una llamada ajax cada x segundos para actualizar el progreso
 			if (target != null && target == 4) {
 				process_status = setInterval(function() { 
 					$.ajax({
@@ -591,7 +595,7 @@
 							$("#estimated_time").text('-')
 						}
 					});
-				}, 7000);
+				}, 4000);
 			}       
 		})
 		
