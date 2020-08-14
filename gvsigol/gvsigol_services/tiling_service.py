@@ -140,10 +140,16 @@ class Tiling():
                 destination.write(content)
                 destination.close()
             except Exception as e:
-                print "ERROR: " + str(e)
+                #Si el servicio no está disponible terminamos la descarga
+                if(e.code and e.code == 503): 
+                    return False
+                else:
+                    print "ERROR: " + str(e)
         else: 
         #print "skipped %r" % url
             pass
+
+        return True
     
     def _download_url(self, zoom, xtile, ytile):
         #No hay 3 hilos, simplemente se turna las URLs para no tirar solo de un servidor
@@ -181,7 +187,8 @@ class Tiling():
                 #break;
                 for x in range(0,2**zoom,1):        
                     for y in range(0,2**zoom,1):
-                        self._download_wmts(zoom, x, y, format_)
+                        if self._download_wmts(zoom, x, y, format_) is False:
+                            return
                     
         # from 6 to 15 ranges
         for zoom in range(7, int(maxzoom)+1, 1):
@@ -194,7 +201,8 @@ class Tiling():
                     if self.mode == "OSM":
                         self._download_url(zoom, x, y)
                     else:
-                        self._download_wmts(zoom, x, y, format_)   
+                        if self._download_wmts(zoom, x, y, format_) is False:
+                            return 
                           
                         
     def create_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_):
@@ -219,7 +227,8 @@ class Tiling():
 
                 for x in range(xtile, final_xtile + 1, 1):
                     for y in range(ytile, final_ytile - 1, -1):  
-                        self._download_wmts(zoom, x, y, format_)
+                        if self._download_wmts(zoom, x, y, format_) is False:
+                            return
                         if base_layer_process is not None:
                             if base_layer_process[str(self.prj_id)]['stop'] == 'true':
                                 return
@@ -242,7 +251,8 @@ class Tiling():
                     if self.mode == "OSM":
                         self._download_url(zoom, x, y)
                     else:
-                        self._download_wmts(zoom, x, y, format_) 
+                        if self._download_wmts(zoom, x, y, format_) is False:
+                            return
                     if base_layer_process is not None:
                         if str(self.prj_id) in base_layer_process:
                             if base_layer_process[str(self.prj_id)]['stop'] == 'true':
