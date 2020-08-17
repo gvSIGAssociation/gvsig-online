@@ -23,15 +23,11 @@
 /**
  * TODO
  */
-var SelectionTable = function(map, conf, features, layerName, workspace, wfsUrl) {
+var SelectionTable = function(conf, map) {
 	this.id = "selection-data-table";
 	this.map = map;
 	this.conf = conf;
-	this.features = features;
-	this.layerName = layerName;
-	this.workspace = workspace;
-	this.wfsUrl = wfsUrl;
-	this.selectionTable = null;
+	this.tabCount = 0;
 
 	this.selectionTableSource = new ol.source.Vector();
 	this.selectionTableLayer = new ol.layer.Vector({
@@ -79,15 +75,12 @@ SelectionTable.prototype.createSelectionTable = function() {
 	ui += 	'<div class="col-md-12">';
 	ui += 		'<div class="nav-tabs-custom">';
 	ui += 			'<div>';
-	ui += 			'<ul class="nav nav-tabs">';
-	ui += 				'<li class="active"><a href="#tab_table" data-toggle="tab"><i class="fa fa-table"></i></a></li>';
+	ui += 			'<ul id="selection-table-tabs" class="nav nav-tabs">';
 	ui +=				'<li class="pull-right"><a id="close-selectiontable" href="javascript:void(0)" class="text-muted"><i class="fa fa-times"></i></a></li>';
 	ui +=				'<li class="pull-right"><a id="maximize-selectiontable" href="javascript:void(0)" class="text-muted"><i class="fa fa-table"></i></a></li>';
 	ui +=				'<li class="pull-right"><a id="minimize-selectiontable" href="javascript:void(0)" class="text-muted"><i class="fa fa-minus"></i></a></li>';
 	ui += 			'</ul>';
-	ui += 			'<div class="tab-content">';
-	ui += 				'<div class="tab-pane active" id="tab_table">';
-	ui += 				'</div>';
+	ui += 			'<div id="selection-table-content" class="tab-content">';
 	ui += 			'</div>';
 	ui += 			'</div>';
 	ui += 		'</div>';
@@ -97,14 +90,63 @@ SelectionTable.prototype.createSelectionTable = function() {
 	$('.panel-content').empty();
 	$('.panel-content').append(ui);
 
-	var featureType = this.describeFeatureType();
-	this.createTableUI(featureType);
+	bottomPanel.hidePanel();
+
+	//var featureType = this.describeFeatureType();
+	//this.createTableUI(featureType);
 };
 
 /**
  * TODO
  */
-SelectionTable.prototype.createTableUI = function(featureType) {
+SelectionTable.prototype.removeTables = function() {
+	$(".selection-table-tab").remove();
+	$(".selection-table-content").remove();
+	this.tabCount = 0;
+};
+
+/**
+ * TODO
+ */
+SelectionTable.prototype.addTable = function(features, layerName, workspace, url) {
+	var self = this;
+	this.tabCount += 1;
+
+	$('.selection-table-tab').removeClass('active');
+	$('.selection-table-content').removeClass('active');
+
+	var tab = '<li data-tabcount="' + this.tabCount + '" id="tab-' + this.tabCount + '" class="active selection-table-tab tab-' + layerName + '-' + this.tabCount + '"><a href="#tab-table-' + layerName + '-' + this.tabCount + '" data-toggle="tab"><span style="margin-right: 5px;">' + layerName + '</span><i id="close-tab-' + this.tabCount + '" data-tabcount="' + this.tabCount + '" style="cursor: pointer;" class="fa fa-times"></i></a></li>';
+	$('#selection-table-tabs').append(tab);
+
+	$('#close-tab-' + this.tabCount).on('click', function(e){
+
+		var count = e.currentTarget.dataset.tabcount;
+		$("#tab-table-" + count).remove();
+		$("#tab-" + count).remove();
+
+		self.tabCount -= 1;
+
+		if (self.tabCount <= 0) {
+			bottomPanel.hidePanel();
+			self.selectionTableSource.clear();
+
+		} else {
+			$("#tab-table-" + self.tabCount).addClass('active');
+			$("#tab-" + self.tabCount).addClass('active');
+		}
+	});
+
+	var table = '<div class="tab-pane active selection-table-content tab-table-' + layerName + '-' + this.tabCount + '" id="tab-table-' + this.tabCount + '"></div>';
+	$('#selection-table-content').append(table);
+
+	var featureType = this.describeFeatureType(layerName, workspace);
+	this.createTableUI(featureType, features, layerName, workspace, url, this.tabCount);
+};
+
+/**
+ * TODO
+ */
+SelectionTable.prototype.createTableUI = function(featureType, features, layerName, workspace, url, tabCount) {
 
 	var self = this;
 
@@ -118,7 +160,7 @@ SelectionTable.prototype.createTableUI = function(featureType) {
 	    return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
 	});
 
-	var table = $("<table>", {id: 'table-' + this.layerName, class: 'stripe nowrap cell-border hover', style: "width: 100%; padding: 10px;"});
+	var table = $("<table>", {id: 'table-' + tabCount, class: 'stripe nowrap cell-border hover', style: "width: 100%; padding: 10px;"});
 	var thead = $("<thead>", {style: "width: 100%;"});
 	var trow = $("<tr>");
 	for (var i=0; i<featureType.length; i++) {
@@ -155,8 +197,8 @@ SelectionTable.prototype.createTableUI = function(featureType) {
 	thead.append(trow);
 	table.append(thead);
 
-	$('#tab_table').empty();
-	$('#tab_table').append(table);
+	$('#tab-table-' + tabCount).empty();
+	$('#tab-table-' + tabCount).append(table);
 	
 	var orderedColumns = columns.sort(function(a, b) {
 	    var textA = a.data.toUpperCase();
@@ -166,8 +208,8 @@ SelectionTable.prototype.createTableUI = function(featureType) {
 	
 	
 	var rows = [];
-	for (var i=0; i<this.features.length; i++) {
-		var arrayFeats = this.features;
+	for (var i=0; i<features.length; i++) {
+		var arrayFeats = features;
 		var row = [];
 		var sorted = Object.keys(arrayFeats[i])
 	    .sort()
@@ -216,7 +258,7 @@ SelectionTable.prototype.createTableUI = function(featureType) {
 	});
 
 	var self = this;
-	this.selectionTable = $('#table-' + this.layerName).DataTable({
+	var selectionTable = $('#table-' + tabCount).DataTable({
 		language: {
     		processing		: gettext("Processing request") + "...",
 	        search			: gettext("Search") + "&nbsp;:",
@@ -254,11 +296,11 @@ SelectionTable.prototype.createTableUI = function(featureType) {
 	    "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
 	    buttons: tableButtons,
 	    "drawCallback": function(settings, json) {
-	        self.getFeatures();
+	        self.getFeatures(features, workspace, url);
 	    }
     });
 	
-	this.selectionTable.on('select', function(e, dt, type, indexes) {
+	selectionTable.on('select', function(e, dt, type, indexes) {
 	    if (type === 'row') {
 	    	var selected = dt.rows({selected: true});
 	    	if ( selected.count() == 1 ) {
@@ -284,6 +326,7 @@ SelectionTable.prototype.createTableUI = function(featureType) {
  */
 SelectionTable.prototype.show = function() {
 	bottomPanel.showPanel();
+	$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
 };
 
 /**
@@ -294,6 +337,9 @@ SelectionTable.prototype.registerEvents = function() {
 	$("#close-selectiontable").on('click', function(){
 		bottomPanel.hidePanel();
 		self.selectionTableSource.clear();
+
+		//self.removeTables();
+		//viewer.core.clearAllSelectedFeatures();
 	});
 
 	$("#minimize-selectiontable").on('click', function(){
@@ -302,6 +348,18 @@ SelectionTable.prototype.registerEvents = function() {
 
 	$("#maximize-selectiontable").on('click', function(){
 		bottomPanel.maximizePanel();
+		bottomPanel.maximizePanel();
+	});
+
+	$(".selection-table-tab").on('click', function(e){
+		$('.selection-table-tab').removeClass('active');
+		$('.selection-table-content').removeClass('active');
+
+		var count = e.currentTarget.dataset.tabcount;
+		$("#tab-table-" + count).addClass('active');
+		$("#tab-" + count).addClass('active');
+
+
 	});
 };
 
@@ -315,15 +373,15 @@ SelectionTable.prototype.getSource = function() {
 /**
  * TODO
  */
-SelectionTable.prototype.describeFeatureType = function() {
+SelectionTable.prototype.describeFeatureType = function(layerName, workspace) {
 	var featureType = new Array();
 	$.ajax({
 		type: 'POST',
 		async: false,
 	  	url: '/gvsigonline/services/describeFeatureType/',
 	  	data: {
-	  		'layer': this.layerName,
-			'workspace': this.workspace,
+	  		'layer': layerName,
+			'workspace': workspace,
 			'skip_pks': false
 		},
 	  	success	:function(response){
@@ -373,30 +431,29 @@ SelectionTable.prototype.isDateType = function(type){
 };
 
 
-SelectionTable.prototype.getFeatures = function(){
+SelectionTable.prototype.getFeatures = function(features, workspace, url){
 	var self = this;
 
-	var typename = this.features[0].featureid.split('.')[0];
+	var typename = features[0].featureid.split('.')[0];
 	var fids = new Array();
-	for (var i=0; i<this.features.length; i++) {
-		fids.push(this.features[i].featureid);
+	for (var i=0; i<features.length; i++) {
+		fids.push(features[i].featureid);
 	}
 
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: this.wfsUrl,
+	  	url: url,
 	  	data: {
 	  		'service': 'WFS',
 			'version': '1.1.0',
 			'request': 'GetFeature',
-			'typename': this.workspace + ':' + typename,
+			'typename': workspace + ':' + typename,
 			'srsname': 'EPSG:3857',
 			'outputFormat': 'application/json',
 			'featureId': fids.toString()
 	  	},
 	  	success	:function(response){
-	    	self.selectionTableSource.clear();
 
 	    	if (response.features.length > 0 ) {
 	    		for (var i=0; i<response.features.length; i++) {
@@ -435,7 +492,7 @@ SelectionTable.prototype.getFeatures = function(){
 /**
  * TODO
  */
-SelectionTable.prototype.zoomToSelection = function(rows) {
+SelectionTable.prototype.zoomToSelection = function(rows, url) {
 	var self = this;
 
 	var typename = rows[0].featureid.split('.')[0];
@@ -447,7 +504,7 @@ SelectionTable.prototype.zoomToSelection = function(rows) {
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: this.wfsUrl,
+	  	url: url,
 	  	data: {
 	  		'service': 'WFS',
 			'version': '1.1.0',
