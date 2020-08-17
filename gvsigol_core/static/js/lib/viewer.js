@@ -234,7 +234,8 @@ viewer.core = {
     _createWidgets: function() {
     	this.layerTree = new layerTree(this.conf, this.map, this);
     	this.legend = new legend(this.conf, this.map);
-    	this.rawFilter = new RawFilter(this.conf, this.map);
+		this.rawFilter = new RawFilter(this.conf, this.map);
+		this.selectionTable = new SelectionTable(this.conf, this.map);
     },
 
     _loadExternalLayer: function(externalLayer, group, index) {
@@ -911,11 +912,13 @@ viewer.core = {
 			//this.tools.push(new selectFeatureByBuffer(this.map, this));
 			new SelectToolBar(this.map);
 		}
-
-
 		this.tools.push(new cleanMap(this.map, this));
 
     	this.map.tools = this.tools;
+	},
+	
+	getSelectionTable: function() {
+    	return this.selectionTable;
     },
 
     loadTool: function(tool) {

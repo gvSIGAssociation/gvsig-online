@@ -221,6 +221,11 @@ RawFilter.prototype.registerEvents = function() {
 	});
 	
 	$('#rawfilter-apply').on('click', function(e){
+
+		if (!self.selectionTable) {
+			self.selectionTable = viewer.core.getSelectionTable();
+		}
+		//self.selectionTable.removeTables();
 		var layerGroup = $('option:selected', $('#rawfilter-layer-group')).val();
 		var layer = $('option:selected', $('#rawfilter-layer')).val();
 		var workspace = $('option:selected', $('#rawfilter-layer')).data('workspace');
@@ -244,13 +249,11 @@ RawFilter.prototype.registerEvents = function() {
 			var features = self.getFeatures(layer, workspace, wfsUrl, field, fieldType, value, operator);
 			
 			if (features.length > 0) {
-				self.selectionTable = null;
-				self.selectionTable = new SelectionTable(self.map, self.conf, features, layer, workspace, wfsUrl);
+				self.selectionTable.addTable(features, layer, workspace, wfsUrl);
 				self.selectionTable.show();
 				self.selectionTable.registerEvents();
 				
 			} else {
-				self.selectionTable = null;
 				messageBox.show('warning', gettext('No results found'));
 			}
 			
