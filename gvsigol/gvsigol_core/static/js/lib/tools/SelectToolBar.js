@@ -30,8 +30,10 @@ var SelectToolBar = function(map) {
 	
 	this.toolBar.controlArray = new Array();
 	this.selectFeatureControl = new SelectFeatureControl(this.map, this.toolBar);
+	this.selectBoxControl = new SelectBoxControl(this.map, this.toolBar);
 	this.selectByBufferControl = new SelectByBufferControl(this.map, this.toolBar);
 	this.toolBar.controlArray.push(this.selectFeatureControl);
+	this.toolBar.controlArray.push(this.selectBoxControl);
 	this.toolBar.controlArray.push(this.selectByBufferControl);
 	this.closeSelectControl = new CloseSelectControl(this.map, this.toolBar);
 	

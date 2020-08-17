@@ -27,22 +27,18 @@ var SelectFeatureControl = function(map, toolbar) {
 	var self = this;
 	this.map = map;
 	this.toolbar = toolbar;
+	this.selectionTable = viewer.core.getSelectionTable();
 	
-	this.distance = 10;
-	
-	this.interaction = new ol.interaction.DragBox({
-        condition: ol.events.condition.platformModifierKeyOnly
+	this.interaction = new ol.interaction.Select({
+        condition: ol.events.condition.click
     });
-	this.interaction.on('boxend', function() {
-        var extent = self.interaction.getGeometry().getExtent();
-        var evt = {
-        	'coordinate': extent
-        }
-        self.clickHandler(evt, true);
+	
+	this.interaction.on('select', function(e) {
+        self.clickHandler(e);
     });
 	
 	this.control = new ol.control.Toggle({	
-		html: '<i class="fa fa-object-group" ></i>',
+		html: '<i class="fa fa-mouse-pointer" ></i>',
 		className: "edit",
 		title: gettext('Select features'),
 		interaction: this.interaction,
@@ -67,6 +63,7 @@ SelectFeatureControl.prototype.isActive = function(e) {
 };
 
 SelectFeatureControl.prototype.activate = function(e) {
+	this.selectionTable.removeTables();
 	for (var i=0; i<this.toolbar.controlArray.length; i++) {
 		this.toolbar.controlArray[i].deactivate();
 	}
@@ -85,11 +82,12 @@ SelectFeatureControl.prototype.addInteraction = function() {
  * @param {ol.MapBrowserEvent} evt
  */
 
-SelectFeatureControl.prototype.clickHandler = function(evt, isArea) {
+SelectFeatureControl.prototype.clickHandler = function(evt) {
 	var self = this;
 	this.showFirst = true;
 
-	this.mapCoordinates = evt.coordinate;
+	var circle = new ol.geom.Circle(evt.coordinate, 100);
+	var polygon = ol.geom.Polygon.fromCircle(circle, 16)
 
 	if (this.active) {
 		var layers = this.map.getLayers().getArray();
@@ -126,39 +124,90 @@ SelectFeatureControl.prototype.clickHandler = function(evt, isArea) {
 
 		var layers_info = [];
 
+		self.selectionTable.getSource().clear();
+		self.selectionTable.removeTables();
+		viewer.core.clearAllSelectedFeatures();
 		for (var i=0; i<queryLayers.length; i++) {
 			const qLayer = queryLayers[i];
+			var geometryName = self.getFeatureGeometryName(qLayer);
+			var f = ol.format.filter;
+			var ftype = qLayer.workspace + ':' + qLayer.layer_name;
+			var featureRequest = new ol.format.WFS().writeGetFeature({
+				srsName: 'EPSG:3857',
+				featureTypes: [ftype],
+				outputFormat: 'application/json',
+				filter: f.intersects(geometryName, polygon, 'EPSG:3857')
+			});
 
-			url = qLayer.wfs_url + '?service=WFS&' +
-			'version=1.1.0&request=GetFeature&typename=' + qLayer.workspace + ':' + qLayer.layer_name +
-			'&outputFormat=json&srsName=' + this.map.getView().getProjection().getCode();
-
-			if(evt.coordinate.length == 2){
-				var distance = this.distance;
-				var pixel_low = [evt.pixel[0]-distance, evt.pixel[1]+distance];
-				var point_low = self.map.getCoordinateFromPixel(pixel_low);
-
-				var pixel_high = [evt.pixel[0]+distance, evt.pixel[1]-distance];
-				var point_high = self.map.getCoordinateFromPixel(pixel_high);
-				evt.coordinate = point_low.concat(point_high);
+			var wfsURL = qLayer.wfs_url;
+			if (wfsURL.indexOf('http') == -1) {
+				wfsURL = window.location.origin + wfsURL;
 			}
 
-			var href = new URL(url);
-			href.searchParams.set('BBOX', evt.coordinate.join()+",urn:ogc:def:crs:EPSG:3857");
-			url = href.toString();
+			fetch(wfsURL, {
+				method: 'POST',
+				body: new XMLSerializer().serializeToString(featureRequest)
+			}).then(function(response) {
+				return response.json();
+			}).then(function(json) {
+				var geometryName = self.getFeatureGeometryName(qLayer);
+				var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
+				var features = formatGeoJSON.readFeatures(json);
+				viewer.core.addSelectedFeaturesSource(qLayer.workspace + ":" + qLayer.layer_name, features);
 
-			$.ajax({
+				var tableFeatures = [];
+				for (var i=0; i<features.length; i++) {
+					var row = {};
+					for (p in features[i].getProperties()) {
+						if (p != 'wkb_geometry') {
+							row[p] = features[i].getProperties()[p];
+						}
+						
+					}
+					row['featureid'] = features[i].getId();
+					tableFeatures.push(row)
+				}
+
+				if (tableFeatures.length > 0) {
+					self.selectionTable.addTable(tableFeatures, qLayer.layer_name, qLayer.workspace, qLayer.wfs_url);
+					self.selectionTable.show();
+					self.selectionTable.registerEvents();
+					
+				}
+			});
+
+			/*$.ajax({
 				url: url,
 				success: function(response) {
 					var geometryName = self.getFeatureGeometryName(qLayer);
 					var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
 					var features = formatGeoJSON.readFeatures(response);
 					viewer.core.addSelectedFeaturesSource(qLayer.workspace + ":" + qLayer.layer_name, features);
+
+					var tableFeatures = [];
+					for (var i=0; i<features.length; i++) {
+						var row = {};
+                		for (p in features[i].getProperties()) {
+							if (p != 'wkb_geometry') {
+								row[p] = features[i].getProperties()[p];
+							}
+							
+						}
+                		row['featureid'] = features[i].getId();
+                		tableFeatures.push(row)
+					}
+
+					if (tableFeatures.length > 0) {
+						self.selectionTable.addTable(tableFeatures, qLayer.layer_name, qLayer.workspace, qLayer.wfs_url);
+						self.selectionTable.show();
+						self.selectionTable.registerEvents();
+						
+					}
 				},
 				error: function(jqXHR, textStatus) {
 					console.log(textStatus);
 				}
-			});
+			});*/
 		}
 
 	}

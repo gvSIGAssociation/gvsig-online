@@ -28,6 +28,7 @@ var SelectByBufferControl = function(map, toolbar) {
 	this.map = map;
 	this.toolbar = toolbar;
 	this.popup = null;
+	this.selectionTable = viewer.core.getSelectionTable();
 	
 	this.distance = 1000;
 	this.circleFeature = null;
@@ -144,7 +145,7 @@ SelectByBufferControl.prototype.showPopup =function(evt) {
 	});
 	$('#select-buffer-button').click(function(){
 		if(self.circleFeature != null){
-			var polygon_geom = ol.geom.Polygon.fromCircle(self.circleFeature.getGeometry(), 16)
+			var polygon_geom = ol.geom.Polygon.fromCircle(self.circleFeature.getGeometry(), 16);
 			self.clickHandler(polygon_geom, true);
 		}
 		self.source.clear();
@@ -194,8 +195,13 @@ SelectByBufferControl.prototype.clickHandler = function(geom, isArea) {
 				outputFormat: 'application/json',
 				filter: f.intersects(geometryName, geom, 'EPSG:3857')
 			});
+
+			var wfsURL = qLayer.wfs_url;
+			if (wfsURL.indexOf('http') == -1) {
+				wfsURL = window.location.origin + wfsURL;
+			}
 			
-			fetch(qLayer.wfs_url, {
+			fetch(wfsURL, {
 				method: 'POST',
 				body: new XMLSerializer().serializeToString(featureRequest)
 			}).then(function(response) {
@@ -205,6 +211,26 @@ SelectByBufferControl.prototype.clickHandler = function(geom, isArea) {
 				var features = format.readFeatures(json);
 				viewer.core.addSelectedFeaturesSource(qLayer.workspace + ":" + qLayer.layer_name, features);
 				if(self.popup) self.popup.hide();
+
+				var tableFeatures = [];
+				for (var i=0; i<features.length; i++) {
+					var row = {};
+					for (p in features[i].getProperties()) {
+						if (p != 'wkb_geometry') {
+							row[p] = features[i].getProperties()[p];
+						}
+						
+					}
+					row['featureid'] = features[i].getId();
+					tableFeatures.push(row)
+				}
+
+				if (tableFeatures.length > 0) {
+					self.selectionTable.addTable(tableFeatures, qLayer.layer_name, qLayer.workspace, qLayer.wfs_url);
+					self.selectionTable.show();
+					self.selectionTable.registerEvents();
+					
+				}
 			});
 		}
 
