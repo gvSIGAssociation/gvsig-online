@@ -630,3 +630,8 @@ def get_iso_language(request, default_lang='en'):
         return languages.get(part1=request.LANGUAGE_CODE)
     except:
         return languages.get(part1=default_lang)
+
+
+def is_gvsigol_process():
+    from gvsigol.celery import is_celery_process
+    return (not is_celery_process())
