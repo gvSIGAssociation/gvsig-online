@@ -34,8 +34,8 @@ class GvsigolServicesConfig(AppConfig):
         from actstream import registry
         registry.register(self.get_model('Layer'))
         
-        import sys
-        if len(sys.argv) <= 1 or sys.argv[1] != 'migrate':
+        from gvsigol_core.utils import is_gvsigol_process
+        if is_gvsigol_process():
             # don't run during migrations 
             try:
                 self._updateLayerInfo()
