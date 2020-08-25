@@ -38,7 +38,7 @@ from future.utils import string_types
 from future.builtins import int
 from django.core.validators import URLValidator
 import logging
-import sys, re
+import sys
 logger = logging.getLogger("gvsigol")
 
 
@@ -633,15 +633,19 @@ def get_iso_language(request, default_lang='en'):
         return languages.get(part1=default_lang)
 
 def is_manage_process(exclude_runserver=False, exclude_testserver=False):
-    cmd = " ".join(sys.argv)
-    if exclude_runserver and exclude_testserver:
-        return (re.match(".*manage(\.py)? +(?!runserver|testserver).+", cmd) is not None)
-    elif exclude_runserver:
-        return (re.match(".*manage(\.py)? +(?!runserver).+", cmd) is not None)
-    elif exclude_testserver:
-        return (re.match(".*manage(\.py)? +(?!testserver).+", cmd) is not None)
-    else:
-        return (re.match(".*manage(\.py)? +.+", cmd) is not None)
+    if sys.argv[0].lower().endswith('manage') or sys.argv[0].lower().endswith('manage.py'):
+        if len(sys.argv) == 1:
+            return True
+        elif len(sys.argv) > 1:
+            if exclude_runserver and exclude_testserver:
+                return (sys.argv[1] != 'runserver' and sys.argv[1] != 'testserver')
+            elif exclude_runserver:
+                return (sys.argv[1] != 'runserver')
+            elif exclude_testserver:
+                return (sys.argv[1] != 'testserver')
+            else:
+                return True
+    return False
 
 def is_gvsigol_process():
     from gvsigol.celery import is_celery_process
