@@ -427,7 +427,6 @@ class Geoserver():
         json = []
         try:
             url = self.service_url + "/workspaces/" + workspace + "/wmsstores/" + wmsstore + "/wmslayers.json?list=available"
-            print url
             if user and password:
                 auth = (user, password)
             else:
