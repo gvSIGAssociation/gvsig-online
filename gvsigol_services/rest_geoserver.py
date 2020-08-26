@@ -247,7 +247,7 @@ class Geoserver():
 
 
     def upload_coveragestore(self, workspace, store, user=None, password=None):
-        url = self.service_url + "/workspaces/" + workspace.name + "/coveragestores/"+store.name+"/file.imagemosaic"
+        url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/file.imagemosaic"
         
         if user and password:
             auth = (user, password)
