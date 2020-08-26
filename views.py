@@ -2130,7 +2130,8 @@ def layergroup_mapserver_toc(group, toc_string):
                 layer.save()
                 i = i + 1
                 layers_array[layer.name] = layer_json
-                last = layer
+                if not layer.external:
+                    last = layer
 
         toc_object = {
             'name': group.name,
@@ -2143,11 +2144,10 @@ def layergroup_mapserver_toc(group, toc_string):
         toc={}
         toc[group.name] = toc_object
         
-        if not layer.external:
-            if last:
-                gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)  
-                gs.createOrUpdateSortedGeoserverLayerGroup(toc)
-                gs.reload_nodes()
+        if last:
+            gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)  
+            gs.createOrUpdateSortedGeoserverLayerGroup(toc)
+            gs.reload_nodes()
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
