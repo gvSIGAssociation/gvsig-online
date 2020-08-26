@@ -571,7 +571,8 @@ def datastore_delete(request, dsid):
 
         ds = Datastore.objects.get(id=dsid)
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-        if gs.deleteDatastore(ds.workspace, ds, delete_schema) or ds.type == 'c_ImageMosaic':
+        try:
+            gs.deleteDatastore(ds.workspace, ds, delete_schema)
             layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
             for l in layers:
                 gs.deleteLayerStyles(l)
@@ -603,8 +604,9 @@ def datastore_delete(request, dsid):
                 
             gs.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
-            
-        else:
+        
+        except:
+            logger.exception("Error deleting store")
             return HttpResponseBadRequest()
 
     except:
