@@ -286,7 +286,7 @@ def close_connection(cursor, conn):
 def get_fields(resource):
     fields = None
     if resource != None:
-        fields = resource.get('featureType').get('attributes').get('attribute')
+        fields = resource.get('featureType', {}).get('attributes', {}).get('attribute', [])
 
     return fields
 
