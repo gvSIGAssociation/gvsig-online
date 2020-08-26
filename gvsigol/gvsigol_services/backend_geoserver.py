@@ -705,8 +705,7 @@ class Geoserver():
     
     def uploadImageMosaic(self, workspace, store):
         try:
-            return self.rest_catalog.upload_coveragestore(workspace, store, user=self.user, password=self.password)
-            #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
+            return self.rest_catalog.upload_coveragestore(workspace.name, store.name, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
