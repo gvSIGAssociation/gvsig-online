@@ -488,9 +488,9 @@ def datastore_add(request):
 
                 if ds is not None:
                     if type == 'c_ImageMosaic':
-                        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+                        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
                         try:
-                            gs.uploadImageMosaic(ds.workspace, ds)
+                            gs.uploadImageMosaic(ws, ds)
                             gs.reload_nodes()
                         except Exception as e:
                             pass
@@ -714,7 +714,10 @@ def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     if layer.layer_group.name != '__default__':
-        gs.deleteGeoserverLayerGroup(layer.layer_group)
+        try:
+            gs.deleteGeoserverLayerGroup(layer.layer_group)
+        except:
+            logger.exception("Error deleting layer group")
     gs.deleteResource(layer.datastore.workspace, layer.datastore, layer)
     gs.deleteLayerStyles(layer)
     signals.layer_deleted.send(sender=None, layer=layer)
@@ -917,8 +920,7 @@ def backend_fields_list(request):
 
 def do_add_layer(server, datastore, name, title, is_queryable, extraParams):
     workspace = datastore.workspace
-    if datastore.type != 'c_GeoTIFF':
-        name = prepare_string(name)
+
     """
     server.createTable(form.cleaned_data)
     """
@@ -944,11 +946,12 @@ def do_add_layer(server, datastore, name, title, is_queryable, extraParams):
 def do_config_layer(server, layer, featuretype):
     layer_autoconfig(layer, featuretype)
     layer.save()
-
-    if layer.datastore.type != 'e_WMS':
-        if layer.datastore.type == 'c_ImageMosaic':
+    
+    ds_type = layer.datastore.type
+    if ds_type != 'e_WMS':
+        if ds_type == 'c_ImageMosaic':
             server.updateImageMosaicTemporal(layer.datastore, layer)
-        if layer.datastore.type != 'c_GeoTIFF':
+        elif ds_type[0:2] == 'v_':
             utils.set_time_enabled(server, layer)
         create_symbology(server, layer)
         server.updateThumbnail(layer, 'create')
@@ -1067,7 +1070,6 @@ def layer_add_with_group(request, layergroup_id):
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
                 
-
                 server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
                 # first create the resource on the backend
                 do_add_layer(server, datastore, form.cleaned_data['name'], form.cleaned_data['title'], is_queryable, extraParams)
