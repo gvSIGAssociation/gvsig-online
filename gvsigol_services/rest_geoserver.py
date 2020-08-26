@@ -425,18 +425,21 @@ class Geoserver():
     
     def get_wmsresources(self, workspace, wmsstore, user=None, password=None):
         json = []
-        url = self.service_url + "/workspaces/" + workspace + "/wmsstores/" + wmsstore + "/wmslayers.json?list=available"
-        if user and password:
-            auth = (user, password)
-        else:
-            auth = self.session.auth
-        r = self.session.get(url, auth=auth)
-        json = r.json()
-        
-        if json['list'] and json['list']['string']:
-            resources = json['list']['string']
-            return [resource for resource in resources]
+        try:
+            url = self.service_url + "/workspaces/" + workspace + "/wmsstores/" + wmsstore + "/wmslayers.json?list=available"
+            print url
+            if user and password:
+                auth = (user, password)
+            else:
+                auth = self.session.auth
+            r = self.session.get(url, auth=auth)
+            json = r.json()
             
+            if json['list'] and json['list']['string']:
+                resources = json['list']['string']
+                return [resource for resource in resources]
+        except:
+            logger.exception("error retrieving wms resources")
         return json
 
     def get_coveragestore(self, workspace, coveragestore, user=None, password=None):

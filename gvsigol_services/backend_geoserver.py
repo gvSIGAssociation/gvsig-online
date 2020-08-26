@@ -260,8 +260,18 @@ class Geoserver():
                 if params_dict.get('username') != '':
                     wmsuser = params_dict.get('username')
                 if params_dict.get('password') != '':
-                    wmspassword = params_dict.get('password')  
-                self.rest_catalog.create_wmsstore(workspace, name, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
+                    wmspassword = params_dict.get('password')
+                catalog = self.getGsconfig()
+                wsconf = catalog.get_workspace(workspace.name)
+                extra_params = {
+                    "workspace": wsconf}
+                if wmsuser and wmspassword:
+                    extra_params['user'] = wmsuser
+                    extra_params['password'] = wmspassword
+                wms_store = catalog.create_wmsstore(name, **extra_params)
+                wms_store.capabilitiesURL = params_dict.get('url')
+                catalog.save(wms_store)
+                #self.rest_catalog.create_wmsstore(workspace, name, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
                 return True
             
             else:
@@ -272,6 +282,7 @@ class Geoserver():
             response = catalog.save(ds) # FIXME: we should check response.status to ensure the operation was correct
             return True
         except Exception as e:
+            logger.exception("Error creating datastore")
             print "Backend MapService - createDatastore Error", e
             return False
         
@@ -337,9 +348,9 @@ class Geoserver():
         """
         Deletes a datastore and all its associated resources
         """
-        try:
-            catalog = self.getGsconfig()
-            ds = catalog.get_store(datastore.name, workspace=workspace.name)
+        catalog = self.getGsconfig()
+        ds = catalog.get_store(datastore.name, workspace=workspace.name)
+        if ds:
             if datastore.type=="c_ImageMosaic":
                 try:
                     catalog.delete(ds, purge, recurse=True)
@@ -352,7 +363,7 @@ class Geoserver():
                     utils.delete_schema_for_datastore(json.loads(datastore.connection_params))
                 
             return True
-        except Exception as e:
+        else:
             return False
         
     def getStyles(self):
