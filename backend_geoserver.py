@@ -871,15 +871,7 @@ class Geoserver():
                     # we can't get the name of the coverage, so we just offer a sensible, non existing name
                     return [self._get_unique_resource_name(datastore.name, workspace.name)]
             elif (format_nature=='e'):
-                params = json.loads(datastore.connection_params)
-                username = None
-                password = None
-                if params['username'] != '':
-                    username = params['username']
-                if params['password'] != '':
-                    password = params['password']
-                return self.rest_catalog.get_wmsresources(workspace.name, datastore.name, self.user, self.password)
-                #return store.get_resources(available=available)
+                return store.get_resources(available=available)
             
         except Exception as ex:
             logger.exception("Error getting resources")
