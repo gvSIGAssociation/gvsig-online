@@ -33,13 +33,13 @@
 				<div class="row">
 					<div class="col-md-12 form-group">	
 						<label for="id_workspace">{% trans "Workspace" %}</label>
-						{{ form.workspace }}									
+						{{ form.workspace }}
 					</div>
 				</div>			
 				<div class="row">
 					<div class="col-md-12 form-group">	
 						<label for="id_workspace">{% trans "Type" %}</label>
-						{{ form.type }}									
+						{{ form.type }}
 					</div>
 				</div>	
 					
@@ -48,7 +48,7 @@
 						<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
 					</div>
 					<div class="col-md-10">
-						{{ form.file }}			
+						{{ form.file }}
 					</div>
 				</div>		
 					
@@ -62,15 +62,15 @@
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<label for="id_description">{% trans "Description" %}</label>
-						{{ form.description }}						
+						{{ form.description }}
 					</div>
 				</div>	
 					
 				<div class="row" id="connection-params-row">
 					<div class="col-md-12 form-group">
 						<label for="id_connection_params">{% trans "Connection params" %}</label>
-						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test database connection" %}</div>					
-						{{ form.connection_params }}						
+						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
+						{{ form.connection_params }}
 					</div>
 				</div>
 					
@@ -97,10 +97,10 @@
 							<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
 						</div>
 					</div>
-				</div>		
-			</div>									
+				</div>
+			</div>
 		</div>
-	</div>				
+	</div>
 </div>
 </form>	
 {% endblock %}
@@ -122,21 +122,25 @@ $().ready(function(){
 	
 	window.GOL = window.GOL || {};
 	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
-	window.GOL.DS_ADD.dstypeChanged = function(type) {
-		
-		codemirror.setValue('');		
+	window.GOL.DS_ADD.dstypeChanged = function(type, value) {
+		if (!value) {
+			value = '';
+		}
+		codemirror.setValue(value)
+		//codemirror.setValue('');
 		var code = '';
 		
 		if (type == 'v_SHP') {
 			$('#select-file-row').css('display', 'none');
-			$('#connection-params-row').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
+			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "file:data/valencia-osm" \n';
 			code += '}';
-			
 		} else if (type == 'v_PostGIS') {
 			$('#select-file-row').css('display', 'none');
 			$('#connection-params-row').css('display', 'block');
+			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "host": "localhost", \n';
 			code += '\t "port": "5432", \n';
@@ -150,6 +154,7 @@ $().ready(function(){
 		} else if (type == 'c_GeoTIFF') {
 			$('#select-file-row').css('display', 'block');
 			$('#connection-params-row').css('display', 'none');
+			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "url_replace" \n';
 			code += '}';
@@ -157,6 +162,7 @@ $().ready(function(){
 		}  else if (type == 'e_WMS') {
 			$('#select-file-row').css('display', 'none');
 			$('#connection-params-row').css('display', 'block');
+			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "https://demo.gvsigonline.com/geoserver/wms?request=getcapabilities", \n';
 			code += '\t "username": "", \n';
@@ -183,7 +189,9 @@ $().ready(function(){
 			
 		}
 		
-		codemirror.setValue(code);
+		if (value == '') {
+			codemirror.setValue(code);
+		}
 
 	}
 	
@@ -197,7 +205,7 @@ $().ready(function(){
 	
 	$("#id_type").change(function() {
 		var type = $('option:selected', $(this)).val();
-		GOL.DS_ADD.dstypeChanged(type);
+		GOL.DS_ADD.dstypeChanged(type, );
 	});
 	
 	$("#time_dimension_input").change(function() {
@@ -209,8 +217,7 @@ $().ready(function(){
 		$("#elevation_dimension_text").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
 		$("#elevation_dimension_format").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
 	});
-	
-	GOL.DS_ADD.dstypeChanged($("#id_type").val());
+	GOL.DS_ADD.dstypeChanged($("#id_type").val(), $('#id_connection_params').val());
 	
 	$('#save_button').click(function (e) {
 		var type = $("#id_type").val();
@@ -258,13 +265,14 @@ $().ready(function(){
 	
 	$('#test_connection').click(function (e) {
 		var connectionParams = JSON.parse(codemirror.getValue());
-		
+		var ds_type = $("#id_type").val();
 		$.ajax({
 			type: 'POST',
 			async: false,
 			url: '/gvsigonline/services/test_connection/',
 			data: {
-				connection_params: JSON.stringify(connectionParams)
+				connection_params: JSON.stringify(connectionParams),
+				ds_type: ds_type
 			},
 			beforeSend:function(xhr){
 			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
