@@ -50,6 +50,7 @@ from dbfread import DBF
 import time
 import utils
 from builtins import str as text
+from django.utils.html import escape, strip_tags
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -255,23 +256,9 @@ class Geoserver():
                     ds = catalog.create_coveragestore(name, workspace.name, path=file_path,create_layer=False)
                     ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
-                wmsuser = None
-                wmspassword = None
-                if params_dict.get('username') != '':
-                    wmsuser = params_dict.get('username')
-                if params_dict.get('password') != '':
-                    wmspassword = params_dict.get('password')
-                catalog = self.getGsconfig()
-                wsconf = catalog.get_workspace(workspace.name)
-                extra_params = {
-                    "workspace": wsconf}
-                if wmsuser and wmspassword:
-                    extra_params['user'] = wmsuser
-                    extra_params['password'] = wmspassword
-                wms_store = catalog.create_wmsstore(name, **extra_params)
-                wms_store.capabilitiesURL = params_dict.get('url')
-                catalog.save(wms_store)
-                #self.rest_catalog.create_wmsstore(workspace, name, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
+                wmsuser = params_dict.get('username')
+                wmspassword = params_dict.get('password')
+                self.rest_catalog.create_wmsstore(escape(workspace.name), escape(name), escape(params_dict.get('url')), escape(wmsuser), escape(wmspassword), self.user, self.password)
                 return True
             
             else:
@@ -328,19 +315,20 @@ class Geoserver():
                     self.__process_image_mosaic_folder(dsname, file_path, date_regex, date_format, ele_regex, ele_format)
                     ds.url = params_dict.get('url')
                 
-            elif format_nature == "e": # cascading wms              
-                wmsuser = None
-                wmspassword = None
-                if params_dict.get('username') != '':
-                    wmsuser = params_dict.get('username')
-                if params_dict.get('password') != '':
-                    wmspassword = params_dict.get('password') 
-                self.rest_catalog.update_wmsstore(wsname, dsname, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
+            elif format_nature == "e": # cascading wms
+                self.rest_catalog.update_wmsstore(wsname,
+                                                   dsname,
+                                                   params_dict.get('url'),
+                                                   params_dict.get('username', ''),
+                                                   params_dict.get('password', ''),
+                                                   self.user,
+                                                   self.password)
                 return True
             
             catalog.save(ds)
             return True
         except Exception as exc:
+            logger.exception("Error updating wmsstore")
             print exc
             return False
     

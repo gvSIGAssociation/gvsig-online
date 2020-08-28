@@ -139,23 +139,25 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
-    def create_wmsstore(self, workspace, store, capabilitiesURL, wmsuser=None, wmspassword=None, user=None, password=None):
-        url = self.service_url + "/workspaces/" + workspace.name + "/wmsstores"
-        headers = {'content-type': "text/xml"}
+    def create_wmsstore(self, ws_name, store_name, capabilitiesURL, wmsuser=None, wmspassword=None, user=None, password=None):
+        url = self.service_url + "/workspaces/" + ws_name + "/wmsstores"
+        headers = {"Content-type": "application/xml",
+                   "Accept": "application/xml"}
         
         if user and password:
             auth = (user, password)
         else:
             auth = self.session.auth
             
-        data = ""
+        data = '<?xml version="1.0" ?>\n'
         data += "<wmsStore>"
-        data +=     "<name>" + store + "</name>"
+        data +=     "<name>" + store_name + "</name>"
         data +=     "<type>WMS</type>"
         data +=     "<enabled>true</enabled>"
         data +=     "<workspace>"
-        data +=         "<name>" + workspace.name + "</name>"      
+        data +=         "<name>" + ws_name + "</name>"
         data +=     "</workspace>"
+        data +=     '<metadata/>'
         data +=     "<__default>false</__default>"
         data +=     "<capabilitiesURL>" + capabilitiesURL + "</capabilitiesURL>"
         if wmsuser and wmspassword:
@@ -167,31 +169,27 @@ class Geoserver():
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
-    
+
     def update_wmsstore(self, wsname, dsname, capabilitiesURL, wmsuser=None, wmspassword=None, user=None, password=None):
-        url = self.service_url + "/workspaces/" + wsname + "/wmsstores/" + dsname + ".xml"
+        url = self.service_url + "/workspaces/" + wsname + "/wmsstores/" + dsname + ".json"
+        r = self.raw_get(url, user, password)
+        if r.status_code < 200 and r.status_code >= 300:
+            logger.error("Error getting wmsstore conf. Status code: " + str(r.status_code) + " - Url: " + url)
+        data = r.json()
+        data["wmsStore"]["capabilitiesURL"] = capabilitiesURL
+        data["wmsStore"]["user"] = wmsuser
+        data["wmsStore"]["password"] = wmspassword
+        
         headers = {
-            "Content-type": "application/xml",
-            "Accept": "application/xml"
+            "Content-type": "application/json",
+            "Accept": "application/json"
         }
         
         if user and password:
             auth = (user, password)
         else:
             auth = self.session.auth
-        
-        data = ''
-        data += '<wmsStore>'
-        data +=     '<name>' + dsname + '</name>'
-        data +=     '<enabled>true</enabled>'
-        data +=     '<capabilitiesURL>' + capabilitiesURL + '</capabilitiesURL>'
-        if wmsuser and wmspassword:
-            data +=     '<user>' + wmsuser + '</user>'
-            data +=     '<password>' + wmspassword + '</password>'
-        data +=     '<metadata />'
-        data += '</wmsStore>'
-        
-        r = self.session.put(url, data=data, headers=headers, auth=auth)
+        r = self.session.put(url, json=data, headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.content)
@@ -378,6 +376,18 @@ class Geoserver():
             else:
                 auth = self.session.auth
             response = self.session.post(url, data=params, auth=auth)
+            return response 
+        
+        except Exception as e:
+            print str(e)
+    
+    def raw_get(self, url, user=None, password=None):
+        try:
+            if user and password:
+                auth = (user, password)
+            else:
+                auth = self.session.auth
+            response = self.session.get(url, auth=auth)
             return response 
         
         except Exception as e:

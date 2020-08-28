@@ -46,6 +46,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
+from django.utils.html import escape, strip_tags
 from future.moves.urllib.parse import urlparse, urlencode
 from geoserver import workspace
 from lxml import html
@@ -485,7 +486,6 @@ def datastore_add(request):
                                   form.cleaned_data['description'],
                                   form.cleaned_data['connection_params'],
                                   request.user.username)
-
                 if ds is not None:
                     if type == 'c_ImageMosaic':
                         gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
@@ -4423,28 +4423,54 @@ def service_url_update(request, svid):
         return render(request, 'service_url_update.html', {'svid': svid, 'form': form})
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@superuser_required
+@staff_required
 def test_connection(request):
     if request.method == 'POST':
+        datastore_type = request.POST.get('ds_type')
         connection_params = json.loads(request.POST.get('connection_params'))
-        
-        try:
-            connection = psycopg2.connect(
-                user = connection_params.get('user'),
-                password = connection_params.get('passwd'),
-                host = connection_params.get('host'),
-                port = connection_params.get('port'),
-                database = connection_params.get('database')
-            )
-            response = { 'success': True }
-            connection.close()
-            
-        except Exception as e:
-            response = {
-                'error': str(e),
-                'success': False 
-            }
-        
+        if datastore_type == 'v_PostGIS':
+                
+            try:
+                connection = psycopg2.connect(
+                    user = connection_params.get('user'),
+                    password = connection_params.get('passwd'),
+                    host = connection_params.get('host'),
+                    port = connection_params.get('port'),
+                    database = connection_params.get('database')
+                )
+                response = { 'success': True }
+                connection.close()
+                
+            except Exception as e:
+                response = {
+                    'error': escape(strip_tags(str(e))),
+                    'success': False 
+                }
+        elif datastore_type == 'e_WMS':
+            try:
+                user = connection_params.get('username')
+                password = connection_params.get('password')
+                url = connection_params.get('url')
+                
+                with requests.get(url, auth=(user, password), stream=True, verify=False) as r:
+                    if r.status_code >= 200 or r.status_code < 300:
+                        response = { 'success': True }
+                    else:
+                        response = {
+                                'error': _('Connection failed') + '<br>' + _("Status code: ") + str(r.status_code),
+                                'success': False 
+                            }
+            except Exception as e:
+                logger.exception("Error connecting WMS")
+                response = {
+                    'error': _('Connection failed') + '<br>' + escape(strip_tags(str(e))),
+                    'success': False 
+                }
+        else:
+                response = {
+                    'error': _('Connection error'),
+                    'success': False 
+                }
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 #@login_required(login_url='/gvsigonline/auth/login_user/')

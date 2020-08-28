@@ -40,7 +40,7 @@
 					<div class="row">
 						<div class="col-md-12 form-group">	
 							<label for="id_workspace">{% trans "Type" %}</label>
-							{{ form.type }}									
+							{{ form.type }}
 						</div>
 					</div>	
 						
@@ -63,15 +63,15 @@
 					<div class="row">
 						<div class="col-md-12 form-group">
 							<label for="id_description">{% trans "Description" %}</label>
-							{{ form.description }}						
+							{{ form.description }}
 						</div>
 					</div>	
 						
 					<div class="row" id="connection-params-row">
 						<div class="col-md-12 form-group">
 							<label for="id_connection_params">{% trans "Connection params" %}</label>
-							<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test database connection" %}</div>					
-							{{ form.connection_params }}						
+							<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
+							{{ form.connection_params }}
 						</div>
 					</div>
 					
@@ -134,6 +134,7 @@ $().ready(function(){
 	if($("#id_type").val() == "c_ImageMosaic"){
 		$('#select-file-row').css('display', 'block');
 		$('.select-mosaic_dimension').css('display', 'block');
+		$('#connection-params-row').css('display', 'none');
 		$('.CodeMirror').css('display', 'none');
 		
 		if("url" in config_json){
@@ -176,7 +177,8 @@ $().ready(function(){
 		
 		if (type == 'v_SHP') {
 			$('#select-file-row').css('display', 'none');
-			$('#connection-params-row').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
+			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "file:data/valencia-osm" \n';
 			code += '}';
@@ -184,6 +186,7 @@ $().ready(function(){
 		} else if (type == 'v_PostGIS') {
 			$('#select-file-row').css('display', 'none');
 			$('#connection-params-row').css('display', 'block');
+			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "host": "localhost", \n';
 			code += '\t "port": "5432", \n';
@@ -196,6 +199,7 @@ $().ready(function(){
 		} else if (type == 'c_GeoTiff') {
 			$('#select-file-row').css('display', 'block');
 			$('#connection-params-row').css('display', 'none');
+			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "file:coverages/img_sample/sample.tif" \n';
 			code += '}';
@@ -282,13 +286,14 @@ $().ready(function(){
 	
 	$('#test_connection').click(function (e) {
 		var connectionParams = JSON.parse(codemirror.getValue());
-		
+		var ds_type = $("#id_type").val();
 		$.ajax({
 			type: 'POST',
 			async: false,
 			url: '/gvsigonline/services/test_connection/',
 			data: {
-				connection_params: JSON.stringify(connectionParams)
+				connection_params: JSON.stringify(connectionParams),
+				ds_type: ds_type
 			},
 			beforeSend:function(xhr){
 			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
