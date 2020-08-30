@@ -36,6 +36,8 @@ import json
 
 def create_style(request, json_data, layer, gs, is_preview=False, has_custom_legend=None):
     name = json_data.get('name')
+    if is_preview:
+        name = name + '__tmp'
     is_default = json_data.get('is_default', False)
     is_default = utils.set_default_style(layer, gs, is_preview=is_preview, is_default=is_default)
         
@@ -230,6 +232,11 @@ def update_style(request, json_data, layer, gs, style, is_preview=False, has_cus
         if gs.updateStyle(layer, style.name, sld_body): 
             gs.setLayerStyle(layer, style.name, style.is_default)
             return style
+        else:
+            # try to recover from inconsistent gvsigol - geoserver status
+            if utils.reset_geoserver_style(gs, layer, style):
+                gs.setLayerStyle(layer, style.name, style.is_default)
+                return style
 
 def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))

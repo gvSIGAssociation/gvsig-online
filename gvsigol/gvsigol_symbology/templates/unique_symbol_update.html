@@ -228,7 +228,7 @@ $(document).ready(function() {
 	var wmsSource = new ol.source.ImageWMS({
 		url: layerUrl,
 		visible: true,
-		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1', 'STYLES': '{{style.name}}'},
 		serverType: 'geoserver',
 		tileLoadFunction: function(image, src) {
 			   imagePostFunction(image, src);
