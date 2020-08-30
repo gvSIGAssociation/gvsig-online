@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from amqp.exceptions import NotFound
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
@@ -805,7 +806,7 @@ class Geoserver():
         r = self.session.post(url, data=data_xml, headers=headers, auth=auth)
         if r.status_code==201:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise FailedRequestError(r.status_code, r.content)
     
     
     def get_layer_styles_configuration(self, layer, user=None, password=None):
