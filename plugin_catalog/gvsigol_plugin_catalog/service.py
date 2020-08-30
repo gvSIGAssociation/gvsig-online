@@ -122,6 +122,8 @@ class Geonetwork():
         
     def create_metadata(self, layer, layer_info, ds_type):
         ws = layer.datastore.workspace
+        if ds_type == 'imagemosaic':
+            ds_type = 'coverage'
         minx, miny, maxx, maxy = self.xmlapi.get_extent(layer_info, ds_type)
         crs_object = layer_info[ds_type]['nativeBoundingBox']['crs']
         if isinstance(crs_object,dict):
@@ -232,6 +234,8 @@ class Geonetwork():
             lm = LayerMetadata.objects.get(layer=layer)
             self.metadata_delete(lm)
             lm.delete()
+        except LayerMetadata.DoesNotExist:
+            pass
         except Exception as e:
             logger.exception("layer metadata delete failed")
             pass
