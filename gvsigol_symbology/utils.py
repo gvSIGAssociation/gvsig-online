@@ -22,6 +22,7 @@
 '''
 
 from gvsigol_symbology.models import  StyleLayer, Symbolizer, Style
+from gvsigol_symbology import sld_builder
 from gvsigol_services.backend_postgis import Introspect
 from django.core import serializers
 from gvsigol import settings
@@ -452,5 +453,13 @@ def set_default_style(layer, gs, style=None, is_preview=False, is_default=False)
             is_default = True
         
         if is_default and style:
-            gs.setLayerStyle(layer, style.name, style.is_default)
+            if not gs.setLayerStyle(layer, style.name, style.is_default):
+                # try to recover from inconsistent gvsigol - geoserver status
+                if reset_geoserver_style(gs, layer, style):
+                     gs.setLayerStyle(layer, style.name, style.is_default)
     return is_default
+
+def reset_geoserver_style(gs, layer, style):
+    sld_body = sld_builder.build_sld(layer, style)
+    return gs.createStyle(style.name, sld_body)
+    

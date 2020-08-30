@@ -551,15 +551,15 @@ def update_preview(request, layer_id):
             
             if style_type == 'UV':
                 services = services_unique_values
-            if style_type == 'US':
+            elif style_type == 'US':
                 services = services_unique_symbol
-            if style_type == 'IN':
+            elif style_type == 'IN':
                 services = services_intervals
-            if style_type == 'EX':
+            elif style_type == 'EX':
                 services = services_expressions
-            if style_type == 'CT':
+            elif style_type == 'CT':
                 services = services_color_table
-            if style_type == 'CP':
+            elif style_type == 'CP':
                 services = services_clustered_points
             
             if services:

@@ -270,6 +270,7 @@ Charts.prototype.save = function(layerId) {
 				location.href = "/gvsigonline/symbology/style_layer_list/";
 			} else {
 				alert('Error');
+				$("body").overlayout();
 			}
 
 		},
@@ -296,6 +297,7 @@ Charts.prototype.update = function(layerId, styleId) {
 				location.href = "/gvsigonline/symbology/style_layer_list/";
 			} else {
 				alert('Error');
+				$("body").overlayout();
 			}
 
 		},

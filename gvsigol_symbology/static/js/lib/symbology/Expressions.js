@@ -722,6 +722,7 @@ Expressions.prototype.save = function(layerId) {
 				location.href = "/gvsigonline/symbology/style_layer_list/";
 			} else {
 				alert('Error');
+				$("body").overlayout();
 			}
 
 		},
@@ -748,6 +749,7 @@ Expressions.prototype.update = function(layerId, styleId) {
 				location.href = "/gvsigonline/symbology/style_layer_list/";
 			} else {
 				alert('Error');
+				$("body").overlayout();
 			}
 
 		},

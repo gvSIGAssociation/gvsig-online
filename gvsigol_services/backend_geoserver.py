@@ -389,10 +389,9 @@ class Geoserver():
             catalog.save(gs_layer)
             
             return True
-        
         except Exception as e:
             logger.exception("error setting style", e)
-            return False     
+            return False
         
     def get_geometry_type(self, layer):
         try:           
@@ -518,24 +517,18 @@ class Geoserver():
         """
         Add new style to layer
         """
-        try:
-            self.rest_catalog.add_style(layer_name, name, user=self.user, password=self.password)
-            if layer is not None:
-                style_list = []
-                default_style = ''
-                style_layers = StyleLayer.objects.filter(layer=layer)
-                for style_layer in style_layers:
-                    if not style_layer.style.name.endswith('_tmp'):
-                        style_list.append(style_layer.style.name)
-                    if style_layer.style.is_default:
-                        default_style = style_layer.style.name
-                                
-                self.rest_catalog.update_layer_styles_configuration(layer, name, default_style, style_list, user=self.user, password=self.password)
-            return True
-        
-        except Exception as e:
-            logger.exception('Adding style: ' + name)
-            return False
+        self.rest_catalog.add_style(layer_name, name, user=self.user, password=self.password)
+        if layer is not None:
+            style_list = []
+            default_style = ''
+            style_layers = StyleLayer.objects.filter(layer=layer)
+            for style_layer in style_layers:
+                if not style_layer.style.name.endswith('_tmp'):
+                    style_list.append(style_layer.style.name)
+                if style_layer.style.is_default:
+                    default_style = style_layer.style.name
+                            
+            self.rest_catalog.update_layer_styles_configuration(layer, name, default_style, style_list, user=self.user, password=self.password)
         
     def updateStyle(self, layer, style_name, sld_body):
         """
