@@ -199,8 +199,8 @@ def get_referencia_catastral(request):
         response = {}
 
         if typex == 'ref_catastral':
-            provincia = params['provincia']
-            municipio = params['municipio']
+            #provincia = params['provincia']
+            #municipio = params['municipio']
             rc = params['rc'].lstrip()
 
             '''
