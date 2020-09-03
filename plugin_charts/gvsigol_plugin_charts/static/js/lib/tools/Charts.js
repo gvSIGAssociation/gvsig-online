@@ -113,7 +113,8 @@ Charts.prototype.showChartsView = function(layerId) {
   				layer_name: response.layer_name,
   				layer_title: response.layer_title,
   				layer_workspace: response.layer_workspace,
-  				layer_wfs_url: response.layer_wfs_url
+				layer_wfs_url: response.layer_wfs_url,
+				layer_native_srs: response.layer_native_srs  
   			};
 	  		var charts = response.charts;
 	  		

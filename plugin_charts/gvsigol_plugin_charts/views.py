@@ -440,6 +440,7 @@ def view(request):
             'layer_title': layer.title,
             'layer_workspace': layer.datastore.workspace.name,
             'layer_wfs_url': layer.datastore.workspace.wfs_endpoint,
+            'layer_native_srs': layer.native_srs,
             'charts': charts
         }
         

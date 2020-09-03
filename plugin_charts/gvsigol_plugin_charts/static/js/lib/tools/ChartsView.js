@@ -145,8 +145,10 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	  		var geojson = new ol.format.GeoJSON();
 	  		features = geojson.readFeatures(response);
 	  		for (var i=0; i < features.length; i++) {
-	  			var feat = features[i];
-	  			var geom = feat.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+				var feat = features[i];
+				//CHANGE
+				//var geom = feat.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+	  			var geom = feat.getGeometry().transform(self.layer.layer_native_srs, 'EPSG:3857');
 	  			feat.setGeometry(geom.clone());	
 	  			var props = feat.getProperties();
 	  			props['custom_color'] = self.getRandomColor();
@@ -185,8 +187,14 @@ ChartsView.prototype.createUI = function(layer, charts) {
 		    		placement: 'point',
 		    		rotation: 0
 		    	})
-		    });
-		    if (selIndex < 0) {
+			});
+			for (var i=0; i < self.source.getFeatures().length; i++) {
+				self.source.getFeatures()[i].setStyle(null);
+			}
+			self.selected.push(f);
+		    f.setStyle(selectedStyle);
+		    self.refreshCharts(self.selected);
+		    /*if (selIndex < 0) {
 		    	self.selected.push(f);
 		    	f.setStyle(selectedStyle);
 		    	self.refreshCharts(self.selected);
@@ -195,7 +203,7 @@ ChartsView.prototype.createUI = function(layer, charts) {
 		    	self.selected.splice(selIndex, 1);
 		    	f.setStyle(null);
 		    	self.refreshCharts(self.selected);
-		    }
+		    }*/
 		});
 	});
 	
@@ -228,8 +236,14 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	    		placement: 'point',
 	    		rotation: 0
 	    	})
-	    });
-	    if (selIndex < 0) {
+		});
+		for (var i=0; i < self.source.getFeatures().length; i++) {
+			self.source.getFeatures()[i].setStyle(null);
+		}
+		self.selected.push(f);
+		f.setStyle(selectedStyle);
+		self.refreshCharts(self.selected);
+	    /*if (selIndex < 0) {
 	    	self.selected.push(f);
 	    	f.setStyle(selectedStyle);
 	    	self.refreshCharts(self.selected);
@@ -238,7 +252,7 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	    	self.selected.splice(selIndex, 1);
 	    	f.setStyle(null);
 	    	self.refreshCharts(self.selected);
-	    }
+	    }*/
 		var p = e.search.getGeometry().getFirstCoordinate();
 		self.map.getView().animate({ center:p });
 		var extent = f.getGeometry().getExtent();
