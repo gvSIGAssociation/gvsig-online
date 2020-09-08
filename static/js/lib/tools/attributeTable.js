@@ -201,7 +201,11 @@ attributeTable.prototype.createTableUI = function(featureType) {
                 	}
                     return node.textContent;
                 }
-            }
+            },
+			modifier: {
+				selected: true,
+				page: 'all'
+			}
         }
 	});
 	tableButtons.push({
@@ -218,7 +222,11 @@ attributeTable.prototype.createTableUI = function(featureType) {
                 	}
                     return node.textContent;
                 }
-            }
+			},
+			modifier: {
+				selected: true,
+				page: 'all'
+			}
         }
 
 	});
@@ -266,20 +274,23 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	tableButtons.push({
 		extend: 'selectNone',
         text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection')
-    });
-	tableButtons.push({
-    	text: '<i class="fa fa-file-pdf-o margin-r-5"></i> ' + gettext('PDF Report'),
-        action: function ( e, dt, node, config ) {
-        	var t = $('#table-' + self.layer.get("id")).DataTable();
-        	var selectedRows = t.rows('.selected').data();
-        	if (selectedRows.length > 0){
-        		self.createPdfReport(selectedRows);
-
-	    	} else {
-	    		messageBox.show('warning', gettext('You must select at least one row'));
-	    	}
-        }
-    });
+	});
+	if (self.conf.gvsigol_app == 'gvsigol_app_sav') {
+		tableButtons.push({
+			text: '<i class="fa fa-file-pdf-o margin-r-5"></i> ' + gettext('PDF Report'),
+			className: 'sav-report-button',
+			action: function ( e, dt, node, config ) {
+				var t = $('#table-' + self.layer.get("id")).DataTable();
+				var selectedRows = t.rows('.selected').data();
+				if (selectedRows.length > 0){
+					self.createPdfReport(selectedRows);
+	
+				} else {
+					messageBox.show('warning', gettext('You must select at least one row'));
+				}
+			}
+		});
+	}	
 
 	var self = this;
 	this.table = $('#table-' + this.layer.get("id")).DataTable({
@@ -346,7 +357,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	    "drawCallback": function(settings, json) {
 	        self.selectFeatures();
 	    }
-    });
+	});
 	
 	/*$('.panel-wrapper').on('resize', function(event, ui){
 		var oSettings = self.table.fnSettings();

@@ -1145,8 +1145,14 @@ def project_get_conf(request):
 
         project_tools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
 
+        gvsigol_app = None
+        for app in settings.INSTALLED_APPS:
+            if 'gvsigol_app_' in app:
+                gvsigol_app = app
+
         conf = {
             'pid': pid,
+            'gvsigol_app': gvsigol_app,
             'project_name': project.name,
             'project_title': project.title,
             'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
