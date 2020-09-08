@@ -272,7 +272,7 @@ RawFilter.prototype.registerEvents = function() {
 		$("#rawfilter-operator").prop('disabled', true);
 		$("#rawfilter-selectvalue").prop('disabled', true);
 		
-		$("#rawfilter-layer-group option[value='__disabled__']").attr("selected", true);
+		$("#rawfilter-layer-group option[value='__disabled__']").attr("selected", 'selected');
 		$("#rawfilter-layer").empty().append('<option selected value="__disabled__">' + gettext('Select layer') + ' ...</option>');
 		$("#rawfilter-field").empty().append('<option selected value="__disabled__">' + gettext('Select field') + ' ...</option>');
 		$("#rawfilter-operator").empty().append('<option selected value="__disabled__">' + gettext('Select operator') + ' ...</option>');
