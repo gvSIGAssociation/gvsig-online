@@ -35,6 +35,7 @@ from gvsigol import settings
 from gvsigol_core.models import Project
 from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server
+from pyproj import Proj, transform
 
 
 class Tiling():
@@ -90,6 +91,8 @@ class Tiling():
         self.min_lon = minx
         self.min_lat = miny
         self.max_lon = maxx
+        if(maxy == 90):
+            maxy = 89
         self.max_lat = maxy
                 
     def _deg2num(self, lat_deg, lon_deg, zoom):
@@ -188,7 +191,7 @@ class Tiling():
                 for x in range(0,2**zoom,1):        
                     for y in range(0,2**zoom,1):
                         if self._download_wmts(zoom, x, y, format_) is False:
-                            return
+                            return False
                     
         # from 6 to 15 ranges
         for zoom in range(7, int(maxzoom)+1, 1):
@@ -202,9 +205,9 @@ class Tiling():
                         self._download_url(zoom, x, y)
                     else:
                         if self._download_wmts(zoom, x, y, format_) is False:
-                            return 
-                          
-                        
+                            return False
+        return True
+
     def create_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_):
         #from 0 to 6 download all
 #         if self.mode  != "OSM":
@@ -228,10 +231,10 @@ class Tiling():
                 for x in range(xtile, final_xtile + 1, 1):
                     for y in range(ytile, final_ytile - 1, -1):  
                         if self._download_wmts(zoom, x, y, format_) is False:
-                            return
+                            return False
                         if base_layer_process is not None:
                             if base_layer_process[str(self.prj_id)]['stop'] == 'true':
-                                return
+                                return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process)
@@ -252,11 +255,11 @@ class Tiling():
                         self._download_url(zoom, x, y)
                     else:
                         if self._download_wmts(zoom, x, y, format_) is False:
-                            return
+                            return False
                     if base_layer_process is not None:
                         if str(self.prj_id) in base_layer_process:
                             if base_layer_process[str(self.prj_id)]['stop'] == 'true':
-                                return
+                                return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process)
@@ -270,13 +273,17 @@ class Tiling():
                             #    'stop' : base_layer_process[str(self.prj_id)]['stop']
                             #}    
      
+        return True
+
+
     def get_estimated_time(self, start_time, base_layer_process):
         elapsed_time = t() - start_time
-        processed_tiles = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
         total_tiles = base_layer_process[str(self.prj_id)]['total_tiles']
+        processed_tiles = min(base_layer_process[str(self.prj_id)]['processed_tiles'] + 1, total_tiles)
         total_estimated_secs = (total_tiles * elapsed_time) / processed_tiles
         estimated_secs = ((total_tiles - processed_tiles) * total_estimated_secs) / total_tiles
-        return self.display_time(estimated_secs)      
+        return self.display_time(estimated_secs)   
+
     
     def display_time(self, seconds, granularity=2):
         intervals = (
@@ -296,6 +303,7 @@ class Tiling():
                     name = name.rstrip('s')
                 result.append("{} {}".format(value, name))
         return ', '.join(result[:granularity])   
+
      
     def get_number_of_tiles(self, min_x, min_y, max_x, max_y, maxzoom, base_layer_process):
         num_tiles = 0
@@ -371,7 +379,7 @@ class Tiling():
 
 
 @start_new_thread
-def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tilematrixset, format_='image/png'):
+def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tilematrixset, format_='image/png', extentid='project'):
     prj = Project.objects.get(id = prj_id)
     if prj.extent is not None:
         bbox = prj.extent.split(',')
@@ -428,22 +436,26 @@ def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tile
                     'time' : '-',
                     'stop' : 'false'
                 }
-            number_of_tiles = tiling.get_number_of_tiles(min_x, min_y, max_x, max_y, num_res_levels, base_layer_process)    
-            
-            #Genera el tileado a partir de coords en 3857 q es en las que está el extent del proyecto
-            tiling.create_tiles_from_utm(base_layer_process, min_x, min_y, max_x, max_y, num_res_levels, format_)
-            
-            #Ahora ya no lo quieren con el extent del proyecto sino de la capa. Transformamos a 3857 para seguir usando create_tiles_from_utm
-            #inProj = Proj(init='epsg:4326')
-            #outProj = Proj(init='epsg:3857')
-            #tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
-            #tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
-            #tiling.create_tiles_from_utm(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_)
+
+            if(extentid == 'project'):
+                number_of_tiles = tiling.get_number_of_tiles(min_x, min_y, max_x, max_y, num_res_levels, base_layer_process)    
+                #Genera el tileado a partir de coords en 3857 q es en las que está el extent del proyecto
+                status = tiling.create_tiles_from_utm(base_layer_process, min_x, min_y, max_x, max_y, num_res_levels, format_)
+            else:
+                #Si hay que usar el extent de la capa hay que transformar las coordenadas geográficas a 3857
+                inProj = Proj(init='epsg:4326')
+                outProj = Proj(init='epsg:3857')
+                tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
+                tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
+                number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, base_layer_process) 
+                status = tiling.create_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_)
+
             
             #TODO;
             #Shutil tiene un bug en algunos SO que hace que te meta una carpeta ./ dentro del zip (a los de SAV no les sirve). 
-            #A partir de la 3.6 de python está resuelto. Mientras tanto lo hago con ZipFile. Queda pendiente volverlo a dejar con shutil  
-            #shutil.make_archive(folder_prj, 'zip', folder_prj)
+            #A partir de la 3.6 de python está resuelto. Mientras tanto lo hago con ZipFile. Queda pendiente volverlo 
+            # a dejar con shutil cuando se migre a python 3 
+            #Sería así: shutil.make_archive(folder_prj, 'zip', folder_prj)
             zipf = zipfile.ZipFile(folder_prj + '.zip', 'w', zipfile.ZIP_DEFLATED)
             lenDirPath = len(folder_prj)
             for root, _, files in os.walk(folder_prj):
@@ -454,24 +466,29 @@ def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tile
             
             shutil.rmtree(folder_prj)
             
+            if(status is False):
+                prj.baselayer_version = old_version
+            else:
+                prj.baselayer_version = millis
+
             if base_layer_process is not None:
                 base_layer_process[prj_id] = {
                     'active' : 'false',
                     'total_tiles' : number_of_tiles,
                     'processed_tiles' : number_of_tiles,
-                    'version' : millis,
+                    'version' : prj.baselayer_version,
                     'time' : '-',
                     'stop' : 'false'
                 }
-              
+            prj.save()
+
         except Exception:
             #Si ha habido algún problema restauramos la versión vieja
             prj.baselayer_version = old_version
             prj.save()
             return
         
-        prj.baselayer_version = millis
-        prj.save()
+        
             
 def exists_base_layer_tiled(prj_id):
     prj = Project.objects.get(id = prj_id)

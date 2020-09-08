@@ -377,9 +377,9 @@
 					              			<div class="row" style="margin-top: 20px">
 												<div class="col-md-6 form-group" style="margin-left: 20px">
 													<label style="color: #3c8dbc;">Tiles {% trans "Processed" %}</label>
-													<label style="color: #3c8dbc;" id='total_tiles'>0</label>
-													<label style="color: #3c8dbc;">{% trans "of" %}</label>
 													<label style="color: #3c8dbc;" id='processed_tiles'>0</label>
+													<label style="color: #3c8dbc;">{% trans "of" %}</label>
+													<label style="color: #3c8dbc;" id='total_tiles'>0</label>
 													<label style="color: #ff0000;" id='tiles_percent'>(0%)</label>
 												</div>
 											</div>
@@ -392,46 +392,62 @@
 										</div>
 										
 										<!-- Enlace para descarga cuando hay una versión -->
-										{% if project.baselayer_version > 0 %}
+										
 											<div class="row">
 												<div class="col-md-3 form-group" style="top:15px;">
 													<label>{% trans "Download version" %}</label>
-													<label id="download_version">({{project.baselayer_version}}):</label>&nbsp;&nbsp;	
+													<label id="download_version">({% if project.baselayer_version > 0 %}{{project.baselayer_version}}{% else %}Ninguna disponible{% endif %}):</label>&nbsp;&nbsp;	
 												</div>
 
 												<div class="col-md-2 form-group" style="top:15px;">
 													<a id="processing_url" href="{{url_base_lyr}}" style="color:#3c8dbc" >{% trans "Download" %}</a>&nbsp;&nbsp;
 												</div>
 											</div>
-										{% endif %}
-				
-										<div class="row">
-											<div class="col-md-3 form-group" style="top:15px;">
-												<label>{% trans "Niveles de zoom" %}</label>&nbsp;&nbsp;															
+										
+
+									
+										<div class="row" style="margin-top:10px;">
+											<div class="col-md-3 form-group" >
+												<label>{% trans "Extent" %}</label>&nbsp;&nbsp;															
 											</div>
-											<div class="col-md-1 form-group" style="top:15px;">
-												<input placeholder="{% trans 'Tiles per side' %}" name="tiles-side" id="tiles-side" type="text" class="form-control" value="16">															
+											<div class="col-md-1 form-group" >
+												<input type="radio" id="project" name="extent" value="project" checked>{% trans "Proyecto" %}<br>
+											</div>
+											<div class="col-md-1 form-group" >
+												<input type="radio" id="layer" name="extent" value="layer">{% trans "Capa" %}<br>														
 											</div>
 										</div>
-										
-										<div class="row">
-											<div class="col-md-3 form-group" style="top:5px;">
+
+
+										<div class="row" style="margin-top:10px;"> 
+											<div class="col-md-3 form-group" >
 												<label>{% trans "Format" %}</label>&nbsp;&nbsp;															
 											</div>
-											<div class="col-md-1 form-group" style="top:5px;">
+											<div class="col-md-1 form-group" >
 												<input type="radio" id="png" name="imgtype" value="image/png" checked>{% trans "PNG" %}<br>
 											</div>
-											<div class="col-md-1 form-group" style="top:5px;">
+											<div class="col-md-1 form-group" >
 												<input type="radio" id="jpg" name="imgtype" value="image/jpeg">{% trans "JPG" %}<br>														
 											</div>
 										</div>
+
+				
+										<div class="row" style="margin-top:10px;">
+											<div class="col-md-3 form-group" >
+												<label>{% trans "Niveles de zoom" %}</label>&nbsp;&nbsp;															
+											</div>
+											<div class="col-md-1 form-group" >
+												<input placeholder="{% trans 'Tiles per side' %}" name="tiles-side" id="tiles-side" type="text" class="form-control" value="16">															
+											</div>
+										</div>
+									
 											
-										<div class="row">
-											<div class="col-md-3 form-group" style="top:5px">
+										<div class="row" style="margin-top:10px;">
+											<div class="col-md-3 form-group" >
 												<label>{% trans "Tilematrixset (WMTS)" %}</label>&nbsp;&nbsp;															
 											</div>
 											<div class="col-md-2 form-group">
-												<input placeholder="{% trans 'Tilematrixset' %}" name="tilematrixset" id="tilematrixset" type="text" class="form-control" value="EPSG:900913">															
+												<input placeholder="{% trans 'Tilematrixset' %}" name="tilematrixset" id="tilematrixset" type="text" class="form-control" value="EPSG:3857" disabled />															
 											</div>
 										</div>
 
@@ -441,6 +457,8 @@
 												<button type="button" id="button-stop-process"> {% trans "Stop Process" %}</button>														
 											</div>
 										</div>
+
+										
 										
 									</div>
 								</div>
@@ -595,7 +613,7 @@
 							$("#estimated_time").text('-')
 						}
 					});
-				}, 4000);
+				}, 2500);
 			}       
 		})
 		
@@ -778,8 +796,9 @@
 				async: true,
 				data: {
 					"tiles":$("#tiles-side").val(),
-					"tilematrixset":$("#tilematrixset").val(),
-					"format":$("input[name='imgtype']:checked").val()
+					"tilematrixset":$("#tilematrixset").val() == 'EPSG:3857' ? 'EPSG:900913' : $("#tilematrixset").val(),
+					"format":$("input[name='imgtype']:checked").val(),
+					"extent":$("input[name='extent']:checked").val()
 				},
 				url: '/gvsigonline/services/create_base_layer/{{pid}}/',
 				beforeSend:function(xhr){
