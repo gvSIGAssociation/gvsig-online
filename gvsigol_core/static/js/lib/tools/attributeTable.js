@@ -292,6 +292,27 @@ attributeTable.prototype.createTableUI = function(featureType) {
 		});
 	}	
 
+	for (var i=0; i<self.conf.project_tools.length; i++) {
+		if (self.conf.project_tools[i].name == 'gvsigol_plugin_turiscan') {
+			if (self.conf.project_tools[i].checked) {
+				tableButtons.push({
+					text: '<i class="fa fa-list-alt margin-r-5"></i> ' + gettext('Mostrar fichas'),
+					className: 'show-cards-button',
+					action: function ( e, dt, node, config ) {
+						var t = $('#table-' + self.layer.get("id")).DataTable();
+						var selectedRows = t.rows('.selected').data();
+						if (selectedRows.length > 0){
+							self.showCards(selectedRows);
+			
+						} else {
+							messageBox.show('warning', gettext('You must select at least one row'));
+						}
+					}
+				});
+			}
+		}
+	}
+
 	var self = this;
 	this.table = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
@@ -1490,4 +1511,25 @@ attributeTable.prototype.getResources = function(feat) {
 	});
 	
 	return resources;
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.showCards = function(selectedRows) {
+	var self = this;
+	
+	var features = new Array();
+	for (var j=0; j<selectedRows.length; j++) {
+		var feat = self.getFeature(selectedRows[j]);
+		var resources = self.getResources(feat);
+		features.push({
+			'fid': selectedRows[j].featureid,
+			'feature': {
+				'properties': selectedRows[j],
+				'resources': resources
+			}
+		});
+	}
+	new ModalCanarias(features);
 };
