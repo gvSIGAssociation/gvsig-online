@@ -29,6 +29,7 @@ var Charts = function(conf, map, chartLayers) {
 	this.map = map;
 	this.chartLayers = chartLayers;
 	this.chartsView = new ChartsView();
+	this.singleChartView = new SingleChart(this.map);
 	
 	this.initialize();
 	this.registerEvents();
@@ -52,7 +53,7 @@ Charts.prototype.initialize = function() {
 						ui += 		'<option value="__none__"><i class="aria-hidden="true"></i>'+ gettext('Select chart') +'...</option>';
 						/*for(var i=0; i<chartLayer.charts.length; i++){
 							var title = chartLayer.charts[i].title;
-							ui += 	'<option value="' + chartLayer.charts[i].id + '"><i class="fa fa-search" aria-hidden="true"></i>'+ title +'</option>';
+							ui += 	'<option data-layerid="' + chartLayer.id + '" value="' + chartLayer.charts[i].id + '"><i class="fa fa-search" aria-hidden="true"></i>'+ title +'</option>';
 						}*/
 						ui += 		'<option data-layerid="' + chartLayer.id + '" value="__charts_dashboard__"><i class="aria-hidden="true"></i>'+ gettext('Show charts view') +'</option>';
 						ui += 	'</select>';
@@ -81,16 +82,24 @@ Charts.prototype.registerEvents = function() {
 	var self = this;
 	
 	$(".select-chart").change(function(e){
+		var _this = this;
 		var chartId = $('option:selected', $(this)).val();
 		if (chartId == '__none__') {
 			console.log('None');
 			
 		} else if (chartId == '__charts_dashboard__') {
-			var layerId = $('option:selected', $(this)).data().layerid;
-			self.showChartsView(layerId);
+			$('body').overlay();
+			setTimeout(function(){
+				var layerId = $('option:selected', $(_this)).data().layerid;
+				self.showChartsView(layerId);
+			}, 2000);	
 			
 		} else {
-			self.showChart(chartId);
+			$('body').overlay();
+			setTimeout(function(){
+				var layerId = $('option:selected', $(_this)).data().layerid;
+				self.showSingleChart(layerId, chartId);
+			}, 2000);
 		}
 	});
 };
@@ -123,9 +132,10 @@ Charts.prototype.showChartsView = function(layerId) {
 	  		$('#gvsigol-navbar-tools-dropdown').css("display","none");
 	  		
 	  		$('#chart-layer-' + layerId + ' option[value=__none__]').attr('selected','selected');
-	  		
+			  
 	  		self.chartsView.createUI(layer, charts);
-	  		self.chartsView.loadCharts();
+			self.chartsView.loadCharts();
+			$.overlayout();
 		},
 	  	error: function(e){
 	  		console.log(e);
@@ -133,6 +143,40 @@ Charts.prototype.showChartsView = function(layerId) {
 	});
 };
 
-Charts.prototype.showChart = function(chartId) {
-	
+Charts.prototype.showSingleChart = function(layerId, chartId) {
+	var self = this;
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/charts/single_chart/',
+	  	beforeSend : function(xhr) {
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+	  	data: {
+			layer_id: layerId,
+			chart_id: chartId  
+	  	},
+	  	success	:function(response){
+	  		var layer = {
+  				layer_id: response.layer_id,
+  				layer_name: response.layer_name,
+  				layer_title: response.layer_title,
+  				layer_workspace: response.layer_workspace,
+				layer_wfs_url: response.layer_wfs_url,
+				layer_native_srs: response.layer_native_srs  
+  			};
+	  		var chart = response.chart;
+	  		
+	  		$('#chart-layer-' + layerId + ' option[value=__none__]').attr('selected','selected');
+			
+			self.singleChartView.prepare();
+			self.singleChartView.loadVectorLayer(layer, chart);
+	  		self.singleChartView.createUI(layer, chart);
+			self.singleChartView.loadChart(chart);
+			$.overlayout();
+		},
+	  	error: function(e){
+	  		console.log(e);
+	  	}
+	});
 };

@@ -445,3 +445,28 @@ def view(request):
         }
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')   
+def single_chart(request):
+    if request.method == 'POST':
+        layer = Layer.objects.get(id=int(request.POST.get('layer_id')))
+        chart_id = int(request.POST.get('chart_id'))
+        chart = Chart.objects.get(id=chart_id)
+            
+        response = {
+            'layer_id': layer.id,
+            'layer_name': layer.name,
+            'layer_title': layer.title,
+            'layer_workspace': layer.datastore.workspace.name,
+            'layer_wfs_url': layer.datastore.workspace.wfs_endpoint,
+            'layer_native_srs': layer.native_srs,
+            'chart': {
+                'chart_id': chart.id,
+                'chart_type': chart.type,
+                'chart_title': chart.title,
+                'chart_description': chart.description,
+                'chart_conf': json.loads(chart.conf)
+            }
+        }
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')

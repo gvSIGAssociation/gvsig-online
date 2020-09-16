@@ -48,7 +48,9 @@ ChartsView.prototype.initialize = function() {
 	ui += '</ul>';
 	$('body').append(ui);
 	this.chartsContainer = $("#charts-container");
-	this.chartsContainer.sortable();
+	this.chartsContainer.sortable({
+		cancel: "#charts-map"
+	});
 	this.chartsContainer.disableSelection();
 };
 
@@ -70,7 +72,7 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	ui += 				'<h3 class="box-title">' + gettext('Map') + '</h3>';
 	ui += 			'</div>';
 	ui += 			'<div class="box-body">';
-	ui += 				'<div id="charts-map" style="width: 100%; height: 304px;"></div>';
+	ui += 				'<div id="charts-map" style="width: 100%;"></div>';
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</li>';
@@ -100,6 +102,9 @@ ChartsView.prototype.createUI = function(layer, charts) {
 			zoom : 2
 		})
 	});
+	this.map.on("movestart", function(e) {
+		e.preventDefault();
+	});
 	
 	this.source = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
@@ -114,19 +119,9 @@ ChartsView.prototype.createUI = function(layer, charts) {
       		width: 2
     	})
     });
-	/*var selectedStyle = new ol.style.Style({
-		fill: new ol.style.Fill({
-			color: 'rgba(243, 151, 18, 0.5)'
-		}),
-    	stroke: new ol.style.Stroke({
-    		color: 'rgba(243, 151, 18, 1.0)',
-      		width: 2
-    	})
-    });*/
 	this.vectorLayer = new ol.layer.Vector({
 		source: this.source,
 		style: this.styleFunction.bind(this)
-		//style: style
 	});
 	this.map.addLayer(this.vectorLayer);
 	
@@ -188,22 +183,26 @@ ChartsView.prototype.createUI = function(layer, charts) {
 		    		rotation: 0
 		    	})
 			});
-			for (var i=0; i < self.source.getFeatures().length; i++) {
-				self.source.getFeatures()[i].setStyle(null);
+			if (self.enableMultipleSelection()) {
+				if (selIndex < 0) {
+					self.selected.push(f);
+					f.setStyle(selectedStyle);
+					self.refreshCharts(self.selected);
+					
+				} else {
+					self.selected.splice(selIndex, 1);
+					f.setStyle(null);
+					self.refreshCharts(self.selected);
+				}
+				
+			} else {
+				for (var i=0; i < self.source.getFeatures().length; i++) {
+					self.source.getFeatures()[i].setStyle(null);
+				}
+				self.selected.push(f);
+				f.setStyle(selectedStyle);
+				self.refreshCharts(self.selected);
 			}
-			self.selected.push(f);
-		    f.setStyle(selectedStyle);
-		    self.refreshCharts(self.selected);
-		    /*if (selIndex < 0) {
-		    	self.selected.push(f);
-		    	f.setStyle(selectedStyle);
-		    	self.refreshCharts(self.selected);
-		    	
-		    } else {
-		    	self.selected.splice(selIndex, 1);
-		    	f.setStyle(null);
-		    	self.refreshCharts(self.selected);
-		    }*/
 		});
 	});
 	
@@ -237,27 +236,44 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	    		rotation: 0
 	    	})
 		});
-		for (var i=0; i < self.source.getFeatures().length; i++) {
-			self.source.getFeatures()[i].setStyle(null);
+		
+		if (self.enableMultipleSelection()) {
+			if (selIndex < 0) {
+				self.selected.push(f);
+				f.setStyle(selectedStyle);
+				self.refreshCharts(self.selected);
+				
+			} else {
+				self.selected.splice(selIndex, 1);
+				f.setStyle(null);
+				self.refreshCharts(self.selected);
+			}
+
+		} else {
+			for (var i=0; i < self.source.getFeatures().length; i++) {
+				self.source.getFeatures()[i].setStyle(null);
+			}
+			self.selected.push(f);
+			f.setStyle(selectedStyle);
+			self.refreshCharts(self.selected);
 		}
-		self.selected.push(f);
-		f.setStyle(selectedStyle);
-		self.refreshCharts(self.selected);
-	    /*if (selIndex < 0) {
-	    	self.selected.push(f);
-	    	f.setStyle(selectedStyle);
-	    	self.refreshCharts(self.selected);
-	    	
-	    } else {
-	    	self.selected.splice(selIndex, 1);
-	    	f.setStyle(null);
-	    	self.refreshCharts(self.selected);
-	    }*/
 		var p = e.search.getGeometry().getFirstCoordinate();
 		self.map.getView().animate({ center:p });
 		var extent = f.getGeometry().getExtent();
-    	self.map.getView().fit(extent, self.map.getSize());
+		self.map.getView().fit(extent, self.map.getSize());
 	});
+	var height = $('#charts-map').height();
+	$('#charts-map').css('height', (height-8).toString() + 'px');
+};
+
+ChartsView.prototype.enableMultipleSelection = function() {
+	var enable = false;
+	for (var i=0; i<this.jsonCharts.length; i++) {
+		if (this.jsonCharts[i].chart_conf.dataset_type == 'multiple_selection') {
+			enable = true;
+		}
+	}
+	return enable;
 };
 
 ChartsView.prototype.hide = function() {
