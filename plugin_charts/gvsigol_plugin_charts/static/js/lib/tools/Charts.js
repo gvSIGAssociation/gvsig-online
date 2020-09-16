@@ -29,7 +29,6 @@ var Charts = function(conf, map, chartLayers) {
 	this.map = map;
 	this.chartLayers = chartLayers;
 	this.chartsView = new ChartsView();
-	this.singleChartView = new SingleChart(this.map);
 	
 	this.initialize();
 	this.registerEvents();
@@ -51,10 +50,10 @@ Charts.prototype.initialize = function() {
 						ui += 	'<i class="fa fa-bar-chart" aria-hidden="true"></i>';
 						ui += 	'<select id="chart-layer-' + chartLayer.id + '" class="select-chart btn btn-block btn-custom-tool">';
 						ui += 		'<option value="__none__"><i class="aria-hidden="true"></i>'+ gettext('Select chart') +'...</option>';
-						/*for(var i=0; i<chartLayer.charts.length; i++){
+						for(var i=0; i<chartLayer.charts.length; i++){
 							var title = chartLayer.charts[i].title;
 							ui += 	'<option data-layerid="' + chartLayer.id + '" value="' + chartLayer.charts[i].id + '"><i class="fa fa-search" aria-hidden="true"></i>'+ title +'</option>';
-						}*/
+						}
 						ui += 		'<option data-layerid="' + chartLayer.id + '" value="__charts_dashboard__"><i class="aria-hidden="true"></i>'+ gettext('Show charts view') +'</option>';
 						ui += 	'</select>';
 						ui += '</div>';
@@ -166,13 +165,10 @@ Charts.prototype.showSingleChart = function(layerId, chartId) {
 				layer_native_srs: response.layer_native_srs  
   			};
 	  		var chart = response.chart;
-	  		
-	  		$('#chart-layer-' + layerId + ' option[value=__none__]').attr('selected','selected');
-			
-			self.singleChartView.prepare();
-			self.singleChartView.loadVectorLayer(layer, chart);
-	  		self.singleChartView.createUI(layer, chart);
-			self.singleChartView.loadChart(chart);
+
+			new SingleChart(self.map, layer, chart);
+			$('#chart-layer-' + layerId + ' option[value=__none__]').prop("selected", true);
+			$('.select-chart').prop("disabled", true);
 			$.overlayout();
 		},
 	  	error: function(e){
