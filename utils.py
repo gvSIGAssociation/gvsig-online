@@ -366,7 +366,7 @@ def get_enum_item_list(layer, column_name, enum=None):
         
 def get_enum_entry(layer, column_name):
     """
-    Gets the list of items of a enumerated field
+    Gets the enumeration object associated to the provided column, or None if the field is not enumerated
     """
     try:
         return LayerFieldEnumeration.objects.get(layer=layer, field=column_name).enumeration
@@ -410,8 +410,9 @@ def get_layer_img(layerid, filename):
     
     return path_, url
 
-def get_db_connect_from_layer(layer_id):
-    layer = Layer.objects.get(id=int(layer_id))
+def get_db_connect_from_layer(layer):
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.get(id=int(layer))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     params = json.loads(datastore.connection_params)
     host = params['host']
@@ -420,7 +421,7 @@ def get_db_connect_from_layer(layer_id):
     user = params['user']
     passwd = params['passwd']
     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-    return i, layer.name, params['schema']
+    return i, layer.source_name, params['schema']
      
 def get_exception(code, msg):
     response = HttpResponse(msg)
