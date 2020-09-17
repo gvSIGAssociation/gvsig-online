@@ -96,4 +96,8 @@ urlpatterns = [
     url(r'^service_url_update/(?P<svid>[0-9]+)/$', services_views.service_url_update, name='service_url_update'),
     url(r'^test_connection/$', services_views.test_connection, name='test_connection'),
     url(r'^register_action/$', services_views.register_action, name='register_action'),
+    url(r'^db_field_delete/$', services_views.db_field_delete, name='db_field_delete'),
+    #url(r'^db_field_changetype/$', services_views.db_field_changetype, name='db_field_changetype'),
+    url(r'^db_field_rename/$', services_views.db_field_rename, name='db_field_rename'),
+    url(r'^db_field_add/$', services_views.db_add_field, name='db_field_add'),
 ]
