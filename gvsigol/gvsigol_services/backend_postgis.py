@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from pyexcel.internal.sheets import column
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -69,7 +70,7 @@ class Introspect:
         SELECT f_geometry_column
         FROM public.geometry_columns
         WHERE f_table_schema = %s AND f_table_name = %s
-        """, [schema, table])        
+        """, [schema, table])
         return [r[0] for r in self.cursor.fetchall()]
     
     def get_geometry_columns_info(self, table=None, schema='public'):
@@ -489,7 +490,6 @@ class Introspect:
             seq_name=sqlbuilder.Identifier(seq_name),
             target_table=sqlbuilder.Identifier(target_table),
             column=sqlbuilder.Identifier(column))
-        print query.as_string(self.conn)
         self.cursor.execute(query,  [])
         
         full_sequence = quote_ident(target_schema, self.conn) + "." + quote_ident(seq_name, self.conn) 
@@ -560,9 +560,10 @@ class Introspect:
             self.clone_spatial_index(target_schema, new_table_name, geom_col)
         
     def delete_table(self, schema, table_name):
-        query = "DROP TABLE IF EXISTS " + schema + "." + table_name + ";"
-        
-        self.cursor.execute(query)
+        query = sqlbuilder.SQL("DROP TABLE IF EXISTS {schema}.{table}").format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name))
+        self.cursor.execute(query,  [])
         
     def insert_sql(self, schema, table_name, sql):
         query = "INSERT INTO " + schema + "." + table_name + " " + sql + ";"
@@ -640,6 +641,23 @@ class Introspect:
         bb = bb.replace("BOX(","").replace(")","").replace(" ", ",")        
         return bb
     
+    def get_bbox(self, schema, table_name, geom_field):
+        """
+        Returns a tuple containing the bounding box of the layer using the format (minx, miny, maxx, maxy)
+        """
+        sql = """
+        SELECT ST_XMin(bbox) xmin, ST_YMin(bbox) ymin, ST_XMax(bbox) xmax, ST_YMax(bbox) ymax
+        FROM
+        (SELECT ST_Extent({geom_field}) bbox FROM {schema}.{table} as s1) as s0
+        """
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            geom_field=sqlbuilder.Identifier(geom_field))
+        self.cursor.execute(query,  [])
+        row = self.cursor.fetchone()
+        return (row[0], row[1], row[2], row[3])
+    
     def set_field_mandatory(self, schema, table, field):
         """
         Sets a column to NOT NULL
@@ -696,6 +714,77 @@ class Introspect:
             else:
                 res[r[0]] = True
         return res
+
+    def delete_column(self, schema, table_name, column_name):
+        query = sqlbuilder.SQL("ALTER TABLE {schema}.{table} DROP COLUMN {column}").format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            column=sqlbuilder.Identifier(column_name))
+        self.cursor.execute(query,  [])
+
+    def rename_column(self, schema, table_name, column_name, new_column_name):
+        query = sqlbuilder.SQL("ALTER TABLE {schema}.{table} RENAME COLUMN {column_name} TO {new_column_name}").format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            column_name=sqlbuilder.Identifier(column_name),
+            new_column_name=sqlbuilder.Identifier(new_column_name))
+        self.cursor.execute(query,  [])
+
+    def add_column(self, schema, table_name, column_name, sql_type):
+        query = sqlbuilder.SQL("ALTER TABLE {schema}.{table} ADD COLUMN {column_name} " + sql_type).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            column_name=sqlbuilder.Identifier(column_name))
+        self.cursor.execute(query,  [])
+    """
+    def allowed_conversion(self, new_type, old_type):
+        " ""
+        TO BE COMPLETED
+        Note that some conversions are allowed but can fail depending on the input data (e.g. text to int with not int values)
+        " ""
+        if new_type == 'integer' and (old_type == 'character varying'
+                                      or old_type == 'text'
+                                      or old_type == 'double precision'
+                                      or old_type == 'numeric'
+                                      or old_type == 'boolean'):
+            return True
+        if new_type == 'double precision' and (old_type == 'character varying'
+                                      or old_type == 'text'
+                                      or old_type == 'double precision'
+                                      or old_type == 'numeric'
+                                      or old_type == 'boolean'):
+            return True
+        return False
+        " ""
+    """
+    
+    """
+    def alter_column_type(self, schema, table_name, column_name, new_type, old_type, expression=None, cast=None):
+        " ""
+        TO BE COMPLETED
+        " ""
+        if not expression:
+            expression = column_name
+        
+        if not cast:
+            if new_type == 'integer' and (old_type == 'character varying' or old_type == 'text' or old_type == 'double precision'):
+                cast = 'integer'
+            if new_type == 'double precision' and (old_type == 'character varying' or old_type == 'text'):
+                cast = 'double precision'
+            else:
+                cast = new_type
+        if cast:
+            sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {column_name} TYPE {new_type} USING CAST ( {expression} AS {cast})"
+        else:
+            sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {column_name} TYPE {new_type}"
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            column_name=sqlbuilder.Identifier(column_name),
+            expression=sqlbuilder.Identifier(expression),
+            new_type=sqlbuilder.Identifier(new_type))
+        self.cursor.execute(query,  [])
+    """
         
     def close(self):
         """

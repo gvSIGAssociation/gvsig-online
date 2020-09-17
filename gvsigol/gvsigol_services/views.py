@@ -16,6 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol_services import backend_postgis
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -43,7 +44,8 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext_lazy
+
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
 from django.utils.html import escape, strip_tags
@@ -673,6 +675,7 @@ def layer_refresh_extent(request, layer_id):
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
     layer.save()
+    server.reload_featuretype(layer, attributes=False, nativeBoundingBox=True, latLonBoundingBox=True)
     return redirect('layer_list')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1515,73 +1518,54 @@ def layer_config(request, layer_id):
 
         try:
             conf = ast.literal_eval(layer.conf)
-            fields_used = []
-            fields_mand = _get_fields_mandatory(layer_id)
-            for f in conf['fields']:
-                field = {}
-                field['name'] = f['name']
-                fields_used.append(f['name'])
-                for id, language in LANGUAGES:
-                    field['title-'+id] = f['title-'+id]
-                field['visible'] = f['visible']
-                field['editable'] = f['editable']
-                field['editableactive'] = True
-                for control_field in settings.CONTROL_FIELDS:
-                    if field['name'] == control_field['name']:
-                        field['editableactive'] = False
-                        field['editable'] = False
-                field['infovisible'] = f['infovisible']
-                field['mandatory'] = fields_mand[field['name']]
-                fields.append(field)
-
-            datastore = Datastore.objects.get(id=layer.datastore_id)
-            workspace = Workspace.objects.get(id=datastore.workspace_id)
-            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-            (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-            resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
-            for f in resource_fields:
-                field = {}
-                field['name'] = f['name']
-                if not f['name'] in fields_used:
-                    for id, language in LANGUAGES:
-                        field['title-'+id] = f['name']
-                    field['visible'] = True
-                    field['editableactive'] = True
-                    field['editable'] = True
-                    for control_field in settings.CONTROL_FIELDS:
-                        if field['name'] == control_field['name']:
-                            field['editableactive'] = False
-                            field['editable'] = False
-                    field['infovisible'] = False
-                    field['mandatory'] = False
+            i, tablename, dsname = utils.get_db_connect_from_layer(layer_id)
+            field_info = i.get_fields_info(tablename, dsname)
+            geometry_columns = i.get_geometry_columns(tablename, dsname)
+            pks = i.get_pk_columns(tablename, dsname)
+            i.close()
+            for f in field_info:
+                if not f['name'] in geometry_columns and not f['name'] in pks:
+                    field = None
+                    for fconf in conf.get('fields', []):
+                        if fconf['name'] == f['name']:
+                            for id, language in LANGUAGES:
+                                fconf['title-'+id] = f.get('title-'+id, f['name'])
+                            fconf['visible'] = fconf.get('visible', True)
+                            fconf['editable'] = fconf.get('editable', True)
+                            fconf['editableactive'] = True
+                            for control_field in settings.CONTROL_FIELDS:
+                                if fconf['name'] == control_field['name']:
+                                    fconf['editableactive'] = False
+                                    fconf['editable'] = False
+                            fconf['infovisible'] = fconf.get('infovisible', False)
+                            fconf['mandatory'] = (f.get('nullable') == 'NO')
+                            field = fconf
+                            break
+                    if not field:
+                        field = {}
+                        field['name'] = f['name']
+                        for id, language in LANGUAGES:
+                            field['title-'+id] = f['name']
+                        field['visible'] = True
+                        field['editableactive'] = True
+                        field['editable'] = True
+                        for control_field in settings.CONTROL_FIELDS:
+                            if field['name'] == control_field['name']:
+                                field['editableactive'] = False
+                                field['editable'] = False
+                        field['infovisible'] = False
+                        fconf['mandatory'] = (f.get('nullable') == 'NO')
+                    enum = utils.get_enum_entry(layer, f['name'])
+                    if enum:
+                        field['type'] = _('enumerated ({0})').format(enum.title)
+                    else:
+                        field['type'] = f['type']
                     fields.append(field)
 
-
-
         except:
-            datastore = Datastore.objects.get(id=layer.datastore_id)
-            workspace = Workspace.objects.get(id=datastore.workspace_id)
-            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-            (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-            resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
-            for f in resource_fields:
-                field = {}
-                field['name'] = f['name']
-                for id, language in LANGUAGES:
-                    field['title-'+id] = f['name']
-                field['visible'] = True
-                field['editableactive'] = True
-                field['editable'] = True
-                for control_field in settings.CONTROL_FIELDS:
-                    if field['name'] == control_field['name']:
-                        field['editableactive'] = False
-                        field['editable'] = False
-                field['infovisible'] = False
-                field['mandatory'] = False
-                fields.append(field)
-                
+            logger.exception("Retrieving fields")
         enums = Enumeration.objects.all();
-        
+        print fields
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup, 'enumerations': enums})
 
 def _set_field_mandatory(layer_id, field_name, mandatory):
@@ -2422,6 +2406,7 @@ def layer_create_with_group(request, layergroup_id):
 
 
             except Exception as e:
+                logger.exception("Error creating layer")
                 try:
                     msg = e.get_message()
                 except:
@@ -2634,13 +2619,12 @@ def create_base_layer(request, pid):
         except Exception:
             return utils.get_exception(400, 'Wrong number of tiles')
         tilematrixset = request.POST.get('tilematrixset')
-        extent = request.POST.get('extent')
         
         if num_res_levels is not None:
             if num_res_levels > 20:
                 return utils.get_exception(400, 'The number of resolution levels cannot be greater than 20')
             else:
-                tiling_service.tiling_base_layer(base_layer_process, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
+                tiling_service.tiling_base_layer(base_layer_process, base_lyr, pid, num_res_levels, tilematrixset, format_)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
                   
@@ -4488,3 +4472,179 @@ def register_action(request):
             action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
 
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_field_delete(request):
+    if request.method == 'POST':
+        try: 
+            field = request.POST.get('field')
+            #layer_name = request.POST['layer_name']
+            layer_id = request.POST.get('layer_id')
+            layer = Layer.objects.get(id=layer_id)
+            datastore_name = layer.datastore.name
+            if not request.user.is_superuser and not (layer.created_by == request.user.username) and not (layer.datastore.type == 'v_PostGIS'):
+                return utils.get_exception(400, 'Error in the input params')
+            params = json.loads(layer.datastore.connection_params)
+            con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            con.delete_column(datastore_name, layer.source_name, field)
+            con.close()
+            
+            layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
+            for f in layer_conf.get('fields', []):
+                if f['name'] == field:
+                    layer_conf.get('fields').remove(f)
+            layer.conf = layer_conf
+            layer.save()
+            LayerFieldEnumeration.objects.filter(layer=layer, field=field).delete()
+
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+        except Exception:
+            logger.exception('Error deleting field')
+    return utils.get_exception(400, 'Error in the input params')
+
+"""
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_field_changetype(request):
+    pass
+"""
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_field_rename(request):
+    if request.method == 'POST':
+        try: 
+            field = request.POST.get('field')
+            new_field_name = request.POST.get('new_field_name')
+            #layer_name = request.POST['layer_name']
+            layer_id = request.POST.get('layer_id')
+            layer = Layer.objects.get(id=layer_id)
+            datastore_name = layer.datastore.name
+            if not request.user.is_superuser and \
+               not (layer.created_by == request.user.username) and \
+               not (layer.datastore.type == 'v_PostGIS'):
+                return utils.get_exception(400, 'Error in the input params')
+            params = json.loads(layer.datastore.connection_params)
+            con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            con.rename_column(datastore_name, layer.source_name, field, new_field_name)
+            con.close()
+
+            layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
+            for f in layer_conf.get('fields', []):
+                if f['name'] == field:
+                    f['name'] = new_field_name
+            layer.conf = layer_conf
+            layer.save()
+
+            for enumDef in LayerFieldEnumeration.objects.filter(layer=layer, field=field):
+                enumDef.field = new_field_name
+                enumDef.save()
+
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+        except Exception:
+            logger.exception('Error renaming field')
+    return utils.get_exception(400, 'Error in the input params')
+
+    def getGeoserverBindings(self, sql_type):
+        if sql_type in ["character varying", "character", "text", "cd_json"]:
+            return "java.lang.String"
+        elif sql_type in ["integer"]:
+            return "java.lang.Integer"
+        elif sql_type in ["double"]:
+            return "java.lang.Double"
+        elif sql_type == "numeric":
+            return "java.math.BigDecimal"
+        elif sql_type == "boolean":
+            return "java.lang.Boolean"
+        elif sql_type == "date":
+            return "java.sql.Date"
+        elif sql_type == "time":
+            return "java.sql.Time"
+        elif sql_type == "timestamp":
+            return "java.sql.Timestamp"
+        sql_type = sql_type.upper()
+    return [{'name': 'character varying', 'label': ugettext_lazy('String')},
+             ]
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_add_field(request):
+    if request.method == 'POST':
+        layer = None
+        try: 
+            field_name = request.POST.get('field')
+            field_type = request.POST.get('type')
+            layer_id = request.POST.get('layer_id')
+            enumkey = request.POST.get('enumkey')
+            layer = Layer.objects.get(id=layer_id)
+            
+
+            if not request.user.is_superuser and \
+               not (layer.created_by == request.user.username) and \
+               not (layer.datastore.type == 'v_PostGIS'):
+                return utils.get_exception(400, 'Error in the input params')
+            datastore_name = layer.datastore.name
+            params = json.loads(layer.datastore.connection_params)
+            con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            try:
+                gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+                sql_type = gs.gvsigol_to_sql_type(field_type)
+                if not sql_type:
+                    return utils.get_exception(400, _('Field type not supported'))
+                try:
+                    con.add_column(datastore_name, layer.source_name, field_name, sql_type)
+                except psycopg2.ProgrammingError:
+                    return utils.get_exception(400, _('Field "{0}" exists').format(field_name))
+            finally:
+                con.close()
+
+            layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
+            fields = layer_conf.get('fields', [])
+            field_def = {
+                "name": field_name,
+                "visible": True,
+                "editableactive": True,
+                "editable": True,
+                "infovisible": False,
+                "mandatory": False
+                }
+            for id, language in LANGUAGES:
+                field_def['title-'+id] = field_name
+            fields.append(field_def)
+            layer_conf['fields'] = fields 
+            layer.conf = layer_conf
+            layer.save()
+            
+            if enumkey:
+                field_enum = LayerFieldEnumeration()
+                field_enum.layer = layer
+                field_enum.field = field_name
+                field_enum.enumeration_id = int(enumkey) 
+                field_enum.multiple = True if field_type == 'multiple_enumeration' else False
+                field_enum.save() 
+            
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+        except Exception:
+            logger.exception("Error creating field")
+            
+            # clean potential half created field
+            con = None
+            try:
+                if layer:
+                    LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
+                con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+                con.delete_column(datastore_name, layer.source_name, field_name)
+            except:
+                pass
+            finally:
+                if con:
+                    con.close()
+
+    return utils.get_exception(400, 'Error in the input params')
