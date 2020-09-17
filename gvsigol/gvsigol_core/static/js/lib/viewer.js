@@ -138,7 +138,8 @@ viewer.core = {
     		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
     		minZoom: 0,
     		maxZoom: self.conf.view.max_zoom_level,
-        	zoom: self.conf.view.zoom
+			zoom: self.conf.view.zoom,
+			zoomFactor: 1.5
     	});
 		this.map = new ol.Map({
 			interactions: interactions,
