@@ -18,6 +18,7 @@ from __future__ import unicode_literals
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -25,6 +26,9 @@ from django.db import models
 from gvsigol_auth.models import UserGroup
 from gvsigol import settings
 from django.utils.crypto import get_random_string
+
+CLONE_PERMISSION_CLONE = "clone"
+CLONE_PERMISSION_SKIP = "skip"
 
 class Server(models.Model):
     TYPE_CHOICES = (
@@ -122,7 +126,7 @@ class LayerGroup(models.Model):
     def __unicode__(self):
         return self.name
     
-    def clone(self, recursive=True, target_datastore=None, copy_layer_data=True):
+    def clone(self, recursive=True, target_datastore=None, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
         old_id = self.pk
         new_name = target_datastore.workspace.name + "_" + self.name
         i = 1
@@ -139,7 +143,7 @@ class LayerGroup(models.Model):
         new_instance =  LayerGroup.objects.get(id=self.pk)
         if recursive:
             for lyr in LayerGroup.objects.get(id=old_id).layer_set.all():
-                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, copy_data=copy_layer_data)
+                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, copy_data=copy_layer_data, permissions=permissions)
         return new_instance
 
 def get_default_layer_thumbnail():
@@ -192,9 +196,9 @@ class Layer(models.Model):
     def get_qualified_name(self):
         return self.datastore.workspace.name + ":" + self.name
     
-    def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True):
+    def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
         from gvsigol_services.utils import clone_layer
-        return clone_layer(target_datastore, self, layer_group, copy_data=copy_data)
+        return clone_layer(target_datastore, self, layer_group, copy_data=copy_data, permissions=permissions)
 
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer)
