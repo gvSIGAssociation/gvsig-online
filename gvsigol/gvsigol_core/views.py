@@ -1449,6 +1449,7 @@ def project_clone(request, pid):
             target_datastore_name = form.cleaned_data.get('target_datastore')
             target_server = form.cleaned_data.get('target_server')
             copy_data = form.cleaned_data.get('copy_data')
+            permission_choice = form.cleaned_data.get('permission_choice')
 
             if target_server.frontend_url.endswith("/"):
                 uri = target_server.frontend_url + target_workspace_name
@@ -1468,7 +1469,7 @@ def project_clone(request, pid):
             target_workspace = services_utils.create_workspace(target_server.id, target_workspace_name, uri, values, request.user.username)
             if target_workspace:
                 datastore = services_utils.create_datastore(request.user.username, target_datastore_name, target_workspace)
-                project.clone(target_datastore=datastore, name=name, title=title, copy_layer_data=copy_data)
+                project.clone(target_datastore=datastore, name=name, title=title, copy_layer_data=copy_data, permissions=permission_choice)
                 messages.add_message(request, messages.INFO, _('The project was successfully cloned.'))
                 return redirect('project_update', pid=project.id)
     else:
