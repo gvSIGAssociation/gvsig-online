@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from django.http import response
+from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -475,7 +476,7 @@ def set_time_enabled(server, layer):
         server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
 
 
-def clone_layer(target_datastore, layer, layer_group, copy_data=True):
+def clone_layer(target_datastore, layer, layer_group, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
     if layer.type == 'v_PostGIS': # operation not defined for the rest of types
         # create the table
         dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
@@ -517,9 +518,20 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
         if layer_group is not None:
             layer.layer_group = layer_group
         layer.save()
-        
+
         new_layer_instance = Layer.objects.get(id=layer.pk)
         old_instance = Layer.objects.get(id=old_id)
+        
+        if permissions != CLONE_PERMISSION_SKIP:
+            for lrg in LayerReadGroup.objects.filter(layer=old_instance):
+                lrg.pk = None
+                lrg.layer = new_layer_instance
+                lrg.save()
+            
+            for lwg in LayerWriteGroup.objects.filter(layer=old_instance):
+                lwg.pk = None
+                lwg.layer = new_layer_instance
+                lwg.save()
         
         set_time_enabled(server, new_layer_instance)
         
@@ -527,7 +539,7 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
             enum.pk = None
             enum.layer = new_layer_instance
             enum.save()
-            
+        
         from gvsigol_symbology.services import clone_layer_styles
         clone_layer_styles(server, old_instance, new_layer_instance)
         
@@ -537,7 +549,7 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
             lyr_res.save()
         """
         TODO:
-        - ¿metadatos? etc
+        - models from plugins (for instance metadata, charts, etc)
         """
         server.updateThumbnail(new_layer_instance, 'create')
     
