@@ -818,7 +818,7 @@ viewer.core = {
 				if (error.responseText.indexOf("TileOutOfRange") == -1){
 					is_tileoutofrange =  false;
 					//TileState.ERROR = 3
-					tile.setState(3);
+					//tile.setState(3);
 				}else{
 					is_tileoutofrange = true;
 				}
