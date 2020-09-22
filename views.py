@@ -2622,8 +2622,8 @@ def create_base_layer(request, pid):
         extent = request.POST.get('extent')
         
         if num_res_levels is not None:
-            if num_res_levels > 20:
-                return utils.get_exception(400, 'The number of resolution levels cannot be greater than 20')
+            if num_res_levels > 22:
+                return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
             else:
                 tiling_service.tiling_base_layer(base_layer_process, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
         else:
