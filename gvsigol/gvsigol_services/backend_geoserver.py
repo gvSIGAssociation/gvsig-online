@@ -681,7 +681,7 @@ class Geoserver():
             return 'com.vividsolutions.jts.geom.MultiLineString'
         elif sql_type == "POLYGON":
             return 'com.vividsolutions.jts.geom.Polygon'
-        elif sql_type == "MULIPOLYGON":
+        elif sql_type == "MULTIPOLYGON":
             return 'com.vividsolutions.jts.geom.MultiPolygon'
 
     def createResource(self, workspace, store, name, title, extraParams={}):
