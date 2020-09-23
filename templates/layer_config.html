@@ -94,6 +94,7 @@
 																	<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
 																	{% endif %}
 																	<td>
+																	{% if f.editableactive %}
 																		{% if counter > 5 %}
 																		<div class="btn-group dropup">
 																		{% else %}
@@ -109,6 +110,11 @@
 																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
 																			</ul>
 																		</div>
+																	{% else %}
+																		<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" disabled aria-expanded="false" title="{% trans "Reserved field" %}">
+																			<i class="fa fa-wrench"></i>
+																		</button>
+																	{% endif %}
 																	</td>
 																</tr>
 																{% if forloop.last %}
