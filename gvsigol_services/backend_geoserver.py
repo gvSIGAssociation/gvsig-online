@@ -661,9 +661,9 @@ class Geoserver():
             return "java.lang.Boolean"
         elif sql_type == "date":
             return "java.sql.Date"
-        elif sql_type in ["time without time zone", "time"]:
+        elif sql_type in ["time without time zone", "time with time zone", "time"]:
             return "java.sql.Time"
-        elif sql_type in ["timestamp without time zone", "timestamp"]:
+        elif sql_type in ["timestamp without time zone", "timestamp with time zone", "timestamp"]:
             return "java.sql.Timestamp"
         sql_type = sql_type.upper()
         if sql_type == "POINT":
@@ -1473,7 +1473,8 @@ class Geoserver():
                 sql_type = f['type']
             binding = self.getGeoserverBindings(sql_type)
             if not binding:
-                raise rest_geoserver.RequestError(_("Unsupported field type: {0}").format(sql_type))
+                logger.debug(_("Unsupported field type: {0}").format(sql_type))
+                raise rest_geoserver.RequestError(-1, _("Unsupported field type: {0}").format(sql_type))
             nullable = True if f['nullable'] == 'YES' else False
             if name in pks:
                 field = {"name": name, "binding": binding, "minOccurs": 1, "maxOccurs": 1, "nillable": False}

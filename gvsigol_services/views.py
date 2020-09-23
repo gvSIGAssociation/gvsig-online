@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from gvsigol_services import backend_postgis
+from django.db.utils import ProgrammingError
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -4486,6 +4487,9 @@ def db_field_delete(request):
             datastore_name = layer.datastore.name
             if not request.user.is_superuser and not (layer.created_by == request.user.username) and not (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
+            for ctrl_field in settings.CONTROL_FIELDS:
+                if field == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('Control field "{0}" cannot be deleted').format(field))
             params = json.loads(layer.datastore.connection_params)
             con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
             con.delete_column(datastore_name, layer.source_name, field)
@@ -4502,8 +4506,12 @@ def db_field_delete(request):
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
+        except psycopg2.ProgrammingError as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+            if e.pgcode == '42703':
+                return utils.get_exception(400, _('Field does not exist. Probably, it was deleted or renamed concurrently by another user'))
         except Exception:
-            logger.exception('Error deleting field')
+            logger.exception(_('Error deleting field. Cause: {0}').format(e.message))
     return utils.get_exception(400, 'Error in the input params')
 
 """
@@ -4528,6 +4536,11 @@ def db_field_rename(request):
                not (layer.created_by == request.user.username) and \
                not (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
+            for ctrl_field in settings.CONTROL_FIELDS:
+                if field == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('Control field "{0}" cannot be renamed').format(field))
+                elif new_field_name == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field))
             params = json.loads(layer.datastore.connection_params)
             con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
             con.rename_column(datastore_name, layer.source_name, field, new_field_name)
@@ -4547,8 +4560,14 @@ def db_field_rename(request):
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
-        except Exception:
-            logger.exception('Error renaming field')
+        except psycopg2.ProgrammingError as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+            if e.pgcode == '42703':
+                return utils.get_exception(400, _('Field does not exist. Probably, it was deleted or renamed concurrently by another user'))
+        except rest_geoserver.RequestError as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.get_detailed_message()))
+        except Exception as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
     return utils.get_exception(400, 'Error in the input params')
 
     def getGeoserverBindings(self, sql_type):
@@ -4584,7 +4603,10 @@ def db_add_field(request):
             enumkey = request.POST.get('enumkey')
             layer = Layer.objects.get(id=layer_id)
             
-
+            for ctrl_field in settings.CONTROL_FIELDS:
+                if field_name == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field_name))
+            
             if not request.user.is_superuser and \
                not (layer.created_by == request.user.username) and \
                not (layer.datastore.type == 'v_PostGIS'):
@@ -4632,8 +4654,8 @@ def db_add_field(request):
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
-        except Exception:
-            logger.exception("Error creating field")
+        except Exception as e:
+            logger.exception(_('Error creating field. Cause: {0}').format(e.message))
             
             # clean potential half created field
             con = None
