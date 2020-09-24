@@ -194,7 +194,7 @@ class Geoserver():
             self.getGsconfig().create_workspace(name, uri)
             return True
         except Exception as e:
-            logger.exception("Error creating workspace");
+            logger.exception("Error creating workspace")
             return False
         
     def getWorkspace(self, name):
@@ -840,7 +840,7 @@ class Geoserver():
     def updateResource(self, workspace, ds_name, ds_type, name, updatedParams={}):
         try:
             if ds_type.startswith('v_'): # vector
-                self.rest_catalog.update_featuretype(workspace, ds_name, name, updatedParams=updatedParams, user=self.user, password=self.password)
+                self.rest_catalog.update_featuretype(workspace, ds_name, name, updated_params=updatedParams, user=self.user, password=self.password)
             else: # raster, external layer, etc
                 title = updatedParams.get('title')
                 if title:
