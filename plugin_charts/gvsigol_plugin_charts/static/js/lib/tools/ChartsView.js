@@ -292,7 +292,7 @@ ChartsView.prototype.loadCharts = function() {
 			$('#first-chart').append('<canvas id="chart-' + firstChart.chart_id + '"></canvas>');
 			$('#first-chart-title').text(firstChart.chart_title);
 			var download = '';
-			download += '<a class="download-chart" data-chartid="' + firstChart.chart_id + '" id="download-' + firstChart.chart_id + '" download="' + this.layer.layer_title + '.jpg" href="" class="btn btn-primary float-right bg-flat-color-1">';
+			download += '<a class="download-chart" data-chartid="' + firstChart.chart_id + '" id="download-' + firstChart.chart_id + '" download="' + this.layer.layer_title + '.png" href="" class="btn btn-primary float-right bg-flat-color-1">';
 			download += 	'<i style="margin-right: 10px;" class="fa fa-download"></i>';
 			download += '</a>';
 			download += '<a class="download-pdf-chart" data-chartid="' + firstChart.chart_id + '" id="download-pdf-' + firstChart.chart_id + '" href="" class="btn btn-primary float-right bg-flat-color-1">';
@@ -336,7 +336,7 @@ ChartsView.prototype.loadCharts = function() {
 			ui += 			'<div class="box-header with-border">';
 			ui += 				'<h3 class="box-title">' + chart.chart_title + '</h3>';
 			ui += 				'<div class="box-tools pull-right">';
-			ui += 					'<a class="download-chart" data-chartid="' + chart.chart_id + '" id="download-' + chart.chart_id + '" download="' + this.layer.layer_title + '.jpg" href="" class="btn btn-primary float-right bg-flat-color-1">';
+			ui += 					'<a class="download-chart" data-chartid="' + chart.chart_id + '" id="download-' + chart.chart_id + '" download="' + this.layer.layer_title + '.png" href="" class="btn btn-primary float-right bg-flat-color-1">';
 			ui += 						'<i style="margin-right: 10px;" class="fa fa-download"></i>';
 			ui += 					'</a>';
 			ui += 					'<a class="download-pdf-chart" data-chartid="' + chart.chart_id + '" id="download-pdf-' + chart.chart_id + '" href="" class="btn btn-primary float-right bg-flat-color-1">';
@@ -379,7 +379,7 @@ ChartsView.prototype.loadCharts = function() {
 		}
 		$('.download-chart').on('click', function(){
 			var chartId = this.dataset.chartid;
-			var url_base64jp = document.getElementById('chart-' + chartId).toDataURL("image/jpg");
+			var url_base64jp = document.getElementById('chart-' + chartId).toDataURL("image/png");
 			var a =  document.getElementById('download-' + chartId);
 			a.href = url_base64jp;
 		});
@@ -397,7 +397,7 @@ ChartsView.prototype.loadCharts = function() {
 			var doc = new jsPDF('landscape');
 			doc.setFontSize(20);
 			doc.text(15, 15, chartConf.chart_title);
-			doc.addImage(canvasImg, 'JPEG', 10, 10, 280, 150 );
+			doc.addImage(canvasImg, 'PNG', 10, 10, 280, 150 );
 			
 			var uri = doc.output('dataurlstring');
 	        self.openDataUriWindow(uri);
@@ -434,7 +434,7 @@ ChartsView.prototype.canvasToImage = function(canvas, backgroundColor) {
 	}
  
 	//get the image data from the canvas
-	var imageData = canvas.toDataURL("image/jpeg", 1.0);
+	var imageData = canvas.toDataURL("image/png", 1.0);
  
 	if(backgroundColor)
 	{

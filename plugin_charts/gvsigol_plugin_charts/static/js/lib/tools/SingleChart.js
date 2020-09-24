@@ -190,7 +190,7 @@ SingleChart.prototype.loadChart = function() {
     $('#single-chart-' + chartId).append('<canvas id="chart-' + chartId + '"></canvas>');
 	$('#single-chart-title-' + chartId).text(self.jsonChart.chart_title);
     var download = '';
-    download += '<a style="color: #222222;" class="download-chart" data-chartid="' + chartId + '" id="download-' + chartId + '" download="' + this.layer.layer_title + '.jpg" href="" class="btn btn-primary float-right bg-flat-color-1">';
+    download += '<a style="color: #222222;" class="download-chart" data-chartid="' + chartId + '" id="download-' + chartId + '" download="' + this.layer.layer_title + '.png" href="" class="btn btn-primary float-right bg-flat-color-1">';
     download += 	'<i style="margin-right: 10px;" class="fa fa-download"></i>';
     download += '</a>';
     download += '<a style="color: #222222;" class="download-pdf-chart" data-chartid="' + chartId + '" id="download-pdf-' + chartId + '" href="" class="btn btn-primary float-right bg-flat-color-1">';
@@ -224,7 +224,7 @@ SingleChart.prototype.loadChart = function() {
     }
     $('.download-chart').on('click', function(){
         var chartId = this.dataset.chartid;
-        var url_base64jp = document.getElementById('chart-' + chartId).toDataURL("image/jpg");
+        var url_base64jp = document.getElementById('chart-' + chartId).toDataURL("image/png");
         var a =  document.getElementById('download-' + chartId);
         a.href = url_base64jp;
     });
@@ -238,7 +238,7 @@ SingleChart.prototype.loadChart = function() {
         var doc = new jsPDF('landscape');
         doc.setFontSize(20);
         doc.text(15, 15, self.jsonChart.chart_title);
-        doc.addImage(canvasImg, 'JPEG', 10, 10, 280, 150 );
+        doc.addImage(canvasImg, 'PNG', 10, 10, 280, 150 );
         
         var uri = doc.output('dataurlstring');
         self.openDataUriWindow(uri);
@@ -273,7 +273,7 @@ SingleChart.prototype.canvasToImage = function(canvas, backgroundColor) {
 	}
  
 	//get the image data from the canvas
-	var imageData = canvas.toDataURL("image/jpeg", 1.0);
+	var imageData = canvas.toDataURL("image/png", 1.0);
  
 	if(backgroundColor)
 	{
