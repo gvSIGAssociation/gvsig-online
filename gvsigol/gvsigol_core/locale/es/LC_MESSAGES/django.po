@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-18 11:00+0000\n"
+"POT-Creation-Date: 2020-09-29 15:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,11 +21,11 @@ msgstr ""
 
 #: gvsigol_core/forms.py:15
 msgid "Clone project and layer permissions"
-msgstr ""
+msgstr "Clonar permisos de proyecto y de capa"
 
 #: gvsigol_core/forms.py:16
 msgid "Don't apply any permission. Cloned layers will become public"
-msgstr ""
+msgstr "No aplicar ningún permiso. Las capas clonadas serán públicas"
 
 #: gvsigol_core/forms.py:21
 msgid "New project title"
@@ -211,11 +211,11 @@ msgstr ""
 "Aprenda a administrar la información geográfica desde un dispositivo móvil o "
 "una tableta"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:500
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:475
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:503
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:478
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -239,8 +239,8 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:504
-#: gvsigol_core/utils.py:516
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
+#: gvsigol_core/utils.py:491
 msgid "Password"
 msgstr "Contraseña"
 
@@ -257,7 +257,7 @@ msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:512
+#: gvsigol_core/utils.py:487
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -589,7 +589,6 @@ msgid "Raster layers will be excluded (except base layers)"
 msgstr "Las capas ráster serán exluidas (excepto las capas base)"
 
 #: gvsigol_core/templates/project_clone.html:113
-#| msgid "Permission cloning behaviour"
 msgid "Permissions cloning"
 msgstr "Clonado de permisos"
 
@@ -886,23 +885,23 @@ msgstr "Los cambios que no se hayan salvado se perdarán. ¿Continuar?"
 msgid "Error loading layers"
 msgstr "Error cargando capas"
 
-#: gvsigol_core/utils.py:483
+#: gvsigol_core/utils.py:458
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: gvsigol_core/utils.py:499
+#: gvsigol_core/utils.py:474
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: gvsigol_core/utils.py:501
+#: gvsigol_core/utils.py:476
 msgid "First name"
 msgstr "Nombre"
 
-#: gvsigol_core/utils.py:502
+#: gvsigol_core/utils.py:477
 msgid "Last name"
 msgstr "Apellidos"
 
-#: gvsigol_core/utils.py:514
+#: gvsigol_core/utils.py:489
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
@@ -1004,11 +1003,11 @@ msgstr "Vista compartida"
 msgid "Link"
 msgstr "Enlace"
 
-#: gvsigol_core/views.py:1445 gvsigol_core/views.py:1478
+#: gvsigol_core/views.py:1445 gvsigol_core/views.py:1481
 msgid "Operation not allowed on project: "
 msgstr "Operación no permitida sobre el proyecto: "
 
-#: gvsigol_core/views.py:1473
+#: gvsigol_core/views.py:1476
 msgid "The project was successfully cloned."
 msgstr "El proyecto se clonó con éxito."
 

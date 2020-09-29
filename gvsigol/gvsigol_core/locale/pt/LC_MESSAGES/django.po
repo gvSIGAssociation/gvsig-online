@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-18 11:00+0000\n"
+"POT-Creation-Date: 2020-09-29 15:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -214,11 +214,11 @@ msgstr ""
 "Saiba como gerenciar informações geográficas de um dispositivo celular ou "
 "tablet"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:500
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:475
 msgid "Username"
 msgstr "Nome de usuário"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:503
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:478
 msgid "Email"
 msgstr "Correio electrónico"
 
@@ -242,8 +242,8 @@ msgstr "Você está logado como usuário básico"
 msgid "Last login"
 msgstr "Último Login"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:504
-#: gvsigol_core/utils.py:516
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
+#: gvsigol_core/utils.py:491
 msgid "Password"
 msgstr "Senha"
 
@@ -260,7 +260,7 @@ msgid "Passwords doesn't match"
 msgstr "As senhas não correspondem"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:512
+#: gvsigol_core/utils.py:487
 msgid "New password"
 msgstr "Nova senha"
 
@@ -898,23 +898,23 @@ msgstr "As alterações não guardadas serão perdidas. Continuar?"
 msgid "Error loading layers"
 msgstr "Erro nas camadas carregadas"
 
-#: gvsigol_core/utils.py:483
+#: gvsigol_core/utils.py:458
 msgid "New user account"
 msgstr "Nova conta de usuário"
 
-#: gvsigol_core/utils.py:499
+#: gvsigol_core/utils.py:474
 msgid "Account data"
 msgstr "Dados da conta"
 
-#: gvsigol_core/utils.py:501
+#: gvsigol_core/utils.py:476
 msgid "First name"
 msgstr "Nome"
 
-#: gvsigol_core/utils.py:502
+#: gvsigol_core/utils.py:477
 msgid "Last name"
 msgstr "Sobrenome"
 
-#: gvsigol_core/utils.py:514
+#: gvsigol_core/utils.py:489
 msgid "This is your new temporary password"
 msgstr "Esta é a  sua nova senha temporária"
 
@@ -1016,11 +1016,11 @@ msgstr "Vista compartilhada"
 msgid "Link"
 msgstr "Link"
 
-#: gvsigol_core/views.py:1445 gvsigol_core/views.py:1478
+#: gvsigol_core/views.py:1445 gvsigol_core/views.py:1481
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1473
+#: gvsigol_core/views.py:1476
 msgid "The project was successfully cloned."
 msgstr ""
 
