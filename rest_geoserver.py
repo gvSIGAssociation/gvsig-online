@@ -900,7 +900,14 @@ class Geoserver():
             auth = self.session.auth
         r = self.session.get(url, json={}, auth=auth)
         if r.status_code==200:
-            return r._content
+            try:
+                cjson = r.json()
+                seq =  cjson.get('global', {}).get('updateSequence')
+                if seq is not None:
+                    return seq
+            except:
+                logger.exception("Error getting updateSequence")
+            return r.content
         raise FailedRequestError(r.status_code, r.content)
             
     
