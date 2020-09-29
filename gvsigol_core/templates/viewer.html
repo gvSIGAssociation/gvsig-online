@@ -158,7 +158,8 @@
 								        {% endfor %}
 								    </select>
 							    </form>
-						    </li>
+							</li>
+							{% if user.is_authenticated %}
 							<li class="user-footer">
 								<div class="pull-left">
 									<a href="/gvsigonline/core/" id="goto-dashboard" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
@@ -167,6 +168,13 @@
 									<a href="/gvsigonline/auth/logout_user/" id="goto-logout" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
 								</div>
 							</li>
+							{% else %}
+							<li class="user-footer">
+								<div class="pull-right">
+									<a href="/gvsigonline/auth/login_user/" class="btn btn-default btn-flat">{% trans "Sign in" %}</a>
+								</div>
+							</li>
+							{% endif %}
 						</ul>
 					</li>
 				</ul>
