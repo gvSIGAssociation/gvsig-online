@@ -663,7 +663,7 @@ def project_update(request, pid):
         
         url_base_lyr = ''
         icon = settings.BASE_URL + settings.STATIC_URL + 'img/processing.gif'
-        if(project.baselayer_version > 0):
+        if(project.baselayer_version is not None and project.baselayer_version > 0):
             url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
                     
         return render(request, 'project_update.html', {'tools': projectTools,
