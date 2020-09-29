@@ -1470,6 +1470,8 @@ def project_clone(request, pid):
             if target_workspace:
                 datastore = services_utils.create_datastore(request.user.username, target_datastore_name, target_workspace)
                 project.clone(target_datastore=datastore, name=name, title=title, copy_layer_data=copy_data, permissions=permission_choice)
+                server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+                server.reload_nodes()
                 messages.add_message(request, messages.INFO, _('The project was successfully cloned.'))
                 return redirect('project_update', pid=project.id)
     else:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-18 11:00+0000\n"
+"POT-Creation-Date: 2020-09-29 15:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -213,11 +213,11 @@ msgstr ""
 "Aprenga a administrar la informació geogràfica des d'un dispositiu mòbil o "
 "una tablet"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:500
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:475
 msgid "Username"
 msgstr "Nom d'usuari"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:503
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:478
 msgid "Email"
 msgstr "Correu electrònic"
 
@@ -241,8 +241,8 @@ msgstr "Ha iniciat sessió com a usuari bàsic"
 msgid "Last login"
 msgstr "Última conexió"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:504
-#: gvsigol_core/utils.py:516
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
+#: gvsigol_core/utils.py:491
 msgid "Password"
 msgstr "Contrasenya"
 
@@ -259,7 +259,7 @@ msgid "Passwords doesn't match"
 msgstr "Les contrasenyes no coincideixen"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:512
+#: gvsigol_core/utils.py:487
 msgid "New password"
 msgstr "Nova contrasenya"
 
@@ -899,23 +899,23 @@ msgstr "Els canvis no guardats es perdran. Continuar?"
 msgid "Error loading layers"
 msgstr "Error carregant capes"
 
-#: gvsigol_core/utils.py:483
+#: gvsigol_core/utils.py:458
 msgid "New user account"
 msgstr "Nou compte d'usuari"
 
-#: gvsigol_core/utils.py:499
+#: gvsigol_core/utils.py:474
 msgid "Account data"
 msgstr "Dades del compte"
 
-#: gvsigol_core/utils.py:501
+#: gvsigol_core/utils.py:476
 msgid "First name"
 msgstr "Nom"
 
-#: gvsigol_core/utils.py:502
+#: gvsigol_core/utils.py:477
 msgid "Last name"
 msgstr "Cognom"
 
-#: gvsigol_core/utils.py:514
+#: gvsigol_core/utils.py:489
 msgid "This is your new temporary password"
 msgstr "Aquesta és la contrasenya provisionalment"
 
@@ -1019,11 +1019,11 @@ msgstr "Vistes compartides"
 msgid "Link"
 msgstr ""
 
-#: gvsigol_core/views.py:1445 gvsigol_core/views.py:1478
+#: gvsigol_core/views.py:1445 gvsigol_core/views.py:1481
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1473
+#: gvsigol_core/views.py:1476
 msgid "The project was successfully cloned."
 msgstr ""
 
