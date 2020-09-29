@@ -523,15 +523,22 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True, permission
         old_instance = Layer.objects.get(id=old_id)
         
         if permissions != CLONE_PERMISSION_SKIP:
+            admin_group = UserGroup.objects.get(name__exact='admin')
+            read_groups = [ admin_group ]
+            write_groups = [ admin_group ]
+
             for lrg in LayerReadGroup.objects.filter(layer=old_instance):
                 lrg.pk = None
                 lrg.layer = new_layer_instance
                 lrg.save()
+                read_groups.append(lrg.group)
             
             for lwg in LayerWriteGroup.objects.filter(layer=old_instance):
                 lwg.pk = None
                 lwg.layer = new_layer_instance
                 lwg.save()
+                write_groups.append(lwg.group)
+            server.setLayerDataRules(layer, read_groups, write_groups)
         
         set_time_enabled(server, new_layer_instance)
         
@@ -555,6 +562,5 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True, permission
     
         core_utils.toc_add_layer(new_layer_instance)
         server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
-        server.reload_nodes()
         return new_layer_instance
     return layer
