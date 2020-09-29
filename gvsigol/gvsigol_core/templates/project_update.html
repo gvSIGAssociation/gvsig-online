@@ -370,7 +370,7 @@
               							<div id="processing_header" style="border: 1px solid #3c8dbc;">
 	              							<div class="row">
 	              								<div class="col-md-6" style="margin-left: 20px">
-	              									<image id="processing_icon" src="{{processing_icon}}" width=60px height=60px {% if project.baselayer_version != -99999 %}class=""{% endif %}></img>
+	              									<image id="processing_icon" src="{{processing_icon}}" width=60px height=60px ></img>
 					              					<label style="color: #3c8dbc;font-size:18px">{% trans "Process running" %}</label>&nbsp;&nbsp;
 					              				</div>
 					              			</div>
@@ -396,7 +396,7 @@
 											<div class="row">
 												<div class="col-md-3 form-group" style="margin-top:10px;">
 													<label>{% trans "Download version" %}</label>
-													<label id="download_version">({% if project.baselayer_version > 0 %}{{project.baselayer_version}}{% else %}Ninguna disponible{% endif %}):</label>&nbsp;&nbsp;	
+													<label id="download_version">({% if project.baselayer_version != None and project.baselayer_version > 0 %}{{project.baselayer_version}}{% else %}Ninguna disponible{% endif %}):</label>&nbsp;&nbsp;	
 												</div>
 
 												<div class="col-md-2 form-group" style="top:15px;">
