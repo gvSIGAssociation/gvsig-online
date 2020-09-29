@@ -411,10 +411,10 @@
 												<label>{% trans "Extent" %}</label>&nbsp;&nbsp;															
 											</div>
 											<div class="col-md-1 form-group" >
-												<input type="radio" id="project" name="extent" value="project" checked>{% trans "Proyecto" %}<br>
+												<input type="radio" id="project" name="extentbaselyr" value="project" checked>{% trans "Proyecto" %}<br>
 											</div>
 											<div class="col-md-1 form-group" >
-												<input type="radio" id="layer" name="extent" value="layer">{% trans "Capa" %}<br>														
+												<input type="radio" id="layer" name="extentbaselyr" value="layer">{% trans "Capa" %}<br>														
 											</div>
 										</div>
 
@@ -798,7 +798,7 @@
 					"tiles":$("#tiles-side").val(),
 					"tilematrixset":$("#tilematrixset").val() == 'EPSG:3857' ? 'EPSG:900913' : $("#tilematrixset").val(),
 					"format":$("input[name='imgtype']:checked").val(),
-					"extent":$("input[name='extent']:checked").val()
+					"extent":$("input[name='extentbaselyr']:checked").val()
 				},
 				url: '/gvsigonline/services/create_base_layer/{{pid}}/',
 				beforeSend:function(xhr){
