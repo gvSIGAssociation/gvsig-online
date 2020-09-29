@@ -52,6 +52,7 @@ import time
 import utils
 from builtins import str as text
 from django.utils.html import escape, strip_tags
+import threading
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -157,8 +158,37 @@ class Geoserver():
         except Exception as e:
             print str(e)
             return False
+    
+    def threaded_reload_nodes(self):
+        try:
+            # get sequence from master
+            us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
+            print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Apache. Update Sequence = " + str(us_master)
+            
+            # reload all nodes except master
+            if len(self.slave_nodes) > 0:
+                time.sleep(settings.RELOAD_NODES_DELAY)
+                for node in self.slave_nodes:
+                    us =  self.rest_catalog.get_update_sequence(node, user=self.user, password=self.password)
+                    if us != us_master:
+                        print  "INFO: Reloading ... " + node + " with updatedSequence " + str(us) 
+                        self.rest_catalog.reload(node, user=self.user, password=self.password)
+        except Exception as e:
+            print str(e)
+            return False
         
     def reload_nodes(self):
+        try:
+            if len(self.slave_nodes) > 0:
+                reload_thread = threading.Thread(target=self.threaded_reload_nodes)
+                reload_thread.start()
+            return True
+        
+        except Exception as e:
+            print str(e)
+            return False
+        
+    def reload_nodes_old(self):
         try:
             # get sequence from master
             us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
@@ -2054,4 +2084,4 @@ class Geoserver():
         field_type = field_type.replace("_", " ")
         if self.is_supported_type(field_type):
             return field_type
-        
+
