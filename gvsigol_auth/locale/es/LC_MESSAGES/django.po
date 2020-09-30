@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-20 11:51+0200\n"
+"POT-Creation-Date: 2020-09-30 14:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -338,45 +338,44 @@ msgstr "Nueva contraseña"
 msgid "This is your new temporary password"
 msgstr "Por favor, siga el enlace que sigue para poder cambiar su contraseña"
 
-#: gvsigol_auth/views.py:77 gvsigol_auth/views.py:151 gvsigol_auth/views.py:249
+#: gvsigol_auth/views.py:79 gvsigol_auth/views.py:153 gvsigol_auth/views.py:255
 msgid "Your account has been disabled"
 msgstr "Su cuenta ha sido deshabilitada"
 
-#: gvsigol_auth/views.py:79 gvsigol_auth/views.py:81 gvsigol_auth/views.py:153
-#: gvsigol_auth/views.py:155 gvsigol_auth/views.py:251
+#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:83 gvsigol_auth/views.py:155
+#: gvsigol_auth/views.py:157 gvsigol_auth/views.py:257
 msgid "The username and password you have entered do not match our records"
 msgstr "El nombre de usuario y contraseña no coinciden"
 
-#: gvsigol_auth/views.py:201
+#: gvsigol_auth/views.py:203
 msgid "User account does not exist"
 msgstr "La cuenta de usuario no existe"
 
-#: gvsigol_auth/views.py:255
+#: gvsigol_auth/views.py:207
+msgid "That did not work"
+msgstr "Eso no funcionó"
+
+#: gvsigol_auth/views.py:261
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr "Token no válido. Su enlace ha caducado, debe solicitar otro."
 
-#: gvsigol_auth/views.py:373
+#: gvsigol_auth/views.py:379
 msgid "User group for"
 msgstr "Grupo de usuario para"
 
-#: gvsigol_auth/views.py:554
+#: gvsigol_auth/views.py:560
 msgid "Admin is a reserved group"
 msgstr "Admin es un grupo reservado"
 
-#: gvsigol_auth/views.py:558
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "Invalid user group name: '{value}'. Identifiers must begin with a letter "
-#| "or an underscore (_). Subsequent characters can be letters, underscores "
-#| "or numbers"
+#: gvsigol_auth/views.py:564
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nombre de grupo de usuarios no válido: '{valor}'. Los identificadores deben "
-"comenzar con una letra oun guión bajo (_). Los caracteres subsiguientes "
-"pueden ser letras, guiones bajos onúmeros"
+"Nombre de grupo de usuarios no válido: '{value}'. Los identificadores deben "
+"comenzar con una letra o un guión bajo (_). Los caracteres subsiguientes "
+"pueden ser letras, guiones bajos o números"
 
 #~ msgid "There must be at least one server"
 #~ msgstr "Debe haber al menos un servidor"
