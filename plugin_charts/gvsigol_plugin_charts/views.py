@@ -418,7 +418,7 @@ def chart_delete(request):
         return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json') 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')   
+#@login_required(login_url='/gvsigonline/auth/login_user/')   
 def view(request):
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(request.POST.get('layer_id')))
@@ -446,7 +446,7 @@ def view(request):
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')   
+#@login_required(login_url='/gvsigonline/auth/login_user/')   
 def single_chart(request):
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(request.POST.get('layer_id')))

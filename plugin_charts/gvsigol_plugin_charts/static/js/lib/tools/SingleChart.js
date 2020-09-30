@@ -187,7 +187,7 @@ SingleChart.prototype.loadChart = function() {
 
 	var chartId = this.jsonChart.chart_id;
 
-    $('#single-chart-' + chartId).append('<canvas id="chart-' + chartId + '"></canvas>');
+    $('#single-chart-' + chartId).append('<canvas id="schart-' + chartId + '"></canvas>');
 	$('#single-chart-title-' + chartId).text(self.jsonChart.chart_title);
     var download = '';
     download += '<a style="color: #222222;" class="download-chart" data-chartid="' + chartId + '" id="download-' + chartId + '" download="' + this.layer.layer_title + '.png" href="" class="btn btn-primary float-right bg-flat-color-1">';
@@ -224,7 +224,7 @@ SingleChart.prototype.loadChart = function() {
     }
     $('.download-chart').on('click', function(){
         var chartId = this.dataset.chartid;
-        var url_base64jp = document.getElementById('chart-' + chartId).toDataURL("image/png");
+        var url_base64jp = document.getElementById('schart-' + chartId).toDataURL("image/png");
         var a =  document.getElementById('download-' + chartId);
         a.href = url_base64jp;
     });
@@ -232,7 +232,7 @@ SingleChart.prototype.loadChart = function() {
     
     $('.download-pdf-chart').on('click', function(e){
         e.preventDefault();
-        var canvas = document.querySelector('#chart-' + self.jsonChart.chart_id);
+        var canvas = document.querySelector('#schart-' + self.jsonChart.chart_id);
         var canvasImg = self.canvasToImage(canvas, '#ffffff');
 
         var doc = new jsPDF('landscape');
@@ -376,7 +376,7 @@ SingleChart.prototype.getChartConf = function(chartId) {
 };
 
 SingleChart.prototype.createBarChart = function() {
-	var ctx = document.getElementById('chart-' + this.jsonChart.chart_id).getContext('2d');
+	var ctx = document.getElementById('schart-' + this.jsonChart.chart_id).getContext('2d');
 	
 	var labels = new Array();
 	for (var i=0; i<this.jsonChart.chart_conf.columns.length; i++) {
@@ -417,7 +417,7 @@ SingleChart.prototype.createBarChart = function() {
 };
 
 SingleChart.prototype.createAggregatedBarChart = function() {
-	var ctx = document.getElementById('chart-' + this.jsonChart.chart_id).getContext('2d');
+	var ctx = document.getElementById('schart-' + this.jsonChart.chart_id).getContext('2d');
 	
 	var labels = new Array();
 	for (var i=0; i<this.jsonChart.chart_conf.columns.length; i++) {
@@ -475,7 +475,7 @@ SingleChart.prototype.createAggregatedBarChart = function() {
 };
 
 SingleChart.prototype.createLineChart = function(c) {
-	var ctx = document.getElementById('chart-' + this.jsonChart.chart_id).getContext('2d');
+	var ctx = document.getElementById('schart-' + this.jsonChart.chart_id).getContext('2d');
 	
 	var labels = new Array();
 	for (var i=0; i<this.jsonChart.chart_conf.columns.length; i++) {
@@ -519,7 +519,7 @@ SingleChart.prototype.createAggregatedLineChart = function(c) {
 };
 
 SingleChart.prototype.createPieChart = function(c) {
-	var ctx = document.getElementById('chart-' + this.jsonChart.chart_id).getContext('2d');
+	var ctx = document.getElementById('schart-' + this.jsonChart.chart_id).getContext('2d');
 	
 	var labels = new Array();
 	for (var i=0; i<this.jsonChart.chart_conf.columns.length; i++) {
@@ -562,7 +562,7 @@ SingleChart.prototype.createPieChart = function(c) {
 };
 
 SingleChart.prototype.createAggregatedPieChart = function(c) {
-	var ctx = document.getElementById('chart-' + this.jsonChart.chart_id).getContext('2d');
+	var ctx = document.getElementById('schart-' + this.jsonChart.chart_id).getContext('2d');
 	
 	var labels = new Array();
 	for (var i=0; i<this.jsonChart.chart_conf.columns.length; i++) {
