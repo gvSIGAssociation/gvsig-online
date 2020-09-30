@@ -42,6 +42,8 @@ import json
 import re
 import base64
 from actstream import action
+import logging
+logger = logging.getLogger('gvsigol')
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
@@ -196,9 +198,13 @@ def password_reset(request):
             
             auth_utils.send_reset_password_email(user.email, user.id, uid, token)
             return redirect('password_reset_success')
-             
-        except Exception as e:            
-            errors.append(_('User account does not exist') + ': ' + str(e))
+        except User.DoesNotExist:
+            logger.exception("Error resetting password")
+            errors.append(_('User account does not exist'))
+            return render(request, 'password_reset.html', {'errors': errors})
+        except Exception:
+            logger.exception("Error resetting password")
+            errors.append(_('That did not work'))
             return render(request, 'password_reset.html', {'errors': errors})
             
     else:
