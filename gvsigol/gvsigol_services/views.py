@@ -1798,7 +1798,6 @@ def cache_clear(request, layer_id):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def manage_cache_clear(request, layer_id):
-
     layer = Layer.objects.get(id=int(layer_id))
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
@@ -3764,6 +3763,7 @@ def external_layer_add(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def external_layer_update(request, external_layer_id):
+    redirect_to_layergroup = request.GET.get('redirect')
     external_layer = Layer.objects.get(id=external_layer_id)
     layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
@@ -3838,7 +3838,11 @@ def external_layer_update(request, external_layer_id):
 
             external_layer.external_params = json.dumps(params)
             external_layer.save()
-            return redirect('external_layer_list')
+            
+            if redirect_to_layergroup:
+                return redirect('layergroup_update', external_layer.layer_group.id)
+            else:
+                return redirect('external_layer_list')
 
 
         except Exception as e:
@@ -3865,7 +3869,8 @@ def external_layer_update(request, external_layer_id):
             'form': form,
             'external_layer': external_layer,
             'bing_layers': BING_LAYERS,
-            'html': html
+            'html': html,
+            'redirect_to_layergroup': redirect_to_layergroup
         }
 
     return render(request, 'external_layer_update.html', response)
