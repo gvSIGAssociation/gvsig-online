@@ -110,3 +110,24 @@ msgstr "Gravar nódulo"
 
 msgid "Edit node"
 msgstr "Editar nodulo"
+
+msgid "Node has been reloaded"
+msgstr ""
+
+msgid "Error reloading node"
+msgstr ""
+
+msgid "Connection has been success"
+msgstr ""
+
+msgid "Filter by project"
+msgstr ""
+
+msgid "Show all layers"
+msgstr ""
+
+msgid "The action was successfully completed"
+msgstr ""
+
+msgid "The action failed"
+msgstr ""
