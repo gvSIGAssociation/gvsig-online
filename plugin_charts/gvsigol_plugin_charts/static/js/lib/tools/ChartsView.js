@@ -63,7 +63,7 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	this.jsonCharts = charts;
 	this.charts = new Array();
 	
-	var title = '<span id="dashboard-layer-tile" style="position: relative;left: 35%;top: 5px;font-size: 24px;color: #ffffff;">' + gettext('Layer') + ': ' + this.layer.layer_title + '</span>';
+	var title = '<span id="dashboard-layer-tile" style="position: relative;top: 5px;font-size: 24px;color: #ffffff;">' + gettext('Layer') + ': ' + this.layer.layer_title + '</span>';
 	$('#viewer-navbar').append(title);
 	
 	this.chartsContainer.empty();
