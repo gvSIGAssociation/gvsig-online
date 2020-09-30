@@ -109,3 +109,9 @@ msgstr ""
 
 msgid "Show all layers"
 msgstr ""
+
+msgid "The action was successfully completed"
+msgstr ""
+
+msgid "The action failed"
+msgstr ""

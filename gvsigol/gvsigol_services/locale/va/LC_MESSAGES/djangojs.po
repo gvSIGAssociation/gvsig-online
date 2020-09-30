@@ -109,3 +109,9 @@ msgstr "Filtrar per projecte"
 
 msgid "Show all layers"
 msgstr "Mostrar totes les capes"
+
+msgid "The action was successfully completed"
+msgstr ""
+
+msgid "The action failed"
+msgstr ""
