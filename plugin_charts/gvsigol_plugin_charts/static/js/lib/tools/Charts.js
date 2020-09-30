@@ -28,7 +28,7 @@ var Charts = function(conf, map, chartLayers) {
 	this.conf = conf;
 	this.map = map;
 	this.chartLayers = chartLayers;
-	this.chartsView = new ChartsView();
+	this.chartsView = new ChartsView(this.map);
 	
 	this.initialize();
 	this.registerEvents();

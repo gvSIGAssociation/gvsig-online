@@ -23,12 +23,14 @@
 /**
  * TODO
  */
-var ChartsView = function() {
-	var self = this;	
+var ChartsView = function(map) {
+	var self = this;
+	this.olmap = map;
 	this.initialize();
 	
 	$('body').on('change-to-2D-event', function() {
 		self.hide();
+		self.olmap.updateSize();
 	});
 	
 	$('body').on('change-to-3D-event', function() {
@@ -42,7 +44,7 @@ var ChartsView = function() {
 
 ChartsView.prototype.initialize = function() {
 	var self = this;
-	
+
 	var ui = '';
 	ui += '<ul id="charts-container" style="list-style-type: none; margin: 0; padding: 20px; width: 100%;">';
 	ui += '</ul>';
