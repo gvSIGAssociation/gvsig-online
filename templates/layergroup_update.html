@@ -120,14 +120,26 @@
 								<span class="text">{{layer.title}}</span>
 							</div>
 							<div class="box-tools box-tools-buttons pull-right">
+								{% if layer.external %}
+								<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+								{% else %}
 								<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+								{% endif %}
 								{% if layer.type == 'v_PostGIS' %}
 									<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple"><i class="fa fa-cogs"></i></button>
 								{% else %}
 									<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
 								{% endif %}
+								{% if layer.cached %}
 								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
+								{% else %}
+								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+								{% endif %}
+								{% if layer.external %}
+								<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+								{% else %}
 								<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+								{% endif %}
 							</div>
 						</div>
 					</div>
@@ -224,12 +236,31 @@
 		location.href = '/gvsigonline/services/layer_update/' + data + '/?redirect=layergroup-redirect';
 	}
 	
+	function updateExternalLayer(data){			
+		location.href = '/gvsigonline/services/external_layer_update/' + data + '/?redirect=layergroup-redirect';
+	}
+	
 	function configLayer(data){			
 		location.href = '/gvsigonline/services/layer_config/' + data + '/?redirect=layergroup-redirect';
 	}
-	
-	function clearCache(data){			
-		location.href = '/gvsigonline/services/cache_clear/' + data + '/?redirect=layergroup-redirect';
+	function clearCache(data){
+		$("body").overlay();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/manage_cache_clear/' + data + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				$.overlayout();
+				messageBox.show('Info', gettext('The action was successfully completed'));
+			},
+			error: function(){
+				$.overlayout();
+				messageBox.show('Error', gettext('The action failed'));
+			}
+		});
 	}
 	
 	function deleteLayer(data){
@@ -247,7 +278,32 @@
 					$.overlayout();
 					location.reload();
 				},
-				error: function(){}
+				error: function(){
+					$.overlayout();
+					messageBox.show('Error', gettext('The action failed'));
+				}
+			});
+		});
+	}
+	function deleteExternalLayer(data){
+		$('#button-delete-layer-accept').click( function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/external_layer_delete/' + data + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-layer').modal('hide');
+					$.overlayout();
+					location.reload();
+				},
+				error: function(){
+					$.overlayout();
+					messageBox.show('Error', gettext('The action failed'));
+				}
 			});
 		});
 	}
@@ -256,10 +312,11 @@
 		
 		$('.box-tools-buttons button').on('click', function (){
 			var data = $(this).attr("data-id");
-		    if (this.name == "button-update-layer") {
-		        updateLayer(data);
-		        
-		    } else if (this.name == "button-config-layer"){
+			if (this.name == "button-update-layer") {
+				updateLayer(data);
+			} else if (this.name == "button-update-externallayer") {
+				updateExternalLayer(data);
+			} else if (this.name == "button-config-layer"){
 				configLayer(data);
 				
 			} else if (this.name == "button-clear-cache"){
@@ -267,6 +324,8 @@
 				
 			} else if (this.name == "button-delete-layer"){
 		        deleteLayer(data);   
+		    } else if (this.name == "button-delete-externallayer"){
+		    	deleteExternalLayer(data);   
 		    }
 		});
 		
