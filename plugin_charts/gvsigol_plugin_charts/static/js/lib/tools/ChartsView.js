@@ -618,7 +618,7 @@ ChartsView.prototype.createAggregatedBarChart = function(c) {
 		options: {
 			responsive: true,
 			legend: {
-				position: 'right',
+				display: false
 			},
 			scales: {
 				xAxes: [{

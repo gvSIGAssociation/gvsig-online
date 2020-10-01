@@ -450,7 +450,7 @@ SingleChart.prototype.createAggregatedBarChart = function() {
 		options: {
 			responsive: true,
 			legend: {
-				position: 'right',
+				display: false
 			},
 			scales: {
 				xAxes: [{
@@ -535,7 +535,7 @@ SingleChart.prototype.createPieChart = function(c) {
 		options: {
 			responsive: true,
 			legend: {
-				position: 'right',
+				display: false
 			},
 			tooltips: {
 				callbacks: {
