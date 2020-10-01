@@ -186,6 +186,10 @@ def barchart_update(request, layer_id, chart_id):
         
         conf = json.loads(chart.conf)
         
+        y_axis_begin_at_zero = False
+        if 'y_axis_begin_at_zero' in conf:
+            y_axis_begin_at_zero = conf['y_axis_begin_at_zero']
+
         return render(request, 'barchart_update.html', {
             'layer_id': layer_id,
             'chart_id': chart_id,
@@ -198,6 +202,7 @@ def barchart_update(request, layer_id, chart_id):
             'dataset_type': conf['dataset_type'],
             'x_axis_title': conf['x_axis_title'],
             'y_axis_title': conf['y_axis_title'],
+            'y_axis_begin_at_zero': y_axis_begin_at_zero,
             'geographic_names_column': conf['geographic_names_column'],
             'geometries_column': conf['geometries_column'],
             'selected_columns': json.dumps(conf['columns'])
@@ -287,6 +292,10 @@ def linechart_update(request, layer_id, chart_id):
         
         conf = json.loads(chart.conf)
         
+        y_axis_begin_at_zero = False
+        if 'y_axis_begin_at_zero' in conf:
+            y_axis_begin_at_zero = conf['y_axis_begin_at_zero']
+
         return render(request, 'linechart_update.html', {
             'layer_id': layer_id,
             'chart_id': chart_id,
@@ -299,6 +308,7 @@ def linechart_update(request, layer_id, chart_id):
             'dataset_type': conf['dataset_type'],
             'x_axis_title': conf['x_axis_title'],
             'y_axis_title': conf['y_axis_title'],
+            'y_axis_begin_at_zero': y_axis_begin_at_zero,
             'geographic_names_column': conf['geographic_names_column'],
             'geometries_column': conf['geometries_column'],
             'selected_columns': json.dumps(conf['columns'])

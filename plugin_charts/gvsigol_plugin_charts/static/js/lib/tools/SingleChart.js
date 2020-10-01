@@ -407,6 +407,9 @@ SingleChart.prototype.createBarChart = function() {
 					scaleLabel: {
 						display: true,
 						labelString: this.jsonChart.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: this.jsonChart.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}
@@ -465,6 +468,9 @@ SingleChart.prototype.createAggregatedBarChart = function() {
 					scaleLabel: {
 						display: true,
 						labelString: this.jsonChart.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: this.jsonChart.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}
@@ -506,6 +512,9 @@ SingleChart.prototype.createLineChart = function(c) {
 					scaleLabel: {
 						display: true,
 						labelString: this.jsonChart.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: this.jsonChart.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}

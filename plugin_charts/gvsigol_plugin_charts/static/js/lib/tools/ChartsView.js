@@ -574,6 +574,9 @@ ChartsView.prototype.createBarChart = function(c) {
 					scaleLabel: {
 						display: true,
 						labelString: c.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: c.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}
@@ -633,6 +636,9 @@ ChartsView.prototype.createAggregatedBarChart = function(c) {
 					scaleLabel: {
 						display: true,
 						labelString: c.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: c.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}
@@ -675,6 +681,9 @@ ChartsView.prototype.createLineChart = function(c) {
 					scaleLabel: {
 						display: true,
 						labelString: c.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: c.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}

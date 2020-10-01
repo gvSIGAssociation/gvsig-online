@@ -71,6 +71,13 @@
 								<input type="text" name="y-axis-title" id="y-axis-title" maxlength="100" class="form-control" tabindex="1" value="{{ y_axis_title }}">
 							</div>
 						</div>
+						<div class="row">
+							<div class="col-md-6 form-group"></div>
+							<div class="col-md-6 form-group">
+								<input checked type="checkbox" id="y_axis_begin_at_zero" name="y_axis_begin_at_zero"/>
+								<label>{% trans "Eje Y empieza en 0" %}</label>
+							</div>
+						</div>
 					</div>
 					<div class="col-md-6">
 						<canvas id="chart-preview" class="chart-preview"></canvas>
@@ -234,6 +241,7 @@ $(document).ready(function() {
 	var datasetType = '{{ dataset_type }}';
 	var xAxisTitle = '{{ x_axis_title }}';
 	var yAxisTitle = '{{ y_axis_title }}';
+	var yAxisBeginAtZero = '{{ y_axis_begin_at_zero }}';
 	var selectedColumns = {{selected_columns|safe}};
 	
 	for (var i=0; i<alphaNumericFields.length; i++) {
@@ -247,6 +255,13 @@ $(document).ready(function() {
 	$('#geometries_column option[value=' + geometriesColumn + ']').attr('selected','selected');
 	
 	$('input:radio[name=dataset_type]').filter('[value=' + datasetType + ']').prop('checked', true);
+
+	if (yAxisBeginAtZero == 'True') {
+		$('input:checkbox[name=y_axis_begin_at_zero]').prop('checked', true);
+
+	} else if (yAxisBeginAtZero == 'False') {
+		$('input:checkbox[name=y_axis_begin_at_zero]').prop('checked', false);
+	}
 	
 	for (var i=0; i<numericFields.length; i++) {
 		var ui = '';
@@ -287,6 +302,7 @@ $(document).ready(function() {
 		var geometriesColumn = $("#geometries_column option:selected").val();
 		var xAxisTitle = $('#x-axis-title').val();
 		var yAxisTitle = $('#y-axis-title').val();
+		var yAxisBeginAtZero = $('#y_axis_begin_at_zero').prop('checked');
 		
 		var selectedColumns = $("input:checkbox:checked").map(function(){
 			return this.dataset.column;
@@ -307,6 +323,7 @@ $(document).ready(function() {
 			geometries_column: geometriesColumn,
 			x_axis_title: xAxisTitle,
 			y_axis_title: yAxisTitle,
+			y_axis_begin_at_zero: yAxisBeginAtZero,
 			columns: columns
 		};
 		
