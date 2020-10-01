@@ -387,7 +387,7 @@ ChartsView.prototype.loadCharts = function() {
 		});
 		
 		
-		$('.download-pdf-chart').on('click', function(e){
+		$('.download-pdf-chart').unbind('click').on('click', function(e){
 			e.preventDefault();
 			var chartId = this.dataset.chartid;
 			var chartConf = self.getChartConf(chartId);
