@@ -336,7 +336,7 @@ ChartsView.prototype.loadCharts = function() {
 			ui += 	'<li class="ui-state-default" style="float: left; width: 47%; text-align: center;margin: 5px;">';
 			ui += 		'<div class="box">';
 			ui += 			'<div class="box-header with-border">';
-			ui += 				'<h3 class="box-title">' + chart.chart_title + '</h3>';
+			ui += 				'<h3 class="box-title" id="view-chart-title-' + chart.chart_id + '">' + chart.chart_title + '</h3>';
 			ui += 				'<div class="box-tools pull-right">';
 			ui += 					'<a class="download-chart" data-chartid="' + chart.chart_id + '" id="download-' + chart.chart_id + '" download="' + this.layer.layer_title + '.png" href="" class="btn btn-primary float-right bg-flat-color-1">';
 			ui += 						'<i style="margin-right: 10px;" class="fa fa-download"></i>';
@@ -517,6 +517,7 @@ ChartsView.prototype.refreshCharts = function(selectedFeatures) {
 			if (chartConf.chart_conf.dataset_type == 'single_selection') {
 				chart.data.datasets = [];
 				var feature = selectedFeatures[selectedFeatures.length - 1];
+				$('#view-chart-title-' + chartConf.chart_id).text(chartConf.chart_title + ': ' + feature.getProperties()[chartConf.chart_conf.geographic_names_column]);
 				var newDataset = {
 					label: feature.getProperties()[chartConf.chart_conf.geographic_names_column],
 					backgroundColor: [],
@@ -526,6 +527,11 @@ ChartsView.prototype.refreshCharts = function(selectedFeatures) {
 					newDataset.data.push(feature.getProperties()[chartConf.chart_conf.columns[k].name]);
 					newDataset.backgroundColor.push(this.getRandomColor());
 				}
+				var labels = new Array();
+				for (var i=0; i<chartConf.chart_conf.columns.length; i++) {
+					labels.push(chartConf.chart_conf.columns[i].title);
+				}
+				chart.data.labels = labels;
 				chart.data.datasets.push(newDataset);
 				chart.update();
 			}
