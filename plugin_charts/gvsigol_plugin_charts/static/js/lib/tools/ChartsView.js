@@ -323,7 +323,7 @@ ChartsView.prototype.loadCharts = function() {
 					this.createAggregatedPieChart(firstChart);
 					
 				} else {
-					this.createPieChart(firstChart);
+					this.createPieChart(firstChart, true);
 				}
 			}
 			
@@ -374,7 +374,7 @@ ChartsView.prototype.loadCharts = function() {
 					this.createAggregatedPieChart(chart);
 					
 				} else {
-					this.createPieChart(chart);
+					this.createPieChart(chart, false);
 				}
 			}
 			
@@ -517,7 +517,12 @@ ChartsView.prototype.refreshCharts = function(selectedFeatures) {
 			if (chartConf.chart_conf.dataset_type == 'single_selection') {
 				chart.data.datasets = [];
 				var feature = selectedFeatures[selectedFeatures.length - 1];
-				$('#view-chart-title-' + chartConf.chart_id).text(chartConf.chart_title + ': ' + feature.getProperties()[chartConf.chart_conf.geographic_names_column]);
+				if (chart.isFirst) {
+					$('#first-chart-title').text(chartConf.chart_title + ': ' + feature.getProperties()[chartConf.chart_conf.geographic_names_column]);
+				} else {
+					$('#view-chart-title-' + chartConf.chart_id).text(chartConf.chart_title + ': ' + feature.getProperties()[chartConf.chart_conf.geographic_names_column]);
+				}
+				
 				var newDataset = {
 					label: feature.getProperties()[chartConf.chart_conf.geographic_names_column],
 					backgroundColor: [],
@@ -703,7 +708,7 @@ ChartsView.prototype.createLineChart = function(c) {
 ChartsView.prototype.createAggregatedLineChart = function(c) {
 };
 
-ChartsView.prototype.createPieChart = function(c) {
+ChartsView.prototype.createPieChart = function(c, isFirst) {
 	var ctx = document.getElementById('chart-' + c.chart_id).getContext('2d');
 	
 	var labels = new Array();
@@ -743,6 +748,7 @@ ChartsView.prototype.createPieChart = function(c) {
 		}
 	});
 	chart.chart_id = c.chart_id;
+	chart.isFirst = isFirst;
 	
 	this.charts.push(chart);
 };
