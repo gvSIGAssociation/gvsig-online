@@ -1527,9 +1527,12 @@ attributeTable.prototype.showCards = function(selectedRows) {
 			'fid': selectedRows[j].featureid,
 			'feature': {
 				'properties': selectedRows[j],
-				'resources': resources
+				'resources': resources,
+				'geometry': {
+					'coordinates': feat.getGeometry().getCoordinates()
+				}
 			}
 		});
 	}
-	new ModalCanarias(features);
+	new ModalCanarias(features, self.map, self.conf);
 };
