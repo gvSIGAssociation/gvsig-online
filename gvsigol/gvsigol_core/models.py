@@ -155,3 +155,15 @@ class GolSettings(models.Model):
     objects = SettingsManager()
     class Meta:
         unique_together = ('plugin_name', 'key')
+
+
+class ProjectBaseLayerTiling(models.Model):
+    project = models.ForeignKey(Project, default=None)
+    layer = models.IntegerField(null=False, default=0)
+    levels = models.IntegerField(null=False, default=0)
+    tilematrixset = models.CharField(max_length=50) 
+    format = models.CharField(max_length=50)
+    extentid = models.CharField(max_length=50)
+    version = models.BigIntegerField(null=True, blank=True)
+    folder_prj = models.CharField(max_length=1024)
+    running = models.BooleanField(default=False)

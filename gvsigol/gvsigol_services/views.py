@@ -70,7 +70,7 @@ from gvsigol.settings import MOSAIC_DB
 from gvsigol_auth.models import UserGroup
 from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_core import utils as core_utils
-from gvsigol_core.models import Project
+from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_services.backend_resources import resource_manager 
 from gvsigol_services.models import LayerResource
@@ -2621,6 +2621,9 @@ def create_base_layer(request, pid):
         tilematrixset = request.POST.get('tilematrixset')
         extent = request.POST.get('extent')
         
+        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
+            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
+        
         if num_res_levels is not None:
             if num_res_levels > 22:
                 return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
@@ -2630,7 +2633,28 @@ def create_base_layer(request, pid):
             return utils.get_exception(400, 'Wrong number of tiles')
                   
     return HttpResponse('{"response": "ok"}', content_type='application/json')
-  
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def retry_base_layer_process(request, pid):
+    if request.method == 'POST':
+        global base_layer_process
+
+        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
+            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
+
+        prj = ProjectBaseLayerTiling.objects.get(id=pid)
+        if(prj is not None):
+            if not os.path.exists(prj.folder_prj):
+                return utils.get_exception(400, 'This project does not have a base layer downloading')
+        else:
+            return utils.get_exception(400, 'This project does not have base layer running')
+        tiling_service.retry_base_layer_tiling(base_layer_process, prj)
+
+    return HttpResponse('{"response": "ok"}', content_type='application/json')
+
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def base_layer_process_update(request, pid):
