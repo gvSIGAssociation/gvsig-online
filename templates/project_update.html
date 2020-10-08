@@ -453,7 +453,8 @@
 
 										<div class="row">
 											<div class="col-md-3" style="top:25px;padding-bottom: 25px">
-												<button type="button" id="button-create-base-layer"> {% trans "Create layer" %}</button>	
+												<button type="button" id="button-create-base-layer"> {% trans "Create layer" %}</button>
+												<button type="button" id="button-retry-base-layer"> {% trans "Continue download" %}</button>	
 												<button type="button" id="button-stop-process"> {% trans "Stop Process" %}</button>														
 											</div>
 										</div>
@@ -801,6 +802,24 @@
 					"extent":$("input[name='extentbaselyr']:checked").val()
 				},
 				url: '/gvsigonline/services/create_base_layer/{{pid}}/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					//messageBox.show('info', gettext('tile process ended'));
+				},
+				error: function(jqXHR, textStatus, errorThrown){
+					messageBox.show('error', gettext(jqXHR.responseText));
+				}
+			});
+		});
+
+		$('#button-retry-base-layer').click(function() {
+	  		$("#button-stop-process").text(gettext('Parar proceso'))
+	  		$.ajax({
+				type: 'POST',
+				async: true,
+				url: '/gvsigonline/services/retry_base_layer_process/{{pid}}/',
 				beforeSend:function(xhr){
 				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},
