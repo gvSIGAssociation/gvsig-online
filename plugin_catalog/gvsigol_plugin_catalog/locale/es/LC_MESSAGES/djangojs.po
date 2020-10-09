@@ -94,3 +94,5 @@ msgstr "Buscar..."
 msgid "The search is running..."
 msgstr "La búsqueda se está ejecutando..."
 
+msgid "Loading..."
+msgstr "Cargando..."
