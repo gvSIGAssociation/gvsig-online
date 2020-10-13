@@ -119,8 +119,10 @@ $(document).ready(function() {
 	        "data": null,
 	        "defaultContent": '<button type="button" name="button-update-provider" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update data provider" %}' + '" class="btn btn-success"><i class="fa fa-cloud-upload"></i></button>'
 	    }],
-	    "dom": 'T<"clear">lfrtip',
-		"bLengthChange": false
+		"dom": 'T<"clear">lfrtip',
+		//dom: 'frtp<"top"l><"bottom"i>',
+		"lengthMenu": [[10, -1], [10, "Todos"]],
+		"bLengthChange": true
 	});
 		 
 	$('#providers-table tbody').on('click', 'button', function (){
