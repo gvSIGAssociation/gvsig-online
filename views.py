@@ -1529,8 +1529,8 @@ def layer_config(request, layer_id):
                     field = None
                     for fconf in conf.get('fields', []):
                         if fconf['name'] == f['name']:
-                            for id, language in LANGUAGES:
-                                fconf['title-'+id] = f.get('title-'+id, f['name'])
+                            #for id, language in LANGUAGES:
+                            #    fconf['title-'+id] = fconf.get('title-'+id)
                             fconf['visible'] = fconf.get('visible', True)
                             fconf['editable'] = fconf.get('editable', True)
                             fconf['editableactive'] = True
@@ -1565,7 +1565,7 @@ def layer_config(request, layer_id):
 
         except:
             logger.exception("Retrieving fields")
-        enums = Enumeration.objects.all();
+        enums = Enumeration.objects.all()
         print fields
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup, 'enumerations': enums})
 
