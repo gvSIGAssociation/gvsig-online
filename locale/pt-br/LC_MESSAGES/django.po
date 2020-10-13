@@ -944,7 +944,7 @@ msgstr "Ampliar zoom, diminuir zoom "
 
 #: gvsigol_core/views.py:196
 msgid "Feature info"
-msgstr "Informação de caracterí­sticas"
+msgstr "Informação"
 
 #: gvsigol_core/views.py:197
 msgid "Map information at point"
