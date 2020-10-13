@@ -201,7 +201,7 @@ msgid "View resources"
 msgstr "Mostrar recursos"
 
 msgid "Feature info"
-msgstr "Feature info"
+msgstr "Informació"
 
 msgid "Multimedia resources"
 msgstr "Recursos multimèdia"
