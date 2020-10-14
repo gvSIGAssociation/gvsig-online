@@ -811,9 +811,9 @@ viewer.core = {
 			async: false,
 			timeout: 3000,
 			method: 'GET',
-			headers: {
-				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
-			},
+			//headers: {
+			//	"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+			//},
 			error: function(error){
 				if (error.responseText.indexOf("TileOutOfRange") == -1){
 					is_tileoutofrange =  false;
