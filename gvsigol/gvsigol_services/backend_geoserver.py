@@ -671,12 +671,15 @@ class Geoserver():
         - latLonBoundingBox
         """
         updated_params = {}
-        conn, tablename, schema = utils.get_db_connect_from_layer(layer)
         if attributes:
-            new_attrs = self._featuretype_attributes(conn, schema, tablename)
-            updated_params['attributes'] = {'attribute': new_attrs}
-        conn.close()
-        self.rest_catalog.update_featuretype(layer.datastore.workspace.name, layer.datastore.name, layer.source_name, updated_params=updated_params, nativeBoundingBox=nativeBoundingBox, latLonBoundingBox=latLonBoundingBox, user=self.user, password=self.password)
+            try:
+                conn, tablename, schema = utils.get_db_connect_from_layer(layer)
+                new_attrs = self._featuretype_attributes(conn, schema, tablename)
+                updated_params['attributes'] = {'attribute': new_attrs}
+            finally:
+                conn.close()
+        source_name = layer.source_name if layer.source_name else layer.name
+        self.rest_catalog.update_featuretype(layer.datastore.workspace.name, layer.datastore.name, source_name, updated_params=updated_params, nativeBoundingBox=nativeBoundingBox, latLonBoundingBox=latLonBoundingBox, user=self.user, password=self.password)
 
     def getGeoserverBindings(self, sql_type):
         if sql_type in ["character varying", "character", "text", "cd_json"]:
