@@ -389,7 +389,7 @@ coordinateCalculator.prototype.calculate = function() {
 	} else if (originFormat == 'XY') {
 		var x = parseFloat($('#origin-x').val());
 		var y = parseFloat($('#origin-y').val());
-		originCoords = [lon, lat];
+		originCoords = [x, y];
 	}
 	
 	var destinationCoords = null;
@@ -410,14 +410,20 @@ coordinateCalculator.prototype.calculate = function() {
 		$('#destination-x').val(destinationCoords[0]);
 		$('#destination-y').val(destinationCoords[1]);
 	}
+
+	var centerCoords = ol.proj.transform([parseFloat(originCoords[0]), parseFloat(originCoords[1])], originRefSystem, 'EPSG:3857');
+	this.map.getView().setCenter(centerCoords);
+	this.map.getView().setZoom(12);
 };
 
 coordinateCalculator.prototype.getDecimalDeg = function(deg, min, sec) {
-    if (deg >= 0) {
-      return deg + ((min / 60) + (sec / 3600));
-    } else {
-      return -(deg + ((min / 60) + (sec / 3600)));
-    }
+	var aux = Math.abs(deg) + (min / 60) + (sec / 3600);
+	if (deg < 0) {
+		return -aux;
+	} else {
+		return aux;
+	}
+	
 };
 
 coordinateCalculator.prototype.inRange = function(value, a, b) {
