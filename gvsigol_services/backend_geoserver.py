@@ -681,11 +681,17 @@ class Geoserver():
     def getGeoserverBindings(self, sql_type):
         if sql_type in ["character varying", "character", "text", "cd_json"]:
             return "java.lang.String"
-        elif sql_type in ["integer"]:
+        elif sql_type in ["integer", "serial"]:
             return "java.lang.Integer"
+        elif sql_type in ["smallint", "smallserial"]:
+            return "java.lang.Short"
+        elif sql_type in ["bigint", "bigserial"]:
+            return "java.lang.Long"
+        elif sql_type in ["real"]:
+            return "java.lang.Float"
         elif sql_type in ["double precision", "double"]:
             return "java.lang.Double"
-        elif sql_type == "numeric":
+        elif sql_type in ["numeric", "decimal"]:
             return "java.math.BigDecimal"
         elif sql_type == "boolean":
             return "java.lang.Boolean"
