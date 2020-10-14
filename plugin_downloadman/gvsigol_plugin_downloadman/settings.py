@@ -8,8 +8,10 @@ from gvsigol.settings import BASE_URL
 TARGET_URL = BASE_URL + '/media/downloads'
 DOWNLOADS_URL = BASE_URL + '/downloads'
 #DOWNLOADS_ROOT = '/var/www/downloads'
-DOWNLOADS_ROOT = TARGET_ROOT
+DOWNLOADS_ROOT = '/opt/descargas/datos'
 DOWNMAN_PACKAGING_BEHAVIOUR = 'DYNAMIC'
+DOWNMAN_EMAIL_HOST_USER = ''
+DOWNMAN_EMAIL_HOST_PASSWORD = ''
 
 STATISTICS=[
 {

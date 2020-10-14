@@ -30,7 +30,7 @@ from celery import shared_task, task
 from celery.exceptions import Retry
 from celery.utils.log import get_task_logger
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
-from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time, get_max_public_download_size
+from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time, get_max_public_download_size, get_notifications_admin_emails, get_notifications_from_email, get_notifications_from_pass
 from datetime import date, timedelta, datetime
 
 import os, glob
@@ -1230,12 +1230,12 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
                 to = user.email
             else:
                 to = request.requested_by_external
-            try:
-                from_email =  core_settings.EMAIL_HOST_USER
-            except:
-                logger.exception("EMAIL_HOST_USER has not been configured")
-                raise
-            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            from_email = get_notifications_from_email()
+            from_pass = get_notifications_from_pass()
+            if not from_email or not from_pass:
+                logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+                raise Error("Error getting email auth credentials")
+            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.INITIAL_NOTIFICATION_COMPLETED_STATUS
             request.save(update_fields=['notification_status'])
 
@@ -1255,11 +1255,11 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
 @shared_task(bind=True)
 def notifyRequestProgress(self, request_id):
     try:
-        try:
-            from_email =  core_settings.EMAIL_HOST_USER
-        except:
-            logger.exception("EMAIL_HOST_USER has not been configured")
-            raise
+        from_email = get_notifications_from_email()
+        from_pass = get_notifications_from_pass()
+        if not from_email or not from_pass:
+            logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+            raise Error("Error getting email auth credentials")
         request = DownloadRequest.objects.get(pk=request_id)
         with override(get_language(request)):
             tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
@@ -1341,7 +1341,7 @@ def notifyRequestProgress(self, request_id):
                 to = request.requested_by_external
             logger.debug(u"mailing: " + to)
             #mail.send_mail(subject, plain_message, from_email, [to])
-            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
             request.save(update_fields=['notification_status'])
 
@@ -1358,16 +1358,47 @@ def notifyRequestProgress(self, request_id):
             request.notification_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
             request.save(update_fields=['notification_status'])
 
+@shared_task(bind=True)
+def notifyApprovalRequired(self, request_id):
+    try:
+        from_email = get_notifications_from_email()
+        from_pass = get_notifications_from_pass()
+        if not from_email or not from_pass:
+            logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+            raise Error("Error getting email auth credentials")
+        request = DownloadRequest.objects.get(pk=request_id)
+        with override(get_language(request)):
+            manage_request_url = core_settings.BASE_URL + reverse('downman-update-request', args=(request.id,))
+            subject = _('Download service: a new request is awaiting approval - %(requestid)s') % {'requestid': request.request_random_id}
+            statusdetails = _(u'A new request has been registered and is awaiting approval.')
+            plain_message = statusdetails + '\n'
+            htmlContext = {
+                u"statusdesc": _(u'Download service: received request - {0}').format(request.request_random_id),
+                u"statusdetails": statusdetails,
+                }
+            plain_message += u'\n' + _(u'Use the following link to manage the request:') + u' ' + manage_request_url + u'\n'
+            htmlContext['request_url'] = manage_request_url
+            html_message = render_to_string('awaiting_approval_email.html', context=htmlContext)
+            #plain_message = strip_tags(html_message)
+            logger.debug(u"mailing: " + str(get_notifications_admin_emails()))
+            #mail.send_mail(subject, plain_message, from_email, [to])
+            mail.send_mail(subject, plain_message, from_email, get_notifications_admin_emails(), html_message=html_message, auth_user=from_email, auth_password=from_pass)
 
+    except Exception as exc:
+        logger.exception("Error notifying adminstrator. Request is awaiting approval")
+        delay = getNextMailRetryDelay(request)
+        if delay:
+            request.save(update_fields=['notification_status', 'package_retry_count'])
+            self.retry(exc=exc, countdown=delay)
 
 @shared_task(bind=True)
 def notifyGenericRequestRegistered(self, request_id):
     try:
-        try:
-            from_email =  core_settings.EMAIL_HOST_USER
-        except:
-            logger.exception("EMAIL_HOST_USER has not been configured")
-            raise
+        from_email = get_notifications_from_email()
+        from_pass = get_notifications_from_pass()
+        if not from_email or not from_pass:
+            logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+            raise Error("Error getting email auth credentials")
         request = DownloadRequest.objects.get(pk=request_id)
         with override(get_language(request)):
             tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
@@ -1389,7 +1420,7 @@ def notifyGenericRequestRegistered(self, request_id):
                 to = request.requested_by_external
             logger.debug(u"mailing: " + to)
             #mail.send_mail(subject, plain_message, from_email, [to])
-            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
             request.save(update_fields=['notification_status'])
 
@@ -1729,6 +1760,7 @@ def processDownloadRequest(self, request_id):
         request = DownloadRequest.objects.get(id=request_id)
         logger.info(u'request UUID: ' + request.request_random_id)
         if request.generic_request == True:
+            notifyApprovalRequired.apply_async(args=[request.pk], queue='notify')
             logger.debug("Skipping generic request")
             return
         if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
@@ -1743,6 +1775,8 @@ def processDownloadRequest(self, request_id):
 
     try:
         updatePendingAuthorization(request)
+        if request.pending_authorization:
+            notifyApprovalRequired.apply_async(args=[request.pk], queue='notify')
         if not result:
             delay = getNextPackagingRetryDelay(request)
             if delay:

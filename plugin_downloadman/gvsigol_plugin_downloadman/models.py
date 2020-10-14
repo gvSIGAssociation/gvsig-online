@@ -3,10 +3,10 @@ from django.utils.translation import ugettext_noop as _
 from django.utils.translation import ugettext
 
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from django.db.models import Q
-import gvsigol_core
+from gvsigol import settings as main_settings
+from gvsigol_plugin_downloadman import settings
 import apps
 from gvsigol_core.models import GolSettings
 
@@ -16,6 +16,7 @@ SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE = 'max_public_download_size'
 DEFAULT_MAX_PUBLIC_DOWNLOAD_SIZE = 300 # MB
 SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS = 'shopping_cart_max_items'
 DEFAULT_SHOPPING_CART_MAX_ITEMS = 0 # means no limit
+SETTINGS_KEY_NOTIFICATIONS_FROM_EMAIL = 'notifications_from_email'
 
 class AuthorizationRequestForm(models.Model):
     definition = models.TextField()
@@ -356,3 +357,38 @@ def get_packaging_max_retry_time():
 def get_mail_max_retry_time():
     # TODO: we could get it for a settings entry, or a settings table in DB
     return 518400  # = 6 days
+
+def get_notifications_from_email():
+    try:
+        from_user = settings.DOWNMAN_EMAIL_HOST_USER
+        if from_user:
+            return from_user
+    except:
+        pass
+    try:
+        return main_settings.EMAIL_HOST_USER
+    except:
+        return ''
+
+def get_notifications_from_pass():
+    try:
+        from_pass = settings.DOWNMAN_EMAIL_HOST_PASSWORD
+        if from_pass:
+            return from_pass
+    except:
+        pass
+    try:
+        return main_settings.EMAIL_HOST_PASSWORD
+    except:
+        return ''
+
+def get_notifications_admin_emails():
+    admin_emails = GolSettings.objects.get_value(apps.PLUGIN_NAME, SETTINGS_KEY_NOTIFICATIONS_FROM_EMAIL)
+    if admin_emails:
+        return admin_emails.replace(" ", "").split(",")
+    else:
+        try:
+            return [get_notifications_from_email()]
+        except:
+            pass
+    return ''
