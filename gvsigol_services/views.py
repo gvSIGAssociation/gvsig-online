@@ -673,10 +673,11 @@ def layer_refresh_extent(request, layer_id):
     workspace = datastore.workspace
     #server.updateBoundingBoxFromData(layer)
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    if datastore.type == 'v_PostGIS':
+        server.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
     layer.save()
-    server.reload_featuretype(layer, attributes=False, nativeBoundingBox=True, latLonBoundingBox=True)
     return redirect('layer_list')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1514,11 +1515,14 @@ def layer_config(request, layer_id):
         layer = Layer.objects.get(id=int(layer_id))
         fields = []
         available_languages = []
-        for id, language in LANGUAGES:
-            available_languages.append(id)
+        for lang_id, _ in LANGUAGES:
+            available_languages.append(lang_id)
 
         try:
-            conf = ast.literal_eval(layer.conf)
+            try:
+                conf = ast.literal_eval(layer.conf)
+            except:
+                conf = {}
             i, tablename, dsname = utils.get_db_connect_from_layer(layer_id)
             field_info = i.get_fields_info(tablename, dsname)
             geometry_columns = i.get_geometry_columns(tablename, dsname)
@@ -1555,7 +1559,7 @@ def layer_config(request, layer_id):
                                 field['editableactive'] = False
                                 field['editable'] = False
                         field['infovisible'] = False
-                        fconf['mandatory'] = (f.get('nullable') == 'NO')
+                        field['mandatory'] = (f.get('nullable') == 'NO')
                     enum = utils.get_enum_entry(layer, f['name'])
                     if enum:
                         field['type'] = _('enumerated ({0})').format(enum.title)
