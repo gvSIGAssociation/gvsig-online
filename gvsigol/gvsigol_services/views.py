@@ -4134,7 +4134,7 @@ def layer_cache_config(request, layer_id):
                         geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
             
             gs = geographic_servers.get_instance().get_server_by_id(server.id)
-            gs.reload_nodes()
+            #gs.reload_nodes()
             
             if not layer.external:
                 gs.updateBoundingBoxFromData(layer)
