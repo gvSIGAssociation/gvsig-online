@@ -131,3 +131,9 @@ msgstr ""
 
 msgid "The action failed"
 msgstr ""
+
+msgid "The layer definition was refreshed"
+msgstr ""
+
+msgid "The layer refresh failed"
+msgstr ""

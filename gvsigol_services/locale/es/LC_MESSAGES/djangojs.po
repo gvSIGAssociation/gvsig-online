@@ -130,3 +130,10 @@ msgstr "La acción se completó correctamente"
 
 msgid "The action failed"
 msgstr "La acción falló"
+
+msgid "The layer definition was refreshed"
+msgstr "La definición de capa fue refrescada"
+
+msgid "The layer refresh failed"
+msgstr "Falló el refrescado de capa"
+
