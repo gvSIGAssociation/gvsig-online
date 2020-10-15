@@ -28,6 +28,7 @@
 							<th>{% trans "Datastore" %}</th>
 							<th>{% trans "Layer group" %}</th>
 							<th>{% trans "Projects" %}</th>
+							<th style="display:none">{% trans "Datastore type" %}</th>
 							<th></th>
 							<th></th>
 							<th></th>
@@ -45,6 +46,7 @@
 							<td>{{ layer.datastore_name }}</td>
 							<td>{{ layer.lg_name }} ({{layer.lg_title }})</td>
 							<td>{{ layer.projects }}</td>
+							<td style="display:none">{{ layer.type }}</td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -152,15 +154,25 @@ $(document).ready(function() {
 	    },{
 	      	"targets": -2,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
-	  	},{
+	       	"render": function ( data, type, row ) {
+	       		if (data[7] && data[7] == "v_PostGIS") {
+            		return '<a title="' + '{% trans "Configure layer" %}" ' + '" href="/gvsigonline/services/layer_config/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn bg-purple"><i class="fa fa-cogs"></i></a>';
+	       		}
+	       		else {
+	       			return '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	       		}
+            }
+	  	},
+	  	{
 	      	"targets": -5,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	       	"render": function ( data, type, row ) {
+            	return '<a title="' + '{% trans "Update layer" %}" ' + '" href="/gvsigonline/services/layer_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
+            }
 	  	},{
 	      	"targets": -3,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-refresh-extent" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Refresh extent" %}' + '" class="btn btn-info"><i class="fa fa-arrows-alt"></i></button>'
+	        "defaultContent": '<button type="button" name="button-refresh-extent" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Refresh extent and layer definition" %}' + '" class="btn btn-info"><i class="fa fa-arrows-alt"></i></button>'
 	  	},{
 	      	"targets": -4,
 	       	"data": null,
@@ -173,26 +185,8 @@ $(document).ready(function() {
 	$('#layers-table tbody').on('click', 'button', function (){
 		var row = table.row($(this).parents('tr'));
 	    var data = row.data();
-	    if (this.name == "button-update-layer") {
-	        updateLayer(data);
-
-	    } else if (this.name == "button-config-layer"){
-	    	var start_index = data[1].indexOf('data-origin=');
-	    	var type = "v_PostGIS";
-	    	if(start_index != -1){
-		    	start_index = start_index + 'data-origin='.length + 1;
-		    	var type_aux = data[1].substring(start_index);
-		    	var end_index = type_aux.indexOf('\"');
-		    	if(end_index != -1){
-		    		type = type_aux.substring(0,end_index);
-		    	}
-	   		}
-		    if(type == "v_PostGIS"){
-				configLayer(data, row);
-		    }else{
-		    	$('#modal-edit-layer').modal('show');
-		    }
-
+	    if (this.name == "button-config-layer"){
+	    	$('#modal-edit-layer').modal('show');
 		} else if (this.name == "button-update-thumbnail"){
 			updateThumbnail(data, row);
 
@@ -203,7 +197,7 @@ $(document).ready(function() {
 	        deleteLayer(data, row);
 	        
 	    } else if (this.name == "button-refresh-extent"){
-	        refreshExtent(data, row);
+	        refreshExtent(data, row, $(this));
 	    }
 	});
 
@@ -262,23 +256,33 @@ $(document).ready(function() {
 				$("#layerpreview-" + layerId).overlayout();
 			}
 		});
+	}
+
+	function refreshExtent(data, row, button){
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
 		
-	}
-
-	function updateLayer(data){
-		location.href = '/gvsigonline/services/layer_update/' + data[0] + '/';
-	}
-
-	function configLayer(data){
-		location.href = '/gvsigonline/services/layer_config/' + data[0] + '/';
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layer_refresh_extent/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layer definition was refreshed"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layer refresh failed"));
+			}
+		});
 	}
 
 	function clearCache(data){
 		location.href = '/gvsigonline/services/cache_clear/' + data[0] + '/';
-	}
-	
-	function refreshExtent(data){
-		location.href = '/gvsigonline/services/layer_refresh_extent/' + data[0] + '/';
 	}
 
 	function deleteLayer(data, row){

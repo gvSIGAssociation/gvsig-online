@@ -672,9 +672,26 @@ class Geoserver():
         """
         updated_params = {}
         if attributes:
+            """
+            We need to refresh the datastore connection params to check whether primary keys are exposed
+            """
+            ds_conf = self.rest_catalog.get_datastore(layer.datastore.workspace.name, layer.datastore.name, user=self.user, password=self.password)
+            conn_param_list = ds_conf.get('dataStore', {}).get('connectionParameters', {}).get('entry', {})
+            conn_params = {}
+            for param in conn_param_list:
+                conn_params[param.get('@key')] = param.get('$')
+            include_pk = (conn_params.get('Expose primary keys', "false") == 'true')
+            """
+            Should we update datastore connection_params in gvsigol model?
+            It may become a confusing side effect of reloading the featuretype.
+            
+            layer.datastore.connection_params = json.dumps(conn_params)
+            layer.datastore.save()
+            """
+
             try:
                 conn, tablename, schema = utils.get_db_connect_from_layer(layer)
-                new_attrs = self._featuretype_attributes(conn, schema, tablename)
+                new_attrs = self._featuretype_attributes(conn, schema, tablename, include_pk=include_pk)
                 updated_params['attributes'] = {'attribute': new_attrs}
             finally:
                 conn.close()
@@ -1487,7 +1504,7 @@ class Geoserver():
         except:
             raise rest_geoserver.RequestError(_("Invalid field definition"))
     
-    def _featuretype_attributes(self, conn, schema, tablename):
+    def _featuretype_attributes(self, conn, schema, tablename, include_pk=True):
         """
         Reads the database schema to get an updated definition of the featuretype fields,
         using the same syntax expected by Geoserver
@@ -1516,10 +1533,12 @@ class Geoserver():
                 raise rest_geoserver.RequestError(-1, _("Unsupported field type: {0}").format(sql_type))
             nullable = True if f['nullable'] == 'YES' else False
             if name in pks:
-                field = {"name": name, "binding": binding, "minOccurs": 1, "maxOccurs": 1, "nillable": False}
+                if include_pk:
+                    field = {"name": name, "binding": binding, "minOccurs": 1, "maxOccurs": 1, "nillable": False}
+                    gs_fields.append(field)
             else:
                 field = {"name": name, "binding": binding, "minOccurs": 0, "maxOccurs": 1, "nillable": nullable}
-            gs_fields.append(field)
+                gs_fields.append(field)
         return gs_fields
 
     def createLayer(self, request, form_data, layer_type):
