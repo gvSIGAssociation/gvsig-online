@@ -290,7 +290,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 			}
 		}
 	}
-	$("#modify-control").trigger('click');
+	//$("#modify-control").trigger('click');
 };
 
 /**
@@ -593,8 +593,17 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 	html += 	'</div>';
 	html += '</li>';
 
+	var fids = new Array();
 	for (var i in features) {
-			var fid = features[i].getId();
+		var fid = features[i].getId();
+			
+		var exists = false;
+		for (var k=0; k<fids.length; k++) {
+			if (fid == fids[k]) {
+				exists = true;
+			}
+		}
+		if (!exists) {
 			var is_first_configured = true;
 			var item_shown = false;
 			var selectedLayer = layer;
@@ -716,6 +725,10 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 			html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
 			html += 	'</div>';
 			html += '</li>';
+
+			fids.push(fid);
+		}
+			
 	}
 	html += '</ul>';
 	this.popup.show(evt.mapBrowserEvent.coordinate, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
