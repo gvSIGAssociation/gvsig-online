@@ -18,6 +18,7 @@
 '''
 from gvsigol_services import backend_postgis
 from django.db.utils import ProgrammingError
+from django.http.response import JsonResponse
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -678,7 +679,7 @@ def layer_refresh_extent(request, layer_id):
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
     layer.save()
-    return redirect('layer_list')
+    return JsonResponse({"result": "ok"})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
