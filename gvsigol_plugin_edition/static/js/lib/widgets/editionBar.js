@@ -266,6 +266,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 		source: this_.source,
 		style: style
 	});
+	this.wfsLayer.setZIndex(9999999);
 
 	this.map.addLayer(this.wfsLayer);
 
@@ -1520,7 +1521,10 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.saveResource(transaction.fid);
 				}
-				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+
+				if (!self.selectedLayer.getSource() instanceof ol.source.WMTS) {
+					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+				}
 				
 				if (checkversion > 0) {
 					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
@@ -1985,7 +1989,9 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.updateResource(transaction.fid);
 				}
-				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+				if (!self.selectedLayer.getSource() instanceof ol.source.WMTS) {
+					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+				}
 				self.clearFeatureBackup();
 				self.selectInteraction.getFeatures().clear();
 				if (checkversion > 0) {
@@ -2165,7 +2171,9 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 					});
 					self.wfsLayer.getSource().removeFeature(feature);
 					self.removeInteraction.getFeatures().clear();
-					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+					if (!self.selectedLayer.getSource() instanceof ol.source.WMTS) {
+						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+					}
 					self.showLayersTab();
 				}
 			}
