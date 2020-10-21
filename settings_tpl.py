@@ -464,7 +464,7 @@ SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
-    'FORMATS': ['image/png'],
+    'FORMATS': ['image/png','image/jpeg'],
     'OPERATION_MODE': '##CACHE_OPERATION_MODE##'
 }
 try:
