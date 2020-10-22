@@ -33,10 +33,34 @@ function configure() {
 		echo "WARNING: GVSIGOL_PATH is not defined using, using gvsigonline."	
 		GVSIGOL_PATH="gvsigonline"	
 	fi
+	echo "INFO: Replace GVSIGOL_NAME"
+	if [ -z $GVSIGOL_NAME ]; then
+		echo "WARNING: GVSIGOL_NAME is not defined using, using gvsig."	
+		GVSIGOL_NAME="gvsig"	
+	fi
+	echo "INFO: Replace GVSIGOL_SURNAME"
+	if [ -z $GVSIGOL_SURNAME ]; then
+		echo "WARNING: GVSIGOL_SURNAME is not defined using, using OL."	
+		GVSIGOL_SURNAME="OL"	
+	fi
+	echo "INFO: Replace GVSIGOL_NAME_SHORT"
+	if [ -z $GVSIGOL_NAME_SHORT ]; then
+		echo "WARNING: GVSIGOL_NAME_SHORT is not defined using, using g."	
+		GVSIGOL_NAME_SHORT="g"	
+	fi
+	echo "INFO: Replace GVSIGOL_SURNAME_SHORT"
+	if [ -z $GVSIGOL_SURNAME_SHORT ]; then
+	echo "WARNING: GVSIGOL_SURNAME_SHORT is not defined using, using OL."	
+		GVSIGOL_SURNAME_SHORT="OL"	
+	fi
+
 	grep -rl "##GVSIGOL_PATH##"  | xargs sed -i "s ##GVSIGOL_PATH## $GVSIGOL_PATH g"
 	grep -rl "/gvsigonline/" | xargs sed -i "s /gvsigonline/ /$GVSIGOL_PATH/ g"
 	grep -rl "\^gvsigonline/" | xargs sed -i "s \^gvsigonline/ \^$GVSIGOL_PATH/ g"
-	
+	grep -rl "##GVSIGOL_NAME##"  | xargs sed -i "s ##GVSIGOL_NAME## $GVSIGOL_NAME g"
+	grep -rl "##GVSIGOL_SURNAME##"  | xargs sed -i "s ##GVSIGOL_SURNAME## $GVSIGOL_SURNAME g"
+	grep -rl "##GVSIGOL_NAME_SHORT##"  | xargs sed -i "s ##GVSIGOL_NAME_SHORT## $GVSIGOL_NAME_SHORT g"
+	grep -rl "##GVSIGOL_SURNAME_SHORT##"  | xargs sed -i "s ##GVSIGOL_SURNAME_SHORT## $GVSIGOL_SURNAME_SHORT g"
 	
 	echo "INFO: Replace GVSIGOL_PLUGINS"
 	if [ -z $GVSIGOL_PLUGINS ]; then
