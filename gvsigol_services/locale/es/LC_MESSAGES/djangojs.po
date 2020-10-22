@@ -137,3 +137,6 @@ msgstr "La definición de capa fue refrescada"
 msgid "The layer refresh failed"
 msgstr "Falló el refrescado de capa"
 
+msgid "Calculated"
+msgstr "Calculado"
+
