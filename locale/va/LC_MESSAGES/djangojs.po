@@ -121,3 +121,7 @@ msgstr ""
 
 msgid "The layer refresh failed"
 msgstr ""
+
+msgid "Calculated"
+msgstr "Calculat"
+
