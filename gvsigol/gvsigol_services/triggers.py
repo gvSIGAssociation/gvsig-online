@@ -62,7 +62,7 @@ INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geoc
             TD["new"][column_name] = ''
         finally:
             return "MODIFY"
-    $$ LANGUAGE plpython3u;
+    $$ LANGUAGE plpython2u;
     """
 
 class InverseGeocoderCartociudad(CustomFunctionDef):
