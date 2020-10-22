@@ -111,11 +111,11 @@ finally:
     except:
         GEOSERVER_PW_DEVEL = 'geoserver'
     try:
-        EMAIL_USER_DEVEL = settings.EMAIL_USER_DEVEL
+        EMAIL_USER_DEVEL = settings_passwords.EMAIL_USER_DEVEL
     except:
         EMAIL_USER_DEVEL = ''
     try:
-        EMAIL_PASSWORD_DEVEL = settings.EMAIL_PASSWORD_DEVEL
+        EMAIL_PASSWORD_DEVEL = settings_passwords.EMAIL_PASSWORD_DEVEL
     except:
         EMAIL_PASSWORD_DEVEL = ''
 
@@ -506,6 +506,7 @@ GVSIGOL_BASE_LAYERS = {
 #skin-yellow-light
 GVSIGOL_SKIN = "skin-blue"
 
+GVSIGOL_PATH = 'gvsigonline'
 GVSIGOL_NAME = 'gvsig'
 GVSIGOL_SURNAME = 'OL'
 GVSIGOL_NAME_SHORT = 'g'
