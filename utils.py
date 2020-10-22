@@ -411,10 +411,9 @@ def get_layer_img(layerid, filename):
     
     return path_, url
 
-def get_db_connect_from_layer(layer):
-    if not isinstance(layer, Layer):
-        layer = Layer.objects.get(id=int(layer))
-    datastore = Datastore.objects.get(id=layer.datastore_id)
+def get_db_connect_from_datastore(datastore):
+    if not isinstance(datastore, Datastore):
+        datastore = Datastore.objects.get(id=int(datastore))
     params = json.loads(datastore.connection_params)
     host = params['host']
     port = params['port']
@@ -422,7 +421,14 @@ def get_db_connect_from_layer(layer):
     user = params['user']
     passwd = params['passwd']
     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-    return i, layer.source_name, params['schema']
+    return i, params
+
+def get_db_connect_from_layer(layer):
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.get(id=int(layer))
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    i, params = get_db_connect_from_datastore(datastore)
+    return i, layer.source_name, params.get('schema', 'public')
      
 def get_exception(code, msg):
     response = HttpResponse(msg)
@@ -486,7 +492,7 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True, permission
         dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
         i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
         table_name = layer.source_name if layer.source_name else layer.name
-        i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=copy_data)
+        new_table_name = i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=copy_data)
         i.close()
 
         from gvsigol_services import views
@@ -497,15 +503,16 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True, permission
             "max_features": layerConf.get('featuretype', {}).get('', 0)
         }
         # add layer to Geoserver
-        views.do_add_layer(server, target_datastore, table_name, layer.title, layer.queryable, extraParams)
+        views.do_add_layer(server, target_datastore, new_table_name, layer.title, layer.queryable, extraParams)
         
-        new_name = layer.name
+        new_name = new_table_name
         if Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
-            new_name = target_datastore.workspace.name + "_" + layer.name
+            base_name = target_datastore.workspace.name + "_" + layer.name
+            new_name = base_name
             i = 1
             salt = ''
             while Layer.objects.filter(name=layer.name, datastore=target_datastore).exists():
-                new_name = new_name + '_' + str(i) + salt
+                new_name = base_name + '_' + str(i) + salt
                 i = i + 1
                 if (i%1000) == 0:
                     salt = '_' + get_random_string(3)

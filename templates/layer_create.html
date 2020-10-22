@@ -108,6 +108,7 @@
 												<tr>
 													<th>{% trans "Field name" %}</th>
 													<th>{% trans "Field type" %}</th>
+													<th>{% trans "Calculated" %}</th>
 													<th></th>
 												</tr>
 											</thead>
@@ -324,6 +325,10 @@
 		config.forms = [];
 		{% for f in forms %}
 		config.forms.push({"name": "{{f.name}}", "title": "{{f.title}}"});
+		{% endfor%}		
+		config.triggerProcedures = [];
+		{% for tp in procedures %}
+		config.triggerProcedures.push({"id": "{{tp.signature}}", "label": "{{tp.localized_label}}"});
 		{% endfor%}
 		return config;
 	}
@@ -334,11 +339,12 @@
 	function addField(field) {
 		
 		fields.push(field);
-		
+		console.log(field);
 		var ui = '';
 		ui += '<tr data-rowid="' + field.id + '">';
 		ui += 	'<td id="field-name-' + field.id + '">' + field.name + '</td>';
 		ui += 	'<td id="field-type-' + field.id + '">' + field.type + '</td>';
+		ui += 	'<td id="field-calculation-' + field.id + '">' + field.calculationLabel + '</td>';
 		ui += 	'<td><a class="edit-field-' + field.id + '" data-fieldid="' + field.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 		ui += 	'<td><a class="delete-field-' + field.id + '" data-fieldid="' + field.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 		ui += '</tr>';
@@ -390,6 +396,7 @@
 		$('#field-name-'+field.id).text(field.name);
 		$('#field-type-'+field.id).text(field.type);
 		$('#field-default-value-'+field.id).text(field.defaultValue);
+		$('#field-calculation-'+field.id).text(field.calculationLabel);
 
 		var data = get_date_fields();
 		create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val(), false);
