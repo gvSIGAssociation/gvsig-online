@@ -33,6 +33,7 @@ import psycopg2
 from psycopg2 import sql as sqlbuilder
 from psycopg2.extensions import quote_ident
 import re
+import random, string
 
 plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
@@ -49,6 +50,13 @@ class Introspect:
         WHERE table_schema = %s 
         """, [schema])    
         return [r[0] for r in self.cursor.fetchall()]
+
+    def table_exists(self, table_name, schema='public'):
+        self.cursor.execute("""
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = %s and table_schema = %s 
+        """, [table_name, schema])
+        return (self.cursor.rowcount == 1)
     
     def get_geometry_tables(self, schema='public'):
         self.cursor.execute("""
@@ -249,36 +257,55 @@ class Introspect:
                 return (seq_name, str_end[1:])
         return ('', '')
     
-    def _parse_sequence_name(self, default_value_def):
-        s = default_value_def[9:]
+    def _parse_sequence_name(self, definition):
+        schema, seq_name, _ = self._parse_qualified_identifier(definition, "'", "nextval('")
+        return (schema, seq_name)
+    
+    def _parse_function_def(self, definition):
+        return self._parse_qualified_identifier(definition, "(", 'CREATE OR REPLACE FUNCTION ')
+    
+    def _parse_function_call(self, definition):
+        (schema, func_name, end_str) = self._parse_qualified_identifier(definition, '(', 'EXECUTE PROCEDURE ')
+        params = end_str[:-1]
+        return (schema, func_name, params)
+
+    def _parse_qualified_identifier(self, definition, end_char, skip_string):
+        s = definition[len(skip_string):]
         
         # faster check for plain unquoted identifiers (common case)
-        (schema_seq_name, str_end) =  self._parse_sql_identifier(s, "'", plainSchemaIdentifierPattern)
+        (schema_seq_name, str_end) =  self._parse_sql_identifier(s, end_char, plainSchemaIdentifierPattern)
         if len(schema_seq_name) > 0:
             parts = schema_seq_name.split(".")
             if len(parts) > 1:
-                return (parts[0], parts[1])
+                return (parts[0], parts[1], str_end)
             else:
-                return ('', parts[0])
+                return ('', parts[0], str_end)
 
         # deep check for quoted identifiers
         (schema, str_end) =  self._parse_sql_identifier(s, '.')
         if schema != '':
-            (seq_name, str_end) =  self._parse_sql_identifier(str_end, "'")
+            (seq_name, str_end) =  self._parse_sql_identifier(str_end, end_char)
         else:
-            (seq_name, str_end) =  self._parse_sql_identifier(s, "'")
-        return (schema, seq_name)
+            (seq_name, str_end) =  self._parse_sql_identifier(s, end_char)
+        return (schema, seq_name, str_end)
         
+    def sequence_exists(self, schema, sequence):
+        query = """SELECT 1 FROM pg_class c
+            LEFT JOIN pg_namespace n on c.relnamespace = n.oid
+            WHERE c.relkind = 'S' AND n.nspname = %s AND relname = %s"""
+        self.cursor.execute(query, [schema, sequence])
+        return (self.cursor.rowcount > 0)
+                 
     def get_sequences(self, table, schema='public'):
         """
         Returns a list of tuples, each tuple containing:
         (col_name, full_sequence_name, schema, sequence_name)
         """
-        self.cursor.execute("""
-        SELECT column_name, column_default FROM information_schema.columns
+        query = """SELECT column_name, column_default FROM information_schema.columns
         WHERE table_schema = %s AND table_name = %s
         AND column_default LIKE %s
-        """, [schema, table, 'nextval%'])
+        """
+        self.cursor.execute(query, [schema, table, 'nextval%'])
 
         result = []
         for (col, col_default) in self.cursor.fetchall():
@@ -482,13 +509,53 @@ class Introspect:
         
         self.cursor.execute(query)
         
-    
+    def get_triggers(self, schema, table):
+        """
+        Returns a list of tuples:
+        (table_schema, table_name, trigger_schema, trigger_name, event, orientation, activation, condition, definition)
+        """
+        
+        query = """
+            SELECT event_object_schema as table_schema,
+                   event_object_table as table_name,
+                   trigger_schema,
+                   trigger_name,
+                   string_agg(event_manipulation, ' OR ') as event,
+                   action_orientation as orientation,
+                   action_timing as activation,
+                   action_condition as condition,
+                   action_statement as definition
+            FROM information_schema.triggers
+            WHERE trigger_schema = %s AND event_object_table = %s
+            GROUP BY table_schema,table_name,trigger_schema,trigger_name,orientation,activation,condition,definition
+
+            ORDER BY table_schema,
+                     table_name;
+            """
+        # print query
+        self.cursor.execute(query, [schema, table])
+        return self.cursor.fetchall()
+
     def clone_sequence(self, target_schema, target_table, column, seq_name, source_schema, source_table):
+        if source_table != target_table:
+            seq_name.replace(source_table, target_table)
+        if seq_name.endswith("_gid_seq"):
+            base_name = seq_name[:-8]
+        else:
+            base_name = seq_name
+        i = 0
+        salt = ''
+        while self.sequence_exists(target_schema, seq_name):
+            seq_name = base_name + '_' + str(i) + salt + "_gid_seq"
+            i = i + 1
+            if (i%1000) == 0:
+                salt = '_' + "".join([ random.choice(string.ascii_uppercase + string.digits) for i in range(0,3)])
         query = sqlbuilder.SQL("CREATE SEQUENCE {target_schema}.{seq_name} OWNED BY {target_schema}.{target_table}.{column}").format(
             target_schema=sqlbuilder.Identifier(target_schema),
             seq_name=sqlbuilder.Identifier(seq_name),
             target_table=sqlbuilder.Identifier(target_table),
             column=sqlbuilder.Identifier(column))
+        # print query.as_string(self.conn)
         self.cursor.execute(query,  [])
         
         full_sequence = quote_ident(target_schema, self.conn) + "." + quote_ident(seq_name, self.conn) 
@@ -537,8 +604,160 @@ class Introspect:
             idx_name=sqlbuilder.Identifier(idx_name)
         )
         self.cursor.execute(query)
+
+    def get_function(self, schema, function_name):
+        """
+        Returns a tuple:
+        (schema, func_name, funct_lang, definition, args, return_type)
+        """
+        query = sqlbuilder.SQL("""
+            SELECT n.nspname as function_schema,
+               p.proname as function_name,
+               l.lanname as function_language,
+               CASE when l.lanname = 'internal' then p.prosrc
+                ELSE pg_get_functiondef(p.oid)
+                END as definition,
+               pg_get_function_arguments(p.oid) as function_arguments,
+               t.typname as return_type
+            FROM pg_proc p
+                LEFT JOIN pg_namespace n on p.pronamespace = n.oid
+                LEFT JOIN pg_language l on p.prolang = l.oid
+                LEFT JOIN pg_type t on t.oid = p.prorettype 
+            WHERE n.nspname not in ('pg_catalog', 'information_schema', 'public')
+                AND p.proname = {function}
+                AND n.nspname = {schema}
+            ORDER BY function_schema, function_name;
+        """).format(
+            schema=sqlbuilder.Literal(schema),
+            function=sqlbuilder.Literal(function_name))
+        self.cursor.execute(query)
+
+        result = self.cursor.fetchall()
+        if len(result)>0:
+            return result[0]
+
+    def clone_function(self, target_schema, source_schema, source_function):
+        function_tuple = self.get_function(source_schema, source_function)
+        if function_tuple is not None:
+            target_function = source_function
+            (_, _, _, definition, _, _) = function_tuple
+            function_tuple = self.get_function(target_schema, target_function)
+            
+            i = 1
+            salt = ''
+            while function_tuple is not None:
+                target_function = source_function + '_' + str(i) + salt
+                i = i + 1
+                if (i%1000) == 0:
+                    salt = '_' + "".join([ random.choice(string.ascii_uppercase + string.digits) for i in range(0,3)])
+                function_tuple = self.get_function(target_schema, target_function)
+        
+        (_, _, end_str) = self._parse_function_def(definition)
+        
+        query = sqlbuilder.SQL("""
+            CREATE OR REPLACE FUNCTION {schema}.{function}({definition}
+        """).format(
+            schema=sqlbuilder.Identifier(target_schema),
+            function=sqlbuilder.Identifier(target_function),
+            definition=sqlbuilder.SQL(end_str))
+        # print query.as_string(self.conn)
+        self.cursor.execute(query)
+        return target_function
+
+    def install_trigger(self, trigger_name, target_schema, target_table,
+                        activation, event, orientation, condition, func_schema, func_name, params):
+        if not activation in ['BEFORE', 'AFTER', 'INSTEAD OF']:
+            # FIXME: use a specific exception class
+            raise Exception('Invalid activation value')
+        if not re.match("^(INSERT|UPDATE|DELETE|TRUNCATE)( +(?:OR) +(INSERT|UPDATE|DELETE|TRUNCATE))*$", event):
+            raise Exception('Unsupported event value')
+        if not orientation in ['ROW', 'STATEMENT']:
+            raise Exception('Invalid orientation value')
+        if not isinstance(condition, sqlbuilder.SQL):
+            condition = sqlbuilder.SQL(condition)
+                
+        if isinstance(params, list):
+            params = sqlbuilder.SQL(', ').join([sqlbuilder.Literal(p) for p in params])
+        else:
+            params = sqlbuilder.SQL(params)
+            
+        definition = sqlbuilder.SQL("EXECUTE PROCEDURE {schema}.{function}({params})").format(
+            schema=sqlbuilder.Identifier(func_schema),
+            function=sqlbuilder.Identifier(func_name),
+            params=params)
+        query = sqlbuilder.SQL("""
+            CREATE TRIGGER {trigger_name} {activation} {event}
+            ON {schema}.{table}
+            FOR EACH {orientation} {condition} {definition};
+            """).format(
+                trigger_name=sqlbuilder.Identifier(trigger_name),
+            schema=sqlbuilder.Identifier(target_schema),
+            table=sqlbuilder.Identifier(target_table),
+            activation=sqlbuilder.SQL(activation),
+            event=sqlbuilder.SQL(event),
+            orientation=sqlbuilder.SQL(orientation),
+            condition=condition,
+            definition=definition
+        )
+        print query.as_string(self.conn)
+        self.cursor.execute(query)
     
+    def drop_trigger(self, trigger_name, target_schema, target_table):
+        sql_tpl = 'DROP TRIGGER IF EXISTS {trigger_name} ON {schema}.{table}'
+        query = sqlbuilder.SQL(sql_tpl).format(
+            trigger_name=sqlbuilder.Identifier(trigger_name),
+            schema=sqlbuilder.Identifier(target_schema),
+            table=sqlbuilder.Identifier(target_table)
+            )
+        print query.as_string(self.conn)
+        self.cursor.execute(query)
+        
+    def clone_triggers(self, target_schema, target_table, source_schema, source_table):
+        for trigger in self.get_triggers(source_schema, source_table):
+            """
+            table_schema = trigger[0]
+            table_name = trigger[1]
+            trigger_schema = trigger[2]
+            trigger_name = trigger[3]
+            event = trigger[4]
+            orientation = trigger[5]
+            activation = trigger[6]
+            print trigger_name
+            condition = trigger[7]
+            definition = trigger[8]
+            """
+            (_, _, _, trigger_name, event, orientation, activation, condition, definition) = trigger
+            if source_table != target_table and trigger_name.startswith(source_table):
+                # try to get a equivalent name
+                trigger_name = target_table + trigger_name[len(source_table):]
+            if condition:
+                condition = sqlbuilder.SQL("WHEN {condition}").format(condition=sqlbuilder.SQL(condition))
+            else:
+                condition = sqlbuilder.SQL("")
+            (func_schema, func_name, end_str) = self._parse_function_call(definition)
+            params = end_str[:-1]
+            if func_schema == source_schema:
+                func_name = self.clone_function(target_schema, source_schema, func_name)
+                func_schema = target_schema
+                
+            definition = sqlbuilder.SQL("EXECUTE PROCEDURE {schema}.{function}({params})").format(
+                schema=sqlbuilder.Identifier(target_schema),
+                function=sqlbuilder.Identifier(func_name),
+                params=sqlbuilder.SQL(params))
+            
+            self.install_trigger(trigger_name, target_schema, target_table, activation, event, orientation, condition, func_schema, func_name, params)
+
     def clone_table(self, schema, table_name, target_schema, new_table_name, copy_data=True):
+        base_name = new_table_name
+        i = 0
+        while self.table_exists(new_table_name, target_schema):
+            # get a unique name
+            salt = ''
+            new_table_name = base_name + '_' + str(i) + salt
+            i = i + 1
+            if (i%1000) == 0:
+                salt = '_' + "".join([ random.choice(string.ascii_uppercase + string.digits) for i in range(0,3)])
+        
         query_tpl = "CREATE TABLE {target_schema}.{new_table} AS TABLE {schema}.{table}"
         if not copy_data:
             query_tpl += " WITH NO DATA"
@@ -547,6 +766,7 @@ class Introspect:
             new_table=sqlbuilder.Identifier(new_table_name),
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table_name))
+        # print query.as_string(self.conn)
         self.cursor.execute(query)
         
         for (column, _, schema, seq_name) in self.get_sequences(table_name, schema):
@@ -557,6 +777,9 @@ class Introspect:
         geom_cols = self.get_geometry_columns(table_name, schema)
         for geom_col in geom_cols:
             self.clone_spatial_index(target_schema, new_table_name, geom_col)
+        
+        self.clone_triggers(target_schema, new_table_name, schema, table_name)
+        return new_table_name
         
     def delete_table(self, schema, table_name):
         query = sqlbuilder.SQL("DROP TABLE IF EXISTS {schema}.{table}").format(

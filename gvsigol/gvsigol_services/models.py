@@ -26,6 +26,8 @@ from django.db import models
 from gvsigol_auth.models import UserGroup
 from gvsigol import settings
 from django.utils.crypto import get_random_string
+from gvsigol_services.triggers import CUSTOM_PROCEDURES
+from django.utils.translation import gettext_lazy as _
 
 CLONE_PERMISSION_CLONE = "clone"
 CLONE_PERMISSION_SKIP = "skip"
@@ -291,8 +293,12 @@ class EnumerationItem(models.Model):
 class LayerFieldEnumeration(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE, null=True)
     enumeration = models.ForeignKey(Enumeration, on_delete=models.CASCADE)
-    field = models.CharField(max_length=150) 
+    field = models.CharField(max_length=150)
     multiple = models.BooleanField(default=False)
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'field']),
+        ]
     
 class ServiceUrl(models.Model):
     SERVICE_TYPE_CHOICES = (
@@ -308,4 +314,66 @@ class ServiceUrl(models.Model):
     def __unicode__(self):
         return self.title
 
+class TriggerProcedure(models.Model):
+    """
+    The definition of a PostgreSQL function designed to be used in a trigger,
+    which will be used for calculated fields.
     
+    Our TriggerProcedure definition includes also parameters for the trigger creation,
+    since these procedures make some assumptions based on the kind of trigger that will
+    be applied (ROW OR STATEMENT orientation, BEFORE, AFTER OR INSTEAD OF activation, etc).
+    
+    If the definition is not static and has to be customized based on environment variables,
+    field names, etc, a CustomFunctionDef subclass must be registered in triggers.CUSTOM_PROCEDURES
+    dictionary.
+    """
+    signature = models.TextField(unique=True)
+    func_name = models.CharField(max_length=150)
+    func_schema = models.CharField(max_length=150)
+    label = models.CharField(max_length=150)
+    definition_tpl =  models.TextField(blank=True, null=True)
+    activation = models.CharField(max_length=10)
+    event = models.CharField(max_length=100)
+    orientation = models.CharField(max_length=10)
+    """
+    Condition is excluded for the moment since it is very complex to validate
+    against SQL injection attacks.
+    condition = models.TextField()
+    """
+    def get_definition(self):
+        custom_procedure_cls = CUSTOM_PROCEDURES.get(self.signature)
+        if custom_procedure_cls:
+            print custom_procedure_cls
+            return custom_procedure_cls().get_definition()
+        else:
+            return self.definition_tpl
+    @property
+    def localized_label(self):
+        return _(self.label)
+
+class Trigger(models.Model):
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE, null=True)
+    field = models.CharField(max_length=150)
+    procedure = models.ForeignKey(TriggerProcedure, on_delete=models.CASCADE)
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'field']),
+        ]
+
+    def get_name(self):
+        return self.procedure.func_name + "_" + self.field + "_trigger"
+    
+    def install(self):
+        from gvsigol_services.utils import get_db_connect_from_layer
+        trigger_name = self.get_name()
+        i, target_table, target_schema = get_db_connect_from_layer(self.layer)
+        i.install_trigger(trigger_name, target_schema, target_table,
+                        self.procedure.activation, self.procedure.event, self.procedure.orientation, '', self.procedure.func_schema, self.procedure.func_name, [self.field])
+        i.close()
+
+    def drop(self):
+        from gvsigol_services.utils import get_db_connect_from_layer
+        trigger_name = self.get_name()
+        i, target_table, target_schema = get_db_connect_from_layer(self.layer)
+        i.drop_trigger(trigger_name, target_schema, target_table)
+        i.close()

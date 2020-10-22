@@ -56,6 +56,7 @@
 													<tr>
 														<th>{% trans "Field name" %}</th>
 														<th>{% trans "Type" %}</th>
+														<th>{% trans "Calculated" %}</th>
 														<th>{% trans "mandatory" %}</th>
 														<th>{% trans "Is visible?" %}</th>
 														<th>{% trans "Is editable?" %}</th>
@@ -69,6 +70,7 @@
 																<tr data-fieldname="{{f.name}}">
 																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
 																	<td><input readonly name="field-type-{{counter}}" type="text" class="form-control" value="{{f.type}}"></td>
+																	<td><input readonly name="field-calculation-{{counter}}" type="text" class="form-control" value="{{f.calculationLabel}}"></td>
 																	{% if f.mandatory %}
 																	<td><input type="checkbox" name="field-mandatory-{{counter}}" checked/></td>
 																	{% else %}
@@ -498,7 +500,8 @@
 		  		'field': field.name,
 		  		'type': field.type,
 		  		'enumkey': field.enumkey,
-		  		'layer_id': "{{layer_id}}"
+		  		'layer_id': "{{layer_id}}",
+		  		'calculation': field.calculation
 		  	},
 			success	:function(response) {
 				messageBox.show('Info', gettext('Field was added'));
@@ -535,6 +538,10 @@
 		config.forms = [];
 		{% for f in forms %}
 		config.forms.push({"name": "{{f.name}}", "title": "{{f.title}}"});
+		{% endfor%}
+		config.triggerProcedures = [];
+		{% for tp in procedures %}
+		config.triggerProcedures.push({"id": "{{tp.signature}}", "label": "{{tp.localized_label}}"});
 		{% endfor%}
 		config.modalSelector = '#my-modal-dialog';
 		return config;

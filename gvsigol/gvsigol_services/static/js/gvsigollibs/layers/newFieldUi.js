@@ -5,9 +5,6 @@ function validateRegex(pattern) {
 
 function getFieldTypes(enableEnums, enableForms) {
 	var fieldTypes = [{
-		key: 'boolean',
-		value: 'Boolean'
-	},{
 		key: 'character_varying',
 		value: 'Text'
 	},{
@@ -16,6 +13,9 @@ function getFieldTypes(enableEnums, enableForms) {
 	},{
 		key: 'double',
 		value: 'Double'
+	},{
+		key: 'boolean',
+		value: 'Boolean'
 	},{
 		key: 'date',
 		value: 'Date'
@@ -49,9 +49,9 @@ function getFieldTypes(enableEnums, enableForms) {
 	return fieldTypes;
 }
 
-function getFieldNameDiv(field_name, field_type, mode, id, defaultValue, enumerations, forms) {
+function getFieldTypeOptions(field_name, field_type, mode, id, defaultValue, enumerations, forms) {
 	var ui = '';
-	ui += '<div id="div-name" class="row">';
+	ui += '<div id="div-field-options" class="row">';
 	ui +=    '<div class="col-md-12 form-group">';
 	if ( field_type == 'enumeration') {
 		ui += 	'<label>' + gettext('Select enumeration') + '</label>';
@@ -95,16 +95,14 @@ function getFieldNameDiv(field_name, field_type, mode, id, defaultValue, enumera
 		ui += 	'</select>';
 	}
 	ui +=    '</div>';
-	ui +=    '<div class="col-md-12 form-group">';
-	ui +=      '<label>' + gettext('Field name') + '</label>';
-	if (mode == 'create') {
-		ui += 		'<input type="text" id="field-name-'+id+'" name="field-name-'+id+'" class="form-control">';
-	} else if (mode == 'update') {
-		ui += 		'<input type="text" id="field-name-'+id+'" name="field-name-'+id+'" class="form-control" value="' + field_name + '">';
-	}
-	ui +=    '</div>';
 	ui += '</div>';
 	return ui;
+}
+
+function updateAddFieldButton(id) {
+	if ($('#field-name-'+id).val()) {
+		
+	}
 }
 
 function createModalContent(fid, mode, title, config){
@@ -112,6 +110,7 @@ function createModalContent(fid, mode, title, config){
 	var forms = config.forms;
 	var enableEnums = config.enableEnums;
 	var enableForms = config.enableForms;
+	var triggerProcedures = config.triggerProcedures || [];
 	var fieldTypes = getFieldTypes(enableEnums, enableForms);
 	var modalSelector = config.modalSelector || '#modal-new-field'; 
 	$(modalSelector).find('.modal-body').empty();
@@ -132,64 +131,109 @@ function createModalContent(fid, mode, title, config){
 	ui += 	'<div class="col-md-12 form-group">';
 	ui += 		'<label>' + gettext('Select type') + '</label>';
 	ui += 		'<select id="field-db-type" class="form-control">';
-	if (mode == 'create') {
-		ui += 		'<option disabled selected value> -- ' + gettext('Select type') + ' -- </option>';
-		for (var i=0; i<fieldTypes.length; i++) {
-			ui += 	'<option value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';
-		}
-	} else if (mode == 'update') {
-		for (var i=0; i<fieldTypes.length; i++) {
-			if (fieldTypes[i].key == field.type) {
-				ui += 	'<option selected value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';
-			} else {
-				ui += 	'<option value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';	
-			}
+	for (var i=0; i<fieldTypes.length; i++) {
+		if (field && (fieldTypes[i].key == field.type)) {
+			ui += 	'<option selected value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';
+		} else {
+			ui += 	'<option value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';	
 		}
 	}
+
 	ui += 		'</select>';
 	ui += 	'</div>';
-	ui += '</div>';	
-	
-	
+	ui += '</div>';
+	ui += '<div class="row">';
+	ui +=    '<div class="col-md-12 form-group">';
+	ui +=      '<label>' + gettext('Field name') + '</label>';
 	if (mode == 'create') {
-		ui += '<div id="div-name" class="row">';
+		ui += 		'<input type="text" id="field-name" name="field-name" class="form-control">';
+	} else if (mode == 'update') {
+		ui += 		'<input type="text" id="field-name" name="field-name" class="form-control" value="' + field.name + '">';
+	}
+	ui +=    '</div>';
+	ui += '</div>';
+	
+	var calculation_checked = "";
+	if (mode == 'create') {
+		ui += '<div id="div-field-options">';
 		ui += '</div>';
 		
 	} else if (mode == 'update') {
-		ui += getFieldNameDiv(field.name, field.type, mode, id, field.enumkey, enumerations, forms);
+		ui += getFieldTypeOptions(field.name, field.type, mode, id, field.enumkey, enumerations, forms);
+		if (field.calculation) {
+			calculation_checked = " checked";
+		}
 	}
+
+	ui += '<div class="row form-group">';
+	ui += 		'<div class="col-md-3 checkbox">';
+	ui += 			'<label><input id="field-calculated" type="checkbox" value="calculated" '+ calculation_checked +'>' + gettext("Calculated") + '</label>';
+	ui += 		'</div>';
+	ui += 		'<div class="col-md-9">';
+	ui += 			'<select id="field-calculation" class="form-control" disabled>';
+	var procedure;
+	for (var i=0; i<triggerProcedures.length; i++) {
+		procedure = triggerProcedures[i];
+		if (field && (procedure.id == field.calculation)) {
+			ui += 		'<option value="' + procedure.id + '" selected>' + procedure.label + '</option>';
+		}
+		else {
+			ui += 		'<option value="' + procedure.id + '">' + procedure.label + '</option>';
+		}
+	}
+	ui += 			'</select>';
+	ui += 		'</div>';
+	ui += '</div>';
 	
 	$(modalSelector).find('.modal-body').append(ui);
 	
 	var buttons = '';
 	buttons += '<button id="add-field-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
 	if (mode == 'create') {
-		buttons += '<button id="add-field-accept" type="button" class="btn btn-default">' + gettext('Save field') + '</button>';
+		buttons += '<button id="add-field-accept" type="button" class="btn btn-default" disabled>' + gettext('Save field') + '</button>';
 		
 	} else if (mode == 'update') {
 		buttons += '<button id="update-field-accept" data-fieldid="'+field.id+'" type="button" class="btn btn-default">' + gettext('Edit field') + '</button>';
 	}
 	
-	
 	$(modalSelector).find('.modal-footer').empty();
 	$(modalSelector).find('.modal-footer').append(buttons);
 	
 	$('#field-db-type').on('change', function(e) {
-		var dvName = getFieldNameDiv('', $('#field-db-type').val(), 'create', id, null, enumerations, forms);
-		$('#div-name').replaceWith(dvName);
+		var dvFieldOptions = getFieldTypeOptions('', $('#field-db-type').val(), 'create', id, null, enumerations, forms);
+		$('#div-field-options').replaceWith(dvFieldOptions);
+	});
+	$('#field-calculated').change(function(evt){
+		if (evt.currentTarget.checked) {
+			document.getElementById('field-calculation').disabled = false;
+		}
+		else {
+			document.getElementById('field-calculation').disabled = true;
+		}
 	});
 	
 	$('#add-field-accept').on('click', function () {
-		var name = $('#field-name-'+id).val();
+		var name = $('#field-name').val();
 		var type = $('#field-db-type').val();
 		var enumkey = $('#field-default-value-'+id).val();
+		var calculated = document.getElementById('field-calculated').checked;
+		if (calculated) {
+			var calculation = $('#field-calculation').val();
+			var calculationLabel = $('#field-calculation option:selected').text();
+		}
+		else {
+			var calculation = '';
+			var calculationLabel = '';
+		}
 		
 		if (validateRegex(name)) {
 			var field = {
 				id: id,
 				name: name,
 				type: type,
-				enumkey: enumkey
+				enumkey: enumkey,
+				calculation: calculation,
+				calculationLabel: calculationLabel
 			};
 			addField(field);
 			
@@ -203,16 +247,27 @@ function createModalContent(fid, mode, title, config){
 	});
 	
 	$('#update-field-accept').on('click', function () {
-		var name = $('#field-name-'+id).val();
+		var name = $('#field-name').val();
 		var type = $('#field-db-type').val();
 		var enumkey = $('#field-default-value-'+id).val();
+		var calculated = document.getElementById('field-calculated').checked;
+		if (calculated) {
+			var calculation = $('#field-calculation').val();
+			var calculationLabel = $('#field-calculation option:selected').text();
+		}
+		else {
+			var calculation = '';
+			var calculationLabel = '';
+		}
 		
 		if (validateRegex(name)) {
 			var field = {
 				id: this.dataset.fieldid,
 				name: name,
 				type: type,
-				enumkey: enumkey
+				enumkey: enumkey,
+				calculation: calculation,
+				calculationLabel: calculationLabel
 			};
 			
 			updateField(field);
@@ -225,6 +280,15 @@ function createModalContent(fid, mode, title, config){
 			$('#field-errors').append(error);
 		}
 		
+	});
+	
+	$('#field-name').on('change keyup', function() {
+		if ($('#field-name').val()) {
+			document.getElementById('add-field-accept').disabled = false;
+		}
+		else {
+			document.getElementById('add-field-accept').disabled = true;
+		}
 	});
 	
 	$(modalSelector).modal('show');

@@ -52,6 +52,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
 from django.utils.html import escape, strip_tags
 from future.moves.urllib.parse import urlparse, urlencode
+from builtins import str as text
 from geoserver import workspace
 from lxml import html
 from owslib.util import Authentication
@@ -74,7 +75,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_services.backend_resources import resource_manager 
-from gvsigol_services.models import LayerResource
+from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
 import gvsigol_services.tiling_service as tiling_service
 import locks_utils
 from models import LayerFieldEnumeration
@@ -1566,13 +1567,32 @@ def layer_config(request, layer_id):
                         field['type'] = _('enumerated ({0})').format(enum.title)
                     else:
                         field['type'] = f['type']
+                    try:
+                        trigger = Trigger.objects.get(layer=layer, field=field['name'])
+                        field['calculation'] = trigger.procedure.signature
+                        field['calculationLabel'] = text(trigger.procedure.localized_label)
+                    except:
+                        field['calculation'] = ''
+                        field['calculationLabel'] = ''
                     fields.append(field)
 
         except:
             logger.exception("Retrieving fields")
         enums = Enumeration.objects.all()
         print fields
-        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup, 'enumerations': enums})
+        
+        data = {
+            'layer': layer,
+            'layer_id': layer.id,
+            'fields': fields,
+            'fields_json': json.dumps(fields),
+            'available_languages': LANGUAGES,
+            'available_languages_array': available_languages,
+            'redirect_to_layergroup': redirect_to_layergroup,
+            'enumerations': enums,
+            'procedures':  TriggerProcedure.objects.all()
+        }
+        return render(request, 'layer_config.html', data)
 
 def _set_field_mandatory(layer_id, field_name, mandatory):
     """
@@ -2399,7 +2419,21 @@ def layer_create_with_group(request, layergroup_id):
                         field_enum.field = i['name']
                         field_enum.enumeration_id = int(i['enumkey']) 
                         field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
-                        field_enum.save() 
+                        field_enum.save()
+                    if i.get('calculation'):
+                        try:
+                            calculation = i.get('calculation')
+                            procedure = TriggerProcedure.objects.get(signature=calculation)
+                            trigger = Trigger()
+                            trigger.layer = newRecord
+                            trigger.field = i['name']
+                            trigger.procedure = procedure
+                            trigger.save()
+                            
+                            trigger.install()
+                        except:
+                            logger.exception("Error creating trigger for calculated field")
+                         
                 featuretype = {
                     'max_features': maxFeatures
                 }
@@ -2439,7 +2473,8 @@ def layer_create_with_group(request, layergroup_id):
                 'form': form,
                 'forms': forms,
                 'layer_type': layer_type,
-                'enumerations': get_currentuser_enumerations(request)
+                'enumerations': get_currentuser_enumerations(request),
+                'procedures':  TriggerProcedure.objects.all(),
             }
             return render(request, "layer_create.html", data)
 
@@ -2456,6 +2491,7 @@ def layer_create_with_group(request, layergroup_id):
             'forms': forms,
             'layer_type': layer_type,
             'enumerations': get_currentuser_enumerations(request),
+            'procedures':  TriggerProcedure.objects.all(),
             'layergroup_id': layergroup_id,
             'redirect_to_layergroup': redirect_to_layergroup
         }
@@ -4590,6 +4626,12 @@ def db_field_rename(request):
             for enumDef in LayerFieldEnumeration.objects.filter(layer=layer, field=field):
                 enumDef.field = new_field_name
                 enumDef.save()
+                
+            for triggerDef in Trigger.objects.filter(layer=layer, field=field):
+                triggerDef.drop()
+                triggerDef.field = new_field_name
+                triggerDef.save()
+                triggerDef.install()
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
@@ -4635,6 +4677,7 @@ def db_add_field(request):
             field_type = request.POST.get('type')
             layer_id = request.POST.get('layer_id')
             enumkey = request.POST.get('enumkey')
+            calculation = request.POST.get('calculation')
             layer = Layer.objects.get(id=layer_id)
             
             for ctrl_field in settings.CONTROL_FIELDS:
@@ -4683,7 +4726,19 @@ def db_add_field(request):
                 field_enum.field = field_name
                 field_enum.enumeration_id = int(enumkey) 
                 field_enum.multiple = True if field_type == 'multiple_enumeration' else False
-                field_enum.save() 
+                field_enum.save()
+            if calculation:
+                try:
+                    procedure = TriggerProcedure.objects.get(signature=calculation)
+                    trigger = Trigger()
+                    trigger.layer = layer
+                    trigger.field = field_name
+                    trigger.procedure = procedure
+                    trigger.save()
+                    
+                    trigger.install()
+                except:
+                    logger.exception("Error creating trigger for calculated field")
             
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
