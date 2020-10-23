@@ -32,20 +32,21 @@ INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME = "gol_geocoder_inverso_cartociudad"
 INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE = "public.gol_geocoder_inverso_cartociudad(text)"
 
 # FIXME: GVSIGOL_NAME or GVSIGOL_PATH ? SHOULD BE FIXED IN INSTALL SCRIPTS
-INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad(column_name text) RETURNS trigger AS $$
+INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
         # TODO: comprobar que no es tipo punto
         import requests
         import json
         timeout = 5
         geocoder_url = '{base_url}/{gvsigol_path}/geocoding/get_location_address/'
-        try:        
+        try:
+            column_name = TD["args"][0]
             plan = plpy.prepare("SELECT * FROM geometry_columns WHERE f_table_name = $1 AND f_table_schema = $2", ["text","text"])        
             rv = plan.execute([TD["table_name"],TD["table_schema"]],1)
-            geom_column = rv[0]["f_geometry_column"]            
+            geom_column = rv[0]["f_geometry_column"]
             
             plan = plpy.prepare("SELECT st_x(ST_GeometryN($1, 1)) || ',' ||st_y(ST_GeometryN($1, 1)) as coords", ["text"])
             rv = plan.execute([TD["new"][geom_column]],1)
-            coords= rv[0]["coords"]                    
+            coords= rv[0]["coords"]
             
             client = requests.session()
             _data = {{'coord': coords, 'type':'new_cartociudad'}}
