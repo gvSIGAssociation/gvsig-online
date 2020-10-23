@@ -46,7 +46,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
@@ -1568,9 +1568,9 @@ def layer_config(request, layer_id):
                                 field['editable'] = False
                         field['infovisible'] = False
                         field['mandatory'] = (f.get('nullable') == 'NO')
-                    enum = utils.get_enum_entry(layer, f['name'])
+                    enum = utils.get_enum_entry(layer, field['name'])
                     if enum:
-                        field['type'] = _('enumerated ({0})').format(enum.title)
+                        field['type'] = text(ugettext('enumerated ({0})').format(enum.title))
                     else:
                         field['type'] = f['type']
                     try:
@@ -1587,7 +1587,6 @@ def layer_config(request, layer_id):
         except:
             logger.exception("Retrieving fields")
         enums = Enumeration.objects.all()
-        print fields
         
         data = {
             'layer': layer,
