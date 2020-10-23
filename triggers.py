@@ -35,7 +35,7 @@ INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE = "public.gol_geocoder_inverso_c
 INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
         # TODO: comprobar que no es tipo punto
         import requests
-        timeout = 6
+        timeout = 10
         geocoder_url = '{base_url}/{gvsigol_path}/geocoding/get_location_address/'
         try:
             column_name = TD["args"][0]
