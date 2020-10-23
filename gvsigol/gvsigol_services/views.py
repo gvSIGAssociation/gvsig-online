@@ -1440,7 +1440,10 @@ def layer_autoconfig(layer, featuretype):
                 field['title-'+id] = f['name']
             field['visible'] = True
             field['editableactive'] = True
-            field['editable'] = True
+            if Trigger.objects.filter(layer=layer, field=field['name']).exists():
+                field['editable'] = False
+            else:
+                field['editable'] = True
             for control_field in settings.CONTROL_FIELDS:
                 if field['name'] == control_field['name']:
                     field['editableactive'] = False
@@ -1502,6 +1505,9 @@ def layer_config(request, layer_id):
                     if field['name'] == control_field['name']:
                         field['editableactive'] = False
                         field['editable'] = False
+                if  Trigger.objects.filter(layer=layer, field=field['name']).exists():
+                    field['editableactive'] = False
+                    field['editable'] = False
             fields.append(field)
         conf['fields'] = fields
         layer.conf = conf
@@ -1571,6 +1577,8 @@ def layer_config(request, layer_id):
                         trigger = Trigger.objects.get(layer=layer, field=field['name'])
                         field['calculation'] = trigger.procedure.signature
                         field['calculationLabel'] = text(trigger.procedure.localized_label)
+                        field['editableactive'] = False
+                        field['editable'] = False
                     except:
                         field['calculation'] = ''
                         field['calculationLabel'] = ''
@@ -4572,6 +4580,7 @@ def db_field_delete(request):
             layer.conf = layer_conf
             layer.save()
             LayerFieldEnumeration.objects.filter(layer=layer, field=field).delete()
+            Trigger.objects.filter(layer=layer, field=field).delete()
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
@@ -4705,11 +4714,13 @@ def db_add_field(request):
 
             layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
             fields = layer_conf.get('fields', [])
+            editable = False if calculation else True
+                
             field_def = {
                 "name": field_name,
                 "visible": True,
                 "editableactive": True,
-                "editable": True,
+                "editable": editable,
                 "infovisible": False,
                 "mandatory": False
                 }
