@@ -43,7 +43,7 @@ INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geoc
             rv = plpy.execute(plan,[TD["table_name"],TD["table_schema"]],1)
             geom_column = rv[0]["f_geometry_column"]
             
-            plan = plpy.prepare("SELECT st_x(ST_GeometryN($1, 1)) || ',' ||st_y(ST_GeometryN($1, 1)) as coords", ["text"])
+            plan = plpy.prepare("SELECT st_x(ST_GeometryN(ST_Transform($1,4326), 1)) || ',' ||st_y(ST_GeometryN(ST_Transform($1,4326), 1)) as coords", ["text"])
             rv = plpy.execute(plan,[TD["new"][geom_column]],1)
             coords= rv[0]["coords"]
             
@@ -53,13 +53,13 @@ INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geoc
             r = client.post(geocoder_url, data=_data, verify=False, timeout=timeout)
             response = r.json() 
             address = response.get('tip_via', '') + " " + response.get('address', '') + "," + str(response.get('portalNumber', ''))
-            TD["new"][column_name] =  address 
+            TD["new"][column_name] = address 
         except plpy.SPIError as e:
             TD["new"][column_name] = ''
-            plpy.error("ERROR geocoder_inverso_cartociudad: " + str(e))
+            plpy.log("ERROR geocoder_inverso_cartociudad: " + str(e))
         except Exception as e:
             TD["new"][column_name] = ''
-            plpy.error(str(e))
+            plpy.log(str(e))
         finally:
             return "MODIFY"
     $$ LANGUAGE plpython2u;
