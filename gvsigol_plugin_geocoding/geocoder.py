@@ -120,10 +120,9 @@ class Geocoder():
         loc = {}
         
         for geocoder_types in self.geocoders:
-            for geocoder_type in geocoder_types:
-                geocoder = geocoder_types[geocoder_type]
-                if geocoder.get_type() == type:
-                    loc = geocoder.reverse(coordinate,exactly_one=True,language='es')
+            geocoder = geocoder_types.get(type)
+            if geocoder:
+                loc = geocoder.reverse(coordinate,exactly_one=True,language='es')
 
         return loc
     
