@@ -4580,7 +4580,11 @@ def db_field_delete(request):
             layer.conf = layer_conf
             layer.save()
             LayerFieldEnumeration.objects.filter(layer=layer, field=field).delete()
-            Trigger.objects.filter(layer=layer, field=field).delete()
+            triggers = Trigger.objects.filter(layer=layer, field=field)
+            for trigger in triggers:
+                trigger.drop()
+            triggers.delete()
+            
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
