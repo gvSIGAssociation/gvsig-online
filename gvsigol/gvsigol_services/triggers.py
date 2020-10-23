@@ -31,8 +31,7 @@ INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SCHEMA = "public"
 INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME = "gol_geocoder_inverso_cartociudad"
 INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE = "public.gol_geocoder_inverso_cartociudad(text)"
 
-# FIXME: GVSIGOL_NAME or GVSIGOL_PATH ? SHOULD BE FIXED IN INSTALL SCRIPTS
-INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
+INVERSE_GEOCODER_CARTOCIUDAD_DEF_GVSIGOL = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
         # TODO: comprobar que no es tipo punto
         import requests
         timeout = 10
@@ -64,10 +63,45 @@ INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geoc
             return "MODIFY"
     $$ LANGUAGE plpython2u;
     """
+    
+INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
+        # TODO: comprobar que no es tipo punto
+        import requests
+        timeout = 10
+        geocoder_url = 'http://www.cartociudad.es/geocoder/api/geocoder/reverseGeocode'
+        try:
+            column_name = TD["args"][0]
+            plan = plpy.prepare("SELECT * FROM geometry_columns WHERE f_table_name = $1 AND f_table_schema = $2", ["text","text"])        
+            rv = plpy.execute(plan,[TD["table_name"],TD["table_schema"]],1)
+            geom_column = rv[0]["f_geometry_column"]
+            
+            plan = plpy.prepare("SELECT st_x(ST_GeometryN(ST_Transform($1,4326), 1)) as lon, st_y(ST_GeometryN(ST_Transform($1,4326), 1)) as lat", ["text"])
+            rv = plpy.execute(plan,[TD["new"][geom_column]],1)
+            lon = rv[0]["lon"]
+            lat = rv[0]["lat"]
+            
+            _data = {'lon': lon, 'lat': lat}
+            #plpy.log(str(_data))
+            r = requests.get(geocoder_url, params=_data, timeout=timeout)
+            response = r.json()
+            #plpy.log(str(r.text)) 
+            address = response.get('tip_via', '') + " " + response.get('address', '') + "," + str(response.get('portalNumber', ''))
+            TD["new"][column_name] = address 
+        except plpy.SPIError as e:
+            TD["new"][column_name] = ''
+            plpy.log("ERROR geocoder_inverso_cartociudad: " + str(e))
+        except Exception as e:
+            TD["new"][column_name] = ''
+            plpy.log(str(e))
+        finally:
+            return "MODIFY"
+    $$ LANGUAGE plpython2u;
+    """
+    
 
 class InverseGeocoderCartociudad(CustomFunctionDef):
      def get_definition(self):
-         return INVERSE_GEOCODER_CARTOCIUDAD_DEF.format(base_url=BASE_URL, gvsigol_path=GVSIGOL_PATH)
+         return INVERSE_GEOCODER_CARTOCIUDAD_DEF
 
 
 CUSTOM_PROCEDURES = {
