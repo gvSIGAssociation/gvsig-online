@@ -503,7 +503,7 @@ def find_candidate(request):
             
     return HttpResponse(json.dumps(suggestion, indent=4), content_type='application/json')
 
-
+@csrf_exempt
 def get_location_address(request):
     if request.method == 'POST':
         coord = request.POST.get('coord')
