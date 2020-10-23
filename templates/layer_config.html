@@ -97,7 +97,7 @@
 																	{% endif %}
 																	<td>
 																	{% if f.editableactive or f.calculationLabel %}
-																		{% if counter > 5 %}
+																		{% if counter > 3 %}
 																		<div class="btn-group dropup">
 																		{% else %}
 																		<div class="btn-group">
@@ -108,7 +108,9 @@
 																			<ul class="dropdown-menu dropdown-menu-right" role="menu">
 																				<li><a href="#" class="actions-menu-entry rename-field"><i class="fa fa-edit" style="color: #3c8dbc;"></i> {% trans "Rename" %}</a></li>
 																				<!--  <li><a href="#" class="actions-menu-entry change-field-type"><i class="fa fa-tag" style="color: #3c8dbc;"></i> {% trans "Change type" %}</a></li> -->
+																				{% if not f.calculationLabel %}
 																				<li><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
+																				{% endif %}
 																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
 																			</ul>
 																		</div>
