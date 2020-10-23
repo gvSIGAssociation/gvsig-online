@@ -35,32 +35,31 @@ INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE = "public.gol_geocoder_inverso_c
 INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
         # TODO: comprobar que no es tipo punto
         import requests
-        import json
-        timeout = 5
+        timeout = 6
         geocoder_url = '{base_url}/{gvsigol_path}/geocoding/get_location_address/'
         try:
             column_name = TD["args"][0]
             plan = plpy.prepare("SELECT * FROM geometry_columns WHERE f_table_name = $1 AND f_table_schema = $2", ["text","text"])        
-            rv = plan.execute([TD["table_name"],TD["table_schema"]],1)
+            rv = plpy.execute(plan,[TD["table_name"],TD["table_schema"]],1)
             geom_column = rv[0]["f_geometry_column"]
             
             plan = plpy.prepare("SELECT st_x(ST_GeometryN($1, 1)) || ',' ||st_y(ST_GeometryN($1, 1)) as coords", ["text"])
-            rv = plan.execute([TD["new"][geom_column]],1)
+            rv = plpy.execute(plan,[TD["new"][geom_column]],1)
             coords= rv[0]["coords"]
             
             client = requests.session()
             _data = {{'coord': coords, 'type':'new_cartociudad'}}
-            plpy.log(str(_data))
+            #plpy.log(str(_data))
             r = client.post(geocoder_url, data=_data, verify=False, timeout=timeout)
-            response = r.json()
-            address = response['tip_via'] + " " + response['address'] + "," + str(response['portalNumber'])
+            response = r.json() 
+            address = response.get('tip_via', '') + " " + response.get('address', '') + "," + str(response.get('portalNumber', ''))
             TD["new"][column_name] =  address 
         except plpy.SPIError as e:
+            TD["new"][column_name] = ''
             plpy.error("ERROR geocoder_inverso_cartociudad: " + str(e))
-            TD["new"][column_name] = ''
         except Exception as e:
-            plpy.error(str(e))
             TD["new"][column_name] = ''
+            plpy.error(str(e))
         finally:
             return "MODIFY"
     $$ LANGUAGE plpython2u;

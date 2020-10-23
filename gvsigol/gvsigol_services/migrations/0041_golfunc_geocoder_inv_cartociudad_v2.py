@@ -12,7 +12,7 @@ def insert_def(apps, schema_editor):
     try:
         from django.utils.translation import ugettext_noop as _
         TriggerProcedure = apps.get_model("gvsigol_services", "TriggerProcedure")
-        procedure = TriggerProcedure()
+        procedure = TriggerProcedure.objects.get(signature=INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE)
         procedure.signature = TRIGGER_SIGNATURE
         procedure.func_name = INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME
         procedure.func_schema = INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SCHEMA
@@ -37,10 +37,13 @@ def remove_def(apps, schema_editor):
         print error
         
 class Migration(migrations.Migration):
+    """
+    The trigger definition was updated, so we force an update using a new migration
+    """
     dependencies = [
-        ('gvsigol_services', '0038_auto_20201021_1305'),
+        ('gvsigol_services', '0040_auto_20201022_1057'),
     ]
 
     operations = [
-        migrations.RunPython(insert_def, reverse_code=remove_def),
+        migrations.RunPython(insert_def, reverse_code=migrations.RunPython.noop),
     ]
