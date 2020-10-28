@@ -459,7 +459,7 @@ class WCSClient():
         self.params = params
         self.output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
         self.nativeSrsCode = None
-        self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0'}
+        self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0', 'xlink': "http://www.w3.org/1999/xlink"}
         self.gmlCoverageNamespaces =  {
                 'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
                 'wcscrs': "http://www.opengis.net/wcs/service-extension/crs/1.0",
@@ -505,8 +505,31 @@ class WCSClient():
         if describeCoverageTree is not None:
             return describeCoverageTree.find('./gml:boundedBy/gml:Envelope', namespaces)
 
+    def getCapabilitiesTree(self, baseUrl, version='2.0.1'):
+        url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=' + version +'&request=GetCapabilities'
+        logger.debug(url)
+        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
+        if r.status_code != 200:
+            raise PreparationError("Error retrieving getCapabilities")
+        return ET.fromstring(r.content)
+
+    def getGetOperationUrl_v2_0_1(self, capabilitiesTree, operationName):
+        try:
+            if capabilitiesTree is not None:
+                findExpr = './ows:OperationsMetadata/ows:Operation[@name="' + operationName + '"]/ows:DCP/ows:HTTP/ows:Get'
+                operationHttpGetList = capabilitiesTree.findall(findExpr, self.wcs200Namespaces)
+                for operationHttpGet in operationHttpGetList:
+                    operationHttpGetUrl = operationHttpGet.get('{' + self.wcs200Namespaces.get('xlink') +'}href')
+                    if operationHttpGetUrl:
+                        return operationHttpGetUrl
+        except:
+            logger.exception(u"Error getting the URL of operation: " + operationName)
+        return self.url
+
     def getWcsRequest(self):
-        url = _normalizeWxsUrl(self.url) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + self.layer_name
+        capabilitiesTree = self.getCapabilitiesTree(self.url)
+        getCoverageUrl = self.getGetOperationUrl_v2_0_1(capabilitiesTree, 'GetCoverage')
+        url = _normalizeWxsUrl(getCoverageUrl) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + self.layer_name
         self.file_format = _getParamValue(self.params, FORMAT_PARAM_NAME)
         if self.isMultipartResult():
             url += u'&mediatype=multipart/related'
@@ -516,7 +539,8 @@ class WCSClient():
         if spatial_filter_type == 'bbox':
             spatial_filter_bbox = _getParamValue(self.params, SPATIAL_FILTER_BBOX_PARAM_NAME)
             if spatial_filter_bbox:
-                describeCoverageTree = self._getDescribeWcsCoverageTree(self.layer_name, self.url)
+                describeCoverageUrl = self.getGetOperationUrl_v2_0_1(capabilitiesTree, 'DescribeCoverage')
+                describeCoverageTree = self._getDescribeWcsCoverageTree(self.layer_name, describeCoverageUrl)
                 if describeCoverageTree is not None:
                     describeCoverageRoot = describeCoverageTree.find('./wcs:CoverageDescription', self.wcs200Namespaces)
                     envelopeNode = self._getWcsCoverageEnvelope(describeCoverageRoot, self.wcs200Namespaces)
@@ -700,7 +724,7 @@ class WFSClient():
         self.output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
         self.nativeSrsCode = None
         self.canceled = False
-        self.wfs200Namespaces = {'wfs': 'http://www.opengis.net/wfs/2.0', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+        self.wfs200Namespaces = {'wfs': 'http://www.opengis.net/wfs/2.0', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'ows': 'http://www.opengis.net/ows/1.1', 'xlink': "http://www.w3.org/1999/xlink"}
         self.wfs100Namespaces = {'wfs': 'http://www.opengis.net/wfs', 'ogc': 'http://www.opengis.net/ogc', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
 
     def cancel(self):
@@ -715,24 +739,50 @@ class WFSClient():
             if epsgString.startswith('urn:ogc:def:crs:EPSG:'):
                 return re.sub('urn:ogc:def:crs:EPSG:[^:]*:', '', epsgString)
 
-    def getLayerCrs_v1_0_0(self, getCapabilitiesTree, layerName):
+    def getLayerCrs_v1_0_0(self, capabilitiesTree, layerName):
         try:
-            if getCapabilitiesTree is not None:
+            if capabilitiesTree is not None:
                 findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
-                featureTypes = getCapabilitiesTree.findall(findExpr, self.wfs100Namespaces)
+                featureTypes = capabilitiesTree.findall(findExpr, self.wfs100Namespaces)
                 for featureTypeNameNode in featureTypes:
                     if featureTypeNameNode.text == layerName:
                         srsNode = featureTypeNameNode.find("../wfs:SRS", self.wfs100Namespaces)
                         if srsNode is not None:
                             return srsNode.text
         except:
-            logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
+            logger.exception(u"Error getting the CRS of the WFS layer: " + layerName)
 
-    def getLayerCrs_v2_0_0(self, getCapabilitiesTree, layerName):
+    def getGetOperationUrl_v1_0_0(self, capabilitiesTree, operationName):
         try:
-            if getCapabilitiesTree is not None:
+            if capabilitiesTree is not None:
+                findExpr = "./wfs:Capability/wfs:Request/wfs:" + operationName + "/wfs:DCPType/wfs:HTTP/wfs:Get"
+                operationHttpGetList = capabilitiesTree.findall(findExpr, self.wfs100Namespaces)
+                for operationHttpGet in operationHttpGetList:
+                    operationHttpGetUrl = operationHttpGet.get("onlineResource")
+                    if operationHttpGetUrl:
+                        return operationHttpGetUrl
+        except:
+            logger.exception(u"Error getting the URL of operation: " + operationName)
+        return self.url
+
+    def getGetOperationUrl_v2_0_0(self, capabilitiesTree, operationName):
+        try:
+            if capabilitiesTree is not None:
+                findExpr = './ows:OperationsMetadata/ows:Operation[@name="' + operationName + '"]/ows:DCP/ows:HTTP/ows:Get'
+                operationHttpGetList = capabilitiesTree.findall(findExpr, self.wfs200Namespaces)
+                for operationHttpGet in operationHttpGetList:
+                    operationHttpGetUrl = operationHttpGet.get('{' + self.wfs200Namespaces.get('xlink') +'}href')
+                    if operationHttpGetUrl:
+                        return operationHttpGetUrl
+        except:
+            logger.exception(u"Error getting the URL of operation: " + operationName)
+        return self.url
+
+    def getLayerCrs_v2_0_0(self, capabilitiesTree, layerName):
+        try:
+            if capabilitiesTree is not None:
                 findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
-                featureTypes = getCapabilitiesTree.findall(findExpr, self.wfs200Namespaces)
+                featureTypes = capabilitiesTree.findall(findExpr, self.wfs200Namespaces)
                 for featureTypeNameNode in featureTypes:
                     if featureTypeNameNode.text == layerName:
                         srsNode = featureTypeNameNode.find("../wfs:DefaultCRS", self.wfs200Namespaces)
@@ -991,7 +1041,17 @@ class WFSClient():
         logger.debug(self.url)
         try:
             self.capabilitiesTree = self.getCapabilitiesTree(self.url, version='1.0.0')
-            self.nativeSrs = self.getLayerCrs_v1_0_0(self.capabilitiesTree, self.layer_name)
+            # in case the server does not support the requested version and returns a different one
+            capabilitiesVersion = self.capabilitiesTree.get('version')
+            if capabilitiesVersion[0] == '1':
+                self.nativeSrs = self.getLayerCrs_v1_0_0(self.capabilitiesTree, self.layer_name)
+                getFeatureUrl = self.getGetOperationUrl_v1_0_0(self.capabilitiesTree, 'GetFeature')
+            else:
+                self.nativeSrs = self.getLayerCrs_v2_0_0(self.capabilitiesTree, self.layer_name)
+                getFeatureUrl = self.getGetOperationUrl_v2_0_0(self.capabilitiesTree, 'GetFeature')
+            print "getFeatureUrl"
+            print getFeatureUrl
+            
             paramDict = {}
             if self.file_format is not None:
                 paramDict['file_format'] = self.file_format
@@ -1007,7 +1067,7 @@ class WFSClient():
                 We use WFS 1.0 because it is easier to get consistent axis order results
                 for Shapefiles, GeoJSONs, etc, as expected by most of the existing GIS software.
                 """
-                url = self.getWfsGetFeatureRequest_v1_0_0(self.url, self.layer_name, self.params, **paramDict)
+                url = self.getWfsGetFeatureRequest_v1_0_0(getFeatureUrl, self.layer_name, self.params, **paramDict)
                 if partCount > 1:
                     suffix = '_part{:02}'.format(partCount)
                 else:
