@@ -459,7 +459,7 @@ class WCSClient():
         self.params = params
         self.output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
         self.nativeSrsCode = None
-        self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0', 'xlink': "http://www.w3.org/1999/xlink"}
+        self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0', 'xlink': "http://www.w3.org/1999/xlink", 'ows': 'http://www.opengis.net/ows/2.0'}
         self.gmlCoverageNamespaces =  {
                 'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
                 'wcscrs': "http://www.opengis.net/wcs/service-extension/crs/1.0",
@@ -643,6 +643,16 @@ class WCSClient():
         try:
             r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
             if r.status_code != 200:
+                try:
+                    error_root = ET.fromstring(r.content)
+                    exc = error_root.find('ows:Exception', self.wcs200Namespaces)
+                    if exc:
+                        code = exc.get('exceptionCode')
+                        message = "".join(exc.itertext())
+                        if code == 'InvalidSubsetting':
+                            raise PermanentPreparationError(u'The provided spatial filter does not overlap the layer. Layer could not be retrieved. Error code: ' + code + ' - Error message: ' + message.strip())
+                except ET.LxmlError:
+                    pass
                 tmp_file.close()
                 raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
             for chunk in r.iter_content(chunk_size=128):
