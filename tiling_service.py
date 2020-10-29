@@ -239,7 +239,7 @@ class Tiling():
                                 return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
-                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process)
+                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, 0)
                             
                         
             #Si la capa es OSM los niveles 0-6 ya están en un zip
@@ -264,7 +264,7 @@ class Tiling():
                                 return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
-                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process)
+                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, 0)
                               
      
         return True
@@ -274,6 +274,7 @@ class Tiling():
     def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y):
         start_time = t()
         first_entry = True   
+        init_processed_tiles = base_layer_process[str(self.prj_id)]['processed_tiles']
         if start_level == None:
             start_level = 0   
 
@@ -300,7 +301,7 @@ class Tiling():
                                 return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
-                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process)
+                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
                     ytile = cpy_ytile
             start_x = None
             start_y = None
@@ -330,17 +331,26 @@ class Tiling():
                                 return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
-                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process)
+                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
                 ytile = cpy_ytile
                               
      
         return True
 
 
-    def get_estimated_time(self, start_time, base_layer_process):
+    def get_estimated_time(self, start_time, base_layer_process, init_processed_tiles):
+        """
+        Calcula el tiempo estimado de los tiles que faltan por descargar en función de lo que ha tardado los ya descargados.
+        Cuando se hace un retry es necesario saber los tiles que ya habia descargados (init_processed_tiles) porque no entran
+        en el cálculo de la descarga
+        """
         elapsed_time = t() - start_time
         total_tiles = base_layer_process[str(self.prj_id)]['total_tiles']
-        processed_tiles = min(base_layer_process[str(self.prj_id)]['processed_tiles'] + 1, total_tiles)
+        
+        processed_tiles = base_layer_process[str(self.prj_id)]['processed_tiles'] - init_processed_tiles
+        total_tiles = total_tiles - init_processed_tiles
+
+        processed_tiles = min(processed_tiles + 1, total_tiles)
         total_estimated_secs = (total_tiles * elapsed_time) / processed_tiles
         estimated_secs = ((total_tiles - processed_tiles) * total_estimated_secs) / total_tiles
         return self.display_time(estimated_secs)   
