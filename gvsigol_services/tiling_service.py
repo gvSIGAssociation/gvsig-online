@@ -394,7 +394,10 @@ class Tiling():
                 'processed_tiles' : base_layer_process[str(self.prj_id)]['processed_tiles'],
                 'version' : base_layer_process[str(self.prj_id)]['version'],
                 'time' : '-',
-                'stop' : 'false'
+                'stop' : 'false',
+                'format_processed' : base_layer_process[str(self.prj_id)]['format_processed'],
+                'extent_processed' : base_layer_process[str(self.prj_id)]['extent_processed'],
+                'zoom_levels_processed' : base_layer_process[str(self.prj_id)]['zoom_levels_processed']
             }
             
         return num_tiles
@@ -459,7 +462,10 @@ def retry_base_layer_tiling(base_layer_process, tiling_data):
                 'processed_tiles' : processed_tiles,
                 'version' : tiling_data.version,
                 'time' : '-',
-                'stop' : 'false'
+                'stop' : 'false',
+                'format_processed' : tiling_data.format,
+                'extent_processed' : tiling_data.extentid,
+                'zoom_levels_processed' : tiling_data.levels
             }
 
             tiling = Tiling(folder_package, lyr.type, tiling_data.tilematrixset, url, tiling_data.project.id)
@@ -491,8 +497,8 @@ def retry_base_layer_tiling(base_layer_process, tiling_data):
                 outProj = Proj(init='epsg:3857')
                 tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
                 tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
-                number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, base_layer_process) 
-                status = tiling.retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, tiling_data.format, start_level, start_x, start_y)
+                number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, tiling_data.levels, base_layer_process) 
+                status = tiling.retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, tiling_data.levels, tiling_data.format, start_level, start_x, start_y)
 
             _close_download(base_layer_process, prj, tiling_data.folder_prj, number_of_tiles, tiling_data.version, status)
 
@@ -538,6 +544,15 @@ def _get_number_of_tiles(dir, levels):
             count = count + len(xlist)
     return count
 
+def _delete_pending_downloads(dir, prefix):
+    """
+    Borra los directorios pendientes de descarga si se inicia una nueva para evitar acumular basura
+    """
+    content = os.listdir(dir)
+    for file in content:
+        path = os.path.join(dir, file)
+        if(os.path.isdir(path) and file.startswith(prefix)):
+            shutil.rmtree(path)
 
 @start_new_thread
 def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tilematrixset, format_='image/png', extentid='project'):
@@ -553,6 +568,7 @@ def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tile
         url = base_lyr.datastore.workspace.wmts_endpoint
     
     layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
+    _delete_pending_downloads(layers_dir, prj.name + "_prj_")
     folder_prj =  os.path.join(layers_dir, prj.name) + "_prj_" + str(millis)
     folder_package = os.path.join(folder_prj, dir)
     if not os.path.exists(layers_dir):
@@ -600,7 +616,10 @@ def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tile
                 'processed_tiles' : 0,
                 'version' : millis,
                 'time' : '-',
-                'stop' : 'false'
+                'stop' : 'false',
+                'format_processed' : format_,
+                'extent_processed' : extentid,
+                'zoom_levels_processed' : num_res_levels
             }
 
         if(extentid == 'project'):
@@ -662,7 +681,10 @@ def _close_download(base_layer_process, prj, folder_prj, number_of_tiles, versio
             'processed_tiles' : number_of_tiles,
             'version' : version,
             'time' : '-',
-            'stop' : 'false'
+            'stop' : 'false',
+            'format_processed' : '-',
+            'extent_processed' : '-',
+            'zoom_levels_processed' : '-'
         }
 
     #Si no se ha parado y ha terminado bien se guarda la nueva versión en Project
