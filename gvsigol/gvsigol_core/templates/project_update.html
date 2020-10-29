@@ -389,6 +389,24 @@
 													<label style="color: #ff0000;" id='estimated_time'>-</label>
 												</div>
 											</div>
+											<div class="row">
+												<div class="col-md-6 form-group" style="margin-left: 20px">
+													<label style="color: #3c8dbc;">{% trans "Format" %}: </label>
+													<label style="color: #ff0000;" id='format_processed'>-</label>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-md-6 form-group" style="margin-left: 20px">
+													<label style="color: #3c8dbc;">{% trans "Extent" %}: </label>
+													<label style="color: #ff0000;" id='extent_processed'>-</label>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-md-6 form-group" style="margin-left: 20px">
+													<label style="color: #3c8dbc;">{% trans "Niveles de zoom" %}: </label>
+													<label style="color: #ff0000;" id='zoom_levels_processed'>-</label>
+												</div>
+											</div>
 										</div>
 										
 										<!-- Enlace para descarga cuando hay una versión -->
@@ -593,6 +611,9 @@
 								var perc = (parseInt(response.processed_tiles) * 100) / parseInt(response.total_tiles)
 								$("#tiles_percent").text("(" + parseInt(perc) + "%)");
 								$("#estimated_time").text(response.time);
+								$("#format_processed").text(response.format_processed);
+								$("#extent_processed").text(response.extent_processed);
+								$("#zoom_levels_processed").text(response.zoom_levels_processed);
 								
 							} else {
 								$("#processing_header").hide()
@@ -612,6 +633,9 @@
 							$("#processed_tiles").text("-");
 							$("#tiles_percent").text("(-)");
 							$("#estimated_time").text('-')
+							$("#format_processed").text('-');
+							$("#extent_processed").text('-');
+							$("#zoom_levels_processed").text('-');
 						}
 					});
 				}, 2500);
