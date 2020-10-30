@@ -337,6 +337,47 @@
   	        
   	    }
   	}
+
+    /**
+    Ensures the center of the extent is within the EPSG:3857 projection bounds
+    */
+	function getCanonicalEpsg3857Extent(extent) {
+        var epsg3857_min_x = -20037508.34;
+        var epsg3857_max_x = 20037508.34;
+        var epsg3857_min_y = -20037508.34;
+        var epsg3857_max_y = 20037508.34;
+        
+        var min_x = extent[0];
+        var min_y = extent[1];
+        var max_x = extent[2];
+        var max_y = extent[3];
+        
+        var extent_width = max_x - min_x;
+        var center_x = min_x + extent_width / 2.0;
+        if (center_x < epsg3857_min_x) {
+            // we first move the extent to pure negative coordinates to ensure the module brings the center to
+            // the "right" world, then we undo this movement to move the center to the right location
+            center_x = (center_x + epsg3857_min_x) % (2* epsg3857_min_x) - epsg3857_min_x ;
+        }
+        else if (center_x > epsg3857_max_x) {
+            center_x = (center_x + epsg3857_max_x) % (2*epsg3857_max_x) - epsg3857_max_x;
+        }
+        min_x = center_x - extent_width / 2.0;
+        max_x = center_x + extent_width / 2.0;
+        
+        var extent_height = max_y - min_y;
+        var center_y = min_y + extent_height / 2.0;
+
+        if (center_y < epsg3857_min_y) {
+            center_y = (center_y + epsg3857_min_y) % (2*epsg3857_min_y) - epsg3857_min_y;
+        }
+        else if (center_y > epsg3857_max_y) {
+            center_y = (center_y + epsg3857_max_y) % (2*epsg3857_max_y) - epsg3857_max_y;
+        }
+        min_y = center_y - extent_height / 2.0;
+        max_y = center_y + extent_height / 2.0;
+        return [min_x, min_y, max_x, max_y];
+	}
 	
 	$().ready(function() {
 		/**
@@ -463,9 +504,10 @@
 		
 		$('#project-form').submit(function() {
 			$("body").overlay();
+			var extent = map.getView().calculateExtent(map.getSize());
+			map.getView().fit(getCanonicalEpsg3857Extent(extent));
 			var coordinate = map.getView().getCenter();
 			var transformedCoordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
-			var extent = map.getView().calculateExtent(map.getSize()); 
 			var zoom = map.getView().getZoom();
 			
 			var selectedBaseLayer = $('input:radio[name=baselayers-default]:checked').val();
