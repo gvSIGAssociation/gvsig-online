@@ -650,3 +650,48 @@ def is_manage_process(exclude_runserver=False, exclude_testserver=False):
 def is_gvsigol_process():
     from gvsigol.celery import is_celery_process
     return (not is_celery_process() and not is_manage_process(exclude_runserver=True, exclude_testserver=True))
+
+def get_canonical_epsg3857_extent(extent_str):
+    """
+    Ensures the center of the extent is within the EPSG:3857 projection bounds
+    """
+    try:
+        epsg3857_min_x = -20037508.34
+        epsg3857_max_x = 20037508.34
+        epsg3857_min_y = -20037508.34
+        epsg3857_max_y = 20037508.34
+        
+        extent = extent_str.split(",")
+        min_x = float(extent[0])
+        min_y = float(extent[1])
+        max_x = float(extent[2])
+        max_y = float(extent[3])
+        
+        extent_width = max_x - min_x
+        center_x = min_x + extent_width / 2.0
+        
+        if (center_x < epsg3857_min_x):
+            # we first move the extent to pure negative coordinates to ensure the module brings the center to
+            # the "right" world, then we undo this movement to move the center to the right location
+            center_x = (center_x + epsg3857_min_x) % (2*epsg3857_min_x) + epsg3857_min_x
+        elif (center_x > epsg3857_max_x):
+            center_x = (center_x + epsg3857_max_x) % (2*epsg3857_max_x) + epsg3857_max_x
+        
+        min_x = center_x - extent_width / 2.0
+        max_x = center_x + extent_width / 2.0
+        
+        extent_height = max_y - min_y
+        center_y = min_y + extent_height / 2.0
+
+        if (center_y < epsg3857_min_y):
+            center_y = (center_y + epsg3857_min_y) % (2*epsg3857_min_y) + epsg3857_min_y
+        elif (center_y > epsg3857_max_y):
+            center_y = (center_y + epsg3857_max_y) % (2*epsg3857_max_y) + epsg3857_max_y
+
+        min_y = center_y - extent_height / 2.0
+        max_y = center_y + extent_height / 2.0
+        return str(min_x) + "," + str(min_y) + "," + str(max_x) + "," + str(max_y)
+    except:
+        logger.exception("Wrong extent")
+        return extent_str
+    
