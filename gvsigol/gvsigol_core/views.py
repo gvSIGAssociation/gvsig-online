@@ -274,7 +274,7 @@ def project_add(request):
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
-        extent = request.POST.get('extent')
+        extent = core_utils.get_canonical_epsg3857_extent(request.POST.get('extent'))
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
@@ -484,7 +484,7 @@ def project_update(request, pid):
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
-        extent = request.POST.get('extent')
+        extent = core_utils.get_canonical_epsg3857_extent(request.POST.get('extent'))
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
@@ -1161,7 +1161,7 @@ def project_get_conf(request):
             'project_tools': project_tools,
             "view": {
                 "restricted_extent": project.restricted_extent,
-                "extent": project.extent.split(','),
+                "extent": [ float(f) for f in project.extent.split(',')],
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon,
                 "zoom": project.zoom,
