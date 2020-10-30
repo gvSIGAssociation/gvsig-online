@@ -321,12 +321,6 @@ def project_add(request):
             if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
 
-        exists = False
-        projects = Project.objects.all()
-        for p in projects:
-            if name == p.name:
-                exists = True
-
         layergroups = None
         if request.user.is_superuser:
             layergroups = LayerGroup.objects.exclude(name='__default__')
@@ -362,75 +356,73 @@ def project_add(request):
             message = _(u"Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
             return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
-        if not exists:
-            project = Project(
-                name = name,
-                title = title,
-                logo_link = logo_link,
-                description = description,
-                center_lat = latitude,
-                center_lon = longitude,
-                zoom = int(float(zoom)),
-                extent = extent,
-                toc_order = toc,
-                toc_mode = toc_mode,
-                created_by = request.user.username,
-                is_public = is_public,
-                show_project_icon = show_project_icon,
-                selectable_groups = selectable_groups,
-                restricted_extent = restricted_extent,
-                tools = tools
-            )
+        if Project.objects.filter(name=name).exists():
+            message = _(u'Project name already exists')
+            return render(request, 'project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+
+        project = Project(
+            name = name,
+            title = title,
+            logo_link = logo_link,
+            description = description,
+            center_lat = latitude,
+            center_lon = longitude,
+            zoom = int(float(zoom)),
+            extent = extent,
+            toc_order = toc,
+            toc_mode = toc_mode,
+            created_by = request.user.username,
+            is_public = is_public,
+            show_project_icon = show_project_icon,
+            selectable_groups = selectable_groups,
+            restricted_extent = restricted_extent,
+            tools = tools
+        )
+        project.save()
+        
+        if has_image:
+            project.image = request.FILES['project-image']
             project.save()
-            
-            if has_image:
-                project.image = request.FILES['project-image']
-                project.save()
-            
-            if has_logo:
-                project.logo = request.FILES['project-logo']
-                project.save()
+        
+        if has_logo:
+            project.logo = request.FILES['project-logo']
+            project.save()
 
-            for alg in assigned_layergroups:
-                layergroup = LayerGroup.objects.get(id=alg)
-                baselayer_group = False
-                if selected_base_group != '' and alg == int(selected_base_group):
-                    baselayer_group = True
-                project_layergroup = ProjectLayerGroup(
-                    project = project,
-                    layer_group = layergroup,
-                    multiselect = True,
-                    baselayer_group = baselayer_group
-                )
+        for alg in assigned_layergroups:
+            layergroup = LayerGroup.objects.get(id=alg)
+            baselayer_group = False
+            if selected_base_group != '' and alg == int(selected_base_group):
+                baselayer_group = True
+            project_layergroup = ProjectLayerGroup(
+                project = project,
+                layer_group = layergroup,
+                multiselect = True,
+                baselayer_group = baselayer_group
+            )
+            project_layergroup.save()
+            if baselayer_group and selected_base_layer:
+                project_layergroup.default_baselayer = selected_base_layer
                 project_layergroup.save()
-                if baselayer_group and selected_base_layer:
-                    project_layergroup.default_baselayer = selected_base_layer
-                    project_layergroup.save()
 
-            for aug in assigned_usergroups:
-                usergroup = UserGroup.objects.get(id=aug)
-                project_usergroup = ProjectUserGroup(
-                    project = project,
-                    user_group = usergroup
-                )
-                project_usergroup.save()
-
-            admin_group = UserGroup.objects.get(name__exact='admin')
+        for aug in assigned_usergroups:
+            usergroup = UserGroup.objects.get(id=aug)
             project_usergroup = ProjectUserGroup(
                 project = project,
-                user_group = admin_group
+                user_group = usergroup
             )
             project_usergroup.save()
 
-            if 'redirect' in request.GET:
-                redirect_var = request.GET.get('redirect')
-                if redirect_var == 'new-layer-group':
-                    return redirect('layergroup_add_with_project', project_id=str(project.id))
+        admin_group = UserGroup.objects.get(name__exact='admin')
+        project_usergroup = ProjectUserGroup(
+            project = project,
+            user_group = admin_group
+        )
+        project_usergroup.save()
 
-
-        else:
-            message = _(u'Project name already exists')
-            return render(request, 'project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+        if 'redirect' in request.GET:
+            redirect_var = request.GET.get('redirect')
+            if redirect_var == 'new-layer-group':
+                return redirect('layergroup_add_with_project', project_id=str(project.id))
 
 
 
