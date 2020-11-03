@@ -1530,7 +1530,9 @@ class Geoserver():
             binding = self.getGeoserverBindings(sql_type)
             if not binding:
                 logger.debug(_("Unsupported field type: {0}").format(sql_type))
-                raise rest_geoserver.RequestError(-1, _("Unsupported field type: {0}").format(sql_type))
+                e = rest_geoserver.RequestError(-1, _("Unsupported field type: {0}").format(sql_type))
+                e.set_message(_("Unsupported field type: {0}").format(sql_type))
+                raise e
             nullable = True if f['nullable'] == 'YES' else False
             if name in pks:
                 if include_pk:
