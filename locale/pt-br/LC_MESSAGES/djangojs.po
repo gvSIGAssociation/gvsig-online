@@ -111,6 +111,21 @@ msgstr "Gravar nódulo"
 msgid "Edit node"
 msgstr "Editar nodulo"
 
+msgid "Convert"
+msgstr ""
+
+msgid "Autogen"
+msgstr ""
+
+msgid "Autogen ok"
+msgstr ""
+
+msgid "Convert ok"
+msgstr ""
+
+msgid "The field can not be set as mandatory because some records contain NULL values in this column. Delete the NULL values and try again."
+msgstr ""
+
 msgid "Node has been reloaded"
 msgstr ""
 

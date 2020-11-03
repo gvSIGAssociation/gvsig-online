@@ -884,21 +884,33 @@ class Introspect:
         """
         Sets a column to NOT NULL
         """
-        query = "ALTER TABLE " + schema + "." + table + " ALTER COLUMN " + field + " SET NOT NULL ;"
+        sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} SET NOT NULL ;"
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            field=sqlbuilder.Identifier(field))
         self.cursor.execute(query)
         
     def set_field_not_mandatory(self, schema, table, field):
         """
         Sets a column to NOT NULL
         """
-        query = "ALTER TABLE " + schema + "." + table + " ALTER COLUMN " + field + " DROP NOT NULL ;"
+        sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} DROP NOT NULL ;"
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            field=sqlbuilder.Identifier(field))
         self.cursor.execute(query)
         
     def check_has_null_values(self, schema, table, field):
         """
         Returns True if the column has any null values and False otherwise
         """
-        query = "SELECT * FROM " + schema + "." + table + " WHERE " + field + " IS NULL ;"
+        sql = "SELECT 1 FROM {schema}.{table} WHERE {field} IS NULL LIMIT 1;"
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            field=sqlbuilder.Identifier(field))
         self.cursor.execute(query)
         if self.cursor.rowcount > 0:
             return True
