@@ -166,7 +166,10 @@ viewer.core = {
 				})
 			);
 		}
-		
+		if (self.conf.view.extent) {
+			var view = self.map.getView();
+			view.fit(self.conf.view.extent);
+		}
 
 		this.extentLayer = new ol.layer.Vector({
 			source: new ol.source.Vector()

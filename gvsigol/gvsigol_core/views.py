@@ -275,6 +275,10 @@ def project_add(request):
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
         extent = core_utils.get_canonical_epsg3857_extent(request.POST.get('extent'))
+        extent4326_minx = request.POST.get('extent4326_minx')
+        extent4326_miny = request.POST.get('extent4326_miny')
+        extent4326_maxx = request.POST.get('extent4326_maxx')
+        extent4326_maxy = request.POST.get('extent4326_maxy')
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
@@ -376,6 +380,10 @@ def project_add(request):
             show_project_icon = show_project_icon,
             selectable_groups = selectable_groups,
             restricted_extent = restricted_extent,
+            extent4326_minx = extent4326_minx,
+            extent4326_miny = extent4326_miny,
+            extent4326_maxx = extent4326_maxx,
+            extent4326_maxy = extent4326_maxy,
             tools = tools
         )
         project.save()
@@ -477,6 +485,10 @@ def project_update(request, pid):
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
         extent = core_utils.get_canonical_epsg3857_extent(request.POST.get('extent'))
+        extent4326_minx = request.POST.get('extent4326_minx')
+        extent4326_miny = request.POST.get('extent4326_miny')
+        extent4326_maxx = request.POST.get('extent4326_maxx')
+        extent4326_maxy = request.POST.get('extent4326_maxy')
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
@@ -552,6 +564,10 @@ def project_update(request, pid):
         project.show_project_icon = show_project_icon
         project.selectable_groups = selectable_groups
         project.restricted_extent = restricted_extent
+        project.extent4326_minx = extent4326_minx
+        project.extent4326_miny = extent4326_miny
+        project.extent4326_maxx = extent4326_maxx
+        project.extent4326_maxy = extent4326_maxy
 
         if has_image:
             project.image = request.FILES['project-image']
@@ -660,7 +676,7 @@ def project_update(request, pid):
                     
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
-                                                       'project': project, 
+                                                       'project': project,
                                                        'groups': groups, 
                                                        'layergroups': layer_groups, 
                                                        'has_geocoding_plugin': has_geocoding_plugin, 
@@ -1154,6 +1170,7 @@ def project_get_conf(request):
             "view": {
                 "restricted_extent": project.restricted_extent,
                 "extent": [ float(f) for f in project.extent.split(',')],
+                "extent4326": [project.extent4326_minx, project.extent4326_miny, project.extent4326_maxx, project.extent4326_maxy],
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon,
                 "zoom": project.zoom,
