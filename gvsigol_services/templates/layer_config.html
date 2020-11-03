@@ -251,7 +251,7 @@
 				},
 				error: function() {
 					obj.checked = false;
-					messageBox.show('error', gettext('El campo no puede ser obligario.'));
+					messageBox.show('error', gettext('The field can not be set as mandatory because some records contain NULL values in this column. Delete the NULL values and try again.'));
 				}
 			});
 		}
