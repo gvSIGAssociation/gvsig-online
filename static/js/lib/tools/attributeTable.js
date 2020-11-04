@@ -1223,7 +1223,8 @@ attributeTable.prototype.createPdfReport = function(selectedRows) {
         		'fid': selectedRows[j].featureid,
         		'properties': selectedRows[j],
         		'address': completeAddress,
-        		'resources': resources
+				'resources': resources,
+				'selected_fields': fields
         	});
         }
         self.source.clear();
@@ -1358,24 +1359,26 @@ attributeTable.prototype.createPDF = function() {
 		doc.addImage(this.getRegisterImage(r), 'JPEG', 10, top + 5, 80, 40);
 		var auxTop = top;
 		var fieldCount = 0;
-		for (var key in r.properties) {
-			if (key != 'id' && r.properties[key] != null && fieldCount < 8) {
-				doc.setFontSize(10);
-				doc.setFontType('bold');
-				doc.text(95, auxTop + 10, this.getFieldTitle(key) + ':');
-				doc.setFontType('italic');
-				var value = r.properties[key].toString();
-				if (value.length > 50) {
-					value = value.slice(0, 45) + ' ...';
-					doc.text(120, auxTop + 10, value);
-				} else {
-					doc.text(120, auxTop + 10, value);
+		for (var j=0; j<r.selected_fields.length; j++) {
+			for (var key in r.properties) {
+				if (r.selected_fields[j] == key) {
+					if (key != 'id' && r.properties[key] != null && fieldCount < 8) {
+						doc.setFontSize(10);
+						doc.setFontType('bold');
+						doc.text(95, auxTop + 10, this.getFieldTitle(key) + ':');
+						doc.setFontType('italic');
+						var value = r.properties[key].toString();
+						if (value.length > 50) {
+							value = value.slice(0, 45) + ' ...';
+							doc.text(130, auxTop + 10, value);
+						} else {
+							doc.text(130, auxTop + 10, value);
+						}
+						auxTop = auxTop + 5;
+						fieldCount++;
+					}
 				}
-				auxTop = auxTop + 5;
-				fieldCount++;
 			}
-			
-			
 		}
 		top = top + 65;
 		numItems++;
