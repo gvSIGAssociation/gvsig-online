@@ -677,6 +677,7 @@ def layer_refresh_extent(request, layer_id):
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     if datastore.type == 'v_PostGIS':
         server.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
+        gs.reload_nodes()
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
     layer.save()
@@ -4587,6 +4588,7 @@ def db_field_delete(request):
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
         except psycopg2.ProgrammingError as e:
             logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
@@ -4647,6 +4649,7 @@ def db_field_rename(request):
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
         except psycopg2.ProgrammingError as e:
             logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
@@ -4756,6 +4759,7 @@ def db_add_field(request):
             
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
         except Exception as e:
             logger.exception(_('Error creating field. Cause: {0}').format(e.message))
