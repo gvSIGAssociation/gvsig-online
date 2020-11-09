@@ -187,25 +187,6 @@ class Geoserver():
         except Exception as e:
             print str(e)
             return False
-        
-    def reload_nodes_old(self):
-        try:
-            # get sequence from master
-            us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
-            print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Aapche. Update Sequence = " + str(us_master)
-            # reload all nodes except master
-            if len(self.slave_nodes) > 0:
-                time.sleep(settings.RELOAD_NODES_DELAY)
-                for node in self.slave_nodes:
-                    us =  self.rest_catalog.get_update_sequence(node, user=self.user, password=self.password)
-                    if us != us_master:
-                        print  "INFO: Reloading ... " + node + " with updatedSequence " + str(us) 
-                        self.rest_catalog.reload(node, user=self.user, password=self.password)
-            return True
-        
-        except Exception as e:
-            print str(e)
-            return False
 
     def reload_all_nodes(self):
         print "DEBUG: Reloading Geoserver nodes ......"
