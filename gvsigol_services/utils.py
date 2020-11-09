@@ -34,7 +34,7 @@ import psycopg2
 import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import MEDIA_ROOT
-from gvsigol_auth.models import UserGroup
+from gvsigol_auth.models import UserGroup, UserGroupUser, User
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace
@@ -42,7 +42,6 @@ from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
-
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
@@ -86,7 +85,44 @@ def get_write_roles(layer):
 
     return roles
 
- 
+def can_write_layer(user, layer):
+    if not isinstance(user, User):
+        user = User.objects.get(username=user)
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.get(id=layer)
+    """
+    Checks whether the user has permissions to write the provied layer.
+    It accepts a project instance, a project name or a project id.
+    """
+    try:
+        if user.is_superuser:
+            return True
+        if UserGroupUser.objects.filter(user=user, user_group__layerwritegroup__layer=layer).count() > 0:
+            return True
+    except Exception as e:
+        print e
+    return False
+
+def can_read_layer(user, layer):
+    if not isinstance(user, User):
+        user = User.objects.get(username=user)
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.get(id=layer)
+    """
+    Checks whether the user has permissions to write the provied layer.
+    It accepts a project instance, a project name or a project id.
+    """
+    try:
+        if user.is_superuser:
+            return True
+        if LayerReadGroup.objects.filter(layer=layer).count() == 0:
+            return True # layer is public
+        if UserGroupUser.objects.filter(user=user, user_group__layerreadgroup__layer=layer).count() > 0:
+            return True
+    except Exception as e:
+        print e
+    return False
+
 def add_datastore(workspace, type, name, description, connection_params, username):
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     # first create the datastore on the backend
