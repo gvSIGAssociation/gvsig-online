@@ -38,11 +38,30 @@ import random, string
 plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
 
+
 class Introspect:
     def __init__(self, database, host='localhost', port='5432', user='postgres', password='postgres'):
-        self.conn = psycopg2.conn = psycopg2.connect(database=database, user=user, password=password, host=host, port=port)
-        self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        self.cursor = self.conn.cursor()
+        self.conn = None
+        self.database = database
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+        self.__enter__()
+
+    def __enter__(self):
+        if not self.conn:
+            self.conn = psycopg2.connect(database=self.database, user=self.user, password=self.password, host=self.host, port=self.port)
+            delattr(self, 'user')
+            delattr(self, 'password')
+            self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            self.cursor = self.conn.cursor()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.conn:
+            self.conn.close()
+        return exc_type is None
     
     def get_tables(self, schema='public'):
         self.cursor.execute("""
