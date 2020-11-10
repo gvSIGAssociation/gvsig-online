@@ -899,28 +899,20 @@ class Introspect:
         row = self.cursor.fetchone()
         return (row[0], row[1], row[2], row[3])
     
-    def set_field_mandatory(self, schema, table, field):
+    def set_field_nullable(self, schema, table, field, nullable):
         """
-        Sets a column to NOT NULL
+        Sets a column to NULL / NOT NULL
         """
-        sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} SET NOT NULL ;"
+        if nullable:
+            sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} DROP NOT NULL ;"
+        else:
+            sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} SET NOT NULL ;"
         query = sqlbuilder.SQL(sql).format(
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table),
             field=sqlbuilder.Identifier(field))
         self.cursor.execute(query)
-        
-    def set_field_not_mandatory(self, schema, table, field):
-        """
-        Sets a column to NOT NULL
-        """
-        sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} DROP NOT NULL ;"
-        query = sqlbuilder.SQL(sql).format(
-            schema=sqlbuilder.Identifier(schema),
-            table=sqlbuilder.Identifier(table),
-            field=sqlbuilder.Identifier(field))
-        self.cursor.execute(query)
-        
+
     def check_has_null_values(self, schema, table, field):
         """
         Returns True if the column has any null values and False otherwise

@@ -1451,6 +1451,7 @@ def layer_autoconfig(layer, featuretype):
                     field['editable'] = False
             field['infovisible'] = False
             field['mandatory'] = False
+            field['nullable'] = True
             fields.append(field)
 
     layer_conf = {
@@ -1487,17 +1488,13 @@ def layer_config(request, layer_id):
             field['infovisible'] = False
             if 'field-infovisible-' + str(i) in request.POST:
                 field['infovisible'] = True
-            field['mandatory'] = False
-            if 'field-mandatory-' + str(i) in request.POST:
-                if _set_field_mandatory(layer_id, field['name'], True):
-                    field['mandatory'] = True
-                else:
-                    field['mandatory'] = False
+            nullable = (request.POST.get('field-nullable-' + str(i), False) != False)
+            _set_field_nullable(layer_id, field['name'], nullable)
+            field['nullable'] = nullable
+            if not nullable:
+                field['mandatory'] = True
             else:
-                if _set_field_mandatory(layer_id, field['name'], False):
-                    field['mandatory'] = False
-                else:
-                    field['mandatory'] = True
+                field['mandatory'] = (request.POST.get('field-mandatory-' + str(i), False) != False)
             field['editable'] = False
             if 'field-editable-' + str(i) in request.POST:
                 field['editableactive'] = True
@@ -1552,7 +1549,11 @@ def layer_config(request, layer_id):
                                     fconf['editableactive'] = False
                                     fconf['editable'] = False
                             fconf['infovisible'] = fconf.get('infovisible', False)
-                            fconf['mandatory'] = (f.get('nullable') == 'NO')
+                            fconf['nullable'] = (f.get('nullable') != 'NO')
+                            if not fconf['nullable']:
+                                fconf['mandatory'] = True
+                            else:
+                                fconf['mandatory'] = fconf.get('mandatory', False)
                             field = fconf
                             break
                     if not field:
@@ -1568,7 +1569,8 @@ def layer_config(request, layer_id):
                                 field['editableactive'] = False
                                 field['editable'] = False
                         field['infovisible'] = False
-                        field['mandatory'] = (f.get('nullable') == 'NO')
+                        field['nullable'] = (f.get('nullable') != 'NO')
+                        field['mandatory'] = (not field['nullable'])
                     enum = utils.get_enum_entry(layer, field['name'])
                     if enum:
                         field['type'] = text(ugettext('enumerated ({0})').format(enum.title))
@@ -1602,7 +1604,7 @@ def layer_config(request, layer_id):
         }
         return render(request, 'layer_config.html', data)
 
-def _set_field_mandatory(layer_id, field_name, mandatory):
+def _set_field_nullable(layer_id, field_name, nullable):
     """
     Sets a column to NULL or NOT NULL constraint depending on 
     "mandatory" parameter. "Mandatory" should be True to set a column
@@ -1610,26 +1612,16 @@ def _set_field_mandatory(layer_id, field_name, mandatory):
     """
     i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
     try:
-        if(mandatory) :
-            i.set_field_mandatory(dsname, layername, field_name)
-        else:
-            i.set_field_not_mandatory(dsname, layername, field_name)
+        with i as con: # autoclose connection
+            con.set_field_nullable(dsname, layername, field_name, nullable)
     except Exception:
         return False
     return True
 
-def _get_field_mandatory(layer_id, field_name):
-    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
-    return i.is_column_nullable(dsname, layername, field_name)
-
-def _get_fields_mandatory(layer_id):
-    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
-    return i.nullable_cols(dsname, layername)
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["POST"])
 @staff_required
-def check_has_null_values(request):
+def check_nullable(request):
     layer_id = request.POST['layer_id']
     field_name = request.POST['field_name']
     i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
@@ -4728,7 +4720,8 @@ def db_add_field(request):
                 "editableactive": True,
                 "editable": editable,
                 "infovisible": False,
-                "mandatory": False
+                "mandatory": False,
+                "nullable": True
                 }
             for id, language in LANGUAGES:
                 field_def['title-'+id] = field_name
