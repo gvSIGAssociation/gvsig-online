@@ -13,12 +13,12 @@ def fix_extent(apps, schema_editor):
         transform = CoordTransform(crs3857, crs4326)
         for project in Project.objects.all():
             if not project.extent4326_minx or not project.extent4326_miny or not project.extent4326_maxx or not project.extent4326_maxy:
-                extent4326_minx, extent4326_miny, extent4326_maxx, extent4326_maxy =  [ float(f) for f in project.extent.split(',')]
-                point = Point(extent4326_minx, extent4326_miny, srid=3857)
+                extent3857_minx, extent3857_miny, extent3857_maxx, extent3857_maxy =  [ float(f) for f in project.extent.split(',')]
+                point = Point(extent3857_minx, extent3857_miny, srid=3857)
                 point.transform(transform)
                 project.extent4326_minx, project.extent4326_miny  = point.coords
                 
-                point = Point(extent4326_maxx, extent4326_maxy, srid=3857)
+                point = Point(extent3857_maxx, extent3857_maxy, srid=3857)
                 point.transform(transform)
                 project.extent4326_maxx, project.extent4326_maxy  = point.coords
                 project.save()
