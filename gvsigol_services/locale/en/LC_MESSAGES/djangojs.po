@@ -107,7 +107,7 @@ msgstr ""
 msgid "Convert ok"
 msgstr ""
 
-msgid "The field can not be set as mandatory because some records contain NULL values in this column. Delete the NULL values and try again."
+msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
 msgstr ""
 
 msgid "Node has been reloaded"
