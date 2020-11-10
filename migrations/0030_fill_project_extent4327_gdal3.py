@@ -8,7 +8,7 @@ def fix_extent(apps, schema_editor):
         Project = apps.get_model("gvsigol_core", "Project")
         from django.contrib.gis import gdal
         major_version = gdal.gdal_version().split(".")[0]
-        if major_version >= 3:
+        if int(major_version) >= 3:
             # fix effect of previous migration on GDAL 3 installations
             try:
                 # newer Django versions include AxisOrder settings to manage this issue
