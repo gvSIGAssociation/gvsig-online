@@ -89,7 +89,7 @@ urlpatterns = [
     url(r'^describeLayerConfig/$', services_views.describeLayerConfig, name='describeLayerConfig'),
     
     url(r'^update_thumbnail/(?P<layer_id>[0-9]+)/$', services_views.update_thumbnail, name='update_thumbnail'),
-    url(r'^mandatory_check/$', services_views.check_has_null_values, name='check_has_null_values'),
+    url(r'^nullable_check/$', services_views.check_nullable, name='check_nullable'),
     
     url(r'^service_url_list/$', services_views.service_url_list, name='service_url_list'),
     url(r'^service_url_add/$', services_views.service_url_add, name='service_url_add'),

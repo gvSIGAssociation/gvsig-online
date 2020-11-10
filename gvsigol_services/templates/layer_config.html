@@ -57,6 +57,7 @@
 														<th>{% trans "Field name" %}</th>
 														<th>{% trans "Type" %}</th>
 														<th>{% trans "Calculated" %}</th>
+														<th>{% trans "Nullable" %}</th>
 														<th>{% trans "mandatory" %}</th>
 														<th>{% trans "Is visible?" %}</th>
 														<th>{% trans "Is editable?" %}</th>
@@ -71,10 +72,15 @@
 																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
 																	<td><input readonly name="field-type-{{counter}}" type="text" class="form-control" value="{{f.type}}"></td>
 																	<td><input readonly name="field-calculation-{{counter}}" type="text" class="form-control" value="{{f.calculationLabel}}"></td>
-																	{% if f.mandatory %}
-																	<td><input type="checkbox" name="field-mandatory-{{counter}}" checked/></td>
+																	{% if f.nullable %}
+																	<td><input title="{% trans 'Set at database level' %}" type="checkbox" data-counter="{{counter}}" name="field-nullable-{{counter}}" checked/></td>
 																	{% else %}
-																	<td><input id="mandatory-check-{{counter}}" data-type="mandatory" data-fieldname="{{f.name}}" type="checkbox" name="field-mandatory-{{counter}}"/></td>
+																	<td><input title="{% trans 'Set at database level' %}" id="nullable-check-{{counter}}"  data-counter="{{counter}}" data-type="nullable" data-fieldname="{{f.name}}" type="checkbox" name="field-nullable-{{counter}}"/></td>
+																	{% endif %}
+																	{% if f.mandatory %}
+																	<td><input title="{% trans 'Required in editing forms' %}" id="field-mandatory-{{counter}}" type="checkbox" name="field-mandatory-{{counter}}" {% if not f.nullable %}disabled{% endif %} checked /></td>
+																	{% else %}
+																	<td><input title="{% trans 'Required in editing forms' %}" id="field-mandatory-{{counter}}" data-type="mandatory" data-fieldname="{{f.name}}" type="checkbox" name="field-mandatory-{{counter}}"/></td>
 																	{% endif %}
 																	{% if f.visible %}
 																	<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
@@ -232,28 +238,56 @@
 	});
 
 	$('input[type="checkbox"]'). click(function(evt){
-		if($(this).is(":checked") && evt.target.id.startsWith('mandatory-check')){
-			var obj = document.getElementById(evt.target.id);
-			field_name = obj.getAttribute('data-fieldname');
-			data = {
-				"layer_id" : "{{layer_id}}",
-				"field_name": field_name,
-			}
-			$.ajax({
-				type: 'POST',
-				async: false,
-				data: data,
-				url: '/gvsigonline/services/mandatory_check/',
-				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-				},
-				success	:function(response) {
-				},
-				error: function() {
-					obj.checked = false;
-					messageBox.show('error', gettext('The field can not be set as mandatory because some records contain NULL values in this column. Delete the NULL values and try again.'));
+		if (evt.target.id.startsWith('nullable-check')){
+			if(!$(this).is(":checked")) {
+				var obj = document.getElementById(evt.target.id);
+				var field_name = obj.getAttribute('data-fieldname');
+				var counter = obj.getAttribute('data-counter');
+				data = {
+					"layer_id" : "{{layer_id}}",
+					"field_name": field_name,
 				}
-			});
+				$.ajax({
+					type: 'POST',
+					async: false,
+					data: data,
+					url: '/gvsigonline/services/nullable_check/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					},
+					success	:function(response) {
+						console.log("field-mandatory-"+counter);
+						document.getElementById("field-mandatory-"+counter).disabled = true;
+						document.getElementById("field-mandatory-"+counter).checked = true;
+					},
+					error: function() {
+						obj.checked = true;
+						console.log("field-mandatory-"+counter);
+						document.getElementById("field-mandatory-"+counter).disabled = false;
+						messageBox.show('error', gettext('The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again.'));
+					}
+				});
+			}
+			else {
+				var obj = document.getElementById(evt.target.id);
+				var counter = obj.getAttribute('data-counter');
+				console.log("field-mandatory-"+counter);
+				document.getElementById("field-mandatory-"+counter).disabled = false;
+			}
+		}
+		else if (evt.target.name.startsWith('field-nullable-')){
+			console.log(evt);
+			var obj = evt.target;
+			console.log(obj);
+			var counter = obj.getAttribute('data-counter');
+			console.log("field-mandatory-"+counter);
+			if(!$(this).is(":checked")) {
+				document.getElementById("field-mandatory-"+counter).disabled = true;
+				document.getElementById("field-mandatory-"+counter).checked = true;
+			}
+			else {
+				document.getElementById("field-mandatory-"+counter).disabled = false;
+			}
 		}
 	});
 	
