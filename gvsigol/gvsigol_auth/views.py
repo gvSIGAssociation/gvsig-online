@@ -138,6 +138,7 @@ def login_user(request):
                         if user.is_active:
                             login(request, user)
                             id_solicitud = request.GET.get('id_solicitud')
+                            expediente = request.GET.get('expediente')
                             app = request.GET.get('app')
                             token = request.GET.get('token')
                             next = request.GET.get('next')
@@ -147,6 +148,14 @@ def login_user(request):
                                     response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app
                                 else:
                                     response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app + '&token=' + token
+                                return response
+
+                            if expediente is not None:
+                                response = redirect(next)
+                                if token is None:
+                                    response['Location'] += '?expediente=' + expediente
+                                else:
+                                    response['Location'] += '?expediente=' + expediente + '&token=' + token
                                 return response
 
                         else:
