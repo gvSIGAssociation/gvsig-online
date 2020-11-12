@@ -641,7 +641,7 @@ def layer_list(request):
         layer = {
             'id': l.id,
             'type': l.type,
-            'thumbnail_url': l.thumbnail.url,
+            'thumbnail_url': l.thumbnail.url.replace(settings.BASE_URL, ''),
             'name': l.name,
             'title': l.title,
             'datastore_name': l.datastore.name,
@@ -4408,7 +4408,7 @@ def update_thumbnail(request, layer_id):
     try:
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
         layer = gs.updateThumbnail(layer, 'update')
-        return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url}, indent=4), content_type='application/json')
+        return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url.replace(settings.BASE_URL, '')}, indent=4), content_type='application/json')
         
     except Exception as e:
         print str(e)
