@@ -70,13 +70,15 @@ SingleChart.prototype.initialize = function() {
 	ui += 	'</div>';
 	ui += '</div>';
 	
-    $('body').append(ui);
+	$('body').append(ui);
+	var height = 0;
     $('#floating-modal-chart-' + chartId).dialog({
+		collapseEnabled: true,
 		width: 600,
 		resizable: false,
 		autoOpen: true,
 		open: function (event, ui) {
-		    //$('#floating-modal5').css('overflow', 'hidden');
+			//$('#floating-modal5').css('overflow', 'hidden');
 		},
 		close: function( event, ui ) {
 			self.map.removeLayer(self.vectorLayer);
@@ -84,6 +86,9 @@ SingleChart.prototype.initialize = function() {
 			$('#floating-modal-chart-' + chartId).remove();
 		}
 	});
+
+	$('.ui-dialog-titlebar-collapse').append('<i class="fa fa-caret-up"></i>');
+	$('.ui-dialog-titlebar-collapse-restore').append('<i class="fa fa-caret-down"></i>');
 
 	this.loadVectorLayer();
 	this.loadChart();
