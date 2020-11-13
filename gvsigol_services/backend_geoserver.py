@@ -21,7 +21,7 @@ from __builtin__ import False
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from models import Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
+from models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.utils.translation import ugettext_lazy as _
@@ -53,6 +53,7 @@ import utils
 from builtins import str as text
 from django.utils.html import escape, strip_tags
 import threading
+import geographic_servers
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -1906,8 +1907,17 @@ class Geoserver():
         
         req = requests.Session()
         req.auth = (self.user, self.password)
-        print ws.wms_endpoint + "?" + params
-        response = req.get(ws.wms_endpoint + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
+
+        layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+        server = Server.objects.get(id=layer_group.server_id)
+        host = server.frontend_url
+        if len(settings.ALLOWED_HOST_NAMES) > 0:
+            host = settings.ALLOWED_HOST_NAMES[0]
+        
+        wms = ws.wms_endpoint.replace(settings.BASE_URL, '') 
+
+        print host + wms + "?" + params
+        response = req.get(host + wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
             for block in response.iter_content(1024):
                 if not block:
