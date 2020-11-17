@@ -677,7 +677,7 @@ def layer_refresh_extent(request, layer_id):
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     if datastore.type == 'v_PostGIS':
         server.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
-        gs.reload_nodes()
+        server.reload_nodes()
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
     layer.save()
