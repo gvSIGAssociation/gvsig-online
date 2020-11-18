@@ -75,7 +75,10 @@
 						}
 					}						
 				}, this);
-
+				var dataTable = viewer.core.getTool('data-table')
+				if(dataTable) {
+					dataTable.clearSource()
+				}
 				startEdition(selectedLayer);
 			} else {
 				messageBox.show('warning', gettext('You are editing the layer') + ': ' + viewer.core.getLayerTree().getEditionBar().getSelectedLayer().title);
