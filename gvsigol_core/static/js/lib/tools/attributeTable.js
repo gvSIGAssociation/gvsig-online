@@ -28,11 +28,17 @@ var attributeTable = function(layer, map, conf, viewer) {
 	this.map = map;
 	this.conf = conf;
 	this.viewer = viewer;
-	this.layer = layer;
-
+	
 	this.filterCode = null;
 	this.selectedType = null;
+	this.init(layer);
+};
 
+/**
+ * TODO
+ */
+attributeTable.prototype.init = function(layer) {
+	this.layer = layer;
 	this.source = new ol.source.Vector();
 	this.resultLayer = new ol.layer.Vector({
 		source: this.source,
