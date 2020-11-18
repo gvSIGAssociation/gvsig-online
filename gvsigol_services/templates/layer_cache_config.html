@@ -66,14 +66,14 @@
 						<div class="row">
 							<div class="col-md-3 form-group">
 								<label for="input_grid_set">{% trans "Grid set" %}</label>
-<!-- 								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true"> -->
-<!-- 									{% for gs in grid_subsets %} -->
-<!-- 										<option value="{{gs.gridSetName}}">{{gs.gridSetName}}</option> -->
-<!-- 									{% endfor %} -->
-<!-- 								</select> -->
-								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true">
+ 								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true">
+ 									{% for gs in grid_subsets %}
+ 										<option value="{{gs}}">{{gs}}</option>
+ 									{% endfor %}
+ 								</select>
+<!-- 								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true">
 									<option value="EPSG:3857">EPSG:3857</option>
-								</select>
+								</select> -->
 							</div>
 							<div class="col-md-3 form-group">
 								<label for="input_format">{% trans "Format" %}</label>
@@ -120,6 +120,12 @@
 						</div>
 	       				<div class="row">
 							<div id="project-map" class="mini-map"></div>
+						</div>
+						<div>
+							<input hidden name="min_x" id="min_x" type="text">
+							<input hidden name="min_y" id="min_y" type="text">
+							<input hidden name="max_x" id="max_x" type="text">
+							<input hidden name="max_y" id="max_y" type="text">
 						</div>
 					</div>
 	       		</div>
@@ -193,10 +199,21 @@ $().ready(function() {
 	});
 	interaction.on('extentchanged', function(e) {
 		if (e.b) {
-			$('#input_min_x').val(e.b[0]);
-			$('#input_min_y').val(e.b[1]);
-			$('#input_max_x').val(e.b[2]);
-			$('#input_max_y').val(e.b[3]);	
+			var epsg = $('option:selected', $('#input_grid_set')).val();
+			var minXY = ol.proj.transform([e.b[0], e.b[1]], 'EPSG:3857', epsg);
+			var maxXY = ol.proj.transform([e.b[2], e.b[3]], 'EPSG:3857', epsg);
+			$('#min_x').val(minXY[0]);
+			$('#min_y').val(minXY[1]);
+			$('#max_x').val(maxXY[0]);
+			$('#max_y').val(maxXY[1]);
+
+			var epsg = $('option:selected', $('#input_grid_set')).val();
+			var minXY = ol.proj.transform([e.b[0], e.b[1]], 'EPSG:3857', 'EPSG:4326');
+			var maxXY = ol.proj.transform([e.b[2], e.b[3]], 'EPSG:3857', 'EPSG:4326');
+			$('#input_min_x').val(minXY[0]);
+			$('#input_min_y').val(minXY[1]);
+			$('#input_max_x').val(maxXY[0]);
+			$('#input_max_y').val(maxXY[1]);	
 		}
 	});
 	
@@ -242,7 +259,7 @@ $().ready(function() {
 	
 	var gridSubsets = {{json_grid_subsets|safe}};
 	for (var i=0; i<gridSubsets.length; i++) {
-		if (gridSubsets[i].gridSetName == $("#input_grid_set option:first").val()) {
+		if (gridSubsets[i] == $("#input_grid_set option:first").val()) {
 			if (gridSubsets[i].zoomStart && gridSubsets[i].zoomStop) {
 				var zoomStart = gridSubsets[i].zoomStart;
 				var zoomStop = gridSubsets[i].zoomStop;
@@ -259,7 +276,7 @@ $().ready(function() {
 	}
 	
 	for (var i=0; i<gridSubsets.length; i++) {
-		if (gridSubsets[i].gridSetName == 'EPSG:3857') {
+		if (gridSubsets[i] == 'EPSG:3857') {
 			if (gridSubsets[i].extent) {
 				map.getView().fit([gridSubsets[i].extent.coords[0], gridSubsets[i].extent.coords[1], gridSubsets[i].extent.coords[2], gridSubsets[i].extent.coords[3]], map.getSize());
 			}
@@ -268,7 +285,7 @@ $().ready(function() {
 	
 	$('#input_grid_set').change(function(e) {
 		for (var i=0; i<gridSubsets.length; i++) {
-			if (gridSubsets[i].gridSetName == $("#input_grid_set option:selected").val()) {
+			if (gridSubsets[i] == $("#input_grid_set option:selected").val()) {
 				var zoomStart = gridSubsets[i].zoomStart;
 				var zoomStop = gridSubsets[i].zoomStop;
 				$('#input_zoom_start option[value=' + zoomStart + ']').attr('selected','selected');

@@ -2133,10 +2133,10 @@ def layergroup_mapserver_toc(group, toc_string):
             for layer in layers:
                 #if not layer.external:
                 layer_json = {
-                        'name': layer.name,
-                        'title': layer.title,
-                        'order': 1000+i
-                    }
+                    'name': layer.name,
+                    'title': layer.title,
+                    'order': 1000+i
+                }
                 layer.order = i
                 layer.save()
                 i = i + 1
@@ -4140,10 +4140,10 @@ def layer_cache_config(request, layer_id):
     if request.method == 'POST':
         format = request.POST.get('input_format')
         grid_set = request.POST.get('input_grid_set')
-        min_x = request.POST.get('input_min_x')
-        min_y = request.POST.get('input_min_y')
-        max_x = request.POST.get('input_max_x')
-        max_y = request.POST.get('input_max_y')
+        min_x = request.POST.get('min_x')
+        min_y = request.POST.get('min_y')
+        max_x = request.POST.get('max_x')
+        max_y = request.POST.get('max_y')
         number_of_tasks = request.POST.get('input_number_of_task')
         operation_type = request.POST.get('input_operation_type')
         zoom_start = request.POST.get('input_zoom_start')
@@ -4198,18 +4198,18 @@ def layer_cache_config(request, layer_id):
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
             if layer.external:
-                config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
+                #config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
                 tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
             else:
-                config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
+                #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
                 tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
             
             response = {
                 "message": message,
                 "layer_id": layer_id,
                 "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-                "grid_subsets": config.get('gridSubsets'),
-                "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
                 "tasks": tasks['long-array-array']
             }
@@ -4224,17 +4224,17 @@ def layer_cache_config(request, layer_id):
         tasks = None
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         if layer.external:
-            config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
+            #config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
             tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
         else:
-            config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
+            #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
             tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
            
         response = {
             "layer_id": layer_id,
             "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-            "grid_subsets": config.get('gridSubsets'),
-            "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+            "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+            "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
             "formats": settings.CACHE_OPTIONS['FORMATS'],
             "tasks": tasks['long-array-array'],
             "latlong_extent": layer.latlong_extent
@@ -4252,10 +4252,10 @@ def group_cache_config(request, group_id):
     if request.method == 'POST':
         format = request.POST.get('input_format')
         grid_set = request.POST.get('input_grid_set')
-        min_x = request.POST.get('input_min_x')
-        min_y = request.POST.get('input_min_y')
-        max_x = request.POST.get('input_max_x')
-        max_y = request.POST.get('input_max_y')
+        min_x = request.POST.get('min_x')
+        min_y = request.POST.get('min_y')
+        max_x = request.POST.get('max_x')
+        max_y = request.POST.get('max_y')
         number_of_tasks = request.POST.get('input_number_of_task')
         operation_type = request.POST.get('input_operation_type')
         zoom_start = request.POST.get('input_zoom_start')
@@ -4295,15 +4295,15 @@ def group_cache_config(request, group_id):
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
             
-            config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
+            #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
             tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
             
             response = {
                 "message": message,
                 "group_id": group_id,
                 "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-                "grid_subsets": config.get('gridSubsets'),
-                "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
                 "tasks": tasks['long-array-array']
             }
@@ -4318,14 +4318,14 @@ def group_cache_config(request, group_id):
         tasks = None
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         
-        config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
+        #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
         tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
                 
         response = {
             "group_id": group_id,
             "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-            "grid_subsets": config.get('gridSubsets'),
-            "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+            "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+            "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
             "formats": settings.CACHE_OPTIONS['FORMATS'],
             "tasks": tasks['long-array-array']
         }
