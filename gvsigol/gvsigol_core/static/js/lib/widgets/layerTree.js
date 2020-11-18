@@ -409,9 +409,18 @@ layerTree.prototype.setLayerEvents = function() {
 				}
 			}						
 		}, this);
-		var dataTable = new attributeTable(selectedLayer, self.map, self.conf, self.viewer);
-		dataTable.show();
-		dataTable.registerEvents();
+
+		var tool = viewer.core.getTool('data-table')
+		var dataTable = null
+		if(tool) {
+			dataTable = tool
+			dataTable.show()
+		} else {
+			var dataTable = new attributeTable(selectedLayer, self.map, self.conf, self.viewer)
+			dataTable.show()
+			dataTable.registerEvents()
+			viewer.core.loadTool(dataTable)
+		}
 	});
 	
 	$(".show-metadata-link").unbind("click").on('click', function(e) {

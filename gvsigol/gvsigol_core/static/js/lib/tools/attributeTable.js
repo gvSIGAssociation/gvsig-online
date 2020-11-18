@@ -115,6 +115,20 @@ attributeTable.prototype.createUI = function() {
 /**
  * TODO
  */
+attributeTable.prototype.clearSource = function() {
+	this.source.clear()
+	var layers = this.map.getLayers().getArray()
+	for (var i=0; i<layers.length; i++) {
+		if (layers[i] instanceof ol.layer.Vector) {
+			layers[i].getSource().clear();
+		}
+	}
+	this.viewer.clearSelectedFeatures()
+};
+
+/**
+ * TODO
+ */
 attributeTable.prototype.createTableUI = function(featureType) {
 
 	var self = this;
