@@ -414,6 +414,8 @@ layerTree.prototype.setLayerEvents = function() {
 		var dataTable = null
 		if(tool) {
 			dataTable = tool
+			dataTable.init(selectedLayer)
+			dataTable.registerEvents()
 			dataTable.show()
 		} else {
 			var dataTable = new attributeTable(selectedLayer, self.map, self.conf, self.viewer)
