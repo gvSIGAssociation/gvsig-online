@@ -1920,7 +1920,6 @@ class Geoserver():
             response = req.get(wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
 
         print host + wms + "?" + params
-        response = req.get(host + wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
             for block in response.iter_content(1024):
                 if not block:
