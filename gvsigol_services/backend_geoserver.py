@@ -1913,8 +1913,11 @@ class Geoserver():
         host = server.frontend_url
         if len(settings.ALLOWED_HOST_NAMES) > 0:
             host = settings.ALLOWED_HOST_NAMES[0]
-        
-        wms = ws.wms_endpoint.replace(settings.BASE_URL, '') 
+            wms = ws.wms_endpoint.replace(settings.BASE_URL, '')
+            response = req.get(host + wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
+        else:
+            wms = ws.wms_endpoint
+            response = req.get(wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
 
         print host + wms + "?" + params
         response = req.get(host + wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
