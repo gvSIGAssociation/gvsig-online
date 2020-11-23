@@ -1013,7 +1013,7 @@ def project_get_conf(request):
                                 layer['wfs_url_no_auth'] = core_utils.get_wfs_url(workspace)
                             elif datastore.type.startswith('c_'):
                                 layer['wcs_url'] = core_utils.get_wcs_url(workspace)
-                            layer['namespace'] = workspace.uri
+                            layer['namespace'] = core_utils.get_absolute_url(workspace.uri, request.META)
                             layer['workspace'] = workspace.name
                             layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
                             layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
