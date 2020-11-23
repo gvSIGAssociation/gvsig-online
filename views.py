@@ -3532,7 +3532,8 @@ def describeLayerConfig(request):
 
                 layer['wms_url'] = core_utils.get_wms_url(workspace)
                 layer['wfs_url'] = core_utils.get_wfs_url(workspace)
-                layer['namespace'] = workspace.uri
+                #layer['namespace'] = workspace.uri
+                layer['namespace'] = core_utils.get_absolute_url(workspace.uri, request.META)
                 layer['workspace'] = workspace.name
                 layer['metadata'] = core_utils.get_catalog_url(request, l)
                 if l.cached:
