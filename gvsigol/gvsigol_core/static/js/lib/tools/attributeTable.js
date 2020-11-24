@@ -333,6 +333,15 @@ attributeTable.prototype.createTableUI = function(featureType) {
 		}
 	}
 
+	if(viewer.core.attributeTableButtons && viewer.core.attributeTableButtons.length > 0) {
+		var registeredButtons = viewer.core.attributeTableButtons
+
+		for (var i=0; i<registeredButtons.length; i++) {
+			if(registeredButtons[i].isEnable(this.layer, featureType, self.conf))
+				tableButtons.push(registeredButtons[i]);
+		}
+	}
+
 	var self = this;
 	this.table = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
@@ -439,20 +448,22 @@ attributeTable.prototype.getSelectedFeatures = function(fids){
 	    	if (response.features.length > 0 ) {
 	    		var newFeatures = [];
 	    		for (var i=0; i<response.features.length; i++) {
-		    		var newFeature = new ol.Feature();
-			    	if (response.features[i].geometry.type == 'Point') {
-			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
-			    		newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'LineString') {
-			    		newFeature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiLineString') {
-			    		newFeature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'Polygon') {
-			    		newFeature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiPolygon') {
-			    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
-			    	}
+					var newFeature = new ol.Feature();
+					if(response.features[i].geometry) {
+						if (response.features[i].geometry.type == 'Point') {
+							newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiPoint') {
+							newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'LineString') {
+							newFeature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiLineString') {
+							newFeature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'Polygon') {
+							newFeature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiPolygon') {
+							newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+						}
+					}
 			    	newFeature.setProperties(response.features[i].properties);
 					newFeature.setId(response.features[i].id);
 
