@@ -55,6 +55,9 @@ viewer.core = {
 
 	overviewmap: null,
 
+	//Lista de botones para la tabla de atributos que se pueden registrar desde los plugins haciendo push
+	attributeTableButtons: new Array(),  
+
     initialize: function(conf, extraParams) {
     	this.conf = conf;
     	if (conf.user) {
