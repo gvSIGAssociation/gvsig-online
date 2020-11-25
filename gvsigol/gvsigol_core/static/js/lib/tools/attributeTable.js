@@ -226,7 +226,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
 				selected: true,
 				page: 'all'
 			}
-        }
+		},
+		extension: '.csv'
 	});
 	tableButtons.push({
    	 	extend: 'excelHtml5',
