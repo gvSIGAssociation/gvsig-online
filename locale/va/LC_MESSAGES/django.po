@@ -35,4 +35,4 @@ msgstr "Anglés"
 
 #: settings.py:258
 msgid "Portuguese"
-msgstr "Portuguès"
+msgstr "Portuguès (Brasil)"

@@ -36,4 +36,4 @@ msgstr "Inglés"
 
 #: gvsigol/settings.py:298 gvsigol/settings_old.py:283
 msgid "Portuguese"
-msgstr "Portugués"
+msgstr "Portugués (Brasil)"
