@@ -545,3 +545,6 @@ msgstr "Ha d'omplir tots els valors"
 
 msgid "Some value is out of range"
 msgstr "Algun valor està fora de rang"
+
+msgid "Find layer"
+msgstr "Buscar capa"
