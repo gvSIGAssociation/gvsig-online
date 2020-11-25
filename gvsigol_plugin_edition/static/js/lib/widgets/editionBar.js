@@ -2204,8 +2204,12 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 						}).fail(function() {
 						});
 					});
-					self.wfsLayer.getSource().removeFeature(feature);
-					self.removeInteraction.getFeatures().clear();
+					if(self.wfsLayer) {
+						self.wfsLayer.getSource().removeFeature(feature);
+					}
+					if(self.removeInteraction) {
+						self.removeInteraction.getFeatures().clear();
+					}
 					if (!self.selectedLayer.getSource() instanceof ol.source.WMTS) {
 						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 					}
