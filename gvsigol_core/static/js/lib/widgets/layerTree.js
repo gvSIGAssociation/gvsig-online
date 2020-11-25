@@ -128,9 +128,9 @@ layerTree.prototype.createTree = function() {
 				tree += '					</div>';
 				tree += '				</div>';
 				tree += '				<div data-grouporder="' + layerGroup.groupOrder + '" data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
-				for (var j=0; j<layerGroup.layers.length; j++) {	
-					var layer = layerGroup.layers[j];				
-					tree += self.createOverlayUI(layer, layerGroup.visible);
+				var reversedLayers = layerGroup.layers;//.reverse();
+				for (var j=0; j<reversedLayers.length; j++) {				
+					tree += self.createOverlayUI(reversedLayers[j], layerGroup.visible);
 				}
 				tree += '				</div>';
 				tree += '			</li>';

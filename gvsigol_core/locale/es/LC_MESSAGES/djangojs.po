@@ -608,3 +608,6 @@ msgstr "Es mayor que"
 
 msgid "You must fill in all fields"
 msgstr "Debe rellenar todos los campos"
+
+msgid "Find layer"
+msgstr "Buscar capa"

@@ -600,3 +600,6 @@ msgstr "É maior que"
 
 msgid "You must fill in all fields"
 msgstr "Você deve preencher todos os campos"
+
+msgid "Find layer"
+msgstr "Pesquisar camada"
