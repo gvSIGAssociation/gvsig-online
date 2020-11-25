@@ -400,6 +400,7 @@ def workspace_delete(request, wsid):
 @superuser_required
 def workspace_update(request, wid):
     if request.method == 'POST':
+        uri = request.POST.get('workspace-uri')
         description = request.POST.get('workspace-description')
         isPublic = False
         if 'is_public' in request.POST:
@@ -408,6 +409,7 @@ def workspace_update(request, wid):
         workspace = Workspace.objects.get(id=int(wid))
 
         workspace.description = description
+        workspace.uri = uri
         workspace.is_public = isPublic
         workspace.save()
         return redirect('workspace_list')
