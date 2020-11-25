@@ -1762,7 +1762,9 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
 					} else if (this.featureType[i].type.endsWith("enumeration")) {
-						value = value.trim();
+						if (value != null) {
+							value = value.trim();
+						}
 						var name = this.featureType[i].name;
 						var has_multiple = false;
 						if(this.featureType[i].type == "multiple_enumeration") {
