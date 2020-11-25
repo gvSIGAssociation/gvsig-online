@@ -2212,11 +2212,19 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 					self.showLayersTab();
 				}
 			}
+			self.acceptListener.forEach(action => {
+				action(self)
+			});
 		});
 
 		$('#save-feature-cancel').on('click', function () {
-			self.removeInteraction.getFeatures().clear();
+			if(self.removeInteraction && self.removeInteraction.getFeatures()) {
+				self.removeInteraction.getFeatures().clear();
+			}
 			self.showLayersTab();
+			self.cancelListener.forEach(action => {
+				action(self)
+			});
 		});
 
 	}
