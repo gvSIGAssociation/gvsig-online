@@ -318,8 +318,10 @@ CatastroForm.prototype.getRefCatastralInfo = function(coord_x, coord_y, srs){
 	  	}
 	});
 
+	var iframe = '<iframe id="iframe-catastro" style="overflow: hidden;" width="800" height="540" frameborder="0"></iframe>';
+
 	$('#float-modal .modal-body').empty();
-	$('#float-modal .modal-body').html(popupContent);
+	$('#float-modal .modal-body').html(iframe);
 
 	var buttons = '';
 	buttons += '<button id="float-modal-cancel-coordcalc" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Accept') + '</button>';
@@ -328,6 +330,13 @@ CatastroForm.prototype.getRefCatastralInfo = function(coord_x, coord_y, srs){
 	$('#float-modal .modal-footer').append(buttons);
 
 	$("#float-modal").modal('show');
+
+	var iframe = document.getElementById('iframe-catastro');
+	iframe = iframe.contentWindow || ( iframe.contentDocument.document || iframe.contentDocument);
+
+	iframe.document.open();
+	iframe.document.write(popupContent);
+	iframe.document.close();
 }
 
 CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral){
