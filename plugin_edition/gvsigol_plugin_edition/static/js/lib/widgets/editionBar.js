@@ -1536,7 +1536,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						self.resourceManager.saveResource(transaction.fid);
 					}
 
-					if (!self.selectedLayer.getSource() instanceof ol.source.WMTS) {
+					if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
 						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 					}
 					
@@ -2014,7 +2014,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.updateResource(transaction.fid);
 				}
-				if (!self.selectedLayer.getSource() instanceof ol.source.WMTS) {
+				if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
 					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 				}
 				self.clearFeatureBackup();
@@ -2212,7 +2212,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 					if(self.removeInteraction) {
 						self.removeInteraction.getFeatures().clear();
 					}
-					if (!self.selectedLayer.getSource() instanceof ol.source.WMTS) {
+					if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
 						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 					}
 					self.showLayersTab();
