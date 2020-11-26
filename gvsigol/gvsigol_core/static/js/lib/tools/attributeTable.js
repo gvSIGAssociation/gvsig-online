@@ -1004,6 +1004,11 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	var clonedFeatureType = featureType.slice(0);
 	var datasource = self.getDataSource(clonedFeatureType, selectedRows);
 
+	var logoUrl = self.conf.project_image;
+	if (logoUrl.indexOf('http') == -1) {
+		logoUrl = window.location.origin + self.conf.project_image;
+	}
+
 	$.ajax({
 		type: 'POST',
 		async: true,
@@ -1025,7 +1030,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 		  			"layers": printLayers
 		  	    },
 		  	    "datasource": datasource,
-			    "logo_url": self.conf.project_image,
+			    "logo_url": logoUrl,
 			    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
 		  	    "legend": {
 		  	    	"name": "",
