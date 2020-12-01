@@ -1669,15 +1669,29 @@ def convert_to_enumerate(request):
         enum_table.created_by = usr
         enum_table.save()
         enum_id = enum_table.id
-        i = 0
+        
+        item = EnumerationItem()
+        item.name = ''
+        item.selected = False
+        item.order = 0
+        item.enumeration_id = enum_id
+        item.save()
+
+        i = 1
         for row in rows:
-            item = EnumerationItem()
-            item.name = row[0]
-            item.selected = False
-            item.order = i
-            i = i +1
-            item.enumeration_id = enum_id
-            item.save()
+            if(row[0] is not None and row[0] != ''):
+                try:
+                    item = EnumerationItem()
+                    item.name = row[0]
+                    item.selected = False
+                    item.order = i
+                    i = i + 1
+                    item.enumeration_id = enum_id
+                    item.save()
+                except Exception:
+                    #Si da un error insertando no se inserta ese elemento pero no se bloquea. 
+                    #Siempre los pueden añadir a mano si falta alguno
+                    pass 
     
     if enum_id == None:
         return utils.get_exception(400, 'We cannot find a enumerated with this name')
