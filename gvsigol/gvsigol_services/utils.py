@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from django.http import response
+from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -33,7 +34,7 @@ import psycopg2
 import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import MEDIA_ROOT
-from gvsigol_auth.models import UserGroup
+from gvsigol_auth.models import UserGroup, UserGroupUser, User
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace
@@ -41,7 +42,6 @@ from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
-
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
@@ -85,7 +85,44 @@ def get_write_roles(layer):
 
     return roles
 
- 
+def can_write_layer(user, layer):
+    if not isinstance(user, User):
+        user = User.objects.get(username=user)
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.get(id=layer)
+    """
+    Checks whether the user has permissions to write the provied layer.
+    It accepts a project instance, a project name or a project id.
+    """
+    try:
+        if user.is_superuser:
+            return True
+        if UserGroupUser.objects.filter(user=user, user_group__layerwritegroup__layer=layer).count() > 0:
+            return True
+    except Exception as e:
+        print e
+    return False
+
+def can_read_layer(user, layer):
+    if not isinstance(user, User):
+        user = User.objects.get(username=user)
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.get(id=layer)
+    """
+    Checks whether the user has permissions to write the provied layer.
+    It accepts a project instance, a project name or a project id.
+    """
+    try:
+        if user.is_superuser:
+            return True
+        if LayerReadGroup.objects.filter(layer=layer).count() == 0:
+            return True # layer is public
+        if UserGroupUser.objects.filter(user=user, user_group__layerreadgroup__layer=layer).count() > 0:
+            return True
+    except Exception as e:
+        print e
+    return False
+
 def add_datastore(workspace, type, name, description, connection_params, username):
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     # first create the datastore on the backend
@@ -366,7 +403,7 @@ def get_enum_item_list(layer, column_name, enum=None):
         
 def get_enum_entry(layer, column_name):
     """
-    Gets the list of items of a enumerated field
+    Gets the enumeration object associated to the provided column, or None if the field is not enumerated
     """
     try:
         return LayerFieldEnumeration.objects.get(layer=layer, field=column_name).enumeration
@@ -410,9 +447,9 @@ def get_layer_img(layerid, filename):
     
     return path_, url
 
-def get_db_connect_from_layer(layer_id):
-    layer = Layer.objects.get(id=int(layer_id))
-    datastore = Datastore.objects.get(id=layer.datastore_id)
+def get_db_connect_from_datastore(datastore):
+    if not isinstance(datastore, Datastore):
+        datastore = Datastore.objects.get(id=int(datastore))
     params = json.loads(datastore.connection_params)
     host = params['host']
     port = params['port']
@@ -420,7 +457,14 @@ def get_db_connect_from_layer(layer_id):
     user = params['user']
     passwd = params['passwd']
     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-    return i, layer.name, params['schema']
+    return i, params
+
+def get_db_connect_from_layer(layer):
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.get(id=int(layer))
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    i, params = get_db_connect_from_datastore(datastore)
+    return i, layer.source_name, params.get('schema', 'public')
      
 def get_exception(code, msg):
     response = HttpResponse(msg)
@@ -474,7 +518,7 @@ def set_time_enabled(server, layer):
         server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
 
 
-def clone_layer(target_datastore, layer, layer_group, copy_data=True):
+def clone_layer(target_datastore, layer, layer_group, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
     if layer.type == 'v_PostGIS': # operation not defined for the rest of types
         # create the table
         dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
@@ -484,7 +528,7 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
         dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
         i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
         table_name = layer.source_name if layer.source_name else layer.name
-        i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=copy_data)
+        new_table_name = i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=copy_data)
         i.close()
 
         from gvsigol_services import views
@@ -495,15 +539,16 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
             "max_features": layerConf.get('featuretype', {}).get('', 0)
         }
         # add layer to Geoserver
-        views.do_add_layer(server, target_datastore, table_name, layer.title, layer.queryable, extraParams)
+        views.do_add_layer(server, target_datastore, new_table_name, layer.title, layer.queryable, extraParams)
         
-        new_name = layer.name
+        new_name = new_table_name
         if Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
-            new_name = target_datastore.workspace.name + "_" + layer.name
+            base_name = target_datastore.workspace.name + "_" + layer.name
+            new_name = base_name
             i = 1
             salt = ''
             while Layer.objects.filter(name=layer.name, datastore=target_datastore).exists():
-                new_name = new_name + '_' + str(i) + salt
+                new_name = base_name + '_' + str(i) + salt
                 i = i + 1
                 if (i%1000) == 0:
                     salt = '_' + get_random_string(3)
@@ -516,9 +561,27 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
         if layer_group is not None:
             layer.layer_group = layer_group
         layer.save()
-        
+
         new_layer_instance = Layer.objects.get(id=layer.pk)
         old_instance = Layer.objects.get(id=old_id)
+        
+        if permissions != CLONE_PERMISSION_SKIP:
+            admin_group = UserGroup.objects.get(name__exact='admin')
+            read_groups = [ admin_group ]
+            write_groups = [ admin_group ]
+
+            for lrg in LayerReadGroup.objects.filter(layer=old_instance):
+                lrg.pk = None
+                lrg.layer = new_layer_instance
+                lrg.save()
+                read_groups.append(lrg.group)
+            
+            for lwg in LayerWriteGroup.objects.filter(layer=old_instance):
+                lwg.pk = None
+                lwg.layer = new_layer_instance
+                lwg.save()
+                write_groups.append(lwg.group)
+            server.setLayerDataRules(layer, read_groups, write_groups)
         
         set_time_enabled(server, new_layer_instance)
         
@@ -526,7 +589,7 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
             enum.pk = None
             enum.layer = new_layer_instance
             enum.save()
-            
+        
         from gvsigol_symbology.services import clone_layer_styles
         clone_layer_styles(server, old_instance, new_layer_instance)
         
@@ -536,12 +599,11 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True):
             lyr_res.save()
         """
         TODO:
-        - ¿metadatos? etc
+        - models from plugins (for instance metadata, charts, etc)
         """
         server.updateThumbnail(new_layer_instance, 'create')
     
         core_utils.toc_add_layer(new_layer_instance)
         server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
-        server.reload_nodes()
         return new_layer_instance
     return layer

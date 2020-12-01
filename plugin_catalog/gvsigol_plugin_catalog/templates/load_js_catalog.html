@@ -13,6 +13,9 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 	var catalog = new CatalogView(viewer.core,
 			{
 				{% if 'gvsigol_plugin_catalog' in plugins_config %}
+					{% if 'CATALOG_SEARCH_FIELD' in plugins_config.gvsigol_plugin_catalog %}
+						searchField: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_SEARCH_FIELD }}',
+					{% endif %}
 					{% if 'CATALOG_FACETS_CONFIG' in plugins_config.gvsigol_plugin_catalog %}
 						facetsConfig: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_FACETS_CONFIG|safe }},
 					{% else %}
@@ -42,6 +45,9 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 						metadata_viewer_button: '{{ plugins_config.gvsigol_plugin_catalog.METADATA_VIEWER_BUTTON }}',
 					{% else %}
 						metadata_viewer_button: "FULL",
+					{% endif %}
+					{% if 'CATALOG_CUSTOM_FILTER_URL' in plugins_config.gvsigol_plugin_catalog %}
+						customFiltersConfig: {url: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_CUSTOM_FILTER_URL }}'},
 					{% endif %}
 				{% endif %}
 			});

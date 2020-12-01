@@ -94,3 +94,5 @@ msgstr "Cerca"
 msgid "The search is running..."
 msgstr "La cerca s'està executant..."
 
+msgid "Loading..."
+msgstr "Carregant..."

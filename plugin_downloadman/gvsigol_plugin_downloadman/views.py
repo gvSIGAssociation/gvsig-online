@@ -33,7 +33,7 @@ from django.db.models import Q
 from collections import namedtuple
 from django.views.decorators.http import require_POST, require_GET, require_safe
 from gvsigol_core.models import GolSettings
-from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS
+from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS, SETTINGS_KEY_NOTIFICATIONS_FROM_EMAIL
 import apps
 from django.http.response import Http404
 import gvsigol_core
@@ -723,7 +723,8 @@ def render_settings(request):
         'archived_class': "",
         'validity': downman_models.get_default_validity(),
         'max_public_download_size': downman_models.get_max_public_download_size(),
-        'shopping_cart_max_items': downman_models.get_shopping_cart_max_items()
+        'shopping_cart_max_items': downman_models.get_shopping_cart_max_items(),
+        'notifications_admin_emails': ",".join(downman_models.get_notifications_admin_emails())
     }
     return render(request, 'downman_index.html', response)
 
@@ -793,9 +794,11 @@ def settings_store(request):
     validity = int(request.POST.get('validity'))
     max_public_download_size = int(request.POST.get('max_public_download_size'))
     shopping_cart_max_items =  int(request.POST.get('shopping_cart_max_items'))
+    notifications_admin_emails = request.POST.get('notifications_admin_emails')
     GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_VALIDITY, validity)
     GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, max_public_download_size)
     GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS, shopping_cart_max_items)
+    GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_NOTIFICATIONS_FROM_EMAIL, notifications_admin_emails)
     return redirect(reverse('downman-dashboard-index') + "?tab=settings")
 
 @require_POST

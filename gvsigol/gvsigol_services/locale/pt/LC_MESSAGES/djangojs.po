@@ -111,6 +111,21 @@ msgstr "Gravar nódulo"
 msgid "Edit node"
 msgstr "Editar nodulo"
 
+msgid "Convert"
+msgstr ""
+
+msgid "Autogen"
+msgstr ""
+
+msgid "Autogen ok"
+msgstr ""
+
+msgid "Convert ok"
+msgstr ""
+
+msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
+msgstr ""
+
 msgid "Node has been reloaded"
 msgstr "O nó foi recarregado"
 
@@ -125,3 +140,19 @@ msgstr "Filtrar por projeto"
 
 msgid "Show all layers"
 msgstr "Mostrar todas as camadas"
+
+msgid "The action was successfully completed"
+msgstr ""
+
+msgid "The action failed"
+msgstr ""
+
+msgid "The layer definition was refreshed"
+msgstr ""
+
+msgid "The layer refresh failed"
+msgstr ""
+
+msgid "Calculated"
+msgstr ""
+

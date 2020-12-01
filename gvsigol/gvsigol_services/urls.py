@@ -81,6 +81,7 @@ urlpatterns = [
     url(r'^create_base_layer/(?P<pid>[0-9]+)/$', services_views.create_base_layer, name='create_base_layer'),
     url(r'^base_layer_process_update/(?P<pid>[0-9]+)/$', services_views.base_layer_process_update, name='base_layer_process_update'),
     url(r'^stop_base_layer_process/(?P<pid>[0-9]+)/$', services_views.stop_base_layer_process, name='stop_base_layer_process'),
+    url(r'^retry_base_layer_process/(?P<pid>[0-9]+)/$', services_views.retry_base_layer_process, name='retry_base_layer_process'),
     
     url(r'^layers_get_temporal_properties/$', services_views.layers_get_temporal_properties, name='layers_get_temporal_properties'),
     url(r'^get_date_fields_from_resource/$', services_views.get_date_fields_from_resource, name='get_date_fields_from_resource'),
@@ -88,7 +89,7 @@ urlpatterns = [
     url(r'^describeLayerConfig/$', services_views.describeLayerConfig, name='describeLayerConfig'),
     
     url(r'^update_thumbnail/(?P<layer_id>[0-9]+)/$', services_views.update_thumbnail, name='update_thumbnail'),
-    url(r'^mandatory_check/$', services_views.check_has_null_values, name='check_has_null_values'),
+    url(r'^nullable_check/$', services_views.check_nullable, name='check_nullable'),
     
     url(r'^service_url_list/$', services_views.service_url_list, name='service_url_list'),
     url(r'^service_url_add/$', services_views.service_url_add, name='service_url_add'),
@@ -96,4 +97,8 @@ urlpatterns = [
     url(r'^service_url_update/(?P<svid>[0-9]+)/$', services_views.service_url_update, name='service_url_update'),
     url(r'^test_connection/$', services_views.test_connection, name='test_connection'),
     url(r'^register_action/$', services_views.register_action, name='register_action'),
+    url(r'^db_field_delete/$', services_views.db_field_delete, name='db_field_delete'),
+    #url(r'^db_field_changetype/$', services_views.db_field_changetype, name='db_field_changetype'),
+    url(r'^db_field_rename/$', services_views.db_field_rename, name='db_field_rename'),
+    url(r'^db_field_add/$', services_views.db_add_field, name='db_field_add'),
 ]

@@ -55,6 +55,9 @@ viewer.core = {
 
 	overviewmap: null,
 
+	//Lista de botones para la tabla de atributos que se pueden registrar desde los plugins haciendo push
+	attributeTableButtons: new Array(),  
+
     initialize: function(conf, extraParams) {
     	this.conf = conf;
     	if (conf.user) {
@@ -138,7 +141,8 @@ viewer.core = {
     		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
     		minZoom: 0,
     		maxZoom: self.conf.view.max_zoom_level,
-        	zoom: self.conf.view.zoom
+			zoom: self.conf.view.zoom/*,
+			zoomFactor: 1.5*/
     	});
 		this.map = new ol.Map({
 			interactions: interactions,
@@ -165,7 +169,10 @@ viewer.core = {
 				})
 			);
 		}
-		
+		if (self.conf.view.extent) {
+			var view = self.map.getView();
+			view.fit(self.conf.view.extent);
+		}
 
 		this.extentLayer = new ol.layer.Vector({
 			source: new ol.source.Vector()
@@ -810,14 +817,14 @@ viewer.core = {
 			async: false,
 			timeout: 3000,
 			method: 'GET',
-			headers: {
-				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
-			},
+			//headers: {
+			//	"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+			//},
 			error: function(error){
 				if (error.responseText.indexOf("TileOutOfRange") == -1){
 					is_tileoutofrange =  false;
 					//TileState.ERROR = 3
-					tile.setState(3);
+					//tile.setState(3);
 				}else{
 					is_tileoutofrange = true;
 				}

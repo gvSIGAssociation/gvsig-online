@@ -131,5 +131,5 @@ def send_reset_password_email(email, id, uid, token):
         toAddress = [email]           
         fromAddress = gvsigol.settings.EMAIL_HOST_USER
         
-        print 'Restore message: ' + body
+        #print 'Restore message: ' + body
         send_mail(subject, body, fromAddress, toAddress, False, gvsigol.settings.EMAIL_HOST_USER, gvsigol.settings.EMAIL_HOST_PASSWORD)

@@ -128,9 +128,9 @@ layerTree.prototype.createTree = function() {
 				tree += '					</div>';
 				tree += '				</div>';
 				tree += '				<div data-grouporder="' + layerGroup.groupOrder + '" data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
-				for (var j=0; j<layerGroup.layers.length; j++) {	
-					var layer = layerGroup.layers[j];				
-					tree += self.createOverlayUI(layer, layerGroup.visible);
+				var reversedLayers = layerGroup.layers;//.reverse();
+				for (var j=0; j<reversedLayers.length; j++) {				
+					tree += self.createOverlayUI(reversedLayers[j], layerGroup.visible);
 				}
 				tree += '				</div>';
 				tree += '			</li>';
@@ -409,9 +409,20 @@ layerTree.prototype.setLayerEvents = function() {
 				}
 			}						
 		}, this);
-		var dataTable = new attributeTable(selectedLayer, self.map, self.conf, self.viewer);
-		dataTable.show();
-		dataTable.registerEvents();
+
+		var tool = viewer.core.getTool('data-table')
+		var dataTable = null
+		if(tool) {
+			dataTable = tool
+			dataTable.init(selectedLayer)
+			dataTable.registerEvents()
+			dataTable.show()
+		} else {
+			var dataTable = new attributeTable(selectedLayer, self.map, self.conf, self.viewer)
+			dataTable.show()
+			dataTable.registerEvents()
+			viewer.core.loadTool(dataTable)
+		}
 	});
 	
 	$(".show-metadata-link").unbind("click").on('click', function(e) {
@@ -1911,7 +1922,7 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 			ui += '		<i class="fa fa-download"></i> ' + gettext('Downloads');
 			ui += '	</a>';
 		}
-		if (layer.metadata || (!layer.external)) {
+		if (layer.metadata && (!layer.external)) {
 			if (!layer.imported) {
 				ui += '	<a id="show-metadata-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
 				ui += '		<i class="fa fa-newspaper-o" aria-hidden="true"></i> ' + gettext('Metadata');

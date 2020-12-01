@@ -37,6 +37,8 @@ var CatalogView = function(mapViewer, config) {
 	this.config.facetsOrder = this.config.facetsOrder || [];
 	this.config.disabledFacets = this.config.disabledFacets || [];
 	this.config.resultsPerPage = this.config.resultsPerPage || 20;
+	this.config.searchField = this.config.searchField || 'any';
+	this.config.customFiltersConfig = this.config.customFiltersConfig || {};
 	this.fromResult = 1;
 	this.sortBy = '&sortBy=relevance';
 	
@@ -68,6 +70,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '			</div>';
 	catalogPanel += '		</div>';
 	catalogPanel += '		<div class="col-sm-7">';
+	catalogPanel = self.addCustomFilter(catalogPanel);
 	catalogPanel += '			<div id="catalog_search"class="row">';
 	catalogPanel += '				<div class="col-sm-12">';
 	catalogPanel += '					<div class="input-group gn-form-any">';
@@ -164,6 +167,19 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '	</div>';
 	catalogPanel += '</div></div>';
 	$("body").append(catalogPanel);
+	$('.dropdown-multiselect .dropdown-menu').click(function(evt) {evt.stopPropagation()})
+	
+	if (this.config.customFiltersConfig.url && !this.config.customFiltersConfig.products) {
+		$.ajax({
+			url: self.config.customFiltersConfig.url,
+			success: function(response) {
+				self.config.customFiltersConfig.products = response.products;
+				self.config.customFiltersConfig.adminAreas = response.adminAreas;
+				self.addCustomFilterEntries();
+			}
+		});
+	}
+	
 	this.catalog_panel = $("#catalog_container");
 	if(!this.catalog_map){
 		this.catalog_map = new CatalogMap(this, "catalog_map");
@@ -203,6 +219,7 @@ CatalogView.prototype.initialization = function(){
 		$("#catalog_register_from").val("");
 		$("#catalog_register_to").val("");
 		self.catalog_map.cleanData();
+		self.clearCustomFilters();
 		self.launchQuery();
 	});
 
@@ -302,41 +319,75 @@ CatalogView.prototype.filterCatalog = function(fromResult){
 
 }
 
-CatalogView.prototype.launchQuery = function(searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent, mainSearchField){
+CatalogView.prototype.launchQuery = function(searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	var query = "";
-	var is_first = true;
 	$(".catalog_filter_entry_ck").each(function(){
 		if($(this).is(':checked')){
-			if(!is_first){
+			if(query != ""){
 				query += "%26";
 			}
 			query += $(this).attr("name");
-			is_first = false;
 		}
 
 	});
-	this.getCatalogFilters(query, searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent, mainSearchField);
+	this.getCatalogFilters(query, searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
 }
 
-CatalogView.prototype.getCatalogEntry = function(query, cat, entry, filterName){
-	var entry_name;
+CatalogView.prototype.getFacetEntryName = function(cat, entry, filterName){
 	if (filterName) {
-		entry_name = filterName + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
+		return filterName + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
 	}
 	else {
-		entry_name = cat['@name'] + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
+		return cat['@name'] + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
 	}
-	var checked = "";
-	var selected = "";
-	if(query.includes(entry_name)){
-		checked = " checked";
-		selected = " catalog_filter_entry_ck_sel"
-	}
-
-	return '<div class="catalog_filter_entry' + selected + '"><input ' + checked + ' type="checkbox" class="catalog_filter_entry_ck" name="'+ entry_name + '"/>&nbsp;&nbsp;&nbsp;'+ entry['@label'] + ' (' + entry['@count'] +')</div>';
 }
 
-CatalogView.prototype.getFilterEntry = function(query, cat, filterTitle, filterName){
+CatalogView.prototype.getFacetEntry = function(entry, entry_name, checked){
+	var checkedStr = "";
+	var selectedStr = "";
+	if(checked){
+		checkedStr = " checked";
+		selectedStr = " catalog_filter_entry_ck_sel"
+	}
+
+	return '<div class="catalog_filter_entry' + selectedStr + '"><input ' + checkedStr + ' type="checkbox" class="catalog_filter_entry_ck" name="'+ entry_name + '"/>&nbsp;&nbsp;&nbsp;'+ entry['@label'] + ' (' + entry['@count'] +')</div>';
+}
+
+CatalogView.prototype.getFacetEntries = function(query, cat, filterName){
+	var filter_code = '';
+	var entryName, checked;
+	if('category' in cat && Array.isArray(cat.category) && cat.category.length > 0){
+		var facetEntriesCode = "";
+		for(var idx = 0; idx < cat.category.length; idx++){
+			var entry = cat.category[idx];
+			entryName = this.getFacetEntryName(cat, entry, filterName);
+			checked = query.includes(entryName);
+			if (checked) {
+				/**
+				 * The catalog UI suggests that selection within a facet behaves
+				 * as AND filters, but it actually behaves as OR filters.
+				 * Therefore, we will only allow one entry selected by facet to
+				 * avoid confusing the users.
+				 */
+				facetEntriesCode = this.getFacetEntry(entry, entryName, checked);
+				break;
+			}
+			else {
+				facetEntriesCode += this.getFacetEntry(entry, entryName, checked);
+			}
+		}
+		filter_code += facetEntriesCode;
+	}
+	if('category' in cat && '@value' in cat.category){
+		var entry = cat.category;
+		entryName = this.getFacetEntryName(cat, entry, filterName);
+		checked = query.includes(entryName);
+		filter_code += this.getFacetEntry(entry, entryName, checked);
+	}
+	return filter_code;
+}
+
+CatalogView.prototype.getFacet = function(filterTitle, filterName, filterEntries){
 	var filter_code = '<ul class="catalog_filter_cat">'+
 	'<li class="box box-default" style="list-style-type: none;">'+	
 	'<div class="box-header with-border catalog_filter_title">'+
@@ -349,17 +400,8 @@ CatalogView.prototype.getFilterEntry = function(query, cat, filterTitle, filterN
 	'</button>'+
 	'</div>'+
 	'</div>'+
-	'<div id="baselayers-group" class="box-body" style="display:block">';
-	if('category' in cat && Array.isArray(cat.category) && cat.category.length > 0){
-		for(var idx = 0; idx < cat.category.length; idx++){
-			var entry = cat.category[idx];
-			filter_code += this.getCatalogEntry(query, cat, entry, filterName);
-		}
-	}
-	if('category' in cat && '@value' in cat.category){
-		var entry = cat.category;
-		filter_code += this.getCatalogEntry(query, cat, entry, filterName);
-	}
+	'<div class="box-body" style="display:block">';
+	filter_code += filterEntries;
 	filter_code += '</div></li></ul>';
 	return filter_code;
 }
@@ -468,7 +510,17 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 	return met;
 }
 
-CatalogView.prototype.getKeywordQuery = function(keywords, key){
+CatalogView.prototype.getKeywordAndQuery = function(keywords, key){
+	var cat_array = keywords.split(";");
+	var cats = "";
+	for(var i=0; i<cat_array.length; i++){
+		cats += "&"+key+"="+cat_array[i];;
+	}
+	cats = cats.replace(new RegExp(' ', 'g'), '+');
+	return cats;
+}
+
+CatalogView.prototype.getKeywordOrQuery = function(keywords, key){
 	var cat_array = keywords.split(";");
 	var cats = "";
 	for(var i=0; i<cat_array.length; i++){
@@ -829,28 +881,27 @@ CatalogView.prototype.updatePager = function(totalCount) {
 	});
 }
 
-CatalogView.prototype.getCatalogFilters = function(query, searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent, mainSearchField){
+CatalogView.prototype.getCatalogFilters = function(query, searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	$('#catalog-search-button-icon').removeClass('fa-search').addClass('fa-spinner fa-spin');
 	$("#catalog_content").html(this._getSearchingContent());
 
 	var self = this;
-	if (!mainSearchField) {
-		mainSearchField = "title";
-	}
 	var filters = "";
 	if (searchComponents && searchComponents.length>0) {
 		for (var i=0; i<searchComponents.length; i++) {
-			filters += "&" + mainSearchField + "=" + searchComponents[i];
+			filters += "&" + this.config.searchField + "=" + searchComponents[i];
 		}
 	}
 	if(resources && resources.length > 0){
-		filters += this.getKeywordQuery(resources, "orgName");
+		filters += this.getKeywordAndQuery(resources, "orgName");
 	}
+	query = this.addCustomAreaFilter(query);
+	filters += this.addCustomKeywordFilter(filters);
 	if(keywords && keywords.length > 0){
-		filters += this.getKeywordQuery(keywords, "keyword");
+		filters += this.getKeywordAndQuery(keywords, "keyword");
 	}
 	if(categories && categories.length > 0){
-		filters += this.getKeywordQuery(categories, "_cat");
+		filters += this.getKeywordAndQuery(categories, "_cat");
 	}
 	if(creation_from && creation_from.length > 0){
 		filters += "&creationDateFrom="+creation_from;
@@ -892,22 +943,31 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 				var shownFilters = {};
 				for(var idx = 0; idx < response.summary.dimension.length; idx++){
 					var cat = response.summary.dimension[idx];
-					if('category' in cat && '@label' in cat && '@name' in cat && !(disabledFacets.includes(cat['@name']))) {
-						if (Array.isArray(facetsConfig[cat['@name']])) { // pattern based configuration
-							var subFilters = self.getPatternBasedCategories(cat, facetsConfig[cat['@name']]);
-							for(var subFilterName in subFilters){
-								var subFilter = subFilters[subFilterName];
-								shownFilters[subFilter['@name']] = self.getFilterEntry(query, subFilter, subFilter['@label'], cat['@name']);
-							}
+					if ('@label' in cat && '@name' in cat && !(disabledFacets.includes(cat['@name']))) {
+						var customFacetEntries = self.getCustomFacetEntries(cat['@name']);
+						if (customFacetEntries) {
+							shownFilters[cat['@name']] = self.getFacet(cat['@label'], cat['@name'], customFacetEntries);
 						}
-						else {
-							if (facetsConfig[cat['@name']]) {
-								var filterLabel = facetsConfig[cat['@name']]['title'];
+						else if('category' in cat) {
+							if (Array.isArray(facetsConfig[cat['@name']])) { // pattern based configuration
+								var subFilters = self.getPatternBasedCategories(cat, facetsConfig[cat['@name']]);
+								var facetEntries;
+								for(var subFilterName in subFilters){
+									var subFilter = subFilters[subFilterName];
+									facetEntries = self.getFacetEntries(query, subFilter, cat['@name']);
+									shownFilters[subFilter['@name']] = self.getFacet(subFilter['@label'], cat['@name'], facetEntries);
+								}
 							}
 							else {
-								var filterLabel = cat['@label'];
+								if (facetsConfig[cat['@name']]) {
+									var filterLabel = facetsConfig[cat['@name']]['title'];
+								}
+								else {
+									var filterLabel = cat['@label'];
+								}
+								var facetEntries = self.getFacetEntries(query, cat, cat['@name']);
+								shownFilters[cat['@name']] = self.getFacet(filterLabel, cat['@name'], facetEntries);
 							}
-							shownFilters[cat['@name']] = self.getFilterEntry(query, cat, filterLabel);
 						}
 					}
 				}
@@ -1289,6 +1349,176 @@ CatalogView.prototype.install = function() {
 	});
 	
 	this._replaceMetadataBtnEvents();
+}
+
+CatalogView.prototype.addCustomFilter = function(catalogPanel) {
+	if (this.config.customFiltersConfig.url) {
+		var adminAreasConf = this.config.customFiltersConfig.adminAreas;
+		
+		catalogPanel += '<div id="catalog_search"class="row">';
+		catalogPanel += '	<div id="admin_areas_div" class="col-sm-6">';
+		catalogPanel += '		<label for="admin_areas_btn"></label>';
+		catalogPanel += '		<div class="dropdown dropdown-multiselect admin_areas_multiselect">';
+		catalogPanel += '		<button class="btn btn-default btn-wrap-text dropdown-toggle form-control" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
+		catalogPanel += '			<span id="admin_areas_label">' + gettext('Loading...') + '</span>&nbsp;<span class="caret"></span>';
+		catalogPanel += '		</button>';
+		catalogPanel += '		<ul class="dropdown-menu" aria-labelledby="admin_areas_label">';
+		catalogPanel += '		</ul>';
+		catalogPanel += '		</div>';
+		catalogPanel += '	</div>';
+		catalogPanel += '	<div class="col-sm-6">';
+		catalogPanel += '		<label for="products_select"></label>';
+		catalogPanel += '		<select class="form-control" id="products_select" name="products_select">';
+		var productsConf = this.config.customFiltersConfig.products;
+		if (productsConf && productsConf.def) {
+			var def;
+			for (var i=0; i<productsConf.def.length; i++) {
+				def = productsConf.products.def[i];
+				if (typeof(def) == 'string') {
+					var name = def;
+					var title = def;
+				}
+				else {
+					var name = def.name;
+					var title = def.title;
+				}
+				catalogPanel += '					<option value="' + name +'" selected>' + title + '</option>';
+			}
+		}
+		else {
+			catalogPanel += '					<option value="" selected>' + gettext('Loading...') + '</option>';
+		}
+		catalogPanel += '					</select>';
+		catalogPanel += '				</div>';
+		catalogPanel += '			</div>';
+	}
+	return catalogPanel;
+}
+
+CatalogView.prototype.addCustomAreaFilter = function(facetQuery) {
+	$("#admin_areas_div * ul li").each(function() {
+		var selOption = $(this).find("input")[0];
+		if (selOption.checked) {
+			if (facetQuery == '') {
+				facetQuery = "keyword/" + selOption.value;
+			}
+			else {
+				facetQuery += "%26keyword/" + selOption.value;
+			}
+		}
+	});
+	return facetQuery;
+}
+
+CatalogView.prototype.addCustomKeywordFilter = function(filters) {
+	var keywords = '';
+	$("#products_select").each(function() {
+		if ($(this)[0].value != '') {
+			if (keywords == '') {
+				keywords = $(this)[0].value;
+			}
+			else {
+				keywords += ";" + $(this)[0].value;
+			}
+		}
+	});
+	if (keywords != '') {
+		return this.getKeywordAndQuery(keywords, "keyword");
+	}
+	return "";
+}
+
+CatalogView.prototype.addCustomFilterEntries = function() {
+	var self = this;
+	var areaDef;
+	var optionStr;
+	var not_filtered_str = gettext("Not filtered");
+
+	$('.admin_areas_multiselect ul').empty();
+	$('#admin_areas_label').text(not_filtered_str);
+	$('.admin_areas_multiselect').siblings().text(this.config.customFiltersConfig.adminAreas.label);
+	for (var i=0; i<this.config.customFiltersConfig.adminAreas.entries.length; i++) {
+		def = this.config.customFiltersConfig.adminAreas.entries[i];
+		if (typeof(def) == 'string') {
+			var name = def;
+			var title = def;
+		}
+		else {
+			var name = def.name;
+			var title = def.title;
+		}
+		optionStr = '<li class="checkbox">';
+		optionStr += '	<label>';
+		optionStr += '		<input type="checkbox" class="cr" value="' + name +'">';
+		optionStr += '		<span class="cr cr-noborder"><i class="cr-icon glyphicon glyphicon-ok"></i></span>';
+		optionStr += '		<span class="option-title">' + title + '</span>';
+		optionStr += '	</label>';
+		optionStr += '</li>';
+		$('.admin_areas_multiselect ul').append(optionStr);
+	}
+	
+	$('#admin_areas_div input').change(function() {
+		var text = '';
+		$("#admin_areas_div * ul li").each(function() {
+			if ($(this).find("input")[0].checked) {
+				if (text != '') {
+					text += ", " + $(this).find("span.option-title").text();
+				}
+				else {
+					text += $(this).find("span.option-title").text();
+				}
+			}
+		});
+		if (text == '') {
+			text = not_filtered_str;
+		}
+		$('#admin_areas_label').text(text);
+	});
+	$('.admin_areas_multiselect').on('hide.bs.dropdown', function() {
+		self.filterCatalog();
+	});
+	
+	var productDef;
+	$('#products_select').empty()
+	$('#products_select').siblings().text(this.config.customFiltersConfig.products.label);
+	optionStr = '<option value="" selected></option>';
+	$('#products_select').append(optionStr);
+	for (var i=0; i<this.config.customFiltersConfig.products.entries.length; i++) {
+		def = this.config.customFiltersConfig.products.entries[i];
+		if (typeof(def) == 'string') {
+			var name = def;
+			var title = def;
+		}
+		else {
+			var name = def.name;
+			var title = def.title;
+		}
+		optionStr = '<option value="' + name +'">' + title + '</option>';
+		$('#products_select').append(optionStr);
+	}
+	$('#products_select').change(function() {
+		self.filterCatalog();
+	});
+}
+
+CatalogView.prototype.getCustomFacetEntries = function(filterName) {
+	var facetEntries = "";
+	if (filterName == 'keyword') {
+		$("#admin_areas_div * ul li").each(function() {
+			if ($(this).find("input")[0].checked) {
+				var entry_label = $(this).find("span.option-title").text();
+				facetEntries += '<div><input disabled checked type="checkbox" name="'+ entry_label + '"/>&nbsp;&nbsp;&nbsp;'+ entry_label + '</div>';
+			}
+		});
+	}
+	return facetEntries;
+}
+
+
+CatalogView.prototype.clearCustomFilters = function() {
+	$('#products_select').val("");
+	$('.admin_areas_multiselect ul * input').prop( "checked", false );
+	$('#admin_areas_label').text(gettext("Not filtered"));
 }
 
 CatalogView.prototype.installNavBars = function() {

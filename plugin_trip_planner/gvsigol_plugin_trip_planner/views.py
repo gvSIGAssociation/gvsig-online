@@ -23,7 +23,6 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.utils.translation import ugettext as _
-from django.conf import settings
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from gvsigol_auth.utils import superuser_required, staff_required
@@ -173,6 +172,7 @@ def gtfs_crontab_update(request):
             aux = crontab_text.split(" ")
             tAux = "{0}:{1}:00".format(aux[0], aux[1])
             t = datetime.strptime(tAux, '%H:%M:%S')
+            my_app_config = apps.get_app_config('gvsigol_plugin_trip_planner')
             my_app_config.initialize_trip_planner_gtfs_cron(CRONTAB_ACTIVE, t, 1, 'days')
         else: # Update now
             cron_trip_planner_refresh(0)
@@ -223,7 +223,7 @@ def initialize_trip_planner_cron(is_first_time=False):
         print("Borrando tareas anteriores...")
         schedule.clear('trip-planner-tasks')
 
-        global my_app_config
+        # global my_app_config
         my_app_config = apps.get_app_config('gvsigol_plugin_trip_planner')
         t = datetime.strptime('02:00:00', '%H:%M:%S')
 

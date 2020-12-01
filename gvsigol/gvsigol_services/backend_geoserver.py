@@ -16,11 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from gvsigol_core.geom import RASTER
+from __builtin__ import False
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from models import Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
+from models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.utils.translation import ugettext_lazy as _
@@ -51,6 +52,8 @@ import time
 import utils
 from builtins import str as text
 from django.utils.html import escape, strip_tags
+import threading
+import geographic_servers
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -75,6 +78,12 @@ class UserInputError(rest_geoserver.UploadError):
 
 #_valid_sql_name_regex=re.compile("^[^\W\d][\w]*$")
 _valid_sql_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+"""
+Types that can be created from gvSIG Online
+"""
+SUPPORTED_SQL_CREATION_TYPES = [ "character varying", "integer", "double precision", "boolean", "date", "time", "timestamp" ]
+OTHER_SUPPORTED_SQL_TYPES = ["character", "text", "numeric"]
 
 class Geoserver():
     CREATE_TYPE_SQL_VIEW = "gs_sql_view"
@@ -126,7 +135,7 @@ class Geoserver():
             ('v_PostGIS', _('PostGIS vector')),
             #('v_SHP', _('Shapefile folder')),       
         )
-    
+
     def getSupportedUploadTypes(self):
         return self.supported_upload_types
     
@@ -150,12 +159,13 @@ class Geoserver():
         except Exception as e:
             print str(e)
             return False
-        
-    def reload_nodes(self):
+    
+    def threaded_reload_nodes(self):
         try:
             # get sequence from master
             us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
-            print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Aapche. Update Sequence = " + str(us_master)
+            print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Apache. Update Sequence = " + str(us_master)
+            
             # reload all nodes except master
             if len(self.slave_nodes) > 0:
                 time.sleep(settings.RELOAD_NODES_DELAY)
@@ -164,6 +174,15 @@ class Geoserver():
                     if us != us_master:
                         print  "INFO: Reloading ... " + node + " with updatedSequence " + str(us) 
                         self.rest_catalog.reload(node, user=self.user, password=self.password)
+        except Exception as e:
+            print str(e)
+            return False
+        
+    def reload_nodes(self):
+        try:
+            if len(self.slave_nodes) > 0:
+                reload_thread = threading.Thread(target=self.threaded_reload_nodes)
+                reload_thread.start()
             return True
         
         except Exception as e:
@@ -187,7 +206,7 @@ class Geoserver():
             self.getGsconfig().create_workspace(name, uri)
             return True
         except Exception as e:
-            logger.exception("Error creating workspace");
+            logger.exception("Error creating workspace")
             return False
         
     def getWorkspace(self, name):
@@ -624,6 +643,85 @@ class Geoserver():
             self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
         # not available/necessary for coverages
 
+    def reload_featuretype(self, layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True):
+        """
+        Reload the feature type config in Geoserver based on the table structure in the database and the data
+        in the table.
+        For the moment, the following elements are supported:
+        - attributes
+        - nativeBoundingBox
+        - latLonBoundingBox
+        """
+        updated_params = {}
+        if attributes:
+            """
+            We need to refresh the datastore connection params to check whether primary keys are exposed
+            """
+            ds_conf = self.rest_catalog.get_datastore(layer.datastore.workspace.name, layer.datastore.name, user=self.user, password=self.password)
+            conn_param_list = ds_conf.get('dataStore', {}).get('connectionParameters', {}).get('entry', {})
+            conn_params = {}
+            for param in conn_param_list:
+                conn_params[param.get('@key')] = param.get('$')
+            include_pk = (conn_params.get('Expose primary keys', "false") == 'true')
+            """
+            Should we update datastore connection_params in gvsigol model?
+            It may become a confusing side effect of reloading the featuretype.
+            
+            layer.datastore.connection_params = json.dumps(conn_params)
+            layer.datastore.save()
+            """
+
+            try:
+                conn, tablename, schema = utils.get_db_connect_from_layer(layer)
+                new_attrs = self._featuretype_attributes(conn, schema, tablename, include_pk=include_pk)
+                updated_params['attributes'] = {'attribute': new_attrs}
+            finally:
+                conn.close()
+        source_name = layer.source_name if layer.source_name else layer.name
+        self.rest_catalog.update_featuretype(layer.datastore.workspace.name, layer.datastore.name, source_name, updated_params=updated_params, nativeBoundingBox=nativeBoundingBox, latLonBoundingBox=latLonBoundingBox, user=self.user, password=self.password)
+
+    def getGeoserverBindings(self, sql_type):
+        if sql_type in ["character varying", "character", "text", "cd_json"]:
+            return "java.lang.String"
+        elif sql_type in ["integer", "serial"]:
+            return "java.lang.Integer"
+        elif sql_type in ["smallint", "smallserial"]:
+            return "java.lang.Short"
+        elif sql_type in ["bigint", "bigserial"]:
+            return "java.lang.Long"
+        elif sql_type in ["real"]:
+            return "java.lang.Float"
+        elif sql_type in ["double precision", "double"]:
+            return "java.lang.Double"
+        elif sql_type in ["numeric", "decimal"]:
+            return "java.math.BigDecimal"
+        elif sql_type == "boolean":
+            return "java.lang.Boolean"
+        elif sql_type == "date":
+            return "java.sql.Date"
+        elif sql_type in ["time without time zone", "time with time zone", "time"]:
+            return "java.sql.Time"
+        elif sql_type in ["timestamp without time zone", "timestamp with time zone", "timestamp"]:
+            return "java.sql.Timestamp"
+        sql_type = sql_type.upper()
+        if sql_type == "POINT":
+            """
+            Note: Geoserver 2.14 migrated from com.vividsolutions.jts.geom JTS packages to 
+                    org.locationtech.jts.geom packages. However, the old namespace is still
+                    accepted by the REST API.
+            """
+            return 'com.vividsolutions.jts.geom.Point'
+        elif sql_type == "MULTIPOINT":
+            return 'com.vividsolutions.jts.geom.MultiPoint'
+        elif sql_type == "LINESTRING":
+            return 'com.vividsolutions.jts.geom.LineString'
+        elif sql_type == "MULTILINESTRING":
+            return 'com.vividsolutions.jts.geom.MultiLineString'
+        elif sql_type == "POLYGON":
+            return 'com.vividsolutions.jts.geom.Polygon'
+        elif sql_type == "MULTIPOLYGON":
+            return 'com.vividsolutions.jts.geom.MultiPolygon'
+
     def createResource(self, workspace, store, name, title, extraParams={}):
         try:
             if store.type[0]=="v":
@@ -780,7 +878,7 @@ class Geoserver():
     def updateResource(self, workspace, ds_name, ds_type, name, updatedParams={}):
         try:
             if ds_type.startswith('v_'): # vector
-                self.rest_catalog.update_featuretype(workspace, ds_name, name, updatedParams=updatedParams, user=self.user, password=self.password)
+                self.rest_catalog.update_featuretype(workspace, ds_name, name, updated_params=updatedParams, user=self.user, password=self.password)
             else: # raster, external layer, etc
                 title = updatedParams.get('title')
                 if title:
@@ -1349,12 +1447,11 @@ class Geoserver():
             print e
             raise e
     
-    
-    def __field_def_to_gs(self, field_def_array, geometry_type):
+    def __field_def_to_gs(self, field_def_array, geometry_type, pks):
         try:
             fields = []
-            if geometry_type in ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]:
-                jts_type = 'com.vividsolutions.jts.geom.' + geometry_type
+            jts_type = self.getGeoserverBindings(geometry_type)
+            if jts_type:
                 fields.append({
                    "name": "geom",
                    "minOccurs": 0,
@@ -1371,26 +1468,14 @@ class Geoserver():
                 if f[0] == "geom" or f[0] == "name" or f[0] == "fid":
                     raise rest_geoserver.RequestError(_("Invalid field name. '{0}' is a reserved word").format(f[0]))
                 field = {"minOccurs": 0, "maxOccurs": 1, "nillable": True}
+                if f[0] in pks:
+                    {"minOccurs": 1, "maxOccurs": 1, "nillable": False}
+                else:
+                    {"minOccurs": 0, "maxOccurs": 1, "nillable": True}
                 field['name'] = f[0]
                 sql_type = f[1]
-                if sql_type == "integer":
-                    field['binding'] = "java.lang.Integer"
-                elif sql_type == "double":
-                    field['binding'] = "java.lang.Double"
-                elif sql_type == "text":
-                    field['binding'] = "java.lang.String"
-                elif sql_type == "cd_json":
-                    field['binding'] = "java.lang.String"
-                    field['name'] = 'cd_json_' + field['name']
-                elif sql_type == "date":
-                    field['binding'] = "java.sql.Date"
-                elif sql_type == "time":
-                    field['binding'] = "java.sql.Time"
-                elif sql_type == "timestamp":
-                    field['binding'] = "java.sql.Timestamp"
-                elif sql_type == "boolean":
-                    field['binding'] = "java.lang.Boolean"
-                else:
+                field['binding'] = self.getGeoserverBindings(sql_type)
+                if not field['binding']:
                     raise rest_geoserver.RequestError(_("Unsupported field type: {0}").format(sql_type))
                 fields.append(field)
                 
@@ -1400,7 +1485,46 @@ class Geoserver():
             
         except:
             raise rest_geoserver.RequestError(_("Invalid field definition"))
+    
+    def _featuretype_attributes(self, conn, schema, tablename, include_pk=True):
+        """
+        Reads the database schema to get an updated definition of the featuretype fields,
+        using the same syntax expected by Geoserver
+        """
+        field_info = conn.get_fields_info(tablename, schema)
+        geometry_columns_info = conn.get_geometry_columns_info(table=tablename, schema=schema)
+        pks = conn.get_pk_columns(tablename, schema)
         
+        gs_fields = []
+        geometry_columns = {}
+        
+        for f in geometry_columns_info:
+            name = f[2]
+            geometry_type = f[5]
+            geometry_columns[name] = geometry_type
+        
+        for f in field_info:
+            name = f["name"]
+            if name in geometry_columns:
+                sql_type = geometry_columns[name]
+            else:
+                sql_type = f['type']
+            binding = self.getGeoserverBindings(sql_type)
+            if not binding:
+                logger.debug(_("Unsupported field type: {0}").format(sql_type))
+                e = rest_geoserver.RequestError(-1, _("Unsupported field type: {0}").format(sql_type))
+                e.set_message(_("Unsupported field type: {0}").format(sql_type))
+                raise e
+            nullable = True if f['nullable'] == 'YES' else False
+            if name in pks:
+                if include_pk:
+                    field = {"name": name, "binding": binding, "minOccurs": 1, "maxOccurs": 1, "nillable": False}
+                    gs_fields.append(field)
+            else:
+                field = {"name": name, "binding": binding, "minOccurs": 0, "maxOccurs": 1, "nillable": nullable}
+                gs_fields.append(field)
+        return gs_fields
+
     def createLayer(self, request, form_data, layer_type):
         name = form_data['name']
 
@@ -1783,8 +1907,19 @@ class Geoserver():
         
         req = requests.Session()
         req.auth = (self.user, self.password)
-        print ws.wms_endpoint + "?" + params
-        response = req.get(ws.wms_endpoint + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
+
+        layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+        server = Server.objects.get(id=layer_group.server_id)
+        host = server.frontend_url
+        if len(settings.ALLOWED_HOST_NAMES) > 0:
+            host = settings.ALLOWED_HOST_NAMES[0]
+            wms = ws.wms_endpoint.replace(settings.BASE_URL, '')
+            response = req.get(host + wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
+        else:
+            wms = ws.wms_endpoint
+            response = req.get(wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
+
+        print host + wms + "?" + params
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
             for block in response.iter_content(1024):
                 if not block:
@@ -1955,4 +2090,21 @@ class Geoserver():
             
             
             fd.close()
+
+
+    def is_supported_type(self, sql_type, for_creation=True):
+        if sql_type in SUPPORTED_SQL_CREATION_TYPES:
+            return True
+        if not for_creation and sql_type in OTHER_SUPPORTED_SQL_TYPES:
+            return True
+        return False
+
+    def gvsigol_to_sql_type(self, field_type):
+        if field_type in ['cd_json', 'enumeration', 'multiple_enumeration']:
+            field_type = 'character varying'
+        elif field_type == 'double':
+            return 'double precision'
+        field_type = field_type.replace("_", " ")
+        if self.is_supported_type(field_type):
+            return field_type
 

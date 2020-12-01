@@ -16,9 +16,9 @@
 				<div class="box-tools pull-right">
 					<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Save" %} <i class="fa fa-floppy-o margin-l-5"></i></button>					
 				</div>
-			</div>				
+			</div>
 		</div>
-		<div class="box">
+		<div class="">
 			{% csrf_token %}
 			{% if form.errors %}
 			<div id="form-error" style="color:#ff0000;">
@@ -37,84 +37,170 @@
 				<p>* {{ message }}</p>
 			</div>
 			{% endif %}
-			
-			<div class="box-body">										
-				<div id="layer-fields" class="row">
+		</div>
+		<ul class="nav nav-tabs">
+			<li role="presentation" class="active"><a href="#tab-layer-config" data-toggle="tab">{% trans "Field management" %}</a></li>
+			<li role="presentation"><a href="#tab-layer-field-trans" data-toggle="tab">{% trans "Field titles" %}</a></li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active" id="tab-layer-config">
+				<div class="row">
 					<div class="col-md-12">
-						<div class="table-responsive">
-							<table id="field-list-table" class="table no-margin">
-								<thead>
-									<tr>
-										<th>{% trans "Field name" %}</th>
-										{% for id, language in available_languages %}
-										<th>{% trans "Field title" %}&nbsp;({{ language }})</th>
-										{% endfor %}
-										<th>{% trans "mandatory" %}</th>
-										<th>{% trans "Is visible?" %}</th>
-										<th>{% trans "Is editable?" %}</th>
-										<th>{% trans "Is shown in getFeatureInfo?" %}</th>
-										<th>{% trans "Convert to enum" %}</th>
-									</tr>
-								</thead>
-								<tbody id="field-list-table-body">
-									{% for f in fields %}
-										{% with counter=forloop.counter %}
-												<tr>
-													<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
-													{% for id, language in available_languages %}
-													<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
-													{% endfor %}
-													{% if f.mandatory %}
-													<td><input type="checkbox" name="field-mandatory-{{counter}}" checked/></td>
-													{% else %}
-													<td><input id="mandatory-check-{{counter}}" data-type="mandatory" data-fieldname="{{f.name}}" type="checkbox" name="field-mandatory-{{counter}}"/></td>
-													{% endif %}
-													{% if f.visible %}
-													<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
-													{% else %}
-													<td><input type="checkbox" name="field-visible-{{counter}}"/></td>
-													{% endif %}
-													{% if f.editable %}
-													<td><input type="checkbox" name="field-editable-{{counter}}" checked/></td>
-													{% else %}
-														{% if f.editableactive %}
-														<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
-														{% else %}
-														<td><input type="checkbox" disabled name="field-editable-{{counter}}"/></td>
-														{% endif %}
-													{% endif %}
-													{% if f.infovisible %}
-													<td><input type="checkbox" name="field-infovisible-{{counter}}" checked/></td>
-													{% else %}
-													<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
-													{% endif %}
-													<td><button id="button-convert-enum-{{counter}}" data="" type="button" name="button-convert-enum" data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-success" data-original-title="Convertir a enumerado"><i class="fa fa-edit"></i></button></td>
-												</tr>
-												{% if forloop.last %}
-												<input type="hidden" name="counter" value="{{counter}}" />
-									    	{% endif %}
-												
-										{% endwith %}
-									{% endfor %}	
-								</tbody>
-							</table>
+						<div class="box">
+							<div class="box-body">
+								<div id="layer-fields" class="row">
+									<div class="col-md-12">
+										<div class="table-responsive">
+											<table id="field-list-table" class="table no-margin">
+												<thead>
+													<tr>
+														<th>{% trans "Field name" %}</th>
+														<th>{% trans "Type" %}</th>
+														<th>{% trans "Calculated" %}</th>
+														<th>{% trans "Nullable" %}</th>
+														<th>{% trans "mandatory" %}</th>
+														<th>{% trans "Is visible?" %}</th>
+														<th>{% trans "Is editable?" %}</th>
+														<th>{% trans "Is shown in getFeatureInfo?" %}</th>
+														<th>{% trans "Actions" %}</th>
+													</tr>
+												</thead>
+												<tbody id="field-list-table-body">
+													{% for f in fields %}
+														{% with counter=forloop.counter %}
+																<tr data-fieldname="{{f.name}}">
+																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
+																	<td><input readonly name="field-type-{{counter}}" type="text" class="form-control" value="{{f.type}}"></td>
+																	<td><input readonly name="field-calculation-{{counter}}" type="text" class="form-control" value="{{f.calculationLabel}}"></td>
+																	{% if f.nullable %}
+																	<td><input title="{% trans 'Set at database level' %}" type="checkbox" data-counter="{{counter}}" name="field-nullable-{{counter}}" checked/></td>
+																	{% else %}
+																	<td><input title="{% trans 'Set at database level' %}" id="nullable-check-{{counter}}"  data-counter="{{counter}}" data-type="nullable" data-fieldname="{{f.name}}" type="checkbox" name="field-nullable-{{counter}}"/></td>
+																	{% endif %}
+																	{% if f.mandatory %}
+																	<td><input title="{% trans 'Required in editing forms' %}" id="field-mandatory-{{counter}}" type="checkbox" name="field-mandatory-{{counter}}" {% if not f.nullable %}disabled{% endif %} checked /></td>
+																	{% else %}
+																	<td><input title="{% trans 'Required in editing forms' %}" id="field-mandatory-{{counter}}" data-type="mandatory" data-fieldname="{{f.name}}" type="checkbox" name="field-mandatory-{{counter}}"/></td>
+																	{% endif %}
+																	{% if f.visible %}
+																	<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
+																	{% else %}
+																	<td><input type="checkbox" name="field-visible-{{counter}}"/></td>
+																	{% endif %}
+																	{% if f.editable %}
+																	<td><input type="checkbox" name="field-editable-{{counter}}" checked/></td>
+																	{% else %}
+																		{% if f.editableactive %}
+																		<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
+																		{% else %}
+																		<td><input type="checkbox" disabled name="field-editable-{{counter}}"/></td>
+																		{% endif %}
+																	{% endif %}
+																	{% if f.infovisible %}
+																	<td><input type="checkbox" name="field-infovisible-{{counter}}" checked/></td>
+																	{% else %}
+																	<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
+																	{% endif %}
+																	<td>
+																	{% if f.editableactive or f.calculationLabel %}
+																		{% if counter > 3 %}
+																		<div class="btn-group dropup">
+																		{% else %}
+																		<div class="btn-group">
+																		{% endif %}
+																			<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+																				<i class="fa fa-wrench"></i>
+																			</button>
+																			<ul class="dropdown-menu dropdown-menu-right" role="menu">
+																				<li><a href="#" class="actions-menu-entry rename-field"><i class="fa fa-edit" style="color: #3c8dbc;"></i> {% trans "Rename" %}</a></li>
+																				<!--  <li><a href="#" class="actions-menu-entry change-field-type"><i class="fa fa-tag" style="color: #3c8dbc;"></i> {% trans "Change type" %}</a></li> -->
+																				{% if not f.calculationLabel %}
+																				<li><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
+																				{% endif %}
+																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
+																			</ul>
+																		</div>
+																	{% else %}
+																		<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" disabled aria-expanded="false" title="{% trans "Reserved field" %}">
+																			<i class="fa fa-wrench"></i>
+																		</button>
+																	{% endif %}
+																	</td>
+																</tr>
+																{% if forloop.last %}
+																<input type="hidden" name="counter" value="{{counter}}" />
+																{% endif %}
+														{% endwith %}
+													{% endfor %}	
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="box-footer clearfix">
+								<a id="add-field-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
+									<i class="fa fa-plus margin-r-5"></i>{% trans "Add field" %}
+								</a>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>		
+			</div>
+			<div class="tab-pane" id="tab-layer-field-trans">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body">
+								<div id="layer-fields" class="row">
+									<div class="col-md-12">
+										<div class="table-responsive">
+											<table id="field-list-table" class="table no-margin">
+												<thead>
+													<tr>
+														<th>{% trans "Field name" %}</th>
+														{% for id, language in available_languages %}
+														<th>{% trans "Field title" %}&nbsp;({{ language }})</th>
+														{% endfor %}
+													</tr>
+												</thead>
+												<tbody id="field-list-table-body">
+													{% for f in fields %}
+														{% with counter=forloop.counter %}
+																<tr>
+																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
+																	{% for id, language in available_languages %}
+																	<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
+																	{% endfor %}
+																</tr>
+																{% if forloop.last %}
+																<input type="hidden" name="counter" value="{{counter}}" />
+															{% endif %}
+														{% endwith %}
+													{% endfor %}	
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
 </form>
 
-<div class="modal fade" id="modal-convert-to-enum" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="my-modal-dialog" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h4 class="modal-title">{% trans "Convert to enum" %}</h4>
+				<h4 id="modalTitle" class="modal-title"></h4>
 			</div>
 			<div class="modal-body">
 			</div>
@@ -127,6 +213,7 @@
 {% endblock %}
 
 {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/gvsigollibs/layers/newFieldUi.js" %}"></script>
 <script type="text/javascript">
 
 	$('#menu-manage-services').addClass("active");
@@ -145,51 +232,86 @@
 			for(var j=0; j<available_languages.length; j++){
 				var lang = available_languages[j];
 				$("input[name=field-title-"+lang+"-"+(i+1)+"]").val(field["title-"+lang]);
-				//$("#button-convert-enum-" + (i+1)).prop('title', field["name"]);
-				//console.log($("#button-convert-enum-" + (i+1)).prop('title'))
 				
 			}
 		}
 	});
-	
+
 	$('input[type="checkbox"]'). click(function(evt){
-		if($(this).is(":checked") && evt.target.id.startsWith('mandatory-check')){
-			var obj = document.getElementById(evt.target.id);
-			field_name = obj.getAttribute('data-fieldname');
-			data = {
-				"layer_id" : "{{layer_id}}",
-				"field_name": field_name,
-			}
-			$.ajax({
-				type: 'POST',
-				async: false,
-				data: data,
-				url: '/gvsigonline/services/mandatory_check/',
-				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-				},
-				success	:function(response) {
-				},
-				error: function() {
-					obj.checked = false;
-					messageBox.show('error', gettext('El campo no puede ser obligario.'));
+		if (evt.target.id.startsWith('nullable-check')){
+			if(!$(this).is(":checked")) {
+				var obj = document.getElementById(evt.target.id);
+				var field_name = obj.getAttribute('data-fieldname');
+				var counter = obj.getAttribute('data-counter');
+				data = {
+					"layer_id" : "{{layer_id}}",
+					"field_name": field_name,
 				}
-			});
+				$.ajax({
+					type: 'POST',
+					async: false,
+					data: data,
+					url: '/gvsigonline/services/nullable_check/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					},
+					success	:function(response) {
+						console.log("field-mandatory-"+counter);
+						document.getElementById("field-mandatory-"+counter).disabled = true;
+						document.getElementById("field-mandatory-"+counter).checked = true;
+					},
+					error: function() {
+						obj.checked = true;
+						console.log("field-mandatory-"+counter);
+						document.getElementById("field-mandatory-"+counter).disabled = false;
+						messageBox.show('error', gettext('The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again.'));
+					}
+				});
+			}
+			else {
+				var obj = document.getElementById(evt.target.id);
+				var counter = obj.getAttribute('data-counter');
+				console.log("field-mandatory-"+counter);
+				document.getElementById("field-mandatory-"+counter).disabled = false;
+			}
+		}
+		else if (evt.target.name.startsWith('field-nullable-')){
+			console.log(evt);
+			var obj = evt.target;
+			console.log(obj);
+			var counter = obj.getAttribute('data-counter');
+			console.log("field-mandatory-"+counter);
+			if(!$(this).is(":checked")) {
+				document.getElementById("field-mandatory-"+counter).disabled = true;
+				document.getElementById("field-mandatory-"+counter).checked = true;
+			}
+			else {
+				document.getElementById("field-mandatory-"+counter).disabled = false;
+			}
 		}
 	});
 	
-	
-	$('#field-list-table-body').on('click', 'button', function (evt){
-	    if (this.name == "button-convert-enum") {
-	    	id = $(this).prop('id');
-	    	id = id.substring(id.lastIndexOf('-') + 1);
-	    	fieldName = $("input[name=field-name-" + id + "]").val();
-	    	createModalContent(fieldName);
-	    }
+	$('.convert-to-enumerate').on('click', function (evt){
+		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
+		converToEnumModal(fieldName);
+	});
+	$('.delete-field').on('click', function (evt){
+		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
+		deleteFieldModal(fieldName);
+	});
+	$('.change-field-type').on('click', function (evt){
+		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
+		//deleteFieldModal(fieldName);
+	});
+	$('.rename-field').on('click', function (evt){
+		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
+		renameFieldModal(fieldName);
 	});
 	
-	function createModalContent(fieldName){
-		$('#modal-convert-to-enum .modal-body').empty();
+	function converToEnumModal(fieldName){
+		$('#my-modal-dialog .modal-body').empty();
+		$('#my-modal-dialog .modal-title').text('{% trans "Convert to enum" %}');
+		
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
 		
@@ -203,13 +325,13 @@
 		ui += '</div>';
 		
 		ui += '</div>';
-		$('#modal-convert-to-enum .modal-body').append(ui);
+		$('#my-modal-dialog .modal-body').append(ui);
 		var buttons = '';
-		buttons += '<button id="add-field-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		buttons += '<button id="enum-convert-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
 		buttons += '<button id="convert" type="button" class="btn btn-default">' + gettext('Convert') + '</button>';
 		buttons += '<button id="autogen" type="button" class="btn btn-default">' + gettext('Autogen') + '</button>';
-		$('#modal-convert-to-enum .modal-footer').empty();
-		$('#modal-convert-to-enum .modal-footer').append(buttons);
+		$('#my-modal-dialog .modal-footer').empty();
+		$('#my-modal-dialog .modal-footer').append(buttons);
 		
 		$('#convert').on('click', function () {
 			$.ajax({
@@ -217,7 +339,7 @@
 				async: false,
 				url: '/gvsigonline/services/convert_to_enumerate/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},
 			  	data:{
 			  		'field': fieldName,
@@ -228,11 +350,11 @@
 			  	},
 				success	:function(response) {
 					messageBox.show('Info', gettext('Convert ok'));
-					$('#modal-convert-to-enum').modal('hide');
+					$('#my-modal-dialog').modal('hide');
 				},
 				error: function() {
 					messageBox.show('error', files.responseText);
-					$('#modal-convert-to-enum').modal('hide');
+					$('#my-modal-dialog').modal('hide');
 				}
 			});
 		});
@@ -243,7 +365,7 @@
 				async: false,
 				url: '/gvsigonline/services/convert_to_enumerate/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},
 			  	data:{
 			  		'field': fieldName,
@@ -254,17 +376,216 @@
 			  	},
 				success	:function(response) {
 					messageBox.show('Info', gettext('Autogen ok'));
-					$('#modal-convert-to-enum').modal('hide');
+					$('#my-modal-dialog').modal('hide');
 				},
-				error: function(files, status, errMsg) {
-					messageBox.show('error', files.responseText);
-					$('#modal-convert-to-enum').modal('hide');
+				error: function(jqXHR, status, errMsg) {
+					messageBox.show('error', jqXHR.responseText);
+					$('#my-modal-dialog').modal('hide');
 				}
 			});
 		});
 		
-		$('#modal-convert-to-enum').modal('show');
+		$('#my-modal-dialog').modal('show');
+	}
+
+	function deleteFieldModal(fieldName){
+		$('#my-modal-dialog .modal-body').empty();
+		$('#my-modal-dialog .modal-title').text('{% trans "Delete field" %}');
+		var ui = '';
+		ui += '<div id="div-name" class="row">';
+		ui += '<div class="col-md-12 form-group">';
+		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
+		ui += '{% trans "Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the field to confirm the deletion:" %}'
+		ui += '<code>' + fieldName + '</code>';
+		ui += '</div>';
+		ui += '</div>';
+		ui += '<div class="col-md-12 form-group">';
+		ui += 	'<label for="deleted-field-name">' + gettext('Field to delete') + '</label>';
+		ui += 	'<input placeholder="' + "{% trans 'Field name' %}" + '" name="deleted-field-name" id="deleted-field-name" type="text" class="form-control">';
+		ui += '</div>';
+		ui += '</div>';
+		$('#my-modal-dialog .modal-body').append(ui);
+		var buttons = '';
+		buttons += '<button id="cancel-delete" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		buttons += '<button id="confirm-delete" type="button" class="btn btn-warning" disabled>' + gettext('Delete') + '</button>';
+		$('#my-modal-dialog .modal-footer').empty();
+		$('#my-modal-dialog .modal-footer').append(buttons);
+		$('#deleted-field-name').change(function(evt) {
+			if ($(this).val() == fieldName) {
+				document.getElementById('confirm-delete').disabled = false;
+			}
+			else {
+				document.getElementById('confirm-delete').disabled = true;
+			}
+		});
+		$('#deleted-field-name').keyup(function(evt) {
+			if ($(this).val() == fieldName) {
+				document.getElementById('confirm-delete').disabled = false;
+			}
+			else {
+				document.getElementById('confirm-delete').disabled = true;
+			}
+		});
+		
+		$('#confirm-delete').on('click', function () {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/db_field_delete/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+			  	data:{
+			  		'field': fieldName,
+			  		'layer_id': "{{layer_id}}"
+			  	},
+				success	:function(response) {
+					$('#my-modal-dialog').modal('hide');
+					messageBox.show('Info', gettext('Field was deleted'));
+					$('tr[data-fieldname="' + fieldName + '"]').remove();
+				},
+				error: function(jqXHR) {
+					messageBox.show('error', jqXHR.responseText);
+					$('#my-modal-dialog').modal('hide');
+				}
+			});
+		});
+		$('#my-modal-dialog').modal('show');
+	}
+
+	function renameFieldModal(fieldName){
+		$('#my-modal-dialog .modal-body').empty();
+		$('#my-modal-dialog .modal-title').text('{% trans "Rename field" %}');
+		var ui = '';
+		ui += '<div id="div-name" class="row">';
+		ui += '<div class="col-md-12 form-group">';
+		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
+		ui += '{% trans "Warning: renaming a field may have side effects, such as breaking a field-based legend." %}'
+		ui += '</div>';
+		ui += '</div>';
+		ui += '<div class="col-md-12 form-group">';
+		ui += 	'<label for="old-field-name">' + gettext('Old name') + '</label>';
+		ui += 	'<input name="old-field-name" id="old-field-name" type="text" class="form-control" value="' + fieldName + '" disabled>';
+		ui += '</div>';
+		ui += '<div class="col-md-12 form-group">';
+		ui += 	'<label for="new-field-name">' + gettext('New name') + '</label>';
+		ui += 	'<input placeholder="' + "{% trans 'Field name' %}" + '" name="new-field-name" id="new-field-name" type="text" class="form-control">';
+		ui += '</div>';
+		ui += '</div>';
+		$('#my-modal-dialog .modal-body').append(ui);
+		var buttons = '';
+		buttons += '<button id="cancel-rename" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		buttons += '<button id="confirm-rename" type="button" class="btn btn-warning">' + gettext('Rename') + '</button>';
+		$('#my-modal-dialog .modal-footer').empty();
+		$('#my-modal-dialog .modal-footer').append(buttons);
+		
+		$('#confirm-rename').on('click', function () {
+			var new_name = document.getElementById('new-field-name').value;
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/db_field_rename/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+			  	data:{
+			  		'field': fieldName,
+			  		'new_field_name': document.getElementById('new-field-name').value,
+			  		'layer_id': "{{layer_id}}"
+			  	},
+				success	:function(response) {
+					messageBox.show('Info', gettext('Field was renamed'));
+					$('#my-modal-dialog').modal('hide');
+					$('tr[data-fieldname="' + fieldName + '"] input')[0].value = new_name;
+					$('tr[data-fieldname="' + fieldName + '"]')[0].setAttribute('data-fieldname', new_name);
+				},
+				error: function(jqXHR) {
+					messageBox.show('error', jqXHR.responseText);
+					$('#my-modal-dialog').modal('hide');
+				}
+			});
+		});
+		$('#my-modal-dialog').modal('show');
+	}
+
+	function getEnumerations() {
+		var enumerations = [];
+		{% for e in enumerations %}
+		enumerations.push({"name": "{{e.name}}", "title": "{{e.title}}"});
+		{% endfor%}
+		return enumerations;
 	}
 	
+	function getForms() {
+		var forms = [];
+		{% for f in forms %}
+		forms.push({"name": "{{f.name}}", "title": "{{f.title}}"});
+		{% endfor%}
+		return forms;
+	}
+	
+	function addField(field) {
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/db_field_add/',
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+		  	data:{
+		  		'field': field.name,
+		  		'type': field.type,
+		  		'enumkey': field.enumkey,
+		  		'layer_id': "{{layer_id}}",
+		  		'calculation': field.calculation
+		  	},
+			success	:function(response) {
+				messageBox.show('Info', gettext('Field was added'));
+				$('#modal-error').on('hidden.bs.modal', function (e) {
+					// reload page to get the updated list of fields
+					window.location = window.location.toString().split("#", 1)[0];
+				});
+			},
+			error: function(jqXHR) {
+				messageBox.show('error', jqXHR.responseText);
+				$('#my-modal-dialog').modal('hide');
+			}
+		});
+	}
+	
+	function getAddFieldConfig() {
+		var config = {};
+		{% if GVSIGOL_ENABLE_ENUMERATIONS %}
+		config.enableEnums = true;
+		{% else %}
+		config.enableEnums = false;
+		{% endif %}
+		
+		{% if 'gvsigol_plugin_form' in INSTALLED_APPS %}
+		config.enableForms = true;
+		{% else %}
+		config.enableForms = false;
+		{% endif %}
+		
+		config.enumerations = [];
+		{% for e in enumerations %}
+		config.enumerations.push({"id": "{{e.id}}", "title": "{{e.title}}"});
+		{% endfor%}
+		config.forms = [];
+		{% for f in forms %}
+		config.forms.push({"name": "{{f.name}}", "title": "{{f.title}}"});
+		{% endfor%}
+		config.triggerProcedures = [];
+		{% for tp in procedures %}
+		config.triggerProcedures.push({"id": "{{tp.signature}}", "label": "{{tp.localized_label}}"});
+		{% endfor%}
+		config.modalSelector = '#my-modal-dialog';
+		return config;
+	}
+	var addFieldConfig = getAddFieldConfig();
+	
+	$("#add-field-button").on('click', function(e){
+		createModalContent(null, 'create', '{% trans "New field" %}', addFieldConfig);
+	});
 </script>
 {% endblock %}

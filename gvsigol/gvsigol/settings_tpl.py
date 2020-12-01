@@ -28,7 +28,7 @@ from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 
-GVSIGOL_VERSION = '2.7.0-dev'
+GVSIGOL_VERSION = '2.7.1-dev'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -374,6 +374,7 @@ GVSIGOL_ENABLE_ENUMERATIONS = ##GVSIGOL_ENABLE_ENUMERATIONS##
 #skin-yellow-light
 GVSIGOL_SKIN = '##GVSIGOL_SKIN##'
 
+GVSIGOL_PATH = '##GVSIGOL_PATH##'
 GVSIGOL_NAME = '##GVSIGOL_NAME##'
 GVSIGOL_SURNAME = '##GVSIGOL_SURNAME##'
 GVSIGOL_NAME_SHORT = '##GVSIGOL_NAME_SHORT##'
@@ -464,7 +465,7 @@ SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
-    'FORMATS': ['image/png'],
+    'FORMATS': ['image/png','image/jpeg'],
     'OPERATION_MODE': '##CACHE_OPERATION_MODE##'
 }
 try:

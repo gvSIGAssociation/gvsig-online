@@ -158,7 +158,8 @@
 								        {% endfor %}
 								    </select>
 							    </form>
-						    </li>
+							</li>
+							{% if user.is_authenticated %}
 							<li class="user-footer">
 								<div class="pull-left">
 									<a href="/gvsigonline/core/" id="goto-dashboard" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
@@ -167,6 +168,13 @@
 									<a href="/gvsigonline/auth/logout_user/" id="goto-logout" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
 								</div>
 							</li>
+							{% else %}
+							<li class="user-footer">
+								<div class="pull-right">
+									<a href="/gvsigonline/auth/login_user/" class="btn btn-default btn-flat">{% trans "Sign in" %}</a>
+								</div>
+							</li>
+							{% endif %}
 						</ul>
 					</li>
 				</ul>
@@ -336,16 +344,7 @@
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jsZip/jszip.min.js" %}"></script>
 	
-	<script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendors/jsPDF/libs/Deflate/adler32cs.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendors/jsPDF/libs/FileSaver/FileSaver.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendors/jsPDF/libs/Blob/Blob.js" %}"></script>
-
-    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.addimage.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.png_support.js" %}"></script>
-
-    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.standard_fonts_metrics.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.split_text_to_size.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jsPDF-1.3.5/dist/jspdf.debug.js" %}"></script>
 
 
 	<script>

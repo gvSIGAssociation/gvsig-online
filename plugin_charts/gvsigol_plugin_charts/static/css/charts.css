@@ -18,5 +18,29 @@
 
 .ol-search {
 	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
-	lef: 6px !important;
+	left: 6px !important;
+}
+
+#gvsigol-navbar-views-dropdown {
+	display: block
+} 
+
+.ui-dialog-titlebar-close {
+	border: none;
+}
+
+.ui-dialog-titlebar-collapse {
+	background: #ffffff;
+	border: none;
+	color: rgb(133, 133, 133);
+	top: 42% !important;
+	font-size: 18px !important;
+}
+
+.ui-dialog-titlebar-collapse-restore {
+	background: #ffffff;
+	border: none;
+	color: rgb(133, 133, 133);
+	top: 42% !important;
+	font-size: 18px !important;
 }

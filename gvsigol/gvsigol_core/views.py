@@ -274,7 +274,11 @@ def project_add(request):
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
-        extent = request.POST.get('extent')
+        extent = core_utils.get_canonical_epsg3857_extent(request.POST.get('extent'))
+        extent4326_minx = request.POST.get('extent4326_minx')
+        extent4326_miny = request.POST.get('extent4326_miny')
+        extent4326_maxx = request.POST.get('extent4326_maxx')
+        extent4326_maxy = request.POST.get('extent4326_maxy')
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
@@ -321,12 +325,6 @@ def project_add(request):
             if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
 
-        exists = False
-        projects = Project.objects.all()
-        for p in projects:
-            if name == p.name:
-                exists = True
-
         layergroups = None
         if request.user.is_superuser:
             layergroups = LayerGroup.objects.exclude(name='__default__')
@@ -362,75 +360,77 @@ def project_add(request):
             message = _(u"Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
             return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
-        if not exists:
-            project = Project(
-                name = name,
-                title = title,
-                logo_link = logo_link,
-                description = description,
-                center_lat = latitude,
-                center_lon = longitude,
-                zoom = int(float(zoom)),
-                extent = extent,
-                toc_order = toc,
-                toc_mode = toc_mode,
-                created_by = request.user.username,
-                is_public = is_public,
-                show_project_icon = show_project_icon,
-                selectable_groups = selectable_groups,
-                restricted_extent = restricted_extent,
-                tools = tools
-            )
+        if Project.objects.filter(name=name).exists():
+            message = _(u'Project name already exists')
+            return render(request, 'project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+
+        project = Project(
+            name = name,
+            title = title,
+            logo_link = logo_link,
+            description = description,
+            center_lat = latitude,
+            center_lon = longitude,
+            zoom = int(float(zoom)),
+            extent = extent,
+            toc_order = toc,
+            toc_mode = toc_mode,
+            created_by = request.user.username,
+            is_public = is_public,
+            show_project_icon = show_project_icon,
+            selectable_groups = selectable_groups,
+            restricted_extent = restricted_extent,
+            extent4326_minx = extent4326_minx,
+            extent4326_miny = extent4326_miny,
+            extent4326_maxx = extent4326_maxx,
+            extent4326_maxy = extent4326_maxy,
+            tools = tools
+        )
+        project.save()
+        
+        if has_image:
+            project.image = request.FILES['project-image']
             project.save()
-            
-            if has_image:
-                project.image = request.FILES['project-image']
-                project.save()
-            
-            if has_logo:
-                project.logo = request.FILES['project-logo']
-                project.save()
+        
+        if has_logo:
+            project.logo = request.FILES['project-logo']
+            project.save()
 
-            for alg in assigned_layergroups:
-                layergroup = LayerGroup.objects.get(id=alg)
-                baselayer_group = False
-                if selected_base_group != '' and alg == int(selected_base_group):
-                    baselayer_group = True
-                project_layergroup = ProjectLayerGroup(
-                    project = project,
-                    layer_group = layergroup,
-                    multiselect = True,
-                    baselayer_group = baselayer_group
-                )
+        for alg in assigned_layergroups:
+            layergroup = LayerGroup.objects.get(id=alg)
+            baselayer_group = False
+            if selected_base_group != '' and alg == int(selected_base_group):
+                baselayer_group = True
+            project_layergroup = ProjectLayerGroup(
+                project = project,
+                layer_group = layergroup,
+                multiselect = True,
+                baselayer_group = baselayer_group
+            )
+            project_layergroup.save()
+            if baselayer_group and selected_base_layer:
+                project_layergroup.default_baselayer = selected_base_layer
                 project_layergroup.save()
-                if baselayer_group and selected_base_layer:
-                    project_layergroup.default_baselayer = selected_base_layer
-                    project_layergroup.save()
 
-            for aug in assigned_usergroups:
-                usergroup = UserGroup.objects.get(id=aug)
-                project_usergroup = ProjectUserGroup(
-                    project = project,
-                    user_group = usergroup
-                )
-                project_usergroup.save()
-
-            admin_group = UserGroup.objects.get(name__exact='admin')
+        for aug in assigned_usergroups:
+            usergroup = UserGroup.objects.get(id=aug)
             project_usergroup = ProjectUserGroup(
                 project = project,
-                user_group = admin_group
+                user_group = usergroup
             )
             project_usergroup.save()
 
-            if 'redirect' in request.GET:
-                redirect_var = request.GET.get('redirect')
-                if redirect_var == 'new-layer-group':
-                    return redirect('layergroup_add_with_project', project_id=str(project.id))
+        admin_group = UserGroup.objects.get(name__exact='admin')
+        project_usergroup = ProjectUserGroup(
+            project = project,
+            user_group = admin_group
+        )
+        project_usergroup.save()
 
-
-        else:
-            message = _(u'Project name already exists')
-            return render(request, 'project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+        if 'redirect' in request.GET:
+            redirect_var = request.GET.get('redirect')
+            if redirect_var == 'new-layer-group':
+                return redirect('layergroup_add_with_project', project_id=str(project.id))
 
 
 
@@ -484,7 +484,11 @@ def project_update(request, pid):
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
-        extent = request.POST.get('extent')
+        extent = core_utils.get_canonical_epsg3857_extent(request.POST.get('extent'))
+        extent4326_minx = request.POST.get('extent4326_minx')
+        extent4326_miny = request.POST.get('extent4326_miny')
+        extent4326_maxx = request.POST.get('extent4326_maxx')
+        extent4326_maxy = request.POST.get('extent4326_maxy')
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
@@ -560,6 +564,10 @@ def project_update(request, pid):
         project.show_project_icon = show_project_icon
         project.selectable_groups = selectable_groups
         project.restricted_extent = restricted_extent
+        project.extent4326_minx = extent4326_minx
+        project.extent4326_miny = extent4326_miny
+        project.extent4326_maxx = extent4326_maxx
+        project.extent4326_maxy = extent4326_maxy
 
         if has_image:
             project.image = request.FILES['project-image']
@@ -663,12 +671,12 @@ def project_update(request, pid):
         
         url_base_lyr = ''
         icon = settings.BASE_URL + settings.STATIC_URL + 'img/processing.gif'
-        if(project.baselayer_version > 0):
+        if(project.baselayer_version is not None and project.baselayer_version > 0):
             url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
                     
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
-                                                       'project': project, 
+                                                       'project': project,
                                                        'groups': groups, 
                                                        'layergroups': layer_groups, 
                                                        'has_geocoding_plugin': has_geocoding_plugin, 
@@ -1005,7 +1013,7 @@ def project_get_conf(request):
                                 layer['wfs_url_no_auth'] = core_utils.get_wfs_url(workspace)
                             elif datastore.type.startswith('c_'):
                                 layer['wcs_url'] = core_utils.get_wcs_url(workspace)
-                            layer['namespace'] = workspace.uri
+                            layer['namespace'] = core_utils.get_absolute_url(workspace.uri, request.META)
                             layer['workspace'] = workspace.name
                             layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
                             layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
@@ -1161,7 +1169,8 @@ def project_get_conf(request):
             'project_tools': project_tools,
             "view": {
                 "restricted_extent": project.restricted_extent,
-                "extent": project.extent.split(','),
+                "extent": [ float(f) for f in project.extent.split(',')],
+                "extent4326": [project.extent4326_minx, project.extent4326_miny, project.extent4326_maxx, project.extent4326_maxy],
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon,
                 "zoom": project.zoom,
@@ -1449,6 +1458,7 @@ def project_clone(request, pid):
             target_datastore_name = form.cleaned_data.get('target_datastore')
             target_server = form.cleaned_data.get('target_server')
             copy_data = form.cleaned_data.get('copy_data')
+            permission_choice = form.cleaned_data.get('permission_choice')
 
             if target_server.frontend_url.endswith("/"):
                 uri = target_server.frontend_url + target_workspace_name
@@ -1468,7 +1478,9 @@ def project_clone(request, pid):
             target_workspace = services_utils.create_workspace(target_server.id, target_workspace_name, uri, values, request.user.username)
             if target_workspace:
                 datastore = services_utils.create_datastore(request.user.username, target_datastore_name, target_workspace)
-                project.clone(target_datastore=datastore, name=name, title=title, copy_layer_data=copy_data)
+                project.clone(target_datastore=datastore, name=name, title=title, copy_layer_data=copy_data, permissions=permission_choice)
+                server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+                server.reload_nodes()
                 messages.add_message(request, messages.INFO, _('The project was successfully cloned.'))
                 return redirect('project_update', pid=project.id)
     else:

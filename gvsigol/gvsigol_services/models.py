@@ -18,6 +18,7 @@ from __future__ import unicode_literals
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -25,6 +26,11 @@ from django.db import models
 from gvsigol_auth.models import UserGroup
 from gvsigol import settings
 from django.utils.crypto import get_random_string
+from gvsigol_services.triggers import CUSTOM_PROCEDURES
+from django.utils.translation import gettext_lazy as _
+
+CLONE_PERMISSION_CLONE = "clone"
+CLONE_PERMISSION_SKIP = "skip"
 
 class Server(models.Model):
     TYPE_CHOICES = (
@@ -122,7 +128,7 @@ class LayerGroup(models.Model):
     def __unicode__(self):
         return self.name
     
-    def clone(self, recursive=True, target_datastore=None, copy_layer_data=True):
+    def clone(self, recursive=True, target_datastore=None, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
         old_id = self.pk
         new_name = target_datastore.workspace.name + "_" + self.name
         i = 1
@@ -139,7 +145,7 @@ class LayerGroup(models.Model):
         new_instance =  LayerGroup.objects.get(id=self.pk)
         if recursive:
             for lyr in LayerGroup.objects.get(id=old_id).layer_set.all():
-                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, copy_data=copy_layer_data)
+                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, copy_data=copy_layer_data, permissions=permissions)
         return new_instance
 
 def get_default_layer_thumbnail():
@@ -192,9 +198,9 @@ class Layer(models.Model):
     def get_qualified_name(self):
         return self.datastore.workspace.name + ":" + self.name
     
-    def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True):
+    def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
         from gvsigol_services.utils import clone_layer
-        return clone_layer(target_datastore, self, layer_group, copy_data=copy_data)
+        return clone_layer(target_datastore, self, layer_group, copy_data=copy_data, permissions=permissions)
 
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer)
@@ -287,8 +293,12 @@ class EnumerationItem(models.Model):
 class LayerFieldEnumeration(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE, null=True)
     enumeration = models.ForeignKey(Enumeration, on_delete=models.CASCADE)
-    field = models.CharField(max_length=150) 
+    field = models.CharField(max_length=150)
     multiple = models.BooleanField(default=False)
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'field']),
+        ]
     
 class ServiceUrl(models.Model):
     SERVICE_TYPE_CHOICES = (
@@ -303,4 +313,67 @@ class ServiceUrl(models.Model):
     
     def __unicode__(self):
         return self.title
+
+class TriggerProcedure(models.Model):
+    """
+    The definition of a PostgreSQL function designed to be used in a trigger,
+    which will be used for calculated fields.
     
+    Our TriggerProcedure definition includes also parameters for the trigger creation,
+    since these procedures make some assumptions based on the kind of trigger that will
+    be applied (ROW OR STATEMENT orientation, BEFORE, AFTER OR INSTEAD OF activation, etc).
+    
+    If the definition is not static and has to be customized based on environment variables,
+    field names, etc, a CustomFunctionDef subclass must be registered in triggers.CUSTOM_PROCEDURES
+    dictionary.
+    """
+    signature = models.TextField(unique=True)
+    func_name = models.CharField(max_length=150)
+    func_schema = models.CharField(max_length=150)
+    label = models.CharField(max_length=150)
+    definition_tpl =  models.TextField(blank=True, null=True)
+    activation = models.CharField(max_length=10)
+    event = models.CharField(max_length=100)
+    orientation = models.CharField(max_length=10)
+    """
+    Condition is excluded for the moment since it is very complex to validate
+    against SQL injection attacks.
+    condition = models.TextField()
+    """
+    def get_definition(self):
+        custom_procedure_cls = CUSTOM_PROCEDURES.get(self.signature)
+        if custom_procedure_cls:
+            print custom_procedure_cls
+            return custom_procedure_cls().get_definition()
+        else:
+            return self.definition_tpl
+    @property
+    def localized_label(self):
+        return _(self.label)
+
+class Trigger(models.Model):
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE, null=True)
+    field = models.CharField(max_length=150)
+    procedure = models.ForeignKey(TriggerProcedure, on_delete=models.CASCADE)
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'field']),
+        ]
+
+    def get_name(self):
+        return self.procedure.func_name + "_" + self.field + "_trigger"
+    
+    def install(self):
+        from gvsigol_services.utils import get_db_connect_from_layer
+        trigger_name = self.get_name()
+        i, target_table, target_schema = get_db_connect_from_layer(self.layer)
+        i.install_trigger(trigger_name, target_schema, target_table,
+                        self.procedure.activation, self.procedure.event, self.procedure.orientation, '', self.procedure.func_schema, self.procedure.func_name, [self.field])
+        i.close()
+
+    def drop(self):
+        from gvsigol_services.utils import get_db_connect_from_layer
+        trigger_name = self.get_name()
+        i, target_table, target_schema = get_db_connect_from_layer(self.layer)
+        i.drop_trigger(trigger_name, target_schema, target_table)
+        i.close()

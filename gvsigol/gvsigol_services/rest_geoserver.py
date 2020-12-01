@@ -510,22 +510,34 @@ class Geoserver():
             return
         raise UploadError(r.status_code, r.content)
 
-    def update_featuretype(self, workspace, ds_name, name, updatedParams={}, user=None, password=None):
+    def update_featuretype(self, workspace, ds_name, name, updated_params={}, nativeBoundingBox=False, latLonBoundingBox=False, original_params=None, user=None, password=None):
         """
         Updates the featuretype definition. Only params included in the updatedParams dict will be
         updated on the feature type. The rest of the featuretype definition will remain unchanged.
         """
+        url = self.service_url + u'/workspaces/' + workspace + u'/datastores/' + ds_name + u'/featuretypes/' + name + u'.json'
         if user and password:
             auth = (user, password)
         else:
             auth = self.session.auth
-        
-        url = self.service_url + u'/workspaces/' + workspace + u'/datastores/' + ds_name + u'/featuretypes/' + name + u'.json' 
-        r = self.session.get(url, auth=auth)
-        if r.status_code!=200:
-            raise FailedRequestError(r.status_code, r.content)
-        data = r.json()
-        data.get('featureType').update(updatedParams) 
+        if original_params:
+            data = original_params
+        else: 
+            r = self.session.get(url, auth=auth)
+            if r.status_code!=200:
+                raise FailedRequestError(r.status_code, r.content)
+            data = r.json()
+        featureType = data.get('featureType')
+        featureType.update(updated_params)
+        recalculate = []
+        if nativeBoundingBox:
+            featureType.pop('nativeBoundingBox', None)
+            recalculate.append("nativebbox")
+        if latLonBoundingBox:
+            featureType.pop('latLonBoundingBox', None)
+            recalculate.append("latlonbbox")
+        if  len(recalculate)>0:
+            url += "?recalculate=" + ",".join(recalculate)
         r = self.session.put(url, json=data, auth=auth)
         if r.status_code!=200:
             logger.error(u'Error updating featuretype. Status code: ' + text(r.status_code) + u' - Url: ' + url)
@@ -888,7 +900,14 @@ class Geoserver():
             auth = self.session.auth
         r = self.session.get(url, json={}, auth=auth)
         if r.status_code==200:
-            return r._content
+            try:
+                cjson = r.json()
+                seq =  cjson.get('global', {}).get('updateSequence')
+                if seq is not None:
+                    return seq
+            except:
+                logger.exception("Error getting updateSequence")
+            return r.content
         raise FailedRequestError(r.status_code, r.content)
             
     

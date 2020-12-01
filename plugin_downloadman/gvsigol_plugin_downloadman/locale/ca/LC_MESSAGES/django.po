@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-11 16:46+0000\n"
+"POT-Creation-Date: 2020-10-13 21:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,219 +18,260 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:42
+#: models.py:43
 msgid "Request queued"
 msgstr ""
 
-#: models.py:43
+#: models.py:44
 msgid "Processing request"
 msgstr ""
 
-#: models.py:44 templates/download_request_update.html:88
+#: models.py:45 templates/download_request_update.html:88
 msgid "Completed"
 msgstr ""
 
-#: models.py:45
+#: models.py:46
 msgid "Completed with errors"
 msgstr ""
 
-#: models.py:46 models.py:249
+#: models.py:47 models.py:251
 msgid "Rejected"
 msgstr ""
 
-#: models.py:47
+#: models.py:48
 msgid "Error queueing request"
 msgstr ""
 
-#: models.py:50
+#: models.py:51
 msgid "Initial notification completed"
 msgstr ""
 
-#: models.py:51
+#: models.py:52
 msgid "Notification completed"
 msgstr ""
 
-#: models.py:52
+#: models.py:53
 msgid "Notification error"
 msgstr ""
 
-#: models.py:53
+#: models.py:54
 msgid "Permanent notification error"
 msgstr ""
 
-#: models.py:81
+#: models.py:82
 msgid "Active"
 msgstr ""
 
-#: models.py:83
+#: models.py:84
 msgid "Archived"
 msgstr ""
 
-#: models.py:87 templates/downman_index.html:28 templates/downman_index.html:30
+#: models.py:88 templates/downman_index.html:28 templates/downman_index.html:30
 msgid "Awaiting approval"
 msgstr ""
 
-#: models.py:119 tasks.py:939 tasks.py:942 views.py:575 views.py:581
+#: models.py:120 tasks.py:1307 tasks.py:1310 views.py:571 views.py:577
 msgid "Multiresource package"
 msgstr ""
 
-#: models.py:154
+#: models.py:155
 msgid "Processed #sing#"
 msgstr ""
 
-#: models.py:155
+#: models.py:156
 msgid "Cancelled by the user"
 msgstr ""
 
-#: models.py:156
+#: models.py:157
 msgid "Cancelled by the administrator"
 msgstr ""
 
-#: models.py:171 models.py:233
+#: models.py:172 models.py:235
 msgid "Processed"
 msgstr ""
 
-#: models.py:173 models.py:260
+#: models.py:174 models.py:262
 msgid "Canceled"
 msgstr ""
 
-#: models.py:175 views.py:557
+#: models.py:176 views.py:553
 msgid "Expired"
 msgstr ""
 
-#: models.py:231
+#: models.py:233
 msgid "Resource queued"
 msgstr ""
 
-#: models.py:232
+#: models.py:234
 msgid "Queued, waiting for free space"
 msgstr ""
 
-#: models.py:234
+#: models.py:236
 msgid "On hold"
 msgstr ""
 
-#: models.py:235
+#: models.py:237
 msgid "Temporal error"
 msgstr ""
 
-#: models.py:236
+#: models.py:238
 msgid "Permanent error"
 msgstr ""
 
-#: models.py:245
+#: models.py:247
 msgid "Not processed"
 msgstr ""
 
-#: models.py:246
+#: models.py:248
 msgid "Not required"
 msgstr ""
 
-#: models.py:247
+#: models.py:249
 msgid "Pending"
 msgstr ""
 
-#: models.py:248
+#: models.py:250
 msgid "Accepted"
 msgstr ""
 
-#: models.py:270
+#: models.py:272
 msgid "Approval: "
 msgstr ""
 
-#: tasks.py:847 tasks.py:1010
+#: tasks.py:970
+msgid "wfs_download_warning"
+msgstr ""
+
+#: tasks.py:972
+msgid ""
+"Could not check the last file of the WFS download. Maybe the result is "
+"incomplete."
+msgstr ""
+
+#: tasks.py:974
+msgid "Layer name: "
+msgstr ""
+
+#: tasks.py:977
+msgid "Total downloaded geometries: "
+msgstr ""
+
+#: tasks.py:980
+msgid "Url of last downloaded file: "
+msgstr ""
+
+#: tasks.py:1215 tasks.py:1409
 #, python-format
 msgid "Download service: your request has been received - %(requestid)s"
 msgstr ""
 
-#: tasks.py:848
+#: tasks.py:1216
 #, python-brace-format
 msgid ""
 "\n"
 "You can use this tracking link to check the status of your request: {0}"
 msgstr ""
 
-#: tasks.py:854
+#: tasks.py:1222
 msgid "Your download request has been received."
 msgstr ""
 
-#: tasks.py:856 templates/request_received_email.html:14
+#: tasks.py:1224 templates/request_received_email.html:14
 msgid "Included resources:"
 msgstr ""
 
-#: tasks.py:903 tasks.py:906
+#: tasks.py:1271 tasks.py:1274
 #, python-format
 msgid "Download service: your request is ready - %(requestid)s"
 msgstr ""
 
-#: tasks.py:904
+#: tasks.py:1272
 msgid "Your download request is ready."
 msgstr ""
 
-#: tasks.py:907
+#: tasks.py:1275
 msgid ""
 "Your download request is ready. Some resources failed to be processed and "
 "are not available for download at the moment."
 msgstr ""
 
-#: tasks.py:909
+#: tasks.py:1277
 #, python-format
 msgid "Download service: request progress - %(requestid)s"
 msgstr ""
 
-#: tasks.py:910
+#: tasks.py:1278
 msgid "Your download request has been partially processed."
 msgstr ""
 
-#: tasks.py:913 templates/progress_notif_email.html:14
+#: tasks.py:1281
 msgid "You can use the following links to download the requested resources:"
 msgstr ""
 
-#: tasks.py:916
+#: tasks.py:1284
 #, python-brace-format
 msgid "Download service: request progress - {0}"
 msgstr ""
 
-#: tasks.py:940
+#: tasks.py:1308
 msgid "    -- Link valid until {0!s}:\n"
 msgstr ""
 
-#: tasks.py:941
+#: tasks.py:1309
 msgid "    -- Contents:"
 msgstr ""
 
-#: tasks.py:946
+#: tasks.py:1314
 msgid "     -- {0!s} [{1!s}]\n"
 msgstr ""
 
-#: tasks.py:947
+#: tasks.py:1315
 msgid "{0!s} [{1!s}]\n"
 msgstr ""
 
-#: tasks.py:954 templates/progress_notif_email.html:35
+#: tasks.py:1322 templates/progress_notif_email.html:14
 msgid "The following resources are still being processed:"
 msgstr ""
 
-#: tasks.py:957 tasks.py:966
+#: tasks.py:1325 tasks.py:1334
 msgid "Status:"
 msgstr ""
 
-#: tasks.py:963 templates/progress_notif_email.html:47
+#: tasks.py:1331 templates/progress_notif_email.html:26
 msgid "The following resources could not be processed:"
 msgstr ""
 
-#: tasks.py:969 tasks.py:1017 templates/progress_notif_email.html:58
+#: tasks.py:1337 tasks.py:1416
 msgid ""
 "You can also use this tracking link to check the status of your request:"
 msgstr ""
 
-#: tasks.py:1011
+#: tasks.py:1376
+#, python-format
+msgid "Download service: a new request is awaiting approval - %(requestid)s"
+msgstr ""
+
+#: tasks.py:1377
+msgid "A new request has been registered and is awaiting approval."
+msgstr ""
+
+#: tasks.py:1380 tasks.py:1413
+#, python-brace-format
+msgid "Download service: received request - {0}"
+msgstr ""
+
+#: tasks.py:1383 templates/awaiting_approval_email.html:13
+#: templates/progress_notif_email.html:37
+msgid "Use the following link to manage the request:"
+msgstr ""
+
+#: tasks.py:1410
 msgid "Our team will contact you when your request has been analysed."
 msgstr ""
 
-#: tasks.py:1014
-#, python-brace-format
-msgid "Download service: received request - {0}"
+#: templates/awaiting_approval_email.html:7
+#: templates/progress_notif_email.html:7
+msgid "Download Service notification - request awaiting approval"
 msgstr ""
 
 #: templates/dashboard_downloadman_menu.html:10
@@ -481,89 +522,84 @@ msgstr ""
 msgid "Maximum number of allowed items in the download list"
 msgstr ""
 
-#: templates/downman_index.html:124
+#: templates/downman_index.html:123
+msgid "Notifications: admin emails"
+msgstr ""
+
+#: templates/downman_index.html:130
 msgid "Save"
 msgstr ""
 
-#: templates/downman_index.html:149
+#: templates/downman_index.html:155
 msgid "Processing request..."
 msgstr ""
 
-#: templates/downman_index.html:150
+#: templates/downman_index.html:156
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: templates/downman_index.html:151
+#: templates/downman_index.html:157
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: templates/downman_index.html:152
+#: templates/downman_index.html:158
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: templates/downman_index.html:153
+#: templates/downman_index.html:159
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: templates/downman_index.html:154
+#: templates/downman_index.html:160
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: templates/downman_index.html:156
+#: templates/downman_index.html:162
 msgid "Loading..."
 msgstr ""
 
-#: templates/downman_index.html:157 templates/downman_index.html:158
+#: templates/downman_index.html:163 templates/downman_index.html:164
 msgid "No records available"
 msgstr ""
 
-#: templates/downman_index.html:160
+#: templates/downman_index.html:166
 msgid "First"
 msgstr ""
 
-#: templates/downman_index.html:161
+#: templates/downman_index.html:167
 msgid "Previous"
 msgstr ""
 
-#: templates/downman_index.html:162
+#: templates/downman_index.html:168
 msgid "Next"
 msgstr ""
 
-#: templates/downman_index.html:163
+#: templates/downman_index.html:169
 msgid "Last"
 msgstr ""
 
-#: templates/downman_index.html:166
+#: templates/downman_index.html:172
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/downman_index.html:167
+#: templates/downman_index.html:173
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: templates/progress_notif_email.html:7
-#: templates/request_received_email.html:7
-msgid "Download Service notification"
-msgstr ""
-
-#: templates/progress_notif_email.html:20
-msgid "Contents: "
-msgstr ""
-
-#: templates/progress_notif_email.html:28
-msgid "Valid to:"
-msgstr ""
-
-#: templates/progress_notif_email.html:40
-#: templates/progress_notif_email.html:52
+#: templates/progress_notif_email.html:19
+#: templates/progress_notif_email.html:31
 #: templates/request_received_email.html:19 templates/track_request.html:48
 msgid "Status: "
+msgstr ""
+
+#: templates/request_received_email.html:7
+msgid "Download Service notification"
 msgstr ""
 
 #: templates/track_request.html:52
@@ -590,59 +626,59 @@ msgstr ""
 msgid "Download request: "
 msgstr ""
 
-#: views.py:182
+#: views.py:183
 msgid "File format"
 msgstr ""
 
-#: views.py:189
+#: views.py:190
 msgid "Spatial filter"
 msgstr ""
 
-#: views.py:284
+#: views.py:278
 msgid ""
 "Include only geometries that intersect the bounding box of the selected area"
 msgstr ""
 
-#: views.py:285 views.py:290
+#: views.py:279 views.py:285
 msgid "Do not filter output"
 msgstr ""
 
-#: views.py:289
+#: views.py:284
 msgid "Trim result using the bounding box of the selected area"
 msgstr ""
 
-#: views.py:321 views.py:417
+#: views.py:317 views.py:414
 msgid "Vector data"
 msgstr ""
 
-#: views.py:333 views.py:343 views.py:414
+#: views.py:329 views.py:339 views.py:411
 msgid "Raster data"
 msgstr ""
 
-#: views.py:562
+#: views.py:558
 msgid "Approved"
 msgstr ""
 
-#: views.py:625
+#: views.py:621
 msgid "Your download request could not be found"
 msgstr ""
 
-#: views.py:663
+#: views.py:659
 msgid "Your download request has expired"
 msgstr ""
 
-#: views.py:663 views.py:665
+#: views.py:659 views.py:661
 msgid "You can start a new request using the Download Service"
 msgstr ""
 
-#: views.py:665
+#: views.py:661
 msgid "Your download request has been cancelled"
 msgstr ""
 
-#: views.py:717
+#: views.py:716
 msgid "The resource could not be found"
 msgstr ""
 
-#: views.py:717
+#: views.py:716
 msgid "Contact the service administrators if you believe this is an error"
 msgstr ""

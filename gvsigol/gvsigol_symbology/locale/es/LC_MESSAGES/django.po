@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-23 11:21+0000\n"
+"POT-Creation-Date: 2020-10-08 15:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,15 +40,15 @@ msgstr "Estrella"
 msgid "Cross"
 msgstr "Cruz"
 
-#: gvsigol_symbology/services.py:45
+#: gvsigol_symbology/services.py:47
 msgid "Default style for: "
 msgstr "Estilo por defecto para: "
 
-#: gvsigol_symbology/services.py:77
+#: gvsigol_symbology/services.py:79
 msgid "Default symbol"
 msgstr "Símbolo por defecto"
 
-#: gvsigol_symbology/services_library.py:69
+#: gvsigol_symbology/services_library.py:67
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
@@ -973,8 +973,8 @@ msgstr "Seleccionar formato"
 
 #: gvsigol_symbology/templates/external_graphic_add.html:146
 #: gvsigol_symbology/templates/external_graphic_add.html:152
-#: gvsigol_symbology/views.py:874 gvsigol_symbology/views.py:1078
-#: gvsigol_symbology/views.py:1264
+#: gvsigol_symbology/views.py:988 gvsigol_symbology/views.py:1192
+#: gvsigol_symbology/views.py:1378
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -1071,7 +1071,6 @@ msgstr "Personalizada"
 
 #: gvsigol_symbology/templates/select_legend_type.html:69
 #: gvsigol_symbology/templates/select_legend_type.html:100
-#| msgid "Has custom legend?"
 msgid "Creates a custom legend"
 msgstr "Crea una leyenda propia"
 
@@ -1137,19 +1136,19 @@ msgstr "Editar simbolizador"
 msgid "Select field to generate unique values"
 msgstr "Seleccionar campo para generar valores únicos"
 
-#: gvsigol_symbology/views.py:141
+#: gvsigol_symbology/views.py:139
 msgid "The layer must contain at least one style"
 msgstr "La capa debe contener al menos un estilo"
 
-#: gvsigol_symbology/views.py:144
+#: gvsigol_symbology/views.py:142
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: gvsigol_symbology/views.py:866
+#: gvsigol_symbology/views.py:980
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: gvsigol_symbology/views.py:926 gvsigol_symbology/views.py:951
+#: gvsigol_symbology/views.py:1040 gvsigol_symbology/views.py:1065
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
@@ -1157,9 +1156,9 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: gvsigol_symbology/views.py:1021 gvsigol_symbology/views.py:1068
-#: gvsigol_symbology/views.py:1116 gvsigol_symbology/views.py:1193
-#: gvsigol_symbology/views.py:1254 gvsigol_symbology/views.py:1392
+#: gvsigol_symbology/views.py:1135 gvsigol_symbology/views.py:1182
+#: gvsigol_symbology/views.py:1230 gvsigol_symbology/views.py:1307
+#: gvsigol_symbology/views.py:1368 gvsigol_symbology/views.py:1506
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
@@ -1167,11 +1166,11 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: gvsigol_symbology/views.py:1075 gvsigol_symbology/views.py:1261
+#: gvsigol_symbology/views.py:1189 gvsigol_symbology/views.py:1375
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: gvsigol_symbology/views.py:1081 gvsigol_symbology/views.py:1267
+#: gvsigol_symbology/views.py:1195 gvsigol_symbology/views.py:1381
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
 

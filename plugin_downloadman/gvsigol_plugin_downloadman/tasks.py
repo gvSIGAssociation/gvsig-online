@@ -30,7 +30,7 @@ from celery import shared_task, task
 from celery.exceptions import Retry
 from celery.utils.log import get_task_logger
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
-from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time, get_max_public_download_size
+from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time, get_max_public_download_size, get_notifications_admin_emails, get_notifications_from_email, get_notifications_from_pass
 from datetime import date, timedelta, datetime
 
 import os, glob
@@ -459,7 +459,7 @@ class WCSClient():
         self.params = params
         self.output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
         self.nativeSrsCode = None
-        self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0'}
+        self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0', 'xlink': "http://www.w3.org/1999/xlink", 'ows': 'http://www.opengis.net/ows/2.0'}
         self.gmlCoverageNamespaces =  {
                 'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
                 'wcscrs': "http://www.opengis.net/wcs/service-extension/crs/1.0",
@@ -505,8 +505,31 @@ class WCSClient():
         if describeCoverageTree is not None:
             return describeCoverageTree.find('./gml:boundedBy/gml:Envelope', namespaces)
 
+    def getCapabilitiesTree(self, baseUrl, version='2.0.1'):
+        url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=' + version +'&request=GetCapabilities'
+        logger.debug(url)
+        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
+        if r.status_code != 200:
+            raise PreparationError("Error retrieving getCapabilities")
+        return ET.fromstring(r.content)
+
+    def getGetOperationUrl_v2_0_1(self, capabilitiesTree, operationName):
+        try:
+            if capabilitiesTree is not None:
+                findExpr = './ows:OperationsMetadata/ows:Operation[@name="' + operationName + '"]/ows:DCP/ows:HTTP/ows:Get'
+                operationHttpGetList = capabilitiesTree.findall(findExpr, self.wcs200Namespaces)
+                for operationHttpGet in operationHttpGetList:
+                    operationHttpGetUrl = operationHttpGet.get('{' + self.wcs200Namespaces.get('xlink') +'}href')
+                    if operationHttpGetUrl:
+                        return operationHttpGetUrl
+        except:
+            logger.exception(u"Error getting the URL of operation: " + operationName)
+        return self.url
+
     def getWcsRequest(self):
-        url = _normalizeWxsUrl(self.url) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + self.layer_name
+        capabilitiesTree = self.getCapabilitiesTree(self.url)
+        getCoverageUrl = self.getGetOperationUrl_v2_0_1(capabilitiesTree, 'GetCoverage')
+        url = _normalizeWxsUrl(getCoverageUrl) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + self.layer_name
         self.file_format = _getParamValue(self.params, FORMAT_PARAM_NAME)
         if self.isMultipartResult():
             url += u'&mediatype=multipart/related'
@@ -516,7 +539,8 @@ class WCSClient():
         if spatial_filter_type == 'bbox':
             spatial_filter_bbox = _getParamValue(self.params, SPATIAL_FILTER_BBOX_PARAM_NAME)
             if spatial_filter_bbox:
-                describeCoverageTree = self._getDescribeWcsCoverageTree(self.layer_name, self.url)
+                describeCoverageUrl = self.getGetOperationUrl_v2_0_1(capabilitiesTree, 'DescribeCoverage')
+                describeCoverageTree = self._getDescribeWcsCoverageTree(self.layer_name, describeCoverageUrl)
                 if describeCoverageTree is not None:
                     describeCoverageRoot = describeCoverageTree.find('./wcs:CoverageDescription', self.wcs200Namespaces)
                     envelopeNode = self._getWcsCoverageEnvelope(describeCoverageRoot, self.wcs200Namespaces)
@@ -619,6 +643,16 @@ class WCSClient():
         try:
             r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
             if r.status_code != 200:
+                try:
+                    error_root = ET.fromstring(r.content)
+                    exc = error_root.find('ows:Exception', self.wcs200Namespaces)
+                    if exc:
+                        code = exc.get('exceptionCode')
+                        message = "".join(exc.itertext())
+                        if code == 'InvalidSubsetting':
+                            raise PermanentPreparationError(u'The provided spatial filter does not overlap the layer. Layer could not be retrieved. Error code: ' + code + ' - Error message: ' + message.strip())
+                except ET.LxmlError:
+                    pass
                 tmp_file.close()
                 raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
             for chunk in r.iter_content(chunk_size=128):
@@ -700,7 +734,7 @@ class WFSClient():
         self.output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
         self.nativeSrsCode = None
         self.canceled = False
-        self.wfs200Namespaces = {'wfs': 'http://www.opengis.net/wfs/2.0', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+        self.wfs200Namespaces = {'wfs': 'http://www.opengis.net/wfs/2.0', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'ows': 'http://www.opengis.net/ows/1.1', 'xlink': "http://www.w3.org/1999/xlink"}
         self.wfs100Namespaces = {'wfs': 'http://www.opengis.net/wfs', 'ogc': 'http://www.opengis.net/ogc', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
 
     def cancel(self):
@@ -715,24 +749,50 @@ class WFSClient():
             if epsgString.startswith('urn:ogc:def:crs:EPSG:'):
                 return re.sub('urn:ogc:def:crs:EPSG:[^:]*:', '', epsgString)
 
-    def getLayerCrs_v1_0_0(self, getCapabilitiesTree, layerName):
+    def getLayerCrs_v1_0_0(self, capabilitiesTree, layerName):
         try:
-            if getCapabilitiesTree is not None:
+            if capabilitiesTree is not None:
                 findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
-                featureTypes = getCapabilitiesTree.findall(findExpr, self.wfs100Namespaces)
+                featureTypes = capabilitiesTree.findall(findExpr, self.wfs100Namespaces)
                 for featureTypeNameNode in featureTypes:
                     if featureTypeNameNode.text == layerName:
                         srsNode = featureTypeNameNode.find("../wfs:SRS", self.wfs100Namespaces)
                         if srsNode is not None:
                             return srsNode.text
         except:
-            logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
+            logger.exception(u"Error getting the CRS of the WFS layer: " + layerName)
 
-    def getLayerCrs_v2_0_0(self, getCapabilitiesTree, layerName):
+    def getGetOperationUrl_v1_0_0(self, capabilitiesTree, operationName):
         try:
-            if getCapabilitiesTree is not None:
+            if capabilitiesTree is not None:
+                findExpr = "./wfs:Capability/wfs:Request/wfs:" + operationName + "/wfs:DCPType/wfs:HTTP/wfs:Get"
+                operationHttpGetList = capabilitiesTree.findall(findExpr, self.wfs100Namespaces)
+                for operationHttpGet in operationHttpGetList:
+                    operationHttpGetUrl = operationHttpGet.get("onlineResource")
+                    if operationHttpGetUrl:
+                        return operationHttpGetUrl
+        except:
+            logger.exception(u"Error getting the URL of operation: " + operationName)
+        return self.url
+
+    def getGetOperationUrl_v2_0_0(self, capabilitiesTree, operationName):
+        try:
+            if capabilitiesTree is not None:
+                findExpr = './ows:OperationsMetadata/ows:Operation[@name="' + operationName + '"]/ows:DCP/ows:HTTP/ows:Get'
+                operationHttpGetList = capabilitiesTree.findall(findExpr, self.wfs200Namespaces)
+                for operationHttpGet in operationHttpGetList:
+                    operationHttpGetUrl = operationHttpGet.get('{' + self.wfs200Namespaces.get('xlink') +'}href')
+                    if operationHttpGetUrl:
+                        return operationHttpGetUrl
+        except:
+            logger.exception(u"Error getting the URL of operation: " + operationName)
+        return self.url
+
+    def getLayerCrs_v2_0_0(self, capabilitiesTree, layerName):
+        try:
+            if capabilitiesTree is not None:
                 findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
-                featureTypes = getCapabilitiesTree.findall(findExpr, self.wfs200Namespaces)
+                featureTypes = capabilitiesTree.findall(findExpr, self.wfs200Namespaces)
                 for featureTypeNameNode in featureTypes:
                     if featureTypeNameNode.text == layerName:
                         srsNode = featureTypeNameNode.find("../wfs:DefaultCRS", self.wfs200Namespaces)
@@ -991,7 +1051,17 @@ class WFSClient():
         logger.debug(self.url)
         try:
             self.capabilitiesTree = self.getCapabilitiesTree(self.url, version='1.0.0')
-            self.nativeSrs = self.getLayerCrs_v1_0_0(self.capabilitiesTree, self.layer_name)
+            # in case the server does not support the requested version and returns a different one
+            capabilitiesVersion = self.capabilitiesTree.get('version')
+            if capabilitiesVersion[0] == '1':
+                self.nativeSrs = self.getLayerCrs_v1_0_0(self.capabilitiesTree, self.layer_name)
+                getFeatureUrl = self.getGetOperationUrl_v1_0_0(self.capabilitiesTree, 'GetFeature')
+            else:
+                self.nativeSrs = self.getLayerCrs_v2_0_0(self.capabilitiesTree, self.layer_name)
+                getFeatureUrl = self.getGetOperationUrl_v2_0_0(self.capabilitiesTree, 'GetFeature')
+            print "getFeatureUrl"
+            print getFeatureUrl
+            
             paramDict = {}
             if self.file_format is not None:
                 paramDict['file_format'] = self.file_format
@@ -1007,7 +1077,7 @@ class WFSClient():
                 We use WFS 1.0 because it is easier to get consistent axis order results
                 for Shapefiles, GeoJSONs, etc, as expected by most of the existing GIS software.
                 """
-                url = self.getWfsGetFeatureRequest_v1_0_0(self.url, self.layer_name, self.params, **paramDict)
+                url = self.getWfsGetFeatureRequest_v1_0_0(getFeatureUrl, self.layer_name, self.params, **paramDict)
                 if partCount > 1:
                     suffix = '_part{:02}'.format(partCount)
                 else:
@@ -1230,12 +1300,12 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
                 to = user.email
             else:
                 to = request.requested_by_external
-            try:
-                from_email =  core_settings.EMAIL_HOST_USER
-            except:
-                logger.exception("EMAIL_HOST_USER has not been configured")
-                raise
-            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            from_email = get_notifications_from_email()
+            from_pass = get_notifications_from_pass()
+            if not from_email or not from_pass:
+                logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+                raise Error("Error getting email auth credentials")
+            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.INITIAL_NOTIFICATION_COMPLETED_STATUS
             request.save(update_fields=['notification_status'])
 
@@ -1255,11 +1325,11 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
 @shared_task(bind=True)
 def notifyRequestProgress(self, request_id):
     try:
-        try:
-            from_email =  core_settings.EMAIL_HOST_USER
-        except:
-            logger.exception("EMAIL_HOST_USER has not been configured")
-            raise
+        from_email = get_notifications_from_email()
+        from_pass = get_notifications_from_pass()
+        if not from_email or not from_pass:
+            logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+            raise Error("Error getting email auth credentials")
         request = DownloadRequest.objects.get(pk=request_id)
         with override(get_language(request)):
             tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
@@ -1341,7 +1411,7 @@ def notifyRequestProgress(self, request_id):
                 to = request.requested_by_external
             logger.debug(u"mailing: " + to)
             #mail.send_mail(subject, plain_message, from_email, [to])
-            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
             request.save(update_fields=['notification_status'])
 
@@ -1358,16 +1428,47 @@ def notifyRequestProgress(self, request_id):
             request.notification_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
             request.save(update_fields=['notification_status'])
 
+@shared_task(bind=True)
+def notifyApprovalRequired(self, request_id):
+    try:
+        from_email = get_notifications_from_email()
+        from_pass = get_notifications_from_pass()
+        if not from_email or not from_pass:
+            logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+            raise Error("Error getting email auth credentials")
+        request = DownloadRequest.objects.get(pk=request_id)
+        with override(get_language(request)):
+            manage_request_url = core_settings.BASE_URL + reverse('downman-update-request', args=(request.id,))
+            subject = _('Download service: a new request is awaiting approval - %(requestid)s') % {'requestid': request.request_random_id}
+            statusdetails = _(u'A new request has been registered and is awaiting approval.')
+            plain_message = statusdetails + '\n'
+            htmlContext = {
+                u"statusdesc": _(u'Download service: received request - {0}').format(request.request_random_id),
+                u"statusdetails": statusdetails,
+                }
+            plain_message += u'\n' + _(u'Use the following link to manage the request:') + u' ' + manage_request_url + u'\n'
+            htmlContext['request_url'] = manage_request_url
+            html_message = render_to_string('awaiting_approval_email.html', context=htmlContext)
+            #plain_message = strip_tags(html_message)
+            logger.debug(u"mailing: " + str(get_notifications_admin_emails()))
+            #mail.send_mail(subject, plain_message, from_email, [to])
+            mail.send_mail(subject, plain_message, from_email, get_notifications_admin_emails(), html_message=html_message, auth_user=from_email, auth_password=from_pass)
 
+    except Exception as exc:
+        logger.exception("Error notifying adminstrator. Request is awaiting approval")
+        delay = getNextMailRetryDelay(request)
+        if delay:
+            request.save(update_fields=['notification_status', 'package_retry_count'])
+            self.retry(exc=exc, countdown=delay)
 
 @shared_task(bind=True)
 def notifyGenericRequestRegistered(self, request_id):
     try:
-        try:
-            from_email =  core_settings.EMAIL_HOST_USER
-        except:
-            logger.exception("EMAIL_HOST_USER has not been configured")
-            raise
+        from_email = get_notifications_from_email()
+        from_pass = get_notifications_from_pass()
+        if not from_email or not from_pass:
+            logger.error("DOWNMAN_EMAIL_HOST_USER or EMAIL_HOST_USER has not been configured")
+            raise Error("Error getting email auth credentials")
         request = DownloadRequest.objects.get(pk=request_id)
         with override(get_language(request)):
             tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
@@ -1389,7 +1490,7 @@ def notifyGenericRequestRegistered(self, request_id):
                 to = request.requested_by_external
             logger.debug(u"mailing: " + to)
             #mail.send_mail(subject, plain_message, from_email, [to])
-            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
             request.save(update_fields=['notification_status'])
 
@@ -1729,6 +1830,7 @@ def processDownloadRequest(self, request_id):
         request = DownloadRequest.objects.get(id=request_id)
         logger.info(u'request UUID: ' + request.request_random_id)
         if request.generic_request == True:
+            notifyApprovalRequired.apply_async(args=[request.pk], queue='notify')
             logger.debug("Skipping generic request")
             return
         if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
@@ -1743,6 +1845,8 @@ def processDownloadRequest(self, request_id):
 
     try:
         updatePendingAuthorization(request)
+        if request.pending_authorization:
+            notifyApprovalRequired.apply_async(args=[request.pk], queue='notify')
         if not result:
             delay = getNextPackagingRetryDelay(request)
             if delay:

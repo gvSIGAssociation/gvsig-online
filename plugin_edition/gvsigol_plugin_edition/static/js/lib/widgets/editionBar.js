@@ -23,7 +23,7 @@
 /**
  * TODO
  */
-var EditionBar = function(layerTree, map, featureType, selectedLayer) {
+var EditionBar = function(layerTree, map, featureType, selectedLayer, buildDrawControl = true) {
 	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
 	$("#jqueryEasyOverlayDiv").css("display", "block");
 
@@ -53,6 +53,8 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.geometryName = null;
 	this.lastAddedFeature = null;
 	this.lastEditedFeature = null;
+	this.cancelListener = new Array();
+	this.acceptListener = new Array();
 	for (var i=0; i<featureType.length; i++) {
 		if (this.isGeomType(this.featureType[i].type)) {
 			if (featureType[i].type == "POLYGON") {
@@ -75,6 +77,10 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 				this.geometryName = featureType[i].name;
 			}
 		}
+	}
+
+	if(!buildDrawControl) {
+		return
 	}
 
 	$('#map').append('<div id="editionbar" class="editionbar ol-unselectable ol-control"></div>');
@@ -266,6 +272,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 		source: this_.source,
 		style: style
 	});
+	this.wfsLayer.setZIndex(9999999);
 
 	this.map.addLayer(this.wfsLayer);
 
@@ -290,7 +297,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 			}
 		}
 	}
-	$("#modify-control").trigger('click');
+	//$("#modify-control").trigger('click');
 };
 
 /**
@@ -318,7 +325,13 @@ EditionBar.prototype.selectInteraction = null;
  */
 EditionBar.prototype.removeInteraction = null;
 
+EditionBar.prototype.addCancelListener = function(e) {
+	this.cancelListener.push(e)
+};
 
+EditionBar.prototype.addAcceptListener = function(e) {
+	this.acceptListener.push(e)
+};
 
 /**
  * @param {Event} e Browser event.
@@ -431,8 +444,10 @@ EditionBar.prototype.removeHandler = function(e) {
 
 EditionBar.prototype.stopEdition = function() {
 	$("#center-cursor").hide();
-	this.deactivateControls();
-	this.removeVectorLayer();
+	if(this.$drawInCenterControl) {
+		this.deactivateControls();
+		this.removeVectorLayer();
+	}
 	$('#editionbar').remove();
 	this.removeLayerLock();
 	this.layerTree.editionBar = null;
@@ -593,8 +608,17 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 	html += 	'</div>';
 	html += '</li>';
 
+	var fids = new Array();
 	for (var i in features) {
-			var fid = features[i].getId();
+		var fid = features[i].getId();
+			
+		var exists = false;
+		for (var k=0; k<fids.length; k++) {
+			if (fid == fids[k]) {
+				exists = true;
+			}
+		}
+		if (!exists) {
 			var is_first_configured = true;
 			var item_shown = false;
 			var selectedLayer = layer;
@@ -716,6 +740,10 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 			html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
 			html += 	'</div>';
 			html += '</li>';
+
+			fids.push(fid);
+		}
+			
 	}
 	html += '</ul>';
 	this.popup.show(evt.mapBrowserEvent.coordinate, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
@@ -1425,99 +1453,106 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		 });
 
 		$('#save-feature').on('click', function () {
-			if(self.showAllErrorMessages()){
-			var properties = {};
-			for (var i=0; i<self.featureType.length; i++) {
-				if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
-					var field = $('#' + self.featureType[i].name)[0];
-					if(field != null && field.id != null){
-						if (self.featureType[i].type == 'boolean') {
-							properties[field.id] = field.checked;
-						}
-						else {
-							if(self.isDateType(self.featureType[i].type)){
-								if(field.value != ""){
-									properties[field.id] = self.getDateTime(field.value);
-								}
-							}else{
-								if (self.featureType[i].type.endsWith("enumeration")) {
-									value = "";
-									for(var ix=0; ix<field.selectedOptions.length; ix++){
-										var option = field.selectedOptions[ix];
-										if(ix != 0){
-											value = value + ";";
-										}
-										value = value + option.value;
+			if(self.showAllErrorMessages()) {
+				var properties = {};
+				for (var i=0; i<self.featureType.length; i++) {
+					if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
+						var field = $('#' + self.featureType[i].name)[0];
+						if(field != null && field.id != null){
+							if (self.featureType[i].type == 'boolean') {
+								properties[field.id] = field.checked;
+							}
+							else {
+								if(self.isDateType(self.featureType[i].type)){
+									if(field.value != ""){
+										properties[field.id] = self.getDateTime(field.value);
 									}
-									properties[field.id] = value;
-								} else if (self.isStringType(self.featureType[i].type)) {
-									if(self.featureType[i].name.startsWith("form_")){
-										properties[field.id] = field.value;
-									}else{
-										if (field.value != null) {
+								}else{
+									if (self.featureType[i].type.endsWith("enumeration")) {
+										value = "";
+										for(var ix=0; ix<field.selectedOptions.length; ix++){
+											var option = field.selectedOptions[ix];
+											if(ix != 0){
+												value = value + ";";
+											}
+											value = value + option.value;
+										}
+										properties[field.id] = value;
+									} else if (self.isStringType(self.featureType[i].type)) {
+										if(self.featureType[i].name.startsWith("form_")){
 											properties[field.id] = field.value;
+										}else{
+											if (field.value != null) {
+												properties[field.id] = field.value;
+											}
 										}
+									} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+											properties[field.id] = field.value;
 									}
-								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-										properties[field.id] = field.value;
 								}
 							}
 						}
 					}
-				}
-				if(self.featureType[i].name == 'modified_by'){
-					properties['modified_by'] = self.layerTree.conf.user.credentials.username;
-				}
-				if(self.featureType[i].name == 'last_modification'){
-					var today = new Date();
-					var dd = today.getDate();
-					var mm = today.getMonth()+1; //January is 0!
-
-					var yyyy = today.getFullYear();
-					if(dd<10){
-					    dd='0'+dd;
+					if(self.featureType[i].name == 'modified_by'){
+						properties['modified_by'] = self.layerTree.conf.user.credentials.username;
 					}
-					if(mm<10){
-					    mm='0'+mm;
+					if(self.featureType[i].name == 'last_modification'){
+						var today = new Date();
+						var dd = today.getDate();
+						var mm = today.getMonth()+1; //January is 0!
+
+						var yyyy = today.getFullYear();
+						if(dd<10){
+							dd='0'+dd;
+						}
+						if(mm<10){
+							mm='0'+mm;
+						}
+						properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
 					}
-					properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
 				}
+
+				feature.setProperties(properties);
+				var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), 1, 1);
+				if (checkversion < 0) {
+					return;
+				}
+				var transaction = self.transactWFS('insert', feature);
+				if (transaction.success) {
+					self.lastAddedFeature = null;
+					if (self.resourceManager.getEngine() == 'gvsigol') {
+						if (uploader.getFileCount() >= 1) {
+							$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+							$("#jqueryEasyOverlayDiv").css("display", "block");
+							uploader.appendExtraParams({
+								layer_name: self.selectedLayer.layer_name,
+								workspace: self.selectedLayer.workspace,
+								fid: transaction.fid
+							});
+							uploader.startUpload();
+						}
+
+					} else if (self.resourceManager.getEngine() == 'alfresco'){
+						self.resourceManager.saveResource(transaction.fid);
+					}
+
+					if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
+						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+					}
+					
+					if (checkversion > 0) {
+						self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
+					}
+					self.showLayersTab();
+				}
+				var geojson_obj = new ol.format.GeoJSON();
+				var stringjson = geojson_obj.writeFeature(feature);
+				parent.$("body").trigger("feature-edition", stringjson);
 			}
 
-			feature.setProperties(properties);
-			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), 1, 1);
-			if (checkversion < 0) {
-				return;
-			}
-			var transaction = self.transactWFS('insert', feature);
-			if (transaction.success) {
-				self.lastAddedFeature = null;
-				if (self.resourceManager.getEngine() == 'gvsigol') {
-					if (uploader.getFileCount() >= 1) {
-						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-						$("#jqueryEasyOverlayDiv").css("display", "block");
-						uploader.appendExtraParams({
-							layer_name: self.selectedLayer.layer_name,
-							workspace: self.selectedLayer.workspace,
-							fid: transaction.fid
-						});
-						uploader.startUpload();
-					}
-
-				} else if (self.resourceManager.getEngine() == 'alfresco'){
-					self.resourceManager.saveResource(transaction.fid);
-				}
-				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
-				
-				if (checkversion > 0) {
-					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
-				}
-				self.showLayersTab();
-			}
-			var geojson_obj = new ol.format.GeoJSON();
-			var stringjson = geojson_obj.writeFeature(feature);
-			parent.$("body").trigger("feature-edition", stringjson);
-			}
+			self.acceptListener.forEach(action => {
+				action(self)
+			});
 		});
 
 		$('#save-feature-cancel').on('click', function () {
@@ -1531,9 +1566,13 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				}).fail(function() {
 				});
 			});
-			self.source.removeFeature(feature);
+			if(feature)
+				self.source.removeFeature(feature);
 			self.lastAddedFeature = null;
 			self.showLayersTab();
+			self.cancelListener.forEach(action => {
+				action(self)
+			});
 		});
 
 		$('.multipleSelect').fastselect();
@@ -1723,6 +1762,9 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
 					} else if (this.featureType[i].type.endsWith("enumeration")) {
+						if (value != null) {
+							value = value.trim();
+						}
 						var name = this.featureType[i].name;
 						var has_multiple = false;
 						if(this.featureType[i].type == "multiple_enumeration") {
@@ -1972,9 +2014,12 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.updateResource(transaction.fid);
 				}
-				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+				if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
+					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+				}
 				self.clearFeatureBackup();
-				self.selectInteraction.getFeatures().clear();
+				if(self.selectInteraction)
+					self.selectInteraction.getFeatures().clear();
 				if (checkversion > 0) {
 					if (uploader.getFileCount() <= 0) {
 						//Control de versión con el tipo de operación de subir fichero
@@ -1988,12 +2033,21 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			var stringjson = geojson_obj.writeFeature(feature);
 			parent.$("body").trigger("feature-edition", stringjson);
 			}
+
+			self.acceptListener.forEach(action => {
+				action(self)
+			});
 		});
 
 		$('#edit-feature-cancel').on('click', function () {
 			self.revertEditedFeature();
-			self.selectInteraction.getFeatures().clear();
+			if(self.selectInteraction) {
+				self.selectInteraction.getFeatures().clear();
+			}
 			self.showLayersTab();
+			self.cancelListener.forEach(action => {
+				action(self)
+			});
 		});
 
 		$('.multipleSelect').fastselect();
@@ -2008,7 +2062,9 @@ EditionBar.prototype.backupFeature = function(feature) {
 		feature.gol_values_orig_ = feature.getProperties();
 	}
 	if (!feature.gol_geom_orig_) {
-		feature.gol_geom_orig_ = feature.getGeometry().clone();
+		if(feature.getGeometry()) {
+			feature.gol_geom_orig_ = feature.getGeometry().clone();
+		}
 	}
 }
 
@@ -2150,17 +2206,31 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 						}).fail(function() {
 						});
 					});
-					self.wfsLayer.getSource().removeFeature(feature);
-					self.removeInteraction.getFeatures().clear();
-					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+					if(self.wfsLayer) {
+						self.wfsLayer.getSource().removeFeature(feature);
+					}
+					if(self.removeInteraction) {
+						self.removeInteraction.getFeatures().clear();
+					}
+					if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
+						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+					}
 					self.showLayersTab();
 				}
 			}
+			self.acceptListener.forEach(action => {
+				action(self)
+			});
 		});
 
 		$('#save-feature-cancel').on('click', function () {
-			self.removeInteraction.getFeatures().clear();
+			if(self.removeInteraction && self.removeInteraction.getFeatures()) {
+				self.removeInteraction.getFeatures().clear();
+			}
 			self.showLayersTab();
+			self.cancelListener.forEach(action => {
+				action(self)
+			});
 		});
 
 	}
@@ -2205,6 +2275,10 @@ EditionBar.prototype.transactWFS = function(p,f) {
 	}).success(function(response, status, request) {
 		try {
 			var resp = self.formatWFS.readTransactionResponse(response);
+			//There was not geometry to insert
+			if(!resp.insertIds) {
+				return 
+			}
 			if (resp.insertIds[0] == 'none') {
 				fid = feat.getId().split('.')[1];
 			} else {

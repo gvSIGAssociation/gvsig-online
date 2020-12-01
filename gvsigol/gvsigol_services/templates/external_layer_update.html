@@ -3,7 +3,12 @@
 {% load i18n %} 
 
 {% block content %}
+{% if redirect_to_layergroup %}
+<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect">
+{% else %}
 <form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/">
+{% endif %}	
+
 <div class="row">
 	<div class="col-md-12">
 		<div class="row">

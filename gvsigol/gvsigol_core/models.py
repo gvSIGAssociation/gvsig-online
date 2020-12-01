@@ -5,6 +5,7 @@ from gvsigol import settings
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup
 from django.utils.translation import ugettext as _
+from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
 
 def get_default_logo_image():
     return settings.STATIC_URL + 'img/logo_principal.png'
@@ -23,6 +24,10 @@ class Project(models.Model):
     center_lon = models.CharField(max_length=100)
     zoom = models.IntegerField(null=False, default=10)
     extent = models.CharField(max_length=250)
+    extent4326_minx = models.FloatField(null=True,blank=True)
+    extent4326_miny = models.FloatField(null=True,blank=True)
+    extent4326_maxx = models.FloatField(null=True,blank=True)
+    extent4326_maxy = models.FloatField(null=True,blank=True)
     toc_mode = models.TextField(max_length=50, default='toc_hidden')
     toc_order = models.TextField(null=True, blank=True)
     created_by = models.CharField(max_length=100)
@@ -36,7 +41,7 @@ class Project(models.Model):
     def __unicode__(self):
         return self.name + ' - ' + self.description
     
-    def clone(self, target_datastore, name, title, recursive=True, copy_layer_data=True):
+    def clone(self, target_datastore, name, title, recursive=True, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
         old_pid = self.pk
         self.pk = None
         self.name = name
@@ -47,11 +52,11 @@ class Project(models.Model):
         if recursive:
             old_project = Project.objects.get(id=old_pid)
             for prj_lg in old_project.projectlayergroup_set.all():
-                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, copy_layer_data=copy_layer_data)
+                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, copy_layer_data=copy_layer_data, permissions=permissions)
             
-            for prj_ug in old_project.projectusergroup_set.all():
-                prj_ug.clone(project=new_project_instance)
-            # TODO: user groups (ProjectUserGroup)
+            if permissions != CLONE_PERMISSION_SKIP:
+                for prj_ug in old_project.projectusergroup_set.all():
+                    prj_ug.clone(project=new_project_instance)
         return new_project_instance
     
 class ProjectUserGroup(models.Model):
@@ -77,10 +82,10 @@ class ProjectLayerGroup(models.Model):
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
     
-    def clone(self, recursive=True, project=None, target_datastore=None, copy_layer_data=True):
+    def clone(self, recursive=True, project=None, target_datastore=None, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
         if recursive:
             if not self.baselayer_group:
-                self.layer_group = self.layer_group.clone(target_datastore=target_datastore, copy_layer_data=copy_layer_data)
+                self.layer_group = self.layer_group.clone(target_datastore=target_datastore, copy_layer_data=copy_layer_data,  permissions=permissions)
         self.pk = None
         if project:
             self.project = project
@@ -154,3 +159,15 @@ class GolSettings(models.Model):
     objects = SettingsManager()
     class Meta:
         unique_together = ('plugin_name', 'key')
+
+
+class ProjectBaseLayerTiling(models.Model):
+    project = models.ForeignKey(Project, default=None)
+    layer = models.IntegerField(null=False, default=0)
+    levels = models.IntegerField(null=False, default=0)
+    tilematrixset = models.CharField(max_length=50) 
+    format = models.CharField(max_length=50)
+    extentid = models.CharField(max_length=50)
+    version = models.BigIntegerField(null=True, blank=True)
+    folder_prj = models.CharField(max_length=1024)
+    running = models.BooleanField(default=False)

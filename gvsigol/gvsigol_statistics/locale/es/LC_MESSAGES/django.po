@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-05 12:23+0100\n"
+"POT-Creation-Date: 2020-10-08 15:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,67 +18,65 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: templates/dashboard_statistics.html:7
-msgid "statistics"
-msgstr "estadísticas"
-
-#: templates/dashboard_statistics.html:11
+#: gvsigol_statistics/templates/dashboard_statistics.html:11
 msgid "Petitions from date"
 msgstr "Peticiones desde"
 
-#: templates/dashboard_statistics.html:16
+#: gvsigol_statistics/templates/dashboard_statistics.html:16
 msgid "Petitions to date"
 msgstr "Peticiones hasta"
 
-#: templates/dashboard_statistics.html:21
+#: gvsigol_statistics/templates/dashboard_statistics.html:21
 msgid "Petitions done by"
 msgstr "Peticiones hechas por"
 
-#: templates/dashboard_statistics.html:24
+#: gvsigol_statistics/templates/dashboard_statistics.html:24
 msgid "Anonymous"
 msgstr "Anónimo"
 
-#: templates/dashboard_statistics.html:33
+#: gvsigol_statistics/templates/dashboard_statistics.html:33
 msgid "Divide by time?"
 msgstr "Dividir por tiempo?"
 
-#: templates/dashboard_statistics.html:38
+#: gvsigol_statistics/templates/dashboard_statistics.html:38
 msgid "Time division"
 msgstr "División de tiempo"
 
-#: templates/dashboard_statistics.html:40
+#: gvsigol_statistics/templates/dashboard_statistics.html:40
 msgid "Year"
 msgstr "Año"
 
-#: templates/dashboard_statistics.html:41
+#: gvsigol_statistics/templates/dashboard_statistics.html:41
 msgid "Month"
 msgstr "Mes"
 
-#: templates/dashboard_statistics.html:42
+#: gvsigol_statistics/templates/dashboard_statistics.html:42
 msgid "Day"
 msgstr "Día"
 
-#: templates/dashboard_statistics.html:47
+#: gvsigol_statistics/templates/dashboard_statistics.html:47
 msgid "Total petitions"
 msgstr "Total de peticiones"
 
-#: templates/dashboard_statistics.html:55
-msgid "list"
-msgstr "lista"
-
-#: templates/dashboard_statistics.html:61
+#: gvsigol_statistics/templates/dashboard_statistics.html:58
 msgid "Interval"
 msgstr "Intervalo"
 
-#: templates/dashboard_statistics.html:63
+#: gvsigol_statistics/templates/dashboard_statistics.html:60
 msgid "Num petitions"
 msgstr "Num. peticiones"
 
-#: templates/dashboard_statistics_menu.html:5
-#: templates/dashboard_statistics_menu.html:7
+#: gvsigol_statistics/templates/dashboard_statistics_menu.html:5
+#: gvsigol_statistics/templates/dashboard_statistics_menu.html:7
 msgid "Statistics"
 msgstr "Estadísticas"
 
-#: templates/dashboard_statistics_menu.html:8
+#: gvsigol_statistics/templates/dashboard_statistics_menu.html:8
 msgid "More Statistics"
 msgstr "Más estadísticas"
+
+#~ msgid "statistics"
+#~ msgstr "estadísticas"
+
+#~ msgid "list"
+#~ msgstr "lista"

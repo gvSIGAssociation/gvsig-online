@@ -16,6 +16,9 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol_services import backend_postgis
+from django.db.utils import ProgrammingError
+from django.http.response import JsonResponse
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -43,11 +46,13 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
+
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
 from django.utils.html import escape, strip_tags
 from future.moves.urllib.parse import urlparse, urlencode
+from builtins import str as text
 from geoserver import workspace
 from lxml import html
 from owslib.util import Authentication
@@ -67,10 +72,10 @@ from gvsigol.settings import MOSAIC_DB
 from gvsigol_auth.models import UserGroup
 from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_core import utils as core_utils
-from gvsigol_core.models import Project
+from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_services.backend_resources import resource_manager 
-from gvsigol_services.models import LayerResource
+from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
 import gvsigol_services.tiling_service as tiling_service
 import locks_utils
 from models import LayerFieldEnumeration
@@ -395,6 +400,7 @@ def workspace_delete(request, wsid):
 @superuser_required
 def workspace_update(request, wid):
     if request.method == 'POST':
+        uri = request.POST.get('workspace-uri')
         description = request.POST.get('workspace-description')
         isPublic = False
         if 'is_public' in request.POST:
@@ -403,6 +409,7 @@ def workspace_update(request, wid):
         workspace = Workspace.objects.get(id=int(wid))
 
         workspace.description = description
+        workspace.uri = uri
         workspace.is_public = isPublic
         workspace.save()
         return redirect('workspace_list')
@@ -636,7 +643,7 @@ def layer_list(request):
         layer = {
             'id': l.id,
             'type': l.type,
-            'thumbnail_url': l.thumbnail.url,
+            'thumbnail_url': l.thumbnail.url.replace(settings.BASE_URL, ''),
             'name': l.name,
             'title': l.title,
             'datastore_name': l.datastore.name,
@@ -670,10 +677,13 @@ def layer_refresh_extent(request, layer_id):
     workspace = datastore.workspace
     #server.updateBoundingBoxFromData(layer)
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    if datastore.type == 'v_PostGIS':
+        server.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
+        server.reload_nodes()
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
     layer.save()
-    return redirect('layer_list')
+    return JsonResponse({"result": "ok"})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1433,13 +1443,17 @@ def layer_autoconfig(layer, featuretype):
                 field['title-'+id] = f['name']
             field['visible'] = True
             field['editableactive'] = True
-            field['editable'] = True
+            if Trigger.objects.filter(layer=layer, field=field['name']).exists():
+                field['editable'] = False
+            else:
+                field['editable'] = True
             for control_field in settings.CONTROL_FIELDS:
                 if field['name'] == control_field['name']:
                     field['editableactive'] = False
                     field['editable'] = False
             field['infovisible'] = False
             field['mandatory'] = False
+            field['nullable'] = True
             fields.append(field)
 
     layer_conf = {
@@ -1476,17 +1490,13 @@ def layer_config(request, layer_id):
             field['infovisible'] = False
             if 'field-infovisible-' + str(i) in request.POST:
                 field['infovisible'] = True
-            field['mandatory'] = False
-            if 'field-mandatory-' + str(i) in request.POST:
-                if _set_field_mandatory(layer_id, field['name'], True):
-                    field['mandatory'] = True
-                else:
-                    field['mandatory'] = False
+            nullable = (request.POST.get('field-nullable-' + str(i), False) != False)
+            _set_field_nullable(layer_id, field['name'], nullable)
+            field['nullable'] = nullable
+            if not nullable:
+                field['mandatory'] = True
             else:
-                if _set_field_mandatory(layer_id, field['name'], False):
-                    field['mandatory'] = False
-                else:
-                    field['mandatory'] = True
+                field['mandatory'] = (request.POST.get('field-mandatory-' + str(i), False) != False)
             field['editable'] = False
             if 'field-editable-' + str(i) in request.POST:
                 field['editableactive'] = True
@@ -1495,6 +1505,9 @@ def layer_config(request, layer_id):
                     if field['name'] == control_field['name']:
                         field['editableactive'] = False
                         field['editable'] = False
+                if  Trigger.objects.filter(layer=layer, field=field['name']).exists():
+                    field['editableactive'] = False
+                    field['editable'] = False
             fields.append(field)
         conf['fields'] = fields
         layer.conf = conf
@@ -1510,81 +1523,90 @@ def layer_config(request, layer_id):
         layer = Layer.objects.get(id=int(layer_id))
         fields = []
         available_languages = []
-        for id, language in LANGUAGES:
-            available_languages.append(id)
+        for lang_id, _ in LANGUAGES:
+            available_languages.append(lang_id)
 
         try:
-            conf = ast.literal_eval(layer.conf)
-            fields_used = []
-            fields_mand = _get_fields_mandatory(layer_id)
-            for f in conf['fields']:
-                field = {}
-                field['name'] = f['name']
-                fields_used.append(f['name'])
-                for id, language in LANGUAGES:
-                    field['title-'+id] = f['title-'+id]
-                field['visible'] = f['visible']
-                field['editable'] = f['editable']
-                field['editableactive'] = True
-                for control_field in settings.CONTROL_FIELDS:
-                    if field['name'] == control_field['name']:
+            try:
+                conf = ast.literal_eval(layer.conf)
+            except:
+                conf = {}
+            i, tablename, dsname = utils.get_db_connect_from_layer(layer_id)
+            field_info = i.get_fields_info(tablename, dsname)
+            geometry_columns = i.get_geometry_columns(tablename, dsname)
+            pks = i.get_pk_columns(tablename, dsname)
+            i.close()
+            for f in field_info:
+                if not f['name'] in geometry_columns and not f['name'] in pks:
+                    field = None
+                    for fconf in conf.get('fields', []):
+                        if fconf['name'] == f['name']:
+                            #for id, language in LANGUAGES:
+                            #    fconf['title-'+id] = fconf.get('title-'+id)
+                            fconf['visible'] = fconf.get('visible', True)
+                            fconf['editable'] = fconf.get('editable', True)
+                            fconf['editableactive'] = True
+                            for control_field in settings.CONTROL_FIELDS:
+                                if fconf['name'] == control_field['name']:
+                                    fconf['editableactive'] = False
+                                    fconf['editable'] = False
+                            fconf['infovisible'] = fconf.get('infovisible', False)
+                            fconf['nullable'] = (f.get('nullable') != 'NO')
+                            if not fconf['nullable']:
+                                fconf['mandatory'] = True
+                            else:
+                                fconf['mandatory'] = fconf.get('mandatory', False)
+                            field = fconf
+                            break
+                    if not field:
+                        field = {}
+                        field['name'] = f['name']
+                        for id, language in LANGUAGES:
+                            field['title-'+id] = f['name']
+                        field['visible'] = True
+                        field['editableactive'] = True
+                        field['editable'] = True
+                        for control_field in settings.CONTROL_FIELDS:
+                            if field['name'] == control_field['name']:
+                                field['editableactive'] = False
+                                field['editable'] = False
+                        field['infovisible'] = False
+                        field['nullable'] = (f.get('nullable') != 'NO')
+                        field['mandatory'] = (not field['nullable'])
+                    enum = utils.get_enum_entry(layer, field['name'])
+                    if enum:
+                        field['type'] = text(ugettext('enumerated ({0})').format(enum.title))
+                    else:
+                        field['type'] = f['type']
+                    try:
+                        trigger = Trigger.objects.get(layer=layer, field=field['name'])
+                        field['calculation'] = trigger.procedure.signature
+                        field['calculationLabel'] = text(trigger.procedure.localized_label)
                         field['editableactive'] = False
                         field['editable'] = False
-                field['infovisible'] = f['infovisible']
-                field['mandatory'] = fields_mand[field['name']]
-                fields.append(field)
-
-            datastore = Datastore.objects.get(id=layer.datastore_id)
-            workspace = Workspace.objects.get(id=datastore.workspace_id)
-            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-            (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-            resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
-            for f in resource_fields:
-                field = {}
-                field['name'] = f['name']
-                if not f['name'] in fields_used:
-                    for id, language in LANGUAGES:
-                        field['title-'+id] = f['name']
-                    field['visible'] = True
-                    field['editableactive'] = True
-                    field['editable'] = True
-                    for control_field in settings.CONTROL_FIELDS:
-                        if field['name'] == control_field['name']:
-                            field['editableactive'] = False
-                            field['editable'] = False
-                    field['infovisible'] = False
-                    field['mandatory'] = False
+                    except:
+                        field['calculation'] = ''
+                        field['calculationLabel'] = ''
                     fields.append(field)
 
-
-
         except:
-            datastore = Datastore.objects.get(id=layer.datastore_id)
-            workspace = Workspace.objects.get(id=datastore.workspace_id)
-            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-            (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-            resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
-            for f in resource_fields:
-                field = {}
-                field['name'] = f['name']
-                for id, language in LANGUAGES:
-                    field['title-'+id] = f['name']
-                field['visible'] = True
-                field['editableactive'] = True
-                field['editable'] = True
-                for control_field in settings.CONTROL_FIELDS:
-                    if field['name'] == control_field['name']:
-                        field['editableactive'] = False
-                        field['editable'] = False
-                field['infovisible'] = False
-                field['mandatory'] = False
-                fields.append(field)
-                
-        enums = Enumeration.objects.all();
+            logger.exception("Retrieving fields")
+        enums = Enumeration.objects.all()
         
-        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup, 'enumerations': enums})
+        data = {
+            'layer': layer,
+            'layer_id': layer.id,
+            'fields': fields,
+            'fields_json': json.dumps(fields),
+            'available_languages': LANGUAGES,
+            'available_languages_array': available_languages,
+            'redirect_to_layergroup': redirect_to_layergroup,
+            'enumerations': enums,
+            'procedures':  TriggerProcedure.objects.all()
+        }
+        return render(request, 'layer_config.html', data)
 
-def _set_field_mandatory(layer_id, field_name, mandatory):
+def _set_field_nullable(layer_id, field_name, nullable):
     """
     Sets a column to NULL or NOT NULL constraint depending on 
     "mandatory" parameter. "Mandatory" should be True to set a column
@@ -1592,26 +1614,16 @@ def _set_field_mandatory(layer_id, field_name, mandatory):
     """
     i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
     try:
-        if(mandatory) :
-            i.set_field_mandatory(dsname, layername, field_name)
-        else:
-            i.set_field_not_mandatory(dsname, layername, field_name)
+        with i as con: # autoclose connection
+            con.set_field_nullable(dsname, layername, field_name, nullable)
     except Exception:
         return False
     return True
 
-def _get_field_mandatory(layer_id, field_name):
-    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
-    return i.is_column_nullable(dsname, layername, field_name)
-
-def _get_fields_mandatory(layer_id):
-    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
-    return i.nullable_cols(dsname, layername)
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["POST"])
 @staff_required
-def check_has_null_values(request):
+def check_nullable(request):
     layer_id = request.POST['layer_id']
     field_name = request.POST['field_name']
     i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
@@ -1657,15 +1669,29 @@ def convert_to_enumerate(request):
         enum_table.created_by = usr
         enum_table.save()
         enum_id = enum_table.id
-        i = 0
+        
+        item = EnumerationItem()
+        item.name = ''
+        item.selected = False
+        item.order = 0
+        item.enumeration_id = enum_id
+        item.save()
+
+        i = 1
         for row in rows:
-            item = EnumerationItem()
-            item.name = row[0]
-            item.selected = False
-            item.order = i
-            i = i +1
-            item.enumeration_id = enum_id
-            item.save()
+            if(row[0] is not None and row[0] != ''):
+                try:
+                    item = EnumerationItem()
+                    item.name = row[0]
+                    item.selected = False
+                    item.order = i
+                    i = i + 1
+                    item.enumeration_id = enum_id
+                    item.save()
+                except Exception:
+                    #Si da un error insertando no se inserta ese elemento pero no se bloquea. 
+                    #Siempre los pueden añadir a mano si falta alguno
+                    pass 
     
     if enum_id == None:
         return utils.get_exception(400, 'We cannot find a enumerated with this name')
@@ -1813,7 +1839,6 @@ def cache_clear(request, layer_id):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def manage_cache_clear(request, layer_id):
-
     layer = Layer.objects.get(id=int(layer_id))
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
@@ -2124,10 +2149,10 @@ def layergroup_mapserver_toc(group, toc_string):
             for layer in layers:
                 #if not layer.external:
                 layer_json = {
-                        'name': layer.name,
-                        'title': layer.title,
-                        'order': 1000+i
-                    }
+                    'name': layer.name,
+                    'title': layer.title,
+                    'order': 1000+i
+                }
                 layer.order = i
                 layer.save()
                 i = i + 1
@@ -2410,7 +2435,21 @@ def layer_create_with_group(request, layergroup_id):
                         field_enum.field = i['name']
                         field_enum.enumeration_id = int(i['enumkey']) 
                         field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
-                        field_enum.save() 
+                        field_enum.save()
+                    if i.get('calculation'):
+                        try:
+                            calculation = i.get('calculation')
+                            procedure = TriggerProcedure.objects.get(signature=calculation)
+                            trigger = Trigger()
+                            trigger.layer = newRecord
+                            trigger.field = i['name']
+                            trigger.procedure = procedure
+                            trigger.save()
+                            
+                            trigger.install()
+                        except:
+                            logger.exception("Error creating trigger for calculated field")
+                         
                 featuretype = {
                     'max_features': maxFeatures
                 }
@@ -2422,6 +2461,7 @@ def layer_create_with_group(request, layergroup_id):
 
 
             except Exception as e:
+                logger.exception("Error creating layer")
                 try:
                     msg = e.get_message()
                 except:
@@ -2449,7 +2489,8 @@ def layer_create_with_group(request, layergroup_id):
                 'form': form,
                 'forms': forms,
                 'layer_type': layer_type,
-                'enumerations': get_currentuser_enumerations(request)
+                'enumerations': get_currentuser_enumerations(request),
+                'procedures':  TriggerProcedure.objects.all(),
             }
             return render(request, "layer_create.html", data)
 
@@ -2466,6 +2507,7 @@ def layer_create_with_group(request, layergroup_id):
             'forms': forms,
             'layer_type': layer_type,
             'enumerations': get_currentuser_enumerations(request),
+            'procedures':  TriggerProcedure.objects.all(),
             'layergroup_id': layergroup_id,
             'redirect_to_layergroup': redirect_to_layergroup
         }
@@ -2636,16 +2678,40 @@ def create_base_layer(request, pid):
         tilematrixset = request.POST.get('tilematrixset')
         extent = request.POST.get('extent')
         
+        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
+            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
+        
         if num_res_levels is not None:
-            if num_res_levels > 20:
-                return utils.get_exception(400, 'The number of resolution levels cannot be greater than 20')
+            if num_res_levels > 22:
+                return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
             else:
                 tiling_service.tiling_base_layer(base_layer_process, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
                   
     return HttpResponse('{"response": "ok"}', content_type='application/json')
-  
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def retry_base_layer_process(request, pid):
+    if request.method == 'POST':
+        global base_layer_process
+
+        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
+            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
+
+        prj = ProjectBaseLayerTiling.objects.get(id=pid)
+        if(prj is not None):
+            if not os.path.exists(prj.folder_prj):
+                return utils.get_exception(400, 'This project does not have a base layer downloading')
+        else:
+            return utils.get_exception(400, 'This project does not have base layer running')
+        tiling_service.retry_base_layer_tiling(base_layer_process, prj)
+
+    return HttpResponse('{"response": "ok"}', content_type='application/json')
+
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def base_layer_process_update(request, pid):
@@ -3482,7 +3548,8 @@ def describeLayerConfig(request):
 
                 layer['wms_url'] = core_utils.get_wms_url(workspace)
                 layer['wfs_url'] = core_utils.get_wfs_url(workspace)
-                layer['namespace'] = workspace.uri
+                #layer['namespace'] = workspace.uri
+                layer['namespace'] = core_utils.get_absolute_url(workspace.uri, request.META)
                 layer['workspace'] = workspace.name
                 layer['metadata'] = core_utils.get_catalog_url(request, l)
                 if l.cached:
@@ -3778,6 +3845,7 @@ def external_layer_add(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def external_layer_update(request, external_layer_id):
+    redirect_to_layergroup = request.GET.get('redirect')
     external_layer = Layer.objects.get(id=external_layer_id)
     layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
@@ -3852,7 +3920,11 @@ def external_layer_update(request, external_layer_id):
 
             external_layer.external_params = json.dumps(params)
             external_layer.save()
-            return redirect('external_layer_list')
+            
+            if redirect_to_layergroup:
+                return redirect('layergroup_update', external_layer.layer_group.id)
+            else:
+                return redirect('external_layer_list')
 
 
         except Exception as e:
@@ -3879,7 +3951,8 @@ def external_layer_update(request, external_layer_id):
             'form': form,
             'external_layer': external_layer,
             'bing_layers': BING_LAYERS,
-            'html': html
+            'html': html,
+            'redirect_to_layergroup': redirect_to_layergroup
         }
 
     return render(request, 'external_layer_update.html', response)
@@ -4084,10 +4157,10 @@ def layer_cache_config(request, layer_id):
     if request.method == 'POST':
         format = request.POST.get('input_format')
         grid_set = request.POST.get('input_grid_set')
-        min_x = request.POST.get('input_min_x')
-        min_y = request.POST.get('input_min_y')
-        max_x = request.POST.get('input_max_x')
-        max_y = request.POST.get('input_max_y')
+        min_x = request.POST.get('min_x')
+        min_y = request.POST.get('min_y')
+        max_x = request.POST.get('max_x')
+        max_y = request.POST.get('max_y')
         number_of_tasks = request.POST.get('input_number_of_task')
         operation_type = request.POST.get('input_operation_type')
         zoom_start = request.POST.get('input_zoom_start')
@@ -4119,7 +4192,7 @@ def layer_cache_config(request, layer_id):
                         geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
             
             gs = geographic_servers.get_instance().get_server_by_id(server.id)
-            gs.reload_nodes()
+            #gs.reload_nodes()
             
             if not layer.external:
                 gs.updateBoundingBoxFromData(layer)
@@ -4142,18 +4215,18 @@ def layer_cache_config(request, layer_id):
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
             if layer.external:
-                config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
+                #config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
                 tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
             else:
-                config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
+                #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
                 tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
             
             response = {
                 "message": message,
                 "layer_id": layer_id,
                 "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-                "grid_subsets": config.get('gridSubsets'),
-                "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
                 "tasks": tasks['long-array-array']
             }
@@ -4168,17 +4241,17 @@ def layer_cache_config(request, layer_id):
         tasks = None
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         if layer.external:
-            config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
+            #config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
             tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
         else:
-            config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
+            #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
             tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
            
         response = {
             "layer_id": layer_id,
             "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-            "grid_subsets": config.get('gridSubsets'),
-            "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+            "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+            "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
             "formats": settings.CACHE_OPTIONS['FORMATS'],
             "tasks": tasks['long-array-array'],
             "latlong_extent": layer.latlong_extent
@@ -4196,10 +4269,10 @@ def group_cache_config(request, group_id):
     if request.method == 'POST':
         format = request.POST.get('input_format')
         grid_set = request.POST.get('input_grid_set')
-        min_x = request.POST.get('input_min_x')
-        min_y = request.POST.get('input_min_y')
-        max_x = request.POST.get('input_max_x')
-        max_y = request.POST.get('input_max_y')
+        min_x = request.POST.get('min_x')
+        min_y = request.POST.get('min_y')
+        max_x = request.POST.get('max_x')
+        max_y = request.POST.get('max_y')
         number_of_tasks = request.POST.get('input_number_of_task')
         operation_type = request.POST.get('input_operation_type')
         zoom_start = request.POST.get('input_zoom_start')
@@ -4239,15 +4312,15 @@ def group_cache_config(request, group_id):
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
             
-            config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
+            #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
             tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
             
             response = {
                 "message": message,
                 "group_id": group_id,
                 "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-                "grid_subsets": config.get('gridSubsets'),
-                "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
                 "tasks": tasks['long-array-array']
             }
@@ -4262,14 +4335,14 @@ def group_cache_config(request, group_id):
         tasks = None
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         
-        config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
+        #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
         tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
                 
         response = {
             "group_id": group_id,
             "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
-            "grid_subsets": config.get('gridSubsets'),
-            "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+            "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+            "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
             "formats": settings.CACHE_OPTIONS['FORMATS'],
             "tasks": tasks['long-array-array']
         }
@@ -4352,7 +4425,7 @@ def update_thumbnail(request, layer_id):
     try:
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
         layer = gs.updateThumbnail(layer, 'update')
-        return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url}, indent=4), content_type='application/json')
+        return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url.replace(settings.BASE_URL, '')}, indent=4), content_type='application/json')
         
     except Exception as e:
         print str(e)
@@ -4488,3 +4561,230 @@ def register_action(request):
             action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
 
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_field_delete(request):
+    if request.method == 'POST':
+        try: 
+            field = request.POST.get('field')
+            #layer_name = request.POST['layer_name']
+            layer_id = request.POST.get('layer_id')
+            layer = Layer.objects.get(id=layer_id)
+            datastore_name = layer.datastore.name
+            if not request.user.is_superuser and not (layer.created_by == request.user.username) and not (layer.datastore.type == 'v_PostGIS'):
+                return utils.get_exception(400, 'Error in the input params')
+            for ctrl_field in settings.CONTROL_FIELDS:
+                if field == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('Control field "{0}" cannot be deleted').format(field))
+            params = json.loads(layer.datastore.connection_params)
+            con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            con.delete_column(datastore_name, layer.source_name, field)
+            con.close()
+            
+            layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
+            for f in layer_conf.get('fields', []):
+                if f['name'] == field:
+                    layer_conf.get('fields').remove(f)
+            layer.conf = layer_conf
+            layer.save()
+            LayerFieldEnumeration.objects.filter(layer=layer, field=field).delete()
+            triggers = Trigger.objects.filter(layer=layer, field=field)
+            for trigger in triggers:
+                trigger.drop()
+            triggers.delete()
+            
+
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            gs.reload_nodes()
+            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+        except psycopg2.ProgrammingError as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+            if e.pgcode == '42703':
+                return utils.get_exception(400, _('Field does not exist. Probably, it was deleted or renamed concurrently by another user'))
+        except Exception:
+            logger.exception(_('Error deleting field. Cause: {0}').format(e.message))
+    return utils.get_exception(400, 'Error in the input params')
+
+"""
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_field_changetype(request):
+    pass
+"""
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_field_rename(request):
+    if request.method == 'POST':
+        try: 
+            field = request.POST.get('field')
+            new_field_name = request.POST.get('new_field_name')
+            #layer_name = request.POST['layer_name']
+            layer_id = request.POST.get('layer_id')
+            layer = Layer.objects.get(id=layer_id)
+            datastore_name = layer.datastore.name
+            if not request.user.is_superuser and \
+               not (layer.created_by == request.user.username) and \
+               not (layer.datastore.type == 'v_PostGIS'):
+                return utils.get_exception(400, 'Error in the input params')
+            for ctrl_field in settings.CONTROL_FIELDS:
+                if field == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('Control field "{0}" cannot be renamed').format(field))
+                elif new_field_name == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field))
+            params = json.loads(layer.datastore.connection_params)
+            con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            con.rename_column(datastore_name, layer.source_name, field, new_field_name)
+            con.close()
+
+            layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
+            for f in layer_conf.get('fields', []):
+                if f['name'] == field:
+                    f['name'] = new_field_name
+            layer.conf = layer_conf
+            layer.save()
+
+            for enumDef in LayerFieldEnumeration.objects.filter(layer=layer, field=field):
+                enumDef.field = new_field_name
+                enumDef.save()
+                
+            for triggerDef in Trigger.objects.filter(layer=layer, field=field):
+                triggerDef.drop()
+                triggerDef.field = new_field_name
+                triggerDef.save()
+                triggerDef.install()
+
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            gs.reload_nodes()
+            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+        except psycopg2.ProgrammingError as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+            if e.pgcode == '42703':
+                return utils.get_exception(400, _('Field does not exist. Probably, it was deleted or renamed concurrently by another user'))
+        except rest_geoserver.RequestError as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.get_detailed_message()))
+        except Exception as e:
+            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+    return utils.get_exception(400, 'Error in the input params')
+
+    def getGeoserverBindings(self, sql_type):
+        if sql_type in ["character varying", "character", "text", "cd_json"]:
+            return "java.lang.String"
+        elif sql_type in ["integer"]:
+            return "java.lang.Integer"
+        elif sql_type in ["double"]:
+            return "java.lang.Double"
+        elif sql_type == "numeric":
+            return "java.math.BigDecimal"
+        elif sql_type == "boolean":
+            return "java.lang.Boolean"
+        elif sql_type == "date":
+            return "java.sql.Date"
+        elif sql_type == "time":
+            return "java.sql.Time"
+        elif sql_type == "timestamp":
+            return "java.sql.Timestamp"
+        sql_type = sql_type.upper()
+    return [{'name': 'character varying', 'label': ugettext_lazy('String')},
+             ]
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def db_add_field(request):
+    if request.method == 'POST':
+        layer = None
+        try: 
+            field_name = request.POST.get('field')
+            field_type = request.POST.get('type')
+            layer_id = request.POST.get('layer_id')
+            enumkey = request.POST.get('enumkey')
+            calculation = request.POST.get('calculation')
+            layer = Layer.objects.get(id=layer_id)
+            
+            for ctrl_field in settings.CONTROL_FIELDS:
+                if field_name == ctrl_field.get('name'):
+                    return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field_name))
+            
+            if not request.user.is_superuser and \
+               not (layer.created_by == request.user.username) and \
+               not (layer.datastore.type == 'v_PostGIS'):
+                return utils.get_exception(400, 'Error in the input params')
+            datastore_name = layer.datastore.name
+            params = json.loads(layer.datastore.connection_params)
+            con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            try:
+                gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+                sql_type = gs.gvsigol_to_sql_type(field_type)
+                if not sql_type:
+                    return utils.get_exception(400, _('Field type not supported'))
+                try:
+                    con.add_column(datastore_name, layer.source_name, field_name, sql_type)
+                except psycopg2.ProgrammingError:
+                    return utils.get_exception(400, _('Field "{0}" exists').format(field_name))
+            finally:
+                con.close()
+
+            layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
+            fields = layer_conf.get('fields', [])
+            editable = False if calculation else True
+                
+            field_def = {
+                "name": field_name,
+                "visible": True,
+                "editableactive": True,
+                "editable": editable,
+                "infovisible": False,
+                "mandatory": False,
+                "nullable": True
+                }
+            for id, language in LANGUAGES:
+                field_def['title-'+id] = field_name
+            fields.append(field_def)
+            layer_conf['fields'] = fields 
+            layer.conf = layer_conf
+            layer.save()
+            
+            if enumkey:
+                field_enum = LayerFieldEnumeration()
+                field_enum.layer = layer
+                field_enum.field = field_name
+                field_enum.enumeration_id = int(enumkey) 
+                field_enum.multiple = True if field_type == 'multiple_enumeration' else False
+                field_enum.save()
+            if calculation:
+                try:
+                    procedure = TriggerProcedure.objects.get(signature=calculation)
+                    trigger = Trigger()
+                    trigger.layer = layer
+                    trigger.field = field_name
+                    trigger.procedure = procedure
+                    trigger.save()
+                    
+                    trigger.install()
+                except:
+                    logger.exception("Error creating trigger for calculated field")
+            
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+            gs.reload_nodes()
+            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+        except Exception as e:
+            logger.exception(_('Error creating field. Cause: {0}').format(e.message))
+            
+            # clean potential half created field
+            con = None
+            try:
+                if layer:
+                    LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
+                con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+                con.delete_column(datastore_name, layer.source_name, field_name)
+            except:
+                pass
+            finally:
+                if con:
+                    con.close()
+
+    return utils.get_exception(400, 'Error in the input params')

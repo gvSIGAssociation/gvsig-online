@@ -23,12 +23,14 @@
 /**
  * TODO
  */
-var ChartsView = function() {
-	var self = this;	
+var ChartsView = function(map) {
+	var self = this;
+	this.olmap = map;
 	this.initialize();
 	
 	$('body').on('change-to-2D-event', function() {
 		self.hide();
+		self.olmap.updateSize();
 	});
 	
 	$('body').on('change-to-3D-event', function() {
@@ -42,7 +44,7 @@ var ChartsView = function() {
 
 ChartsView.prototype.initialize = function() {
 	var self = this;
-	
+
 	var ui = '';
 	ui += '<ul id="charts-container" style="list-style-type: none; margin: 0; padding: 20px; width: 100%;">';
 	ui += '</ul>';
@@ -61,7 +63,7 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	this.jsonCharts = charts;
 	this.charts = new Array();
 	
-	var title = '<span id="dashboard-layer-tile" style="position: relative;left: 35%;top: 5px;font-size: 24px;color: #ffffff;">' + gettext('Layer') + ': ' + this.layer.layer_title + '</span>';
+	var title = '<span id="dashboard-layer-tile" style="position: relative;top: 5px;font-size: 24px;color: #ffffff;">' + gettext('Layer') + ': ' + this.layer.layer_title + '</span>';
 	$('#viewer-navbar').append(title);
 	
 	this.chartsContainer.empty();
@@ -292,7 +294,7 @@ ChartsView.prototype.loadCharts = function() {
 			$('#first-chart').append('<canvas id="chart-' + firstChart.chart_id + '"></canvas>');
 			$('#first-chart-title').text(firstChart.chart_title);
 			var download = '';
-			download += '<a class="download-chart" data-chartid="' + firstChart.chart_id + '" id="download-' + firstChart.chart_id + '" download="' + this.layer.layer_title + '.jpg" href="" class="btn btn-primary float-right bg-flat-color-1">';
+			download += '<a class="download-chart" data-chartid="' + firstChart.chart_id + '" id="download-' + firstChart.chart_id + '" download="' + this.layer.layer_title + '.png" href="" class="btn btn-primary float-right bg-flat-color-1">';
 			download += 	'<i style="margin-right: 10px;" class="fa fa-download"></i>';
 			download += '</a>';
 			download += '<a class="download-pdf-chart" data-chartid="' + firstChart.chart_id + '" id="download-pdf-' + firstChart.chart_id + '" href="" class="btn btn-primary float-right bg-flat-color-1">';
@@ -321,7 +323,7 @@ ChartsView.prototype.loadCharts = function() {
 					this.createAggregatedPieChart(firstChart);
 					
 				} else {
-					this.createPieChart(firstChart);
+					this.createPieChart(firstChart, true);
 				}
 			}
 			
@@ -334,9 +336,9 @@ ChartsView.prototype.loadCharts = function() {
 			ui += 	'<li class="ui-state-default" style="float: left; width: 47%; text-align: center;margin: 5px;">';
 			ui += 		'<div class="box">';
 			ui += 			'<div class="box-header with-border">';
-			ui += 				'<h3 class="box-title">' + chart.chart_title + '</h3>';
+			ui += 				'<h3 class="box-title" id="view-chart-title-' + chart.chart_id + '">' + chart.chart_title + '</h3>';
 			ui += 				'<div class="box-tools pull-right">';
-			ui += 					'<a class="download-chart" data-chartid="' + chart.chart_id + '" id="download-' + chart.chart_id + '" download="' + this.layer.layer_title + '.jpg" href="" class="btn btn-primary float-right bg-flat-color-1">';
+			ui += 					'<a class="download-chart" data-chartid="' + chart.chart_id + '" id="download-' + chart.chart_id + '" download="' + this.layer.layer_title + '.png" href="" class="btn btn-primary float-right bg-flat-color-1">';
 			ui += 						'<i style="margin-right: 10px;" class="fa fa-download"></i>';
 			ui += 					'</a>';
 			ui += 					'<a class="download-pdf-chart" data-chartid="' + chart.chart_id + '" id="download-pdf-' + chart.chart_id + '" href="" class="btn btn-primary float-right bg-flat-color-1">';
@@ -372,20 +374,20 @@ ChartsView.prototype.loadCharts = function() {
 					this.createAggregatedPieChart(chart);
 					
 				} else {
-					this.createPieChart(chart);
+					this.createPieChart(chart, false);
 				}
 			}
 			
 		}
 		$('.download-chart').on('click', function(){
 			var chartId = this.dataset.chartid;
-			var url_base64jp = document.getElementById('chart-' + chartId).toDataURL("image/jpg");
+			var url_base64jp = document.getElementById('chart-' + chartId).toDataURL("image/png");
 			var a =  document.getElementById('download-' + chartId);
 			a.href = url_base64jp;
 		});
 		
 		
-		$('.download-pdf-chart').on('click', function(e){
+		$('.download-pdf-chart').unbind('click').on('click', function(e){
 			e.preventDefault();
 			var chartId = this.dataset.chartid;
 			var chartConf = self.getChartConf(chartId);
@@ -397,7 +399,7 @@ ChartsView.prototype.loadCharts = function() {
 			var doc = new jsPDF('landscape');
 			doc.setFontSize(20);
 			doc.text(15, 15, chartConf.chart_title);
-			doc.addImage(canvasImg, 'JPEG', 10, 10, 280, 150 );
+			doc.addImage(canvasImg, 'PNG', 10, 10, 280, 150 );
 			
 			var uri = doc.output('dataurlstring');
 	        self.openDataUriWindow(uri);
@@ -434,7 +436,7 @@ ChartsView.prototype.canvasToImage = function(canvas, backgroundColor) {
 	}
  
 	//get the image data from the canvas
-	var imageData = canvas.toDataURL("image/jpeg", 1.0);
+	var imageData = canvas.toDataURL("image/png", 1.0);
  
 	if(backgroundColor)
 	{
@@ -515,6 +517,12 @@ ChartsView.prototype.refreshCharts = function(selectedFeatures) {
 			if (chartConf.chart_conf.dataset_type == 'single_selection') {
 				chart.data.datasets = [];
 				var feature = selectedFeatures[selectedFeatures.length - 1];
+				if (chart.isFirst) {
+					$('#first-chart-title').text(chartConf.chart_title + ': ' + feature.getProperties()[chartConf.chart_conf.geographic_names_column]);
+				} else {
+					$('#view-chart-title-' + chartConf.chart_id).text(chartConf.chart_title + ': ' + feature.getProperties()[chartConf.chart_conf.geographic_names_column]);
+				}
+				
 				var newDataset = {
 					label: feature.getProperties()[chartConf.chart_conf.geographic_names_column],
 					backgroundColor: [],
@@ -524,6 +532,11 @@ ChartsView.prototype.refreshCharts = function(selectedFeatures) {
 					newDataset.data.push(feature.getProperties()[chartConf.chart_conf.columns[k].name]);
 					newDataset.backgroundColor.push(this.getRandomColor());
 				}
+				var labels = new Array();
+				for (var i=0; i<chartConf.chart_conf.columns.length; i++) {
+					labels.push(chartConf.chart_conf.columns[i].title);
+				}
+				chart.data.labels = labels;
 				chart.data.datasets.push(newDataset);
 				chart.update();
 			}
@@ -572,6 +585,9 @@ ChartsView.prototype.createBarChart = function(c) {
 					scaleLabel: {
 						display: true,
 						labelString: c.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: c.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}
@@ -616,7 +632,7 @@ ChartsView.prototype.createAggregatedBarChart = function(c) {
 		options: {
 			responsive: true,
 			legend: {
-				position: 'right',
+				display: false
 			},
 			scales: {
 				xAxes: [{
@@ -631,6 +647,9 @@ ChartsView.prototype.createAggregatedBarChart = function(c) {
 					scaleLabel: {
 						display: true,
 						labelString: c.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: c.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}
@@ -673,6 +692,9 @@ ChartsView.prototype.createLineChart = function(c) {
 					scaleLabel: {
 						display: true,
 						labelString: c.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: c.chart_conf.y_axis_begin_at_zero
 					}
 				}]
 			}
@@ -686,7 +708,7 @@ ChartsView.prototype.createLineChart = function(c) {
 ChartsView.prototype.createAggregatedLineChart = function(c) {
 };
 
-ChartsView.prototype.createPieChart = function(c) {
+ChartsView.prototype.createPieChart = function(c, isFirst) {
 	var ctx = document.getElementById('chart-' + c.chart_id).getContext('2d');
 	
 	var labels = new Array();
@@ -704,10 +726,29 @@ ChartsView.prototype.createPieChart = function(c) {
 			responsive: true,
 			legend: {
 				position: 'right',
+			},
+			tooltips: {
+				callbacks: {
+					label: function(tooltipItem, data) {
+						//get the concerned dataset
+						var dataset = data.datasets[tooltipItem.datasetIndex];
+						//calculate the total of this data set
+						var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+						  return previousValue + currentValue;
+						});
+						//get the current items value
+						var currentValue = dataset.data[tooltipItem.index];
+						//calculate the precentage based on the total and current item, also this does a rough rounding to give a whole number
+						var percentage = Math.floor(((currentValue/total) * 100)+0.5);
+				  
+						return percentage + "%";
+					}
+				}
 			}
 		}
 	});
 	chart.chart_id = c.chart_id;
+	chart.isFirst = isFirst;
 	
 	this.charts.push(chart);
 };
@@ -746,6 +787,24 @@ ChartsView.prototype.createAggregatedPieChart = function(c) {
 			responsive: true,
 			legend: {
 				position: 'right',
+			},
+			tooltips: {
+				callbacks: {
+					label: function(tooltipItem, data) {
+						//get the concerned dataset
+						var dataset = data.datasets[tooltipItem.datasetIndex];
+						//calculate the total of this data set
+						var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+						  return previousValue + currentValue;
+						});
+						//get the current items value
+						var currentValue = dataset.data[tooltipItem.index];
+						//calculate the precentage based on the total and current item, also this does a rough rounding to give a whole number
+						var percentage = Math.floor(((currentValue/total) * 100)+0.5);
+				  
+						return percentage + "%";
+					}
+				}
 			}
 		}
 	});

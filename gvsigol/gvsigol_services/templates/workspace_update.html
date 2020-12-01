@@ -23,6 +23,10 @@
 				<div class="box-body">
 					<div class="row">
 						<div class="col-md-12 form-group">
+							<label for="workspace-uri">{% trans "Uri" %}</label>
+							<input type="text" name="workspace-uri" id="workspace-uri" maxlength="500" class="form-control" tabindex="3" value="{{workspace.uri}}">
+						</div>
+						<div class="col-md-12 form-group">
 							<label for="workspace-description">{% trans "Description" %}</label>
 							<input placeholder="{% trans 'Workspace description' %}" name="workspace-description" id="workspace-description" type="text" class="form-control" value="{{workspace.description}}">						
 						</div>

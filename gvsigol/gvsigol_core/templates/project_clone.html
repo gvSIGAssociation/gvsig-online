@@ -13,7 +13,7 @@
 					</div>
 				</div>				
 			</div>
-			<div class="box">
+			<div>
 				{% csrf_token %}					
 				{% if form.errors %}
 				<div id="form-error" style="color:#ff0000;">
@@ -31,66 +31,87 @@
 					<p>* {{ message }}</p>
 				</div>
 				{% endif %}
-				<div class="box-body">
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="project_title">{% trans "Title" %}</label>
-							{{form.project_title}}
+			</div>
+		<ul class="nav nav-tabs">
+			<li role="presentation" class="active"><a href="#tab-main" data-toggle="tab">{% trans "General" %}</a></li>
+			<li role="presentation"><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active" id="tab-main">
+				<div class="box">
+					<div class="box-body">
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project_title">{% trans "Title" %}</label>
+								{{form.project_title}}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project_name">{% trans "Name" %}</label>
+								{{form.project_name}}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="target_workspace">{% trans "Workspace" %}</label>
+								{{form.target_workspace}}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="target_datastore">{% trans "Datastore" %}</label>
+								{{form.target_datastore}}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="target_server">{% trans "Select server" %}</label>
+								<select class="form-control" id="target_server" name="target_server">
+									{% for server in servers %}
+										{% if forloop.first %}
+										<option value="{{server.id}}" selected>{{server.title}}</option>
+										{% else %}
+										<option value="{{server.id}}">{{server.title}}</option>
+										{% endif %}
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<span>{% trans "Options:" %}.</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-4 form-group">
+								{{form.copy_data}}
+								<label for="copy_data">{% trans "Copy data" %}</label>
+							</div>
+							<div class="col-md-8 form-group">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">{% trans "Notes:" %}
+									<ul>
+									<li>{% trans "Vector layers will be cloned" %}</li>
+									<li>{% trans "Base layer groups will be referenced instead of cloned" %}</li>
+									<li>{% trans "Raster layers will be excluded (except base layers)" %}</li>
+									</ul>
+								</div>
+							</div>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="project_name">{% trans "Name" %}</label>
-							{{form.project_name}}
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="target_workspace">{% trans "Workspace" %}</label>
-							{{form.target_workspace}}
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="target_datastore">{% trans "Datastore" %}</label>
-							{{form.target_datastore}}
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="target_server">{% trans "Select server" %}</label>
-							<select class="form-control" id="target_server" name="target_server">
-								{% for server in servers %}
-									{% if forloop.first %}
-									<option value="{{server.id}}" selected>{{server.title}}</option>
-									{% else %}
-									<option value="{{server.id}}">{{server.title}}</option>
-									{% endif %}
-								{% endfor %}
-							</select>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<span>{% trans "Options:" %}.</span>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-4 form-group">
-							{{form.copy_data}}
-							<label for="copy_data">{% trans "Copy data" %}</label>
-						</div>
-						<div class="col-md-8 form-group">
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">{% trans "Notes:" %}
-								<ul>
-								<li>{% trans "Vector layers will be cloned" %}</li>
-								<li>{% trans "Base layer groups will be referenced instead of cloned" %}</li>
-								<li>{% trans "Raster layers will be excluded (except base layers)" %}</li>
-								</ul>
+				</div>
+			</div>
+			<div class="tab-pane" id="tab-permissions">
+				<div class="box">
+					<div class="box-body">
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="permission_choice">{% trans "Permissions cloning" %}</label>
+								{{form.permission_choice}}
 							</div>
 						</div>
 					</div>

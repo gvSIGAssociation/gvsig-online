@@ -42,6 +42,8 @@ import json
 import re
 import base64
 from actstream import action
+import logging
+logger = logging.getLogger('gvsigol')
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
@@ -136,6 +138,7 @@ def login_user(request):
                         if user.is_active:
                             login(request, user)
                             id_solicitud = request.GET.get('id_solicitud')
+                            expediente = request.GET.get('expediente')
                             app = request.GET.get('app')
                             token = request.GET.get('token')
                             next = request.GET.get('next')
@@ -145,6 +148,14 @@ def login_user(request):
                                     response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app
                                 else:
                                     response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app + '&token=' + token
+                                return response
+
+                            if expediente is not None:
+                                response = redirect(next)
+                                if token is None:
+                                    response['Location'] += '?expediente=' + expediente
+                                else:
+                                    response['Location'] += '?expediente=' + expediente + '&token=' + token
                                 return response
 
                         else:
@@ -196,9 +207,13 @@ def password_reset(request):
             
             auth_utils.send_reset_password_email(user.email, user.id, uid, token)
             return redirect('password_reset_success')
-             
-        except Exception as e:            
-            errors.append(_('User account does not exist') + ': ' + str(e))
+        except User.DoesNotExist:
+            logger.exception("Error resetting password")
+            errors.append(_('User account does not exist'))
+            return render(request, 'password_reset.html', {'errors': errors})
+        except Exception:
+            logger.exception("Error resetting password")
+            errors.append(_('That did not work'))
             return render(request, 'password_reset.html', {'errors': errors})
             
     else:

@@ -186,6 +186,10 @@ def barchart_update(request, layer_id, chart_id):
         
         conf = json.loads(chart.conf)
         
+        y_axis_begin_at_zero = False
+        if 'y_axis_begin_at_zero' in conf:
+            y_axis_begin_at_zero = conf['y_axis_begin_at_zero']
+
         return render(request, 'barchart_update.html', {
             'layer_id': layer_id,
             'chart_id': chart_id,
@@ -198,6 +202,7 @@ def barchart_update(request, layer_id, chart_id):
             'dataset_type': conf['dataset_type'],
             'x_axis_title': conf['x_axis_title'],
             'y_axis_title': conf['y_axis_title'],
+            'y_axis_begin_at_zero': y_axis_begin_at_zero,
             'geographic_names_column': conf['geographic_names_column'],
             'geometries_column': conf['geometries_column'],
             'selected_columns': json.dumps(conf['columns'])
@@ -287,6 +292,10 @@ def linechart_update(request, layer_id, chart_id):
         
         conf = json.loads(chart.conf)
         
+        y_axis_begin_at_zero = False
+        if 'y_axis_begin_at_zero' in conf:
+            y_axis_begin_at_zero = conf['y_axis_begin_at_zero']
+
         return render(request, 'linechart_update.html', {
             'layer_id': layer_id,
             'chart_id': chart_id,
@@ -299,6 +308,7 @@ def linechart_update(request, layer_id, chart_id):
             'dataset_type': conf['dataset_type'],
             'x_axis_title': conf['x_axis_title'],
             'y_axis_title': conf['y_axis_title'],
+            'y_axis_begin_at_zero': y_axis_begin_at_zero,
             'geographic_names_column': conf['geographic_names_column'],
             'geometries_column': conf['geometries_column'],
             'selected_columns': json.dumps(conf['columns'])
@@ -418,7 +428,7 @@ def chart_delete(request):
         return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json') 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')   
+#@login_required(login_url='/gvsigonline/auth/login_user/')   
 def view(request):
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(request.POST.get('layer_id')))
@@ -446,7 +456,7 @@ def view(request):
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')   
+#@login_required(login_url='/gvsigonline/auth/login_user/')   
 def single_chart(request):
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(request.POST.get('layer_id')))

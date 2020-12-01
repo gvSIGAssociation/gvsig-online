@@ -28,11 +28,17 @@ var attributeTable = function(layer, map, conf, viewer) {
 	this.map = map;
 	this.conf = conf;
 	this.viewer = viewer;
-	this.layer = layer;
-
+	
 	this.filterCode = null;
 	this.selectedType = null;
+	this.init(layer);
+};
 
+/**
+ * TODO
+ */
+attributeTable.prototype.init = function(layer) {
+	this.layer = layer;
 	this.source = new ol.source.Vector();
 	this.resultLayer = new ol.layer.Vector({
 		source: this.source,
@@ -110,6 +116,20 @@ attributeTable.prototype.createUI = function() {
 	var featureType = this.describeFeatureType();
 	this.createTableUI(featureType);
 	this.createFiltersUI(featureType);
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.clearSource = function() {
+	this.source.clear()
+	var layers = this.map.getLayers().getArray()
+	for (var i=0; i<layers.length; i++) {
+		if (layers[i] instanceof ol.layer.Vector) {
+			layers[i].getSource().clear();
+		}
+	}
+	this.viewer.clearSelectedFeatures()
 };
 
 /**
@@ -206,7 +226,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
 				selected: true,
 				page: 'all'
 			}
-        }
+		},
+		extension: '.csv'
 	});
 	tableButtons.push({
    	 	extend: 'excelHtml5',
@@ -292,24 +313,12 @@ attributeTable.prototype.createTableUI = function(featureType) {
 		});
 	}	
 
-	for (var i=0; i<self.conf.project_tools.length; i++) {
-		if (self.conf.project_tools[i].name == 'gvsigol_plugin_turiscan') {
-			if (self.conf.project_tools[i].checked) {
-				tableButtons.push({
-					text: '<i class="fa fa-list-alt margin-r-5"></i> ' + gettext('Mostrar fichas'),
-					className: 'show-cards-button',
-					action: function ( e, dt, node, config ) {
-						var t = $('#table-' + self.layer.get("id")).DataTable();
-						var selectedRows = t.rows('.selected').data();
-						if (selectedRows.length > 0){
-							self.showCards(selectedRows);
-			
-						} else {
-							messageBox.show('warning', gettext('You must select at least one row'));
-						}
-					}
-				});
-			}
+	if(viewer.core.attributeTableButtons && viewer.core.attributeTableButtons.length > 0) {
+		var registeredButtons = viewer.core.attributeTableButtons
+
+		for (var i=0; i<registeredButtons.length; i++) {
+			if(registeredButtons[i].isEnable(this.layer, featureType, self.conf))
+				tableButtons.push(registeredButtons[i]);
 		}
 	}
 
@@ -419,20 +428,22 @@ attributeTable.prototype.getSelectedFeatures = function(fids){
 	    	if (response.features.length > 0 ) {
 	    		var newFeatures = [];
 	    		for (var i=0; i<response.features.length; i++) {
-		    		var newFeature = new ol.Feature();
-			    	if (response.features[i].geometry.type == 'Point') {
-			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
-			    		newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'LineString') {
-			    		newFeature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiLineString') {
-			    		newFeature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'Polygon') {
-			    		newFeature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiPolygon') {
-			    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
-			    	}
+					var newFeature = new ol.Feature();
+					if(response.features[i].geometry) {
+						if (response.features[i].geometry.type == 'Point') {
+							newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiPoint') {
+							newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'LineString') {
+							newFeature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiLineString') {
+							newFeature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'Polygon') {
+							newFeature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiPolygon') {
+							newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+						}
+					}
 			    	newFeature.setProperties(response.features[i].properties);
 					newFeature.setId(response.features[i].id);
 
@@ -484,10 +495,18 @@ attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
 		for(var ix=0; ix<fields.length; ix++){
 			var feat_name = fields[ix]["name"];
 			var feat_name_trans = fields[ix]["title-"+language];
+			//cql_filter = cql_filter.replace('(', '').replace(')', '');
 			if(feat_name_trans && feat_name){
-				feat_name_trans = feat_name_trans.replace("?", "\\\?").replace("¿", "\\\¿");
-				var filter_string =  new RegExp("("+feat_name_trans+")([^\\w'\"]+)","g");
-				cql_filter = cql_filter.replace(filter_string, feat_name+"$2")
+				//feat_name_trans = feat_name_trans.replace('?', '').replace('¿', '').replace('(', '').replace(')', '');
+				//var filter_string =  new RegExp("("+feat_name_trans+")([^\\w'\"]+)","g");
+				//cql_filter = cql_filter.replace(filter_string, feat_name+"$2");
+				var aux = cql_filter.split('=')[0];
+				if (aux.slice(-1) == ' '){
+					aux = aux.slice(0, -1);
+				}
+				if (aux == feat_name_trans) {
+					cql_filter = cql_filter.replace(feat_name_trans, feat_name);
+				}
 			}
 
 		}
@@ -985,6 +1004,11 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	var clonedFeatureType = featureType.slice(0);
 	var datasource = self.getDataSource(clonedFeatureType, selectedRows);
 
+	var logoUrl = self.conf.project_image;
+	if (logoUrl.indexOf('http') == -1) {
+		logoUrl = window.location.origin + self.conf.project_image;
+	}
+
 	$.ajax({
 		type: 'POST',
 		async: true,
@@ -1006,7 +1030,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 		  			"layers": printLayers
 		  	    },
 		  	    "datasource": datasource,
-			    "logo_url": self.conf.project_image,
+			    "logo_url": logoUrl,
 			    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
 		  	    "legend": {
 		  	    	"name": "",
@@ -1215,7 +1239,8 @@ attributeTable.prototype.createPdfReport = function(selectedRows) {
         		'fid': selectedRows[j].featureid,
         		'properties': selectedRows[j],
         		'address': completeAddress,
-        		'resources': resources
+				'resources': resources,
+				'selected_fields': fields
         	});
         }
         self.source.clear();
@@ -1350,24 +1375,26 @@ attributeTable.prototype.createPDF = function() {
 		doc.addImage(this.getRegisterImage(r), 'JPEG', 10, top + 5, 80, 40);
 		var auxTop = top;
 		var fieldCount = 0;
-		for (var key in r.properties) {
-			if (key != 'id' && r.properties[key] != null && fieldCount < 8) {
-				doc.setFontSize(10);
-				doc.setFontType('bold');
-				doc.text(95, auxTop + 10, this.getFieldTitle(key) + ':');
-				doc.setFontType('italic');
-				var value = r.properties[key].toString();
-				if (value.length > 50) {
-					value = value.slice(0, 45) + ' ...';
-					doc.text(120, auxTop + 10, value);
-				} else {
-					doc.text(120, auxTop + 10, value);
+		for (var j=0; j<r.selected_fields.length; j++) {
+			for (var key in r.properties) {
+				if (r.selected_fields[j] == key) {
+					if (key != 'id' && r.properties[key] != null && fieldCount < 8) {
+						doc.setFontSize(10);
+						doc.setFontType('bold');
+						doc.text(95, auxTop + 10, this.getFieldTitle(key) + ':');
+						doc.setFontType('italic');
+						var value = r.properties[key].toString();
+						if (value.length > 50) {
+							value = value.slice(0, 45) + ' ...';
+							doc.text(130, auxTop + 10, value);
+						} else {
+							doc.text(130, auxTop + 10, value);
+						}
+						auxTop = auxTop + 5;
+						fieldCount++;
+					}
 				}
-				auxTop = auxTop + 5;
-				fieldCount++;
 			}
-			
-			
 		}
 		top = top + 65;
 		numItems++;
@@ -1513,23 +1540,3 @@ attributeTable.prototype.getResources = function(feat) {
 	return resources;
 };
 
-/**
- * TODO
- */
-attributeTable.prototype.showCards = function(selectedRows) {
-	var self = this;
-	
-	var features = new Array();
-	for (var j=0; j<selectedRows.length; j++) {
-		var feat = self.getFeature(selectedRows[j]);
-		var resources = self.getResources(feat);
-		features.push({
-			'fid': selectedRows[j].featureid,
-			'feature': {
-				'properties': selectedRows[j],
-				'resources': resources
-			}
-		});
-	}
-	new ModalCanarias(features);
-};

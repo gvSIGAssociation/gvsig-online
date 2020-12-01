@@ -103,3 +103,5 @@ msgstr ""
 msgid "The search is running..."
 msgstr ""
 
+msgid "Loading..."
+msgstr ""

@@ -28,7 +28,7 @@ var Charts = function(conf, map, chartLayers) {
 	this.conf = conf;
 	this.map = map;
 	this.chartLayers = chartLayers;
-	this.chartsView = new ChartsView();
+	this.chartsView = new ChartsView(this.map);
 	
 	this.initialize();
 	this.registerEvents();
@@ -129,8 +129,7 @@ Charts.prototype.showChartsView = function(layerId) {
 	  		$('#container').hide();
 	  		$('.viewer-search-form').css("display","none");
 	  		$('#gvsigol-navbar-tools-dropdown').css("display","none");
-	  		
-	  		$('#chart-layer-' + layerId + ' option[value=__none__]').attr('selected','selected');
+			$('#chart-layer-' + layerId + ' option[value=__none__]').prop("selected", true);
 			  
 	  		self.chartsView.createUI(layer, charts);
 			self.chartsView.loadCharts();

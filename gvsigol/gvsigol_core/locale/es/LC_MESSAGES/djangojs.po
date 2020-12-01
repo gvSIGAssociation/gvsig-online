@@ -201,7 +201,7 @@ msgid "View resources"
 msgstr "Ver recursos"
 
 msgid "Feature info"
-msgstr "Feature info"
+msgstr "Información"
 
 msgid "Multimedia resources"
 msgstr "Recursos multimedia"
@@ -608,3 +608,6 @@ msgstr "Es mayor que"
 
 msgid "You must fill in all fields"
 msgstr "Debe rellenar todos los campos"
+
+msgid "Find layer"
+msgstr "Buscar capa"

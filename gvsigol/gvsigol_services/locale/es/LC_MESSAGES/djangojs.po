@@ -107,8 +107,8 @@ msgstr "Generación correcta del campo enumerado"
 msgid "Convert ok"
 msgstr "Se ha asignado el campo enumerado correctamente"
 
-msgid "El campo no puede ser obligario"
-msgstr "El campo no puede ser obligario. Puede que ya tenga valores nulos en la columna. Elimine los valores nulos y vuelva a intentarlo"
+msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
+msgstr "El campo no se puede configurar como obligatorio a nivel de base de datos porque algunos registros contienen valores nulos en esta columna. Borre los valores nulos y vuelva a intentarlo."
 
 msgid "Node has been reloaded"
 msgstr "El nodo ha sido recargado"
@@ -124,3 +124,19 @@ msgstr "Filtrar por proyecto"
 
 msgid "Show all layers"
 msgstr "Mostrar todas las capas"
+
+msgid "The action was successfully completed"
+msgstr "La acción se completó correctamente"
+
+msgid "The action failed"
+msgstr "La acción falló"
+
+msgid "The layer definition was refreshed"
+msgstr "La definición de capa fue refrescada"
+
+msgid "The layer refresh failed"
+msgstr "Falló el refrescado de capa"
+
+msgid "Calculated"
+msgstr "Calculado"
+
