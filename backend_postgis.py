@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from psycopg2._psycopg import quote_ident
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -331,10 +332,7 @@ class Introspect:
             try:
                 schema, seq_name = self._parse_sequence_name(col_default)
                 if seq_name != '':
-                    if schema != '':
-                        result.append((col, schema + u'.' + seq_name, schema, seq_name))
-                    else:
-                        result.append((col, seq_name, schema, seq_name))
+                    result.append((col, schema, seq_name))
             except:
               pass
 
@@ -352,9 +350,9 @@ class Introspect:
         seqs = self.get_sequences(table, schema)
         pks = self.get_pk_columns(table, schema)
         result = []
-        for (col, seq, _, _) in seqs:
+        for (col, schema, seq_name) in seqs:
             if col in pks:
-              result.append((col, seq))
+              result.append((col, schema, seq_name))
         return result
 
     def update_pk_sequences(self, table, schema='public'):
@@ -362,9 +360,15 @@ class Introspect:
         Ensures the sequence start value is higher than any existing value for the column.
         """
         seqs = self.get_pk_sequences(table, schema)
-        for (col, seq) in seqs:
-            sql = "SELECT setval('" + seq + "', max(" + col + ")) FROM " + schema + "." + table + " ;"
-            self.cursor.execute(sql)
+        sql = "SELECT setval({seq}, max({col})) FROM {schema}.{table}"
+        for (col, seq_schema, seq_name) in seqs:
+            full_sequence = quote_ident(seq_schema, self.conn) + "." + quote_ident(seq_name, self.conn)
+            query = sqlbuilder.SQL(sql).format(
+                seq=sqlbuilder.Literal(full_sequence),
+                col=sqlbuilder.Literal(col),
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table))
+            self.cursor.execute(query)
     
     def get_fields_info(self, table, schema='public'):
         self.cursor.execute("""
@@ -788,7 +792,7 @@ class Introspect:
         # print query.as_string(self.conn)
         self.cursor.execute(query)
         
-        for (column, _, schema, seq_name) in self.get_sequences(table_name, schema):
+        for (column, schema, seq_name) in self.get_sequences(table_name, schema):
             self.clone_sequence(target_schema, new_table_name, column, seq_name, schema, table_name)
         
         self.clone_pks(target_schema, new_table_name, schema, table_name)
@@ -853,33 +857,42 @@ class Introspect:
         
         self.cursor.execute(query)
         
-    def get_count(self, schema, layer_name):
-        query = "SELECT COUNT(*) FROM " + schema + "." + layer_name;
+    def get_count(self, schema, table):
+        sql = "SELECT COUNT(*) FROM {schema}.{table}"
+        query = sqlbuilder.SQL(sql).format(
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table))
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
         count = rows[0]
         
         return count
-    def get_estimated_count(self, schema, layer_name):
-        query = "SELECT reltuples::BIGINT AS estimate FROM pg_class WHERE relname='" + layer_name + "'";
-        self.cursor.execute(query)
+    def get_estimated_count(self, schema, table):
+        query = "SELECT reltuples::BIGINT AS estimate FROM pg_class WHERE relname = %s";
+        self.cursor.execute(query, [table])
         rows = self.cursor.fetchall()
         if self.cursor.rowcount == 1:
             return rows[0]
         else:
-            return self.get_count(schema,layer_name)
+            return self.get_count(schema, table)
     
-    def get_bbox_firstgeom(self, schema, layer_name, expand):
-        column_name = self.get_geometry_columns(layer_name,schema)
+    def get_bbox_firstgeom(self, schema, table, expand):
+        column_name = self.get_geometry_columns(table, schema)[0]
         if expand is None:
-            ex = 0
-        else:
-            ex = str(expand)
-        query = "SELECT BOX2D(ST_EXPAND(ST_TRANSFORM(" + column_name[0] + ",4326),"  + ex + ")) FROM " + schema + "." + layer_name + " WHERE " + column_name[0] + " IS NOT NULL LIMIT 1"
-        self.cursor.execute(query)
+            expand = 0
+        sql = """SELECT BOX2D(ST_EXPAND(ST_TRANSFORM({column_name} ,4326), {expand}))
+        FROM {schema}.{table}
+        WHERE %s IS NOT NULL LIMIT 1"""
+        query = sqlbuilder.SQL(sql).format(
+            schema=schema,
+            table=table,
+            column_name=sqlbuilder.Literal(column_name),
+            expand=sqlbuilder.Literal(expand)
+            )
+        self.cursor.execute(query, [column_name])
         rows = self.cursor.fetchone()
         bb = rows[0]
-        bb = bb.replace("BOX(","").replace(")","").replace(" ", ",")        
+        bb = bb.replace("BOX(","").replace(")","").replace(" ", ",")
         return bb
     
     def get_bbox(self, schema, table_name, geom_field):
