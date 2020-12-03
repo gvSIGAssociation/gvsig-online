@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
+    'django_celery_beat',
     'rest_framework',
     'gvsigol_statistics',
     'gvsigol_auth',
