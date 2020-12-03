@@ -1360,7 +1360,7 @@ msgstr "Espaços de trabalho"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:10
 msgid "Datastores"
-msgstr "Datastores"
+msgstr "Armazéns de dados"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:11
 msgid "Layer groups"
@@ -1384,7 +1384,7 @@ msgstr "Serviços"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:21
 msgid "Datatypes"
-msgstr "Datatypes"
+msgstr "Tipos de dados"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:23
 msgid "Enumerations"
