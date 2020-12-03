@@ -104,6 +104,8 @@ celery==4.3.0
 kombu==4.5.0
 zipp==0.6.0
 
+django-celery-beat==1.6.0
+
 # workaround for indirect dependencies problem when using pip 8
 more-itertools<6.0.0
 
