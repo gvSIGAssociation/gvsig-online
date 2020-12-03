@@ -1609,7 +1609,7 @@ def processLocators(request, zipobj=None, zip_path=None):
             temporal_errors += 1
 
     if len(packaged_locators) > 0:
-        new_link = createDownloadLink(request, packaged_locators, zip_path, is_temporary=True)
+        new_link = createDownloadLink(request, packaged_locators, prepared_download_path=zip_path, is_temporary=True)
         for resourceLocator in packaged_locators:
             resourceLocator.status = ResourceLocator.PROCESSED_STATUS
             resourceLocator.save()
@@ -1647,8 +1647,12 @@ def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path
         new_link.is_temporary = is_temporary
         if name:
             new_link.name = name
-        else:
+        elif prepared_download_path:
             new_link.name = os.path.basename(prepared_download_path)
+        elif resolved_url:
+            new_link.name = os.path.basename(resolved_url)
+        else:
+            new_link.name = link_uuid
         new_link.save()
         if isinstance(resourceLocators, ResourceLocator):
             resourceLocators.download_links.add(new_link)
@@ -1696,10 +1700,14 @@ def createDownloadLinks(downloadRequest, resourceLocator):
                 raise PermanentPreparationError()
             for p in paths:
                 is_auxiliary = (p != local_path)
-                createDownloadLink(downloadRequest, resourceLocator, p, is_auxiliary=is_auxiliary)
+                createDownloadLink(downloadRequest, resourceLocator, prepared_download_path=p, is_auxiliary=is_auxiliary)
+            return
+        elif resourceLocator.resolved_url.startswith("http://") or resourceLocator.resolved_url.startswith("https://"):
+            createDownloadLink(downloadRequest, resourceLocator, resolved_url=resourceLocator.resolved_url)
+            return
     except ForbiddenAccessError:
         logger.exception("Error creating download link")
-        raise PermanentPreparationError()
+    raise PermanentPreparationError()
 
 def updatePendingAuthorization(request):
     pending_authorization = request.resourcelocator_set.filter(authorization=ResourceLocator.AUTHORIZATION_PENDING).count()
@@ -1913,7 +1921,7 @@ def processDownloadRequest(self, request_id):
 @celery_app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     # Calls test('hello') every 10 seconds.
-    sender.add_periodic_task(CLEAN_TASK_FREQUENCY, cleanOutdatedRequests.s(), options={'queue' : 'gvsigolperiodic'})
+    sender.add_periodic_task(CLEAN_TASK_FREQUENCY, cleanOutdatedRequests.s(), options={'queue' : 'celery'})
 
 @task(bind=True)
 def cleanOutdatedRequests(self):
