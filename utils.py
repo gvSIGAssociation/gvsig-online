@@ -461,9 +461,8 @@ def get_db_connect_from_datastore(datastore):
 
 def get_db_connect_from_layer(layer):
     if not isinstance(layer, Layer):
-        layer = Layer.objects.get(id=int(layer))
-    datastore = Datastore.objects.get(id=layer.datastore_id)
-    i, params = get_db_connect_from_datastore(datastore)
+        layer = Layer.objects.select_related('datastore').get(id=int(layer))
+    i, params = get_db_connect_from_datastore(layer.datastore)
     return i, layer.source_name, params.get('schema', 'public')
      
 def get_exception(code, msg):
