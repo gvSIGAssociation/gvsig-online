@@ -129,7 +129,7 @@ viewer.core = {
     		})
     	});
 
-		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
+		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, shiftDragZoom: false});
 		this.overviewmap = new ol.control.OverviewMap({
 			collapsed: false, 
 			layers: [osm],
@@ -888,6 +888,7 @@ viewer.core = {
 		}
 		if (this.ifToolInConf('gvsigol_tool_zoom')) {
 			this.tools.push(new projectZoom(this.map, this.conf));
+			this.tools.push(new DragZoomControl(this.map, this.conf));
 		}
 		if (this.ifToolInConf('gvsigol_tool_info')) {
 			this.tools.push(new getFeatureInfo(this.conf, this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
