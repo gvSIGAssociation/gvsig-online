@@ -195,7 +195,7 @@ $().ready(function() {
 	});
 	
 	var interaction = new ol.interaction.Extent({
-		condition: ol.events.condition.allways
+		condition: ol.events.condition.always
 	});
 	interaction.on('extentchanged', function(e) {
 		if (e.b) {
