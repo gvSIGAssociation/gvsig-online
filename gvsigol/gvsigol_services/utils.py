@@ -432,6 +432,7 @@ def get_layer_img(layerid, filename):
         filename = m.hexdigest() + "." + ext
         path_ = settings.MEDIA_ROOT + "images/" + filename
         url = settings.MEDIA_URL + "images/" + filename
+        url = url.replace(settings.BASE_URL, '')
     else:
         suffix_list = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'svg']
         filename = m.hexdigest()
@@ -440,6 +441,7 @@ def get_layer_img(layerid, filename):
             path_ = settings.MEDIA_ROOT + "images/" + test
             if os.path.exists(path_):
                 url = settings.MEDIA_URL + "images/" + test
+                url = url.replace(settings.BASE_URL, '')
                 break
             else:
                 path_ = None
