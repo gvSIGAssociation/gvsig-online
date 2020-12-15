@@ -500,13 +500,14 @@ attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
 				//feat_name_trans = feat_name_trans.replace('?', '').replace('¿', '').replace('(', '').replace(')', '');
 				//var filter_string =  new RegExp("("+feat_name_trans+")([^\\w'\"]+)","g");
 				//cql_filter = cql_filter.replace(filter_string, feat_name+"$2");
-				var aux = cql_filter.split('=')[0];
+				/*var aux = cql_filter.split('=')[0];
 				if (aux.slice(-1) == ' '){
 					aux = aux.slice(0, -1);
 				}
 				if (aux == feat_name_trans) {
 					cql_filter = cql_filter.replace(feat_name_trans, feat_name);
-				}
+				}*/
+				cql_filter = cql_filter.replace(feat_name_trans, feat_name);
 			}
 
 		}
