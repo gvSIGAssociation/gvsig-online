@@ -53,6 +53,7 @@
 									<div class="col-md-12 form-group">
 										<label for="id_url">{% trans "Url" %}</label>
 										{{ form.url }}
+										<input type="hidden" name="get_map_url" id="get_map_url">
 									</div>	
 								</div>
 								<div class="row layers-control wms-control wmts-control">
@@ -318,6 +319,10 @@ $(document).ready(function(){
 					if($("#id_title").val() == ""){
 						$("#id_title").val(data['title']);
 					}
+				}
+
+				if('get_map_url' in data){
+					$("#get_map_url").val(data['get_map_url']);
 				}
 				
 				if (data.crs_list) {

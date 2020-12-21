@@ -3796,6 +3796,7 @@ def external_layer_add(request):
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                 params['version'] = request.POST.get('version')
                 params['url'] = request.POST.get('url')
+                params['get_map_url'] = request.POST.get('get_map_url')
                 params['cache_url'] = server.getCacheEndpoint()
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
@@ -3900,6 +3901,7 @@ def external_layer_update(request, external_layer_id):
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                 params['version'] = request.POST.get('version')
                 params['url'] = request.POST.get('url')
+                params['get_map_url'] = request.POST.get('get_map_url')
                 params['cache_url'] = server.getCacheEndpoint()
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
@@ -3993,6 +3995,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     capabilities = None
     title = ''
     crs_list = None
+    get_map_url = url
     
     auth = Authentication(verify=False)
     if service == 'WMS':
@@ -4019,7 +4022,9 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                         infoformats.append(i_format)
             except Exception:
                 pass
-            
+
+            get_map_url = wms.getOperationByName('GetMap').methods[0]['url']
+
             lyr = wms.contents.get(layer)
             if not lyr:
                 for capabLyrName in wms.contents:
@@ -4098,7 +4103,8 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         'title': title,
         'matrixsets': matrixsets,
         'capabilities': capabilities,
-        'crs_list': crs_list
+        'crs_list': crs_list,
+        'get_map_url': get_map_url
     }
 
     return data
