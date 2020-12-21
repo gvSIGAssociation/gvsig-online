@@ -728,7 +728,7 @@ def load_project(request, project_name):
             has_image = False
 
         plugins_config = core_utils.get_plugins_config()
-        response = render(request, 'viewer.html', {
+        resp = {
             'has_image': has_image,
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
@@ -739,8 +739,8 @@ def load_project(request, project_name):
             'plugins_config': plugins_config,
             'is_shared_view': False,
             'main_page': settings.LOGOUT_PAGE_URL
-            }
-        )
+        }
+        response = render(request, 'viewer.html', resp)
 
         #Expira la caché cada día
         tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
@@ -838,7 +838,6 @@ def get_default_style(layer):
         if stl.is_default:
             default = stl
     return default
-
 
 def project_get_conf(request):
     if request.method == 'POST':
@@ -1116,6 +1115,7 @@ def project_get_conf(request):
                             l.external_params = json.dumps(params)
                             l.save()
                         layer.update(params)
+                        layer['url'] = params.get('get_map_url')
     
                     order = int(conf_group['groupOrder']) + l.order
                     layer['order'] = order
