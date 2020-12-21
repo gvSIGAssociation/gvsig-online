@@ -143,6 +143,13 @@ ImportFromService.prototype.createServiceForm = function() {
 							var parser = new ol.format.WMSCapabilities();
 							var result = parser.read(response);
 							self.wmsLayers = result.Capability.Layer.Layer;
+
+							if (result.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource) {
+								serviceURL = result.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource;
+								if (serviceURL.includes('?')) {
+									serviceURL = serviceURL.split('?')[0];
+								}
+							}
 							
 							$('#importfromservice-layerlist').empty();
 							for (var i=0; i<self.wmsLayers.length; i++) {
