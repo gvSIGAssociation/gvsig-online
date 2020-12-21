@@ -39,7 +39,6 @@ from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server, Layer
 from pyproj import Proj, transform
 
-
 class Tiling():
     
     directory = None
@@ -132,7 +131,7 @@ class Tiling():
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         
-        if(not os.path.isfile(download_path)):
+        if(not os.path.isfile(download_path) and not os.path.exists(download_path)):
             #print "downloading %r" % url
             try:
                 request = urllib2.Request(url)
@@ -376,11 +375,12 @@ class Tiling():
         return ', '.join(result[:granularity])   
 
      
-    def get_number_of_tiles(self, min_x, min_y, max_x, max_y, maxzoom, base_layer_process):
+    def get_number_of_tiles(self, min_x, min_y, max_x, max_y, maxzoom, base_layer_process, count_base=True):
         num_tiles = 0
         
         #Niveles de 0 al 7 sólo capas WMTS (pq OSM ya están descargados)
-        if self.mode  != "OSM":
+
+        if count_base and self.mode  != "OSM":
             for zoom in range(0, 7, 1):
                 xtile, ytile = self._deg2num(float(self.min_lat), float(self.min_lon), zoom)
                 final_xtile, final_ytile = self._deg2num(float(self.max_lat), float(self.max_lon), zoom)
@@ -450,6 +450,126 @@ class Tiling():
             return 7                      
 
 #***********END TILING CLASS********************
+
+"""
+Dado un extent o una lista de extents en GeoJSON genera un paquete con los tiles de la capa que caen dentro de 
+las geometrías. Las geometrías pasadas pueden ser de tipo Polygon o Point. Si son Polygon se usará la extensión
+del poligono. Si son de tipo Point se usará la extensión de un buffer definido en una propiedad del geoJson llamada 
+buffer con un entero que indique el buffer en metros alrededor de la coordenada. 
+
+Las coordenadas siempre serán en geográficas.
+
+Los niveles de 0 al 6 se empaquetan completos y del 7 en adelante solo los tiles que caen dentro de los polígonos o
+puntos con buffer definidos.
+
+El objeto process_data es una estructura en la que se va actualizando el número de tiles procesados y otra información
+del proceso de descarga y empaquetado
+"""
+@start_new_thread
+def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png'):
+    millis = int(round(time.time() * 1000))
+
+    url = None
+    if lyr.datastore is not None:
+        url = lyr.datastore.workspace.wmts_endpoint
+    
+    layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
+    folder_lyr =  os.path.join(layers_dir, lyr.name) + "_lyr_" + str(millis)
+    folder_package = os.path.join(folder_lyr, 'EPSG3857')
+    if not os.path.exists(layers_dir):
+        os.mkdir(layers_dir)
+    
+    try:
+        identif = "lyr_" + str(lyr.id)
+        mode = lyr.type
+        
+        #num_res_levels = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
+        
+        if mode == 'OSM':
+            base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
+            with zipfile.ZipFile(base_zip, 'r') as zipObj:
+                zipObj.extractall(path=layers_dir)
+                shutil.move(layers_dir + '/tiles_download', folder_package)
+
+        if process_data is not None:
+            process_data[str(identif)] = {
+                'active' : 'true',
+                'total_tiles' : 0,
+                'processed_tiles' : 0,
+                'version' : millis,
+                'time' : '-',
+                'stop' : 'false',
+                'format_processed' : format_,
+                'extent_processed' : 'geometries',
+                'zoom_levels_processed' : num_res_levels
+            }
+
+        lyr_name = lyr.datastore.workspace.name + ":" + lyr.name
+        number_of_tiles = 0
+        tilingList = [] 
+        for geojson in geojson_list:
+            tiling = Tiling(folder_package, mode, tilematrixset, url, identif)
+            if mode != 'OSM':
+                tiling.set_layer_name(lyr_name)
+                extent = lyr.latlong_extent
+                extent = extent.split(',')
+                tiling.set_layer_extent(float(extent[0]), float(extent[1]), float(extent[2]), float(extent[3]))
+
+            min_lon, min_lat, max_lon, max_lat = get_extent(geojson) 
+            tile_min_x, tile_min_y = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), min_lon, min_lat)
+            tile_max_x, tile_max_y = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), max_lon, max_lat)
+            number_of_tiles = number_of_tiles + tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, process_data, True if number_of_tiles == 0 else False) 
+            tilingList.append({
+                'tiling': tiling,
+                'tile_min_x': tile_min_x,
+                'tile_min_y': tile_min_y,
+                'tile_max_x': tile_max_x,
+                'tile_max_y': tile_max_y
+            })
+
+        process_data[str(identif)]['total_tiles'] = number_of_tiles
+
+        start_level = 0
+        for t in tilingList:
+            print process_data
+            t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None)
+            print process_data
+            start_level =  7 #Para al 1ra geom se descargan los niveles de 0-6 completos pero para las sgtes ya no hace falta 
+            
+        _zipFolder(folder_lyr)
+    except Exception as e:
+        print e
+        return
+
+def get_extent(json):
+    if(json['type'] == 'Polygon'):
+        min_lon = float('Inf')
+        min_lat = float('Inf')
+        max_lon = -float('Inf') 
+        max_lat = -float('Inf')
+        coords = json['coordinates']
+        for coord in coords:
+            for c in coord:
+                min_lon = min(c[1], min_lon)
+                min_lat = min(c[0], min_lat)
+                max_lon = max(c[1], max_lon)
+                max_lat = max(c[0], max_lat)
+        return min_lon, min_lat, max_lon, max_lat
+    if(json['type'] == 'Point'):
+        try:
+            buffer = int(json['properties']['buffer'])
+        except Exception:
+            buffer = 500
+
+        coords = json['coordinates']
+        x, y = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), coords[1], coords[0])
+        minx = x - buffer
+        miny = y - buffer
+        maxx = x + buffer
+        maxy = y + buffer
+        min_lon, min_lat = transform(Proj(init='epsg:3857'), Proj(init='epsg:4326'), minx, miny)
+        max_lon, max_lat = transform(Proj(init='epsg:3857'), Proj(init='epsg:4326'), maxx, maxy)
+        return min_lon, min_lat, max_lon, max_lat
 
 @start_new_thread
 def retry_base_layer_tiling(base_layer_process, tiling_data):
@@ -556,6 +676,7 @@ def _get_number_of_tiles(dir, levels):
 
 def _delete_pending_downloads(dir, prefix):
     """
+    @deprecated: pongo esto deprecated porque al implementar el retry no podemos eliminar los directorios pendientes de descarga
     Borra los directorios pendientes de descarga si se inicia una nueva para evitar acumular basura
     """
     content = os.listdir(dir)
@@ -578,7 +699,7 @@ def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tile
         url = base_lyr.datastore.workspace.wmts_endpoint
     
     layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
-    _delete_pending_downloads(layers_dir, prj.name + "_prj_")
+    #_delete_pending_downloads(layers_dir, prj.name + "_prj_")
     folder_prj =  os.path.join(layers_dir, prj.name) + "_prj_" + str(millis)
     folder_package = os.path.join(folder_prj, dir)
     if not os.path.exists(layers_dir):
@@ -668,20 +789,7 @@ def _close_download(base_layer_process, prj, folder_prj, number_of_tiles, versio
     #Empaquetamos y borramos el directorio si no se ha pulsado el botón de stop
     #Si se ha pulsado lo dejamos como está para poder hacer retry cuando se ponga el botón
     if base_layer_process[str(prj.id)]['stop'] == 'false': 
-        #TODO;
-        #Shutil tiene un bug en algunos SO que hace que te meta una carpeta ./ dentro del zip (a los de SAV no les sirve). 
-        #A partir de la 3.6 de python está resuelto. Mientras tanto lo hago con ZipFile. Queda pendiente volverlo 
-        # a dejar con shutil cuando se migre a python 3 
-        #Sería así: shutil.make_archive(folder_prj, 'zip', folder_prj)
-        zipf = zipfile.ZipFile(folder_prj + '.zip', 'w', zipfile.ZIP_DEFLATED)
-        lenDirPath = len(folder_prj)
-        for root, _, files in os.walk(folder_prj):
-            for file_ in files:
-                filePath = os.path.join(root, file_)
-                zipf.write(filePath, filePath[lenDirPath :])
-        zipf.close()
-        
-        shutil.rmtree(folder_prj)
+        _zipFolder(folder_prj)
 
     #Actualiza la estructura de datos de refresco del interfaz web
     if base_layer_process is not None:
@@ -706,6 +814,22 @@ def _close_download(base_layer_process, prj, folder_prj, number_of_tiles, versio
     store = ProjectBaseLayerTiling.objects.get(id=prj.id)
     store.running = False
     store.save()
+
+
+def _zipFolder(folder_prj):
+    #TODO;
+    #Shutil tiene un bug en algunos SO que hace que te meta una carpeta ./ dentro del zip (a los de SAV no les sirve). 
+    #A partir de la 3.6 de python está resuelto. Mientras tanto lo hago con ZipFile. Queda pendiente volverlo 
+    # a dejar con shutil cuando se migre a python 3 
+    #Sería así: shutil.make_archive(folder_prj, 'zip', folder_prj)
+    zipf = zipfile.ZipFile(folder_prj + '.zip', 'w', zipfile.ZIP_DEFLATED)
+    lenDirPath = len(folder_prj)
+    for root, _, files in os.walk(folder_prj):
+        for file_ in files:
+            filePath = os.path.join(root, file_)
+            zipf.write(filePath, filePath[lenDirPath :])
+    zipf.close()
+    shutil.rmtree(folder_prj)
 
             
 def exists_base_layer_tiled(prj_id):
