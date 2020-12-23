@@ -26,11 +26,32 @@
  */
 var messageBox = function() {};
 
+messageBox.prototype.createModal = function() {
+	if ($('#modal-error').length == 0) {
+		var ui = '';
+		ui += '<div class="modal fade" id="modal-error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display:none">';
+		ui += 	'<div class="modal-dialog" role="document">';
+		ui += 		'<div class="modal-content">';
+		ui += 			'<div class="modal-body" style="padding: 0px !important;">';
+		ui += 				'<div class="alert alert-dismissible" style="border-radius: 0px !important;">';
+		ui += 					'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>';
+		ui += 					'<h4 class="messageBoxTitle"></h4>';
+		ui += 					'<div class="messageBoxMsg"></div>';
+		ui += 				'</div>';
+		ui += 			'</div>';
+		ui += 		'</div>';
+		ui += 	'</div>';
+		ui += '</div>';
+		$('body').append(ui);
+	}
+}
+
+
 /**
  * TODO.
  */
 messageBox.prototype.show = function(type, msg) {
-	
+	this.createModal();
 	var title = '';
 	var style = '';
 	var icon = '';
@@ -55,33 +76,19 @@ messageBox.prototype.show = function(type, msg) {
 		style = 'alert-danger';
 		icon = 'fa-ban';
 	}
-	
-	// remove any previous content
-	$('#modal-error').remove();
-	
-	var ui = '';
-	ui += '<div class="modal fade" id="modal-error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
-	ui += 	'<div class="modal-dialog" role="document">';
-	ui += 		'<div class="modal-content">';
-	ui += 			'<div class="modal-body" style="padding: 0px !important;">';
-	ui += 				'<div class="alert ' + style + ' alert-dismissible" style="border-radius: 0px !important;">';
-	ui += 					'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>';
-	ui += 					'<h4><i class="icon fa ' + icon + '"></i> ' + title + '</h4>';
-	ui += 					msg;
-	ui += 				'</div>';
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += '</div>';
-	$('body').append(ui);
+
+	$('#modal-error .modal-body .alert').removeClass("alert-info alert-warning alert-danger alert-success").addClass(style);
+	$('#modal-error h4.messageBoxTitle').html('<i class="icon fa ' + icon + '"></i> ' + title + '</h4>');
+	$('#modal-error div.messageBoxMsg').text(msg);
 	$('#modal-error').modal('show');
 };
+
 
 /**
  * TODO.
  */
 messageBox.prototype.showMultiLine = function(type, messages) {
-	
+	this.createModal();
 	var title = '';
 	var style = '';
 	var icon = '';
@@ -107,27 +114,16 @@ messageBox.prototype.showMultiLine = function(type, messages) {
 		icon = 'fa-ban';
 	}
 	
-	// remove any previous content
-	$('#modal-error').remove();
-	
-	var ui = '';
-	ui += '<div class="modal fade" id="modal-error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
-	ui += 	'<div class="modal-dialog" role="document">';
-	ui += 		'<div class="modal-content">';
-	ui += 			'<div class="modal-body" style="padding: 0px !important;">';
-	ui += 				'<div class="alert ' + style + ' alert-dismissible" style="border-radius: 0px !important;">';
-	ui += 					'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>';
-	ui += 					'<h4><i class="icon fa ' + icon + '"></i> ' + title + '</h4>';
-	ui +=					'<ul>'
+	$('#modal-error .modal-body .alert').removeClass("alert-info alert-warning alert-danger alert-success").addClass(style);
+	$('#modal-error h4.messageBoxTitle').html('<i class="icon fa ' + icon + '"></i> ' + title + '</h4>');
+	var list = '';
+	var ul = $('<ul></ul>');
 	for (var i=0; i<messages.length; i++) {
-		ui +=					'<li style="list-style-type: none;">' + messages[i] + '</li>';
+		var li = $('<li style="list-style-type: none;"></li>');
+		li.text(messages[i]);
+		ul.append(li);
 	}
-	ui +=					'</ul>'
-	ui += 				'</div>';
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += '</div>';
-	$('body').append(ui);
+	$('#modal-error div.messageBoxMsg').empty();
+	$('#modal-error div.messageBoxMsg').append(ul);
 	$('#modal-error').modal('show');
 };
