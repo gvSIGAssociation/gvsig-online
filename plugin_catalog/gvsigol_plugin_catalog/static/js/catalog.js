@@ -27,7 +27,8 @@
 var CatalogView = function(mapViewer, config) {
 	this.mapViewer = mapViewer;
 	this.map = mapViewer.getMap();
-	this.map_container = $("#container");	
+	this.map_container = $("#container");
+	this.modalSelector = config.modalSelector || '#float-modal';
 	this.layerTree = mapViewer.getLayerTree();
 	this.catalog_panel = null;
 	this.catalog_map = null;
@@ -478,17 +479,17 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 		met += '	</div>';
 		met += '	<div class="col-sm-12">';
 		met += '			<div class="catalog_content_button_place col-sm-3">';
-		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_details">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_details">';
 		met += ' 					<i class="fa fa-search" aria-hidden="true"></i><span>' + gettext('Details') + '</span>';
 		met += '				</a>';
 		met += '			</div>';
 		met += '			<div class="catalog_content_button_place col-sm-3">';
-		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_linkmap">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_linkmap">';
 		met += ' 					<i class="fa fa-map-o" aria-hidden="true"></i><span>' + gettext('Map') + '</span>';
 		met += '				</a>';
 		met += '			</div>';
 		met += '			<div class="catalog_content_button_place col-sm-3">';
-		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_download">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_download">';
 		met += ' 					<i class="fa fa-download" aria-hidden="true"></i><span>' + gettext('Download') + '</span>';
 		met += '				</a>';
 		met += '			</div>';
@@ -603,26 +604,94 @@ CatalogView.prototype.createResourceLink = function(links){
 	return content;
 }
 
-CatalogView.prototype.linkResourceMap = function(){
+CatalogView.prototype.onAddLayerButtonClick = function(targetBtn){
+	if (this.onAddLayerButtonClickRunning) {
+		// prevent the button to be clicked twice, it creates problems with the messageBox modal
+		return;
+	}
+	this.onAddLayerButtonClickRunning = true;
 	var self = this;
 
-	$(".catalog_add_layer").unbind("click").click(function(){
-		var url = $(this).attr("url");
-		var name = $(this).attr("name");
-		var title = $(this).attr("title");
-		var id = $(this).attr("data-id");
-
+	var id = targetBtn.attr("name");
+	var layerSummary = self.data[id];
+	targetBtn.find("i.fa").removeClass('fa-map-o').addClass('fa-spinner fa-spin');
+	var links = layerSummary.link || [];
+	var title = layerSummary.title || layerSummary.defaultTitle || layerSummary.name || '';
+	var abstract = layerSummary.abstract || title;
+	try {
+		var geoBox = [];
+		if (layerSummary.geoBox) {
+			if (Array.isArray(layerSummary.geoBox)) {
+				// TODO: merge all the bboxes in this case
+				var geoBoxStrList = layerSummary.geoBox[0].split("|");
+			}
+			else {
+				var geoBoxStrList = layerSummary.geoBox.split("|");
+			}
+			for (var i=0; i<geoBoxStrList.length; i++) {
+				var bboxValue = parseFloat(geoBoxStrList[i]);
+				geoBox.push(bboxValue);
+			}
+		}
+	}
+	catch (e) {}
+	if(!Array.isArray(links)){
+		links = [links];
+	}
+	//console.log(geoBox);
+	var wms = {};
+	var wcs_url = '';
+	var wfs_url = '';
+	for(var i=0; i<links.length; i++){
+		var link = links[i].split('|');
+		var content = '';
+		if(link.length==6){
+			var type = link[3].trim().substring(0, 7);
+			if(type == "OGC:WMS"){
+				wms.url = link[2];
+				wms.name = link[0];
+				wms.title = title;
+				wms.abstract = abstract;
+			}
+			else if (type == "OGC:WFS"){
+				wfs_url = link[2];
+			}
+			else if (type == "OGC:WCS"){
+				wcs_url = link[2];
+			}
+		}
+	}
+	if (wms.url) {
 		var group_visible = false;
 		group_visible = $("#layergroup-geonetwork-group").is(":checked");
+		var name = wms.name || null;
 		try {
-			self.createLayer(name, title, title, url, id, null, group_visible);
+			self.getAvailableLayers(wms.url, name).then(function(url, layers, formats) {
+				targetBtn.find("i.fa").removeClass('fa-spinner fa-spin').addClass('fa-map-o');
+				self.createSelectLayersPanel(layers, formats).then(function(selectedLayer) {
+					self.createLayer(selectedLayer.Name, selectedLayer.Title, selectedLayer.Abstract, url, id, geoBox, group_visible, wfs_url, wcs_url);
+					self.hidePanel();
+				});
+			}).catch(function(error) {
+				messageBox.show('warning', gettext("No layers available"));
+			}).finally(function() {
+				self.onAddLayerButtonClickRunning = false;
+				targetBtn.find("i.fa").removeClass('fa-spinner fa-spin').addClass('fa-map-o');
+			});
 		}
-		catch (error) {
+		catch(error) {
 			console.log(error);
+			targetBtn.find("i.fa").removeClass('fa-spinner fa-spin').addClass('fa-map-o');
+			self.onAddLayerButtonClickRunning = false;
 		}
-		$('#modal-catalog').modal('hide');
-		self.hidePanel();
-	});
+	}
+	else {
+		messageBox.show('warning', gettext("No layers available"));
+		targetBtn.find("i.fa").removeClass('fa-spinner fa-spin').addClass('fa-map-o');
+		self.onAddLayerButtonClickRunning = false;
+	}
+	//targetBtn.find("i.fa").removeClass('fa-spinner fa-spin').addClass('fa-map-o');
+	
 }
 
 CatalogView.prototype.getMaxGroupOrder = function() {
@@ -773,6 +842,155 @@ CatalogView.prototype._createOLLayer = function(url, name, title, abstract, data
 	return catalogLayer;
 }
 
+CatalogView.prototype.createSelectLayersPanel = function(layers, formats) {
+	var self = this;
+	var onSuccess = function() {}
+	var onError = function() {}
+	var onFinally = function() {};
+	var layerMap = [];
+
+	for(var i=0; i<layers.length; i++) {
+		var sanitizedName = self.sanitizeHtmlText(layers[i].Name);
+		layerMap[sanitizedName] = layers[i];
+		var content = '<div class="container-fluid">';
+		content += '<div class="row">';
+		content += '  <div class="col-sm-4">';
+		content += '    <label class="form-label">' + self.sanitizeHtmlText(layers[i].Title) + '</label>';
+		content += '    <div class="layer-name" style="padding: 6px 4px 6px 0px">'+ sanitizedName + '</div>';
+		content += '  </div>';
+		content += '  <div class="col-sm-4">';
+		if (formats.length>0) {
+			content += '    <select class="form-control">';
+			for (var j=0; j<formats.length; j++) {
+				content += '      <option val="' + self.sanitizeHtmlText(formats[j]) + '">' + self.sanitizeHtmlText(formats[j]) + '</option>';
+			}
+		}
+		content += '    </select>';
+		content += '  </div>';
+		content += '  <div class="col-sm-4">';
+		content += '    <button class="btn btn-default add-to-map-btn" type="button">' + gettext("Add to map") + '</button>';
+		content += '  </div>';
+		content += '</div>';
+	}
+
+	$(self.modalSelector).find('.modal-body').html(content);
+	$(self.modalSelector).find('.modal-title').html(gettext("Add layer to map"));
+	$('.add-to-map-btn').click(function() {
+		var selectedLayerName = $(this).parents('div.row').find('.layer-name').text();
+		var selectedStyle = $(this).parents('div.row').find('select').val();
+		var selectedLayer = layerMap[selectedLayerName];
+		$(self.modalSelector).modal('hide');
+		onSuccess(selectedLayer, selectedStyle);
+		onFinally(selectedLayer, selectedStyle);
+	});
+	$(self.modalSelector).find('.modal-footer').html('');
+	$(self.modalSelector).modal('show');
+	$(self.modalSelector).on('hidden.bs.modal', function (e) {
+		onError(e);
+		onFinally(e);
+	})
+	var response = {
+		then: function (callback) {
+			if (typeof(callback)==='function') onSuccess = callback;
+			return response;
+		},
+		catch: function (callback) {
+			if (typeof(callback)==='function') onError = callback;
+			return response;
+		},
+		finally: function (callback) {
+			if (typeof(callback)==='function') onFinally = callback;
+			return response;
+		}
+	}
+	return response;
+}
+
+CatalogView.prototype.getAvailableLayers = function(baseUrl, layerName) {
+	var self = this;
+	var onSuccess = function() {}
+	var onError = function() {}
+	var onFinally = function() {};
+	
+	var url = baseUrl + "?service=WMS&request=GetCapabilities&version=1.1.1";
+	var parser = new ol.format.WMSCapabilities();
+	$.ajax({
+		url: url,
+		success: function(response) {
+			var result = parser.read(response);
+			var url = baseUrl;
+			try {
+				var getMapDCPTypes = result.Capability.Request.GetMap.DCPType;
+				for (var i=0; i<getMapDCPTypes.length; i++) {
+					if (getMapDCPTypes[i]["HTTP"] && getMapDCPTypes[i]["HTTP"]["Get"]) {
+						url = getMapDCPTypes[i]["HTTP"]["Get"].OnlineResource;
+						url.split("?")[0];
+						break;
+					}
+				}
+			}
+			catch(e) {}
+			var formats = [];
+			try {
+				var allFormats = result.Capability.Request.GetMap.Format;
+				for (var i=0; i<allFormats.length; i++) {
+					if (allFormats[i].toLowerCase().indexOf('png', 0) !== -1 ||
+						allFormats[i].toLowerCase().indexOf('jpeg', 0) !== -1) {
+						formats.push(allFormats[i]);
+					}
+				}
+			}
+			catch(e) {}
+			
+			var layers = result.Capability.Layer.Layer; 
+			
+			var layer = null;
+			if (layerName) {
+				var layer = null;
+				for (var i=0, len = layers.length; i<len; i++) {
+					var layerobj = layers[i];
+					if (layerobj.Name == layerName) {
+						layer = layerobj;
+					}
+				}
+			}
+			if (layer != null) {
+				layers = [layer];
+			}
+			onSuccess(url, layers, formats);
+			onFinally(url, layers, formats);
+			/*
+			var extent;
+			if((extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
+					(extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
+				return;
+			}
+			var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+			self.map.getView().fit(ext, self.map.getSize());
+			*/
+		},
+		error: function(jqXHR, textStatus) {
+			onError(jqXHR, textStatus);
+			onFinally(jqXHR, textStatus);
+		}
+	});
+
+	var response = {
+		then: function (callback) {
+			if (typeof(callback)==='function') onSuccess = callback;
+			return response;
+		},
+		catch: function (callback) {
+			if (typeof(callback)==='function') onError = callback;
+			return response;
+		},
+		finally: function (callback) {
+			if (typeof(callback)==='function') onFinally = callback;
+			return response;
+		}
+	}
+	return response;
+}
 
 
 CatalogView.prototype.createLayer = function(name, title, abstract, url, dataId, bbox, group_visible, wfs_url, wcs_url) {
@@ -1007,7 +1225,8 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 				$("#catalog_content").html(content_code);
 
 
-				$(".catalog_details").unbind("click").click(function(){
+				$(".catalog_details").unbind("click").click(function(evt){
+					evt.preventDefault();
 					var id = $(this).attr("name");
 					self.createDetailsPanel(id);
 
@@ -1019,7 +1238,8 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 					});
 				}
 
-				$(".catalog_download").unbind("click").click(function(){
+				$(".catalog_download").unbind("click").click(function(evt){
+					evt.preventDefault();
 					var id = $(this).attr("name");
 					if (viewer.core.getDownloadManager().isManagerEnabled()) {
 						viewer.core.getDownloadManager().layerDownloads(id);
@@ -1056,72 +1276,12 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 						$('#modal-catalog').modal('show');
 					}
 				});
-
-				$(".catalog_linkmap").unbind("click").click(function(){
-					var id = $(this).attr("name");
-					var layerSummary = self.data[id]; 
-					var links = layerSummary.link;
-					var title = layerSummary.title || layerSummary.defaultTitle || layerSummary.name || '';
-					var abstract = layerSummary.abstract || title;
-					try {
-						var geoBox = [];
-						if (self.data[id].geoBox) {
-							if (Array.isArray(self.data[id].geoBox)) {
-								// TODO: merge all the bboxes in this case
-								var geoBoxStrList = self.data[id].geoBox[0].split("|");
-							}
-							else {
-								var geoBoxStrList = self.data[id].geoBox.split("|");
-							}
-							for (var i=0; i<geoBoxStrList.length; i++) {
-								var bboxValue = parseFloat(geoBoxStrList[i]);
-								geoBox.push(bboxValue);
-							}
-						}
-					}
-					catch (e) {}
-					if(!Array.isArray(links)){
-						links = [links];
-					}
-					var wms = {};
-					var wcs_url = '';
-					var wfs_url = '';
-					for(var i=0; i<links.length; i++){
-						var link = links[i].split('|');
-						var content = '';
-						if(link.length==6){
-							var type = link[3].trim().substring(0, 7);
-							if(type == "OGC:WMS"){
-								wms.url = link[2];
-								wms.name = link[0];
-								wms.title = title;
-								wms.abstract = abstract;
-							}
-							else if (type == "OGC:WFS"){
-								wfs_url = link[2];
-							}
-							else if (type == "OGC:WCS"){
-								wcs_url = link[2];
-							}
-						}
-					}
-					if (wms.url) {
-						var group_visible = false;
-						group_visible = $("#layergroup-geonetwork-group").is(":checked");
-						if (wms.name) {
-							try {
-								self.createLayer(wms.name, wms.title, wms.abstract, wms.url, id, geoBox, group_visible, wfs_url, wcs_url);
-								self.hidePanel();
-							}
-							catch(error) {
-								console.log(error);
-							}
-						}
-						else {
-							self.createAvailableLayersPanel(wms.url, "WMS");
-						}
-						
-					}
+				
+				self.onAddLayerButtonClickRunning = false;
+				$(".catalog_linkmap").unbind("click").click(function(evt){
+					evt.preventDefault();
+					var targetBtn = $(this);
+					self.onAddLayerButtonClick(targetBtn);
 				});
 
 				$(".catalog_filter_entry_ck").unbind("click").click(function(){
@@ -1172,40 +1332,6 @@ CatalogView.prototype.createDetailsPanel = function(layer){
 			} else {
 				alert('Error');
 			}
-
-		},
-		error: function(jqXHR, textStatus){
-			console.log(textStatus);
-			console.log(jqXHR);
-		}
-	});
-}
-
-CatalogView.prototype.createAvailableLayersPanel = function(url, service){
-	service = service || "WMS";
-	var serviceUrl = url.split("?")[0];
-	var getCapabilitiesUrl = serviceUrl + "?service=" + service + "&request=GetCapabilities&version=1.3.0";
-	var self = this;
-	$.ajax({
-		type: "GET",
-		async: true,
-		url: getCapabilitiesUrl,
-		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
-		success: function(response){
-			var xmlDoc = $.parseXML(response);
-			var xml = $(xmlDoc);
-			var rootElem = xml.get(0);
-			/*
-			if ("html" in response) {
-				$('#modal-catalog .modal-title').html(gettext("Details"));
-				$('#modal-catalog .modal-body').html(response['html']);
-				$('#modal-catalog .modal-footer').html("");
-				$('#modal-catalog').modal('show');
-			} else {
-				alert('Error');
-			}*/
 
 		},
 		error: function(jqXHR, textStatus){
