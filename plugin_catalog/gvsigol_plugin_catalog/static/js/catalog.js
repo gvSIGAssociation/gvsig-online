@@ -652,6 +652,7 @@ CatalogView.prototype.onAddLayerButtonClick = function(targetBtn){
 				wms.name = link[0];
 				wms.title = title;
 				wms.abstract = abstract;
+				// TODO: if several services are available, we should query all of them to get available layers
 			}
 			else if (type == "OGC:WFS"){
 				wfs_url = link[2];
@@ -659,6 +660,7 @@ CatalogView.prototype.onAddLayerButtonClick = function(targetBtn){
 			else if (type == "OGC:WCS"){
 				wcs_url = link[2];
 			}
+			// TODO: support WMTS
 		}
 	}
 	if (wms.url) {
