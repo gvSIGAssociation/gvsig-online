@@ -96,3 +96,30 @@ msgstr ""
 
 msgid "Loading..."
 msgstr ""
+
+msgid "No layers available"
+msgstr ""
+
+msgid "Add to map"
+msgstr ""
+
+msgid "Add layer to map"
+msgstr ""
+
+msgid "Download ShapeFile"
+msgstr ""
+
+msgid "Download CSV"
+msgstr ""
+
+msgid "Download GML"
+msgstr ""
+
+msgid "Access raster data"
+msgstr ""
+
+msgid "Access resource"
+msgstr ""
+
+msgid "Not filtered"
+msgstr ""

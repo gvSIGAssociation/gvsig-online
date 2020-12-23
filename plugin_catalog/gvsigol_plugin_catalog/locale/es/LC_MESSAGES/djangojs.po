@@ -96,3 +96,31 @@ msgstr "La búsqueda se está ejecutando..."
 
 msgid "Loading..."
 msgstr "Cargando..."
+
+msgid "No layers available"
+msgstr "No hay capas disponibles"
+
+msgid "Add to map"
+msgstr "Añadir al mapa"
+
+msgid "Add layer to map"
+msgstr "Añadir capa al mapa"
+
+msgid "Download ShapeFile"
+msgstr "Descargar Shapefile"
+
+msgid "Download CSV"
+msgstr "Descargar CSV"
+
+msgid "Download GML"
+msgstr "Descargar GML"
+
+msgid "Access raster data"
+msgstr "Acceder a datos ráster"
+
+msgid "Access resource"
+msgstr "Acceder al recurso"
+
+msgid "Not filtered"
+msgstr "Sin filtrar"
+
