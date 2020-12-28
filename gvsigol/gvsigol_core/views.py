@@ -1115,7 +1115,8 @@ def project_get_conf(request):
                             l.external_params = json.dumps(params)
                             l.save()
                         layer.update(params)
-                        layer['url'] = params.get('get_map_url')
+                        if params.get('get_map_url'):
+                            layer['url'] = params.get('get_map_url')
     
                     order = int(conf_group['groupOrder']) + l.order
                     layer['order'] = order
