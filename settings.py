@@ -524,6 +524,22 @@ CONTROL_FIELDS = [{
                 'name': 'last_modification',
                 'type': 'date'
                 }]
+VERSION_FIELD = 'feat_version_gvol'
+DATE_FIELD = 'feat_date_gvol'
+if 'gvsigol_plugin_restapi' in INSTALLED_APPS:
+    CONTROL_FIELDS.extend([{
+        'name': DATE_FIELD,
+        'type': 'timestamp_with_time_zone',
+        'visible': False,
+        'nullable': False,
+        'default':  'now()'
+        },{
+        'name': VERSION_FIELD,
+        'type': 'integer',
+        'visible': False,
+        'nullable': False,
+        'default':  '1'
+        }])
 
 EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
 
@@ -601,9 +617,6 @@ PROXIES = {
     "https" : None,
     "ftp"   : None
 }
-
-VERSION_FIELD = 'feat_version_gvol'
-DATE_FIELD = 'feat_date_gvol'
 
 SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 SHARED_VIEW_EXPIRATION_TIME = 1
