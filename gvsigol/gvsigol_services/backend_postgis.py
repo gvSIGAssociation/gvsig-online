@@ -480,56 +480,121 @@ class Introspect:
     
     
     def create_table(self, schema, table_name, geom_type, srs, fields):
-        query = ""
-        
         if geom_type == 'Point':
             geom_type = 'MultiPoint'
         if geom_type == 'LineString':
             geom_type = 'MultiLineString'
         if geom_type == 'Polygon':
             geom_type = 'MultiPolygon'
-        
-        query += "CREATE TABLE " + schema + "." + table_name + " ("
-        query += "    gid serial NOT NULL,"
-        query += "    wkb_geometry geometry(" + geom_type + "," + srs + "),"
+        create_table_sqls = [
+            sqlbuilder.SQL('gid serial NOT NULL'),
+            sqlbuilder.SQL('wkb_geometry geometry({geom_type},{srs})').format(
+                                geom_type=sqlbuilder.Identifier(geom_type),
+                                srs=sqlbuilder.Literal(int(srs)))
+        ]
         
         for field in fields:
             if field.get('type') == 'character_varying':
-                query += field.get('name').lower() + " character varying,"
-                    
+                field_sql = '{field_name} character varying'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
+                
             elif field.get('type') == 'integer':
-                query += field.get('name').lower() + " integer,"                    
-                    
+                field_sql = '{field_name} integer'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
+                
             elif field.get('type') == 'double':
-                query += field.get('name').lower() + " double precision,"
-                    
+                field_sql = '{field_name} double precision'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
+                
             elif field.get('type') == 'boolean':
-                query += field.get('name').lower() + " boolean DEFAULT FALSE,"
+                field_sql = '{field_name} boolean'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default', 'FALSE')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
                     
             elif field.get('type') == 'date':
-                query += field.get('name').lower() + " date,"
+                field_sql = '{field_name} date'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
                 
             elif field.get('type') == 'time':
-                query += field.get('name').lower() + " time,"
+                field_sql = '{field_name} time'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
                 
             elif field.get('type') == 'timestamp':
-                query += field.get('name').lower() + " timestamp,"
+                field_sql = '{field_name} timestamp'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
                 
+            elif field.get('type') == 'timestamp_with_time_zone':
+                field_sql = '{field_name} timestamp with time zone'
+                if not field.get('nullable', True):
+                    field_sql += ' NOT NULL'
+                if field.get('default'):
+                    field_sql += ' DEFAULT ' + field.get('default')
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
+                    
             elif field.get('type') == 'cd_json':
-                query += 'cd_json_' + field.get('name').lower() + " character varying,"
-                
-            elif field.get('type') == 'enumeration':
-                query += field.get('name').lower() + " character varying,"
-            
-            elif field.get('type') == 'multiple_enumeration':
-                query += field.get('name').lower() + " character varying,"
-                
-            elif field.get('type') == 'form':
-                query += field.get('name').lower() + " character varying,"
-            
-        query += "    CONSTRAINT " + table_name + "_pkey PRIMARY KEY (gid)"
-        query += ");"
+                field_sql = '{field_name} character varying'
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(field_name=sqlbuilder.Identifier('cd_json_' + field.get('name').lower())))
+            elif field.get('type') == 'enumeration' or \
+                    field.get('type') == 'multiple_enumeration' or \
+                    field.get('type') == 'form':
+                field_sql = '{field_name} character varying'
+                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=sqlbuilder.Identifier(field.get('name').lower()
+                )))
         
+        create_table_sqls.append(
+            sqlbuilder.SQL('CONSTRAINT {pkey_constraint} PRIMARY KEY (gid)').format(
+                pkey_constraint=sqlbuilder.Identifier(table_name + '_pkey')
+            ))
+        
+        sql = "CREATE TABLE {schema}.{table_name} ({fields_sql})"
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table_name=sqlbuilder.Identifier(table_name),
+            fields_sql=sqlbuilder.SQL(', ').join(create_table_sqls))
         self.cursor.execute(query)
         
     def get_triggers(self, schema, table):
