@@ -1443,17 +1443,20 @@ def layer_autoconfig(layer, featuretype):
                 field['title-'+id] = f['name']
             field['visible'] = True
             field['editableactive'] = True
+            field['infovisible'] = False
+            field['mandatory'] = False
+            field['nullable'] = True
             if Trigger.objects.filter(layer=layer, field=field['name']).exists():
                 field['editable'] = False
             else:
                 field['editable'] = True
             for control_field in settings.CONTROL_FIELDS:
                 if field['name'] == control_field['name']:
-                    field['editableactive'] = False
-                    field['editable'] = False
-            field['infovisible'] = False
-            field['mandatory'] = False
-            field['nullable'] = True
+                    field['editableactive'] = control_field.get('editableactive', False)
+                    field['editable'] = control_field.get('editable', False)
+                    field['visible'] = control_field.get('visible', field['visible'])
+                    field['mandatory'] = control_field.get('mandatory', field['mandatory'])
+                    field['nullable'] = control_field.get('nullable', field['nullable'])
             fields.append(field)
 
     layer_conf = {
@@ -1501,10 +1504,13 @@ def layer_config(request, layer_id):
             if 'field-editable-' + str(i) in request.POST:
                 field['editableactive'] = True
                 field['editable'] = True
-                for control_field in settings.CONTROL_FIELDS:
-                    if field['name'] == control_field['name']:
-                        field['editableactive'] = False
-                        field['editable'] = False
+            for control_field in settings.CONTROL_FIELDS:
+                if field['name'] == control_field['name']:
+                    field['editableactive'] = control_field.get('editableactive', False)
+                    field['editable'] = control_field.get('editable', False)
+                    field['visible'] = control_field.get('visible', field['visible'])
+                    field['mandatory'] = control_field.get('mandatory', field['mandatory'])
+                    field['nullable'] = control_field.get('nullable', field['nullable'])
                 if  Trigger.objects.filter(layer=layer, field=field['name']).exists():
                     field['editableactive'] = False
                     field['editable'] = False
@@ -1546,11 +1552,12 @@ def layer_config(request, layer_id):
                             fconf['visible'] = fconf.get('visible', True)
                             fconf['editable'] = fconf.get('editable', True)
                             fconf['editableactive'] = True
+                            fconf['infovisible'] = fconf.get('infovisible', False)
                             for control_field in settings.CONTROL_FIELDS:
                                 if fconf['name'] == control_field['name']:
-                                    fconf['editableactive'] = False
-                                    fconf['editable'] = False
-                            fconf['infovisible'] = fconf.get('infovisible', False)
+                                    fconf['editableactive'] = control_field.get('editableactive', False)
+                                    fconf['editable'] = control_field.get('editable', False)
+                                    fconf['visible'] = control_field.get('visible', fconf['visible'])
                             fconf['nullable'] = (f.get('nullable') != 'NO')
                             if not fconf['nullable']:
                                 fconf['mandatory'] = True
@@ -1568,8 +1575,9 @@ def layer_config(request, layer_id):
                         field['editable'] = True
                         for control_field in settings.CONTROL_FIELDS:
                             if field['name'] == control_field['name']:
-                                field['editableactive'] = False
-                                field['editable'] = False
+                                field['editableactive'] = control_field.get('editableactive', False)
+                                field['editable'] = control_field.get('editable', False)
+                                field['visible'] = control_field.get('visible', field['visible'])
                         field['infovisible'] = False
                         field['nullable'] = (f.get('nullable') != 'NO')
                         field['mandatory'] = (not field['nullable'])
