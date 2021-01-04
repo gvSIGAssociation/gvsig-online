@@ -1157,10 +1157,12 @@ class Geoserver():
             gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
             return True
         
-        except (rest_geoserver.RequestError):
-            raise 
+        except rest_geoserver.RequestError:
+            raise
+        except gdal_tools.GdalWarning as e:
+            raise rest_geoserver.RequestError(0, e.message)
         except gdal_tools.GdalError as e:
-            if e.code == 1:
+            if e.code > 0 and creation_mode == gdal_tools.MODE_OVERWRITE:
                 params = json.loads(datastore.connection_params)
                 host = params['host']
                 port = params['port']
@@ -1171,13 +1173,17 @@ class Geoserver():
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 i.delete_table(schema, name)
                 i.close()
-                
+                try:
+                    gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                except gdal_tools.GdalError as e:
+                    raise rest_geoserver.RequestError(e.code, e.message)
+                except gdal_tools.GdalWarning as e:
+                    raise rest_geoserver.RequestError(0, e.message)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             #logging.exception(e)
             message =  _("Error uploading the layer. Review the file format. Cause: ") + str(e)
             raise rest_geoserver.RequestError(-1, message)
-        raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
     def prepare_string(self, s):
         return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
