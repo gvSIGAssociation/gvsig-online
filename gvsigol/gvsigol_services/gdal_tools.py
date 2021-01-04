@@ -135,7 +135,7 @@ def gdalsrsinfo(raster_path):
     else:
         return output
 
-def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=MODE_CREATE, encoding="autodetect"):
+def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=MODE_CREATE, encoding="autodetect", sql=None):
     conn_string = "PG:host='{host}' port='{port}' user='{user}' dbname='{dbname}' password='{password}'".format(host=host, port=port, user=user, dbname=dbname, password=password, schema=schema)
     args = [OGR2OGR_PATH, "-f", "PostgreSQL", "-nlt", "PROMOTE_TO_MULTI"]
     if creation_mode==MODE_APPEND:
@@ -148,8 +148,11 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
     # GDAL >=1.9 && < 2.0
     if encoding != "autodetect":
         args.extend(["--config", "SHAPE_ENCODING", encoding])
-    args.extend(["-lco", "LAUNDER=YES"])
-    args.extend(["-lco", "precision=NO"])
+    if creation_mode != MODE_APPEND:
+        args.extend(["-lco", "LAUNDER=YES"])
+        args.extend(["-lco", "precision=NO"])
+    if sql:
+        args.extend(["-sql", sql])
     args.extend([conn_string, shp_path])
     print " ".join(args).replace("password='{password}'".format(password=password), "password='xxxxxx'")
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
