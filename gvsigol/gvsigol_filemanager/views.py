@@ -137,9 +137,14 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
             
             except rest_geoserver.RequestError as e:
+                if e.status_code == 0:
+                    msg = _('Export process completed with warnings:') + ' ' + e.server_message
+                    messages.add_message(request, messages.INFO, msg)
+                    return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
                 message = e.server_message
                 #request.session['message'] = str(message)
                 messages.add_message(request, messages.ERROR, str(message))
+                """
                 if e.status_code == -1:
                     name = form.data['name']
                     datastore_id = form.data['datastore']
@@ -154,6 +159,7 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                     i.delete_table(schema, name)
                     i.close()
+                """
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
                 
             except Exception as exc:

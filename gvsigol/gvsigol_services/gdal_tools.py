@@ -47,6 +47,10 @@ class GdalError(Exception):
         self.code = code
         self.message=message
 
+class GdalWarning(Exception):
+    def __init__(self, message=None):
+        self.message=message
+
 def get_raster_stats(raster_path):
     """
     Gets the statistics of the raster using gdalinfo command.
@@ -161,9 +165,7 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
         raise GdalError(rc, msg)  
     if err != '':
         logging.error(err)
-        rc=1
-        raise GdalError(rc, err)
-        
+        raise GdalWarning(err)
     return args
 
 def postgis2spatialite(table_name, out_spatialite_path, pg_conn_str, out_table_name=None, srs=None, creation_mode=MODE_CREATE, update=True):
