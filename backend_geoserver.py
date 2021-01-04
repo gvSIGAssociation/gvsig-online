@@ -17,6 +17,9 @@
 '''
 from gvsigol_core.geom import RASTER
 from __builtin__ import False
+from django.contrib.gis import gdal
+from gvsigol.settings import CONTROL_FIELDS
+from django.db.backends.base import creation
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -1125,7 +1128,80 @@ class Geoserver():
                 shutil.rmtree(tmp_dir, ignore_errors=True)
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
-    def __do_export_to_postgis(self, name, datastore, form_data, shp_path):
+    def __fieldmapping_sql(self, creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password):
+        if creation_mode == gdal_tools.MODE_CREATE:
+            # no mapping needed
+            return
+        
+        i = Introspect(db, host=host, port=port, user=user, password=password)
+        db_fields = i.get_fields(table_name, schema=schema)
+        db_pks = i.get_pk_columns(table_name, schema=schema)
+        i.close()
+        if len(db_pks) == 1:
+            db_pk = db_pks[0]
+        else:
+            db_pk = 'ogc_fid'
+        
+        if 'ogc_fid' in shp_fields:
+            # ogr will use this as pk, nothing to do
+            pk = 'ogc_fid'
+        elif db_pk in shp_fields:
+            pk = db_pk
+        else:
+            pk = None
+
+        fields = []
+        pending = []
+        for f in shp_fields:
+            if f == pk:
+                fields.append('"' + f + '" as ogc_fid')
+            elif f in db_fields:
+                ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == f), None)
+                if ctrl_field:
+                    if creation_mode==gdal_tools.MODE_APPEND:
+                        # skip control field in append mode
+                        continue
+                    elif ctrl_field.get('type', '').startswith('timestamp'):
+                        fields.append('CAST("' + f + '" AS timestamp)')
+                        continue
+                fields.append('"' + f + '"')
+            else:
+                pending.append(f)
+        
+        if (pk is None or pk == 'ogc_fid') and len(pending) == 0:
+            # no mapping needed
+            return
+        for f in pending:
+            # try to find a mapping
+            db_mapped_field = None
+            for db_field in db_fields:
+                if db_field.startswith(f):
+                    db_mapped_field = db_field
+            if not db_mapped_field:
+                for db_field in db_fields:
+                    if db_field.startswith(f.rstrip('0123456789')):
+                        # remove numbers in the right side of the field name to try to match with db
+                        db_mapped_field = db_field
+            if db_mapped_field:
+                ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == db_mapped_field), None)
+                if ctrl_field:
+                    if creation_mode==gdal_tools.MODE_APPEND:
+                        # skip control field in append mode
+                        continue
+                    elif ctrl_field.get('type', '').startswith('timestamp'):
+                        fields.append('CAST("' + f + '" AS timestamp) as "' + db_mapped_field + '"')
+                        db_fields.remove(db_mapped_field)
+                        continue
+                fields.append('"' + f + '" as "' + db_mapped_field + '"')
+                db_fields.remove(db_mapped_field)
+            else:
+                fields.append('"' + f + '"')
+        
+        shp_name = os.path.splitext(os.path.basename(shp_path))[0]
+        sql = "SELECT " + ",".join(fields) + " FROM " + shp_name
+        return sql
+    
+    def __do_export_to_postgis(self, name, datastore, form_data, shp_path, shp_fields):
         try: 
             # get & sanitize parameters
             srs = form_data.get('srs')
@@ -1154,7 +1230,9 @@ class Geoserver():
             if _valid_sql_name_regex.search(schema) == None:
                 raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
 
-            gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+            shp_field_names = [f.name for f in shp_fields]
+            sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
+            gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
             return True
         
         except rest_geoserver.RequestError:
@@ -1439,7 +1517,7 @@ class Geoserver():
             raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
                     
         try:
-            self.__do_export_to_postgis(name, ds, form_data, shp_path)
+            self.__do_export_to_postgis(name, ds, form_data, shp_path, fields)
             return True
 
         except Exception as e:
