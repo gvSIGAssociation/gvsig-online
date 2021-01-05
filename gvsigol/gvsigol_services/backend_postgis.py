@@ -478,7 +478,34 @@ class Introspect:
         
         return geom
     
-    
+    def validate_data_type(self, data_type_def):
+        """
+        Returns a PostgreSQL data type if the provided data_type_def is valid,
+        or None otherwise.
+        """
+        if data_type_def == 'character_varying' or data_type_def == 'character varying':
+            return 'character varying'
+        elif data_type_def == 'integer':
+            return 'integer'
+        elif data_type_def == 'double':
+            return 'double precision'
+        elif data_type_def == 'boolean':
+            return 'boolean'
+        elif data_type_def == 'date':
+            return 'date'
+        elif data_type_def == 'time':
+            return 'time'
+        elif data_type_def == 'timestamp':
+            return 'timestamp'
+        elif data_type_def == 'timestamp_with_time_zone' or data_type_def == 'timestamp with time zone':
+            return 'timestamp with time zone'
+        elif data_type_def == 'cd_json':
+            return 'character varying'
+        elif data_type_def == 'enumeration' or \
+                data_type_def == 'multiple_enumeration' or \
+                data_type_def == 'form':
+            return 'character varying'
+
     def create_table(self, schema, table_name, geom_type, srs, fields):
         if geom_type == 'Point':
             geom_type = 'MultiPoint'
@@ -494,96 +521,51 @@ class Introspect:
         ]
         
         for field in fields:
-            if field.get('type') == 'character_varying':
-                field_sql = '{field_name} character varying'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
+            data_type = self.validate_data_type(field.get('type'))
+            if not data_type:
+                continue
+            if not field.get('nullable', True):
+                nullable_sql = sqlbuilder.SQL('NOT NULL')
+            else:
+                nullable_sql = sqlbuilder.SQL('')
+            if data_type == 'character varying' or \
+                data_type == 'integer' or \
+                data_type == 'double precision' or \
+                data_type == 'boolean' or \
+                data_type == 'date' or \
+                data_type == 'time' or \
+                data_type == 'timestamp' or \
+                data_type == 'timestamp with time zone' or \
+                data_type == 'enumeration' or \
+                data_type == 'multiple_enumeration' or \
+                data_type == 'form':
+                field_name_sql = sqlbuilder.Identifier(field.get('name').lower())
                 if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                
-            elif field.get('type') == 'integer':
-                field_sql = '{field_name} integer'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
-                if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                
-            elif field.get('type') == 'double':
-                field_sql = '{field_name} double precision'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
-                if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                
+                    default_sql = sqlbuilder.SQL('DEFAULT ' + field.get('default'))
+                else:
+                    default_sql = sqlbuilder.SQL('')
             elif field.get('type') == 'boolean':
-                field_sql = '{field_name} boolean'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
+                field_name_sql = sqlbuilder.Identifier(field.get('name').lower())
                 if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default', 'FALSE')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                    
-            elif field.get('type') == 'date':
-                field_sql = '{field_name} date'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
-                if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                
-            elif field.get('type') == 'time':
-                field_sql = '{field_name} time'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
-                if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                
-            elif field.get('type') == 'timestamp':
-                field_sql = '{field_name} timestamp'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
-                if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                
-            elif field.get('type') == 'timestamp_with_time_zone':
-                field_sql = '{field_name} timestamp with time zone'
-                if not field.get('nullable', True):
-                    field_sql += ' NOT NULL'
-                if field.get('default'):
-                    field_sql += ' DEFAULT ' + field.get('default')
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
-                    
+                    default_sql = sqlbuilder.SQL('DEFAULT ' + field.get('default'))
+                else:
+                    default_sql = sqlbuilder.SQL('DEFAULT FALSE')
             elif field.get('type') == 'cd_json':
-                field_sql = '{field_name} character varying'
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(field_name=sqlbuilder.Identifier('cd_json_' + field.get('name').lower())))
-            elif field.get('type') == 'enumeration' or \
-                    field.get('type') == 'multiple_enumeration' or \
-                    field.get('type') == 'form':
-                field_sql = '{field_name} character varying'
-                create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
-                    field_name=sqlbuilder.Identifier(field.get('name').lower()
-                )))
+                field_name_sql = sqlbuilder.Identifier('cd_json_' + field.get('name').lower())
+                if field.get('default'):
+                    default_sql = sqlbuilder.SQL('DEFAULT ' + field.get('default'))
+                else:
+                    default_sql = sqlbuilder.SQL('')
+            else:
+                #logger.warning("Invalid type: " + data_type + " - Field: " + field.get('name', ''))
+                continue
+            field_sql = '{field_name} {data_type} {nullable} {default}'
+            create_table_sqls.append(sqlbuilder.SQL(field_sql).format(
+                    field_name=field_name_sql,
+                    data_type=sqlbuilder.SQL(data_type),
+                    nullable=nullable_sql,
+                    default=default_sql
+                ))
         
         create_table_sqls.append(
             sqlbuilder.SQL('CONSTRAINT {pkey_constraint} PRIMARY KEY (gid)').format(
@@ -595,6 +577,7 @@ class Introspect:
             schema=sqlbuilder.Identifier(schema),
             table_name=sqlbuilder.Identifier(table_name),
             fields_sql=sqlbuilder.SQL(', ').join(create_table_sqls))
+        print(query.as_string(self.conn))
         self.cursor.execute(query)
         
     def get_triggers(self, schema, table):
@@ -991,6 +974,22 @@ class Introspect:
             field=sqlbuilder.Identifier(field))
         self.cursor.execute(query)
 
+    def set_field_default(self, schema, table, field, default_value=None):
+        """
+        Sets a column default value. Use None to drop the default value of a column.
+        Warning: 'default_value' parameter is not protected against SQL injection.
+        Always validate user input to feed this parameter.
+        """
+        if default_value is None:
+            sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} DROP DEFAULT"
+        else:
+            sql = "ALTER TABLE {schema}.{table} ALTER COLUMN {field} SET DEFAULT " + default_value
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            field=sqlbuilder.Identifier(field))
+        self.cursor.execute(query)
+
     def check_has_null_values(self, schema, table, field):
         """
         Returns True if the column has any null values and False otherwise
@@ -1053,11 +1052,29 @@ class Introspect:
             new_column_name=sqlbuilder.Identifier(new_column_name))
         self.cursor.execute(query,  [])
 
-    def add_column(self, schema, table_name, column_name, sql_type):
-        query = sqlbuilder.SQL("ALTER TABLE {schema}.{table} ADD COLUMN {column_name} " + sql_type).format(
+    def add_column(self, schema, table_name, column_name, sql_type, nullable=True, default=None):
+        """
+        Warning: 'default' parameter is not protected against SQL injection. Always validate
+        user input to feed this parameter.
+        """
+        data_type = self.validate_data_type(sql_type)
+        if not data_type:
+            raise Exception('Invalid data type')
+        if not nullable:
+            nullable_query = sqlbuilder.SQL("NOT NULL")
+        else:
+            nullable_query = sqlbuilder.SQL("")
+        if default:
+            default_query = sqlbuilder.SQL("DEFAULT " + default)
+        else:
+            default_query = sqlbuilder.SQL("")
+        query = sqlbuilder.SQL("ALTER TABLE {schema}.{table} ADD COLUMN {column_name} {sql_type} {nullable} {default}").format(
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table_name),
-            column_name=sqlbuilder.Identifier(column_name))
+            column_name=sqlbuilder.Identifier(column_name),
+            sql_type=sqlbuilder.SQL(data_type),
+            nullable=nullable_query,
+            default=default_query)
         self.cursor.execute(query,  [])
     """
     def allowed_conversion(self, new_type, old_type):
