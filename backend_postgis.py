@@ -514,7 +514,7 @@ class Introspect:
         if geom_type == 'Polygon':
             geom_type = 'MultiPolygon'
         create_table_sqls = [
-            sqlbuilder.SQL('gid serial NOT NULL'),
+            sqlbuilder.SQL('ogc_fid serial NOT NULL'),
             sqlbuilder.SQL('wkb_geometry geometry({geom_type},{srs})').format(
                                 geom_type=sqlbuilder.Identifier(geom_type),
                                 srs=sqlbuilder.Literal(int(srs)))
@@ -568,7 +568,7 @@ class Introspect:
                 ))
         
         create_table_sqls.append(
-            sqlbuilder.SQL('CONSTRAINT {pkey_constraint} PRIMARY KEY (gid)').format(
+            sqlbuilder.SQL('CONSTRAINT {pkey_constraint} PRIMARY KEY (ogc_fid)').format(
                 pkey_constraint=sqlbuilder.Identifier(table_name + '_pkey')
             ))
         
@@ -612,12 +612,17 @@ class Introspect:
             seq_name.replace(source_table, target_table)
         if seq_name.endswith("_gid_seq"):
             base_name = seq_name[:-8]
+            suffix = "_gid_seq"
+        elif seq_name.endswith("_ogc_fid_seq"):
+            base_name = seq_name[:len("_ogc_fid_seq")]
+            suffix = "_ogc_fid_seq"
         else:
             base_name = seq_name
+            suffix = "_ogc_fid_seq"
         i = 0
         salt = ''
         while self.sequence_exists(target_schema, seq_name):
-            seq_name = base_name + '_' + str(i) + salt + "_gid_seq"
+            seq_name = base_name + '_' + str(i) + salt + suffix
             i = i + 1
             if (i%1000) == 0:
                 salt = '_' + "".join([ random.choice(string.ascii_uppercase + string.digits) for i in range(0,3)])
