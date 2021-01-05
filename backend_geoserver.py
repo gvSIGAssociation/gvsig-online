@@ -1233,6 +1233,22 @@ class Geoserver():
             shp_field_names = [f.name for f in shp_fields]
             sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
             gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
+            
+            with Introspect(db, host=host, port=port, user=user, password=password) as i:
+                # add control fields
+                db_fields = i.get_fields(name, schema=schema)
+                for control_field in settings.CONTROL_FIELDS:
+                    has_control_field = False
+                    for field in db_fields:
+                        if field == control_field['name']:
+                            try:
+                                i.set_field_default(schema, name, control_field['name'], control_field.get('default'))
+                            except:
+                                logger.error("Error setting default value for control field: " + control_field['name'])
+                            has_control_field = True
+                    if not has_control_field:
+                        i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
+            
             return True
         
         except rest_geoserver.RequestError:
