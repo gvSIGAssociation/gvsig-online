@@ -24,7 +24,7 @@ from django.db.backends.base import creation
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
+from models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup, Trigger
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.utils.translation import ugettext_lazy as _
@@ -1248,6 +1248,14 @@ class Geoserver():
                             has_control_field = True
                     if not has_control_field:
                         i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
+            
+            if creation_mode == gdal_tools.MODE_OVERWRITE:
+                # re-install triggers
+                for trigger in Trigger.objects.filter(layer__datastore=datastore, layer__source_name=name):
+                    try:
+                        trigger.install()
+                    except:
+                        logger.warning("Failed to install trigger: " + str(trigger))
             
             return True
         
