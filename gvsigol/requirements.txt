@@ -59,7 +59,7 @@ argparse==1.2.1
 wsgiref==0.1.2
 
 cmislib==0.5.1
-lxml==4.3.0
+lxml==4.6.2
 
 # Cron para aguas de valencia
 schedule==0.4.2
