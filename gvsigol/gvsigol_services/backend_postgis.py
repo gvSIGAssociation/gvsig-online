@@ -775,7 +775,7 @@ class Introspect:
             condition=condition,
             definition=definition
         )
-        print query.as_string(self.conn)
+        #print query.as_string(self.conn)
         self.cursor.execute(query)
     
     def drop_trigger(self, trigger_name, target_schema, target_table):
