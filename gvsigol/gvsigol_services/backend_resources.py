@@ -26,6 +26,7 @@ import os
 import time
 from os import path
 from shutil import copyfile
+import tempfile
 
 logger = logging.getLogger(__name__)
 from gvsigol_services.models import LayerResource
@@ -37,15 +38,17 @@ class GvsigolRM():
     def __init__(self):
         logger.info('Initializing gvsigol resource manager')
     
-    def save_resource(self, resource, type):
-        try: 
-            file_path = os.path.join(utils.get_resources_dir(type), resource.name)
-            relative_path = file_path.replace(settings.MEDIA_ROOT, '')
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            with open(file_path, 'wb+') as destination:
+    def save_resource(self, resource, layer_id, res_type):
+        try:
+            resource_dir = utils.get_resources_dir(layer_id, res_type)
+            orig_res_name = os.path.basename(resource.name)
+            prefix, suffix = os.path.splitext(orig_res_name)
+            (fd, f) = tempfile.mkstemp(suffix=suffix, prefix=prefix+'_', dir=resource_dir)
+            with os.fdopen(fd, "wb") as destination:
                 for chunk in resource.chunks():
                     destination.write(chunk)
+            relative_path = os.path.relpath(f, settings.MEDIA_ROOT)
+            os.chmod(f, 0o0700)
             return [True, relative_path]
          
         except Exception as e:

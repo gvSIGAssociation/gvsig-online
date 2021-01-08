@@ -42,7 +42,7 @@ import zipfile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -2941,7 +2941,7 @@ def get_feature_info(request):
                                     try:
                                         layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                                         for lr in layer_resources:
-                                            (type, rsurl) = utils.get_resource_type(lr)
+                                            (type, rsurl) = utils.get_resource_info(lr)
                                             resource = {
                                                 'type': type,
                                                 'url': rsurl,
@@ -3331,6 +3331,8 @@ def get_feature_resources(request):
         fid = request.POST.get('fid')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
+            if not utils.can_write_layer(request.user, layer):
+                return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             resources = []
             for lr in layer_resources:
@@ -3391,30 +3393,23 @@ def upload_resources(request):
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
+        if not utils.can_write_layer(request.user, layer):
+            return HttpResponseForbidden()
         if 'resource' in request.FILES:
-            type = None
             resource = request.FILES['resource']
-            if 'image/' in resource.content_type:
-                type = LayerResource.EXTERNAL_IMAGE
-            elif resource.content_type == 'application/pdf':
-                type = LayerResource.EXTERNAL_PDF
-            elif 'video/' in resource.content_type:
-                type = LayerResource.EXTERNAL_VIDEO
-            else:
-                type = LayerResource.EXTERNAL_FILE
+            res_type = utils.get_resource_type(resource.content_type)
 
-            (saved, path) = resource_manager.save_resource(resource, type)
+            (saved, path) = resource_manager.save_resource(resource, layer.id, res_type)
             if saved:
                 res = LayerResource()
                 res.feature = int(fid)
                 res.layer = layer
                 res.path = path
-                res.title = ''
-                res.type = type
+                res.title = resource.name
+                res.type = res_type
                 res.created = timezone.now()
                 res.save()
-                response = {'success': True}
-
+                response = {'success': True, 'id': res.pk, 'path': path}
             else:
                 response = {'success': False}
 
@@ -3440,6 +3435,8 @@ def delete_resource(request):
         rid = request.POST.get('rid')
         try:
             resource = LayerResource.objects.get(id=int(rid))
+            if not utils.can_write_layer(request.user, resource.layer):
+                return HttpResponseForbidden()
             featid = resource.feature
             lyrid = resource.layer.id
             resource.delete()
@@ -3463,6 +3460,8 @@ def delete_resources(request):
         fid = request.POST.get('fid')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
+            if not utils.can_write_layer(request.user, layer):
+                return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             featidlist = []
             lyridlist = []

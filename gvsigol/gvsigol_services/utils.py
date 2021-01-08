@@ -335,23 +335,29 @@ def get_alphanumeric_fields(fields):
 
     return alphanumeric_fields
 
-def get_resources_dir(resource_type):
+def get_resources_dir(layer_id, resource_type):
 
     if resource_type == LayerResource.EXTERNAL_IMAGE:
-        the_path = os.path.join(MEDIA_ROOT, "resources/image")
+        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "image")
     elif  resource_type == LayerResource.EXTERNAL_PDF:
-        the_path = os.path.join(MEDIA_ROOT, "resources/pdf")
+        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "pdf")
     elif  resource_type == LayerResource.EXTERNAL_DOC:
-        the_path = os.path.join(MEDIA_ROOT, "resources/docs")
+        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "docs")
     elif  resource_type == LayerResource.EXTERNAL_VIDEO:
-        the_path = os.path.join(MEDIA_ROOT, "resources/videos")
+        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "videos")
     else:
-        the_path = os.path.join(MEDIA_ROOT, "resources/files")
+        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "files")
     if not os.path.exists(the_path):
-        os.makedirs(the_path, 0700)
+        os.makedirs(the_path)
+        # makedirs permissions are umasked, so we need to explicitly set permissions afterwards
+        for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, "resources" , str(layer_id)), followlinks=True):
+            for d in dirs:
+                print(d)
+                print(os.path.join(root, d))
+                os.chmod(os.path.join(root, d), 0o0775)
     return the_path
 
-def get_resource_type(lr):
+def get_resource_info(lr):
     url = None
     type = None
     
@@ -379,6 +385,16 @@ def get_resource_type(lr):
         url = lr.path
 
     return [type, url]
+
+def get_resource_type(content_type):
+    if 'image/' in content_type:
+        return LayerResource.EXTERNAL_IMAGE
+    elif content_type == 'application/pdf':
+        return LayerResource.EXTERNAL_PDF
+    elif 'video/' in content_type:
+        return LayerResource.EXTERNAL_VIDEO
+    else:
+        return LayerResource.EXTERNAL_FILE
 
 def is_field_enumerated(layer, column_name):
     """
