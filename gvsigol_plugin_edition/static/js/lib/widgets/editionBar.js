@@ -1549,7 +1549,6 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				var stringjson = geojson_obj.writeFeature(feature);
 				parent.$("body").trigger("feature-edition", stringjson);
 			}
-
 			self.acceptListener.forEach(action => {
 				action(self)
 			});
@@ -2002,13 +2001,12 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 							workspace: self.selectedLayer.workspace,
 							fid: transaction.fid
 						});
+						uploader.delegatedOnSuccess = function(files,data,xhr){
+							if (checkversion > 0 && data && data.success && data.id) {
+					   			self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 4, feature, data.id, true);
+					   		}
+						};
 						uploader.startUpload();
-						//Control de versión con el tipo de operación de subir fichero
-						if (checkversion > 0) {
-							for(var i = 0; i < uploader.getFileCount(); i++) {
-								self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 4, feature, uploader.existingFileNames[i]);
-							}
-						}
 					}
 
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
@@ -2423,13 +2421,14 @@ EditionBar.prototype.verifyGeometryField = function(feature) {
 };
 
 
-EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, featid, operation, feat, path) {
+EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, featid, operation, feat, resourceid, async) {
+	async = (async===true) || false;
 	if(lyrid) {
 		data = {
 				"lyrid":lyrid,	
 				"featid":featid,
 				"operation":operation,
-				"path":path
+				"resourceid":resourceid
 			}
 	} else {
 		data = {
@@ -2437,12 +2436,12 @@ EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, f
 				"operation":operation,
 				"lyrname":selectedLayer.layer_name,
 				"workspace":selectedLayer.workspace,
-				"path":path
+				"resourceid":resourceid
 			}
 	}
 	$.ajax({
 		type: 'POST',
-		async: false,
+		async: async,
 		data: data,
 		url: '/gvsigonline/edition/feature_version_management/',
 		beforeSend:function(xhr){
