@@ -82,11 +82,12 @@ GvsigolResourceManager.prototype.createUploader = function() {
 	   	previewHeight: "100px",
 	   	previewWidth: "100px",
 	   	onSuccess: function(files,data,xhr){
-	   		console.log('Update resource list');
+	   		if (typeof(uploader.delegatedOnSuccess)=='function') {
+	   			uploader.delegatedOnSuccess(files, data, xhr);
+	   		}
     	},
 	   	afterUploadAll: function(files,data,xhr){
 	   		$.overlayout();
-    		console.log('All resources has been uploaded');
     	},
     	onError: function(files,status,errMsg){}
 	});
