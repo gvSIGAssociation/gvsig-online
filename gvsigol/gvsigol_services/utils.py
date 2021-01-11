@@ -336,7 +336,6 @@ def get_alphanumeric_fields(fields):
     return alphanumeric_fields
 
 def get_resources_dir(layer_id, resource_type):
-
     if resource_type == LayerResource.EXTERNAL_IMAGE:
         the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "image")
     elif  resource_type == LayerResource.EXTERNAL_PDF:
@@ -357,44 +356,43 @@ def get_resources_dir(layer_id, resource_type):
                 os.chmod(os.path.join(root, d), 0o0775)
     return the_path
 
-def get_resource_info(lr):
-    url = None
-    type = None
-    
-    url = settings.MEDIA_URL
-    if settings.BASE_URL in url:
-        url = url.replace(settings.BASE_URL, '')
-    
-    if lr.type == LayerResource.EXTERNAL_IMAGE:
-        type = 'image'
-        url = os.path.join(url, lr.path)
-    elif lr.type == LayerResource.EXTERNAL_PDF:
-        type = 'pdf'
-        url = os.path.join(url, lr.path)
-    elif lr.type == LayerResource.EXTERNAL_DOC:
-        type = 'doc'
-        url = os.path.join(url, lr.path)
-    elif lr.type == LayerResource.EXTERNAL_FILE:
-        type = 'file'
-        url = os.path.join(url, lr.path)
-    elif lr.type == LayerResource.EXTERNAL_VIDEO:
-        type = 'video'
-        url = os.path.join(url, lr.path)
-    elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
-        type = 'alfresco_dir'
-        url = lr.path
-
-    return [type, url]
-
 def get_resource_type(content_type):
     if 'image/' in content_type:
         return LayerResource.EXTERNAL_IMAGE
     elif content_type == 'application/pdf':
         return LayerResource.EXTERNAL_PDF
+    elif content_type in [ #.doc, .docx, .odt,
+                          'application/msword', 
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                          'application/vnd.oasis.opendocument.text',
+                          # .xls, .xlsx, .ods
+                          'application/vnd.ms-excel',
+                          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                          'application/vnd.oasis.opendocument.spreadsheet',
+                          # .ppt, .pptx, .odp
+                          'application/vnd.ms-powerpoint',
+                          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                          'application/vnd.oasis.opendocument.presentation'
+                          ]:
+        return LayerResource.EXTERNAL_DOC
     elif 'video/' in content_type:
         return LayerResource.EXTERNAL_VIDEO
     else:
         return LayerResource.EXTERNAL_FILE
+
+def get_resource_type_label(resource_type):
+    if resource_type == LayerResource.EXTERNAL_IMAGE:
+        return 'image'
+    elif resource_type == LayerResource.EXTERNAL_PDF:
+        return 'pdf'
+    elif resource_type == LayerResource.EXTERNAL_DOC:
+        return 'doc'
+    elif resource_type == LayerResource.EXTERNAL_VIDEO:
+        return 'video'
+    elif resource_type == LayerResource.EXTERNAL_ALFRESCO_DIR:
+        return 'alfresco_dir'
+    else:
+        return 'file'
 
 def is_field_enumerated(layer, column_name):
     """

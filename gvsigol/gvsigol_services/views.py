@@ -91,6 +91,7 @@ from psycopg2 import sql
 
 from actstream import action
 from actstream.models import Action
+from sendfile import sendfile
 
 logger = logging.getLogger("gvsigol")
 
@@ -2941,10 +2942,10 @@ def get_feature_info(request):
                                     try:
                                         layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                                         for lr in layer_resources:
-                                            (type, rsurl) = utils.get_resource_info(lr)
+                                            res_type = utils.get_resource_type_label(lr.type)
                                             resource = {
-                                                'type': type,
-                                                'url': rsurl,
+                                                'type': res_type,
+                                                'url': lr.get_url(),
                                                 'name': lr.path.split('/')[-1]
                                             }
                                             resources.append(resource)
@@ -3331,49 +3332,23 @@ def get_feature_resources(request):
         fid = request.POST.get('fid')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
-            if not utils.can_write_layer(request.user, layer):
+            if not utils.can_read_layer(request.user, layer):
                 return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             resources = []
             for lr in layer_resources:
-                url = settings.MEDIA_URL
-                if settings.BASE_URL in url:
-                    url = url.replace(settings.BASE_URL, '')
-                    
-                type = None
-                if lr.type == LayerResource.EXTERNAL_IMAGE:
-                    type = 'image'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_PDF:
-                    type = 'pdf'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_DOC:
-                    type = 'doc'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_FILE:
-                    type = 'file'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_VIDEO:
-                    type = 'video'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
-                    type = 'alfresco_dir'
-                    url = lr.path
-
+                url = lr.get_url()
+                name = lr.path.split('/')[-1]
+                title = lr.title
+                res_type = utils.get_resource_type_label(lr.type)
                 resource = {
-                    'type': type,
+                    'type': res_type,
                     'url': url,
                     'name': name,
+                    'title': title,
                     'rid': lr.id
                 }
                 resources.append(resource)
-
-
         except Exception as e:
             print e.message
 
@@ -3383,6 +3358,16 @@ def get_feature_resources(request):
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
+def get_resource(request, resource_id):
+    try:
+        resource = LayerResource.objects.get(id=resource_id)
+        if not utils.can_read_layer(request.user, resource.layer):
+            return HttpResponseForbidden()
+        return sendfile(request, resource.get_abspath(), attachment=True)
+    except LayerResource.DoesNotExist:
+        return HttpResponseNotFound()
+    
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def upload_resources(request):
