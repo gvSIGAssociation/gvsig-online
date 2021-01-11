@@ -3365,7 +3365,7 @@ def get_resource(request, resource_id):
         resource = LayerResource.objects.get(id=resource_id)
         if not utils.can_read_layer(request.user, resource.layer):
             return HttpResponseForbidden()
-        return sendfile(request, resource.get_abspath(), attachment=True)
+        return sendfile(request, resource.get_abspath(), attachment=False)
     except LayerResource.DoesNotExist:
         return HttpResponseNotFound()
     
