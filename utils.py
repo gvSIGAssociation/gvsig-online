@@ -19,6 +19,7 @@
 '''
 from django.http import response
 from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
+from django.contrib.auth.models import AnonymousUser
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -42,6 +43,7 @@ from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
+from past.builtins import basestring 
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
@@ -86,7 +88,7 @@ def get_write_roles(layer):
     return roles
 
 def can_write_layer(user, layer):
-    if not isinstance(user, User):
+    if isinstance(user, basestring):
         user = User.objects.get(username=user)
     if not isinstance(layer, Layer):
         layer = Layer.objects.get(id=layer)
@@ -97,6 +99,8 @@ def can_write_layer(user, layer):
     try:
         if user.is_superuser:
             return True
+        if isinstance(user, AnonymousUser):
+            return False
         if UserGroupUser.objects.filter(user=user, user_group__layerwritegroup__layer=layer).count() > 0:
             return True
     except Exception as e:
@@ -104,7 +108,7 @@ def can_write_layer(user, layer):
     return False
 
 def can_read_layer(user, layer):
-    if not isinstance(user, User):
+    if isinstance(user, basestring):
         user = User.objects.get(username=user)
     if not isinstance(layer, Layer):
         layer = Layer.objects.get(id=layer)
@@ -117,6 +121,8 @@ def can_read_layer(user, layer):
             return True
         if LayerReadGroup.objects.filter(layer=layer).count() == 0:
             return True # layer is public
+        if isinstance(user, AnonymousUser):
+            return False
         if UserGroupUser.objects.filter(user=user, user_group__layerreadgroup__layer=layer).count() > 0:
             return True
     except Exception as e:
