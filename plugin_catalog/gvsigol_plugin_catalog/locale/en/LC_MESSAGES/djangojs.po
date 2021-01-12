@@ -225,3 +225,13 @@ msgstr ""
 
 msgid "Year"
 msgstr ""
+
+msgid "Representation type"
+msgstr ""
+
+msgid "Update frequency"
+msgstr ""
+
+msgid "Scale"
+msgstr ""
+

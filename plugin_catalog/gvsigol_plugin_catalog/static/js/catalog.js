@@ -1185,6 +1185,7 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 								else {
 									var filterLabel = cat['@label'];
 								}
+								console.log(filterLabel);
 								var facetEntries = self.getFacetEntries(query, cat, cat['@name']);
 								shownFilters[cat['@name']] = self.getFacet(gettext(filterLabel), cat['@name'], facetEntries);
 							}

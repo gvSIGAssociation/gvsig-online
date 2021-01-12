@@ -225,3 +225,13 @@ msgstr "Catálogo de origen"
 
 msgid "Year"
 msgstr "Año"
+
+msgid "Representation type"
+msgstr "Tipo de representación"
+
+msgid "Update frequency"
+msgstr "Frecuencia de actualización"
+
+msgid "Scale"
+msgstr "Escala"
+

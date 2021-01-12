@@ -135,97 +135,97 @@ msgstr ""
 
 
 msgid "keywords"
-msgstr "Keywords"
+msgstr ""
 
 msgid "topicCats"
-msgstr "Topic Categories"
+msgstr ""
 
 msgid "categories"
-msgstr "Categories"
+msgstr ""
 
 msgid "inspireThemes"
-msgstr "Inspire Themes"
+msgstr ""
 
 msgid "inspireThemesWithAc"
-msgstr "Inspire Themes With Ac"
+msgstr ""
 
 msgid "inspireThemesURI"
-msgstr "Inspire Themes URI"
+msgstr ""
 
 msgid "denominators"
-msgstr "Denominators"
+msgstr ""
 
 msgid "resolutions"
-msgstr "Resolutions"
+msgstr ""
 
 msgid "spatialRepresentationTypes"
-msgstr "Spatial representation types"
+msgstr ""
 
 msgid "orgNames"
-msgstr "Organization names"
+msgstr ""
 
 msgid "orgNamesTree"
-msgstr "Organization names tree"
+msgstr ""
 
 msgid "metadataPOCs"
-msgstr "Metadata POCs"
+msgstr ""
 
 msgid "serviceTypes"
-msgstr "Service types"
+msgstr ""
 
 msgid "types"
-msgstr "Types"
+msgstr ""
 
 msgid "createDateYears"
-msgstr "Creation year"
+msgstr ""
 
 msgid "formats"
-msgstr "Formats"
+msgstr ""
 
 msgid "titles"
-msgstr "Titles"
+msgstr ""
 
 msgid "metadataTypes"
-msgstr "Metadata types"
+msgstr ""
 
 msgid "isValidInspire"
-msgstr "Is valid Inspire"
+msgstr ""
 
 msgid "isHarvested"
-msgstr "Is harvested"
+msgstr ""
 
 msgid "mdStatus"
-msgstr "Metadata status"
+msgstr ""
 
 msgid "status"
-msgstr "Status"
+msgstr ""
 
 msgid "sourceCatalog"
-msgstr "Source catalog"
+msgstr ""
 
 msgid "standards"
-msgstr "Standards"
+msgstr ""
 
 msgid "subTemplateTypes"
-msgstr "Subtemplate types"
+msgstr ""
 
 msgid "recordOwner"
-msgstr "Record owner"
+msgstr ""
 
 msgid "groupOwners"
-msgstr "Group owners"
+msgstr ""
 
 msgid "publishedForGroup"
-msgstr "Published for group"
+msgstr ""
 
 msgid "isPublishedToAll"
-msgstr "Is published to all"
+msgstr ""
 
 msgid "maintenanceAndUpdateFrequencies"
-msgstr "Maintenance and update frequencies"
+msgstr ""
 
 msgid "mdActions"
-msgstr "Metadata actions"
+msgstr ""
 
 msgid "Organization"
 msgstr ""
@@ -235,3 +235,13 @@ msgstr ""
 
 msgid "Year"
 msgstr ""
+
+msgid "Representation type"
+msgstr ""
+
+msgid "Update frequency"
+msgstr ""
+
+msgid "Scale"
+msgstr ""
+

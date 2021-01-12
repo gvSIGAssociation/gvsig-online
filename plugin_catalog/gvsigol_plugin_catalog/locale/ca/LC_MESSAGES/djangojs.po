@@ -225,3 +225,13 @@ msgstr "Catàleg d'origen"
 
 msgid "Year"
 msgstr "Any"
+
+msgid "Representation type"
+msgstr "Tipus de representació"
+
+msgid "Update frequency"
+msgstr "Frequència d'actualització"
+
+msgid "Scale"
+msgstr "Escala"
+
