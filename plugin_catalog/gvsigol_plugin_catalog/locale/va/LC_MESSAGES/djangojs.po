@@ -235,3 +235,5 @@ msgstr "Frequència d'actualització"
 msgid "Scale"
 msgstr "Escala"
 
+msgid "Service type"
+msgstr "Tipus de servici"

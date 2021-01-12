@@ -244,3 +244,5 @@ msgstr ""
 msgid "Scale"
 msgstr ""
 
+msgid "Service type"
+msgstr ""

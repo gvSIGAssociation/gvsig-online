@@ -187,6 +187,9 @@ msgstr "Recolectado"
 msgid "mdStatus"
 msgstr "Estado del metadato"
 
+msgid "Type"
+msgstr "Tipo"
+
 msgid "status"
 msgstr "Estado"
 
@@ -235,3 +238,5 @@ msgstr "Frecuencia de actualización"
 msgid "Scale"
 msgstr "Escala"
 
+msgid "Service type"
+msgstr "Tipo de servicio"
