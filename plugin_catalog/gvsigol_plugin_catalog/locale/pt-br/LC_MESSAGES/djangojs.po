@@ -20,7 +20,7 @@ msgid "Clean"
 msgstr "Limpar"
 
 msgid "Search"
-msgstr "Procurar"
+msgstr "Pesquisar"
 
 msgid "Clean current search, filters and order"
 msgstr "Limpar a pesquisa atual, filtros e ordem"
@@ -56,7 +56,7 @@ msgid "Map"
 msgstr "Mapa"
 
 msgid "Download"
-msgstr "Descarregar"
+msgstr "Download"
 
 msgid "No results found"
 msgstr "Nenhum resultado encontrado"
@@ -68,7 +68,7 @@ msgid "Add"
 msgstr "Adicionar"
 
 msgid "Catalog layers"
-msgstr "Camadas de catálogo"
+msgstr "Catálogo de camadas"
 
 msgid "Remove layer"
 msgstr "Remover a camada"
@@ -80,60 +80,58 @@ msgid "List of layers"
 msgstr "Lista de camadas"
 
 msgid "Include only results overlapping with the selected map area"
-msgstr ""
+msgstr "Incluir apenas resultados da área seleccionada"
 
 msgid "Metadatum"
 msgstr "Metadado"
 
 msgid "Draw rectangle"
-msgstr ""
+msgstr "Desenhar rectângulo"
 
 msgid "Order by relevance"
-msgstr ""
+msgstr "Ordenar por relevância"
 
 msgid "Order by modification date"
-msgstr ""
+msgstr "Ordenar por data de modificação"
 
 msgid "Order by title"
-msgstr ""
+msgstr "Ordenar pelo titulo"
 
 msgid "Search..."
-msgstr ""
+msgstr "Pesquisar..."
 
 msgid "The search is running..."
-msgstr ""
+msgstr "A busca está em andamento..."
 
 msgid "Loading..."
-msgstr ""
+msgstr "Carregando"
 
 msgid "No layers available"
-msgstr ""
+msgstr "Não há camadas disponíveis"
 
 msgid "Add to map"
-msgstr ""
+msgstr "Adicionar no mapa"
 
 msgid "Add layer to map"
-msgstr ""
+msgstr "Adicionar camada no mapa"
 
 msgid "Download ShapeFile"
-msgstr ""
+msgstr "Baixar ShapeFile"
 
 msgid "Download CSV"
-msgstr ""
+msgstr "Baixar CSV"
 
 msgid "Download GML"
-msgstr ""
+msgstr "Baixar GML"
 
 msgid "Access raster data"
-msgstr ""
+msgstr "Acesso aos dados raster"
 
 msgid "Access resource"
-msgstr ""
+msgstr "Acesso aos recursos"
 
 msgid "Not filtered"
-msgstr ""
-
-
+msgstr "Não filtrado"
 msgid "keywords"
 msgstr "Keywords"
 
