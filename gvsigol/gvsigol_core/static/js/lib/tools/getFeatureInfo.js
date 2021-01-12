@@ -955,7 +955,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 				for (var i=0; i<selectedFeature.resources.length; i++) {
 					if (selectedFeature.resources[i].type == 'image') {
 						resourcesContent += '<li style="padding: 20px;">';
-						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
+						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery" data-type="image">';
 						resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
 						resourcesContent += '</a>';
 						resourcesContent += '</li>';
