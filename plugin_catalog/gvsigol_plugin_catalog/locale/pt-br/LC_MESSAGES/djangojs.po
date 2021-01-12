@@ -132,3 +132,106 @@ msgstr ""
 
 msgid "Not filtered"
 msgstr ""
+
+
+msgid "keywords"
+msgstr "Keywords"
+
+msgid "topicCats"
+msgstr "Topic Categories"
+
+msgid "categories"
+msgstr "Categories"
+
+msgid "inspireThemes"
+msgstr "Inspire Themes"
+
+msgid "inspireThemesWithAc"
+msgstr "Inspire Themes With Ac"
+
+msgid "inspireThemesURI"
+msgstr "Inspire Themes URI"
+
+msgid "denominators"
+msgstr "Denominators"
+
+msgid "resolutions"
+msgstr "Resolutions"
+
+msgid "spatialRepresentationTypes"
+msgstr "Spatial representation types"
+
+msgid "orgNames"
+msgstr "Organization names"
+
+msgid "orgNamesTree"
+msgstr "Organization names tree"
+
+msgid "metadataPOCs"
+msgstr "Metadata POCs"
+
+msgid "serviceTypes"
+msgstr "Service types"
+
+msgid "types"
+msgstr "Types"
+
+msgid "createDateYears"
+msgstr "Creation year"
+
+msgid "formats"
+msgstr "Formats"
+
+msgid "titles"
+msgstr "Titles"
+
+msgid "metadataTypes"
+msgstr "Metadata types"
+
+msgid "isValidInspire"
+msgstr "Is valid Inspire"
+
+msgid "isHarvested"
+msgstr "Is harvested"
+
+msgid "mdStatus"
+msgstr "Metadata status"
+
+msgid "status"
+msgstr "Status"
+
+msgid "sourceCatalog"
+msgstr "Source catalog"
+
+msgid "standards"
+msgstr "Standards"
+
+msgid "subTemplateTypes"
+msgstr "Subtemplate types"
+
+msgid "recordOwner"
+msgstr "Record owner"
+
+msgid "groupOwners"
+msgstr "Group owners"
+
+msgid "publishedForGroup"
+msgstr "Published for group"
+
+msgid "isPublishedToAll"
+msgstr "Is published to all"
+
+msgid "maintenanceAndUpdateFrequencies"
+msgstr "Maintenance and update frequencies"
+
+msgid "mdActions"
+msgstr "Metadata actions"
+
+msgid "Organization"
+msgstr ""
+
+msgid "Source Catalog"
+msgstr ""
+
+msgid "Year"
+msgstr ""

@@ -1175,7 +1175,7 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 								for(var subFilterName in subFilters){
 									var subFilter = subFilters[subFilterName];
 									facetEntries = self.getFacetEntries(query, subFilter, cat['@name']);
-									shownFilters[subFilter['@name']] = self.getFacet(subFilter['@label'], cat['@name'], facetEntries);
+									shownFilters[subFilter['@name']] = self.getFacet(gettext(subFilter['@label']), cat['@name'], facetEntries);
 								}
 							}
 							else {
@@ -1186,7 +1186,7 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 									var filterLabel = cat['@label'];
 								}
 								var facetEntries = self.getFacetEntries(query, cat, cat['@name']);
-								shownFilters[cat['@name']] = self.getFacet(filterLabel, cat['@name'], facetEntries);
+								shownFilters[cat['@name']] = self.getFacet(gettext(filterLabel), cat['@name'], facetEntries);
 							}
 						}
 					}
