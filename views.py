@@ -2947,7 +2947,8 @@ def get_feature_info(request):
                                                 'type': res_type,
                                                 'url': lr.get_url(),
                                                 'title': lr.title,
-                                                'name': lr.path.split('/')[-1]
+                                                'name': lr.path.split('/')[-1],
+                                                'id': lr.id
                                             }
                                             resources.append(resource)
                                     except Exception as e:
