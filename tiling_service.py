@@ -38,6 +38,7 @@ from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server, Layer
 from pyproj import Proj, transform
+import json
 
 class Tiling():
     
@@ -472,6 +473,11 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
     url = None
     if lyr.datastore is not None:
         url = lyr.datastore.workspace.wmts_endpoint
+        lyr_name = lyr.datastore.workspace.name + ":" + lyr.name
+    else:
+        ext_lyr = json.loads(lyr.external_params)
+        lyr_name = ext_lyr['layers']
+        url = ext_lyr['url']
     
     layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
     folder_lyr =  os.path.join(layers_dir, lyr.name) + "_lyr_" + str(millis)
@@ -504,7 +510,6 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
                 'zoom_levels_processed' : num_res_levels
             }
 
-        lyr_name = lyr.datastore.workspace.name + ":" + lyr.name
         number_of_tiles = 0
         tilingList = [] 
         for geojson in geojson_list:
