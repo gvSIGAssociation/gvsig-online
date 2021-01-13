@@ -985,14 +985,12 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 
 					} else if  (selectedFeature.resources[i].type == 'file') {
 						resourcesContent += '<li style="padding: 20px;">';
-						resourcesContent += '<li style="padding: 20px;">';
 						var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file margin-r-5"></i></a>');
 						anchor.attr("href", selectedFeature.resources[i].url);
 						var span = $('<span style="color:#00c0ef;"></span>');
 						span.text('[' + selectedFeature.resources[i].id + '] ' + selectedFeature.resources[i].title)
 						anchor.append(span);
 						resourcesContent += anchor.prop('outerHTML');
-						resourcesContent += '</a>';
 						resourcesContent += '</li>';
 
 					} else if (selectedFeature.resources[i].type == 'alfresco_dir') {

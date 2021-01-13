@@ -113,26 +113,33 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
 		resource += 	'</div>';
 		resource += 	'<div class="box-body">';
 		if (resources[i].type == 'image') {
-			resource += '<a href="' + resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
-			resource += 	'<img src="' + resources[i].url + '" class="img-fluid adjust-image">';
-			resource += '</a>';
+			var anchor = $('<a data-toggle="lightbox" data-gallery="example-gallery" data-type="image"></a>')
+			var img =       $('<img class="img-fluid adjust-image">');
+			anchor.attr("href", resources[i].url);
+			img.attr("src", resources[i].url);
+			anchor.append(img);
+			resource += anchor.prop('outerHTML');
 		} else if  (resources[i].type == 'pdf') {
-			resource += '<a href="' + resources[i].url + '" target="_blank">';
-			resource += 	'<i style="font-size:24px;" class="fa fa-file-pdf-o margin-r-5"></i>';
-			resource += 	'<span style="color:#00c0ef;">' + resources[i].name + '</span>';
-			resource += '</a>';
-			
-		}  else if  (resources[i].type == 'video') {
-			resource += '<a href="' + resources[i].url + '" target="_blank">';
-			resource += 	'<i style="font-size:24px;" class="fa fa-file-video-o margin-r-5"></i>';
-			resource += 	'<span style="color:#00c0ef;">' + resources[i].name + '</span>';
-			resource += '</a>';
-			
-		}   else if  (resources[i].type == 'file') {
-			resource += '<a href="' + resources[i].url + '" target="_blank">';
-			resource += 	'<i style="font-size:24px;" class="fa fa-file margin-r-5"></i>';
-			resource += 	'<span style="color:#00c0ef;">' + resources[i].name + '</span>';
-			resource += '</a>';
+			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-pdf-o margin-r-5"></i></a>');
+			anchor.attr("href", resources[i].url);
+			var span = $('<span style="color:#00c0ef;"></span>');
+			span.text('[' + resources[i].rid + '] ' + resources[i].title)
+			anchor.append(span);
+			resource += anchor.prop('outerHTML');
+		} else if  (resources[i].type == 'video') {
+			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-video-o margin-r-5"></i></a>');
+			anchor.attr("href", resources[i].url);
+			var span = $('<span style="color:#00c0ef;"></span>');
+			span.text('[' + resources[i].rid + '] ' + resources[i].title)
+			anchor.append(span);
+			resource += anchor.prop('outerHTML');
+		} else if  (resources[i].type == 'file') {
+			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file margin-r-5"></i></a>');
+			anchor.attr("href", resources[i].url);
+			var span = $('<span style="color:#00c0ef;"></span>');
+			span.text('[' + resources[i].rid + '] ' + resources[i].title)
+			anchor.append(span);
+			resource += anchor.prop('outerHTML');
 		}
 		resource += 	'</div>';
 		resource += '</div>';
