@@ -831,17 +831,22 @@ EditionBar.prototype.addModifyInteraction = function() {
 	this.map.addInteraction(this.modifyInteraction);
 
 	this.selectInteraction.on('select',
-			function(evt) {
-				if (self.lastEditedFeature != null) {
-					self.revertEditedFeature();
+		function(evt) {
+			if (evt.selected.length > 0) {
+				if (evt.selected[0].getId()) {
+					if (self.lastEditedFeature != null) {
+						self.revertEditedFeature();
+					}
+					if(evt.selected.length > 1){
+						self.showInfo(evt, self.selectedLayer, evt.selected, self.selectInteraction)
+					}else{
+						self.editFeatureForm(evt.selected[0]);
+					}
+					$("#jqueryEasyOverlayDiv").css("display", "none");
 				}
-		        if(evt.selected.length > 1){
-		        	self.showInfo(evt, self.selectedLayer, evt.selected, self.selectInteraction)
-		        }else{
-		        	self.editFeatureForm(evt.selected[0]);
-		        }
-				$("#jqueryEasyOverlayDiv").css("display", "none");
-			}, this);
+			}
+			
+		}, this);
 
 	this.selectInteraction.on('change',
 			function(evt) {
