@@ -134,13 +134,13 @@ msgid "categories"
 msgstr "Categories"
 
 msgid "inspireThemes"
-msgstr "Inspire Themes"
+msgstr "INSPIRE Themes"
 
 msgid "inspireThemesWithAc"
-msgstr "Inspire Themes With Ac"
+msgstr "INSPIRE Themes With Ac"
 
 msgid "inspireThemesURI"
-msgstr "Inspire Themes URI"
+msgstr "INSPIRE Themes URI"
 
 msgid "denominators"
 msgstr "Denominators"
@@ -179,7 +179,7 @@ msgid "metadataTypes"
 msgstr "Metadata types"
 
 msgid "isValidInspire"
-msgstr "Is valid Inspire"
+msgstr "Is valid INSPIRE"
 
 msgid "isHarvested"
 msgstr "Is harvested"

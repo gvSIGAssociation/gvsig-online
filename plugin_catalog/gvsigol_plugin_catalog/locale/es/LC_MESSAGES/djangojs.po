@@ -134,13 +134,13 @@ msgid "categories"
 msgstr "Categorías"
 
 msgid "inspireThemes"
-msgstr "Temas de Inspire"
+msgstr "Temas de INSPIRE"
 
 msgid "inspireThemesWithAc"
-msgstr "Temas de Inspire con Ac"
+msgstr "Temas de INSPIRE con Ac"
 
 msgid "inspireThemesURI"
-msgstr "URI de Temas de Inspire"
+msgstr "URI de Temas de INSPIRE"
 
 msgid "denominators"
 msgstr "Denominadores"
@@ -179,7 +179,7 @@ msgid "metadataTypes"
 msgstr "Tipo de metadato"
 
 msgid "isValidInspire"
-msgstr "Es Inspire válido"
+msgstr "Es INSPIRE válido"
 
 msgid "isHarvested"
 msgstr "Recolectado"
@@ -203,7 +203,7 @@ msgid "subTemplateTypes"
 msgstr "Tipos de subplantilla"
 
 msgid "recordOwner"
-msgstr "Propietario del registre"
+msgstr "Propietario del registro"
 
 msgid "groupOwners"
 msgstr "Propietarios del grupo"

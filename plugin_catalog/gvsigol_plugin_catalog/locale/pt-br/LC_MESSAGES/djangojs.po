@@ -104,7 +104,7 @@ msgid "The search is running..."
 msgstr "A busca está em andamento..."
 
 msgid "Loading..."
-msgstr "Carregando"
+msgstr "Carregando..."
 
 msgid "No layers available"
 msgstr "Não há camadas disponíveis"
@@ -128,121 +128,120 @@ msgid "Access raster data"
 msgstr "Acesso aos dados raster"
 
 msgid "Access resource"
-msgstr "Acesso aos recursos"
+msgstr "Acesso aos produtos"
 
 msgid "Not filtered"
 msgstr "Não filtrado"
-
 msgid "keywords"
-msgstr ""
+msgstr "Palavras-chave"
 
 msgid "topicCats"
-msgstr ""
+msgstr "Categorias temáticas"
 
 msgid "categories"
-msgstr ""
+msgstr "Categorias"
 
 msgid "inspireThemes"
-msgstr ""
+msgstr "Tópicos INSPIRE"
 
 msgid "inspireThemesWithAc"
-msgstr ""
+msgstr "Tópicos INSPIRE com Ac"
 
 msgid "inspireThemesURI"
-msgstr ""
+msgstr "Tópicos INSPIRE URI"
 
 msgid "denominators"
-msgstr ""
+msgstr "Denominadores"
 
 msgid "resolutions"
-msgstr ""
+msgstr "Resoluções"
 
 msgid "spatialRepresentationTypes"
-msgstr ""
+msgstr "Tipos de representação espacial"
 
 msgid "orgNames"
-msgstr ""
+msgstr "Nomes das organizações"
 
 msgid "orgNamesTree"
-msgstr ""
+msgstr "Árvore de nomes de organizações"
 
 msgid "metadataPOCs"
-msgstr ""
+msgstr "POCs de Metadados"
 
 msgid "serviceTypes"
-msgstr ""
+msgstr "Tipos de serviços"
 
 msgid "types"
-msgstr ""
+msgstr "Tipos"
 
 msgid "createDateYears"
-msgstr ""
+msgstr "Ano de criação"
 
 msgid "formats"
-msgstr ""
+msgstr "Formatos"
 
 msgid "titles"
-msgstr ""
+msgstr "Títulos"
 
 msgid "metadataTypes"
-msgstr ""
+msgstr "Tipos de metadados"
 
 msgid "isValidInspire"
-msgstr ""
+msgstr "INSPIRE é valido"
 
 msgid "isHarvested"
-msgstr ""
+msgstr "Dados coletados de"
 
 msgid "mdStatus"
-msgstr ""
+msgstr "Estado dos metadados"
 
 msgid "status"
-msgstr ""
+msgstr "Estado"
 
 msgid "sourceCatalog"
-msgstr ""
+msgstr "Catálogo de produtos"
 
 msgid "standards"
-msgstr ""
+msgstr "Normas"
 
 msgid "subTemplateTypes"
-msgstr ""
+msgstr "Tipos de sub-modelos"
 
 msgid "recordOwner"
-msgstr ""
+msgstr "Proprietário dos metadados"
 
 msgid "groupOwners"
-msgstr ""
+msgstr "Proprietários do grupo"
 
 msgid "publishedForGroup"
-msgstr ""
+msgstr "Publicado para o público em geral"
 
 msgid "isPublishedToAll"
-msgstr ""
+msgstr "É publicado para todos"
 
 msgid "maintenanceAndUpdateFrequencies"
-msgstr ""
+msgstr "Freqüências de manutenção e atualização"
 
 msgid "mdActions"
-msgstr ""
+msgstr "Ações de metadados"
 
 msgid "Organization"
-msgstr ""
+msgstr "Organização"
 
 msgid "Source Catalog"
-msgstr ""
+msgstr "Catálogo de produtos"
 
 msgid "Year"
-msgstr ""
+msgstr "Ano"
 
 msgid "Representation type"
-msgstr ""
+msgstr "Tipo de representação"
 
 msgid "Update frequency"
-msgstr ""
+msgstr "Freqüência de atualização"
 
 msgid "Scale"
-msgstr ""
+msgstr "Escala"
 
 msgid "Service type"
-msgstr ""
+msgstr "Tipo de serviço"
