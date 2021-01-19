@@ -1202,7 +1202,8 @@ class Geoserver():
         return sql
     
     def __do_export_to_postgis(self, name, datastore, form_data, shp_path, shp_fields):
-        try: 
+        try:
+            name = name.lower()
             # get & sanitize parameters
             srs = form_data.get('srs')
             encoding = form_data.get('encoding')
@@ -1244,18 +1245,22 @@ class Geoserver():
                             try:
                                 i.set_field_default(schema, name, control_field['name'], control_field.get('default'))
                             except:
-                                logger.error("Error setting default value for control field: " + control_field['name'])
+                                logger.exception("Error setting default value for control field: " + control_field['name'])
                             has_control_field = True
                     if not has_control_field:
-                        i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
+                        try:
+                            i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
+                        except:
+                            logger.exception("Error adding control field: " + control_field['name'])
             
             if creation_mode == gdal_tools.MODE_OVERWRITE:
                 # re-install triggers
                 for trigger in Trigger.objects.filter(layer__datastore=datastore, layer__source_name=name):
                     try:
+                        trigger.drop()
                         trigger.install()
                     except:
-                        logger.warning("Failed to install trigger: " + str(trigger))
+                        logger.exception("Failed to install trigger: " + str(trigger))
             
             return True
         
@@ -1277,6 +1282,7 @@ class Geoserver():
                 i.close()
                 try:
                     gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    return True
                 except gdal_tools.GdalError as e:
                     raise rest_geoserver.RequestError(e.code, e.message)
                 except gdal_tools.GdalWarning as e:
