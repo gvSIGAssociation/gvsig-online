@@ -3930,6 +3930,15 @@ def external_layer_update(request, external_layer_id):
                 msg = _("Error: externallayer could not be published")
             form.add_error(None, msg)
 
+            response= {
+                'message': msg,
+                'form': form,
+                'external_layer': external_layer,
+                'bing_layers': BING_LAYERS,
+                'html': False,
+                'redirect_to_layergroup': redirect_to_layergroup
+            }
+
     else:
         form = ExternalLayerForm(instance=external_layer)
 
@@ -3959,8 +3968,8 @@ def external_layer_update(request, external_layer_id):
 @require_POST
 @staff_required
 def external_layer_delete(request, external_layer_id):
+    external_layer = Layer.objects.get(id=external_layer_id)
     try:
-        external_layer = Layer.objects.get(id=external_layer_id)
         server = Server.objects.get(id=external_layer.layer_group.server_id)
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         if external_layer.cached:
@@ -3969,11 +3978,17 @@ def external_layer_delete(request, external_layer_id):
             geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
             
         external_layer.delete()
+        return redirect('external_layer_list')
                 
     except Exception as e:
+        if e.server_message:
+            if 'Unknown layer' in e.server_message:
+                external_layer.delete()
+                return redirect('external_layer_list')
+
         return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
 
-    return redirect('external_layer_list')
+    
 
 def ows_get_capabilities(url, service, version, layer, remove_extra_params=True):
     if remove_extra_params:
