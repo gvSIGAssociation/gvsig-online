@@ -1264,11 +1264,14 @@ class Geoserver():
             
             return True
         
-        except rest_geoserver.RequestError:
+        except rest_geoserver.RequestError as e:
+            logger.exception(str(e))
             raise
         except gdal_tools.GdalWarning as e:
+            logger.exception(str(e))
             raise rest_geoserver.RequestError(0, e.message)
         except gdal_tools.GdalError as e:
+            logger.exception(str(e))
             if e.code > 0 and creation_mode == gdal_tools.MODE_OVERWRITE:
                 params = json.loads(datastore.connection_params)
                 host = params['host']
@@ -1289,7 +1292,7 @@ class Geoserver():
                     raise rest_geoserver.RequestError(0, e.message)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
-            #logging.exception(e)
+            logger.exception(str(e))
             message =  _("Error uploading the layer. Review the file format. Cause: ") + str(e)
             raise rest_geoserver.RequestError(-1, message)
     
