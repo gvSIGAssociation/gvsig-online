@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-21 14:28+0200\n"
+"POT-Creation-Date: 2020-12-23 15:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,19 +20,19 @@ msgstr ""
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
 
-#: forms.py:5
+#: gvsigol_filemanager/forms.py:5
 msgid "Directory name"
 msgstr "Nome do diretório"
 
-#: templates/browser/export_to_database.html:13
+#: gvsigol_filemanager/templates/browser/export_to_database.html:13
 msgid "Export"
 msgstr "Exportar"
 
-#: templates/browser/export_to_database.html:44
+#: gvsigol_filemanager/templates/browser/export_to_database.html:50
 msgid "Warning!"
 msgstr "Aviso!"
 
-#: templates/browser/export_to_database.html:45
+#: gvsigol_filemanager/templates/browser/export_to_database.html:51
 msgid ""
 "Before exporting the shapefile check the name of the columns. Column names "
 "can not contain spaces or special characters."
@@ -40,101 +40,111 @@ msgstr ""
 "Antes de exportar o shapefile, verifique o nome das colunas. Os nomes das "
 "colunas não podem conter espaços ou caracteres especiais."
 
-#: templates/browser/export_to_database.html:56
+#: gvsigol_filemanager/templates/browser/export_to_database.html:62
 msgid "Table creation mode"
 msgstr "Modo de criação de tabela"
 
-#: templates/browser/export_to_database.html:63
+#: gvsigol_filemanager/templates/browser/export_to_database.html:69
 msgid "Data store"
 msgstr "Armazenamento de dados"
 
-#: templates/browser/export_to_database.html:70
-#: templates/browser/filemanager_list.html:23
+#: gvsigol_filemanager/templates/browser/export_to_database.html:76
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:29
 msgid "Name"
 msgstr "Nome"
 
-#: templates/browser/export_to_database.html:72
+#: gvsigol_filemanager/templates/browser/export_to_database.html:78
 msgid "Layer will be uploaded to the selected data store"
 msgstr "A camada será carregada para o armazenamento de dados selecionados"
 
-#: templates/browser/export_to_database.html:78
+#: gvsigol_filemanager/templates/browser/export_to_database.html:84
 msgid "Character encoding"
 msgstr "Codificação de caracteres"
 
-#: templates/browser/export_to_database.html:82
+#: gvsigol_filemanager/templates/browser/export_to_database.html:88
 msgid "Coordinate reference system"
 msgstr "Coordenar sistema de referência"
 
-#: templates/browser/export_to_database.html:105
+#: gvsigol_filemanager/templates/browser/export_to_database.html:111
 msgid "Default"
 msgstr "Default"
 
-#: templates/browser/filemanager_list.html:21
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:27
 msgid "Select"
 msgstr "Seleção"
 
-#: templates/browser/filemanager_list.html:24
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:30
 msgid "Size"
 msgstr "Tamanho"
 
-#: templates/browser/filemanager_list.html:25
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:31
 msgid "Date"
 msgstr "Data"
 
-#: templates/browser/filemanager_list.html:28
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:34
 msgid "Actions"
 msgstr "Ações"
 
-#: templates/browser/filemanager_list.html:65
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:73
 msgid "Delete directory"
 msgstr "Excluir diretório"
 
-#: templates/browser/filemanager_list.html:68
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:76
 msgid "Export to database"
 msgstr "Exportar para banco de dados"
 
-#: templates/browser/filemanager_list.html:73
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:81
 msgid "Transform to database"
 msgstr "Transformar em banco de dados"
 
-#: templates/browser/filemanager_list.html:77
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:86
+msgid "Unzip file"
+msgstr ""
+
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:89
 msgid "Delete file"
 msgstr "Apagar ficheiro"
 
-#: templates/browser/filemanager_list.html:88
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:100
 msgid "Nothing to see here."
 msgstr "Nada para ver aqui"
 
-#: templates/browser/filemanager_list.html:97
-#: templates/filemanager_create_directory.html:13
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:109
+#: gvsigol_filemanager/templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Criar diretório"
 
-#: templates/browser/filemanager_list.html:98
-#: templates/filemanager_upload.html:14
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:110
+#: gvsigol_filemanager/templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Carregar"
 
-#: templates/dashboard_filemanager_menu.html:7
+#: gvsigol_filemanager/templates/dashboard_filemanager_menu.html:7
 msgid "File manager"
 msgstr "Gerenciador de arquivos"
 
-#: views.py:96
+#: gvsigol_filemanager/views.py:136
 msgid "Export process done successfully"
 msgstr "Processo de exportação realizado com sucesso"
 
-#: views.py:118
+#: gvsigol_filemanager/views.py:161
 msgid "Server error"
 msgstr "Erro do servidor"
 
-#: views.py:121
+#: gvsigol_filemanager/views.py:165
 msgid "You must fill in all fields"
 msgstr "Você deve preencher todos os campos"
 
-#: views.py:162 views.py:173
+#: gvsigol_filemanager/views.py:216 gvsigol_filemanager/views.py:227
 msgid "Error deleting resource"
 msgstr "Erro ao eliminar recurso"
 
-#: views.py:162
+#: gvsigol_filemanager/views.py:216
 msgid "exists in datastore"
 msgstr "existe no datastore"
+
+#: gvsigol_filemanager/views.py:250
+#, fuzzy
+#| msgid "Error deleting resource"
+msgid "Error unzipping resource"
+msgstr "Erro ao eliminar recurso"

@@ -153,7 +153,7 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    'gvsigol_app_dev',
+    'gvsigol_app_test',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
 

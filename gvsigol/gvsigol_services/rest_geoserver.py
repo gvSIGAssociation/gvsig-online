@@ -544,7 +544,7 @@ class Geoserver():
             logger.error(r.text)
             raise FailedRequestError(r.status_code, r.content)
         return True
-    
+
     def update_ft_bounding_box(self, workspace, datastore, feature_type, user=None, password=None):
         """
         Updates the native & lat/lon bounding box of the feature type using
