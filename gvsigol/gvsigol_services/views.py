@@ -3377,15 +3377,20 @@ def upload_resources(request):
         ws_name = request.POST.get('workspace')
         layer_name = request.POST.get('layer_name')
         fid = request.POST.get('fid')
+        version = request.POST.get('version', 0)
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
         if not utils.can_write_layer(request.user, layer):
             return HttpResponseForbidden()
         if 'resource' in request.FILES:
+            check_version = utils.check_feature_version(layer, fid, int(version))
+            if check_version == False:
+                response = HttpResponse("Version conflict")
+                response.status_code = 409
+                return response
             resource = request.FILES['resource']
             res_type = utils.get_resource_type(resource.content_type)
-
             (saved, path) = resource_manager.save_resource(resource, layer.id, res_type)
             if saved:
                 res = LayerResource()
@@ -3397,42 +3402,59 @@ def upload_resources(request):
                 res.created = timezone.now()
                 res.save()
                 response = {'success': True, 'id': res.pk, 'path': path}
+                if check_version is not None:
+                    version, version_date = utils.update_feat_version(res.layer, res.feature)
+                    signals.layerresource_created.send(sender=res.__class__, 
+                                                       layer=res.layer,
+                                                       featid=res.feature,
+                                                       resource_id=res.pk,
+                                                       version=version,
+                                                       path=path,
+                                                       user=request.user)
+                    response['feat_version'] = version
+                    response['feat_date'] = str(version_date)
             else:
                 response = {'success': False}
-
+        else:
+            response = {'success': False}
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-def get_feat_version(resource, featid):
-    try:
-        params = json.loads(resource.layer.datastore.connection_params)
-        i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-        pks = i.get_pk_columns(resource.layer.name, resource.layer.datastore.name)
-        if(pks and len(pks) > 0):
-            rows = i.custom_query("SELECT " + settings.VERSION_FIELD + ", " + settings.DATE_FIELD + " FROM "+ resource.layer.datastore.name + "." + resource.layer.name + " WHERE " + pks[0] + "=" + str(featid))
-            i.close()
-            if(rows and len(rows) > 0): 
-                return rows[0][0]
-    except Exception:
-        return None
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def delete_resource(request):
     if request.method == 'POST':
         rid = request.POST.get('rid')
+        version = request.POST.get(settings.VERSION_FIELD, 0)
         try:
             resource = LayerResource.objects.get(id=int(rid))
             if not utils.can_write_layer(request.user, resource.layer):
                 return HttpResponseForbidden()
+            check_version = utils.check_feature_version(resource.layer, resource.feature, int(version))
+            if check_version == False:
+                response = HttpResponse("Version conflict")
+                response.status_code = 409
+                return response
             featid = resource.feature
             lyrid = resource.layer.id
             resource.delete()
-            historical_url, historical_filepath = resource_manager.delete_resource(resource)
-            
-            version = get_feat_version(resource, featid)
-            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath, 'url': historical_url, 'feat_version': version}
+            historical_filepath = resource_manager.delete_resource(resource)
+            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath}
+            if check_version is not None:
+                version, version_date = utils.update_feat_version(resource.layer, resource.feature)
+                signals.layerresource_deleted.send(sender=None, 
+                                                   layer=resource.layer,
+                                                   featid=featid,
+                                                   resource_id=resource.pk,
+                                                   version=version,
+                                                   historical_path=historical_filepath,
+                                                   user=request.user)
+                response['feat_version'] = version
+                response['feat_date'] = str(version_date)
+                response['url'] = reverse('get_layer_historic_resource', args=[lyrid, featid, version])
 
         except Exception:
+            logger.exception("Error deleting resource")
             response = {'deleted': False}
             pass
 
@@ -3445,23 +3467,25 @@ def delete_resources(request):
         query_layer = request.POST.get('query_layer')
         workspace = request.POST.get('workspace')
         fid = request.POST.get('fid')
+        version = request.POST.get('feat_version_gvol')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
             if not utils.can_write_layer(request.user, layer):
                 return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
-            featidlist = []
-            lyridlist = []
             pathlist = []
-            urllist = []
             for resource in layer_resources:
-                featidlist.append(resource.feature)
-                lyridlist.append(resource.layer.id)
-                historical_url, historical_filepath = resource_manager.delete_resource(resource)
-                pathlist.append(historical_filepath)
-                urllist.append(historical_url)
                 resource.delete()
-            response = {'deleted': True, 'featidlist': featidlist, 'lyridlist': lyridlist, 'pathlist': pathlist, 'urllist':urllist}
+                historical_filepath = resource_manager.delete_resource(resource)
+                pathlist.append(historical_filepath)
+                signals.layerresource_deleted.send(sender=None, 
+                                               layer=resource.layer,
+                                               featid=resource.feature,
+                                               resource_id=resource.pk,
+                                               version=version,
+                                               historical_path=historical_filepath,
+                                               user=request.user)
+            response = {'deleted': True, 'pathlist': pathlist}
 
         except Exception as e:
             print e.message
