@@ -1525,15 +1525,38 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				var transaction = self.transactWFS('insert', feature);
 				if (transaction.success) {
 					self.lastAddedFeature = null;
+					if (checkversion > 0) {
+						self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
+					}
 					if (self.resourceManager.getEngine() == 'gvsigol') {
 						if (uploader.getFileCount() >= 1) {
 							$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
 							$("#jqueryEasyOverlayDiv").css("display", "block");
-							uploader.appendExtraParams({
-								layer_name: self.selectedLayer.layer_name,
-								workspace: self.selectedLayer.workspace,
-								fid: transaction.fid
-							});
+							var extraParams = {
+									layer_name: self.selectedLayer.layer_name,
+									workspace: self.selectedLayer.workspace,
+									fid: transaction.fid
+								};
+							if (feature.getProperties().feat_version_gvol !== undefined) {
+								extraParams.version = feature.getProperties().feat_version_gvol;
+							}
+							uploader.appendExtraParams(extraParams);
+							uploader.delegatedOnSuccess = function(files,data,xhr){
+								if (data && data.success) {
+									if (data.feat_version !== undefined) {
+										// Feature version checking and management is done directly in delete_resource method
+										feature.setProperties({
+											"feat_date_gvol": data.feat_date,
+											"feat_version_gvol": data.feat_version
+										});
+									}
+								}
+								else {
+									console.log(files);
+									console.log(data);
+									console.log(xhr);
+								}
+							};
 							uploader.startUpload();
 						}
 
@@ -1545,9 +1568,6 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 					}
 					
-					if (checkversion > 0) {
-						self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
-					}
 					self.showLayersTab();
 				}
 				var geojson_obj = new ol.format.GeoJSON();
@@ -1997,19 +2017,38 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			}
 			var transaction = self.transactWFS('update', feature);
 			if (transaction.success) {
+				if (checkversion > 0) {
+					//Control de versión con el tipo de operación de actualizar feature
+					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
+				}
 				if (self.resourceManager.getEngine() == 'gvsigol') {
 					if (uploader.getFileCount() >= 1) {
 						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
 						$("#jqueryEasyOverlayDiv").css("display", "block");
-						uploader.appendExtraParams({
-							layer_name: self.selectedLayer.layer_name,
-							workspace: self.selectedLayer.workspace,
-							fid: transaction.fid
-						});
+						var extraParams = {
+								layer_name: self.selectedLayer.layer_name,
+								workspace: self.selectedLayer.workspace,
+								fid: transaction.fid
+							};
+						if (feature.getProperties().feat_version_gvol !== undefined) {
+							extraParams.version = feature.getProperties().feat_version_gvol;
+						}
+						uploader.appendExtraParams(extraParams);
 						uploader.delegatedOnSuccess = function(files,data,xhr){
-							if (checkversion > 0 && data && data.success && data.id) {
-					   			self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 4, feature, data.id, true);
-					   		}
+							if (data && data.success) {
+								if (data.feat_version !== undefined) {
+									// Feature version checking and management is done directly in delete_resource method
+									feature.setProperties({
+										"feat_date_gvol": data.feat_date,
+										"feat_version_gvol": data.feat_version
+									});
+								}
+							}
+							else {
+								console.log(files);
+								console.log(data);
+								console.log(xhr);
+							}
 						};
 						uploader.startUpload();
 					}
@@ -2023,12 +2062,6 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				self.clearFeatureBackup();
 				if(self.selectInteraction)
 					self.selectInteraction.getFeatures().clear();
-				if (checkversion > 0) {
-					if (uploader.getFileCount() <= 0) {
-						//Control de versión con el tipo de operación de subir fichero
-						self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
-					}
-				}
 				self.showLayersTab();
 			}
 
@@ -2157,7 +2190,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		}
 		ui += 		'</div>';
 		ui += 		'<div class="box-footer text-right">';
-		ui += 			'<button id="remove-feature" class="btn btn-default margin-r-5">' + gettext('remove') + '</button>';
+		ui += 			'<button id="remove-feature" class="btn btn-default margin-r-5">' + gettext('Remove') + '</button>';
 		ui += 			'<button id="save-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
 		ui += 		'</div>';
 		ui += '</div>';
@@ -2426,8 +2459,7 @@ EditionBar.prototype.verifyGeometryField = function(feature) {
 };
 
 
-EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, featid, operation, feat, resourceid, async) {
-	async = (async===true) || false;
+EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, featid, operation, feat, resourceid) {
 	if(lyrid) {
 		data = {
 				"lyrid":lyrid,	
@@ -2446,7 +2478,7 @@ EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, f
 	}
 	$.ajax({
 		type: 'POST',
-		async: async,
+		async: false,
 		data: data,
 		url: '/gvsigonline/edition/feature_version_management/',
 		beforeSend:function(xhr){
