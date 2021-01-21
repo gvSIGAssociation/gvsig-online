@@ -2021,6 +2021,12 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 					//Control de versión con el tipo de operación de actualizar feature
 					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
 				}
+				if (feature.deletedResources_) {
+					for (var i=0; i<feature.deletedResources_.length; i++) {
+						self.resourceManager.deleteResource(feature.deletedResources_[i]);
+					}
+					feature.deletedResources_ = [];
+				}
 				if (self.resourceManager.getEngine() == 'gvsigol') {
 					if (uploader.getFileCount() >= 1) {
 						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
@@ -2125,6 +2131,9 @@ EditionBar.prototype.revertEditedFeature = function() {
 		if (this.lastEditedFeature.gol_geom_orig_) {
 			this.lastEditedFeature.setGeometry(this.lastEditedFeature.gol_geom_orig_);
 			delete this.lastEditedFeature.gol_geom_orig_;
+		}
+		if (this.lastEditedFeature.deletedResources_) {
+			delete this.lastEditedFeature.deletedResources_;
 		}
 		this.lastEditedFeature = null;
 	}
