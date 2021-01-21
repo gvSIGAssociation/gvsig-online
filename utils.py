@@ -43,7 +43,10 @@ from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
-from past.builtins import basestring 
+from past.builtins import basestring
+from psycopg2 import sql as sqlbuilder
+import logging
+logger = logging.getLogger("gvsigol")
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
@@ -342,25 +345,44 @@ def get_alphanumeric_fields(fields):
     return alphanumeric_fields
 
 def get_resources_dir(layer_id, resource_type):
+    resource_dir='resources'
     if resource_type == LayerResource.EXTERNAL_IMAGE:
-        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "image")
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "image")
     elif  resource_type == LayerResource.EXTERNAL_PDF:
-        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "pdf")
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "pdf")
     elif  resource_type == LayerResource.EXTERNAL_DOC:
-        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "docs")
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "docs")
     elif  resource_type == LayerResource.EXTERNAL_VIDEO:
-        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "videos")
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "videos")
     else:
-        the_path = os.path.join(MEDIA_ROOT, "resources" , str(layer_id), "files")
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "files")
     if not os.path.exists(the_path):
         os.makedirs(the_path)
         # makedirs permissions are umasked, so we need to explicitly set permissions afterwards
-        for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, "resources" , str(layer_id)), followlinks=True):
+        for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, resource_dir , str(layer_id)), followlinks=True):
             for d in dirs:
-                print(d)
-                print(os.path.join(root, d))
-                os.chmod(os.path.join(root, d), 0o0775)
+                os.chmod(os.path.join(root, d), 0o0750)
     return the_path
+
+def get_historic_resources_dir(path, layer_id):
+    historic_base_path = os.path.join(MEDIA_ROOT, 'historic_resources')
+    if not os.path.exists(historic_base_path):
+        os.makedirs(historic_base_path)
+        os.chmod(historic_base_path, 0o0750)
+    
+    if not os.path.isabs(path):
+        path = os.path.join(MEDIA_ROOT, path)
+    rel_path = os.path.relpath(os.path.dirname(path), os.path.join(MEDIA_ROOT, 'resources'))
+    historic_path = os.path.join(historic_base_path, rel_path)
+    if not os.path.exists(historic_path):
+        print historic_path
+        os.makedirs(historic_path)
+        
+        # makedirs permissions are umasked, so we need to explicitly set permissions afterwards
+        for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, 'historic_resources' , str(layer_id)), followlinks=True):
+            for d in dirs:
+                os.chmod(os.path.join(root, d), 0o0750)
+    return historic_path
 
 def get_resource_type(content_type):
     if 'image/' in content_type:
@@ -628,3 +650,66 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True, permission
         server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
         return new_layer_instance
     return layer
+
+def get_feat_version(introspect_con, schema, table, featid):
+    try:
+        pks = introspect_con.get_pk_columns(table, schema=schema)
+        if(pks and len(pks) == 1):
+            sqlst = "SELECT {version} FROM {schema}.{table} WHERE {pkfield} = %s"
+            query = sqlbuilder.SQL(sqlst).format(
+                version=sqlbuilder.Identifier(settings.VERSION_FIELD),
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                pkfield=sqlbuilder.Identifier(pks[0]))
+            introspect_con.cursor.execute(query, [featid])
+            for r in introspect_con.cursor.fetchall():
+                return r[0]
+    except Exception:
+        logger.exception("Error getting feature version")
+        return None
+
+def check_feature_version(layer, feature_id, feat_version):
+    """
+    Returns True if the provided version matches the current feature version, False if
+    they don't match and None if the version could not be checked
+    """
+    i, table, schema = get_db_connect_from_layer(layer)
+    with i as con: # conn will autoclose
+        version = get_feat_version(i, schema, table, feature_id)
+        if version is not None:
+            if feat_version == version:
+                return True
+            return False
+
+
+def update_feat_version(layer, featid):
+    """
+    Increments the version of a feature and sets the current date.
+    Returns a tuple containing the new version and date,
+    or None if the version is not
+    updated (because the feature is not found, has no version field,
+    
+    """
+    
+    try:
+        i, table, schema = get_db_connect_from_layer(layer)
+        with i as introspect_conn:
+            pks = introspect_conn.get_pk_columns(table, schema=schema)
+            if len(pks) != 1:
+                return
+            pk = pks[0]
+            sql = """UPDATE {schema}.{table} SET {versionfield} = (COALESCE({versionfield}, 0)+1),
+                     {datefield} = now() WHERE {idfield} = %s
+                     RETURNING {versionfield}, {datefield}"""
+            query = sqlbuilder.SQL(sql).format(
+                versionfield = sqlbuilder.Identifier(settings.VERSION_FIELD),
+                datefield = sqlbuilder.Identifier(settings.DATE_FIELD),
+                schema = sqlbuilder.Identifier(schema),
+                table = sqlbuilder.Identifier(table),
+                idfield = sqlbuilder.Identifier(pk)
+                )
+            introspect_conn.cursor.execute(query, [featid])
+            for r in introspect_conn.cursor.fetchall():
+                return r[0], r[1]
+    except:
+        logger.exception("Error updating feature version")
