@@ -123,21 +123,21 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
 			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-pdf-o margin-r-5"></i></a>');
 			anchor.attr("href", resources[i].url);
 			var span = $('<span style="color:#00c0ef;"></span>');
-			span.text('[' + resources[i].rid + '] ' + resources[i].title)
+			span.text(resources[i].title);
 			anchor.append(span);
 			resource += anchor.prop('outerHTML');
 		} else if  (resources[i].type == 'video') {
 			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-video-o margin-r-5"></i></a>');
 			anchor.attr("href", resources[i].url);
 			var span = $('<span style="color:#00c0ef;"></span>');
-			span.text('[' + resources[i].rid + '] ' + resources[i].title)
+			span.text(resources[i].title);
 			anchor.append(span);
 			resource += anchor.prop('outerHTML');
 		} else if  (resources[i].type == 'file') {
 			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file margin-r-5"></i></a>');
 			anchor.attr("href", resources[i].url);
 			var span = $('<span style="color:#00c0ef;"></span>');
-			span.text('[' + resources[i].rid + '] ' + resources[i].title)
+			span.text(resources[i].title);
 			anchor.append(span);
 			resource += anchor.prop('outerHTML');
 		}
@@ -147,11 +147,11 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
 		resourceList.append(resource);
 		
 		$('#remove-resource-' + i).on('click', function () {
+			feature.deletedResources_ = feature.deletedResources_ || [];
 			var rid = this.dataset.rid;
-			if (self.deleteResource(rid)) {
-				var resourceBox = this.parentNode.parentNode.parentNode;
-				resourceBox.remove();
-			}
+			feature.deletedResources_.push(rid);
+			var resourceBox = this.parentNode.parentNode.parentNode;
+			resourceBox.remove();
 		});
 	}
 	
