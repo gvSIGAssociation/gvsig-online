@@ -174,7 +174,7 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_opensea2',
     #'gvsigol_plugin_picassa',
     'gvsigol_plugin_print',
-    'gvsigol_plugin_restapi',
+    #'gvsigol_plugin_restapi',
     #'gvsigol_plugin_streetview',
     #'gvsigol_plugin_turiscan',
     #'gvsigol_plugin_worldwind',
@@ -339,7 +339,7 @@ LANGUAGES = (
     ('va', _('Valencian')),
     #('ca', _('Catalan')), 
     ('en', _('English')),
-    ('pt', _('Portuguese')),
+    #('pt', _('Portuguese')),
     ('pt-br', _('Brazilian Portuguese')),
 )
 LOCALE_PATHS = (
