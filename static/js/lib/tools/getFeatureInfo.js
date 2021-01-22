@@ -968,7 +968,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-pdf-o margin-r-5"></i></a>');
 						anchor.attr("href", selectedFeature.resources[i].url);
 						var span = $('<span style="color:#00c0ef;"></span>');
-						span.text('[' + selectedFeature.resources[i].id + '] ' + selectedFeature.resources[i].title)
+						span.text(selectedFeature.resources[i].title);
 						anchor.append(span);
 						resourcesContent += anchor.prop('outerHTML');
 						resourcesContent += '</li>';
@@ -978,7 +978,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-video-o margin-r-5"></i></a>');
 						anchor.attr("href", selectedFeature.resources[i].url);
 						var span = $('<span style="color:#00c0ef;"></span>');
-						span.text('[' + selectedFeature.resources[i].id + '] ' + selectedFeature.resources[i].title)
+						span.text(selectedFeature.resources[i].title);
 						anchor.append(span);
 						resourcesContent += anchor.prop('outerHTML');
 						resourcesContent += '</li>';
@@ -988,7 +988,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file margin-r-5"></i></a>');
 						anchor.attr("href", selectedFeature.resources[i].url);
 						var span = $('<span style="color:#00c0ef;"></span>');
-						span.text('[' + selectedFeature.resources[i].id + '] ' + selectedFeature.resources[i].title)
+						span.text(selectedFeature.resources[i].title);
 						anchor.append(span);
 						resourcesContent += anchor.prop('outerHTML');
 						resourcesContent += '</li>';
