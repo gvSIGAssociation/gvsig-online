@@ -87,7 +87,6 @@ GvsigolResourceManager.prototype.createUploader = function() {
 			}
 		},
 		afterUploadAll: function(files,data,xhr){
-			console.log("afterAll");
 			$.overlayout();
 		},
 		onError: function(files,status,errMsg){
