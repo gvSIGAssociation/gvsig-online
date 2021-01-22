@@ -665,7 +665,6 @@ def get_feat_version(introspect_con, schema, table, featid):
             for r in introspect_con.cursor.fetchall():
                 return r[0]
     except Exception:
-        logger.exception("Error getting feature version")
         return None
 
 def check_feature_version(layer, feature_id, feat_version):
