@@ -81,18 +81,27 @@ GvsigolResourceManager.prototype.createUploader = function() {
 	   	showPreview: true,
 	   	previewHeight: "100px",
 	   	previewWidth: "100px",
-	   	onSuccess: function(files,data,xhr){
-	   		if (typeof(uploader.delegatedOnSuccess)=='function') {
-	   			uploader.delegatedOnSuccess(files, data, xhr);
-	   		}
-    	},
-	   	afterUploadAll: function(files,data,xhr){
-	   		$.overlayout();
-    	},
-    	onError: function(files,status,errMsg){}
+		onSuccess: function(files,data,xhr){
+			if (typeof(uploader.delegatedOnSuccess)=='function') {
+				uploader.delegatedOnSuccess(files, data, xhr);
+			}
+		},
+		afterUploadAll: function(files,data,xhr){
+			console.log("afterAll");
+			$.overlayout();
+		},
+		onError: function(files,status,errMsg){
+			uploader.errors = uploader.errors.concat(files);
+			if (uploader.getFileCount()==1) {
+				$.overlayout();
+				var errorMsg = gettext('Some files could not be uploaded:') + ' ' + uploader.errors.join(", ");
+				uploader.errors = [];
+				messageBox.show('error', errorMsg);
+			}
+	}
 	});
-  	
-  	return uploader;
+	uploader.errors = [];
+	return uploader;
 };
 
 /**
