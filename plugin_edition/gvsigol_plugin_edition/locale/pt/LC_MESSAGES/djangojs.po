@@ -50,8 +50,8 @@ msgstr "Propriedades"
 msgid "Feature resources"
 msgstr "Recursos"
 
-msgid "remove"
-msgstr "excluir"
+msgid "Remove"
+msgstr "Excluir"
 
 msgid "Failed to remove layer lock"
 msgstr "Falha ao remover o bloqueio da camada"

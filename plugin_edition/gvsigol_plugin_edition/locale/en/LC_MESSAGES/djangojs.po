@@ -42,7 +42,7 @@ msgstr ""
 msgid "Feature resources"
 msgstr ""
 
-msgid "remove"
+msgid "Remove"
 msgstr ""
 
 msgid "Failed to remove layer lock"
