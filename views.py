@@ -3377,7 +3377,6 @@ def upload_resources(request):
         ws_name = request.POST.get('workspace')
         layer_name = request.POST.get('layer_name')
         fid = request.POST.get('fid')
-        version = request.POST.get('version', 0)
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
