@@ -2043,11 +2043,15 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						uploader.delegatedOnSuccess = function(files,data,xhr){
 							if (data && data.success) {
 								if (data.feat_version !== undefined) {
-									// Feature version checking and management is done directly in delete_resource method
-									feature.setProperties({
-										"feat_date_gvol": data.feat_date,
-										"feat_version_gvol": data.feat_version
-									});
+									// Since several uploads can be launched concurrently and return
+									// the new version numbers in unpredicatable order, we only set
+									// the version if it is bigger than current one
+									if (feature.getProperties().feat_version_gvol < data.feat_version) {
+										feature.setProperties({
+											"feat_date_gvol": data.feat_date,
+											"feat_version_gvol": data.feat_version
+										});
+									}
 								}
 							}
 							else {
