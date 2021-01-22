@@ -1459,6 +1459,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 
 		$('#save-feature').on('click', function () {
 			if(self.showAllErrorMessages()) {
+				$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+				$("#jqueryEasyOverlayDiv").css("display", "block");
 				var properties = {};
 				for (var i=0; i<self.featureType.length; i++) {
 					if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
@@ -1520,6 +1522,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				feature.setProperties(properties);
 				var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), 1, 1);
 				if (checkversion < 0) {
+					$.overlayout();
+					messageBox.show('error', gettext('Version conflict: the feature was edited concurrently. Restart your editing session to get the last version.'));
 					return;
 				}
 				var transaction = self.transactWFS('insert', feature);
@@ -1530,8 +1534,6 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 					}
 					if (self.resourceManager.getEngine() == 'gvsigol') {
 						if (uploader.getFileCount() >= 1) {
-							$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-							$("#jqueryEasyOverlayDiv").css("display", "block");
 							var extraParams = {
 									layer_name: self.selectedLayer.layer_name,
 									workspace: self.selectedLayer.workspace,
@@ -1573,6 +1575,9 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				var geojson_obj = new ol.format.GeoJSON();
 				var stringjson = geojson_obj.writeFeature(feature);
 				parent.$("body").trigger("feature-edition", stringjson);
+				if (uploader.getFileCount() == 0) {
+					$.overlayout();
+				}
 			}
 			self.acceptListener.forEach(action => {
 				action(self)
@@ -1954,130 +1959,136 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 
 		$('#edit-feature').on('click', function () {
 			if(self.showAllErrorMessages()) {
-			var properties = {};
-			for (var i=0; i<self.featureType.length; i++) {
-				if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
-					var field = $('#' + self.featureType[i].name)[0];
-					if(field != null && field.id != null){
-						if (self.featureType[i].type == 'boolean') {
-							properties[field.id] = field.checked;
-						} else {
-							if(self.isDateType(self.featureType[i].type)) {
-								if(field.value != ""){
-									properties[field.id] = self.getDateTime(field.value);
-								}
-							} else if(self.featureType[i].type == "multiple_enumeration") {
-								value = "";
-								for(var ix=0; ix<field.selectedOptions.length; ix++) {
-									var option = field.selectedOptions[ix];
-									if(ix != 0) {
-										value = value + ";";
+				$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+				$("#jqueryEasyOverlayDiv").css("display", "block");
+
+				var properties = {};
+				for (var i=0; i<self.featureType.length; i++) {
+					if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
+						var field = $('#' + self.featureType[i].name)[0];
+						if(field != null && field.id != null){
+							if (self.featureType[i].type == 'boolean') {
+								properties[field.id] = field.checked;
+							} else {
+								if(self.isDateType(self.featureType[i].type)) {
+									if(field.value != ""){
+										properties[field.id] = self.getDateTime(field.value);
 									}
-									value = value + option.value;
-								}
-								properties[field.id] = value;
-							} else if (self.isStringType(self.featureType[i].type)) {
-									if(self.featureType[i].name.startsWith("form_")) {
-										properties[field.id] = field.value;
-									} else {
-										if (field.value != null) {
+								} else if(self.featureType[i].type == "multiple_enumeration") {
+									value = "";
+									for(var ix=0; ix<field.selectedOptions.length; ix++) {
+										var option = field.selectedOptions[ix];
+										if(ix != 0) {
+											value = value + ";";
+										}
+										value = value + option.value;
+									}
+									properties[field.id] = value;
+								} else if (self.isStringType(self.featureType[i].type)) {
+										if(self.featureType[i].name.startsWith("form_")) {
 											properties[field.id] = field.value;
+										} else {
+											if (field.value != null) {
+												properties[field.id] = field.value;
+											}
+										}
+									} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+											properties[field.id] = field.value;
+								}
+							}
+						}
+					}
+					
+					if(self.featureType[i].name == 'modified_by') {
+						properties['modified_by'] = self.layerTree.conf.user.credentials.username;
+					}
+					if(self.featureType[i].name == 'last_modification') {
+						var today = new Date();
+						var dd = today.getDate();
+						var mm = today.getMonth()+1; //January is 0!
+	
+						var yyyy = today.getFullYear();
+						if(dd<10){
+						    dd='0'+dd;
+						}
+						if(mm<10){
+						    mm='0'+mm;
+						}
+						properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
+					}
+				}
+	
+				feature.setProperties(properties);
+				var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol, 2);
+				if (checkversion < 0) {
+					$.overlayout();
+					messageBox.show('error', gettext('Version conflict: the feature was edited concurrently. Restart your editing session to get the last version.'));
+					return;
+				}
+				var transaction = self.transactWFS('update', feature);
+				if (transaction.success) {
+					if (checkversion > 0) {
+						//Control de versión con el tipo de operación de actualizar feature
+						self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
+					}
+					if (feature.deletedResources_) {
+						for (var i=0; i<feature.deletedResources_.length; i++) {
+							self.resourceManager.deleteResource(feature.deletedResources_[i]);
+						}
+						feature.deletedResources_ = [];
+					}
+					if (self.resourceManager.getEngine() == 'gvsigol') {
+						if (uploader.getFileCount() >= 1) {
+							var extraParams = {
+									layer_name: self.selectedLayer.layer_name,
+									workspace: self.selectedLayer.workspace,
+									fid: transaction.fid
+								};
+							if (feature.getProperties().feat_version_gvol !== undefined) {
+								extraParams.version = feature.getProperties().feat_version_gvol;
+							}
+							uploader.appendExtraParams(extraParams);
+							uploader.delegatedOnSuccess = function(files,data,xhr){
+								if (data && data.success) {
+									if (data.feat_version !== undefined) {
+										// Since several uploads can be launched concurrently and return
+										// the new version numbers in unpredicatable order, we only set
+										// the version if it is bigger than current one
+										if (feature.getProperties().feat_version_gvol < data.feat_version) {
+											feature.setProperties({
+												"feat_date_gvol": data.feat_date,
+												"feat_version_gvol": data.feat_version
+											});
 										}
 									}
-								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-										properties[field.id] = field.value;
-							}
-						}
-					}
-				}
-				
-				if(self.featureType[i].name == 'modified_by') {
-					properties['modified_by'] = self.layerTree.conf.user.credentials.username;
-				}
-				if(self.featureType[i].name == 'last_modification') {
-					var today = new Date();
-					var dd = today.getDate();
-					var mm = today.getMonth()+1; //January is 0!
-
-					var yyyy = today.getFullYear();
-					if(dd<10){
-					    dd='0'+dd;
-					}
-					if(mm<10){
-					    mm='0'+mm;
-					}
-					properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
-				}
-			}
-
-			feature.setProperties(properties);
-			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol, 2);
-			if (checkversion < 0) {
-				return;
-			}
-			var transaction = self.transactWFS('update', feature);
-			if (transaction.success) {
-				if (checkversion > 0) {
-					//Control de versión con el tipo de operación de actualizar feature
-					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
-				}
-				if (feature.deletedResources_) {
-					for (var i=0; i<feature.deletedResources_.length; i++) {
-						self.resourceManager.deleteResource(feature.deletedResources_[i]);
-					}
-					feature.deletedResources_ = [];
-				}
-				if (self.resourceManager.getEngine() == 'gvsigol') {
-					if (uploader.getFileCount() >= 1) {
-						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-						$("#jqueryEasyOverlayDiv").css("display", "block");
-						var extraParams = {
-								layer_name: self.selectedLayer.layer_name,
-								workspace: self.selectedLayer.workspace,
-								fid: transaction.fid
-							};
-						if (feature.getProperties().feat_version_gvol !== undefined) {
-							extraParams.version = feature.getProperties().feat_version_gvol;
-						}
-						uploader.appendExtraParams(extraParams);
-						uploader.delegatedOnSuccess = function(files,data,xhr){
-							if (data && data.success) {
-								if (data.feat_version !== undefined) {
-									// Since several uploads can be launched concurrently and return
-									// the new version numbers in unpredicatable order, we only set
-									// the version if it is bigger than current one
-									if (feature.getProperties().feat_version_gvol < data.feat_version) {
-										feature.setProperties({
-											"feat_date_gvol": data.feat_date,
-											"feat_version_gvol": data.feat_version
-										});
-									}
 								}
-							}
-							else {
-								console.log(files);
-								console.log(data);
-								console.log(xhr);
-							}
-						};
-						uploader.startUpload();
+								else {
+									console.log(files);
+									console.log(data);
+									console.log(xhr);
+								}
+							};
+							uploader.startUpload();
+						}
+	
+					} else if (self.resourceManager.getEngine() == 'alfresco'){
+						self.resourceManager.updateResource(transaction.fid);
 					}
-
-				} else if (self.resourceManager.getEngine() == 'alfresco'){
-					self.resourceManager.updateResource(transaction.fid);
+					if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
+						self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+					}
+					self.clearFeatureBackup();
+					if(self.selectInteraction)
+						self.selectInteraction.getFeatures().clear();
+					self.showLayersTab();
 				}
-				if (self.selectedLayer.getSource() instanceof ol.source.TileWMS || self.selectedLayer.getSource() instanceof ol.source.ImageWMS) {
-					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+	
+				var geojson_obj = new ol.format.GeoJSON();
+				var stringjson = geojson_obj.writeFeature(feature);
+				parent.$("body").trigger("feature-edition", stringjson);
+				if (uploader.getFileCount() == 0) {
+					$.overlayout();
 				}
-				self.clearFeatureBackup();
-				if(self.selectInteraction)
-					self.selectInteraction.getFeatures().clear();
-				self.showLayersTab();
-			}
-
-			var geojson_obj = new ol.format.GeoJSON();
-			var stringjson = geojson_obj.writeFeature(feature);
-			parent.$("body").trigger("feature-edition", stringjson);
 			}
 
 			self.acceptListener.forEach(action => {
@@ -2540,7 +2551,7 @@ EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, versi
 				success = 0; //No hay servidor
 				return;
 			} else if(response.responseText && response.responseText != '') {
-				messageBox.show('error', response.responseText);
+				messageBox.show('error', gettext('Error validando la version') + " " + response.responseText);
 			} else {
 				messageBox.show('error', gettext('Error validando la version'));
 			}
