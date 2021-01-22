@@ -3451,7 +3451,11 @@ def delete_resource(request):
                                                    user=request.user)
                 response['feat_version'] = version
                 response['feat_date'] = str(version_date)
-                response['url'] = reverse('get_layer_historic_resource', args=[lyrid, featid, version])
+                try:
+                    # missing if plugin_restapi is not installed
+                    response['url'] = reverse('get_layer_historic_resource', args=[lyrid, featid, version])
+                except:
+                    pass
 
         except Exception:
             logger.exception("Error deleting resource")
