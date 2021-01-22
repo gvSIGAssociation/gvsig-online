@@ -690,13 +690,12 @@ def update_feat_version(layer, featid):
     updated (because the feature is not found, has no version field,
     
     """
-    
     try:
         i, table, schema = get_db_connect_from_layer(layer)
         with i as introspect_conn:
             pks = introspect_conn.get_pk_columns(table, schema=schema)
             if len(pks) != 1:
-                return
+                return None, None
             pk = pks[0]
             sql = """UPDATE {schema}.{table} SET {versionfield} = (COALESCE({versionfield}, 0)+1),
                      {datefield} = now() WHERE {idfield} = %s
@@ -713,3 +712,4 @@ def update_feat_version(layer, featid):
                 return r[0], r[1]
     except:
         logger.exception("Error updating feature version")
+    return None, None
