@@ -67,6 +67,7 @@ encoding//gvsigol_plugin_manageaddresses/uruguay_model_adapter.py=utf-8
 encoding//gvsigol_plugin_manageaddresses/views.py=utf-8
 encoding//gvsigol_plugin_restapi/api.py=utf-8
 encoding//gvsigol_plugin_restapi/migrations/0009_featurechange_resource.py=utf-8
+encoding//gvsigol_plugin_restapi/migrations/0010_fix_historic_layerresources.py=utf-8
 encoding//gvsigol_plugin_restapi/serializers.py=utf-8
 encoding//gvsigol_plugin_restapi/settings.py=utf-8
 encoding//gvsigol_plugin_restapi/settings_tpl.py=utf-8
