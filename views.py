@@ -3384,11 +3384,12 @@ def upload_resources(request):
         if not utils.can_write_layer(request.user, layer):
             return HttpResponseForbidden()
         if 'resource' in request.FILES:
-            check_version = utils.check_feature_version(layer, fid, int(version))
-            if check_version == False:
-                response = HttpResponse("Version conflict")
-                response.status_code = 409
-                return response
+            """
+            Don't check version for resource upload. The uploads will run concurrently if
+            several files are uploaded, so we could get inconsistent versions.
+            Since modification of resources is not allowed now (only add/remove is allowed),
+            increasing the version number should be enough for uploads.
+            """
             resource = request.FILES['resource']
             res_type = utils.get_resource_type(resource.content_type)
             (saved, path) = resource_manager.save_resource(resource, layer.id, res_type)
@@ -3402,15 +3403,15 @@ def upload_resources(request):
                 res.created = timezone.now()
                 res.save()
                 response = {'success': True, 'id': res.pk, 'path': path}
-                if check_version is not None:
-                    version, version_date = utils.update_feat_version(res.layer, res.feature)
+                version, version_date = utils.update_feat_version(res.layer, res.feature)
+                if version is not None:
                     signals.layerresource_created.send(sender=res.__class__, 
-                                                       layer=res.layer,
-                                                       featid=res.feature,
-                                                       resource_id=res.pk,
-                                                       version=version,
-                                                       path=path,
-                                                       user=request.user)
+                       layer=res.layer,
+                       featid=res.feature,
+                       resource_id=res.pk,
+                       version=version,
+                       path=path,
+                       user=request.user)
                     response['feat_version'] = version
                     response['feat_date'] = str(version_date)
             else:
