@@ -92,6 +92,7 @@ from psycopg2 import sql
 from actstream import action
 from actstream.models import Action
 from sendfile import sendfile
+from gvsigol_services.backend_geoserver import _valid_sql_name_regex
 
 logger = logging.getLogger("gvsigol")
 
@@ -2396,6 +2397,7 @@ def layer_create_with_group(request, layergroup_id):
                 datastore = form.cleaned_data['datastore']
                 server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
+                server.normalizeTableFields(form.cleaned_data['fields'])
                 server.createTable(form.cleaned_data)
                 extraParams = {}
                 if datastore.type == 'v_PostGIS':
@@ -3377,6 +3379,7 @@ def upload_resources(request):
         ws_name = request.POST.get('workspace')
         layer_name = request.POST.get('layer_name')
         fid = request.POST.get('fid')
+        version = request.POST.get('version', 0)
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
@@ -4663,8 +4666,9 @@ def db_field_rename(request):
     if request.method == 'POST':
         try: 
             field = request.POST.get('field')
-            new_field_name = request.POST.get('new_field_name')
-            #layer_name = request.POST['layer_name']
+            new_field_name = request.POST.get('new_field_name').lower()
+            if _valid_sql_name_regex.search(new_field_name) == None:
+                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=new_field_name))
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
             datastore_name = layer.datastore.name
@@ -4739,8 +4743,10 @@ def db_field_rename(request):
 def db_add_field(request):
     if request.method == 'POST':
         layer = None
-        try: 
-            field_name = request.POST.get('field')
+        try:
+            field_name = request.POST.get('field').lower()
+            if _valid_sql_name_regex.search(field_name) == None:
+                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=field_name))
             field_type = request.POST.get('type')
             layer_id = request.POST.get('layer_id')
             enumkey = request.POST.get('enumkey')
