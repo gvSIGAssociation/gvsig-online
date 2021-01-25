@@ -213,7 +213,7 @@ function createModalContent(fid, mode, title, config){
 	});
 	
 	$('#add-field-accept').on('click', function () {
-		var name = $('#field-name').val();
+		var name = $('#field-name').val().toLowerCase();
 		var type = $('#field-db-type').val();
 		var enumkey = $('#field-default-value-'+id).val();
 		var calculated = document.getElementById('field-calculated').checked;

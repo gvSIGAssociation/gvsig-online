@@ -458,6 +458,8 @@
 		$('#my-modal-dialog .modal-title').text('{% trans "Rename field" %}');
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
+		ui += '<div id="field-errors" class="col-md-12 form-group">';
+		ui += '</div>';
 		ui += '<div class="col-md-12 form-group">';
 		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
 		ui += '{% trans "Warning: renaming a field may have side effects, such as breaking a field-based legend." %}'
@@ -481,29 +483,35 @@
 		
 		$('#confirm-rename').on('click', function () {
 			var new_name = document.getElementById('new-field-name').value;
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: '/gvsigonline/services/db_field_rename/',
-				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-				},
-			  	data:{
-			  		'field': fieldName,
-			  		'new_field_name': document.getElementById('new-field-name').value,
-			  		'layer_id': "{{layer_id}}"
-			  	},
-				success	:function(response) {
-					messageBox.show('Info', gettext('Field was renamed'));
-					$('#my-modal-dialog').modal('hide');
-					$('tr[data-fieldname="' + fieldName + '"] input')[0].value = new_name;
-					$('tr[data-fieldname="' + fieldName + '"]')[0].setAttribute('data-fieldname', new_name);
-				},
-				error: function(jqXHR) {
-					messageBox.show('error', jqXHR.responseText);
-					$('#my-modal-dialog').modal('hide');
-				}
-			});
+			if (validateRegex(new_name)) {
+				$.ajax({
+					type: 'POST',
+					async: false,
+					url: '/gvsigonline/services/db_field_rename/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					},
+				  	data:{
+				  		'field': fieldName,
+				  		'new_field_name': document.getElementById('new-field-name').value,
+				  		'layer_id': "{{layer_id}}"
+				  	},
+					success	:function(response) {
+						messageBox.show('Info', gettext('Field was renamed'));
+						$('#my-modal-dialog').modal('hide');
+						$('tr[data-fieldname="' + fieldName + '"] input')[0].value = new_name;
+						$('tr[data-fieldname="' + fieldName + '"]')[0].setAttribute('data-fieldname', new_name);
+					},
+					error: function(jqXHR) {
+						messageBox.show('error', jqXHR.responseText);
+						$('#my-modal-dialog').modal('hide');
+					}
+				});
+			} else {
+				var error = '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' + gettext('Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers') + '.</p>';
+				$('#field-errors').empty();
+				$('#field-errors').append(error);
+			}
 		});
 		$('#my-modal-dialog').modal('show');
 	}
