@@ -993,7 +993,7 @@ class Geoserver():
             jsonData = json.loads(content)
             return [ds_type, jsonData]
         
-        return None
+        return None, None
 
     def getLayerCreateTypes(self):
         return self.layer_create_types
