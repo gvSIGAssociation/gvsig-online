@@ -1128,6 +1128,7 @@ class Geoserver():
     def __do_export_to_postgis(self, name, datastore, form_data, shp_path):
         try: 
             # get & sanitize parameters
+            name = name.lower()
             srs = form_data.get('srs')
             encoding = form_data.get('encoding')
             creation_mode = form_data.get('mode')
@@ -1584,6 +1585,15 @@ class Geoserver():
         l.created_by = request.user.username
         l.save()
         return l
+    
+    def normalizeTableFields(self, fields):
+        """
+        For the moment, we only allow names that validate against _valid_sql_name_regex
+        """
+        for field in fields:
+            if _valid_sql_name_regex.search(field['name']) == None:
+                raise InvalidValue(-1, _("Invalid field name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=field['name']))
+            field['name'] = field['name'].lower()
     
     def createTable(self, form):
         datastore = form.get('datastore')

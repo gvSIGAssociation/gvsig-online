@@ -76,6 +76,7 @@ from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_services.backend_resources import resource_manager 
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
+from gvsigol_services.backend_geoserver import _valid_sql_name_regex
 import gvsigol_services.tiling_service as tiling_service
 import locks_utils
 from models import LayerFieldEnumeration
@@ -2387,6 +2388,7 @@ def layer_create_with_group(request, layergroup_id):
                 datastore = form.cleaned_data['datastore']
                 server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
+                server.normalizeTableFields(form.cleaned_data['fields'])
                 server.createTable(form.cleaned_data)
                 extraParams = {}
                 if datastore.type == 'v_PostGIS':
@@ -4620,8 +4622,9 @@ def db_field_rename(request):
     if request.method == 'POST':
         try: 
             field = request.POST.get('field')
-            new_field_name = request.POST.get('new_field_name')
-            #layer_name = request.POST['layer_name']
+            new_field_name = request.POST.get('new_field_name').lower()
+            if _valid_sql_name_regex.search(new_field_name) == None:
+                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=new_field_name))
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
             datastore_name = layer.datastore.name
@@ -4697,6 +4700,9 @@ def db_add_field(request):
     if request.method == 'POST':
         layer = None
         try: 
+            field_name = request.POST.get('field').lower()
+            if _valid_sql_name_regex.search(field_name) == None:
+                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=field_name))
             field_name = request.POST.get('field')
             field_type = request.POST.get('type')
             layer_id = request.POST.get('layer_id')
