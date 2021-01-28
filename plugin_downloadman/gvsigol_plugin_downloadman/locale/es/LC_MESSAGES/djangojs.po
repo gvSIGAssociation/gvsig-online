@@ -1,0 +1,106 @@
+#    gvSIG Online.
+#    Copyright (C) 2019 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "Add to download list"
+msgstr "Añadir a descargas"
+
+msgid "No results found"
+msgstr "No se encontraron resultados"
+
+msgid "View download list"
+msgstr "Ver lista de descargas"
+
+msgid "Available downloads"
+msgstr "Descargas disponibles"
+
+msgid "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
+msgstr "No se pudo obtener La lista de descargas. Inténtelo más tarde o contacte al administrador del servicio si el error persiste"
+
+msgid "Email"
+msgstr "Correo electrónico"
+
+msgid "No layers have been selected for download"
+msgstr "No se han seleccionado capas para descarga"
+
+msgid "List of downloads"
+msgstr "Lista de descargas"
+
+msgid "Start downloading"
+msgstr "Comenzar descarga"
+
+msgid ""
+"Your download request has been registered. You will receive an email when your request is ready for download. "
+"You can also use this tracking link to check the status of your request: "
+msgstr ""
+"Su petición de descarga se ha registrado. Recibirá un correo electrónico cuando su petición esté lista para descargar. "
+"También puede usar este enlace de seguimiento para consultar el estado de su petición: "
+
+msgid "There was an error processing your download request. Please, try again later"
+msgstr "Hubo un error procesando su petición. Por favor, inténtelo más tarde"
+
+msgid "Direct download"
+msgstr "Descarga directa"
+
+msgid "Requires approval"
+msgstr "Requiere aprobación"
+
+msgid "Approved"
+msgstr "Aprobado"
+
+msgid "Approval"
+msgstr "Aprobación"
+
+msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
+msgstr "Alguno de los recursos seleccionados requiere ser aprobado por un administrador. Por favor, rellene la siguiente información:"
+
+msgid "Organization (optional)"
+msgstr "Organización (opcional)"
+
+msgid "Indended usage (optional)"
+msgstr "Uso previsto (opcional)"
+
+msgid "%(number)s days"
+msgstr "%(number)s días"
+
+msgid "%(number)s hours"
+msgstr "%(number)s horas"
+
+msgid "%(number)s minutes"
+msgstr "%(number)s minutos"
+
+msgid "Generic download request"
+msgstr "Solicitud de descarga genérica"
+
+msgid "Please, use this form to describe which data you need to download:"
+msgstr "Por favor, use este formulario para describir los datos que necesita descargar:"
+
+msgid "Request description"
+msgstr "Descripción de la petición"
+
+msgid "Send generic request"
+msgstr "Enviar solicitud genérica"
+
+msgid "Send request"
+msgstr "Enviar solicitud"
+
+msgid ""
+"The limit of allowed download items per request has been reached. "
+"You can start a new request to download additional items."
+msgstr ""
+"Se ha alcanzado el límite de elementos de descarga permitidos "
+"en cada solicitud. Puede iniciar una nueva solicitud para "
+"descargar elementos adicionales."
+

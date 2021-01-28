@@ -1,0 +1,88 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+
+<div class="row">
+	<div class="col-md-8">
+		<h1>{{ title }}</h1>
+		<p>{{ abstract }}</p>
+		
+		<h2>{% trans 'About this resource' %}</h2>
+		<span>{% trans 'Categories' %}:</span>
+		{{ categories|join:", " }}
+		<br />
+		
+		<span>{% trans 'Keywords' %}:</span>
+		{{ keywords|join:", " }}
+		<br />
+		
+		<span>{% trans 'Legal constraints' %}:</span>
+		.......TO DO....
+		<br />
+
+		<h2>{% trans 'Technical information' %}</h2>
+		
+		<span>{% trans 'Representation type' %}:</span>
+		{{ representation_type }}
+		<br />
+		
+		<span>{% trans 'Scale' %}:</span>
+		1:{{ scale }}
+		<br />
+		
+		<span>{% trans 'Coordinate Reference System' %}:</span>
+		{{ srs }}
+		<br />
+		
+		<span>{% trans 'Metadata identifier' %}:</span>
+		{{ metadata_id }}
+		<br />
+		
+		
+	</div>
+	<div class="col-md-4">
+		{% for thumbnail in thumbnails %}
+			<img src="{{ thumbnail.url }}" alt="{{ thumbnail.name }}"/><br />
+		{% endfor %}
+	
+		<h2>{% trans 'Download and links' %}</h2>
+		{% for resource in resources %}
+			{{ resource.name }}
+			
+			{% if resource.protocol == 'WWW:DOWNLOAD-1.0-http--download' %}
+				<a href="{{ resource.url }}" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">{% trans 'Download' %}</a>
+			{% endif %}
+			
+			{% if resource.protocol == "OGC:WMS" %}
+				<a href="{{ resource.url }}?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">OGC:WMS</a>
+			{% endif %}
+			
+			{% if resource.protocol == "OGC:WFS-1.0.0-http-get-capabilities" %}
+				<a href="{{ resource.url }}?service=WFS&version=1.0.0&request=GetFeature&typeName={{ resource.name }}&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">{% trans 'Get shape' %}</a>
+			{% endif %} 
+			<div style="clear:both"></div>
+		{% endfor %}
+
+		<h2>{% trans 'Spatial Extent' %}</h2>
+		<img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="{{ image_url }}" src="{{ image_url }}"/>
+		
+		<h2>{% trans 'Temporal Extent' %}</h2>
+		<span>{% trans 'Publication date' %}:</span>
+		{{ publish_date }}
+		<br />
+		
+		<span>{% trans 'Period' %}:</span>
+		{{ period_start }} - {{ period_end }}
+		<br />
+		
+	</div>
+</div>      
+
+
+<script>
+$(document).ready(function() {
+});
+</script>
+{% endblock %}

@@ -1,0 +1,818 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-13 21:23+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+
+#: models.py:43
+msgid "Request queued"
+msgstr ""
+
+#: models.py:44
+msgid "Processing request"
+msgstr ""
+
+#: models.py:45 templates/download_request_update.html:88
+msgid "Completed"
+msgstr ""
+
+#: models.py:46
+msgid "Completed with errors"
+msgstr ""
+
+#: models.py:47 models.py:251
+msgid "Rejected"
+msgstr ""
+
+#: models.py:48
+msgid "Error queueing request"
+msgstr ""
+
+#: models.py:51
+msgid "Initial notification completed"
+msgstr ""
+
+#: models.py:52
+msgid "Notification completed"
+msgstr ""
+
+#: models.py:53
+msgid "Notification error"
+msgstr ""
+
+#: models.py:54
+msgid "Permanent notification error"
+msgstr ""
+
+#: models.py:82
+msgid "Active"
+msgstr ""
+
+#: models.py:84
+msgid "Archived"
+msgstr ""
+
+#: models.py:88 templates/downman_index.html:28 templates/downman_index.html:30
+#, fuzzy
+#| msgid "Pending authorization"
+msgid "Awaiting approval"
+msgstr "Autorização pendente"
+
+#: models.py:120 tasks.py:1307 tasks.py:1310 views.py:571 views.py:577
+msgid "Multiresource package"
+msgstr ""
+
+#: models.py:155
+msgid "Processed #sing#"
+msgstr ""
+
+#: models.py:156
+msgid "Cancelled by the user"
+msgstr ""
+
+#: models.py:157
+msgid "Cancelled by the administrator"
+msgstr ""
+
+#: models.py:172 models.py:235
+msgid "Processed"
+msgstr ""
+
+#: models.py:174 models.py:262
+msgid "Canceled"
+msgstr ""
+
+#: models.py:176 views.py:553
+msgid "Expired"
+msgstr ""
+
+#: models.py:233
+#, fuzzy
+#| msgid "Resource "
+msgid "Resource queued"
+msgstr "Recurso "
+
+#: models.py:234
+msgid "Queued, waiting for free space"
+msgstr ""
+
+#: models.py:236
+msgid "On hold"
+msgstr ""
+
+#: models.py:237
+msgid "Temporal error"
+msgstr ""
+
+#: models.py:238
+msgid "Permanent error"
+msgstr ""
+
+#: models.py:247
+msgid "Not processed"
+msgstr ""
+
+#: models.py:248
+msgid "Not required"
+msgstr ""
+
+#: models.py:249
+msgid "Pending"
+msgstr ""
+
+#: models.py:250
+msgid "Accepted"
+msgstr ""
+
+#: models.py:272
+msgid "Approval: "
+msgstr ""
+
+#: tasks.py:970
+msgid "wfs_download_warning"
+msgstr ""
+
+#: tasks.py:972
+msgid ""
+"Could not check the last file of the WFS download. Maybe the result is "
+"incomplete."
+msgstr ""
+
+#: tasks.py:974
+msgid "Layer name: "
+msgstr ""
+
+#: tasks.py:977
+#, fuzzy
+#| msgid "Download request: "
+msgid "Total downloaded geometries: "
+msgstr "Solicitação de descarga: "
+
+#: tasks.py:980
+#, fuzzy
+#| msgid "Download request: "
+msgid "Url of last downloaded file: "
+msgstr "Solicitação de descarga: "
+
+#: tasks.py:1215 tasks.py:1409
+#, fuzzy, python-format
+#| msgid "Download service: your request has failed - %(requestid)s"
+msgid "Download service: your request has been received - %(requestid)s"
+msgstr "Serviço de download: o seu pedido falhou - %(requestid)s"
+
+#: tasks.py:1216
+#, python-brace-format
+msgid ""
+"\n"
+"You can use this tracking link to check the status of your request: {0}"
+msgstr ""
+
+#: tasks.py:1222
+#, fuzzy
+#| msgid "Sorry, your download request has been rejected."
+msgid "Your download request has been received."
+msgstr "Desculpe, o seu pedido de descarga foi rejeitado."
+
+#: tasks.py:1224 templates/request_received_email.html:14
+msgid "Included resources:"
+msgstr ""
+
+#: tasks.py:1271 tasks.py:1274
+#, python-format
+msgid "Download service: your request is ready - %(requestid)s"
+msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
+
+#: tasks.py:1272
+#, fuzzy
+#| msgid "Your download request is being prepared."
+msgid "Your download request is ready."
+msgstr "Seu pedido de descarga está sendo preparado."
+
+#: tasks.py:1275
+msgid ""
+"Your download request is ready. Some resources failed to be processed and "
+"are not available for download at the moment."
+msgstr ""
+
+#: tasks.py:1277
+#, fuzzy, python-format
+#| msgid "Download service: your request is ready - %(requestid)s"
+msgid "Download service: request progress - %(requestid)s"
+msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
+
+#: tasks.py:1278
+#, fuzzy
+#| msgid "Your download request is being prepared."
+msgid "Your download request has been partially processed."
+msgstr "Seu pedido de descarga está sendo preparado."
+
+#: tasks.py:1281
+msgid "You can use the following links to download the requested resources:"
+msgstr ""
+
+#: tasks.py:1284
+#, fuzzy, python-brace-format
+#| msgid "Download service: your request is ready - %(requestid)s"
+msgid "Download service: request progress - {0}"
+msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
+
+#: tasks.py:1308
+msgid "    -- Link valid until {0!s}:\n"
+msgstr ""
+
+#: tasks.py:1309
+msgid "    -- Contents:"
+msgstr ""
+
+#: tasks.py:1314
+msgid "     -- {0!s} [{1!s}]\n"
+msgstr ""
+
+#: tasks.py:1315
+msgid "{0!s} [{1!s}]\n"
+msgstr ""
+
+#: tasks.py:1322 templates/progress_notif_email.html:14
+msgid "The following resources are still being processed:"
+msgstr ""
+
+#: tasks.py:1325 tasks.py:1334
+msgid "Status:"
+msgstr ""
+
+#: tasks.py:1331 templates/progress_notif_email.html:26
+#, fuzzy
+#| msgid "Your download request could not be processed."
+msgid "The following resources could not be processed:"
+msgstr "O seu pedido de download não pôde ser processado."
+
+#: tasks.py:1337 tasks.py:1416
+msgid ""
+"You can also use this tracking link to check the status of your request:"
+msgstr ""
+
+#: tasks.py:1376
+#, fuzzy, python-format
+#| msgid "Download service: your request is ready - %(requestid)s"
+msgid "Download service: a new request is awaiting approval - %(requestid)s"
+msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
+
+#: tasks.py:1377
+msgid "A new request has been registered and is awaiting approval."
+msgstr ""
+
+#: tasks.py:1380 tasks.py:1413
+#, fuzzy, python-brace-format
+#| msgid "Download service: your request is ready - %(requestid)s"
+msgid "Download service: received request - {0}"
+msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
+
+#: tasks.py:1383 templates/awaiting_approval_email.html:13
+#: templates/progress_notif_email.html:37
+msgid "Use the following link to manage the request:"
+msgstr ""
+
+#: tasks.py:1410
+msgid "Our team will contact you when your request has been analysed."
+msgstr ""
+
+#: templates/awaiting_approval_email.html:7
+#: templates/progress_notif_email.html:7
+#, fuzzy
+#| msgid "Download service"
+msgid "Download Service notification - request awaiting approval"
+msgstr "Serviço de descarga"
+
+#: templates/dashboard_downloadman_menu.html:10
+#: templates/dashboard_downloadman_menu.html:18
+#, fuzzy
+#| msgid "Download service"
+msgid "Download manager"
+msgstr "Serviço de descarga"
+
+#: templates/dashboard_downloadman_menu.html:16
+msgid "Plugins"
+msgstr ""
+
+#: templates/download_request_update.html:10
+#, fuzzy
+#| msgid "Download request: "
+msgid "Download request"
+msgstr "Solicitação de descarga: "
+
+#: templates/download_request_update.html:36 templates/downman_index.html:65
+msgid "User"
+msgstr ""
+
+#: templates/download_request_update.html:40
+msgid "Internal user"
+msgstr ""
+
+#: templates/download_request_update.html:43
+msgid "External user"
+msgstr ""
+
+#: templates/download_request_update.html:48 templates/downman_index.html:63
+msgid "Date"
+msgstr ""
+
+#: templates/download_request_update.html:52
+#: templates/download_request_update.html:141
+#: templates/download_request_update.html:186 templates/downman_index.html:64
+#: templates/track_request.html:70
+msgid "Status"
+msgstr ""
+
+#: templates/download_request_update.html:58
+msgid "Random ID"
+msgstr ""
+
+#: templates/download_request_update.html:62
+msgid "Tracking URL"
+msgstr ""
+
+#: templates/download_request_update.html:73 templates/track_request.html:50
+msgid "Generic request"
+msgstr ""
+
+#: templates/download_request_update.html:78
+msgid "Approval status"
+msgstr ""
+
+#: templates/download_request_update.html:81
+msgid "Do you want to approve the request?"
+msgstr ""
+
+#: templates/download_request_update.html:94 templates/track_request.html:55
+#, fuzzy
+#| msgid "Resource "
+msgid "Request description"
+msgstr "Recurso "
+
+#: templates/download_request_update.html:101
+msgid "Approval request"
+msgstr ""
+
+#: templates/download_request_update.html:107
+msgid "Indended usage"
+msgstr ""
+
+#: templates/download_request_update.html:113 templates/track_request.html:59
+msgid "Organization"
+msgstr ""
+
+#: templates/download_request_update.html:120
+#, fuzzy
+#| msgid "Resource "
+msgid "Requested area"
+msgstr "Recurso "
+
+#: templates/download_request_update.html:133
+#, fuzzy
+#| msgid "Download service"
+msgid "Download links"
+msgstr "Serviço de descarga"
+
+#: templates/download_request_update.html:142 templates/track_request.html:70
+msgid "Valid to"
+msgstr ""
+
+#: templates/download_request_update.html:143
+#: templates/download_request_update.html:191
+#, fuzzy
+#| msgid "Download service"
+msgid "Downloaded"
+msgstr "Serviço de descarga"
+
+#: templates/download_request_update.html:144 templates/downman_index.html:66
+msgid "Contents"
+msgstr ""
+
+#: templates/download_request_update.html:145
+msgid "Public Link"
+msgstr ""
+
+#: templates/download_request_update.html:146
+msgid "Internal link"
+msgstr ""
+
+#: templates/download_request_update.html:179
+msgid "Requested resources"
+msgstr ""
+
+#: templates/download_request_update.html:187 templates/track_request.html:70
+msgid "Approval"
+msgstr ""
+
+#: templates/download_request_update.html:188
+#, fuzzy
+#| msgid "Resource "
+msgid "Resource description"
+msgstr "Recurso "
+
+#: templates/download_request_update.html:189
+msgid "Layer id"
+msgstr ""
+
+#: templates/download_request_update.html:190
+msgid "Type"
+msgstr ""
+
+#: templates/download_request_update.html:192
+msgid "Disable"
+msgstr ""
+
+#: templates/download_request_update.html:232
+msgid "Disable resource"
+msgstr ""
+
+#: templates/download_request_update.html:235
+msgid ""
+"The resource [<span id=\"disabled-resource\"></span>] will not be available "
+"for the user who requested the download. Do you want to continue?"
+msgstr ""
+
+#: templates/download_request_update.html:238
+#: templates/download_request_update.html:258
+#: templates/download_request_update.html:278
+#: templates/download_request_update.html:298
+#: templates/download_request_update.html:318
+#: templates/download_request_update.html:338
+msgid "Cancel"
+msgstr ""
+
+#: templates/download_request_update.html:239
+#: templates/download_request_update.html:259
+#: templates/download_request_update.html:279
+#: templates/download_request_update.html:299
+#: templates/download_request_update.html:319
+#: templates/download_request_update.html:339
+msgid "Accept"
+msgstr ""
+
+#: templates/download_request_update.html:252
+msgid "Disable download link"
+msgstr ""
+
+#: templates/download_request_update.html:255
+msgid ""
+"The link [<span id=\"disabled-link\"></span>] and the related resources will "
+"not be available for the user who requested the download. Do you want to "
+"continue?"
+msgstr ""
+
+#: templates/download_request_update.html:272
+msgid "Approve access to a restricted resource"
+msgstr ""
+
+#: templates/download_request_update.html:275
+msgid ""
+"The user will get access to a restricted resource [ID <span id=\"authorized-"
+"resource\"></span>]. Do you want to continue?"
+msgstr ""
+
+#: templates/download_request_update.html:292
+msgid "Reject approval"
+msgstr ""
+
+#: templates/download_request_update.html:295
+msgid ""
+"The resource [<span id=\"rejected-resource\"></span>] will not be available "
+"for the user who requested the download. Do you want to continue?"
+msgstr ""
+
+#: templates/download_request_update.html:312
+msgid "Complete request"
+msgstr ""
+
+#: templates/download_request_update.html:315
+msgid "The request will be tagged as completed. Do you want to continue?"
+msgstr ""
+
+#: templates/download_request_update.html:332
+msgid "Reject request"
+msgstr ""
+
+#: templates/download_request_update.html:335
+msgid "The request will be tagged as rejected. Do you want to continue?"
+msgstr ""
+
+#: templates/download_request_update.html:348
+msgid "Close"
+msgstr ""
+
+#: templates/downman_error_page.html:39 templates/track_request.html:39
+msgid "Download service"
+msgstr "Serviço de descarga"
+
+#: templates/downman_error_page.html:56 templates/track_request.html:98
+msgid "Version"
+msgstr "Versão"
+
+#: templates/downman_error_page.html:60 templates/track_request.html:102
+msgid "All rights reserved"
+msgstr "Todos os direitos reservados"
+
+#: templates/downman_index.html:33 templates/downman_index.html:35
+#, fuzzy
+#| msgid "Download request: "
+msgid "Active download requests"
+msgstr "Solicitação de descarga: "
+
+#: templates/downman_index.html:38 templates/downman_index.html:40
+#, fuzzy
+#| msgid "Download request: "
+msgid "Archived download requests"
+msgstr "Solicitação de descarga: "
+
+#: templates/downman_index.html:43 templates/downman_index.html:45
+msgid "Download manager settings"
+msgstr ""
+
+#: templates/downman_index.html:76
+msgid "(External user)"
+msgstr ""
+
+#: templates/downman_index.html:78
+msgid "Update request"
+msgstr ""
+
+#: templates/downman_index.html:99
+msgid "Default validity (seconds)"
+msgstr ""
+
+#: templates/downman_index.html:108
+msgid "Maximum size for public downloads (MB)"
+msgstr ""
+
+#: templates/downman_index.html:117
+msgid "Maximum number of allowed items in the download list"
+msgstr ""
+
+#: templates/downman_index.html:123
+msgid "Notifications: admin emails"
+msgstr ""
+
+#: templates/downman_index.html:130
+msgid "Save"
+msgstr ""
+
+#: templates/downman_index.html:155
+msgid "Processing request..."
+msgstr ""
+
+#: templates/downman_index.html:156
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: templates/downman_index.html:157
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: templates/downman_index.html:158
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/downman_index.html:159
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: templates/downman_index.html:160
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/downman_index.html:162
+msgid "Loading..."
+msgstr ""
+
+#: templates/downman_index.html:163 templates/downman_index.html:164
+msgid "No records available"
+msgstr ""
+
+#: templates/downman_index.html:166
+msgid "First"
+msgstr ""
+
+#: templates/downman_index.html:167
+msgid "Previous"
+msgstr ""
+
+#: templates/downman_index.html:168
+msgid "Next"
+msgstr ""
+
+#: templates/downman_index.html:169
+msgid "Last"
+msgstr ""
+
+#: templates/downman_index.html:172
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: templates/downman_index.html:173
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: templates/progress_notif_email.html:19
+#: templates/progress_notif_email.html:31
+#: templates/request_received_email.html:19 templates/track_request.html:48
+msgid "Status: "
+msgstr ""
+
+#: templates/request_received_email.html:7
+#, fuzzy
+#| msgid "Download service"
+msgid "Download Service notification"
+msgstr "Serviço de descarga"
+
+#: templates/track_request.html:52
+#, fuzzy
+#| msgid "Your download request is being prepared."
+msgid "The request has to be analysed and processed."
+msgstr "Seu pedido de descarga está sendo preparado."
+
+#: templates/track_request.html:63
+msgid "Intended usage"
+msgstr ""
+
+#: templates/track_request.html:68
+#, fuzzy
+#| msgid "Resource "
+msgid "Requested resources: "
+msgstr "Recurso "
+
+#: templates/track_request.html:70
+msgid "Name"
+msgstr ""
+
+#: templates/track_request.html:70
+msgid "URL"
+msgstr ""
+
+#: templates/track_request.html:90
+msgid "Download request: "
+msgstr "Solicitação de descarga: "
+
+#: views.py:183
+msgid "File format"
+msgstr "Formato do arquivo"
+
+#: views.py:190
+msgid "Spatial filter"
+msgstr ""
+
+#: views.py:278
+msgid ""
+"Include only geometries that intersect the bounding box of the selected area"
+msgstr ""
+
+#: views.py:279 views.py:285
+msgid "Do not filter output"
+msgstr ""
+
+#: views.py:284
+msgid "Trim result using the bounding box of the selected area"
+msgstr ""
+
+#: views.py:317 views.py:414
+msgid "Vector data"
+msgstr "Dados vectoriais"
+
+#: views.py:329 views.py:339 views.py:411
+msgid "Raster data"
+msgstr "Dados rasterizados"
+
+#: views.py:558
+msgid "Approved"
+msgstr ""
+
+#: views.py:621
+msgid "Your download request could not be found"
+msgstr "O seu pedido de descarga não pôde ser encontrado"
+
+#: views.py:659
+#, fuzzy
+#| msgid "Your download request is being prepared."
+msgid "Your download request has expired"
+msgstr "Seu pedido de descarga está sendo preparado."
+
+#: views.py:659 views.py:661
+msgid "You can start a new request using the Download Service"
+msgstr ""
+
+#: views.py:661
+#, fuzzy
+#| msgid "Your download request is being prepared."
+msgid "Your download request has been cancelled"
+msgstr "Seu pedido de descarga está sendo preparado."
+
+#: views.py:716
+#, fuzzy
+#| msgid "Your download request could not be found"
+msgid "The resource could not be found"
+msgstr "O seu pedido de descarga não pôde ser encontrado"
+
+#: views.py:716
+msgid "Contact the service administrators if you believe this is an error"
+msgstr ""
+
+#, fuzzy
+#~| msgid "Pending authorization"
+#~ msgid "Authorization: "
+#~ msgstr "Autorização: "
+
+#~| msgid "Pending authorization"
+#~ msgid "Authorization"
+#~ msgstr "Autorização"
+
+#, fuzzy
+#~| msgid "Pending authorization"
+#~ msgid "Reject authorization"
+#~ msgstr "Autorização pendente"
+
+#~ msgid ""
+#~ "Your download request is ready. You can download it in the following "
+#~ "link: %(url)s\n"
+#~ "The link will be available until %(valid_to)s"
+#~ msgstr ""
+#~ "O seu pedido de download está pronto. Você pode baixá-lo no seguinte "
+#~ "link: %(url)s\n"
+#~ "O link estará disponível até %(valid_to)s"
+
+#~ msgid ""
+#~ "Sorry, your download request could not be completed. Please, try again or "
+#~ "contact the service support."
+#~ msgstr ""
+#~ "Lamentamos, mas o seu pedido de download não pôde ser concluído. Por "
+#~ "favor, tente novamente ou entre em contato com o suporte ao serviço."
+
+#~ msgid ""
+#~ " 'Use the following link if your download does not start automatically: "
+#~ "<a href=\"%(download_url)s\">%(download_url)s</a>' "
+#~ msgstr ""
+#~ "'Use o seguinte link se o download não começar automaticamente: <ahref="
+#~ "\"%(download_url)s\">%(download_url)s</a>' "
+
+#~ msgid ""
+#~ "Your download request has expired and it is not longer available. You can "
+#~ "start a new request"
+#~ msgstr ""
+#~ "Seu pedido de download expirou e não está mais disponível. Você pode "
+#~ "iniciar uma nova solicitação"
+
+#~ msgid "Your request is ready for download"
+#~ msgstr "Seu pedido está pronto para ser baixado"
+
+#~ msgid "The link will be available until %(valid_to)s"
+#~ msgstr "O link estará disponível até %(valid_to)s"
+
+#~ msgid ""
+#~ "You can create a new request if you are still interested on these datasets"
+#~ msgstr ""
+#~ "Pode criar um novo pedido se ainda estiver interessado nestes conjuntos "
+#~ "de dados"
+
+#~ msgid "Your download request requires authorization from IDEUY."
+#~ msgstr "Seu pedido de descarga requer autorização da IDEUY."
+
+#~ msgid "You will receive an email when it becomes available"
+#~ msgstr "Você receberá um e-mail quando ele estiver disponível"
+
+#~ msgid "Your download request requires confirmation from IDEUY."
+#~ msgstr "Seu pedido de download requer confirmação da IDEUY."
+
+#~ msgid "You can contact IDEUY if you believe this is a mistake"
+#~ msgstr ""
+#~ "Você pode entrar em contato com IDEUY se você acredita que isso é um erro"
+
+#~ msgid "You have cancelled this download request."
+#~ msgstr "Você cancelou este pedido de descarga."
+
+#~ msgid ""
+#~ "You should create a new request if you are still interested on these "
+#~ "datasets"
+#~ msgstr ""
+#~ "Você deve criar uma nova solicitação se você ainda estiver interessado "
+#~ "nesses conjuntos de dados"

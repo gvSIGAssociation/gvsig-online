@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">	
+		<div class="col-md-12">
+				<div class="row">
+					<div class="col">
+					<h3 class="dashboard-form-title">{% trans "Download request" %}</h3>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col" style="padding-left: 30px;">
+						<form id="theform" role="form" method="post" action="">
+							{% csrf_token %}
+							<div id="form-error" style="color:#ff0000;">
+								<ul>
+								{% for field in form %}
+									{% if field.errors %}
+										<li>{{field.label}}. {{ field.errors|striptags }}</li>
+									{% endif %}	
+								{% endfor %}
+								{% for field, msg in form.errors.iteritems %}
+									<li>{{ msg|striptags }}</li>
+								{% endfor %}
+								</ul>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="box">
+					<div class="box-body">
+						<div class="row">
+							<div class="col-md-4">
+								<label>{% trans "User" %}</label>
+								<div class="input-group">
+									{% if download_request.requested_by_user %}
+									<input class="form-control" readonly name="user" id="user" type="text" value="{{ download_request.requested_by_user }}">
+									<span class="input-group-addon" id="user_type">{% trans 'Internal user' %}</span>
+									{% else %}
+									<input class="form-control" readonly name="user" id="user" type="text" value="{{ download_request.requested_by_external }}">
+									<span class="input-group-addon" id="user_type">{% trans 'External user' %}</span>
+									{% endif %}
+								</div>
+							</div>
+							<div class="col-md-4">
+								<label>{% trans "Date" %}</label>
+								<input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{{download_request.requested_date}}">
+							</div>
+							<div class="col-md-4">
+								<label>{% trans "Status" %}</label>
+								<input readonly name="request_status" id="request_status" type="text" class="form-control" value="{{download_request.status_active}}">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-5">
+								<label>{% trans "Random ID" %}</label>
+								<input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{{download_request.request_random_id}}">
+							</div>
+							<div class="col-md-7">
+								<label>{% trans "Tracking URL" %}</label>
+								<div class="input-group">
+								<a target="_blank" href="{% url 'download-request-tracking' download_request.request_random_id %}"><input class="form-control" readonly type="text" value="{% url 'download-request-tracking' download_request.request_random_id %}"></a>
+								<a class="input-group-addon" target="_blank" href="{% url 'download-request-tracking' download_request.request_random_id %}"><i class="fa fa-external-link"></i></a>
+								</div>
+							</div>
+						</div>
+						{% if download_request.generic_request == 1 or usage or organization %}
+						{% if download_request.generic_request %}
+						<div class="row">
+							<div class="col-sm-12">
+								<h4 class="dashboard-form-title-color">{% trans "Generic request" %}</h3>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<label>{% trans "Approval status" %}</label>
+								{% if download_request.pending_authorization == 1 %}
+								<div class="input-group">
+									<span>{% trans 'Do you want to approve the request?' %}</span>
+									<span>
+									<a class="complete-request-button" data-resourceid="{{ id }}" href="javascript:void(0)"><i class="fa fa-check text-success"></i></a>
+									<a class="reject-request-button" data-resourceid="{{ id }}" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a>
+									</span>
+								</div>
+								{% else %}
+								<input readonly name="request_completed_status" id="request_completed_status" type="text" class="form-control" value="{% trans 'Completed' %}">
+								{% endif %}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<label>{% trans "Request description" %}</label>
+								<textarea class="form-control" readonly name="request_desc" id="request_desc">{{request_desc}}</textarea>
+							</div>
+						</div>
+						{% else %}
+						<div class="row">
+							<div class="col-sm-12">
+								<h4 class="dashboard-form-title-color">{% trans "Approval request" %}</h4>
+							</div>
+						</div>
+						{% endif %}
+						<div class="row">
+							<div class="col-sm-12">
+								<label>{% trans "Indended usage" %}</label>
+								<textarea class="form-control" readonly name="usage" id="usage">{{usage}}</textarea>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<label>{% trans "Organization" %}</label>
+								<input class="form-control" readonly name="organization" id="organization" type="text" value="{{organization}}">
+							</div>
+						</div>
+						{% if download_request.shared_view_url %}
+						<div class="row">
+							<div class="col-sm-12">
+								<label>{% trans "Requested area" %}</label>
+								<div class="input-group">
+								<a target="_blank" href="{{download_request.shared_view_url}}"><input class="form-control" readonly name="shv-request-area" id="shv-request-area" type="text" value="{{download_request.shared_view_url}}"></a>
+								<a class="input-group-addon" target="_blank" href="{{download_request.shared_view_url}}"><i class="fa fa-external-link"></i></a>
+								</div>
+							</div>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% if download_request.generic_request != 1 %}
+						<div class="row" style="padding-top: 10px">
+							<div class="col-md-12">
+								<div class="box-header"  style="padding-top: 10px; padding-bottom: 0px">
+									<h3 class="box-title">{% trans "Download links" %}</h3>
+								</div>
+								<div class="box-body table-responsive">
+									{% now "c" as today_date %}
+									<table class="table" id="links-table">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>{% trans "Status" %}</th>
+												<th>{% trans "Valid to" %}</th>
+												<th>{% trans "Downloaded" %}</th>
+												<th>{% trans "Contents" %}</th>
+												<th>{% trans "Public Link" %}</th>
+												<!-- <th>{% trans "Internal link" %}</th>  -->
+												<th>Disable</th>
+											</tr>
+										</thead>
+										<tbody>
+										{% for download_link in download_request.downloadlink_set.all %}
+										{% if download_link.active %}
+											<tr class="success">
+										{% else %}
+											<tr class="danger">
+										{% endif %}
+												<td>{{ download_link.id }}</td>
+												<td>{{ download_link.status_active }}</td>
+												<td>{{ download_link.valid_to }}</td>
+												<td>{{ download_link.download_count }}</td>
+												<td>{{ download_link.contents_details }}</td>
+												<td><a target="_blank" href="{% url 'downman-download-resource' download_request.request_random_id download_link.link_random_id %}"><i class="fa fa-external-link"></i></a></td>
+											{% if download_link.prepared_download_path %}
+												<!-- <td>{{ download_link.prepared_download_path }}</td> -->
+											{% else %}
+												<!-- <td>{{ download_link.resourcelocator_set.first.resolved_url }}</td> -->
+											{% endif %}
+												<td><a class="disable-link-button" data-linkid="{{ download_link.id }}" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>
+											</tr>
+										{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div class="row" style="padding-top: 10px">
+							<div class="col-md-12">
+								<div class="box-header"  style="padding-top: 10px; padding-bottom: 0px">
+									<h3 class="box-title">{% trans "Requested resources" %}</h3>
+								</div>
+								<div class="box-body table-responsive">
+									<table class="table" id="resources-table">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>{% trans "Status" %}</th>
+												<th>{% trans "Approval" %}</th>
+												<th>{% trans "Resource description" %}</th>
+												<th>{% trans "Layer id" %}</th>
+												<th>{% trans "Type" %}</th>
+												<th>{% trans "Downloaded" %}</th>
+												<th>{% trans "Disable" %}</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for resourceLocator in download_request.resourcelocator_set.all %}
+											<tr>
+												<td>{{ resourceLocator.id }}</td>
+												<td>{{ resourceLocator.status_canceled }}</td>
+												<td>{{ resourceLocator.authorization_desc }}<br>
+													{% if resourceLocator.authorization == 1 %}
+													<a class="authorize-resource-button" data-resourceid="{{ resourceLocator.id }}" href="javascript:void(0)"><i class="fa fa-check text-success"></i></a>
+													<a class="reject-resource-button" data-resourceid="{{ resourceLocator.id }}" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a>
+													{% endif %}
+												</td>
+												<td>{{ resourceLocator.fq_title_name }}</td>
+												<td>{{ resourceLocator.layer_id }}</td>
+												<td>{{ resourceLocator.layer_id_type }}</td>
+												<td>{{ resourceLocator.download_count }}</td>
+												<td><a class="disable-resource-button" data-resourceid="{{ resourceLocator.id }}" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						{% endif %}
+					</div>
+				</div>
+		</div>
+	</div>
+	<!-- Modals -->
+	<div class="modal fade" id="modal-resource-cancel" tabindex="-1" role="dialog" aria-labelledby="modal-resource-cancel-label">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-resource-cancel-label">{% trans "Disable resource" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The resource [<span id="disabled-resource"></span>] will not be available for the user who requested the download. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-disable-resource" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-disable-resource" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-link-cancel" tabindex="-1" role="dialog" aria-labelledby="modal-link-cancel-resource">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-link-cancel-resource">{% trans "Disable download link" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The link [<span id="disabled-link"></span>] and the related resources will not be available for the user who requested the download. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-disable-link" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-disable-link" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-authorization-accept" tabindex="-1" role="dialog" aria-labelledby="modal-authorization-label">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-authorization-label">{% trans "Approve access to a restricted resource" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The user will get access to a restricted resource [ID <span id="authorized-resource"></span>]. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-authorize-resource" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-authorize-resource" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-authorization-reject" tabindex="-1" role="dialog" aria-labelledby="modal-authorization-reject-label">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-authorization-reject-label">{% trans "Reject approval" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The resource [<span id="rejected-resource"></span>] will not be available for the user who requested the download. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-reject-resource" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-reject-resource" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-request-accept" tabindex="-1" role="dialog" aria-labelledby="modal-authorization-label">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-authorization-label">{% trans "Complete request" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The request will be tagged as completed. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-authorize-request" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-authorize-request" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-request-reject" tabindex="-1" role="dialog" aria-labelledby="modal-request-reject-label">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-request-reject-label">{% trans "Reject request" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The request will be tagged as rejected. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-reject-request" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-reject-request" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row" style="padding-top: 10px">
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<a href="{% url 'downman-dashboard-index' %}"><button type="button" class="btn btn-default btn-sm">
+					{% trans "Close" %}
+				</button></a>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-downloadman').addClass("active");
+
+	$( document ).ready(function() {
+		$('#button-confirm-disable-resource').click( function() {
+			var theForm = document.getElementById("theform");
+			var resourceId = $('#disabled-resource').html();
+			var actionUrl = "{% url 'download-resource-cancel' resource_id=12345 %}".replace(/12345/, resourceId);
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
+		$('#button-confirm-disable-link').click( function() {
+			var theForm = document.getElementById("theform");
+			var linkId = $('#disabled-link').html();
+			var actionUrl = "{% url 'download-link-cancel' link_id=12345 %}".replace(/12345/, linkId);
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
+		$('#button-confirm-authorize-resource').click( function() {
+			var theForm = document.getElementById("theform");
+			var resourceId = $('#authorized-resource').html();
+			var actionUrl = "{% url 'resource-authorization-accept' resource_id=12345 %}".replace(/12345/, resourceId);
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
+		$('#button-confirm-reject-resource').click( function() {
+			var theForm = document.getElementById("theform");
+			var resourceId = $('#rejected-resource').html();
+			var actionUrl = "{% url 'resource-authorization-reject' resource_id=12345 %}".replace(/12345/, resourceId);
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
+		$('#button-confirm-authorize-request').click( function() {
+			var theForm = document.getElementById("theform");
+			var resourceId = $('#authorized-resource').html();
+			var actionUrl = "{% url 'generic-request-completed' request_id=download_request.id %}";
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
+		$('#button-confirm-reject-request').click( function() {
+			var theForm = document.getElementById("theform");
+			var resourceId = $('#rejected-resource').html();
+			var actionUrl = "{% url 'generic-request-rejected' request_id=download_request.id %}";
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
+		$('.disable-link-button').on('click', function (){
+			$('#disabled-link').html($(this).attr('data-linkid'));
+			$('#modal-link-cancel').modal('show');
+		});
+		$('.disable-resource-button').on('click', function (){
+			$('#disabled-resource').html($(this).attr('data-resourceid'));
+			$('#modal-resource-cancel').modal('show');
+		});
+		$('.reject-resource-button').on('click', function (){
+			$('#rejected-resource').html($(this).attr('data-resourceid'));
+			$('#modal-authorization-reject').modal('show');
+		});
+		$('.authorize-resource-button').on('click', function (){
+			$('#authorized-resource').html($(this).attr('data-resourceid'));
+			$('#modal-authorization-accept').modal('show');
+		});
+		$('.reject-request-button').on('click', function (){
+			$('#modal-request-reject').modal('show');
+		});
+		$('.complete-request-button').on('click', function (){
+			$('#modal-request-accept').modal('show');
+		});
+		
+	});
+</script>
+{% endblock %}

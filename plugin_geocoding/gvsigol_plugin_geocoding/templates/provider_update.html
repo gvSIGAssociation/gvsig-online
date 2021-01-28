@@ -1,0 +1,606 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+
+			<form id="provider-form" enctype="multipart/form-data" role="form"
+				method="post"
+				action="/gvsigonline/geocoding/provider_update/{{provider_id}}/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Update provider" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+				
+					<div class="box-body">
+						{% csrf_token %}													
+						{% if form.errors %}
+							<div id="form-error" style="color:#ff0000;">
+								<ul>
+								{% for field in form %}
+									{% if field.errors %}
+										<li>{{field.label}}. {{ field.errors|striptags }}</li>
+									{% endif %}	
+								{% endfor %}
+								</ul>
+							</div>
+						{% endif %}
+																		
+						{% if message %}
+							<div id="form-error" style="color:#ff0000;">
+								<p>* {{ message }}</p>
+							</div>
+						{% endif %}
+						
+						<div class="row">
+							<div class="col-md-12 form-group">	
+								<label for="id_type">{% trans "Type" %}</label>
+								{{ form.type }}									
+							</div>
+							<input type="hidden" name="provider-type" value="{{ type }}"/>
+						</div>
+						
+						<div class="row user-param cartociudad-param postgres-param hidden">
+							<div class="col-md-12 form-group">	
+								<label for="id_workspace">{% trans "Workspace" %}</label>
+								{{ form.workspace }}									
+							</div>
+							<input type="hidden" id="provider-workspace-id" name="provider-workspace-id" value="{{ workspace_id }}"/>
+							<input type="hidden" id="provider-workspace" name="provider-workspace" value="{{ workspace_name }}"/>
+						</div>
+						
+						<div class="row user-param cartociudad-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_datastore">{% trans "Data Store" %}</label>
+								{{ form.datastore }}						
+							</div>
+							<input type="hidden" id="provider-datastore" name="provider-datastore" value="{{ datastore }}"/>
+						</div>
+										
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_resource">{% trans "Resource name" %}</label>
+								{{ form.resource }}						
+							</div>
+							<input type="hidden" id="provider-resource" name="provider-resource" value="{{ resource }}"/>
+						</div>	
+						
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_id_field">{% trans "ID Field" %}</label>
+								{{ form.id_field }}						
+							</div>
+							<input type="hidden" id="provider-id_field" name="provider-id_field" value="{{ form.id_field.value|default_if_none:"" }}"/>
+						</div>	
+						
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_text_field">{% trans "Text Field" %}</label>
+								{{ form.text_field }}						
+							</div>
+							<input type="hidden" id="provider-text_field" name="provider-text_field" value="{{  form.text_field.value|default_if_none:"" }}"/>
+						</div>	
+						
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_geom_field">{% trans "Geom Field" %}</label>
+								{{ form.geom_field }}						
+							</div>
+							<input type="hidden" id="provider-geom_field"" name="provider-geom_field"" value="{{ form.geom_field.value|default_if_none:"" }}"/>
+						</div>	
+						
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="id_category">{% trans "Category" %}</label>
+								{{ form.category }}						
+							</div>
+						</div>	
+						
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param postgres-param ide_uy-param">
+							<div class="col-md-12" style="margin-bottom: 20px;">
+								<div class="provider-img">
+									<img id="image-preview" src={{image_photo_url}} alt="">
+								</div>
+								<div class="provider-img-change">
+									<label>{% trans "Change image?" %}</label>
+									<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
+								</div>
+							</div>	
+						</div>	
+						
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param ide_uy-param" id="params-row">
+							<div class="col-md-12 form-group">
+								<div id="advanced-params-button">
+								<label for="id_params">{% trans "Advanced params" %} </label>
+								<div class="pull-right"><i id="advanced-params-icon" class="fa fa-plus"></i></div>
+								</div>	
+								<div id="advanced-params">
+									{{ form.params }}			
+								</div>			
+												
+							</div>
+						</div>
+	
+						
+							
+					</div>	
+				</form>	
+				
+				
+				{% if type != "nominatim" and type != "googlemaps" and type != "new_cartociudad" and type != "ide_uy" %}
+					<div class="box-header process-title">
+								<h3 class="title">{% trans "Import process status" %}</h3>
+						</div>
+
+			<div id="process-resume" class="box-body">
+				<div class="row">
+
+					<div class="col-md-12 form-group">
+
+						<p class="last_update">
+							{% trans "Last Update" %}: <label>---</label>
+						</p>
+						<div class="info">
+							<div class="none-message">
+								<strong><i class="fa fa-info-circle" aria-hidden="true"></i>
+									<span>{% trans "No data uplodaded" %} </span> </strong>
+							</div>
+							
+							<div class="error-message">
+								<strong><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+									<span>{% trans "Error in process" %} </span></strong> <span class="error-details"> </span>
+							</div>
+						
+							<div class="idle-message">
+								<strong><i class="fa fa-info-circle" aria-hidden="true"></i>
+									{% trans "No information available" %} </span> </strong>
+							</div>
+
+
+							<div class="busy-message">
+								<strong class="indexing-during"><i
+									class="fa fa-spinner fa-pulse fa-spin fa-fw"></i> {% trans "Indexing since" %} <label>0:12:11.263</label></span>
+								</strong>
+								<div class="details">
+									<p>
+										<label> {% trans "Request" %}:</label> <label class="request"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Fetched" %}:</label> <label class="fetched"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Skipped" %}:</label> <label class="skipped"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Processed" %}:</label> <label class="processed"> 0 </label>
+									</p>
+								</div>
+							</div>
+
+							<div class="complete-message">
+								<strong class="result_import"><i class="fa fa-check"
+									aria-hidden="true"></i> <label class="result-message"></label>&nbsp;<label
+									class="result-time"></label></span> </strong>
+								<div class="details">
+									<p>
+										<label> {% trans "Request" %}:</label> <label class="request"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Fetched" %}:</label> <label class="fetched"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Skipped" %}:</label> <label class="skipped"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Processed" %}:</label> <label class="processed"> 0 </label>
+									</p>
+								</div>
+							</div>
+
+							<button class="abort-import hidden">Refresh status</button>
+						</div>
+						
+								<div class="box-body">
+				<div class="row">
+				<!-- 
+					<div class="col-md-6 upload-form-button-div">
+						<button
+							class="btn btn-default upload-form-button delta-import-button btn-sm">
+							<i class="fa fa-refresh margin-r-5"></i> {% trans "Update data"	%}
+						</button>
+					</div>
+ 				-->
+					<div class="col-md-12 upload-form-button-div">
+						<button
+							class="btn btn-default upload-form-button full-import-button btn-sm">
+							<i class="fa fa-cloud-upload margin-r-5"></i> 
+								{% if type == 'postgres' %}
+								{%     trans "Create fulltext index" %}
+								{% else %}
+								{%     trans "Upload full data" %}
+								{% endif %}
+						</button>
+					</div>
+				</div>
+			</div>
+
+					</div>
+				</div>
+			</div>
+			
+			{% endif %}
+			<div class="row">
+							
+						</div>
+		</div>
+	</div>
+</div>
+{% endblock %} {% block extra-scripts %}
+<script type="text/javascript">
+	var params = JSON.parse('{{ params | escapejs }}');
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-geocoding').addClass("active");
+	
+	$('.save-button').click( function() {
+		$("body").overlay();
+	});
+	
+	
+	$('.abort-import').click( function() {
+		startImportProcessStatus()
+	});
+	
+	var interval = null;
+	
+	var connectionParams = document.getElementById('id_params');
+	var codemirror = CodeMirror.fromTextArea(connectionParams, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	window.GOL = window.GOL || {};
+	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
+	window.GOL.DS_ADD.dstypeChanged = function(type) {
+		codemirror.setValue('');		
+		var code = params;
+		$('#select-file-row').css('display', 'none');
+		$('#connection-params-row').css('display', 'block');
+		codemirror.setValue(JSON.stringify(code, null, "\t"));
+	
+	}
+	
+	
+	function updateForm(type){
+		$("[class$=-param]").addClass("hidden");
+		$("."+type+"-param").removeClass("hidden");
+		
+ 		//GOL.DS_ADD.dstypeChanged(type);
+	}
+	
+	function updateResourceList(id_workspace, id_datastore, resource) {
+		if (id_workspace && id_datastore) {
+			$("body").overlay();
+			$.getJSON("{% url 'get_geocoding_resource_list_available' %}", {name_datastore: id_datastore, id_workspace: id_workspace}, function(data2){
+				if(data2){
+					var id_ds = data2["id_datastore"];
+					$.getJSON("{% url 'backend_resource_list' %}", {id_datastore: id_ds, type: "all"}, function(data){
+						var name_select = $("#id_resource");
+						var previousValue = resource;
+						var placeholderSelected = true;
+						
+						if (data==null || data.length==0) {
+							var text = "{% trans 'Data store contains no resources to publish' %}";
+							rebuildSelect(name_select, text, true);
+							$.overlayout();
+							return;
+						}
+						var options = [];
+						for (var i=0; i<data.length; i++) {
+							var attribs = {
+								value: data[i],
+								text: data[i]
+							};
+							if (previousValue == data[i]) {
+								attribs['selected']='true';
+								placeholderSelected = false;
+							}
+							options.push($('<option>', attribs));
+						}
+						var text = '{% trans "Choose resource" %}';
+						rebuildSelect(name_select, text, placeholderSelected, options);
+						$.overlayout();
+					}).fail(function() {
+						var name_select = $("#id_resource");
+						var text = "{% trans 'Service is unavailable' %}";
+						rebuildSelect(name_select, text, true);
+						$.overlayout();
+					});
+				}
+				
+			}).fail(function() {
+				var name_select = $("#id_resource");
+				var text = "{% trans 'Service is unavailable' %}";
+				rebuildSelect(name_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var name_select = $("#id_resource");
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(name_select, text, true);
+		}
+	};
+	
+	
+	function updateFieldsList(id_workspace, id_datastore, id_resource, field, prev_value) {
+		if (id_workspace && id_datastore && id_resource) {
+			$("body").overlay();
+			$.getJSON("{% url 'backend_fields_list' %}", {name_resource: id_resource, name_datastore: id_datastore, id_workspace: id_workspace}, function(data){
+				var language = $("#select-language").val();
+				var placeholderSelected = true;
+				var name_select = $("#"+field);
+				if (data==null || data.length==0) {
+					var text = "{% trans 'Resource contains no fields' %}";
+					rebuildSelect(name_select, text, true);
+					$.overlayout();
+					return;
+				}
+				var options = [];
+				for (var i=0; i<data.length; i++) {
+					var attribs = {
+							value: data[i]["name"],
+							text: data[i]["title-" + language]
+						};
+					if (prev_value == data[i]["name"]) {
+						attribs['selected']='true';
+						placeholderSelected = false;
+					}
+					options.push($('<option>', attribs));
+				}
+				var text = '{% trans "Choose field" %}';
+				rebuildSelect(name_select, text, placeholderSelected, options);
+				$.overlayout();
+				
+			}).fail(function() {
+				var name_select = $("#"+field);
+				var text = "{% trans 'Service is unavailable' %}";
+				rebuildSelect(name_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var name_select = $("#"+field);
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(name_select, text, true);
+		}
+	};
+	
+	
+	function actualizarInfoPanel(data){
+		if(data.status){
+			if(data.status == 500){
+				data.status = "error";
+			}
+			$("#process-resume").removeClass();
+			$("#process-resume").addClass("box-body").addClass(data.status);
+		}
+		
+		if(data.status=="idle" && data.statusMessages["Time taken"]){
+			$("#process-resume").addClass("box-body").addClass("complete");
+		}
+		if(data.statusMessages){
+			if(data.statusMessages["Full Dump Started"]){
+				$(".last_update label").text(data.statusMessages["Full Dump Started"]);
+			}
+			if(data.statusMessages["Time Elapsed"]){
+				$(".indexing-during label").text(data.statusMessages["Time Elapsed"]);
+			}
+			
+			if(data.statusMessages["Total Requests made to DataSource"]){
+				$(".details .request").text(data.statusMessages["Total Requests made to DataSource"]);
+			}
+			if(data.statusMessages["Total Rows Fetched"]){
+				$(".details .fetched").text(data.statusMessages["Total Rows Fetched"]);
+			}
+			if(data.statusMessages["Total Documents Processed"]){
+				$(".details .processed").text(data.statusMessages["Total Documents Processed"]);
+			}
+			if(data.statusMessages["Total Documents Skipped"]){
+				$(".details .skipped").text(data.statusMessages["Total Documents Skipped"]);
+			}
+			if(data.statusMessages["Postgres Index Created"]){
+				$(".details .skipped").text(data.statusMessages["Postgres Index Created"]);
+			}
+			
+			if(data.statusMessages[""]){
+				$(".result_import .result-message").text(data.statusMessages[""]);
+			}
+			
+			/*
+			if(data.statusMessage["Committed"]){
+				$(".details .skipped").text(data.statusMessage["Committed"]);
+			}
+			if(data.statusMessage["Total Documents Failed"]){
+				$(".details .skipped").text(data.statusMessage["Total Documents Failed"]);
+			}
+			*/
+			if(data.statusMessages["Time taken"]){
+				$(".result_import .result-time").text(' ({% trans "Duration" %}: ' + data.statusMessages["Time taken"]+")");
+			}
+			
+			
+						
+		}
+		
+		if(data.responseText){
+			$(".error .error-details").text(data.responseText);
+		}
+		
+		if(data.status == "error"){
+			if(interval != null){
+	  			clearInterval(interval);
+	  			interval = null;
+	  		}
+		}
+		
+		
+	}
+	
+	function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
+		selectObj.empty().html(' ');
+		var attribs = {
+			value: '__disabled__',
+			text: placeholderOptionText,
+			disabled: 'disabled',
+			
+		};
+		if (placeholderSelected) {
+			attribs['selected'] = 'selected';
+		} 
+		selectObj.append($('<option>', attribs));
+		if (extraOptions) {
+			for (var i=0; i<extraOptions.length; i++) {
+				selectObj.append(extraOptions[i]);
+			}
+		}
+		
+		selectObj.prop('disabled', true);
+	}
+	
+	function getImportProcessStatus(){
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/geocoding/provider_import_status/{{provider_id}}/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		actualizarInfoPanel(response);	  		
+			},
+		  	error: function(response){
+				if(interval != null){
+		  			clearInterval(interval);
+		  			interval = null;
+		  		}
+				actualizarInfoPanel(response);	
+		  	}
+		});
+		return false;
+		
+	}
+	
+	function startImportProcessStatus(){
+		$("#process-resume").removeClass("hidden");
+		interval = setInterval(function(){ 
+			getImportProcessStatus();
+		}, 5000);
+	}
+	
+	$('.delta-import-button').click( function() {
+		startImportProcessStatus();
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/geocoding/provider_delta_import/{{provider_id}}/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		getImportProcessStatus();
+			},
+		  	error: function(){
+		  		getImportProcessStatus();
+		  	}
+		});
+		
+		//window.location.replace("/gvsigonline/geocoding/provider_delta_import/{{provider_id}}/");
+		return false;
+	});
+	
+	$('.full-import-button').click( function() {
+		startImportProcessStatus();
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/geocoding/provider_full_import/{{provider_id}}/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		getImportProcessStatus();
+			},
+		  	error: function(){
+		  		getImportProcessStatus();
+		  	}
+		});
+		
+		
+		//window.location.replace("/gvsigonline/geocoding/provider_full_import/{{provider_id}}/");
+		return false;
+	});
+	
+	 function readURL(input) {
+	        if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+	                $('#image-preview').attr('src', e.target.result);
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	    }
+	
+	
+	$("#id_image").change(function(){
+        readURL(this);
+    });
+	
+	$('#advanced-params').hide();
+	 $('#advanced-params-button').click(function(){
+		 if($("#advanced-params-icon").hasClass("fa-plus")){
+			 $("#advanced-params-icon").removeClass("fa-plus").addClass("fa-minus");
+		 }else{
+			 $("#advanced-params-icon").removeClass("fa-minus").addClass("fa-plus");
+		 }
+	         $('#advanced-params').slideToggle("slow");
+	         GOL.DS_ADD.dstypeChanged($('#id_type').val());
+	 });
+	
+	$().ready(function() {
+		var type = $('#id_type').val();
+		
+		updateForm(type);
+		
+		var ws_id = $("#provider-workspace-id").val();
+		var ds_name = $("#provider-datastore").val();
+		
+		if(type=="user" || type == 'postgres'){
+			var resource = $("#provider-resource").val();
+			updateResourceList(ws_id, ds_name, resource);
+ 			updateFieldsList(ws_id, ds_name, resource, "id_id_field", params["id_field"]);
+ 			updateFieldsList(ws_id, ds_name, resource, "id_text_field", params["text_field"]);
+ 			updateFieldsList(ws_id, ds_name, resource, "id_geom_field", params["geom_field"]);
+		}
+		
+		if(type=="user" || type=="cartociudad" || type == 'postgres'){
+			$("#id_category").prop("disabled", "disabled");
+		}
+		
+		$("#id_resource").change(function() {
+			var ws_id = $("#provider-workspace-id").val();
+			var ds_name = $("#provider-datastore").val();
+			var id_resource = $('option:selected', $(this)).val();
+			updateFieldsList(ws_id, ds_name, id_resource, "id_id_field", "");
+			updateFieldsList(ws_id, ds_name, id_resource, "id_text_field", "");
+			updateFieldsList(ws_id, ds_name, id_resource, "id_geom_field", "");
+		});
+		
+ 		//getImportProcessStatus();
+	});
+</script>
+{% endblock %}

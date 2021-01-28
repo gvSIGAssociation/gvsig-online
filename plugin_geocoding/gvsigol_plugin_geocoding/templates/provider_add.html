@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box">
+
+				<form id="provider-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/geocoding/provider_add/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Add provider" %}</h3>
+						<div class="box-tools pull-right">
+							<button id="submit-button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+				
+					<div class="box-body">
+						{% csrf_token %}													
+						{% if form.errors %}
+							<div id="form-error" style="color:#ff0000;">
+								<ul>
+								{% for field in form %}
+									{% if field.errors %}
+										<li>{{field.label}}. {{ field.errors|striptags }}</li>
+									{% endif %}	
+								{% endfor %}
+								</ul>
+								{% if form.errors %}
+										{{form.errors}}
+									{% endif %}	
+							</div>
+						{% endif %}
+						
+						{% if message %}
+							<div id="form-error" style="color:#ff0000;">
+								<p>* {{ message }}</p>
+							</div>
+						{% endif %}
+						
+						<div class="row">
+							<div class="col-md-12 form-group">	
+								<label for="id_type">{% trans "Type" %}</label>
+								{{ form.type }}									
+							</div>
+						</div>
+						
+						<div class="row user-param cartociudad-param postgres-param hidden">
+							<div class="col-md-12 form-group">	
+								<label for="id_workspace">{% trans "Workspace" %}</label>
+								{{ form.workspace }}									
+							</div>
+						</div>
+						
+						<div class="row user-param cartociudad-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_datastore">{% trans "Data Store" %}</label>
+								{{ form.datastore }}						
+							</div>
+						</div>
+										
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_resource">{% trans "Resource name" %}</label>
+								{{ form.resource }}						
+							</div>
+						</div>	
+						
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_id_field">{% trans "ID Field" %}</label>
+								{{ form.id_field }}						
+							</div>
+						</div>	
+						
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_text_field">{% trans "Text Field" %}</label>
+								{{ form.text_field }}						
+							</div>
+						</div>	
+						
+						<div class="row user-param postgres-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_geom_field">{% trans "Geom Field" %}</label>
+								{{ form.geom_field }}						
+							</div>
+						</div>	
+						
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="id_category">{% trans "Category" %}</label>
+								{{ form.category }}						
+							</div>
+						</div>	
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param postgres-param">
+							<div class="col-md-12" style="margin-bottom: 40px;">
+								<div class="provider-img">
+									<img id="image-preview" src="" alt="">
+								</div>
+								<div class="provider-img-change">
+									<label>{% trans "Select image" %}</label>
+									<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
+								</div>
+							</div>	
+						</div>	
+										
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param" id="advanced-params-row">
+							<div class="col-md-12 form-group">
+								<div id="advanced-params-button">
+								<label for="advance-params">{% trans "Advanced params" %}</label>
+								<div class="pull-right"><i id="advanced-params-icon" class="fa fa-plus"></i></div>
+								</div>
+								<div id="advanced-params">
+									<textarea id="params" name="params" form="provider-form">
+										{{ form.params }}
+									</textarea>
+								</div>			
+							</div>
+						</div>
+							
+					</div>	
+				</form>		
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-geocoding').addClass("active");
+
+
+	var save_label = gettext("Save");
+	var continue_label = gettext("Continue");
+	
+//	var settings = JSON.parse("{\"datastore_id\": 2, \"resource\": \"municipio\", \"text_field\": \"nombre\", \"id_field\": \"id\", \"geom_field\": \"geom\"}");
+ 	var settings = JSON.parse('{{ settings | escapejs }}');
+
+	var connectionParams = document.getElementById('params');
+	var codemirror = CodeMirror.fromTextArea(connectionParams, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	window.GOL = window.GOL || {};
+	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
+	window.GOL.DS_ADD.dstypeChanged = function(type) {
+		
+		codemirror.setValue('');		
+		var code = '';
+		
+		$('#select-file-row').css('display', 'none');
+		$('#connection-params-row').css('display', 'block');
+		code += JSON.stringify(settings[type], null, "\t");
+			
+		codemirror.setValue(code);
+	
+	}
+	
+	$('.save-button').click( function() {
+		$("body").overlay();
+	});
+	
+	
+	$('#id_type').change( function() {
+		updateForm($('#id_type').val());
+	});
+	
+	var id_workspace = "";
+	var id_datastore = "";
+	var id_resource = "";
+	
+	
+	function updateForm(type){
+		$("#id_type > option").each(function() {
+			$("."+this.value+"-param").addClass("hidden");
+		});
+		$("."+type+"-param").removeClass("hidden");
+		
+		
+		if(type == "cartociudad" || type == "user" || type == "postgres" ){
+			$("#submit-button").html("<i class=\"fa fa-chevron-right\" aria-hidden=\"true\"></i> " + continue_label);
+		}else{
+			$("#submit-button").html("<i class=\"fa fa-floppy-o margin-r-5\"></i> " + save_label);
+		}
+		
+		GOL.DS_ADD.dstypeChanged(type);
+	}
+	
+	function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
+		selectObj.empty().html(' ');
+		var attribs = {
+			value: '__disabled__',
+			text: placeholderOptionText,
+			disabled: 'disabled',
+			
+		};
+		if (placeholderSelected) {
+			attribs['selected'] = 'selected';
+		} 
+		selectObj.append($('<option>', attribs));
+		if (extraOptions) {
+			for (var i=0; i<extraOptions.length; i++) {
+				selectObj.append(extraOptions[i]);
+			}
+		}
+	}
+	
+	function updateDataStoreList(id_workspace) {
+		if (id_workspace) {
+			$("body").overlay();
+			$.getJSON("{% url 'backend_datastore_list' %}", {id_workspace: id_workspace}, function(data){
+				var name_select = $("#id_datastore");
+				var previousValue = name_select.val();
+				var placeholderSelected = true;
+				
+				if (data==null || data.length==0) {
+					var text = "{% trans 'Data store contains no resources to publish' %}";
+					rebuildSelect(name_select, text, true);
+					$.overlayout();
+					return;
+				}
+				var options = [];
+				for (var i=0; i<data.length; i++) {
+					var attribs = {
+						value: data[i],
+						text: data[i]
+					};
+					if (previousValue == data[i]) {
+						attribs['selected']='true';
+						placeholderSelected = false;
+					}
+					options.push($('<option>', attribs));
+				}
+				var text = '{% trans "Choose dataStore" %}';
+				rebuildSelect(name_select, text, placeholderSelected, options);
+				$.overlayout();
+				
+			}).fail(function() {
+				var name_select = $("#id_datastore");
+				var text = "{% trans 'Service is unavailable' %}";
+				rebuildSelect(name_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var name_select = $("#id_datastore");
+			var text = "{% trans 'No valid workspace selected' %}";
+			rebuildSelect(name_select, text, true);
+		}
+	};
+	
+	function updateResourceList(id_workspace, id_datastore) {
+		if (id_workspace && id_datastore) {
+			$("body").overlay();
+			$.getJSON("{% url 'get_geocoding_resource_list_available' %}", {name_datastore: id_datastore, id_workspace: id_workspace}, function(data2){
+				if(data2){
+					var id_ds = data2["id_datastore"];
+					$.getJSON("{% url 'backend_resource_list' %}", {id_datastore: id_ds, type: "all"}, function(data){
+						var name_select = $("#id_resource");
+						var previousValue = name_select.val();
+						var placeholderSelected = true;
+						
+						if (data==null || data.length==0) {
+							var text = "{% trans 'Data store contains no resources to publish' %}";
+							rebuildSelect(name_select, text, true);
+							$.overlayout();
+							return;
+						}
+						var options = [];
+						for (var i=0; i<data.length; i++) {
+							var attribs = {
+								value: data[i],
+								text: data[i]
+							};
+							if (previousValue == data[i]) {
+								attribs['selected']='true';
+								placeholderSelected = false;
+							}
+							options.push($('<option>', attribs));
+						}
+						var text = '{% trans "Choose resource" %}';
+						rebuildSelect(name_select, text, placeholderSelected, options);
+						$.overlayout();
+					}).fail(function() {
+						var name_select = $("#id_resource");
+						var text = "{% trans 'Service is unavailable' %}";
+						rebuildSelect(name_select, text, true);
+						$.overlayout();
+					});
+				}
+				
+			}).fail(function() {
+				var name_select = $("#id_resource");
+				var text = "{% trans 'Service is unavailable' %}";
+				rebuildSelect(name_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var name_select = $("#id_resource");
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(name_select, text, true);
+		}
+	};
+	
+	
+	function updateFieldsList(id_workspace, id_datastore, id_resource, field) {
+		if (id_workspace && id_datastore && id_resource) {
+			$("body").overlay();
+			$.getJSON("{% url 'backend_fields_list' %}", {name_resource: id_resource, name_datastore: id_datastore, id_workspace: id_workspace}, function(data){
+				var language = $("#select-language").val();
+				var name_select = $("#"+field);
+				var previousValue = name_select.val();
+				var placeholderSelected = true;
+				
+				if (data==null || data.length==0) {
+					var text = "{% trans 'Resource contains no fields' %}";
+					rebuildSelect(name_select, text, true);
+					$.overlayout();
+					return;
+				}
+				var options = [];
+				for (var i=0; i<data.length; i++) {
+					var attribs = {
+						value: data[i]["name"],
+						text: data[i]["title-" + language]
+					};
+					if (previousValue == data[i]["name"]) {
+						attribs['selected']='true';
+						placeholderSelected = false;
+					}
+					options.push($('<option>', attribs));
+				}
+				var text = '{% trans "Choose field" %}';
+				rebuildSelect(name_select, text, placeholderSelected, options);
+				$.overlayout();
+				
+			}).fail(function() {
+				var name_select = $("#"+field);
+				var text = "{% trans 'Service is unavailable' %}";
+				rebuildSelect(name_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var name_select = $("#"+field);
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(name_select, text, true);
+		}
+	};
+	
+	 function readURL(input) {
+	        if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+	                $('#image-preview').attr('src', e.target.result);
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	    }
+	
+	
+	$("#id_image").change(function(){
+     readURL(this);
+	 });
+	
+	$('#advanced-params').hide();
+	 $('#advanced-params-button').click(function(){
+		 if($("#advanced-params-icon").hasClass("fa-plus")){
+			 $("#advanced-params-icon").removeClass("fa-plus").addClass("fa-minus");
+		 }else{
+			 $("#advanced-params-icon").removeClass("fa-minus").addClass("fa-plus");
+		 }
+	         $('#advanced-params').slideToggle("slow");
+	         GOL.DS_ADD.dstypeChanged($('#id_type').val());
+	 });
+	
+	
+	$().ready(function() {
+		updateDataStoreList(id_workspace);
+		updateResourceList(id_workspace, id_datastore);
+		updateFieldsList(id_workspace, id_datastore, id_resource, "id_id_field");
+		updateFieldsList(id_workspace, id_datastore, id_resource, "id_text_field");
+		updateFieldsList(id_workspace, id_datastore, id_resource, "id_geom_field");
+		
+		var text = null;
+		rebuildSelect($("#id_datastore"), text, false);
+		rebuildSelect($("#id_resource"), text, false);
+		rebuildSelect($("#id_id_field"), text, false);
+		rebuildSelect($("#id_text_field"), text, false);
+		rebuildSelect($("#id_geom_field"), text, false);
+		
+		updateForm($('#id_type').val());
+		
+		$("#id_workspace").change(function() {
+			id_workspace = $('option:selected', $(this)).val();
+			updateDataStoreList(id_workspace);
+		});
+		
+		$("#id_datastore").change(function() {
+			id_datastore = $('option:selected', $(this)).val();
+			updateResourceList(id_workspace, id_datastore);
+		});
+		
+		$("#id_resource").change(function() {
+			id_resource = $('option:selected', $(this)).val();
+			updateFieldsList(id_workspace, id_datastore, id_resource, "id_id_field");
+			updateFieldsList(id_workspace, id_datastore, id_resource, "id_text_field");
+			updateFieldsList(id_workspace, id_datastore, id_resource, "id_geom_field");
+		});
+		
+		 $(".select2").css("width", "100%");
+	});
+</script>
+{% endblock %}

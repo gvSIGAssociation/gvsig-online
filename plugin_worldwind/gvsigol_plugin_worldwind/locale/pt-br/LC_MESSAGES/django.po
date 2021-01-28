@@ -1,0 +1,162 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-21 14:31+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: forms.py:7 templates/ww_provider_add.html.py:40
+#: templates/ww_providers_list.html:24
+msgid "Project"
+msgstr ""
+
+#: forms.py:8
+msgid "Directory name"
+msgstr ""
+
+#: templates/dashboard_worldwind_menu.html:9
+#: templates/dashboard_worldwind_menu.html:17
+msgid "WorldWind configuration"
+msgstr ""
+
+#: templates/dashboard_worldwind_menu.html:15
+msgid "Plugins"
+msgstr ""
+
+#: templates/ww_provider_add.html:12
+msgid "Add WorldWind Provider"
+msgstr ""
+
+#: templates/ww_provider_add.html:14
+msgid "Save"
+msgstr ""
+
+#: templates/ww_provider_add.html:34
+msgid "Name"
+msgstr ""
+
+#: templates/ww_provider_add.html:46
+msgid "Directory"
+msgstr ""
+
+#: templates/ww_provider_add.html:47
+msgid "Select directory"
+msgstr ""
+
+#: templates/ww_providers_list.html:11
+msgid "Providers list"
+msgstr ""
+
+#: templates/ww_providers_list.html:14
+msgid "Add provider"
+msgstr ""
+
+#: templates/ww_providers_list.html:52 templates/ww_providers_list.html:100
+msgid "Delete provider"
+msgstr ""
+
+#: templates/ww_providers_list.html:55
+msgid "The provider will be removed, Do you want continue?"
+msgstr ""
+
+#: templates/ww_providers_list.html:58
+msgid "Cancel"
+msgstr ""
+
+#: templates/ww_providers_list.html:59
+msgid "Accept"
+msgstr ""
+
+#: templates/ww_providers_list.html:76
+msgid "Processing request..."
+msgstr ""
+
+#: templates/ww_providers_list.html:77
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: templates/ww_providers_list.html:78
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: templates/ww_providers_list.html:79
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/ww_providers_list.html:80
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: templates/ww_providers_list.html:81
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/ww_providers_list.html:83
+msgid "Loading..."
+msgstr ""
+
+#: templates/ww_providers_list.html:84 templates/ww_providers_list.html:85
+msgid "No records available"
+msgstr ""
+
+#: templates/ww_providers_list.html:87
+msgid "First"
+msgstr ""
+
+#: templates/ww_providers_list.html:88
+msgid "Previous"
+msgstr ""
+
+#: templates/ww_providers_list.html:89
+msgid "Next"
+msgstr ""
+
+#: templates/ww_providers_list.html:90
+msgid "Last"
+msgstr ""
+
+#: templates/ww_providers_list.html:93
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: templates/ww_providers_list.html:94
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: templates/ww_providers_list.html:104
+msgid "TOC order"
+msgstr ""
+
+#: templates/ww_providers_list.html:108
+msgid "Update provider"
+msgstr ""
+
+#: views.py:75
+msgid "Error: Problem creating mapfile."
+msgstr ""
+
+#: views.py:84
+msgid "Error: Provider already defined for this project."
+msgstr ""
+
+#: views.py:87
+msgid "Error: "
+msgstr ""

@@ -1,0 +1,318 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-07-03 10:59+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: forms.py:31 templates/select_chart_type.html:21
+msgid "Bar Chart"
+msgstr "Gráfico de barras"
+
+#: forms.py:32 templates/select_chart_type.html:30
+msgid "Line Chart"
+msgstr "Gráfico de líneas"
+
+#: forms.py:33 templates/select_chart_type.html:39
+msgid "Pie Chart"
+msgstr "Gráfico de tartas"
+
+#: forms.py:37
+msgid "Layer"
+msgstr "Capa"
+
+#: forms.py:38
+msgid "Type"
+msgstr "Tipo"
+
+#: forms.py:39 templates/barchart_add.html:25 templates/barchart_add.html:90
+#: templates/barchart_update.html:25 templates/barchart_update.html:90
+#: templates/linechart_add.html:25 templates/linechart_add.html:90
+#: templates/linechart_update.html:25 templates/linechart_update.html:90
+#: templates/piechart_add.html:25 templates/piechart_add.html:76
+#: templates/piechart_update.html:25 templates/piechart_update.html:76
+msgid "Title"
+msgstr "Título"
+
+#: forms.py:40 templates/barchart_add.html:31 templates/barchart_update.html:31
+#: templates/linechart_add.html:31 templates/linechart_update.html:31
+#: templates/piechart_add.html:31 templates/piechart_update.html:31
+msgid "Description"
+msgstr "Descripción"
+
+#: templates/barchart_add.html:11
+msgid "Add new bar chart"
+msgstr "Añadir nuevo gráfico de barras"
+
+#: templates/barchart_add.html:13 templates/barchart_update.html:13
+#: templates/linechart_add.html:13 templates/linechart_update.html:13
+#: templates/piechart_add.html:13 templates/piechart_update.html:13
+msgid "Update preview"
+msgstr "Actualizar previsualización"
+
+#: templates/barchart_add.html:14 templates/linechart_add.html:14
+#: templates/piechart_add.html:14
+msgid "Save"
+msgstr "Guardar"
+
+#: templates/barchart_add.html:26 templates/linechart_add.html:26
+#: templates/piechart_add.html:26
+msgid "Insert title"
+msgstr "Insertar título"
+
+#: templates/barchart_add.html:36 templates/barchart_update.html:36
+#: templates/linechart_add.html:36 templates/linechart_update.html:36
+#: templates/piechart_add.html:36 templates/piechart_update.html:36
+msgid "Dataset type"
+msgstr "Tipo de dataset"
+
+#: templates/barchart_add.html:39 templates/barchart_update.html:39
+#: templates/linechart_add.html:39 templates/linechart_update.html:39
+#: templates/piechart_add.html:39 templates/piechart_update.html:39
+msgid "Aggregated"
+msgstr "Agregado"
+
+#: templates/barchart_add.html:39 templates/barchart_update.html:39
+#: templates/linechart_add.html:39 templates/linechart_update.html:39
+#: templates/piechart_add.html:39 templates/piechart_update.html:39
+msgid "Show aggregated data for a column"
+msgstr "Mostrar los datos agregados de la columna"
+
+#: templates/barchart_add.html:43 templates/barchart_update.html:43
+#: templates/linechart_add.html:43 templates/linechart_update.html:43
+#: templates/piechart_add.html:43 templates/piechart_update.html:43
+msgid "Single selection"
+msgstr "Selección simple"
+
+#: templates/barchart_add.html:43 templates/barchart_update.html:43
+#: templates/linechart_add.html:43 templates/linechart_update.html:43
+#: templates/piechart_add.html:43 templates/piechart_update.html:43
+msgid "Shows the data of the last selected element"
+msgstr "Mostrar los datos del último elemento seleccionado"
+
+#: templates/barchart_add.html:47 templates/barchart_update.html:47
+#: templates/linechart_add.html:47 templates/linechart_update.html:47
+msgid "Multiple selection"
+msgstr "Selección múltiple"
+
+#: templates/barchart_add.html:47 templates/barchart_update.html:47
+#: templates/linechart_add.html:47 templates/linechart_update.html:47
+msgid "Shows the data of each selected element"
+msgstr "Mostrar datos de cada elemento seleccionado"
+
+#: templates/barchart_add.html:52 templates/barchart_update.html:52
+#: templates/linechart_add.html:52 templates/linechart_update.html:52
+#: templates/piechart_add.html:48 templates/piechart_update.html:48
+msgid "Select column with geographic names"
+msgstr "Seleccionar column con los nombres geográficos"
+
+#: templates/barchart_add.html:58 templates/barchart_update.html:58
+#: templates/linechart_add.html:58 templates/linechart_update.html:58
+#: templates/piechart_add.html:54 templates/piechart_update.html:54
+msgid "Select column with geometries"
+msgstr "Seleccionar columna con las geometrías"
+
+#: templates/barchart_add.html:66 templates/barchart_update.html:66
+#: templates/linechart_add.html:66 templates/linechart_update.html:66
+msgid "Title for the X axis"
+msgstr "Título para el eje X"
+
+#: templates/barchart_add.html:67 templates/linechart_add.html:67
+msgid "X axis"
+msgstr "Eje X"
+
+#: templates/barchart_add.html:70 templates/barchart_update.html:70
+#: templates/linechart_add.html:70 templates/linechart_update.html:70
+msgid "Title for the Y axis"
+msgstr "Título para el eje Y"
+
+#: templates/barchart_add.html:71 templates/linechart_add.html:71
+msgid "Y axis"
+msgstr "Eje Y"
+
+#: templates/barchart_add.html:81 templates/barchart_update.html:81
+#: templates/linechart_add.html:81 templates/linechart_update.html:81
+#: templates/piechart_add.html:67 templates/piechart_update.html:67
+msgid "Select data columns"
+msgstr "Seleccionar columnas de datos"
+
+#: templates/barchart_add.html:84 templates/barchart_update.html:84
+#: templates/linechart_add.html:84 templates/linechart_update.html:84
+#: templates/piechart_add.html:70 templates/piechart_update.html:70
+msgid "Selected"
+msgstr "Seleccionada"
+
+#: templates/barchart_add.html:87 templates/barchart_update.html:87
+#: templates/linechart_add.html:87 templates/linechart_update.html:87
+#: templates/piechart_add.html:73 templates/piechart_update.html:73
+msgid "Column name"
+msgstr "Nombre de la columna"
+
+#: templates/barchart_add.html:275 templates/barchart_update.html:314
+#: templates/linechart_add.html:277 templates/linechart_update.html:315
+#: templates/piechart_add.html:215 templates/piechart_update.html:252
+msgid "You must select column with geographic names"
+msgstr "Debe seleccionar una columna con los nombres geográficos"
+
+#: templates/barchart_add.html:279 templates/barchart_update.html:318
+#: templates/linechart_add.html:281 templates/linechart_update.html:319
+#: templates/piechart_add.html:219 templates/piechart_update.html:256
+msgid "You must select column with geometries"
+msgstr "Debe seleccionar una columna con las geometrías"
+
+#: templates/barchart_add.html:283 templates/barchart_update.html:322
+#: templates/linechart_add.html:285 templates/linechart_update.html:323
+#: templates/piechart_add.html:223 templates/piechart_update.html:260
+msgid "At least one column must be selected"
+msgstr "Al menos una columna debe ser seleccionada"
+
+#: templates/barchart_update.html:11
+msgid "Update bar chart"
+msgstr "Actualizar gráfico de barras"
+
+#: templates/barchart_update.html:14 templates/linechart_update.html:14
+#: templates/piechart_update.html:14
+msgid "Update"
+msgstr "Actualizar"
+
+#: templates/chart_list.html:14
+msgid "Layer title"
+msgstr "Título de la capa"
+
+#: templates/chart_list.html:15
+msgid "Datastore"
+msgstr "Almacén de datos"
+
+#: templates/chart_list.html:16 templates/dashboard_charts_menu.html:9
+#: templates/dashboard_charts_menu.html:17
+msgid "Charts"
+msgstr "Gráficos"
+
+#: templates/chart_list.html:60
+msgid "Processing request..."
+msgstr "Procesando petición..."
+
+#: templates/project_list.html:89 templates/shared_view_list.html:72
+#, python-format
+msgid "Search%(sep)s"
+msgstr "Buscar%(sep)s"
+
+#: templates/project_list.html:90 templates/shared_view_list.html:73
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr "Mostrando %(numrecords)s registros"
+
+#: templates/project_list.html:91 templates/shared_view_list.html:74
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
+
+#: templates/project_list.html:92 templates/shared_view_list.html:75
+msgid "Showing from 0 to 0 of 0 records"
+msgstr "Mostrando desde 0 a 0 de 0 registros"
+
+#: templates/project_list.html:93 templates/shared_view_list.html:76
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr "Filtrando %(max)s registros"
+
+#: templates/project_list.html:95 templates/shared_view_list.html:78
+msgid "Loading..."
+msgstr "Cargando..."
+
+#: templates/project_list.html:96 templates/project_list.html:97
+#: templates/shared_view_list.html:79 templates/shared_view_list.html:80
+msgid "No records available"
+msgstr "No hay registros disponibles"
+
+#: templates/project_list.html:99 templates/shared_view_list.html:82
+msgid "First"
+msgstr "Primero"
+
+#: templates/project_list.html:100 templates/shared_view_list.html:83
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/project_list.html:101 templates/shared_view_list.html:84
+msgid "Next"
+msgstr "Siguiente"
+
+#: templates/project_list.html:102 templates/shared_view_list.html:85
+msgid "Last"
+msgstr "Último"
+
+#: templates/project_list.html:105 templates/shared_view_list.html:88
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr "%(sep)sOrden ascendente"
+
+#: templates/project_list.html:106 templates/shared_view_list.html:89
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr "%(sep)sOrden descendente"
+
+
+#: templates/chart_list.html:84
+msgid "Add chart"
+msgstr "Añadir gráfico"
+
+#: templates/chart_list.html:88
+msgid "Update chart"
+msgstr "Actualizar gráfico"
+
+#: templates/chart_list.html:92
+msgid "Delete chart"
+msgstr "Eliminar gráfico"
+
+#: templates/charts_dashboard.html:37
+msgid "Statistics"
+msgstr "Estadísticas"
+
+#: templates/dashboard_charts_menu.html:15
+msgid "Plugins"
+msgstr "Plugins"
+
+#: templates/linechart_add.html:11
+msgid "Add new line chart"
+msgstr "Añadir nuevo gráfico de líneas"
+
+#: templates/linechart_update.html:11
+msgid "Update line chart"
+msgstr "Actualizar gráfico de líneas"
+
+#: templates/piechart_add.html:11
+msgid "Add new pie chart"
+msgstr "Añadir new gráfico de tartas"
+
+#: templates/piechart_update.html:11
+msgid "Update pie chart"
+msgstr "Actualizar gráfico de tartas"
+
+#: templates/select_chart_type.html:10
+msgid "Create new chart"
+msgstr "Crear nuevo gráfico"
+
+#: templates/select_chart_type.html:22
+msgid "Create new bar chart"
+msgstr "Crear nuevo gráfico de barras"
+
+#: templates/select_chart_type.html:31
+msgid "Create new line chart"
+msgstr "Crear nuevo gráfico de líneas"
+
+#: templates/select_chart_type.html:40
+msgid "Create new pie chart"
+msgstr "Crear nuevo gráfico de tarta"

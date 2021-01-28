@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box padding-20">
+			<form id="section-form" role="form" method="post" action="/gvsigonline/survey/survey_section_add/{{ survey.id }}/">
+				{% csrf_token %}
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Add survey section" %}</h3>
+					<div class="box-tools pull-right">
+						<div id="submit-button" class="btn btn-default btn-sm"><i class="fa fa-chevron-right margin-r-5" aria-hidden="true"></i> {% trans "Save" %}</div>					
+					</div>
+				</div>					
+				<div class="box-body">
+				
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+					
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{ form.name }}
+						</div>	
+					</div>
+										
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_title">{% trans "Title" %}</label>
+							{{ form.title }}									
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_srs">{% trans "SRS" %}</label>
+							{{ form.srs }}									
+						</div>
+					</div>
+										
+				</div>									
+			</form>	
+		</div>
+	</div>				
+</div>
+
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-survey').addClass("active");
+</script>
+<script type="text/javascript">
+$().ready(function(){ 
+	$('#id_srs').val('4326').trigger('change');
+	$("#id_srs").prop("disabled", true);
+	
+	$("#submit-button").click(function(){
+		$("#id_srs").prop("disabled", false);
+		$("#section-form").submit();
+	})
+});
+</script>
+{% endblock %}

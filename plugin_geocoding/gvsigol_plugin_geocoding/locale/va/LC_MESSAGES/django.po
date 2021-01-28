@@ -1,0 +1,349 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-21 14:30+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: ca_ES\n"
+"X-Source-Language: C\n"
+
+#: cartociudad2.py:131 googlemaps.py:126 nominatim.py:117
+msgid "Not founded"
+msgstr "No trobat"
+
+#: forms_services.py:36 forms_services.py:56 templates/provider_add.html.py:43
+#: templates/provider_list.html:23 templates/provider_update.html.py:42
+msgid "Type"
+msgstr "Tipus"
+
+#: forms_services.py:38 forms_services.py:58 templates/provider_add.html.py:50
+#: templates/provider_update.html:50
+msgid "Workspace"
+msgstr "Espai de treball"
+
+#: forms_services.py:39 forms_services.py:59
+msgid "Datastore"
+msgstr "Magatzem de dades"
+
+#: forms_services.py:40 forms_services.py:60
+msgid "Resource"
+msgstr "Recurs"
+
+#: forms_services.py:42 forms_services.py:62 templates/provider_list.html.py:22
+msgid "Id"
+msgstr "Id"
+
+#: forms_services.py:43 forms_services.py:63
+msgid "Text"
+msgstr "Text"
+
+#: forms_services.py:44 forms_services.py:64
+msgid "Geom"
+msgstr "Geom"
+
+#: forms_services.py:46 forms_services.py:66 templates/provider_add.html.py:92
+#: templates/provider_list.html:24 templates/provider_update.html.py:99
+msgid "Category"
+msgstr "Categoria"
+
+#: forms_services.py:48 forms_services.py:68
+msgid "Parameters"
+msgstr "Parametres"
+
+#: googlemaps.py:128
+msgid "Not founded. The rate-limit is exceeded for this API"
+msgstr "No trobat: el límit de tarifa és excedit per aquesta API"
+
+#: settings.py:34 settings_tpl.py:31
+msgid "Google Maps services"
+msgstr "Serveis de Google Maps"
+
+#: settings.py:35 settings_tpl.py:32
+msgid "Nominatim services"
+msgstr "Serveis de Nominatim"
+
+#: settings.py:36 settings_tpl.py:33
+msgid "Cartography of CartoCiudad"
+msgstr "Cartografia de CartoCiudad"
+
+#: settings.py:37 settings_tpl.py:34
+msgid "(New) Cartography of CartoCiudad"
+msgstr "(Nova) Cartografia de CartoCiudad"
+
+#: settings.py:38 settings_tpl.py:35
+msgid "Other data sources"
+msgstr "Altres origens de dades"
+
+#: templates/dashboard_geocoding_menu.html:9
+#: templates/dashboard_geocoding_menu.html:17
+msgid "Geocoding"
+msgstr "Geocodificació"
+
+#: templates/dashboard_geocoding_menu.html:15
+msgid "Plugins"
+msgstr "Plugins"
+
+#: templates/provider_add.html:12 templates/provider_list.html.py:13
+msgid "Add provider"
+msgstr "Afegir proveïdor"
+
+#: templates/provider_add.html:14 templates/provider_update.html.py:16
+msgid "Save"
+msgstr "Guardar"
+
+#: templates/provider_add.html:57 templates/provider_update.html.py:59
+msgid "Data Store"
+msgstr "Magatzem de dades"
+
+#: templates/provider_add.html:64 templates/provider_update.html.py:67
+msgid "Resource name"
+msgstr "Nom del recurs"
+
+#: templates/provider_add.html:71 templates/provider_update.html.py:75
+msgid "ID Field"
+msgstr "Camp ID"
+
+#: templates/provider_add.html:78 templates/provider_update.html.py:83
+msgid "Text Field"
+msgstr "Camp de text"
+
+#: templates/provider_add.html:85 templates/provider_update.html.py:91
+msgid "Geom Field"
+msgstr "Camp Geom"
+
+#: templates/provider_add.html:106
+msgid "Select image"
+msgstr "Seleccionar imatge"
+
+#: templates/provider_add.html:116 templates/provider_update.html.py:119
+msgid "Advanced params"
+msgstr "Parametres avançats"
+
+#: templates/provider_add.html:225 templates/provider_add.html.py:272
+#: templates/provider_update.html:282
+msgid "Data store contains no resources to publish"
+msgstr "El magatzem de dades no conté recursos per publicar"
+
+#: templates/provider_add.html:242
+msgid "Choose dataStore"
+msgstr "Seleccionar magatzem de dades"
+
+#: templates/provider_add.html:248 templates/provider_add.html.py:294
+#: templates/provider_add.html:302 templates/provider_add.html.py:348
+#: templates/provider_update.html:304 templates/provider_update.html.py:312
+#: templates/provider_update.html:356
+msgid "Service is unavailable"
+msgstr "Servei no disponible"
+
+#: templates/provider_add.html:255
+msgid "No valid workspace selected"
+msgstr "No ha triat un espai de treball vàlid"
+
+#: templates/provider_add.html:289 templates/provider_update.html.py:299
+msgid "Choose resource"
+msgstr "Seleccionar recurs"
+
+#: templates/provider_add.html:309 templates/provider_add.html.py:355
+#: templates/provider_update.html:319 templates/provider_update.html.py:363
+msgid "No valid data store selected"
+msgstr "No ha triat un magatzem de dades vàlid"
+
+#: templates/provider_add.html:325 templates/provider_update.html.py:333
+msgid "Resource contains no fields"
+msgstr "El recurs no conté camps per triar"
+
+#: templates/provider_add.html:342 templates/provider_update.html.py:350
+msgid "Choose field"
+msgstr "Triar camp"
+
+#: templates/provider_list.html:11
+msgid "Providers list"
+msgstr "Llistat de proveïdors"
+
+#: templates/provider_list.html:21
+msgid "Order"
+msgstr "Ordre"
+
+#: templates/provider_list.html:25
+msgid "Provider"
+msgstr "Proveïdor"
+
+#: templates/provider_list.html:39
+msgid "(Default)"
+msgstr "(Defecte)"
+
+#: templates/provider_list.html:62 templates/provider_list.html.py:110
+msgid "Delete provider"
+msgstr "Eliminar proveïdor"
+
+#: templates/provider_list.html:65
+msgid "The provider will be removed, Do you want continue?"
+msgstr "S'eliminará el proveïdor, Voleu continuar?"
+
+#: templates/provider_list.html:68
+msgid "Cancel"
+msgstr "Cancel lar"
+
+#: templates/provider_list.html:69
+msgid "Accept"
+msgstr "Acceptar"
+
+#: templates/provider_list.html:86
+msgid "Processing request..."
+msgstr "Processant la sol·licitud ..."
+
+#: templates/provider_list.html:87
+#, python-format
+msgid "Search%(sep)s"
+msgstr "Cercar%(sep)s"
+
+#: templates/provider_list.html:88
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr "Mostrant %(numrecords)s registres"
+
+#: templates/provider_list.html:89
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr "Mostrant desde %(start)s fins %(end)s de %(numrecords)s registres"
+
+#: templates/provider_list.html:90
+msgid "Showing from 0 to 0 of 0 records"
+msgstr "Mostrant desde 0 fins 0 de 0 registres"
+
+#: templates/provider_list.html:91
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr "Filtrant %(max)s registres"
+
+#: templates/provider_list.html:93
+msgid "Loading..."
+msgstr "Carregant..."
+
+#: templates/provider_list.html:94 templates/provider_list.html.py:95
+msgid "No records available"
+msgstr "No hi ha registres disponibles"
+
+#: templates/provider_list.html:97
+msgid "First"
+msgstr "Primer"
+
+#: templates/provider_list.html:98
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/provider_list.html:99
+msgid "Next"
+msgstr "Pròxim"
+
+#: templates/provider_list.html:100
+msgid "Last"
+msgstr "Últim"
+
+#: templates/provider_list.html:103
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr "%(sep)sOrdre ascendent"
+
+#: templates/provider_list.html:104
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr "%(sep)sOrdre descendent"
+
+#: templates/provider_list.html:114
+msgid "Update data provider"
+msgstr "Actualitzar proveïdor de dades"
+
+#: templates/provider_update.html:14
+msgid "Update provider"
+msgstr "Actualitzar proveïdor"
+
+#: templates/provider_update.html:110
+msgid "Change image?"
+msgstr "Canviar la imatge?"
+
+#: templates/provider_update.html:137
+msgid "Import process status"
+msgstr "Importar estat del procés"
+
+#: templates/provider_update.html:146
+msgid "Last Update"
+msgstr "Darrera actualització"
+
+#: templates/provider_update.html:151
+msgid "No data uplodaded"
+msgstr "No s’ha introduït cap dada"
+
+#: templates/provider_update.html:156
+msgid "Error in process"
+msgstr "Error en el procés"
+
+#: templates/provider_update.html:161
+msgid "No information available"
+msgstr "No hi ha informació disponible"
+
+#: templates/provider_update.html:167
+msgid "Indexing since"
+msgstr "Indexant desde"
+
+#: templates/provider_update.html:171 templates/provider_update.html.py:185
+msgid "Request"
+msgstr "Petició"
+
+#: templates/provider_update.html:172 templates/provider_update.html.py:186
+msgid "Fetched"
+msgstr "Recuperat"
+
+#: templates/provider_update.html:173 templates/provider_update.html.py:187
+msgid "Skipped"
+msgstr "Omès"
+
+#: templates/provider_update.html:174 templates/provider_update.html.py:188
+msgid "Processed"
+msgstr "Processat"
+
+#: templates/provider_update.html:202
+msgid "Update data"
+msgstr "Actualitzar dades"
+
+#: templates/provider_update.html:209
+msgid "Upload full data"
+msgstr "Carregar dades completes"
+
+#: templates/provider_update.html:415
+msgid "Duration"
+msgstr "Duració"
+
+#: views.py:117 views.py:270
+msgid "Error: DataStore has not a valid CartoCiudad schema (Needed , "
+msgstr "Error: El magatzem no té un esquema de CartoCiudad vàlid (necessari, "
+
+#: views.py:129
+msgid "Error: this type of provider is already added to the project"
+msgstr "Error: aquest tipus de proveïdor ja s’ha afegit al projecte"
+
+#: views.py:133 views.py:278
+msgid "Error: API-Key is needed"
+msgstr "Error: cal una API-Key"
+
+#: views.py:158
+msgid "Error: provider could not be published"
+msgstr "Error: el proveïdor no s'ha pogut publicar"
+
+#: views.py:229
+#, fuzzy
+msgid "Provider not found"
+msgstr "No s’ha trobat el proveïdor"
