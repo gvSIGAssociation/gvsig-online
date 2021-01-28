@@ -1470,7 +1470,6 @@ def layer_autoconfig(layer, featuretype):
 @staff_required
 def layer_config(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
-
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
         old_conf = ast.literal_eval(layer.conf) if layer.conf else {}
@@ -1593,6 +1592,11 @@ def layer_config(request, layer_id):
         except:
             logger.exception("Retrieving fields")
         enums = Enumeration.objects.all()
+        procedures = []
+        disabled_procedures = core_utils.get_app_setting('GVSIGOL_DISABLED_PROCEDURES', [])
+        for procedure in TriggerProcedure.objects.all():
+            if not procedure.signature in disabled_procedures:
+                procedures.append(procedure)
         
         data = {
             'layer': layer,
@@ -1603,7 +1607,7 @@ def layer_config(request, layer_id):
             'available_languages_array': available_languages,
             'redirect_to_layergroup': redirect_to_layergroup,
             'enumerations': enums,
-            'procedures':  TriggerProcedure.objects.all()
+            'procedures':  procedures
         }
         return render(request, 'layer_config.html', data)
 
