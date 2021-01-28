@@ -112,7 +112,9 @@ class APIGeoWebCache():
             layer_name = layer.name
             wms_layers = json.loads(layer.external_params).get('layers')
             url = json.loads(layer.external_params).get('url')
-            
+            if (json.loads(layer.external_params).get('get_map_url')):
+                url = json.loads(layer.external_params).get('get_map_url')
+
         else:
             layer_name = ws + ":" + layer.name
             wms_layers = layer_name

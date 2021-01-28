@@ -132,3 +132,118 @@ msgstr ""
 
 msgid "Not filtered"
 msgstr ""
+
+
+msgid "keywords"
+msgstr ""
+
+msgid "topicCats"
+msgstr ""
+
+msgid "categories"
+msgstr ""
+
+msgid "inspireThemes"
+msgstr ""
+
+msgid "inspireThemesWithAc"
+msgstr ""
+
+msgid "inspireThemesURI"
+msgstr ""
+
+msgid "denominators"
+msgstr ""
+
+msgid "resolutions"
+msgstr ""
+
+msgid "spatialRepresentationTypes"
+msgstr ""
+
+msgid "orgNames"
+msgstr ""
+
+msgid "orgNamesTree"
+msgstr ""
+
+msgid "metadataPOCs"
+msgstr ""
+
+msgid "serviceTypes"
+msgstr ""
+
+msgid "types"
+msgstr ""
+
+msgid "createDateYears"
+msgstr ""
+
+msgid "formats"
+msgstr ""
+
+msgid "titles"
+msgstr ""
+
+msgid "metadataTypes"
+msgstr ""
+
+msgid "isValidInspire"
+msgstr ""
+
+msgid "isHarvested"
+msgstr ""
+
+msgid "mdStatus"
+msgstr ""
+
+msgid "status"
+msgstr ""
+
+msgid "sourceCatalog"
+msgstr ""
+
+msgid "standards"
+msgstr ""
+
+msgid "subTemplateTypes"
+msgstr ""
+
+msgid "recordOwner"
+msgstr ""
+
+msgid "groupOwners"
+msgstr ""
+
+msgid "publishedForGroup"
+msgstr ""
+
+msgid "isPublishedToAll"
+msgstr ""
+
+msgid "maintenanceAndUpdateFrequencies"
+msgstr ""
+
+msgid "mdActions"
+msgstr ""
+
+msgid "Organization"
+msgstr ""
+
+msgid "Source Catalog"
+msgstr ""
+
+msgid "Year"
+msgstr ""
+
+msgid "Representation type"
+msgstr ""
+
+msgid "Update frequency"
+msgstr ""
+
+msgid "Scale"
+msgstr ""
+
+msgid "Service type"
+msgstr ""

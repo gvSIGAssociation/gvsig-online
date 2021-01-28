@@ -694,4 +694,39 @@ def get_canonical_epsg3857_extent(extent_str):
     except:
         logger.exception("Wrong extent")
         return extent_str
-    
+
+GOL_APP_SETTINGS = None
+try:
+    for app in settings.INSTALLED_APPS:
+        if app.startswith("gvsigol_app_"):
+            importlib.import_module(app+".settings")
+            GOL_APP_SETTINGS = importlib.import_module(app+".settings")
+            break
+except:
+    logger.exception("App settings are not available")
+    pass
+
+def get_app_setting(key, default=None):
+    """
+    Gets the value of a variable from the gvsigol installed app or None
+    if the variable does not exist.
+    For instance, if the installed app is "gvsigol_app_test", then
+    get_app_setting("MYVAR") gets the value of the variable
+    gvsigol_app_test.settings.MYVAR
+    """
+    if GOL_APP_SETTINGS:
+        return getattr(GOL_APP_SETTINGS, key, default)
+
+
+def get_setting(key, default=None):
+    """
+    Gets the value of a variable from the gvsigol installed app, or from
+    the gvsigol/settings.py if the variable is not defined by the app
+    or None otherwise.
+    For instance, if the installed app is "gvsigol_app_test", then
+    get_setting("MYVAR") tries to get the value of the variable
+    gvsigol_app_test.settings.MYVAR. If it is not found, it tries to
+    get the value of gvsigol.settings.MYVAR. It will return None if
+    the variable is not defined on those settings.py files.
+    """
+    return get_app_setting(key, getattr(settings, key, default))

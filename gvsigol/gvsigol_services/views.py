@@ -42,7 +42,7 @@ import zipfile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -91,6 +91,8 @@ from psycopg2 import sql
 
 from actstream import action
 from actstream.models import Action
+from sendfile import sendfile
+from gvsigol_services.backend_geoserver import _valid_sql_name_regex
 
 logger = logging.getLogger("gvsigol")
 
@@ -1472,7 +1474,6 @@ def layer_autoconfig(layer, featuretype):
 @staff_required
 def layer_config(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
-
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
         old_conf = ast.literal_eval(layer.conf) if layer.conf else {}
@@ -1600,6 +1601,11 @@ def layer_config(request, layer_id):
         except:
             logger.exception("Retrieving fields")
         enums = Enumeration.objects.all()
+        procedures = []
+        disabled_procedures = core_utils.get_app_setting('GVSIGOL_DISABLED_PROCEDURES', [])
+        for procedure in TriggerProcedure.objects.all():
+            if not procedure.signature in disabled_procedures:
+                procedures.append(procedure)
         
         data = {
             'layer': layer,
@@ -1610,7 +1616,7 @@ def layer_config(request, layer_id):
             'available_languages_array': available_languages,
             'redirect_to_layergroup': redirect_to_layergroup,
             'enumerations': enums,
-            'procedures':  TriggerProcedure.objects.all()
+            'procedures':  procedures
         }
         return render(request, 'layer_config.html', data)
 
@@ -2395,6 +2401,7 @@ def layer_create_with_group(request, layergroup_id):
                 datastore = form.cleaned_data['datastore']
                 server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
+                server.normalizeTableFields(form.cleaned_data['fields'])
                 server.createTable(form.cleaned_data)
                 extraParams = {}
                 if datastore.type == 'v_PostGIS':
@@ -2941,11 +2948,13 @@ def get_feature_info(request):
                                     try:
                                         layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                                         for lr in layer_resources:
-                                            (type, rsurl) = utils.get_resource_type(lr)
+                                            res_type = utils.get_resource_type_label(lr.type)
                                             resource = {
-                                                'type': type,
-                                                'url': rsurl,
-                                                'name': lr.path.split('/')[-1]
+                                                'type': res_type,
+                                                'url': lr.get_url(),
+                                                'title': lr.title,
+                                                'name': lr.path.split('/')[-1],
+                                                'id': lr.id
                                             }
                                             resources.append(resource)
                                     except Exception as e:
@@ -3331,47 +3340,23 @@ def get_feature_resources(request):
         fid = request.POST.get('fid')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
+            if not utils.can_read_layer(request.user, layer):
+                return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             resources = []
             for lr in layer_resources:
-                url = settings.MEDIA_URL
-                if settings.BASE_URL in url:
-                    url = url.replace(settings.BASE_URL, '')
-                    
-                type = None
-                if lr.type == LayerResource.EXTERNAL_IMAGE:
-                    type = 'image'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_PDF:
-                    type = 'pdf'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_DOC:
-                    type = 'doc'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_FILE:
-                    type = 'file'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_VIDEO:
-                    type = 'video'
-                    url = os.path.join(url, lr.path)
-                    name = lr.path.split('/')[-1]
-                elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
-                    type = 'alfresco_dir'
-                    url = lr.path
-
+                url = lr.get_url()
+                name = lr.path.split('/')[-1]
+                title = lr.title
+                res_type = utils.get_resource_type_label(lr.type)
                 resource = {
-                    'type': type,
+                    'type': res_type,
                     'url': url,
                     'name': name,
+                    'title': title,
                     'rid': lr.id
                 }
                 resources.append(resource)
-
-
         except Exception as e:
             print e.message
 
@@ -3381,6 +3366,16 @@ def get_feature_resources(request):
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
+def get_resource(request, resource_id):
+    try:
+        resource = LayerResource.objects.get(id=resource_id)
+        if not utils.can_read_layer(request.user, resource.layer):
+            return HttpResponseForbidden()
+        return sendfile(request, resource.get_abspath(), attachment=False)
+    except LayerResource.DoesNotExist:
+        return HttpResponseNotFound()
+    
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def upload_resources(request):
@@ -3388,67 +3383,89 @@ def upload_resources(request):
         ws_name = request.POST.get('workspace')
         layer_name = request.POST.get('layer_name')
         fid = request.POST.get('fid')
+        version = request.POST.get('version', 0)
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
+        if not utils.can_write_layer(request.user, layer):
+            return HttpResponseForbidden()
         if 'resource' in request.FILES:
-            type = None
+            """
+            Don't check version for resource upload. The uploads will run concurrently if
+            several files are uploaded, so we could get inconsistent versions.
+            Since modification of resources is not allowed now (only add/remove is allowed),
+            increasing the version number should be enough for uploads.
+            """
             resource = request.FILES['resource']
-            if 'image/' in resource.content_type:
-                type = LayerResource.EXTERNAL_IMAGE
-            elif resource.content_type == 'application/pdf':
-                type = LayerResource.EXTERNAL_PDF
-            elif 'video/' in resource.content_type:
-                type = LayerResource.EXTERNAL_VIDEO
-            else:
-                type = LayerResource.EXTERNAL_FILE
-
-            (saved, path) = resource_manager.save_resource(resource, type)
+            res_type = utils.get_resource_type(resource.content_type)
+            (saved, path) = resource_manager.save_resource(resource, layer.id, res_type)
             if saved:
                 res = LayerResource()
                 res.feature = int(fid)
                 res.layer = layer
                 res.path = path
-                res.title = ''
-                res.type = type
+                res.title = resource.name
+                res.type = res_type
                 res.created = timezone.now()
                 res.save()
-                response = {'success': True}
-
+                response = {'success': True, 'id': res.pk, 'path': path}
+                version, version_date = utils.update_feat_version(res.layer, res.feature)
+                if version is not None:
+                    signals.layerresource_created.send(sender=res.__class__, 
+                       layer=res.layer,
+                       featid=res.feature,
+                       resource_id=res.pk,
+                       version=version,
+                       path=path,
+                       user=request.user)
+                    response['feat_version'] = version
+                    response['feat_date'] = str(version_date)
             else:
                 response = {'success': False}
-
+        else:
+            response = {'success': False}
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-def get_feat_version(resource, featid):
-    try:
-        params = json.loads(resource.layer.datastore.connection_params)
-        i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-        pks = i.get_pk_columns(resource.layer.name, resource.layer.datastore.name)
-        if(pks and len(pks) > 0):
-            rows = i.custom_query("SELECT " + settings.VERSION_FIELD + ", " + settings.DATE_FIELD + " FROM "+ resource.layer.datastore.name + "." + resource.layer.name + " WHERE " + pks[0] + "=" + str(featid))
-            i.close()
-            if(rows and len(rows) > 0): 
-                return rows[0][0]
-    except Exception:
-        return None
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def delete_resource(request):
     if request.method == 'POST':
         rid = request.POST.get('rid')
+        version = request.POST.get(settings.VERSION_FIELD, 0)
         try:
             resource = LayerResource.objects.get(id=int(rid))
+            if not utils.can_write_layer(request.user, resource.layer):
+                return HttpResponseForbidden()
+            check_version = utils.check_feature_version(resource.layer, resource.feature, int(version))
+            if check_version == False:
+                response = HttpResponse("Version conflict")
+                response.status_code = 409
+                return response
             featid = resource.feature
             lyrid = resource.layer.id
             resource.delete()
-            historical_url, historical_filepath = resource_manager.delete_resource(resource)
-            
-            version = get_feat_version(resource, featid)
-            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath, 'url': historical_url, 'feat_version': version}
+            historical_filepath = resource_manager.delete_resource(resource)
+            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath}
+            if check_version is not None:
+                version, version_date = utils.update_feat_version(resource.layer, resource.feature)
+                signals.layerresource_deleted.send(sender=None, 
+                                                   layer=resource.layer,
+                                                   featid=featid,
+                                                   resource_id=resource.pk,
+                                                   version=version,
+                                                   historical_path=historical_filepath,
+                                                   user=request.user)
+                response['feat_version'] = version
+                response['feat_date'] = str(version_date)
+                try:
+                    # missing if plugin_restapi is not installed
+                    response['url'] = reverse('get_layer_historic_resource', args=[lyrid, featid, version])
+                except:
+                    pass
 
         except Exception:
+            logger.exception("Error deleting resource")
             response = {'deleted': False}
             pass
 
@@ -3461,21 +3478,25 @@ def delete_resources(request):
         query_layer = request.POST.get('query_layer')
         workspace = request.POST.get('workspace')
         fid = request.POST.get('fid')
+        version = request.POST.get('feat_version_gvol')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
+            if not utils.can_write_layer(request.user, layer):
+                return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
-            featidlist = []
-            lyridlist = []
             pathlist = []
-            urllist = []
             for resource in layer_resources:
-                featidlist.append(resource.feature)
-                lyridlist.append(resource.layer.id)
-                historical_url, historical_filepath = resource_manager.delete_resource(resource)
-                pathlist.append(historical_filepath)
-                urllist.append(historical_url)
                 resource.delete()
-            response = {'deleted': True, 'featidlist': featidlist, 'lyridlist': lyridlist, 'pathlist': pathlist, 'urllist':urllist}
+                historical_filepath = resource_manager.delete_resource(resource)
+                pathlist.append(historical_filepath)
+                signals.layerresource_deleted.send(sender=None, 
+                                               layer=resource.layer,
+                                               featid=resource.feature,
+                                               resource_id=resource.pk,
+                                               version=version,
+                                               historical_path=historical_filepath,
+                                               user=request.user)
+            response = {'deleted': True, 'pathlist': pathlist}
 
         except Exception as e:
             print e.message
@@ -3944,6 +3965,15 @@ def external_layer_update(request, external_layer_id):
                 msg = _("Error: externallayer could not be published")
             form.add_error(None, msg)
 
+            response= {
+                'message': msg,
+                'form': form,
+                'external_layer': external_layer,
+                'bing_layers': BING_LAYERS,
+                'html': False,
+                'redirect_to_layergroup': redirect_to_layergroup
+            }
+
     else:
         form = ExternalLayerForm(instance=external_layer)
 
@@ -3973,8 +4003,8 @@ def external_layer_update(request, external_layer_id):
 @require_POST
 @staff_required
 def external_layer_delete(request, external_layer_id):
+    external_layer = Layer.objects.get(id=external_layer_id)
     try:
-        external_layer = Layer.objects.get(id=external_layer_id)
         server = Server.objects.get(id=external_layer.layer_group.server_id)
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         if external_layer.cached:
@@ -3983,11 +4013,17 @@ def external_layer_delete(request, external_layer_id):
             geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
             
         external_layer.delete()
+        return redirect('external_layer_list')
                 
     except Exception as e:
+        if e.server_message:
+            if 'Unknown layer' in e.server_message:
+                external_layer.delete()
+                return redirect('external_layer_list')
+
         return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
 
-    return redirect('external_layer_list')
+    
 
 def ows_get_capabilities(url, service, version, layer, remove_extra_params=True):
     if remove_extra_params:
@@ -4634,8 +4670,9 @@ def db_field_rename(request):
     if request.method == 'POST':
         try: 
             field = request.POST.get('field')
-            new_field_name = request.POST.get('new_field_name')
-            #layer_name = request.POST['layer_name']
+            new_field_name = request.POST.get('new_field_name').lower()
+            if _valid_sql_name_regex.search(new_field_name) == None:
+                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=new_field_name))
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
             datastore_name = layer.datastore.name
@@ -4710,8 +4747,10 @@ def db_field_rename(request):
 def db_add_field(request):
     if request.method == 'POST':
         layer = None
-        try: 
-            field_name = request.POST.get('field')
+        try:
+            field_name = request.POST.get('field').lower()
+            if _valid_sql_name_regex.search(field_name) == None:
+                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=field_name))
             field_type = request.POST.get('type')
             layer_id = request.POST.get('layer_id')
             enumkey = request.POST.get('enumkey')

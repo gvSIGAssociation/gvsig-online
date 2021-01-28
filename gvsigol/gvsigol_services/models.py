@@ -28,6 +28,8 @@ from gvsigol import settings
 from django.utils.crypto import get_random_string
 from gvsigol_services.triggers import CUSTOM_PROCEDURES
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
+import os
 
 CLONE_PERMISSION_CLONE = "clone"
 CLONE_PERMISSION_SKIP = "skip"
@@ -272,6 +274,12 @@ class LayerResource(models.Model):
             models.Index(fields=['layer', 'feature']),
             models.Index(fields=['path']),
         ]
+        
+    def get_abspath(self):
+        return os.path.join(settings.MEDIA_ROOT, self.path)
+    
+    def get_url(self):
+        return reverse('get_layer_resource', args=[self.pk])
     
 class Enumeration(models.Model):
     name = models.CharField(max_length=150) 

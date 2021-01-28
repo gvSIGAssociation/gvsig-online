@@ -539,19 +539,19 @@ class Introspect:
                 data_type == 'enumeration' or \
                 data_type == 'multiple_enumeration' or \
                 data_type == 'form':
-                field_name_sql = sqlbuilder.Identifier(field.get('name').lower())
+                field_name_sql = sqlbuilder.Identifier(field.get('name'))
                 if field.get('default'):
                     default_sql = sqlbuilder.SQL('DEFAULT ' + field.get('default'))
                 else:
                     default_sql = sqlbuilder.SQL('')
             elif field.get('type') == 'boolean':
-                field_name_sql = sqlbuilder.Identifier(field.get('name').lower())
+                field_name_sql = sqlbuilder.Identifier(field.get('name'))
                 if field.get('default'):
                     default_sql = sqlbuilder.SQL('DEFAULT ' + field.get('default'))
                 else:
                     default_sql = sqlbuilder.SQL('DEFAULT FALSE')
             elif field.get('type') == 'cd_json':
-                field_name_sql = sqlbuilder.Identifier('cd_json_' + field.get('name').lower())
+                field_name_sql = sqlbuilder.Identifier('cd_json_' + field.get('name'))
                 if field.get('default'):
                     default_sql = sqlbuilder.SQL('DEFAULT ' + field.get('default'))
                 else:
@@ -775,7 +775,7 @@ class Introspect:
             condition=condition,
             definition=definition
         )
-        print query.as_string(self.conn)
+        #print query.as_string(self.conn)
         self.cursor.execute(query)
     
     def drop_trigger(self, trigger_name, target_schema, target_table):

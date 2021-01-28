@@ -21,6 +21,7 @@
 			</div>	
 			<div class="row" style="padding-left: 30px;">
 				{% csrf_token %}
+				{% if form.errors %}
 				<div id="form-error" style="color:#ff0000;">
 					<ul>
 					{% for field in form %}
@@ -33,6 +34,12 @@
 					{% endfor %}
 					</ul>
 				</div>
+				{% endif %}
+				{% if message %}
+				<div id="form-error" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
 			</div>			
 		</div>
 		

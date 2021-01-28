@@ -31,39 +31,6 @@ INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SCHEMA = "public"
 INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME = "gol_geocoder_inverso_cartociudad"
 INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE = "public.gol_geocoder_inverso_cartociudad(text)"
 
-INVERSE_GEOCODER_CARTOCIUDAD_DEF_GVSIGOL = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
-        # TODO: comprobar que no es tipo punto
-        import requests
-        timeout = 10
-        geocoder_url = '{base_url}/{gvsigol_path}/geocoding/get_location_address/'
-        try:
-            column_name = TD["args"][0]
-            plan = plpy.prepare("SELECT * FROM geometry_columns WHERE f_table_name = $1 AND f_table_schema = $2", ["text","text"])        
-            rv = plpy.execute(plan,[TD["table_name"],TD["table_schema"]],1)
-            geom_column = rv[0]["f_geometry_column"]
-            
-            plan = plpy.prepare("SELECT st_x(ST_GeometryN(ST_Transform($1,4326), 1)) || ',' ||st_y(ST_GeometryN(ST_Transform($1,4326), 1)) as coords", ["text"])
-            rv = plpy.execute(plan,[TD["new"][geom_column]],1)
-            coords= rv[0]["coords"]
-            
-            client = requests.session()
-            _data = {{'coord': coords, 'type':'new_cartociudad'}}
-            #plpy.log(str(_data))
-            r = client.post(geocoder_url, data=_data, verify=False, timeout=timeout)
-            response = r.json() 
-            address = response.get('tip_via', '') + " " + response.get('address', '') + "," + str(response.get('portalNumber', ''))
-            TD["new"][column_name] = address 
-        except plpy.SPIError as e:
-            TD["new"][column_name] = ''
-            plpy.log("ERROR geocoder_inverso_cartociudad: " + str(e))
-        except Exception as e:
-            TD["new"][column_name] = ''
-            plpy.log(str(e))
-        finally:
-            return "MODIFY"
-    $$ LANGUAGE plpython2u;
-    """
-    
 INVERSE_GEOCODER_CARTOCIUDAD_DEF = """CREATE OR REPLACE FUNCTION public.gol_geocoder_inverso_cartociudad() RETURNS trigger AS $$
         # TODO: comprobar que no es tipo punto
         import requests

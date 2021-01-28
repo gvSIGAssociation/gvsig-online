@@ -993,7 +993,7 @@ class Geoserver():
             jsonData = json.loads(content)
             return [ds_type, jsonData]
         
-        return None
+        return None, None
 
     def getLayerCreateTypes(self):
         return self.layer_create_types
@@ -1202,7 +1202,8 @@ class Geoserver():
         return sql
     
     def __do_export_to_postgis(self, name, datastore, form_data, shp_path, shp_fields):
-        try: 
+        try:
+            name = name.lower()
             # get & sanitize parameters
             srs = form_data.get('srs')
             encoding = form_data.get('encoding')
@@ -1244,26 +1245,33 @@ class Geoserver():
                             try:
                                 i.set_field_default(schema, name, control_field['name'], control_field.get('default'))
                             except:
-                                logger.error("Error setting default value for control field: " + control_field['name'])
+                                logger.exception("Error setting default value for control field: " + control_field['name'])
                             has_control_field = True
                     if not has_control_field:
-                        i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
+                        try:
+                            i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
+                        except:
+                            logger.exception("Error adding control field: " + control_field['name'])
             
             if creation_mode == gdal_tools.MODE_OVERWRITE:
                 # re-install triggers
                 for trigger in Trigger.objects.filter(layer__datastore=datastore, layer__source_name=name):
                     try:
+                        trigger.drop()
                         trigger.install()
                     except:
-                        logger.warning("Failed to install trigger: " + str(trigger))
+                        logger.exception("Failed to install trigger: " + str(trigger))
             
             return True
         
-        except rest_geoserver.RequestError:
+        except rest_geoserver.RequestError as e:
+            logger.exception(str(e))
             raise
         except gdal_tools.GdalWarning as e:
+            logger.exception(str(e))
             raise rest_geoserver.RequestError(0, e.message)
         except gdal_tools.GdalError as e:
+            logger.exception(str(e))
             if e.code > 0 and creation_mode == gdal_tools.MODE_OVERWRITE:
                 params = json.loads(datastore.connection_params)
                 host = params['host']
@@ -1277,13 +1285,14 @@ class Geoserver():
                 i.close()
                 try:
                     gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    return True
                 except gdal_tools.GdalError as e:
                     raise rest_geoserver.RequestError(e.code, e.message)
                 except gdal_tools.GdalWarning as e:
                     raise rest_geoserver.RequestError(0, e.message)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
-            #logging.exception(e)
+            logger.exception(str(e))
             message =  _("Error uploading the layer. Review the file format. Cause: ") + str(e)
             raise rest_geoserver.RequestError(-1, message)
     
@@ -1692,6 +1701,15 @@ class Geoserver():
         l.created_by = request.user.username
         l.save()
         return l
+    
+    def normalizeTableFields(self, fields):
+        """
+        For the moment, we only allow names that validate against _valid_sql_name_regex
+        """
+        for field in fields:
+            if _valid_sql_name_regex.search(field['name']) == None:
+                raise InvalidValue(-1, _("Invalid field name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=field['name']))
+            field['name'] = field['name'].lower()
     
     def createTable(self, form):
         datastore = form.get('datastore')

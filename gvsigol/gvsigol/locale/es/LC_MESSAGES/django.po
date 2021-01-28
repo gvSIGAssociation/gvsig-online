@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-08 15:48+0200\n"
+"POT-Creation-Date: 2020-12-23 15:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,22 +18,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: gvsigol/settings.py:294 gvsigol/settings_old.py:279
+#: gvsigol/settings.py:339
 msgid "Spanish"
 msgstr "Español"
 
-#: gvsigol/settings.py:295 gvsigol/settings_old.py:280
+#: gvsigol/settings.py:340
 msgid "Valencian"
 msgstr "Valenciano"
 
-#: gvsigol/settings.py:296 gvsigol/settings_old.py:281
-msgid "Catalan"
-msgstr "Catalan"
-
-#: gvsigol/settings.py:297 gvsigol/settings_old.py:282
+#: gvsigol/settings.py:342
 msgid "English"
 msgstr "Inglés"
 
-#: gvsigol/settings.py:298 gvsigol/settings_old.py:283
-msgid "Portuguese"
-msgstr "Portugués (Brasil)"
+#~ msgid "Catalan"
+#~ msgstr "Catalan"
+
+#~ msgid "Portuguese"
+#~ msgstr "Portugués (Brasil)"

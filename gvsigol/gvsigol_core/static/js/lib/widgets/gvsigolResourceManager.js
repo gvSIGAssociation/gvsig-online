@@ -81,17 +81,26 @@ GvsigolResourceManager.prototype.createUploader = function() {
 	   	showPreview: true,
 	   	previewHeight: "100px",
 	   	previewWidth: "100px",
-	   	onSuccess: function(files,data,xhr){
-	   		console.log('Update resource list');
-    	},
-	   	afterUploadAll: function(files,data,xhr){
-	   		$.overlayout();
-    		console.log('All resources has been uploaded');
-    	},
-    	onError: function(files,status,errMsg){}
+		onSuccess: function(files,data,xhr){
+			if (typeof(uploader.delegatedOnSuccess)=='function') {
+				uploader.delegatedOnSuccess(files, data, xhr);
+			}
+		},
+		afterUploadAll: function(files,data,xhr){
+			$.overlayout();
+		},
+		onError: function(files,status,errMsg){
+			uploader.errors = uploader.errors.concat(files);
+			if (uploader.getFileCount()==1) {
+				$.overlayout();
+				var errorMsg = gettext('Some files could not be uploaded:') + ' ' + uploader.errors.join(", ");
+				uploader.errors = [];
+				messageBox.show('error', errorMsg);
+			}
+	}
 	});
-  	
-  	return uploader;
+	uploader.errors = [];
+	return uploader;
 };
 
 /**
@@ -112,26 +121,33 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
 		resource += 	'</div>';
 		resource += 	'<div class="box-body">';
 		if (resources[i].type == 'image') {
-			resource += '<a href="' + resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
-			resource += 	'<img src="' + resources[i].url + '" class="img-fluid adjust-image">';
-			resource += '</a>';
+			var anchor = $('<a data-toggle="lightbox" data-gallery="example-gallery" data-type="image"></a>')
+			var img =       $('<img class="img-fluid adjust-image">');
+			anchor.attr("href", resources[i].url);
+			img.attr("src", resources[i].url);
+			anchor.append(img);
+			resource += anchor.prop('outerHTML');
 		} else if  (resources[i].type == 'pdf') {
-			resource += '<a href="' + resources[i].url + '" target="_blank">';
-			resource += 	'<i style="font-size:24px;" class="fa fa-file-pdf-o margin-r-5"></i>';
-			resource += 	'<span style="color:#00c0ef;">' + resources[i].name + '</span>';
-			resource += '</a>';
-			
-		}  else if  (resources[i].type == 'video') {
-			resource += '<a href="' + resources[i].url + '" target="_blank">';
-			resource += 	'<i style="font-size:24px;" class="fa fa-file-video-o margin-r-5"></i>';
-			resource += 	'<span style="color:#00c0ef;">' + resources[i].name + '</span>';
-			resource += '</a>';
-			
-		}   else if  (resources[i].type == 'file') {
-			resource += '<a href="' + resources[i].url + '" target="_blank">';
-			resource += 	'<i style="font-size:24px;" class="fa fa-file margin-r-5"></i>';
-			resource += 	'<span style="color:#00c0ef;">' + resources[i].name + '</span>';
-			resource += '</a>';
+			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-pdf-o margin-r-5"></i></a>');
+			anchor.attr("href", resources[i].url);
+			var span = $('<span style="color:#00c0ef;"></span>');
+			span.text(resources[i].title);
+			anchor.append(span);
+			resource += anchor.prop('outerHTML');
+		} else if  (resources[i].type == 'video') {
+			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file-video-o margin-r-5"></i></a>');
+			anchor.attr("href", resources[i].url);
+			var span = $('<span style="color:#00c0ef;"></span>');
+			span.text(resources[i].title);
+			anchor.append(span);
+			resource += anchor.prop('outerHTML');
+		} else if  (resources[i].type == 'file') {
+			var anchor = $('<a target="_blank"><i style="font-size:24px;" class="fa fa-file margin-r-5"></i></a>');
+			anchor.attr("href", resources[i].url);
+			var span = $('<span style="color:#00c0ef;"></span>');
+			span.text(resources[i].title);
+			anchor.append(span);
+			resource += anchor.prop('outerHTML');
 		}
 		resource += 	'</div>';
 		resource += '</div>';
@@ -139,11 +155,11 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
 		resourceList.append(resource);
 		
 		$('#remove-resource-' + i).on('click', function () {
+			feature.deletedResources_ = feature.deletedResources_ || [];
 			var rid = this.dataset.rid;
-			if (self.deleteResource(rid)) {
-				var resourceBox = this.parentNode.parentNode.parentNode;
-				resourceBox.remove();
-			}
+			feature.deletedResources_.push(rid);
+			var resourceBox = this.parentNode.parentNode.parentNode;
+			resourceBox.remove();
 		});
 	}
 	
@@ -155,28 +171,47 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
 GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	var deleted = false;
 	var self = this;
+	var data = {
+			rid: rid
+	};
+	// Feature version management is directly done in server-side delete_resource method
+	if (self.feature.getProperties().feat_version_gvol !== undefined) {
+		data.feat_version_gvol = self.feature.getProperties().feat_version_gvol;
+	}
+	if (self.feature.getProperties().feat_date_gvol !== undefined) {
+		data.feat_date_gvol = self.feature.getProperties().feat_date_gvol;
+	}
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: '/gvsigonline/services/delete_resource/',
-	  	data: {
-	  		rid: rid
-	  	},
-	  	success	:function(response){
-	  		if (response.deleted) {
-	  			deleted = true;
-				var checkversion = self.checkFeatureVersion(self.selectedLayer, response.featid, response.version, 5);
-				if (checkversion <= 0) {
-					return;
+		url: '/gvsigonline/services/delete_resource/',
+		data: data,
+		success	:function(response){
+			if (response.deleted) {
+				if (response.feat_version !== undefined) {
+					self.feature.setProperties({
+						"feat_date_gvol": response.feat_date,
+						"feat_version_gvol": response.feat_version
+					});
 				}
-				self.featureVersionManagement(response.lyrid, response.featid, response.url, self.feature);
-	  		}
-	  	}, 
-	  	error: function(){}
+				deleted = true;
+			}
+		}, 
+		error: function(response){
+			console.log(response);
+			if(response.status == 409){
+				messageBox.show('error', gettext('Version conflict: the feature was edited concurrently. Restart your editing session to get the last version.'));
+			} else if(response.responseText && response.responseText != '') {
+				messageBox.show('error', response.responseText);
+			} else {
+				messageBox.show('error', gettext('Error deleting resource'));
+			}
+		}
 	});
 	
 	return deleted;
 };
+
 
 /**
  * TODO.
@@ -187,24 +222,19 @@ GvsigolResourceManager.prototype.deleteResources = function(feature) {
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: '/gvsigonline/services/delete_resources/',
-	  	data: {
-	  		query_layer: this.selectedLayer.layer_name,
-	  		workspace: this.selectedLayer.workspace,
-	  		fid: feature.getId().split('.')[1]
-	  	},
-	  	success	:function(response){
-	  		if (response.deleted) {
-	  			deleted = true;
-	  			/* deleteResources se llama cuando se borra una feature por lo que no es necesario mantener el control de versión
-	  			 if(response.featidlist) {
-		  			for(var i = 0; i < response.featidlist.length; i++) {
-		  				self.featureVersionManagement(response.lyridlist[i], response.featidlist[i], response.urllist[i], self.feature);
-		  			}
-	  			}*/
-	  		}
-	  	}, 
-	  	error: function(){}
+		url: '/gvsigonline/services/delete_resources/',
+		data: {
+			query_layer: this.selectedLayer.layer_name,
+			workspace: this.selectedLayer.workspace,
+			fid: feature.getId().split('.')[1]
+		},
+		success	:function(response){
+			if (response.deleted) {
+				deleted = true;
+				/* deleteResources se llama cuando se borra una feature por lo que no es necesario mantener el control de versión */
+			}
+		}, 
+		error: function(){}
 	});
 	
 	return deleted;
@@ -231,74 +261,4 @@ GvsigolResourceManager.prototype.getFeatureResources = function(feature) {
 	});
 	
 	return resources;
-};
-
-GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, featid, path_, feat) {
-	data = {
-			"lyrid":lyrid,	
-			"featid":featid,
-			"operation":5,
-			"path":path_
-		}
-	
-	$.ajax({
-		type: 'POST',
-		async: false,
-		data: data,
-		url: '/gvsigonline/edition/feature_version_management/',
-		beforeSend:function(xhr){
-		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
-		success	:function(response) {
-			//Actualiza las propiedades de versión de la feature en el  
-			//cliente ya que se han cambiado en el servidor
-			feat_version_gvol = response.feat_version_gvol
-			feat_date_gvol = response.feat_date_gvol
-			feat.setProperties({
-				"feat_date_gvol": feat_date_gvol,
-				"feat_version_gvol": feat_version_gvol
-			})
-		},
-		error: function(response) {
-			//console.log(response.statusText)
-		}
-	});
-};
-
-//Operation: 1-Create feat, 2-Update feat, 3-Delete feat, 4-Upload file, 5-Delete file
-GvsigolResourceManager.prototype.checkFeatureVersion = function(selectedLayer, featid, version, operation) {
-	var success = -1;
-	data = {
-			"featid":featid,
-			"lyrname":selectedLayer.layer_name,
-			"workspace":selectedLayer.workspace,
-			"version":version,
-			"operation":operation
-		}
-	
-	$.ajax({
-		type: 'POST',
-		async: false,
-		data: data,
-		url: '/gvsigonline/edition/check_feat_version/',
-		beforeSend:function(xhr){
-		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
-		success	:function(response) {
-			success = 1;//OK
-		},
-		error: function(response) {
-			if(response.status == 404){
-				success = 0; //No hay servidor
-				return;
-			} else if(response.responseText && response.responseText != '') {
-				messageBox.show('error', response.responseText);
-			} else {
-				messageBox.show('error', gettext('Error validando la version'));
-			}
-			success = -1 //Error en la respuesta
-			return;
-		}
-	});
-	return success;
 };

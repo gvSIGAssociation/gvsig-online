@@ -123,3 +123,117 @@ msgstr "Accedir al recurs"
 
 msgid "Not filtered"
 msgstr "Sense filtre"
+
+msgid "keywords"
+msgstr "Paraules clau"
+
+msgid "topicCats"
+msgstr "Categories temàtiques"
+
+msgid "categories"
+msgstr "Categories"
+
+msgid "inspireThemes"
+msgstr "Temes d'INSPIRE"
+
+msgid "inspireThemesWithAc"
+msgstr "Temes d'INSPIRE amb Ac"
+
+msgid "inspireThemesURI"
+msgstr "URI de Temes d'INSPIRE"
+
+msgid "denominators"
+msgstr "Denominadors"
+
+msgid "resolutions"
+msgstr "Resolucions"
+
+msgid "spatialRepresentationTypes"
+msgstr "Tipus de representació espacial"
+
+msgid "orgNames"
+msgstr "Noms d'organització"
+
+msgid "orgNamesTree"
+msgstr "Arbre de noms d'organització"
+
+msgid "metadataPOCs"
+msgstr "POCs de metadades"
+
+msgid "serviceTypes"
+msgstr "Tipus de serveis"
+
+msgid "types"
+msgstr "Tipus"
+
+msgid "createDateYears"
+msgstr "Any de creació"
+
+msgid "formats"
+msgstr "Formats"
+
+msgid "titles"
+msgstr "Títols"
+
+msgid "metadataTypes"
+msgstr "Tipus de metadada"
+
+msgid "isValidInspire"
+msgstr "És INSPIRE vàlid"
+
+msgid "isHarvested"
+msgstr "Recol·lectat"
+
+msgid "mdStatus"
+msgstr "Estat de la metadada"
+
+msgid "status"
+msgstr "Estat"
+
+msgid "sourceCatalog"
+msgstr "Catàleg d'origen"
+
+msgid "standards"
+msgstr "Estàndards"
+
+msgid "subTemplateTypes"
+msgstr "Tipus de subplantilla"
+
+msgid "recordOwner"
+msgstr "Propietari del registre"
+
+msgid "groupOwners"
+msgstr "Propietaris del grup"
+
+msgid "publishedForGroup"
+msgstr "Publicat pel grup"
+
+msgid "isPublishedToAll"
+msgstr "Publicat per tots"
+
+msgid "maintenanceAndUpdateFrequencies"
+msgstr "Freqüències de manteniment i actualització"
+
+msgid "mdActions"
+msgstr "Accions de metadada"
+
+msgid "Organization"
+msgstr "Organització"
+
+msgid "Source Catalog"
+msgstr "Catàleg d'origen"
+
+msgid "Year"
+msgstr "Any"
+
+msgid "Representation type"
+msgstr "Tipus de representació"
+
+msgid "Update frequency"
+msgstr "Frequència d'actualització"
+
+msgid "Scale"
+msgstr "Escala"
+
+msgid "Service type"
+msgstr "Tipus de servei"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-30 14:12+0000\n"
+"POT-Creation-Date: 2020-12-23 15:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -333,36 +333,36 @@ msgstr ""
 msgid "This is your new temporary password"
 msgstr ""
 
-#: gvsigol_auth/views.py:79 gvsigol_auth/views.py:153 gvsigol_auth/views.py:255
+#: gvsigol_auth/views.py:79 gvsigol_auth/views.py:162 gvsigol_auth/views.py:264
 msgid "Your account has been disabled"
 msgstr ""
 
-#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:83 gvsigol_auth/views.py:155
-#: gvsigol_auth/views.py:157 gvsigol_auth/views.py:257
+#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:83 gvsigol_auth/views.py:164
+#: gvsigol_auth/views.py:166 gvsigol_auth/views.py:266
 msgid "The username and password you have entered do not match our records"
 msgstr ""
 
-#: gvsigol_auth/views.py:203
+#: gvsigol_auth/views.py:212
 msgid "User account does not exist"
 msgstr ""
 
-#: gvsigol_auth/views.py:207
+#: gvsigol_auth/views.py:216
 msgid "That did not work"
 msgstr ""
 
-#: gvsigol_auth/views.py:261
+#: gvsigol_auth/views.py:270
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr ""
 
-#: gvsigol_auth/views.py:379
+#: gvsigol_auth/views.py:388
 msgid "User group for"
 msgstr ""
 
-#: gvsigol_auth/views.py:560
+#: gvsigol_auth/views.py:569
 msgid "Admin is a reserved group"
 msgstr ""
 
-#: gvsigol_auth/views.py:564
+#: gvsigol_auth/views.py:573
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "

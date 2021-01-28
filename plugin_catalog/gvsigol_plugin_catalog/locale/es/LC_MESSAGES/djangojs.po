@@ -124,3 +124,119 @@ msgstr "Acceder al recurso"
 msgid "Not filtered"
 msgstr "Sin filtrar"
 
+msgid "keywords"
+msgstr "Palabras clave"
+
+msgid "topicCats"
+msgstr "Categorías temáticas"
+
+msgid "categories"
+msgstr "Categorías"
+
+msgid "inspireThemes"
+msgstr "Temas de INSPIRE"
+
+msgid "inspireThemesWithAc"
+msgstr "Temas de INSPIRE con Ac"
+
+msgid "inspireThemesURI"
+msgstr "URI de Temas de INSPIRE"
+
+msgid "denominators"
+msgstr "Denominadores"
+
+msgid "resolutions"
+msgstr "Resoluciones"
+
+msgid "spatialRepresentationTypes"
+msgstr "Tipos de representación espacial"
+
+msgid "orgNames"
+msgstr "Nombres de organización"
+
+msgid "orgNamesTree"
+msgstr "Árbol de de nombres de organización"
+
+msgid "metadataPOCs"
+msgstr "POCs de metadatos"
+
+msgid "serviceTypes"
+msgstr "Tipos de servicio"
+
+msgid "types"
+msgstr "Tipos"
+
+msgid "createDateYears"
+msgstr "Año de creación"
+
+msgid "formats"
+msgstr "Formatos"
+
+msgid "titles"
+msgstr "Títulos"
+
+msgid "metadataTypes"
+msgstr "Tipo de metadato"
+
+msgid "isValidInspire"
+msgstr "Es INSPIRE válido"
+
+msgid "isHarvested"
+msgstr "Recolectado"
+
+msgid "mdStatus"
+msgstr "Estado del metadato"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "status"
+msgstr "Estado"
+
+msgid "sourceCatalog"
+msgstr "Catálogo de origen"
+
+msgid "standards"
+msgstr "Estándardes"
+
+msgid "subTemplateTypes"
+msgstr "Tipos de subplantilla"
+
+msgid "recordOwner"
+msgstr "Propietario del registro"
+
+msgid "groupOwners"
+msgstr "Propietarios del grupo"
+
+msgid "publishedForGroup"
+msgstr "Publicado para el grupo"
+
+msgid "isPublishedToAll"
+msgstr "Publicado para todos"
+
+msgid "maintenanceAndUpdateFrequencies"
+msgstr "Frecuencias de mantenimiento y actualización"
+
+msgid "mdActions"
+msgstr "Acciones de metadato"
+
+msgid "Organization"
+msgstr "Organización"
+
+msgid "Source Catalog"
+msgstr "Catálogo de origen"
+
+msgid "Year"
+msgstr "Año"
+
+msgid "Representation type"
+msgstr "Tipo de representación"
+
+msgid "Update frequency"
+msgstr "Frecuencia de actualización"
+
+msgid "Scale"
+msgstr "Escala"
+
+msgid "Service type"
+msgstr "Tipo de servicio"

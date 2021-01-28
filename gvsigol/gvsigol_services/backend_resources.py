@@ -26,6 +26,7 @@ import os
 import time
 from os import path
 from shutil import copyfile
+import tempfile
 
 logger = logging.getLogger(__name__)
 from gvsigol_services.models import LayerResource
@@ -37,15 +38,17 @@ class GvsigolRM():
     def __init__(self):
         logger.info('Initializing gvsigol resource manager')
     
-    def save_resource(self, resource, type):
-        try: 
-            file_path = os.path.join(utils.get_resources_dir(type), resource.name)
-            relative_path = file_path.replace(settings.MEDIA_ROOT, '')
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            with open(file_path, 'wb+') as destination:
+    def save_resource(self, resource, layer_id, res_type):
+        try:
+            resource_dir = utils.get_resources_dir(layer_id, res_type)
+            orig_res_name = os.path.basename(resource.name)
+            prefix, suffix = os.path.splitext(orig_res_name)
+            (fd, f) = tempfile.mkstemp(suffix=suffix, prefix=prefix+'_', dir=resource_dir)
+            with os.fdopen(fd, "wb") as destination:
                 for chunk in resource.chunks():
                     destination.write(chunk)
+            relative_path = os.path.relpath(f, settings.MEDIA_ROOT)
+            os.chmod(f, 0o0700)
             return [True, relative_path]
          
         except Exception as e:
@@ -55,11 +58,11 @@ class GvsigolRM():
         try:
             path = os.path.join(settings.MEDIA_ROOT, resource.path) 
             if os.path.exists(path):
-                url, media_path = self.store_historical(path, resource.layer.id, resource.feature)
+                media_path = self.store_historical(path, resource.layer.id, resource.feature)
                 if not LayerResource.objects.filter(path=resource.path).exists():
                     # only deleted if there are no cloned resources that share the same path
-                    os.remove(path)  
-                return url, media_path
+                    os.remove(path)
+                return media_path
         except Exception as e:
             raise e
         
@@ -67,23 +70,26 @@ class GvsigolRM():
         """
         Hace una copia del recurso para el historico y devuelve la url al fichero
         """
+        name = os.path.basename(path_)
         millis = int(round(time.time() * 1000))
+        
         if(lyrid is not None and featid is not None):
             suffix = "_" + str(lyrid) + "_" + str(featid) + "_" + str(millis)
         else:
             suffix = "_" + str(millis)    
             
-        if(not path.exists(path_)):
-            path_ = settings.MEDIA_ROOT + path_
-        li = path_.rsplit(".", 1)
+        li = name.rsplit(".", 1)
         try:
-            new_path = li[0] + suffix  + "." + li[1]
+            new_name = li[0] + suffix  + "." + li[1]
         except Exception:
-            new_path = li[0] + suffix
+            new_name = li[0] + suffix
+        if not os.path.isabs(path_):
+            path_ = os.path.join(settings.MEDIA_ROOT, path_)
         if(path.exists(path_)):
+            target_dir = utils.get_historic_resources_dir(path_, lyrid)
+            new_path = os.path.join(target_dir, new_name)
             copyfile(path_, new_path)
-            rel_path = new_path.replace(settings.MEDIA_ROOT, '')
-            url = settings.MEDIA_URL + rel_path
-        return url, new_path
+            rel_path = os.path.relpath(new_path, settings.MEDIA_ROOT)
+            return rel_path
 
 resource_manager = GvsigolRM()
