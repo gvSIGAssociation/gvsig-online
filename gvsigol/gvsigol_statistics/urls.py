@@ -1,6 +1,7 @@
 from django.conf.urls import include, url
 from gvsigol_statistics import views
 
+app_name="gvsigol_statistics"
 urlpatterns = [
     url(r'^activity/', include('actstream.urls')),
     url(r'^get_registered_actions/(?P<plugin_name>.*)/(?P<action_name>.*)/$', views.get_registered_actions, name='get_registered_actions'),

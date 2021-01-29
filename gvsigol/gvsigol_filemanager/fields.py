@@ -41,9 +41,8 @@ class FilemanagerFormField(forms.CharField):
         super(FilemanagerFormField, self).__init__(*args, **kwargs)
 
 
-class FilemanagerField(models.CharField):
+class FilemanagerField(models.CharField, metaclass=models.SubfieldBase):
     description = "FilemanagerField"
-    __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         self.path = kwargs.pop('path', '')

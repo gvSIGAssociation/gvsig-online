@@ -26,18 +26,18 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from forms import UserCreateForm, UserGroupForm
-from models import UserGroupUser, UserGroup
+from .forms import UserCreateForm, UserGroupForm
+from .models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
-from utils import superuser_required, staff_required
+from .utils import superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
-import utils as auth_utils
+from . import utils as auth_utils
 import json
 import re
 import base64
@@ -52,7 +52,7 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 def login_user(request):
     errors = []
     if request.method == "POST":
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             logout_user(request)
         username = request.POST.get('username')
         try:
@@ -86,7 +86,7 @@ def login_user(request):
         if AUTH_WITH_REMOTE_USER:
             if "HTTP_REMOTE_USER" in request.META:
                 if settings.DEBUG == True:
-                    print "HTTP_REMOTE_USER: " + request.META['HTTP_REMOTE_USER']
+                    print("HTTP_REMOTE_USER: " + request.META['HTTP_REMOTE_USER'])
                 request.session['username'] = None
                 request.session['password'] = None
                 user = authenticate(remote_user=request.META['HTTP_REMOTE_USER'])
@@ -109,7 +109,7 @@ def login_user(request):
                                 return redirect('home')
             elif 'HTTP_OIDC_CLAIM_SUB' in request.META:
                 if settings.DEBUG == True:
-                        print "HTTP_OIDC_CLAIM_SUB: " + request.META['HTTP_OIDC_CLAIM_SUB']
+                        print("HTTP_OIDC_CLAIM_SUB: " + request.META['HTTP_OIDC_CLAIM_SUB'])
                 request.session['username'] = None
                 request.session['password'] = None
                 aux = request.META['HTTP_OIDC_CLAIM_SUB']
@@ -343,8 +343,8 @@ def user_add(request):
                 if form.data['password1'] == form.data['password2']:
                     user = User(
                         username = form.data['username'].lower(),
-                        first_name = u''.join(form.data['first_name']).encode('utf-8'),
-                        last_name = u''.join(form.data['last_name']).encode('utf-8'),
+                        first_name = ''.join(form.data['first_name']),
+                        last_name = ''.join(form.data['last_name']),
                         email = form.data['email'].lower(),
                         is_superuser = is_superuser,
                         is_staff = is_staff
@@ -355,7 +355,7 @@ def user_add(request):
                     #admin_group = UserGroup.objects.get(name__exact='admin')
                     aux = UserGroup.objects.filter(name="admin")
                     if aux.count() > 1:
-                        print "WARNING: table gvsigol_auth_usergroup inconsistent !!!!!!!!!!!"
+                        print("WARNING: table gvsigol_auth_usergroup inconsistent !!!!!!!!!!!")
                     
                     admin_group = aux[0]
                     
@@ -385,7 +385,7 @@ def user_add(request):
                     if is_superuser or is_staff:  
                         ugroup = UserGroup(
                             name = 'ug_' + form.data['username'].lower(),
-                            description = _(u'User group for') + ': ' + form.data['username'].lower()
+                            description = _('User group for') + ': ' + form.data['username'].lower()
                         )
                         ugroup.save()
                         
@@ -427,13 +427,13 @@ def user_add(request):
                     try:    
                         auth_utils.sendMail(user, form.data['password1'])
                     except Exception as ex:
-                        print str(ex)
+                        print(str(ex))
                         pass
     
                     return redirect('user_list')
             
             except Exception as e:
-                print "ERROR: Problem creating user " + str(e)
+                print("ERROR: Problem creating user " + str(e))
                 errors = []
                 errors.append({'message': "ERROR: Problem creating user " + str(e)})
                 groups = auth_utils.get_all_groups()
@@ -585,7 +585,7 @@ def group_add(request):
                 return redirect('group_list')
             
             except Exception as e:
-                print str(e)
+                print(str(e))
                 return render(request, 'group_add.html', {'form': form, 'message': message})
                 
         else:

@@ -1,9 +1,9 @@
 from django.conf.urls import url
 from django.views.decorators.csrf import csrf_exempt
 
-from views import BrowserView, ExportToDatabaseView, UploadView, UploadFileView, DeleteFileView, DirectoryCreateView, UnzipFileView
+from .views import BrowserView, ExportToDatabaseView, UploadView, UploadFileView, DeleteFileView, DirectoryCreateView, UnzipFileView
 
-
+app_name="gvsigol_filemanager"
 urlpatterns = [
     url(r'^$', BrowserView.as_view(), name='browser'),
     #url(r'^pbrowser/$', PopupBrowserView.as_view(), name='pbrowser'),

@@ -22,7 +22,7 @@
 '''
 
 from django.utils.translation import ugettext_lazy as _
-import StringIO as io
+import io as io
 import subprocess
 import logging
 import re
@@ -108,7 +108,7 @@ def gdalinfo(raster_path):
     Returns the output of gdalinfo command on the provided raster.
     """
     args = [GDALINFO_PATH, "-stats", raster_path] 
-    print " ".join(args)
+    print(" ".join(args))
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, bufsize=-1)
     output, err = p.communicate()
     rc = p.returncode
@@ -124,7 +124,7 @@ def gdalsrsinfo(raster_path):
     Returns the output of gdalinfo command on the provided raster.
     """
     args = [GDALSRSINFO_PATH, raster_path] 
-    print " ".join(args)
+    print(" ".join(args))
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, bufsize=-1)
     output, err = p.communicate()
     rc = p.returncode
@@ -154,11 +154,11 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
     if sql:
         args.extend(["-sql", sql])
     args.extend([conn_string, shp_path])
-    print " ".join(args).replace("password='{password}'".format(password=password), "password='xxxxxx'")
+    print(" ".join(args).replace("password='{password}'".format(password=password), "password='xxxxxx'"))
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
     output, err = p.communicate()
     rc = p.returncode
-    print "return code: " + str(rc)
+    print("return code: " + str(rc))
     if rc>0:
         msg = _("Error when loading the layer to PostGIS. Ogr2ogr error: {msg}").format(msg=err)
         logging.error(msg)
@@ -192,12 +192,12 @@ def postgis2spatialite(table_name, out_spatialite_path, pg_conn_str, out_table_n
     args.extend(["-lco", "LAUNDER=NO"])
     safe_args = list(args)
     args.extend([pg_conn_str.encode(), table_name])
-    safe_args.extend([unicode(pg_conn_str), table_name])
-    print " ".join(safe_args)
+    safe_args.extend([str(pg_conn_str), table_name])
+    print(" ".join(safe_args))
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
     output, err = p.communicate()
     rc = p.returncode
-    print "return code: " + str(rc)
+    print("return code: " + str(rc))
     if rc>0:
         msg = _("Error exporting layer from PostGIS to Spatialite. Ogr2ogr error: {msg}").format(msg=err)
         logging.error(msg)
@@ -210,7 +210,7 @@ class ConnectionString():
         pass
 
 class PgConnectionString(ConnectionString):
-    conn_string_tpl = u"PG:host='{host}' port='{port}' user='{user}' dbname='{dbname}' password='{password}'"
+    conn_string_tpl = "PG:host='{host}' port='{port}' user='{user}' dbname='{dbname}' password='{password}'"
     def __init__(self, host=None, port=None, dbname=None, schema=None, user=None, password=None):
         self.host = host
         self.port = port
@@ -258,7 +258,7 @@ class Wrapper():
         p = subprocess.Popen(args, stdin=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
         output, err = p.communicate()
         rc = p.returncode
-        print "return code: " + str(rc)
+        print("return code: " + str(rc))
         if rc>0:
             msg = _("Error exporting layer from PostGIS to Spatialite. Ogr2ogr error: {msg}").format(msg=err)
             logging.error(msg)
@@ -454,11 +454,11 @@ class Ogr2ogr(Wrapper):
         
         args.extend("-f", self.out_file_type)
         
-        for key, value in self.dataset_creation_options.iteritems():
+        for key, value in self.dataset_creation_options.items():
             args.extend(["-dsco", key+"="+value])
-        for key,value in self.layer_creation_options.iteritems():
+        for key,value in self.layer_creation_options.items():
             args.extend(["-lco", key+"="+value])
-        for key,value in self.config_options.iteritems():
+        for key,value in self.config_options.items():
             args.extend(["--config", key, value])
 
         if self.out_table:
@@ -474,10 +474,10 @@ class Ogr2ogr(Wrapper):
         safe_args = list(args)
         if self.in_table:
             args.extend([self.out_ds.encode(), self.in_ds.encode(), self.in_table])
-            safe_args.extend([unicode(self.out_ds), unicode(self.in_ds), self.in_table])
+            safe_args.extend([str(self.out_ds), str(self.in_ds), self.in_table])
         else:
             args.extend([self.out_ds.encode(), self.in_ds.encode()])
-            safe_args.extend([unicode(self.out_ds), unicode(self.in_ds)])
-        print " ".join(safe_args)
+            safe_args.extend([str(self.out_ds), str(self.in_ds)])
+        print(" ".join(safe_args))
         
         return self._do_execute(args)

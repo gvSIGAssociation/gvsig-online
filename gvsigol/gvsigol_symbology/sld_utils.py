@@ -22,12 +22,12 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 
-from models import Style, Rule, Symbolizer
+from .models import Style, Rule, Symbolizer
 from xml.sax.saxutils import escape
 import gvsigol.settings
 import xmltodict
 import json
-import utils
+from . import utils
 import re
 
 def copy_resources(symbol, resource_path):

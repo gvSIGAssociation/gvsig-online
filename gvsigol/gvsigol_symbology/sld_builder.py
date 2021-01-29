@@ -22,11 +22,11 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Rule as ModelRule, Symbolizer as ModelSymbolizer, ColorMapEntry as ModelColorMapEntry
+from .models import Rule as ModelRule, Symbolizer as ModelSymbolizer, ColorMapEntry as ModelColorMapEntry
 from gvsigol_symbology.sld import StyledLayerDescriptor, PointSymbolizer, LineSymbolizer, PolygonSymbolizer, TextSymbolizer, \
     Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion, \
     Geometry, Function, LabelPlacement, LinePlacement, PointPlacement, AnchorPoint
-import utils
+from . import utils
 import json
 import sys
 import re
@@ -35,7 +35,7 @@ CDATA_pattern_ = re.compile(r"<!\[CDATA\[.*?\]\]>", re.DOTALL)
 
 Validate_simpletypes_ = True
 if sys.version_info.major == 2:
-    BaseStrType_ = basestring
+    BaseStrType_ = str
 else:
     BaseStrType_ = str
     

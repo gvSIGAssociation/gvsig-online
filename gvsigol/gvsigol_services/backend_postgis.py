@@ -270,7 +270,7 @@ class Introspect:
                 elif prev_escape_char != '"':
                     seq_name_list.append(c)
                 else:
-                    seq_name = u''.join(seq_name_list)
+                    seq_name = ''.join(seq_name_list)
                     str_end = s[idx:]
                     break
             if len(str_end) > 0 and str_end[0] == expected_next_char:
@@ -577,7 +577,7 @@ class Introspect:
             schema=sqlbuilder.Identifier(schema),
             table_name=sqlbuilder.Identifier(table_name),
             fields_sql=sqlbuilder.SQL(', ').join(create_table_sqls))
-        print(query.as_string(self.conn))
+        print((query.as_string(self.conn)))
         self.cursor.execute(query)
         
     def get_triggers(self, schema, table):
@@ -785,7 +785,7 @@ class Introspect:
             schema=sqlbuilder.Identifier(target_schema),
             table=sqlbuilder.Identifier(target_table)
             )
-        print query.as_string(self.conn)
+        print(query.as_string(self.conn))
         self.cursor.execute(query)
         
     def clone_triggers(self, target_schema, target_table, source_schema, source_table):

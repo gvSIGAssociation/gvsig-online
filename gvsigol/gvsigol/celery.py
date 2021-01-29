@@ -3,7 +3,7 @@
  See https://docs.celeryproject.org/en/latest/django/first-steps-with-django.html#django-first-steps
 """
 
-from __future__ import absolute_import, unicode_literals
+
 import os
 from celery import Celery
 import sys, re
@@ -41,7 +41,7 @@ app.autodiscover_tasks()
 
 @app.task(bind=True)
 def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+    print(('Request: {0!r}'.format(self.request)))
     
 
 def is_celery_process():

@@ -3,9 +3,9 @@ import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 
-import signals
+from . import signals
 from gvsigol.settings import FILEMANAGER_DIRECTORY, FILEMANAGER_STORAGE, INSTALLED_APPS
-from utils import sizeof_fmt
+from .utils import sizeof_fmt
 from gvsigol_core import utils as core_utils
 import zipfile
 import shutil

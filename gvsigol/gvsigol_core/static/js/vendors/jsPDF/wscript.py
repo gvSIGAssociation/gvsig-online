@@ -31,7 +31,7 @@ def minifyfiles(context):
 
     minified = dst - '.source.js' + '.min.js'
 
-    print("=== Compressing jsPDF and select plugins into " + minified.name)
+    print(("=== Compressing jsPDF and select plugins into " + minified.name))
     minified.text = compress_with_closure_compiler( dst.text )
 
     # AMD-compatible version:
@@ -98,7 +98,7 @@ def compress_with_closure_compiler(code, compression_level = None):
     # script (with some modifications) from 
     # https://developers.google.com/closure/compiler/docs/api-tutorial1
 
-    import httplib, urllib, sys
+    import http.client, urllib.request, urllib.parse, urllib.error, sys
 
     compression_levels = [
         'WHITESPACE_ONLY'
@@ -111,7 +111,7 @@ def compress_with_closure_compiler(code, compression_level = None):
 
     # Define the parameters for the POST request and encode them in
     # a URL-safe format.
-    params = urllib.urlencode([
+    params = urllib.parse.urlencode([
         ('js_code', code)
         , ('compilation_level', compression_level)
         , ('output_format', 'json')
@@ -125,7 +125,7 @@ def compress_with_closure_compiler(code, compression_level = None):
 
     # Always use the following value for the Content-type header.
     headers = { "Content-type": "application/x-www-form-urlencoded" }
-    conn = httplib.HTTPConnection('closure-compiler.appspot.com')
+    conn = http.client.HTTPConnection('closure-compiler.appspot.com')
     conn.request('POST', '/compile', params, headers)
     response = conn.getresponse()
 

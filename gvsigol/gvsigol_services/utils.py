@@ -27,23 +27,22 @@ from django.contrib.auth.models import AnonymousUser
 import hashlib
 import json
 import os
-from string import strip
 
 from django.http.response import HttpResponse
 import psycopg2
 
-import geographic_servers
+from . import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import MEDIA_ROOT
 from gvsigol_auth.models import UserGroup, UserGroupUser, User
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace
-from models import LayerReadGroup, LayerWriteGroup
+from .models import LayerReadGroup, LayerWriteGroup
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
-from past.builtins import basestring
+from past.builtins import str
 from psycopg2 import sql as sqlbuilder
 import logging
 logger = logging.getLogger("gvsigol")
@@ -91,7 +90,7 @@ def get_write_roles(layer):
     return roles
 
 def can_write_layer(user, layer):
-    if isinstance(user, basestring):
+    if isinstance(user, str):
         user = User.objects.get(username=user)
     if not isinstance(layer, Layer):
         layer = Layer.objects.get(id=layer)
@@ -107,11 +106,11 @@ def can_write_layer(user, layer):
         if UserGroupUser.objects.filter(user=user, user_group__layerwritegroup__layer=layer).count() > 0:
             return True
     except Exception as e:
-        print e
+        print(e)
     return False
 
 def can_read_layer(user, layer):
-    if isinstance(user, basestring):
+    if isinstance(user, str):
         user = User.objects.get(username=user)
     if not isinstance(layer, Layer):
         layer = Layer.objects.get(id=layer)
@@ -129,7 +128,7 @@ def can_read_layer(user, layer):
         if UserGroupUser.objects.filter(user=user, user_group__layerreadgroup__layer=layer).count() > 0:
             return True
     except Exception as e:
-        print e
+        print(e)
     return False
 
 def add_datastore(workspace, type, name, description, connection_params, username):
@@ -193,8 +192,8 @@ def create_schema(ds_name):
         create_schema = "CREATE SCHEMA IF NOT EXISTS " + ds_name + " AUTHORIZATION " + dbuser + ";"
         cursor.execute(create_schema)
 
-    except StandardError, e:
-        print "SQL Error", e
+    except Exception as e:
+        print("SQL Error", e)
         if e.pgcode == '42710':
             return True
         else:
@@ -219,8 +218,8 @@ def create_schema_for_datastore(connection_params):
         create_schema = "CREATE SCHEMA IF NOT EXISTS " + schema + " AUTHORIZATION " + user + ";"
         cursor.execute(create_schema)
 
-    except StandardError, e:
-        print "SQL Error", e
+    except Exception as e:
+        print("SQL Error", e)
         if e.pgcode == '42710':
             return True
         else:
@@ -245,8 +244,8 @@ def delete_schema_for_datastore(connection_params):
         delete_schema = "DROP SCHEMA IF EXISTS " + schema +  ";"
         cursor.execute(delete_schema)
 
-    except StandardError, e:
-        print "SQL Error", e
+    except Exception as e:
+        print("SQL Error", e)
         if e.pgcode == '42710':
             return True
         else:
@@ -260,10 +259,10 @@ def get_connection(host, port, database, user, password):
     try:
         conn = psycopg2.connect("host=" + host +" port=" + port +" dbname=" + database +" user=" + user +" password="+ password);
         conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        print "Connect ... "
+        print("Connect ... ")
 
-    except StandardError, e:
-        print "Failed to connect!", e
+    except Exception as e:
+        print("Failed to connect!", e)
         return []
 
     return conn;
@@ -285,14 +284,14 @@ def get_distinct_query(host, port, schema, database, user, password, layer, fiel
         for row in rows:
             if row[0] is not None:
                 val = row[0]
-                if isinstance(val, basestring):
+                if isinstance(val, str):
                     values.append(val)
                 else:
                     val = str(val)
                     values.append(val)
 
-    except StandardError, e:
-        print "Query error!", e
+    except Exception as e:
+        print("Query error!", e)
         return []
 
     close_connection(cursor, conn)
@@ -308,8 +307,8 @@ def get_minmax_query(host, port, schema, database, user, password, layer, field)
         cursor.execute(sql);
         rows = cursor.fetchall()
 
-    except StandardError, e:
-        print "Fallo en el getMIN y getMAX", e
+    except Exception as e:
+        print("Fallo en el getMIN y getMAX", e)
         return {}
 
     close_connection(cursor, conn)
@@ -375,7 +374,6 @@ def get_historic_resources_dir(path, layer_id):
     rel_path = os.path.relpath(os.path.dirname(path), os.path.join(MEDIA_ROOT, 'resources'))
     historic_path = os.path.join(historic_base_path, rel_path)
     if not os.path.exists(historic_path):
-        print historic_path
         os.makedirs(historic_path)
         
         # makedirs permissions are umasked, so we need to explicitly set permissions afterwards

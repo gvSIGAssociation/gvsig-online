@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 
 from django.db import models
 from gvsigol import settings
@@ -60,8 +60,8 @@ class Project(models.Model):
         return new_project_instance
     
 class ProjectUserGroup(models.Model):
-    project = models.ForeignKey(Project, default=None)
-    user_group = models.ForeignKey(UserGroup, default=None)
+    project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
+    user_group = models.ForeignKey(UserGroup, default=None, on_delete=models.CASCADE)
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.user_group.name
@@ -73,8 +73,8 @@ class ProjectUserGroup(models.Model):
         return ProjectUserGroup.objects.get(id=self.pk)
         
 class ProjectLayerGroup(models.Model):
-    project = models.ForeignKey(Project, default=None)
-    layer_group = models.ForeignKey(LayerGroup, default=None)
+    project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
+    layer_group = models.ForeignKey(LayerGroup, default=None, on_delete=models.CASCADE)
     multiselect = models.BooleanField(default=True)
     baselayer_group = models.BooleanField(default=False)
     default_baselayer = models.IntegerField(null=True, blank=True)
@@ -162,7 +162,7 @@ class GolSettings(models.Model):
 
 
 class ProjectBaseLayerTiling(models.Model):
-    project = models.ForeignKey(Project, default=None)
+    project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
     layer = models.IntegerField(null=False, default=0)
     levels = models.IntegerField(null=False, default=0)
     tilematrixset = models.CharField(max_length=50) 

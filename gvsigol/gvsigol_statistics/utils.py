@@ -37,11 +37,11 @@ def get_DB_connection():
     try:
         connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
         connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        print "Connecting ... "
+        print("Connecting ... ")
 
         return connection
-    except StandardError, e:
-        print "Failed to connect!", e
+    except Exception as e:
+        print("Failed to connect!", e)
 
     return None
 
@@ -121,13 +121,13 @@ def get_actions(verb, reverse=False, is_count=False, user=None, target=None, sta
             query = query + order_by_query + ";"
 
 
-    print query
+    print(query)
 
     values = []
     cursor.execute(query, [])
     for r in cursor.fetchall():
         values.append(r)
-        print r
+        print(r)
 
     close_DB_connection(conn)
 

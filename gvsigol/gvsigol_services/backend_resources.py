@@ -21,7 +21,7 @@
 '''
 from gvsigol import settings
 import logging
-import utils
+from . import utils
 import os
 import time
 from os import path

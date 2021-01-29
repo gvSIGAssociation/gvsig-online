@@ -24,7 +24,7 @@
 from lxml.etree import parse, Element, XMLSchema, tostring
 from lxml import objectify
 try:
-    from urllib2 import urlopen
+    from urllib.request import urlopen
 except ImportError:
     from urllib.request import urlopen
 from tempfile import NamedTemporaryFile

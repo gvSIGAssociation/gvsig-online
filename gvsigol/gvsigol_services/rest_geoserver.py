@@ -23,7 +23,7 @@ from amqp.exceptions import NotFound
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from models import Layer, LayerGroup, Workspace, Datastore
+from .models import Layer, LayerGroup, Workspace, Datastore
 from gvsigol import settings
 import requests
 import json
@@ -266,7 +266,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        if isinstance(file, basestring):
+        if isinstance(file, str):
             with open(file, 'rb') as f:
                 r = self.session.put(url, data=f, headers=headers, auth=auth)
         else:
@@ -367,7 +367,7 @@ class Geoserver():
         if r.status_code==200:
             return True
         
-        print "ERROR " + str(r.status_code) + ":" + r.content
+        print("ERROR " + str(r.status_code) + ":" + r.content)
         raise FailedRequestError(r.status_code, r.content)
             
     def raw_request(self, url, params, user=None, password=None):
@@ -380,7 +380,7 @@ class Geoserver():
             return response 
         
         except Exception as e:
-            print str(e)
+            print(str(e))
     
     def raw_get(self, url, user=None, password=None):
         try:
@@ -392,7 +392,7 @@ class Geoserver():
             return response 
         
         except Exception as e:
-            print str(e)
+            print(str(e))
     
         
     def get_datastore(self, workspace, datastore, user=None, password=None):
@@ -503,8 +503,8 @@ class Geoserver():
         else:
             auth = self.session.auth
         data_str = json.dumps(json_data)
-        print "json:"
-        print data_str
+        print("json:")
+        print(data_str)
         r = self.session.put(url, json=json_data, auth=auth)
         if r.status_code==200:
             return
@@ -515,7 +515,7 @@ class Geoserver():
         Updates the featuretype definition. Only params included in the updatedParams dict will be
         updated on the feature type. The rest of the featuretype definition will remain unchanged.
         """
-        url = self.service_url + u'/workspaces/' + workspace + u'/datastores/' + ds_name + u'/featuretypes/' + name + u'.json'
+        url = self.service_url + '/workspaces/' + workspace + '/datastores/' + ds_name + '/featuretypes/' + name + '.json'
         if user and password:
             auth = (user, password)
         else:
@@ -540,7 +540,7 @@ class Geoserver():
             url += "?recalculate=" + ",".join(recalculate)
         r = self.session.put(url, json=data, auth=auth)
         if r.status_code!=200:
-            logger.error(u'Error updating featuretype. Status code: ' + text(r.status_code) + u' - Url: ' + url)
+            logger.error('Error updating featuretype. Status code: ' + text(r.status_code) + ' - Url: ' + url)
             logger.error(r.text)
             raise FailedRequestError(r.status_code, r.content)
         return True
@@ -823,7 +823,7 @@ class Geoserver():
     
     def get_layer_styles_configuration(self, layer, user=None, password=None):
         url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
-        print '########################### get_layer_styles_configuration: update_layer_styles_configuration' + url
+        print('########################### get_layer_styles_configuration: update_layer_styles_configuration' + url)
         
         if user and password:
             auth = (user, password)
@@ -912,7 +912,7 @@ class Geoserver():
             
     
     def __update_dict(self, d, u):
-        for k, v in u.iteritems():
+        for k, v in u.items():
             if isinstance(v, dict):
                 r = self.__update_dict(d.get(k, {}), v)
                 d[k] = r
@@ -938,16 +938,16 @@ class RequestError(Exception):
 
     def get_detailed_message(self):
         from builtins import str as text
-        msg = u'Status: ' + text(self.status_code)
-        if isinstance(self.server_message, unicode):
-            msg += u'\nServer message: ' + self.server_message
+        msg = 'Status: ' + text(self.status_code)
+        if isinstance(self.server_message, str):
+            msg += '\nServer message: ' + self.server_message
         else:
-            msg += u'\nServer message: ' + self.server_message.decode('utf-8', 'replace')
+            msg += '\nServer message: ' + self.server_message.decode('utf-8', 'replace')
         if self.message:
-            if isinstance(self.message, unicode):
-                msg += u'\nMessage: ' + self.message
+            if isinstance(self.message, str):
+                msg += '\nMessage: ' + self.message
             else:
-                msg += u'\nMessage: ' + self.message.decode('utf-8', 'replace')
+                msg += '\nMessage: ' + self.message.decode('utf-8', 'replace')
         return msg
 
 class UploadError(RequestError):

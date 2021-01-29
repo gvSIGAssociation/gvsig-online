@@ -28,7 +28,7 @@ from lxml import etree as etree_
 
 Validate_simpletypes_ = True
 if sys.version_info.major == 2:
-    BaseStrType_ = basestring
+    BaseStrType_ = str
 else:
     BaseStrType_ = str
 
@@ -349,7 +349,7 @@ except ImportError as exp:
             return None
         @classmethod
         def gds_reverse_node_mapping(cls, mapping):
-            return dict(((v, k) for k, v in mapping.iteritems()))
+            return dict(((v, k) for k, v in mapping.items()))
         @staticmethod
         def gds_encode(instring):
             if sys.version_info.major == 2:
@@ -14106,7 +14106,7 @@ def parseEtree(inFileName, silence=False):
 
 
 def parseString(inString, silence=False):
-    from StringIO import StringIO
+    from io import StringIO
     parser = None
     doc = parsexml_(StringIO(inString), parser)
     rootNode = doc.getroot()

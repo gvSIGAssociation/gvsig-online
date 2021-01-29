@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 '''
     gvSIG Online.
@@ -79,7 +79,7 @@ class Server(models.Model):
         return self.name
     
 class Node(models.Model):
-    server = models.ForeignKey(Server)
+    server = models.ForeignKey(Server, on_delete=models.CASCADE)
     status = models.CharField(max_length=25)
     url = models.CharField(max_length=500)
     is_master = models.BooleanField(default=False)
@@ -92,7 +92,7 @@ def get_default_server():
     return theServer.id
 
 class Workspace(models.Model):
-    server = models.ForeignKey(Server, default=get_default_server)
+    server = models.ForeignKey(Server, default=get_default_server, on_delete=models.CASCADE)
     name = models.CharField(max_length=250, unique=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     uri = models.CharField(max_length=500)
@@ -109,7 +109,7 @@ class Workspace(models.Model):
     
     
 class Datastore(models.Model):
-    workspace = models.ForeignKey(Workspace)
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
     type = models.CharField(max_length=250)
     name = models.CharField(max_length=250)
     description = models.CharField(max_length=500, null=True, blank=True)
@@ -156,8 +156,8 @@ def get_default_layer_thumbnail():
 class Layer(models.Model):
     external = models.BooleanField(default=False)
     external_params = models.TextField(null=True, blank=True)
-    datastore = models.ForeignKey(Datastore, null=True)
-    layer_group = models.ForeignKey(LayerGroup)
+    datastore = models.ForeignKey(Datastore, null=True, on_delete=models.CASCADE)
+    layer_group = models.ForeignKey(LayerGroup, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=150)
     abstract = models.CharField(max_length=5000, null=True, blank=True)
@@ -205,13 +205,13 @@ class Layer(models.Model):
         return clone_layer(target_datastore, self, layer_group, copy_data=copy_data, permissions=permissions)
 
 class LayerReadGroup(models.Model):
-    layer = models.ForeignKey(Layer)
-    group = models.ForeignKey(UserGroup)
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
+    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     
     
 class LayerWriteGroup(models.Model):
-    layer = models.ForeignKey(Layer)
-    group = models.ForeignKey(UserGroup)
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
+    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     
     
 class DataRule(models.Model):
@@ -351,7 +351,6 @@ class TriggerProcedure(models.Model):
     def get_definition(self):
         custom_procedure_cls = CUSTOM_PROCEDURES.get(self.signature)
         if custom_procedure_cls:
-            print custom_procedure_cls
             return custom_procedure_cls().get_definition()
         else:
             return self.definition_tpl
@@ -369,14 +368,14 @@ class Trigger(models.Model):
         ]
 
     def get_name(self):
-        return self.procedure.func_name + "_" + self.field + "_trigger"
+        return self.procedure.__name__ + "_" + self.field + "_trigger"
     
     def install(self):
         from gvsigol_services.utils import get_db_connect_from_layer
         trigger_name = self.get_name()
         i, target_table, target_schema = get_db_connect_from_layer(self.layer)
         i.install_trigger(trigger_name, target_schema, target_table,
-                        self.procedure.activation, self.procedure.event, self.procedure.orientation, '', self.procedure.func_schema, self.procedure.func_name, [self.field])
+                        self.procedure.activation, self.procedure.event, self.procedure.orientation, '', self.procedure.func_schema, self.procedure.__name__, [self.field])
         i.close()
 
     def drop(self):

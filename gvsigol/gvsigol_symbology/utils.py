@@ -70,17 +70,17 @@ def __compress_folder(file_path):
         return zip
 
 def remove_accents(string):
-    if type(string) is not unicode:
-        string = unicode(string, encoding='utf-8')
+    if type(string) is not str:
+        string = str(string, encoding='utf-8')
 
     string = string.lower()
 
-    string = re.sub(u"[àáâãäå]", 'a', string)
-    string = re.sub(u"[èéêë]", 'e', string)
-    string = re.sub(u"[ìíîï]", 'i', string)
-    string = re.sub(u"[òóôõö]", 'o', string)
-    string = re.sub(u"[ùúûü]", 'u', string)
-    string = re.sub(u"[ýÿ]", 'y', string)
+    string = re.sub("[àáâãäå]", 'a', string)
+    string = re.sub("[èéêë]", 'e', string)
+    string = re.sub("[ìíîï]", 'i', string)
+    string = re.sub("[òóôõö]", 'o', string)
+    string = re.sub("[ùúûü]", 'u', string)
+    string = re.sub("[ýÿ]", 'y', string)
     
     string = re.sub('[^a-z0-9 \_\.]', '', string)
     string = string.replace(' ','_')
@@ -135,7 +135,7 @@ def copy(src, dest):
         if e.errno == errno.ENOTDIR:
             shutil.copy(src, dest)
         else:
-            print('Directory not copied. Error: %s' % e)
+            print(('Directory not copied. Error: %s' % e))
 
 
 def sortFontsArray(array):
@@ -182,7 +182,7 @@ def check_library_path(library):
         return library_path
      
     except OSError as e:
-        print('Info: %s' % e)
+        print(('Info: %s' % e))
         return library_path
     
 def check_custom_legend_path():
@@ -192,7 +192,7 @@ def check_custom_legend_path():
         return legend_path
      
     except OSError as e:
-        print('Info: %s' % e)
+        print(('Info: %s' % e))
         return legend_path
     
 def save_custom_legend(legend_path, file, file_name):    
@@ -235,7 +235,7 @@ def delete_external_graphic_img(library, file_name):
         return True
      
     except Exception as e:
-        print('Error: %s' % e)
+        print(('Error: %s' % e))
         return False
     
 def delete_library_dir(library):    
@@ -247,7 +247,7 @@ def delete_library_dir(library):
         return True
      
     except Exception as e:
-        print('Error: %s' % e)
+        print(('Error: %s' % e))
         return False
     
 def get_online_resource(library, file_name):

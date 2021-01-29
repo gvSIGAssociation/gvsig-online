@@ -13,85 +13,65 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import include, url, i18n
-from django.views.i18n import javascript_catalog
+from django.urls import include, re_path, path
+from django.conf.urls import i18n
 from django.views.i18n import JavaScriptCatalog
 from django.contrib import admin
 
-import settings
+from . import settings
 
 handler404 = 'gvsigol_core.views.not_found_view'
 
-packages = [
-    'gvsigol_auth',
-    'gvsigol_core',
-    'gvsigol_services',
-    'gvsigol_symbology',
-    'gvsigol_plugin_print',
-    'gvsigol_plugin_etl',
-    'gvsigol_plugin_graphiccapture',
-    'gvsigol_plugin_importvector',
-    'gvsigol_plugin_picassa',
-    'gvsigol_plugin_catalog',
-    'gvsigol_plugin_worldwind',
-    'gvsigol_plugin_edition',
-    'gvsigol_plugin_print',
-    'gvsigol_plugin_geocoding',
-    'gvsigol_plugin_downloadman',
-    'gvsigol_plugin_importfromservice',
-    'gvsigol_plugin_trip_planner',
-    'gvsigol_plugin_draw',
-    'gvsigol_plugin_elevation',
-    'gvsigol_plugin_manageaddresses',
-    'gvsigol_plugin_emergencies',
-    'gvsigol_plugin_opensea2',
-    'gvsigol_plugin_charts'
-]
+packages = [ app for app in settings.INSTALLED_APPS
+                if app.startswith('gvsigol_plugin_')
+                 or app.startswith('gvsigol_app_')
+            ]
 
 urlpatterns = [
-    url(r'^gvsigonline/i18n/', include(i18n)),
-    url(r'^gvsigonline/jsi18n/$', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
-    url(r'^gvsigonline/admin/', include(admin.site.urls)),
+    re_path(r'^gvsigonline/i18n/', include(i18n)),
+    re_path(r'^gvsigonline/jsi18n/$', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
+    re_path(r'^gvsigonline/admin/', admin.site.urls),
 ]
 
-for app in settings.INSTALLED_APPS:
+for app in packages:
     if 'gvsigol_app_' in app:
         urlpatterns += [
-            url(r'^gvsigonline/', include(app + '.urls')),
+            path('gvsigonline/', include(app + '.urls')),
         ]
+
         
 for plugin in settings.INSTALLED_APPS:
     if 'gvsigol_plugin_' in plugin:
         urlpatterns += [
-            url(r'^gvsigonline/', include(plugin + '.urls')),
+            re_path(r'^gvsigonline/', include(plugin + '.urls')),
         ]
     
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += [
-        url(r'^gvsigonline/core/', include('gvsigol_core.urls')),
+        re_path(r'^gvsigonline/core/', include('gvsigol_core.urls')),
     ]
   
 if 'gvsigol_auth' in settings.INSTALLED_APPS:
     urlpatterns += [
-        url(r'^gvsigonline/auth/', include('gvsigol_auth.urls')),
+        path('gvsigonline/auth/', include('gvsigol_auth.urls')),
     ]
 
 if 'gvsigol_services' in settings.INSTALLED_APPS:
     urlpatterns += [
-        url(r'^gvsigonline/services/', include('gvsigol_services.urls')),
+        re_path(r'^gvsigonline/services/', include('gvsigol_services.urls')),
     ]
     
 if 'gvsigol_symbology' in settings.INSTALLED_APPS:
     urlpatterns += [
-        url(r'^gvsigonline/symbology/', include('gvsigol_symbology.urls')),
+        re_path(r'^gvsigonline/symbology/', include('gvsigol_symbology.urls')),
     ]
     
 if 'gvsigol_filemanager' in settings.INSTALLED_APPS:
     urlpatterns += [
-        url(r'^gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
+        re_path(r'^gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
     ]
 
 if 'gvsigol_statistics' in settings.INSTALLED_APPS:
     urlpatterns += [
-        url(r'^gvsigonline/statistics/', include('gvsigol_statistics.urls', namespace='statistics')),
+        re_path(r'^gvsigonline/statistics/', include('gvsigol_statistics.urls', namespace='statistics')),
     ]

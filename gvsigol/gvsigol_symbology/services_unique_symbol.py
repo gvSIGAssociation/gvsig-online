@@ -22,12 +22,12 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
+from .models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
 from gvsigol import settings
-import utils, sld_builder
+from . import utils, sld_builder
 import json
 import ast
 

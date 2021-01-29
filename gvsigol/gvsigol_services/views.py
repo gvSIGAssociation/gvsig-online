@@ -26,7 +26,7 @@ from django.http.response import JsonResponse
 import ast
 from datetime import datetime
 import hashlib
-from httplib import HTTPResponse
+from http.client import HTTPResponse
 import json
 import logging
 from math import floor
@@ -36,12 +36,12 @@ import re
 import shutil
 import string
 import unicodedata
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import zipfile
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.shortcuts import render, redirect
@@ -61,11 +61,11 @@ from owslib.wmts import WebMapTileService
 import requests
 from requests_futures.sessions import FuturesSession
 
-from backend_postgis import Introspect
-from forms_geoserver import CreateFeatureTypeForm
-from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
-from gdal_tools import gdalsrsinfo
-import geographic_servers
+from .backend_postgis import Introspect
+from .forms_geoserver import CreateFeatureTypeForm
+from .forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
+from .gdal_tools import gdalsrsinfo
+from . import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from gvsigol.settings import MOSAIC_DB
@@ -77,21 +77,21 @@ from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_services.backend_resources import resource_manager 
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
 import gvsigol_services.tiling_service as tiling_service
-import locks_utils
-from models import LayerFieldEnumeration
-from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem, \
+from . import locks_utils
+from .models import LayerFieldEnumeration
+from .models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem, \
     LayerLock, Server, Node, ServiceUrl
-from rest_geoserver import RequestError
-import rest_geoserver
-import rest_geowebcache as geowebcache
-import signals
-import utils
+from .rest_geoserver import RequestError
+from . import rest_geoserver
+from . import rest_geowebcache as geowebcache
+from . import signals
+from . import utils
 import psycopg2
 from psycopg2 import sql
 
 from actstream import action
 from actstream.models import Action
-from sendfile import sendfile
+from django_sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
 
 logger = logging.getLogger("gvsigol")
@@ -107,7 +107,7 @@ base_layer_process = {}
 @superuser_required
 def server_list(request):
     response = {
-        'servers': Server.objects.values()
+        'servers': list(Server.objects.values())
     }
     return render(request, 'server_list.html', response)
 
@@ -192,7 +192,7 @@ def server_delete(request, svid):
         return HttpResponseRedirect(reverse('server_list'))
         
     except Exception as e:
-        print e.message 
+        print(e.message) 
         return HttpResponseNotFound(e.message ) 
     
     
@@ -307,7 +307,7 @@ def reload_node(request, nid):
 @superuser_required
 def workspace_list(request):
     response = {
-        'workspaces': Workspace.objects.values()
+        'workspaces': list(Workspace.objects.values())
     }
     return render(request, 'workspace_list.html', response)
 
@@ -371,7 +371,7 @@ def workspace_import(request):
         workspace_names = [n for n in workspaces['name']]
         querySet = Workspace.objects.all().exclude(name__in=workspace_names)
         response = {
-            'workspaces': querySet.values()
+            'workspaces': list(querySet.values())
         }
         return render(request, 'workspace_import.html', response)
 
@@ -1859,7 +1859,7 @@ def manage_cache_clear(request, layer_id):
     gs = geographic_servers.get_instance().get_server_by_id(server.id)
     if request.method == 'GET' or request.method == 'POST':
         if layer.external:
-            print 'TO DO'
+            print('TO DO')
             
         else:
             layer_cache_clear(layer_id)
@@ -2086,7 +2086,7 @@ def layergroup_add_with_project(request, project_id):
             name = request.POST.get('layergroup_name') + '_' + request.user.username
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                return render(request, 'layergroup_add.html', {'message': message, 'servers': Server.objects.values()})
+                return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values())})
 
             exists = False
             layergroups = LayerGroup.objects.all()
@@ -2134,19 +2134,19 @@ def layergroup_add_with_project(request, project_id):
 
 
             else:
-                message = _(u'Layer group name already exists')
-                return render(request, 'layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()})
+                message = _('Layer group name already exists')
+                return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'workspaces': list(Workspace.objects.values())})
 
         else:
-            message = _(u'You must enter a name for layer group')
-            return render(request, 'layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()})
+            message = _('You must enter a name for layer group')
+            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'workspaces': list(Workspace.objects.values())})
 
         return redirect('layergroup_list')
 
     else:
         response = {
             'project_id': project_id,
-            'servers': Server.objects.values()
+            'servers': list(Server.objects.values())
         }
         return render(request, 'layergroup_add.html', response)
 
@@ -2243,7 +2243,7 @@ def layergroup_update(request, lgid):
             if not exists:
                 if _valid_name_regex.search(name) == None:
                     message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                    return render(request, 'layergroup_update.html', {'message': message, 'servers': Server.objects.values()})
+                    return render(request, 'layergroup_update.html', {'message': message, 'servers': list(Server.objects.values())})
 
                 layergroup.name = name
                 layergroup.title = title
@@ -2263,8 +2263,8 @@ def layergroup_update(request, lgid):
                 return redirect('layergroup_list')
 
             else:
-                message = _(u'Layer group name already exists')
-                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'servers': Server.objects.values()})
+                message = _('Layer group name already exists')
+                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'servers': list(Server.objects.values())})
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
@@ -2274,8 +2274,8 @@ def layergroup_update(request, lgid):
             'lgid': lgid, 
             'layergroup': layergroup, 
             'layers': layers,
-            'workspaces': Workspace.objects.values(),
-            'servers': Server.objects.values()
+            'workspaces': list(Workspace.objects.values()),
+            'servers': list(Server.objects.values())
         }
 
         return render(request, 'layergroup_update.html', response)
@@ -2613,12 +2613,12 @@ def enumeration_add(request):
             else:
                 index = len(Enumeration.objects.all())
                 enum_name = 'enm_' + str(index)
-                message = _(u'You must enter a title for enumeration')
+                message = _('You must enter a title for enumeration')
                 return render(request, 'enumeration_add.html', {'message': message, 'enum_name': enum_name})
         else:
             index = len(Enumeration.objects.all())
             enum_name = 'enm_' + str(index)
-            message = _(u'Name already taken')
+            message = _('Name already taken')
             return render(request, 'enumeration_add.html', {'message': message, 'enum_name': enum_name})
 
         return redirect('enumeration_list')
@@ -2869,7 +2869,7 @@ def get_feature_info(request):
                     if 'workspace' in layer_array:
                         ws = layer_array['workspace']
     
-                    print url
+                    print(url)
     
                     servers = Server.objects.all()
                     auth2 = None
@@ -2907,7 +2907,7 @@ def get_feature_info(request):
                         })
                 i = i + 1
         except Exception as e:
-            print e.message
+            print(e.message)
             response = {
                 'error':  str(e.message),
                 'urls': urls
@@ -2958,7 +2958,7 @@ def get_feature_info(request):
                                             }
                                             resources.append(resource)
                                     except Exception as e:
-                                        print e.message
+                                        print(e.message)
 
                                 else:
                                     geojson['features'][i]['type']= 'raster'
@@ -2979,7 +2979,7 @@ def get_feature_info(request):
                             features = geojson['features']
                             
                     except Exception as e:
-                        print e.message
+                        print(e.message)
                         feat = {}
                         feat['type'] = 'plain_or_html'
                         feat['text'] = resultset.get('response')
@@ -3164,14 +3164,14 @@ def get_datatable_data(request):
                 recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
                 recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
 
-            params = urllib.urlencode(values)
+            params = urllib.parse.urlencode(values)
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
                     req.auth = (request.session['username'], request.session['password'])
                     #req.auth = ('admin', 'geoserver')
 
-            print wfs_url + "?" + params
+            print(wfs_url + "?" + params)
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
             jsonString = response.text
             geojson = json.loads(jsonString)
@@ -3245,14 +3245,14 @@ def get_feature_wfs(request):
                 "CQL_FILTER": cql_filter.encode('utf-8')
             }
             
-            params = urllib.urlencode(data)
+            params = urllib.parse.urlencode(data)
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
                     req.auth = (request.session['username'], request.session['password'])
                     #req.auth = ('admin', 'geoserver')
 
-            print wfs_url + "?" + params
+            print(wfs_url + "?" + params)
             response = req.post(wfs_url, data=data, verify=False, proxies=settings.PROXIES)
             jsonString = response.text
             geojson = json.loads(jsonString)
@@ -3358,7 +3358,7 @@ def get_feature_resources(request):
                 }
                 resources.append(resource)
         except Exception as e:
-            print e.message
+            print(e.message)
 
         response = {
             'resources': resources
@@ -3499,7 +3499,7 @@ def delete_resources(request):
             response = {'deleted': True, 'pathlist': pathlist}
 
         except Exception as e:
-            print e.message
+            print(e.message)
             response = {'deleted': False}
             pass
 
@@ -3592,7 +3592,7 @@ def describeLayerConfig(request):
 
 
         except Exception as e:
-            print e.message
+            print(e.message)
             response = {'layer': {}}
             pass
 
@@ -3670,7 +3670,7 @@ def _describeFeatureType(lyr, workspace, skip_pks):
 
 
     except Exception as e:
-        print e.message
+        print(e.message)
         response = {'fields': [], 'error': e.message}
         pass
     
@@ -3708,7 +3708,7 @@ def describe_feature_type(lyr, workspace):
 
 
     except Exception as e:
-        print e.message
+        print(e.message)
         response = {'fields': [], 'error': e.message}
         pass
     
@@ -3744,7 +3744,7 @@ def describeFeatureTypeWithPk(request):
 
 
         except Exception as e:
-            print e.message
+            print(e.message)
             response = {'fields': []}
             pass
 
@@ -4029,7 +4029,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     if remove_extra_params:
         # remove any param in the query string
         urlObj = urlparse(url)
-        url = urlObj.scheme + u'://' + urlObj.netloc + urlObj.path
+        url = urlObj.scheme + '://' + urlObj.netloc + urlObj.path
 
     layers = []
     formats = []
@@ -4046,10 +4046,10 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         if not version:
             version = WMS_MAX_VERSION
         try:
-            print 'Add base layer: ' + url+ ', version: ' + version
+            print('Add base layer: ' + url+ ', version: ' + version)
             wms = WebMapService(url, version=version, auth=auth)
 
-            print 'Add base layer type ' + wms.identification.type
+            print('Add base layer type ' + wms.identification.type)
             title = wms.identification.title
             matrixsets = []
             layers = list(wms.contents)
@@ -4088,7 +4088,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 crs_list = lyr.crs_list
 
         except Exception as e:
-            print 'Add base layer ERROR: ' + str(e.message)
+            print('Add base layer ERROR: ' + str(e.message))
             data = {'response': '500',
              'message':  str(e.message)}
             return data
@@ -4274,7 +4274,7 @@ def layer_cache_config(request, layer_id):
             response = {
                 "message": message,
                 "layer_id": layer_id,
-                "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+                "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
@@ -4299,7 +4299,7 @@ def layer_cache_config(request, layer_id):
            
         response = {
             "layer_id": layer_id,
-            "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+            "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
             "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
             "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
             "formats": settings.CACHE_OPTIONS['FORMATS'],
@@ -4368,7 +4368,7 @@ def group_cache_config(request, group_id):
             response = {
                 "message": message,
                 "group_id": group_id,
-                "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+                "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
@@ -4390,7 +4390,7 @@ def group_cache_config(request, group_id):
                 
         response = {
             "group_id": group_id,
-            "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+            "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
             "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
             "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
             "formats": settings.CACHE_OPTIONS['FORMATS'],
@@ -4478,7 +4478,7 @@ def update_thumbnail(request, layer_id):
         return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url.replace(settings.BASE_URL, '')}, indent=4), content_type='application/json')
         
     except Exception as e:
-        print str(e)
+        print(str(e))
         return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
     
 
@@ -4487,7 +4487,7 @@ def update_thumbnail(request, layer_id):
 @superuser_required
 def service_url_list(request):
     response = {
-        'services': ServiceUrl.objects.values()
+        'services': list(ServiceUrl.objects.values())
     }
     return render(request, 'service_url_list.html', response)
 
@@ -4519,7 +4519,7 @@ def service_url_delete(request, svid):
         return HttpResponseRedirect(reverse('service_url_list'))
         
     except Exception as e:
-        print e.message 
+        print(e.message) 
         return HttpResponseNotFound(e.message ) 
     
     
