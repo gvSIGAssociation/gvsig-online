@@ -42,7 +42,6 @@ from .models import LayerReadGroup, LayerWriteGroup
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
-from past.builtins import str
 from psycopg2 import sql as sqlbuilder
 import logging
 logger = logging.getLogger("gvsigol")
@@ -463,8 +462,8 @@ def get_layer_img(layerid, filename):
     path_ = None
     url = None
     m = hashlib.md5()
-    m.update("layer" + str(layerid))
-    if(filename is not None):
+    m.update(("layer" + str(layerid)).encode("utf-8"))
+    if filename is not None:
         suffix = filename.split('.')
         ext = ''
         if(suffix is not None and len(suffix) > 0):

@@ -709,7 +709,7 @@ def load(request, project_name):
     project = Project.objects.get(name__exact=project_name)
 
     if project.is_public:
-        if request.user and request.user.is_authenticated():
+        if request.user and request.user.is_authenticated:
             return redirect('load_project', project_name=project.name)
         else:
             return redirect('load_public_project', project_name=project.name)
@@ -1366,7 +1366,7 @@ def load_shared_view(request, view_name):
         project = Project.objects.get(id=shared_view.project_id)
         if shared_view.internal and not request.user.is_superuser:
             raise PermissionDenied
-        if not (project.is_public or request.user.is_authenticated()):
+        if not (project.is_public or request.user.is_authenticated):
             shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + view_name
             return redirect(shared_url)
 
