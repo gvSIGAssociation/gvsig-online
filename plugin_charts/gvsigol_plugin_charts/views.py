@@ -26,17 +26,17 @@ from django.views.decorators.http import require_http_methods, require_safe, req
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import HttpResponse
 from gvsigol_core.models import Project
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_services import geographic_servers
-from forms import ChartForm
+from .forms import ChartForm
 
-from models import Chart
-import settings
-import utils
+from .models import Chart
+from . import settings
+from . import utils
 import json
 
 def get_conf(request):
