@@ -21,10 +21,10 @@
 '''
 @author: jvhigon <jvhigon@scolab.es>
 '''
-from models import WorldwindProvider
-from forms import DirectoryPath
-import settings
-import services
+from .models import WorldwindProvider
+from .forms import DirectoryPath
+from . import settings
+from . import services
 
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required
@@ -120,7 +120,7 @@ def delete(request,id):
         else:
             return redirect('list')
     except Exception as e:
-        print e
+        print(e)
 
 
 def conf(request, id):
@@ -144,4 +144,4 @@ def conf(request, id):
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')           
         
     except Exception as e:
-        print e
+        print(e)

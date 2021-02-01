@@ -9,10 +9,10 @@ class DirectoryPath(forms.Form):
         ('mapserver', 'Mapserver')
     ]
 
-    projects = forms.ModelChoiceField(label=_(u'Project'), required=True, queryset=Project.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
-    type = forms.ChoiceField(label=_(u'Type'), required=True, 
+    projects = forms.ModelChoiceField(label=_('Project'), required=True, queryset=Project.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
+    type = forms.ChoiceField(label=_('Type'), required=True, 
                              choices = TYPE_CHOICES, widget=forms.Select(attrs={'class':'form-control'}))
-    directory_path = forms.CharField(label=_(u'Directory name'), required=False, widget=forms.TextInput(attrs={ 'id': 'id_directory', 'class' : 'form-control', 'tabindex': '1'}))
-    heightUrl = forms.CharField(label=_(u'Url to get height'), required=False, widget=forms.TextInput(attrs={ 'id': 'id_heightUrl', 'class' : 'form-control', 'tabindex': '2'}))
-    layers = forms.CharField(label=_(u'layers'), required=False, widget=forms.TextInput(attrs={ 'id': 'id_layers', 'class' : 'form-control', 'tabindex': '3'}))
+    directory_path = forms.CharField(label=_('Directory name'), required=False, widget=forms.TextInput(attrs={ 'id': 'id_directory', 'class' : 'form-control', 'tabindex': '1'}))
+    heightUrl = forms.CharField(label=_('Url to get height'), required=False, widget=forms.TextInput(attrs={ 'id': 'id_heightUrl', 'class' : 'form-control', 'tabindex': '2'}))
+    layers = forms.CharField(label=_('layers'), required=False, widget=forms.TextInput(attrs={ 'id': 'id_layers', 'class' : 'form-control', 'tabindex': '3'}))
 
