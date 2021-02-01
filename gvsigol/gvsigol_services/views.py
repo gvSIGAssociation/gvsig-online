@@ -1602,7 +1602,7 @@ def layer_config(request, layer_id):
             logger.exception("Retrieving fields")
         enums = Enumeration.objects.all()
         procedures = []
-        disabled_procedures = core_utils.get_app_setting('GVSIGOL_DISABLED_PROCEDURES', [])
+        disabled_procedures = core_utils.get_setting('GVSIGOL_DISABLED_PROCEDURES', [])
         for procedure in TriggerProcedure.objects.all():
             if not procedure.signature in disabled_procedures:
                 procedures.append(procedure)

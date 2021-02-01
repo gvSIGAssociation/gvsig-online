@@ -716,6 +716,7 @@ def get_app_setting(key, default=None):
     """
     if GOL_APP_SETTINGS:
         return getattr(GOL_APP_SETTINGS, key, default)
+    return default
 
 
 def get_setting(key, default=None):
