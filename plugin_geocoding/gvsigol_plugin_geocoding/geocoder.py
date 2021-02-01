@@ -21,13 +21,13 @@ from gvsigol_plugin_geocoding.googlemaps import GoogleMaps
 '''
 
 from django.core.exceptions import ImproperlyConfigured
-from urlparse import urlparse
-import settings
-from cartociudad2 import CartoCiudad2
-from cartociudad import Cartociudad
-from nominatim import Nominatim 
-from geocoder_postgres import GeocoderPostgres
-from ide_uy import IdeUY
+from urllib.parse import urlparse
+from . import settings
+from .cartociudad2 import CartoCiudad2
+from .cartociudad import Cartociudad
+from .nominatim import Nominatim 
+from .geocoder_postgres import GeocoderPostgres
+from .ide_uy import IdeUY
 import json, ast
 
 
@@ -41,7 +41,7 @@ class Geocoder():
             type = provider.type
             if type == 'user':
                 type = 'cartociudad'
-            if geocoder.has_key(type):
+            if type in geocoder:
                 geocoder[type].append(provider)
                 return
         

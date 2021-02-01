@@ -16,9 +16,9 @@ __date__ = "$Date: 2007/02/11 09:05:49 $"[7:-2]
 
 __all__ = ["DbfRecord"]
 
-from itertools import izip
 
-import utils
+
+from . import utils
 
 class DbfRecord(object):
     """DBF record.
@@ -220,7 +220,7 @@ class DbfRecord(object):
         """Return string packed record values."""
         return "".join([" *"[self.deleted]] + [
             _def.encodeValue(_dat)
-            for (_def, _dat) in izip(self.dbf.header.fields, self.fieldData)
+            for (_def, _dat) in zip(self.dbf.header.fields, self.fieldData)
         ])
 
     def asList(self):
@@ -241,11 +241,11 @@ class DbfRecord(object):
             real values stored in this object.
 
         """
-        return dict([_i for _i in izip(self.dbf.fieldNames, self.fieldData)])
+        return dict([_i for _i in zip(self.dbf.fieldNames, self.fieldData)])
 
     def __getitem__(self, key):
         """Return value by field name or field index."""
-        if isinstance(key, (long, int)):
+        if isinstance(key, int):
             # integer index of the field
             return self.fieldData[key]
         # assuming string field name
@@ -253,7 +253,7 @@ class DbfRecord(object):
 
     def __setitem__(self, key, value):
         """Set field value by integer index of the field or string name."""
-        if isinstance(key, (int, long)):
+        if isinstance(key, int):
             # integer index of the field
             return self.fieldData[key]
         # assuming string field name

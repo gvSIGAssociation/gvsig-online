@@ -20,13 +20,13 @@ __date__ = "$Date: 2010/12/14 11:07:45 $"[7:-2]
 
 __all__ = ["DbfHeader"]
 
-import cStringIO
+import io
 import datetime
 import struct
 import time
 
-import fields
-from utils import getDate
+from . import fields
+from .utils import getDate
 
 
 class DbfHeader(object):
@@ -99,7 +99,7 @@ class DbfHeader(object):
     # @classmethod
     def fromString(cls, string):
         """Return header instance from the string object."""
-        return cls.fromStream(cStringIO.StringIO(str(string)))
+        return cls.fromStream(io.StringIO(str(string)))
     fromString = classmethod(fromString)
 
     # @classmethod
@@ -300,7 +300,7 @@ Version (signature): 0x%02x
 
     def __getitem__(self, item):
         """Return a field definition by numeric index or name string"""
-        if isinstance(item, basestring):
+        if isinstance(item, str):
             _name = item.upper()
             for _field in self.fields:
                 if _field.name == _name:
