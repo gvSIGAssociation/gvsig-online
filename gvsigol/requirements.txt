@@ -56,9 +56,6 @@ python-dateutil==2.8.1
 
 numpy==1.19.1
 
-# argparse==1.2.1 # not needed in Python >= 3.2
-wsgiref==0.1.2 # not needed in Python >= 3.2
-
 cmislib3==1.0.8
 lxml==4.6.2
 
@@ -80,8 +77,6 @@ pyproj==2.2.2 # to be updated
 OWSLib==0.21.0
 
 limesurveyrc2api==1.0.0
-
-suds==0.4
 
 django-jenkins==0.110.0
 
@@ -117,3 +112,4 @@ gevent==1.4.0
 #greenlet==0.4.12
 
 APScheduler==3.6.3
+

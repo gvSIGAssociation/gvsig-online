@@ -158,18 +158,18 @@ INSTALLED_APPS = [
     #'gvsigol_app_librapicassa',
 
     ############# PLUGINS ################
-    #'gvsigol_plugin_catalog',
+    'gvsigol_plugin_catalog',
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_catastrouy',
-    #'gvsigol_plugin_charts',
+    'gvsigol_plugin_charts',
     #'gvsigol_plugin_downloadman',
-    #'gvsigol_plugin_draw',
-    #'gvsigol_plugin_edition',
+    'gvsigol_plugin_draw',
+    'gvsigol_plugin_edition',
     #'gvsigol_plugin_elevation',
     #'gvsigol_plugin_emergencies',
-    #'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_importfromservice',
-    #'gvsigol_plugin_importvector',
+    'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_importfromservice',
+    'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
     #'gvsigol_plugin_opensea2',
     #'gvsigol_plugin_picassa',
@@ -177,7 +177,7 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_restapi',
     #'gvsigol_plugin_streetview',
     #'gvsigol_plugin_turiscan',
-    #'gvsigol_plugin_worldwind',
+    'gvsigol_plugin_worldwind',
     'actstream'
 ]
 
