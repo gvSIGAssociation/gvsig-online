@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from lxml import etree as ET
 from builtins import str as text
-from registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
+from .registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
 from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter
@@ -318,7 +318,7 @@ def create_thumbnail(root_elem, thumbnail_url, thumbnail_desc=None):
             file_desc_str.text = thumbnail_desc
         file_type = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileType")
         file_type_str = ET.SubElement(file_type, "{http://www.isotc211.org/2005/gco}CharacterString")
-        file_type_str.text = u'gvsigol thumbnail'
+        file_type_str.text = 'gvsigol thumbnail'
 
 def create_extent(root_elem, minx, miny, maxx, maxy):
     data_ident_elements = root_elem.findall('./gmd:identificationInfo/gmd:MD_DataIdentification', namespaces)
@@ -437,8 +437,8 @@ class Iso19139_2007Updater(XmlStandardUpdater):
                 valid_overviews += 1
                 ftype = overview.find('./gmd:MD_BrowseGraphic/gmd:fileType/gco:CharacterString', namespaces)
                 desc = overview.find('./gmd:MD_BrowseGraphic/gmd:fileDescription/gco:CharacterString', namespaces)
-                if (ftype is not None and ftype.text ==  u'gvsigol thumbnail') \
-                        or (desc is not None and desc.text == u'gvsigol thumbnail'):
+                if (ftype is not None and ftype.text ==  'gvsigol thumbnail') \
+                        or (desc is not None and desc.text == 'gvsigol thumbnail'):
                     file_name.text = thumbnail_url
         for el in to_remove:
             el.getparent().remove(el)

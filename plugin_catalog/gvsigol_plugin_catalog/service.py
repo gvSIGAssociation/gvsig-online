@@ -70,7 +70,7 @@ class Geonetwork():
         
         except Exception as e:
             logger.exception(e);
-            print e
+            print(e)
 
     def get_raw_metadata_url(self, uuid):
         return self.xmlapi.gn_get_raw_metadata_url(uuid)
@@ -85,7 +85,7 @@ class Geonetwork():
         
         except Exception as e:
             logger.exception(e);
-            print e
+            print(e)
             
     def _get_first_dict_value(self, d):
         if len(d) > 0:
@@ -117,7 +117,7 @@ class Geonetwork():
             raise
         except Exception as e:
             logger.exception(e);
-            print e
+            print(e)
         return online_resources
         
     def create_metadata(self, layer, layer_info, ds_type):
@@ -186,7 +186,7 @@ class Geonetwork():
             return None
         
         except Exception as e:
-            print e        
+            print(e)        
 
     def metadata_delete(self, lm):
         try:
@@ -197,7 +197,7 @@ class Geonetwork():
             return False
         
         except Exception as e:
-            print e
+            print(e)
             return False
         
     def layer_created_handler(self, sender, **kwargs):
