@@ -347,7 +347,7 @@ class Tiling():
             tiling_status.processed_tiles = layer_process['processed_tiles']
             tiling_status.time = layer_process['time']
             if tiling_status.processed_tiles == tiling_status.total_tiles:
-                tiling_status.stop = "true" 
+                tiling_status.active = "false" 
                 tiling_status.end_time = timezone.now()
             tiling_status.save()
 
