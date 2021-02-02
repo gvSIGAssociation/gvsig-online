@@ -32,9 +32,11 @@ import os
 import re
 from time import time as t
 from datetime import datetime, timedelta
+import pytz
+from django.utils import timezone
 
 from gvsigol import settings
-from gvsigol_core.models import Project, ProjectBaseLayerTiling
+from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
 from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server, Layer
 from pyproj import Proj, transform
@@ -271,7 +273,7 @@ class Tiling():
 
 
 
-    def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y):
+    def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y, tiling_status = None):
         start_time = t()
         first_entry = True   
         init_processed_tiles = base_layer_process[str(self.prj_id)]['processed_tiles']
@@ -303,6 +305,8 @@ class Tiling():
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
                     ytile = cpy_ytile
+                    self.saveProcessInfo(base_layer_process[str(self.prj_id)], tiling_status) 
+
             start_x = None
             start_y = None
             start_level = 7
@@ -333,9 +337,19 @@ class Tiling():
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
                 ytile = cpy_ytile
-                              
+                self.saveProcessInfo(base_layer_process[str(self.prj_id)], tiling_status)              
      
         return True
+
+
+    def saveProcessInfo(self, layer_process, tiling_status):
+        if(tiling_status is not None):
+            tiling_status.processed_tiles = layer_process['processed_tiles']
+            tiling_status.time = layer_process['time']
+            if tiling_status.processed_tiles == tiling_status.total_tiles:
+                tiling_status.stop = "true" 
+                tiling_status.end_time = timezone.now()
+            tiling_status.save()
 
 
     def get_estimated_time(self, start_time, base_layer_process, init_processed_tiles):
@@ -467,8 +481,9 @@ El objeto process_data es una estructura en la que se va actualizando el número
 del proceso de descarga y empaquetado
 """
 @start_new_thread
-def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png'):
-    millis = int(round(time.time() * 1000))
+def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png'):
+    if(version is None):
+        version = int(round(time.time() * 1000))
 
     url = None
     if lyr.datastore is not None:
@@ -480,7 +495,7 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
         url = ext_lyr['url']
     
     layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
-    folder_lyr =  os.path.join(layers_dir, lyr.name) + "_lyr_" + str(millis)
+    folder_lyr =  os.path.join(layers_dir, lyr.name) + "_lyr_" + str(version)
     folder_package = os.path.join(folder_lyr, 'EPSG3857')
     if not os.path.exists(layers_dir):
         os.mkdir(layers_dir)
@@ -502,7 +517,7 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
                 'active' : 'true',
                 'total_tiles' : 0,
                 'processed_tiles' : 0,
-                'version' : millis,
+                'version' : version,
                 'time' : '-',
                 'stop' : 'false',
                 'format_processed' : format_,
@@ -535,16 +550,31 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
         process_data[str(identif)]['total_tiles'] = number_of_tiles
 
         start_level = 0
+        tiling_status = create_status(process_data[str(identif)], lyr.id)
         for t in tilingList:
-            print process_data
-            t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None)
-            print process_data
+            t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None, tiling_status)
             start_level =  7 #Para al 1ra geom se descargan los niveles de 0-6 completos pero para las sgtes ya no hace falta 
             
         _zipFolder(folder_lyr)
     except Exception as e:
         print e
         return
+
+def create_status(process_data, id):
+    status = TilingProcessStatus()
+    status.layer = id
+    status.format_processed = process_data['format_processed']
+    status.processed_tiles = process_data['processed_tiles']
+    status.total_tiles = process_data['total_tiles']
+    status.version = process_data['version']
+    status.time = process_data['time']
+    status.active = process_data['active']
+    status.stop = process_data['stop']
+    status.extent_processed = process_data['extent_processed']
+    status.zoom_levels_processed = process_data['zoom_levels_processed']
+    status.start_time = timezone.now()
+    status.save()
+    return status
 
 def get_extent(json):
     if(json['type'] == 'Polygon'):
