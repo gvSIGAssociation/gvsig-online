@@ -2693,9 +2693,12 @@ def create_base_layer(request, pid):
         tilematrixset = request.POST.get('tilematrixset')
         extent = request.POST.get('extent')
         
-        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
-            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
-        
+        try:
+            if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
+                return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
+        except Exception:
+            pass
+
         if num_res_levels is not None:
             if num_res_levels > 22:
                 return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
@@ -2881,7 +2884,7 @@ def get_feature_info(request):
                                 if 'username' in request.session and 'password' in request.session:
                                     if request.session['username'] is not None and request.session['password'] is not None:
                                         auth2 = (request.session['username'], request.session['password'])
-                                        #auth2 = ('admin', 'geoserver')
+                                        auth2 = ('admin', 'geoserver')
                                         break
                                         
     
@@ -3169,7 +3172,7 @@ def get_datatable_data(request):
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
                     req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    req.auth = ('admin', 'geoserver')
 
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
