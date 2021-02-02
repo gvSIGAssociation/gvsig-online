@@ -16,13 +16,14 @@ from datetime import date, datetime
 from django.utils import timezone
 from django.utils.formats import date_format
 
-from django.core.urlresolvers import reverse
-from models import FORMAT_PARAM_NAME, SPATIAL_FILTER_GEOM_PARAM_NAME, SPATIAL_FILTER_TYPE_PARAM_NAME
-from utils import getLayer
-from settings import TARGET_URL, TARGET_ROOT, DOWNLOADS_ROOT, DOWNLOADS_URL
+from django.urls import reverse
+from .models import FORMAT_PARAM_NAME, SPATIAL_FILTER_GEOM_PARAM_NAME, SPATIAL_FILTER_TYPE_PARAM_NAME
+from .utils import getLayer
+from .settings import TARGET_URL, TARGET_ROOT, DOWNLOADS_ROOT, DOWNLOADS_URL
 import os
-from tasks import Error
-from sendfile import sendfile
+from .tasks import Error
+from django_sendfile import sendfile
+
 from django.shortcuts import redirect
 from actstream import action
 from django.contrib.auth.models import User, AnonymousUser, AbstractBaseUser
@@ -34,7 +35,7 @@ from collections import namedtuple
 from django.views.decorators.http import require_POST, require_GET, require_safe
 from gvsigol_core.models import GolSettings
 from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS, SETTINGS_KEY_NOTIFICATIONS_FROM_EMAIL
-import apps
+from . import apps
 from django.http.response import Http404
 import gvsigol_core
 from gvsigol_plugin_downloadman.settings import TARGET_ROOT
@@ -76,7 +77,7 @@ class ResourceDownloadDescriptor():
         for p in params:
             if isinstance(p, DownloadParam):
                 processed_params.append(p)
-            elif isinstance(p, basestring):
+            elif isinstance(p, str):
                 processed_params.append(DownloadParam(p, p))
             elif isinstance(p, list) and len(p) >= 2:
                 processed_params.append(DownloadParam(p[0], p[1]))
@@ -564,17 +565,17 @@ def requestTracking(request, uuid):
                 linkResources = downloadlink.resourcelocator_set.all()
                 if len(linkResources)==1:
                     if downloadlink.is_auxiliary:
-                        link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, downloadlink.name)
+                        link['name'] = '{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, downloadlink.name)
                     else:
-                        link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
+                        link['name'] = '{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
                 else:
-                    link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
+                    link['name'] = '{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
                     link['locators'] = []
                     locator_count =1
                     for locator in linkResources:
-                        link['locators'].append({'name': u'{0:d}-{1!s} [{2!s}]\n'.format(locator_count, locator.fq_title, locator.name)})
+                        link['locators'].append({'name': '{0:d}-{1!s} [{2!s}]\n'.format(locator_count, locator.fq_title, locator.name)})
                         locator_count += 1
-                    link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
+                    link['name'] = '{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
                 count += 1
                 links_info.append(link)
             #plain_message += _('\nThe following resources are still being processed:|n')
@@ -584,7 +585,7 @@ def requestTracking(request, uuid):
                 link['status'] = locator.status_desc
                 link['valid_to'] = '-'
                 link['download_url'] = '-'
-                link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, locator.fq_title, locator.name)
+                link['name'] = '{0:d}-{1!s} [{2!s}]\n'.format(count, locator.fq_title, locator.name)
                 links_info.append(link)
                 count += 1
             if len(links_info)>0:
@@ -677,7 +678,7 @@ def downloadResource(request, uuid, resuuid):
                     ldown_log.layer_id_type = resourceLocator.layer_id_type
                 ldown_log.name = resourceLocator.layer_name
                 ldown_log.title = resourceLocator.layer_title
-                ldown_log.title_name = resourceLocator.layer_title + u'[' + resourceLocator.name + u']'
+                ldown_log.title_name = resourceLocator.layer_title + '[' + resourceLocator.name + ']'
                 ldown_log.save()
                 try:
                     lrdown_log = downman_models.LayerResourceProxy.objects.get(layer=ldown_log, name=resourceLocator.name)
@@ -701,14 +702,14 @@ def downloadResource(request, uuid, resuuid):
         if link.prepared_download_path:
             # ensure the file is contained in DOWNLOADS_ROOT or TARGET_ROOT folders
             if os.path.relpath(link.prepared_download_path, DOWNLOADS_ROOT)[:2] != '..' or os.path.relpath(link.prepared_download_path, TARGET_ROOT)[:2] != '..':
-                logger.debug(u"using sendfile: " + link.prepared_download_path)
+                logger.debug("using sendfile: " + link.prepared_download_path)
                 return sendfile(request, link.prepared_download_path, attachment=True)
         else:
             if link.resolved_url:
                 return redirect(link.resolved_url) 
-            logger.debug(u"going to use redirect")
+            logger.debug("going to use redirect")
             for locator in link.resourcelocator_set.all():
-                logger.debug(u"using redirect: " + locator.resolved_url)
+                logger.debug("using redirect: " + locator.resolved_url)
                 # we expect a single locator associated to the link if prepared_download_path is not defined
                 return redirect(locator.resolved_url)
     except:
