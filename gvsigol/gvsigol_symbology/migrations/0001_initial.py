@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
                 ('opacity', models.IntegerField(default=1)),
                 ('size', models.IntegerField(default=8)),
                 ('rotation', models.IntegerField(default=0)),
-                ('well_known_name', models.CharField(choices=[('circle', 'C\xedrculo'), ('square', 'Cuadrado'), ('triangle', 'Tri\xe1ngulo'), ('star', 'Estrella'), ('cross', 'Cruz')], default='circle', max_length=25)),
+                ('well_known_name', models.CharField(choices=[('circle', 'Círculo'), ('square', 'Cuadrado'), ('triangle', 'Triángulo'), ('star', 'Estrella'), ('cross', 'Cruz')], default='circle', max_length=25)),
                 ('fill', models.CharField(max_length=100)),
                 ('fill_opacity', models.FloatField(default=1.0)),
                 ('stroke', models.CharField(max_length=100)),
