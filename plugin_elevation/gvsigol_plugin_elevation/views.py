@@ -23,7 +23,7 @@
 '''
 
 from django.shortcuts import HttpResponse
-import settings
+from . import settings
 import json
 
 def get_conf(request):
