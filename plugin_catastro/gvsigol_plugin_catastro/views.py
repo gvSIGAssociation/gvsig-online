@@ -23,7 +23,7 @@
 '''
 
 from django.shortcuts import HttpResponse
-import settings
+from . import settings
 import json
 import requests
 from django.views.decorators.csrf import csrf_exempt
@@ -237,7 +237,7 @@ def get_referencia_catastral(request):
                 url = settings.URL_API_CATASTRO + "/OVCCallejero.asmx/Consulta_DNPPP"
                 url += "?Provincia="+provincia+"&Municipio="+municipio+"&Poligono="+poligonovia+"&Parcela="+parcelavia
 
-            print 'Location url: ' + url
+            print('Location url: ' + url)
             r = requests.get(url = url, params = {})
             tree = ElementTree.fromstring(r.content)
 
@@ -249,7 +249,7 @@ def get_referencia_catastral(request):
                                 rc = aux5.text
                             for aux5 in aux4.iter('{http://www.catastro.meh.es/}pc2'):
                                 rc += aux5.text
-                            print 'Referencia catastral: ' + rc
+                            print('Referencia catastral: ' + rc)
 
 
             for aux1 in tree.iter('{http://www.catastro.meh.es/}lrcdnp'):
@@ -259,7 +259,7 @@ def get_referencia_catastral(request):
                             rc = aux5.text
                         for aux5 in aux4.iter('{http://www.catastro.meh.es/}pc2'):
                             rc += aux5.text
-                        print 'Referencia catastral: ' + rc
+                        print('Referencia catastral: ' + rc)
 
         if typex == 'reg_code':
             address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaVia?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia="
