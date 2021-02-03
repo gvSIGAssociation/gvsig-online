@@ -1,0 +1,45 @@
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.draw2d_InputPort{
+	fill:#F7F7F7;
+	stroke:#d7d7d7;
+ }
+ .draw2d_OutputPort{
+	fill:#F7F7F7;
+	stroke:#d7d7d7;
+ }
+
+#canvas-parent {
+	height: 78vh;
+	border: 4px;
+	position: relative;
+	overflow: scroll;
+	background-color: #fff;
+}
+
+#canvas-etl{
+	width: 6000px;
+	height: 6000px;
+}
+
+.palette_node_element {
+	
+	cursor: move;
+	padding-left: 10px;
+
+}
+
+.column
+{
+    float: left;
+    width: 50%;
+}
+.threecolumn
+{
+    float: left;
+    width: 33%;
+}
