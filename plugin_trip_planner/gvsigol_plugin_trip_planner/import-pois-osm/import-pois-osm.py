@@ -6,6 +6,7 @@ import geopandas as gpd
 import requests
 import sys
 import os
+import imp
 
 # Amenity:
 #         Hospital
@@ -48,7 +49,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
 
 
     for i in range(layerDefinition.GetFieldCount()):
-        print layerDefinition.GetFieldDefn(i).GetName()
+        print(layerDefinition.GetFieldDefn(i).GetName())
 
     features=[x for x in layer]
 
@@ -57,7 +58,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
     numFeatures = len(features)
     for f in features:
         if i % 100 == 0:
-                print 'Processing {0} of {1}'.format(i, numFeatures)
+                print('Processing {0} of {1}'.format(i, numFeatures))
         i = i+1
         # if i > 1000:
         #         break
@@ -97,7 +98,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
                                         feat=[x for x in other_tags.split(',') if 'historic' in x][0]
                                         category = 'historic'
                                         aux = feat[feat.rfind('>')+2:feat.rfind('"')]
-                                        print 'Historic: ' + name + ' Subcat: ' + aux
+                                        print('Historic: ' + name + ' Subcat: ' + aux)
                                         if aux in historicTags:
                                                 subcat = aux
 
@@ -117,22 +118,22 @@ def extract_points(pbfFile, reverseGeocodeUrl):
                                 address = '{0} {1}'.format(res.get('tip_via'), res.get('address'), muni)
 
                 except requests.exceptions.RequestException as e:
-                        print e
+                        print(e)
                 except ValueError as jsonErr:
-                        print jsonErr
+                        print(jsonErr)
                 nameUni = name.decode('utf-8')
 
                 try:
-                        nameAndAddress = nameUni + u' - ' + address + u', ' + muni
+                        nameAndAddress = nameUni + ' - ' + address + ', ' + muni
                         data_list.append([nameUni,nameAndAddress,category,subcat,shapely_geo, address, muni])
                 except TypeError as e2:
-                        print e2
-                        print nameUni
-                        print address
-                        print muni
+                        print(e2)
+                        print(nameUni)
+                        print(address)
+                        print(muni)
 
 
-    print(len(data_list))
+    print((len(data_list)))
     # create the data source
     fileDest = pbfFile.replace('.pbf', '.shp')
     create_shapefile(data_list, fileDest)
@@ -214,7 +215,7 @@ def create_shapefile(data_list, fileDest):
         
 
 
-reload(sys)
+imp.reload(sys)
 sys.setdefaultencoding('latin1')
 
 reverseGeocodeUrl = 'https://trip-planner.gvsigonline.com/geocodersolr/api/geocoder/reverseGeocode' # ?lon=-0.3576982972310994&lat=39.4767836851722

@@ -28,9 +28,6 @@ from dateutil.parser import parse as parsedate
 from tzlocal import get_localzone # $ pip install tzlocal
 from shutil import copyfileobj
 
-from __builtin__ import False
-
-
 def download_file(url, dstFile):
     try:
 #         unverified_context = ssl._create_unverified_context()        
@@ -54,7 +51,7 @@ def download_file(url, dstFile):
 def download_file_if_newer(url, dstFile):
     try :
         r = requests.head(url)
-        if 'last-modified' in r.headers.keys():
+        if 'last-modified' in list(r.headers.keys()):
             url_time = r.headers['last-modified']
         else:
             return download_file(url, dstFile)
@@ -70,5 +67,5 @@ def download_file_if_newer(url, dstFile):
         else:
             return False
     except requests.exceptions.RequestException as e:
-        print e
+        print(e)
         return False

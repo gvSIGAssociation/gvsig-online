@@ -24,7 +24,7 @@ from gvsigol_plugin_trip_planner.models import GTFSProvider, APPMobileConfig
 from django.utils.translation import ugettext as _
 from django import forms
 import json
-import settings
+from . import settings
 
 
 class GtfsProviderForm(forms.ModelForm):
@@ -32,10 +32,10 @@ class GtfsProviderForm(forms.ModelForm):
         model = GTFSProvider
         fields = ['name', 'description', 'url', 'is_active', 'last_update']
 
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    url = forms.URLField(label=_(u'Url'), required=True, max_length=400, widget=forms.URLInput(attrs={'class' : 'form-control'}))
-    is_active = forms.BooleanField(label=_(u'Active'), required = False)
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    description = forms.CharField(label=_('Description'), required=False, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    url = forms.URLField(label=_('Url'), required=True, max_length=400, widget=forms.URLInput(attrs={'class' : 'form-control'}))
+    is_active = forms.BooleanField(label=_('Active'), required = False)
 
 
 
@@ -44,17 +44,17 @@ class GtfsProviderUpdateForm(forms.ModelForm):
         model = GTFSProvider
         fields = ['name', 'description', 'url', 'is_active', 'last_update']
 
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    url = forms.URLField(label=_(u'Url'), required=True, max_length=400, widget=forms.URLInput(attrs={'class' : 'form-control'}))
-    is_active = forms.BooleanField(label=_(u'Active'), required = False)
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    description = forms.CharField(label=_('Description'), required=False, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    url = forms.URLField(label=_('Url'), required=True, max_length=400, widget=forms.URLInput(attrs={'class' : 'form-control'}))
+    is_active = forms.BooleanField(label=_('Active'), required = False)
 
 class GtfsCrontabForm(forms.ModelForm):
     class Meta:
         fields = ['cron_hour', 'cron_minutes']
 
-    cron_hour = forms.CharField(label=_(u'Hour'), required=True, max_length=10, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    cron_minutes = forms.CharField(label=_(u'Minutes'), required=True, max_length=10, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    cron_hour = forms.CharField(label=_('Hour'), required=True, max_length=10, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    cron_minutes = forms.CharField(label=_('Minutes'), required=True, max_length=10, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
 
 
@@ -63,6 +63,6 @@ class APPMobileConfigUpdateForm(forms.ModelForm):
         model = APPMobileConfig
         fields = ['name', 'description', 'params']
 
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=1000, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    params = forms.CharField(label=_(u'Config'), required=False, widget=forms.HiddenInput(attrs={'class' : 'form-control'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    description = forms.CharField(label=_('Description'), required=False, max_length=1000, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    params = forms.CharField(label=_('Config'), required=False, widget=forms.HiddenInput(attrs={'class' : 'form-control'}))
