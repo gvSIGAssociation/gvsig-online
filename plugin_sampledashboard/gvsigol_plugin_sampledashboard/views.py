@@ -23,9 +23,9 @@
 '''
 
 from django.shortcuts import HttpResponse, render, redirect
-from models import SampleDashboard
+from .models import SampleDashboard
 from django.contrib.auth.decorators import login_required
-import settings
+from . import settings
 import json
 
 def get_conf(request):
