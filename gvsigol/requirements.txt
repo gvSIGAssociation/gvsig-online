@@ -60,7 +60,7 @@ cmislib3==1.0.8
 lxml==4.6.2
 
 # Cron para aguas de valencia
-schedule==0.6.0
+schedule==1.0.0
 
 # Ver #3727
 openpyxl==3.0.5
