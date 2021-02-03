@@ -46,12 +46,11 @@ from spatialiteintrospect import introspect as sq_introspect
 from gvsigol import settings
 from gvsigol_core import geom
 from gvsigol_services import utils
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services import geographic_servers
 from gvsigol_services import backend_postgis as pg_introspect
 from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock, \
     LayerResource
 from gvsigol_services.locks_utils import *
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
 
 DEFAULT_BUFFER_SIZE = 1048576
 
@@ -117,7 +116,8 @@ def get_layerinfo_by_project(request, project):
     
 def fill_layer_attrs(layer, permissions):
     row = {}
-    geom_info = mapservice_backend.get_geometry_info(layer)
+    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+    geom_info = gs.get_geometry_info(layer)
     if geom_info:
         srid = geom_info['srs']
         if srid is None:
@@ -284,7 +284,8 @@ def sync_upload(request, release_locks=True):
                         pgdb.update_pk_sequences(lock.layer.name, schema)
                         pgdb.close()
 
-                        mapservice_backend.updateBoundingBoxFromData(lock.layer)
+                        gs = geographic_servers.get_instance().get_server_by_id(lock.layer.datastore.workspace.server.id)
+                        gs.updateBoundingBoxFromData(lock.layer)
                     else:
                         raise HttpResponseBadRequest(SYNCERROR_UNREADABLE_LAYER.format(lock.layer.get_qualified_name())) 
             finally:
@@ -333,7 +334,7 @@ def _remove_existing_images(tables):
     resources.delete()
     for r in resources:
         # should print nothing as we have removed all the resources
-        print r
+        print(r)
 
 def _extract_images(db_path):
     """
@@ -430,7 +431,7 @@ def handle_uploaded_file(f):
     for chunk in f.chunks():
         destination.write(chunk)
     destination.close()
-    print path
+    print(path)
     return path
 
 
@@ -443,7 +444,7 @@ def handle_uploaded_file_base64(fileupload):
     asBytes = bytearray(fileupload, "unicode_internal")
     destination.write(asBytes)
     destination.close()
-    print path
+    print(path)
     return path
 
 
@@ -452,7 +453,7 @@ def handle_uploaded_file_raw(request):
     destination = os.fdopen(fd_dest, "w", DEFAULT_BUFFER_SIZE)
     shutil.copyfileobj(request, destination, DEFAULT_BUFFER_SIZE)
     destination.close()
-    print path
+    print(path)
     return path
 
 class ResourceReplacer():
