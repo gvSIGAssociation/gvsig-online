@@ -65,7 +65,7 @@ if len(SECRET_KEY) == 14:
             from django.core.management import utils
             import os
             SECRET_KEY = get_random_secret_key()
-            secret = file(SECRET_FILE, 'w')
+            secret = open(SECRET_FILE, 'w')
             secret.write(SECRET_KEY)
             secret.close()
             os.chmod(SECRET_FILE, 0o400)
