@@ -22,13 +22,13 @@ from geoserver.layergroup import LayerGroup
 
 @author: jbadia <jbadia@scolab.es>
 '''
-from models import Survey, SurveySection, SurveyReadGroup, SurveyWriteGroup
+from .models import Survey, SurveySection, SurveyReadGroup, SurveyWriteGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadGroup, LayerWriteGroup
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services import geographic_servers
 from gvsigol_services.views import layer_delete_operation
-from forms import SurveyForm, SurveySectionForm, UploadFileForm
+from .forms import SurveyForm, SurveySectionForm, UploadFileForm
 from gvsigol_core import utils as core_utils
 from gvsigol_services import utils
 from gvsigol import settings
@@ -45,8 +45,8 @@ import json
 from django.utils.translation import ugettext as _
 from django.db import IntegrityError
 from django.shortcuts import render
-from settings import SURVEY_FUNCTIONS
-from django.core.urlresolvers import reverse
+from .settings import SURVEY_FUNCTIONS
+from django.urls import reverse
 from gvsigol.settings import LANGUAGES
 
 import re
@@ -166,18 +166,18 @@ def survey_add(request):
                     exists = True
             
             if name == '':
-                message = _(u'You must enter an survey name')
+                message = _('You must enter an survey name')
                 return render(request, 'survey_add.html', {'message': message, 'form': form})
             
             if _valid_name_regex.search(name) == None:
-                message = _(u"Invalid survey name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+                message = _("Invalid survey name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
                 return render(request, 'survey_add.html', {'message': message, 'form': form})
               
             if not exists:     
                 newSurvey.save()
                 return redirect('survey_update', survey_id=newSurvey.id)
             else:
-                message = _(u'Exists a project with the same name')
+                message = _('Exists a project with the same name')
                 return render(request, 'survey_add.html', {'message': message, 'form': form})
         
        
@@ -582,7 +582,8 @@ def survey_update_project(request, survey_id):
         survey.layer_group_id = layergroup.id
         survey.save()
         
-        mapservice_backend.reload_nodes()
+        gs = geographic_servers.get_instance().get_server_by_id(survey.datastore.workspace.server.id)
+        gs.reload_nodes()
         
         project_layergroup = ProjectLayerGroup(
             project = project,
@@ -652,10 +653,11 @@ def survey_section_update_project(request, section_id):
 def survey_section_update_project_operation(request, survey, section, lyorder):
     if section.layer_id != None:
         layer_delete_operation(request, section.layer_id)
-        
+    
+    gs = geographic_servers.get_instance().get_server_by_id(survey.datastore.workspace.server.id)
     try:
-        mapservice_backend.deleteTable(survey.datastore, section.name)
-        mapservice_backend.deleteResource(
+        gs.deleteTable(survey.datastore, section.name)
+        gs.deleteResource(
             survey.datastore.workspace,
             survey.datastore,
             section.name)
@@ -699,11 +701,11 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
                                 field_defs.append(field_def)
                                 
     section.name = prepare_string(section.name)
-    mapservice_backend.createTableFromFields(survey.datastore, section.name, geom_type, section.srs, fields)
+    gs.createTableFromFields(survey.datastore, section.name, geom_type, section.srs, fields)
     
     # first create the resource on the backend
     try:
-        mapservice_backend.createResource(
+        gs.createResource(
             survey.datastore.workspace,
             survey.datastore,
             section.name,
@@ -713,7 +715,7 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
         pass
     
     try:
-        mapservice_backend.setQueryable(
+        gs.setQueryable(
             survey.datastore.workspace.name,
             survey.datastore.name,
             survey.datastore.type,
@@ -743,9 +745,9 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
     layer.save()
    
     style_name = survey.datastore.workspace.name + '_' + layer.name + '_default'
-    mapservice_backend.createDefaultStyle(layer, style_name)
-    mapservice_backend.setLayerStyle(layer, style_name, True)
-    layer = mapservice_backend.updateThumbnail(layer, 'create')
+    gs.createDefaultStyle(layer, style_name)
+    gs.setLayerStyle(layer, style_name, True)
+    layer = gs.updateThumbnail(layer, 'create')
     layer.save()
     
     section.layer_id = layer.id
@@ -758,8 +760,8 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
     layer.save()
     
     core_utils.toc_add_layer(layer)
-    mapservice_backend.createOrUpdateGeoserverLayerGroup(survey.layer_group)
-    mapservice_backend.reload_nodes()
+    gs.createOrUpdateGeoserverLayerGroup(survey.layer_group)
+    gs.reload_nodes()
 
 
     permissionsr = SurveyReadGroup.objects.filter(survey=survey)
@@ -789,8 +791,8 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
             pass
                 
                 
-    mapservice_backend.setLayerDataRules(layer, groupsr, groupsw)
-    mapservice_backend.reload_nodes()
+    gs.setLayerDataRules(layer, groupsr, groupsw)
+    gs.reload_nodes()
 
 
 
@@ -880,7 +882,7 @@ def survey_upload_db(request):
                 db_name = survey.name
                 c = conn.cursor()
                 for row in c.execute('SELECT _id, lon, lat, altim, ts, description, text, form, style, isdirty FROM notes;'):
-                    print row
+                    print(row)
                     add_result_from_survey(request, db_name, row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
             except Exception as e:
                 logger.exception(SYNCERROR_UPLOAD)
