@@ -32,9 +32,11 @@ import os
 import re
 from time import time as t
 from datetime import datetime, timedelta
+import pytz
+from django.utils import timezone
 
 from gvsigol import settings
-from gvsigol_core.models import Project, ProjectBaseLayerTiling
+from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
 from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server, Layer
 from pyproj import Proj, transform
@@ -45,6 +47,7 @@ class Tiling():
     directory = None
     mode = 'OSM'
     tilematrixset = None
+    matrixset_prefix = None
     layer = None
     ctx = None
     gsuser = None
@@ -55,6 +58,7 @@ class Tiling():
     max_lon = None
     max_lat = None
     prj_id = None
+    level_download_all_tiles = 5
 
     def __init__(self, folder, type_, tilematrixset, url, prj_id):
         self.prj_id = prj_id
@@ -70,6 +74,7 @@ class Tiling():
             pass
 
         self.tilematrixset = tilematrixset
+        self.matrixset_prefix = tilematrixset + ":"
         if type_ is not None:
             self.mode = type_
             if type_ == "OSM":
@@ -88,6 +93,12 @@ class Tiling():
     
     def set_layer_name(self, lyr_name):
         self.layer = lyr_name
+
+    def set_matrixset_prefix(self, prefix):
+        if prefix is None:
+            self.matrixset_prefix = ""
+        else:
+            self.matrixset_prefix = prefix
         
     def set_layer_extent(self, minx, miny, maxx, maxy):
         self.min_lon = minx
@@ -118,10 +129,10 @@ class Tiling():
         return (xtile, ytile)
     
     def _download_wmts(self, zoom, xtile, ytile, format_):
-        params = "?REQUEST=GetTile&&TILEMATRIXSET=" + self.tilematrixset + "&LAYER=" + self.layer + "&FORMAT=" + format_ 
+        params = "?REQUEST=GetTile&SERVICE=WMTS&TILEMATRIXSET=" + self.tilematrixset + "&LAYER=" + self.layer + "&FORMAT=" + format_ 
         url = self.tile_url + params
         
-        url = "%s&TILEMATRIX=%s&TILECOL=%d&TILEROW=%d" % (url, (self.tilematrixset + ':' + str(zoom)), xtile, ytile)
+        url = "%s&TILEMATRIX=%s&TILECOL=%d&TILEROW=%d" % (url, (self.matrixset_prefix + str(zoom)), xtile, ytile)
         dir_path = "%s/%d/%d/" % (self.directory,zoom, xtile)
         
         if(format_.endswith("png")):
@@ -271,19 +282,19 @@ class Tiling():
 
 
 
-    def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y):
+    def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y, tiling_status = None):
         start_time = t()
         first_entry = True   
         init_processed_tiles = base_layer_process[str(self.prj_id)]['processed_tiles']
         if start_level == None:
             start_level = 0   
 
-        if self.mode  != "OSM" and start_level <= 6:
+        if self.mode  != "OSM" and start_level <= (self.level_download_all_tiles - 1):
             #Si la capa es WMTS:
             #De los niveles 0-6 se descargan todos los tiles de la capa ajustandose al extent de esta
             #para no pedir tiles que no contenga.
             # Como el extent de la capa siempre viene en geográficas se usa deg2num
-            for zoom in range(start_level, 7, 1):
+            for zoom in range(start_level, self.level_download_all_tiles, 1):
                 xtile, ytile = self._deg2num(float(self.min_lat), float(self.min_lon), zoom)
                 cpy_ytile = ytile
                 final_xtile, final_ytile = self._deg2num(float(self.max_lat), float(self.max_lon), zoom)
@@ -303,9 +314,11 @@ class Tiling():
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
                     ytile = cpy_ytile
+                    self.saveProcessInfo(base_layer_process[str(self.prj_id)], tiling_status) 
+
             start_x = None
             start_y = None
-            start_level = 7
+            start_level = self.level_download_all_tiles
                                              
 
         for zoom in range(start_level, int(maxzoom) + 1, 1):
@@ -333,9 +346,19 @@ class Tiling():
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
                 ytile = cpy_ytile
-                              
+                self.saveProcessInfo(base_layer_process[str(self.prj_id)], tiling_status)              
      
         return True
+
+
+    def saveProcessInfo(self, layer_process, tiling_status):
+        if(tiling_status is not None):
+            tiling_status.processed_tiles = layer_process['processed_tiles']
+            tiling_status.time = layer_process['time']
+            if tiling_status.processed_tiles == tiling_status.total_tiles:
+                tiling_status.active = "false" 
+                tiling_status.end_time = timezone.now()
+            tiling_status.save()
 
 
     def get_estimated_time(self, start_time, base_layer_process, init_processed_tiles):
@@ -378,11 +401,11 @@ class Tiling():
      
     def get_number_of_tiles(self, min_x, min_y, max_x, max_y, maxzoom, base_layer_process, count_base=True):
         num_tiles = 0
-        
-        #Niveles de 0 al 7 sólo capas WMTS (pq OSM ya están descargados)
+
+        #Niveles de 0 al level_download_all_tiles sólo capas WMTS (pq OSM ya están descargados)
 
         if count_base and self.mode  != "OSM":
-            for zoom in range(0, 7, 1):
+            for zoom in range(0, self.level_download_all_tiles, 1):
                 xtile, ytile = self._deg2num(float(self.min_lat), float(self.min_lon), zoom)
                 final_xtile, final_ytile = self._deg2num(float(self.max_lat), float(self.max_lon), zoom)
                 w = abs(final_xtile - xtile) + 1
@@ -391,7 +414,7 @@ class Tiling():
                         
         #Para cualquier capa base se descargan los siguientes niveles               
         #solo de la extensión del proyecto
-        for zoom in range(7, int(maxzoom) + 1, 1):
+        for zoom in range(self.level_download_all_tiles, int(maxzoom) + 1, 1):
             xtile, ytile = self._utm2num(min_y, min_x, zoom)
             final_xtile, final_ytile = self._utm2num(max_y, max_x, zoom)
             w = abs(final_xtile - xtile) + 1
@@ -467,8 +490,9 @@ El objeto process_data es una estructura en la que se va actualizando el número
 del proceso de descarga y empaquetado
 """
 @start_new_thread
-def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png'):
-    millis = int(round(time.time() * 1000))
+def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None):
+    if(version is None):
+        version = int(round(time.time() * 1000))
 
     url = None
     if lyr.datastore is not None:
@@ -480,7 +504,7 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
         url = ext_lyr['url']
     
     layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
-    folder_lyr =  os.path.join(layers_dir, lyr.name) + "_lyr_" + str(millis)
+    folder_lyr =  os.path.join(layers_dir, lyr.name) + "_lyr_" + str(version)
     folder_package = os.path.join(folder_lyr, 'EPSG3857')
     if not os.path.exists(layers_dir):
         os.mkdir(layers_dir)
@@ -502,7 +526,7 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
                 'active' : 'true',
                 'total_tiles' : 0,
                 'processed_tiles' : 0,
-                'version' : millis,
+                'version' : version,
                 'time' : '-',
                 'stop' : 'false',
                 'format_processed' : format_,
@@ -514,6 +538,7 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
         tilingList = [] 
         for geojson in geojson_list:
             tiling = Tiling(folder_package, mode, tilematrixset, url, identif)
+            tiling.set_matrixset_prefix(matrixset_prefix)
             if mode != 'OSM':
                 tiling.set_layer_name(lyr_name)
                 extent = lyr.latlong_extent
@@ -535,16 +560,32 @@ def tiling_layer(process_data, lyr, geojson_list, num_res_levels, tilematrixset,
         process_data[str(identif)]['total_tiles'] = number_of_tiles
 
         start_level = 0
+        tiling_status = create_status(process_data[str(identif)], lyr.id)
         for t in tilingList:
             print(process_data)
             t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None)
             print(process_data)
-            start_level =  7 #Para al 1ra geom se descargan los niveles de 0-6 completos pero para las sgtes ya no hace falta 
-            
+            start_level =  5 #Para al 1ra geom se descargan los niveles de 0-4 completos pero para las sgtes ya no hace falta
         _zipFolder(folder_lyr)
     except Exception as e:
         print(e)
         return
+
+def create_status(process_data, id):
+    status = TilingProcessStatus()
+    status.layer = id
+    status.format_processed = process_data['format_processed']
+    status.processed_tiles = process_data['processed_tiles']
+    status.total_tiles = process_data['total_tiles']
+    status.version = process_data['version']
+    status.time = process_data['time']
+    status.active = process_data['active']
+    status.stop = process_data['stop']
+    status.extent_processed = process_data['extent_processed']
+    status.zoom_levels_processed = process_data['zoom_levels_processed']
+    status.start_time = timezone.now()
+    status.save()
+    return status
 
 def get_extent(json):
     if(json['type'] == 'Polygon'):

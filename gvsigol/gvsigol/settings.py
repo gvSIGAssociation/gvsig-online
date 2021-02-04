@@ -158,24 +158,31 @@ INSTALLED_APPS = [
     #'gvsigol_app_librapicassa',
 
     ############# PLUGINS ################
+    'gvsigol_plugin_alfresco',
     'gvsigol_plugin_catalog',
-    #'gvsigol_plugin_catastro',
+    'gvsigol_plugin_catastro',
     #'gvsigol_plugin_catastrouy',
     'gvsigol_plugin_charts',
-    #'gvsigol_plugin_downloadman',
+    'gvsigol_plugin_downloadman',
     'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
-    #'gvsigol_plugin_elevation',
+    'gvsigol_plugin_elevation',
     #'gvsigol_plugin_emergencies',
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_importvector',
-    #'gvsigol_plugin_manageaddresses',
+    'gvsigol_plugin_manageaddresses',
     #'gvsigol_plugin_opensea2',
+    'gvsigol_plugin_sampledashboard',
+    'gvsigol_plugin_samplemenubutton',
+    'gvsigol_plugin_staticdownloads',
+    'gvsigol_plugin_survey',
     #'gvsigol_plugin_picassa',
-    #'gvsigol_plugin_print',
-    #'gvsigol_plugin_restapi',
-    #'gvsigol_plugin_streetview',
+    'gvsigol_plugin_print',
+    'gvsigol_plugin_restapi',
+    'gvsigol_plugin_streetview',
+    ##'gvsigol_plugin_sync',
+    ##'gvsigol_plugin_trip_planner',
     #'gvsigol_plugin_turiscan',
     'gvsigol_plugin_worldwind',
     'actstream'
@@ -340,23 +347,19 @@ LANGUAGES = (
     #('pt', _('Portuguese')),
     #('pt-br', _('Brazilian Portuguese')),
 )
-LOCALE_PATHS = (
+
+LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol/locale'),
     os.path.join(BASE_DIR, 'gvsigol_core/locale'),
     os.path.join(BASE_DIR, 'gvsigol_auth/locale'),
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_statistics/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_test/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_edition/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_catalog/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_print/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_importvector/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_draw/locale'),
-)
+    os.path.join(BASE_DIR, 'gvsigol_filemanager/locale')
+]
+for app in INSTALLED_APPS:
+    if app.startswith('gvsigol_app_') or app.startswith('gvsigol_plugin_'):
+        LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGOUT_PAGE_URL = '/gvsigonline/'

@@ -1,0 +1,240 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "Undo"
+msgstr "Deshacer"
+
+msgid "Redo"
+msgstr "Rehacer"
+
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "Run"
+msgstr "Ejecutar"
+
+msgid "Zoom In"
+msgstr "Acercar"
+
+msgid "Zoom Out"
+msgstr "Alejar"
+
+msgid "Process has been executed succesfully"
+msgstr "El proceso se ha ejecutado correctamente"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Accept"
+msgstr "Aceptar"
+
+msgid "Response"
+msgstr "Respuesta"
+
+msgid "Excel Parameters"
+msgstr "Parámetros Excel"
+
+msgid "Choose excel file:"
+msgstr "Elige el fichero excel:"
+
+msgid "Sheet:"
+msgstr "Hoja:"
+
+msgid "Attribute columns:"
+msgstr "Columnas de atributos:"
+
+msgid "Skip header:"
+msgstr "Salta cabecera:"
+
+msgid "Input"
+msgstr "Entrada"
+
+msgid "Output"
+msgstr "Salida"
+
+msgid "Shapefile Parameters"
+msgstr "Parámetros Shapefile"
+
+msgid "Choose shapefile files:"
+msgstr "Elige los ficheros shapefile:"
+
+msgid "Join"
+msgstr "Unión"
+
+msgid "Join Parameters"
+msgstr "Parámetros Unión"
+
+msgid "Main table attribute:"
+msgstr "Atributo tabla principal:"
+
+msgid "Secondary table attribute:"
+msgstr "Atributo tabla secundaria:"
+
+msgid "Input Main"
+msgstr "Entrada Pr."
+
+msgid "Input Sec."
+msgstr "Entrada Sec."
+
+msgid "Main Not Used"
+msgstr "Pr. Sin Usar"
+
+msgid "Sec. Not Used"
+msgstr "Sec. Sin Usar"
+
+msgid "Remove Attribute"
+msgstr "Elimina Atributo"
+
+msgid "Remove Attribute Parameters"
+msgstr "Parámetros Elimina Atributo"
+
+msgid "Attribute to remove:"
+msgstr "Atributo a eliminar:"
+
+msgid "Rename Attribute"
+msgstr "Renombra Atributo"
+
+msgid "Rename Attribute Parameters"
+msgstr "Parámetros Renombra Atributo"
+
+msgid "Attribute to rename:"
+msgstr "Atributo a renombrar:"
+
+msgid "New name:"
+msgstr "Nuevo nombre:"
+
+msgid "Modify Value"
+msgstr "Modifica Valor"
+
+msgid "Modify Value Parameters"
+msgstr "Parámetros Modifica Valor"
+
+msgid "Attribute to modify:"
+msgstr "Atributo a modificar:"
+
+msgid "New value:"
+msgstr "Nuevo valor:"
+
+msgid "Create Attribute"
+msgstr "Crea Atributo"
+
+msgid "Create Attribute Parameters"
+msgstr "Parámetros Crea Atributo"
+
+msgid "New attribute:"
+msgstr "Nuevo atributo:"
+
+msgid "Value:"
+msgstr "Valor:"
+
+msgid "Filter"
+msgstr "Filtro"
+
+msgid "Filter Parameters"
+msgstr "Parámetros Filtro"
+
+msgid "Attribute:"
+msgstr "Atributo:"
+
+msgid "Operator:"
+msgstr "Operador:"
+
+msgid "Starts with"
+msgstr "Empieza por"
+
+msgid "Ends with"
+msgstr "Acaba por"
+
+msgid "Contains"
+msgstr "Contiene"
+
+msgid "True"
+msgstr "Verdadero"
+
+msgid "False"
+msgstr "Falso"
+
+msgid "Keep Attribute"
+msgstr "Mantén Atributo"
+
+msgid "Keep Attribute Parameters"
+msgstr "Parámetros Mantén Atributo"
+
+msgid "Attribute to keep:"
+msgstr "Atributo a manetener:"
+
+msgid "PostgreSQL Parameters"
+msgstr "Parámetros PostgreSQL"
+
+msgid "PostGIS Parameters"
+msgstr "Parámetros PostGIS"
+
+msgid "Host:"
+msgstr "Anfitrión:"
+
+msgid "Port:"
+msgstr "Puerto:"
+
+msgid "Database:"
+msgstr "Base de datos:"
+
+msgid "User:"
+msgstr "Usuario:"
+
+msgid "Password:"
+msgstr "Contraseña:"
+
+msgid "Table name:"
+msgstr "Nombre de la tabla:"
+
+msgid "Operation:"
+msgstr "Operación:"
+
+msgid "CREATE"
+msgstr "CREAR"
+
+msgid "UPDATE"
+msgstr "ACTUALIZAR"
+
+msgid "DELETE"
+msgstr "ELIMINAR"
+
+msgid "Match column:"
+msgstr "Columna coincidente:"
+
+msgid "Verify connection"
+msgstr "Verifica conexión"
+
+msgid "New name"
+msgstr "Nuevo nombre"
+
+msgid "New attribute value"
+msgstr "Nuevo valor de atributo"
+
+msgid "New attribute name"
+msgstr "Nuevo nombre de atributo"
+
+msgid "Name of your database"
+msgstr "Nombre de tu base de datos"
+
+msgid "schema.tablename"
+msgstr "esquema.nombretabla"
+
+msgid "Connection parameters are valids."
+msgstr "Los parámetros de conexión son válidos."
+
+msgid "Connection parameters are not valids."
+msgstr "Los parámetros de conexión no son válidos."

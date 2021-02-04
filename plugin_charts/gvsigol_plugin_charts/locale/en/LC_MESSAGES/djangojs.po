@@ -21,6 +21,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: en\n"
 "X-Source-Language: C\n"
+
 msgid "Select chart"
 msgstr ""
 

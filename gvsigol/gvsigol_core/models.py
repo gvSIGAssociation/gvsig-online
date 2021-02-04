@@ -171,3 +171,18 @@ class ProjectBaseLayerTiling(models.Model):
     version = models.BigIntegerField(null=True, blank=True)
     folder_prj = models.CharField(max_length=1024)
     running = models.BooleanField(default=False)
+
+
+class TilingProcessStatus(models.Model):
+    layer = models.IntegerField(null=False, default=0)
+    format_processed = models.CharField(max_length=50)
+    processed_tiles = models.IntegerField(null=False, default=0)
+    total_tiles = models.IntegerField(null=False, default=0)
+    version = models.BigIntegerField(null=True, blank=True)
+    time = models.CharField(max_length=150)
+    active = models.CharField(max_length=10)
+    stop = models.CharField(max_length=10)
+    extent_processed = models.CharField(max_length=150)
+    zoom_levels_processed = models.IntegerField(null=False, default=0)
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
