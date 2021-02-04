@@ -123,15 +123,14 @@ ACTSTREAM_SETTINGS = {
 }
 
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -139,7 +138,7 @@ MIDDLEWARE_CLASSES = [
 
 try:
     __import__('corsheaders')
-    MIDDLEWARE_CLASSES.append('corsheaders.middleware.CorsMiddleware')
+    MIDDLEWARE.append('corsheaders.middleware.CorsMiddleware')
 except ImportError:
     print('ERROR: No ha instalado la libreria corsheaders')
 
