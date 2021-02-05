@@ -20,17 +20,15 @@ from django.contrib import admin
 
 from . import settings
 
-handler404 = 'gvsigol_core.views.not_found_view'
-
 packages = [ app for app in settings.INSTALLED_APPS
                 if app.startswith('gvsigol_plugin_')
                  or app.startswith('gvsigol_app_')
             ]
 
 urlpatterns = [
-    re_path(r'^gvsigonline/i18n/', include(i18n)),
-    re_path(r'^gvsigonline/jsi18n/$', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
-    re_path(r'^gvsigonline/admin/', admin.site.urls),
+    path('gvsigonline/i18n/', include(i18n)),
+    path('gvsigonline/jsi18n/', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
+    path('gvsigonline/admin/', admin.site.urls),
 ]
 
 for app in packages:

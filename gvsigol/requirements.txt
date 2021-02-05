@@ -1,5 +1,5 @@
 ## django
-django==2.0.13
+django==2.2.18
 djangoajax==3.2
 httplib2==0.18.1
 ### br-ch: https://geopy.readthedocs.io/en/latest/changelog_2xx.html

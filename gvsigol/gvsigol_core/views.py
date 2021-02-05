@@ -69,11 +69,6 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 import logging
 logger = logging.getLogger("gvsigol")
 
-def not_found_view(request):
-    response = render(request, '404.html', {})
-    response.status_code = 404
-    return response
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def home(request):
     user = User.objects.get(username=request.user.username)
