@@ -113,3 +113,4 @@ gevent==1.4.0
 
 APScheduler==3.6.3
 
+suds-community==0.8.4
