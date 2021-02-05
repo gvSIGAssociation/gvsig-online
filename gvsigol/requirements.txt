@@ -114,3 +114,6 @@ gevent==1.4.0
 APScheduler==3.6.3
 
 suds-community==0.8.4
+
+# plugin_widget
+django_tinymce==3.2.0
