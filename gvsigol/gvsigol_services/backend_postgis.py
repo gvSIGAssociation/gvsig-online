@@ -603,7 +603,7 @@ class Introspect:
             ORDER BY table_schema,
                      table_name;
             """
-        # print query
+        # print(query)
         self.cursor.execute(query, [schema, table])
         return self.cursor.fetchall()
 
@@ -631,7 +631,7 @@ class Introspect:
             seq_name=sqlbuilder.Identifier(seq_name),
             target_table=sqlbuilder.Identifier(target_table),
             column=sqlbuilder.Identifier(column))
-        # print query.as_string(self.conn)
+        # print(query.as_string(self.conn))
         self.cursor.execute(query,  [])
         
         full_sequence = quote_ident(target_schema, self.conn) + "." + quote_ident(seq_name, self.conn) 
@@ -736,7 +736,7 @@ class Introspect:
             schema=sqlbuilder.Identifier(target_schema),
             function=sqlbuilder.Identifier(target_function),
             definition=sqlbuilder.SQL(end_str))
-        # print query.as_string(self.conn)
+        # print(query.as_string(self.conn))
         self.cursor.execute(query)
         return target_function
 
@@ -775,7 +775,7 @@ class Introspect:
             condition=condition,
             definition=definition
         )
-        #print query.as_string(self.conn)
+        #print(query.as_string(self.conn))
         self.cursor.execute(query)
     
     def drop_trigger(self, trigger_name, target_schema, target_table):
@@ -798,7 +798,7 @@ class Introspect:
             event = trigger[4]
             orientation = trigger[5]
             activation = trigger[6]
-            print trigger_name
+            print(trigger_name)
             condition = trigger[7]
             definition = trigger[8]
             """
@@ -842,7 +842,7 @@ class Introspect:
             new_table=sqlbuilder.Identifier(new_table_name),
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table_name))
-        # print query.as_string(self.conn)
+        # print(query.as_string(self.conn))
         self.cursor.execute(query)
         
         for (column, schema, seq_name) in self.get_sequences(table_name, schema):
