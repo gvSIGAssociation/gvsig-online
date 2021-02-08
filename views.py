@@ -74,6 +74,9 @@ def not_found_view(request):
     response.status_code = 404
     return response
 
+def forbidden_view(request):
+    return render(request, 'illegal_operation.html', {}, status=403)
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def home(request):
     user = User.objects.get(username=request.user.username)
