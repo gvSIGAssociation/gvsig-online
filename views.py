@@ -72,8 +72,10 @@ from gvsigol.settings import MOSAIC_DB
 from gvsigol_auth.models import UserGroup
 from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_core import utils as core_utils
+from gvsigol_core.views import forbidden_view
 from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup
+from gvsigol_core.views import not_found_view
 from gvsigol_services.backend_resources import resource_manager 
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
 import gvsigol_services.tiling_service as tiling_service
@@ -522,9 +524,12 @@ def datastore_add(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def datastore_update(request, datastore_id):
-    datastore = Datastore.objects.get(id=datastore_id)
-    if datastore==None:
-        return HttpResponseNotFound(_('Datastore not found'))
+    try:
+        datastore = Datastore.objects.get(id=datastore_id)
+    except Datastore.DoesNotExist:
+        return HttpResponseNotFound('<h1>Datastore not found {0}</h1>'.format(datastore_id))
+    if not utils.can_manage_datastore(request.user, datastore):
+        return forbidden_view(request)
     if request.method == 'POST':
         form = DatastoreUpdateForm(request.POST)
         if form.is_valid():
@@ -574,11 +579,16 @@ def datastore_update(request, datastore_id):
 @staff_required
 def datastore_delete(request, dsid):
     try:
+        ds = Datastore.objects.get(id=dsid)
+    except Datastore.DoesNotExist:
+        return HttpResponseNotFound('<h1>Datastore not found {0}</h1>'.format(dsid))
+    if not utils.can_manage_datastore(request.user, ds):
+        return forbidden_view(request)
+    try:
         delete_schema = False
         if request.POST.get('delete_schema') == 'true':
             delete_schema = True
 
-        ds = Datastore.objects.get(id=dsid)
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
         try:
             gs.deleteDatastore(ds.workspace, ds, delete_schema)
@@ -675,6 +685,8 @@ def layer_list(request):
 @staff_required
 def layer_refresh_extent(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
+    if not utils.can_manage_layer(request.user, layer):
+        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
     datastore = layer.datastore
     workspace = datastore.workspace
     #server.updateBoundingBoxFromData(layer)
@@ -691,7 +703,9 @@ def layer_refresh_extent(request, layer_id):
 @staff_required
 def layer_delete(request, layer_id):
     try:
-        layer_delete_operation(request, layer_id)
+        response = layer_delete_operation(request, layer_id)
+        if response:
+            return response
         return HttpResponseRedirect(reverse('datastore_list'))
     except rest_geoserver.FailedRequestError as e:
         if e.status_code == 503:
@@ -726,6 +740,14 @@ def layer_delete(request, layer_id):
 @staff_required
 def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
+    if not utils.can_manage_layer(request.user, layer):
+        msg = _('ERROR User is not authorized to perform this operation')
+        data = {
+                'status': 'ERROR',
+                'status_code': 403,
+                'message': msg,
+            }
+        return HttpResponse(json.dumps(data))
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     if layer.layer_group.name != '__default__':
         try:
@@ -798,6 +820,8 @@ def backend_resource_list_available(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden(json.dumps([]))
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
             resources = gs.getResources(ds.workspace, ds, 'available')
@@ -816,6 +840,8 @@ def backend_layergroup_list_available(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden("[]")
         if ds:
             layer_groups = []
             for lg in LayerGroup.objects.filter(server_id=ds.workspace.server.id):
@@ -839,6 +865,8 @@ def backend_resource_list_configurable(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden("[]")
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
             resources = gs.getResources(ds.workspace, ds, 'configurable')
@@ -861,6 +889,8 @@ def backend_resource_list(request):
             type = request.GET['type']
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden("[]")
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
             resources = gs.getResources(ds.workspace, ds, type)
@@ -885,6 +915,8 @@ def backend_fields_list(request):
         ws = Workspace.objects.get(id=id_ws)
         ds = Datastore.objects.get(name=ds_name, workspace=ws)
         if ds:
+            if not utils.can_manage_datastore(request.user, ds):
+                return HttpResponseForbidden("[]") 
             layer = Layer.objects.filter(external=False).filter(datastore=ds, name=name).first()
 
             params = json.loads(ds.connection_params)
@@ -1172,11 +1204,15 @@ def layer_add_with_group(request, layergroup_id):
 @staff_required
 def layer_update(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
+    try:
+        layer = Layer.objects.get(id=int(layer_id))
+        if not utils.can_manage_layer(request.user, layer):
+            return forbidden_view(request)
+    except Layer.DoesNotExist:
+        return not_found_view(request)
 
     if request.method == 'POST':
         updatedParams = {}
-
-        layer = Layer.objects.get(id=int(layer_id))
         workspace = request.POST.get('workspace')
         datastore = request.POST.get('datastore')
         name = request.POST.get('name')
@@ -1332,8 +1368,6 @@ def layer_update(request, layer_id):
         else:
             return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
     else:
-
-        layer = Layer.objects.get(id=int(layer_id))
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(instance=layer)
@@ -1474,8 +1508,10 @@ def layer_autoconfig(layer, featuretype):
 @staff_required
 def layer_config(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
+    layer = Layer.objects.get(id=int(layer_id))
+    if not utils.can_manage_layer(request.user, layer):
+        return forbidden_view(request)
     if request.method == 'POST':
-        layer = Layer.objects.get(id=int(layer_id))
         old_conf = ast.literal_eval(layer.conf) if layer.conf else {}
 
         conf = {
@@ -1527,7 +1563,6 @@ def layer_config(request, layer_id):
             return redirect('layer_list')
 
     else:
-        layer = Layer.objects.get(id=int(layer_id))
         fields = []
         available_languages = []
         for lang_id, _ in LANGUAGES:
@@ -1662,6 +1697,8 @@ def convert_to_enumerate(request):
     usr = request.user
 
     layer = Layer.objects.get(id=layer_id)
+    if not utils.can_manage_layer(request.user, layer):
+        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
     datastore_name = layer.datastore.name
        
     is_enum, _ = utils.is_field_enumerated(layer, field)
@@ -1834,13 +1871,15 @@ def cache_clear(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
 
     layer = Layer.objects.get(id=int(layer_id))
+    if not utils.can_manage_layer(request.user, layer):
+        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     if request.method == 'GET' or request.method == 'POST':
         layer_cache_clear(layer_id)
         gs.reload_nodes()
         
     if request.method == 'GET':
-        if redirect_to_layergroup:           
+        if redirect_to_layergroup:
             layergroup_id = layer.layer_group.id
             return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
         else:
@@ -1854,6 +1893,8 @@ def cache_clear(request, layer_id):
 @staff_required
 def manage_cache_clear(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
+    if not utils.can_manage_layer(request.user, layer):
+        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     gs = geographic_servers.get_instance().get_server_by_id(server.id)
@@ -1878,6 +1919,8 @@ def manage_cache_clear(request, layer_id):
 def group_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id))
+        if not utils.can_manage_layergroup(request.user, layergroup):
+            return forbidden_view(request)
         layer_group_cache_clear(layergroup)
 
         return redirect('layergroup_list')
@@ -1888,6 +1931,8 @@ def group_cache_clear(request, layergroup_id):
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id))
+        if not utils.can_manage_layergroup(request.user, layergroup):
+            return forbidden_view(request)
         layer_group_cache_clear(layergroup)
 
         return redirect('layergroup_list')
@@ -1910,14 +1955,16 @@ def layer_group_cache_clear(layergroup):
         gs.reload_nodes()
 
 
-
-
-
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def layer_permissions_update(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
+    try:
+        layer = Layer.objects.get(id=int(layer_id))
+    except Exception as e:
+        return HttpResponseNotFound('<h1>Layer not found{0}</h1>'.format(layer.name))
+    if not utils.can_manage_layer(request.user, layer):
+        return forbidden_view(request)
 
     if request.method == 'POST':
         assigned_read_roups = []
@@ -1929,11 +1976,6 @@ def layer_permissions_update(request, layer_id):
         for key in request.POST:
             if 'write-usergroup-' in key:
                 assigned_write_groups.append(int(key.split('-')[2]))
-
-        try:
-            layer = Layer.objects.get(id=int(layer_id))
-        except Exception as e:
-            return HttpResponseNotFound('<h1>Layer not found{0}</h1>'.format(layer.name))
 
         agroup = UserGroup.objects.get(name__exact='admin')
 
@@ -1988,7 +2030,6 @@ def layer_permissions_update(request, layer_id):
             return redirect('layer_list')
     else:
         try:
-            layer = Layer.objects.get(pk=layer_id)
             groups = utils.get_all_user_groups_checked_by_layer(layer)
             return render(request, 'layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'type': layer.type, 'groups': groups, 'redirect_to_layergroup': redirect_to_layergroup})
         except Exception as e:
@@ -2198,7 +2239,10 @@ def layergroup_update(request, lgid):
         name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
         toc = request.POST.get('toc')
-
+        layergroup = LayerGroup.objects.get(id=int(lgid))
+        if not utils.can_manage_layergroup(request.user, layergroup):
+            return forbidden_view(request)
+        
         cached = False
         if 'cached' in request.POST:
             cached = True
@@ -2206,8 +2250,6 @@ def layergroup_update(request, lgid):
         visible = False
         if 'visible' in request.POST:
             visible = True
-
-        layergroup = LayerGroup.objects.get(id=int(lgid))
 
         sameName = False
         if layergroup.name == name:
@@ -2286,6 +2328,8 @@ def layergroup_update(request, lgid):
 def layergroup_delete(request, lgid):
     if request.method == 'POST':
         layergroup = LayerGroup.objects.get(id=int(lgid))
+        if not utils.can_manage_layergroup(request.user, layergroup):
+            return HttpResponseForbidden('{"deleted": false}', content_type='application/json')
         server = Server.objects.get(id=layergroup.server_id)
         layers = Layer.objects.filter(layer_group_id=layergroup.id)
         projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group_id=layergroup.id)
@@ -2693,12 +2737,9 @@ def create_base_layer(request, pid):
         tilematrixset = request.POST.get('tilematrixset')
         extent = request.POST.get('extent')
         
-        try:
-            if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
-                return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
-        except Exception:
-            pass
-
+        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
+            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
+        
         if num_res_levels is not None:
             if num_res_levels > 22:
                 return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
@@ -3008,7 +3049,8 @@ def get_unique_values(request):
 
         workspace = Workspace.objects.get(name__exact=layer_ws)
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace.name)
-
+        if not utils.can_manage_layer(request.user, layer):
+            return HttpResponseForbidden(json.dumps({'values': []}), content_type='application/json')
         connection = ast.literal_eval(layer.datastore.connection_params)
 
         host = connection.get('host')
@@ -3039,6 +3081,15 @@ def get_datatable_data(request):
     if request.method == 'POST':
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+        if not utils.can_manage_layer(request.user, layer):
+            response = {
+                'draw': 0,
+                'recordsTotal': 0,
+                'recordsFiltered': 0,
+                'data': []
+            }
+            return HttpResponseForbidden(json.dumps(response), content_type='application/json')
         wfs_url = request.POST.get('wfs_url')
         property_name = request.POST.get('property_name')
         properties_with_type = request.POST.get('properties_with_type')
@@ -3053,8 +3104,6 @@ def get_datatable_data(request):
         recordsFiltered = 0
 
         encoded_property_name = property_name.encode('utf-8')
-         
-        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
         aux_encoded_property_name = ' '
@@ -3212,6 +3261,9 @@ def get_feature_wfs(request):
     if request.method == 'POST':
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+        if not utils.can_manage_layer(request.user, layer):
+            return HttpResponseForbidden('{"data": []}', content_type='application/json')
         wfs_url = request.POST.get('wfs_url')
         field = request.POST.get('field')
         field_type = request.POST.get('field_type')
@@ -3606,13 +3658,20 @@ def describeFeatureType(request):
     if request.method == 'POST':
         lyr = request.POST.get('layer')
         workspace = request.POST.get('workspace')
-        skip_pks = request.POST.get('skip_pks')
-        feat_type = _describeFeatureType(lyr, workspace, skip_pks)
-        return HttpResponse(json.dumps(feat_type, indent=4), content_type='application/json')
+        try:
+            layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
+            if not utils.can_manage_layer(request.user, layer):
+                response = {'fields': [], 'error': 'Not authorized'}
+                return HttpResponseForbidden(response, content_type='application/json')
+            skip_pks = request.POST.get('skip_pks')
+            feat_type = _describeFeatureType(layer, skip_pks)
+            return HttpResponse(json.dumps(feat_type, indent=4), content_type='application/json')
+        except:
+            response = {'fields': [], 'error': 'Not found'}
+            return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-def _describeFeatureType(lyr, workspace, skip_pks):
+def _describeFeatureType(layer, skip_pks):
     try:
-        layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
         params = json.loads(layer.datastore.connection_params)
         host = params['host']
         port = params['port']
@@ -3724,6 +3783,10 @@ def describeFeatureTypeWithPk(request):
         workspace = request.POST.get('workspace')
         try:
             layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
+            if not utils.can_manage_layer(request.user, layer):
+                response = {'fields': [], 'error': 'Not authorized'}
+                return HttpResponseForbidden(response, content_type='application/json')
+
             params = json.loads(layer.datastore.connection_params)
             host = params['host']
             port = params['port']
@@ -3880,6 +3943,8 @@ def external_layer_add(request):
 def external_layer_update(request, external_layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
     external_layer = Layer.objects.get(id=external_layer_id)
+    if not utils.can_manage_layer(request.user, external_layer):
+        return forbidden_view(request)
     layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     if request.method == 'POST':
@@ -4007,6 +4072,8 @@ def external_layer_update(request, external_layer_id):
 @staff_required
 def external_layer_delete(request, external_layer_id):
     external_layer = Layer.objects.get(id=external_layer_id)
+    if not utils.can_manage_layer(request.user, external_layer):
+        return forbidden_view(request)
     try:
         server = Server.objects.get(id=external_layer.layer_group.server_id)
         master_node = geographic_servers.get_instance().get_master_node(server.id)
@@ -4204,6 +4271,8 @@ def cache_list(request):
 @staff_required
 def layer_cache_config(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
+    if not utils.can_manage_layer(request.user, layer):
+        return forbidden_view(request)
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     
@@ -4318,7 +4387,8 @@ def layer_cache_config(request, layer_id):
 def group_cache_config(request, group_id):
     layer_group = LayerGroup.objects.get(id=int(group_id))
     server = Server.objects.get(id=layer_group.server_id)
-    
+    if not utils.can_manage_layergroup(request.user, layer_group):
+        return forbidden_view(request)
     if request.method == 'POST':
         format = request.POST.get('input_format')
         grid_set = request.POST.get('input_grid_set')
@@ -4625,7 +4695,9 @@ def db_field_delete(request):
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
             datastore_name = layer.datastore.name
-            if not request.user.is_superuser and not (layer.created_by == request.user.username) and not (layer.datastore.type == 'v_PostGIS'):
+            if not utils.can_manage_layer(request.user, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            if (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
             for ctrl_field in settings.CONTROL_FIELDS:
                 if field == ctrl_field.get('name'):
@@ -4679,9 +4751,9 @@ def db_field_rename(request):
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
             datastore_name = layer.datastore.name
-            if not request.user.is_superuser and \
-               not (layer.created_by == request.user.username) and \
-               not (layer.datastore.type == 'v_PostGIS'):
+            if not utils.can_manage_layer(request.user, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            if not (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
             for ctrl_field in settings.CONTROL_FIELDS:
                 if field == ctrl_field.get('name'):
@@ -4764,9 +4836,9 @@ def db_add_field(request):
                 if field_name == ctrl_field.get('name'):
                     return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field_name))
             
-            if not request.user.is_superuser and \
-               not (layer.created_by == request.user.username) and \
-               not (layer.datastore.type == 'v_PostGIS'):
+            if not utils.can_manage_layer(request.user, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            if not (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
             datastore_name = layer.datastore.name
             params = json.loads(layer.datastore.connection_params)
