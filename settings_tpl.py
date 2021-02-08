@@ -28,7 +28,7 @@ from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 
-GVSIGOL_VERSION = '2.8.3-dev'
+GVSIGOL_VERSION = '2.8.4-dev'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -510,5 +510,6 @@ OSM_TILING_3 = '##OSM_TILING_3##'
 
 RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
-ALLOWED_HOST_NAMES = [##ALLOWED_HOST_NAMES##]
+ALLOWED_HOST_NAMES = [##ALLOWED_HOST_NAMES##
+                      ]
 
