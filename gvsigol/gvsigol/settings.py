@@ -27,11 +27,9 @@
 import os
 import ldap
 import django.conf.locale
-from django.conf import settings
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
-import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -143,7 +141,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
-    'django_celery_beat',
+
     ############# CORE ################
     'gvsigol_statistics',
     'gvsigol_auth',
@@ -153,7 +151,8 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    'gvsigol_app_test',
+    'gvsigol_app_dev',
+    #'gvsigol_app_test',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
 
@@ -162,25 +161,24 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_catastrouy',
     #'gvsigol_plugin_charts',
-    'gvsigol_plugin_downloadman',
-    'gvsigol_plugin_draw',
+    #'gvsigol_plugin_downloadman',
+    #'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
     #'gvsigol_plugin_elevation',
     #'gvsigol_plugin_emergencies',
-    'gvsigol_plugin_geocoding',
-    'gvsigol_plugin_importfromservice',
+    #'gvsigol_plugin_geocoding',
+    #'gvsigol_plugin_importfromservice',
     #'gvsigol_plugin_importvector',
-    'gvsigol_plugin_manageaddresses',
+    #'gvsigol_plugin_manageaddresses',
     #'gvsigol_plugin_opensea2',
     #'gvsigol_plugin_picassa',
-    'gvsigol_plugin_print',
-    #'gvsigol_plugin_restapi',
+    #'gvsigol_plugin_print',
+    'gvsigol_plugin_restapi',
     #'gvsigol_plugin_streetview',
     #'gvsigol_plugin_turiscan',
     #'gvsigol_plugin_worldwind',
     'actstream'
 ]
-
 
 try:
     __import__('corsheaders')
@@ -199,10 +197,9 @@ PUBLIC_PLUGINS = []
 ACTSTREAM_SETTINGS = {
     'FETCH_RELATIONS': True,
     'USE_JSONFIELD': True,
-    #'USE_JSONFIELD': False,
 }
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
@@ -218,7 +215,7 @@ MIDDLEWARE_CLASSES = [
 
 try:
     __import__('corsheaders')
-    MIDDLEWARE_CLASSES.append('corsheaders.middleware.CorsMiddleware')
+    MIDDLEWARE.append('corsheaders.middleware.CorsMiddleware')
 except ImportError:
     print 'ERROR: No ha instalado la libreria corsheaders'
 
@@ -237,7 +234,6 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
             os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
             os.path.join(BASE_DIR, 'gvsigol_filemanager/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_plugin_restapi/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -309,13 +305,13 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
-AUTH_LDAP_ROOT_DN = "dc=local,dc=gvsigonline,dc=com"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_ROOT_DN = "dc=dev,dc=gvsigonline,dc=com"
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
@@ -327,7 +323,7 @@ EXTRA_LANG_INFO = {
         'code': u'va',
         'name': u'Valencian',
         'name_local': u'Valencian'
-    }
+    },
 }
 
 # Add custom languages not provided by Django
@@ -340,7 +336,6 @@ LANGUAGES = (
     #('ca', _('Catalan')), 
     ('en', _('English')),
     #('pt', _('Portuguese')),
-    ('pt-br', _('Brazilian Portuguese')),
 )
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol/locale'),
@@ -367,7 +362,7 @@ LOGOUT_PAGE_URL = '/gvsigonline/'
 EMAIL_BACKEND_ACTIVE = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = ''
 EMAIL_HOST_USER = EMAIL_USER_DEVEL
 EMAIL_HOST_PASSWORD = EMAIL_PASSWORD_DEVEL
 EMAIL_PORT = 587
@@ -385,7 +380,6 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_core/static'),
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_restapi/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
@@ -415,9 +409,8 @@ MOSAIC_DB = {
     'schema': 'imagemosaic',
     'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-}
+},
 
-SHP2PGSQL_PATH = '/Library/PostgreSQL/9.6/bin/shp2pgsql'
 GDALTOOLS_BASEPATH = '/usr/bin'
 GDALSRSINFO_PATH = GDALTOOLS_BASEPATH + '/gdalsrsinfo'
 GDALINFO_PATH = GDALTOOLS_BASEPATH + '/gdalinfo'
@@ -477,13 +470,7 @@ SUPPORTED_CRS = {
         'title': 'WGS 84 / UTM zone 21S',
         'definition': '+proj=utm +zone=21 +south +datum=WGS84 +units=m +no_defs',
         'units': 'meters'
-    },
-    '4674': {
-        'code': 'EPSG:4674',
-        'title': 'SIRGAS 2000 Geographic2D',
-        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs',
-        'units': 'degrees'
-        }
+    }
 }
 
 GVSIGOL_TOOLS = {
@@ -529,7 +516,6 @@ FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
 FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
 FILEMANAGER_STORAGE = FileSystemStorage(location=FILEMANAGER_MEDIA_ROOT, base_url=FILEMANAGER_MEDIA_URL, file_permissions_mode=0o666)
-
 
 CONTROL_FIELDS = [{
                 'name': 'modified_by',
@@ -611,7 +597,7 @@ TEMPORAL_ADVANCED_PARAMETERS = False
 
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/geoserver',
+    'URL': 'https://gvsigol.localhost/geoserver',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -632,7 +618,6 @@ PROXIES = {
     "ftp"   : None
 }
 
-
 SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 SHARED_VIEW_EXPIRATION_TIME = 1
 
@@ -651,10 +636,5 @@ PUSH_NOTIFICATIONS_SETTINGS = {
 }
 
 RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
-LAYERS_ROOT = 'layer_downloads'
-ALLOWED_HOST_NAMES = ['http://localhost']
-JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
-    'JWT_ALLOW_REFRESH': True,
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
-}
+
+ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']

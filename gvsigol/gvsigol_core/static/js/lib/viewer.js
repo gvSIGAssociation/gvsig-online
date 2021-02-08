@@ -773,7 +773,9 @@ viewer.core = {
 									$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
 									
 								}
-								self.map.removeLayer(iLayer);
+								console.log("removing layer");
+								console.log(iLayer);
+								// self.map.removeLayer(iLayer);
 							}
 						}
 	
@@ -786,6 +788,7 @@ viewer.core = {
 			
 			});
 			wmsLayer.getSource().on('tileloaderror', function(e){
+				console.log(e);
 				var aux = self._check_error_is_TileOutOfRange(e.tile);
 				if (aux){
 					return;
@@ -803,7 +806,9 @@ viewer.core = {
 					$('#' + iLayer.id).parent().children('input').prop( "checked", false );
 					$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
 					$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-					self.map.removeLayer(iLayer);
+					console.log("removing layer");
+					console.log(iLayer);
+					// self.map.removeLayer(iLayer);
 				}								
 			});						
 		}
