@@ -933,13 +933,13 @@ class Introspect:
         column_name = self.get_geometry_columns(table, schema)[0]
         if expand is None:
             expand = 0
-        sql = """SELECT BOX2D(ST_EXPAND(ST_TRANSFORM({column_name} ,4326), {expand}))
+        sql = """SELECT BOX2D(ST_EXPAND(ST_TRANSFORM({column_name}, 4326), {expand}))
         FROM {schema}.{table}
         WHERE %s IS NOT NULL LIMIT 1"""
         query = sqlbuilder.SQL(sql).format(
-            schema=schema,
-            table=table,
-            column_name=sqlbuilder.Literal(column_name),
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            column_name=sqlbuilder.Identifier(column_name),
             expand=sqlbuilder.Literal(expand)
             )
         self.cursor.execute(query, [column_name])

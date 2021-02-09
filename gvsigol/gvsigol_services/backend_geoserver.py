@@ -580,10 +580,7 @@ class Geoserver():
         return False
         
     def updateThumbnail(self, layer, mode='update'):
-        if not 'no_thumbnail.jpg' in layer.thumbnail.name:
-            if os.path.isfile(layer.thumbnail.path):
-                os.remove(layer.thumbnail.path)
-        
+        old_thumbnail = layer.thumbnail
         try:   
             layer.thumbnail = self.getThumbnail(layer.datastore.workspace, layer.datastore, layer)
             layer.save()
@@ -598,6 +595,11 @@ class Geoserver():
         except Exception as e:
             logger.exception('Actualizando thumbnail: ' + layer.name)
             pass
+
+        if old_thumbnail and not 'no_thumbnail.jpg' in old_thumbnail.name:
+            if os.path.isfile(old_thumbnail.path):
+                os.remove(old_thumbnail.path)
+
         
     def deleteStyle(self, name):
         try:
