@@ -64,7 +64,7 @@ class Filemanager(object):
             'filepath': self.path,
             'filename': filename,
             'filesize': sizeof_fmt(FILEMANAGER_STORAGE.size(self.location)),
-            'filedate': FILEMANAGER_STORAGE.modified_time(self.location),
+            'filedate': FILEMANAGER_STORAGE.get_modified_time(self.location),
             'fileurl': self.url,
         }
 
