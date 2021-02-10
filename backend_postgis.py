@@ -513,11 +513,13 @@ class Introspect:
             geom_type = 'MultiLineString'
         if geom_type == 'Polygon':
             geom_type = 'MultiPolygon'
+        geom_column = 'wkb_geometry'
         create_table_sqls = [
             sqlbuilder.SQL('ogc_fid serial NOT NULL'),
-            sqlbuilder.SQL('wkb_geometry geometry({geom_type},{srs})').format(
+            sqlbuilder.SQL('{geom_column} geometry({geom_type},{srs})').format(
                                 geom_type=sqlbuilder.Identifier(geom_type),
-                                srs=sqlbuilder.Literal(int(srs)))
+                                srs=sqlbuilder.Literal(int(srs)),
+                                geom_column=sqlbuilder.Identifier(geom_column))
         ]
         
         for field in fields:
@@ -578,6 +580,19 @@ class Introspect:
             table_name=sqlbuilder.Identifier(table_name),
             fields_sql=sqlbuilder.SQL(', ').join(create_table_sqls))
         print(query.as_string(self.conn))
+        self.cursor.execute(query)
+        spatial_idx_name = table_name + "_" + geom_column + "_geom_idx"
+        query = sqlbuilder.SQL("""
+            CREATE INDEX {idx_name}
+            ON {schema}.{table}
+            USING gist
+            ({geom_col});
+            """).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            geom_col=sqlbuilder.Identifier(geom_column),
+            idx_name=sqlbuilder.Identifier(spatial_idx_name)
+        )
         self.cursor.execute(query)
         
     def get_triggers(self, schema, table):
