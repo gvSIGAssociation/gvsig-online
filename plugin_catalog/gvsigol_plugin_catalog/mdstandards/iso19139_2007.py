@@ -4,7 +4,7 @@ from builtins import str as text
 from registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter
+from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter, namespacedTag
 from gvsigol.settings import BASE_DIR
 import collections
 from owslib import wcs
@@ -420,6 +420,20 @@ def create_transfer_options(root_elem, qualified_name, spatialRepresentationType
             create_online_resource(MD_DigitalTransferOptionsElem, wcs_endpoint, 'OGC:WCS', qualified_name, title)
 
 class Iso19139_2007Updater(XmlStandardUpdater):
+    def update_dateStamp(self):
+        dateTime = self.tree.find('./gmd:dateStamp/gco:DateTime', namespaces)
+        str_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+        if dateTime is not None:
+            dateTime.text = str_timestamp
+        else:
+            dateStamp = ET.Element(namespacedTag('gmd', 'dateStamp', namespaces))
+            dateTime = ET.Element(namespacedTag('gco', 'DateTime', namespaces))
+            dateTime.text =  str_timestamp
+            dateStamp.insert(0, dateTime)
+            prevSiblingNames = ['gmd:contact']
+            insertAfter(self.tree, dateStamp, prevSiblingNames, namespaces)
+        return self
+    
     def update_extent(self, extent_tuple):
         for geog_bounding_box_element in self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', namespaces):
             update_extent(geog_bounding_box_element, extent_tuple)
@@ -450,6 +464,7 @@ class Iso19139_2007Updater(XmlStandardUpdater):
     def update_all(self, extent_tuple, thumbnail_url):
         self.update_extent(extent_tuple)
         self.update_thumbnail(thumbnail_url)
+        self.update_dateStamp()
         return self
 
 class Iso19139_2007Reader(XmlStandardReader):

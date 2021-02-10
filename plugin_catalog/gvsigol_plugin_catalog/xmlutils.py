@@ -90,3 +90,7 @@ def insertAfter(parent, child, previousSiblingNames, namespaces={}):
         prevSibling.addnext(child)
     else:
         parent.insert(0, child)
+
+def namespacedTag(ns_prefix, tag, nsmap):
+    namespace = nsmap.get(ns_prefix)
+    return "{" + namespace + "}" + tag
