@@ -916,16 +916,15 @@ class Introspect:
                 schema=sqlbuilder.Identifier(schema),
                 table=sqlbuilder.Identifier(table))
         self.cursor.execute(query)
-        rows = self.cursor.fetchall()
-        count = rows[0]
-        
-        return count
+        row = self.cursor.fetchone()
+        return row[0]
+
     def get_estimated_count(self, schema, table):
         query = "SELECT reltuples::BIGINT AS estimate FROM pg_class WHERE relname = %s";
         self.cursor.execute(query, [table])
         rows = self.cursor.fetchall()
         if self.cursor.rowcount == 1:
-            return rows[0]
+            return rows[0][0]
         else:
             return self.get_count(schema, table)
     
@@ -933,9 +932,11 @@ class Introspect:
         column_name = self.get_geometry_columns(table, schema)[0]
         if expand is None:
             expand = 0
-        sql = """SELECT BOX2D(ST_EXPAND(ST_TRANSFORM({column_name}, 4326), {expand}))
+        sql = """SELECT ST_XMin(bbox) xmin, ST_YMin(bbox) ymin, ST_XMax(bbox) xmax, ST_YMax(bbox) ymax
+        FROM
+        (SELECT BOX2D(ST_EXPAND(ST_TRANSFORM({column_name}, 4326), {expand})) bbox
         FROM {schema}.{table}
-        WHERE %s IS NOT NULL LIMIT 1"""
+        WHERE %s IS NOT NULL LIMIT 1) as s0"""
         query = sqlbuilder.SQL(sql).format(
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table),
@@ -943,10 +944,8 @@ class Introspect:
             expand=sqlbuilder.Literal(expand)
             )
         self.cursor.execute(query, [column_name])
-        rows = self.cursor.fetchone()
-        bb = rows[0]
-        bb = bb.replace("BOX(","").replace(")","").replace(" ", ",")
-        return bb
+        row = self.cursor.fetchone()
+        return (row[0], row[1], row[2], row[3])
     
     def get_bbox(self, schema, table_name, geom_field):
         """
