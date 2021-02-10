@@ -44,7 +44,6 @@ import signals
 import requests
 import gdal_tools
 import logging
-import urllib
 import random
 import string
 import json
@@ -484,7 +483,7 @@ class Geoserver():
         
         style_type = 'US'
         
-        aux = None
+        count = None
         try:
             if geom_type == RASTER:
                 style_type = 'CT'
@@ -499,10 +498,9 @@ class Geoserver():
                 
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 count = i.get_estimated_count(schema, layer.name)
-                aux = count[0]
                 i.close()
                 
-            sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
+            sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, count)
         
         except Exception as ex:
                 logger.exception('Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
@@ -1975,9 +1973,7 @@ class Geoserver():
         return numberOfFeatures
     
     def getThumbnail(self, ws, ds, layer):
-        (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
-        
-        if ds_type == 'featureType':
+        if layer.type == 'v_PostGIS':
             params = json.loads(layer.datastore.connection_params)
             host = params['host']
             port = params['port']
@@ -1986,36 +1982,57 @@ class Geoserver():
             passwd = params['passwd']
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            count = i.get_estimated_count(schema, layer.name)
-            aux = count[0]
-            if aux < 10000:
-                maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
-                maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-                minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
-                miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
-                if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-                    maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] +1)
-                if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-                    maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] +1)
-                bbox = minx + "," + miny + "," + maxx + "," + maxy 
+            count = i.get_estimated_count(schema, layer.source_name)
+            if count < 10000:
+                (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
+                maxx = layer_info[ds_type]['latLonBoundingBox']['maxx']
+                maxy = layer_info[ds_type]['latLonBoundingBox']['maxy']
+                minx = layer_info[ds_type]['latLonBoundingBox']['minx']
+                miny = layer_info[ds_type]['latLonBoundingBox']['miny']
             else:
-                bbox = i.get_bbox_firstgeom(schema, layer.name, 0.01)  
+                # we get the extent of a single feature to avoid hitting Geoserver performance for big layers 
+                minx, miny, maxx, maxy = i.get_bbox_firstgeom(schema, layer.name, 0.01)
             i.close()
-               
+            if minx is None: # empty layers
+                minx = -180.0
+            if miny is None:
+                miny = -90.0
+            if maxx is None:
+                maxx = 180.0
+            if maxy is None:
+                maxy = 90.0
+            
         else:
+            (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
             if ds_type == 'imagemosaic':
                 ds_type = 'coverage'
-            maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
-            maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-            minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
-            miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
-            if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-                maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] +1)
-            if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-                maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] +1)
-            bbox = minx + "," + miny + "," + maxx + "," + maxy
-            
+            maxx = layer_info[ds_type]['latLonBoundingBox']['maxx']
+            maxy = layer_info[ds_type]['latLonBoundingBox']['maxy']
+            minx = layer_info[ds_type]['latLonBoundingBox']['minx']
+            miny = layer_info[ds_type]['latLonBoundingBox']['miny']
+        if minx > maxx:
+            maxx = minx +1
+        if miny > maxy:
+            maxy = miny +1
         
+        # adjust extent to match thumbnail width/height ratio
+        bbox_width = maxx - minx
+        bbox_height = maxy - miny
+        bbox_ratio = bbox_width / bbox_height
+        img_width = 768.0
+        img_height = 550.0
+        img_ratio = img_width / img_height
+        if bbox_ratio > img_ratio:
+            center_y = (bbox_height / 2.0) + miny
+            new_bbox_height = bbox_width / img_ratio
+            miny = center_y - (new_bbox_height / 2.0)
+            maxy = center_y + (new_bbox_height / 2.0)
+        else:
+            center_x = (bbox_width / 2.0) + minx
+            new_bbox_width = bbox_height * img_ratio
+            minx = center_x - (new_bbox_width / 2.0)
+            maxx = center_x + (new_bbox_width / 2.0)
+        bbox = str(minx) + "," + str(miny) + "," + str(maxx) + "," + str(maxy)
         values = {
             'SERVICE': 'WMS',
             'VERSION': '1.1.1',
@@ -2031,37 +2048,28 @@ class Geoserver():
         iname = ''.join(random.choice(string.ascii_uppercase) for i in range(8))
         iname += '.png'
         
-        params = urllib.urlencode(values)
-        
         req = requests.Session()
         req.auth = (self.user, self.password)
-
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
         host = server.frontend_url
         if len(settings.ALLOWED_HOST_NAMES) > 0:
             host = settings.ALLOWED_HOST_NAMES[0]
-            wms = ws.wms_endpoint.replace(settings.BASE_URL, '')
-            response = req.get(host + wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
+            wms = host + ws.wms_endpoint.replace(settings.BASE_URL, '')
         else:
             wms = ws.wms_endpoint
-            response = req.get(wms + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
+        response = req.get(wms, params=values, verify=False, stream=True, proxies=settings.PROXIES)
 
-        print host + wms + "?" + params
+        print(response.url)
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
             for block in response.iter_content(1024):
                 if not block:
                     break
                 f.write(block)
                 
-        return os.path.join("thumbnails/", iname)        
+        return os.path.join("thumbnails/", iname)
     
-    
-        #
     # ImageMosaic methods
-    #
-    
-    
     def createimagemosaic(self, store, layer):
         params = json.loads(store.connection_params)
         try:
