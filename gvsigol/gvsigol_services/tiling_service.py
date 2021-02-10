@@ -490,7 +490,7 @@ El objeto process_data es una estructura en la que se va actualizando el número
 del proceso de descarga y empaquetado
 """
 @start_new_thread
-def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None):
+def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None, properties=None):
     if(version is None):
         version = int(round(time.time() * 1000))
 
@@ -545,7 +545,7 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
                 extent = extent.split(',')
                 tiling.set_layer_extent(float(extent[0]), float(extent[1]), float(extent[2]), float(extent[3]))
 
-            min_lon, min_lat, max_lon, max_lat = get_extent(geojson) 
+            min_lon, min_lat, max_lon, max_lat = get_extent(geojson, properties) 
             tile_min_x, tile_min_y = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), min_lon, min_lat)
             tile_max_x, tile_max_y = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), max_lon, max_lat)
             number_of_tiles = number_of_tiles + tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, process_data, True if number_of_tiles == 0 else False) 
@@ -586,7 +586,7 @@ def create_status(process_data, id):
     status.save()
     return status
 
-def get_extent(json):
+def get_extent(json, properties):
     if(json['type'] == 'Polygon'):
         min_lon = float('Inf')
         min_lat = float('Inf')
@@ -602,7 +602,7 @@ def get_extent(json):
         return min_lon, min_lat, max_lon, max_lat
     if(json['type'] == 'Point'):
         try:
-            buffer = int(json['properties']['buffer'])
+            buffer = int(properties['buffer'])
         except Exception:
             buffer = 500
 
