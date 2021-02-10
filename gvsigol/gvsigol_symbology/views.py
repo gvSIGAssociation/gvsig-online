@@ -36,7 +36,6 @@ from django.views.decorators.csrf import csrf_exempt
 from . import utils
 import json
 import ast
-from gvsigol_services.gdal_tools import get_raster_stats
 from gvsigol_services.backend_postgis import Introspect
 import re
 
@@ -48,7 +47,7 @@ def get_raster_statistics(request, layer_id):
     params = json.loads(datastore.connection_params)
     result = None
     if 'url' in params:
-        result = get_raster_stats(params['url'])
+        result = utils.get_raster_stats(params['url'])
     if result:
         response = {
             'result': result

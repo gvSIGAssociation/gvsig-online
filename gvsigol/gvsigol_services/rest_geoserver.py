@@ -920,6 +920,9 @@ class Geoserver():
                 d[k] = u[k]
         return d
     
+class RequestWarning(Exception):
+    def __init__(self, message=None):
+        self.message=message
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):

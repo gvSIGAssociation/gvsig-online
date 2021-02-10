@@ -30,6 +30,7 @@ import tempfile, zipfile
 import os, shutil, errno
 import json
 import re
+import gdaltools
 
 def __get_uncompressed_file_upload_path(f):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
@@ -463,3 +464,29 @@ def reset_geoserver_style(gs, layer, style):
     sld_body = sld_builder.build_sld(layer, style)
     return gs.createStyle(style.name, sld_body)
     
+def get_raster_stats(raster_path):
+    """
+    Gets the statistics of a raster file or a directory containing .tif files.
+    If the path is a directory, the bands of each raster are concatenated as
+    if we had a single raster with lots of bands.
+    
+    Usage:
+    import gdal_tools
+    stats = gdal_tools.get_raster_stats('path_to_my_raster')
+    (band0_ min, band0_max, band0_mean, band0_stdev) = stats[0]
+    (band1_ min, band1_max, band1_mean, band1_stdev) = stats[1]
+    """
+    
+    main_path = raster_path.replace("file://", "")
+    files = []
+    result = []
+    
+    if os.path.isdir(main_path):
+        files = [os.path.join(main_path, f) for f in os.listdir(main_path) if os.path.isfile(os.path.join(main_path, f)) and str(f).endswith('.tif')]
+    else:
+        files.append(main_path)
+    
+    for file_path in files:
+        band_results = gdaltools.get_raster_stats(file_path)
+        result = result + band_results
+    return result

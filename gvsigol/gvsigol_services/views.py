@@ -64,7 +64,7 @@ from requests_futures.sessions import FuturesSession
 from .backend_postgis import Introspect
 from .forms_geoserver import CreateFeatureTypeForm
 from .forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
-from .gdal_tools import gdalsrsinfo
+from gdaltools import gdalsrsinfo
 from . import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS

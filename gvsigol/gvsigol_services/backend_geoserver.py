@@ -15,14 +15,14 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_core.geom import RASTER
-from django.contrib.gis import gdal
-from gvsigol.settings import CONTROL_FIELDS
-from django.db.backends.base import creation
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
+from gvsigol_core.geom import RASTER
+from django.contrib.gis import gdal
+from gvsigol.settings import CONTROL_FIELDS
+from django.db.backends.base import creation
 from .models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup, Trigger
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
@@ -41,7 +41,7 @@ from . import rest_geoserver
 from .rest_geoserver import RequestError
 from . import signals
 import requests
-from . import gdal_tools
+import gdaltools
 import logging
 import urllib.request, urllib.parse, urllib.error
 import random
@@ -108,14 +108,8 @@ class Geoserver():
             ('c_ImageMosaic', _('ImageMosaic')),
         )
 
-        if settings.OGR2OGR_PATH is not None and settings.OGR2OGR_PATH != '':
-            gdal_tools.OGR2OGR_PATH = settings.OGR2OGR_PATH
-        if settings.GDALSRSINFO_PATH is not None and settings.GDALSRSINFO_PATH != '':
-            gdal_tools.GDALSRSINFO_PATH = settings.GDALSRSINFO_PATH
-        if settings.GDALINFO_PATH is not None and settings.GDALINFO_PATH != '':
-            gdal_tools.GDALINFO_PATH = settings.GDALINFO_PATH
-         
-
+        if settings.GDALTOOLS_BASEPATH:
+            gdaltools.Wrapper.BASEPATH = settings.GDALTOOLS_BASEPATH
         
         self.supported_srs_plain = [ x[0] for x in forms_geoserver.supported_srs ]
         self.supported_encodings_plain = [ x[0] for x in forms_geoserver.supported_encodings ]
@@ -1051,8 +1045,8 @@ class Geoserver():
             return global_stats if global_stats else (None, None, None, None)
         elif os.path.isfile(file_path):
             try:
-                return gdal_tools.get_raster_stats(file_path)
-            except gdal_tools.GdalError as e:
+                return gdaltools.get_raster_stats(file_path)
+            except gdaltools.GdalError as e:
                 raise rest_geoserver.RequestError(e.code, e.message)    
 
 
@@ -1114,11 +1108,11 @@ class Geoserver():
             # import SHP to DB
             if len(files)==1:
                 shp_abs = os.path.join(tmp_dir, files[0])
-                gdal_tools.shp2postgis(shp_abs, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                __shp2postgis(shp_abs, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                 return
         except (rest_geoserver.RequestError):
             raise 
-        except gdal_tools.GdalError as e:
+        except gdaltools.GdalError as e:
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logging.exception(e)
@@ -1128,7 +1122,7 @@ class Geoserver():
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
     def __fieldmapping_sql(self, creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password):
-        if creation_mode == gdal_tools.MODE_CREATE:
+        if creation_mode == forms_geoserver.MODE_CREATE:
             # no mapping needed
             return
         
@@ -1157,7 +1151,7 @@ class Geoserver():
             elif f in db_fields:
                 ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == f), None)
                 if ctrl_field:
-                    if creation_mode==gdal_tools.MODE_APPEND:
+                    if creation_mode==forms_geoserver.MODE_APPEND:
                         # skip control field in append mode
                         continue
                     elif ctrl_field.get('type', '').startswith('timestamp'):
@@ -1184,7 +1178,7 @@ class Geoserver():
             if db_mapped_field:
                 ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == db_mapped_field), None)
                 if ctrl_field:
-                    if creation_mode==gdal_tools.MODE_APPEND:
+                    if creation_mode==forms_geoserver.MODE_APPEND:
                         # skip control field in append mode
                         continue
                     elif ctrl_field.get('type', '').startswith('timestamp'):
@@ -1200,6 +1194,32 @@ class Geoserver():
         sql = "SELECT " + ",".join(fields) + " FROM " + shp_name
         return sql
     
+    def shp2postgis(self, shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=forms_geoserver.MODE_CREATE, encoding="autodetect", sql=None):
+        ogr = gdaltools.ogr2ogr()
+        ogr.set_encoding(encoding)
+        ogr.set_input(shp_path, srs=srs)
+        conn = gdaltools.PgConnectionString(host=host, port=port, dbname=dbname, schema=schema, user=user, password=password)
+        ogr.set_output(conn, table_name=table_name)
+        if creation_mode == forms_geoserver.MODE_CREATE:
+            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
+        elif creation_mode == forms_geoserver.MODE_APPEND:
+                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_APPEND, data_source_mode=ogr.MODE_DS_UPDATE)
+        elif creation_mode == forms_geoserver.MODE_OVERWRITE:
+                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_OVERWRITE, data_source_mode=ogr.MODE_DS_UPDATE)
+        ogr.layer_creation_options = {
+            "LAUNDER": "YES",
+            "precision": "NO"
+        }
+        ogr.config_options = {
+            "OGR_TRUNCATE": "NO"
+        }
+        ogr.set_sql(sql)
+        ogr.set_dim("2")
+        ogr.geom_type = "PROMOTE_TO_MULTI"
+        ogr.execute()
+        print(" ".join(ogr.safe_args))
+        return ogr.stderr if ogr.stderr is not None else ''
+
     def __do_export_to_postgis(self, name, datastore, form_data, shp_path, shp_fields):
         try:
             name = name.lower()
@@ -1232,8 +1252,8 @@ class Geoserver():
 
             shp_field_names = [f.name for f in shp_fields]
             sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
-            gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
-            
+            stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
+
             with Introspect(db, host=host, port=port, user=user, password=password) as i:
                 # add control fields
                 db_fields = i.get_fields(name, schema=schema)
@@ -1252,7 +1272,7 @@ class Geoserver():
                         except:
                             logger.exception("Error adding control field: " + control_field['name'])
             
-            if creation_mode == gdal_tools.MODE_OVERWRITE:
+            if creation_mode == forms_geoserver.MODE_OVERWRITE:
                 # re-install triggers
                 for trigger in Trigger.objects.filter(layer__datastore=datastore, layer__source_name=name):
                     try:
@@ -1261,17 +1281,15 @@ class Geoserver():
                     except:
                         logger.exception("Failed to install trigger: " + str(trigger))
             
+            if stderr:
+                raise rest_geoserver.RequestWarning(stderr)
             return True
-        
         except rest_geoserver.RequestError as e:
             logger.exception(str(e))
             raise
-        except gdal_tools.GdalWarning as e:
+        except gdaltools.GdalError as e:
             logger.exception(str(e))
-            raise rest_geoserver.RequestError(0, e.message)
-        except gdal_tools.GdalError as e:
-            logger.exception(str(e))
-            if e.code > 0 and creation_mode == gdal_tools.MODE_OVERWRITE:
+            if e.code > 0 and creation_mode == forms_geoserver.MODE_OVERWRITE:
                 params = json.loads(datastore.connection_params)
                 host = params['host']
                 port = params['port']
@@ -1283,12 +1301,12 @@ class Geoserver():
                 i.delete_table(schema, name)
                 i.close()
                 try:
-                    gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    if stderr:
+                        raise rest_geoserver.RequestWarning(stderr)
                     return True
-                except gdal_tools.GdalError as e:
+                except gdaltools.GdalError as e:
                     raise rest_geoserver.RequestError(e.code, e.message)
-                except gdal_tools.GdalWarning as e:
-                    raise rest_geoserver.RequestError(0, e.message)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logger.exception(str(e))
@@ -1318,7 +1336,7 @@ class Geoserver():
             else:
                 encoding = 'LATIN1'
             if creation_mode not in ('CR', 'OW'):
-                raise
+                raise Exception()
             
             if not encoding in self.supported_encodings_plain or not srs in self.supported_srs_plain:
                 raise rest_geoserver.RequestError()
@@ -1395,7 +1413,7 @@ class Geoserver():
                         original_style_name = layer_name
                     shp_abs = os.path.join(dir_path, f)
                     try:
-                        gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                        shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                     except Exception as e:
                         print("ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido ")
                         continue 
@@ -1514,7 +1532,7 @@ class Geoserver():
         except rest_geoserver.RequestError as ex:
             print("Error Request: " + str(ex))
             raise             
-        except gdal_tools.GdalError as ex:
+        except gdaltools.GdalError as ex:
             print("Error Gdal: " + str(ex))
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
