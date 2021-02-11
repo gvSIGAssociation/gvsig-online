@@ -10,10 +10,7 @@ import tempfile
 import shutil
 from osgeo import ogr, osr
 
-
-
 # Python class to print topological sorting of a DAG 
-
 class Graph: 
 	def __init__(self, vertices): 
         # dictionary containing adjacency List 
@@ -129,10 +126,16 @@ def input_Shp(dicc):
     layer = dataSource.GetLayer()
     
     fc = {
-        'features': []
+        "features": []
         }
+
+    epsg = str(dicc['epsg'])
     
-    epsg = layer.GetSpatialRef().GetAuthorityCode(None)
+    if epsg == '':
+        try:
+            epsg = layer.GetSpatialRef().GetAuthorityCode(None)
+        except:
+            epsg = '-1'
     
     for feature in layer:    
         f= feature.ExportToJson(as_object=True)
@@ -296,11 +299,11 @@ def trans_Filter(dicc):
     operator = dicc['operator']
 
     passed = {
-        'features': []
+        "features": []
         }
 
     failed = {
-        'features': []
+        "features": []
         }
 
     for i in table['features']:
@@ -341,7 +344,9 @@ def trans_Filter(dicc):
             else:
                 failed['features'].append(i)
         if operator == 'starts-with':
+            
             if valueAttr.startswith(value):
+                
                 passed['features'].append(i)
             else:
                 failed['features'].append(i)
@@ -364,6 +369,14 @@ def isNumber(value):
         return "_"+value
     except:
         return value
+
+def commaToDot(value):
+    try:
+        v = float(str(value).replace(",","."))
+        return v
+    except:
+        return value
+
 
 def output_Postgresql(dicc):
 
@@ -391,15 +404,25 @@ def output_Postgresql(dicc):
     #for creating a new table in database
     if operation=='CREATE':
 
-        sqlCreate="CREATE TABLE IF NOT EXISTS "+tableName+" ("
-        sqlInsert = "INSERT INTO "+tableName+" ("
+        sqlCr="CREATE TABLE IF NOT EXISTS "+tableName+" ("
+        sqlIn = "INSERT INTO "+tableName+" ("
 
+        sqlCreate = sqlCr.encode('utf-8') 
+        sqlInsert = sqlIn.encode('utf-8') 
+        
         for i in listKeys:
 
             attr = isNumber(i)
-
-            sqlCreate = sqlCreate + attr.lower().replace(": ","_")
-            sqlInsert = sqlInsert + attr.lower().replace(": ","_")+","
+            
+            try:
+                sqlCreate = sqlCreate + str(attr).lower().replace(": ","_").replace(" ","_")
+            except:
+                sqlCreate = sqlCreate + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")
+            
+            try:
+                sqlInsert = sqlInsert + str(attr).lower().replace(": ","_").replace(" ","_")+","
+            except:
+                sqlInsert = sqlInsert + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")+","
 
             longitud=0
             tipo = 'None'
@@ -407,9 +430,11 @@ def output_Postgresql(dicc):
             for j in range(0,rows):
 
                 try:
-                    value = fc['features'][j]['properties'][i]
+                    v = fc['features'][j]['properties'][i]
                 except:
-                    value = None
+                    v = None
+
+                value = commaToDot(v)
 
                 if type(value) is int or type(value) == np.dtype('int64'):
                     if tipo=='None':
@@ -466,9 +491,11 @@ def output_Postgresql(dicc):
             for attr in listKeys:
 
                 try:
-                    value = fc['features'][k]['properties'][attr]
+                    v = fc['features'][k]['properties'][attr]
                 except:
-                    value = None
+                    v = None
+
+                value = commaToDot(v)
 
                 if type(value) is str or type(value) is unicode and value !='NULL':
                     
@@ -485,7 +512,7 @@ def output_Postgresql(dicc):
                     sqlInsert2 = sqlInsert2+ str(value)+','
             
             sqlInsert2=sqlInsert2[:-1]+")"
-
+            
             cur.execute(sqlInsert2)
     
     #for updating rows from an existent table, matching by column
@@ -595,26 +622,39 @@ def output_Postgis(dicc):
                 listKeysLower.append(p.lower())
 
     if operation=='CREATE':
+        
+        sqlCr="CREATE TABLE IF NOT EXISTS "+tableName+" ("
+        sqlIn = "INSERT INTO "+tableName+" ("
 
-        sqlCreate="CREATE TABLE IF NOT EXISTS "+tableName+" ("
-        sqlInsert = "INSERT INTO "+tableName+" ("
+        sqlCreate = sqlCr.encode('utf-8') 
+        sqlInsert = sqlIn.encode('utf-8') 
 
         for i in listKeys:
 
             attr = isNumber(i)
 
-            sqlCreate = sqlCreate + attr.lower().replace(": ","_")
-            sqlInsert = sqlInsert + attr.lower().replace(": ","_")+","
+            try:
+                sqlCreate = sqlCreate + str(attr).lower().replace(": ","_").replace(" ","_")
+            except:
+                sqlCreate = sqlCreate + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")
+                
+            try:
+                sqlInsert = sqlInsert + str(attr).lower().replace(": ","_").replace(" ","_")+","
+            except:
+                sqlInsert = sqlInsert + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")+","
 
             longitud=0
             tipo = 'None'
 
             for j in range(0,rows):
 
+
                 try:
-                    value = fc['features'][j]['properties'][i]
+                    v = fc['features'][j]['properties'][i]
                 except:
-                    value = None
+                    v = None
+
+                value = commaToDot(v)
 
                 if type(value) is int or type(value) == np.dtype('int64'):
                     if tipo=='None':
@@ -683,9 +723,11 @@ def output_Postgis(dicc):
             for attr in listKeys:
 
                 try:
-                    value = fc['features'][k]['properties'][attr]
+                    v = fc['features'][k]['properties'][attr]
                 except:
-                    value = None
+                    v = None
+
+                value = commaToDot(v)
 
                 if type(value) is str or type(value) is unicode and value !='NULL':
 
@@ -701,8 +743,8 @@ def output_Postgis(dicc):
                 else:
                     sqlInsert2 = sqlInsert2+ str(value)+','
             
-            sqlInsert2=sqlInsert2+"ST_SetSRID(ST_GeomFromGeoJSON('"+str(coord)+"'), "+ epsg+") )"
-
+            sqlInsert2=sqlInsert2+"ST_SetSRID(ST_GeomFromGeoJSON('"+str(coord)+"'), "+ str(epsg)+") )"
+            
             cur.execute(sqlInsert2)
     
     elif operation == 'UPDATE':
@@ -782,3 +824,115 @@ def output_Postgis(dicc):
     conn.commit()
     conn.close()
     cur.close()
+
+def input_Csv(dicc):
+
+    csvdata = pd.read_csv(dicc["file"], sep=dicc["separator"], encoding='utf8')
+    
+    js_csv ={
+        'features':[]
+    }
+    
+    for i in csvdata:
+        lon = len(csvdata[i])
+        break
+
+    for i in range (0, lon):
+        lista=[]
+        for j in csvdata:
+            try:
+                value = csvdata[j][i]
+                valueFloat =float(value)
+            except:
+                pass
+            
+            if math.isnan(valueFloat):
+                lista.append((j, 'NULL'))
+            else:
+                lista.append((j, csvdata[j][i]))
+            dic = OrderedDict(lista)
+        js_csv['features'].append({'properties':dic})
+
+    return [js_csv]
+
+def trans_Reproject(dicc):
+    table = dicc['data'][0]
+    sourceepsg = str(dicc['sourceepsg'])
+    targetepsg = str(dicc['targetepsg'])
+
+    source = osr.SpatialReference()
+
+    if sourceepsg == '':
+        source.ImportFromEPSG(int(table['features'][0]['geometry']['epsg']))
+    else:
+        source.ImportFromEPSG(int(sourceepsg))
+
+    target = osr.SpatialReference()
+    target.ImportFromEPSG(int(targetepsg))
+
+    table['type'] = 'FeatureCollection'
+
+    dataSet = ogr.Open(json.dumps(table))
+    layer = dataSet.GetLayer()
+
+    source.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    target.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+    coordTrans= osr.CoordinateTransformation(source, target)
+
+    fc = {
+        "features": []
+        }
+
+    for feature in layer:    
+        geom = feature.GetGeometryRef()
+        geom.Transform(coordTrans)
+        f = feature.ExportToJson(as_object=True)
+        f['geometry']['epsg'] = targetepsg
+        fc['features'].append(f)
+    
+    return[fc]
+
+def trans_Counter(dicc):
+    table = dicc['data'][0]
+    attr = dicc['attr']
+    
+    gbAttr= dicc['groupby']
+    
+    if gbAttr == '':
+        count=1
+        for i in table['features']:
+            i['properties'][attr] = count
+            count+=1
+    else:
+        listGroup =[[],[]]
+        for i in table['features']:
+            row = i['properties']
+            if row[gbAttr] not in listGroup[0]:
+                listGroup[0].append(row[gbAttr])
+                listGroup[1].append(1)
+                row[attr] = 1
+            else:
+                ind = listGroup[0].index(row[gbAttr])
+                count = listGroup[1][ind] + 1
+                listGroup[1][ind] = count
+                row[attr] = count
+        
+    return [table]
+
+def trans_Calculator(dicc):
+
+    table = dicc['data'][0]
+    attr = dicc['attr']
+    expression= dicc['expression']
+
+    exp = expression.replace("[", "i['properties'][")
+
+    for i in table['features']:
+        i['properties'][attr] = eval(exp)
+        print i['properties'][attr]
+
+    return [table]
+
+
+

@@ -513,11 +513,13 @@ class Introspect:
             geom_type = 'MultiLineString'
         if geom_type == 'Polygon':
             geom_type = 'MultiPolygon'
+        geom_column = 'wkb_geometry'
         create_table_sqls = [
             sqlbuilder.SQL('ogc_fid serial NOT NULL'),
-            sqlbuilder.SQL('wkb_geometry geometry({geom_type},{srs})').format(
+            sqlbuilder.SQL('{geom_column} geometry({geom_type},{srs})').format(
                                 geom_type=sqlbuilder.Identifier(geom_type),
-                                srs=sqlbuilder.Literal(int(srs)))
+                                srs=sqlbuilder.Literal(int(srs)),
+                                geom_column=sqlbuilder.Identifier(geom_column))
         ]
         
         for field in fields:
@@ -578,6 +580,19 @@ class Introspect:
             table_name=sqlbuilder.Identifier(table_name),
             fields_sql=sqlbuilder.SQL(', ').join(create_table_sqls))
         print((query.as_string(self.conn)))
+        self.cursor.execute(query)
+        spatial_idx_name = table_name + "_" + geom_column + "_geom_idx"
+        query = sqlbuilder.SQL("""
+            CREATE INDEX {idx_name}
+            ON {schema}.{table}
+            USING gist
+            ({geom_col});
+            """).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            geom_col=sqlbuilder.Identifier(geom_column),
+            idx_name=sqlbuilder.Identifier(spatial_idx_name)
+        )
         self.cursor.execute(query)
         
     def get_triggers(self, schema, table):
@@ -916,16 +931,15 @@ class Introspect:
                 schema=sqlbuilder.Identifier(schema),
                 table=sqlbuilder.Identifier(table))
         self.cursor.execute(query)
-        rows = self.cursor.fetchall()
-        count = rows[0]
-        
-        return count
+        row = self.cursor.fetchone()
+        return row[0]
+
     def get_estimated_count(self, schema, table):
         query = "SELECT reltuples::BIGINT AS estimate FROM pg_class WHERE relname = %s";
         self.cursor.execute(query, [table])
         rows = self.cursor.fetchall()
         if self.cursor.rowcount == 1:
-            return rows[0]
+            return rows[0][0]
         else:
             return self.get_count(schema, table)
     
@@ -933,20 +947,20 @@ class Introspect:
         column_name = self.get_geometry_columns(table, schema)[0]
         if expand is None:
             expand = 0
-        sql = """SELECT BOX2D(ST_EXPAND(ST_TRANSFORM({column_name} ,4326), {expand}))
+        sql = """SELECT ST_XMin(bbox) xmin, ST_YMin(bbox) ymin, ST_XMax(bbox) xmax, ST_YMax(bbox) ymax
+        FROM
+        (SELECT BOX2D(ST_EXPAND(ST_TRANSFORM({column_name}, 4326), {expand})) bbox
         FROM {schema}.{table}
-        WHERE %s IS NOT NULL LIMIT 1"""
+        WHERE %s IS NOT NULL LIMIT 1) as s0"""
         query = sqlbuilder.SQL(sql).format(
-            schema=schema,
-            table=table,
-            column_name=sqlbuilder.Literal(column_name),
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            column_name=sqlbuilder.Identifier(column_name),
             expand=sqlbuilder.Literal(expand)
             )
         self.cursor.execute(query, [column_name])
-        rows = self.cursor.fetchone()
-        bb = rows[0]
-        bb = bb.replace("BOX(","").replace(")","").replace(" ", ",")
-        return bb
+        row = self.cursor.fetchone()
+        return (row[0], row[1], row[2], row[3])
     
     def get_bbox(self, schema, table_name, geom_field):
         """

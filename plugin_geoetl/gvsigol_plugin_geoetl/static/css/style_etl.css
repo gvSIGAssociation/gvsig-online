@@ -26,6 +26,26 @@
 	height: 6000px;
 }
 
+#schema-calculator{
+	list-style-type: none;
+	width: 31%;
+	background-color: #f1f1f1;
+	position: fixed;
+	height: 29%;
+	overflow: auto;
+	cursor: pointer;
+}
+#functions-calculator{
+	list-style-type: none;
+	width: 31%;
+	background-color: #f1f1f1;
+	position: fixed;
+	height: 29%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+
 .palette_node_element {
 	
 	cursor: move;
@@ -43,3 +63,10 @@
     float: left;
     width: 33%;
 }
+
+.column66
+{
+    float: left;
+    width: 66%;
+}
+

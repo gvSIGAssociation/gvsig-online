@@ -69,6 +69,9 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 import logging
 logger = logging.getLogger("gvsigol")
 
+def forbidden_view(request):
+    return render(request, 'illegal_operation.html', {}, status=403)
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def home(request):
     user = User.objects.get(username=request.user.username)

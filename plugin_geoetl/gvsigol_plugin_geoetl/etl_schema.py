@@ -66,3 +66,6 @@ def test_postgres(dicc):
     except:
         return {"result": False}
 
+def get_schema_csv(csv, dicc):
+    csvdata = pd.read_csv(csv, sep=dicc["separator"])
+    return list(csvdata.columns)

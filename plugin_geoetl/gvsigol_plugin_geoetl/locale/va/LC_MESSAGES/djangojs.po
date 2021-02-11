@@ -32,6 +32,12 @@ msgstr "Acostar"
 msgid "Zoom Out"
 msgstr "Allunyar"
 
+msgid "Open"
+msgstr "Obrir"
+
+msgid "Save"
+msgstr "Guardar"
+
 msgid "Process has been executed succesfully"
 msgstr "El procés ha sigut executat satisfactòriament"
 
@@ -39,7 +45,7 @@ msgid "Close"
 msgstr "Tancar"
 
 msgid "Accept"
-msgstr "Aceptar"
+msgstr "Acceptar"
 
 msgid "Response"
 msgstr "Resposta"
@@ -238,3 +244,60 @@ msgstr "Els paràmetres de connexió son vàlids."
 
 msgid "Connection parameters are not valids."
 msgstr "Els paràmetres de connexió no son vàlids."
+
+msgid "CSV Parameters"
+msgstr "Paràmetres CSV"
+
+msgid "Choose csv file:"
+msgstr "Tria l'arxiu csv:"
+
+msgid "Column separator:"
+msgstr "Separador de columna:"
+
+msgid "Insert if PRJ is not loaded"
+msgstr "Insertar si no es carrega el PRJ"
+
+msgid "Reproject"
+msgstr "Reprojectar"
+
+msgid "Reproject Parameters"
+msgstr "Paràmetres Reprojectar"
+
+msgid "Source EPSG:"
+msgstr "EPSG origen:"
+
+msgid "Target EPSG:"
+msgstr "EPSG destí:"
+
+msgid "Counter Parameters"
+msgstr "Paràmetres Contador"
+
+msgid "New counter attribute:"
+msgstr "Nou atribut contador:"
+
+msgid "Group by:"
+msgstr "Agrupa per:"
+
+msgid "Counter"
+msgstr "Contador"
+
+msgid "Calculator"
+msgstr "Calculador"
+
+msgid "Calculator Parameters"
+msgstr "Paràmetres Calculador"
+
+msgid "Math functions:"
+msgstr "Funcions matemàtiques:"
+
+msgid "Attributes:"
+msgstr "Atributs:"
+
+msgid "Expression:"
+msgstr "Expressió:"
+
+msgid "For more math functions check above link."
+msgstr "Per a més funcions matemàtiques consulta l'enllaç de dalt."
+
+msgid "Set all transformers parameters in canvas"
+msgstr "Configura tots els paràmetres dels transformadors al canvas"

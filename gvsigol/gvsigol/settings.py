@@ -345,7 +345,7 @@ LANGUAGES = (
     #('ca', _('Catalan')), 
     ('en', _('English')),
     #('pt', _('Portuguese')),
-    #('pt-br', _('Brazilian Portuguese')),
+    ('pt-br', _('Brazilian Portuguese')),
 )
 
 LOCALE_PATHS =  [
@@ -657,7 +657,7 @@ RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
 LAYERS_ROOT = 'layer_downloads'
 #ALLOWED_HOST_NAMES = ['http://localhost']
-ALLOWED_HOST_NAMES = ['http://localhost', 'http://gvsigol.localhost']
+ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
     'JWT_ALLOW_REFRESH': True,

@@ -32,6 +32,12 @@ msgstr ""
 msgid "Zoom Out"
 msgstr ""
 
+msgid "Open"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
 msgid "Process has been executed succesfully"
 msgstr ""
 
@@ -237,4 +243,61 @@ msgid "Connection parameters are valids."
 msgstr ""
 
 msgid "Connection parameters are not valids."
+msgstr ""
+
+msgid "CSV Parameters"
+msgstr ""
+
+msgid "Choose csv file:"
+msgstr ""
+
+msgid "Column separator:"
+msgstr ""
+
+msgid "Insert if PRJ is not loaded"
+msgstr ""
+
+msgid "Reproject"
+msgstr ""
+
+msgid "Reproject Parameters"
+msgstr ""
+
+msgid "Source EPSG:"
+msgstr ""
+
+msgid "Target EPSG:"
+msgstr ""
+
+msgid "Counter Parameters"
+msgstr ""
+
+msgid "New counter attribute:"
+msgstr ""
+
+msgid "Group by:"
+msgstr ""
+
+msgid "Counter"
+msgstr ""
+
+msgid "Calculator"
+msgstr ""
+
+msgid "Calculator Parameters"
+msgstr ""
+
+msgid "Math functions:"
+msgstr ""
+
+msgid "Attributes:"
+msgstr ""
+
+msgid "Expression:"
+msgstr ""
+
+msgid "For more math functions check above link"
+msgstr ""
+
+msgid "Set all transformers parameters in canvas"
 msgstr ""

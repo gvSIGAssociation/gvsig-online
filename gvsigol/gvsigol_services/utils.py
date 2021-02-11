@@ -89,15 +89,16 @@ def get_write_roles(layer):
     return roles
 
 def can_write_layer(user, layer):
-    if isinstance(user, str):
-        user = User.objects.get(username=user)
-    if not isinstance(layer, Layer):
-        layer = Layer.objects.get(id=layer)
     """
-    Checks whether the user has permissions to write the provied layer.
-    It accepts a project instance, a project name or a project id.
+    Checks whether the user has permissions to write the provided layer.
+    It accepts a layer instance or a layer id.
     """
     try:
+        if isinstance(user, str):
+            user = User.objects.get(username=user)
+        if not isinstance(layer, Layer):
+            layer = Layer.objects.get(id=layer)
+        
         if user.is_superuser:
             return True
         if isinstance(user, AnonymousUser):
@@ -109,15 +110,16 @@ def can_write_layer(user, layer):
     return False
 
 def can_read_layer(user, layer):
-    if isinstance(user, str):
-        user = User.objects.get(username=user)
-    if not isinstance(layer, Layer):
-        layer = Layer.objects.get(id=layer)
     """
-    Checks whether the user has permissions to write the provied layer.
-    It accepts a project instance, a project name or a project id.
+    Checks whether the user has permissions to manage the provided layer.
+    It accepts a layer instance or a layer id.
     """
     try:
+        if isinstance(user, str):
+            user = User.objects.get(username=user)
+        if not isinstance(layer, Layer):
+            layer = Layer.objects.get(id=layer)
+
         if user.is_superuser:
             return True
         if LayerReadGroup.objects.filter(layer=layer).count() == 0:
@@ -128,6 +130,60 @@ def can_read_layer(user, layer):
             return True
     except Exception as e:
         print(e)
+    return False
+
+def can_manage_layer(user, layer):
+    """
+    Checks whether the user has permissions to manage the provided layer.
+    It accepts a layer instance or a layer id.
+    """
+    try:
+        if isinstance(user, basestring):
+            user = User.objects.get(username=user)
+        if not isinstance(layer, Layer):
+            layer = Layer.objects.get(id=layer)
+        if user.is_superuser:
+            return True
+        if layer.created_by == user.username:
+            return True
+    except Exception as e:
+        print e
+    return False
+
+def can_manage_datastore(user, datastore):
+    """
+    Checks whether the user has permissions to manage the provided datastore.
+    It accepts a datastore instance or a datastore id.
+    """
+    try:
+        if isinstance(user, basestring):
+            user = User.objects.get(username=user)
+        if not isinstance(datastore, Datastore):
+            datastore = Datastore.objects.get(id=datastore)
+        if user.is_superuser:
+            return True
+        if datastore.created_by == user.username:
+            return True
+    except Exception as e:
+        print e
+    return False
+
+def can_manage_layergroup(user, layergroup):
+    """
+    Checks whether the user has permissions to manage the provided layergroup.
+    It accepts a layergroup instance or a layergroup id.
+    """
+    try:
+        if isinstance(user, basestring):
+            user = User.objects.get(username=user)
+        if not isinstance(layergroup, LayerGroup):
+            layergroup = LayerGroup.objects.get(id=layergroup)
+        if user.is_superuser:
+            return True
+        if layergroup.created_by == user.username:
+            return True
+    except Exception as e:
+        print e
     return False
 
 def add_datastore(workspace, type, name, description, connection_params, username):
