@@ -516,7 +516,7 @@ class Geoserver():
         Create new style
         """
         try:
-            self.getGsconfig().create_style(name, data.encode('utf-8'), overwrite=overwrite, workspace=None, style_format="sld10", raw=False)
+            self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=False)
             return True
         
         except Exception as e:

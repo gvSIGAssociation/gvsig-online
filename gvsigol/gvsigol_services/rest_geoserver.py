@@ -879,7 +879,7 @@ class Geoserver():
             auth = self.session.auth
         
         headers = { "content-type": "application/vnd.ogc.sld+xml" }
-        r = self.session.put(url, data=sld_body.encode('utf-8'), headers=headers, auth=auth)
+        r = self.session.put(url, data=sld_body, headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.content)

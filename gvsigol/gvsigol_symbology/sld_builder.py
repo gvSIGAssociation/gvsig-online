@@ -60,38 +60,37 @@ def build_sld(layer, style, single_symbol = False):
     
     sld_body = style_layer_descriptor.as_sld(True)
     if style.type == 'CP' and not single_symbol:
-        transform = ''\
-        '                <sld:Transformation>'\
-        '                    <ogc:Function name="gs:PointStacker">'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>data</ogc:Literal>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>cellSize</ogc:Literal>'\
-        '                            <ogc:Literal>30</ogc:Literal>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputBBOX</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                                <ogc:Literal>wms_bbox</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputWidth</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                                <ogc:Literal>wms_width</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputHeight</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                               <ogc:Literal>wms_height</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                    </ogc:Function>'\
-        '               </sld:Transformation>'
-        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '@@@'+transform, 1)
-        sld_body = sld_body.replace('@@@', '<sld:FeatureTypeStyle>', 1)
+        transform = b"""<sld:FeatureTypeStyle>
+                        <sld:Transformation>
+                            <ogc:Function name="gs:PointStacker">
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>data</ogc:Literal>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>cellSize</ogc:Literal>
+                                    <ogc:Literal>30</ogc:Literal>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>outputBBOX</ogc:Literal>
+                                    <ogc:Function name="env">
+                                        <ogc:Literal>wms_bbox</ogc:Literal>
+                                    </ogc:Function>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>outputWidth</ogc:Literal>
+                                    <ogc:Function name="env">
+                                        <ogc:Literal>wms_width</ogc:Literal>
+                                    </ogc:Function>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>outputHeight</ogc:Literal>
+                                    <ogc:Function name="env">
+                                       <ogc:Literal>wms_height</ogc:Literal>
+                                    </ogc:Function>
+                                </ogc:Function>
+                            </ogc:Function>
+                       </sld:Transformation>"""
+        sld_body = sld_body.replace(b'<sld:FeatureTypeStyle>', transform, 1)
 
     return sld_body
 
