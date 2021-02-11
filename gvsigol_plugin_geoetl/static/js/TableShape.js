@@ -36,7 +36,29 @@ function getPerAttr(){
         return memento;
     }
     catch{
-       /*  alert("ERROR: Configura todos los parámetros de las tareas."); */
+        $("#dialog-response").remove();
+
+        role = 'class="alert alert-danger" role = "alert"'
+
+        $('#canvas-parent').append('<div id="dialog-response" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
+                    '</div>'+
+                    '<div '+role+' align="center">'+gettext('Set all transformers parameters in canvas')+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        $('#dialog-response').modal('show')
     }
 };
 
