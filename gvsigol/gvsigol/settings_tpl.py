@@ -54,15 +54,7 @@ if len(SECRET_KEY) == 14:
         SECRET_KEY = open(SECRET_FILE).read().strip()
     except IOError:
         try:
-            try:
-                # available since Django 1.10.x
-                from django.core.management.utils import get_random_secret_key
-            except:
-                from django.utils.crypto import get_random_string
-                def get_random_secret_key():
-                    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-                    return get_random_string(50, chars)
-            from django.core.management import utils
+            from django.core.management.utils import get_random_secret_key
             import os
             SECRET_KEY = get_random_secret_key()
             secret = open(SECRET_FILE, 'w')
