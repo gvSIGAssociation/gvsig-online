@@ -238,3 +238,57 @@ msgstr "Los parámetros de conexión son válidos."
 
 msgid "Connection parameters are not valids."
 msgstr "Los parámetros de conexión no son válidos."
+
+msgid "CSV Parameters"
+msgstr "Parámetros CSV"
+
+msgid "Choose csv file:"
+msgstr "Elige un fichero csv:"
+
+msgid "Column separator:"
+msgstr "Separador de columna:"
+
+msgid "Insert if PRJ is not loaded"
+msgstr "Insertar si no se carga el PRJ"
+
+msgid "Reproject"
+msgstr "Reproyectar"
+
+msgid "Reproject Parameters"
+msgstr "Parámetros Reproyectar"
+
+msgid "Source EPSG:"
+msgstr "EPSG origen:"
+
+msgid "Target EPSG:"
+msgstr "EPSG destino:"
+
+msgid "Counter Parameters"
+msgstr "Parámetros Contador"
+
+msgid "New counter attribute:"
+msgstr "Nuevo atributo contador:"
+
+msgid "Group by:"
+msgstr "Agrupa por:"
+
+msgid "Counter"
+msgstr "Contador"
+
+msgid "Calculator"
+msgstr "Calculador"
+
+msgid "Calculator Parameters"
+msgstr "Parámetros Calculador"
+
+msgid "Math functions:"
+msgstr "Funciones matemáticas:"
+
+msgid "Attributes:"
+msgstr "Atributos:"
+
+msgid "Expression:"
+msgstr "Expresión:"
+
+msgid "For more math functions check above link."
+msgstr "Para más funciones matemáticas consulta el enlace de arriba."

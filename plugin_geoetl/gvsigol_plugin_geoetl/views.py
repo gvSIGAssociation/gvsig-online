@@ -82,98 +82,101 @@ def etl_read_canvas(request):
                 g.addEdge(source, target)
 
             sortedList = g.topologicalSort()
-
-            #going down the sorted list of tasks and executing them
-            for s in sortedList:
-                for n in nodes:
-                    if s == n[0]:
-                        
-                        #get parameters for the task
-                        try:
-                            parameters = n[1]['entities'][0]['parameters'][0]
+            try:
+                #going down the sorted list of tasks and executing them
+                for s in sortedList:
+                    for n in nodes:
+                        if s == n[0]:
                             
-                        except:
-                            parameters = {}
-                        
-                        #execute input task
-                        if n[1]['type'].startswith('input'):
-                            filesCounter=0
-                            for r in request.FILES:
-                                #input with unique files uploaded
-                                if r == n[1]['id']:
-                                    parameters['file'] = request.FILES[n[1]['id']]
-                                    break
-
-                                #input with multiple files uploaded
-                                elif r.startswith(n[1]['id']):
-                                    if filesCounter==0:
-                                        filesList=[]
-                                    
-                                    filesList.append(request.FILES[n[1]['id']+'_'+str(filesCounter)])
-                                    parameters['file'] = filesList
-                                    filesCounter+=1
-
-                        
-                            method_to_call = getattr(etl_tasks, n[1]['type'])
-                            result = method_to_call(parameters)
-                            n.append(result)
-                        
-                        #execute trasnformers or outputs tasks    
-                        else:
+                            #get parameters for the task
+                            try:
+                                parameters = n[1]['entities'][0]['parameters'][0]
+                                
+                            except:
+                                parameters = {}
                             
-                            for ip in n[1]['ports']:
-                                if ip['name'].startswith('input'):
-                                    
-                                    targetPort = ip['name']
-                                    targetPortRepeated = False
-                                    for e in edges:
-                                        if e['target']['port'] == targetPort:
+                            #execute input task
+                            if n[1]['type'].startswith('input'):
+                                filesCounter=0
+                                for r in request.FILES:
+                                    #input with unique files uploaded
+                                    if r == n[1]['id']:
+                                        parameters['file'] = request.FILES[n[1]['id']]
+                                        break
 
-                                            sourceNode = e['source']['node']
-                                            sourcePort = e['source']['port']
-                                            
-                                            for nd in nodes:
-                                                if nd[1]['id'] == sourceNode:
-                                                    
-                                                    outputPortCounter=-1
-                                                    for op in nd[1]['ports']:
-                                                        
-                                                        if op['name'].startswith('output'):
-                                                            outputPortCounter+=1
-                                                        if op['name']== sourcePort:
-                                                            break
-                                                    if 'data' in parameters:
-                                                        parameters['data'].append(nd[2][outputPortCounter])
-                                                    else:
-                                                        parameters['data'] = [nd[2][outputPortCounter]]
-                                                        
-                                                    break
-                                            
-                                            #if more than an edge has the end in the same port
-                                            if targetPortRepeated == True:
+                                    #input with multiple files uploaded
+                                    elif r.startswith(n[1]['id']):
+                                        if filesCounter==0:
+                                            filesList=[]
+                                        
+                                        filesList.append(request.FILES[n[1]['id']+'_'+str(filesCounter)])
+                                        parameters['file'] = filesList
+                                        filesCounter+=1
 
-                                                fc = parameters['data'][-2]
-
-                                                
-                                                for f in parameters['data'][-1]['features']:
-                                                    fc['features'].append(f)
-
-                                                del parameters['data'][-1]
-                                            
-                                            targetPortRepeated = True
-                                            
-
-                            method_to_call = getattr(etl_tasks, n[1]['type'])
-                            result = method_to_call(parameters)
                             
-                            if not n[1]['type'].startswith('output'):
+                                method_to_call = getattr(etl_tasks, n[1]['type'])
+                                result = method_to_call(parameters)
                                 n.append(result)
+                            
+                            #execute trasnformers or outputs tasks    
+                            else:
+                                
+                                for ip in n[1]['ports']:
+                                    if ip['name'].startswith('input'):
+                                        
+                                        targetPort = ip['name']
+                                        targetPortRepeated = False
+                                        for e in edges:
+                                            if e['target']['port'] == targetPort:
 
+                                                sourceNode = e['source']['node']
+                                                sourcePort = e['source']['port']
+                                                
+                                                for nd in nodes:
+                                                    if nd[1]['id'] == sourceNode:
+                                                        
+                                                        outputPortCounter=-1
+                                                        for op in nd[1]['ports']:
+                                                            
+                                                            if op['name'].startswith('output'):
+                                                                outputPortCounter+=1
+                                                            if op['name']== sourcePort:
+                                                                break
+                                                        if 'data' in parameters:
+                                                            parameters['data'].append(nd[2][outputPortCounter])
+                                                        else:
+                                                            parameters['data'] = [nd[2][outputPortCounter]]
+                                                            
+                                                        break
+                                                
+                                                #if more than an edge has the end in the same port
+                                                if targetPortRepeated == True:
+
+                                                    fc = parameters['data'][-2]
+
+                                                    
+                                                    for f in parameters['data'][-1]['features']:
+                                                        fc['features'].append(f)
+
+                                                    del parameters['data'][-1]
+                                                
+                                                targetPortRepeated = True
+                                                
+
+                                method_to_call = getattr(etl_tasks, n[1]['type'])
+                                result = method_to_call(parameters)
+                                
+                                if not n[1]['type'].startswith('output'):
+                                    n.append(result)
+            
+            except Exception as e:
+                result = {"error": "ERROR - "+str(e)}
+ 
         else:
             print 'invalid form'
             print form.errors
 
-    return HttpResponse(result)
+    return HttpResponse(json.dumps(result), content_type="application/json")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_sheet_excel(request):
@@ -217,11 +220,22 @@ def etl_schema_shape(request):
 def test_postgres_conexion(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
-        
         if form.is_valid():
 
             jsParams = json.loads(request.POST['jsonParamsPostgres'])
 
             response = etl_schema.test_postgres(jsParams['parameters'][0])
 
+            return HttpResponse(json.dumps(response), content_type="application/json")
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')    
+def etl_schema_csv(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            f= request.FILES['file']
+            jsParams = json.loads(request.POST['jsonParamsCSV'])
+            response = etl_schema.get_schema_csv(f, jsParams['parameters'][0])
+            
             return HttpResponse(json.dumps(response), content_type="application/json")
