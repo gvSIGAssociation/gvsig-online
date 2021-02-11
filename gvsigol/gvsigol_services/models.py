@@ -75,7 +75,7 @@ class Server(models.Model):
     def getGWCRestEndpoint(self, workspace=None):
         return self.frontend_url + "/gwc/rest"
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
 class Node(models.Model):
@@ -104,7 +104,7 @@ class Workspace(models.Model):
     created_by = models.CharField(max_length=100)
     is_public = models.BooleanField(default=False)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
     
@@ -115,8 +115,8 @@ class Datastore(models.Model):
     description = models.CharField(max_length=500, null=True, blank=True)
     connection_params = models.TextField()
     created_by = models.CharField(max_length=100)
-    
-    def __unicode__(self):
+
+    def __str__(self):
         return self.workspace.name + ":" + self.name
 
 class LayerGroup(models.Model):
@@ -127,7 +127,7 @@ class LayerGroup(models.Model):
     cached = models.BooleanField(default=False)
     created_by = models.CharField(max_length=100)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
     def clone(self, recursive=True, target_datastore=None, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
@@ -194,7 +194,7 @@ class Layer(models.Model):
     latlong_extent = models.CharField(max_length=250, default='-180,-90,180,90')
     source_name = models.TextField(null=True, blank=True) # table name for postgis layers, not defined for the rest
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
     def get_qualified_name(self):
@@ -233,7 +233,7 @@ class LayerLock(models.Model):
     created_by = models.CharField(max_length=100)
     type = models.IntegerField(choices=TYPE_CHOICES, default=GEOPORTAL_LOCK) 
     
-    def __unicode__(self):
+    def __str__(self):
         return self.layer.name
 
 class LayerResource(models.Model):
@@ -286,7 +286,7 @@ class Enumeration(models.Model):
     title = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.CharField(max_length=100)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
 class EnumerationItem(models.Model):
@@ -295,7 +295,7 @@ class EnumerationItem(models.Model):
     selected = models.BooleanField(default=False)
     order = models.IntegerField(null=False, default=0)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class LayerFieldEnumeration(models.Model):
@@ -319,7 +319,7 @@ class ServiceUrl(models.Model):
     type = models.CharField(max_length=50, choices=SERVICE_TYPE_CHOICES, default='WMS')
     url = models.CharField(max_length=500, null=True, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 class TriggerProcedure(models.Model):
