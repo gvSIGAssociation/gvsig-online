@@ -138,7 +138,7 @@ def can_manage_layer(user, layer):
     It accepts a layer instance or a layer id.
     """
     try:
-        if isinstance(user, basestring):
+        if isinstance(user, str):
             user = User.objects.get(username=user)
         if not isinstance(layer, Layer):
             layer = Layer.objects.get(id=layer)
@@ -147,7 +147,7 @@ def can_manage_layer(user, layer):
         if layer.created_by == user.username:
             return True
     except Exception as e:
-        print e
+        print(e)
     return False
 
 def can_manage_datastore(user, datastore):
@@ -156,7 +156,7 @@ def can_manage_datastore(user, datastore):
     It accepts a datastore instance or a datastore id.
     """
     try:
-        if isinstance(user, basestring):
+        if isinstance(user, str):
             user = User.objects.get(username=user)
         if not isinstance(datastore, Datastore):
             datastore = Datastore.objects.get(id=datastore)
@@ -165,7 +165,7 @@ def can_manage_datastore(user, datastore):
         if datastore.created_by == user.username:
             return True
     except Exception as e:
-        print e
+        print(e)
     return False
 
 def can_manage_layergroup(user, layergroup):
@@ -174,7 +174,7 @@ def can_manage_layergroup(user, layergroup):
     It accepts a layergroup instance or a layergroup id.
     """
     try:
-        if isinstance(user, basestring):
+        if isinstance(user, str):
             user = User.objects.get(username=user)
         if not isinstance(layergroup, LayerGroup):
             layergroup = LayerGroup.objects.get(id=layergroup)
@@ -183,7 +183,7 @@ def can_manage_layergroup(user, layergroup):
         if layergroup.created_by == user.username:
             return True
     except Exception as e:
-        print e
+        print(e)
     return False
 
 def add_datastore(workspace, type, name, description, connection_params, username):
