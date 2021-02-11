@@ -32,6 +32,12 @@ msgstr "Acercar"
 msgid "Zoom Out"
 msgstr "Alejar"
 
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Save"
+msgstr "Guardar"
+
 msgid "Process has been executed succesfully"
 msgstr "El proceso se ha ejecutado correctamente"
 
@@ -292,3 +298,6 @@ msgstr "Expresión:"
 
 msgid "For more math functions check above link."
 msgstr "Para más funciones matemáticas consulta el enlace de arriba."
+
+msgid "Set all transformers parameters in canvas"
+msgstr "Configura todos los parámetros de los transformadores en el canvas"

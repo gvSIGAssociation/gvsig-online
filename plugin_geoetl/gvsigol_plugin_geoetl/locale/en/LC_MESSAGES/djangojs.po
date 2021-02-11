@@ -32,6 +32,12 @@ msgstr ""
 msgid "Zoom Out"
 msgstr ""
 
+msgid "Open"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
 msgid "Process has been executed succesfully"
 msgstr ""
 
@@ -291,4 +297,7 @@ msgid "Expression:"
 msgstr ""
 
 msgid "For more math functions check above link"
+msgstr ""
+
+msgid "Set all transformers parameters in canvas"
 msgstr ""

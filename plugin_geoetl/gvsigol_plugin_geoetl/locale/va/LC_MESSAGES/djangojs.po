@@ -32,6 +32,12 @@ msgstr "Acostar"
 msgid "Zoom Out"
 msgstr "Allunyar"
 
+msgid "Open"
+msgstr "Obrir"
+
+msgid "Save"
+msgstr "Guardar"
+
 msgid "Process has been executed succesfully"
 msgstr "El procés ha sigut executat satisfactòriament"
 
@@ -292,3 +298,6 @@ msgstr "Expressió:"
 
 msgid "For more math functions check above link."
 msgstr "Per a més funcions matemàtiques consulta l'enllaç de dalt."
+
+msgid "Set all transformers parameters in canvas"
+msgstr "Configura tots els paràmetres dels transformadors al canvas"

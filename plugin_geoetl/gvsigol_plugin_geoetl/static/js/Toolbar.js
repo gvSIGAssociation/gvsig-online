@@ -15,30 +15,13 @@ gvsigolETL.Toolbar = Class.extend({
 		// of the Delete Button
 		view.on("select", $.proxy(this.onSelectionChanged,this));
 
+		// Inject the LOAD Button
+		this.loadButton  = $('<button id="button-load" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>' + gettext('Open') + '</button>');
+		this.html.append(this.loadButton);
 		
-		// Inject the UNDO Button and the callbacks
-		this.undoButton  = $('<button id="button-undo" class="btn btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i>' + gettext('Undo') + '</button>');
-		this.html.append(this.undoButton);
-		this.undoButton.click($.proxy(function(){
-			   this.view.getCommandStack().undo();
-		},this));
-
-		// Inject the REDO Button and the callback
-		this.redoButton  = $('<button id="button-redo" class="btn btn-default btn-sm"><i class="fa fa-share margin-r-5"></i>' + gettext('Redo') + '</button>');
-		this.html.append(this.redoButton);
-		this.redoButton.click($.proxy(function(){
-		    this.view.getCommandStack().redo();
-		},this));
-
-		// Inject the DELETE Button
-		this.deleteButton  = $('<button id="button-remove" class="btn btn-default btn-sm"><i class="fa fa-times margin-r-5"></i>' + gettext('Remove') + '</button>');
-		this.html.append(this.deleteButton);
-		this.deleteButton.click($.proxy(function(){
-			var node = this.view.getPrimarySelection();		
-			var command= new draw2d.command.CommandDelete(node);
-			this.view.getCommandStack().execute(command);
-			this.disableButton(this.deleteButton, true);
-		},this));
+		// Inject the SAVE Button
+		this.saveButton  = $('<button id="button-save" class="btn btn-default btn-sm"><i class="fa fa-save margin-r-5"></i>' + gettext('Save') + '</button>');
+		this.html.append(this.saveButton);
 
 		// Inject the RUN Button
 		this.runButton  = $('<button id="button-run" class="btn btn-default btn-sm"><i class="fa fa-play margin-r-5"></i>' + gettext('Run') + '</button>');
@@ -100,6 +83,30 @@ gvsigolETL.Toolbar = Class.extend({
 		
 		});
 
+		// Inject the DELETE Button
+		this.deleteButton  = $('<button id="button-remove" class="btn btn-default btn-sm"><i class="fa fa-times margin-r-5"></i>' + gettext('Remove') + '</button>');
+		this.html.append(this.deleteButton);
+		this.deleteButton.click($.proxy(function(){
+			var node = this.view.getPrimarySelection();		
+			var command= new draw2d.command.CommandDelete(node);
+			this.view.getCommandStack().execute(command);
+			this.disableButton(this.deleteButton, true);
+		},this));
+		
+		// Inject the UNDO Button and the callbacks
+		this.undoButton  = $('<button id="button-undo" class="btn btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i>' + gettext('Undo') + '</button>');
+		this.html.append(this.undoButton);
+		this.undoButton.click($.proxy(function(){
+			   this.view.getCommandStack().undo();
+		},this));
+
+		// Inject the REDO Button and the callback
+		this.redoButton  = $('<button id="button-redo" class="btn btn-default btn-sm"><i class="fa fa-share margin-r-5"></i>' + gettext('Redo') + '</button>');
+		this.html.append(this.redoButton);
+		this.redoButton.click($.proxy(function(){
+		    this.view.getCommandStack().redo();
+		},this));
+
 		// Inject the ZOOM IN Button and the callbacks
 		this.zoomInButton  = $('<button id="button-zoom-in" class="btn btn-default btn-sm"><i class="fa fa-search-plus margin-r-5"></i>'+gettext('Zoom In')+'</button>');
 		this.html.append(this.zoomInButton);
@@ -138,6 +145,7 @@ gvsigolETL.Toolbar = Class.extend({
 			}
 
 		},this));
+
 		
         this.disableButton(this.undoButton, true);
         this.disableButton(this.redoButton, true);
@@ -145,6 +153,7 @@ gvsigolETL.Toolbar = Class.extend({
 		this.disableButton(this.runButton, true);
 		this.disableButton(this.zoomOutButton, true);
 		this.disableButton(this.resetButton, true);
+		this.disableButton(this.saveButton, true);
 
     },
 
@@ -176,6 +185,7 @@ gvsigolETL.Toolbar = Class.extend({
         this.disableButton(this.undoButton, !event.getStack().canUndo());
 		this.disableButton(this.redoButton, !event.getStack().canRedo());
 		this.disableButton(this.runButton, false);
+		this.disableButton(this.saveButton, false);
 	
 	},
 	
