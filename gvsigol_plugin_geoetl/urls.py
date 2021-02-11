@@ -9,6 +9,6 @@ urlpatterns = [
     url(r'^etl/etl_schema_excel/$', views.etl_schema_excel, name='etl_schema_excel'),
     url(r'^etl/etl_schema_shape/$', views.etl_schema_shape, name='etl_schema_shape'),
     url(r'^etl/test_postgres_conexion/$', views.test_postgres_conexion, name='test_postgres_conexion'),
-#    url(r'^sampledashboard/sampledashboard_update/$', views.sampledashboard_update, name='sampledashboard_update'),
+    url(r'^etl/etl_schema_csv/$', views.etl_schema_csv, name='etl_schema_csv'),
 #    url(r'^sampledashboard/sampledashboard_update/(?P<lgid>[0-9]+)/$', views.sampledashboard_update, name='sampledashboard_update'),
 ]

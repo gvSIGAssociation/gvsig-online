@@ -62,27 +62,37 @@ gvsigolETL.Toolbar = Class.extend({
 					cache: false, 
                     contentType: false, 
                     processData: false,
-					success: function () {
+					success: function (result) {
 
-					$('#canvas-parent').append('<div id="dialog-response" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-						'<div class="modal-dialog" role="document">'+
-							'<div class="modal-content">'+
-								'<div class="modal-header">'+
-									'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-										'<span aria-hidden="true">&times;</span>'+
-									'</button>'+
-									'<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-								'</div>'+
-								'<div class="modal-body" align="center">'+gettext('Process has been executed succesfully')+
-								'</div>'+
-								'<div class="modal-footer">'+
-									'<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+						if(result != null){
+							message = result.error
+							role = 'class="alert alert-danger" role = "alert"'
+						}else{
+							message = gettext('Process has been executed succesfully')
+							role = 'class="alert alert-success" role = "alert"'
+						}
+
+						$("#dialog-response").remove();
+
+						$('#canvas-parent').append('<div id="dialog-response" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+							'<div class="modal-dialog" role="document">'+
+								'<div class="modal-content">'+
+									'<div class="modal-header">'+
+										'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+											'<span aria-hidden="true">&times;</span>'+
+										'</button>'+
+										'<h4 class="modal-title">'+gettext('Response')+'</h4>'+
+									'</div>'+
+									'<div '+role+' align="center">'+message+
+									'</div>'+
+									'<div class="modal-footer">'+
+										'<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+									'</div>'+
 								'</div>'+
 							'</div>'+
-						'</div>'+
-					'</div>')
+						'</div>')
 
-					$('#dialog-response').modal('show')
+						$('#dialog-response').modal('show')
 					}
 				});
 

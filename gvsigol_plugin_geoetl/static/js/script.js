@@ -36,12 +36,14 @@ function passSchemaWhenInputTask(canvasCtxt, listLabel, id){
         for(j=0;j<sourceports.length;j++){
             schemaPort =[]
             for (i=0;i<canvas.length;i++){
-                try{
-                    if (canvas[i]['type']=='draw2d.Connection'){
-                        if(canvas[i]['target']['port']==sourceports[j]){
-                            for (k=0; k<canvas[i]['userData']['0'].length;k++){
-                                if(schemaPort.includes(canvas[i]['userData']['0'][k])==false){
-                                    schemaPort.push(canvas[i]['userData']['0'][k])
+                try{ 
+                    if(canvas[i]!=null){
+                        if (canvas[i]['type']=='draw2d.Connection'){
+                            if(canvas[i]['target']['port']==sourceports[j]){
+                                for (k=0; k<canvas[i]['userData']['0'].length;k++){
+                                    if(schemaPort.includes(canvas[i]['userData']['0'][k])==false){
+                                        schemaPort.push(canvas[i]['userData']['0'][k])
+                                    }
                                 }
                             }
                         }
@@ -98,19 +100,21 @@ function passSchemaToEdgeConnected(id, listLabel, schema, canvasCtxt){
         
             for(j=0;j<targetports.length;j++){
                 for(i=0; i<canvas.length;i++){
-                
-                    if (canvas[i]['type']=='draw2d.Connection'){
-                        if(canvas[i]['source']['port']==targetports[j]){
-                            
-                            edge = canvasCtxt.getLine(canvas[i]['id'])
-                            edge['userData'] = [schema]
+                    if(canvas[i]!=null){
+                        if (canvas[i]['type']=='draw2d.Connection'){
+                            if(canvas[i]['source']['port']==targetports[j]){
+                                
+                                edge = canvasCtxt.getLine(canvas[i]['id'])
+                                edge['userData'] = [schema]
+                            }
                         }
                     }
                 
                 }
             }
         });
-    }catch{
+    }catch(error){
+        //console.log(error)
             
     }
     

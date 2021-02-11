@@ -18,13 +18,17 @@
                     <div class="btn-group" >
                         <button class="btn btn-success" type="button" id="button-inputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top"  title='{% trans "Inputs" %}'> <i class="fa fa-sign-in"></i> </button>
                         <div class="dropdown-menu">
+                            <li><a data-shape="input_Csv" class="palette_node_element draw2d_droppable dropdown-item">CSV</a></li>
                             <li><a data-shape="input_Excel" class="palette_node_element draw2d_droppable dropdown-item">Excel</a></li>
                             <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
+                            
                         </div>
                     </div>
                     <div class="btn-group">
                         <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Transformers" %}'> <i class="fa fa-cogs"></i>  </button>
                         <div class="dropdown-menu">
+                            <li><a data-shape="trans_Calculator" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculator" %}</a></li>
+                            <li><a data-shape="trans_Counter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Counter" %}</a></li>
                             <li><a data-shape="trans_CreateAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Create Attribute" %}</a></li>
                             <li><a data-shape="trans_Filter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Filter" %}</a></li>
                             <li><a data-shape="trans_Join" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Join" %}</a></li>
@@ -32,6 +36,7 @@
                             <li><a data-shape="trans_ModifyValue" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Modify Value" %}</a></li>
                             <li><a data-shape="trans_RemoveAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Remove Attribute" %}</a></li>
                             <li><a data-shape="trans_RenameAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Rename Attribute" %}</a></li>
+                            <li><a data-shape="trans_Reproject" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Reproject" %}</a></li>
                             
                         </div>
                     </div>

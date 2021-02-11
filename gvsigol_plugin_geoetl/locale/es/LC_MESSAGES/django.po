@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-02 11:59+0100\n"
+"POT-Creation-Date: 2021-02-11 08:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,57 +20,69 @@ msgstr ""
 "X-Language: es_ES\n"
 "X-Source-Language: C\n"
 
-#: gvsigol_plugin_etl/templates/dashboard_etl_menu.html:9
-#: gvsigol_plugin_etl/templates/dashboard_etl_menu.html:17
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:9
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:17
 #, fuzzy
 #| msgid "ETL - Extract, Transform & Load"
 msgid "Extract, Transform & Load"
 msgstr "Extrae, Transforma y Carga"
 
-#: gvsigol_plugin_etl/templates/dashboard_etl_menu.html:15
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:15
 msgid "Plugins"
 msgstr ""
 
-#: gvsigol_plugin_etl/templates/etl.html:16
+#: gvsigol_plugin_geoetl/templates/etl.html:16
 msgid "ETL - Extract, Transform & Load"
 msgstr "ETL - Extrae, Transforma y Carga"
 
-#: gvsigol_plugin_etl/templates/etl.html:19
+#: gvsigol_plugin_geoetl/templates/etl.html:19
 msgid "Inputs"
 msgstr "Entradas"
 
-#: gvsigol_plugin_etl/templates/etl.html:26
+#: gvsigol_plugin_geoetl/templates/etl.html:28
 msgid "Transformers"
 msgstr "Transformadores"
 
-#: gvsigol_plugin_etl/templates/etl.html:28
+#: gvsigol_plugin_geoetl/templates/etl.html:30
+msgid "Calculator"
+msgstr "Calculador"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:31
+msgid "Counter"
+msgstr "Contador"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:32
 msgid "Create Attribute"
 msgstr "Crea Atributo"
 
-#: gvsigol_plugin_etl/templates/etl.html:29
+#: gvsigol_plugin_geoetl/templates/etl.html:33
 msgid "Filter"
 msgstr "Filtro"
 
-#: gvsigol_plugin_etl/templates/etl.html:30
+#: gvsigol_plugin_geoetl/templates/etl.html:34
 msgid "Join"
 msgstr "Unión"
 
-#: gvsigol_plugin_etl/templates/etl.html:31
+#: gvsigol_plugin_geoetl/templates/etl.html:35
 msgid "Keep Attribute"
 msgstr "Mantén Atributo"
 
-#: gvsigol_plugin_etl/templates/etl.html:32
+#: gvsigol_plugin_geoetl/templates/etl.html:36
 msgid "Modify Value"
 msgstr "Modifica Valor"
 
-#: gvsigol_plugin_etl/templates/etl.html:33
+#: gvsigol_plugin_geoetl/templates/etl.html:37
 msgid "Remove Attribute"
 msgstr "Elimina Atributo"
 
-#: gvsigol_plugin_etl/templates/etl.html:34
+#: gvsigol_plugin_geoetl/templates/etl.html:38
 msgid "Rename Attribute"
 msgstr "Renombra Atributo"
 
-#: gvsigol_plugin_etl/templates/etl.html:39
+#: gvsigol_plugin_geoetl/templates/etl.html:39
+msgid "Reproject"
+msgstr "Reproyectar"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:44
 msgid "Outputs"
 msgstr "Salidas"
