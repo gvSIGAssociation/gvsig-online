@@ -3103,40 +3103,39 @@ def get_datatable_data(request):
         recordsTotal = 0
         recordsFiltered = 0
 
-        encoded_property_name = property_name.encode('utf-8')
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
-        aux_encoded_property_name = ' '
+        aux_property_name = ' '
         sortby_field = None
         if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
             attributes = definition['featureType']['attributes']['attribute']
             if isinstance(attributes, list):
                 for attribute in attributes:
-                    aux_encoded_property_name += attribute['name'] + ' '
+                    aux_property_name += attribute['name'] + ' '
                     if not sortby_field and not 'jts.geom' in attribute['binding']:
                         sortby_field = attribute['name']
             else:
                 attribute = attributes
-                aux_encoded_property_name += attribute['name'] + ' '
+                aux_property_name += attribute['name'] + ' '
                 if not sortby_field and not 'jts.geom' in attribute['binding']:
                     sortby_field = attribute['name']
 
-        num_fields = encoded_property_name.split(',').__len__()
+        num_fields = property_name.split(',').__len__()
         found = -1
         idx = 0
         while found == -1 and num_fields - 1 >= idx:
             if not sortby_field:
-                sortby_field = encoded_property_name.split(',')[idx]
-            found = aux_encoded_property_name.find(' ' + sortby_field + ' ')
+                sortby_field = property_name.split(',')[idx]
+            found = aux_property_name.find(' ' + sortby_field + ' ')
             idx = idx + 1
-        encoded_property_name = aux_encoded_property_name.strip().replace(' ',',')
+        property_name = aux_property_name.strip().replace(' ',',')
 
         params = json.loads(layer.datastore.connection_params)
         if not sortby_field:
-            sortby_field = encoded_property_name.split(',')[0]
+            sortby_field = property_name.split(',')[0]
 
         if sortby_field == 'wkb_geometry' and num_fields > 1:
-            sortby_field = encoded_property_name.split(',')[1]
+            sortby_field = property_name.split(',')[1]
 
         '''
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
@@ -3159,7 +3158,7 @@ def get_datatable_data(request):
                     'OUTPUTFORMAT': 'application/json',
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
-                    'PROPERTYNAME': encoded_property_name
+                    'PROPERTYNAME': property_name
                 }
 
                 if sortby_field != 'wkb_geometry':
@@ -3176,7 +3175,7 @@ def get_datatable_data(request):
                 properties = properties_with_type.split(',')
                 encoded_value = search_value.encode('ascii', 'replace')
 
-                geoserver_fields = encoded_property_name.split(',')
+                geoserver_fields = property_name.split(',')
                 raw_search_cql = '('
                 for p in properties:
                     if p.split('|')[0] != 'id' and p.split('|')[0] in geoserver_fields:
@@ -3204,7 +3203,7 @@ def get_datatable_data(request):
                     'OUTPUTFORMAT': 'application/json',
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
-                    'PROPERTYNAME': encoded_property_name
+                    'PROPERTYNAME': property_name
                 }
                 if sortby_field != 'wkb_geometry':
                     values['SORTBY'] = sortby_field
@@ -3710,17 +3709,17 @@ def _describeFeatureType(layer, skip_pks):
         if skip_pks == 'true':        
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
-            aux_encoded_property_name = ''
+            aux_property_name = ''
             if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
                 attributes = definition['featureType']['attributes']['attribute']
                 if isinstance(attributes, list):
                     for attribute in attributes:
-                        aux_encoded_property_name += attribute['name'] + ' '
+                        aux_property_name += attribute['name'] + ' '
                 else:
                     attribute = attributes
-                    aux_encoded_property_name += attribute['name'] + ' '
+                    aux_property_name += attribute['name'] + ' '
 
-            names = aux_encoded_property_name.split(' ');
+            names = aux_property_name.split(' ');
             layer_defs_aux = []
             for layer_def in layer_defs:
                 if layer_def.get('name') in names:
