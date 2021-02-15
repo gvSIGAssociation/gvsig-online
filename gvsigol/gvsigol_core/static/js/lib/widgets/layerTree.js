@@ -1982,8 +1982,8 @@ layerTree.prototype.zoomToLayer = function(layer) {
 	}
 	
 	var layer_name = layer.layer_name;
-
-	var url = layer.wms_url+'?request=GetCapabilities&service=WMS';
+	
+	var url = layer.wms_url.split("?")[0]+'?request=GetCapabilities&service=WMS';
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
 		   var result = parser.read(response);
