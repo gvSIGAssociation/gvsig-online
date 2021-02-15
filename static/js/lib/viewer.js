@@ -85,8 +85,9 @@ viewer.core = {
     				'REQUEST': 'GetCapabilities'
     			},
     			async: true,
-    			//dataType: 'jsonp',
-    			//jsonpCallback: "authenticateCallback",
+    			xhrFields: {
+					withCredentials: true
+			   	},
     			method: 'GET',
     			headers: {
     				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
@@ -275,34 +276,23 @@ viewer.core = {
 				var time = 0;
 				var pid;
 				var _this = this;
+				
+				var eLayer = null;
+				self.map.getLayers().forEach(function(layer){
+					if (layer.layer_name == _this.layer_name) {
+						eLayer = layer;
+					}						
+				}, _this);
+
+				self._setTileLoadError(false, eLayer);
 				pid = setInterval(function() {
 					if (time < externalLayer['timeout']) {
 						time += 1000;
 					} else {
 						if (!_this.loadend) {
-							var eLayer = null;
 							clearInterval(pid);
-							self.map.getLayers().forEach(function(layer){
-								if (layer.layer_name == _this.layer_name) {
-									eLayer = layer;
-								}						
-							}, _this);
-							
 							if (eLayer) {
-								if (eLayer.baselayer) {
-									$('#' + eLayer.id).parent().css('color', '#ff0000');
-									$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-									$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-									$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-									
-								} else {
-									$('#' + eLayer.id).parent().css('color', '#ff0000');
-									$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-									$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-									$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-									
-								}
-								self.map.removeLayer(eLayer);
+								self._setTileLoadError(true, eLayer);
 							}
 						}
 	
@@ -324,20 +314,7 @@ viewer.core = {
 				
 				if (eLayer) {
 					if (this.getUrls()[0] == eLayer.cached_url) {
-						if (eLayer.baselayer) {
-							$('#' + eLayer.id).parent().css('color', '#ff0000');
-							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-							
-						} else {
-							$('#' + eLayer.id).parent().css('color', '#ff0000');
-							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-							
-						}
-						self.map.removeLayer(eLayer);
+						self._setTileLoadError(true, eLayer);
 						
 					} else {
 						if (eLayer.cached && eLayer.cached_url) {
@@ -345,20 +322,7 @@ viewer.core = {
 							this.updateParams({'LAYERS': eLayer.layer_name, 'FORMAT': eLayer.format, 'VERSION': eLayer.version, 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
 							
 						} else {
-							if (eLayer.baselayer) {
-								$('#' + eLayer.id).parent().css('color', '#ff0000');
-								$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-								$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-								$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-								
-							} else {
-								$('#' + eLayer.id).parent().css('color', '#ff0000');
-								$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-								$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-								$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-								
-							}
-							self.map.removeLayer(eLayer);
+							self._setTileLoadError(true, eLayer);
 						}
 					}
 				}
@@ -432,34 +396,24 @@ viewer.core = {
 					var time = 0;
 					var pid;
 					var _this = this;
+
+					var eLayer = null;
+					self.map.getLayers().forEach(function(layer){
+						if (layer.layer_name == _this.layer_name) {
+							eLayer = layer;
+						}						
+					}, _this);
+
+					self._setTileLoadError(false, eLayer);
+
 					pid = setInterval(function() {
 						if (time < externalLayer['timeout']) {
 							time += 1000;
 						} else {
 							if (!_this.loadend) {
-								var eLayer = null;
 								clearInterval(pid);
-								self.map.getLayers().forEach(function(layer){
-									if (layer.layer_name == _this.layer_name) {
-										eLayer = layer;
-									}						
-								}, _this);
-								
 								if (eLayer) {
-									if (eLayer.baselayer) {
-										$('#' + eLayer.id).parent().css('color', '#ff0000');
-										$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-										$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-										$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-										
-									} else {
-										$('#' + eLayer.id).parent().css('color', '#ff0000');
-										$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-										$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-										$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-										
-									}
-									self.map.removeLayer(eLayer);
+									self._setTileLoadError(true, eLayer);
 								}
 							}
 		
@@ -480,20 +434,7 @@ viewer.core = {
 					}, this);
 					
 					if (eLayer) {
-						if (eLayer.baselayer) {
-							$('#' + eLayer.id).parent().css('color', '#ff0000');
-							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-							
-						} else {
-							$('#' + eLayer.id).parent().css('color', '#ff0000');
-							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
-							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
-							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-							
-						}
-						self.map.removeLayer(eLayer);
+						self._setTileLoadError(true, eLayer);
 					}
 					
 					
@@ -743,40 +684,28 @@ viewer.core = {
 				var time = 0;
 				var pid;
 				var _this = this;
+
+				var iLayer = null;
+				self.map.getLayers().forEach(function(layer){
+					if (layer.layer_name) {
+						if (layer.layer_name === _this.layer_name) {
+							iLayer = layer;
+						}
+					}
+											
+				}, _this);
+				self._setTileLoadError(false, iLayer);
+
 				pid = setInterval(function() {
 					if (time < layerConf.timeout) {
 						time += 1000;
 					} else {
 						if (!_this.loadend) {
-							var iLayer = null;
 							clearInterval(pid);
-							self.map.getLayers().forEach(function(layer){
-								if (layer.layer_name) {
-									if (layer.layer_name === _this.layer_name) {
-										iLayer = layer;
-									}
-								}
-														
-							}, _this);
-							
 							if (iLayer) {
-								if (iLayer.baselayer) {
-									$('#' + iLayer.id).parent().css('color', '#ff0000');
-									$('#' + iLayer.id).parent().children('input').prop( "checked", false );
-									$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
-									$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-									
-								} else {
-									$('#' + iLayer.id).parent().css('color', '#ff0000');
-									$('#' + iLayer.id).parent().children('input').prop( "checked", false );
-									$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
-									$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-									
-								}
-								console.log("removing layer");
-								console.log(iLayer);
-								// self.map.removeLayer(iLayer);
+								self._setTileLoadError(true, iLayer);
 							}
+
 						}
 	
 					}
@@ -802,17 +731,32 @@ viewer.core = {
 					}						
 				}, this);								
 				if (iLayer) {
-					$('#' + iLayer.id).parent().css('color', '#ff0000');
-					$('#' + iLayer.id).parent().children('input').prop( "checked", false );
-					$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
-					$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
-					console.log("removing layer");
-					console.log(iLayer);
-					// self.map.removeLayer(iLayer);
+					self._setTileLoadError(true, iLayer);
 				}								
 			});						
 		}
 	},
+
+	_setTileLoadError: function(tileLoadError, layer){
+		/*$('#' + eLayer.id).parent().css('color', '#ff0000');
+		$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+		$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+		var exclamation = $('#' + eLayer.id).parent().find('i.fa-exclamation-triangle');
+		if (!exclamation) {
+			$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+		}*/
+		if (tileLoadError) {
+			$('#' + layer.id).parent().css('color', '#ff0000');
+			$('#' + layer.id).parent().children('input').prop( "checked", false );
+			//$('#' + layer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+			layer.setVisible(false);
+
+		} else {
+			$('#' + layer.id).parent().css('color', '#444');
+
+		}
+	},
+
 	//check if tile error is caused by a TileOutOfRange
 	_check_error_is_TileOutOfRange: function(tile){
 		var is_tileoutofrange;
@@ -840,6 +784,7 @@ viewer.core = {
 		});
 		return is_tileoutofrange;		
 	},
+
 	_loadLayerGroups: function() {
 		var self = this;
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
