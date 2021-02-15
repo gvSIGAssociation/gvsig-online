@@ -168,14 +168,14 @@ StyleSettings.prototype.createModal = function(e) {
 	ui += 	'<ul id="tab-menu" class="nav nav-tabs">';	
 	ui += 		'<li class="active"><a href="#point-tab" data-toggle="tab">' + gettext('Point') + '</a></li>';
 	ui += 		'<li><a href="#line-tab" data-toggle="tab">' + gettext('Line') + '</a></li>';
-	ui += 		'<li><a href="#arrow-tab" data-toggle="tab">' + gettext('Arrow') + '</a></li>';
+	//ui += 		'<li><a href="#arrow-tab" data-toggle="tab">' + gettext('Arrow') + '</a></li>';
 	ui += 		'<li><a href="#polygon-tab" data-toggle="tab">' + gettext('Polygon') + '</a></li>';
 	ui += 		'<li><a href="#text-tab" data-toggle="tab">' + gettext('Text') + '</a></li>';
 	ui += 	'</ul>';
 	ui += 	'<div id="tab-content" class="tab-content">';
 	ui += 		this.getPointTabUI();
 	ui += 		this.getLineTabUI();
-	ui += 		this.getArrowTabUI();
+	//ui += 		this.getArrowTabUI();
 	ui += 		this.getPolygonTabUI();
 	ui += 		this.getTextTabUI();
 	ui += 	'</div>';
