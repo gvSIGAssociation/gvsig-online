@@ -3082,7 +3082,7 @@ def get_datatable_data(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_read_layer(request.user, layer):
             response = {
                 'draw': 0,
                 'recordsTotal': 0,
@@ -3660,7 +3660,7 @@ def describeFeatureType(request):
         workspace = request.POST.get('workspace')
         try:
             layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            if not utils.can_manage_layer(request.user, layer):
+            if not utils.can_read_layer(request.user, layer):
                 response = {'fields': [], 'error': 'Not authorized'}
                 return HttpResponseForbidden(response, content_type='application/json')
             skip_pks = request.POST.get('skip_pks')
