@@ -450,6 +450,7 @@ viewer.core = {
 	    		wmtsLayer.external = true;
 	    		wmtsLayer.queryable = false;
 	    		wmtsLayer.imported = false;
+				wmtsLayer.layer_name = externalLayer['name'];
 	    		wmtsLayer.infoFormat = externalLayer['infoformat'];
 	    		wmtsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
 	    		wmtsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
@@ -475,6 +476,7 @@ viewer.core = {
 				})
 			});
 			bingLayer.baselayer = baselayer;
+			bingLayer.layer_name = externalLayer['name'];
 			bingLayer.setZIndex(parseInt(externalLayer.order));
 			bingLayer.external = true;
 			bingLayer.imported = false;
@@ -500,6 +502,7 @@ viewer.core = {
     		osm.baselayer = baselayer;
     		osm.external = true;
     		osm.imported = false;
+			osm.layer_name = externalLayer['name'];
     		osm.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(osm);
 		}
@@ -517,6 +520,7 @@ viewer.core = {
     		xyz.baselayer = baselayer;
     		xyz.external = true;
     		xyz.imported = false;
+			xyz.layer_name = externalLayer['name'];
     		xyz.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(xyz);
 		}
