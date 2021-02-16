@@ -774,7 +774,7 @@ viewer.core = {
 			//	"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
 			//},
 			error: function(error){
-				if (error.responseText.indexOf("TileOutOfRange") == -1){
+				if (error.responseText && error.responseText.indexOf("TileOutOfRange") == -1){
 					is_tileoutofrange =  false;
 					//TileState.ERROR = 3
 					//tile.setState(3);
