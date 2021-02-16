@@ -513,3 +513,8 @@ RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 ALLOWED_HOST_NAMES = [##ALLOWED_HOST_NAMES##
                       ]
 
+DOCS = {
+    'URL': '##DOCS_URL##',
+    'NAME': '##DOCS_NAME##',
+    'VERSION': '##DOCS_VERSION##'
+}
