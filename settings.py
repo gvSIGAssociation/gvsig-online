@@ -123,10 +123,11 @@ finally:
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS_NAMES = ['https://localhost', 'https://host-local/']
 USE_X_FORWARDED_HOST = True
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-#GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
+GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 
 
@@ -152,14 +153,16 @@ INSTALLED_APPS = [
 
     ############# APPS ################
     'gvsigol_app_dev',
-    #'gvsigol_app_test',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
 
     ############# PLUGINS ################
     'gvsigol_plugin_catalog',
-    #'gvsigol_plugin_catastro',
+    'gvsigol_plugin_catastro',
     #'gvsigol_plugin_catastrouy',
+    'gvsigol_plugin_charts',
+    #'gvsigol_plugin_downloadman',
+    'gvsigol_plugin_draw',
     #'gvsigol_plugin_charts',
     #'gvsigol_plugin_downloadman',
     #'gvsigol_plugin_draw',
@@ -168,15 +171,20 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_emergencies',
     #'gvsigol_plugin_geocoding',
     #'gvsigol_plugin_importfromservice',
-    #'gvsigol_plugin_importvector',
+    'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
     #'gvsigol_plugin_opensea2',
     #'gvsigol_plugin_picassa',
+    #'gvsigol_plugin_regepa',
     #'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
     #'gvsigol_plugin_streetview',
     #'gvsigol_plugin_turiscan',
+    #'gvsigol_plugin_playas',
     #'gvsigol_plugin_worldwind',
+    #'gvsigol_plugin_mobileview',
+    #'gvsigol_plugin_sampledashboard',
+    #'gvsigol_plugin_samplemenubutton',
     'actstream'
 ]
 
@@ -259,7 +267,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gvsigonline_v2',
+        'NAME': 'gvsigonline',
         'USER': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
         'PASSWORD': DB_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
         'HOST': 'localhost',
@@ -289,7 +297,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': True,
+    'ENABLED': False,
     'HOST':'localhost',
     'PORT': '389',
     'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
@@ -331,8 +339,9 @@ LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
 django.conf.locale.LANG_INFO = LANG_INFO
 
 LANGUAGES = (
+    ('pt', _('Portuguese')),
     ('es', _('Spanish')),
-    ('va', _('Valencian')),
+    #('va', _('Valencian')),
     #('ca', _('Catalan')), 
     ('en', _('English')),
     #('pt', _('Portuguese')),
@@ -370,9 +379,9 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-BASE_URL = 'https://gvsigol.localhost'
-MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
-MEDIA_URL = 'https://gvsigol.localhost/media/'
+BASE_URL = 'https://localhost'
+MEDIA_ROOT = '/var/www/media/'
+MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -385,6 +394,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_librapicassa/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_picassa/static'),
+    os.path.join(BASE_DIR, "gvsigol_viewer/dist")
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -397,7 +407,7 @@ GVSIGOL_VERSION = '2.3.4'
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
     'dbport': '5432',
-    'dbname': 'gvsigonline_v2',
+    'dbname': 'gvsigonline',
     'dbuser': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -405,7 +415,7 @@ GVSIGOL_USERS_CARTODB = {
 MOSAIC_DB = {
     'host': 'localhost',
     'port': '5432',
-    'database': 'gvsigonline_v2',
+    'database': 'gvsigonline',
     'schema': 'imagemosaic',
     'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
@@ -636,5 +646,18 @@ PUSH_NOTIFICATIONS_SETTINGS = {
 }
 
 RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
+
+DOCS = {
+    'URL': 'http://localhost/media/docs',
+    'NAME': 'manual.pdf',
+    'VERSION': 'v1'
+}
+LAYERS_ROOT = 'layer_downloads'
+ALLOWED_HOST_NAMES = ['http://localhost']
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
 
 ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
