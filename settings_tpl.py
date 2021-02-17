@@ -515,6 +515,5 @@ ALLOWED_HOST_NAMES = [##ALLOWED_HOST_NAMES##
 
 DOCS = {
     'URL': '##DOCS_URL##',
-    'NAME': '##DOCS_NAME##',
-    'VERSION': '##DOCS_VERSION##'
+    'NAME': '##DOCS_NAME##'
 }
