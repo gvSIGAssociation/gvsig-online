@@ -267,27 +267,22 @@ function configure() {
 		echo "WARNING: ALLOWED_HOST_NAMES is not defined."
 	fi
 	grep -rl "##ALLOWED_HOST_NAMES##"  | xargs sed -i "s ##ALLOWED_HOST_NAMES## $ALLOWED_HOST_NAMES g"
-
+	
+	#docs 
 	echo "INFO: Replace DOCS_URL"
 	if [ -z $DOCS_URL ]; then
-		echo "WARNING: DOCS_URL is not defined using, http://localhost/media/docs ."	
-		DOCS_URL="http://localhost/media/docs"	
+		echo "WARNING: DOCS_URL is not defined using, /docs ."	
+		DOCS_URL="/docs"	
 	fi
 	grep -rl "##DOCS_URL##"  | xargs sed -i "s ##DOCS_URL## $DOCS_URL g"
 
 	echo "INFO: Replace DOCS_NAME"
 	if [ -z $DOCS_NAME ]; then
-		echo "WARNING: DOCS_NAME is not defined using, manual.pdf ."	
-		DOCS_NAME="manual.pdf"	
+		echo "WARNING: DOCS_NAME is not defined using, user_manual.pdf ."	
+		DOCS_NAME="user_manual.pdf"	
 	fi
 	grep -rl "##DOCS_NAME##"  | xargs sed -i "s ##DOCS_NAME## $DOCS_NAME g"
 
-	echo "INFO: Replace DOCS_VERSION"
-	if [ -z $DOCS_VERSION ]; then
-		echo "WARNING: DOCS_VERSION is not defined using, v1 ."	
-		DOCS_VERSION="v1"	
-	fi
-	grep -rl "##DOCS_VERSION##"  | xargs sed -i "s ##DOCS_VERSION## $DOCS_VERSION g"
 }
 
 function move_template() {
