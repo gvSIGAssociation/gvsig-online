@@ -703,7 +703,7 @@ try:
             GOL_APP_SETTINGS = importlib.import_module(app+".settings")
             break
 except:
-    logger.exception("App settings are not available")
+    logger.warning("App settings are not available")
     pass
 
 def get_app_setting(key, default=None):
