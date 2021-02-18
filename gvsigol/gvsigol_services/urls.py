@@ -26,7 +26,6 @@ urlpatterns = [
     url(r'^layer_list/$', services_views.layer_list, name='layer_list'),
     url(r'^layer_add/$', services_views.layer_add, name='layer_add'),
     url(r'^layer_add/(?P<layergroup_id>[0-9]+)/$', services_views.layer_add_with_group, name='layer_add_with_group'),
-    url(r'^layer_permissions/(?P<layer_id>[0-9]+)/$', services_views.layer_permissions_update, name='layer_permissions_update'),
     url(r'^get_resources_from_workspace/$', services_views.get_resources_from_workspace, name='get_resources_from_workspace'),
     url(r'^layer_update/(?P<layer_id>[0-9]+)/$', services_views.layer_update, name='layer_update'),
     url(r'^layer_delete/(?P<layer_id>[0-9]+)/$', services_views.layer_delete, name='layer_delete'),

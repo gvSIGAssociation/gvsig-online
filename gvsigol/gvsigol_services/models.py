@@ -162,6 +162,7 @@ class Layer(models.Model):
     title = models.CharField(max_length=150)
     abstract = models.CharField(max_length=5000, null=True, blank=True)
     type = models.CharField(max_length=150)
+    public = models.BooleanField(default=False) # the layer can be read by anyone, even anonymous users
     visible = models.BooleanField(default=True)
     queryable = models.BooleanField(default=True)
     cached = models.BooleanField(default=False)

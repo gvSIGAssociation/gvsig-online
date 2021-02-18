@@ -50,8 +50,12 @@ logger = logging.getLogger("gvsigol")
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
-    read_groups = LayerReadGroup.objects.filter(layer=layer)
-    write_groups = LayerWriteGroup.objects.filter(layer=layer)
+    if layer:
+        read_groups = LayerReadGroup.objects.filter(layer=layer)
+        write_groups = LayerWriteGroup.objects.filter(layer=layer)
+    else:
+        read_groups = []
+        write_groups = []
 
     groups = []
     for g in groups_list:
@@ -124,8 +128,8 @@ def can_read_layer(user, layer):
 
         if user.is_superuser:
             return True
-        if LayerReadGroup.objects.filter(layer=layer).count() == 0:
-            return True # layer is public
+        if layer.public:
+            return True
         if isinstance(user, AnonymousUser):
             return False
         if UserGroupUser.objects.filter(user=user, user_group__layerreadgroup__layer=layer).count() > 0:
@@ -768,3 +772,69 @@ def update_feat_version(layer, featid):
     except:
         logger.exception("Error updating feature version")
     return None, None
+
+def set_layer_permissions(layer, is_public, assigned_read_roups, assigned_write_groups):
+    layer.public = is_public
+    layer.save()
+    agroup = UserGroup.objects.get(name__exact='admin')
+
+    read_groups = []
+    write_groups = []
+
+    # clean existing groups and assign them again if necessary
+    LayerReadGroup.objects.filter(layer=layer).delete()
+    if len(assigned_read_roups) > 0:
+        lrag = LayerReadGroup()
+        lrag.layer = layer
+        lrag.group = agroup
+        lrag.save()
+        read_groups.append(agroup)
+    for group in assigned_read_roups:
+        try:
+            group = UserGroup.objects.get(id=group)
+            lrg = LayerReadGroup()
+            lrg.layer = layer
+            lrg.group = group
+            lrg.save()
+            read_groups.append(group)
+        except:
+            pass
+
+    LayerWriteGroup.objects.filter(layer=layer).delete()
+    if not layer.type.startswith('c_'):
+        lwag = LayerWriteGroup()
+        lwag.layer = layer
+        lwag.group = agroup
+        lwag.save()
+        write_groups.append(agroup)
+    for group in assigned_write_groups:
+        try:
+            group = UserGroup.objects.get(id=group)
+            lwg = LayerWriteGroup()
+            lwg.layer = layer
+            lwg.group = group
+            lwg.save()
+            write_groups.append(group)
+        except:
+            pass
+            
+    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+    gs.setLayerDataRules(layer, read_groups, write_groups)
+
+def get_checked_usergroups_from_user_input(read_groups, write_groups):
+    groups_list = UserGroup.objects.all()
+    groups = []
+    for g in groups_list:
+        if g.name != 'admin' and g.name != 'public':
+            group = {}
+            for lrg in read_groups:
+                if lrg == g.id:
+                    group['read_checked'] = True
+            for lwg in write_groups:
+                if lwg == g.id:
+                    group['write_checked'] = True
+            group['id'] = g.id
+            group['name'] = g.name
+            group['description'] = g.description
+            groups.append(group)
+    return groups

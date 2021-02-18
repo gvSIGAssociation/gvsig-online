@@ -5,16 +5,16 @@
 {% block content %}
 
 {% if redirect_to_layergroup %}
-<form role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect">
+<form id="layer-update-form" role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect">
 {% else %}
-<form role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
+<form id="layer-update-form" role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
 {% endif %}	
 <div class="row">
 	<div class="col-md-12">
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
-					<button id="dash-submit-button" type="submit" class="btn btn-default btn-sm">{% trans "Next" %}</button>					
+					<button id="dash-submit-button" class="btn btn-default btn-sm">{% trans "Save" %}</button>
 				</div>
 			</div>	
 			<div class="row" style="padding-left: 30px;">
@@ -37,6 +37,7 @@
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
           	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
+          	<li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
           	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
         </ul>
@@ -237,7 +238,9 @@
 					</div>
 				</div>
 		    </div>
-		    
+			<div class="tab-pane" id="tab-layer-permissions">
+				{% include "select_layer_permissions.html" %}
+			</div>
 		    <div class="tab-pane" id="tab-layer-metadata">
           		<div class="row">
 					<div class="col-md-12">
@@ -455,7 +458,35 @@ $('#submenu-layers').addClass("active");
 	};
 
 	$(document).ready(function() {
-		
+		var searcheableReadList = new List('read-list-box', {
+				valueNames: ['product-title'],
+				listClass:'list',
+				searchClass: 'search',
+				page: 5,
+				pagination: false
+			});
+		var searcheableWriteList = new List('write-list-box', {
+				valueNames: ['product-title'],
+				listClass:'list',
+				searchClass: 'search',
+				page: 5,
+				pagination: false
+			});
+			
+		$("#dash-submit-button").click(function(e){
+			for(var i=0; i<searcheableReadList.items.length; i++){
+				var item = searcheableReadList.items[i];
+				item.show();
+			}
+			for(var i=0; i<searcheableWriteList.items.length; i++){
+				var item = searcheableWriteList.items[i];
+				item.show();
+			}
+			$(".layer-read-checkbox").prop( "disabled", false)
+			$("#layer-update-form").submit();
+			return false; 
+		});
+
 		var detailedInfoHTML = document.getElementById('detailed_info_html');
 		if ('False' == '{{html|safe}}') {
 			if (fileExists(HTML_PATH + 'detailed_info.html')) {
@@ -567,7 +598,7 @@ $('#submenu-layers').addClass("active");
 			});
 		});
 		{% endif %}
-
+		handleIsPublicResourceCheckbox(searcheableReadList);
 	});
 </script>
 {% endblock %}
