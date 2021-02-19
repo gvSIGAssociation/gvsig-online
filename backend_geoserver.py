@@ -1838,6 +1838,11 @@ class Geoserver():
         self.setWfsTransactionRules()
 
     def setLayerDataRules(self, layer, read_groups, write_groups):
+        self.setLayerReadRules(layer, read_groups)
+        self.setLayerWriteRules(layer, write_groups)
+        self.setWfsTransactionRules()
+    
+    def setLayerReadRules(self, layer, read_groups):
         url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
         if layer.public:
             who_can_read = [ "*" ]
@@ -1846,8 +1851,6 @@ class Geoserver():
                 who_can_read = [ "ROLE_"+ g.name.upper() for g in read_groups]
             else:
                 who_can_read = [ "ROLE_ADMIN"]
-        who_can_write = [ "ROLE_"+ g.name.upper() for g in write_groups ]
-        
         read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
         read_rule_roles = ",".join(who_can_read)
         rules = DataRule.objects.filter(path=read_rule_path)
@@ -1865,7 +1868,10 @@ class Geoserver():
             # We could delete and then add, but it is safer in this way (the layer remains protected in every instant)
             # It also safe if the geoserver/gvsigol rules get incoherent
             result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
-
+    
+    def setLayerWriteRules(self, layer, write_groups):
+        url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
+        who_can_write = [ "ROLE_"+ g.name.upper() for g in write_groups ]
         write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
         # now add the rule if necessary
         if len(who_can_write)>0:
@@ -1890,16 +1896,7 @@ class Geoserver():
             self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/layers/" + write_rule_path, verify=False, auth=(self.user, self.password))
             rules = DataRule.objects.filter(path=write_rule_path)
             rules.delete()
-        self.setWfsTransactionRules()
-
-    def deleteLayerRules(self, layer):
-        url = self.rest_catalog.get_service_url() + "/security/acl/layers/"
-        read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
-        self.rest_catalog.get_session().delete(url + read_rule_path, verify=False, auth=(self.user, self.password))
-        write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
-        self.rest_catalog.get_session().delete(url + write_rule_path, verify=False, auth=(self.user, self.password))
-        self.setWfsTransactionRules()
-
+    
     def setWfsTransactionRules(self):
         write_groups_query = LayerWriteGroup.objects.all()
         transaction_roles = [ "ROLE_"+ g.group.name.upper() for g in write_groups_query ]
@@ -1911,7 +1908,14 @@ class Geoserver():
             result = self.rest_catalog.get_session().put(services_url, json=service, verify=False, auth=(self.user, self.password))
             if result.status_code == 409:
                 self.rest_catalog.get_session().post(services_url, json=service, verify=False, auth=(self.user, self.password))
-
+    
+    def deleteLayerRules(self, layer):
+        url = self.rest_catalog.get_service_url() + "/security/acl/layers/"
+        read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
+        self.rest_catalog.get_session().delete(url + read_rule_path, verify=False, auth=(self.user, self.password))
+        write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
+        self.rest_catalog.get_session().delete(url + write_rule_path, verify=False, auth=(self.user, self.password))
+        self.setWfsTransactionRules()
 
     def clearCache(self, ws, layer):
         try:
