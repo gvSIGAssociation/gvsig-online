@@ -41,7 +41,7 @@
               		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
               		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
               		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
-              		<li><a  data-id="3" href="#tab-project-usergroups" data-toggle="tab">{% trans "User groups" %}</a></li>
+              		<li><a  data-id="3" href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>
               		<li><a  data-id="4" href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>
             	</ul>
             	
@@ -66,18 +66,6 @@
 										<input name="project-logo-link" id="project-logo-link" type="text" class="form-control" value="{{project.logo_link}}">
 									</div>
 								</div>
-								
-								<div class="row">
-									<div class="col-md-3 form-group">
-										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
-										{% if project.is_public %}
-										<input type="checkbox" name="is_public"  id="is_public" checked/>
-										{% else %}
-										<input type="checkbox" name="is_public"  id="is_public"/>
-										{% endif %}								
-									</div>
-								</div>
-								
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="project-title">{% trans "Title" %}</label>
@@ -94,7 +82,7 @@
 								
 								<div class="row">
 									<div class="col-md-6 form-group">
-										<label for="is_public">{% trans "Toc panel presentation" %}</label>
+										<label for="id_toc_mode">{% trans "Toc panel presentation" %}</label>
 										<select class="form-control" id="id_toc_mode" name="toc_mode" tabindex="-1" aria-hidden="true">
 											{% if project.toc_mode == "toc_hidden" %}
 												<option value="toc_hidden" selected>{% trans "Toc hidden" %}</option>
@@ -341,10 +329,26 @@
               			<div class="row">
 							<div class="col-md-12">
 								<div id="user-list-box" class="box searchable-list-box">
-									<div class="box-header">
-										<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" /></div>
+									<div class="box-header" style="padding-bottom:0px">
+										<label for="is_public" class="form-label" title="{% trans 'Project will be readable by everyone if public' %}">
+											<span>{% trans "Is public?" %}</span>
+											<input style="position:absolute; margin-left: 10px" type="checkbox" name="is_public" id="is_public" {% if resource_is_public %}checked {% endif %}/>
+										</label>
+										<div class="form-horizontal">
+											<div class="form-group" style="margin-left: 0px; margin-right: 0px">
+											<div class="col-md-6 ">
+											<label class="control-label">{% trans "Allow access to the project for the following user groups:" %}</label>
+											</div>
+											<div class="col-md-4 ">
+											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+											</div>
+											<div class="col-md-2 ">
+											<button id="extend-to-lyrs-btn" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs margin-r-5"></i>{% trans "Extend to layers" %}</button>
+											</div>
+											</div>
+										</div>
 									</div>
-									<div class="box-body">
+									<div class="box-body" style="padding-top: 0px">
 										<ul class="products-list product-list-in-box list">
 											{% for group in groups %}
 											<li class="item">
@@ -353,12 +357,12 @@
 												</div>
 												<div class="product-info">
 													<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
-														<div class="checkbox pull-right">													
+														<div class="checkbox pull-right">
 															<label>
 																{% if group.checked %}
-																	<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
 																{% else %}
-																	<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
 																{% endif %}
 															</label>
 														</div>
@@ -524,6 +528,27 @@
 				<div class="modal-footer">
 					<button id="button-add-layer-group-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
 					<button id="button-add-layer-group-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-extend-to-layers" tabindex="-1" role="dialog" aria-labelledby="extendToLayersTitle">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="extendToLayersTitle">{% trans "Extend project permissions to layers" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% trans "This action will give the selected user groups permission to read all the layers included in this project." %}</p>
+					<p>{% trans "Note: additional permissions existing on the layer will not be removed." %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-extend-to-layers-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-extend-to-layers-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
 				</div>
 			</div>
 		</div>
@@ -955,17 +980,17 @@
 		});
 		
 		$(".save_button").click(function(e){
-    		e.preventDefault(); // prevents default
-    		for(var i=0; i<searcheableList.items.length; i++){
-    			var item = searcheableList.items[i];
-    			item.show();
-    		}
-    		for(var i=0; i<searcheableList2.items.length; i++){
-    			var item = searcheableList2.items[i];
-    			item.show();
-    		}
-    		
-	  		
+			e.preventDefault(); // prevents default
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				item.show();
+			}
+			for(var i=0; i<searcheableList2.items.length; i++){
+				var item = searcheableList2.items[i];
+				item.show();
+			}
+			$(".project-usergroup-checkbox").prop( "disabled", false)
+			
 			var toc = {}
 			var root = $('#toc');
 			var groupList = root.children();
@@ -1075,14 +1100,12 @@
 		});
 	  	
 		$('#project-form').submit(function() {
-			console.log('#project-form');
 			$("body").overlay();
 			var minx_4326 = parseFloat($("#extent4326_minx").val());
 			var maxx_4326 = parseFloat($("#extent4326_maxx").val());
 			var miny_4326 = parseFloat($("#extent4326_miny").val());
 			var maxy_4326 = parseFloat($("#extent4326_maxy").val());
 			if (isNaN(minx_4326) || isNaN(maxx_4326) || isNaN(miny_4326) || isNaN(maxy_4326)) {
-				console.log('isNaN');
 				// if the user did not set a valid extent, get extent for map view
 				var extent = map.getView().calculateExtent(map.getSize());
 				var normalizedExtent = getCanonicalExtent(extent, epsg3857Bounds);
@@ -1267,7 +1290,78 @@
     			var item = visibleItems[i].show();
     		}
 			
-	  	});
+		});
+		
+		function handleIsPublicResourceCheckbox(searcheableList) {
+			console.log(searcheableList);
+			// inital status
+			$(".project-usergroup-checkbox").prop( "disabled", $("#is_public").is(":checked"));
+			// monitor changes
+			$("#is_public").change(function () {
+				if (this.checked) {
+					$(".project-usergroup-checkbox").prop( "disabled", true);
+				}
+				else {
+					$(".project-usergroup-checkbox").prop( "disabled", false);
+				}
+			});
+			// apply disabled status on searcheableReadList page changes
+			searcheableList.on('updated', function() {
+				console.log("updated");
+				$(".project-usergroup-checkbox").prop( "disabled", $("#is_public").is(":checked"));
+			});
+		}
+
+		handleIsPublicResourceCheckbox(searcheableList);
+		$("#button-extend-to-layers-accept").click(function(){
+			var checkedUsergroups = [];
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				var checkbox = $(item.elm).find("input")[0];
+				if (checkbox.checked) {
+					checkedUsergroups.push(checkbox.id);
+				}
+			}
+			var checkedLayergroups = [];
+			for(var i=0; i<searcheableList2.items.length; i++){
+				var item = searcheableList2.items[i];
+				var checkbox = $(item.elm).find("input:checkbox")[0];
+				if (checkbox.checked) {
+					checkedLayergroups.push(checkbox.dataset.id);
+				}
+			}
+			data = {
+				"usergroups": checkedUsergroups,
+				"layergroups": checkedLayergroups,
+				"is_public": $("#is_public").is(":checked")
+			};
+			$.ajax({
+				type: "POST",
+				async: true,
+				url: "{% url 'extend_permissions_to_layer' %}",
+				data: data,
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$("#modal-extend-to-layers").modal('hide');
+					if (response.status == "success") {
+						$("#modal-extend-to-layers").modal('hide');
+						messageBox.show("info", "{% trans 'Success: Project permissions were applied to layers.' %}");
+					}
+					else {
+						console.log(response);
+						messageBox.show("error", "{% trans 'Error: Permissions could not be extended to layers.' %}");
+					}
+				},
+				error :function(response){
+					console.log(response);
+					$("#modal-extend-to-layers").modal('hide');
+					messageBox.show("error", "{% trans 'Error: Permissions could not be extended to layers.' %}");
+				}
+			});
+		});
+		
 	});
 </script>
 {% endblock %}
