@@ -27,4 +27,6 @@ urlpatterns = [
     url(r'^public_project_load/(?P<project_name>.*)/$', core_views.load_public_project, name='public_project_load'),
     url(r'^project_load/(?P<project_name>.*)/$', core_views.load_project, name='project_load'),
     url(r'^project_clone/(?P<pid>[0-9]+)/$', core_views.project_clone, name='project_clone'),
+    url(r'^project_permissions_to_layers/(?P<pid>[0-9]+)/$', core_views.project_permissions_to_layer, name='project_permissions_to_layers'),
+    url(r'^extend_permissions_to_layer/$', core_views.extend_permissions_to_layer, name='extend_permissions_to_layer'),
 ]
