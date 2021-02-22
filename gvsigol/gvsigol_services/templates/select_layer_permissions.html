@@ -4,14 +4,14 @@
 					<div class="col-md-12">
 						<div id="read-list-box" class="box searchable-list-box">
 							<div class="box-header">
-								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Assign permissions on the layer for the following groups" %}</h3>
+								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Give the selected groups permissions to read or write the layer" %}</h3>
 								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
 								</div>
 								<div class="col-md-12">
 								<div class="checkbox">
 									<label title="{% trans 'Layer will be readable by everyone if public' %}">
 										<input type="checkbox" name="resource-is-public" id="resource-is-public" {% if resource_is_public %}checked {% endif %}/>
-										<span>{% trans "Public layer" %}</span>
+										<span>{% trans "Is public" %}</span>
 									</label>
 								</div>
 								</div>

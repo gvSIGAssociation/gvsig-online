@@ -2,13 +2,11 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-19 15:18+0000\n"
+"POT-Creation-Date: 2021-02-22 11:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -335,16 +333,12 @@ msgstr ""
 "subdirectori."
 
 #: gvsigol_services/backend_geoserver.py:1711
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
-#| "underscore (_). Subsequent characters can be letters, underscores or "
-#| "numbers"
+#, python-brace-format
 msgid ""
 "Invalid field name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nom de la capa no vàlid: '{value}'. Els identificadors han de començar amb "
+"Nom de la camp no vàlid: '{value}'. Els identificadors han de començar amb "
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o nombres"
 
@@ -974,11 +968,11 @@ msgstr ""
 #: gvsigol_services/migrations/0041_golfunc_geocoder_inv_cartociudad_v2.py:19
 #: gvsigol_services/migrations/0042_golfunc_geocoder_inv_cartociudad_v3.py:19
 msgid "Inverse Geocoder Cartociudad"
-msgstr ""
+msgstr "Geocodificación inversa Cartociudad"
 
 #: gvsigol_services/migrations/0045_golfunc_geocoder_inv_icv_gva_es.py:59
 msgid "Inverse Geocoder ICV"
-msgstr ""
+msgstr "Geocodificació inversa ICV"
 
 #: gvsigol_services/templates/base_layer_add.html:12
 #: gvsigol_services/templates/datastore_add.html:12
@@ -1415,7 +1409,7 @@ msgstr "Seleccionar arxiu"
 #: gvsigol_services/templates/datastore_add.html:72
 #: gvsigol_services/templates/datastore_update.html:73
 msgid "Test connection"
-msgstr ""
+msgstr "Provar connexió"
 
 #: gvsigol_services/templates/datastore_add.html:79
 #: gvsigol_services/templates/datastore_update.html:88
@@ -1442,6 +1436,8 @@ msgstr "El magatzem de dades i els recursos associats a ell seran eliminats"
 #: gvsigol_services/templates/datastore_list.html:69
 msgid "Check this option to remove the schema associated with the datastore"
 msgstr ""
+"Marcar aquesta opció per a esborrar l'esquema associat amb el magatzem de "
+"dades"
 
 #: gvsigol_services/templates/datastore_list.html:116
 msgid "Remove datastore"
@@ -1523,7 +1519,7 @@ msgstr "Informació detallada"
 #: gvsigol_services/templates/layer_add.html:95
 #: gvsigol_services/templates/layer_update.html:112
 msgid "Timeout (miliseconds)"
-msgstr ""
+msgstr "Temps d'espera (milisegons)"
 
 #: gvsigol_services/templates/external_layer_add.html:160
 #: gvsigol_services/templates/external_layer_update.html:205
@@ -1565,7 +1561,7 @@ msgstr "Activar metaqualitat"
 #: gvsigol_services/templates/layer_create.html:259
 #: gvsigol_services/templates/layer_update.html:308
 msgid "Button title in the TOC"
-msgstr ""
+msgstr "Títol del botó en el TOC"
 
 #: gvsigol_services/templates/external_layer_add.html:184
 #: gvsigol_services/templates/external_layer_update.html:238
@@ -1573,7 +1569,7 @@ msgstr ""
 #: gvsigol_services/templates/layer_create.html:260
 #: gvsigol_services/templates/layer_update.html:309
 msgid "Button title"
-msgstr ""
+msgstr "Títol del botó"
 
 #: gvsigol_services/templates/external_layer_add.html:184
 #: gvsigol_services/templates/external_layer_update.html:238
@@ -1903,17 +1899,17 @@ msgstr "Tipus d'operació"
 #: gvsigol_services/templates/group_cache_config.html:60
 #: gvsigol_services/templates/layer_cache_config.html:60
 msgid "Seed - generate missing tiles"
-msgstr ""
+msgstr "Sembrar - generar les tessel·les que manquen"
 
 #: gvsigol_services/templates/group_cache_config.html:61
 #: gvsigol_services/templates/layer_cache_config.html:61
 msgid "Reseed - regenerate all tiles"
-msgstr ""
+msgstr "Resembrar - regenera totes les tessel·les"
 
 #: gvsigol_services/templates/group_cache_config.html:62
 #: gvsigol_services/templates/layer_cache_config.html:62
 msgid "Truncate - remove tiles"
-msgstr ""
+msgstr "Truncar - esborrar les tessel·les"
 
 #: gvsigol_services/templates/group_cache_config.html:68
 #: gvsigol_services/templates/layer_cache_config.html:68
@@ -1923,12 +1919,12 @@ msgstr ""
 #: gvsigol_services/templates/group_cache_config.html:87
 #: gvsigol_services/templates/layer_cache_config.html:87
 msgid "Zoom start"
-msgstr ""
+msgstr "Zoom d'inici"
 
 #: gvsigol_services/templates/group_cache_config.html:95
 #: gvsigol_services/templates/layer_cache_config.html:95
 msgid "Zoom stop"
-msgstr ""
+msgstr "Zoom final"
 
 #: gvsigol_services/templates/group_cache_config.html:105
 #: gvsigol_services/templates/layer_cache_config.html:105
@@ -1953,42 +1949,41 @@ msgstr ""
 #: gvsigol_services/templates/group_cache_config.html:140
 #: gvsigol_services/templates/layer_cache_config.html:140
 msgid "Refresh tasks"
-msgstr ""
+msgstr "Refrescar tasques"
 
 #: gvsigol_services/templates/group_cache_config.html:141
 #: gvsigol_services/templates/layer_cache_config.html:141
 msgid "kill all tasks"
-msgstr ""
+msgstr "Aturar totes les tasques"
 
 #: gvsigol_services/templates/group_cache_config.html:148
 #: gvsigol_services/templates/layer_cache_config.html:148
 msgid "Tiles processed"
-msgstr ""
+msgstr "Tessel·les processades"
 
 #: gvsigol_services/templates/group_cache_config.html:149
 #: gvsigol_services/templates/layer_cache_config.html:149
 msgid "Total of tiles to process"
-msgstr ""
+msgstr "Total de tessel·es a processar"
 
 #: gvsigol_services/templates/group_cache_config.html:150
 #: gvsigol_services/templates/layer_cache_config.html:150
 msgid "Total of remaining tiles"
-msgstr ""
+msgstr "Total de tesseles que manquen"
 
 #: gvsigol_services/templates/group_cache_config.html:151
 #: gvsigol_services/templates/layer_cache_config.html:151
 msgid "Task ID"
-msgstr ""
+msgstr "Identificador de tasca"
 
 #: gvsigol_services/templates/group_cache_config.html:152
 #: gvsigol_services/templates/layer_cache_config.html:152
 msgid "Task status"
-msgstr ""
+msgstr "Estat de la tasca"
 
 #: gvsigol_services/templates/layer_add.html:40
 #: gvsigol_services/templates/layer_create.html:47
 #: gvsigol_services/templates/layer_update.html:40
-#| msgid "Read permissions"
 msgid "Permissions"
 msgstr "Permisos"
 
@@ -2112,12 +2107,10 @@ msgid "Choose date field"
 msgstr "Trieu data"
 
 #: gvsigol_services/templates/layer_config.html:42
-#| msgid "Field name"
 msgid "Field management"
 msgstr "Gestió dels camps"
 
 #: gvsigol_services/templates/layer_config.html:43
-#| msgid "Field title"
 msgid "Field titles"
 msgstr "Títols dels camps"
 
@@ -2135,7 +2128,6 @@ msgid "Calculated"
 msgstr "Calculat"
 
 #: gvsigol_services/templates/layer_config.html:60
-#| msgid "Table"
 msgid "Nullable"
 msgstr "Nulable"
 
@@ -2162,20 +2154,18 @@ msgstr "Accions"
 #: gvsigol_services/templates/layer_config.html:76
 #: gvsigol_services/templates/layer_config.html:78
 msgid "Set at database level"
-msgstr ""
+msgstr "Establir a nivell de base de dades"
 
 #: gvsigol_services/templates/layer_config.html:81
 #: gvsigol_services/templates/layer_config.html:83
 msgid "Required in editing forms"
-msgstr ""
+msgstr "Requerit als formularis d'edició"
 
 #: gvsigol_services/templates/layer_config.html:115
-#| msgid "Resource name"
 msgid "Rename"
 msgstr "Canviar de nom"
 
 #: gvsigol_services/templates/layer_config.html:116
-#| msgid "Geom type"
 msgid "Change type"
 msgstr "Canvia tipus"
 
@@ -2184,7 +2174,6 @@ msgid "Convert to enumerate"
 msgstr "Convertir a enumerat"
 
 #: gvsigol_services/templates/layer_config.html:124
-#| msgid "Delete field"
 msgid "Reserved field"
 msgstr "Camp reservat"
 
@@ -2206,9 +2195,10 @@ msgid ""
 "Warning: the field will be deleted from the database. This operation cannot "
 "be undone. Type the name of the field to confirm the deletion:"
 msgstr ""
+"Avís: el camp s'eliminarà de la base de dades. Aquesta operació no espot "
+"desfer. Escriu el nom del camp per confirmar la supressió:"
 
 #: gvsigol_services/templates/layer_config.html:458
-#| msgid "Delete field"
 msgid "Rename field"
 msgstr "Canviar nom del cap camp"
 
@@ -2217,6 +2207,8 @@ msgid ""
 "Warning: renaming a field may have side effects, such as breaking a field-"
 "based legend."
 msgstr ""
+"Avís: el canvi de nom d'un camp pot tenir efectes secundaris, com ara la "
+"ruptura d'una llegenda basada en un camp."
 
 #: gvsigol_services/templates/layer_create.html:103
 msgid "Field list"
@@ -2234,10 +2226,9 @@ msgstr "Previsualització"
 
 #: gvsigol_services/templates/layer_list.html:30
 msgid "Projects"
-msgstr ""
+msgstr "Projectes"
 
 #: gvsigol_services/templates/layer_list.html:31
-#| msgid "Datastore"
 msgid "Datastore type"
 msgstr "Tipus de magatzem de dades"
 
@@ -2260,9 +2251,11 @@ msgstr "Les capes raster no son configurables"
 
 #: gvsigol_services/templates/layer_list.html:107
 msgid ""
-"This layer can't be remove from GeoServer, but it was delete from the list "
-"anyway"
+"The layer could not be removed from GeoServer, but it was deleted from the "
+"list anyway"
 msgstr ""
+"La capa no s'ha pogut eliminar de Geosever, però igualment s'ha esborrat"
+" d'aquesta llista"
 
 #: gvsigol_services/templates/layer_list.html:159
 #: gvsigol_services/templates/layer_list.html:162
@@ -2279,7 +2272,7 @@ msgstr "Actualitzar capa"
 
 #: gvsigol_services/templates/layer_list.html:175
 msgid "Refresh extent and layer definition"
-msgstr ""
+msgstr "Refrescar extensió i definició de capa"
 
 #: gvsigol_services/templates/layer_list.html:179
 msgid "Update thumbnail"
@@ -2291,7 +2284,7 @@ msgstr "Icona"
 
 #: gvsigol_services/templates/layer_update.html:94
 msgid "Supported formats"
-msgstr ""
+msgstr "Formats admesos"
 
 #: gvsigol_services/templates/layergroup_add.html:37
 #: gvsigol_services/templates/layergroup_update.html:38
@@ -2379,16 +2372,19 @@ msgstr "MÒBIL"
 msgid "Unlock layer"
 msgstr "Desbloquejar capa"
 
+#: gvsigol_services/templates/select_layer_permissions.html:7
+msgid "Give the selected groups permissions to read or write the layer"
+msgstr "Donar permisos per llegir o escriure la capa als grups seleccionats."
+
 #: gvsigol_services/templates/select_layer_permissions.html:8
 msgid "Search user group..."
 msgstr "Cercar grup d'usuari..."
 
 #: gvsigol_services/templates/select_layer_permissions.html:12
 msgid "Layer will be readable by everyone if public"
-msgstr ""
+msgstr "Tothom podrà accedir la capa si es fa pública"
 
 #: gvsigol_services/templates/select_layer_permissions.html:14
-#| msgid "Is public?"
 msgid "Is public"
 msgstr "És pública?"
 
@@ -2455,9 +2451,6 @@ msgid "Delete server"
 msgstr "Eliminar servidor"
 
 #: gvsigol_services/templates/server_list.html:62
-#| msgid ""
-#| "The server and all associated elements will be deleted, Do you want "
-#| "continue?"
 msgid ""
 "The server and all associated elements will be deleted, Do you want to "
 "continue?"
@@ -2483,7 +2476,6 @@ msgid "Delete service URL"
 msgstr "Eliminar URL del servei"
 
 #: gvsigol_services/templates/service_url_list.html:60
-#| msgid "The layer will be removed, Do you want continue?"
 msgid "Service URL will be deleted, Do you want to continue?"
 msgstr "La URL del servei serà eliminada, desitja continuar?"
 
@@ -2514,10 +2506,8 @@ msgid "Update workspace"
 msgstr "Actualitzar espai de treball"
 
 #: gvsigol_services/templates/workspace_update.html:26
-#, fuzzy
-#| msgid "Url"
 msgid "Uri"
-msgstr "Url"
+msgstr "Uri"
 
 #: gvsigol_services/templates/workspace_update.html:31
 msgid "Workspace description"
@@ -2563,20 +2553,22 @@ msgstr "Error actualitzant magatzem"
 
 #: gvsigol_services/views.py:712
 msgid "ERROR can't connect with GeoServer"
-msgstr ""
+msgstr "ERROR no es pot connectar a GeoServer"
 
 #: gvsigol_services/views.py:720
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
+"ERROr no es poden eliminar les dades del GeoServer. Forçant supressió de la "
+"base de dades"
 
 #: gvsigol_services/views.py:744
 msgid "ERROR User is not authorized to perform this operation"
-msgstr ""
+msgstr "ERROR L'usuari no està autoritzat a realitzar aquesta operació"
 
 #: gvsigol_services/views.py:1667
 #, python-brace-format
 msgid "enumerated ({0})"
-msgstr ""
+msgstr "enumerat ({0})"
 
 #: gvsigol_services/views.py:2093 gvsigol_services/views.py:2251
 #, python-brace-format
@@ -2606,60 +2598,56 @@ msgid "Name already taken"
 msgstr "Nom ja utilitzat"
 
 #: gvsigol_services/views.py:3913
-#| msgid "Error: layer could not be published"
 msgid "Error: ExternalLayer could not be published"
 msgstr "Error: La capa externa no pot ser publicada"
 
 #: gvsigol_services/views.py:4014
-#| msgid "Error: layer could not be published"
 msgid "Error: externallayer could not be published"
 msgstr "Error: La capa externa no pot ser publicada"
 
 #: gvsigol_services/views.py:4638 gvsigol_services/views.py:4644
-#| msgid "Connection params"
 msgid "Connection failed"
 msgstr "La connexió ha fallat"
 
 #: gvsigol_services/views.py:4638
-#| msgid "Status"
 msgid "Status code: "
 msgstr "Codi d'estat: "
 
 #: gvsigol_services/views.py:4649
-#| msgid "Connection params"
 msgid "Connection error"
 msgstr "Error de connexió"
 
 #: gvsigol_services/views.py:4685
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
-msgstr ""
+msgstr "No es pot suprimir el camp de control \"{0}\""
 
 #: gvsigol_services/views.py:4709 gvsigol_services/views.py:4771
 #: gvsigol_services/views.py:4775 gvsigol_services/views.py:4777
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
-msgstr ""
+msgstr "Error canviant el nom del camp. Causa: {0}"
 
 #: gvsigol_services/views.py:4711 gvsigol_services/views.py:4773
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
 msgstr ""
+"El camp no existeix. Probablement, un altre usuari l'ha suprimit o ha canviat "
+"el nom simultàniament"
 
 #: gvsigol_services/views.py:4713
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
-msgstr ""
+msgstr "Error suprimint el camp. Causa: {0}"
 
 #: gvsigol_services/views.py:4741
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
-msgstr ""
+msgstr "No es pot canviar el nom del camp de control \"{0}\""
 
 #: gvsigol_services/views.py:4743 gvsigol_services/views.py:4818
-#, fuzzy, python-brace-format
-#| msgid "Invalid field name. '{0}' is a reserved word"
+#, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr "Nom del camp no vàlid. '{0}' és una paraula reservada"
 
@@ -2669,18 +2657,17 @@ msgstr ""
 
 #: gvsigol_services/views.py:4831
 msgid "Field type not supported"
-msgstr ""
+msgstr "Tipus de camp no admès"
 
 #: gvsigol_services/views.py:4835
 #, python-brace-format
-#| msgid "Field list"
 msgid "Field \"{0}\" exists"
 msgstr "El camp \"{0}\" existeix"
 
 #: gvsigol_services/views.py:4884
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
-msgstr ""
+msgstr "Error al crear el camp. Causa: {0}"
 
 #, fuzzy
 #~| msgid "Make layer writeable only for the following groups"
