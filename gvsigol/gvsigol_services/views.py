@@ -81,7 +81,7 @@ from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
 import gvsigol_services.tiling_service as tiling_service
 import locks_utils
 from models import LayerFieldEnumeration
-from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem, \
+from models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
     LayerLock, Server, Node, ServiceUrl
 from rest_geoserver import RequestError
 import rest_geoserver
@@ -3549,10 +3549,9 @@ def describeLayerConfig(request):
         workspace = request.POST.get('workspace')
         try:
             l = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            read_roles = utils.get_read_roles(l)
-            write_roles = utils.get_write_roles(l)
-
-            if len(read_roles) <= 0:
+            if l.public:
+                read_roles = utils.get_read_roles(l)
+                write_roles = utils.get_write_roles(l)
                 layer = {}
                 layer['name'] = l.name
                 layer['title'] = l.title
@@ -3578,6 +3577,7 @@ def describeLayerConfig(request):
                 layer['single_image'] = l.single_image
                 layer['read_roles'] = read_roles
                 layer['write_roles'] = write_roles
+                layer['public'] = l.public
 
                 try:
                     json_conf = ast.literal_eval(l.conf)
