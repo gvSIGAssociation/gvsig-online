@@ -128,6 +128,19 @@
 										<label for="allow_download">{% trans "Allow downloads" %}</label>
 									</div>
 								</div>
+
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="real_time" id="real_time"/>
+										<label for="real_time">{% trans "View in real time" %}</label>														
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-4 form-group">
+									  	<label for="update_interval">{% trans "Update interval (miliseconds)" %}</label>
+									  	<input name="update_interval" id="update_interval" value="1000" type="number" class="form-control">														
+								  	</div>
+							  	</div>
 								
 								<div class="box-body time_enabled-check">
 									<div class="image_mosaic_tmp_fields">
