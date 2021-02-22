@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-19 15:18+0000\n"
+"POT-Creation-Date: 2021-02-22 11:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -812,12 +812,12 @@ msgid "Download"
 msgstr "Descarga"
 
 #: gvsigol_core/templates/project_update.html:451
-msgid "Proyecto"
-msgstr ""
+msgid "Project"
+msgstr "Proyect"
 
 #: gvsigol_core/templates/project_update.html:454
-msgid "Capa"
-msgstr ""
+msgid "Layer"
+msgstr "Capa"
 
 #: gvsigol_core/templates/project_update.html:464
 msgid "PNG"
@@ -1094,9 +1094,6 @@ msgstr "El proyecto se clonó con éxito."
 
 #~ msgid "Create"
 #~ msgstr "Crear"
-
-#~ msgid "Project"
-#~ msgstr "Proyectos"
 
 #~ msgid "Crear capa base"
 #~ msgstr "Buscar capa base"
