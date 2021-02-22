@@ -1053,6 +1053,10 @@ def layer_add_with_group(request, layergroup_id):
         if 'allow_download' in request.POST:
             allow_download = True
 
+        real_time = False
+        if 'real_time' in request.POST:
+            real_time = True
+
         assigned_read_roups = []
         for key in request.POST:
             if 'read-usergroup-' in key:
@@ -1164,6 +1168,8 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.detailed_info_button_title = detailed_info_button_title
                 newRecord.detailed_info_html = detailed_info_html
                 newRecord.timeout = request.POST.get('timeout')
+                newRecord.real_time = real_time
+                newRecord.update_interval = request.POST.get('update_interval')
                 
                 params = {}
                 params['format'] = request.POST.get('format')
@@ -1259,6 +1265,10 @@ def layer_update(request, layer_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
+
+        real_time = False
+        if 'real_time' in request.POST:
+            real_time = True
 
         assigned_read_roups = []
         for key in request.POST:
@@ -1356,6 +1366,8 @@ def layer_update(request, layer_id):
             layer.detailed_info_button_title = detailed_info_button_title
             layer.detailed_info_html = detailed_info_html
             layer.timeout = request.POST.get('timeout')
+            layer.real_time = real_time
+            layer.update_interval = request.POST.get('update_interval')
             
             params = {}
             params['format'] = request.POST.get('format')

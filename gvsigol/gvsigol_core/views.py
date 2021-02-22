@@ -940,7 +940,8 @@ def project_get_conf(request):
                             layer['detailed_info_enabled'] = l.detailed_info_enabled
                             layer['detailed_info_button_title'] = l.detailed_info_button_title
                             layer['detailed_info_html'] = l.detailed_info_html
-    
+                            layer['real_time'] = l.real_time
+                            layer['update_interval'] = l.update_interval
                             layer['time_enabled'] = l.time_enabled
                             if layer['time_enabled']:
                                 layer['ref'] = l.id

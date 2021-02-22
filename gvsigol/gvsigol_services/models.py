@@ -194,6 +194,8 @@ class Layer(models.Model):
     native_extent = models.CharField(max_length=250, default='-180,-90,180,90')
     latlong_extent = models.CharField(max_length=250, default='-180,-90,180,90')
     source_name = models.TextField(null=True, blank=True) # table name for postgis layers, not defined for the rest
+    real_time = models.BooleanField(default=False)
+    update_interval = models.IntegerField(null=True, default=1000)
     
     def __unicode__(self):
         return self.name

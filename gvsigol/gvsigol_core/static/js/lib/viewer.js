@@ -737,7 +737,14 @@ viewer.core = {
 				if (iLayer) {
 					self._setTileLoadError(true, iLayer);
 				}								
-			});						
+			});	
+
+			if (layerConf.real_time) {
+				var updateInterval = layerConf.update_interval;
+				setInterval(function() {
+					wmsLayer.getSource().updateParams({"_time": Date.now()});
+				}, updateInterval);
+			}
 		}
 	},
 
