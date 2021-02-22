@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-19 15:18+0000\n"
+"POT-Creation-Date: 2021-02-22 11:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2217,8 +2217,8 @@ msgstr ""
 
 #: gvsigol_services/templates/layer_list.html:107
 msgid ""
-"This layer can't be remove from GeoServer, but it was delete from the list "
-"anyway"
+"The layer could not be removed from GeoServer, but it was deleted from the "
+"list anyway"
 msgstr ""
 
 #: gvsigol_services/templates/layer_list.html:159
@@ -2334,6 +2334,10 @@ msgstr ""
 
 #: gvsigol_services/templates/lock_list.html:78
 msgid "Unlock layer"
+msgstr ""
+
+#: gvsigol_services/templates/select_layer_permissions.html:7
+msgid "Give the selected groups permissions to read or write the layer"
 msgstr ""
 
 #: gvsigol_services/templates/select_layer_permissions.html:8
