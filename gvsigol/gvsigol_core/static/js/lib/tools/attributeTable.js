@@ -584,8 +584,9 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 			}
 
 
-
-			ui += '<option class="filter-field-option" data-orig="' + featureType[i].name + '" value="' + featureType[i].type + '">' + feat_name + '</option>';
+			if (column_shown) {
+				ui += '<option class="filter-field-option" data-orig="' + featureType[i].name + '" value="' + featureType[i].type + '">' + feat_name + '</option>';
+			}
 		}
 	}
 	ui += 								'</select>';
