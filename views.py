@@ -910,7 +910,7 @@ def project_get_conf(request):
                         write_roles = services_utils.get_write_roles(l)
     
                         readable = False
-                        if len(read_roles) == 0:
+                        if l.public:
                             readable = True
                         else:
                             for ur in user_roles:
@@ -966,6 +966,7 @@ def project_get_conf(request):
                             layer['single_image'] = l.single_image
                             layer['read_roles'] = read_roles
                             layer['write_roles'] = write_roles
+                            layer['public'] = l.public
                             layer['styles'] = get_layer_styles(l)
                             
                             if l.external_params:
@@ -1496,6 +1497,10 @@ def project_clone(request, pid):
 
 @superuser_required
 def project_permissions_to_layer(request, pid):
+    """
+    Add read permissions on all the layers belonging to the layer groups of the project
+    for all the user groups of the project.
+    """
     if request.POST:
         try:
             print(request.POST.get("usergroups[]"))
@@ -1525,6 +1530,10 @@ def project_permissions_to_layer(request, pid):
 
 @superuser_required
 def extend_permissions_to_layer(request):
+    """
+    Add read permissions on all the layers belonging to the provided layer groups
+    for all the provided user groups.
+    """
     if request.POST:
         try:
             assigned_read_roups = []
