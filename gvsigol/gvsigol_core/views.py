@@ -23,7 +23,6 @@ from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
 from django.http.response import JsonResponse
 from gvsigol_core import forms
-from __builtin__ import True
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
