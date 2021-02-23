@@ -41,12 +41,12 @@ for app in packages:
 for plugin in settings.INSTALLED_APPS:
     if 'gvsigol_plugin_' in plugin:
         urlpatterns += [
-            re_path(r'^gvsigonline/', include(plugin + '.urls')),
+            path('gvsigonline/', include(plugin + '.urls')),
         ]
     
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += [
-        re_path(r'^gvsigonline/core/', include('gvsigol_core.urls')),
+        path('gvsigonline/core/', include('gvsigol_core.urls')),
     ]
   
 if 'gvsigol_auth' in settings.INSTALLED_APPS:
@@ -56,20 +56,20 @@ if 'gvsigol_auth' in settings.INSTALLED_APPS:
 
 if 'gvsigol_services' in settings.INSTALLED_APPS:
     urlpatterns += [
-        re_path(r'^gvsigonline/services/', include('gvsigol_services.urls')),
+        path('gvsigonline/services/', include('gvsigol_services.urls')),
     ]
     
 if 'gvsigol_symbology' in settings.INSTALLED_APPS:
     urlpatterns += [
-        re_path(r'^gvsigonline/symbology/', include('gvsigol_symbology.urls')),
+        path('gvsigonline/symbology/', include('gvsigol_symbology.urls')),
     ]
     
 if 'gvsigol_filemanager' in settings.INSTALLED_APPS:
     urlpatterns += [
-        re_path(r'^gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
+        path('gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
     ]
 
 if 'gvsigol_statistics' in settings.INSTALLED_APPS:
     urlpatterns += [
-        re_path(r'^gvsigonline/statistics/', include('gvsigol_statistics.urls', namespace='statistics')),
+        path('gvsigonline/statistics/', include('gvsigol_statistics.urls', namespace='statistics')),
     ]
