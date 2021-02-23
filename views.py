@@ -3213,8 +3213,7 @@ def get_datatable_data(request):
                     #req.auth = ('admin', 'geoserver')
 
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
-            jsonString = response.text
-            geojson = json.loads(jsonString)
+            geojson = response.json()
 
             data = []
             for f in geojson['features']:
@@ -4685,7 +4684,7 @@ def db_field_delete(request):
             datastore_name = layer.datastore.name
             if not utils.can_manage_layer(request.user, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
-            if (layer.datastore.type == 'v_PostGIS'):
+            if (layer.datastore.type != 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
             for ctrl_field in settings.CONTROL_FIELDS:
                 if field == ctrl_field.get('name'):
