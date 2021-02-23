@@ -1,4 +1,4 @@
-from models import SharedView
+from .models import SharedView
 from django.utils import timezone
     
 def clean_shared_views():

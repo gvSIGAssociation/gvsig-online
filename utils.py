@@ -59,7 +59,7 @@ def can_read_project(user, project):
         if UserGroupUser.objects.filter(user_id=user.id, user_group__projectusergroup__project_id=project.id).count() > 0:
             return True
     except Exception as e:
-        print e
+        print(e)
     return False
 
 def get_all_groups():
@@ -279,7 +279,7 @@ def toc_remove_layergroups(toc_structure, layer_groups):
     json_toc = json.loads(toc_structure)
     for lg in layer_groups:
         layergroup = LayerGroup.objects.get(id=lg)
-        if json_toc.has_key(layergroup.name):
+        if layergroup.name in json_toc:
             del json_toc[layergroup.name]
             
     return json.dumps(json_toc)
@@ -290,7 +290,7 @@ def toc_add_layer(layer):
         json_toc = p.project.toc_order
         try:
             toc = json.loads(json_toc)
-            if toc.has_key(layer.layer_group.name):
+            if layer.layer_group.name in toc:
                 indexes = []
                 for l in toc.get(layer.layer_group.name).get('layers'):
                     indexes.append(int(toc.get(layer.layer_group.name).get('layers').get(l).get('order')))
@@ -318,7 +318,7 @@ def toc_move_layer(layer, old_layer_group):
         json_toc = p.project.toc_order
         try:
             toc = json.loads(json_toc)
-            if toc.has_key(old_layer_group.name) and layer.name in toc.get(old_layer_group.name).get('layers'):
+            if old_layer_group.name in toc and layer.name in toc.get(old_layer_group.name).get('layers'):
                 del toc.get(old_layer_group.name).get('layers')[layer.name]
             p.project.toc_order = json.dumps(toc)
             p.project.save()
@@ -333,7 +333,7 @@ def toc_remove_layer(layer):
         json_toc = p.project.toc_order
         try:
             toc = json.loads(json_toc)
-            if toc.has_key(layer.layer_group.name):
+            if layer.layer_group.name in toc:
                 del toc.get(layer.layer_group.name).get('layers')[layer.name]
             p.project.toc_order = json.dumps(toc)
             p.project.save()
@@ -436,7 +436,7 @@ def update_layer_metadata_uuid(layer, uuid):
         
         try: 
             lm = LayerMetadata.objects.get(layer=layer)
-            if uuid != u'':
+            if uuid != '':
                 lm.metadata_uuid = uuid
                 lm.save()
                 return
@@ -447,7 +447,7 @@ def update_layer_metadata_uuid(layer, uuid):
             lm = LayerMetadata.objects.filter(layer=layer).delete()
         except LayerMetadata.DoesNotExist as e:
             pass
-        if uuid != u'':
+        if uuid != '':
             lm = LayerMetadata()
             lm.layer = layer
             lm.metadata_uuid = uuid
@@ -455,28 +455,28 @@ def update_layer_metadata_uuid(layer, uuid):
 
 def sendMail(user, password):
             
-    subject = _(u'New user account')
+    subject = _('New user account')
     
     first_name = ''
     last_name = ''
     try:
-        first_name = unicode(user.first_name, 'utf-8')
+        first_name = str(user.first_name, 'utf-8')
         
     except TypeError:
         first_name = user.first_name
         
     try:
-        last_name = unicode(user.last_name, 'utf-8')
+        last_name = str(user.last_name, 'utf-8')
         
     except TypeError:
         last_name = user.last_name
     
-    body = _(u'Account data') + ':\n\n'   
-    body = body + '  - ' + _(u'Username') + ': ' + user.username + '\n'
-    body = body + '  - ' + _(u'First name') + ': ' + first_name + '\n'
-    body = body + '  - ' + _(u'Last name') + ': ' + last_name + '\n'
-    body = body + '  - ' + _(u'Email') + ': ' + user.email + '\n'
-    body = body + '  - ' + _(u'Password') + ': ' + password + '\n'
+    body = _('Account data') + ':\n\n'   
+    body = body + '  - ' + _('Username') + ': ' + user.username + '\n'
+    body = body + '  - ' + _('First name') + ': ' + first_name + '\n'
+    body = body + '  - ' + _('Last name') + ': ' + last_name + '\n'
+    body = body + '  - ' + _('Email') + ': ' + user.email + '\n'
+    body = body + '  - ' + _('Password') + ': ' + password + '\n'
     
     toAddress = [user.email]           
     fromAddress = settings.EMAIL_HOST_USER
@@ -484,11 +484,11 @@ def sendMail(user, password):
     
 def send_reset_password_email(email, temp_pass):
             
-    subject = _(u'New password')
+    subject = _('New password')
     
-    body = _(u'This is your new temporary password') + ':\n\n'
+    body = _('This is your new temporary password') + ':\n\n'
     
-    body = body + '  - ' + _(u'Password') + ': ' + temp_pass + '\n\n'
+    body = body + '  - ' + _('Password') + ': ' + temp_pass + '\n\n'
     
     toAddress = [email]           
     fromAddress = settings.EMAIL_HOST_USER
@@ -503,7 +503,7 @@ def get_supported_crs(used_crs=None):
     if (not supported_crs) or used_crs:
         
         if settings.USE_DEFAULT_SUPPORTED_CRS:
-            for item in settings.SUPPORTED_CRS.items():
+            for item in list(settings.SUPPORTED_CRS.items()):
                 supported_crs_array.append(item[1])
             supported_crs = settings.SUPPORTED_CRS
             return settings.SUPPORTED_CRS
@@ -524,10 +524,10 @@ def get_supported_crs(used_crs=None):
         try:
             connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
             connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            print "Connect ... "
+            print("Connect ... ")
         
-        except StandardError, e:
-            print "Failed to connect!", e
+        except Exception as e:
+            print("Failed to connect!", e)
             return []
         cursor = connection.cursor()
         
@@ -536,8 +536,8 @@ def get_supported_crs(used_crs=None):
             cursor.execute(create_schema)
             rows = cursor.fetchall()
     
-        except StandardError, e:
-            print "SQL Error", e
+        except Exception as e:
+            print("SQL Error", e)
             if not e.pgcode == '42710':
                 return supported_crs   
             cursor.close();
@@ -704,7 +704,6 @@ try:
             break
 except:
     logger.warning("App settings are not available")
-    pass
 
 def get_app_setting(key, default=None):
     """
