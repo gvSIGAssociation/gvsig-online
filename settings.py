@@ -27,9 +27,11 @@
 import os
 import ldap
 import django.conf.locale
+from django.conf import settings
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -54,7 +56,7 @@ if len(SECRET_KEY) == 14:
         try:
             from django.core.management.utils import get_random_secret_key
             SECRET_KEY = get_random_secret_key()
-            secret = file(SECRET_FILE, 'w')
+            secret = open(SECRET_FILE, 'w')
             secret.write(SECRET_KEY)
             secret.close()
             os.chmod(SECRET_FILE, 0o400)
@@ -66,7 +68,7 @@ try:
 except:
     # Store your passwords for local development in 'settings_passwds.py'
     # Do not write any password here!!!!
-    pw_file = file(os.path.join(BASE_DIR, 'gvsigol', 'settings_passwords.py'), 'w')
+    pw_file = open(os.path.join(BASE_DIR, 'gvsigol', 'settings_passwords.py'), 'w')
     pw_file.write("BING_KEY_DEVEL='yourbingkey'\n")
     pw_file.write("DB_USER_DEVEL='postgres'\n")
     pw_file.write("DB_PW_DEVEL='postgres'\n")
@@ -123,11 +125,10 @@ finally:
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS_NAMES = ['https://localhost', 'https://host-local/']
 USE_X_FORWARDED_HOST = True
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
+#GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
 
 
 
@@ -157,48 +158,50 @@ INSTALLED_APPS = [
     #'gvsigol_app_librapicassa',
 
     ############# PLUGINS ################
+    'gvsigol_plugin_alfresco',
     'gvsigol_plugin_catalog',
     'gvsigol_plugin_catastro',
-    #'gvsigol_plugin_catastrouy',
+    'gvsigol_plugin_catastrouy',
     'gvsigol_plugin_charts',
-    #'gvsigol_plugin_downloadman',
+    'gvsigol_plugin_downloadman',
     'gvsigol_plugin_draw',
-    #'gvsigol_plugin_charts',
-    #'gvsigol_plugin_downloadman',
-    #'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
-    #'gvsigol_plugin_elevation',
-    #'gvsigol_plugin_emergencies',
-    #'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_importfromservice',
+    'gvsigol_plugin_elevation',
+    'gvsigol_plugin_emergencies',
+    'gvsigol_plugin_geocoding',
+    #'gvsigol_plugin_geoetl',
+    'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_importvector',
-    #'gvsigol_plugin_manageaddresses',
-    #'gvsigol_plugin_opensea2',
-    #'gvsigol_plugin_picassa',
-    #'gvsigol_plugin_regepa',
-    #'gvsigol_plugin_print',
+    'gvsigol_plugin_manageaddresses',
+    'gvsigol_plugin_opensea2',
+    'gvsigol_plugin_sampledashboard',
+    'gvsigol_plugin_samplemenubutton',
+    'gvsigol_plugin_staticdownloads',
+    'gvsigol_plugin_survey',
+    'gvsigol_plugin_picassa',
+    'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
-    #'gvsigol_plugin_streetview',
-    #'gvsigol_plugin_turiscan',
-    #'gvsigol_plugin_playas',
-    #'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_mobileview',
-    #'gvsigol_plugin_sampledashboard',
-    #'gvsigol_plugin_samplemenubutton',
-    'actstream'
+    'gvsigol_plugin_streetview',
+    'gvsigol_plugin_sync',
+    'gvsigol_plugin_trip_planner',
+    'gvsigol_plugin_turiscan',
+    'gvsigol_plugin_worldwind',
+    'actstream',
+    #### DEPENDENCIES ######,
+    'django_celery_beat'
 ]
 
 try:
     __import__('corsheaders')
     INSTALLED_APPS.append('corsheaders')
 except ImportError:
-    print 'ERROR: No ha instalado la libreria corsheaders'
+    print('ERROR: No ha instalado la libreria corsheaders')
     
 try:
     __import__('drf_yasg')
     INSTALLED_APPS.append('drf_yasg')
 except ImportError:
-    print 'ERROR: No ha instalado la libreria drf_yasg'
+    print('ERROR: No ha instalado la libreria drf_yasg')
 
 PUBLIC_PLUGINS = []
 
@@ -215,7 +218,6 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -225,7 +227,7 @@ try:
     __import__('corsheaders')
     MIDDLEWARE.append('corsheaders.middleware.CorsMiddleware')
 except ImportError:
-    print 'ERROR: No ha instalado la libreria corsheaders'
+    print('ERROR: No ha instalado la libreria corsheaders')
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -267,7 +269,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gvsigonline',
+        'NAME': 'gvsigonline_v3',
         'USER': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
         'PASSWORD': DB_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
         'HOST': 'localhost',
@@ -297,7 +299,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': False,
+    'ENABLED': True,
     'HOST':'localhost',
     'PORT': '389',
     'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
@@ -313,8 +315,10 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
-AUTH_LDAP_ROOT_DN = "dc=dev,dc=gvsigonline,dc=com"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+#AUTH_LDAP_ROOT_DN = "dc=dev,dc=gvsigonline,dc=com"
+#AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_ROOT_DN = "dc=local,dc=gvsigonline,dc=com"
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 
 # Internationalization
@@ -328,41 +332,37 @@ USE_TZ = True
 EXTRA_LANG_INFO = {
     'va': {
         'bidi': False,
-        'code': u'va',
-        'name': u'Valencian',
-        'name_local': u'Valencian'
+        'code': 'va',
+        'name': 'Valencian',
+        'name_local': 'Valencian'
     },
 }
 
 # Add custom languages not provided by Django
-LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
+LANG_INFO = dict(list(django.conf.locale.LANG_INFO.items()) + list(EXTRA_LANG_INFO.items()))
 django.conf.locale.LANG_INFO = LANG_INFO
 
 LANGUAGES = (
-    ('pt', _('Portuguese')),
     ('es', _('Spanish')),
-    #('va', _('Valencian')),
+    ('va', _('Valencian')),
     #('ca', _('Catalan')), 
     ('en', _('English')),
     #('pt', _('Portuguese')),
+    ('pt-br', _('Brazilian Portuguese')),
 )
-LOCALE_PATHS = (
+
+LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol/locale'),
     os.path.join(BASE_DIR, 'gvsigol_core/locale'),
     os.path.join(BASE_DIR, 'gvsigol_auth/locale'),
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_statistics/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_test/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_edition/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_catalog/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_print/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_importvector/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_draw/locale'),
-)
+    os.path.join(BASE_DIR, 'gvsigol_filemanager/locale')
+]
+for app in INSTALLED_APPS:
+    if app.startswith('gvsigol_app_') or app.startswith('gvsigol_plugin_'):
+        LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGOUT_PAGE_URL = '/gvsigonline/'
@@ -371,7 +371,8 @@ LOGOUT_PAGE_URL = '/gvsigonline/'
 EMAIL_BACKEND_ACTIVE = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
-EMAIL_HOST = ''
+#EMAIL_HOST = ''
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = EMAIL_USER_DEVEL
 EMAIL_HOST_PASSWORD = EMAIL_PASSWORD_DEVEL
 EMAIL_PORT = 587
@@ -379,9 +380,12 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-BASE_URL = 'https://localhost'
-MEDIA_ROOT = '/var/www/media/'
-MEDIA_URL = 'https://localhost/media/'
+#BASE_URL = 'https://localhost'
+#MEDIA_ROOT = '/usr/local/var/www/media/'
+#MEDIA_URL = 'https://localhost/media/'
+BASE_URL = 'https://gvsigol.localhost'
+MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
+MEDIA_URL = 'https://gvsigol.localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -394,7 +398,6 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_librapicassa/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_picassa/static'),
-    os.path.join(BASE_DIR, "gvsigol_viewer/dist")
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -407,7 +410,7 @@ GVSIGOL_VERSION = '2.3.4'
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
     'dbport': '5432',
-    'dbname': 'gvsigonline',
+    'dbname': 'gvsigonline_v2',
     'dbuser': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -415,13 +418,15 @@ GVSIGOL_USERS_CARTODB = {
 MOSAIC_DB = {
     'host': 'localhost',
     'port': '5432',
-    'database': 'gvsigonline',
+    'database': 'gvsigonline_v2',
     'schema': 'imagemosaic',
     'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 },
 
+SHP2PGSQL_PATH = '/Library/PostgreSQL/9.6/bin/shp2pgsql'
 GDALTOOLS_BASEPATH = '/usr/bin'
+#GDALTOOLS_BASEPATH = '/usr/local/bin'
 GDALSRSINFO_PATH = GDALTOOLS_BASEPATH + '/gdalsrsinfo'
 GDALINFO_PATH = GDALTOOLS_BASEPATH + '/gdalinfo'
 OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
@@ -480,6 +485,12 @@ SUPPORTED_CRS = {
         'title': 'WGS 84 / UTM zone 21S',
         'definition': '+proj=utm +zone=21 +south +datum=WGS84 +units=m +no_defs',
         'units': 'meters'
+    },
+    '4674': {
+        'code': 'EPSG:4674',
+        'title': 'SIRGAS 2000 Geographic2D',
+        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs',
+        'units': 'degrees'
     }
 }
 
@@ -607,7 +618,7 @@ TEMPORAL_ADVANCED_PARAMETERS = False
 
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://gvsigol.localhost/geoserver',
+    'URL': 'https://localhost/geoserver',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -647,17 +658,17 @@ PUSH_NOTIFICATIONS_SETTINGS = {
 
 RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
-DOCS = {
-    'URL': 'http://localhost/media/docs',
-    'NAME': 'manual.pdf',
-    'VERSION': 'v1'
-}
 LAYERS_ROOT = 'layer_downloads'
-ALLOWED_HOST_NAMES = ['http://localhost']
+#ALLOWED_HOST_NAMES = ['http://localhost']
+ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
     'JWT_ALLOW_REFRESH': True,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
+DOCS = {
+    'URL': BASE_URL + '/media/docs',
+    'NAME': 'manual.pdf',
+    'VERSION': 'v1'
+}
 
-ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
