@@ -23,7 +23,7 @@
 from django.shortcuts import render
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from models import UserGroup, UserGroupUser
+from .models import UserGroup, UserGroupUser
 import gvsigol.settings
 
 def superuser_required(function):
@@ -91,40 +91,40 @@ def get_all_groups_checked_by_user(user):
         
 def sendMail(user, password):
     if gvsigol.settings.EMAIL_BACKEND_ACTIVE:       
-        subject = _(u'New user account')
+        subject = _('New user account')
         
         first_name = ''
         last_name = ''
         try:
-            first_name = unicode(user.first_name, 'utf-8')
+            first_name = str(user.first_name, 'utf-8')
             
         except TypeError:
             first_name = user.first_name
             
         try:
-            last_name = unicode(user.last_name, 'utf-8')
+            last_name = str(user.last_name, 'utf-8')
             
         except TypeError:
             last_name = user.last_name
         
-        body = _(u'Account data') + ':\n\n'   
-        body = body + '  - ' + _(u'Username') + ': ' + user.username + '\n'
-        body = body + '  - ' + _(u'First name') + ': ' + first_name + '\n'
-        body = body + '  - ' + _(u'Last name') + ': ' + last_name + '\n'
-        body = body + '  - ' + _(u'Email') + ': ' + user.email + '\n'
-        body = body + '  - ' + _(u'Password') + ': ' + password + '\n'
+        body = _('Account data') + ':\n\n'   
+        body = body + '  - ' + _('Username') + ': ' + user.username + '\n'
+        body = body + '  - ' + _('First name') + ': ' + first_name + '\n'
+        body = body + '  - ' + _('Last name') + ': ' + last_name + '\n'
+        body = body + '  - ' + _('Email') + ': ' + user.email + '\n'
+        body = body + '  - ' + _('Password') + ': ' + password + '\n'
         
         toAddress = [user.email]           
         fromAddress = gvsigol.settings.EMAIL_HOST_USER
         
-        print 'Restore message: ' + body
+        print('Restore message: ' + body)
         send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
     
 def send_reset_password_email(email, id, uid, token):
     if gvsigol.settings.EMAIL_BACKEND_ACTIVE:     
-        subject = _(u'New password')
+        subject = _('New password')
         
-        body = _(u'This is your new temporary password') + ':\n\n'
+        body = _('This is your new temporary password') + ':\n\n'
         
         body = body + gvsigol.settings.BASE_URL +'/gvsigonline/auth/reset/' + str(id) + '/' + uid + '/' + token + '/ \n\n'
         

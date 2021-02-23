@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 # -*- coding: utf-8 -*-
 
 '''
@@ -33,8 +33,8 @@ class UserGroup(models.Model):
     
     
 class UserGroupUser(models.Model):
-    user = models.ForeignKey(User)
-    user_group = models.ForeignKey(UserGroup)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     
     def __unicode__(self):
         return self.user.email + ' - ' + self.user_group.name

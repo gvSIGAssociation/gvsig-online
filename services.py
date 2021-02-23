@@ -20,7 +20,7 @@
 '''
 
 from django.core.exceptions import ImproperlyConfigured
-from models import UserGroup, UserGroupUser
+from .models import UserGroup, UserGroupUser
 from gvsigol_core.models import LayerGroup
 from django.utils.translation import ugettext as _
 from gvsigol.settings import GVSIGOL_LDAP
@@ -31,6 +31,9 @@ import shutil
 import ldap
 import sys
 import os
+import imp
+
+LDAP_ENCODING = 'utf-8'
 
 class GvSigOnlineServices():
     
@@ -43,7 +46,7 @@ class GvSigOnlineServices():
         self.password = password
         
         if sys.getdefaultencoding() != 'utf-8':
-            reload(sys)  # Reload does the trick!
+            imp.reload(sys)  # Reload does the trick!
             sys.setdefaultencoding('utf-8')
         
         if is_enabled:
@@ -57,13 +60,13 @@ class GvSigOnlineServices():
                 
                 dn=str("cn=admin,ou=groups," + self.domain)                    
                 attrs = {}
-                attrs['objectclass'] = ['top','posixGroup']
-                attrs['cn'] = str('admin')
-                attrs['gidNumber'] = str('501')  
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixGroup'.encode(LDAP_ENCODING)]
+                attrs['cn'] = 'admin'.encode(LDAP_ENCODING)
+                attrs['gidNumber'] = '501'.encode(LDAP_ENCODING)
         
                 ldif = modlist.addModlist(attrs)
                 self.ldap.add_s(dn,ldif)
-            except ldap.LDAPError, e:
+            except ldap.LDAPError as e:
                 pass
             try:
                 if not UserGroup.objects.filter(name="admin").exists():
@@ -81,21 +84,21 @@ class GvSigOnlineServices():
                 
                 dn=str("cn=root,ou=users," + self.domain)
                 attrs = {}
-                attrs['cn'] = 'root'
-                attrs['gidNumber'] = '501'
-                attrs['givenName'] = ''
-                attrs['homeDirectory'] = '/home/users/root'
-                attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
-                attrs['userPassword'] = self.password
-                attrs['oclExtraAttrs'] = 'CAT_ALL_Administrator'
-                attrs['uidNumber'] = '1000'
-                attrs['sn'] = 'root'
-                attrs['uid'] = 'root'
+                attrs['cn'] = 'root'.encode(LDAP_ENCODING)
+                attrs['gidNumber'] = '501'.encode(LDAP_ENCODING)
+                attrs['givenName'] = ''.encode(LDAP_ENCODING)
+                attrs['homeDirectory'] = '/home/users/root'.encode(LDAP_ENCODING)
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixAccount'.encode(LDAP_ENCODING),'inetOrgPerson'.encode(LDAP_ENCODING),'extensibleObject'.encode(LDAP_ENCODING)]
+                attrs['userPassword'] = self.password.encode(LDAP_ENCODING)
+                attrs['oclExtraAttrs'] = 'CAT_ALL_Administrator'.encode(LDAP_ENCODING)
+                attrs['uidNumber'] = '1000'.encode(LDAP_ENCODING)
+                attrs['sn'] = 'root'.encode(LDAP_ENCODING)
+                attrs['uid'] = 'root'.encode(LDAP_ENCODING)
             
                 ldif = modlist.addModlist(attrs)
                 self.ldap.add_s(dn,ldif)
                 
-            except ldap.LDAPError, e:
+            except ldap.LDAPError as e:
                 pass
             try:
                 # ensure the user exists both on django and ldap
@@ -121,14 +124,14 @@ class GvSigOnlineServices():
                 dn=str("cn=default,ou=groups," + self.domain)
                     
                 attrs = {}
-                attrs['objectclass'] = ['top','posixGroup']
-                attrs['cn'] = str('default')
-                attrs['gidNumber'] = str('500')  
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixGroup'.encode(LDAP_ENCODING)]
+                attrs['cn'] = 'default'.encode(LDAP_ENCODING)
+                attrs['gidNumber'] = '500'.encode(LDAP_ENCODING)
         
                 ldif = modlist.addModlist(attrs)
                 self.ldap.add_s(dn,ldif)
                 
-            except ldap.LDAPError, e:
+            except ldap.LDAPError as e:
                 pass
         
     def ldap_add_group(self, group):
@@ -140,21 +143,21 @@ class GvSigOnlineServices():
                 dn=str("cn=" + group.name + ",ou=groups," + self.domain)
                     
                 attrs = {}
-                attrs['objectclass'] = ['top','posixGroup']
-                attrs['cn'] = str(group.name)
-                attrs['gidNumber'] = str(last_gid)
-                attrs['description'] = str(group.description)  
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixGroup'.encode(LDAP_ENCODING)]
+                attrs['cn'] = group.name.encode(LDAP_ENCODING)
+                attrs['gidNumber'] = str(last_gid).encode(LDAP_ENCODING)
+                attrs['description'] = group.description.encode(LDAP_ENCODING)
         
                 ldif = modlist.addModlist(attrs)
                 self.ldap.add_s(dn,ldif)                        
                 
-            except ldap.LDAPError, e:
-                print e 
+            except ldap.LDAPError as e:
+                print(e) 
         
         
     def ldap_modify_group(self, old_group_name, new_group_name):
         if self.is_enabled:
-            print 'group modified'
+            print('group modified')
         
     def ldap_delete_group(self, group):    
         if self.is_enabled:   
@@ -162,29 +165,29 @@ class GvSigOnlineServices():
                 dn = "cn=" + group.name + ",ou=groups," + self.domain
                 self.ldap.delete_s(dn)
                 
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
         
     def ldap_add_user(self, user, password, is_superuser):
         if self.is_enabled:
             # The dn of our new entry/object
-            dn=str("cn=" + user.username + ",ou=users," + self.domain)
+            dn = "cn=" + user.username + ",ou=users," + self.domain
             
             # A dict to help build the "body" of the object
             attrs = {}
-            attrs['cn'] = str(user.username)
-            attrs['gidNumber'] = str('500')
-            attrs['givenName'] = str(user.first_name)
-            attrs['homeDirectory'] = str('/home/users/' + user.username)
+            attrs['cn'] = user.username.encode(LDAP_ENCODING)
+            attrs['gidNumber'] = '500'.encode(LDAP_ENCODING)
+            attrs['givenName'] = user.first_name.encode(LDAP_ENCODING)
+            attrs['homeDirectory'] = ('/home/users/' + user.username).encode(LDAP_ENCODING)
             if is_superuser:
-                attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
-                attrs['olcExtraAttrs'] = 'CAT_ALL_Administrator'
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixAccount'.encode(LDAP_ENCODING),'inetOrgPerson'.encode(LDAP_ENCODING),'extensibleObject'.encode(LDAP_ENCODING)]
+                attrs['olcExtraAttrs'] = 'CAT_ALL_Administrator'.encode(LDAP_ENCODING)
             else:
-                attrs['objectclass'] = ['top','posixAccount','inetOrgPerson']
-            attrs['userPassword'] = str(password)
-            attrs['uidNumber'] = str(self.ldap_get_last_uid() + 1)
-            attrs['sn'] = str(user.username)
-            attrs['uid'] = str(user.username)
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixAccount'.encode(LDAP_ENCODING),'inetOrgPerson'.encode(LDAP_ENCODING)]
+            attrs['userPassword'] = password.encode(LDAP_ENCODING)
+            attrs['uidNumber'] = str(self.ldap_get_last_uid() + 1).encode('utf-8')
+            attrs['sn'] = user.username.encode(LDAP_ENCODING)
+            attrs['uid'] = user.username.encode(LDAP_ENCODING)
             
             # Convert our dict to nice syntax for the add-function using modlist-module
             ldif = modlist.addModlist(attrs)
@@ -196,7 +199,7 @@ class GvSigOnlineServices():
         
     def ldap_modify_user(self, group_id, group_name):
         if self.is_enabled:
-            print 'User modified'
+            print('User modified')
         
     def ldap_delete_user(self, user):
         if self.is_enabled:
@@ -204,67 +207,67 @@ class GvSigOnlineServices():
                 dn = "cn=" + user.username + ",ou=users," + self.domain
                 self.ldap.delete_s(dn)
                 
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
             
     def ldap_add_group_member(self, user, group):
         if self.is_enabled:
-            add_member = [(ldap.MOD_ADD, 'memberUid', str(user.username))]
+            add_member = [(ldap.MOD_ADD, 'memberUid', user.username.encode(LDAP_ENCODING))]
     
             try:
                 group_dn = str("cn=" + group.name + ",ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, add_member)
                     
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
                 return False
             
     def ldap_add_default_group_member(self, user):
         if self.is_enabled:
-            add_member = [(ldap.MOD_ADD, 'memberUid', str(user.username))]
+            add_member = [(ldap.MOD_ADD, 'memberUid', user.username.encode(LDAP_ENCODING))]
     
             try:
                 group_dn = str("cn=default,ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, add_member)
                     
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
                 return False
             
     def ldap_add_admin_group_member(self, user):
         if self.is_enabled:
-            add_member = [(ldap.MOD_ADD, 'memberUid', str(user.username))]
+            add_member = [(ldap.MOD_ADD, 'memberUid'.encode(LDAP_ENCODING), user.username.encode(LDAP_ENCODING))]
     
             try:
                 group_dn = str("cn=admin,ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, add_member)
                     
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
                 return False
         
     def ldap_delete_group_member(self, user, group):
         if self.is_enabled:
-            delete_member = [(ldap.MOD_DELETE, 'memberUid', str(user.username))]
+            delete_member = [(ldap.MOD_DELETE, 'memberUid', user.username.encode(LDAP_ENCODING))]
     
             try:
                 group_dn = str("cn=" + group.name + ",ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, delete_member)
                     
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
                 return False
             
     def ldap_delete_default_group_member(self, user):
         if self.is_enabled:
-            delete_member = [(ldap.MOD_DELETE, 'memberUid', str(user.username))]
+            delete_member = [(ldap.MOD_DELETE, 'memberUid', user.username.encode(LDAP_ENCODING))]
     
             try:
                 group_dn = str("cn=default,ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, delete_member)
                     
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
                 return False
         
     def ldap_get_last_gid(self):
@@ -293,8 +296,8 @@ class GvSigOnlineServices():
                 last_gid = gids[-1]
             return int(last_gid)
             
-        except ldap.LDAPError, e:
-            print e
+        except ldap.LDAPError as e:
+            print(e)
     
        
     def ldap_get_last_uid(self):
@@ -323,8 +326,8 @@ class GvSigOnlineServices():
                 last_uid = uids[-1]
             return int(last_uid)
             
-        except ldap.LDAPError, e:
-            print e
+        except ldap.LDAPError as e:
+            print(e)
             
             
     def ldap_get_uid(self, user_name):
@@ -353,8 +356,8 @@ class GvSigOnlineServices():
                 last_uid = uids[-1]
             return int(last_uid)
             
-        except ldap.LDAPError, e:
-            print e
+        except ldap.LDAPError as e:
+            print(e)
             
             
     def ldap_change_user_password(self, user, password):
@@ -365,8 +368,8 @@ class GvSigOnlineServices():
             try:
                 self.ldap.modify_s(user_dn, new_password)
                     
-            except ldap.LDAPError, e:
-                print e
+            except ldap.LDAPError as e:
+                print(e)
                 return False
 
     
@@ -384,7 +387,7 @@ class GvSigOnlineServices():
             aux = aux[:-1]
         path = aux + "/data/" + group.name
         try: 
-            os.makedirs(path, mode=0777)
+            os.makedirs(path, mode=0o777)
             
         except OSError as e:
             if not os.path.isdir(path):
@@ -399,7 +402,7 @@ class GvSigOnlineServices():
             return True
          
         except Exception as e:
-            print('Error: %s' % e)
+            print(('Error: %s' % e))
             return False
             
 # Hacemos override de la clase para implementar la autenticacion pass-through con AD
