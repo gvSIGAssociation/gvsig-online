@@ -23,6 +23,7 @@ from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
 from django.http.response import JsonResponse
 from gvsigol_core import forms
+from __builtin__ import True
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -1538,6 +1539,7 @@ def extend_permissions_to_layer(request):
     if request.POST:
         try:
             assigned_read_roups = []
+            public_project = (request.POST.get("is_public") == 'true')
             for key in request.POST.getlist("usergroups[]", []):
                 assigned_read_roups.append(int(key.split('-')[1]))
             #assigned_layergroups = [ int(id) for id in request.POST.getlist("layergroups[]", []) ]
@@ -1547,6 +1549,9 @@ def extend_permissions_to_layer(request):
             last_server_id = None
             for layergroup in LayerGroup.objects.filter(pk__in=assigned_layergroups):
                 for layer in layergroup.layer_set.filter(external=False):
+                    if public_project:
+                        layer.public = True
+                        layer.save()
                     for gid in assigned_read_roups:
                         if not LayerReadGroup.objects.filter(layer=layer, group_id=gid).exists():
                             lrg = LayerReadGroup()

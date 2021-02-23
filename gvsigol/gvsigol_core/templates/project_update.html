@@ -339,12 +339,18 @@
 											<div class="col-md-6 ">
 											<label class="control-label">{% trans "Allow access to the project for the following user groups:" %}</label>
 											</div>
+											{% if user.is_superuser %}
 											<div class="col-md-4 ">
 											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
 											</div>
 											<div class="col-md-2 ">
 											<button id="extend-to-lyrs-btn" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs margin-r-5"></i>{% trans "Extend to layers" %}</button>
 											</div>
+											{% else %}
+											<div class="col-md-6 ">
+											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+											</div>
+											{% endif %}
 											</div>
 										</div>
 									</div>
@@ -543,8 +549,12 @@
 					<h4 class="modal-title" id="extendToLayersTitle">{% trans "Extend project permissions to layers" %}</h4>
 				</div>
 				<div class="modal-body">
-					<p>{% trans "This action will give the selected user groups permission to read all the layers included in this project." %}</p>
-					<p>{% trans "Note: additional permissions existing on the layer will not be removed." %}</p>
+					<p>{% trans "This action will give the selected user groups permission to read all the layers included in this project. Notes:" %}</p>
+					<ul>
+					<li>{% trans "If the project is public, all the layers assigned to the project will become public." %}</li>
+					<li>{% trans "This action will operate on layers, layer groups and users currently selected, even if they have been not saved." %}</li>
+					<li>{% trans "Additional permissions existing on the layer will not be removed." %}</li>
+					</ul>
 				</div>
 				<div class="modal-footer">
 					<button id="button-extend-to-layers-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
