@@ -3158,7 +3158,7 @@ def get_datatable_data(request):
                     values['SORTBY'] = sortby_field
 
                 if cql_filter != '':
-                    values['cql_filter'] = cql_filter.encode('utf-8')
+                    values['cql_filter'] = cql_filter
 
                 recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
                 recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
@@ -3166,14 +3166,12 @@ def get_datatable_data(request):
 
             else:
                 properties = properties_with_type.split(',')
-                encoded_value = search_value.encode('ascii', 'replace')
-
                 geoserver_fields = property_name.split(',')
                 raw_search_cql = '('
                 for p in properties:
                     if p.split('|')[0] != 'id' and p.split('|')[0] in geoserver_fields:
                         if is_string_type(p.split('|')[1]):
-                            raw_search_cql += p.split('|')[0] + " ILIKE '%" + encoded_value.replace('?', '_') +"%'"
+                            raw_search_cql += p.split('|')[0] + " ILIKE '%" + search_value.replace('?', '_') +"%'"
                             raw_search_cql += ' OR '
 
                         elif is_numeric_type(p.split('|')[1]):
@@ -3204,18 +3202,16 @@ def get_datatable_data(request):
                 if cql_filter == '':
                     values['cql_filter'] = raw_search_cql
                 else:
-                    values['cql_filter'] = cql_filter.encode('utf-8') + ' AND ' + raw_search_cql
+                    values['cql_filter'] = cql_filter + ' AND ' + raw_search_cql
                 recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
                 recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
 
-            params = urllib.parse.urlencode(values)
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
                     req.auth = (request.session['username'], request.session['password'])
                     #req.auth = ('admin', 'geoserver')
 
-            print(wfs_url + "?" + params)
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
             jsonString = response.text
             geojson = json.loads(jsonString)
