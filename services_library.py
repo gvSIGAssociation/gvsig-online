@@ -17,22 +17,21 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from __builtin__ import file
 
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
+from .models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_services.models import Layer
 from gvsigol_services import geographic_servers
 from django.utils.translation import ugettext as _
-import utils, sld_utils, sld_builder, sld_reader
+from . import utils, sld_utils, sld_builder, sld_reader
 from django.http import HttpResponse
 from gvsigol import settings
 from xml.dom import minidom
 import tempfile, zipfile
-import StringIO
+import io
 import json
 import re
 import os
@@ -353,7 +352,7 @@ def export_library(library, library_rules):
         i=i+1
    
     
-    buffer = StringIO.StringIO()
+    buffer = io.StringIO()
     z = zipfile.ZipFile(buffer, "w")
     relroot = dir_path
     for root, dirs, files in os.walk(dir_path):
@@ -401,7 +400,7 @@ def upload_color_ramp_library(name, description, file):
             
             
             for file in file_list: 
-                print('start file: ' + file)
+                print(('start file: ' + file))
                 file_name = file
                 m = re.search('color_ramp-(.+?)-[0-9]+', file)
                 if m:
@@ -445,7 +444,7 @@ def upload_color_ramp_library(name, description, file):
                 )
                 color_ramp.save()
                     
-                print('end file: ' + file)
+                print(('end file: ' + file))
 
     utils.__delete_temporaries(file_path)
 
@@ -493,7 +492,7 @@ def export_ramp_color_library(library, library_rules):
         
    
     
-    buffer = StringIO.StringIO()
+    buffer = io.StringIO()
     z = zipfile.ZipFile(buffer, "w")
     relroot = dir_path
     for root, dirs, files in os.walk(dir_path):
@@ -518,17 +517,17 @@ def export_ramp_color_library(library, library_rules):
 
 
 def remove_accents(string):
-    if type(string) is not unicode:
-        string = unicode(string, encoding='utf-8')
+    if type(string) is not str:
+        string = str(string, encoding='utf-8')
 
     string = string.lower()
 
-    string = re.sub(u"[àáâãäå]", 'a', string)
-    string = re.sub(u"[èéêë]", 'e', string)
-    string = re.sub(u"[ìíîï]", 'i', string)
-    string = re.sub(u"[òóôõö]", 'o', string)
-    string = re.sub(u"[ùúûü]", 'u', string)
-    string = re.sub(u"[ýÿ]", 'y', string)
+    string = re.sub("[àáâãäå]", 'a', string)
+    string = re.sub("[èéêë]", 'e', string)
+    string = re.sub("[ìíîï]", 'i', string)
+    string = re.sub("[òóôõö]", 'o', string)
+    string = re.sub("[ùúûü]", 'u', string)
+    string = re.sub("[ýÿ]", 'y', string)
     
     string = re.sub('[^a-z0-9 \_\.]', '', string)
     string = string.replace(' ','_')
@@ -702,7 +701,7 @@ def upload_library(name, description, file):
                     
                 scount-= 1
                 
-            output = StringIO.StringIO()
+            output = io.StringIO()
             sld.export(output, 0)
             sld_body = output.getvalue()
             output.close()

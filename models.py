@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 '''
     gvSIG Online.
@@ -76,14 +76,14 @@ class Style(models.Model):
         return self.name
 
 class StyleLayer(models.Model):
-    style = models.ForeignKey(Style)
-    layer = models.ForeignKey(Layer)  
+    style = models.ForeignKey(Style, on_delete=models.CASCADE)
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)  
     
     def __unicode__(self):
         return self.layer.name + ' - ' + self.style.name
       
 class Rule(models.Model):
-    style = models.ForeignKey(Style)
+    style = models.ForeignKey(Style, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=500, blank=True, null=True)
     abstract = models.CharField(max_length=500, blank=True, null=True)
@@ -93,7 +93,7 @@ class Rule(models.Model):
     order = models.IntegerField(null=False, default=0)
     
 class Symbolizer(models.Model):
-    rule = models.ForeignKey(Rule) 
+    rule = models.ForeignKey(Rule, on_delete=models.CASCADE)
     order = models.IntegerField(null=False, default=0)
     
 class MarkSymbolizer(Symbolizer):
@@ -168,8 +168,8 @@ class Library(models.Model):
         return self.name
  
 class LibraryRule(models.Model):
-    library = models.ForeignKey(Library)
-    rule = models.ForeignKey(Rule)
+    library = models.ForeignKey(Library, on_delete=models.CASCADE)
+    rule = models.ForeignKey(Rule, on_delete=models.CASCADE)
     
     def __unicode__(self):
         return self.library.name + ' - ' + self.rule.name
@@ -184,7 +184,7 @@ class ColorRampLibrary(models.Model):
 class ColorRampFolder(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     description = models.CharField(max_length=500, blank=True, null=True)
-    color_ramp_library = models.ForeignKey(ColorRampLibrary)
+    color_ramp_library = models.ForeignKey(ColorRampLibrary, on_delete=models.CASCADE)
     
     def __unicode__(self):
         return self.name
@@ -192,7 +192,7 @@ class ColorRampFolder(models.Model):
 class ColorRamp(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     definition = models.TextField()
-    color_ramp_folder = models.ForeignKey(ColorRampFolder)
+    color_ramp_folder = models.ForeignKey(ColorRampFolder, on_delete=models.CASCADE)
     
     def __unicode__(self):
         return self.name
