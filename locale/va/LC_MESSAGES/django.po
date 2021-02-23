@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-22 11:30+0000\n"
+"POT-Creation-Date: 2021-02-23 10:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,10 +29,8 @@ msgid "Don't apply any permission. Cloned layers will become public"
 msgstr ""
 
 #: gvsigol_core/forms.py:21
-#, fuzzy
-#| msgid "Project title"
 msgid "New project title"
-msgstr "Títol del projecte"
+msgstr "Títol del nou projecte"
 
 #: gvsigol_core/forms.py:26 gvsigol_core/forms.py:33 gvsigol_core/forms.py:41
 msgid ""
@@ -41,10 +39,8 @@ msgid ""
 msgstr ""
 
 #: gvsigol_core/forms.py:28 gvsigol_core/templates/project_list.html:100
-#, fuzzy
-#| msgid "Project name"
 msgid "New project name"
-msgstr "Nom del projecte"
+msgstr "Nom del nou projecte"
 
 #: gvsigol_core/forms.py:36 gvsigol_core/templates/project_list.html:106
 msgid "Target workspace name"
@@ -526,50 +522,52 @@ msgstr "És públic?"
 msgid "Allow access to the project for the following user groups:"
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:285
-#: gvsigol_core/templates/project_update.html:343
+#: gvsigol_core/templates/project_add.html:286
+#: gvsigol_core/templates/project_add.html:293
+#: gvsigol_core/templates/project_update.html:344
+#: gvsigol_core/templates/project_update.html:351
 msgid "Search user group..."
 msgstr "Cercar grup d'usuari..."
 
-#: gvsigol_core/templates/project_add.html:288
-#: gvsigol_core/templates/project_update.html:346
+#: gvsigol_core/templates/project_add.html:289
+#: gvsigol_core/templates/project_update.html:347
 msgid "Extend to layers"
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:305
-#: gvsigol_core/templates/project_add.html:307
-#: gvsigol_core/templates/project_update.html:363
-#: gvsigol_core/templates/project_update.html:365
+#: gvsigol_core/templates/project_add.html:311
+#: gvsigol_core/templates/project_add.html:313
+#: gvsigol_core/templates/project_update.html:369
+#: gvsigol_core/templates/project_update.html:371
 msgid "Assign user group"
 msgstr "Asignar grup d'usuari"
 
-#: gvsigol_core/templates/project_add.html:339
-#: gvsigol_core/templates/project_update.html:523
+#: gvsigol_core/templates/project_add.html:345
+#: gvsigol_core/templates/project_update.html:529
 msgid "Create new layer group"
 msgstr "Crear nou grup de capes"
 
-#: gvsigol_core/templates/project_add.html:342
-#: gvsigol_core/templates/project_update.html:526
-msgid "Is needed to save this project first, Do you want continue?"
+#: gvsigol_core/templates/project_add.html:348
+#: gvsigol_core/templates/project_update.html:532
+msgid "The project has to be saved first, Do you want continue?"
 msgstr "Cal guardar el projecte primer, Voleu continuar?"
 
-#: gvsigol_core/templates/project_add.html:345
-#: gvsigol_core/templates/project_add.html:366
+#: gvsigol_core/templates/project_add.html:351
+#: gvsigol_core/templates/project_add.html:376
 #: gvsigol_core/templates/project_list.html:72
 #: gvsigol_core/templates/project_list.html:123
-#: gvsigol_core/templates/project_update.html:529
-#: gvsigol_core/templates/project_update.html:550
+#: gvsigol_core/templates/project_update.html:535
+#: gvsigol_core/templates/project_update.html:560
 #: gvsigol_core/templates/shared_view_list.html:53
 #: gvsigol_core/templates/viewer.html:289
 #: gvsigol_core/templates/viewer_compress.html:290
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-#: gvsigol_core/templates/project_add.html:346
-#: gvsigol_core/templates/project_add.html:367
+#: gvsigol_core/templates/project_add.html:352
+#: gvsigol_core/templates/project_add.html:377
 #: gvsigol_core/templates/project_list.html:73
-#: gvsigol_core/templates/project_update.html:530
-#: gvsigol_core/templates/project_update.html:551
+#: gvsigol_core/templates/project_update.html:536
+#: gvsigol_core/templates/project_update.html:561
 #: gvsigol_core/templates/shared_view_list.html:54
 #: gvsigol_core/templates/viewer.html:290
 #: gvsigol_core/templates/viewer.html:312
@@ -578,32 +576,46 @@ msgstr "Cancel·lar"
 msgid "Accept"
 msgstr "Acceptar"
 
-#: gvsigol_core/templates/project_add.html:359
-#: gvsigol_core/templates/project_update.html:543
+#: gvsigol_core/templates/project_add.html:365
+#: gvsigol_core/templates/project_update.html:549
 msgid "Extend project permissions to layers"
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:362
-#: gvsigol_core/templates/project_update.html:546
+#: gvsigol_core/templates/project_add.html:368
+#: gvsigol_core/templates/project_update.html:552
 msgid ""
 "This action will give the selected user groups permission to read all the "
-"layers included in this project."
+"layers included in this project. Notes:"
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:363
-#: gvsigol_core/templates/project_update.html:547
-msgid "Note: additional permissions existing on the layer will not be removed."
+#: gvsigol_core/templates/project_add.html:370
+#: gvsigol_core/templates/project_update.html:554
+msgid ""
+"If the project is public, all the layers assigned to the project will become "
+"public."
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:934
-#: gvsigol_core/templates/project_update.html:1350
+#: gvsigol_core/templates/project_add.html:371
+#: gvsigol_core/templates/project_update.html:555
+msgid ""
+"This action will operate on layers, layer groups and user groups currently "
+"selected, even if they have been not saved."
+msgstr ""
+
+#: gvsigol_core/templates/project_add.html:372
+#: gvsigol_core/templates/project_update.html:556
+msgid "Additional permissions existing on the layer will not be removed."
+msgstr ""
+
+#: gvsigol_core/templates/project_add.html:944
+#: gvsigol_core/templates/project_update.html:1360
 msgid "Success: Project permissions were applied to layers."
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:938
-#: gvsigol_core/templates/project_add.html:944
-#: gvsigol_core/templates/project_update.html:1354
-#: gvsigol_core/templates/project_update.html:1360
+#: gvsigol_core/templates/project_add.html:948
+#: gvsigol_core/templates/project_add.html:954
+#: gvsigol_core/templates/project_update.html:1364
+#: gvsigol_core/templates/project_update.html:1370
 msgid "Error: Permissions could not be extended to layers."
 msgstr ""
 
@@ -781,86 +793,86 @@ msgstr "Actualitzar"
 msgid "Package the base layer"
 msgstr "Cercar capes base..."
 
-#: gvsigol_core/templates/project_update.html:393
+#: gvsigol_core/templates/project_update.html:399
 msgid "Process running"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:398
+#: gvsigol_core/templates/project_update.html:404
 msgid "Processed"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:400
+#: gvsigol_core/templates/project_update.html:406
 msgid "of"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:407
+#: gvsigol_core/templates/project_update.html:413
 msgid "Estimated Time"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:413
-#: gvsigol_core/templates/project_update.html:461
+#: gvsigol_core/templates/project_update.html:419
+#: gvsigol_core/templates/project_update.html:467
 msgid "Format"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:419
-#: gvsigol_core/templates/project_update.html:448
+#: gvsigol_core/templates/project_update.html:425
+#: gvsigol_core/templates/project_update.html:454
 msgid "Extent"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:425
-#: gvsigol_core/templates/project_update.html:474
+#: gvsigol_core/templates/project_update.html:431
+#: gvsigol_core/templates/project_update.html:480
 msgid "Niveles de zoom"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:435
+#: gvsigol_core/templates/project_update.html:441
 msgid "Download version"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:440
+#: gvsigol_core/templates/project_update.html:446
 msgid "Download"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:451
+#: gvsigol_core/templates/project_update.html:457
 msgid "Project"
 msgstr "Projecte"
 
-#: gvsigol_core/templates/project_update.html:454
+#: gvsigol_core/templates/project_update.html:460
 #, fuzzy
 #| msgid "Layer tree"
 msgid "Layer"
 msgstr "Arbre de capes"
 
-#: gvsigol_core/templates/project_update.html:464
+#: gvsigol_core/templates/project_update.html:470
 msgid "PNG"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:467
+#: gvsigol_core/templates/project_update.html:473
 msgid "JPG"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:477
+#: gvsigol_core/templates/project_update.html:483
 msgid "Tiles per side"
 msgstr "Tiles per costat"
 
-#: gvsigol_core/templates/project_update.html:484
+#: gvsigol_core/templates/project_update.html:490
 msgid "Tilematrixset (WMTS)"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:487
+#: gvsigol_core/templates/project_update.html:493
 msgid "Tilematrixset"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:493
+#: gvsigol_core/templates/project_update.html:499
 #, fuzzy
 #| msgid "Create new layer group"
 msgid "Create layer"
 msgstr "Crear nou grup de capes"
 
-#: gvsigol_core/templates/project_update.html:494
+#: gvsigol_core/templates/project_update.html:500
 msgid "Continue download"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:495
+#: gvsigol_core/templates/project_update.html:501
 msgid "Stop Process"
 msgstr ""
 
@@ -995,85 +1007,85 @@ msgstr "Cognom"
 msgid "This is your new temporary password"
 msgstr "Aquesta és la contrasenya provisionalment"
 
-#: gvsigol_core/views.py:189
+#: gvsigol_core/views.py:190
 msgid "Navigation history"
 msgstr "Historial de navegació"
 
-#: gvsigol_core/views.py:190
+#: gvsigol_core/views.py:191
 msgid "Browse the view forward and backward"
 msgstr "Examineu la vista endavant i endarrere"
 
-#: gvsigol_core/views.py:194
+#: gvsigol_core/views.py:195
 msgid "Zoom tools"
 msgstr "Eines de zoom"
 
-#: gvsigol_core/views.py:195
+#: gvsigol_core/views.py:196
 msgid "Zoom in, zoom out, ..."
 msgstr "Zoom mès, zoom menys, ..."
 
-#: gvsigol_core/views.py:199
+#: gvsigol_core/views.py:200
 msgid "Feature info"
 msgstr "Eina d'informació"
 
-#: gvsigol_core/views.py:200
+#: gvsigol_core/views.py:201
 msgid "Map information at point"
 msgstr "Informació del mapa al punt"
 
-#: gvsigol_core/views.py:204
+#: gvsigol_core/views.py:205
 msgid "Measure tools"
 msgstr "Eines de mesura"
 
-#: gvsigol_core/views.py:205
+#: gvsigol_core/views.py:206
 msgid "It allows to measure areas and distances"
 msgstr "Permet mesurar àrees i distàncies"
 
-#: gvsigol_core/views.py:209
+#: gvsigol_core/views.py:210
 msgid "Search coordinates"
 msgstr "Buscar coordenades"
 
-#: gvsigol_core/views.py:210
+#: gvsigol_core/views.py:211
 msgid "Center the map at given coordinates"
 msgstr "Centra el mapa a les coordenades donades"
 
-#: gvsigol_core/views.py:214
+#: gvsigol_core/views.py:215
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenades"
 
-#: gvsigol_core/views.py:215
+#: gvsigol_core/views.py:216
 msgid "Transform coordinates between different systems"
 msgstr "Transformar les coordenades entre diferents sistemes"
 
-#: gvsigol_core/views.py:219
+#: gvsigol_core/views.py:220
 msgid "Geolocation"
 msgstr "Geolocalització"
 
-#: gvsigol_core/views.py:220
+#: gvsigol_core/views.py:221
 msgid "Center the map in the current position"
 msgstr "Centra el mapa a la posició actual"
 
-#: gvsigol_core/views.py:224
+#: gvsigol_core/views.py:225
 msgid "Share view"
 msgstr "Compartir vista"
 
-#: gvsigol_core/views.py:225
+#: gvsigol_core/views.py:226
 msgid "Allows you to share the view in its current state"
 msgstr "Permet compartir la vista en el seu estat actual"
 
-#: gvsigol_core/views.py:229
+#: gvsigol_core/views.py:230
 #, fuzzy
 #| msgid "Select image"
 msgid "Select feature"
 msgstr "Seleccionar imatge"
 
-#: gvsigol_core/views.py:230
+#: gvsigol_core/views.py:231
 msgid "Select features from current layers"
 msgstr "Seleccioneu features de les capes actuals"
 
-#: gvsigol_core/views.py:359
+#: gvsigol_core/views.py:360
 msgid "You must enter an project name"
 msgstr "Ha d'introduir un nom de projecte"
 
-#: gvsigol_core/views.py:363
+#: gvsigol_core/views.py:364
 #, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
@@ -1083,27 +1095,30 @@ msgstr ""
 "una lletra o guió baix (_). Els següents caracters poden ser lletres, guió "
 "baix o nombres"
 
-#: gvsigol_core/views.py:367
+#: gvsigol_core/views.py:368
 msgid "Project name already exists"
 msgstr "El nom del projecte ja existeix"
 
-#: gvsigol_core/views.py:1350 gvsigol_core/views.py:1352
+#: gvsigol_core/views.py:1353 gvsigol_core/views.py:1355
 #, fuzzy
 #| msgid "Shared views"
 msgid "Shared view"
 msgstr "Vistes compartides"
 
-#: gvsigol_core/views.py:1353
+#: gvsigol_core/views.py:1356
 msgid "Link"
 msgstr ""
 
-#: gvsigol_core/views.py:1458 gvsigol_core/views.py:1493
+#: gvsigol_core/views.py:1461 gvsigol_core/views.py:1496
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1488
+#: gvsigol_core/views.py:1491
 msgid "The project was successfully cloned."
 msgstr ""
+
+#~ msgid "Is needed to save this project first, Do you want continue?"
+#~ msgstr "Cal guardar el projecte primer, Voleu continuar?"
 
 #~ msgid "gvsigonline docs"
 #~ msgstr "Manual de gvSIGOnline"
