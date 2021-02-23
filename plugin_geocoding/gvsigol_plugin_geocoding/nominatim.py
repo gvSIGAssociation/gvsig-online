@@ -16,14 +16,14 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from __builtin__ import RuntimeError
+from builtins import RuntimeError
 '''
 @author: Jose Badia <jbadia@scolab.es>
 '''
 from django.utils.translation import ugettext as _
 from geopy.geocoders import Nominatim as Nominatim_geocoder
 import json
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 class Nominatim():
     
@@ -74,8 +74,8 @@ class Nominatim():
                         suggestions.append(suggestion)
                 i=i+1
         except Exception as e:
-            print e
-            print 'Error al geocodificar con Nominatim. Probablemente está usando el servicio gratuito.'
+            print(e)
+            print('Error al geocodificar con Nominatim. Probablemente está usando el servicio gratuito.')
             
         
         response = suggestions

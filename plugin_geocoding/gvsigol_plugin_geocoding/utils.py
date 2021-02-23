@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from geoserver.workspace import Workspace
-from models import Provider
+from .models import Provider
 from gvsigol_services.models import Datastore
 # from gvsigol import settings
 from gvsigol_plugin_geocoding import settings as geocoding_settings
@@ -26,21 +26,19 @@ from gvsigol_plugin_geocoding import settings as geocoding_settings
 import psycopg2
 
 import json
-import xml.etree.cElementTree as ET
-import xml.etree.ElementTree as ET2
+from lxml import etree as ET
 import sys
 import codecs
 import os
-import urllib2
-import settings
+import urllib.request, urllib.error, urllib.parse
+from . import settings
 import zipfile
 import datetime
 import tempfile
 from subprocess import call
-from dbfpy import dbf
+from gvsigol_plugin_geocoding.dbfpy import dbf
 import shutil
 import logging
-from __builtin__ import False
 
 '''
 @author: José Badía <jbadia@scolab.es>
@@ -52,7 +50,7 @@ http://localhost:8983/solr/cartociudad/dataimport2?_=1487864250477&command=statu
 def status_solr_import(provider):
     url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=status&indent=on&wt=json"
     #url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport2?command=status&indent=on&wt=json"
-    req = urllib2.urlopen(url)
+    req = urllib.request.urlopen(url)
     if req.code != 200:
         return None
     data = json.load(req)   
@@ -64,7 +62,7 @@ http://localhost:8983/solr/admin/cores?action=RELOAD&core=<core_name>
 '''
 def reload_solr_config():
     url = geocoding_settings.URL_SOLR+"/admin/cores?action=RELOAD&core="+geocoding_settings.SOLR_CORE_NAME
-    req = urllib2.urlopen(url)
+    req = urllib.request.urlopen(url)
     if req.code != 200:
         return False
     return True
@@ -77,7 +75,7 @@ def remove_solr_data(provider):
     #resource = provider.type+"-"+str(provider.pk)
     resource = str(provider.pk)
     url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/update?stream.body=<delete><query>resource:*"+resource+"</query></delete>&commit=true"
-    req = urllib2.urlopen(url)
+    req = urllib.request.urlopen(url)
     if req.code != 200:
         return False
     return True
@@ -88,7 +86,7 @@ http://localhost:8983/solr/<core_name>/dataimport-<dataStoreID>?command=full-imp
 ''' 
 def full_import_solr_data(provider):
     url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=full-import&clean=false"
-    req = urllib2.urlopen(url)
+    req = urllib.request.urlopen(url)
     if req.code != 200:
         return False
     return True
@@ -96,7 +94,7 @@ def full_import_solr_data(provider):
 
 def delta_import_solr_data(provider):
     url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=delta-import"
-    req = urllib2.urlopen(url)
+    req = urllib.request.urlopen(url)
     if req.code != 200:
         return False
     return True
@@ -642,10 +640,10 @@ def check_postgres_config_is_ok(provider):
     try:
         connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
         connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        print "Connect ... "
+        print("Connect ... ")
     
-    except StandardError, e:
-        print "Failed to connect!", e
+    except Exception as e:
+        print("Failed to connect!", e)
         return False
     cursor = connection.cursor()
     
@@ -654,14 +652,14 @@ def check_postgres_config_is_ok(provider):
         test_func_exists = "select 'immutable_unaccent'::regproc;"
         cursor.execute(test_ext_exists)
         if (cursor.rowcount == 0):
-            print "NO existe la extensión pg_trgm en la base de datos. Intentamos crearla."
+            print("NO existe la extensión pg_trgm en la base de datos. Intentamos crearla.")
             return False
         
         cursor.execute(test_func_exists)
         if (cursor.rowcount == 0):
-            print "NO existe la función immmutable_unaccent en la base de datos. Intentamos crearla."
+            print("NO existe la función immmutable_unaccent en la base de datos. Intentamos crearla.")
             return False
-    except Exception, e:
+    except Exception as e:
         return False
     return True
             
@@ -690,10 +688,10 @@ def create_postgres_config(provider, has_soundex):
         try:
             connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
             connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            print "Connect ... "
+            print("Connect ... ")
         
-        except StandardError, e:
-            print "Failed to connect!", e
+        except Exception as e:
+            print("Failed to connect!", e)
             return False
         cursor = connection.cursor()
         
@@ -702,7 +700,7 @@ def create_postgres_config(provider, has_soundex):
             test_func_exists = "select 'immutable_unaccent'::regproc;"
             cursor.execute(test_ext_exists)
             if (cursor.rowcount == 0):
-                print "NO existe la extensión pg_trgm en la base de datos. Intentamos crearla."
+                print("NO existe la extensión pg_trgm en la base de datos. Intentamos crearla.")
                 create_extension = "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
                 
                 create_function = ("CREATE OR REPLACE FUNCTION immutable_unaccent(text) \n"
@@ -715,7 +713,7 @@ def create_postgres_config(provider, has_soundex):
             
             cursor.execute(test_func_exists)
             if (cursor.rowcount == 0):
-                print "NO existe la función immmutable_unaccent en la base de datos. Intentamos crearla."
+                print("NO existe la función immmutable_unaccent en la base de datos. Intentamos crearla.")
                 cursor.execute(create_function)
                 
             
@@ -733,8 +731,8 @@ def create_postgres_config(provider, has_soundex):
             cursor.execute(create_spatial_index)
             #rows = cursor.fetchall()
     
-        except StandardError, e:
-            print "SQL Error", e
+        except Exception as e:
+            print("SQL Error", e)
             cursor.close();
             connection.close();
             return False;
@@ -928,14 +926,8 @@ def remove_temp_files(provider):
 '''    
     
        
-class PCParser(ET2.XMLTreeBuilder):
-
-   def __init__(self):
-       ET2.XMLTreeBuilder.__init__(self)
-       # assumes ElementTree 1.2.X
-       self._parser.CommentHandler = self.handle_comment
-
-   def handle_comment(self, data):
-       self._target.start(ET2.Comment, {})
-       self._target.data(data)
-       self._target.end(ET2.Comment)
+class PCParser(ET.TreeBuilder):
+    def comment(self, data):
+        self.start(ET.Comment, {})
+        self.data(data)
+        self.end(ET.Comment)

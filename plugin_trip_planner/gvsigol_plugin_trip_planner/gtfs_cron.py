@@ -89,7 +89,7 @@ class trip_planner_schedule_tasks(AppConfig):
             spam_info = imp.find_module('gvsigol_auth')
             spam = imp.load_module('gvsigol_auth', *spam_info)
             
-            from views import initialize_trip_planner_cron
+            from .views import initialize_trip_planner_cron
             
             initialize_trip_planner_cron(True)
             
@@ -99,7 +99,7 @@ class trip_planner_schedule_tasks(AppConfig):
     
     def remove_job(self, id):
         global sch
-        print "############################    schedule=" + str(sch)
+        print("############################    schedule=" + str(sch))
         for job in sch.jobs:
             for tag in job.tags:
                 if tag == 'trip-planner-tasks':
@@ -111,7 +111,7 @@ class trip_planner_schedule_tasks(AppConfig):
                     
     def run_job(self, id):
         global sch
-        print "############################    schedule=" + str(sch)
+        print("############################    schedule=" + str(sch))
         for job in sch.jobs:
             for tag in job.tags:
                 if tag == 'trip-planner-tasks':
@@ -125,39 +125,39 @@ class trip_planner_schedule_tasks(AppConfig):
     
     def initialize_trip_planner_gtfs_cron(self, is_cron_activated, time_update_programmed, interval_update_programmed, unit_update_programmed):
         global sch
-        print "############################ 1- schedule.jobs=" + str(sch.jobs.__len__())
+        print("############################ 1- schedule.jobs=" + str(sch.jobs.__len__()))
         
         #self.remove_job(str(id))
         sch.clear('trip-planner-tasks')
         
-        from views import cron_trip_planner_refresh
+        from .views import cron_trip_planner_refresh
         
         if is_cron_activated:
             days = "all"
             dt = time_update_programmed
             hour = '00:00'
             if dt:
-                hour = str(dt.hour)+':'+str(dt.minute)
+                hour = "{:02d}:{:02d}".format(dt.hour, dt.minute)
             
             if interval_update_programmed and unit_update_programmed:
                 time_value = interval_update_programmed
                 time_unit = unit_update_programmed
                 if time_unit == 'minutes':
                     sch.every(time_value).minutes.do(cron_trip_planner_refresh, id).tag('trip-planner-tasks', 'trip-planner-tasks')
-                    print("schedule.every("+str(time_value)+").minutes.do(action_launched, "+str(id) +").tag('trip-planner-tasks')")
+                    print(("schedule.every("+str(time_value)+").minutes.do(action_launched, "+str(id) +").tag('trip-planner-tasks')"))
                 if time_unit == 'hours':
                     sch.every(time_value).hours.at(hour).do(cron_trip_planner_refresh, id).tag('trip-planner-tasks', 'trip-planner-tasks')
-                    print("schedule.every("+str(time_value)+").hours.at("+hour+").do(action_launched, "+str(id) +").tag('trip-planner-tasks')")
+                    print(("schedule.every("+str(time_value)+").hours.at("+hour+").do(action_launched, "+str(id) +").tag('trip-planner-tasks')"))
                 if time_unit == 'days':
                     sch.every(time_value).days.at(hour).do(cron_trip_planner_refresh, id).tag('trip-planner-tasks', 'trip-planner-tasks')
-                    print("schedule.every("+str(time_value)+").days.at("+hour+").do(action_launched, "+str(id) +").tag('trip-planner-tasks')")
+                    print(("schedule.every("+str(time_value)+").days.at("+hour+").do(action_launched, "+str(id) +").tag('trip-planner-tasks')"))
             else:
                 if hour:
                     sch.every(days).days.at(hour).do(cron_trip_planner_refresh, id).tag('trip-planner-tasks', 'trip-planner-tasks')
-                    print("schedule.every("+str(time_value)+").days.at("+hour+").do(action_launched, "+str(id) +").tag('trip-planner-tasks')")
+                    print(("schedule.every("+str(time_value)+").days.at("+hour+").do(action_launched, "+str(id) +").tag('trip-planner-tasks')"))
             
             #if not is_first_time:
                 #self.run_job(str(id))
          
-        print "############################ 2- schedule.jobs=" + str(sch.jobs.__len__())
+        print("############################ 2- schedule.jobs=" + str(sch.jobs.__len__()))
                        

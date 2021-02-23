@@ -20,14 +20,13 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 from django.utils.translation import ugettext as _
-from geopy.compat import urlencode
 from geopy.util import logger
 from geopy.geocoders import Nominatim as Nominatim_geocoder
 # from gvsigol import settings as core_settings
-import settings
-import urllib2
+from . import settings
+import urllib.request, urllib.error, urllib.parse
 import json, requests, ast
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 class GoogleMaps():
 

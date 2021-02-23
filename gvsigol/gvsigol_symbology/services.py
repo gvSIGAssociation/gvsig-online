@@ -22,11 +22,11 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap
+from .models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap
 from django.utils.translation import ugettext_lazy as _
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
-import utils, sld_builder
+from . import utils, sld_builder
 import tempfile
 import json
 import os
@@ -238,7 +238,7 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                     symbolizer.save()
                     
                 if len(s.Graphic.ExternalGraphic) >= 1:
-                    print 'ExternalGraphic'
+                    print('ExternalGraphic')
                     
             elif s.original_tagname_ == 'LineSymbolizer':
                 stroke = '#ffffff'
@@ -416,7 +416,7 @@ def clone_layer_styles(mapservice, source_layer, target_layer):
             mapservice.setLayerStyle(target_layer, new_style.name, new_style.is_default)
         else:
             # TODO: manage errors
-            print "DEBUG: Problem cloning style .." + new_style.name
+            print("DEBUG: Problem cloning style .." + new_style.name)
 
 
 def clone_style(mapservice, layer, original_style_name, cloned_style_name):
@@ -424,24 +424,24 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     try:
         original_style = Style.objects.filter(name__exact=original_style_name)[0]
     except Exception as e:
-        print str(e)
+        print(str(e))
         return False
         
     try:
         style = Style.objects.filter(name__exact=cloned_style_name)[0] 
         exists_cloned_style = True   
     except Exception as e:
-        print "DEBUG: Problem getting style .." + cloned_style_name
-        print str(e)
+        print("DEBUG: Problem getting style .." + cloned_style_name)
+        print(str(e))
         
     if exists_cloned_style:
-        print "DEBUG: Exists cloned style .." + cloned_style_name
+        print("DEBUG: Exists cloned style .." + cloned_style_name)
         rule = Rule.objects.filter(style=style)[0]
         symbolizers_to_delete = Symbolizer.objects.filter(rule=rule)
         for i in symbolizers_to_delete:
             i.delete()
     else:           
-        print "DEBUG: Not existe cloned style .." + cloned_style_name         
+        print("DEBUG: Not existe cloned style .." + cloned_style_name)         
         style = Style(
             name = cloned_style_name,
             title = original_style_name,
@@ -529,13 +529,13 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     sld_body = sld_builder.build_library_symbol(rule)
     s = mapservice.getStyle(style.name)
     if s is None:        
-        print "DEBUG: style not exists in Geoserver .. " + style.name
+        print("DEBUG: style not exists in Geoserver .. " + style.name)
         if mapservice.createStyle(style.name, sld_body):
             mapservice.setLayerStyle(layer, cloned_style_name, style.is_default)
         else:
             "DEBUG: problem creating style !!!!!" + style.name
     else:
-        print "DEBUG: Style exists in Geoserver .. " +style.name
+        print("DEBUG: Style exists in Geoserver .. " +style.name)
         if not mapservice.createStyle(cloned_style_name, sld_body):
             mapservice.updateStyle(layer, cloned_style_name, sld_body)
         mapservice.setLayerStyle(layer, cloned_style_name, style.is_default)

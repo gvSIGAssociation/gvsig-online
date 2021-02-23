@@ -30,6 +30,7 @@ import tempfile, zipfile
 import os, shutil, errno
 import json
 import re
+import gdaltools
 
 def __get_uncompressed_file_upload_path(f):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
@@ -70,17 +71,17 @@ def __compress_folder(file_path):
         return zip
 
 def remove_accents(string):
-    if type(string) is not unicode:
-        string = unicode(string, encoding='utf-8')
+    if type(string) is not str:
+        string = str(string, encoding='utf-8')
 
     string = string.lower()
 
-    string = re.sub(u"[àáâãäå]", 'a', string)
-    string = re.sub(u"[èéêë]", 'e', string)
-    string = re.sub(u"[ìíîï]", 'i', string)
-    string = re.sub(u"[òóôõö]", 'o', string)
-    string = re.sub(u"[ùúûü]", 'u', string)
-    string = re.sub(u"[ýÿ]", 'y', string)
+    string = re.sub("[àáâãäå]", 'a', string)
+    string = re.sub("[èéêë]", 'e', string)
+    string = re.sub("[ìíîï]", 'i', string)
+    string = re.sub("[òóôõö]", 'o', string)
+    string = re.sub("[ùúûü]", 'u', string)
+    string = re.sub("[ýÿ]", 'y', string)
     
     string = re.sub('[^a-z0-9 \_\.]', '', string)
     string = string.replace(' ','_')
@@ -135,7 +136,7 @@ def copy(src, dest):
         if e.errno == errno.ENOTDIR:
             shutil.copy(src, dest)
         else:
-            print('Directory not copied. Error: %s' % e)
+            print(('Directory not copied. Error: %s' % e))
 
 
 def sortFontsArray(array):
@@ -182,7 +183,7 @@ def check_library_path(library):
         return library_path
      
     except OSError as e:
-        print('Info: %s' % e)
+        print(('Info: %s' % e))
         return library_path
     
 def check_custom_legend_path():
@@ -192,7 +193,7 @@ def check_custom_legend_path():
         return legend_path
      
     except OSError as e:
-        print('Info: %s' % e)
+        print(('Info: %s' % e))
         return legend_path
     
 def save_custom_legend(legend_path, file, file_name):    
@@ -235,7 +236,7 @@ def delete_external_graphic_img(library, file_name):
         return True
      
     except Exception as e:
-        print('Error: %s' % e)
+        print(('Error: %s' % e))
         return False
     
 def delete_library_dir(library):    
@@ -247,7 +248,7 @@ def delete_library_dir(library):
         return True
      
     except Exception as e:
-        print('Error: %s' % e)
+        print(('Error: %s' % e))
         return False
     
 def get_online_resource(library, file_name):
@@ -463,3 +464,29 @@ def reset_geoserver_style(gs, layer, style):
     sld_body = sld_builder.build_sld(layer, style)
     return gs.createStyle(style.name, sld_body)
     
+def get_raster_stats(raster_path):
+    """
+    Gets the statistics of a raster file or a directory containing .tif files.
+    If the path is a directory, the bands of each raster are concatenated as
+    if we had a single raster with lots of bands.
+    
+    Usage:
+    import gdal_tools
+    stats = gdal_tools.get_raster_stats('path_to_my_raster')
+    (band0_ min, band0_max, band0_mean, band0_stdev) = stats[0]
+    (band1_ min, band1_max, band1_mean, band1_stdev) = stats[1]
+    """
+    
+    main_path = raster_path.replace("file://", "")
+    files = []
+    result = []
+    
+    if os.path.isdir(main_path):
+        files = [os.path.join(main_path, f) for f in os.listdir(main_path) if os.path.isfile(os.path.join(main_path, f)) and str(f).endswith('.tif')]
+    else:
+        files.append(main_path)
+    
+    for file_path in files:
+        band_results = gdaltools.get_raster_stats(file_path)
+        result = result + band_results
+    return result

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 
 '''
@@ -34,8 +34,8 @@ class Survey(models.Model):
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=150) 
     project = models.ForeignKey(Project, null=True, blank=True, on_delete = models.SET_NULL)
-    datastore = models.ForeignKey(Datastore)
-    layer_group = models.ForeignKey(LayerGroup, null=True, blank=True)
+    datastore = models.ForeignKey(Datastore, on_delete = models.CASCADE)
+    layer_group = models.ForeignKey(LayerGroup, null=True, blank=True, on_delete = models.SET_NULL)
     
     def __unicode__(self):
         return self.name
@@ -54,13 +54,13 @@ class SurveySection(models.Model):
         return self.survey+'-'+self.name
     
 class SurveyReadGroup(models.Model):
-    survey = models.ForeignKey(Survey, default=None)
-    user_group = models.ForeignKey(UserGroup, default=None)
-    def unicode(self):
+    survey = models.ForeignKey(Survey, default=None, on_delete=models.CASCADE)
+    user_group = models.ForeignKey(UserGroup, default=None, on_delete=models.CASCADE)
+    def str(self):
         return self.survey.name + ' - ' + self.user_group.name
       
 class SurveyWriteGroup(models.Model):
-    survey = models.ForeignKey(Survey, default=None)
-    user_group = models.ForeignKey(UserGroup, default=None)
-    def unicode(self):
+    survey = models.ForeignKey(Survey, default=None, on_delete=models.CASCADE)
+    user_group = models.ForeignKey(UserGroup, default=None, on_delete=models.CASCADE)
+    def str(self):
         return self.survey.name + ' - ' + self.user_group.name

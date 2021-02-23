@@ -19,13 +19,13 @@
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
-import backend_geoserver
+from . import backend_geoserver
 import logging
 
 logger = logging.getLogger("gvsigol")
 
 
-from models import Server, Node
+from .models import Server, Node
            
 class GeographicServers:
     def __init__(self):

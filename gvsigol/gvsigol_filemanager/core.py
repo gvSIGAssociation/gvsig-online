@@ -3,9 +3,9 @@ import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 
-import signals
+from . import signals
 from gvsigol.settings import FILEMANAGER_DIRECTORY, FILEMANAGER_STORAGE, INSTALLED_APPS
-from utils import sizeof_fmt
+from .utils import sizeof_fmt
 from gvsigol_core import utils as core_utils
 import zipfile
 import shutil
@@ -64,7 +64,7 @@ class Filemanager(object):
             'filepath': self.path,
             'filename': filename,
             'filesize': sizeof_fmt(FILEMANAGER_STORAGE.size(self.location)),
-            'filedate': FILEMANAGER_STORAGE.modified_time(self.location),
+            'filedate': FILEMANAGER_STORAGE.get_modified_time(self.location),
             'fileurl': self.url,
         }
 
@@ -84,7 +84,7 @@ class Filemanager(object):
                 'extension': extension,
                 'filetype': filetype,
                 'filename': name,
-                'filedate': FILEMANAGER_STORAGE.modified_time(os.path.join(self.path, name)),
+                'filedate': FILEMANAGER_STORAGE.get_modified_time(os.path.join(self.path, name)),
                 'filesize': sizeof_fmt(FILEMANAGER_STORAGE.size(os.path.join(self.path, name))),
             }
 

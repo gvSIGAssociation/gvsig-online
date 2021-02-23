@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
 from builtins import str as text
-from __builtin__ import True
-from billiard.compat import resource
 
 '''
     gvSIG Online.
@@ -43,7 +40,7 @@ import json
 from django.core import mail
 from django.template.loader import render_to_string
 from django.utils.translation import override
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils import timezone
 from gvsigol import settings as core_settings
@@ -172,11 +169,11 @@ def getDownloadResourceUrl(request_random_id, link_random_id):
 
 def getFreeSpace(path):
     try:
-        logger.debug(u"getFreeSpace path: "+path)
+        logger.debug("getFreeSpace path: "+path)
         usage  = os.statvfs(path)
         return (usage.f_frsize * usage.f_bfree)
     except OSError:
-        logger.exception(u"Error getting free space for path: " + path)
+        logger.exception("Error getting free space for path: " + path)
         return 0
     except AttributeError: # Python 3
         try:
@@ -252,7 +249,7 @@ def _getExtension(file_format):
     return "." + file_format
 
 def _normalizeWxsUrl(url):
-        return url.split(u"?")[0]
+        return url.split("?")[0]
 
 INVERSE_AXIS_CRS_LIST = None
 def _getCrsReverseAxisList():
@@ -329,7 +326,7 @@ def checkCatalogPermissions(metadata_uuid, res_type, url):
             for onlineResource in onlineResources:
                 if protocol in onlineResource.protocol:
                     if url == onlineResource.url:
-                        logger.debug(u"permissions OK - " + metadata_uuid + u" - " + res_type)
+                        logger.debug("permissions OK - " + metadata_uuid + " - " + res_type)
                         return isRestricted(onlineResource, max_public_size)
         elif res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
             for onlineResource in onlineResources:
@@ -337,7 +334,7 @@ def checkCatalogPermissions(metadata_uuid, res_type, url):
                         or (onlineResource.protocol.startswith('WWW:LINK-') and onlineResource.protocol.endswith('-link')) \
                         or onlineResource.protocol.startswith('FILE:'):
                     if url == onlineResource.url:
-                        logger.debug(u"permissions OK - " + metadata_uuid + u" - " + res_type)
+                        logger.debug("permissions OK - " + metadata_uuid + " - " + res_type)
                         return isRestricted(onlineResource, max_public_size)
     except requests.exceptions.RequestException:
         logger.exception("Error connecting to the catalog")
@@ -375,7 +372,7 @@ def retrieveLinkLocator(url):
         r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
         if r.status_code != 200:
             tmp_file.close()
-            raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+            raise PreparationError('Error retrieving link. HTTP status code: '+text(r.status_code) + ". Url: " + url)
         for chunk in r.iter_content(chunk_size=128):
             tmp_file.write(chunk)
         tmp_file.close()
@@ -424,7 +421,7 @@ def preprocessLocator(resourceLocator, resource_descriptor):
         resourceLocator.authorization = ResourceLocator.AUTHORIZATION_NOT_REQUIRED
     
     if not resourceLocator.resolved_url:
-        raise PermanentPreparationError(u"Url could not be resolved for resource locator: " + text(resourceLocator.pk))
+        raise PermanentPreparationError("Url could not be resolved for resource locator: " + text(resourceLocator.pk))
 
 def retrieveResource(url, resource_descriptor):
     """
@@ -477,7 +474,7 @@ class WCSClient():
             logger.debug(url)
             r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
             if r.status_code != 200:
-                logger.debug(u'Error getting DescribeCoverage. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+                logger.debug('Error getting DescribeCoverage. HTTP status code: '+text(r.status_code) + ". Url: " + url)
                 return
             describeCoverageXml = r.content
             incorrectGeoserverNamespaces = '<wcs:CoverageDescriptions xsi:schemaLocation=" http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd">'
@@ -523,18 +520,18 @@ class WCSClient():
                     if operationHttpGetUrl:
                         return operationHttpGetUrl
         except:
-            logger.exception(u"Error getting the URL of operation: " + operationName)
+            logger.exception("Error getting the URL of operation: " + operationName)
         return self.url
 
     def getWcsRequest(self):
         capabilitiesTree = self.getCapabilitiesTree(self.url)
         getCoverageUrl = self.getGetOperationUrl_v2_0_1(capabilitiesTree, 'GetCoverage')
-        url = _normalizeWxsUrl(getCoverageUrl) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + self.layer_name
+        url = _normalizeWxsUrl(getCoverageUrl) + '?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + self.layer_name
         self.file_format = _getParamValue(self.params, FORMAT_PARAM_NAME)
         if self.isMultipartResult():
-            url += u'&mediatype=multipart/related'
+            url += '&mediatype=multipart/related'
         if self.file_format:
-            url += u'&format=' + self.file_format
+            url += '&format=' + self.file_format
         spatial_filter_type = _getParamValue(self.params, SPATIAL_FILTER_TYPE_PARAM_NAME)
         if spatial_filter_type == 'bbox':
             spatial_filter_bbox = _getParamValue(self.params, SPATIAL_FILTER_BBOX_PARAM_NAME)
@@ -565,11 +562,11 @@ class WCSClient():
                             
                         axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, srs, self.nativeSrsCode)
                         if self.nativeSrsCode and int(self.nativeSrsCode) in _getCrsReverseAxisList():
-                            spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
-                            spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
+                            spatial_subset = '&subset=' + text(axes[0]) + '%28%22' + text(axis1_min) + '%22%2C%22' + text(axis1_max) + '%22%29'
+                            spatial_subset += '&subset=' + text(axes[1]) + '%28%22' + text(axis0_min) + '%22%2C%22' + text(axis0_max) + '%22%29'
                         else:
-                            spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
-                            spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
+                            spatial_subset = '&subset=' + text(axes[0]) + '%28%22' + text(axis0_min) + '%22%2C%22' + text(axis0_max) + '%22%29'
+                            spatial_subset += '&subset=' + text(axes[1]) + '%28%22' + text(axis1_min) + '%22%2C%22' + text(axis1_max) + '%22%29'
                     url += spatial_subset
         logger.debug(url)
         return url
@@ -650,11 +647,11 @@ class WCSClient():
                         code = exc.get('exceptionCode')
                         message = "".join(exc.itertext())
                         if code == 'InvalidSubsetting':
-                            raise PermanentPreparationError(u'The provided spatial filter does not overlap the layer. Layer could not be retrieved. Error code: ' + code + ' - Error message: ' + message.strip())
+                            raise PermanentPreparationError('The provided spatial filter does not overlap the layer. Layer could not be retrieved. Error code: ' + code + ' - Error message: ' + message.strip())
                 except ET.LxmlError:
                     pass
                 tmp_file.close()
-                raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+                raise PreparationError('Error retrieving link. HTTP status code: '+text(r.status_code) + ". Url: " + url)
             for chunk in r.iter_content(chunk_size=128):
                 tmp_file.write(chunk)
             tmp_file.close()
@@ -665,7 +662,7 @@ class WCSClient():
                     ns, sep, tag = element.tag.rpartition('}') # get the tag name
                     if 'www.opengis.net/ows' in ns and tag == 'ExceptionReport':
                         error_text = ET.parse(tmp_path).tostring()
-                        raise PreparationError(u'Error retrieving WCS resource. Url: ' + url + 'OWS error message: ' + error_text)
+                        raise PreparationError('Error retrieving WCS resource. Url: ' + url + 'OWS error message: ' + error_text)
                     break
 
         except PreparationError:
@@ -722,7 +719,7 @@ class WCSClient():
             if not selfReferencedFormat:
                 self._createWldFile(values)
         except:
-            logger.exception(u"Error creating auxiliary files for resource: " + url)
+            logger.exception("Error creating auxiliary files for resource: " + url)
         return self.output_dir
 
 class WFSClient():
@@ -760,7 +757,7 @@ class WFSClient():
                         if srsNode is not None:
                             return srsNode.text
         except:
-            logger.exception(u"Error getting the CRS of the WFS layer: " + layerName)
+            logger.exception("Error getting the CRS of the WFS layer: " + layerName)
 
     def getGetOperationUrl_v1_0_0(self, capabilitiesTree, operationName):
         try:
@@ -772,7 +769,7 @@ class WFSClient():
                     if operationHttpGetUrl:
                         return operationHttpGetUrl
         except:
-            logger.exception(u"Error getting the URL of operation: " + operationName)
+            logger.exception("Error getting the URL of operation: " + operationName)
         return self.url
 
     def getGetOperationUrl_v2_0_0(self, capabilitiesTree, operationName):
@@ -785,7 +782,7 @@ class WFSClient():
                     if operationHttpGetUrl:
                         return operationHttpGetUrl
         except:
-            logger.exception(u"Error getting the URL of operation: " + operationName)
+            logger.exception("Error getting the URL of operation: " + operationName)
         return self.url
 
     def getLayerCrs_v2_0_0(self, capabilitiesTree, layerName):
@@ -799,7 +796,7 @@ class WFSClient():
                         if srsNode is not None:
                             return srsNode.text
         except:
-            logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
+            logger.exception("Error getting the CRS of the WFS layer" + layerName)
     
     def getCapabilitiesTree(self, baseUrl, version='2.0.0'):
         url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=' + version +'&request=GetCapabilities'
@@ -840,11 +837,11 @@ class WFSClient():
         </ogc:Filter>
         """
     
-        url = _normalizeWxsUrl(baseUrl) + u'?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name
+        url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name
         if hits:
-            url += u'&RESULTTYPE=hits'
+            url += '&RESULTTYPE=hits'
         else:
-            url += u'&OUTPUTFORMAT='+ file_format
+            url += '&OUTPUTFORMAT='+ file_format
         spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
         if spatial_filter_type == 'bbox':
             spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
@@ -853,11 +850,11 @@ class WFSClient():
                 if len(bboxElements) == 5:
                     sourceCrs = bboxElements[4]
                     nativeExtent = reprojectExtent(float(bboxElements[0]), float(bboxElements[1]), float(bboxElements[2]), float(bboxElements[3]), sourceCrs, self.nativeSrs)
-                    url += u'&BBOX=' + text(nativeExtent[0]) + u"," + text(nativeExtent[1])  + u"," + text(nativeExtent[2]) + u"," + text(nativeExtent[3])
+                    url += '&BBOX=' + text(nativeExtent[0]) + "," + text(nativeExtent[1])  + "," + text(nativeExtent[2]) + "," + text(nativeExtent[3])
         if not hits and count is not None:
-            url += u'&MAXFEATURES=' + text(count)
+            url += '&MAXFEATURES=' + text(count)
             if startIndex is not None:
-                url += u'&STARTINDEX=' + text(startIndex)
+                url += '&STARTINDEX=' + text(startIndex)
     
         return url
 
@@ -889,11 +886,11 @@ class WFSClient():
           </ogc:BBOX>
         </ogc:Filter>
         """
-        url = _normalizeWxsUrl(baseUrl) + u'?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAME=' + layer_name
+        url = _normalizeWxsUrl(baseUrl) + '?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAME=' + layer_name
         if hits:
-            url += u'&RESULTTYPE=hits'
+            url += '&RESULTTYPE=hits'
         else:
-            url += u'&OUTPUTFORMAT='+ file_format
+            url += '&OUTPUTFORMAT='+ file_format
         spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
         if spatial_filter_type == 'bbox':
             spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
@@ -917,13 +914,13 @@ class WFSClient():
                     epsgCodeValue = self._getEpsgValue(self.nativeSrs)
                     axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, sourceCrs, epsgCodeValue)
                     if epsgCodeValue and self.nativeSrs != 'urn:ogc:def:crs:OGC:1.3:CRS:84' and int(epsgCodeValue) in _getCrsReverseAxisList():
-                        url += u'&BBOX=' + text(axis1_min) + u"," + text(axis0_min)  + u"," + text(axis1_max) + u"," + text(axis0_max)
+                        url += '&BBOX=' + text(axis1_min) + "," + text(axis0_min)  + "," + text(axis1_max) + "," + text(axis0_max)
                     else:
-                        url += u'&BBOX=' + text(axis0_min) + u"," + text(axis1_min)  + u"," + text(axis0_max) + u"," + text(axis1_max)
+                        url += '&BBOX=' + text(axis0_min) + "," + text(axis1_min)  + "," + text(axis0_max) + "," + text(axis1_max)
         if not hits and count is not None:
-            url += u'&COUNT=' + text(count)
+            url += '&COUNT=' + text(count)
             if startIndex is not None:
-                url += u'&STARTINDEX=' + text(startIndex)
+                url += '&STARTINDEX=' + text(startIndex)
         logger.debug(url)
         return url
 
@@ -936,7 +933,7 @@ class WFSClient():
             if r.status_code != 200:
                 resource_file.close()
                 os.remove(resource_file)
-                raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+                raise PreparationError('Error retrieving link. HTTP status code: '+text(r.status_code) + ". Url: " + url)
             for chunk in r.iter_content(chunk_size=1024*1024):
                 resource_file.write(chunk)
                 # logger.debug("got 1MB")
@@ -949,7 +946,7 @@ class WFSClient():
                     ns, sep, tag = element.tag.rpartition('}') # get the tag name
                     if 'www.opengis.net/ows' in ns and tag == 'ExceptionReport':
                         error_text = ET.parse(resource_path).tostring()
-                        raise PreparationError(u'Error retrieving WFS resource. Url: ' + url + 'OWS error message: ' + error_text)
+                        raise PreparationError('Error retrieving WFS resource. Url: ' + url + 'OWS error message: ' + error_text)
                     break
 
         except PreparationError:
@@ -994,11 +991,11 @@ class WFSClient():
                 if line.startswith('Feature Count: '):
                     return int(line[15:])
                 line = buf.readline()
-            logger.error(u"Error getting feature count: " + local_path)
+            logger.error("Error getting feature count: " + local_path)
             logger.debug(info_str)
             return None
         except:
-            logger.exception(u"Error getting feature count: " + local_path)
+            logger.exception("Error getting feature count: " + local_path)
 
     def parseHits(self, response):
         try:
@@ -1016,7 +1013,7 @@ class WFSClient():
                     return int(collection.get('numberMatched'))
             """ 
         except:
-            logger.exception(u"Error parsing the hits response")
+            logger.exception("Error parsing the hits response")
         return 0
     
     def getHits(self):
@@ -1029,17 +1026,17 @@ class WFSClient():
     def _addDownloadWarningFile(self, count, url):
         out_file = os.path.join(self.output_dir, _('wfs_download_warning')+'.txt')
         with open(out_file, "w") as thefile:
-            thefile.write(_(u"Could not check the last file of the WFS download. Maybe the result is incomplete.").encode("utf-8"))
-            thefile.write(u"\n".encode("utf-8"))
-            thefile.write(_(u"Layer name: ").encode("utf-8"))
+            thefile.write(_("Could not check the last file of the WFS download. Maybe the result is incomplete.").encode("utf-8"))
+            thefile.write("\n".encode("utf-8"))
+            thefile.write(_("Layer name: ").encode("utf-8"))
             thefile.write(text(self.layer_name).encode("utf-8"))
-            thefile.write(u"\n".encode("utf-8"))
-            thefile.write(_(u"Total downloaded geometries: ").encode("utf-8"))
+            thefile.write("\n".encode("utf-8"))
+            thefile.write(_("Total downloaded geometries: ").encode("utf-8"))
             thefile.write(text(count).encode("utf-8"))
-            thefile.write(u"\n".encode("utf-8"))
-            thefile.write(_(u"Url of last downloaded file: ").encode("utf-8"))
+            thefile.write("\n".encode("utf-8"))
+            thefile.write(_("Url of last downloaded file: ").encode("utf-8"))
             thefile.write(text(url).encode("utf-8"))
-            thefile.write(u"\n".encode("utf-8"))
+            thefile.write("\n".encode("utf-8"))
 
     def retrieveResources(self):
         """
@@ -1059,8 +1056,8 @@ class WFSClient():
             else:
                 self.nativeSrs = self.getLayerCrs_v2_0_0(self.capabilitiesTree, self.layer_name)
                 getFeatureUrl = self.getGetOperationUrl_v2_0_0(self.capabilitiesTree, 'GetFeature')
-            print "getFeatureUrl"
-            print getFeatureUrl
+            print("getFeatureUrl")
+            print(getFeatureUrl)
             
             paramDict = {}
             if self.file_format is not None:
@@ -1108,7 +1105,7 @@ class WFSClient():
             """
         except:
             shutil.rmtree(self.output_dir, ignore_errors=True)
-            logger.exception(u"Error retrieving resource: " + self.url)
+            logger.exception("Error retrieving resource: " + self.url)
             raise
         return self.output_dir
 
@@ -1120,7 +1117,7 @@ def normalizeOutname(name):
 def guessResourceName(resource_name, params, suffix='', extension=None):
     # remove non-a-z_ or numeric characters
     resource_name = normalizeOutname(resource_name)
-    if u'.' in resource_name:
+    if '.' in resource_name:
         return resource_name
     file_format = _getParamValue(params, FORMAT_PARAM_NAME, '')
     if extension is not None:
@@ -1193,9 +1190,9 @@ def _addResources(zipobj, resource_desc_list, count):
     i = 0
     for resourceDesc in resource_desc_list:
         if len(resource_desc_list) > 1:
-            res_name = text(count) + u"-" + text(i) + u"-" + resourceDesc.name
+            res_name = text(count) + "-" + text(i) + "-" + resourceDesc.name
         else:
-            res_name = text(count) + u"-" + resourceDesc.name
+            res_name = text(count) + "-" + resourceDesc.name
         if os.path.isdir(resourceDesc.res_path):
             for root, dirs, files in os.walk(resourceDesc.res_path):
                 for file_name in files:
@@ -1279,17 +1276,17 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
         with override(get_language(request)):
             tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
             subject = _('Download service: your request has been received - %(requestid)s') % {'requestid': request.request_random_id}
-            statusdetails = _(u'\nYou can use this tracking link to check the status of your request: {0}').format(tracking_url)
+            statusdetails = _('\nYou can use this tracking link to check the status of your request: {0}').format(tracking_url)
             htmlContext = {
-                u"statusdesc": subject,
-                u"statusdetails": statusdetails,
-                u'locators': []
+                "statusdesc": subject,
+                "statusdetails": statusdetails,
+                'locators': []
                 }
-            plain_message = _(u'Your download request has been received.')
+            plain_message = _('Your download request has been received.')
             plain_message += '\n' + statusdetails + '\n'
             plain_message += '\n' + _('Included resources:')
             for locator in request.resourcelocator_set.all():
-                plain_message += u' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
+                plain_message += ' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
                 htmlContext['locators'].append({'name': '{0!s} [{1!s}]\n'.format(locator.fq_title, locator.name),
                                                 'status': _(locator.status_detail)})
                 
@@ -1335,20 +1332,20 @@ def notifyRequestProgress(self, request_id):
             tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
             if request.request_status == DownloadRequest.COMPLETED_STATUS:
                 subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
-                statusdetails = _(u'Your download request is ready.')
+                statusdetails = _('Your download request is ready.')
             elif request.request_status == DownloadRequest.COMPLETED_WITH_ERRORS:
                 subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
-                statusdetails = _(u'Your download request is ready. Some resources failed to be processed and are not available for download at the moment.')
+                statusdetails = _('Your download request is ready. Some resources failed to be processed and are not available for download at the moment.')
             else:
                 subject = _('Download service: request progress - %(requestid)s') % {'requestid': request.request_random_id}
-                statusdetails = _(u'Your download request has been partially processed.')
+                statusdetails = _('Your download request has been partially processed.')
             
             plain_message = statusdetails + '\n'
             plain_message +=  _('You can use the following links to download the requested resources:') + '\n'
             
             htmlContext = {
-                u"statusdesc": _(u'Download service: request progress - {0}').format(request.request_random_id),
-                u"statusdetails": statusdetails,
+                "statusdesc": _('Download service: request progress - {0}').format(request.request_random_id),
+                "statusdetails": statusdetails,
                 }
 
             count = 1
@@ -1363,22 +1360,22 @@ def notifyRequestProgress(self, request_id):
                 linkHtmlContext['validto'] = valid_to
                 if len(linkResources)==1:
                     if link.is_auxiliary:
-                        plain_message += u' {0:2d}- {1!s} [{2!s}]: {3!s}\n'.format(count, linkResources[0].fq_title, link.name, link_url)
-                        linkHtmlContext['name'] = u'{0!s} [{0!s}]'.format(linkResources[0].fq_title, link.name)
+                        plain_message += ' {0:2d}- {1!s} [{2!s}]: {3!s}\n'.format(count, linkResources[0].fq_title, link.name, link_url)
+                        linkHtmlContext['name'] = '{0!s} [{0!s}]'.format(linkResources[0].fq_title, link.name)
                     else:
-                        plain_message += u' {0:2d}- {1!s} [{2!s}]: {3!s}\n'.format(count, linkResources[0].fq_title, linkResources[0].name, link_url)
-                        linkHtmlContext['name'] = u'{0!s} [{0!s}]'.format(linkResources[0].fq_title, linkResources[0].name)
+                        plain_message += ' {0:2d}- {1!s} [{2!s}]: {3!s}\n'.format(count, linkResources[0].fq_title, linkResources[0].name, link_url)
+                        linkHtmlContext['name'] = '{0!s} [{0!s}]'.format(linkResources[0].fq_title, linkResources[0].name)
                     linkHtmlContext['url'] = link_url
                 else:
-                    plain_message += u' {0:2d}- {1!s}: {2!s}\n'.format(count, _('Multiresource package'), link_url)
-                    plain_message += _(u'    -- Link valid until {0!s}:\n').format(valid_to)
-                    plain_message += _(u'    -- Contents:')
+                    plain_message += ' {0:2d}- {1!s}: {2!s}\n'.format(count, _('Multiresource package'), link_url)
+                    plain_message += _('    -- Link valid until {0!s}:\n').format(valid_to)
+                    plain_message += _('    -- Contents:')
                     linkHtmlContext['name'] = _('Multiresource package')
                     linkHtmlContext['url'] = link_url
                     linkHtmlContext['locators'] = []
                     for linkResource in linkResources:
-                        plain_message += _(u'     -- {0!s} [{1!s}]\n').format(linkResource.fq_title, linkResource.name)
-                        linkHtmlContext['locators'].append({'name': _(u'{0!s} [{1!s}]\n').format(linkResource.fq_title, linkResource.name)})
+                        plain_message += _('     -- {0!s} [{1!s}]\n').format(linkResource.fq_title, linkResource.name)
+                        linkHtmlContext['locators'].append({'name': _('{0!s} [{1!s}]\n').format(linkResource.fq_title, linkResource.name)})
                 count += 1
                 links.append(linkHtmlContext)
             htmlContext['links'] = links
@@ -1387,8 +1384,8 @@ def notifyRequestProgress(self, request_id):
                 htmlContext['pendinglocators'] = []
                 plain_message += '\n' + _('The following resources are still being processed:') + '\n'
                 for locator in locators:
-                    plain_message += u' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
-                    plain_message += (u'   -- ' + _('Status:') + '{0!s}\n').format(_(locator.status_detail))
+                    plain_message += ' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
+                    plain_message += ('   -- ' + _('Status:') + '{0!s}\n').format(_(locator.status_detail))
                     htmlContext['pendinglocators'].append({'name': '{0!s} [{1!s}]\n'.format(locator.fq_title, locator.name),
                                                            'status': _(locator.status_detail)})
             locators =  request.resourcelocator_set.filter(download_links__isnull=True).filter(status=ResourceLocator.PERMANENT_ERROR_STATUS)
@@ -1396,11 +1393,11 @@ def notifyRequestProgress(self, request_id):
                 htmlContext['failedlocators'] = []
                 plain_message += '\n' + _("The following resources could not be processed:") + '\n'
                 for locator in locators:
-                    plain_message += u' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
-                    plain_message += (u'   -- ' + _('Status:') + '{0!s}\n').format(_(locator.status_detail))
+                    plain_message += ' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
+                    plain_message += ('   -- ' + _('Status:') + '{0!s}\n').format(_(locator.status_detail))
                     htmlContext['failedlocators'].append({'name': '{0!s} [{1!s}]\n'.format(locator.fq_title, locator.name),
                                                            'status': _(locator.status_detail)})
-            plain_message += u'\n' + _(u'You can also use this tracking link to check the status of your request:') + u' ' + tracking_url + u'\n'
+            plain_message += '\n' + _('You can also use this tracking link to check the status of your request:') + ' ' + tracking_url + '\n'
             htmlContext['request_url'] = tracking_url
             html_message = render_to_string('progress_notif_email.html', context=htmlContext)
             #plain_message = strip_tags(html_message)
@@ -1409,7 +1406,7 @@ def notifyRequestProgress(self, request_id):
                 to = user.email
             else:
                 to = request.requested_by_external
-            logger.debug(u"mailing: " + to)
+            logger.debug("mailing: " + to)
             #mail.send_mail(subject, plain_message, from_email, [to])
             mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
@@ -1440,17 +1437,17 @@ def notifyApprovalRequired(self, request_id):
         with override(get_language(request)):
             manage_request_url = core_settings.BASE_URL + reverse('downman-update-request', args=(request.id,))
             subject = _('Download service: a new request is awaiting approval - %(requestid)s') % {'requestid': request.request_random_id}
-            statusdetails = _(u'A new request has been registered and is awaiting approval.')
+            statusdetails = _('A new request has been registered and is awaiting approval.')
             plain_message = statusdetails + '\n'
             htmlContext = {
-                u"statusdesc": _(u'Download service: received request - {0}').format(request.request_random_id),
-                u"statusdetails": statusdetails,
+                "statusdesc": _('Download service: received request - {0}').format(request.request_random_id),
+                "statusdetails": statusdetails,
                 }
-            plain_message += u'\n' + _(u'Use the following link to manage the request:') + u' ' + manage_request_url + u'\n'
+            plain_message += '\n' + _('Use the following link to manage the request:') + ' ' + manage_request_url + '\n'
             htmlContext['request_url'] = manage_request_url
             html_message = render_to_string('awaiting_approval_email.html', context=htmlContext)
             #plain_message = strip_tags(html_message)
-            logger.debug(u"mailing: " + str(get_notifications_admin_emails()))
+            logger.debug("mailing: " + str(get_notifications_admin_emails()))
             #mail.send_mail(subject, plain_message, from_email, [to])
             mail.send_mail(subject, plain_message, from_email, get_notifications_admin_emails(), html_message=html_message, auth_user=from_email, auth_password=from_pass)
 
@@ -1473,13 +1470,13 @@ def notifyGenericRequestRegistered(self, request_id):
         with override(get_language(request)):
             tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
             subject = _('Download service: your request has been received - %(requestid)s') % {'requestid': request.request_random_id}
-            statusdetails = _(u'Our team will contact you when your request has been analysed.')
+            statusdetails = _('Our team will contact you when your request has been analysed.')
             plain_message = statusdetails + '\n'
             htmlContext = {
-                u"statusdesc": _(u'Download service: received request - {0}').format(request.request_random_id),
-                u"statusdetails": statusdetails,
+                "statusdesc": _('Download service: received request - {0}').format(request.request_random_id),
+                "statusdetails": statusdetails,
                 }
-            plain_message += u'\n' + _(u'You can also use this tracking link to check the status of your request:') + u' ' + tracking_url + u'\n'
+            plain_message += '\n' + _('You can also use this tracking link to check the status of your request:') + ' ' + tracking_url + '\n'
             htmlContext['request_url'] = tracking_url
             html_message = render_to_string('progress_notif_email.html', context=htmlContext)
             #plain_message = strip_tags(html_message)
@@ -1488,7 +1485,7 @@ def notifyGenericRequestRegistered(self, request_id):
                 to = user.email
             else:
                 to = request.requested_by_external
-            logger.debug(u"mailing: " + to)
+            logger.debug("mailing: " + to)
             #mail.send_mail(subject, plain_message, from_email, [to])
             mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message, auth_user=from_email, auth_password=from_pass)
             request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
@@ -1730,11 +1727,11 @@ def getPackageManagedFields(requestInstance):
 def packageRequest(self, request_id):
     try:
         logger.debug('starting packageRequest')
-        logger.info(u'request ID: ' + text(request_id))
+        logger.info('request ID: ' + text(request_id))
         request = DownloadRequest.objects.get(id=request_id)
-        logger.info(u'request UUID: ' + request.request_random_id)
+        logger.info('request UUID: ' + request.request_random_id)
         if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
-            logger.debug(u"Task already processed: " + text(request_id))
+            logger.debug("Task already processed: " + text(request_id))
             return
         result = None
         zip_file = None
@@ -1832,11 +1829,11 @@ def packageRequest(self, request_id):
 def processDownloadRequest(self, request_id):
     try:
         logger.info("starting processDownloadRequest")
-        logger.info(u'request ID: ' + text(request_id)) 
+        logger.info('request ID: ' + text(request_id)) 
         result = None
         # 1 get request
         request = DownloadRequest.objects.get(id=request_id)
-        logger.info(u'request UUID: ' + request.request_random_id)
+        logger.info('request UUID: ' + request.request_random_id)
         if request.generic_request == True:
             notifyApprovalRequired.apply_async(args=[request.pk], queue='notify')
             logger.debug("Skipping generic request")
@@ -1946,7 +1943,7 @@ def cleanOutdatedRequests(self):
                                 break
             except:
                 try:
-                    logger.exception(u"error getting link: " + fullpath + u" - " + link_uuid)
+                    logger.exception("error getting link: " + fullpath + " - " + link_uuid)
                     # if older than UNKNOWN_FILES_MAX_AGE days, remove the file
                     #modified_time = os.path.getmtime(fullpath)
                     #if date.fromtimestamp(modified_time) < (date.today() - timedelta(days=UNKNOWN_FILES_MAX_AGE)):

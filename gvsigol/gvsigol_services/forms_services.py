@@ -20,7 +20,7 @@
 '''
 @author: César Martinez <cmartinez@scolab.es>
 '''
-from models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl
+from .models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl
 from django.utils.translation import ugettext as _
 from gvsigol_services import geographic_servers
 from django import forms
@@ -77,34 +77,34 @@ def random_id():
     
 
 class ServerForm(forms.Form):
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1', 'readonly': 'true'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
-    type = forms.ChoiceField(label=_(u'Type'), required=False, choices=servers, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '4'}))
-    frontend_url = forms.CharField(label=_(u'Frontend URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
-    user = forms.CharField(label=_(u'User'), required=False, max_length=25, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1', 'readonly': 'true'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
+    description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
+    type = forms.ChoiceField(label=_('Type'), required=False, choices=servers, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '4'}))
+    frontend_url = forms.CharField(label=_('Frontend URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
+    user = forms.CharField(label=_('User'), required=False, max_length=25, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
     password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={'class' : 'form-control', 'tabindex': '8'}))
-    default = forms.BooleanField(label=_(u'Default'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
+    default = forms.BooleanField(label=_('Default'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
 
 class WorkspaceForm(forms.Form):  
-    server = forms.ModelChoiceField(label=_(u'Server'), required=True, queryset=Server.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'})) 
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
+    server = forms.ModelChoiceField(label=_('Server'), required=True, queryset=Server.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'})) 
+    name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
+    description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
     uri = forms.CharField(required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
-    wms_endpoint = forms.CharField(label=_(u'WMS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '4'}))
-    wfs_endpoint = forms.CharField(label=_(u'WFS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
-    wcs_endpoint = forms.CharField(label=_(u'WCS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '6'}))
-    wmts_endpoint = forms.CharField(label=_(u'WMTS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
-    cache_endpoint = forms.CharField(label=_(u'Cache URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '8'}))
-    is_public = forms.BooleanField(label=_(u'Is public?'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
+    wms_endpoint = forms.CharField(label=_('WMS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '4'}))
+    wfs_endpoint = forms.CharField(label=_('WFS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
+    wcs_endpoint = forms.CharField(label=_('WCS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '6'}))
+    wmts_endpoint = forms.CharField(label=_('WMTS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
+    cache_endpoint = forms.CharField(label=_('Cache URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '8'}))
+    is_public = forms.BooleanField(label=_('Is public?'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
     
 class DatastoreForm(forms.Form):
-    workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all().order_by('name'), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
-    type = forms.ChoiceField(label=_(u'Type'), choices=supported_types, required=True, widget=forms.Select(attrs={'class':'form-control'}))
-    file = forms.CharField(label=_(u'File'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
-    connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
+    workspace = forms.ModelChoiceField(label=_('Workspace'), required=True, queryset=Workspace.objects.all().order_by('name'), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    type = forms.ChoiceField(label=_('Type'), choices=supported_types, required=True, widget=forms.Select(attrs={'class':'form-control'}))
+    file = forms.CharField(label=_('File'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
+    name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
+    connection_params = forms.CharField(label=_('Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
     def __init__(self, *args, **kwargs):
         super(DatastoreForm, self).__init__(*args, **kwargs)
@@ -131,10 +131,10 @@ class DatastoreUpdateForm(forms.ModelForm):
     class Meta:
         model = Datastore
         fields = ['type', 'name', 'description', 'connection_params']
-    type = forms.CharField(label=_(u'Type'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))   
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class':'form-control', 'tabindex': '1'}))
-    connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class':'form-control connection_params', 'tabindex': '2'}))
+    type = forms.CharField(label=_('Type'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))   
+    description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class':'form-control', 'tabindex': '1'}))
+    connection_params = forms.CharField(label=_('Connection params'), required=True, widget=forms.Textarea(attrs={'class':'form-control connection_params', 'tabindex': '2'}))
     
     def clean(self):
         cleaned_data = super(DatastoreUpdateForm, self).clean()
@@ -152,56 +152,56 @@ class LayerForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = ['datastore', 'name', 'title', 'layer_group', 'format','visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    name = forms.CharField(label=_(u'Name'), required=True, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    format = forms.ChoiceField(label=_(u'Format'), required=False, choices=img_formats, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    name = forms.CharField(label=_('Name'), required=True, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    format = forms.ChoiceField(label=_('Format'), required=False, choices=img_formats, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
-    time_enabled_field = forms.CharField(label=_(u'Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_enabled_endfield = forms.CharField(label=_(u'End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_enabled_field = forms.CharField(label=_('Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_enabled_endfield = forms.CharField(label=_('End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
     
-    time_resolution = forms.ChoiceField(label=_(u'Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_resolution = forms.ChoiceField(label=_('Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
     
-    time_presentation = forms.ChoiceField(label=_(u'Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_resolution_year = forms.IntegerField(label=_(u'Resolution year'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_month = forms.IntegerField(label=_(u'Resolution month'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_week = forms.IntegerField(label=_(u'Resolution week'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_day = forms.IntegerField(label=_(u'Resolution day'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_hour = forms.IntegerField(label=_(u'Resolution hour'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_minute = forms.IntegerField(label=_(u'Resolution minute'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_second = forms.IntegerField(label=_(u'Resolution second'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_default_value_mode = forms.ChoiceField(label=_(u'Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_default_value = forms.DateTimeField(label=_(u'Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
+    time_presentation = forms.ChoiceField(label=_('Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_resolution_year = forms.IntegerField(label=_('Resolution year'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_month = forms.IntegerField(label=_('Resolution month'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_week = forms.IntegerField(label=_('Resolution week'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_day = forms.IntegerField(label=_('Resolution day'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_hour = forms.IntegerField(label=_('Resolution hour'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_minute = forms.IntegerField(label=_('Resolution minute'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_second = forms.IntegerField(label=_('Resolution second'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_default_value_mode = forms.ChoiceField(label=_('Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_default_value = forms.DateTimeField(label=_('Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
     
 class LayerUpdateForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single', 'readonly': 'true'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    format = forms.ChoiceField(label=_(u'Format'), required=False, choices=img_formats, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single', 'readonly': 'true'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    format = forms.ChoiceField(label=_('Format'), required=False, choices=img_formats, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #cached = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     
-    time_resolution = forms.ChoiceField(label=_(u'Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_resolution = forms.ChoiceField(label=_('Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
   
-    time_enabled_field = forms.ChoiceField(label=_(u'Field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_enabled_endfield = forms.ChoiceField(label=_(u'End field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_presentation = forms.ChoiceField(label=_(u'Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_resolution_year = forms.CharField(label=_(u'Resolution year'), required=False, max_length=4, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_month = forms.CharField(label=_(u'Resolution month'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_week = forms.CharField(label=_(u'Resolution week'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_day = forms.CharField(label=_(u'Resolution day'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_hour = forms.CharField(label=_(u'Resolution hour'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_minute = forms.CharField(label=_(u'Resolution minute'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_second = forms.CharField(label=_(u'Resolution second'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_default_value_mode = forms.ChoiceField(label=_(u'Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_default_value = forms.DateTimeField(label=_(u'Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
+    time_enabled_field = forms.ChoiceField(label=_('Field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_enabled_endfield = forms.ChoiceField(label=_('End field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_presentation = forms.ChoiceField(label=_('Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_resolution_year = forms.CharField(label=_('Resolution year'), required=False, max_length=4, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_month = forms.CharField(label=_('Resolution month'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_week = forms.CharField(label=_('Resolution week'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_day = forms.CharField(label=_('Resolution day'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_hour = forms.CharField(label=_('Resolution hour'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_minute = forms.CharField(label=_('Resolution minute'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_second = forms.CharField(label=_('Resolution second'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_default_value_mode = forms.ChoiceField(label=_('Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_default_value = forms.DateTimeField(label=_('Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
     
 class LayerUploadTypeForm(forms.ModelForm):
     class Meta:
@@ -215,25 +215,25 @@ class ExternalLayerForm(forms.ModelForm):
         fields = ['title', 'layer_group', 'type', 'version', 'url', 'layers', 'format', 'key']
         
     #name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     
-    type = forms.ChoiceField(label=_(u'Type'), choices=external_layer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
-    version = forms.ChoiceField(label=_(u'Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
+    type = forms.ChoiceField(label=_('Type'), choices=external_layer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
+    version = forms.ChoiceField(label=_('Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
    
-    url = forms.CharField(label=_(u'URL'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    layers = forms.ChoiceField(label=_(u'Layers'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    url = forms.CharField(label=_('URL'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    layers = forms.ChoiceField(label=_('Layers'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
 
-    format = forms.ChoiceField(label=_(u'Format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
-    infoformat = forms.ChoiceField(label=_(u'Featureinfo format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
-    matrixset = forms.ChoiceField(label=_(u'Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
-    key = forms.CharField(label=_(u'Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    format = forms.ChoiceField(label=_('Format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    infoformat = forms.ChoiceField(label=_('Featureinfo format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    matrixset = forms.ChoiceField(label=_('Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    key = forms.CharField(label=_('Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
  
 class ServiceUrlForm(forms.ModelForm):
     class Meta:
         model = ServiceUrl
         fields = ['title', 'type', 'url']
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
-    type = forms.ChoiceField(label=_(u'Type'), required=False, choices=service_types, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '2'}))
-    url = forms.CharField(label=_(u'URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))   
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
+    type = forms.ChoiceField(label=_('Type'), required=False, choices=service_types, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '2'}))
+    url = forms.CharField(label=_('URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))   

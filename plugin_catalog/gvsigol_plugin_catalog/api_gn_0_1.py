@@ -31,7 +31,7 @@ from gvsigol_plugin_catalog.mdstandards import registry
 #from gvsigol_plugin_catalog.mdstandards import iso19139_2007
 import logging
 logger = logging.getLogger("gvsigol")
-from xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText, sanitizeXmlText
+from .xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText, sanitizeXmlText
 from future.moves.urllib.parse import quote
 
 DEFAULT_TIMEOUT = 10 #seconds
@@ -88,7 +88,7 @@ class Geonetwork():
                 return False
         except Exception as e:
             logger.exception('Error authenticating')
-            print (e.message)
+            print((e.message))
             return False
         
     def gn_unauth(self):
@@ -133,19 +133,19 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
 
     def csw_update_metadata(self, uuid, updated_xml_md):
-        metadata = u'<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" service="CSW" version="2.0.2">'
-        metadata +=     u'<csw:Update>'
+        metadata = '<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" service="CSW" version="2.0.2">'
+        metadata +=     '<csw:Update>'
         metadata +=         updated_xml_md
-        metadata +=         u'<csw:Constraint version="1.1.0">'
-        metadata +=             u'<ogc:Filter>'
-        metadata +=                 u'<ogc:PropertyIsEqualTo>'
-        metadata +=                     u'<ogc:PropertyName>identifier</ogc:PropertyName>'
-        metadata +=                     u'<ogc:Literal>' + uuid + u'</ogc:Literal>'
-        metadata +=                 u'</ogc:PropertyIsEqualTo>'
-        metadata +=             u'</ogc:Filter>'
-        metadata +=         u'</csw:Constraint>'
-        metadata +=     u'</csw:Update>'
-        metadata += u'</csw:Transaction>'
+        metadata +=         '<csw:Constraint version="1.1.0">'
+        metadata +=             '<ogc:Filter>'
+        metadata +=                 '<ogc:PropertyIsEqualTo>'
+        metadata +=                     '<ogc:PropertyName>identifier</ogc:PropertyName>'
+        metadata +=                     '<ogc:Literal>' + uuid + '</ogc:Literal>'
+        metadata +=                 '</ogc:PropertyIsEqualTo>'
+        metadata +=             '</ogc:Filter>'
+        metadata +=         '</csw:Constraint>'
+        metadata +=     '</csw:Update>'
+        metadata += '</csw:Transaction>'
         headers = {
             'Accept': 'application/xml',
             'Content-Type': 'application/xml',
@@ -367,7 +367,7 @@ class Geonetwork():
     def gn_get_metadata(self, metadata_id):
         #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/97769e85-2e7b-418b-a8c8-0163bfb97aac?withBackup=false'
         url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)+""
-        print ("Getting metadata from uuid:" + str(metadata_id) + " -> " + url)
+        print(("Getting metadata from uuid:" + str(metadata_id) + " -> " + url))
         headers = {
             'Accept': 'application/xml',
             'X-XSRF-TOKEN': self.get_csrf_token()

@@ -28,7 +28,7 @@ from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 
-GVSIGOL_VERSION = '2.9.2-dev'
+GVSIGOL_VERSION = '3.0.0-dev'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -54,18 +54,10 @@ if len(SECRET_KEY) == 14:
         SECRET_KEY = open(SECRET_FILE).read().strip()
     except IOError:
         try:
-            try:
-                # available since Django 1.10.x
-                from django.core.management.utils import get_random_secret_key
-            except:
-                from django.utils.crypto import get_random_string
-                def get_random_secret_key():
-                    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-                    return get_random_string(50, chars)
-            from django.core.management import utils
+            from django.core.management.utils import get_random_secret_key
             import os
             SECRET_KEY = get_random_secret_key()
-            secret = file(SECRET_FILE, 'w')
+            secret = open(SECRET_FILE, 'w')
             secret.write(SECRET_KEY)
             secret.close()
             os.chmod(SECRET_FILE, 0o400)
@@ -76,7 +68,8 @@ if len(SECRET_KEY) == 14:
 DEBUG = ##DEBUG##
 
 ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOST_NAMES = [##ALLOWED_HOST_NAMES##
+]
 
 # Application definition
 
@@ -105,13 +98,13 @@ try:
     __import__('corsheaders')
     INSTALLED_APPS.append('corsheaders')
 except ImportError:
-    print 'ERROR: No ha instalado la libreria corsheaders'
+    print('ERROR: No ha instalado la libreria corsheaders')
     
 try:
     __import__('drf_yasg')
     INSTALLED_APPS.append('drf_yasg')
 except ImportError:
-    print 'ERROR: No ha instalado la libreria drf_yasg'
+    print('ERROR: No ha instalado la libreria drf_yasg')
 
 PUBLIC_PLUGINS = [
     ##GVSIGOL_PUBLIC_PLUGINS##
@@ -123,15 +116,14 @@ ACTSTREAM_SETTINGS = {
 }
 
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -139,9 +131,9 @@ MIDDLEWARE_CLASSES = [
 
 try:
     __import__('corsheaders')
-    MIDDLEWARE_CLASSES.append('corsheaders.middleware.CorsMiddleware')
+    MIDDLEWARE.append('corsheaders.middleware.CorsMiddleware')
 except ImportError:
-    print 'ERROR: No ha instalado la libreria corsheaders'
+    print('ERROR: No ha instalado la libreria corsheaders')
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -247,14 +239,14 @@ USE_TZ = True
 EXTRA_LANG_INFO = {
     'va': {
         'bidi': False,
-        'code': u'va',
-        'name': u'Valencian',
-        'name_local': u'Valencian'
+        'code': 'va',
+        'name': 'Valencian',
+        'name_local': 'Valencian'
     },
 }
 
 # Add custom languages not provided by Django
-LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
+LANG_INFO = dict(list(django.conf.locale.LANG_INFO.items()) + list(EXTRA_LANG_INFO.items()))
 django.conf.locale.LANG_INFO = LANG_INFO
 
 LANGUAGES = [ ##LANGUAGES##
@@ -486,15 +478,15 @@ CACHE_OPTIONS = {
     'OPERATION_MODE': '##CACHE_OPERATION_MODE##'
 }
 try:
-    print("Proxy HTTP:"  + os.environ['HTTP_PROXY'])
-    print("Proxy HTTPS:"  + os.environ['HTTPS_PROXY'])
+    print(("Proxy HTTP:"  + os.environ['HTTP_PROXY']))
+    print(("Proxy HTTPS:"  + os.environ['HTTPS_PROXY']))
     PROXIES = {
         "http"  : os.environ['HTTP_PROXY'],
         "https" : os.environ['HTTPS_PROXY'],
         "ftp"   : None
         }
 except:
-    print "No proxies defined."
+    print("No proxies defined.")
     PROXIES = {
         "http"  : None,
         "https" : None,
@@ -509,9 +501,6 @@ OSM_TILING_2 = '##OSM_TILING_2##'
 OSM_TILING_3 = '##OSM_TILING_3##'
 
 RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
-
-ALLOWED_HOST_NAMES = [##ALLOWED_HOST_NAMES##
-                      ]
 
 DOCS = {
     'URL': '##DOCS_URL##',

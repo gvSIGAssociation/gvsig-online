@@ -26,7 +26,7 @@ from django.utils.translation import ugettext as _
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from gvsigol_auth.utils import superuser_required, staff_required
-from forms_services import GtfsProviderForm, GtfsProviderUpdateForm, GtfsCrontabForm, APPMobileConfigUpdateForm
+from .forms_services import GtfsProviderForm, GtfsProviderUpdateForm, GtfsCrontabForm, APPMobileConfigUpdateForm
 from gvsigol import settings
 from gvsigol_plugin_trip_planner.utils import *
 import json
@@ -38,7 +38,7 @@ import threading
 import schedule
 import time
 
-import settings as priv_settings
+from . import settings as priv_settings
 from django.apps import apps
 from gvsigol_plugin_trip_planner.settings import GTFS_SCRIPT
 
@@ -188,7 +188,7 @@ def gtfs_crontab_update(request):
 # This method will download the GTFS files, stop the server, calculate Graph and start again.
 def cron_trip_planner_refresh(id):
 
-    print('############################    '+datetime.now().strftime("%Y-%m-%d %H:%M") + ' -> Actualizando Trip-Planner: ')
+    print(('############################    '+datetime.now().strftime("%Y-%m-%d %H:%M") + ' -> Actualizando Trip-Planner: '))
 
     providers = GTFSProvider.objects.order_by('name')
     bChange = False

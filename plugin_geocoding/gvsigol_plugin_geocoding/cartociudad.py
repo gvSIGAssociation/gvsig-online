@@ -20,11 +20,10 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 from gvsigol_services.models import Datastore
-from geopy.compat import urlencode
 from geopy.util import logger
 from gvsigol import settings as core_settings
-import settings
-import urllib2
+from . import settings
+import urllib.request, urllib.error, urllib.parse
 import json, requests
 import logging
 

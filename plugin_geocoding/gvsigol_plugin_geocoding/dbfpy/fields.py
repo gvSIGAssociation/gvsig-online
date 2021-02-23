@@ -36,8 +36,8 @@ import datetime
 import struct
 import sys
 
-from memo import MemoData
-import utils
+from .memo import MemoData
+from . import utils
 
 ## abstract definitions
 
@@ -64,7 +64,7 @@ class DbfFieldDef(object):
 
     # length of the field, None in case of variable-length field,
     # or a number if this field is a fixed-length field
-    length = None
+    defaultLength = None
 
     # field type. for more information about fields types visit
     # `http://www.clicketyclick.dk/databases/xbase/format/data_types.html`
@@ -88,7 +88,7 @@ class DbfFieldDef(object):
         if len(name) >10:
             raise ValueError("Field name \"%s\" is too long" % name)
         name = str(name).upper()
-        if self.__class__.length is None:
+        if self.__class__.defaultLength is None:
             if length is None:
                 raise ValueError("[%s] Length isn't specified" % name)
             length = int(length)
@@ -96,7 +96,7 @@ class DbfFieldDef(object):
                 raise ValueError("[%s] Length must be a positive integer"
                     % name)
         else:
-            length = self.length
+            length = self.defaultLength
         if decimalCount is None:
             decimalCount = 0
         ## set fields
@@ -271,7 +271,7 @@ class DbfIntegerFieldDef(DbfFieldDef):
     """Definition of the integer field."""
 
     typeCode = "I"
-    length = 4
+    defaultLength = 4
     defaultValue = 0
 
     def decodeValue(self, value):
@@ -286,7 +286,7 @@ class DbfCurrencyFieldDef(DbfFieldDef):
     """Definition of the currency field."""
 
     typeCode = "Y"
-    length = 8
+    defaultLength = 8
     defaultValue = 0.0
 
     def decodeValue(self, value):
@@ -302,7 +302,7 @@ class DbfLogicalFieldDef(DbfFieldDef):
 
     typeCode = "L"
     defaultValue = -1
-    length = 1
+    defaultLength = 1
 
     def decodeValue(self, value):
         """Return True, False or -1 decoded from ``value``."""
@@ -335,7 +335,7 @@ class DbfMemoFieldDef(DbfFieldDef):
 
     typeCode = "M"
     defaultValue = "\0" * 4
-    length = 4
+    defaultLength = 4
     # MemoFile instance.  Must be set before reading or writing to the field.
     file = None
     # MemoData type for strings written to the memo file
@@ -375,7 +375,7 @@ class DbfDateFieldDef(DbfFieldDef):
     typeCode = "D"
     defaultValue = utils.classproperty(lambda cls: datetime.date.today())
     # "yyyymmdd" gives us 8 characters
-    length = 8
+    defaultLength = 8
 
     def decodeValue(self, value):
         """Return a ``datetime.date`` instance decoded from ``value``."""
@@ -411,7 +411,7 @@ class DbfDateTimeFieldDef(DbfFieldDef):
     # two 32-bits integers representing JDN and amount of
     # milliseconds respectively gives us 8 bytes.
     # note, that values must be encoded in LE byteorder.
-    length = 8
+    defaultLength = 8
 
     def decodeValue(self, value):
         """Return a `datetime.datetime` instance."""
@@ -474,7 +474,7 @@ def lookupFor(typeCode):
 
 ## register generic types
 
-for (_name, _val) in globals().items():
+for (_name, _val) in list(globals().items()):
     if isinstance(_val, type) and issubclass(_val, DbfFieldDef) \
     and (_name != "DbfFieldDef"):
         __all__.append(_name)

@@ -28,15 +28,14 @@ from gvsigol_services.models import Workspace, Datastore, Layer
 from gvsigol_services import utils as service_utils
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
+from .models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_auth.utils import staff_required
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
     services_unique_values, services_intervals, services_expressions, services_color_table, services_clustered_points, services_custom
 from django.views.decorators.csrf import csrf_exempt
-import utils
+from . import utils
 import json
 import ast
-from gvsigol_services.gdal_tools import get_raster_stats
 from gvsigol_services.backend_postgis import Introspect
 import re
 
@@ -48,7 +47,7 @@ def get_raster_statistics(request, layer_id):
     params = json.loads(datastore.connection_params)
     result = None
     if 'url' in params:
-        result = get_raster_stats(params['url'])
+        result = utils.get_raster_stats(params['url'])
     if result:
         response = {
             'result': result
@@ -177,7 +176,7 @@ def select_legend_type(request, layer_id):
                 if r[5] == 'MULTIPOINT' or r[5] == 'POINT':
                     is_points = True
         except Exception as e:
-            print str(e)
+            print(str(e))
             raise
         
     is_view = False

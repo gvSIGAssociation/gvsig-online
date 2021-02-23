@@ -23,21 +23,20 @@ from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
 from django.http.response import JsonResponse
 from gvsigol_core import forms
-from __builtin__ import True
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
-from models import Project, ProjectUserGroup, ProjectLayerGroup
+from .models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User, AnonymousUser
 from gvsigol_auth.utils import superuser_required, is_superuser, staff_required
-import utils as core_utils
+from . import utils as core_utils
 from gvsigol_services import geographic_servers, utils, backend_postgis
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
@@ -48,7 +47,7 @@ from django.core.mail import send_mail
 from owslib.util import Authentication
 from owslib.wmts import WebMapTileService
 import gvsigol
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import random
 import datetime
 import string
@@ -71,9 +70,7 @@ import logging
 logger = logging.getLogger("gvsigol")
 
 def not_found_view(request):
-    response = render(request, '404.html', {})
-    response.status_code = 404
-    return response
+    return render(request, '404.html', {}, status=404)
 
 def forbidden_view(request):
     return render(request, 'illegal_operation.html', {}, status=403)
@@ -118,7 +115,7 @@ def home(request):
             project['name'] = p.name
             project['title'] = p.title
             project['description'] = p.description
-            project['image'] = urllib.unquote(image)
+            project['image'] = urllib.parse.unquote(image)
 
             if p.is_public:
                 public_projects.append(project)
@@ -138,7 +135,7 @@ def home(request):
             project['name'] = p.name
             project['title'] = p.title
             project['description'] = p.description
-            project['image'] = urllib.unquote(image)
+            project['image'] = urllib.parse.unquote(image)
 
             if p.is_public:
                 public_projects.append(project)
@@ -187,48 +184,48 @@ def get_core_tools(enabled=True):
     return [{
         'name': 'gvsigol_tool_navigationhistory',
         'checked': enabled,
-        'title': _(u'Navigation history'),
-        'description': _(u'Browse the view forward and backward')
+        'title': _('Navigation history'),
+        'description': _('Browse the view forward and backward')
     },{
         'name': 'gvsigol_tool_zoom',
         'checked': enabled,
-        'title': _(u'Zoom tools'),
-        'description': _(u'Zoom in, zoom out, ...')
+        'title': _('Zoom tools'),
+        'description': _('Zoom in, zoom out, ...')
     }, {
         'name': 'gvsigol_tool_info',
         'checked': enabled,
-        'title': _(u'Feature info'),
-        'description': _(u'Map information at point')
+        'title': _('Feature info'),
+        'description': _('Map information at point')
     }, {
         'name': 'gvsigol_tool_measure',
         'checked': enabled,
-        'title': _(u'Measure tools'),
-        'description': _(u'It allows to measure areas and distances')
+        'title': _('Measure tools'),
+        'description': _('It allows to measure areas and distances')
     }, {
         'name': 'gvsigol_tool_coordinate',
         'checked': enabled,
-        'title': _(u'Search coordinates'),
-        'description': _(u'Center the map at given coordinates')
+        'title': _('Search coordinates'),
+        'description': _('Center the map at given coordinates')
     }, {
         'name': 'gvsigol_tool_coordinatecalc',
         'checked': enabled,
-        'title': _(u'Coordinate calculator'),
-        'description': _(u'Transform coordinates between different systems')
+        'title': _('Coordinate calculator'),
+        'description': _('Transform coordinates between different systems')
     }, {
         'name': 'gvsigol_tool_location',
         'checked': enabled,
-        'title': _(u'Geolocation'),
-        'description': _(u'Center the map in the current position')
+        'title': _('Geolocation'),
+        'description': _('Center the map in the current position')
     }, {
         'name': 'gvsigol_tool_shareview',
         'checked': enabled,
-        'title': _(u'Share view'),
-        'description': _(u'Allows you to share the view in its current state')
+        'title': _('Share view'),
+        'description': _('Allows you to share the view in its current state')
     }, {
         'name': 'gvsigol_tool_selectfeature',
         'checked': enabled,
-        'title': _(u'Select feature'),
-        'description': _(u'Select features from current layers')
+        'title': _('Select feature'),
+        'description': _('Select features from current layers')
     }]
 
 def get_plugin_tools(enabled=False):
@@ -357,15 +354,15 @@ def project_add(request):
             groups = core_utils.get_user_groups(request.user.username)
 
         if name == '':
-            message = _(u'You must enter an project name')
+            message = _('You must enter an project name')
             return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
         if _valid_name_regex.search(name) == None:
-            message = _(u"Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+            message = _("Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
             return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
         if Project.objects.filter(name=name).exists():
-            message = _(u'Project name already exists')
+            message = _('Project name already exists')
             return render(request, 'project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
         project = Project(
@@ -594,7 +591,7 @@ def project_update(request, pid):
                 if alg == int(selected_base_group):
                     baselayer_group = True
             except:
-                print 'ERROR: selected_base_group is not defined'
+                print('ERROR: selected_base_group is not defined')
             project_layergroup = ProjectLayerGroup(
                 project = project,
                 layer_group = layergroup,
@@ -638,14 +635,14 @@ def project_update(request, pid):
             toc = json.loads(project.toc_order)
             for g in toc:
                 group = toc.get(g)
-                ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+                ordered_layers = sorted(iter(group.get('layers').items()), key=lambda x_y: x_y[1]['order'], reverse=True)
                 group['layers'] = ordered_layers
-            ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
+            ordered_toc = sorted(iter(toc.items()), key=lambda x_y1: x_y1[1]['order'], reverse=True)
         else:
             ordered_toc = {}
             for g in layer_groups:
                 ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': 1000, 'layers': {}}
-            ordered_toc = sorted(ordered_toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
+            ordered_toc = sorted(iter(ordered_toc.items()), key=lambda x_y2: x_y2[1]['order'], reverse=True)
         projectTools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
 
         for defaultTool in get_available_tools(True, True):
@@ -713,7 +710,7 @@ def load(request, project_name):
     project = Project.objects.get(name__exact=project_name)
 
     if project.is_public:
-        if request.user and request.user.is_authenticated():
+        if request.user and request.user.is_authenticated:
             return redirect('load_project', project_name=project.name)
         else:
             return redirect('load_public_project', project_name=project.name)
@@ -1032,7 +1029,7 @@ def project_get_conf(request):
                             else:
                                 ls = get_default_style(l)
                                 if ls is None:
-                                    print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
+                                    print('CAPA SIN ESTILO POR DEFECTO: ' + l.name)
                                     layer['legend'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                     layer['legend_no_auth'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                     layer['legend_graphic'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
@@ -1248,9 +1245,9 @@ def toc_update(request, pid):
         toc = json.loads(project.toc_order)
         for g in toc:
             group = toc.get(g)
-            ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+            ordered_layers = sorted(iter(group.get('layers').items()), key=lambda x_y3: x_y3[1]['order'], reverse=True)
             group['layers'] = ordered_layers
-        ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
+        ordered_toc = sorted(iter(toc.items()), key=lambda x_y4: x_y4[1]['order'], reverse=True)
         return render(request, 'toc_update.html', {'toc': ordered_toc, 'pid': pid})
 
 def export(request, pid):
@@ -1262,7 +1259,7 @@ def export(request, pid):
     else:
         image = p.image.url
         
-    return render(request, 'app_print_template.html', {'print_logo_url': urllib.unquote(image)})
+    return render(request, 'app_print_template.html', {'print_logo_url': urllib.parse.unquote(image)})
 
 def ogc_services(request):
     wms = ServiceUrl.objects.filter(type='WMS')
@@ -1297,7 +1294,7 @@ def select_public_project(request):
             project['name'] = p.name
             project['title'] = p.title
             project['description'] = p.description
-            project['image'] = urllib.unquote(image)
+            project['image'] = urllib.parse.unquote(image)
             projects.append(project)
 
         return render(request, 'select_public_project.html', {'projects': projects})
@@ -1350,19 +1347,19 @@ def save_shared_view(request):
     
 def send_shared_view(destination, shared_url):
     if gvsigol.settings.EMAIL_BACKEND_ACTIVE:       
-        subject = _(u'Shared view')
+        subject = _('Shared view')
         
-        body = _(u'Shared view') + ':\n\n'   
-        body = body + '  - ' + _(u'Link') + ': ' + shared_url + '\n'
+        body = _('Shared view') + ':\n\n'   
+        body = body + '  - ' + _('Link') + ': ' + shared_url + '\n'
         
         toAddress = [destination]           
         fromAddress = gvsigol.settings.EMAIL_HOST_USER
         
-        print 'Restore message: ' + body
+        print('Restore message: ' + body)
         try:
             send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
         except Exception as e:
-            print e.smtp_error
+            print(e.smtp_error)
             pass
 
 @cache_control(max_age=86400)
@@ -1372,7 +1369,7 @@ def load_shared_view(request, view_name):
         project = Project.objects.get(id=shared_view.project_id)
         if shared_view.internal and not request.user.is_superuser:
             raise PermissionDenied
-        if not (project.is_public or request.user.is_authenticated()):
+        if not (project.is_public or request.user.is_authenticated):
             shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + view_name
             return redirect(shared_url)
 

@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Language: pt_BR\n"
+"X-Language: pt\n"
 "X-Source-Language: C\n"
 
 #: mdstandards/iso19139_2007.py:21

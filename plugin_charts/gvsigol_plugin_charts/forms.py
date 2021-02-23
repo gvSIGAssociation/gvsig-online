@@ -24,7 +24,7 @@
 
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import Layer
-from models import Chart
+from .models import Chart
 from django import forms
 
 chart_types = (
@@ -34,10 +34,10 @@ chart_types = (
 )
 
 class ChartForm(forms.Form):
-    layer = forms.ModelChoiceField(label=_(u'Layer'), required=True, queryset=Layer.objects.all().order_by('title'), widget=forms.Select(attrs={'class' : 'form-control', 'tabindex': '1'}))
-    type = forms.ChoiceField(label=_(u'Type'), choices=chart_types, required=True, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '2'}))  
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
-    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '4'}))
+    layer = forms.ModelChoiceField(label=_('Layer'), required=True, queryset=Layer.objects.all().order_by('title'), widget=forms.Select(attrs={'class' : 'form-control', 'tabindex': '1'}))
+    type = forms.ChoiceField(label=_('Type'), choices=chart_types, required=True, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '2'}))  
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
+    description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '4'}))
     
     class Meta:
         model = Chart

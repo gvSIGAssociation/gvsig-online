@@ -17,17 +17,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import os
-import settings
+from . import settings
 '''
 @author: Francisco J. Peñarrubia <fjp@scolab.es>
 '''
 from django.utils.translation import ugettext as _
-from geopy.compat import urlencode
 from geopy.util import logger
 from gvsigol import settings as core_settings
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import json, requests, ast
-from urlparse import urlparse
+from urllib.parse import urlparse
     
 class IdeUY():
     
@@ -84,7 +83,7 @@ class IdeUY():
         http://127.0.0.1:8080/api/v1/geocode/find?type=calle&nomvia=YAGUARON&departamento=MONTEVIDEO&localidad=MONTEVIDEO
         '''
         address = json.loads(address_str)
-        print(str(address))
+        print((str(address)))
         typeSearch = address['address[type]']
         inmueble = address['address[inmueble]'] 
         if (inmueble != ''):

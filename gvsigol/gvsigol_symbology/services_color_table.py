@@ -23,13 +23,13 @@ from doctest import master
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import ColorMap, ColorMapEntry, Library, Style, StyleLayer, Rule, Symbolizer, RasterSymbolizer
+from .models import ColorMap, ColorMapEntry, Library, Style, StyleLayer, Rule, Symbolizer, RasterSymbolizer
 
 from gvsigol_services import geographic_servers
 
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
-import utils, sld_builder
+from . import utils, sld_builder
 import string
 import random
 import json

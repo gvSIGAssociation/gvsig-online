@@ -26,7 +26,7 @@ import os.path
 import shutil
 import ssl
 import time
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import zipfile
 import os
 import re
@@ -146,10 +146,10 @@ class Tiling():
         if(not os.path.isfile(download_path) and not os.path.exists(download_path)):
             #print "downloading %r" % url
             try:
-                request = urllib2.Request(url)
+                request = urllib.request.Request(url)
                 base64string = base64.b64encode('%s:%s' % (self.gsuser, self.gspaswd))
                 request.add_header("Authorization", "Basic %s" % base64string)
-                source = urllib2.urlopen(request, context=self.ctx)
+                source = urllib.request.urlopen(request, context=self.ctx)
                 content = source.read()
                 source.close()
                 destination = open(download_path,'wb')
@@ -160,7 +160,7 @@ class Tiling():
                 if(e.code and e.code == 503): 
                     return False
                 else:
-                    print "ERROR: " + str(e)
+                    print("ERROR: " + str(e))
         else: 
         #print "skipped %r" % url
             pass
@@ -184,15 +184,15 @@ class Tiling():
             os.makedirs(dir_path)
         
         if(not os.path.isfile(download_path)):
-            print "downloading %r" % url
-            source = urllib2.urlopen(url)
+            print("downloading %r" % url)
+            source = urllib.request.urlopen(url)
             content = source.read()
             source.close()
             destination = open(download_path,'wb')
             destination.write(content)
             destination.close()
         else: 
-            print "skipped %r" % url
+            print("skipped %r" % url)
             pass
     
     #No se usa
@@ -562,12 +562,13 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
         start_level = 0
         tiling_status = create_status(process_data[str(identif)], lyr.id)
         for t in tilingList:
-            t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None, tiling_status)
-            start_level =  5 #Para la 1ra geom se descargan los niveles de 0-4 completos pero para las sgtes ya no hace falta 
-            
+            print(process_data)
+            t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None)
+            print(process_data)
+            start_level =  5 #Para al 1ra geom se descargan los niveles de 0-4 completos pero para las sgtes ya no hace falta
         _zipFolder(folder_lyr)
     except Exception as e:
-        print e
+        print(e)
         return
 
 def create_status(process_data, id):

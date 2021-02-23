@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 from django.utils.translation import ugettext_noop as _
 from django.utils.translation import ugettext
 
@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.db.models import Q
 from gvsigol import settings as main_settings
 from gvsigol_plugin_downloadman import settings
-import apps
+from . import apps
 from gvsigol_core.models import GolSettings
 
 SETTINGS_KEY_VALIDITY = 'default_link_validity'
@@ -186,7 +186,7 @@ class DownloadLink(models.Model):
     def contents_details(self):
         if self.is_auxiliary:
             locators = self.resourcelocator_set.all()
-            return ", ".join([ locator.fq_title + u" [" + self.name + u"]" for locator in locators ])
+            return ", ".join([ locator.fq_title + " [" + self.name + "]" for locator in locators ])
         else:
             locators = self.resourcelocator_set.all()
             return ", ".join([ locator.fq_title_name for locator in locators ])
@@ -282,17 +282,17 @@ class ResourceLocator(models.Model):
     layer_title = models.TextField()
     @property
     def fq_name(self):
-        return self.layer_name + u" - " + self.name
+        return self.layer_name + " - " + self.name
     @property
     def fq_title(self):
         if self.layer_title == self.title:
             return self.title
-        return self.layer_title + u" - " + self.title
+        return self.layer_title + " - " + self.title
     @property
     def fq_title_name(self):
         if self.layer_title == self.title:
-            return self.layer_title + u" [" + self.name + u"]"
-        return self.layer_title + u" - " + self.title + u" [" + self.name + u"]"
+            return self.layer_title + " [" + self.name + "]"
+        return self.layer_title + " - " + self.title + " [" + self.name + "]"
     authorization = models.PositiveSmallIntegerField(default=AUTHORIZATION_NOT_PROCESSED, choices=AUTHORIZATION_CHOICES)
     status = models.CharField(max_length=2, default=RESOURCE_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES)
     download_count = models.PositiveIntegerField(default=0)

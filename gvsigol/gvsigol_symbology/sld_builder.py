@@ -22,11 +22,11 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Rule as ModelRule, Symbolizer as ModelSymbolizer, ColorMapEntry as ModelColorMapEntry
+from .models import Rule as ModelRule, Symbolizer as ModelSymbolizer, ColorMapEntry as ModelColorMapEntry
 from gvsigol_symbology.sld import StyledLayerDescriptor, PointSymbolizer, LineSymbolizer, PolygonSymbolizer, TextSymbolizer, \
     Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion, \
     Geometry, Function, LabelPlacement, LinePlacement, PointPlacement, AnchorPoint
-import utils
+from . import utils
 import json
 import sys
 import re
@@ -35,7 +35,7 @@ CDATA_pattern_ = re.compile(r"<!\[CDATA\[.*?\]\]>", re.DOTALL)
 
 Validate_simpletypes_ = True
 if sys.version_info.major == 2:
-    BaseStrType_ = basestring
+    BaseStrType_ = str
 else:
     BaseStrType_ = str
     
@@ -60,38 +60,37 @@ def build_sld(layer, style, single_symbol = False):
     
     sld_body = style_layer_descriptor.as_sld(True)
     if style.type == 'CP' and not single_symbol:
-        transform = ''\
-        '                <sld:Transformation>'\
-        '                    <ogc:Function name="gs:PointStacker">'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>data</ogc:Literal>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>cellSize</ogc:Literal>'\
-        '                            <ogc:Literal>30</ogc:Literal>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputBBOX</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                                <ogc:Literal>wms_bbox</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputWidth</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                                <ogc:Literal>wms_width</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputHeight</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                               <ogc:Literal>wms_height</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                    </ogc:Function>'\
-        '               </sld:Transformation>'
-        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '@@@'+transform, 1)
-        sld_body = sld_body.replace('@@@', '<sld:FeatureTypeStyle>', 1)
+        transform = b"""<sld:FeatureTypeStyle>
+                        <sld:Transformation>
+                            <ogc:Function name="gs:PointStacker">
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>data</ogc:Literal>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>cellSize</ogc:Literal>
+                                    <ogc:Literal>30</ogc:Literal>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>outputBBOX</ogc:Literal>
+                                    <ogc:Function name="env">
+                                        <ogc:Literal>wms_bbox</ogc:Literal>
+                                    </ogc:Function>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>outputWidth</ogc:Literal>
+                                    <ogc:Function name="env">
+                                        <ogc:Literal>wms_width</ogc:Literal>
+                                    </ogc:Function>
+                                </ogc:Function>
+                                <ogc:Function name="parameter">
+                                    <ogc:Literal>outputHeight</ogc:Literal>
+                                    <ogc:Function name="env">
+                                       <ogc:Literal>wms_height</ogc:Literal>
+                                    </ogc:Function>
+                                </ogc:Function>
+                            </ogc:Function>
+                       </sld:Transformation>"""
+        sld_body = sld_body.replace(b'<sld:FeatureTypeStyle>', transform, 1)
 
     return sld_body
 

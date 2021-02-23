@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 # from win32.lib.netbios import MAX_LANA
 
 
@@ -38,7 +38,7 @@ class WorldwindProvider(models.Model):
     ]
     type = models.CharField(max_length=250, choices = TYPE_CHOICES, default="url", blank = False)
     path = models.CharField(max_length=250, default="", blank=True, null=True)
-    project = models.OneToOneField(Project)
+    project = models.OneToOneField(Project, on_delete=models.CASCADE)
     heightUrl = models.URLField(max_length=250, default="")
     layers = models.CharField(max_length=250, default="elevation", blank=True, null = True);
     

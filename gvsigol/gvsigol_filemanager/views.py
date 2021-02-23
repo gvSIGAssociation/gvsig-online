@@ -7,13 +7,13 @@ from django.views.generic import TemplateView, FormView
 from django.shortcuts import HttpResponse, redirect
 from django.utils.translation import ugettext as _
 from gvsigol.settings import FILEMANAGER_DIRECTORY, INSTALLED_APPS
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.http import HttpResponseBadRequest
 from gvsigol_services import rest_geoserver
 from django.views.generic.base import View
-from forms import DirectoryCreateForm
+from .forms import DirectoryCreateForm
 from django.contrib import messages
-from core import Filemanager
+from .core import Filemanager
 from zipfile import ZipFile
 import json
 import os
@@ -29,7 +29,7 @@ def can_manage_path(user, path):
     if path is not None:
         full_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, path))
         if not full_path.startswith(ABS_FILEMANAGER_DIRECTORY):
-            logger.warning(u"Suspicious path provided")
+            logger.warning("Suspicious path provided")
             return False
         if user:
             if user.is_superuser:
@@ -135,12 +135,11 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                     #request.session.message = _('Export process done successfully')
                     messages.add_message(request, messages.INFO, _('Export process done successfully'))
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
-            
-            except rest_geoserver.RequestError as e:
-                if e.status_code == 0:
+            except rest_geoserver.RequestWarning as e:
                     msg = _('Export process completed with warnings:') + ' ' + e.server_message
                     messages.add_message(request, messages.INFO, msg)
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
+            except rest_geoserver.RequestError as e:
                 message = e.server_message
                 #request.session['message'] = str(message)
                 messages.add_message(request, messages.ERROR, str(message))

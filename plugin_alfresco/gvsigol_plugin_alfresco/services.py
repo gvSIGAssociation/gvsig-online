@@ -22,7 +22,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseBadRequest
 from gvsigol_plugin_alfresco import settings
-from cmislib import CmisClient
+from cmislib.model import CmisClient
 import logging
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class AlfrescoRM():
             obj = repository.getObject(s.id)
             s = {}
             s['isSite'] = True
-            for key,val in obj.properties.items():
+            for key,val in list(obj.properties.items()):
                 if key=='cmis:name' or key=='cmis:title' or key=='cmis:description' or key=='cmis:path' or key=='cmis:objectId' or key=='cmis:objectTypeId' or key=='cmis:parentId':
                     s[key] = val
             document_library = repository.getObjectByPath(s['cmis:path'] + '/documentLibrary')
@@ -86,7 +86,7 @@ class AlfrescoRM():
         
         content = {}
         content['isSite'] = False
-        for key,val in f.properties.items():
+        for key,val in list(f.properties.items()):
             if key=='cmis:name' or key=='cmis:title' or key=='cmis:description' or key=='cmis:path' or key=='cmis:objectId' or key=='cmis:objectTypeId' or key=='cmis:parentId':
                 content[key] = val
                     
