@@ -67,7 +67,7 @@ class MemoFile(object):
 
         """
         self.is_fpt = fpt
-        if isinstance(f, basestring):
+        if isinstance(f, str):
             # a filename
             self.name = f
             if new:

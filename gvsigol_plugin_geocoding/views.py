@@ -24,17 +24,16 @@
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
-from geocoder import Geocoder
+from .geocoder import Geocoder
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from gvsigol_plugin_geocoding.models import Provider
 from django.utils.translation import ugettext as _
 from gvsigol_auth.utils import superuser_required, staff_required
-from forms_services import ProviderForm, ProviderUpdateForm
-
+from .forms_services import ProviderForm, ProviderUpdateForm
+from gvsigol_plugin_geocoding.utils import *
 from gvsigol_plugin_geocoding import settings as geocoding_setting
 from gvsigol import settings as core_settings
-from gvsigol_plugin_geocoding.utils import *
 import json
 import ast
 from gvsigol_services.models import Workspace, Datastore
@@ -315,12 +314,12 @@ def provider_update(request, provider_id):
                 form.fields['text_field'].initial = params["text_field"]
                 form.fields['geom_field'].initial = params["geom_field"]
             
-            if params and params.has_key('datastore_id'):
+            if params and 'datastore_id' in params:
                 ds = Datastore.objects.get(id=params['datastore_id'])
                 workspace_id = ds.workspace.id
                 workspace = ds.workspace.name
                 datastore = ds.name
-            if params and params.has_key('resource'):
+            if params and 'resource' in params:
                 resource = params['resource']
             
         form.fields['params'].initial = provider.params
@@ -491,7 +490,7 @@ def search_candidates(request):
         aux = json.dumps(suggestions, indent=4)
         t3 = time()
         
-        print 'Tsuggestions: ', (t2-t1)*1000 , 'msecs Tjson=', (t3-t2)*1000 
+        print('Tsuggestions: ', (t2-t1)*1000 , 'msecs Tjson=', (t3-t2)*1000) 
         
         return HttpResponse(aux, content_type='application/json')
     

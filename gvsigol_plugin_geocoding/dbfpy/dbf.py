@@ -64,10 +64,10 @@ __author__ = "Jeff Kunce <kuncej@mail.conservation.state.mo.us>"
 
 __all__ = ["Dbf"]
 
-import header
-import memo
-import record
-from utils import INVALID_VALUE
+from . import header
+from . import memo
+from . import record
+from .utils import INVALID_VALUE
 
 class Dbf(object):
     """DBF accessor.
@@ -116,7 +116,7 @@ class Dbf(object):
                 Default is generated from the DBF file name.
 
         """
-        if isinstance(f, basestring):
+        if isinstance(f, str):
             # a filename
             self.name = f
             if new:
@@ -186,7 +186,7 @@ class Dbf(object):
             Return value is numeric object maning valid index.
 
         """
-        if not isinstance(index, (int, long)):
+        if not isinstance(index, int):
             raise TypeError("Index must be a numeric object")
         if index < 0:
             # index from the right side
@@ -276,8 +276,8 @@ class Dbf(object):
 def demoRead(filename):
     _dbf = Dbf(filename, True)
     for _rec in _dbf:
-        print
-        print repr(_rec)
+        print()
+        print(repr(_rec))
     _dbf.close()
 
 def demoCreate(filename):
@@ -300,7 +300,7 @@ def demoCreate(filename):
         _rec["INITIALS"] = _i
         _rec["BIRTHDATE"] = _b
         _rec.store()
-    print repr(_dbf)
+    print(repr(_dbf))
     _dbf.close()
 
 if (__name__=='__main__'):

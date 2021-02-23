@@ -20,7 +20,7 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 from django.utils.translation import ugettext as _
-import settings
+from . import settings
 from gvsigol import settings as core_settings
 import json, requests
     

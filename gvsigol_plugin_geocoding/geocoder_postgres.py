@@ -18,7 +18,6 @@
 '''
 from openpyxl.utils.cell import rows_from_range
 from lxml.etree import tounicode
-from string import replace
 '''
 @author: Francisco José Peñarrubia <fjp@scolab.es>
 '''
@@ -28,7 +27,7 @@ from gvsigol_services.models import Datastore, Layer
 from geopy.util import logger
 from gvsigol import settings as core_settings
 from gvsigol_services.backend_postgis import Introspect
-import settings
+from . import settings
 import json, requests
 import logging
 
@@ -90,10 +89,10 @@ class GeocoderPostgres():
             provider.srs = field_info[0][4]
             provider.connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
             provider.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            print "Connect ... "
+            print("Connect ... ")
         
-        except StandardError, e:
-            print "Failed to connect!", e
+        except Exception as e:
+            print("Failed to connect!", e)
             return False
 
         provider.cursor = provider.connection.cursor() 
@@ -115,7 +114,7 @@ class GeocoderPostgres():
             'autocancel': self.urls['autocancel'],
             'limit': self.urls['max_results'],
         }
-        sanitized_q = replace(query, "'", " ")
+        sanitized_q = query.replace("'", " ")
 
         # TODO: NO LLAMAR A UNA URL, BUSCAR EN POSTGRES Y DEVOLVER UN JSON
         resul = []
@@ -139,7 +138,7 @@ class GeocoderPostgres():
                 }
                 resul.append(a)
             t2 = time()
-            print 'T geocoder postgres ' + provider.dbtable + ':', (t2-t1)*1000, ' msecs'
+            print('T geocoder postgres ' + provider.dbtable + ':', (t2-t1)*1000, ' msecs')
             
 
         return resul;
@@ -178,7 +177,7 @@ class GeocoderPostgres():
                         'srs': 'EPSG:4326'
                     }
                 t2 = time()
-                print 'T geocoder postgres find ' + provider.dbtable + ':', (t2-t1)*1000, ' msecs'
+                print('T geocoder postgres find ' + provider.dbtable + ':', (t2-t1)*1000, ' msecs')
             
 
         return resul;
@@ -211,7 +210,7 @@ class GeocoderPostgres():
                 }
                 resul.append(a)
             t2 = time()
-            print 'T geocoder postgres reverse ' + provider.dbtable + ':', (t2-t1)*1000, ' msecs'
+            print('T geocoder postgres reverse ' + provider.dbtable + ':', (t2-t1)*1000, ' msecs')
 
         return resul;
 

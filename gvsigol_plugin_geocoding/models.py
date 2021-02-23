@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 '''
     gvSIG Online.
@@ -49,7 +49,7 @@ class Provider(models.Model):
     
     def __unicode__(self):
         values = dict(geocoding_setting.GEOCODING_SUPPORTED_TYPES).get(self.type)
-        cadena = unicode(values)
+        cadena = str(values)
         
         if self.type == 'googlemaps' or self.type == 'nominatim' or self.type == 'new_cartociudad' or self.type == 'ide_uy':
             return cadena
