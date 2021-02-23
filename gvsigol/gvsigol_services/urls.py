@@ -26,7 +26,6 @@ urlpatterns = [
     path('layer_list/', services_views.layer_list, name='layer_list'),
     path('layer_add/', services_views.layer_add, name='layer_add'),
     path('layer_add/<int:layergroup_id>)/', services_views.layer_add_with_group, name='layer_add_with_group'),
-    path('layer_permissions/<int:layer_id>/', services_views.layer_permissions_update, name='layer_permissions_update'),
     path('get_resources_from_workspace/', services_views.get_resources_from_workspace, name='get_resources_from_workspace'),
     path('layer_update/<int:layer_id>/', services_views.layer_update, name='layer_update'),
     path('layer_delete/<int:layer_id>/', services_views.layer_delete, name='layer_delete'),
@@ -83,15 +82,11 @@ urlpatterns = [
     path('base_layer_process_update/<int:pid>)/', services_views.base_layer_process_update, name='base_layer_process_update'),
     path('stop_base_layer_process/<int:pid>)/', services_views.stop_base_layer_process, name='stop_base_layer_process'),
     path('retry_base_layer_process/<int:pid>)/', services_views.retry_base_layer_process, name='retry_base_layer_process'),
-    
     path('layers_get_temporal_properties/', services_views.layers_get_temporal_properties, name='layers_get_temporal_properties'),
     path('get_date_fields_from_resource/', services_views.get_date_fields_from_resource, name='get_date_fields_from_resource'),
-        
     path('describeLayerConfig/', services_views.describeLayerConfig, name='describeLayerConfig'),
-    
     path('update_thumbnail/<int:layer_id>/', services_views.update_thumbnail, name='update_thumbnail'),
     path('nullable_check/', services_views.check_nullable, name='check_nullable'),
-    
     path('service_url_list/', services_views.service_url_list, name='service_url_list'),
     path('service_url_add/', services_views.service_url_add, name='service_url_add'),
     path('service_url_delete/<int:svid>/', services_views.service_url_delete, name='service_url_delete'),

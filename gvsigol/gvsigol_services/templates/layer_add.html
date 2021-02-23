@@ -5,16 +5,16 @@
 {% block content %}	
 
 {% if redirect_to_layergroup %}
-<form role="form" method="post" action="/gvsigonline/services/layer_add/?redirect=layergroup-redirect">
+<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/?redirect=layergroup-redirect">
 {% else %}
-<form role="form" method="post" action="/gvsigonline/services/layer_add/">
+<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/">
 {% endif %}
 <div class="row">
 	<div class="col-md-12">
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
-					<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Next" %} <i class="fa fa-angle-right margin-l-5"></i></button>					
+					<button id="submit-button" class="btn btn-default btn-sm save-button">{% trans "Save" %}</button>
 				</div>
 			</div>
 			<div class="row" style="padding-left: 30px;">
@@ -37,6 +37,7 @@
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
           	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
+          	<li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
           	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
         </ul>
@@ -127,6 +128,19 @@
 										<label for="allow_download">{% trans "Allow downloads" %}</label>
 									</div>
 								</div>
+
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="real_time" id="real_time"/>
+										<label for="real_time">{% trans "View in real time" %}</label>														
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-4 form-group">
+									  	<label for="update_interval">{% trans "Update interval (miliseconds)" %}</label>
+									  	<input name="update_interval" id="update_interval" value="1000" type="number" class="form-control">														
+								  	</div>
+							  	</div>
 								
 								<div class="box-body time_enabled-check">
 									<div class="image_mosaic_tmp_fields">
@@ -195,7 +209,9 @@
 					</div>
 				</div>
 		    </div>
-		    
+			<div class="tab-pane" id="tab-layer-permissions">
+				{% include "select_layer_permissions.html" %}
+			</div>
 		    <div class="tab-pane" id="tab-layer-metadata">
           		<div class="row">
 					<div class="col-md-12">
@@ -509,6 +525,33 @@
 	};
 	
 	$(document).ready(function() {
+		var searcheableReadList = new List('read-list-box', {
+			valueNames: ['product-title'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 5,
+			pagination: false
+		});
+		var searcheableWriteList = new List('write-list-box', {
+				valueNames: ['product-title'],
+				listClass:'list',
+				searchClass: 'search',
+				page: 5,
+				pagination: false
+			});
+		$("#submit-button").click(function(e){
+			for(var i=0; i<searcheableReadList.items.length; i++){
+				var item = searcheableReadList.items[i];
+				item.show();
+			}
+			for(var i=0; i<searcheableWriteList.items.length; i++){
+				var item = searcheableWriteList.items[i];
+				item.show();
+			}
+			$(".layer-read-checkbox").prop( "disabled", false)
+			$("#layer-add-form").submit();
+			return false; 
+		});
 		
 		var detailedInfoHTML = document.getElementById('detailed_info_html');
 		var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
@@ -606,6 +649,7 @@
 		if(layergroup_id != "None"){
 			$("#id_layer_group").val(layergroup_id).trigger('change');
 		}
+		handleIsPublicResourceCheckbox(searcheableReadList);
 	});
 </script>
 {% endblock %}

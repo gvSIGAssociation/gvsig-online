@@ -267,6 +267,22 @@ function configure() {
 		echo "WARNING: ALLOWED_HOST_NAMES is not defined."
 	fi
 	grep -rl "##ALLOWED_HOST_NAMES##"  | xargs sed -i "s ##ALLOWED_HOST_NAMES## $ALLOWED_HOST_NAMES g"
+	
+	#docs 
+	echo "INFO: Replace DOCS_URL"
+	if [ -z $DOCS_URL ]; then
+		echo "WARNING: DOCS_URL is not defined using, /docs ."	
+		DOCS_URL="/docs"	
+	fi
+	grep -rl "##DOCS_URL##"  | xargs sed -i "s ##DOCS_URL## $DOCS_URL g"
+
+	echo "INFO: Replace DOCS_NAME"
+	if [ -z $DOCS_NAME ]; then
+		echo "WARNING: DOCS_NAME is not defined using, user_manual.pdf ."	
+		DOCS_NAME="user_manual.pdf"	
+	fi
+	grep -rl "##DOCS_NAME##"  | xargs sed -i "s ##DOCS_NAME## $DOCS_NAME g"
+
 }
 
 function move_template() {

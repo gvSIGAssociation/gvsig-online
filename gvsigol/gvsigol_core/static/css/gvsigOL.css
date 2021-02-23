@@ -2538,7 +2538,9 @@ a:focus {
 .products-list .product-title2,
 .products-list .product-title {
   font-weight: 600;
+  color: #666666;
 }
+
 .products-list .product-description {
   display: block;
   color: #999;

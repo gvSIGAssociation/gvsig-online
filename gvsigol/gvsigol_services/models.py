@@ -162,6 +162,7 @@ class Layer(models.Model):
     title = models.CharField(max_length=150)
     abstract = models.CharField(max_length=5000, null=True, blank=True)
     type = models.CharField(max_length=150)
+    public = models.BooleanField(default=False) # the layer can be read by anyone, even anonymous users
     visible = models.BooleanField(default=True)
     queryable = models.BooleanField(default=True)
     cached = models.BooleanField(default=False)
@@ -193,6 +194,8 @@ class Layer(models.Model):
     native_extent = models.CharField(max_length=250, default='-180,-90,180,90')
     latlong_extent = models.CharField(max_length=250, default='-180,-90,180,90')
     source_name = models.TextField(null=True, blank=True) # table name for postgis layers, not defined for the rest
+    real_time = models.BooleanField(default=False)
+    update_interval = models.IntegerField(null=True, default=1000)
     
     def __str__(self):
         return self.name

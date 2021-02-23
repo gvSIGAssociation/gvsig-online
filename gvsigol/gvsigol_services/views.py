@@ -81,7 +81,7 @@ from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
 import gvsigol_services.tiling_service as tiling_service
 from . import locks_utils
 from .models import LayerFieldEnumeration
-from .models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem, \
+from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
     LayerLock, Server, Node, ServiceUrl
 from .rest_geoserver import RequestError
 from . import rest_geoserver
@@ -782,8 +782,8 @@ def layer_delete_operation(request, layer_id):
     if not 'no_thumbnail.jpg' in layer.thumbnail.name:
         if os.path.isfile(layer.thumbnail.path):
             os.remove(layer.thumbnail.path)
-    Layer.objects.all().filter(pk=layer_id).delete()
-    gs.setDataRules()
+    Layer.objects.filter(pk=layer_id).delete()
+    gs.deleteLayerRules(layer)
     core_utils.toc_remove_layer(layer)
     gs.createOrUpdateGeoserverLayerGroup(layer.layer_group)
     gs.reload_nodes()
@@ -1052,7 +1052,23 @@ def layer_add_with_group(request, layergroup_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
-        
+
+        real_time = False
+        if 'real_time' in request.POST:
+            real_time = True
+
+        assigned_read_roups = []
+        for key in request.POST:
+            if 'read-usergroup-' in key:
+                assigned_read_roups.append(int(key.split('-')[2]))
+
+        assigned_write_groups = []
+        for key in request.POST:
+            if 'write-usergroup-' in key:
+                assigned_write_groups.append(int(key.split('-')[2]))
+
+        is_public = (request.POST.get('resource-is-public') is not None)
+
         try:
             maxFeatures = int(request.POST.get('max_features', 0))
         except:
@@ -1152,6 +1168,8 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.detailed_info_button_title = detailed_info_button_title
                 newRecord.detailed_info_html = detailed_info_html
                 newRecord.timeout = request.POST.get('timeout')
+                newRecord.real_time = real_time
+                newRecord.update_interval = request.POST.get('update_interval')
                 
                 params = {}
                 params['format'] = request.POST.get('format')
@@ -1162,12 +1180,14 @@ def layer_add_with_group(request, layergroup_id):
                 featuretype = {
                     'max_features': maxFeatures
                 }
+                utils.set_layer_permissions(newRecord, is_public, assigned_read_roups, assigned_write_groups)
                 do_config_layer(server, newRecord, featuretype)
 
                 if redirect_to_layergroup:
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id})+"?redirect=grouplayer-redirect")
+                    layergroup_id = newRecord.layer_group.id
+                    return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
                 else:
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+                    return redirect('layer_list')
 
             except Exception as e:
                 msg = _("Error: layer could not be published")
@@ -1179,25 +1199,27 @@ def layer_add_with_group(request, layergroup_id):
                 logger.exception(msg)
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
+        groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
     else:
         form = LayerForm()
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
-
+        groups = utils.get_all_user_groups_checked_by_layer(None)
+        is_public = False
 
     datastore_types = {}
     types = {}
     for datastore in Datastore.objects.filter():
         types[datastore.id] = datastore.type
         datastore_types[datastore.id] = datastore.type
-
     return render(request, 'layer_add.html', {
             'form': form,
             'datastore_types': json.dumps(datastore_types),
             'layergroup_id': layergroup_id,
-            'redirect_to_layergroup': redirect_to_layergroup})
-
+            'redirect_to_layergroup': redirect_to_layergroup,
+            'groups': groups,
+            'resource_is_public': is_public})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -1243,6 +1265,22 @@ def layer_update(request, layer_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
+
+        real_time = False
+        if 'real_time' in request.POST:
+            real_time = True
+
+        assigned_read_roups = []
+        for key in request.POST:
+            if 'read-usergroup-' in key:
+                assigned_read_roups.append(int(key.split('-')[2]))
+
+        assigned_write_groups = []
+        for key in request.POST:
+            if 'write-usergroup-' in key:
+                assigned_write_groups.append(int(key.split('-')[2]))
+
+        is_public = (request.POST.get('resource-is-public') is not None)
 
         if layer.datastore.type.startswith('v_'):
             try:
@@ -1328,6 +1366,8 @@ def layer_update(request, layer_id):
             layer.detailed_info_button_title = detailed_info_button_title
             layer.detailed_info_html = detailed_info_html
             layer.timeout = request.POST.get('timeout')
+            layer.real_time = real_time
+            layer.update_interval = request.POST.get('update_interval')
             
             params = {}
             params['format'] = request.POST.get('format')
@@ -1360,13 +1400,15 @@ def layer_update(request, layer_id):
                 core_utils.toc_move_layer(layer, old_layer_group)
                 gs.createOrUpdateGeoserverLayerGroup(old_layer_group)
                 gs.createOrUpdateGeoserverLayerGroup(new_layer_group)
-                                
-            gs.reload_nodes()   
+
+            utils.set_layer_permissions(layer, is_public, assigned_read_roups, assigned_write_groups)
+            gs.reload_nodes()
         
         if redirect_to_layergroup:
-            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id})+"?redirect=grouplayer-redirect")
+            layergroup_id = layer.layer_group.id
+            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
         else:
-            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
+            return redirect('layer_list')
     else:
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
@@ -1406,7 +1448,22 @@ def layer_update(request, layer_id):
             html = False
         
         _, layer_image_url = utils.get_layer_img(layer.id, None)
-        return render(request, 'layer_update.html', {'html': html, 'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'layer_conf': layerConf, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config, 'layer_image_url': layer_image_url, 'datastore_type': layer.datastore.type})
+        groups = utils.get_all_user_groups_checked_by_layer(layer)
+        return render(request, 'layer_update.html', {
+            'html': html, 'layer': layer,
+            'workspace': workspace,
+            'form': form,
+            'layer_id': layer_id,
+            'layer_conf': layerConf,
+            'date_fields': json.dumps(date_fields),
+            'redirect_to_layergroup': redirect_to_layergroup,
+            'layer_md_uuid': md_uuid,
+            'plugins_config': plugins_config,
+            'layer_image_url': layer_image_url,
+            'datastore_type': layer.datastore.type,
+            'groups': groups,
+            'resource_is_public': layer.public
+        })
 
 def get_date_fields(layer_id):
     date_fields = []
@@ -1954,87 +2011,6 @@ def layer_group_cache_clear(layergroup):
         gs.clearLayerGroupCache(layergroup.name)
         gs.reload_nodes()
 
-
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@staff_required
-def layer_permissions_update(request, layer_id):
-    redirect_to_layergroup = request.GET.get('redirect')
-    try:
-        layer = Layer.objects.get(id=int(layer_id))
-    except Exception as e:
-        return HttpResponseNotFound('<h1>Layer not found{0}</h1>'.format(layer.name))
-    if not utils.can_manage_layer(request.user, layer):
-        return forbidden_view(request)
-
-    if request.method == 'POST':
-        assigned_read_roups = []
-        for key in request.POST:
-            if 'read-usergroup-' in key:
-                assigned_read_roups.append(int(key.split('-')[2]))
-
-        assigned_write_groups = []
-        for key in request.POST:
-            if 'write-usergroup-' in key:
-                assigned_write_groups.append(int(key.split('-')[2]))
-
-        agroup = UserGroup.objects.get(name__exact='admin')
-
-        read_groups = []
-        write_groups = []
-
-        # clean existing groups and assign them again if necessary
-        LayerReadGroup.objects.filter(layer=layer).delete()
-        if len(assigned_read_roups) > 0:
-            lrag = LayerReadGroup()
-            lrag.layer = layer
-            lrag.group = agroup
-            lrag.save()
-            read_groups.append(agroup)
-        for group in assigned_read_roups:
-            try:
-                group = UserGroup.objects.get(id=group)
-                lrg = LayerReadGroup()
-                lrg.layer = layer
-                lrg.group = group
-                lrg.save()
-                read_groups.append(group)
-            except:
-                pass
-
-        LayerWriteGroup.objects.filter(layer=layer).delete()
-        if not layer.type.startswith('c_'):
-            lwag = LayerWriteGroup()
-            lwag.layer = layer
-            lwag.group = agroup
-            lwag.save()
-            write_groups.append(agroup)
-        for group in assigned_write_groups:
-            try:
-                group = UserGroup.objects.get(id=group)
-                lwg = LayerWriteGroup()
-                lwg.layer = layer
-                lwg.group = group
-                lwg.save()
-                write_groups.append(group)
-            except:
-                pass
-                
-        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)        
-        gs.setLayerDataRules(layer, read_groups, write_groups)
-        gs.reload_nodes()
-
-        if redirect_to_layergroup:
-            layergroup_id = layer.layer_group.id
-            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
-        else:
-            return redirect('layer_list')
-    else:
-        try:
-            groups = utils.get_all_user_groups_checked_by_layer(layer)
-            return render(request, 'layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'type': layer.type, 'groups': groups, 'redirect_to_layergroup': redirect_to_layergroup})
-        except Exception as e:
-            return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id))
-
 def get_resources_from_workspace(request):
     # FIXME
     if request.method == 'POST':
@@ -2399,6 +2375,18 @@ def layer_create_with_group(request, layergroup_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
+            
+        assigned_read_roups = []
+        for key in request.POST:
+            if 'read-usergroup-' in key:
+                assigned_read_roups.append(int(key.split('-')[2]))
+
+        assigned_write_groups = []
+        for key in request.POST:
+            if 'write-usergroup-' in key:
+                assigned_write_groups.append(int(key.split('-')[2]))
+
+        is_public = (request.POST.get('resource-is-public') is not None)
 
         try:
             maxFeatures = int(request.POST.get('max_features', 0))
@@ -2512,12 +2500,13 @@ def layer_create_with_group(request, layergroup_id):
                 featuretype = {
                     'max_features': maxFeatures
                 }
+                utils.set_layer_permissions(newRecord, is_public, assigned_read_roups, assigned_write_groups)
                 do_config_layer(server, newRecord, featuretype)
                 if redirect_to_layergroup:
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id})+"?redirect=grouplayer-redirect")
+                    layergroup_id = newRecord.layer_group.id
+                    return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
                 else:
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
-
+                    return redirect('layer_list')
 
             except Exception as e:
                 logger.exception("Error creating layer")
@@ -2527,13 +2516,14 @@ def layer_create_with_group(request, layergroup_id):
                     msg = _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
-
+                groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
                 data = {
                     'form': form,
                     'message': msg,
                     'layer_type': layer_type,
-                    'enumerations': get_currentuser_enumerations(request)
-
+                    'enumerations': get_currentuser_enumerations(request),
+                    'groups': groups,
+                    'resource_is_public': is_public
                 }
                 return render(request, "layer_create.html", data)
 
@@ -2542,14 +2532,15 @@ def layer_create_with_group(request, layergroup_id):
             if 'gvsigol_plugin_form' in INSTALLED_APPS:
                 from gvsigol_plugin_form.models import Form
                 forms = Form.objects.all()
-
-
+            groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
             data = {
                 'form': form,
                 'forms': forms,
                 'layer_type': layer_type,
                 'enumerations': get_currentuser_enumerations(request),
                 'procedures':  TriggerProcedure.objects.all(),
+                'groups': groups,
+                'resource_is_public': is_public
             }
             return render(request, "layer_create.html", data)
 
@@ -2560,7 +2551,7 @@ def layer_create_with_group(request, layergroup_id):
         if 'gvsigol_plugin_form' in INSTALLED_APPS:
             from gvsigol_plugin_form.models import Form
             forms = Form.objects.all()
-
+        groups = utils.get_all_user_groups_checked_by_layer(None)
         data = {
             'form': form,
             'forms': forms,
@@ -2568,7 +2559,9 @@ def layer_create_with_group(request, layergroup_id):
             'enumerations': get_currentuser_enumerations(request),
             'procedures':  TriggerProcedure.objects.all(),
             'layergroup_id': layergroup_id,
-            'redirect_to_layergroup': redirect_to_layergroup
+            'redirect_to_layergroup': redirect_to_layergroup,
+            'groups': groups,
+            'resource_is_public': False
         }
         return render(request, "layer_create.html", data)
 
@@ -3567,10 +3560,9 @@ def describeLayerConfig(request):
         workspace = request.POST.get('workspace')
         try:
             l = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            read_roles = utils.get_read_roles(l)
-            write_roles = utils.get_write_roles(l)
-
-            if len(read_roles) <= 0:
+            if l.public:
+                read_roles = utils.get_read_roles(l)
+                write_roles = utils.get_write_roles(l)
                 layer = {}
                 layer['name'] = l.name
                 layer['title'] = l.title
@@ -3596,6 +3588,7 @@ def describeLayerConfig(request):
                 layer['single_image'] = l.single_image
                 layer['read_roles'] = read_roles
                 layer['write_roles'] = write_roles
+                layer['public'] = l.public
 
                 try:
                     json_conf = ast.literal_eval(l.conf)

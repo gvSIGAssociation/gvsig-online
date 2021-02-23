@@ -502,4 +502,7 @@ OSM_TILING_3 = '##OSM_TILING_3##'
 
 RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
-
+DOCS = {
+    'URL': '##DOCS_URL##',
+    'NAME': '##DOCS_NAME##'
+}

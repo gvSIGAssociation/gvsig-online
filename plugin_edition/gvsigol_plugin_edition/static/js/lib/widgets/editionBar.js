@@ -1595,7 +1595,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				}).fail(function() {
 				});
 			});
-			if(feature)
+			if(feature && self.source)
 				self.source.removeFeature(feature);
 			self.lastAddedFeature = null;
 			self.showLayersTab();

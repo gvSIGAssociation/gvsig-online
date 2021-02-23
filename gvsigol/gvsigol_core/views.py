@@ -23,6 +23,7 @@ from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
 from django.http.response import JsonResponse
 from gvsigol_core import forms
+from __builtin__ import True
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -30,7 +31,7 @@ from gvsigol_core import forms
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
 from .models import Project, ProjectUserGroup, ProjectLayerGroup
-from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl
+from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -908,7 +909,7 @@ def project_get_conf(request):
                         write_roles = services_utils.get_write_roles(l)
     
                         readable = False
-                        if len(read_roles) == 0:
+                        if l.public:
                             readable = True
                         else:
                             for ur in user_roles:
@@ -938,7 +939,8 @@ def project_get_conf(request):
                             layer['detailed_info_enabled'] = l.detailed_info_enabled
                             layer['detailed_info_button_title'] = l.detailed_info_button_title
                             layer['detailed_info_html'] = l.detailed_info_html
-    
+                            layer['real_time'] = l.real_time
+                            layer['update_interval'] = l.update_interval
                             layer['time_enabled'] = l.time_enabled
                             if layer['time_enabled']:
                                 layer['ref'] = l.id
@@ -964,6 +966,7 @@ def project_get_conf(request):
                             layer['single_image'] = l.single_image
                             layer['read_roles'] = read_roles
                             layer['write_roles'] = write_roles
+                            layer['public'] = l.public
                             layer['styles'] = get_layer_styles(l)
                             
                             if l.external_params:
@@ -1492,4 +1495,76 @@ def project_clone(request, pid):
     servers = Server.objects.all()
     return render(request, 'project_clone.html', {'form': form, 'servers': servers})
 
-    
+@superuser_required
+def project_permissions_to_layer(request, pid):
+    """
+    Add read permissions on all the layers belonging to the layer groups of the project
+    for all the user groups of the project.
+    """
+    if request.POST:
+        try:
+            print(request.POST.get("usergroups[]"))
+            print(request.POST.get("is_public"))
+            project = Project.objects.get(pk=pid)
+            project_user_groups = project.projectusergroup_set.all()
+            last_server_id = None
+            for prlg in project.projectlayergroup_set.all():
+                for layer in prlg.layer_group.layer_set.filter(external=False):
+                    for prug in project_user_groups:
+                        if not LayerReadGroup.objects.filter(layer=layer, group=prug.user_group).exists():
+                            lrg = LayerReadGroup()
+                            lrg.layer = layer
+                            lrg.group = prug.user_group
+                            lrg.save()
+                    if layer.datastore.workspace.server_id != last_server_id:
+                        last_server_id = layer.datastore.workspace.server_id
+                        server = geographic_servers.get_instance().get_server_by_id(last_server_id)
+                    read_groups = [ lrg.group for lrg in LayerReadGroup.objects.filter(layer=layer) ]
+                    server.setLayerReadRules(layer, read_groups)
+            return JsonResponse({"status": "success"})
+        except Project.DoesNotExist:
+            return JsonResponse({"status": "error"}, status_code=404)
+        except:
+            return JsonResponse({"status": "error"}, status_code=500)
+    return JsonResponse({"status": "error"}, status_code=400)
+
+@superuser_required
+def extend_permissions_to_layer(request):
+    """
+    Add read permissions on all the layers belonging to the provided layer groups
+    for all the provided user groups.
+    """
+    if request.POST:
+        try:
+            assigned_read_roups = []
+            public_project = (request.POST.get("is_public") == 'true')
+            for key in request.POST.getlist("usergroups[]", []):
+                assigned_read_roups.append(int(key.split('-')[1]))
+            #assigned_layergroups = [ int(id) for id in request.POST.getlist("layergroups[]", []) ]
+            assigned_layergroups = request.POST.getlist("layergroups[]", [])
+            # not used for the moment
+            #is_public = request.POST.get("is_public")
+            last_server_id = None
+            for layergroup in LayerGroup.objects.filter(pk__in=assigned_layergroups):
+                for layer in layergroup.layer_set.filter(external=False):
+                    if public_project:
+                        layer.public = True
+                        layer.save()
+                    for gid in assigned_read_roups:
+                        if not LayerReadGroup.objects.filter(layer=layer, group_id=gid).exists():
+                            lrg = LayerReadGroup()
+                            lrg.layer = layer
+                            lrg.group_id = gid
+                            lrg.save()
+                    if layer.datastore.workspace.server_id != last_server_id:
+                        last_server_id = layer.datastore.workspace.server_id
+                        server = geographic_servers.get_instance().get_server_by_id(last_server_id)
+                    read_groups = [ lrg.group for lrg in LayerReadGroup.objects.filter(layer=layer) ]
+                    server.setLayerReadRules(layer, read_groups)
+            return JsonResponse({"status": "success"})
+        except Project.DoesNotExist:
+            return JsonResponse({"status": "error"}, status=404)
+        except:
+            logger.exception("")
+            return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error"}, status=400)
