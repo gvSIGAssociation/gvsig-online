@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations
 import ast
@@ -26,7 +26,7 @@ def fill_layer_nullable(apps, schema_editor):
         import logging
         logger = logging.getLogger()
         logger.exception("error")
-        print str(error)
+        print(str(error))
 
 class Migration(migrations.Migration):
 

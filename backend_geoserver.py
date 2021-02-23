@@ -15,20 +15,19 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_core.geom import RASTER
-from __builtin__ import False
-from django.contrib.gis import gdal
-from gvsigol.settings import CONTROL_FIELDS
-from django.db.backends.base import creation
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup, Trigger
+from gvsigol_core.geom import RASTER
+from django.contrib.gis import gdal
+from gvsigol.settings import CONTROL_FIELDS
+from django.db.backends.base import creation
+from .models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup, Trigger
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.utils.translation import ugettext_lazy as _
-from backend_postgis import Introspect
+from .backend_postgis import Introspect
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
 from geoserver.support import DimensionInfo
@@ -37,12 +36,12 @@ from gvsigol import settings
 from zipfile import ZipFile
 import tempfile, zipfile
 import sys, os, shutil
-import forms_geoserver
-import rest_geoserver
-from rest_geoserver import RequestError
-import signals
+from . import forms_geoserver
+from . import rest_geoserver
+from .rest_geoserver import RequestError
+from . import signals
 import requests
-import gdal_tools
+import gdaltools
 import logging
 import random
 import string
@@ -51,11 +50,11 @@ import re
 import unicodedata
 from dbfread import DBF
 import time
-import utils
+from . import utils
 from builtins import str as text
 from django.utils.html import escape, strip_tags
 import threading
-import geographic_servers
+from . import geographic_servers
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -108,14 +107,8 @@ class Geoserver():
             ('c_ImageMosaic', _('ImageMosaic')),
         )
 
-        if settings.OGR2OGR_PATH is not None and settings.OGR2OGR_PATH != '':
-            gdal_tools.OGR2OGR_PATH = settings.OGR2OGR_PATH
-        if settings.GDALSRSINFO_PATH is not None and settings.GDALSRSINFO_PATH != '':
-            gdal_tools.GDALSRSINFO_PATH = settings.GDALSRSINFO_PATH
-        if settings.GDALINFO_PATH is not None and settings.GDALINFO_PATH != '':
-            gdal_tools.GDALINFO_PATH = settings.GDALINFO_PATH
-         
-
+        if settings.GDALTOOLS_BASEPATH:
+            gdaltools.Wrapper.BASEPATH = settings.GDALTOOLS_BASEPATH
         
         self.supported_srs_plain = [ x[0] for x in forms_geoserver.supported_srs ]
         self.supported_encodings_plain = [ x[0] for x in forms_geoserver.supported_encodings ]
@@ -159,14 +152,14 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print str(e)
+            print(str(e))
             return False
     
     def threaded_reload_nodes(self):
         try:
             # get sequence from master
             us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
-            print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Apache. Update Sequence = " + str(us_master)
+            print("INFO: Reloading Geoserver all nodes except master configured with IP FO in Apache. Update Sequence = " + str(us_master))
             
             # reload all nodes except master
             if len(self.slave_nodes) > 0:
@@ -174,10 +167,10 @@ class Geoserver():
                 for node in self.slave_nodes:
                     us =  self.rest_catalog.get_update_sequence(node, user=self.user, password=self.password)
                     if us != us_master:
-                        print  "INFO: Reloading ... " + node + " with updatedSequence " + str(us) 
+                        print("INFO: Reloading ... " + node + " with updatedSequence " + str(us)) 
                         self.rest_catalog.reload(node, user=self.user, password=self.password)
         except Exception as e:
-            print str(e)
+            print(str(e))
             return False
         
     def reload_nodes(self):
@@ -188,18 +181,18 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print str(e)
+            print(str(e))
             return False
 
     def reload_all_nodes(self):
-        print "DEBUG: Reloading Geoserver nodes ......"
+        print("DEBUG: Reloading Geoserver nodes ......")
         try:
             if len(self.slave_nodes) > 0:
                 for node in self.slave_nodes:
                     self.rest_catalog.reload(node, user=self.user, password=self.password)
             return True
         except Exception as e:
-            print str(e)
+            print(str(e))
             return False
 
         
@@ -219,7 +212,7 @@ class Geoserver():
             else:
                 return True
         except Exception as e:
-            print str(e)
+            print(str(e))
             return False
         
     def deleteWorkspace(self, workspace):
@@ -232,7 +225,7 @@ class Geoserver():
             catalog.delete(ws, recurse=True)
             return True
         except Exception as e:
-            print str(e)
+            print(str(e))
             return False
         
     def getConfUrl(self):
@@ -291,7 +284,7 @@ class Geoserver():
             return True
         except Exception as e:
             logger.exception("Error creating datastore")
-            print "Backend MapService - createDatastore Error", e
+            print("Backend MapService - createDatastore Error", e)
             return False
         
     def datastore_exists(self, workspace, name):
@@ -350,7 +343,7 @@ class Geoserver():
             return True
         except Exception as exc:
             logger.exception("Error updating wmsstore")
-            print exc
+            print(exc)
             return False
     
     def deleteDatastore(self, workspace, datastore, delete_schema, purge=None):
@@ -504,7 +497,7 @@ class Geoserver():
         
         except Exception as ex:
                 logger.exception('Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
-                print str(ex.message)
+                print(str(ex.message))
                 return False
      
         try:
@@ -523,7 +516,7 @@ class Geoserver():
         Create new style
         """
         try:
-            self.getGsconfig().create_style(name, data.encode('utf-8'), overwrite=overwrite, workspace=None, style_format="sld10", raw=False)
+            self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=False)
             return True
         
         except Exception as e:
@@ -597,14 +590,13 @@ class Geoserver():
         if old_thumbnail and not 'no_thumbnail.jpg' in old_thumbnail.name:
             if os.path.isfile(old_thumbnail.path):
                 os.remove(old_thumbnail.path)
-
         
     def deleteStyle(self, name):
         try:
             catalog = self.getGsconfig()
             style = catalog.get_style(name, workspace=None)
             if style is None:
-                logger.warn(u'gvsigol style was not found in Geoserver:' + text(name))
+                logger.warn('gvsigol style was not found in Geoserver:' + text(name))
             else:
                 catalog.delete(style, purge=True, recurse=True)
             return True
@@ -899,20 +891,20 @@ class Geoserver():
         try:
             return self.rest_catalog.set_queryable(workspace, ds_name, ds_type, name, queryable, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
-            print ("ERROR: setQueryable failedrequest exception: " + e.get_message())
+            print(("ERROR: setQueryable failedrequest exception: " + e.get_message()))
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error changing property. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
-            print ("ERROR: failedrequest unknown exception: " + str(e))
+            print(("ERROR: failedrequest unknown exception: " + str(e)))
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be updated"))
             
     def setTimeEnabled(self, workspace, ds_name, ds_type, name, time_enabled, time_field, time_endfield, presentation, resolution, default_value_mode, default_value):
         try:
             return self.rest_catalog.set_time_dimension(workspace, ds_name, ds_type, name, time_enabled, time_field, time_endfield, presentation, resolution, default_value_mode, default_value, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
-            print ("ERROR: setQueryable failedrequest exception: " + e.get_message())
+            print(("ERROR: setQueryable failedrequest exception: " + e.get_message()))
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error changing property. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
-            print ("ERROR: failedrequest unknown exception: " + str(e))
+            print(("ERROR: failedrequest unknown exception: " + str(e)))
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be updated"))
 
     def _get_unique_resource_name(self, datastore, workspace):
@@ -957,7 +949,7 @@ class Geoserver():
             
         except Exception as ex:
             logger.exception("Error getting resources")
-            print str(ex)
+            print(str(ex))
             pass 
     
          
@@ -1052,8 +1044,8 @@ class Geoserver():
             return global_stats if global_stats else (None, None, None, None)
         elif os.path.isfile(file_path):
             try:
-                return gdal_tools.get_raster_stats(file_path)
-            except gdal_tools.GdalError as e:
+                return gdaltools.get_raster_stats(file_path)
+            except gdaltools.GdalError as e:
                 raise rest_geoserver.RequestError(e.code, e.message)    
 
 
@@ -1072,8 +1064,8 @@ class Geoserver():
             logging.error(e.get_message())
         except Exception as e:
             logging.error("__update_raster_stats failed!! Layer: " + coverage)
-            print "__update_raster_stats failed!!"
-            print e
+            print("__update_raster_stats failed!!")
+            print(e)
             pass
     
     def __do_upload_postgis(self, name, datastore, form_data, zip_path):
@@ -1115,11 +1107,11 @@ class Geoserver():
             # import SHP to DB
             if len(files)==1:
                 shp_abs = os.path.join(tmp_dir, files[0])
-                gdal_tools.shp2postgis(shp_abs, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                __shp2postgis(shp_abs, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                 return
         except (rest_geoserver.RequestError):
             raise 
-        except gdal_tools.GdalError as e:
+        except gdaltools.GdalError as e:
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logging.exception(e)
@@ -1129,7 +1121,7 @@ class Geoserver():
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
     def __fieldmapping_sql(self, creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password):
-        if creation_mode == gdal_tools.MODE_CREATE:
+        if creation_mode == forms_geoserver.MODE_CREATE:
             # no mapping needed
             return
         
@@ -1158,7 +1150,7 @@ class Geoserver():
             elif f in db_fields:
                 ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == f), None)
                 if ctrl_field:
-                    if creation_mode==gdal_tools.MODE_APPEND:
+                    if creation_mode==forms_geoserver.MODE_APPEND:
                         # skip control field in append mode
                         continue
                     elif ctrl_field.get('type', '').startswith('timestamp'):
@@ -1185,7 +1177,7 @@ class Geoserver():
             if db_mapped_field:
                 ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == db_mapped_field), None)
                 if ctrl_field:
-                    if creation_mode==gdal_tools.MODE_APPEND:
+                    if creation_mode==forms_geoserver.MODE_APPEND:
                         # skip control field in append mode
                         continue
                     elif ctrl_field.get('type', '').startswith('timestamp'):
@@ -1201,6 +1193,32 @@ class Geoserver():
         sql = "SELECT " + ",".join(fields) + " FROM " + shp_name
         return sql
     
+    def shp2postgis(self, shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=forms_geoserver.MODE_CREATE, encoding="autodetect", sql=None):
+        ogr = gdaltools.ogr2ogr()
+        ogr.set_encoding(encoding)
+        ogr.set_input(shp_path, srs=srs)
+        conn = gdaltools.PgConnectionString(host=host, port=port, dbname=dbname, schema=schema, user=user, password=password)
+        ogr.set_output(conn, table_name=table_name)
+        if creation_mode == forms_geoserver.MODE_CREATE:
+            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
+        elif creation_mode == forms_geoserver.MODE_APPEND:
+                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_APPEND, data_source_mode=ogr.MODE_DS_UPDATE)
+        elif creation_mode == forms_geoserver.MODE_OVERWRITE:
+                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_OVERWRITE, data_source_mode=ogr.MODE_DS_UPDATE)
+        ogr.layer_creation_options = {
+            "LAUNDER": "YES",
+            "precision": "NO"
+        }
+        ogr.config_options = {
+            "OGR_TRUNCATE": "NO"
+        }
+        ogr.set_sql(sql)
+        ogr.set_dim("2")
+        ogr.geom_type = "PROMOTE_TO_MULTI"
+        ogr.execute()
+        print(" ".join(ogr.safe_args))
+        return ogr.stderr if ogr.stderr is not None else ''
+
     def __do_export_to_postgis(self, name, datastore, form_data, shp_path, shp_fields):
         try:
             name = name.lower()
@@ -1233,8 +1251,8 @@ class Geoserver():
 
             shp_field_names = [f.name for f in shp_fields]
             sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
-            gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
-            
+            stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
+
             with Introspect(db, host=host, port=port, user=user, password=password) as i:
                 # add control fields
                 db_fields = i.get_fields(name, schema=schema)
@@ -1253,7 +1271,7 @@ class Geoserver():
                         except:
                             logger.exception("Error adding control field: " + control_field['name'])
             
-            if creation_mode == gdal_tools.MODE_OVERWRITE:
+            if creation_mode == forms_geoserver.MODE_OVERWRITE:
                 # re-install triggers
                 for trigger in Trigger.objects.filter(layer__datastore=datastore, layer__source_name=name):
                     try:
@@ -1262,17 +1280,15 @@ class Geoserver():
                     except:
                         logger.exception("Failed to install trigger: " + str(trigger))
             
+            if stderr:
+                raise rest_geoserver.RequestWarning(stderr)
             return True
-        
         except rest_geoserver.RequestError as e:
             logger.exception(str(e))
             raise
-        except gdal_tools.GdalWarning as e:
+        except gdaltools.GdalError as e:
             logger.exception(str(e))
-            raise rest_geoserver.RequestError(0, e.message)
-        except gdal_tools.GdalError as e:
-            logger.exception(str(e))
-            if e.code > 0 and creation_mode == gdal_tools.MODE_OVERWRITE:
+            if e.code > 0 and creation_mode == forms_geoserver.MODE_OVERWRITE:
                 params = json.loads(datastore.connection_params)
                 host = params['host']
                 port = params['port']
@@ -1284,12 +1300,12 @@ class Geoserver():
                 i.delete_table(schema, name)
                 i.close()
                 try:
-                    gdal_tools.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    if stderr:
+                        raise rest_geoserver.RequestWarning(stderr)
                     return True
-                except gdal_tools.GdalError as e:
+                except gdaltools.GdalError as e:
                     raise rest_geoserver.RequestError(e.code, e.message)
-                except gdal_tools.GdalWarning as e:
-                    raise rest_geoserver.RequestError(0, e.message)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logger.exception(str(e))
@@ -1310,16 +1326,16 @@ class Geoserver():
     def __do_shpdir2postgis(self, username, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults):
         try: 
             # get & sanitize parameters
-            if 'srs' in defaults.keys():    
+            if 'srs' in list(defaults.keys()):    
                 srs = defaults['srs']
             else:
                 srs = 'EPSG:4326'
-            if 'encoding' in defaults.keys():            
+            if 'encoding' in list(defaults.keys()):            
                 encoding = defaults['encoding']
             else:
                 encoding = 'LATIN1'
             if creation_mode not in ('CR', 'OW'):
-                raise
+                raise Exception()
             
             if not encoding in self.supported_encodings_plain or not srs in self.supported_srs_plain:
                 raise rest_geoserver.RequestError()
@@ -1372,13 +1388,13 @@ class Geoserver():
                         layer_name = self.prepare_string(table_def['name'].lower())
                         layer_title = table_def['title']
                         
-                        if table_def.has_key('srs') and table_def['srs']:
+                        if 'srs' in table_def and table_def['srs']:
                             srs = table_def['srs']
     
-                        if table_def.has_key('visible') and table_def['visible']:
+                        if 'visible' in table_def and table_def['visible']:
                             visible = table_def['visible']
                         
-                        if table_def.has_key('conf') and table_def['conf']:
+                        if 'conf' in table_def and table_def['conf']:
                             has_conf = True
                             conf = table_def['conf']
                             
@@ -1388,7 +1404,7 @@ class Geoserver():
                             
                         except Exception as e:
                             original_style_name = self.prepare_string(layer_name)
-                            print e
+                            print(e)
                         #layer_group = table_def['group'] + '_' + application.name.lower()
                     else:
                         layer_name = self.prepare_string(os.path.splitext(os.path.basename(f))[0].lower())
@@ -1396,9 +1412,9 @@ class Geoserver():
                         original_style_name = layer_name
                     shp_abs = os.path.join(dir_path, f)
                     try:
-                        gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                        shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                     except Exception as e:
-                        print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
+                        print("ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido ")
                         continue 
                     
                     layer_exists = False
@@ -1418,7 +1434,7 @@ class Geoserver():
                             if not result:
                                 self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
                         except:
-                            print "ERROR en createFeaturetype"
+                            print("ERROR en createFeaturetype")
                             raise
                     
                     if creation_mode==forms_geoserver.MODE_CREATE or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists): 
@@ -1462,10 +1478,10 @@ class Geoserver():
                     style_from_library = self.getStyle(original_style_name)                
     
                     if has_style and style_from_library is not None :
-                        print "DEBUG: has_style AND style_from_library"       
+                        print("DEBUG: has_style AND style_from_library")       
                         if creation_mode == 'CR':
                             if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
-                                print "DEBUG: Creation mode CR. Clone style False. Creating default" 
+                                print("DEBUG: Creation mode CR. Clone style False. Creating default") 
                                 self.createDefaultStyle(layer, final_style_name)
                                 stylelayers = StyleLayer.objects.filter(layer=layer)  
                                 for stylelayer in stylelayers:
@@ -1477,9 +1493,9 @@ class Geoserver():
                                 if newRecord2:
                                     newRecord2.save()  
                             else:
-                                print "DEBUG: Creation mode CR. Clone style True"
+                                print("DEBUG: Creation mode CR. Clone style True")
                         else:
-                            print "DEBUG: Has style and style_from_library. Creation mode UPDATE"
+                            print("DEBUG: Has style and style_from_library. Creation mode UPDATE")
                             style_name = datastore.workspace.name + '_' + layer.name + '_default'
                             symbology_services.clone_style(self, layer, original_style_name, final_style_name)
                             stylelayers = StyleLayer.objects.filter(layer=layer)  
@@ -1492,7 +1508,7 @@ class Geoserver():
                             if newRecord2:
                                 newRecord2.save()                      
                     else:
-                        print "DEBUG: NO has_style or style_from_library " + original_style_name
+                        print("DEBUG: NO has_style or style_from_library " + original_style_name)
                         style_name = datastore.workspace.name + '_' + layer.name + '_default'
                         stylelayers = StyleLayer.objects.filter(layer=layer)  
                         
@@ -1513,10 +1529,10 @@ class Geoserver():
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
                             
         except rest_geoserver.RequestError as ex:
-            print "Error Request: " + str(ex)
+            print("Error Request: " + str(ex))
             raise             
-        except gdal_tools.GdalError as ex:
-            print "Error Gdal: " + str(ex)
+        except gdaltools.GdalError as ex:
+            print("Error Gdal: " + str(ex))
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logging.exception(e)
@@ -1554,14 +1570,14 @@ class Geoserver():
             return True
 
         except Exception as e:
-            print e
+            print(e)
             raise e
     
     def shpdir2postgis(self, request, datastore, application, dir_path, layergroup, table_definition,creation_mode, defaults):
         try:
             self.__do_shpdir2postgis(request, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults)        
         except Exception as e:
-            print e
+            print(e)
             raise e
     
     def __field_def_to_gs(self, field_def_array, geometry_type, pks):
@@ -1580,7 +1596,7 @@ class Geoserver():
                raise rest_geoserver.RequestError(_("Invalid geometry type")) 
             
             for f in field_def_array:
-                if len(filter(lambda existing: existing['name'] == f[0], fields))>0:
+                if len([existing for existing in fields if existing['name'] == f[0]])>0:
                     raise rest_geoserver.RequestError(_("Duplicated field name: {0}").format(f[0]))
                 if f[0] == "geom" or f[0] == "name" or f[0] == "fid":
                     raise rest_geoserver.RequestError(_("Invalid field name. '{0}' is a reserved word").format(f[0]))
@@ -1748,7 +1764,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print str(e)
+            print(str(e))
             raise
         
         
@@ -1769,7 +1785,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print str(e)
+            print(str(e))
             raise
     
     def setDataRules(self):
@@ -1941,7 +1957,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print e
+            print(e)
             return False
         
     def getGeomColumns(self, datastore):
@@ -1966,7 +1982,7 @@ class Geoserver():
                 result.append({"schema": r[0], "name": r[1], "geom_column": r[2], "geom_type": r[5], "srs": srs, 'key_column': r[6], 'fields': r[7]})
             return result
         except Exception as e:
-            print str(e)
+            print(str(e))
             raise
         
     def getFeatureCount(self, request, url, layer_name, f):   
@@ -2075,7 +2091,6 @@ class Geoserver():
                 
         iname = ''.join(random.choice(string.ascii_uppercase) for i in range(8))
         iname += '.png'
-        
         req = requests.Session()
         req.auth = (self.user, self.password)
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
@@ -2087,7 +2102,6 @@ class Geoserver():
         else:
             wms = ws.wms_endpoint
         response = req.get(wms, params=values, verify=False, stream=True, proxies=settings.PROXIES)
-
         print(response.url)
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
             for block in response.iter_content(1024):
@@ -2144,14 +2158,14 @@ class Geoserver():
             folder_path = zip_path.replace('file://','')
             try: 
                 try:
-                    os.chmod(folder_path, 0775)
+                    os.chmod(folder_path, 0o775)
                 except Exception:
                     pass
                 filenames = os.listdir(folder_path)
                 founded = False
                 for filename in filenames:
                     try:
-                        os.chmod(folder_path+"/"+filename, 0775)
+                        os.chmod(folder_path+"/"+filename, 0o775)
                         if (date_regex != "" and re.search(date_regex, filename) != None) or (ele_regex != "" and re.search(ele_regex, filename) != None):
                             founded = True
                     except:

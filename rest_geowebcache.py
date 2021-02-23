@@ -42,16 +42,16 @@ class RequestError(Exception):
 
     def get_detailed_message(self):
         from builtins import str as text
-        msg = u'Status: ' + text(self.status_code)
-        if isinstance(self.server_message, unicode):
-            msg += u'\nServer message: ' + self.server_message
+        msg = 'Status: ' + text(self.status_code)
+        if isinstance(self.server_message, str):
+            msg += '\nServer message: ' + self.server_message
         else:
-            msg += u'\nServer message: ' + self.server_message.decode('utf-8', 'replace')
+            msg += '\nServer message: ' + self.server_message.decode('utf-8', 'replace')
         if self.message:
-            if isinstance(self.message, unicode):
-                msg += u'\nMessage: ' + self.message
+            if isinstance(self.message, str):
+                msg += '\nMessage: ' + self.message
             else:
-                msg += u'\nMessage: ' + self.message.decode('utf-8', 'replace')
+                msg += '\nMessage: ' + self.message.decode('utf-8', 'replace')
         return msg
 
 class UploadError(RequestError):

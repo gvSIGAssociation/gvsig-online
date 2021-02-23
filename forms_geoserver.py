@@ -24,7 +24,7 @@
 
 from django import forms
 from django.utils.translation import ugettext as _
-from models import Workspace, Datastore, LayerGroup
+from .models import Workspace, Datastore, LayerGroup
 from gvsigol.settings import SUPPORTED_ENCODINGS
 from gvsigol_core import utils as core_utils
 import json
@@ -48,57 +48,57 @@ time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM
 #time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
 
 class ImageMosaicUploadForm(forms.Form): 
-    workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    workspace = forms.ModelChoiceField(label=_('Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
     #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
-    file = forms.CharField(label=_(u'File'), required=True, max_length=500, widget=forms.TextInput(attrs={'id':'selected-file', 'readonly': 'readonly', 'class' : 'form-control'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    file = forms.CharField(label=_('File'), required=True, max_length=500, widget=forms.TextInput(attrs={'id':'selected-file', 'readonly': 'readonly', 'class' : 'form-control'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
-    visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    date_regex = forms.CharField(label=_(u'Date regex'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'placeholder': "(?<=_)[0-9]{8}"}))
-    ele_regex = forms.CharField(label=_(u'Elevation regex'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'placeholder': "(?<=_)(\\d{4}\\.\\d{3})"}))   
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    visible = forms.BooleanField(label=_('Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    queryable = forms.BooleanField(label=_('Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    cached = forms.BooleanField(label=_('Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    single_image = forms.BooleanField(label=_('Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    date_regex = forms.CharField(label=_('Date regex'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'placeholder': "(?<=_)[0-9]{8}"}))
+    ele_regex = forms.CharField(label=_('Elevation regex'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'placeholder': "(?<=_)(\\d{4}\\.\\d{3})"}))   
 
 class RasterLayerUploadForm(forms.Form):
-    workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    workspace = forms.ModelChoiceField(label=_('Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
     #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
-    file = forms.CharField(label=_(u'File'), required=True, max_length=500, widget=forms.TextInput(attrs={'id':'selected-file', 'readonly': 'readonly', 'class' : 'form-control'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    file = forms.CharField(label=_('File'), required=True, max_length=500, widget=forms.TextInput(attrs={'id':'selected-file', 'readonly': 'readonly', 'class' : 'form-control'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
-    visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    visible = forms.BooleanField(label=_('Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    queryable = forms.BooleanField(label=_('Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    cached = forms.BooleanField(label=_('Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    single_image = forms.BooleanField(label=_('Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
 
 class VectorLayerUploadForm(forms.Form):
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
-    file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    file = forms.FileField(label=_('File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    visible = forms.BooleanField(label=_('Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    queryable = forms.BooleanField(label=_('Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    cached = forms.BooleanField(label=_('Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    single_image = forms.BooleanField(label=_('Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
 
 
 class PostgisLayerUploadForm(forms.Form):
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
     #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
-    file = forms.CharField(label=_(u'File'), required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    mode = forms.ChoiceField(label=_(u'Mode'), required=True, choices=postgis_modes, widget=forms.Select(attrs={'class':'form-control'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    file = forms.CharField(label=_('File'), required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    mode = forms.ChoiceField(label=_('Mode'), required=True, choices=postgis_modes, widget=forms.Select(attrs={'class':'form-control'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
-    encoding = forms.ChoiceField(label=_(u'Encoding'), required=True, choices=supported_encodings, widget=forms.Select(attrs={'class':'form-control'}))
-    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    encoding = forms.ChoiceField(label=_('Encoding'), required=True, choices=supported_encodings, widget=forms.Select(attrs={'class':'form-control'}))
+    srs = forms.ChoiceField(label=_('SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     #visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
@@ -113,7 +113,7 @@ class PostgisLayerUploadForm(forms.Form):
             qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username).order_by('name')
             
         self.fields["datastore"] = forms.ModelChoiceField(
-            label=_(u'Datastore'), required=True,
+            label=_('Datastore'), required=True,
             queryset=qs,
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )
@@ -123,44 +123,44 @@ class PostgisLayerUploadForm(forms.Form):
         return cleaned_data
 
 class CreateSqlViewForm(forms.Form):
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.filter(type="v_PostGIS"), widget=forms.Select(attrs={'class':'form-control'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    sql_statement = forms.CharField(label=_(u'SQL Statement'), required=True, widget=forms.Textarea(attrs={'class' : 'form-control materialize-textarea'}))
-    key_column = forms.CharField(label=_(u'Primary key column'), required=True, max_length=512, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    geom_column = forms.CharField(label=_(u'Geometry column'), required=True, max_length=512, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    geom_type = forms.ChoiceField(label=_(u'Geometry type'), required=True, choices=geometry_types)
-    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs)
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
-    visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.filter(type="v_PostGIS"), widget=forms.Select(attrs={'class':'form-control'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    sql_statement = forms.CharField(label=_('SQL Statement'), required=True, widget=forms.Textarea(attrs={'class' : 'form-control materialize-textarea'}))
+    key_column = forms.CharField(label=_('Primary key column'), required=True, max_length=512, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    geom_column = forms.CharField(label=_('Geometry column'), required=True, max_length=512, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    geom_type = forms.ChoiceField(label=_('Geometry type'), required=True, choices=geometry_types)
+    srs = forms.ChoiceField(label=_('SRS'), required=True, choices=supported_srs)
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    visible = forms.BooleanField(label=_('Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    queryable = forms.BooleanField(label=_('Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    cached = forms.BooleanField(label=_('Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    single_image = forms.BooleanField(label=_('Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
 
 class CreateFeatureTypeForm(forms.Form):
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    geom_type = forms.ChoiceField(label=_(u'Geometry type'), required=True, choices=geometry_types, widget=forms.Select(attrs={'class' : 'form-control'}))
-    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, initial=1, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    fields = forms.CharField(label=_(u'Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    time_enabled_field = forms.CharField(label=_(u'Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_enabled_endfield = forms.CharField(label=_(u'End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_presentation = forms.ChoiceField(label=_(u'Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_resolution_year = forms.IntegerField(label=_(u'Resolution year'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_month = forms.IntegerField(label=_(u'Resolution month'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_week = forms.IntegerField(label=_(u'Resolution week'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_day = forms.IntegerField(label=_(u'Resolution day'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_hour = forms.IntegerField(label=_(u'Resolution hour'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_minute = forms.IntegerField(label=_(u'Resolution minute'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_resolution_second = forms.IntegerField(label=_(u'Resolution second'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
-    time_default_value_mode = forms.ChoiceField(label=_(u'Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_default_value = forms.CharField(label=_(u'Default value'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    geom_type = forms.ChoiceField(label=_('Geometry type'), required=True, choices=geometry_types, widget=forms.Select(attrs={'class' : 'form-control'}))
+    srs = forms.ChoiceField(label=_('SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, initial=1, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    visible = forms.BooleanField(label=_('Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    queryable = forms.BooleanField(label=_('Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    cached = forms.BooleanField(label=_('Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    single_image = forms.BooleanField(label=_('Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    fields = forms.CharField(label=_('Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    time_enabled_field = forms.CharField(label=_('Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_enabled_endfield = forms.CharField(label=_('End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_presentation = forms.ChoiceField(label=_('Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_resolution_year = forms.IntegerField(label=_('Resolution year'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_month = forms.IntegerField(label=_('Resolution month'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_week = forms.IntegerField(label=_('Resolution week'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_day = forms.IntegerField(label=_('Resolution day'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_hour = forms.IntegerField(label=_('Resolution hour'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_minute = forms.IntegerField(label=_('Resolution minute'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_second = forms.IntegerField(label=_('Resolution second'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_default_value_mode = forms.ChoiceField(label=_('Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_default_value = forms.CharField(label=_('Default value'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  
@@ -174,13 +174,13 @@ class CreateFeatureTypeForm(forms.Form):
             qs_lg = (LayerGroup.objects.filter(created_by__exact=user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
             
         self.fields["datastore"] = forms.ModelChoiceField(
-            label=_(u'Datastore'), required=True,
+            label=_('Datastore'), required=True,
             queryset=qs,
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )
         
         self.fields["layer_group"] = forms.ModelChoiceField(
-            label=_(u'Layer group'), required=True,
+            label=_('Layer group'), required=True,
             queryset=qs_lg,
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )

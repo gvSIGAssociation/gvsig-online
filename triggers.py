@@ -86,7 +86,7 @@ def install_procedure(procedure, cursor=None):
     from gvsigol_services.utils import get_db_connect_from_datastore
 
     if not isinstance(procedure, TriggerProcedure):
-        if isinstance(procedure, basestring):
+        if isinstance(procedure, str):
             procedure = TriggerProcedure.objects.get(signature = procedure)
         else:
             procedure = TriggerProcedure.objects.get(id=int(procedure))
@@ -118,7 +118,7 @@ def drop_procedure(procedure, cursor=None):
     from gvsigol_services.utils import get_db_connect_from_datastore
 
     if not isinstance(procedure, TriggerProcedure):
-        if isinstance(procedure, basestring):
+        if isinstance(procedure, str):
             procedure = TriggerProcedure.objects.get(signature = procedure)
         else:
             procedure = TriggerProcedure.objects.get(id=int(procedure))

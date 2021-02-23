@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 
 from django.apps import AppConfig
 import logging
@@ -9,8 +9,8 @@ class GvsigolServicesConfig(AppConfig):
     name = 'gvsigol_services'
     
     def _updateLayerInfo(self):
-        import geographic_servers
-        from models import Layer, Datastore, Workspace
+        from gvsigol_services import geographic_servers
+        from gvsigol_services.models import Layer, Datastore, Workspace
         layer_list = Layer.objects.filter(external=False)
         for l in layer_list:
             datastore = Datastore.objects.get(id=l.datastore_id)
