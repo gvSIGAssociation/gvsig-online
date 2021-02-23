@@ -16,7 +16,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_services import backend_postgis
 from django.db.utils import ProgrammingError
 from django.http.response import JsonResponse
 '''
@@ -467,7 +466,8 @@ def datastore_add(request):
                     has_errors = True
                 else:
                     post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
-            except:
+            except Exception as e:
+                logger.exception(str(e))
                 has_errors = True
 
         if type == 'c_ImageMosaic':
