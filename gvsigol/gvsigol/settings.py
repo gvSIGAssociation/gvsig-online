@@ -161,31 +161,34 @@ INSTALLED_APPS = [
     'gvsigol_plugin_alfresco',
     'gvsigol_plugin_catalog',
     'gvsigol_plugin_catastro',
-    #'gvsigol_plugin_catastrouy',
+    'gvsigol_plugin_catastrouy',
     'gvsigol_plugin_charts',
     'gvsigol_plugin_downloadman',
     'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
     'gvsigol_plugin_elevation',
-    #'gvsigol_plugin_emergencies',
+    'gvsigol_plugin_emergencies',
     'gvsigol_plugin_geocoding',
+    #'gvsigol_plugin_geoetl',
     'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_importvector',
     'gvsigol_plugin_manageaddresses',
-    #'gvsigol_plugin_opensea2',
+    'gvsigol_plugin_opensea2',
     'gvsigol_plugin_sampledashboard',
     'gvsigol_plugin_samplemenubutton',
     'gvsigol_plugin_staticdownloads',
     'gvsigol_plugin_survey',
-    #'gvsigol_plugin_picassa',
+    'gvsigol_plugin_picassa',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
     'gvsigol_plugin_streetview',
-    ##'gvsigol_plugin_sync',
-    ##'gvsigol_plugin_trip_planner',
-    #'gvsigol_plugin_turiscan',
+    'gvsigol_plugin_sync',
+    'gvsigol_plugin_trip_planner',
+    'gvsigol_plugin_turiscan',
     'gvsigol_plugin_worldwind',
-    'actstream'
+    'actstream',
+    #### DEPENDENCIES ######,
+    'django_celery_beat'
 ]
 
 try:
@@ -663,3 +666,9 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
+DOCS = {
+    'URL': BASE_URL + '/media/docs',
+    'NAME': 'manual.pdf',
+    'VERSION': 'v1'
+}
+
