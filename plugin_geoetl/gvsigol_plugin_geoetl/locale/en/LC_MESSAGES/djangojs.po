@@ -74,7 +74,10 @@ msgstr ""
 msgid "Shapefile Parameters"
 msgstr ""
 
-msgid "Choose shapefile files:"
+msgid "Choose shapefile:"
+msgstr ""
+
+msgid "Path:"
 msgstr ""
 
 msgid "Join"
@@ -251,7 +254,7 @@ msgstr ""
 msgid "Choose csv file:"
 msgstr ""
 
-msgid "Column separator:"
+msgid "Separator:"
 msgstr ""
 
 msgid "Insert if PRJ is not loaded"
@@ -300,4 +303,22 @@ msgid "For more math functions check above link"
 msgstr ""
 
 msgid "Set all transformers parameters in canvas"
+msgstr ""
+
+msgid "Select file"
+msgstr ""
+
+msgid "Load sheets"
+msgstr ""
+
+msgid "Set parameters of all tasks before save"
+msgstr ""
+
+msgid "Empty canvas"
+msgstr ""
+
+msgid "Are you sure?"
+msgstr ""
+
+msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
 msgstr ""

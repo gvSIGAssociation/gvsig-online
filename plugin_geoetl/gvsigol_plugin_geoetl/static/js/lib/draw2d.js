@@ -17133,10 +17133,23 @@ _packages2.default.command.CommandReconnect = _packages2.default.command.Command
 		for(i=0;i<json.length;i++){
 			try{
 				if (json[i]['type']!='draw2d.Connection'){
+					multiOut = 0
 					for(j=0;j<json[i]['ports'].length;j++){
+						
+						if(json[i]['ports'][j]['name'].startsWith('output')){
+							multiOut = multiOut + 1
+						};
+
 						if (json[i]['ports'][j]['name']== source.name){
+							
 							var schema = [...json[i]['entities'][0]['schema']]
-							connection['userData'] = [schema]
+							
+							if (Array.isArray(schema[multiOut-1])){
+								
+								connection['userData'] = [schema[multiOut-1]]
+							}else{
+								connection['userData'] = [schema]
+							}
 							break;
 						}
 					}
@@ -21046,6 +21059,7 @@ _packages2.default.io.json.Reader = _packages2.default.io.Reader.extend(
     canvas.getLines().each(function (i, line) {
       line.svgPathString = null;
       line.repaint();
+	  line.setTargetDecorator(new draw2d.decoration.connection.ArrowDecorator(15, 10).setBackgroundColor("#141517"))
     });
     canvas.linesToRepaintAfterDragDrop = canvas.getLines().clone();
 

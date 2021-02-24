@@ -7,46 +7,21 @@ from osgeo import ogr, osr
 import psycopg2
 
 def get_sheets_excel(excel):
+    
     xl = pd.ExcelFile(excel)
     return xl.sheet_names
 
-def get_schema_excel(excel, dicc):
-    xl = pd.read_excel(excel, sheet_name=dicc["sheet-name"], header=dicc["header"], usecols=dicc["usecols"])
-
+def get_schema_excel(dicc):
+    
+    xl = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
     return list(xl.columns)
 
-def get_schema_shape(listF):
-    for i in listF:
+def get_schema_shape(file):
 
-        ext = i.name[-4:]
-        shpName = i.name[:-4]
-
-        if ext =='.dbf':
-            dbfTemp = tempfile.NamedTemporaryFile(delete=False)
-            dbfTemp.write(i.read())
-            dbfTemp.close()
-            shutil.copy(dbfTemp.name, '/tmp/'+shpName+'.dbf')
-        
-        elif ext == '.prj':
-            prjTemp = tempfile.NamedTemporaryFile(delete=False)
-            prjTemp.write(i.read())
-            prjTemp.close()
-            shutil.copy(prjTemp.name, '/tmp/'+shpName+'.prj')
-        
-        elif ext == '.shp':
-            shpTemp = tempfile.NamedTemporaryFile(delete=False)
-            shpTemp.write(i.read())
-            shpTemp.close()
-            shutil.copy(shpTemp.name, '/tmp/'+shpName+'.shp')
-        
-        elif ext == '.shx':
-            shxTemp = tempfile.NamedTemporaryFile(delete=False)
-            shxTemp.write(i.read())
-            shxTemp.close()
-            shutil.copy(shxTemp.name, '/tmp/'+shpName+'.shx')
-  
+    shp = file[7:]
+    
     driver = ogr.GetDriverByName('ESRI Shapefile')
-    dataSource = driver.Open('/tmp/'+shpName+'.shp', 0)
+    dataSource = driver.Open(shp, 0)
             
     layer = dataSource.GetLayer()
     schema = []
@@ -66,6 +41,6 @@ def test_postgres(dicc):
     except:
         return {"result": False}
 
-def get_schema_csv(csv, dicc):
-    csvdata = pd.read_csv(csv, sep=dicc["separator"])
+def get_schema_csv(dicc):
+    csvdata = pd.read_csv(dicc["csv-file"], sep=dicc["separator"])
     return list(csvdata.columns)

@@ -1,5 +1,3 @@
-
-
 gvsigolETL.View = draw2d.Canvas.extend({
 	
 	init:function(id)
@@ -8,7 +6,6 @@ gvsigolETL.View = draw2d.Canvas.extend({
 		
         this.setScrollArea("#"+id);
                 
-
 	},
 
     /**
@@ -24,7 +21,9 @@ gvsigolETL.View = draw2d.Canvas.extend({
      **/
     onDrop : function(droppedDomNode, x, y)
     {
+    
         var type = $(droppedDomNode).data("shape");
+        
         var figure = eval("new "+type+"();");
         
         figure.addEntity("id");

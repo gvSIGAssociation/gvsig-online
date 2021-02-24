@@ -54,7 +54,7 @@ msgid "Excel Parameters"
 msgstr "Paràmetres Excel"
 
 msgid "Choose excel file:"
-msgstr "Tria l'arxiu excel:"
+msgstr "Tria arxiu excel:"
 
 msgid "Sheet:"
 msgstr "Fulla:"
@@ -74,8 +74,11 @@ msgstr "Eixida"
 msgid "Shapefile Parameters"
 msgstr "Paràmetres Shapefile"
 
-msgid "Choose shapefile files:"
-msgstr "Tria els arxius shapefile:"
+msgid "Choose shapefile:"
+msgstr "Tria l'arxiu SHP:"
+
+msgid "Path:"
+msgstr "Ruta:"
 
 msgid "Join"
 msgstr "Unió"
@@ -249,10 +252,10 @@ msgid "CSV Parameters"
 msgstr "Paràmetres CSV"
 
 msgid "Choose csv file:"
-msgstr "Tria l'arxiu csv:"
+msgstr "Tria arxiu csv:"
 
-msgid "Column separator:"
-msgstr "Separador de columna:"
+msgid "Separator:"
+msgstr "Separador:"
 
 msgid "Insert if PRJ is not loaded"
 msgstr "Insertar si no es carrega el PRJ"
@@ -301,3 +304,21 @@ msgstr "Per a més funcions matemàtiques consulta l'enllaç de dalt."
 
 msgid "Set all transformers parameters in canvas"
 msgstr "Configura tots els paràmetres dels transformadors al canvas"
+
+msgid "Select file"
+msgstr "Tria arxiu"
+
+msgid "Load sheets"
+msgstr "Carrega fulles"
+
+msgid "Set parameters of all tasks before save"
+msgstr "Configura els paràmetres de totes les tasques abans de guardar"
+
+msgid "Empty canvas"
+msgstr "Canvas buit"
+
+msgid "Are you sure?"
+msgstr "Estàs segur?"
+
+msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
+msgstr "Si obris un nou canvas buit perdràs el canvas actual si no l'has guardat abans"

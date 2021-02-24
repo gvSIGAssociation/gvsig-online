@@ -61,7 +61,7 @@ class Graph:
 
 def input_Excel(dicc):
 
-    xl = pd.read_excel(dicc["file"], sheet_name=dicc["sheet-name"], header=dicc["header"], usecols=dicc["usecols"])
+    xl = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
 
     js_excel ={
         'features':[]
@@ -91,37 +91,10 @@ def input_Excel(dicc):
 
 def input_Shp(dicc):
 
-    for i in  dicc['file']:
-
-        ext = i.name[-4:]
-        shpName = i.name[:-4]
-
-        if ext =='.dbf':
-            dbfTemp = tempfile.NamedTemporaryFile(delete=False)
-            dbfTemp.write(i.read())
-            dbfTemp.close()
-            shutil.copy(dbfTemp.name, '/tmp/'+shpName+'.dbf')
-        
-        elif ext == '.prj':
-            prjTemp = tempfile.NamedTemporaryFile(delete=False)
-            prjTemp.write(i.read())
-            prjTemp.close()
-            shutil.copy(prjTemp.name, '/tmp/'+shpName+'.prj')
-        
-        elif ext == '.shp':
-            shpTemp = tempfile.NamedTemporaryFile(delete=False)
-            shpTemp.write(i.read())
-            shpTemp.close()
-            shutil.copy(shpTemp.name, '/tmp/'+shpName+'.shp')
-        
-        elif ext == '.shx':
-            shxTemp = tempfile.NamedTemporaryFile(delete=False)
-            shxTemp.write(i.read())
-            shxTemp.close()
-            shutil.copy(shxTemp.name, '/tmp/'+shpName+'.shx')
+    shp = dicc['shp-file'][7:]
   
     driver = ogr.GetDriverByName('ESRI Shapefile')
-    dataSource = driver.Open('/tmp/'+shpName+'.shp', 0)
+    dataSource = driver.Open(shp, 0)
             
     layer = dataSource.GetLayer()
     
@@ -181,8 +154,8 @@ def trans_KeepAttr(dicc):
 
 def trans_RenameAttr(dicc):
 
-    oldAttr = dicc['oldAttr']
-    newAttr = dicc['newAttr']
+    oldAttr = dicc['old-attr']
+    newAttr = dicc['new-attr']
     
     table = dicc['data'][0]
     
@@ -827,7 +800,7 @@ def output_Postgis(dicc):
 
 def input_Csv(dicc):
 
-    csvdata = pd.read_csv(dicc["file"], sep=dicc["separator"], encoding='utf8')
+    csvdata = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8')
     
     js_csv ={
         'features':[]
@@ -857,8 +830,8 @@ def input_Csv(dicc):
 
 def trans_Reproject(dicc):
     table = dicc['data'][0]
-    sourceepsg = str(dicc['sourceepsg'])
-    targetepsg = str(dicc['targetepsg'])
+    sourceepsg = str(dicc['source-epsg'])
+    targetepsg = str(dicc['target-epsg'])
 
     source = osr.SpatialReference()
 
@@ -897,7 +870,7 @@ def trans_Counter(dicc):
     table = dicc['data'][0]
     attr = dicc['attr']
     
-    gbAttr= dicc['groupby']
+    gbAttr= dicc['group-by-attr']
     
     if gbAttr == '':
         count=1
@@ -930,7 +903,7 @@ def trans_Calculator(dicc):
 
     for i in table['features']:
         i['properties'][attr] = eval(exp)
-        print i['properties'][attr]
+        #print i['properties'][attr]
 
     return [table]
 

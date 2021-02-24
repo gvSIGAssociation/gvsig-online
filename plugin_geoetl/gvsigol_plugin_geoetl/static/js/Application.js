@@ -15,6 +15,7 @@ gvsigolETL.Application = Class.extend(
 	      this.view    = new gvsigolETL.View("canvas-etl");
           this.toolbar = new gvsigolETL.Toolbar("toolbar-etl",  this.view );
     }
+    
 
 
 });

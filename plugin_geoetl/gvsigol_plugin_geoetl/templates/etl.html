@@ -62,12 +62,28 @@
 
 {% block extra-scripts %}
 <script>
+    
     $('#menu-manage-plugins').addClass("active");
     $('#submenu-etl').addClass("active");
+
+    lgid = '{{ id }}'
+    name_ws = '{{ name }}'
+    description_ws = '{{ description }}'
+    workspace = '{{ workspace }}'
+    fm_directory = '{{ fm_directory }}'
+
+    function htmlDecode(input){
+        var e = document.createElement('textarea');
+        e.innerHTML = input;
+        // handle case of empty input
+        return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+    };
+
+    if(workspace){
+        var cnv = JSON.parse(htmlDecode(workspace))
+    };
+
 </script>
-
-
-
 
 <link type="text/css" rel="stylesheet" href="{% static "css/style_etl.css" %}">
 
@@ -77,7 +93,7 @@
 <script type="text/javascript" src="{% static "js/View.js" %}"></script>
 <script type="text/javascript" src="{% static "js/Toolbar.js" %}"></script>
 <script type="text/javascript" src="{% static "js/TableShape.js" %}"></script>
-<script type="text/javascript" src="{% static "js/script.js" %}"></script>
+<script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}"></script>
 
 <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 
