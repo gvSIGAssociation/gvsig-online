@@ -3042,7 +3042,7 @@ def get_unique_values(request):
 
         workspace = Workspace.objects.get(name__exact=layer_ws)
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace.name)
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_read_layer(request.user, layer):
             return HttpResponseForbidden(json.dumps({'values': []}), content_type='application/json')
         connection = ast.literal_eval(layer.datastore.connection_params)
 
@@ -3249,7 +3249,7 @@ def get_feature_wfs(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_read_layer(request.user, layer):
             return HttpResponseForbidden('{"data": []}', content_type='application/json')
         wfs_url = request.POST.get('wfs_url')
         field = request.POST.get('field')
