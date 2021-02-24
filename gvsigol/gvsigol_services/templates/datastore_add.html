@@ -18,13 +18,11 @@
 			{% if form.errors %}
 				<div id="form-error" style="color:#ff0000;">
 					<ul>
+					{{ form.non_field_errors }}
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>
 						{% endif %}	
-					{% endfor %}
-					{% for field, msg in form.errors.iteritems %}
-						<li>{{ msg|striptags }}</li>
 					{% endfor %}
 					</ul>
 				</div>
@@ -279,7 +277,7 @@ $().ready(function(){
 			},
 			success	:function(response){
 				if (response.success) {
-					messageBox.show('info', gettext('Connection has been success'));
+					messageBox.show('info', gettext('Connection has been successful'));
 					
 				} else {
 					messageBox.show('warning', response.error);

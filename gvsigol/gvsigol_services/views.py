@@ -4627,7 +4627,7 @@ def test_connection(request):
                 
             except Exception as e:
                 response = {
-                    'error': escape(strip_tags(str(e))),
+                    'error': str(e),
                     'success': False 
                 }
         elif datastore_type == 'e_WMS':
