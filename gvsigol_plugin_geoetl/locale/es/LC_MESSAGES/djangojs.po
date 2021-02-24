@@ -54,7 +54,7 @@ msgid "Excel Parameters"
 msgstr "Parámetros Excel"
 
 msgid "Choose excel file:"
-msgstr "Elige el fichero excel:"
+msgstr "Elige excel:"
 
 msgid "Sheet:"
 msgstr "Hoja:"
@@ -74,8 +74,11 @@ msgstr "Salida"
 msgid "Shapefile Parameters"
 msgstr "Parámetros Shapefile"
 
-msgid "Choose shapefile files:"
-msgstr "Elige los ficheros shapefile:"
+msgid "Choose shapefile:"
+msgstr "Elige shapefile:"
+
+msgid "Path:"
+msgstr "Ruta:"
 
 msgid "Join"
 msgstr "Unión"
@@ -249,10 +252,10 @@ msgid "CSV Parameters"
 msgstr "Parámetros CSV"
 
 msgid "Choose csv file:"
-msgstr "Elige un fichero csv:"
+msgstr "Elige csv:"
 
-msgid "Column separator:"
-msgstr "Separador de columna:"
+msgid "Separator:"
+msgstr "Separador:"
 
 msgid "Insert if PRJ is not loaded"
 msgstr "Insertar si no se carga el PRJ"
@@ -301,3 +304,21 @@ msgstr "Para más funciones matemáticas consulta el enlace de arriba."
 
 msgid "Set all transformers parameters in canvas"
 msgstr "Configura todos los parámetros de los transformadores en el canvas"
+
+msgid "Select file"
+msgstr "Elige fichero"
+
+msgid "Load sheets"
+msgstr "Carga hojas"
+
+msgid "Set parameters of all tasks before save"
+msgstr "Configura los parámetros de todas las tareas antes de guardar"
+
+msgid "Empty canvas"
+msgstr "Canvas vacío"
+
+msgid "Are you sure?"
+msgstr "¿Estás seguro?"
+
+msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
+msgstr "Si abres un nuevo canvas vacío perderás el canvas actual si no lo has guardado antes"

@@ -36,45 +36,64 @@ function getPerAttr(){
         return memento;
     }
     catch{
-        $("#dialog-response").remove();
 
-        role = 'class="alert alert-danger" role = "alert"'
-
-        $('#canvas-parent').append('<div id="dialog-response" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-            '<div class="modal-dialog" role="document">'+
-                '<div class="modal-content">'+
-                    '<div class="modal-header">'+
-                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                            '<span aria-hidden="true">&times;</span>'+
-                        '</button>'+
-                        '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-                    '</div>'+
-                    '<div '+role+' align="center">'+gettext('Set all transformers parameters in canvas')+
-                    '</div>'+
-                    '<div class="modal-footer">'+
-                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                    '</div>'+
-                '</div>'+
-            '</div>'+
-        '</div>')
-
-        $('#dialog-response').modal('show')
     }
 };
 
 function isAlreadyInCanvas(jsonParams, jsonTask, ID){
 
     if(jsonParams.length == 0){
+
         jsonParams.push(jsonTask)
-    } else {                
+
+    } else {
+
+        is = false
+
         for (i = 0; i < jsonParams.length; i++) {
+
             if(ID == jsonParams[i]["id"]){
+
                 jsonParams[i] = jsonTask
+                is = true
                 break;
-            } else {
-                jsonParams.push(jsonTask)
+
+            };
+        };
+
+        if(is == false) {
+
+            jsonParams.push(jsonTask)
+        };
+    };
+};
+
+function setColorIfIsOpened(jsonParams, type, ID, icon){
+    setTimeout(function(){
+        
+        for(k=0;k<jsonParams.length;k++){
+            if (jsonParams[k]['id'] == ID){
+
+                if (type.startsWith('input')){ 
+                    icon.setColor('#01b0a0')
+                }else if (type.startsWith('output')){ 
+                    icon.setColor("#e79600")
+                }else if (type.startsWith('trans')){ 
+                    icon.setColor("#4682B4")
+                }
+                break;
             }
-        }
+        } },1)
+
+};
+
+function getPathFile(fileType, ID){
+    $('#select-file-button-'+ID).click(function (e) {
+        window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+    });
+    
+    window.filemanagerCallback = function(url) {
+        $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
     }
 };
 
@@ -100,7 +119,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
        
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({ 
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -108,11 +127,14 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
 
         $('#canvas-parent').append('<div id="dialog-input-csv-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -125,12 +147,16 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column66">'+
-                                '<label class="col-form-label" >'+gettext('Choose csv file:')+'</label>'+
-                                '<input type="file" id="csv-file-'+ID+'" name="file" class="form-control" accept=".csv">'+
+                            '<div class="column20">'+
+                                '<label class="col-form-label" >'+gettext('Choose csv file:')+'</label><br>'+
+                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
                             '</div>'+ 
-                            '<div class="threecolumn">'+
-                                '<label class="col-form-label">'+gettext('Column separator:')+'</label>'+
+                            '<div class="column60">'+
+                            '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                '<input type="text" id="csv-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+ 
+                            '<div class="column20">'+
+                                '<label class="col-form-label">'+gettext('Separator:')+'</label>'+
                                 '<select class="form-control" id="separator-'+ID+'">'+
                                     '<option value=";"> ; </option>'+
                                     '<option value=","> , </option>'+
@@ -146,28 +172,25 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
+        getPathFile('csv', ID)
+
         var context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             $('#dialog-input-csv-'+ID).modal('show')
 
             $('#input-csv-accept-'+ID).click(function() {
 
-                formData.append(ID, $('#csv-file-'+ID)[0].files[0])
-
-                var paramsCSV = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"csv-file":"'+$('#csv-file-'+ID)[0].files[0].name+'",'+
-                '"separator":"'+ $('#separator-'+ID).val()+'"}]}'
-                
-                var jsonParamsCSV = JSON.parse(paramsCSV)
+                var paramsCSV = {"id": ID,
+                "parameters": [
+                    {"csv-file": $('#csv-file-'+ID).val(),
+                    "separator": $('#separator-'+ID).val()}
+                ]}
 
                 var formDataSchemaCSV = new FormData();
 
-                formDataSchemaCSV.append('file', $('#csv-file-'+ID)[0].files[0])
-                formDataSchemaCSV.append('jsonParamsCSV', paramsCSV)
-
+                formDataSchemaCSV.append('jsonParamsCSV', JSON.stringify(paramsCSV))
 
                 $.ajax({
 					type: 'POST',
@@ -180,14 +203,15 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                     contentType: false, 
                     processData: false,
 					success: function (data) {
-                        jsonParamsCSV['schema'] = data
+                        paramsCSV['schema'] = data
+                        
                         passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                         }
                     })
         
-                isAlreadyInCanvas(jsonParams, jsonParamsCSV, ID)
+                isAlreadyInCanvas(jsonParams, paramsCSV, ID)
 
-                icono.setColor('#01b0a0')
+                icon.setColor('#01b0a0')
                 
                 $('#dialog-input-csv-'+ID).modal('hide')
             })
@@ -290,6 +314,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
              $.each(memento.entities, $.proxy(function(i,e){
                  var entity =this.addEntity(e.text);
                  entity.id = e.id;
+                 
                  entity.getInputPort(0).setName("input_"+e.id);
                  entity.getOutputPort(0).setName("output_"+e.id);
              },this));
@@ -299,7 +324,6 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
      }  
 
 });
-
 
 //// INPUT EXCEL ////
 
@@ -322,7 +346,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
 
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({ 
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -330,11 +354,13 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-input-excel-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -347,14 +373,30 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<label for ="excel-file" class="col-form-label">'+gettext('Choose excel file:')+'</label>'+
-                            '<input type="file" id="excel-file-'+ID+'" name="file" class="form-control"  accept = "application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">'+
-                            '<label form="sheet-name" class="col-form-label">'+gettext('Sheet:')+'</label>'+
-                            '<select class="form-control" id="sheet-name-'+ID+'"> </select>'+
-                            '<label form="usecols" class="col-form-label">'+gettext('Attribute columns:')+'</label>'+
-                            '<input id="usecols-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="A:H">'+
-                            '<label form="header" class="col-form-label">'+gettext('Skip header:')+'</label>'+
-                            '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                            '<div class="column20">'+
+                                '<label for ="excel-file" class="col-form-label">'+gettext('Choose excel file:')+'</label><br>'+
+                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a><br>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                '<input type="text" id="excel-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+
+                            '<div class="column20">'+
+                                '<label for ="excel-file" class="col-form-label">'+gettext('Load sheets')+':</label><br>'+
+                                '<a href="#" id="get-sheets-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-file-excel-o margin-r-5"></i>'+gettext('Load sheets')+'</a><br>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<label form="sheet-name" class="col-form-label">'+gettext('Sheet:')+'</label>'+
+                                '<select class="form-control" id="sheet-name-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<label form="usecols" class="col-form-label">'+gettext('Attribute columns:')+'</label>'+
+                                '<input id="usecols-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="A:H">'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<label form="header" class="col-form-label">'+gettext('Skip header:')+'</label>'+
+                                '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -365,17 +407,19 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
+        getPathFile('excel', ID)
+
         var context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             $('#dialog-input-excel-'+ID).modal('show')
 
-            $('#excel-file-'+ID).change( function(){
-                
+            $('#get-sheets-'+ID).on("click", function(){
+                                
                 var formDataSheetExcel = new FormData();
 
-                formDataSheetExcel.append('file', $('#excel-file-'+ID)[0].files[0])
+                formDataSheetExcel.append('file', $('#excel-file-'+ID).val())
 
                 $.ajax({
 					type: 'POST',
@@ -400,21 +444,18 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             });
 
             $('#input-excel-accept-'+ID).click(function() {
-
-                formData.append(ID, $('#excel-file-'+ID)[0].files[0])
                 
-                var paramsExcel = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"excel-file":"'+$('#excel-file-'+ID)[0].files[0].name+ '",'+
-                '"sheet-name":"'+ $('#sheet-name-'+ID).val()+ '",'+
-                '"usecols":"'+$('#usecols-'+ID).val()+ '",'+
-                '"header":'+$('#header-'+ID).val()+'}]}'
-                
-                var jsonParamsExcel = JSON.parse(paramsExcel)
+                var paramsExcel = {"id": ID,
+                "parameters": [
+                    {"excel-file": $('#excel-file-'+ID).val(),
+                    "sheet-name": $('#sheet-name-'+ID).val(),
+                    "usecols": $('#usecols-'+ID).val(),
+                    "header": $('#header-'+ID).val() }
+                ]}
 
                 var formDataSchemaExcel = new FormData();
-                formDataSchemaExcel.append('file', $('#excel-file-'+ID)[0].files[0])
-                formDataSchemaExcel.append('jsonParamsExcel', paramsExcel)
+                
+                formDataSchemaExcel.append('jsonParamsExcel', JSON.stringify(paramsExcel))
 
                 $.ajax({
 					type: 'POST',
@@ -427,21 +468,21 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     contentType: false, 
                     processData: false,
 					success: function (data) {
-                        jsonParamsExcel['schema'] = data
+                        paramsExcel['schema'] = data
                         passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                         
                         }
                     })
                 
-                isAlreadyInCanvas(jsonParams, jsonParamsExcel, ID)
+                isAlreadyInCanvas(jsonParams, paramsExcel, ID)
 
-                icono.setColor('#01b0a0')
+                icon.setColor('#01b0a0')
 
                 $('#dialog-input-excel-'+ID).modal('hide')
             })
         })
     },
-     
+    
     /**
      * @method
      * Add an entity to the db shape
@@ -544,8 +585,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
          }
 
          return this;
-     }  
-
+     }
 
 });
 
@@ -570,7 +610,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
        
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({ 
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -578,11 +618,13 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-input-shp-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -595,11 +637,15 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column66">'+
-                                '<label for ="shp-file" class="col-form-label">'+gettext('Choose shapefile files:')+'</label>'+
-                                '<input type="file" id="shp-file-'+ID+'" name="file" class="form-control" multiple ="multiple">'+
+                            '<div class="column20">'+
+                                '<label for ="shp-file" class="col-form-label">'+gettext('Choose shapefile:')+'</label><br>'+
+                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a><br>'+
                             '</div>'+
-                            '<div class="threecolumn">'+
+                            '<div class="column60">'+
+                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                '<input type="text" id="shp-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+
+                            '<div class="column20">'+
                                 '<label class="col-form-label">EPSG:</label>'+
                                 '<input id="epsg-'+ID+'" type="text" size="40" value="" class="form-control" placeholder="'+gettext('Insert if PRJ is not loaded')+'">'+
                             '</div>'+
@@ -613,21 +659,29 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
+        getPathFile('shp', ID)
+
         var context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             $('#dialog-input-shp-'+ID).modal('show')
 
             $('#input-shp-accept-'+ID).click(function() {
 
-                var paramsSHP = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"epsg":"'+$('#epsg-'+ID).val()+ '"},'
+                var paramsSHP = {"id": ID,
+                "parameters": [
+                { "shp-file": $('#shp-file-'+ID).val(),
+                    "epsg": $('#epsg-'+ID).val()}
+                ]}
+
+                
 
                 var formDataSchemaShape = new FormData();
+                formDataSchemaShape.append('file', $('#shp-file-'+ID).val())
+                
 
-                for (i = 0; i < $('#shp-file-'+ID)[0].files.length; i++) {
+                /*for (i = 0; i < $('#shp-file-'+ID)[0].files.length; i++) {
 
                     formData.append(ID+'_'+i, $('#shp-file-'+ID)[0].files[i])
                     formDataSchemaShape.append('file_'+i, $('#shp-file-'+ID)[0].files[i])
@@ -638,7 +692,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
 
                 paramsSHP = paramsSHP.slice(0,-1) + ']}'
                 
-                var jsonParamsSHP = JSON.parse(paramsSHP)
+                var jsonParamsSHP = JSON.parse(paramsSHP)*/
 
                 $.ajax({
 					type: 'POST',
@@ -651,14 +705,14 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                     contentType: false, 
                     processData: false,
 					success: function (data) {
-                        jsonParamsSHP['schema'] = data
+                        paramsSHP['schema'] = data
                         passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                         }
                     })
         
-                isAlreadyInCanvas(jsonParams, jsonParamsSHP, ID)
+                isAlreadyInCanvas(jsonParams, paramsSHP, ID)
 
-                icono.setColor('#01b0a0')
+                icon.setColor('#01b0a0')
                 
                 $('#dialog-input-shp-'+ID).modal('hide')
             })
@@ -793,7 +847,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({ 
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -801,11 +855,14 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
         $('#canvas-parent').append('<div id="dialog-join-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
                 '<div class="modal-content">'+
@@ -817,11 +874,11 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label form="attr1" class="col-form-label">'+gettext('Main table attribute:')+'</label>'+
                                 '<select class="form-control" id="attr1-'+ID+'"> </select>'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label form="attr2" class="col-form-label">'+gettext('Secondary table attribute:')+'</label>'+
                                 '<select class="form-control" id="attr2-'+ID+'"> </select>'+
                             '</div>'+
@@ -837,7 +894,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
         
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
             
             setTimeout(function(){
                 try{
@@ -871,30 +928,28 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#join-accept-'+ID).click(function() {
 
-                var paramsJoin = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr1":"'+$('#attr1-'+ID).val()+ '",'+
-                '"attr2":"'+$('#attr2-'+ID).val()+ '"}'+
-                ']}'
+                var paramsJoin = {"id": ID,
+                "parameters": [
+                    {"attr1": $('#attr1-'+ID).val(),
+                    "attr2": $('#attr2-'+ID).val()}
+                ]}
 
-                var jsonParamsJoin = JSON.parse(paramsJoin)
-
-                jsonParamsJoin['schema-old'] = schemaEdge
+                paramsJoin['schema-old'] = schemaEdge
 
                 if (Array.isArray(schema[0])){
-                    schemaMod = schema[0].concat(schema[1])
+                    schemaMod = [schema[0].concat(schema[1]), schema[0],schema[1]]
                 }
                 else{
                     schemaMod = [...schema]
                 }
 
-                jsonParamsJoin['schema'] = schemaMod
+                paramsJoin['schema'] = schemaMod
 
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
-                isAlreadyInCanvas(jsonParams, jsonParamsJoin, ID)
+                isAlreadyInCanvas(jsonParams, paramsJoin, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-join-'+ID).modal('hide')
 
@@ -1091,7 +1146,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -1099,11 +1154,13 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         //adding dialog for choosing parameters of the transformer
         $('#canvas-parent').append('<div id="dialog-remove-attr-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
@@ -1131,7 +1188,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
 
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             setTimeout(function(){
                 
@@ -1171,12 +1228,10 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
             $('#remove-attr-accept-'+ID).click(function() {
 
                 //parameters selected to json
-                var paramsRemove = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr":"'+$('#attr-'+ID).val()+ '"}'+
-                ']}'
-
-                var jsonParamsRemove = JSON.parse(paramsRemove)
+                var paramsRemove = {"id": ID,
+                "parameters": [
+                {"attr": $('#attr-'+ID).val()}
+                ]}
 
                 //schema handling depending the parameters chosen
                 //this case we remove an attribute
@@ -1184,17 +1239,17 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
                 schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
                 
                 //updating schema-old and schema parameters in json
-                jsonParamsRemove['schema-old'] = schemaEdge
-                jsonParamsRemove['schema'] = schemaMod
+                paramsRemove['schema-old'] = schemaEdge
+                paramsRemove['schema'] = schemaMod
 
                 //add the schema to a later edge if it exists
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 
                 //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, jsonParamsRemove, ID)
+                isAlreadyInCanvas(jsonParams, paramsRemove, ID)
 
                 //set red color to another in order to know if parameters are checked
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-remove-attr-'+ID).modal('hide')
 
@@ -1323,7 +1378,6 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
-
 //// RENAME ATTRIBUTE ////
 
 trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
@@ -1345,7 +1399,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({ 
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -1353,11 +1407,13 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-rename-attr-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -1370,11 +1426,11 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Attribute to rename:')+'</label>'+
                                 '<select class="form-control" id="old-attr-'+ID+'"> </select>'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                             '<label class="col-form-label">'+gettext('New name:')+'</label>'+
                                 '<input id="new-attr-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New name')+'">'+
                             '</div>'+
@@ -1390,7 +1446,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
         
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             setTimeout(function(){
                 try{
@@ -1420,26 +1476,24 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#rename-attr-accept-'+ID).click(function() {
                 
-                var paramsRename = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"oldAttr":"'+$('#old-attr-'+ID).val()+ '",'+
-                '"newAttr":"'+$('#new-attr-'+ID).val()+ '"}'+
-                ']}'
-
-                var jsonParamsRename = JSON.parse(paramsRename)
+                var paramsRename = {"id": ID,
+                "parameters": [
+                    {"old-attr": $('#old-attr-'+ID).val(),
+                    "new-attr": $('#new-attr-'+ID).val() }
+                ]}
 
                 schemaMod =[...schema]
                 schemaMod.splice($('#old-attr-'+ID).prop('selectedIndex'), 1, $('#new-attr-'+ID).val())
 
-                jsonParamsRename['schema-old'] = schemaEdge
-                jsonParamsRename['schema'] = schemaMod
+                paramsRename['schema-old'] = schemaEdge
+                paramsRename['schema'] = schemaMod
 
 
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
-                isAlreadyInCanvas(jsonParams, jsonParamsRename, ID)
+                isAlreadyInCanvas(jsonParams, paramsRename, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-rename-attr-'+ID).modal('hide')
 
@@ -1589,7 +1643,7 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -1597,11 +1651,13 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-modify-value-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -1614,11 +1670,11 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Attribute to modify:')+'</label>'+
                                 '<select class="form-control" id="attr-'+ID+'"> </select>'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('New value:')+'</label>'+
                                 '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
                             '</div>'+
@@ -1634,7 +1690,7 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
         
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
             
             setTimeout(function(){
                 try{
@@ -1665,21 +1721,19 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#modify-value-accept-'+ID).click(function() {
 
-                var paramsModifyValue = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr":"'+$('#attr-'+ID).val()+ '",'+
-                '"value":"'+$('#value-'+ID).val()+ '"}'+
-                ']}'
+                var paramsModifyValue = {"id": ID,
+                "parameters": [
+                    {"attr": $('#attr-'+ID).val(),
+                    "value": $('#value-'+ID).val() }
+                ]}
 
-                var jsonParamsModifyValue = JSON.parse(paramsModifyValue)
-
-                jsonParamsModifyValue['schema-old'] = schemaEdge
-                jsonParamsModifyValue['schema'] = schema
+                paramsModifyValue['schema-old'] = schemaEdge
+                paramsModifyValue['schema'] = schema
 
                 passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-                isAlreadyInCanvas(jsonParams, jsonParamsModifyValue, ID)
+                isAlreadyInCanvas(jsonParams, paramsModifyValue, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-modify-value-'+ID).modal('hide')
 
@@ -1759,7 +1813,6 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
         return this.children.get(index+1).figure;
     },
      
-
      /**
       * @method
       * Set the name of the DB table. Visually it is the header of the shape
@@ -1772,7 +1825,6 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
          
          return this;
      },
-     
      
      /**
       * @method 
@@ -1831,7 +1883,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -1839,11 +1891,13 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-counter-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -1856,11 +1910,11 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('New counter attribute:')+'</label>'+
                                 '<input id="attr-'+ID+'" type="text" size="40" value="count" class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Group by:')+'</label>'+
                                 '<select class="form-control" id="group-by-attr-'+ID+'"> </select>'+
                             '</div>'+
@@ -1876,7 +1930,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
         
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
             
             setTimeout(function(){
                 try{
@@ -1910,25 +1964,23 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#counter-accept-'+ID).click(function() {
 
-                var paramsCounter = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr":"'+$('#attr-'+ID).val()+ '",'+
-                '"groupby":"'+$('#group-by-attr-'+ID).val()+ '"}'+
-                ']}'
-
-                var jsonParamsCounter = JSON.parse(paramsCounter)
+                var paramsCounter = {"id": ID,
+                "parameters": [
+                    {"attr": $('#attr-'+ID).val(),
+                    "group-by-attr": $('#group-by-attr-'+ID).val()}
+                ]}
 
                 schemaMod =[...schema]
                 
                 schemaMod.push($('#attr-'+ID).val())
                
-                jsonParamsCounter['schema'] = schemaMod
-                jsonParamsCounter['schema-old'] = schemaEdge
+                paramsCounter['schema'] = schemaMod
+                paramsCounter['schema-old'] = schemaEdge
 
                 passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-                isAlreadyInCanvas(jsonParams, jsonParamsCounter, ID)
+                isAlreadyInCanvas(jsonParams, paramsCounter, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-counter-'+ID).modal('hide')
 
@@ -2067,7 +2119,6 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
     init : function(attr)
     {
     	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
-        
       
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Calculator"), 
@@ -2080,7 +2131,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -2088,11 +2139,13 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-calculator-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -2105,7 +2158,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div  class="modal-body">'+
                         '<form>'+
-                            '<div class="threecolumn">'+
+                            '<div class="column33">'+
                                 '<label class="col-form-label">'+gettext('Attribute:')+'</label>'+
                                 '<select class="form-control" id="attr-'+ID+'"> </select>'+
                                 '<label class="col-form-label">'+gettext('Math functions:')+'</label>'+
@@ -2168,7 +2221,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
         
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
             
             setTimeout(function(){
                 try{
@@ -2235,21 +2288,19 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#calculator-accept-'+ID).click(function() {
 
-                var paramsCalculator = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr":"'+$('#attr-'+ID).val()+ '",'+
-                '"expression":"'+$('#expression-'+ID).val()+'"}'+
-                ']}'
-
-                var jsonParamsCalculator = JSON.parse(paramsCalculator)
+                var paramsCalculator = {"id": ID,
+                "parameters": [
+                    {"attr": $('#attr-'+ID).val(),
+                    "expression": $('#expression-'+ID).val()}
+                ]}
                
-                jsonParamsCalculator['schema'] = schema
-                jsonParamsCalculator['schema-old'] = schemaEdge
+                paramsCalculator['schema'] = schema
+                paramsCalculator['schema-old'] = schemaEdge
 
                 passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-                isAlreadyInCanvas(jsonParams, jsonParamsCalculator, ID)
+                isAlreadyInCanvas(jsonParams, paramsCalculator, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-calculator-'+ID).modal('hide')
 
@@ -2343,7 +2394,6 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
          return this;
      },
      
-     
      /**
       * @method 
       * Return an objects with all important attributes for XML or JSON serialization
@@ -2368,7 +2418,9 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
          if(typeof memento.entities !== "undefined"){
              $.each(memento.entities, $.proxy(function(i,e){
                  var entity =this.addEntity(e.text);
+                 
                  entity.id = e.id;
+                 
                  entity.getInputPort(0).setName("input_"+e.id);
                  entity.getOutputPort(0).setName("output_"+e.id);
              },this));
@@ -2388,7 +2440,6 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
     init : function(attr)
     {
     	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
-        
       
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Create Attribute"), 
@@ -2401,7 +2452,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -2409,11 +2460,13 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-create-attr-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -2426,11 +2479,11 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("New attribute:")+'</label>'+
                                 '<input id="attr-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute name')+'">'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("Value:")+'</label>'+
                                 '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
                             '</div>'+
@@ -2446,7 +2499,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
         
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
             
             setTimeout(function(){
                 try{
@@ -2468,26 +2521,22 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#create-attr-accept-'+ID).click(function() {
 
-                var paramsCreateAttr = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr":"'+$('#attr-'+ID).val()+ '",'+
-                '"value":"'+$('#value-'+ID).val()+ '"}'+
-                ']}'
-
-                var jsonParamsCreateAttr = JSON.parse(paramsCreateAttr)
-
-                jsonParamsCreateAttr['schema-old'] = schemaEdge
+                var paramsCreateAttr = {"id": ID,
+                "parameters": [
+                    {"attr": $('#attr-'+ID).val(),
+                    "value": $('#value-'+ID).val()}
+                ]}
                 
                 schemaMod =[...schema]
                 
                 schemaMod.push($('#attr-'+ID).val())
                
-                jsonParamsCreateAttr['schema'] = schemaMod
+                paramsCreateAttr['schema'] = schemaMod
 
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                isAlreadyInCanvas(jsonParams, jsonParamsCreateAttr, ID)
+                isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-create-attr-'+ID).modal('hide')
 
@@ -2566,7 +2615,6 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
     {
         return this.children.get(index+1).figure;
     },
-     
 
      /**
       * @method
@@ -2616,7 +2664,6 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
-
 //// FILTERING////
 
 trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
@@ -2639,7 +2686,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -2647,11 +2694,13 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-filter-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -2664,11 +2713,11 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="threecolumn">'+
+                            '<div class="column40">'+
                                 '<label form="attr" class="col-form-label">'+gettext('Attribute:')+'</label>'+
                                 '<select class="form-control" id="attr-'+ID+'"> </select>'+
                             '</div>'+
-                            '<div class="threecolumn">'+
+                            '<div class="column20">'+
                                 '<label class="col-form-label">'+gettext('Operator:')+'</label>'+
                                 '<select class="form-control" id="operator-'+ID+'">'+
                                     '<option value="=="> == </option>'+
@@ -2682,7 +2731,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value="contains">'+gettext('Contains')+'</option>'+
                                 '</select>'+
                             '</div>'+                           
-                            '<div class="threecolumn">'+
+                            '<div class="column40">'+
                                 '<label form="value" class="col-form-label">'+gettext('Value:')+'</label>'+
                                 '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
                             '</div>'+
@@ -2698,7 +2747,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
 
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
             setTimeout(function(){
                 try{
                     schemas = getOwnSchemas(context.canvas, ID)
@@ -2727,23 +2776,21 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#filter-accept-'+ID).click(function() {
 
-                var paramsFilter = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr":"'+$('#attr-'+ID).val()+ '",'+
-                '"operator":"'+$('#operator-'+ID).val()+ '",'+
-                '"value":"'+$('#value-'+ID).val()+ '"}'+
-                ']}'
-
-                var jsonParamsFilter = JSON.parse(paramsFilter)
+                var paramsFilter = {"id": ID,
+                "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "operator": $('#operator-'+ID).val(),
+                "value": $('#value-'+ID).val()}
+                ]}
                 
-                jsonParamsFilter['schema-old'] = schemaEdge
-                jsonParamsFilter['schema'] = schema
+                paramsFilter['schema-old'] = schemaEdge
+                paramsFilter['schema'] = schema
 
                 passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
 
-                isAlreadyInCanvas(jsonParams, jsonParamsFilter, ID)
+                isAlreadyInCanvas(jsonParams, paramsFilter, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-filter-'+ID).modal('hide')
 
@@ -2910,7 +2957,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -2918,11 +2965,13 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-keep-attr-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -2949,7 +2998,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
 
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             setTimeout(function(){
                 try{
@@ -2969,9 +3018,9 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                     $('#attr-'+ID).empty()
 
                     for (i = 0; i < schema.length; i++){
-                        
                         $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
                     }
+
                 }
 
             },100);
@@ -2980,24 +3029,21 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#keep-attr-accept-'+ID).click(function() {
 
-                var paramsKeep = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"attr":"'+$('#attr-'+ID).val()+ '"}'+
-                ']}'
-
-                var jsonParamsKeep = JSON.parse(paramsKeep)
+                var paramsKeep = {"id": ID,
+                "parameters": [
+                    {"attr": $('#attr-'+ID).val()}
+                ]}
 
                 schemaMod =[$('#attr-'+ID).val()]
-                //schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
 
-                jsonParamsKeep['schema-old'] = schemaEdge
-                jsonParamsKeep['schema'] = schemaMod
+                paramsKeep['schema-old'] = schemaEdge
+                paramsKeep['schema'] = schemaMod
 
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 
-                isAlreadyInCanvas(jsonParams, jsonParamsKeep, ID)
+                isAlreadyInCanvas(jsonParams, paramsKeep, ID)
 
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-keep-attr-'+ID).modal('hide')
 
@@ -3077,7 +3123,6 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
         return this.children.get(index+1).figure;
     },
      
-
      /**
       * @method
       * Set the name of the DB table. Visually it is the header of the shape
@@ -3136,7 +3181,6 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
     {
     	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
         
-      
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Reproject"), 
             stroke:1,
@@ -3148,7 +3192,7 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -3156,11 +3200,13 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         //adding dialog for choosing parameters of the transformer
         $('#canvas-parent').append('<div id="dialog-reproject-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
@@ -3174,11 +3220,11 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("Source EPSG:")+'</label>'+
                                 '<input id="source-epsg-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder = "'+gettext('Empty to read from input layer')+'" >'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("Target EPSG:")+'</label>'+
                                 '<input id="target-epsg-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
                             '</div>'+
@@ -3194,7 +3240,7 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
 
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             setTimeout(function(){
                 
@@ -3218,26 +3264,24 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
             $('#reproject-accept-'+ID).click(function() {
 
                 //parameters selected to json
-                var paramsReproject = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"sourceepsg":"'+$('#source-epsg-'+ID).val()+ '", '+
-                '"targetepsg":"'+$('#target-epsg-'+ID).val()+'"}'+
-                ']}'
-
-                var jsonParamsReproject = JSON.parse(paramsReproject)
+                var paramsReproject = {"id": ID,
+                "parameters": [
+                {"source-epsg": $('#source-epsg-'+ID).val(),
+                "target-epsg": $('#target-epsg-'+ID).val() }
+                ]}
                 
                 //updating schema-old and schema parameters in json
-                jsonParamsReproject['schema-old'] = schemaEdge
-                jsonParamsReproject['schema'] = schemaEdge
+                paramsReproject['schema-old'] = schemaEdge
+                paramsReproject['schema'] = schemaEdge
 
                 //add the schema to a later edge if it exists
                 passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
                 
                 //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, jsonParamsReproject, ID)
+                isAlreadyInCanvas(jsonParams, paramsReproject, ID)
 
                 //set red color to another in order to know if parameters are checked
-                icono.setColor('#4682B4')
+                icon.setColor('#4682B4')
                 
                 $('#dialog-reproject-'+ID).modal('hide')
 
@@ -3388,7 +3432,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -3396,11 +3440,13 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-output-postgresql-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -3413,46 +3459,46 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
                                 '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column">'+    
+                            '<div class="column50">'+    
                                 '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
                                 '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
                                 '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
                             '</div>'+
-                            '<div class="column">'+                                
+                            '<div class="column50">'+                                
                                 '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
                                 '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column">'+
-                                '<label form="psw" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id = "psw-'+ID+'" class="form-control" value="">'+
+                            '<div class="column50">'+
+                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
+                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
                             '</div>'+
-                            '<div class="column">'+
-                                '<label form="tbl-name-postgreSQL" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tbl-name-postgreSQL-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                            '<div class="column50">'+
+                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
+                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Operation:')+'</label>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="create" name="operationPSQL-'+ID+'" class="form-check-input" value="CREATE" checked="checked">'+
+                                    '<input type="radio" id="create" name="operation-'+ID+'" class="form-check-input" value="CREATE" checked="checked">'+
                                     '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="update" name="operationPSQL-'+ID+'" class="form-check-input" value="UPDATE">'+
+                                    '<input type="radio" id="update" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
                                     '<label for="update" class="form-check-label">'+gettext('UPDATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="delete" name="operationPSQL-'+ID+'" class="form-check-input" value="DELETE">'+
+                                    '<input type="radio" id="delete" name="operation-'+ID+'" class="form-check-input" value="DELETE">'+
                                     '<label for="delete" class="form-check-label">'+gettext('DELETE')+'</label>'+
                                 '</div>'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Match column:')+'</label>'+
                                 '<select class="form-control" id="match-'+ID+'" disabled> </select>'+
                             '</div>'+
@@ -3467,7 +3513,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        $('input:radio[name="operationPSQL-'+ID+'"]').change(function(){
+        $('input:radio[name="operation-'+ID+'"]').change(function(){
             
             if ($(this).val()!='CREATE'){
                 $('#match-'+ID).attr('disabled', false)
@@ -3478,18 +3524,18 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
         });
         $('#verify-postgresql-'+ID).click(function() {
                 
-            var paramsPostgres = '{"id":"'+ID+
-            '","parameters": ['+
-            '{"host":"'+$('#host-'+ID).val()+ '",'+
-            '"port":"'+$('#port-'+ID).val()+ '",'+
-            '"database":"'+$('#database-'+ID).val()+'",'+
-            '"user":"'+$('#user-'+ID).val()+ '",'+
-            '"password":"'+$('#psw-'+ID).val()+ '"}'+
-            ']}'
+            var paramsPostgres = {"id": ID,
+            "parameters": [
+                {"host": $('#host-'+ID).val(),
+                "port": $('#port-'+ID).val(),
+                "database": $('#database-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val()}
+            ]}
 
             var formDataPostgres = new FormData();
             
-            formDataPostgres.append('jsonParamsPostgres', paramsPostgres)
+            formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
 
             $.ajax({
                 type: 'POST',
@@ -3541,7 +3587,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
         });
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
 
             setTimeout(function(){
                 try{
@@ -3571,26 +3617,24 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#output-postgresql-accept-'+ID).click(function() {
 
-                var paramsPostgreSQL = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"host":"'+$('#host-'+ID).val()+ '",'+
-                '"port":"'+$('#port-'+ID).val()+ '",'+
-                '"database":"'+$('#database-'+ID).val()+'",'+
-                '"user":"'+$('#user-'+ID).val()+ '",'+
-                '"password":"'+$('#psw-'+ID).val()+ '",'+
-                '"tablename":"'+$('#tbl-name-postgreSQL-'+ID).val()+ '",'+
-                '"match":"'+$('#match-'+ID).val()+ '",'+
-                '"operation":"'+$('input:radio[name="operationPSQL-'+ID+'"]:checked').val()+ '"}'+
-                ']}'
-
-                var jsonParamsPostgreSQL = JSON.parse(paramsPostgreSQL)
+                var paramsPostgreSQL = {"id": ID,
+                "parameters": [
+                    {"host": $('#host-'+ID).val(),
+                    "port": $('#port-'+ID).val(),
+                    "database": $('#database-'+ID).val(),
+                    "user": $('#user-'+ID).val(),
+                    "password": $('#password-'+ID).val(),
+                    "tablename": $('#tablename-'+ID).val(),
+                    "match": $('#match-'+ID).val(),
+                    "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
+                ]}
                 
-                jsonParamsPostgreSQL['schema-old'] = schemaEdge
-                jsonParamsPostgreSQL['schema'] = schema
+                paramsPostgreSQL['schema-old'] = schemaEdge
+                paramsPostgreSQL['schema'] = schema
                 
-                isAlreadyInCanvas(jsonParams, jsonParamsPostgreSQL, ID)
+                isAlreadyInCanvas(jsonParams, paramsPostgreSQL, ID)
 
-                icono.setColor('#e79600')
+                icon.setColor('#e79600')
                 
                 $('#dialog-output-postgresql-'+ID).modal('hide')
 
@@ -3728,7 +3772,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
-        var icono = new draw2d.shape.icon.Gear({ 
+        var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
             width:13, 
@@ -3736,11 +3780,13 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             color:"#e2504c"
         });
 
-        this.classLabel.add(icono, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
 
         this.add(this.classLabel);
 
         var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-output-postgis-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -3753,46 +3799,46 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
                                 '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column">'+    
+                            '<div class="column50">'+    
                                 '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
                                 '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
                                 '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
                             '</div>'+
-                            '<div class="column">'+                                
+                            '<div class="column50">'+                                
                                 '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
                                 '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column">'+
-                                '<label form="psw" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id = "psw-'+ID+'" class="form-control" value="">'+
+                            '<div class="column50">'+
+                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
+                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
                             '</div>'+
-                            '<div class="column">'+
-                                '<label form="tbl-name-postGIS" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tbl-name-postGIS-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                            '<div class="column50">'+
+                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
+                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Operation:')+'</label>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="create" name="operationPSGIS-'+ID+'" class="form-check-input" value="CREATE" checked="checked">'+
+                                    '<input type="radio" id="create" name="operation-'+ID+'" class="form-check-input" value="CREATE" checked="checked">'+
                                     '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="update" name="operationPSGIS-'+ID+'" class="form-check-input" value="UPDATE">'+
+                                    '<input type="radio" id="update" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
                                     '<label for="update" class="form-check-label">'+gettext('UPDATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="delete" name="operationPSGIS-'+ID+'" class="form-check-input" value="DELETE">'+
+                                    '<input type="radio" id="delete" name="operation-'+ID+'" class="form-check-input" value="DELETE">'+
                                     '<label for="delete" class="form-check-label">'+gettext('DELETE')+'</label>'+
                                 '</div>'+
                             '</div>'+
-                            '<div class="column">'+
+                            '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Match column:')+'</label>'+
                                 '<select class="form-control" id="match-'+ID+'" disabled> </select>'+
                             '</div>'+
@@ -3807,7 +3853,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        $('input:radio[name="operationPSGIS-'+ID+'"]').change(function(){
+        $('input:radio[name="operation-'+ID+'"]').change(function(){
             
             if ($(this).val()!='CREATE'){
                 $('#match-'+ID).attr('disabled', false)
@@ -3819,18 +3865,18 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         
         $('#verify-postgis-'+ID).click(function() {
                 
-            var paramsPostgres = '{"id":"'+ID+
-            '","parameters": ['+
-            '{"host":"'+$('#host-'+ID).val()+ '",'+
-            '"port":"'+$('#port-'+ID).val()+ '",'+
-            '"database":"'+$('#database-'+ID).val()+'",'+
-            '"user":"'+$('#user-'+ID).val()+ '",'+
-            '"password":"'+$('#psw-'+ID).val()+'"}'+
-            ']}'
+            var paramsPostgres = {"id": ID,
+            "parameters": [
+                {"host": $('#host-'+ID).val(),
+                "port": $('#port-'+ID).val(),
+                "database": $('#database-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val()}
+            ]}
 
             var formDataPostgres = new FormData();
             
-            formDataPostgres.append('jsonParamsPostgres', paramsPostgres)
+            formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
 
             $.ajax({
                 type: 'POST',
@@ -3883,7 +3929,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
         context = this
 
-        icono.on("click", function(){
+        icon.on("click", function(){
             setTimeout(function(){
                 try{
                     schemas = getOwnSchemas(context.canvas, ID)
@@ -3913,26 +3959,24 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#output-postgis-accept-'+ID).click(function() {
 
-                var paramsPostGIS = '{"id":"'+ID+
-                '","parameters": ['+
-                '{"host":"'+$('#host-'+ID).val()+ '",'+
-                '"port":"'+$('#port-'+ID).val()+ '",'+
-                '"database":"'+$('#database-'+ID).val()+'",'+
-                '"user":"'+$('#user-'+ID).val()+ '",'+
-                '"password":"'+$('#psw-'+ID).val()+ '",'+
-                '"tablename":"'+$('#tbl-name-postGIS-'+ID).val()+ '",'+
-                '"match":"'+$('#match-'+ID).val()+ '",'+
-                '"operation":"'+$('input:radio[name="operationPSGIS-'+ID+'"]:checked').val()+ '"}'+
-                ']}'
+                var paramsPostGIS = {"id": ID,
+                "parameters": [
+                    {"host": $('#host-'+ID).val(),
+                    "port": $('#port-'+ID).val(),
+                    "database": $('#database-'+ID).val(),
+                    "user": $('#user-'+ID).val(),
+                    "password": $('#password-'+ID).val(),
+                    "tablename": $('#tablename-'+ID).val(),
+                    "match": $('#match-'+ID).val(),
+                    "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
+                ]}
 
-                var jsonParamsPostGIS = JSON.parse(paramsPostGIS)
-
-                jsonParamsPostGIS['schema-old'] = schemaEdge
-                jsonParamsPostGIS['schema'] = schema
+                paramsPostGIS['schema-old'] = schemaEdge
+                paramsPostGIS['schema'] = schema
                 
-                isAlreadyInCanvas(jsonParams, jsonParamsPostGIS, ID)
+                isAlreadyInCanvas(jsonParams, paramsPostGIS, ID)
 
-                icono.setColor('#e79600')
+                icon.setColor('#e79600')
                 
                 $('#dialog-output-postgis-'+ID).modal('hide')
 

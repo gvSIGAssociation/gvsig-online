@@ -10,5 +10,8 @@ urlpatterns = [
     url(r'^etl/etl_schema_shape/$', views.etl_schema_shape, name='etl_schema_shape'),
     url(r'^etl/test_postgres_conexion/$', views.test_postgres_conexion, name='test_postgres_conexion'),
     url(r'^etl/etl_schema_csv/$', views.etl_schema_csv, name='etl_schema_csv'),
-#    url(r'^sampledashboard/sampledashboard_update/(?P<lgid>[0-9]+)/$', views.sampledashboard_update, name='sampledashboard_update'),
+    url(r'^etl/etl_workspace_list/$', views.etl_workspace_list, name='etl_workspace_list'),
+    url(r'^etl/etl_workspace_add/$', views.etl_workspace_add, name='etl_workspace_add'),
+    url(r'^etl/etl_workspace_delete/$', views.etl_workspace_delete, name='etl_workspace_delete'),
+    url(r'^etl/etl_workspace_update/$', views.etl_workspace_update, name='etl_workspace_update'),
 ]

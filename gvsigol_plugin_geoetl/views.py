@@ -19,14 +19,16 @@
 '''
 
 '''
-@author: nbrodin <carlesmarti@scolab.es>
+@author: carlesmarti <carlesmarti@scolab.es>
 '''
 
 from django.shortcuts import HttpResponse, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.utils.translation import ugettext as _
+from gvsigol import settings as core_settings
 from .forms import UploadFileForm
+from models import ETLworkspaces
 import settings
 import json
 import etl_tasks
@@ -41,14 +43,107 @@ def get_conf(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_canvas(request):
+    try:
+        lgid = request.GET['lgid']
+        instance  = ETLworkspaces.objects.get(id=int(lgid))
 
-    return render(request, 'etl.html')
+        response = {
+            'id':lgid,
+            'name': instance.name,
+            'description': instance.description,
+            'workspace': instance.workspace,
+            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/"
+        }
+        
+        return render(request, 'etl.html', response)
+    
+    except:
+        response = {
+            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/"
+        }
+        return render(request, 'etl.html', response)
+
+def get_list():
+    etl_list = ETLworkspaces.objects.all()
+    
+    workspaces = []
+    for w in etl_list:
+        workspace = {}
+        workspace['id'] = w.id
+        workspace['name'] = w.name
+        workspace['description'] = w.description
+        workspace['workspace'] = w.workspace[:200]+" (...) ]"
+        workspaces.append(workspace)
+    return workspaces
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def etl_workspace_list(request):
+    response = {
+        'workspaces': get_list()
+    }
+
+    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def etl_workspace_add(request):
+    if request.method == 'POST':
+       
+        try: 
+            int(request.POST.get('id'))
+            lgid = request.POST['id']
+
+            workspace = ETLworkspaces(
+                id = int(request.POST.get('id')),
+                name = request.POST.get('name'),
+                description = request.POST.get('description'),
+                workspace = request.POST.get('workspace')
+            )
+            workspace.save()
+            
+        except:
+
+            workspace = ETLworkspaces(
+                name = request.POST.get('name'),
+                description = request.POST.get('description'),
+                workspace = request.POST.get('workspace')
+            )
+            workspace.save()
+
+        return redirect('etl_workspace_list')
+        
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def etl_workspace_delete(request):
+    lgid = request.POST['lgid']
+    if request.method == 'POST':
+        instance  = ETLworkspaces.objects.get(id=int(lgid))
+        instance.delete()
+    response = {}
+    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def etl_workspace_update(request):
+    if request.method == 'POST':
+        lgid = request.POST['id']
+        instance  = ETLworkspaces.objects.get(id=int(lgid))
+
+        workspace = ETLworkspaces(
+            id = int(request.POST.get('id')),
+            name = request.POST.get('name'),
+            description = request.POST.get('description'),
+            workspace = instance.workspace
+        )
+        workspace.save()
+    response = {}
+    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_read_canvas(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+        form = UploadFileForm(request.POST)
         
         if form.is_valid():
 
@@ -97,23 +192,7 @@ def etl_read_canvas(request):
                             
                             #execute input task
                             if n[1]['type'].startswith('input'):
-                                filesCounter=0
-                                for r in request.FILES:
-                                    #input with unique files uploaded
-                                    if r == n[1]['id']:
-                                        parameters['file'] = request.FILES[n[1]['id']]
-                                        break
 
-                                    #input with multiple files uploaded
-                                    elif r.startswith(n[1]['id']):
-                                        if filesCounter==0:
-                                            filesList=[]
-                                        
-                                        filesList.append(request.FILES[n[1]['id']+'_'+str(filesCounter)])
-                                        parameters['file'] = filesList
-                                        filesCounter+=1
-
-                            
                                 method_to_call = getattr(etl_tasks, n[1]['type'])
                                 result = method_to_call(parameters)
                                 n.append(result)
@@ -181,9 +260,9 @@ def etl_read_canvas(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_sheet_excel(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+        form = UploadFileForm(request.POST)
         if form.is_valid():
-            f= request.FILES['file']
+            f= request.POST['file']
             listSheets = etl_schema.get_sheets_excel(f)
 
             response = json.dumps(listSheets)
@@ -193,11 +272,10 @@ def etl_sheet_excel(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_schema_excel(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+        form = UploadFileForm(request.POST)
         if form.is_valid():
-            f= request.FILES['file']
             jsParams = json.loads(request.POST['jsonParamsExcel'])
-            listSchema = etl_schema.get_schema_excel(f, jsParams['parameters'][0])
+            listSchema = etl_schema.get_schema_excel(jsParams['parameters'][0])
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")
@@ -205,13 +283,11 @@ def etl_schema_excel(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_schema_shape(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+        form = UploadFileForm(request.POST)
         if form.is_valid():
-            listFiles =[]
-            for i in range(0, len(request.FILES)):
-                listFiles.append(request.FILES['file_'+str(i)])
+            f= request.POST['file']
 
-            listSchema = etl_schema.get_schema_shape(listFiles)
+            listSchema = etl_schema.get_schema_shape(f)
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")
@@ -232,10 +308,12 @@ def test_postgres_conexion(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')    
 def etl_schema_csv(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+        form = UploadFileForm(request.POST)
         if form.is_valid():
-            f= request.FILES['file']
+
             jsParams = json.loads(request.POST['jsonParamsCSV'])
-            response = etl_schema.get_schema_csv(f, jsParams['parameters'][0])
+
+            response = etl_schema.get_schema_csv(jsParams['parameters'][0])
             
             return HttpResponse(json.dumps(response), content_type="application/json")
+
