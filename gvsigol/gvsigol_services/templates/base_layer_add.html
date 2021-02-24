@@ -18,13 +18,11 @@
 			<div id="form-error" style="color:#ff0000;">
 				<ul>
 				{% if form.errors %}
+				{{ form.non_field_errors }}
 				{% for field in form %}
 					{% if field.errors %}
 						<li>{{field.label}}. {{ field.errors|striptags }}</li>
 					{% endif %}	
-				{% endfor %}
-				{% for field, msg in form.errors.iteritems %}
-					<li>{{ msg|striptags }}</li>
 				{% endfor %}
 				{% endif %}
 				</ul>
