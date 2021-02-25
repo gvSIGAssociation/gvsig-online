@@ -31,6 +31,7 @@ var attributeTable = function(layer, map, conf, viewer) {
 	
 	this.filterCode = null;
 	this.selectedType = null;
+	this.filterApplied = false;
 	this.init(layer);
 };
 
@@ -368,10 +369,12 @@ attributeTable.prototype.createTableUI = function(featureType) {
                 d.property_name = properties.toString();
                 d.properties_with_type = propertiesWithType.toString();
                 var cql_filter = '';
-                if (self.filterCode != null) {
-                	cql_filter = self.filterCode.getValue();
-                	cql_filter = self.change_alias_from_cql_filter(cql_filter);
-                }
+				if (self.filterApplied) {
+					if (self.filterCode != null) {
+						cql_filter = self.filterCode.getValue();
+						cql_filter = self.change_alias_from_cql_filter(cql_filter);
+					}
+				}
                 d.cql_filter = cql_filter;
             }
         },
@@ -858,12 +861,14 @@ attributeTable.prototype.registerEvents = function() {
 	});
 
 	$("#apply-filter").on('click', function(){
+		self.filterApplied = true;
 		var t = $('#table-' + self.layer.get("id")).DataTable();
 		$('.nav-tabs a[href="#tab_data"]').tab('show');
 		t.ajax.reload();
 	});
 
 	$("#clear-filter").on('click', function(){
+		self.filterApplied = false;
 		self.filterCode.setValue('');
 		var t = $('#table-' + self.layer.get("id")).DataTable();
 		$('.nav-tabs a[href="#tab_data"]').tab('show');
