@@ -3272,7 +3272,7 @@ def get_feature_wfs(request):
               
             cql_filter = None  
             if operator == 'equal_to':
-                if field_type == 'character varying':
+                if field_type == 'character varying' or field_type == 'enumeration':
                     cql_filter = field + "='" + value + "'"
                 else:
                     cql_filter = field + "=" + value
