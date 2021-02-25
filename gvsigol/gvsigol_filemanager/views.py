@@ -136,7 +136,7 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                     messages.add_message(request, messages.INFO, _('Export process done successfully'))
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
             except rest_geoserver.RequestWarning as e:
-                    msg = _('Export process completed with warnings:') + ' ' + e.server_message
+                    msg = _('Export process completed with warnings:') + ' ' + str(e)
                     messages.add_message(request, messages.INFO, msg)
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
             except rest_geoserver.RequestError as e:
