@@ -44,7 +44,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
 from time import time
-
+import logging
+logger = logging.getLogger("gvsigol")
 
 
 providers_order = []
@@ -159,11 +160,8 @@ def provider_add(request):
                 return redirect('provider_update', provider_id=newProvider.pk)
             
         except Exception as e:
-            try:
-                msg = e.get_message()
-            except:
-                msg = _("Error: provider could not be published")
-            form.add_error(None, msg)
+            logger.exception(str(e))
+            form.add_error(None, str(e))
 
     else:
         form = ProviderForm()
