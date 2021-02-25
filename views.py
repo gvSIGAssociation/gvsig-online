@@ -38,6 +38,8 @@ import json
 import ast
 from gvsigol_services.backend_postgis import Introspect
 import re
+import logging
+logger = logging.getLogger("gvsigol")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1289,7 +1291,7 @@ def library_list(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
-def library_add(request, library_id):
+def library_add(request):
     if request.method == 'POST': 
         name = request.POST.get('library-name')
         description = request.POST.get('library-description')        
@@ -1400,8 +1402,8 @@ def library_export(request, library_id):
         return response
         
     except Exception as e:
-        message = e.message
-        return HttpResponse(json.dumps({'message':message}, indent=4), content_type='application/json')
+        logger.exception(str(e))
+        return HttpResponse(json.dumps({'message':str(e)}, indent=4), content_type='application/json')
     
     
 

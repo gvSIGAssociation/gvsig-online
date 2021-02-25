@@ -37,8 +37,8 @@ import re
 import os
 import ast
 
-_valid_name_regex=re.compile("^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
-_valid_title_regex=re.compile("^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
+_valid_name_regex=re.compile(r"^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
+_valid_title_regex=re.compile(r"^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
@@ -340,10 +340,9 @@ def export_library(library, library_rules):
     i=0
     for library_rule in library_rules:
         try:
-            file = open(dir_path+"/symbol-"+library_rule.rule.name+"-"+str(i)+".sld",'w+')
+            file = open(dir_path+"/symbol-"+library_rule.rule.name+"-"+str(i)+".sld",'wb+')
             file.write(sld_builder.build_library_symbol(library_rule.rule))
             file.close()
-            
             sld_utils.copy_resources(library_rule.rule, resource_path)
             
         except Exception as e:
@@ -352,7 +351,7 @@ def export_library(library, library_rules):
         i=i+1
    
     
-    buffer = io.StringIO()
+    buffer = io.BytesIO()
     z = zipfile.ZipFile(buffer, "w")
     relroot = dir_path
     for root, dirs, files in os.walk(dir_path):
