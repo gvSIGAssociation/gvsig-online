@@ -1045,7 +1045,7 @@ class Geoserver():
         elif os.path.isfile(file_path):
             try:
                 return gdaltools.get_raster_stats(file_path)
-            except gdaltools.GdalError as e:
+            except gdaltools.GdalToolsError as e:
                 raise rest_geoserver.RequestError(e.code, e.message)    
 
 
@@ -1107,11 +1107,11 @@ class Geoserver():
             # import SHP to DB
             if len(files)==1:
                 shp_abs = os.path.join(tmp_dir, files[0])
-                __shp2postgis(shp_abs, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                self.__shp2postgis(shp_abs, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                 return
         except (rest_geoserver.RequestError):
             raise 
-        except gdaltools.GdalError as e:
+        except gdaltools.GdalToolsError as e:
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logging.exception(e)
@@ -1252,7 +1252,8 @@ class Geoserver():
             shp_field_names = [f.name for f in shp_fields]
             sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
             stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
-
+            if stderr.startswith("ERROR"): # some errors don't return non-0 status so will not directly raise an exception
+                raise gdaltools.GdalToolsError(message=stderr)
             with Introspect(db, host=host, port=port, user=user, password=password) as i:
                 # add control fields
                 db_fields = i.get_fields(name, schema=schema)
@@ -1279,14 +1280,12 @@ class Geoserver():
                         trigger.install()
                     except:
                         logger.exception("Failed to install trigger: " + str(trigger))
-            
-            if stderr:
-                raise rest_geoserver.RequestWarning(stderr)
-            return True
+            if not stderr:
+                return True
         except rest_geoserver.RequestError as e:
             logger.exception(str(e))
             raise
-        except gdaltools.GdalError as e:
+        except gdaltools.GdalToolsError as e:
             logger.exception(str(e))
             if e.code > 0 and creation_mode == forms_geoserver.MODE_OVERWRITE:
                 params = json.loads(datastore.connection_params)
@@ -1304,14 +1303,15 @@ class Geoserver():
                     if stderr:
                         raise rest_geoserver.RequestWarning(stderr)
                     return True
-                except gdaltools.GdalError as e:
+                except gdaltools.GdalToolsError as e:
                     raise rest_geoserver.RequestError(e.code, e.message)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logger.exception(str(e))
             message =  _("Error uploading the layer. Review the file format. Cause: ") + str(e)
             raise rest_geoserver.RequestError(-1, message)
-    
+        raise rest_geoserver.RequestWarning(stderr)
+
     def prepare_string(self, s):
         return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
 
@@ -1412,7 +1412,7 @@ class Geoserver():
                         original_style_name = layer_name
                     shp_abs = os.path.join(dir_path, f)
                     try:
-                        shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                        self.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                     except Exception as e:
                         print("ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido ")
                         continue 
@@ -1531,7 +1531,7 @@ class Geoserver():
         except rest_geoserver.RequestError as ex:
             print("Error Request: " + str(ex))
             raise             
-        except gdaltools.GdalError as ex:
+        except gdaltools.GdalToolsError as ex:
             print("Error Gdal: " + str(ex))
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
