@@ -1,8 +1,7 @@
 ## django
 django==2.2.18
 djangoajax==3.2
-httplib2==0.18.1
-### br-ch: https://geopy.readthedocs.io/en/latest/changelog_2xx.html
+httplib2==0.19.0
 geopy==2.1.0
 gisdata==0.5.4
 
@@ -10,7 +9,6 @@ gisdata==0.5.4
 #future==0.17.1
 
 ## auth
-### br-ch https://github.com/python-ldap/python-ldap/releases
 python-ldap==3.3.1
 django-auth-ldap==2.2.0
 
