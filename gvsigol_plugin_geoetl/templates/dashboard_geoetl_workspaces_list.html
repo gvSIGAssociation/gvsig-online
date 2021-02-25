@@ -1,0 +1,265 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button id="button-new-empty-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-file-o margin-r-5"></i> {% trans "New empty canvas" %}</button>
+				</div>
+				<div class="box-tools pull-right">
+					<button id="button-back-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i> {% trans "Go back to canvas" %}</button>
+				</div>
+			</div>
+		</div>
+		<div class="box">
+			<div class="box-body">
+				<table class="table" id="etl-table">
+					<thead>
+						<tr>
+							<th>{% trans "ID" %}</th>
+							<th>{% trans "Name" %}</th>
+							<th>{% trans "Description" %}</th>
+							<th>{% trans "Workspace" %}</th>
+							<th></th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for workspace in workspaces %}
+						<tr>
+							<td>{{ workspace.id }}</td> 
+							<td>{{ workspace.name }}</td>
+							<td>{{ workspace.description }}</td>
+							<td>{{ workspace.workspace }}</td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>      
+
+<!-- Modals -->
+<div class="modal fade" id="modal-delete-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete workspace" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<p style="font-weight: 600;">{% trans "The ETL workspace and its parameters will be deleted" %}</p>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-workspace-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="modal-update-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+		
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Update ETL Workspace" %}</h4>
+			</div>
+
+			<div class="modal-body">
+				<form id="layer-group-form" role="form">
+
+					<div class="row">
+						<div class="col-md-12">
+							<label for="etl_id">ID</label>
+							<input placeholder = "{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<label for="etl_name">{% trans "Name" %}</label>
+							<input placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name" type="text" class="form-control">							
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<label for="etl_desc">{% trans "Description" %}</label>
+							<input placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">								
+						</div>
+					</div>				
+
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
+				<button type="button" class="btn btn-default btn-sm" id="update-etl-workspace">{% trans "Update" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}
+
+{% block extra-scripts %}
+
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-etl').addClass("active");
+
+	$(document).ready(function() {
+	var table = $('#etl-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		    	first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		        last		: '{% trans "Last" %}'
+		    },
+		    aria: {
+		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	  		"targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	  	},{
+	  		"targets": -2,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-warning"><i class="fa fa-folder-open"></i></button>'
+	  	},{
+	      	"targets": -3,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	  	}],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+
+
+	$('[data-toggle-second="tooltip"]').tooltip();
+
+	$('#button-back-canvas').on('click', function (){
+		window.history.back();
+	});
+
+	$('#button-new-empty-canvas').on('click', function (){
+		location.href = '/gvsigonline/etl/etl_canvas/';
+	});
+
+	$('#etl-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();
+	    if (this.name == "button-update-workspace-etl") {
+			
+			$(".modal-body #etl_id").val( data[0] );
+			$(".modal-body #etl_name").val( data[1] );
+			$(".modal-body #etl_desc").val( data[2] );
+			$('#modal-update-workspace-etl').modal('show')
+			
+			updateWorkspace(data)
+	        
+	        
+	    } else if (this.name == "button-delete-workspace-etl"){
+	        deleteWorkspace(data);   
+	    }
+
+		else if (this.name == "button-open-workspace-etl"){
+				
+	        openWorkspace(data);  
+	    }
+
+	});
+		
+	function openWorkspace(data){	
+			
+		location.href = '/gvsigonline/etl/etl_canvas/?lgid=' + data[0];
+		
+	}
+
+	function deleteWorkspace(data){
+		$('#button-delete-workspace-accept').click( function() {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				data: {
+					"lgid": data[0]
+		        },
+				url: '/gvsigonline/etl/etl_workspace_delete/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-workspace-etl').modal('hide');
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	}
+
+	function updateWorkspace(data){
+		
+		$('#update-etl-workspace').click( function() {
+
+			updateData = {"id": data[0], "name": $(".modal-body #etl_name").val(), "description": $(".modal-body #etl_desc").val(), "workspace": data[3]}
+
+			$.ajax({
+				type: 'POST',
+				async: false,
+				data: updateData,
+				url: '/gvsigonline/etl/etl_workspace_update/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-update-workspace-etl').modal('hide');
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	};
+
+});
+
+</script>
+
+{% endblock %}
