@@ -2612,10 +2612,10 @@ def enumeration_add(request):
         name = request.POST.get('enumeration_name')
         title = request.POST.get('enumeration_title')
 
-        aux_title = ''.join(title.encode('ASCII', 'ignore').split())[:4]
+        aux_title = b"".join(title.encode('ASCII', 'ignore').split())[:4]
         aux_title = aux_title.lower()
 
-        name = name + '_' + re.sub("[!@#$%^&*()[]{};:,./<>?\|`~-=_+ ]", "", aux_title)
+        name = name + '_' + re.sub("[!@#$%^&*()[]{};:,./<>?\|`~-=_+ ]", "", aux_title.decode("utf-8"))
 
         name_exists = False
         enums = Enumeration.objects.all()
@@ -3266,7 +3266,7 @@ def get_feature_wfs(request):
               
             cql_filter = None  
             if operator == 'equal_to':
-                if field_type == 'character varying':
+                if field_type == 'character varying' or field_type == 'enumeration':
                     cql_filter = field + "='" + value + "'"
                 else:
                     cql_filter = field + "=" + value
