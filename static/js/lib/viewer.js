@@ -56,7 +56,11 @@ viewer.core = {
 	overviewmap: null,
 
 	//Lista de botones para la tabla de atributos que se pueden registrar desde los plugins haciendo push
-	attributeTableButtons: new Array(),  
+	attributeTableButtons: new Array(), 
+	//Eventos de la tabla registrables desde plugins
+	tableEvent: {
+		'rowCallback': new Array()
+	}, 
 
     initialize: function(conf, extraParams) {
     	this.conf = conf;
