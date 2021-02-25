@@ -153,7 +153,7 @@ class GoogleMaps():
     def get_json_from_url(url, params):
         response = requests.get(url=url, params=params)
         if response.status_code == 200:
-            respuesta = response.content
+            respuesta = response.text
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
 
