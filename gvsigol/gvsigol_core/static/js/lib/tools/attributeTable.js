@@ -389,7 +389,20 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	    },
 	    "drawCallback": function(settings, json) {
 	        self.selectFeatures();
-	    }
+	    },
+		"rowCallback": function( row, data, dataIndex){
+			if(viewer.core.tableEvent['rowCallback'] && viewer.core.tableEvent['rowCallback'].length > 0) {
+				var event = viewer.core.tableEvent['rowCallback']
+				params = {
+					'row': row,
+					'data': data,
+					'dataIndex': dataIndex
+				}
+				for (var i=0; i<event.length; i++) {
+					event[i](params)
+				}
+			}
+		}
 	});
 	
 	/*$('.panel-wrapper').on('resize', function(event, ui){
