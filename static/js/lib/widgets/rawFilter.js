@@ -162,7 +162,9 @@ RawFilter.prototype.registerEvents = function() {
 		var hasFields = false;
 		for (var i=0; i < fields.length; i++) {
 			hasFields = true;
-			$("#rawfilter-field").append('<option data-layer="' + layer  + '" data-workspace="' + workspace  + '" data-type="' + fields[i].type  + '" value="' + fields[i].name  + '">' + fields[i].name  + '</option>');
+			if (fields[i].type != 'date' && fields[i].type != 'timestamp' && fields[i].type != 'timestamp with time zone' && fields[i].name != 'wkb_geometry' && fields[i].name != 'geometry' && fields[i].name != 'geom' && fields[i].name != 'modified_by' && fields[i].name != 'last_modification' && fields[i].name != 'feat_version_gvol' && fields[i].name != 'id') {
+				$("#rawfilter-field").append('<option data-layer="' + layer  + '" data-workspace="' + workspace  + '" data-type="' + fields[i].type  + '" value="' + fields[i].name  + '">' + fields[i].name  + '</option>');
+			}
 		}
 		
 		if (!hasFields) {
@@ -176,12 +178,12 @@ RawFilter.prototype.registerEvents = function() {
 		
 		var type = $('option:selected', $(this)).data('type');
 		
-		if (type == 'numeric') {	
+		if (type == 'numeric' || type == 'integer' || type == 'bigint' || type == 'double' || type == 'double precision') {	
 			$("#rawfilter-operator").append('<option value="equal_to">' + gettext('Equal to') + '</option>');
 			$("#rawfilter-operator").append('<option value="smaller_than">' + gettext('Smaller than') + '</option>');
 			$("#rawfilter-operator").append('<option value="greater_than">' + gettext('Greater than') + '</option>');
 			
-		} else if (type == 'character varying'){
+		} else if (type == 'character varying' || type == 'enumeration'){
 			$("#rawfilter-operator").append('<option value="equal_to">' + gettext('Equal to') + '</option>');
 		}
 	});
