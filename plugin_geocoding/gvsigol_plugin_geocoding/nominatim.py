@@ -24,6 +24,7 @@ from django.utils.translation import ugettext as _
 from geopy.geocoders import Nominatim as Nominatim_geocoder
 import json
 from urllib.parse import urlparse
+from gvsigol import settings
 
 class Nominatim():
     
@@ -47,9 +48,11 @@ class Nominatim():
         url_params = urlparse(url)
         scheme = url_params.scheme
         domain = url_params.netloc + url_params.path
+        user_agent = settings.GVSIGOL_NAME + ' ' + settings.GVSIGOL_VERSION
         self.geolocators.append({
-            'geocoder': Nominatim_geocoder(country_bias=country_code, scheme=scheme, domain=domain), 
-            'provider': provider
+            'geocoder': Nominatim_geocoder(scheme=scheme, domain=domain, user_agent=user_agent), 
+            'provider': provider,
+            'country_code': country_code
         })
         
         
@@ -59,7 +62,8 @@ class Nominatim():
         i=1
         try: 
             for geolocator in self.geolocators:
-                locations = geolocator['geocoder'].geocode(query,exactly_one=False)
+                print(geolocator.get('country_code'))
+                locations = geolocator['geocoder'].geocode(query,country_codes=geolocator.get('country_code'), exactly_one=False)
                 if locations:
                     for l in locations:
                         suggestion = {}

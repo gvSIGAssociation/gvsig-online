@@ -47,7 +47,7 @@ class Provider(models.Model):
     order = models.IntegerField(null=False, default=10)
     last_update = models.DateTimeField(auto_now_add=False, null=True, blank=True) 
     
-    def __unicode__(self):
+    def __str__(self):
         values = dict(geocoding_setting.GEOCODING_SUPPORTED_TYPES).get(self.type)
         cadena = str(values)
         
