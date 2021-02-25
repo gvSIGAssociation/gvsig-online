@@ -51,7 +51,7 @@ urlpatterns = [
     
     
     path('library_list/', symbology_views.library_list, name='library_list'),
-    path('library_add/<int:library_id>/', symbology_views.library_add, name='library_add'),
+    path('library_add/', symbology_views.library_add, name='library_add'),
     path('library_update/<int:library_id>/', symbology_views.library_update, name='library_update'),
     path('library_import/', symbology_views.library_import, name='library_import'),
     path('library_export/<int:library_id>/', symbology_views.library_export, name='library_export'),
