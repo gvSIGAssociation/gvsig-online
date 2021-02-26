@@ -3776,7 +3776,7 @@ def describeFeatureTypeWithPk(request):
         workspace = request.POST.get('workspace')
         try:
             layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            if not utils.can_manage_layer(request.user, layer):
+            if not utils.can_read_layer(request.user, layer):
                 response = {'fields': [], 'error': 'Not authorized'}
                 return HttpResponseForbidden(response, content_type='application/json')
 
