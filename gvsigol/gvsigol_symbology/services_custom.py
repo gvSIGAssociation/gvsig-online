@@ -52,7 +52,7 @@ def create_style(style_name, style_title, is_default, sld, layer, gs, is_preview
     )
     style_layer.save()
 
-    sld_body = sld
+    sld_body = utils.encode_xml(sld)
 
     if is_preview:
         if gs.createOverwrittenStyle(style.name, sld_body, True): 
@@ -71,7 +71,7 @@ def update_style(style_title, is_default, sld, layer, gs, style, is_preview=Fals
     style.is_default = is_default
     style.save()
 
-    sld_body = sld
+    sld_body = utils.encode_xml(sld)
 
     if is_preview:
         if gs.createOverwrittenStyle(style.name, sld_body, True): 
