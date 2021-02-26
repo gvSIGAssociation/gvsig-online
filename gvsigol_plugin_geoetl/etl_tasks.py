@@ -83,10 +83,22 @@ def input_Excel(dicc):
             if math.isnan(valueFloat):
                 lista.append((j, 'NULL'))
             else:
-                lista.append((j, xl[j][i]))
-            dic = OrderedDict(lista)
-        js_excel['features'].append({'properties':dic})
+                value = commaToDot(xl[j][i])
+                lon = len(str(value).split(".")[-1])
+                val = str(value).split(".")[-1]
+                if lon == 1 and val == '0':
+                    try:
+                        lista.append((j, int(value)))
+                    except:
+                        lista.append((j, value))
 
+                else:
+                    lista.append((j, value))
+        
+        dicc = dict(lista)
+
+        js_excel['features'].append({'properties':dicc})
+    
     return [js_excel]
 
 def input_Shp(dicc):
@@ -113,6 +125,7 @@ def input_Shp(dicc):
     for feature in layer:    
         f= feature.ExportToJson(as_object=True)
         f['geometry']['epsg'] = epsg
+        
         fc['features'].append(f)
 
     return[fc]
@@ -132,7 +145,7 @@ def trans_RemoveAttr(dicc):
                 del tableWithoutAttr['features'][k]['properties'][attr]
                 break
         k+=1
-    
+
     return [tableWithoutAttr]
 
 def trans_KeepAttr(dicc):
@@ -196,26 +209,19 @@ def trans_Join(dicc):
     
     k=0
     for i in table2['features']:
-        value2 = i['properties'][attr2]
-        try:
-            value2=str(value2)
-        except:
-            value2 = str(value2.encode('utf-8'))
+        value2 = str(i['properties'][attr2])
 
         count1 =0
         for j in table1['features']:
-            value1 = j['properties'][attr1]
-            try:
-                value1=str(value1)
-            except:
-                value1 = str(value1.encode('utf-8'))
+            value1 = str(j['properties'][attr1])
             
-            if value1==value2:
+            if value1 == value2:
+
                 join['features'].append(j)
                 join['features'][k]['properties'].update(i['properties'])
 
                 for l in table1NotUsed['features']:
-                    if l['properties'][attr1] ==value1:
+                    if l['properties'][attr1] == value1:
                         table1NotUsed['features'].remove(l)
                         break
                 k+=1
@@ -225,6 +231,7 @@ def trans_Join(dicc):
                 count1+=1
                 if count1 == lonMax:
                     table2NotUsed['features'].append(i)
+            break
     
     return [join, table1NotUsed, table2NotUsed]
 
@@ -264,10 +271,7 @@ def trans_Filter(dicc):
     table = dicc['data'][0]
     attr = dicc['attr']
     
-    try:
-        value=str(dicc['value'])
-    except:
-        value = str(dicc['value'].encode('utf-8'))
+    value=str(dicc['value'])
     
     operator = dicc['operator']
 
@@ -281,10 +285,7 @@ def trans_Filter(dicc):
 
     for i in table['features']:
 
-        try:
-            valueAttr=str(i['properties'][attr])
-        except:
-            valueAttr = str(i['properties'][attr].encode('utf-8'))
+        valueAttr=str(i['properties'][attr])
 
         if operator == '==':
             if valueAttr == value:
@@ -377,25 +378,16 @@ def output_Postgresql(dicc):
     #for creating a new table in database
     if operation=='CREATE':
 
-        sqlCr="CREATE TABLE IF NOT EXISTS "+tableName+" ("
-        sqlIn = "INSERT INTO "+tableName+" ("
-
-        sqlCreate = sqlCr.encode('utf-8') 
-        sqlInsert = sqlIn.encode('utf-8') 
+        sqlCreate="CREATE TABLE IF NOT EXISTS "+tableName+" ("
+        sqlInsert = "INSERT INTO "+tableName+" ("
         
         for i in listKeys:
 
             attr = isNumber(i)
-            
-            try:
-                sqlCreate = sqlCreate + str(attr).lower().replace(": ","_").replace(" ","_")
-            except:
-                sqlCreate = sqlCreate + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")
-            
-            try:
-                sqlInsert = sqlInsert + str(attr).lower().replace(": ","_").replace(" ","_")+","
-            except:
-                sqlInsert = sqlInsert + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")+","
+
+            sqlCreate = sqlCreate + str(attr).lower().replace(": ","_").replace(" ","_")
+
+            sqlInsert = sqlInsert + str(attr).lower().replace(": ","_").replace(" ","_")+","
 
             longitud=0
             tipo = 'None'
@@ -432,7 +424,7 @@ def output_Postgresql(dicc):
                         if longitud < len(str(value)):
                             longitud = len(str(value))     
                     
-                if type(value) is str or type(value) is unicode:
+                if type(value) is str or type(value) is str:
                     if tipo=='None':
                         tipo = 'VARCHAR'
                         longitud=len(value)
@@ -456,10 +448,7 @@ def output_Postgresql(dicc):
 
         for k in range(0, rows):
 
-            try:
-                sqlInsert2=sqlInsert.encode('utf-8')
-            except:
-                sqlInsert2=sqlInsert
+            sqlInsert2=sqlInsert
 
             for attr in listKeys:
 
@@ -470,12 +459,10 @@ def output_Postgresql(dicc):
 
                 value = commaToDot(v)
 
-                if type(value) is str or type(value) is unicode and value !='NULL':
+                if type(value) is str or type(value) is str and value !='NULL':
                     
-                    try:
-                        sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
-                    except:
-                        sqlInsert2 = sqlInsert2+"'"+str(value.encode('utf-8')).replace("'", "''")+"',"
+
+                    sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
 
                 elif type(value) is float and math.isnan(value) or value==None:
                     value = 'NULL'
@@ -504,12 +491,9 @@ def output_Postgresql(dicc):
                 except:
                     value = None
 
-                if type(value) is str or type(value) is unicode and value !='NULL':
+                if type(value) is str or type(value) is str and value !='NULL':
                     
-                    try:
-                        value ="'"+ str(value).replace("'", "''")+"'"
-                    except:
-                        value ="'"+ str(value.encode('utf-8')).replace("'", "''")+"'"
+                    value ="'"+ str(value).replace("'", "''")+"'"
 
                 elif type(value) is float and math.isnan(value) or value==None:
                     value = 'NULL'
@@ -520,10 +504,10 @@ def output_Postgresql(dicc):
                 if i != m:
                     
                     attr = isNumber(i)
-                    sqlUpdate = sqlUpdate + attr.lower().replace(": ","_") + " = "+ value.decode('utf-8') +', '
+                    sqlUpdate = sqlUpdate + attr.lower().replace(": ","_") + " = "+ value +', '
                 else:
                     match = isNumber(m)
-                    macthValue = value.decode('utf-8')
+                    macthValue = value
                     
             
             sqlUpdate = sqlUpdate[:-2]+' WHERE '+ match.lower().replace(": ","_")+' = ' + macthValue+';'
@@ -544,12 +528,9 @@ def output_Postgresql(dicc):
             except:
                 value = None
 
-            if type(value) is str or type(value) is unicode and value !='NULL':
+            if type(value) is str or type(value) is str and value !='NULL':
                         
-                try:
-                    value ="'"+ str(value).replace("'", "''")+"'"
-                except:
-                    value ="'"+ str(value.encode('utf-8')).replace("'", "''")+"'"
+                value ="'"+ str(value).replace("'", "''")+"'"
 
             elif type(value) is float and math.isnan(value) or value==None:
                 value = 'NULL'
@@ -558,7 +539,7 @@ def output_Postgresql(dicc):
                 value = str(value)
 
             match = isNumber(i)
-            macthValue = value.decode('utf-8')
+            macthValue = value
                     
             sqlDelete = sqlDelete+ match.lower().replace(": ","_")+' = ' + macthValue+';'
 
@@ -596,31 +577,21 @@ def output_Postgis(dicc):
 
     if operation=='CREATE':
         
-        sqlCr="CREATE TABLE IF NOT EXISTS "+tableName+" ("
-        sqlIn = "INSERT INTO "+tableName+" ("
-
-        sqlCreate = sqlCr.encode('utf-8') 
-        sqlInsert = sqlIn.encode('utf-8') 
+        sqlCreate="CREATE TABLE IF NOT EXISTS "+tableName+" ("
+        sqlInsert = "INSERT INTO "+tableName+" ("
 
         for i in listKeys:
 
             attr = isNumber(i)
 
-            try:
-                sqlCreate = sqlCreate + str(attr).lower().replace(": ","_").replace(" ","_")
-            except:
-                sqlCreate = sqlCreate + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")
+            sqlCreate = sqlCreate + str(attr).lower().replace(": ","_").replace(" ","_")
                 
-            try:
-                sqlInsert = sqlInsert + str(attr).lower().replace(": ","_").replace(" ","_")+","
-            except:
-                sqlInsert = sqlInsert + str(attr.encode('utf-8')).lower().replace(": ","_").replace(" ","_")+","
+            sqlInsert = sqlInsert + str(attr).lower().replace(": ","_").replace(" ","_")+","
 
             longitud=0
             tipo = 'None'
 
             for j in range(0,rows):
-
 
                 try:
                     v = fc['features'][j]['properties'][i]
@@ -652,7 +623,7 @@ def output_Postgis(dicc):
                         if longitud < len(str(value)):
                             longitud = len(str(value))     
                     
-                if type(value) is str or type(value) is unicode:
+                if type(value) is str or type(value) is str:
                     if tipo=='None':
                         tipo = 'VARCHAR'
                         longitud=len(value)
@@ -683,10 +654,7 @@ def output_Postgis(dicc):
 
         for k in range(0, rows):
 
-            try:
-                sqlInsert2=sqlInsert.encode('utf-8')
-            except:
-                sqlInsert2=sqlInsert
+            sqlInsert2=sqlInsert
 
             #geojson geometry
             coord = fc['features'][k]['geometry']
@@ -702,12 +670,9 @@ def output_Postgis(dicc):
 
                 value = commaToDot(v)
 
-                if type(value) is str or type(value) is unicode and value !='NULL':
+                if type(value) is str or type(value) is str and value !='NULL':
 
-                    try:
-                        sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
-                    except:
-                        sqlInsert2 = sqlInsert2+"'"+str(value.encode('utf-8')).replace("'", "''")+"',"
+                    sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
 
                 elif type(value) is float and math.isnan(value) or value==None:
                     value = 'NULL'
@@ -719,7 +684,7 @@ def output_Postgis(dicc):
             sqlInsert2=sqlInsert2+"ST_SetSRID(ST_GeomFromGeoJSON('"+str(coord)+"'), "+ str(epsg)+") )"
             
             cur.execute(sqlInsert2)
-    
+
     elif operation == 'UPDATE':
         
         m = dicc['match']
@@ -735,12 +700,9 @@ def output_Postgis(dicc):
                 except:
                     value = None
 
-                if type(value) is str or type(value) is unicode and value !='NULL':
+                if type(value) is str or type(value) is str and value !='NULL':
 
-                    try:
-                        value ="'"+ str(value).replace("'", "''")+"'"
-                    except:
-                        value ="'"+ str(value.encode('utf-8')).replace("'", "''")+"'"
+                    value ="'"+ str(value).replace("'", "''")+"'"
 
                 elif type(value) is float and math.isnan(value) or value==None:
                     value = 'NULL'
@@ -751,10 +713,10 @@ def output_Postgis(dicc):
                 if i != m:
                     
                     attr = isNumber(i)
-                    sqlUpdate = sqlUpdate + attr.lower().replace(": ","_") + " = "+ value.decode('utf-8') +', '
+                    sqlUpdate = sqlUpdate + attr.lower().replace(": ","_") + " = "+ value +', '
                 else:
                     match = isNumber(m)
-                    macthValue = value.decode('utf-8')
+                    macthValue = value
 
             
             sqlUpdate = sqlUpdate[:-2]+' WHERE '+ match.lower().replace(": ","_")+' = ' + macthValue+';'
@@ -774,12 +736,9 @@ def output_Postgis(dicc):
             except:
                 value = None
 
-            if type(value) is str or type(value) is unicode and value !='NULL':
+            if type(value) is str or type(value) is str and value !='NULL':
                         
-                try:
-                    value ="'"+ str(value).replace("'", "''")+"'"
-                except:
-                    value ="'"+ str(value.encode('utf-8')).replace("'", "''")+"'"
+                value ="'"+ str(value).replace("'", "''")+"'"
 
             elif type(value) is float and math.isnan(value) or value==None:
                 value = 'NULL'
@@ -788,7 +747,7 @@ def output_Postgis(dicc):
                 value = str(value)
 
             match = isNumber(i)
-            macthValue = value.decode('utf-8')
+            macthValue = value
                     
             sqlDelete = sqlDelete+ match.lower().replace(": ","_")+' = ' + macthValue+';'
  
@@ -801,6 +760,7 @@ def output_Postgis(dicc):
 def input_Csv(dicc):
 
     csvdata = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8')
+
     
     js_csv ={
         'features':[]
@@ -813,6 +773,7 @@ def input_Csv(dicc):
     for i in range (0, lon):
         lista=[]
         for j in csvdata:
+
             try:
                 value = csvdata[j][i]
                 valueFloat =float(value)
@@ -822,9 +783,19 @@ def input_Csv(dicc):
             if math.isnan(valueFloat):
                 lista.append((j, 'NULL'))
             else:
-                lista.append((j, csvdata[j][i]))
-            dic = OrderedDict(lista)
-        js_csv['features'].append({'properties':dic})
+                value = commaToDot(csvdata[j][i])
+                lon = len(str(value).split(".")[-1])
+                val = str(value).split(".")[-1]
+                if lon == 1 and val == '0':
+                    try:
+                        lista.append((j, int(value)))
+                    except:
+                        lista.append((j, value))
+
+                else:
+                    lista.append((j, value))
+            
+        js_csv['features'].append({'properties':dicc})
 
     return [js_csv]
 
@@ -890,7 +861,7 @@ def trans_Counter(dicc):
                 count = listGroup[1][ind] + 1
                 listGroup[1][ind] = count
                 row[attr] = count
-        
+
     return [table]
 
 def trans_Calculator(dicc):
@@ -903,7 +874,6 @@ def trans_Calculator(dicc):
 
     for i in table['features']:
         i['properties'][attr] = eval(exp)
-        #print i['properties'][attr]
 
     return [table]
 

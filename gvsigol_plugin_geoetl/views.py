@@ -28,11 +28,23 @@ from django.core import serializers
 from django.utils.translation import ugettext as _
 from gvsigol import settings as core_settings
 from .forms import UploadFileForm
-from models import ETLworkspaces
-import settings
+from .models import ETLworkspaces
+from . import settings
 import json
-import etl_tasks
-import etl_schema
+from . import etl_tasks
+from . import etl_schema
+import numpy as np
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NpEncoder, self).default(obj)
 
 def get_conf(request):
     if request.method == 'POST': 
@@ -252,10 +264,10 @@ def etl_read_canvas(request):
                 result = {"error": "ERROR - "+str(e)}
  
         else:
-            print 'invalid form'
-            print form.errors
+            print ('invalid form')
+            print((form.errors))
 
-    return HttpResponse(json.dumps(result), content_type="application/json")
+    return HttpResponse(json.dumps(result, cls=NpEncoder), content_type="application/json")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_sheet_excel(request):
