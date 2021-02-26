@@ -1008,7 +1008,7 @@ def do_config_layer(server, layer, featuretype):
 
 
 def create_symbology(server, layer):
-    style_name = layer.datastore.workspace.name + '_' + layer.name + '_default'
+    style_name = layer.datastore.workspace.name + '_' + layer.name + '_1'
     server.createDefaultStyle(layer, style_name)
     server.setLayerStyle(layer, style_name, True)
     layer.save()
