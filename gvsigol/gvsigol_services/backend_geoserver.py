@@ -456,7 +456,7 @@ class Geoserver():
                     geom_type = geom.fromJTS(attr['binding'])
                     if geom_type != None:
                         the_type = geom_type
-                        break;
+                        break
             else:
                 the_type = 'raster'
             srs = result['featureType']['srs']
@@ -470,7 +470,6 @@ class Geoserver():
     
     def createDefaultStyle(self, layer, style_name):
         geom_type = self.get_geometry_type(layer)
-        logging.basicConfig(level=logging.INFO)
         logger.info('[backend_mapserver] Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
         
         
@@ -503,7 +502,7 @@ class Geoserver():
         try:
             catalog = self.getGsconfig()
             if catalog.get_style(style_name, workspace=None) == None:
-                catalog.create_style(style_name, sld_body.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
+                catalog.create_style(style_name, sld_body, overwrite=False, workspace=None, style_format="sld10", raw=False)
                     
             return True
         
