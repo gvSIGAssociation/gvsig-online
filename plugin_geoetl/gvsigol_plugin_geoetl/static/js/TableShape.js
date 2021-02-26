@@ -447,7 +447,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                 
                 var paramsExcel = {"id": ID,
                 "parameters": [
-                    {"excel-file": $('#excel-file-'+ID).val(),
+                    { "excel-file": $('#excel-file-'+ID).val(),
                     "sheet-name": $('#sheet-name-'+ID).val(),
                     "usecols": $('#usecols-'+ID).val(),
                     "header": $('#header-'+ID).val() }
@@ -3448,6 +3448,8 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
 
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
+        context = this
+
         $('#canvas-parent').append('<div id="dialog-output-postgresql-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
                 '<div class="modal-content">'+
@@ -3585,7 +3587,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                 }
             })
         });
-        context = this
+        
 
         icon.on("click", function(){
 
@@ -3786,6 +3788,8 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
         var ID = this.id
 
+        context = this
+
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-output-postgis-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
@@ -3927,7 +3931,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             })
         });
 
-        context = this
+        
 
         icon.on("click", function(){
             setTimeout(function(){
