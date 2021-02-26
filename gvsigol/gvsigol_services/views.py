@@ -958,7 +958,7 @@ def backend_fields_list(request):
                         field['title-'+id] = resource
                     result_resources.append(field)
 
-            result_resources_sorted = sorted(result_resources)
+            result_resources_sorted = sorted(result_resources, key=lambda rk: rk.get('name', ''))
             return HttpResponse(json.dumps(result_resources_sorted))
 
     return HttpResponseBadRequest()
