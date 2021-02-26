@@ -490,3 +490,22 @@ def get_raster_stats(raster_path):
         band_results = gdaltools.get_raster_stats(file_path)
         result = result + band_results
     return result
+
+def encode_xml(xml_string):
+    encoding = get_declared_xml_encoding(xml_string)
+    try:
+        return xml_string.encode(encoding)
+    except LookupError:
+        return xml_string.encode('utf-8')
+
+def get_declared_xml_encoding(xml_string):
+    """
+    Fast way to get the declared encoding of an XML string. If no
+    encoding is declared, utf-8 is assumed.
+    xml_string: must be an string, not bytes. 
+    """
+    pattern = r'^<\?xml(?: *version="[0-9\.]+")? +encoding="([^"]*)"'
+    m = re.match(pattern, xml_string)
+    if m and m.lastindex == 1:
+        return m.group(1)
+    return 'utf-8'

@@ -539,7 +539,7 @@ def update_preview(request, layer_id):
                     gs.reload_nodes()
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:    
-                style = services_custom.update_style(style_title, is_default, sld, layer. gs, style, True)
+                style = services_custom.update_style(style_title, is_default, sld, layer, gs, style, True)
                 if style:
                     gs.reload_nodes()
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
