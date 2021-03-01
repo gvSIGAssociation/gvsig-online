@@ -1944,8 +1944,6 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                console.log(schemaEdge)
-
                 if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
                     schema = schemaEdge
                     $('#group-by-attr-'+ID).empty()
@@ -2131,6 +2129,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
             editor:new draw2d.ui.LabelInplaceEditor()
         });
         
+        
         var icon = new draw2d.shape.icon.Gear({
             minWidth:13, 
             minHeight:13, 
@@ -2228,6 +2227,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                     schemas = getOwnSchemas(context.canvas, ID)
                     schema = schemas[0]
                     schemaOld = schemas[1]
+                    
                 }catch{ 
                     schema=[]
                     schemaOld =[]
@@ -2243,6 +2243,13 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
 
                     for (i = 0; i < schema.length; i++){
                         $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                        $('#schema-calculator-'+ID).append('<li class="nav-item"><a class="nav-link active">'+schema[i]+'</a></li>')
+                    }
+                //this else only for this transformer for selecting attributes
+                }else{
+                    schema = schemaEdge
+                    $('#schema-calculator-'+ID).empty()
+                    for (i = 0; i < schema.length; i++){
                         $('#schema-calculator-'+ID).append('<li class="nav-item"><a class="nav-link active">'+schema[i]+'</a></li>')
                     }
                 }
@@ -2762,6 +2769,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
 
                 if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
                     schema = schemaEdge
+
                     $('#attr-'+ID).empty()
 
                     for (i = 0; i < schema.length; i++){
