@@ -5113,3 +5113,28 @@ input.temporary-check[type=checkbox]{
 	right: 8px;
 	top: 8px;
 }
+
+.header_project_label {
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  font-size: 9pt;
+  background-color: #eef7ff;
+  padding: 2px;
+  border-top: 1px solid #729ac2;
+  border-bottom: 1px solid #729ac2;
+}
+
+.project_label_button_add {
+  content: '\21D2';
+  height: 15px;
+  width: 15px;
+}
+
+.col-md-0 {
+  position: relative;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+  width: 50%;
+}
