@@ -1975,7 +1975,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                 paramsCounter['schema'] = schemaMod
                 paramsCounter['schema-old'] = schemaEdge
 
-                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 isAlreadyInCanvas(jsonParams, paramsCounter, ID)
 
                 icon.setColor('#4682B4')

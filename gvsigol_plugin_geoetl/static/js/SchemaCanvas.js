@@ -3,8 +3,6 @@ $('[data-toggle-second="tooltip"]').tooltip();
 //get schema from previous task of input edge
 function passSchemaWhenInputEdge(canvas, sourceport){
 
-    
-
     for (i=0;i<canvas.length;i++){
         try{
             if (canvas[i]['type']!='draw2d.Connection'){
@@ -120,6 +118,8 @@ function passSchemaToEdgeConnected(id, listLabel, schema, canvasCtxt){
                             if(canvas[i]['source']['port']==targetports[j]){
                                 
                                 edge = canvasCtxt.getLine(canvas[i]['id'])
+
+                                delete edge['userData']
                                 
                                 if (Array.isArray(schema[j])){
                                     edge['userData'] = [schema[j]]
