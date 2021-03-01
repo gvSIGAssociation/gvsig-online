@@ -318,6 +318,10 @@ def project_add(request):
         if 'selected_base_group' in request.POST:
             selected_base_group = request.POST.get('selected_base_group')
 
+        labels_added = None
+        if 'labels_added' in request.POST:
+            labels_added = request.POST.get('labels_added')
+
         assigned_layergroups = []
         assigned_usergroups = []
         for key in request.POST:
@@ -385,7 +389,8 @@ def project_add(request):
             extent4326_miny = extent4326_miny,
             extent4326_maxx = extent4326_maxx,
             extent4326_maxy = extent4326_maxy,
-            tools = tools
+            tools = tools,
+            labels = labels_added
         )
         project.save()
         
@@ -520,6 +525,10 @@ def project_update(request, pid):
         if 'selected_base_group' in request.POST:
             selected_base_group = request.POST.get('selected_base_group')
 
+        label_added = None
+        if 'labels_added' in request.POST:
+            labels_added = request.POST.get('labels_added')
+
         assigned_layergroups = []
         assigned_usergroups = []
         for key in request.POST:
@@ -569,6 +578,7 @@ def project_update(request, pid):
         project.extent4326_miny = extent4326_miny
         project.extent4326_maxx = extent4326_maxx
         project.extent4326_maxy = extent4326_maxy
+        project.labels = labels_added
 
         if has_image:
             project.image = request.FILES['project-image']
@@ -675,6 +685,10 @@ def project_update(request, pid):
         if(project.baselayer_version is not None and project.baselayer_version > 0):
             url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
                     
+        labels = []
+        if project.labels:
+            labels = project.labels.split(',')   
+        
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
                                                        'project': project,
@@ -684,7 +698,8 @@ def project_update(request, pid):
                                                        'toc': ordered_toc, 
                                                        'superuser' : is_superuser(request.user), 
                                                        'processing_icon' : icon,
-                                                       'url_base_lyr' : url_base_lyr
+                                                       'url_base_lyr' : url_base_lyr,
+                                                       'labels_added' : labels
                                                        })
 
 
