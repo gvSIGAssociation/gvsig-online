@@ -1,8 +1,7 @@
 python libraries for plugin ETL
 
--Pandas 0.24.2
-	reinstall engine XLRD to an older version (1.2.0)
+-Pandas 1.2.2
 	
--gdal
+-gdal 3.2.1
 
--psycopg2 2.7.7.
+-psycopg2 2.8.6
