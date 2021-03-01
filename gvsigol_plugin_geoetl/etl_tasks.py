@@ -9,6 +9,7 @@ from collections import defaultdict, OrderedDict
 import tempfile
 import shutil
 from osgeo import ogr, osr
+import copy
 
 # Python class to print topological sorting of a DAG 
 class Graph: 
@@ -95,7 +96,7 @@ def input_Excel(dicc):
                 else:
                     lista.append((j, value))
         
-        dicc = dict(lista)
+            dicc = dict(lista)
 
         js_excel['features'].append({'properties':dicc})
     
@@ -135,7 +136,7 @@ def trans_RemoveAttr(dicc):
 
     attr = dicc['attr']
     table = dicc['data'][0]
-    tableWithoutAttr = dicc['data'][0]
+    tableWithoutAttr = copy.deepcopy(table)
     
     k=0
     
@@ -152,18 +153,18 @@ def trans_KeepAttr(dicc):
 
     attr = dicc['attr']
     table = dicc['data'][0]
-    tableWithAttr = dicc['data'][0]
+    tableWithAttr = copy.deepcopy(table)
     
     k=0
     
     for i in table['features']:
         for j in i['properties']:
             if j != attr:
-                del tableWithAttr['features'][k]['properties'][attr]
-                break
+                del tableWithAttr['features'][k]['properties'][j]
+                
         k+=1
     
-    return [tableWithoutAttr]
+    return [tableWithAttr]
 
 def trans_RenameAttr(dicc):
 
@@ -199,7 +200,7 @@ def trans_Join(dicc):
         'features': []
         }
     
-    table1NotUsed = dicc['data'][0]
+    table1NotUsed = copy.deepcopy(table1)
 
     table2NotUsed = {
         'features': []
@@ -211,7 +212,7 @@ def trans_Join(dicc):
     for i in table2['features']:
         value2 = str(i['properties'][attr2])
 
-        count1 =0
+        count1 = 0
         for j in table1['features']:
             value1 = str(j['properties'][attr1])
             
@@ -231,8 +232,7 @@ def trans_Join(dicc):
                 count1+=1
                 if count1 == lonMax:
                     table2NotUsed['features'].append(i)
-            break
-    
+
     return [join, table1NotUsed, table2NotUsed]
 
 def trans_ModifyValue(dicc):
@@ -262,7 +262,7 @@ def trans_CreateAttr(dicc):
     table = dicc['data'][0]
 
     for i in table['features']:
-        i['properties'][attr]=value
+        i['properties'][attr] = value
 
     return[table]
 
@@ -334,7 +334,7 @@ def trans_Filter(dicc):
                 passed['features'].append(i)
             else:
                 failed['features'].append(i)
-
+    
     return [passed, failed]
 
 def isNumber(value):
@@ -350,7 +350,6 @@ def commaToDot(value):
         return v
     except:
         return value
-
 
 def output_Postgresql(dicc):
 
@@ -460,7 +459,6 @@ def output_Postgresql(dicc):
                 value = commaToDot(v)
 
                 if type(value) is str or type(value) is str and value !='NULL':
-                    
 
                     sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
 
@@ -761,7 +759,6 @@ def input_Csv(dicc):
 
     csvdata = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8')
 
-    
     js_csv ={
         'features':[]
     }
@@ -794,6 +791,7 @@ def input_Csv(dicc):
 
                 else:
                     lista.append((j, value))
+            dicc = dict(lista)
             
         js_csv['features'].append({'properties':dicc})
 
