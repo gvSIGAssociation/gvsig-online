@@ -710,6 +710,12 @@ def create_postgres_config(provider, has_soundex):
                     "$func$  LANGUAGE sql IMMUTABLE;")
            
                 cursor.execute(create_extension)
+
+                create_extension = "CREATE EXTENSION IF NOT EXISTS unaccent"
+                try:
+                    cursor.execute(create_extension)
+                except:
+                    pass
             
             cursor.execute(test_func_exists)
             if (cursor.rowcount == 0):
