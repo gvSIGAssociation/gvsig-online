@@ -37,6 +37,7 @@ class Project(models.Model):
     restricted_extent = models.BooleanField(default=False)
     tools = models.TextField(null=True, blank=True) 
     baselayer_version = models.BigIntegerField(null=True, blank=True)
+    labels =  models.CharField(max_length=250, null=True, blank=True)
     
     def __unicode__(self):
         return self.name + ' - ' + self.description

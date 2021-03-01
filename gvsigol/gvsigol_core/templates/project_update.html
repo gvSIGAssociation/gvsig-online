@@ -176,7 +176,30 @@
 									</div>
 								</div>
 								
-								
+								<div class="row">
+									<div class="col-md-3 form-group">
+										<span class='header_project_label'>{% trans "Etiquetas de proyecto" %}</span>
+										<select size="8" multiple='multiple' class="form-control" id="id_project_label" name="project_label" aria-hidden="true">
+											<option value="mobile">mobile</option>
+											<option value="otherlabel">otherlabel</option>
+										</select>
+									</div>
+									<div class="col-md-1 form-group" style="width: 4%;top:40px">
+										<div style="width:25px">
+											<button id="button_add_label" type="button" >>></button>
+											<button id="button_remove_label" type="button" ><<</button>
+										</div>
+									</div>
+									<div class="col-md-3 form-group">
+										<span class='header_project_label'>{% trans "Etiquetas añadidas" %}</span>
+										<select size="8" multiple='multiple'  class="form-control" id="id_label_added" name="label_added" aria-hidden="true">
+											{% for label in labels_added %}
+												<option value='{{ label }}' selected>{{ label }}</option>
+											{% endfor %}
+										</select>
+									</div>
+									<input class="hide form-control" id="labels_added" name="labels_added" type="text" />
+								</div>
 				
 								
 								
@@ -581,6 +604,20 @@
 	            reader.readAsDataURL(input.files[0]);
 	        }
 	    }
+
+	$('#button_add_label').on("click", function (e) {
+		let val = $('#id_project_label').val();
+		if(val) {
+			var hasOption = $('#id_label_added option[value="' + val + '"]');
+			if (hasOption.length == 0) {
+				$('#id_label_added').append("<option value='" + val + "'>"+ val + "</option>")
+			}
+		}
+	})
+
+	$('#button_remove_label').on("click", function (e) {
+		$('#id_label_added option:selected').remove();
+	})
 	
 	
 	$("#project-image").change(function(){
@@ -825,7 +862,6 @@
 		$("#processing_header").hide()
 		$("#button-stop-process").hide()
 		
-		
 		$('#project-update-tabs').on("click", function (e) {
 			//Al pulsar cualquier tab desactiva la llamada de actualización de progreso de la capa base
 			var target = $(e.target).attr("data-id");
@@ -1034,6 +1070,14 @@
 				
 			}
 			$("#project_tools").val(JSON.stringify(projectTools));
+
+			//Se seleccionan todas las opciones del listado de etiquetas para que se manden en el submit
+			let labels_to_send = ""
+			$("#id_label_added option").each(function() {
+				labels_to_send += this.value + ","
+			});
+			labels_to_send = labels_to_send.substring(0, labels_to_send.length - 1)
+			$("#labels_added").val(labels_to_send)
 			
     		$("#project-form").submit();
     	    return false; 
