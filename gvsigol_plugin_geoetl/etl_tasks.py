@@ -408,7 +408,7 @@ def output_Postgresql(dicc):
                     elif longitud < len(str(value)):
                         longitud = len(str(value))
 
-                if type(value) is float or type(value) == np.dtype('float64'):
+                elif type(value) is float or type(value) == np.dtype('float64'):
 
                     if tipo=='None' or 'INTEGER':
                         longi = len(str(value).split(".")[-1])
@@ -423,7 +423,7 @@ def output_Postgresql(dicc):
                         if longitud < len(str(value)):
                             longitud = len(str(value))     
                     
-                if type(value) is str or type(value) is str:
+                elif (type(value) is str or type(value) is str) and value != 'NULL' :
                     if tipo=='None':
                         tipo = 'VARCHAR'
                         longitud=len(value)
@@ -432,6 +432,9 @@ def output_Postgresql(dicc):
                         tipo='VARCHAR'
                         if longitud < len(value):
                             longitud=len(value)
+                
+                else:
+                    pass
             
             if tipo == 'INTEGER' or tipo == 'DECIMAL':
                 sqlCreate = sqlCreate+' '+tipo+', '
@@ -458,17 +461,18 @@ def output_Postgresql(dicc):
 
                 value = commaToDot(v)
 
-                if type(value) is str or type(value) is str and value !='NULL':
+                if type(value) is str and value !='NULL':
 
                     sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
 
-                elif type(value) is float and math.isnan(value) or value==None:
-                    value = 'NULL'
-                    sqlInsert2 = sqlInsert2+str(value)+","
+                elif (type(value) is float and math.isnan(value)) or value==None or value =='NULL':
+
+                    sqlInsert2 = sqlInsert2+"NULL,"
 
                 else:
+
                     sqlInsert2 = sqlInsert2+ str(value)+','
-            
+
             sqlInsert2=sqlInsert2[:-1]+")"
             
             cur.execute(sqlInsert2)
@@ -606,7 +610,7 @@ def output_Postgis(dicc):
                     elif longitud < len(str(value)):
                         longitud = len(str(value))
 
-                if type(value) is float or type(value) == np.dtype('float64'):
+                elif type(value) is float or type(value) == np.dtype('float64'):
 
                     if tipo=='None' or 'INTEGER':
                         longi = len(str(value).split(".")[-1])
@@ -621,7 +625,7 @@ def output_Postgis(dicc):
                         if longitud < len(str(value)):
                             longitud = len(str(value))     
                     
-                if type(value) is str or type(value) is str:
+                elif type(value) is str or type(value) is str:
                     if tipo=='None':
                         tipo = 'VARCHAR'
                         longitud=len(value)
@@ -631,6 +635,8 @@ def output_Postgis(dicc):
                         
                         if longitud < len(value):
                             longitud=len(value)
+                else:
+                    pass
             
             if tipo == 'INTEGER' or tipo == 'DECIMAL':
                 sqlCreate = sqlCreate+' '+tipo+', '
@@ -668,15 +674,16 @@ def output_Postgis(dicc):
 
                 value = commaToDot(v)
 
-                if type(value) is str or type(value) is str and value !='NULL':
+                if type(value) is str and value !='NULL':
 
                     sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
 
-                elif type(value) is float and math.isnan(value) or value==None:
-                    value = 'NULL'
-                    sqlInsert2 = sqlInsert2+str(value)+","
+                elif (type(value) is float and math.isnan(value)) or value==None or value =='NULL':
+
+                    sqlInsert2 = sqlInsert2+"NULL,"
 
                 else:
+
                     sqlInsert2 = sqlInsert2+ str(value)+','
             
             sqlInsert2=sqlInsert2+"ST_SetSRID(ST_GeomFromGeoJSON('"+str(coord)+"'), "+ str(epsg)+") )"
