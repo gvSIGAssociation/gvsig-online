@@ -46,12 +46,6 @@
         "sourceType": "jcdecaux",
         "url": "http://api.jcdecaux.com/vls/v1/stations?contract=valence&apiKey=9595de725ee4c60aac7406c1a69743625c9056a0",
         "frequencySec": 60
-      },
-      {
-      "type":"bike-rental",
-      "sourceType":"mibisi",
-      "url":"http://www.mibisivalencia.es/swpublico/jsonMibisi.php",
-      "frequencySec": 60
       }
       ],
       "boardTimes": {
