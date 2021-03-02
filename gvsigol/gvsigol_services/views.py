@@ -3860,6 +3860,7 @@ def external_layer_add(request):
                 
             external_layer = Layer()
             external_layer.external = True
+            external_layer.public = True
             external_layer.title = request.POST.get('title')
             external_layer.layer_group_id = layer_group.id
             external_layer.type = request.POST.get('type')
