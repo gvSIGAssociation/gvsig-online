@@ -151,6 +151,9 @@ class APIGeoWebCache():
         xml +=  "<wmsLayers>" + wms_layers + "</wmsLayers>"
         xml += "</wmsLayer>"
         
+        # xml-encode any & appearance which causes Geoserver to complain.
+        # FIXME: we should instead generate the XML using lxml to ensure the encoding reliability
+        xml = xml.replace('&', '&amp;')
         api_url = master_node_url + "/gwc/rest/layers/" + layer_name + ".xml"
         
         auth = (server.user, server.password)
