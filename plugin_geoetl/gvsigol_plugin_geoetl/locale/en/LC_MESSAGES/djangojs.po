@@ -328,7 +328,7 @@ msgstr ""
 msgid "Set parameters of all tasks before save"
 msgstr ""
 
-msgid "Empty canvas"
+msgid "New"
 msgstr ""
 
 msgid "Are you sure?"
