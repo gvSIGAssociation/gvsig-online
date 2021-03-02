@@ -328,8 +328,8 @@ msgstr "Carga hojas"
 msgid "Set parameters of all tasks before save"
 msgstr "Configura los parámetros de todas las tareas antes de guardar"
 
-msgid "Empty canvas"
-msgstr "Canvas vacío"
+msgid "New"
+msgstr "Nuevo"
 
 msgid "Are you sure?"
 msgstr "¿Estás seguro?"

@@ -17,7 +17,7 @@ gvsigolETL.Toolbar = Class.extend({
 		view.on("select", $.proxy(this.onSelectionChanged,this));
 
 		// Inject the new empty canvas Button
-		this.emptyButton  = $('<button id="button-new-empty-canvas" class="btn btn-default btn-sm"><i class="fa fa-file-o margin-r-5"></i>' + gettext('Empty canvas') + '</button>');
+		this.emptyButton  = $('<button id="button-new-empty-canvas" class="btn btn-default btn-sm"><i class="fa fa-file-o margin-r-5"></i>' + gettext('New') + '</button>');
 		this.html.append(this.emptyButton);
 		this.emptyButton.click( function() {
 

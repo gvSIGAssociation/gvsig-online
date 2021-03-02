@@ -328,8 +328,8 @@ msgstr "Carrega fulles"
 msgid "Set parameters of all tasks before save"
 msgstr "Configura els paràmetres de totes les tasques abans de guardar"
 
-msgid "Empty canvas"
-msgstr "Canvas buit"
+msgid "New"
+msgstr "Nou"
 
 msgid "Are you sure?"
 msgstr "Estàs segur?"
