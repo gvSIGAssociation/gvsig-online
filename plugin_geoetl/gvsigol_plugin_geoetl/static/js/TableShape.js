@@ -1972,9 +1972,9 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                 schemaMod =[...schema]
                 
                 schemaMod.push($('#attr-'+ID).val())
-               
+                
                 paramsCounter['schema'] = schemaMod
-                paramsCounter['schema-old'] = schemaEdge
+                
 
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 isAlreadyInCanvas(jsonParams, paramsCounter, ID)
