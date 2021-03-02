@@ -94,6 +94,7 @@ from actstream import action
 from actstream.models import Action
 from django_sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
+from lxml import etree
 
 logger = logging.getLogger("gvsigol")
 
@@ -4157,7 +4158,11 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 version = WMTS_MAX_VERSION
             wmts = WebMapTileService(url, version=version, auth=auth)
             title = wmts.identification.title
-            capabilities = wmts.getServiceXML()
+            try:
+                capabilities = etree.tostring(wmts._capabilities, encoding='unicode')
+            except:
+                capabilities = wmts.getServiceXML()
+                capabilities = capabilities.decode('utf-8')
 
             layers = list(wmts.contents)
             if (not layer) and layers.__len__() > 0:

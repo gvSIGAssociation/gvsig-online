@@ -110,11 +110,12 @@ class APIGeoWebCache():
         url = None
         if layer.external:
             layer_name = layer.name
-            wms_layers = json.loads(layer.external_params).get('layers')
-            url = json.loads(layer.external_params).get('url')
-            if (json.loads(layer.external_params).get('get_map_url')):
-                url = json.loads(layer.external_params).get('get_map_url')
-
+            external_params = json.loads(layer.external_params)
+            wms_layers = external_params.get('layers')
+            if external_params.get('get_map_url'):
+                url = external_params.get('get_map_url')
+            else:
+                url = external_params
         else:
             layer_name = ws + ":" + layer.name
             wms_layers = layer_name
@@ -150,15 +151,17 @@ class APIGeoWebCache():
         xml +=  "</wmsUrl>"
         xml +=  "<wmsLayers>" + wms_layers + "</wmsLayers>"
         xml += "</wmsLayer>"
-        
+
+        # xml-encode any & appearance which causes Geoserver to complain.
+        # FIXME: we should instead generate the XML using lxml to ensure the encoding reliability
+        xml = xml.replace('&', '&amp;')
         api_url = master_node_url + "/gwc/rest/layers/" + layer_name + ".xml"
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.put(api_url, data=xml, headers=headers, auth=auth)
+        response = self.session.put(api_url, data=xml.encode('utf-8'), headers=headers, auth=auth)
         if response.status_code==200:
             return True
-        
         raise FailedRequestError(response.status_code, response.content)
     
     def modify_layer(self, ws, layer, server, master_node_url):
@@ -189,7 +192,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.post(api_url, data=xml, headers=headers, auth=auth)
+        response = self.session.post(api_url, data=xml.encode(), headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -210,7 +213,7 @@ class APIGeoWebCache():
         if response.status_code==200:
             return True
         
-        raise FailedRequestError(response.status_code, response.content)
+        raise FailedRequestError(response.status_code, response.text)
     
     def execute_cache_operation(self, ws, layer, server, url, minx, miny, maxx, maxy, grid_set, zoom_start, zoom_stop, format, op_type, thread_count):
         layer_name = None
