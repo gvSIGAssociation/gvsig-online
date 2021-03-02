@@ -408,7 +408,7 @@ def output_Postgresql(dicc):
                     elif longitud < len(str(value)):
                         longitud = len(str(value))
 
-                elif type(value) is float or type(value) == np.dtype('float64'):
+                if type(value) is float or type(value) == np.dtype('float64'):
 
                     if tipo=='None' or 'INTEGER':
                         longi = len(str(value).split(".")[-1])
@@ -423,7 +423,7 @@ def output_Postgresql(dicc):
                         if longitud < len(str(value)):
                             longitud = len(str(value))     
                     
-                elif (type(value) is str or type(value) is str) and value != 'NULL' :
+                if type(value) is str and value != 'NULL' :
                     if tipo=='None':
                         tipo = 'VARCHAR'
                         longitud=len(value)
@@ -433,7 +433,7 @@ def output_Postgresql(dicc):
                         if longitud < len(value):
                             longitud=len(value)
                 
-                else:
+                if type(value) is str and value == 'NULL' :
                     pass
             
             if tipo == 'INTEGER' or tipo == 'DECIMAL':
@@ -610,7 +610,7 @@ def output_Postgis(dicc):
                     elif longitud < len(str(value)):
                         longitud = len(str(value))
 
-                elif type(value) is float or type(value) == np.dtype('float64'):
+                if type(value) is float or type(value) == np.dtype('float64'):
 
                     if tipo=='None' or 'INTEGER':
                         longi = len(str(value).split(".")[-1])
@@ -625,17 +625,17 @@ def output_Postgis(dicc):
                         if longitud < len(str(value)):
                             longitud = len(str(value))     
                     
-                elif type(value) is str or type(value) is str:
+                if type(value) is str and value != 'NULL' :
                     if tipo=='None':
                         tipo = 'VARCHAR'
                         longitud=len(value)
                     
                     else:
                         tipo='VARCHAR'
-                        
                         if longitud < len(value):
                             longitud=len(value)
-                else:
+                
+                if type(value) is str and value == 'NULL':
                     pass
             
             if tipo == 'INTEGER' or tipo == 'DECIMAL':
