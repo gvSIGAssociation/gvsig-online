@@ -109,6 +109,11 @@
 		  		<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
 		  		<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
 		  	{% endif %}
+		{% else %}
+			{% if user.is_superuser or not first_level %}
+				<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
+				<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
+			{% endif %}
 	  	{% endif %}
 	</div>
 
