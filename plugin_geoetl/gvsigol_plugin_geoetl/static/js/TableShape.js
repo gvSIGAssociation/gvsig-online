@@ -1133,7 +1133,6 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
     init : function(attr)
     {
     	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
-        
       
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Remove Attribute"), 
@@ -1158,6 +1157,8 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
+        context = this
+        
         var ID = this.id
 
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
@@ -1186,7 +1187,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        context = this
+       
 
         icon.on("click", function(){
 
