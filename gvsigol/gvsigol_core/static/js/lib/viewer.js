@@ -232,10 +232,11 @@ viewer.core = {
 			var group = this.conf.layerGroups[i];
 			for (var k=0; k<group.layers.length; k++) {
 				var layerConf = group.layers[k];
+				var checkTileLoadError = this.conf.check_tileload_error;
 				if (layerConf.external) {
-					this._loadExternalLayer(layerConf, group, k);
+					this._loadExternalLayer(layerConf, group, checkTileLoadError);
 				} else {
-					this._loadInternalLayer(layerConf, group, k);
+					this._loadInternalLayer(layerConf, group, checkTileLoadError);
 				}
 
 			}
@@ -250,7 +251,7 @@ viewer.core = {
 		this.selectionTable = new SelectionTable(this.map);
     },
 
-    _loadExternalLayer: function(externalLayer, group, index) {
+    _loadExternalLayer: function(externalLayer, group, checkTileLoadError) {
 	    var self = this;
 
 	    var visible = false;
@@ -275,64 +276,66 @@ viewer.core = {
 				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'}
 			});
 			wmsSource.layer_name = externalLayer['name'];
-			wmsSource.loadend = false;
-			wmsSource.on('tileloadstart', function() {
-				var time = 0;
-				var pid;
-				var _this = this;
-				
-				var eLayer = null;
-				self.map.getLayers().forEach(function(layer){
-					if (layer.layer_name == _this.layer_name) {
-						eLayer = layer;
-					}						
-				}, _this);
+			if (checkTileLoadError) {
+				wmsSource.loadend = false;
+				wmsSource.on('tileloadstart', function() {
+					var time = 0;
+					var pid;
+					var _this = this;
+					
+					var eLayer = null;
+					self.map.getLayers().forEach(function(layer){
+						if (layer.layer_name == _this.layer_name) {
+							eLayer = layer;
+						}						
+					}, _this);
 
-				self._setTileLoadError(false, eLayer);
-				pid = setInterval(function() {
-					if (time < externalLayer['timeout']) {
-						time += 1000;
-					} else {
-						if (!_this.loadend) {
-							clearInterval(pid);
-							if (eLayer) {
+					self._setTileLoadError(false, eLayer);
+					pid = setInterval(function() {
+						if (time < externalLayer['timeout']) {
+							time += 1000;
+						} else {
+							if (!_this.loadend) {
+								clearInterval(pid);
+								if (eLayer) {
+									self._setTileLoadError(true, eLayer);
+								}
+							}
+		
+						}
+					}, 1000);
+				
+				});
+				wmsSource.on('tileloadend', function() {
+					this.loadend = true;
+				
+				});
+				wmsSource.on('tileloaderror', function(e){
+					var eLayer = null;
+					self.map.getLayers().forEach(function(layer){
+						if (layer.layer_name == this.layer_name) {
+							eLayer = layer;
+						}						
+					}, this);
+					
+					if (eLayer) {
+						if (this.getUrls()[0] == eLayer.cached_url) {
+							self._setTileLoadError(true, eLayer);
+							
+						} else {
+							if (eLayer.cached && eLayer.cached_url) {
+								this.setUrl(eLayer.cached_url);
+								this.updateParams({'LAYERS': eLayer.layer_name, 'FORMAT': eLayer.format, 'VERSION': eLayer.version, 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
+								
+							} else {
 								self._setTileLoadError(true, eLayer);
 							}
 						}
-	
 					}
-				}, 1000);
-			
-			});
-			wmsSource.on('tileloadend', function() {
-				this.loadend = true;
-			
-			});
-			wmsSource.on('tileloaderror', function(e){
-				var eLayer = null;
-				self.map.getLayers().forEach(function(layer){
-					if (layer.layer_name == this.layer_name) {
-						eLayer = layer;
-					}						
-				}, this);
-				
-				if (eLayer) {
-					if (this.getUrls()[0] == eLayer.cached_url) {
-						self._setTileLoadError(true, eLayer);
-						
-					} else {
-						if (eLayer.cached && eLayer.cached_url) {
-							this.setUrl(eLayer.cached_url);
-							this.updateParams({'LAYERS': eLayer.layer_name, 'FORMAT': eLayer.format, 'VERSION': eLayer.version, 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
-							
-						} else {
-							self._setTileLoadError(true, eLayer);
-						}
-					}
-				}
-				
-				
-			});
+					
+					
+				});
+			}
 			var wmsLayer = new ol.layer.Tile({
 				id: layerId,
 				source: wmsSource,
@@ -395,55 +398,56 @@ viewer.core = {
 	    		
 				var wmtsSource = new ol.source.WMTS((options));
 				wmtsSource.layer_name = externalLayer['name'];
-				wmtsSource.loadend = false;
-				wmtsSource.on('tileloadstart', function() {
-					var time = 0;
-					var pid;
-					var _this = this;
+				if (checkTileLoadError) {
+					wmtsSource.loadend = false;
+					wmtsSource.on('tileloadstart', function() {
+						var time = 0;
+						var pid;
+						var _this = this;
 
-					var eLayer = null;
-					self.map.getLayers().forEach(function(layer){
-						if (layer.layer_name == _this.layer_name) {
-							eLayer = layer;
-						}						
-					}, _this);
+						var eLayer = null;
+						self.map.getLayers().forEach(function(layer){
+							if (layer.layer_name == _this.layer_name) {
+								eLayer = layer;
+							}						
+						}, _this);
 
-					self._setTileLoadError(false, eLayer);
+						self._setTileLoadError(false, eLayer);
 
-					pid = setInterval(function() {
-						if (time < externalLayer['timeout']) {
-							time += 1000;
-						} else {
-							if (!_this.loadend) {
-								clearInterval(pid);
-								if (eLayer) {
-									self._setTileLoadError(true, eLayer);
+						pid = setInterval(function() {
+							if (time < externalLayer['timeout']) {
+								time += 1000;
+							} else {
+								if (!_this.loadend) {
+									clearInterval(pid);
+									if (eLayer) {
+										self._setTileLoadError(true, eLayer);
+									}
 								}
+			
 							}
-		
+						}, 1000);
+					
+					});
+					wmtsSource.on('tileloadend', function() {
+						this.loadend = true;
+					
+					});
+					wmtsSource.on('tileloaderror', function(e){
+						var eLayer = null;
+						self.map.getLayers().forEach(function(layer){
+							if (layer.layer_name == this.layer_name) {
+								eLayer = layer;
+							}						
+						}, this);
+						
+						if (eLayer) {
+							self._setTileLoadError(true, eLayer);
 						}
-					}, 1000);
-				
-				});
-				wmtsSource.on('tileloadend', function() {
-					this.loadend = true;
-				
-				});
-				wmtsSource.on('tileloaderror', function(e){
-					var eLayer = null;
-					self.map.getLayers().forEach(function(layer){
-						if (layer.layer_name == this.layer_name) {
-							eLayer = layer;
-						}						
-					}, this);
-					
-					if (eLayer) {
-						self._setTileLoadError(true, eLayer);
-					}
-					
-					
-				});
-				
+						
+						
+					});
+				}
 	    		var wmtsLayer = new ol.layer.Tile({
 	    			id: layerId,
 					source: wmtsSource,
@@ -531,7 +535,7 @@ viewer.core = {
 
 	},
 
-	_loadInternalLayer: function(internalLayer, group) {
+	_loadInternalLayer: function(internalLayer, group, checkTileLoadError) {
 		var self = this;
 
 		var layerConf = internalLayer;
@@ -685,63 +689,66 @@ viewer.core = {
 
 			wmsLayer.setOpacity(layerConf.opacity);
 			this.map.addLayer(wmsLayer);
-			
-			wmsLayer.getSource().loadend = false;
+
 			wmsLayer.getSource().layer_name = layerConf.name;
-			wmsLayer.getSource().on('tileloadstart', function() {
-				var time = 0;
-				var pid;
-				var _this = this;
 
-				var iLayer = null;
-				self.map.getLayers().forEach(function(layer){
-					if (layer.layer_name) {
-						if (layer.layer_name === _this.layer_name) {
-							iLayer = layer;
-						}
-					}
-											
-				}, _this);
-				self._setTileLoadError(false, iLayer);
+			if (checkTileLoadError) {
+				wmsLayer.getSource().loadend = false;
+				wmsLayer.getSource().on('tileloadstart', function() {
+					var time = 0;
+					var pid;
+					var _this = this;
 
-				pid = setInterval(function() {
-					if (time < layerConf.timeout) {
-						time += 1000;
-					} else {
-						if (!_this.loadend) {
-							clearInterval(pid);
-							if (iLayer) {
-								self._setTileLoadError(true, iLayer);
+					var iLayer = null;
+					self.map.getLayers().forEach(function(layer){
+						if (layer.layer_name) {
+							if (layer.layer_name === _this.layer_name) {
+								iLayer = layer;
 							}
+						}
+												
+					}, _this);
+					self._setTileLoadError(false, iLayer);
 
+					pid = setInterval(function() {
+						if (time < layerConf.timeout) {
+							time += 1000;
+						} else {
+							if (!_this.loadend) {
+								clearInterval(pid);
+								if (iLayer) {
+									self._setTileLoadError(true, iLayer);
+								}
+
+							}
+		
 						}
-	
+					}, 1000);
+				
+				});
+				wmsLayer.getSource().on('tileloadend', function() {
+					this.loadend = true;
+				
+				});
+				wmsLayer.getSource().on('tileloaderror', function(e){
+					console.log(e);
+					var aux = self._check_error_is_TileOutOfRange(e.tile);
+					if (aux){
+						return;
 					}
-				}, 1000);
-			
-			});
-			wmsLayer.getSource().on('tileloadend', function() {
-				this.loadend = true;
-			
-			});
-			wmsLayer.getSource().on('tileloaderror', function(e){
-				console.log(e);
-				var aux = self._check_error_is_TileOutOfRange(e.tile);
-				if (aux){
-					return;
-				}
-				var iLayer = null;
-				self.map.getLayers().forEach(function(layer){
-					if (layer.layer_name) {
-						if (layer.layer_name === this.layer_name) {
-							iLayer = layer;
-						}
-					}						
-				}, this);								
-				if (iLayer) {
-					self._setTileLoadError(true, iLayer);
-				}								
-			});	
+					var iLayer = null;
+					self.map.getLayers().forEach(function(layer){
+						if (layer.layer_name) {
+							if (layer.layer_name === this.layer_name) {
+								iLayer = layer;
+							}
+						}						
+					}, this);								
+					if (iLayer) {
+						self._setTileLoadError(true, iLayer);
+					}								
+				});	
+			}
 
 			if (layerConf.real_time) {
 				var updateInterval = layerConf.update_interval;

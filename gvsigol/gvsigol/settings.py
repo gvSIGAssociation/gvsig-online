@@ -661,3 +661,5 @@ JWT_AUTH = {
 }
 
 ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
+
+CHECK_TILELOAD_ERROR = False

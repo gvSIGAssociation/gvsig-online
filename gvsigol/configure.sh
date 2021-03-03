@@ -283,6 +283,19 @@ function configure() {
 	fi
 	grep -rl "##DOCS_NAME##"  | xargs sed -i "s ##DOCS_NAME## $DOCS_NAME g"
 
+	echo "INFO: CHECK_TILELOAD_ERROR"																
+	if [ -z $CHECK_TILELOAD_ERROR ]; then
+		echo "WARNING: CHECK_TILELOAD_ERROR is not defined, using default value False"					
+		CHECK_TILELOAD_ERROR="False"
+	else
+		if [ "$CHECK_TILELOAD_ERROR" = "true" ]; then
+			CHECK_TILELOAD_ERROR=True
+		else
+			CHECK_TILELOAD_ERROR=False
+		fi		
+	fi
+	grep -rl "##CHECK_TILELOAD_ERROR##"  | xargs sed -i "s/##CHECK_TILELOAD_ERROR##/$CHECK_TILELOAD_ERROR/g"
+
 }
 
 function move_template() {
