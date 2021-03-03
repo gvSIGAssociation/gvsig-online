@@ -1207,7 +1207,8 @@ def project_get_conf(request):
             'remote_auth': settings.AUTH_WITH_REMOTE_USER,
             'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
             'errors': errors,
-            'auth_urls': auth_urls
+            'auth_urls': auth_urls,
+            'check_tileload_error': settings.CHECK_TILELOAD_ERROR
         }
         
         if language:

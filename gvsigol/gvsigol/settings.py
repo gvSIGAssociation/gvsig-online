@@ -154,13 +154,10 @@ INSTALLED_APPS = [
 
     ############# APPS ################
     'gvsigol_app_dev',
-    #'gvsigol_app_ideuy',
-    #'gvsigol_app_librapicassa',
 
     ############# PLUGINS ################
-    'gvsigol_plugin_alfresco',
     'gvsigol_plugin_catalog',
-    'gvsigol_plugin_catastro',
+    #'gvsigol_plugin_catastro',
     'gvsigol_plugin_catastrouy',
     'gvsigol_plugin_charts',
     'gvsigol_plugin_downloadman',
@@ -172,20 +169,10 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_geoetl',
     'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_importvector',
-    'gvsigol_plugin_manageaddresses',
+    #'gvsigol_plugin_manageaddresses',
     'gvsigol_plugin_opensea2',
-    'gvsigol_plugin_sampledashboard',
-    'gvsigol_plugin_samplemenubutton',
-    'gvsigol_plugin_staticdownloads',
-    'gvsigol_plugin_survey',
-    'gvsigol_plugin_picassa',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
-    'gvsigol_plugin_streetview',
-    'gvsigol_plugin_sync',
-    'gvsigol_plugin_trip_planner',
-    'gvsigol_plugin_turiscan',
-    'gvsigol_plugin_worldwind',
     'actstream',
     #### DEPENDENCIES ######,
     'django_celery_beat'
@@ -299,7 +286,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': True,
+    'ENABLED': False,
     'HOST':'localhost',
     'PORT': '389',
     'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
@@ -383,9 +370,9 @@ SITE_ID=1
 #BASE_URL = 'https://localhost'
 #MEDIA_ROOT = '/usr/local/var/www/media/'
 #MEDIA_URL = 'https://localhost/media/'
-BASE_URL = 'https://gvsigol.localhost'
-MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
-MEDIA_URL = 'https://gvsigol.localhost/media/'
+BASE_URL = 'https://localhost'
+MEDIA_ROOT = '/var/www/media/'
+MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -671,4 +658,6 @@ DOCS = {
     'NAME': 'manual.pdf',
     'VERSION': 'v1'
 }
+
+CHECK_TILELOAD_ERROR = False
 

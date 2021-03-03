@@ -506,3 +506,5 @@ DOCS = {
     'URL': '##DOCS_URL##',
     'NAME': '##DOCS_NAME##'
 }
+
+CHECK_TILELOAD_ERROR = ##CHECK_TILELOAD_ERROR##
