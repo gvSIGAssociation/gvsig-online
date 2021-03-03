@@ -30,6 +30,7 @@ var SelectByBufferControl = function(map, toolbar) {
 	this.popup = null;
 	this.selectionTable = viewer.core.getSelectionTable();
 	
+	
 	this.distance = 1000;
 	this.circleFeature = null;
 	
@@ -83,6 +84,10 @@ SelectByBufferControl.prototype.isActive = function(e) {
 };
 
 SelectByBufferControl.prototype.activate = function(e) {
+	if (this.selectionTable == null) {
+		this.selectionTable = new SelectionTable(this.map);
+		viewer.core.setSelectionTable(this.selectionTable);
+	}
 	for (var i=0; i<this.toolbar.controlArray.length; i++) {
 		this.toolbar.controlArray[i].deactivate();
 	}

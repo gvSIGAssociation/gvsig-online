@@ -29,6 +29,7 @@ var SelectFeatureControl = function(map, toolbar) {
 	this.toolbar = toolbar;
 	this.selectionTable = viewer.core.getSelectionTable();
 	
+	
 	this.interaction = new ol.interaction.Select({
         condition: ol.events.condition.click
     });
@@ -63,6 +64,10 @@ SelectFeatureControl.prototype.isActive = function(e) {
 };
 
 SelectFeatureControl.prototype.activate = function(e) {
+	if (this.selectionTable == null) {
+		this.selectionTable = new SelectionTable(this.map);
+		viewer.core.setSelectionTable(this.selectionTable);
+	}
 	this.selectionTable.removeTables();
 	for (var i=0; i<this.toolbar.controlArray.length; i++) {
 		this.toolbar.controlArray[i].deactivate();
