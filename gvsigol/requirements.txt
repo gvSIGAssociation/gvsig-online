@@ -1,5 +1,5 @@
 ## django
-django==2.2.18
+django==2.2.19
 djangoajax==3.2
 httplib2==0.19.0
 geopy==2.1.0
@@ -17,16 +17,15 @@ django-auth-ldap==2.2.0
 #django-filter
 #django-rest-auth
 #django-formtools
-djangorestframework==3.9.4 # to be updated
-djangorestframework-jwt==1.11.0 # to be updated
-drf-yasg==1.17.0
+djangorestframework==3.12.2
+djangorestframework-jwt==1.11.0
+drf-yasg==1.20.0
 django-rest-swagger==2.2.0
 django-rest-swagger-swaggerdoc==1.0.post3
-django-cors-headers==3.0.2
+django-cors-headers==3.7.0
 
 ##Instalamos el driver de PostgreSQL para python:
 psycopg2>=2.8.6
-#psycopg2>=2.7,<2.8 --no-binary psycopg2
 # *NOTE:* Es necesario instalar previamente la libreria _libpq-dev_
 #psycopg2-binary>=2.7,<2.8
 
@@ -40,7 +39,6 @@ requests==2.25.1
 
 # async requests
 requests-futures==1.0.0
-# futures==3.2.0 # only needed for Python 2.x
 
 ## Scolab tools
 spatialiteintrospect==1.2
@@ -71,7 +69,6 @@ pyexcel-xlsx==0.6.0
 pyexcel-ods3==0.6.0
 
 # Parseo del getCapabilities (baseLayers)
-# se instala un pyproj compatible con python 2
 pyproj==2.2.2 # to be updated
 OWSLib==0.23.0
 
