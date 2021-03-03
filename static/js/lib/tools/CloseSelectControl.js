@@ -34,6 +34,10 @@ var CloseSelectControl = function(map, toolbar) {
 		className: "edit",
 		title: gettext('Close selection tools'),
 		onToggle: function(active){
+			if (viewer.core.getSelectionTable() != null) {
+				viewer.core.getSelectionTable().remove();
+				viewer.core.setSelectionTable(null);
+			}
 			for (var i=0; i<toolbar.controlArray.length; i++) {
 				toolbar.controlArray[i].deactivate();
 			}

@@ -224,8 +224,10 @@ RawFilter.prototype.registerEvents = function() {
 	
 	$('#rawfilter-apply').on('click', function(e){
 
-		if (!self.selectionTable) {
-			self.selectionTable = viewer.core.getSelectionTable();
+		self.selectionTable = viewer.core.getSelectionTable();
+		if (self.selectionTable == null) {
+			self.selectionTable = new SelectionTable(self.map);
+			viewer.core.setSelectionTable(self.selectionTable);
 		}
 		//self.selectionTable.removeTables();
 		var layerGroup = $('option:selected', $('#rawfilter-layer-group')).val();
