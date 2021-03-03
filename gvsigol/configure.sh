@@ -286,7 +286,7 @@ function configure() {
 	echo "INFO: CHECK_TILELOAD_ERROR"																
 	if [ -z $CHECK_TILELOAD_ERROR ]; then
 		echo "WARNING: CHECK_TILELOAD_ERROR is not defined, using default value True"					
-		CHECK_TILELOAD_ERROR="True"
+		CHECK_TILELOAD_ERROR=True
 	else
 		if [ "$CHECK_TILELOAD_ERROR" = "true" ]; then
 			CHECK_TILELOAD_ERROR=True
