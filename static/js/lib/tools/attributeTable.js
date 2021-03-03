@@ -78,6 +78,10 @@ attributeTable.prototype.init = function(layer) {
  * TODO
  */
 attributeTable.prototype.initialize = function() {
+	if (this.viewer.getSelectionTable() != null) {
+		this.viewer.getSelectionTable().remove();
+		this.viewer.setSelectionTable(null);
+	}
 	this.source.clear();
 	this.createUI();
 };
@@ -843,6 +847,8 @@ attributeTable.prototype.registerEvents = function() {
 
 	$("#close-table").on('click', function(){
 		bottomPanel.hidePanel();
+		self.source.clear();
+		self.viewer.clearAllSelectedFeatures();
 	});
 
 	$("#minimize-table").on('click', function(){
