@@ -27,6 +27,7 @@ var SelectBoxControl = function(map, toolbar) {
 	var self = this;
 	this.map = map;
 	this.toolbar = toolbar;
+
 	this.selectionTable = viewer.core.getSelectionTable();
 
 	this.distance = 10;
@@ -69,6 +70,10 @@ SelectBoxControl.prototype.isActive = function(e) {
 };
 
 SelectBoxControl.prototype.activate = function(e) {
+	if (this.selectionTable == null) {
+		this.selectionTable = new SelectionTable(this.map);
+		viewer.core.setSelectionTable(this.selectionTable);
+	}
 	this.selectionTable.removeTables();
 	for (var i=0; i<this.toolbar.controlArray.length; i++) {
 		this.toolbar.controlArray[i].deactivate();

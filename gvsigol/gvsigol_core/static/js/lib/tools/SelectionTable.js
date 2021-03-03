@@ -23,10 +23,9 @@
 /**
  * TODO
  */
-var SelectionTable = function(conf, map) {
+var SelectionTable = function(map) {
 	this.id = "selection-data-table";
 	this.map = map;
-	this.conf = conf;
 	this.tabCount = 0;
 
 	this.selectionTableSource = new ol.source.Vector();
@@ -154,13 +153,13 @@ SelectionTable.prototype.createTableUI = function(featureType, features, layerNa
 	var propertiesWithType = new Array();
 	var columns = new Array();
 	
-	featureType.sort(function(a, b) {
+	/*featureType.sort(function(a, b) {
 	    var textA = a.name.toUpperCase();
 	    var textB = b.name.toUpperCase();
 	    return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-	});
+	});*/
 
-	var table = $("<table>", {id: 'table-' + tabCount, class: 'stripe nowrap cell-border hover', style: "width: 100%; padding: 10px;"});
+	var table = $("<table>", {id: 'table-' + tabCount, class: 'stripe nowrap cell-border hover', style: "width: 100%;"});
 	var thead = $("<thead>", {style: "width: 100%;"});
 	var trow = $("<tr>");
 	for (var i=0; i<featureType.length; i++) {
@@ -200,24 +199,28 @@ SelectionTable.prototype.createTableUI = function(featureType, features, layerNa
 	$('#tab-table-' + tabCount).empty();
 	$('#tab-table-' + tabCount).append(table);
 	
-	var orderedColumns = columns.sort(function(a, b) {
+	/*var orderedColumns = columns.sort(function(a, b) {
 	    var textA = a.data.toUpperCase();
 	    var textB = b.data.toUpperCase();
 	    return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-	});
+	});*/
 	
 	
 	var rows = [];
 	for (var i=0; i<features.length; i++) {
 		var arrayFeats = features;
 		var row = [];
-		var sorted = Object.keys(arrayFeats[i])
+		/*var sorted = Object.keys(arrayFeats[i])
 	    .sort()
 	    .reduce(function (acc, k) { 
 	        acc[k] = arrayFeats[i][k];
 	        return acc;
 	    }, {});
-		rows.push(sorted);
+		rows.push(sorted);*/
+		rows.push(Object.keys(arrayFeats[i]).reduce(function (acc, k) { 
+	        acc[k] = arrayFeats[i][k];
+	        return acc;
+	    }, {}));
 	}
 	
 	var tableButtons = new Array();
@@ -289,7 +292,7 @@ SelectionTable.prototype.createTableUI = function(featureType, features, layerNa
         "scrollX": true,
         scrollY: '50vh',
         scrollCollapse: true,
-        columns: orderedColumns,
+        columns: columns,
         data: rows,
         dom: 'Bfrtp<"top"l><"bottom"i>',
         "bSort" : false,
@@ -336,7 +339,7 @@ SelectionTable.prototype.registerEvents = function() {
 	var self = this;
 	$("#close-selectiontable").on('click', function(){
 		bottomPanel.hidePanel();
-		self.selectionTableSource.clear();
+		//self.selectionTableSource.clear();
 
 		//self.removeTables();
 		//viewer.core.clearAllSelectedFeatures();
@@ -368,6 +371,14 @@ SelectionTable.prototype.registerEvents = function() {
  */
 SelectionTable.prototype.getSource = function() {
 	return this.selectionTableSource;
+};
+
+/**
+ * TODO
+ */
+SelectionTable.prototype.remove = function() {
+	this.selectionTableSource.clear();
+	this.map.removeLayer(this.selectionTableLayer);
 };
 
 /**
@@ -457,23 +468,25 @@ SelectionTable.prototype.getFeatures = function(features, workspace, url){
 
 	    	if (response.features.length > 0 ) {
 	    		for (var i=0; i<response.features.length; i++) {
-		    		var newFeature = new ol.Feature();
-			    	if (response.features[i].geometry.type == 'Point') {
-			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
-			    		newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'LineString') {
-			    		newFeature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiLineString') {
-			    		newFeature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'Polygon') {
-			    		newFeature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
-			    	} else if (response.features[i].geometry.type == 'MultiPolygon') {
-			    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
-			    	}
-			    	newFeature.setProperties(response.features[i].properties);
-					newFeature.setId(response.features[i].id);
-					self.selectionTableSource.addFeature(newFeature);
+					if (response.features[i].geometry) {
+						var newFeature = new ol.Feature();
+						if (response.features[i].geometry.type == 'Point') {
+							newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiPoint') {
+							newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'LineString') {
+							newFeature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiLineString') {
+							newFeature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'Polygon') {
+							newFeature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
+						} else if (response.features[i].geometry.type == 'MultiPolygon') {
+							newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+						}
+						newFeature.setProperties(response.features[i].properties);
+						newFeature.setId(response.features[i].id);
+						self.selectionTableSource.addFeature(newFeature);
+					}
 		    	}
 
 		    	var extent = self.selectionTableSource.getExtent();

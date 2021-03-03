@@ -56,11 +56,11 @@ viewer.core = {
 	overviewmap: null,
 
 	//Lista de botones para la tabla de atributos que se pueden registrar desde los plugins haciendo push
-	attributeTableButtons: new Array(),  
+	attributeTableButtons: new Array(), 
 	//Eventos de la tabla registrables desde plugins
 	tableEvent: {
 		'rowCallback': new Array()
-	},
+	}, 
 
     initialize: function(conf, extraParams) {
     	this.conf = conf;
@@ -247,7 +247,7 @@ viewer.core = {
     	this.layerTree = new layerTree(this.conf, this.map, this);
     	this.legend = new legend(this.conf, this.map);
 		this.rawFilter = new RawFilter(this.conf, this.map);
-		this.selectionTable = new SelectionTable(this.conf, this.map);
+		this.selectionTable = new SelectionTable(this.map);
     },
 
     _loadExternalLayer: function(externalLayer, group, index) {
@@ -892,6 +892,10 @@ viewer.core = {
 	
 	getSelectionTable: function() {
     	return this.selectionTable;
+    },
+
+	setSelectionTable: function(table) {
+    	this.selectionTable = table;
     },
 
     loadTool: function(tool) {
