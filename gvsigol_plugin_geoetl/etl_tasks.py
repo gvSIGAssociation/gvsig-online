@@ -5,11 +5,11 @@ import psycopg2
 import json
 import math
 import numpy as np
-from collections import defaultdict, OrderedDict
-import tempfile
-import shutil
+from collections import defaultdict
 from osgeo import ogr, osr
 import copy
+from dateutil.parser import parse
+
 
 # Python class to print topological sorting of a DAG 
 class Graph: 
@@ -110,7 +110,7 @@ def input_Shp(dicc):
     dataSource = driver.Open(shp, 0)
             
     layer = dataSource.GetLayer()
-    
+        
     fc = {
         "features": []
         }
@@ -351,6 +351,15 @@ def commaToDot(value):
     except:
         return value
 
+
+def is_date(string):
+    try: 
+        parse(string, fuzzy=False)
+        return True
+
+    except:
+        return False
+
 def output_Postgresql(dicc):
 
     fc = dicc['data'][0]
@@ -433,10 +442,18 @@ def output_Postgresql(dicc):
                         if longitud < len(value):
                             longitud=len(value)
                 
+                if is_date(value) == True:
+                    if tipo=='None' or tipo == 'VARCHAR':
+                        tipo = 'DATE'
+                        longitud = len(str(value))
+
+                    elif longitud < len(str(value)):
+                        longitud = len(str(value))
+                
                 if type(value) is str and value == 'NULL' :
                     pass
             
-            if tipo == 'INTEGER' or tipo == 'DECIMAL':
+            if tipo == 'INTEGER' or tipo == 'DECIMAL' or tipo == 'DATE':
                 sqlCreate = sqlCreate+' '+tipo+', '
             else:
                 sqlCreate = sqlCreate+' '+tipo+'('+str(longitud)+'), '
@@ -634,11 +651,19 @@ def output_Postgis(dicc):
                         tipo='VARCHAR'
                         if longitud < len(value):
                             longitud=len(value)
+
+                if is_date(value) == True:
+                    if tipo=='None' or tipo == 'VARCHAR':
+                        tipo = 'DATE'
+                        longitud = len(str(value))
+
+                    elif longitud < len(str(value)):
+                        longitud = len(str(value))
                 
                 if type(value) is str and value == 'NULL':
                     pass
             
-            if tipo == 'INTEGER' or tipo == 'DECIMAL':
+            if tipo == 'INTEGER' or tipo == 'DECIMAL' or tipo == 'DATE':
                 sqlCreate = sqlCreate+' '+tipo+', '
             else:
                 sqlCreate = sqlCreate+' '+tipo+'('+str(longitud)+'), '
@@ -824,8 +849,9 @@ def trans_Reproject(dicc):
     dataSet = ogr.Open(json.dumps(table))
     layer = dataSet.GetLayer()
 
-    source.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    target.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    #for newers gdal versions we must use next sentences
+    #source.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    #target.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     coordTrans= osr.CoordinateTransformation(source, target)
 
