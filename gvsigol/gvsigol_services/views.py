@@ -95,6 +95,7 @@ from actstream import action
 from actstream.models import Action
 from sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
+import locale
 
 logger = logging.getLogger("gvsigol")
 
@@ -4112,8 +4113,8 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         try:
             print 'Add base layer: ' + url+ ', version: ' + version
             wms = WebMapService(url, version=version, auth=auth)
-
-            print 'Add base layer type ' + wms.identification.type
+            encoding = locale.getpreferredencoding() or 'utf-8'
+            print 'Add base layer type ' + wms.identification.type.encode(encoding)
             title = wms.identification.title
             matrixsets = []
             layers = list(wms.contents)
