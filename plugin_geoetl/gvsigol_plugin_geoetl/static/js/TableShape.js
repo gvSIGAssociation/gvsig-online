@@ -91,9 +91,16 @@ function getPathFile(fileType, ID){
     $('#select-file-button-'+ID).click(function (e) {
         window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
     });
-    
     window.filemanagerCallback = function(url) {
-        $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        if(fileType == 'csv' && url.endsWith('.csv')){
+            $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        } else if(fileType == 'excel' && (url.endsWith('.xls') || url.endsWith('.xlsx'))){
+            $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        } else if(fileType == 'shp' && url.endsWith('.shp')){
+            $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        } else{
+            messageBox.show('warning', gettext('File selected is not a ')+fileType)
+        }
     }
 };
 
@@ -1974,7 +1981,6 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                 schemaMod.push($('#attr-'+ID).val())
                 
                 paramsCounter['schema'] = schemaMod
-                
 
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 isAlreadyInCanvas(jsonParams, paramsCounter, ID)

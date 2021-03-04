@@ -336,3 +336,6 @@ msgstr "¿Estás seguro?"
 
 msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
 msgstr "Si abres un nuevo canvas vacío perderás el canvas actual si no lo has guardado antes"
+
+msgid "File selected is not a "
+msgstr "El archivo seleccionado no es un "

@@ -2,6 +2,6 @@ python libraries for plugin ETL
 
 -Pandas 1.2.2
 	
--gdal 3.2.1
+-GDAL 1.11.5
 
 -psycopg2 2.8.6

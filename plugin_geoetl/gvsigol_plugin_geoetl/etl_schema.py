@@ -19,7 +19,7 @@ def get_schema_excel(dicc):
 def get_schema_shape(file):
 
     shp = file[7:]
-    
+
     driver = ogr.GetDriverByName('ESRI Shapefile')
     dataSource = driver.Open(shp, 0)
             
@@ -29,7 +29,7 @@ def get_schema_shape(file):
     for n in range(ldefn.GetFieldCount()):
         fdefn = ldefn.GetFieldDefn(n)
         schema.append(fdefn.name)
-    
+
     return schema
 
 #test if connection postgres is valid

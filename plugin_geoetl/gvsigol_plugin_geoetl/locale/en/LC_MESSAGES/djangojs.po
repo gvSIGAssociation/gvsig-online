@@ -336,3 +336,6 @@ msgstr ""
 
 msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
 msgstr ""
+
+msgid "File selected is not a "
+msgstr ""
