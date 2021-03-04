@@ -699,7 +699,6 @@ GOL_APP_SETTINGS = None
 try:
     for app in settings.INSTALLED_APPS:
         if app.startswith("gvsigol_app_"):
-            importlib.import_module(app+".settings")
             GOL_APP_SETTINGS = importlib.import_module(app+".settings")
             break
 except:
