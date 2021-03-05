@@ -557,10 +557,17 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
                 'tile_max_y': tile_max_y
             })
 
+        if(number_of_tiles == 0):
+            process_data[str(identif)]['active'] = 'false' 
+
         process_data[str(identif)]['total_tiles'] = number_of_tiles
 
         start_level = 0
         tiling_status = create_status(process_data[str(identif)], lyr.id)
+        
+        if(number_of_tiles == 0):
+            return 
+
         for t in tilingList:
             t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None, tiling_status)
             start_level =  5 #Para la 1ra geom se descargan los niveles de 0-4 completos pero para las sgtes ya no hace falta 
