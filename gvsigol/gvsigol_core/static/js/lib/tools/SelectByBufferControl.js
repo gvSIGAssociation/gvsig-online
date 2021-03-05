@@ -28,8 +28,6 @@ var SelectByBufferControl = function(map, toolbar) {
 	this.map = map;
 	this.toolbar = toolbar;
 	this.popup = null;
-	this.selectionTable = viewer.core.getSelectionTable();
-	
 	
 	this.distance = 1000;
 	this.circleFeature = null;
@@ -84,6 +82,7 @@ SelectByBufferControl.prototype.isActive = function(e) {
 };
 
 SelectByBufferControl.prototype.activate = function(e) {
+	this.selectionTable = viewer.core.getSelectionTable();
 	if (this.selectionTable == null) {
 		this.selectionTable = new SelectionTable(this.map);
 		viewer.core.setSelectionTable(this.selectionTable);
@@ -110,7 +109,7 @@ SelectByBufferControl.prototype.addPopup = function() {
 		onshow: function(){ console.log("You opened the box"); },
 		onclose: function(){ console.log("You close the box"); },
 		positioning: 'auto',
-		autoPan: true,
+		//autoPan: true,
 		autoPanAnimation: { duration: 250 }
 	});
 	this.map.addOverlay(this.popup);
@@ -168,7 +167,7 @@ SelectByBufferControl.prototype.showPopup =function(evt) {
 SelectByBufferControl.prototype.clickHandler = function(geom, isArea) {
 	var self = this;
 	this.showFirst = true;
-
+	this.source.clear();
 	if (this.active) {
 		var layers = this.map.getLayers().getArray();
 		var queryLayers = new Array();
