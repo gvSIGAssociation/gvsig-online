@@ -23,12 +23,10 @@
 /**
  * TODO
  */
-var SelectFeatureControl = function(map, toolbar) {
+ var SelectFeatureControl = function(map, toolbar) {
 	var self = this;
 	this.map = map;
 	this.toolbar = toolbar;
-	this.selectionTable = viewer.core.getSelectionTable();
-	
 	
 	this.interaction = new ol.interaction.Select({
         condition: ol.events.condition.click
@@ -64,6 +62,7 @@ SelectFeatureControl.prototype.isActive = function(e) {
 };
 
 SelectFeatureControl.prototype.activate = function(e) {
+	this.selectionTable = viewer.core.getSelectionTable();
 	if (this.selectionTable == null) {
 		this.selectionTable = new SelectionTable(this.map);
 		viewer.core.setSelectionTable(this.selectionTable);
@@ -91,7 +90,7 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 	var self = this;
 	this.showFirst = true;
 
-	var circle = new ol.geom.Circle(evt.coordinate, 100);
+	var circle = new ol.geom.Circle(evt.coordinate, 10);
 	var polygon = ol.geom.Polygon.fromCircle(circle, 16)
 
 	if (this.active) {

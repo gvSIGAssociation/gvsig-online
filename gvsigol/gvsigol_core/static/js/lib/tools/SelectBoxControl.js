@@ -23,16 +23,14 @@
 /**
  * TODO
  */
-var SelectBoxControl = function(map, toolbar) {
+ var SelectBoxControl = function(map, toolbar) {
 	var self = this;
 	this.map = map;
 	this.toolbar = toolbar;
 
-	this.selectionTable = viewer.core.getSelectionTable();
-
 	this.distance = 10;
 	
-	this.interaction = new ol.interaction.DragBox({
+	/*this.interaction = new ol.interaction.DragBox({
         condition: ol.events.condition.platformModifierKeyOnly
 	});
 
@@ -40,6 +38,46 @@ var SelectBoxControl = function(map, toolbar) {
         var extent = self.interaction.getGeometry().getExtent();
         var evt = {
         	'coordinate': extent
+        }
+        self.clickHandler(evt);
+	});*/
+
+	this.drawSource = new ol.source.Vector();
+	var lineStyle = new ol.style.Style({
+		stroke: new ol.style.Stroke({
+			color: '#ffcc33',
+			width: 3
+		}),
+		fill: new ol.style.Fill({
+			color: [255, 255, 255, 0.3]
+		})
+	});
+	this.drawLayer = new ol.layer.Vector({
+		source: self.drawSource,
+		//style: [lineStyle],
+		zIndex: 999999
+	});
+	this.map.addLayer(this.drawLayer);
+
+	this.interaction = new ol.interaction.DragBox();
+		
+	this.interaction.on('boxstart', function (evt) {
+		self.drawSource.clear();
+	});
+
+	this.interaction.on('boxend', function (evt) {
+		var geom = evt.target.getGeometry();
+		var epsg3857Bounds = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
+		var normalizedExtent = self.getCanonicalExtent(geom.getExtent(), epsg3857Bounds);
+		var selectedFeat = new ol.Feature({
+			name: "selected_area",
+			geometry: ol.geom.Polygon.fromExtent(normalizedExtent)
+		});
+		self.drawSource.addFeatures([selectedFeat]);
+
+		//var extent = self.interaction.getGeometry().getExtent();
+        var evt = {
+        	'coordinate': normalizedExtent
         }
         self.clickHandler(evt);
 	});
@@ -70,6 +108,7 @@ SelectBoxControl.prototype.isActive = function(e) {
 };
 
 SelectBoxControl.prototype.activate = function(e) {
+	this.selectionTable = viewer.core.getSelectionTable();
 	if (this.selectionTable == null) {
 		this.selectionTable = new SelectionTable(this.map);
 		viewer.core.setSelectionTable(this.selectionTable);
@@ -198,6 +237,58 @@ SelectBoxControl.prototype.clickHandler = function(evt) {
 	}
 };
 
+SelectBoxControl.prototype.getCanonicalExtent = function(extent, crsBounds) {
+	var crs_min_x = crsBounds[0];
+	var crs_min_y = crsBounds[1];
+	var crs_max_x = crsBounds[2];
+	var crs_max_y = crsBounds[3];
+	
+	var min_x = extent[0];
+	var min_y = extent[1];
+	var max_x = extent[2];
+	var max_y = extent[3];
+	
+	var bounds_width = crs_max_x - crs_min_x;
+	var extent_width = max_x - min_x;
+	if (extent_width > bounds_width) { // wrong extent
+		min_x = crs_min_x;
+		max_x = crs_max_x;
+		extent_width = max_x - min_x;
+	}
+	
+	var center_x = min_x + extent_width / 2.0;
+	var center_xx = null;
+	if (center_x < crs_min_x) {
+		// we first move the extent to pure negative coordinates to ensure the module brings the center to
+		// the "right" world, then we undo this movement to move the center to the right location
+		center_xx = (center_x + crs_min_x) % (2* crs_min_x) - crs_min_x ;
+	}
+	else if (center_x > crs_max_x) {
+		center_xx = (center_x + crs_max_x) % (2*crs_max_x) - crs_max_x;
+	}
+	if (center_xx) {
+		// recalculate only when center was updated to avoid unnecessary rounding
+		min_x = center_xx - extent_width / 2.0;
+		max_x = center_xx + extent_width / 2.0;
+	}
+	
+	var extent_height = max_y - min_y;
+	var center_y = min_y + extent_height / 2.0;
+
+	var center_yy = null;
+	if (center_y < crs_min_y) {
+		center_yy = (center_y + crs_min_y) % (2*crs_min_y) - crs_min_y;
+	}
+	else if (center_y > crs_max_y) {
+		center_yy = (center_y + crs_max_y) % (2*crs_max_y) - crs_max_y;
+	}
+	if (center_yy) { // recalculate only when center was updated
+		min_y = center_yy - extent_height / 2.0;
+		max_y = center_yy + extent_height / 2.0;
+	}
+	return [min_x, min_y, max_x, max_y];
+};
+
 /**
  * TODO
  */
@@ -291,4 +382,5 @@ SelectBoxControl.prototype.deactivate = function() {
 	this.map.un('click', this.clickHandler, this);
 	this.map.removeInteraction(this.interaction);
 	viewer.core.clearAllSelectedFeatures();
+	this.drawSource.clear();
 };

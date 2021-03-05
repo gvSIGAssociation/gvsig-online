@@ -23,7 +23,7 @@
 /**
  * TODO
  */
-var attributeTable = function(layer, map, conf, viewer) {
+ var attributeTable = function(layer, map, conf, viewer) {
 	this.id = "data-table";
 	this.map = map;
 	this.conf = conf;
@@ -849,6 +849,7 @@ attributeTable.prototype.registerEvents = function() {
 		bottomPanel.hidePanel();
 		self.source.clear();
 		self.viewer.clearAllSelectedFeatures();
+		$('.panel-content').empty();
 	});
 
 	$("#minimize-table").on('click', function(){
@@ -902,7 +903,6 @@ attributeTable.prototype.registerEvents = function() {
  */
 attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	var self = this;
-
 	$("body").overlay();
 	var mapLayers = this.map.getLayers().getArray();
 	var printLayers = new Array();
@@ -910,9 +910,13 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	for (var i=0; i<mapLayers.length; i++) {
 		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro' && !(mapLayers[i] instanceof ol.layer.Vector)) {
 			if (mapLayers[i].getVisible()) {
+				var url = mapLayers[i].getSource().getUrls()[0];
+				if (url.indexOf('http') == -1) {
+					url = window.location.origin + url;
+				}
 				var layer = {
 					//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
-					"baseURL": mapLayers[i].wms_url_no_auth,
+					"baseURL": url,
 			  	    "opacity": 1,
 			  	    "type": "WMS",
 		  			"imageFormat": "image/png",
@@ -927,15 +931,22 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 				}
 				printLayers.push(layer);
 
-				var legend = {
-					"name": mapLayers[i].title,
-		            "icons": [mapLayers[i].legend_no_auth]
-		        };
-				/*var legend = {
-					"name": mapLayers[i].title,
-			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
-			    };*/
-				legends.push(legend);
+				var legendUrl = mapLayers[i].legend_no_auth;
+				if (legendUrl) {
+					if (legendUrl.indexOf('http') == -1) {
+						legendUrl = window.location.origin + legendUrl;
+					}
+					var legend = {
+						"name": mapLayers[i].title,
+						"icons": [mapLayers[i].legend_no_auth]
+					};
+					/*var legend = {
+						"name": mapLayers[i].title,
+						"icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
+					};*/
+					legends.push(legend);
+				}
+				
 			}
 		}
 	}
@@ -979,9 +990,13 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 								});
 							}
+							var url = mapLayers[i].getSource().getUrls()[0];
+							if (url.indexOf('http') == -1) {
+								url = window.location.origin + url;
+							}
 							printLayers.push({
 								"type": "WMTS",
-						        "baseURL": baseLayers[i].getSource().getUrls()[0],
+						        "baseURL": url,
 						        "opacity": 1.0,
 						        "layer": baseLayers[i].getSource().getLayer(),
 						        "version": "1.0.0",
@@ -994,10 +1009,14 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 							});
 
 						} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
+							var url = mapLayers[i].getSource().getUrls()[0];
+							if (url.indexOf('http') == -1) {
+								url = window.location.origin + url;
+							}
 							printLayers.push({
 								"type": "WMS",
 						        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
-						        "baseURL": baseLayers[i].getSource().getUrls()[0],
+						        "baseURL": url,
 						        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
 						        "version": baseLayers[i].getSource().getParams()['VERSION'],
 						        "customParams": {
@@ -1006,6 +1025,10 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 							});
 
 						} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
+							var url = mapLayers[i].getSource().getUrls()[0];
+							if (url.indexOf('http') == -1) {
+								url = window.location.origin + url;
+							}
 							printLayers.push({
 								"baseURL": baseLayers[i].getSource().getUrls()[0],
 							    "type": "OSM",
@@ -1057,7 +1080,6 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 		  	    },
 		  	    "datasource": datasource,
 			    "logo_url": logoUrl,
-			    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": [legend]

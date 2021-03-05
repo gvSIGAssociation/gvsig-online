@@ -23,7 +23,7 @@
 /**
  * TODO
  */
-var SelectionTable = function(map) {
+ var SelectionTable = function(map) {
 	this.id = "selection-data-table";
 	this.map = map;
 	this.tabCount = 0;
@@ -339,10 +339,10 @@ SelectionTable.prototype.registerEvents = function() {
 	var self = this;
 	$("#close-selectiontable").on('click', function(){
 		bottomPanel.hidePanel();
-		//self.selectionTableSource.clear();
+		self.selectionTableSource.clear();
 
-		//self.removeTables();
-		//viewer.core.clearAllSelectedFeatures();
+		self.removeTables();
+		viewer.core.clearAllSelectedFeatures();
 	});
 
 	$("#minimize-selectiontable").on('click', function(){
