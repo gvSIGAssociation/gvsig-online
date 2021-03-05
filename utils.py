@@ -770,23 +770,19 @@ def update_feat_version(layer, featid):
         logger.exception("Error updating feature version")
     return None, None
 
-def set_layer_permissions(layer, is_public, assigned_read_roups, assigned_write_groups):
+def set_layer_permissions(layer, is_public, assigned_read_groups, assigned_write_groups):
     layer.public = is_public
     layer.save()
-    agroup = UserGroup.objects.get(name__exact='admin')
+    admin_group = UserGroup.objects.get(name__exact='admin')
+    assigned_read_groups.append(admin_group.pk)
+    assigned_write_groups.append(admin_group.pk)
 
     read_groups = []
     write_groups = []
 
     # clean existing groups and assign them again if necessary
     LayerReadGroup.objects.filter(layer=layer).delete()
-    if len(assigned_read_roups) > 0:
-        lrag = LayerReadGroup()
-        lrag.layer = layer
-        lrag.group = agroup
-        lrag.save()
-        read_groups.append(agroup)
-    for group in assigned_read_roups:
+    for group in assigned_read_groups:
         try:
             group = UserGroup.objects.get(id=group)
             lrg = LayerReadGroup()
@@ -798,12 +794,6 @@ def set_layer_permissions(layer, is_public, assigned_read_roups, assigned_write_
             pass
 
     LayerWriteGroup.objects.filter(layer=layer).delete()
-    if not layer.type.startswith('c_'):
-        lwag = LayerWriteGroup()
-        lwag.layer = layer
-        lwag.group = agroup
-        lwag.save()
-        write_groups.append(agroup)
     for group in assigned_write_groups:
         try:
             group = UserGroup.objects.get(id=group)
