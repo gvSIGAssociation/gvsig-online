@@ -339,10 +339,10 @@ SelectionTable.prototype.registerEvents = function() {
 	var self = this;
 	$("#close-selectiontable").on('click', function(){
 		bottomPanel.hidePanel();
-		//self.selectionTableSource.clear();
+		self.selectionTableSource.clear();
 
-		//self.removeTables();
-		//viewer.core.clearAllSelectedFeatures();
+		self.removeTables();
+		viewer.core.clearAllSelectedFeatures();
 	});
 
 	$("#minimize-selectiontable").on('click', function(){
