@@ -1864,6 +1864,8 @@ class Geoserver():
         else:
             if len(read_groups) > 0:
                 who_can_read = [ "ROLE_"+ g.name.upper() for g in read_groups]
+                if not 'ROLE_ADMIN' in who_can_read:
+                    who_can_read.append('ROLE_ADMIN')
             else:
                 who_can_read = [ "ROLE_ADMIN"]
         read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
