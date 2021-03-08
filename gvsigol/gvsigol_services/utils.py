@@ -775,7 +775,8 @@ def set_layer_permissions(layer, is_public, assigned_read_groups, assigned_write
     layer.save()
     admin_group = UserGroup.objects.get(name__exact='admin')
     assigned_read_groups.append(admin_group.pk)
-    assigned_write_groups.append(admin_group.pk)
+    if not layer.type.startswith('c_'):
+        assigned_write_groups.append(admin_group.pk)
 
     read_groups = []
     write_groups = []
