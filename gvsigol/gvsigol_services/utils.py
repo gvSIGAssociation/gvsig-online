@@ -498,7 +498,7 @@ def get_enum_item_list(layer, column_name, enum=None):
     try:
         if not enum:
             enum = LayerFieldEnumeration.objects.get(layer=layer, field=column_name).enumeration
-        return enum.enumerationitem_set.all()
+        return enum.enumerationitem_set.all().order_by('order')
     except:
         pass
     return []
