@@ -125,9 +125,9 @@ print.prototype.handler = function(e) {
 		for (var i=0; i<templates.length; i++) {
 			if (templates[i] != 'default' && templates[i] != 'a4_landscape_att') {
 				if (templates[i] == 'a4_landscape') {
-					ui += 	'<option value="' + templates[i] + '" selected>' + templates[i] + '</option>';
+					ui += 	'<option value="' + templates[i] + '" selected>' + this.getTemplateName(templates[i]) + '</option>';
 				} else {
-					ui += 	'<option value="' + templates[i] + '">' + templates[i] + '</option>';
+					ui += 	'<option value="' + templates[i] + '">' + this.getTemplateName(templates[i]) + '</option>';
 				}
 			}
 		}
@@ -701,6 +701,22 @@ print.prototype.getTemplates = function() {
 	});
 	return templates;
 };
+
+print.prototype.getTemplateName = function(id) {
+	if(id == 'a3_sin_leyenda') {
+		return "A3 Sin leyenda"
+	}
+	if(id == 'a4_landscape') {
+		return "A4 Apaisado"
+	}
+	if(id == 'a4_landscape_overview') {
+		return "A4 Apaisado (Con localizador)"
+	}
+	if(id == 'a3_landscape') {
+		return "A3 Apaisado"
+	}
+};
+
 
 /**
  * TODO
