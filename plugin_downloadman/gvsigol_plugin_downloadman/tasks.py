@@ -1941,13 +1941,18 @@ def cleanOutdatedRequests(self):
                                 # for some status value such as cancelled, we should also remove the file
                                 os.remove(link.prepared_download_path)
                                 break
-            except:
+            except DownloadLink.DoesNotExist:
                 try:
-                    logger.exception("error getting link: " + fullpath + " - " + link_uuid)
+                    logger.debug("error getting link: " + fullpath + " - " + link_uuid)
                     # if older than UNKNOWN_FILES_MAX_AGE days, remove the file
                     #modified_time = os.path.getmtime(fullpath)
                     #if date.fromtimestamp(modified_time) < (date.today() - timedelta(days=UNKNOWN_FILES_MAX_AGE)):
                     #    os.remove(fullpath)
+                except:
+                    logger.exception("Error cleaning request package")
+            except:
+                try:
+                    logger.exception("error getting link: " + fullpath + " - " + link_uuid)
                 except:
                     logger.exception("Error cleaning request package")
             
