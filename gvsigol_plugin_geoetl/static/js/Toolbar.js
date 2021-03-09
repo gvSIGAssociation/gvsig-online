@@ -360,7 +360,6 @@ gvsigolETL.Toolbar = Class.extend({
 							}
 
 						}catch{
-							//console.log('Esta no : '+'#'+key+'-'+figure.id)
 						}
 					})
 			

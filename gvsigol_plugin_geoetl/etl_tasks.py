@@ -858,11 +858,15 @@ def trans_Reproject(dicc):
     fc = {
         "features": []
         }
-
-    for feature in layer:    
+    
+    for feature in layer:  
         geom = feature.GetGeometryRef()
         geom.Transform(coordTrans)
-        f = feature.ExportToJson(as_object=True)
+        g = geom.ExportToWkt()#, as_object=True,options=["COORDINATE_PRECISION=150"])
+        geo = g.replace(',', '],[').replace(')', ']').replace('(', '[').replace(' ', ',')
+        index = geo.find(',')
+        f =json.loads('{"type": "Feature", "geometry":{"type": "'+geo[:index].capitalize()+'", "coordinates": ['+geo[index+1:]+']}}')
+        f['properties']=(feature.ExportToJson(as_object=True)['properties'])
         f['geometry']['epsg'] = targetepsg
         fc['features'].append(f)
     

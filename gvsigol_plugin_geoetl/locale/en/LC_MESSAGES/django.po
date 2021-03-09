@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-24 12:55+0100\n"
+"POT-Creation-Date: 2021-03-05 16:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,136 +28,140 @@ msgid "Plugins"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:11
-msgid "Go back to canvas"
+msgid "New"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:20
-msgid "ID"
-msgstr ""
-
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:21
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:98
-msgid "Name"
-msgstr ""
-
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:22
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:105
-msgid "Description"
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:14
+msgid "Back"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:23
+msgid "ID"
+msgstr ""
+
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:24
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:101
+msgid "Name"
+msgstr ""
+
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:25
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:108
+msgid "Description"
+msgstr ""
+
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:26
 msgid "Workspace"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:57
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:159
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:60
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:162
 msgid "Delete workspace"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:62
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:65
 msgid "The ETL workspace and its parameters will be deleted"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:67
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:70
 msgid "Cancel"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:68
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:71
 msgid "Accept"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:83
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:86
 msgid "Update ETL Workspace"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:92
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:95
 msgid "ETL Workspace ID"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:99
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:102
 msgid "ETL Workspace name"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:106
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:109
 msgid "ETL Workspace description"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:113
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:116
 msgid "Close"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:114
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:117
 msgid "Update"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:135
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:138
 msgid "Processing request..."
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:136
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:139
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:137
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:140
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:138
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:141
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:139
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:142
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:140
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:143
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:142
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:145
 msgid "Loading..."
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:143
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:144
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:146
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:147
 msgid "No records available"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:146
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:149
 msgid "First"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:147
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:150
 msgid "Previous"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:148
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:151
 msgid "Next"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:149
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:152
 msgid "Last"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:152
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:155
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:153
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:156
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:163
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:166
 msgid "Open workspace"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:167
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:170
 msgid "Update workspace"
 msgstr ""
 
@@ -169,50 +173,50 @@ msgstr ""
 msgid "Inputs"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:28
+#: gvsigol_plugin_geoetl/templates/etl.html:27
 msgid "Transformers"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:30
+#: gvsigol_plugin_geoetl/templates/etl.html:29
 msgid "Calculator"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:31
+#: gvsigol_plugin_geoetl/templates/etl.html:30
 msgid "Counter"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:32
+#: gvsigol_plugin_geoetl/templates/etl.html:31
 msgid "Create Attribute"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:33
+#: gvsigol_plugin_geoetl/templates/etl.html:32
 msgid "Filter"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:34
+#: gvsigol_plugin_geoetl/templates/etl.html:33
 msgid "Join"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:35
+#: gvsigol_plugin_geoetl/templates/etl.html:34
 msgid "Keep Attribute"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:36
+#: gvsigol_plugin_geoetl/templates/etl.html:35
 msgid "Modify Value"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:37
+#: gvsigol_plugin_geoetl/templates/etl.html:36
 msgid "Remove Attribute"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:38
+#: gvsigol_plugin_geoetl/templates/etl.html:37
 msgid "Rename Attribute"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:39
+#: gvsigol_plugin_geoetl/templates/etl.html:38
 msgid "Reproject"
 msgstr ""
 
-#: gvsigol_plugin_geoetl/templates/etl.html:44
+#: gvsigol_plugin_geoetl/templates/etl.html:42
 msgid "Outputs"
 msgstr ""

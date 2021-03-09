@@ -69,6 +69,7 @@ function isAlreadyInCanvas(jsonParams, jsonTask, ID){
 };
 
 function setColorIfIsOpened(jsonParams, type, ID, icon){
+    
     setTimeout(function(){
         
         for(k=0;k<jsonParams.length;k++){
