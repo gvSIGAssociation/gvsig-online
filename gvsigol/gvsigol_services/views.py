@@ -4692,7 +4692,7 @@ def db_field_delete(request):
             datastore_name = layer.datastore.name
             if not utils.can_manage_layer(request.user, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
-            if (layer.datastore.type == 'v_PostGIS'):
+            if (layer.datastore.type != 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
             for ctrl_field in settings.CONTROL_FIELDS:
                 if field == ctrl_field.get('name'):
