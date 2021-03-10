@@ -17,9 +17,11 @@ class Project(models.Model):
     name = models.CharField(max_length=100, unique=True)
     title = models.CharField(max_length=100, null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
-    logo = models.ImageField(upload_to='images', default=get_default_logo_image, null=True, blank=True)
+    # see also logo_url property
+    logo = models.ImageField(upload_to='images', default='', null=True, blank=True)
     logo_link = models.CharField(max_length=250, null=True, blank=True)
-    image = models.ImageField(upload_to='images', default=get_default_project_image, null=True, blank=True)
+    # see also image_url property
+    image = models.ImageField(upload_to='images', default='', null=True, blank=True)
     center_lat = models.CharField(max_length=100)
     center_lon = models.CharField(max_length=100)
     zoom = models.IntegerField(null=False, default=10)
@@ -59,6 +61,32 @@ class Project(models.Model):
                 for prj_ug in old_project.projectusergroup_set.all():
                     prj_ug.clone(project=new_project_instance)
         return new_project_instance
+    
+    @property
+    def image_url(self):
+        """
+        Returns URL to the project image if defined, otherwise it returns get_default_project_image()
+        otherwise. This method always returns a relative URL, such as
+        '/media/images/logo_AMQtcXf.png'
+        or
+        '/static/img/no_project.png'
+        """
+        if not self.image:
+            return get_default_project_image()
+        return self.image.url.replace(settings.BASE_URL, '')
+
+    @property
+    def logo_url(self):
+        """
+        Returns URL to the project logo if defined, otherwise it returns get_default_logo_image()
+        otherwise. This method always returns a relative URL, such as
+        '/media/images/logo_AMQtcXf.png'
+        or
+        '/static/img/logo_principal.png'
+        """
+        if not self.logo:
+            return get_default_logo_image()
+        return self.logo.url.replace(settings.BASE_URL, '')
     
 class ProjectUserGroup(models.Model):
     project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)

@@ -104,12 +104,7 @@ def home(request):
     public_projects = []
     if request.user.is_superuser:
         for p in Project.objects.all():
-            image = ''
-            if "no_project.png" in p.image.url:
-                image = p.image.url.replace(media_url, '')
-            else:
-                image = p.image.url.replace(settings.BASE_URL, '')
-
+            image = p.image_url
             project = {}
             project['id'] = p.id
             project['name'] = p.name
@@ -123,13 +118,7 @@ def home(request):
                 projects.append(project)
     else:
         for p in Project.objects.all():
-            image = ''
-            if "no_project.png" in p.image.url:
-                media_url = settings.MEDIA_URL[:-1]
-                image = p.image.url.replace(media_url, '')
-            else:
-                image = p.image.url.replace(settings.BASE_URL, '')
-                
+            image = p.image_url
             project = {}
             project['id'] = p.id
             project['name'] = p.name
@@ -739,17 +728,13 @@ def load_project(request, project_name):
     if core_utils.can_read_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
 
-        has_image = True
-        if "no_project.png" in project.image.url:
-            has_image = False
-
         plugins_config = core_utils.get_plugins_config()
         resp = {
-            'has_image': has_image,
+            'has_image': bool(project.image),
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
-            'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
-            'project_image': project.image.url.replace(settings.BASE_URL, ''),
+            'project_logo': project.logo_url,
+            'project_image': project.image_url,
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
@@ -778,17 +763,13 @@ def load_public_project(request, project_name):
     if not core_utils.can_read_project(request.user, project):
         return render(request, 'illegal_operation.html', {})
 
-    has_image = True
-    if "no_project.png" in project.image.url:
-        has_image = False
-
     plugins_config = core_utils.get_plugins_config()
     response = render(request, 'viewer.html', {
-        'has_image': has_image,
+        'has_image': bool(project.image),
         'supported_crs': core_utils.get_supported_crs(),
         'project': project,
-        'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
-        'project_image': project.image.url.replace(settings.BASE_URL, ''),
+        'project_logo': project.logo_url,
+        'project_image': project.image_url,
         'pid': project.id,
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
@@ -1182,9 +1163,9 @@ def project_get_conf(request):
             'gvsigol_app': gvsigol_app,
             'project_name': project.name,
             'project_title': project.title,
-            'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
+            'project_logo': project.logo_url,
             'project_logo_link': project.logo_link,
-            'project_image': project.image.url.replace(settings.BASE_URL, ''),
+            'project_image': project.image_url,
             'project_tools': project_tools,
             "view": {
                 "restricted_extent": project.restricted_extent,
@@ -1268,13 +1249,7 @@ def toc_update(request, pid):
 
 def export(request, pid):
     p = Project.objects.get(id=pid)
-    image = ''
-    if "no_project.png" in p.image.url:
-        media_url = settings.MEDIA_URL[:-1]
-        image = p.image.url.replace(media_url, '')
-    else:
-        image = p.image.url
-        
+    image = p.image_url
     return render(request, 'app_print_template.html', {'print_logo_url': urllib.parse.unquote(image)})
 
 def ogc_services(request):
@@ -1298,13 +1273,7 @@ def select_public_project(request):
     elif len (public_projects) > 1:
         for pp in public_projects:
             p = Project.objects.get(id=pp.id)
-            image = ''
-            if "no_project.png" in p.image.url:
-                media_url = settings.MEDIA_URL[:-1]
-                image = p.image.url.replace(media_url, '')
-            else:
-                image = p.image.url
-
+            image = p.image_url
             project = {}
             project['id'] = p.id
             project['name'] = p.name
@@ -1389,17 +1358,13 @@ def load_shared_view(request, view_name):
             shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + view_name
             return redirect(shared_url)
 
-        has_image = True
-        if "no_project.png" in project.image.url:
-            has_image = False
-
         plugins_config = core_utils.get_plugins_config()
         response = render(request, 'viewer.html', {
-            'has_image': has_image,
+            'has_image': bool(project.image),
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
-            'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
-            'project_image': project.image.url.replace(settings.BASE_URL, ''),
+            'project_logo': project.logo_url,
+            'project_image': project.image_url,
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,

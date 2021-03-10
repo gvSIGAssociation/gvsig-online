@@ -246,10 +246,7 @@ def survey_update(request, survey_id):
     image = ''
     if survey.project_id:
         p = survey.project
-        if "no_project.png" in p.image.url:
-            image = p.image.url.replace(settings.MEDIA_URL, '')
-        else:
-            image = p.image.url
+        image = p.image_url
     
     response= {
         'form': form,
