@@ -938,13 +938,14 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 					}
 					var legend = {
 						"name": mapLayers[i].title,
-						"icons": [mapLayers[i].legend_no_auth]
+						"icons": [legendUrl]
 					};
 					/*var legend = {
 						"name": mapLayers[i].title,
 						"icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
 					};*/
 					legends.push(legend);
+					console.log(legend);
 				}
 				
 			}
