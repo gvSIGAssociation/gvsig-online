@@ -742,9 +742,13 @@ def load_project(request, project_name):
     if core_utils.can_read_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
 
-        has_image = True
         if "no_project.png" in project.image.url:
             has_image = False
+            media_url = settings.MEDIA_URL[:-1]
+            image = project.image.url.replace(media_url, '')
+        else:
+            has_image = True
+            image = project.image.url.replace(settings.BASE_URL, '')
 
         plugins_config = core_utils.get_plugins_config()
         resp = {
@@ -752,7 +756,7 @@ def load_project(request, project_name):
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
             'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
-            'project_image': project.image.url.replace(settings.BASE_URL, ''),
+            'project_image': image,
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
@@ -781,9 +785,14 @@ def load_public_project(request, project_name):
     if not core_utils.can_read_project(request.user, project):
         return render(request, 'illegal_operation.html', {})
 
-    has_image = True
     if "no_project.png" in project.image.url:
         has_image = False
+        media_url = settings.MEDIA_URL[:-1]
+        image = project.image.url.replace(media_url, '')
+    else:
+        has_image = True
+        image = project.image.url.replace(settings.BASE_URL, '')
+
 
     plugins_config = core_utils.get_plugins_config()
     response = render(request, 'viewer.html', {
@@ -791,7 +800,7 @@ def load_public_project(request, project_name):
         'supported_crs': core_utils.get_supported_crs(),
         'project': project,
         'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
-        'project_image': project.image.url.replace(settings.BASE_URL, ''),
+        'project_image': image,
         'pid': project.id,
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
@@ -1180,6 +1189,12 @@ def project_get_conf(request):
             if 'gvsigol_app_' in app:
                 gvsigol_app = app
 
+        if "no_project.png" in project.image.url:
+            media_url = settings.MEDIA_URL[:-1]
+            image = project.image.url.replace(media_url, '')
+ 
+        else:
+            image = project.image.url.replace(settings.BASE_URL, '')
         conf = {
             'pid': pid,
             'gvsigol_app': gvsigol_app,
@@ -1187,7 +1202,7 @@ def project_get_conf(request):
             'project_title': project.title,
             'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
             'project_logo_link': project.logo_link,
-            'project_image': project.image.url.replace(settings.BASE_URL, ''),
+            'project_image': image,
             'project_tools': project_tools,
             "view": {
                 "restricted_extent": project.restricted_extent,
@@ -1392,9 +1407,13 @@ def load_shared_view(request, view_name):
             shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + view_name
             return redirect(shared_url)
 
-        has_image = True
         if "no_project.png" in project.image.url:
+            media_url = settings.MEDIA_URL[:-1]
+            image = project.image.url.replace(media_url, '')
             has_image = False
+        else:
+            image = project.image.url.replace(settings.BASE_URL, '')
+            has_image = True
 
         plugins_config = core_utils.get_plugins_config()
         response = render(request, 'viewer.html', {
@@ -1402,7 +1421,7 @@ def load_shared_view(request, view_name):
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
             'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
-            'project_image': project.image.url.replace(settings.BASE_URL, ''),
+            'project_image': image,
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
