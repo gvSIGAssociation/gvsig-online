@@ -69,7 +69,11 @@ class Project(models.Model):
         otherwise. This method always returns a relative URL, such as
         '/media/images/logo_AMQtcXf.png'
         or
-        '/static/img/no_project.png'
+        '/static/img/no_project.png'.
+        
+        This property is recommended instead of directly using image.url because
+        the default projecte image is outside media dir, so the url property does
+        not build a valid URL.
         """
         if not self.image:
             return get_default_project_image()
@@ -83,6 +87,10 @@ class Project(models.Model):
         '/media/images/logo_AMQtcXf.png'
         or
         '/static/img/logo_principal.png'
+
+        This property is recommended instead of directly using logo.url because
+        the default projecte logo is outside media dir, so the url property does
+        not build a valid URL.
         """
         if not self.logo:
             return get_default_logo_image()
