@@ -469,7 +469,7 @@ msgstr "Mostrar icono del proyecto en el TOC"
 #: gvsigol_core/templates/project_add.html:153
 #: gvsigol_core/templates/project_update.html:193
 msgid "Add layer group"
-msgstr "Asignar grupo de capas"
+msgstr "Añadir grupo de capas"
 
 #: gvsigol_core/templates/project_add.html:154
 #: gvsigol_core/templates/project_update.html:194
