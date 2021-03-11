@@ -342,6 +342,22 @@ def toc_remove_layer(layer):
             pass
 
 def get_absolute_url(url, headers):
+    """
+    Converts a relative URL to an absolute URL. Usage examples:
+    get_absolute_url('/relative/url/', request.META)
+    returns 'https://myvalidorigin.com/relative/url/'
+
+    get_absolute_url('https://absoluteurl.com/my-path/', request.META)
+    returns 'https://absoluteurl.com/my-path/'
+    
+    The following rules are used for the conversion:
+    - if the URL is absolute, it is returned with no changes
+    - if the URL is relative (e.g. it does not include protocol, host name
+    nor port), it is converted to an absolute URL
+    - the absolute URL is build using HTTP_ORIGIN header value, provided that it
+    is an origin defined in ALLOWED_HOST_NAMES setting. Otherwise, BASE_URL setting
+    is used to build the absolute URL
+    """
     try:
         # first check if it is an absolute url
         validate = URLValidator(schemes=['https','http'])
