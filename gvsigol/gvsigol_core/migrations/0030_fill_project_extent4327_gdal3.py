@@ -7,7 +7,7 @@ def fix_extent(apps, schema_editor):
     try:
         Project = apps.get_model("gvsigol_core", "Project")
         from django.contrib.gis import gdal
-        major_version = gdal.gdal_version().split(".")[0]
+        major_version = gdal.gdal_version().decode('utf-8').split(".")[0]
         if int(major_version) >= 3:
             # fix effect of previous migration on GDAL 3 installations
             try:
