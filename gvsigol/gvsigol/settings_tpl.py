@@ -27,6 +27,13 @@ import django.conf.locale
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
+from django.views import debug
+import re
+debug.HIDDEN_SETTINGS = re.compile(
+    # exclude these variables from debug output
+    debug.HIDDEN_SETTINGS.pattern + '|CELERY_BROKER_URL|USERNAME|HOST_USER|DBUSER|^USER$',
+    flags=re.IGNORECASE,
+)
 
 GVSIGOL_VERSION = '2.9.6-dev'
 
