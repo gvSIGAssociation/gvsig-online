@@ -41,7 +41,7 @@ class Project(models.Model):
     baselayer_version = models.BigIntegerField(null=True, blank=True)
     labels =  models.CharField(max_length=250, null=True, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name + ' - ' + self.description
     
     def clone(self, target_datastore, name, title, recursive=True, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
@@ -100,7 +100,7 @@ class ProjectUserGroup(models.Model):
     project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
     user_group = models.ForeignKey(UserGroup, default=None, on_delete=models.CASCADE)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.project.name + ' - ' + self.user_group.name
     
     def clone(self, project):
@@ -116,7 +116,7 @@ class ProjectLayerGroup(models.Model):
     baselayer_group = models.BooleanField(default=False)
     default_baselayer = models.IntegerField(null=True, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.project.name + ' - ' + self.layer_group.name
     
     def clone(self, recursive=True, project=None, target_datastore=None, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
@@ -142,7 +142,7 @@ class SharedView(models.Model):
     # They are used to bookmark the map state of user requests
     internal = models.BooleanField(default=False, db_index=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class SettingsManager(models.Manager):
