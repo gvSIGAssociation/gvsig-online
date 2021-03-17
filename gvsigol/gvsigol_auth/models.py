@@ -28,7 +28,7 @@ class UserGroup(models.Model):
     name = models.CharField(max_length=250)
     description = models.CharField(max_length=500, null=True, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
     
@@ -36,5 +36,5 @@ class UserGroupUser(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.user.email + ' - ' + self.user_group.name
