@@ -226,7 +226,13 @@ print.prototype.handler = function(e) {
 			var template = $('#print-template').val();
 			if (template != null) {
 				$("body").overlay();
-				self.createPrintJob(template);
+				try {
+					self.createPrintJob(template);
+				}
+				catch(e) {
+					$.overlayout();
+					messageBox.show('error', gettext('Error creating print job'));
+				}
 			} else {
 				messageBox.show('warning', gettext('You must select a template'));
 			}
@@ -268,76 +274,7 @@ print.prototype.createPrintJob = function(template) {
 		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro'/* && !(mapLayers[i] instanceof ol.layer.Vector)*/) {
 			if (mapLayers[i].getVisible()) {
 				var layer = null;
-				if(mapLayers[i].getSource() instanceof ol.source.WMTS){
-					var initialScale = 559082263.950892933;
-					var scale = 0;
-					var matrices = new Array();
-					var tileGrid = mapLayers[i].getSource().getTileGrid();
-					var lastSize = 1;
-					var format = mapLayers[i].getSource().getFormat();
-					var tileSize = 256;
-					if (tileGrid.getTileSize(0)) {
-						tileSize = tileGrid.getTileSize(0);
-					}
-
-					for (var z = 0; z < tileGrid.getMatrixIds().length; ++z) {
-						var matrixSize = new Array();
-						if (z == 0) {
-							matrixSize.push(1);
-							matrixSize.push(1);
-							scale = initialScale;
-
-						} else if (z >= 1) {
-							lastSize = lastSize*2;
-							matrixSize.push(lastSize*2);
-							matrixSize.push(lastSize*2);
-							scale = scale / 2;
-						}
-						var tileSizeZ = 256;
-						if (tileGrid.getTileSize(z)) {
-							tileSizeZ = tileGrid.getTileSize(z);
-						}
-
-						matrices.push({
-				            "identifier": tileGrid.getMatrixIds()[z],
-				            "matrixSize": matrixSize,
-				            "scaleDenominator": scale,
-				            "tileSize": [tileSizeZ, tileSizeZ],
-				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
-						});
-					}
-					var url = mapLayers[i].getSource().getUrls()[0];
-					if (url.indexOf('http') == -1) {
-						url = self.origin + url;
-					}
-					layer = {
-							"type": "WMTS",
-					        "baseURL": url,
-					        "opacity": mapLayers[i].getOpacity(),
-					        "layer": mapLayers[i].getSource().getLayer(),
-					        "version": "1.0.0",
-					        "requestEncoding": "KVP",
-					        "dimensions": mapLayers[i].getSource().getDimensions(),
-					        "dimensionParams": {},
-					        "matrixSet": mapLayers[i].getSource().getMatrixSet(),
-					        "matrices": matrices,
-					        "customParams": {
-				  				"TRANSPARENT": "true"
-				  			},
-					        "imageFormat": format
-				  	    };
-					if (mapLayers[i].getSource().getStyle()) {
-						layer['style'] = mapLayers[i].getSource().getStyle();
-					}
-//					if (mapLayers[i].getSource().getDimensions() && "TIME" in mapLayers[i].getSource().getDimensions()) {
-//						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimensions()['TIME'];
-//					}
-//					if (mapLayers[i].isLayerGroup) {
-//						layer['layers'] = [mapLayers[i].layer_name];
-//					} else {
-//						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
-//					}
-				} else if (mapLayers[i].getSource() instanceof ol.source.XYZ) {
+				if (mapLayers[i].getSource() instanceof ol.source.XYZ) {
 					var url = mapLayers[i].getSource().getUrls()[0];
 					if (url.indexOf('http') == -1) {
 						url = self.origin + url;
@@ -401,19 +338,27 @@ print.prototype.createPrintJob = function(template) {
 				  			},
 							"mergeableParams": {},
 				  	    };
-					if (mapLayers[i].getSource().getParams()['STYLES']) {
-						layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
+					if(mapLayers[i].getSource() instanceof ol.source.WMTS){
+						// we print WMTS layers using WMS since MapFish Print can't properly authenticate in GWC. See: #4809
+						layer['layers'] = [mapLayers[i].getSource().getLayer()];
+						if (mapLayers[i].getSource().getStyle()) {
+							layer['styles'] = [mapLayers[i].getSource().getStyle()];
+						}
 					}
-					if (mapLayers[i].getSource().getParams()['TIME']) {
-						layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
-					}
-					if (mapLayers[i].isLayerGroup) {
-						layer['layers'] = [mapLayers[i].layer_name];
-					} else {
-						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
-					}
-					if (mapLayers[i].external) {
-						layer['layers'] = [mapLayers[i].getSource().getParams().LAYERS];
+					else {
+						if (mapLayers[i].getSource().getParams()['STYLES']) {
+							layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
+						}
+						if (mapLayers[i].getSource().getParams()['TIME']) {
+							layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
+						}
+						if (mapLayers[i].isLayerGroup) {
+							layer['layers'] = [mapLayers[i].layer_name];
+						} else if (mapLayers[i].external) {
+							layer['layers'] = [mapLayers[i].getSource().getParams().LAYERS];
+						} else {
+							layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
+						}
 					}
 				}
 
