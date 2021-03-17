@@ -47,7 +47,7 @@ def get_sites(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
                     
     except Exception as e:
-        return HttpResponseBadRequest(e.message)
+        return HttpResponseBadRequest(str(e))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt

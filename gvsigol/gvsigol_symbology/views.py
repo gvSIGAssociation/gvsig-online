@@ -148,7 +148,7 @@ def style_layer_delete(request):
                     success = True
                     gs.reload_nodes()
                 except Exception as e:
-                    message = e.message
+                    message = str(e)
                     pass
                 
             
@@ -1094,7 +1094,7 @@ def color_ramp_library_export(request, color_ramp_library_id):
         return response
         
     except Exception as e:
-        message = e.message
+        message = str(e)
         return HttpResponse(json.dumps({'message':message}, indent=4), content_type='application/json')
 
 
@@ -1198,7 +1198,7 @@ def color_ramp_library_import(request):
             return render(request, 'color_ramp_library_import.html', {'message': message})
         
         except Exception as e:
-            message = e.message
+            message = str(e)
             return render(request, 'color_ramp_library_import.html', {'message': message})
     
     else:   
@@ -1384,7 +1384,7 @@ def library_import(request):
             return render(request, 'library_import.html', {'message': message})
         
         except Exception as e:
-            message = e.message
+            message = str(e)
             return render(request, 'library_import.html', {'message': message})
     
     else:   
@@ -1514,7 +1514,7 @@ def symbol_add(request, library_id, symbol_type):
                 return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
         except Exception as e:
-            message = e.message
+            message = str(e)
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
  
     else: 
@@ -1551,7 +1551,7 @@ def symbol_update(request, symbol_id):
                 return HttpResponse(json.dumps({'library_id': library_rule.library.id, 'success': True}, indent=4), content_type='application/json')
         
         except Exception as e:
-            message = e.message
+            message = str(e)
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
         
     else:
@@ -1592,7 +1592,7 @@ def symbol_delete(request):
             return HttpResponse(json.dumps({'library_id': library_id, 'success': True}, indent=4), content_type='application/json')
         
         except Exception as e:
-            message = e.message
+            message = str(e)
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
         
 @csrf_exempt
@@ -1613,5 +1613,5 @@ def get_wfs_style(request):
                     return HttpResponse(json.dumps({'style':sym, 'success': True}, indent=4), content_type='application/json')
                     
         except Exception as e:
-            message = e.message
+            message = str(e)
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')

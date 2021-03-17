@@ -88,7 +88,7 @@ class Geonetwork():
                 return False
         except Exception as e:
             logger.exception('Error authenticating')
-            print((e.message))
+            print(str(e))
             return False
         
     def gn_unauth(self):

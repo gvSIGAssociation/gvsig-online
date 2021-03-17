@@ -1045,7 +1045,7 @@ class Geoserver():
             try:
                 return gdaltools.get_raster_stats(file_path)
             except gdaltools.GdalToolsError as e:
-                raise rest_geoserver.RequestError(e.code, e.message)    
+                raise rest_geoserver.RequestError(e.code, str(e))    
 
 
     def __update_raster_stats(self, workspace, coveragestore, coverage, old_conf, stats):
@@ -1111,7 +1111,7 @@ class Geoserver():
         except (rest_geoserver.RequestError):
             raise 
         except gdaltools.GdalToolsError as e:
-            raise rest_geoserver.RequestError(e.code, e.message)
+            raise rest_geoserver.RequestError(e.code, str(e))
         except Exception as e:
             logging.exception(e)
         finally:
@@ -1303,8 +1303,8 @@ class Geoserver():
                         raise rest_geoserver.RequestWarning(stderr)
                     return True
                 except gdaltools.GdalToolsError as e:
-                    raise rest_geoserver.RequestError(e.code, e.message)
-            raise rest_geoserver.RequestError(e.code, e.message)
+                    raise rest_geoserver.RequestError(e.code, str(e))
+            raise rest_geoserver.RequestError(e.code, str(e))
         except Exception as e:
             logger.exception(str(e))
             message =  _("Error uploading the layer. Review the file format. Cause: ") + str(e)
@@ -1532,7 +1532,7 @@ class Geoserver():
             raise             
         except gdaltools.GdalToolsError as ex:
             print("Error Gdal: " + str(ex))
-            raise rest_geoserver.RequestError(e.code, e.message)
+            raise rest_geoserver.RequestError(e.code, str(e))
         except Exception as e:
             logging.exception(e)
             raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))

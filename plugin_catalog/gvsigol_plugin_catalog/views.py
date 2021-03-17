@@ -61,7 +61,7 @@ def get_query(request):
             aux_response = json.loads(response)
             return HttpResponse(response, content_type='text/plain')
         except Exception as e:
-            return HttpResponse(status=500, content=e.message)
+            return HttpResponse(status=500, content=str(e))
         
     return HttpResponse(status=500)
 
@@ -104,7 +104,7 @@ def create_metadata(request, layer_id):
             return JsonResponse({'status': 'ok', 'uuid': uuid, 'id': the_id})
         except Exception as e:
             logger.exception(e)
-            return HttpResponse(status=500, content=e.message)
+            return HttpResponse(status=500, content=str(e))
 
 def get_metadata_as_html(response, lang='eng'):
     try:
@@ -321,7 +321,7 @@ def get_metadata_from_uuid(request, metadata_uuid):
             
         except Exception as e:
             logger.exception(e)
-            return HttpResponse(status=500, content=e.message)
+            return HttpResponse(status=500, content=str(e))
         
     return HttpResponse(status=500)
 
