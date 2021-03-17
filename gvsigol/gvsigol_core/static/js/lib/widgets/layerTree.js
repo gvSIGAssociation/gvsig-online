@@ -1152,21 +1152,19 @@ layerTree.prototype.hasTemporaryLayersActive = function() {
 layerTree.prototype.assignStyleToLayer = function(layer, style) {
 	if(!(layer.getSource() instanceof ol.source.WMTS)){
 		layer.getSource().updateParams({"STYLES":style});
-		
 	} else {
-		var ignSource3 = new ol.source.WMTS({
-			layer: layer.getSource()['layer_'],
-			url: layer.getSource()['urls'][0],
-			projection: layer.getSource()['projection_'],
-			matrixSet: layer.getSource()['matrixSet_'],
-			format:'image/png',
-			tileGrid: layer.getSource()['tileGrid'],
+		var newSource = new ol.source.WMTS({
+			layer: layer.getSource().getLayer(),
+			url: layer.getSource().getUrls()[0],
+			projection: layer.getSource().getProjection(),
+			matrixSet: layer.getSource().getMatrixSet(),
+			format: layer.getSource().getFormat(),
+			tileGrid: layer.getSource().getTileGrid(),
 			crossOrigin: 'anonymous',
 			style: style,
 			wrapX: true
 		});
-
-		layer.setSource(ignSource3);
+		layer.setSource(newSource);
 	}
 	var selectedStyle = null;
 	for (var i=0; i<layer.styles.length; i++) {
@@ -2178,10 +2176,8 @@ layerTree.prototype.registerAction = function(layer) {
 			'workspace': layer.workspace
 		},
 	  	success	:function(response){
-	  		console.log('Layer action registered');
 		},
 	  	error: function(e){
-	  		console.log('Error registering layer action');
 	  		
 	  	}
 	});
