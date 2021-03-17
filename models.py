@@ -72,14 +72,14 @@ class Style(models.Model):
     custom_legend_url = models.CharField(max_length=250, blank=True, null=True)
     sld = models.TextField(null=True, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class StyleLayer(models.Model):
     style = models.ForeignKey(Style, on_delete=models.CASCADE)
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)  
     
-    def __unicode__(self):
+    def __str__(self):
         return self.layer.name + ' - ' + self.style.name
       
 class Rule(models.Model):
@@ -164,21 +164,21 @@ class Library(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     description = models.CharField(max_length=500, blank=True, null=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
  
 class LibraryRule(models.Model):
     library = models.ForeignKey(Library, on_delete=models.CASCADE)
     rule = models.ForeignKey(Rule, on_delete=models.CASCADE)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.library.name + ' - ' + self.rule.name
 
 class ColorRampLibrary(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     description = models.CharField(max_length=500, blank=True, null=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
 class ColorRampFolder(models.Model):
@@ -186,7 +186,7 @@ class ColorRampFolder(models.Model):
     description = models.CharField(max_length=500, blank=True, null=True)
     color_ramp_library = models.ForeignKey(ColorRampLibrary, on_delete=models.CASCADE)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
    
 class ColorRamp(models.Model):
@@ -194,5 +194,5 @@ class ColorRamp(models.Model):
     definition = models.TextField()
     color_ramp_folder = models.ForeignKey(ColorRampFolder, on_delete=models.CASCADE)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
