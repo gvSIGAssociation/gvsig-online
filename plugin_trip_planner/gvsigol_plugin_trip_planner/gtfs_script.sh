@@ -44,7 +44,7 @@ else
     rm -f $3/graphs/$5/*.zip
     cp $3/GTFS/*.zip $3/graphs/$5/
     #cp /pre_datos_gvinterbus/*.zip /datos_apl/gvsigol_gvenruta/data/graphs/gva/
-    java -Xmx4G -jar --build $4 $3/graphs/$5
+    java -Xmx4G -jar $4 --build $3/graphs/$5
     echo "INFO: STOP OTP graph process on $HOSTNAME $(date)"
 fi  
 
