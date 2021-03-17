@@ -5,5 +5,5 @@ class SampleDashboard(models.Model):
     title = models.CharField(max_length=20, unique=True)
     description = models.CharField(max_length=250, null=True, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name

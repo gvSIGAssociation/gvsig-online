@@ -37,7 +37,7 @@ class Survey(models.Model):
     datastore = models.ForeignKey(Datastore, on_delete = models.CASCADE)
     layer_group = models.ForeignKey(LayerGroup, null=True, blank=True, on_delete = models.SET_NULL)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
 class SurveySection(models.Model):
@@ -50,7 +50,7 @@ class SurveySection(models.Model):
     
     order = models.IntegerField(null=False, default=0)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.survey+'-'+self.name
     
 class SurveyReadGroup(models.Model):
