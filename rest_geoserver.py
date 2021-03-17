@@ -929,15 +929,18 @@ class RequestError(Exception):
         self.status_code = status_code
         self.server_message = server_message
         self.message = None
-    
-    def set_message(self, message):
-        self.message = message
-    
-    def get_message(self):
+
+    def __str__():
         if self.message:
             return self.message
         else:
             return self.server_message
+
+    def set_message(self, message):
+        self.message = message
+    
+    def get_message(self):
+        return self.__str__()
 
     def get_detailed_message(self):
         from builtins import str as text

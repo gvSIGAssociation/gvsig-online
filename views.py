@@ -194,8 +194,8 @@ def server_delete(request, svid):
         return HttpResponseRedirect(reverse('server_list'))
         
     except Exception as e:
-        print(e.message) 
-        return HttpResponseNotFound(e.message ) 
+        print(str(e)) 
+        return HttpResponseNotFound(str(e) ) 
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -2945,9 +2945,9 @@ def get_feature_info(request):
                         })
                 i = i + 1
         except Exception as e:
-            print(e.message)
+            print(str(e))
             response = {
-                'error':  str(e.message),
+                'error':  str(str(e)),
                 'urls': urls
             }
 
@@ -2996,7 +2996,7 @@ def get_feature_info(request):
                                             }
                                             resources.append(resource)
                                     except Exception as e:
-                                        print(e.message)
+                                        print(str(e))
 
                                 else:
                                     geojson['features'][i]['type']= 'raster'
@@ -3017,7 +3017,7 @@ def get_feature_info(request):
                             features = geojson['features']
                             
                     except Exception as e:
-                        print(e.message)
+                        print(str(e))
                         feat = {}
                         feat['type'] = 'plain_or_html'
                         feat['text'] = resultset.get('response')
@@ -3401,7 +3401,7 @@ def get_feature_resources(request):
                 }
                 resources.append(resource)
         except Exception as e:
-            print(e.message)
+            print(str(e))
 
         response = {
             'resources': resources
@@ -3542,7 +3542,7 @@ def delete_resources(request):
             response = {'deleted': True, 'pathlist': pathlist}
 
         except Exception as e:
-            print(e.message)
+            print(str(e))
             response = {'deleted': False}
             pass
 
@@ -3635,7 +3635,7 @@ def describeLayerConfig(request):
 
 
         except Exception as e:
-            print(e.message)
+            print(str(e))
             response = {'layer': {}}
             pass
 
@@ -3720,8 +3720,8 @@ def _describeFeatureType(layer, skip_pks):
 
 
     except Exception as e:
-        print(e.message)
-        response = {'fields': [], 'error': e.message}
+        print(str(e))
+        response = {'fields': [], 'error': str(e)}
         pass
     
     return response
@@ -3758,8 +3758,8 @@ def describe_feature_type(lyr, workspace):
 
 
     except Exception as e:
-        print(e.message)
-        response = {'fields': [], 'error': e.message}
+        print(str(e))
+        response = {'fields': [], 'error': str(e)}
         pass
     
     return response
@@ -3798,7 +3798,7 @@ def describeFeatureTypeWithPk(request):
 
 
         except Exception as e:
-            print(e.message)
+            print(str(e))
             response = {'fields': []}
             pass
 
@@ -4578,8 +4578,8 @@ def service_url_delete(request, svid):
         return HttpResponseRedirect(reverse('service_url_list'))
         
     except Exception as e:
-        print(e.message) 
-        return HttpResponseNotFound(e.message ) 
+        print(str(e)) 
+        return HttpResponseNotFound(str(e) ) 
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -4711,11 +4711,11 @@ def db_field_delete(request):
             gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
         except psycopg2.ProgrammingError as e:
-            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+            logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
             if e.pgcode == '42703':
                 return utils.get_exception(400, _('Field does not exist. Probably, it was deleted or renamed concurrently by another user'))
         except Exception:
-            logger.exception(_('Error deleting field. Cause: {0}').format(e.message))
+            logger.exception(_('Error deleting field. Cause: {0}').format(str(e)))
     return utils.get_exception(400, 'Error in the input params')
 
 """
@@ -4773,13 +4773,13 @@ def db_field_rename(request):
             gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
         except psycopg2.ProgrammingError as e:
-            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+            logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
             if e.pgcode == '42703':
                 return utils.get_exception(400, _('Field does not exist. Probably, it was deleted or renamed concurrently by another user'))
         except rest_geoserver.RequestError as e:
             logger.exception(_('Error renaming field. Cause: {0}').format(e.get_detailed_message()))
         except Exception as e:
-            logger.exception(_('Error renaming field. Cause: {0}').format(e.message))
+            logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
     return utils.get_exception(400, 'Error in the input params')
 
     def getGeoserverBindings(self, sql_type):
@@ -4886,7 +4886,7 @@ def db_add_field(request):
             gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
         except Exception as e:
-            logger.exception(_('Error creating field. Cause: {0}').format(e.message))
+            logger.exception(_('Error creating field. Cause: {0}').format(str(e)))
             
             # clean potential half created field
             con = None
