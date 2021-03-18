@@ -967,10 +967,6 @@ def backend_fields_list(request):
 
 def do_add_layer(server, datastore, name, title, is_queryable, extraParams):
     workspace = datastore.workspace
-
-    """
-    server.createTable(form.cleaned_data)
-    """
     
     # first create the resource on the backend
     server.createResource(
@@ -1189,14 +1185,12 @@ def layer_add_with_group(request, layergroup_id):
                     return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
                 else:
                     return redirect('layer_list')
-
-            except Exception as e:
-                msg = _("Error: layer could not be published")
+            except rest_geoserver.RequestError as e:
+                msg = e.server_message
                 logger.exception(msg)
-                try:
-                    msg = e.server_message
-                except:
-                    pass
+                form.add_error(None, msg)
+            except Exception as e:
+                msg = _("Error: layer could not be published") + '. ' + str(e)
                 logger.exception(msg)
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
