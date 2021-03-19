@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2021-03-19 23:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,40 +57,35 @@ msgstr "Estilo por defecto para: "
 msgid "Default symbol"
 msgstr "Símbolo por defecto"
 
-#: gvsigol_symbology/services_library.py:67
+#: gvsigol_symbology/services_library.py:66
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
 "Nombre inválido: '{value}'. El nombre no debe contener ningún caracter "
 "especial"
 
-#: gvsigol_symbology/templates/base_symbology.html:73
-#: gvsigol_symbology/templates/base_symbology_compress.html:73
-msgid "gvsigonline docs"
-msgstr "Manual gvSIG Online"
-
-#: gvsigol_symbology/templates/base_symbology.html:108
-#: gvsigol_symbology/templates/base_symbology_compress.html:108
+#: gvsigol_symbology/templates/base_symbology.html:112
+#: gvsigol_symbology/templates/base_symbology_compress.html:111
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: gvsigol_symbology/templates/base_symbology.html:127
-#: gvsigol_symbology/templates/base_symbology_compress.html:126
+#: gvsigol_symbology/templates/base_symbology.html:131
+#: gvsigol_symbology/templates/base_symbology_compress.html:129
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: gvsigol_symbology/templates/base_symbology.html:133
-#: gvsigol_symbology/templates/base_symbology_compress.html:132
+#: gvsigol_symbology/templates/base_symbology.html:137
+#: gvsigol_symbology/templates/base_symbology_compress.html:135
 msgid "Home"
 msgstr "Inicio"
 
-#: gvsigol_symbology/templates/base_symbology.html:170
-#: gvsigol_symbology/templates/base_symbology_compress.html:169
+#: gvsigol_symbology/templates/base_symbology.html:174
+#: gvsigol_symbology/templates/base_symbology_compress.html:172
 msgid "Version"
 msgstr "Versión"
 
-#: gvsigol_symbology/templates/base_symbology.html:174
-#: gvsigol_symbology/templates/base_symbology_compress.html:173
+#: gvsigol_symbology/templates/base_symbology.html:178
+#: gvsigol_symbology/templates/base_symbology_compress.html:176
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -191,8 +186,8 @@ msgstr "Guardar"
 #: gvsigol_symbology/templates/library_add.html:39
 #: gvsigol_symbology/templates/library_import.html:38
 #: gvsigol_symbology/templates/library_import.html:39
-#: gvsigol_symbology/templates/library_update.html:45
-#: gvsigol_symbology/templates/library_update.html:46
+#: gvsigol_symbology/templates/library_update.html:43
+#: gvsigol_symbology/templates/library_update.html:44
 #: gvsigol_symbology/templates/sld_import.html:40
 #: gvsigol_symbology/templates/symbol_add.html:22
 #: gvsigol_symbology/templates/symbol_update.html:23
@@ -371,7 +366,7 @@ msgstr "Añadir nueva regla"
 
 #: gvsigol_symbology/templates/clustered_points_add.html:65
 msgid "Creates a new rule for clustered points"
-msgstr "Crea una leyenda definida por expresiones"
+msgstr "Crea una nueva regla para agrupaciones de puntos"
 
 #: gvsigol_symbology/templates/clustered_points_add.html:85
 #: gvsigol_symbology/templates/clustered_points_update.html:88
@@ -464,7 +459,7 @@ msgstr "Cerrar"
 #: gvsigol_symbology/templates/unique_values_add.html:386
 #: gvsigol_symbology/templates/unique_values_update.html:395
 msgid "Field name is required"
-msgstr "El campo nombre es obligatorio"
+msgstr "El nombre de campo es obligatorio"
 
 #: gvsigol_symbology/templates/clustered_points_update.html:11
 #: gvsigol_symbology/templates/color_ramp_update.html:11
@@ -533,8 +528,8 @@ msgstr "Añadir categoría de rampas"
 #: gvsigol_symbology/templates/library_import.html:44
 #: gvsigol_symbology/templates/library_import.html:45
 #: gvsigol_symbology/templates/library_list.html:23
-#: gvsigol_symbology/templates/library_update.html:52
-#: gvsigol_symbology/templates/library_update.html:53
+#: gvsigol_symbology/templates/library_update.html:50
+#: gvsigol_symbology/templates/library_update.html:51
 msgid "Description"
 msgstr "Descripción"
 
@@ -604,7 +599,7 @@ msgstr "Importar biblioteca"
 
 #: gvsigol_symbology/templates/color_ramp_library_list.html:22
 #: gvsigol_symbology/templates/library_list.html:22
-#: gvsigol_symbology/templates/library_update.html:33
+#: gvsigol_symbology/templates/library_update.html:31
 msgid "Library"
 msgstr "Biblioteca"
 
@@ -982,8 +977,8 @@ msgstr "Seleccionar formato"
 
 #: gvsigol_symbology/templates/external_graphic_add.html:146
 #: gvsigol_symbology/templates/external_graphic_add.html:152
-#: gvsigol_symbology/views.py:988 gvsigol_symbology/views.py:1192
-#: gvsigol_symbology/views.py:1378
+#: gvsigol_symbology/views.py:989 gvsigol_symbology/views.py:1193
+#: gvsigol_symbology/views.py:1379
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -1009,27 +1004,27 @@ msgstr "Seleccionar un campo numérico"
 msgid "Select field"
 msgstr "Seleccionar un campo"
 
-#: gvsigol_symbology/templates/library_update.html:34
+#: gvsigol_symbology/templates/library_update.html:32
 msgid "Symbols"
 msgstr "Simbolos"
 
-#: gvsigol_symbology/templates/library_update.html:67
+#: gvsigol_symbology/templates/library_update.html:65
 msgid "Library symbols"
 msgstr "Símbolos de la biblioteca"
 
-#: gvsigol_symbology/templates/library_update.html:69
+#: gvsigol_symbology/templates/library_update.html:67
 msgid "Add external graphic"
 msgstr "Añadir gráfico externo"
 
-#: gvsigol_symbology/templates/library_update.html:70
+#: gvsigol_symbology/templates/library_update.html:68
 msgid "Add point"
 msgstr "Añadir punto"
 
-#: gvsigol_symbology/templates/library_update.html:71
+#: gvsigol_symbology/templates/library_update.html:69
 msgid "Add line"
 msgstr "Añadir línea"
 
-#: gvsigol_symbology/templates/library_update.html:72
+#: gvsigol_symbology/templates/library_update.html:70
 msgid "Add polygon"
 msgstr "Añadir polígono"
 
@@ -1105,7 +1100,7 @@ msgstr "Agrupación de puntos"
 
 #: gvsigol_symbology/templates/select_legend_type.html:112
 msgid "Creates a legend for clustered points defined by expressions"
-msgstr "Crea una leyenda definida por expresiones"
+msgstr "Crea una leyenda para puntos agrupados definida por expresiones"
 
 #: gvsigol_symbology/templates/sld_import.html:12
 msgid "Import SLD"
@@ -1145,19 +1140,19 @@ msgstr "Editar simbolizador"
 msgid "Select field to generate unique values"
 msgstr "Seleccionar campo para generar valores únicos"
 
-#: gvsigol_symbology/views.py:139
+#: gvsigol_symbology/views.py:140
 msgid "The layer must contain at least one style"
 msgstr "La capa debe contener al menos un estilo"
 
-#: gvsigol_symbology/views.py:142
+#: gvsigol_symbology/views.py:143
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: gvsigol_symbology/views.py:980
+#: gvsigol_symbology/views.py:981
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: gvsigol_symbology/views.py:1040 gvsigol_symbology/views.py:1065
+#: gvsigol_symbology/views.py:1041 gvsigol_symbology/views.py:1066
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
@@ -1165,9 +1160,9 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: gvsigol_symbology/views.py:1135 gvsigol_symbology/views.py:1182
-#: gvsigol_symbology/views.py:1230 gvsigol_symbology/views.py:1307
-#: gvsigol_symbology/views.py:1368 gvsigol_symbology/views.py:1506
+#: gvsigol_symbology/views.py:1136 gvsigol_symbology/views.py:1183
+#: gvsigol_symbology/views.py:1231 gvsigol_symbology/views.py:1308
+#: gvsigol_symbology/views.py:1369 gvsigol_symbology/views.py:1507
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
@@ -1175,13 +1170,16 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: gvsigol_symbology/views.py:1189 gvsigol_symbology/views.py:1375
+#: gvsigol_symbology/views.py:1190 gvsigol_symbology/views.py:1376
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: gvsigol_symbology/views.py:1195 gvsigol_symbology/views.py:1381
+#: gvsigol_symbology/views.py:1196 gvsigol_symbology/views.py:1382
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
+
+#~ msgid "gvsigonline docs"
+#~ msgstr "Manual gvSIG Online"
 
 #~ msgid "Color ramp libraries"
 #~ msgstr "Bibliotecas de rampa de color"
