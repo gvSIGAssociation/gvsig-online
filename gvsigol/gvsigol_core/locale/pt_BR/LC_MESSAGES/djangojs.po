@@ -546,3 +546,60 @@ msgstr "Você deve preencher todos os valores"
 
 msgid "Some value is out of range"
 msgstr "Algum valor está fora da faixa"
+
+msgid "Raw filter"
+msgstr "Filtro rápido"
+
+msgid "Layer group"
+msgstr "Grupo de camadas"
+
+msgid "Select layer group"
+msgstr "Selecionar grupo de camadas"
+
+msgid "Layer"
+msgstr "Camada"
+
+msgid "Select layer"
+msgstr "Selecionar camada"
+
+msgid "Field"
+msgstr "Campo"
+
+msgid "Operator"
+msgstr "Operador"
+
+msgid "Select operator"
+msgstr "Selecionar operador"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Clean filter"
+msgstr "Limpar filtro"
+
+msgid "The selected layer group does not contain queryable layers"
+msgstr "O grupo de camadas selecionado não contém camadas consultáveis"
+
+msgid "The selected layer does not contain queryable fields"
+msgstr "A camada selecionada não contém campos consultáveis"
+
+msgid "The selected field does not contain values"
+msgstr "O campo selecionado não contém valores"
+
+msgid "No results found"
+msgstr "Não foram encontrados resultados"
+
+msgid "Equal to"
+msgstr "É o mesmo que"
+
+msgid "Smaller than"
+msgstr "É menos que"
+
+msgid "Greater than"
+msgstr "É maior que"
+
+msgid "You must fill in all fields"
+msgstr "Você deve preencher todos os campos"
+
+msgid "Find layer"
+msgstr "Pesquisar camada"
