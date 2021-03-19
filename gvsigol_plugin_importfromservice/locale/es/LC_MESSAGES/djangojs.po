@@ -54,3 +54,9 @@ msgstr "Cerrar"
 
 msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
 msgstr "Contenido mixto: La página fue cargada sobre HTTPS, pero se ha solicitado una URL insegura"
+
+msgid "Output format not supported"
+msgstr "Formato de salida no soportado"
+
+msgid "No layers are available"
+msgstr "No hay capas disponibles"

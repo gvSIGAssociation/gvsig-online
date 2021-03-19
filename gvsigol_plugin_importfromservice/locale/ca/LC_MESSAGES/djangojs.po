@@ -54,3 +54,9 @@ msgstr "Tancar"
 
 msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
 msgstr "Contingut mixt: es va carregar la pàgina a HTTPS, però es va sol·licitar un URL insegur"
+
+msgid "Output format not supported"
+msgstr ""
+
+msgid "No layers are available"
+msgstr ""

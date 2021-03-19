@@ -54,3 +54,9 @@ msgstr ""
 
 msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
 msgstr ""
+
+msgid "Output format not supported"
+msgstr ""
+
+msgid "No layers are available"
+msgstr ""
