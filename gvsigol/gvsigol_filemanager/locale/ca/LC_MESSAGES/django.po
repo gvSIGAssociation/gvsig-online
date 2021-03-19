@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2021-03-19 23:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,11 +28,11 @@ msgstr "Nom del directori"
 msgid "Export"
 msgstr "Exportar"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:50
+#: gvsigol_filemanager/templates/browser/export_to_database.html:48
 msgid "Warning!"
 msgstr "Avís!"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:51
+#: gvsigol_filemanager/templates/browser/export_to_database.html:49
 msgid ""
 "Before exporting the shapefile check the name of the columns. Column names "
 "can not contain spaces or special characters."
@@ -40,32 +40,32 @@ msgstr ""
 "Abans d'exportar el shapefile revisi el nom de les columnes. El nom de les "
 "columnes no pot contenir espais ni caràcters especials."
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:62
+#: gvsigol_filemanager/templates/browser/export_to_database.html:60
 msgid "Table creation mode"
 msgstr "Mode de creació de la taula"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:69
+#: gvsigol_filemanager/templates/browser/export_to_database.html:67
 msgid "Data store"
 msgstr "Magatzem de dades"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:76
+#: gvsigol_filemanager/templates/browser/export_to_database.html:74
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:29
 msgid "Name"
 msgstr "Nom"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:78
+#: gvsigol_filemanager/templates/browser/export_to_database.html:76
 msgid "Layer will be uploaded to the selected data store"
 msgstr "La capa serà pujada al magatzem seleccionat"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:84
+#: gvsigol_filemanager/templates/browser/export_to_database.html:82
 msgid "Character encoding"
 msgstr "Codificació de caracters"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:88
+#: gvsigol_filemanager/templates/browser/export_to_database.html:86
 msgid "Coordinate reference system"
 msgstr "sistema de coordenades"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:111
+#: gvsigol_filemanager/templates/browser/export_to_database.html:109
 msgid "Default"
 msgstr "Per defecte"
 
@@ -110,11 +110,13 @@ msgid "Nothing to see here."
 msgstr "No hi ha arxius per mostrar."
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:109
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:118
 #: gvsigol_filemanager/templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Crear directori"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:110
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:119
 #: gvsigol_filemanager/templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Pujar"
@@ -127,23 +129,27 @@ msgstr "Administrador d'arxius"
 msgid "Export process done successfully"
 msgstr "Procés d’exportació realitzat correctament"
 
-#: gvsigol_filemanager/views.py:161
+#: gvsigol_filemanager/views.py:139
+msgid "Export process completed with warnings:"
+msgstr ""
+
+#: gvsigol_filemanager/views.py:166
 msgid "Server error"
 msgstr "Error del servidor"
 
-#: gvsigol_filemanager/views.py:165
+#: gvsigol_filemanager/views.py:170
 msgid "You must fill in all fields"
 msgstr "Ha d'omplir tots els camps"
 
-#: gvsigol_filemanager/views.py:216 gvsigol_filemanager/views.py:227
+#: gvsigol_filemanager/views.py:221 gvsigol_filemanager/views.py:232
 msgid "Error deleting resource"
 msgstr "Error eliminant recurs"
 
-#: gvsigol_filemanager/views.py:216
+#: gvsigol_filemanager/views.py:221
 msgid "exists in datastore"
 msgstr "Existeix en el magatzem de dades"
 
-#: gvsigol_filemanager/views.py:250
+#: gvsigol_filemanager/views.py:255
 #, fuzzy
 #| msgid "Error deleting resource"
 msgid "Error unzipping resource"

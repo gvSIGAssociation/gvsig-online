@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2021-03-19 23:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,11 +27,11 @@ msgstr "Nombre del directorio"
 msgid "Export"
 msgstr "Exportar"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:50
+#: gvsigol_filemanager/templates/browser/export_to_database.html:48
 msgid "Warning!"
 msgstr "Aviso!"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:51
+#: gvsigol_filemanager/templates/browser/export_to_database.html:49
 msgid ""
 "Before exporting the shapefile check the name of the columns. Column names "
 "can not contain spaces or special characters."
@@ -40,32 +39,32 @@ msgstr ""
 "Antes de exportar el shapefile revise el nombre de las columnas. Los nombres "
 "no pueden contener espacios ni caracteres especiales."
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:62
+#: gvsigol_filemanager/templates/browser/export_to_database.html:60
 msgid "Table creation mode"
 msgstr "Modo de creación de la tabla"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:69
+#: gvsigol_filemanager/templates/browser/export_to_database.html:67
 msgid "Data store"
 msgstr "Almacén de datos"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:76
+#: gvsigol_filemanager/templates/browser/export_to_database.html:74
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:29
 msgid "Name"
 msgstr "Nombre"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:78
+#: gvsigol_filemanager/templates/browser/export_to_database.html:76
 msgid "Layer will be uploaded to the selected data store"
 msgstr "La capa será subida al almacén seleccionado"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:84
+#: gvsigol_filemanager/templates/browser/export_to_database.html:82
 msgid "Character encoding"
 msgstr "Codificación de caracteres"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:88
+#: gvsigol_filemanager/templates/browser/export_to_database.html:86
 msgid "Coordinate reference system"
 msgstr "Sistema de coordenadas"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:111
+#: gvsigol_filemanager/templates/browser/export_to_database.html:109
 msgid "Default"
 msgstr "Por defecto"
 
@@ -99,7 +98,7 @@ msgstr "Aplicar transformación"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:86
 msgid "Unzip file"
-msgstr ""
+msgstr "Descomprimir fichero"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:89
 msgid "Delete file"
@@ -110,11 +109,13 @@ msgid "Nothing to see here."
 msgstr "No hay archivos para mostrar."
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:109
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:118
 #: gvsigol_filemanager/templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Crear directorio"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:110
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:119
 #: gvsigol_filemanager/templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Subir"
@@ -127,24 +128,26 @@ msgstr "Administrador de archivos"
 msgid "Export process done successfully"
 msgstr "Proceso de exportación ralizado satisfactoriamente"
 
-#: gvsigol_filemanager/views.py:161
+#: gvsigol_filemanager/views.py:139
+msgid "Export process completed with warnings:"
+msgstr "El proceso de exportación se completó con avisos:"
+
+#: gvsigol_filemanager/views.py:166
 msgid "Server error"
 msgstr "Error del servidor"
 
-#: gvsigol_filemanager/views.py:165
+#: gvsigol_filemanager/views.py:170
 msgid "You must fill in all fields"
 msgstr "Debe rellenar todos los campos"
 
-#: gvsigol_filemanager/views.py:216 gvsigol_filemanager/views.py:227
+#: gvsigol_filemanager/views.py:221 gvsigol_filemanager/views.py:232
 msgid "Error deleting resource"
 msgstr "Error borrando el recurso"
 
-#: gvsigol_filemanager/views.py:216
+#: gvsigol_filemanager/views.py:221
 msgid "exists in datastore"
 msgstr "ya que se utiliza en el almacén de datos"
 
-#: gvsigol_filemanager/views.py:250
-#, fuzzy
-#| msgid "Error deleting resource"
+#: gvsigol_filemanager/views.py:255
 msgid "Error unzipping resource"
-msgstr "Error borrando el recurso"
+msgstr "Error descomprimiendo el recurso"
