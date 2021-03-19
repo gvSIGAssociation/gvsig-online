@@ -694,6 +694,8 @@ def layer_refresh_extent(request, layer_id):
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     if datastore.type == 'v_PostGIS':
         server.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
+        # restore dynamic grid subsets for gwc layers
+        server.set_gwclayer_dynamic_subsets(workspace, layer.name)
         server.reload_nodes()
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
@@ -993,7 +995,6 @@ def do_add_layer(server, datastore, name, title, is_queryable, extraParams):
 def do_config_layer(server, layer, featuretype):
     layer_autoconfig(layer, featuretype)
     layer.save()
-    
     ds_type = layer.datastore.type
     if ds_type != 'e_WMS':
         if ds_type == 'c_ImageMosaic':
@@ -1006,7 +1007,6 @@ def do_config_layer(server, layer, featuretype):
     core_utils.toc_add_layer(layer)
     server.createOrUpdateGeoserverLayerGroup(layer.layer_group)
     server.reload_nodes()
-
 
 def create_symbology(server, layer):
     style_name = layer.datastore.workspace.name + '_' + layer.name + '_default'
@@ -1890,7 +1890,9 @@ def layer_boundingbox_from_data(request):
         layer_query_set = Layer.objects.filter(external=False).filter(name=layer_name, datastore__workspace=workspace)
         layer = layer_query_set[0]
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-        gs.updateBoundingBoxFromData(layer)  
+        gs.updateBoundingBoxFromData(layer)
+        # restore dynamic grid subsets for gwc layers
+        gs.set_gwclayer_dynamic_subsets(workspace, layer.name) 
         gs.clearCache(workspace.name, layer)
         gs.updateThumbnail(layer, 'update')
         

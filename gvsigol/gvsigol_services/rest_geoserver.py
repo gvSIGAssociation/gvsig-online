@@ -756,50 +756,30 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
-    def add_grid_subset(self, ws, layer, user=None, password=None):
-        url = self.gwc_url + "/layers/" + ws.name + ":" + layer.name + ".xml"
-        headers = {'content-type': 'text/xml'}
-        xml = "<GeoServerLayer>"
-        xml +=  "<enabled>true</enabled>"
-        xml +=  "<inMemoryCached>false</inMemoryCached>"
-        xml +=  "<name>" + ws.name + ":" + layer.name + "</name>"
-        xml +=  "<mimeFormats>"
-        xml +=      "<string>image/png</string>"
-        xml +=      "<string>image/jpeg</string>"
-        xml +=  "</mimeFormats>"
-        xml +=  "<gridSubsets>"
-        xml +=      "<gridSubset>"
-        xml +=          "<gridSetName>EPSG:900913</gridSetName>"
-        xml +=      "</gridSubset>"
-        xml +=      "<gridSubset>"
-        xml +=          "<gridSetName>EPSG:4326</gridSetName>"
-        xml +=      "</gridSubset>"
-        xml +=      "<gridSubset>"
-        xml +=          "<gridSetName>EPSG:3857</gridSetName>"
-        xml +=      "</gridSubset>"
-        xml +=  "</gridSubsets>"
-        xml +=  "<metaWidthHeight>"
-        xml +=      "<int>4</int>"
-        xml +=      "<int>4</int>"
-        xml +=  "</metaWidthHeight>"
-        xml +=  "<expireCache>0</expireCache>"
-        xml +=  "<expireClients>0</expireClients>"
-        xml +=  "<parameterFilters>"
-        xml +=      "<styleParameterFilter>"
-        xml +=          "<key>STYLES</key>"
-        xml +=          "<defaultValue></defaultValue>"
-        xml +=          "<availableStyles class=\"sorted-set\"/>"
-        xml +=          "<defaultStyle>point</defaultStyle>"
-        xml +=      "</styleParameterFilter>"
-        xml +=  "</parameterFilters>"
-        xml +=  "<gutter>0</gutter>"
-        xml += "</GeoServerLayer>"
+    def set_gwclayer_dynamic_subsets(self, ws_name, layer_name, user=None, password=None):
+        """
+        Updates the gwc layer definition, setting existing grid subsets as dynamic.
+        """
+        url = self.gwc_url + "/layers/" + ws_name + ":" + layer_name + ".xml"
         if user and password:
             auth = (user, password)
         else:
             auth = self.session.auth
+        headers = {'content-type': 'text/xml'}
+        r = self.session.get(url, headers=headers, auth=auth)
+        root = ET.fromstring(r.content)
+        subsets = root.find('gridSubsets')
+        if subsets is not None:
+            for subset in subsets.findall('gridSubset'):
+                name_elem = subset.find('gridSetName')
+                if name_elem is not None:
+                    name = name_elem.text
+                    subset.clear()
+                    name_elem = ET.SubElement(subset, 'gridSetName')
+                    name_elem.text = name
+        xml = ET.tostring(root, encoding='utf-8')
         r = self.session.post(url, data=xml, headers=headers, auth=auth)
-        if r.status_code==201:
+        if r.status_code==200:
             return True
         raise FailedRequestError(r.status_code, r.content)
     
@@ -831,7 +811,7 @@ class Geoserver():
             auth = self.session.auth
         r = self.session.get(url, json={}, auth=auth)
         if r.status_code==200:
-            return r._content
+            return r.content
         raise FailedRequestError(r.status_code, r.content)
     
     

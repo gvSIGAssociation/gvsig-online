@@ -408,7 +408,9 @@ class Geoserver():
             if is_default:
                 gs_layer.default_style = style
             catalog.save(gs_layer)
-            
+            # catalog.save() someway sets fixed subsets for gwc layers, so we need to
+            # restore dynamic grid subsets afterwards
+            self.set_gwclayer_dynamic_subsets(layer.datastore.workspace, layer.name)
             return True
         except Exception as e:
             logger.exception("error setting style", e)
@@ -740,7 +742,7 @@ class Geoserver():
                     coverage_name = store.name
                     return self.createImageMosaicLayer(workspace, store, name, title, coverage_name)
                 else:    
-                    return self.createCoverage(workspace, store, name, title)   
+                    return self.createCoverage(workspace, store, name, title)
         except Exception as e:
             logger.exception('Creando capa: ' + name)
             raise rest_geoserver.FailedRequestError(-1, str(e.server_message))
@@ -1937,15 +1939,6 @@ class Geoserver():
             logger.exception('ERROR clearCache. Group:' + str(name))
             return False
         
-    def addGridSubset(self, ws, layer):
-        try:
-            self.rest_catalog.add_grid_subset(ws, layer, user=self.user, password=self.password)
-            return True
-        
-        except Exception as e:
-            print e
-            return False
-        
     def getGeomColumns(self, datastore):
         """
         Gets the SRS of a PostGIS feature type by connecting directly to the database
@@ -2274,3 +2267,9 @@ class Geoserver():
         if self.is_supported_type(field_type):
             return field_type
 
+    def set_gwclayer_dynamic_subsets(self, workspace, layer_name):
+        try:
+            self.rest_catalog.set_gwclayer_dynamic_subsets(workspace.name, layer_name, user=self.user, password=self.password)
+        except:
+            logger.exception("Could not update gwc layer subset")
+        
