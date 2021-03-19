@@ -197,7 +197,7 @@
 		
 		$('#server-nodes-table tbody').append(ui);	
 		
-		$(".reload-node-" + n.id).on('click', function(e){	
+		$(".reload-node-" + node.id).on('click', function(e){	
 			e.preventDefault();
 			reloadNode(this.dataset.nodeid);
 		});
@@ -362,7 +362,7 @@
 		$('#modal-new-node .modal-footer').empty();
 		$('#modal-new-node .modal-footer').append(buttons);
 		
-		$('#add-node-accept').on('click', function () {	
+		$('#add-node-accept').on('click', function () {
 			var status = $('#node-status-select-'+id).val();
 			var url = $('#node-url-input-'+id).val();
 			var ismaster = $('#node-ismaster-input-'+id).prop('checked');
@@ -391,7 +391,7 @@
 			var status = $('#node-status-select-'+this.dataset.nodeid).val();
 			var url = $('#node-url-input-'+this.dataset.nodeid).val();
 			var ismaster = $('#node-ismaster-input-'+this.dataset.nodeid).prop('checked');
-			
+
 			if (true) {
 				var node = {
 					id: this.dataset.nodeid,
