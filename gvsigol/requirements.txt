@@ -30,7 +30,7 @@ psycopg2>=2.8.6
 #psycopg2-binary>=2.7,<2.8
 
 ##Instalamos Pillow para que django soporte la gestion de images;
-Pillow==8.1.0
+Pillow==8.1.1
 # *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
 
 ## gsconfig
@@ -115,3 +115,9 @@ suds-community==0.8.4
 
 # plugin_widget
 django_tinymce==3.2.0
+
+# plugin geoetl
+#pandas==1.1.5
+# will not install on Ubuntu 18.04
+#gdal==1.11.2
+
