@@ -91,7 +91,9 @@ ImportFromService.prototype.createServiceForm = function() {
 		self.modal += 							'</div>';
 		self.modal += 						'</div>';
 		self.modal += 						'<div class="row">';
-		self.modal += 							'<div class="col-md-12 form-group">';	
+		self.modal += 							'<div class="col-md-12 form-group">';		
+		self.modal +=								'<span id="format-error" style="display: none; color: red;">* ' + gettext('Output format not supported') + '</span>';
+		self.modal +=								'<span id="nolayers-error" style="display: none; color: red;">* ' + gettext('No layers are available') + '</span>';
 		self.modal +=								'<span id="serviceurl-error" style="display: none; color: red;">* ' + gettext('You must type a valid URL') + '</span>';
 		self.modal +=								'<span id="mixedcontent-error" style="display: none; color: red;">* ' + gettext('Mixed content: The page at was loaded over HTTPS, but requested an insecure URL') + '</span>';
 		self.modal += 							'</div>';
@@ -175,27 +177,48 @@ ImportFromService.prototype.createServiceForm = function() {
 							});
 							
 						} else if (serviceType == 'WFS') {
-							self.featureTypeList = response.getElementsByTagName("FeatureTypeList")[0];
-							
+							$('#nolayers-error').css('display', 'none');
+							$('#format-error').css('display', 'none');
+							$('#serviceurl-error').css('display', 'none');
 							$('#importfromservice-layerlist').empty();
-							for (var i=0; i<self.featureTypeList.children.length; i++) {
+							self.featureTypeList = response.getElementsByTagName("FeatureType");
+							if (self.featureTypeList.length == 0) {
+								$('#nolayers-error').css('display', 'block');
+								return;
+							}
+							var formats = self._getWFSOutputFormats(response);
+							var format = null;
+							for (var i=0; i<formats.length; i++) {
+								if (formats[i] == 'application/json') {
+									format = formats[i];
+									break; // prefer json format
+								}
+								else if (formats[i].indexOf('gml/3.1.1')!==-1) {
+									format = formats[i];
+								}
+							}
+							if (format === null) {
+								$('#format-error').css('display', 'block');
+								return;
+							}
+							for (i=0; i<self.featureTypeList.length; i++) {
 								var htmlLayer = '';
 								htmlLayer += '<li class="item">';
 								htmlLayer += 	'<div class="product-info">';
-								htmlLayer += 		'<a data-layername="' + self.featureTypeList.children[i].children[0].textContent + '" href="" class="product-title load-wfs-layer">' + self.featureTypeList.children[i].children[0].textContent + '<span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-globe margin-r-5"></i>' + gettext('Load layer') + '</span></a>'; 
-								htmlLayer += 		'<span class="product-description">' + self.featureTypeList.children[i].children[1].textContent + '</span>';
+								htmlLayer += 		'<a data-layername="' + self.featureTypeList[i].children[0].textContent + '" href="" class="product-title load-wfs-layer">' + self.featureTypeList[i].children[0].textContent + '<span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-globe margin-r-5"></i>' + gettext('Load layer') + '</span></a>'; 
+								htmlLayer += 		'<span class="product-description">' + self.featureTypeList[i].children[1].textContent + '</span>';
 								htmlLayer += 	'</div>';
 								htmlLayer += '</li>';
 								
 								$('#importfromservice-layerlist').append(htmlLayer);
-							}
-							
+							}			
+
 							$('.load-wfs-layer').on('click', function(e){
 								e.preventDefault();
 								var layerName = this.dataset.layername;
-								for (var i=0; i<self.featureTypeList.children.length; i++) {
-									if (self.featureTypeList.children[i].children[0].textContent == layerName) {
-										self.loadWFSLayer(serviceURL, self.featureTypeList.children[i]);
+								for (var i=0; i<self.featureTypeList.length; i++) {
+									if (self.featureTypeList[i].children[0].textContent == layerName) {
+										self.loadWFSLayer(serviceURL, self.featureTypeList[i], format);
 									}
 								}
 							});
@@ -224,6 +247,29 @@ ImportFromService.prototype.createServiceForm = function() {
 		self.modal = null;
 	}
 };
+
+ImportFromService.prototype._getWFSOutputFormats = function(capabilitiesElement) {
+	var operationsMd = capabilitiesElement.getElementsByTagNameNS("*", "OperationsMetadata");
+	if (operationsMd.length == 0) {
+		return [];
+	}
+	operationsMd = operationsMd[0];
+	var formats = [];
+	for (var i=0; i<operationsMd.children.length; i++) {
+		if ((operationsMd.children[i].localName == 'Operation' &&
+				operationsMd.children[i].getAttribute("name") == 'GetFeature')
+				||
+				// outputFormat can also be declared for all operations at OperationsMetadata level	
+				(operationsMd.children[i].localName == 'Parameter' &&
+				operationsMd.children[i].getAttribute("name") == 'outputFormat')) {
+			var values = operationsMd.children[i].getElementsByTagNameNS("*", "Value");
+			for (var j=0; j<values.length; j++) {
+				formats.push(values[j].textContent);
+			}
+		}
+	}
+	return formats;
+}
 
 ImportFromService.prototype.loadWMSLayer = function(url, layer) {
 	var self = this;
@@ -271,13 +317,20 @@ ImportFromService.prototype.loadWMSLayer = function(url, layer) {
 	
 };
 
-ImportFromService.prototype.loadWFSLayer = function(url, layer) {
+ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 	var self = this;
 	var layerId = viewer.core._nextLayerId();
 	var layerName = layer.children[0].textContent;
 	var layerTitle = layer.children[1].textContent;
 
 	var style = self.getRandomStyle();
+
+	if (format.indexOf("json")!==-1) {
+		formatParser = new ol.format.GeoJSON();
+	}
+	else if (format.indexOf("gml/3.1.1")!==-1) {
+		formatParser = new ol.format.GML3();
+	}
 	
 	var wfsLayer = new ol.layer.Vector({
 		id: layerId,
@@ -285,12 +338,12 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer) {
 		style: style,
 		strategy: ol.loadingstrategy.bbox,
 		source: new ol.source.Vector({
-			format: new ol.format.GeoJSON(),
+			format: formatParser,
 		    url: function(extent) {
 		    	return  url + '?' +
 		        		'service=WFS&' +
-		        		'version=1.0.0&request=GetFeature&typename=' + layerName + '&'+
-		        		'outputFormat=application/json&srsname=EPSG:3857';/* +
+		        		'version=1.0.0&request=GetFeature&typename=' + layerName +
+		        		'&outputFormat=' + encodeURI(format) + '&srsname=EPSG:3857';/* +
 		        		'bbox=' + extent.join(',') + ',EPSG:3857';*/
 		    }
 		})
