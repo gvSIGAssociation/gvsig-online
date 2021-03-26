@@ -1,0 +1,7 @@
+{
+    "areaVisibility": true,
+    "staticParkAndRide": false,
+    "parentStopLinking": true,
+    "subwayAccessTime": 1,
+    "elevationUnitMultiplier": 0.1
+  }
