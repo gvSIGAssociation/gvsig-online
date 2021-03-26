@@ -1,3 +1,5 @@
+# para evitar problemas, usa vscode desde linux para ejecutar y depurar
+
 import ogr
 import osr
 import shapely
@@ -22,16 +24,31 @@ import imp
 # Various:
 #         Marketplace (son los mercados municipales)
 
+
+'''
+Selecccionados por Mar y Salvador:
+# Amenity:
+    Hospital
+    Library
+    Police
+    Post office
+    School college
+    Taxi 
+    Bicycle rental
+    Theatre
+    University
+    Cementery
+# Sport:
+    Sport centre
 # Tourism:
-#         Attraction
-#         Historic
-#         Information
-#         Monument 
-#         Museum
-#         Artcentre
-#         Shops  
-#         Shopping centre
-#         Department store
+    Castle
+    Atraction
+    Historic
+    Museum
+    Zoo
+# Various:
+    Market place
+'''
 
 
 # Usage: python import-pois-osm
@@ -40,10 +57,16 @@ def extract_points(pbfFile, reverseGeocodeUrl):
     data = driver.Open(pbfFile)
     layer = data.GetLayer('points')
 
-    amenityTags = ('hospital', 'taxi', 'parking', 'cine', 'police', 'post office', 'theatre', 'university', 'school/college')
+#     amenityTags = ('hospital', 'taxi', 'parking', 'cine', 'police', 'post office', 'theatre', 'university', 'school/college')
+#     variousTags = ('marketplace',)
+#     tourismTags = ('attraction', 'historic', 'information', 'monument', 'museum', 'artcentre', 'shops', 'shopping centre', 'department store')
+#     historicTags = ('monument', 'museum')
+
+    amenityTags = ('hospital', 'library', 'police', 'post office', 'school/college', 'taxi', 'bicycle rental', 'cine','theatre', 'university', 'cementery')
     variousTags = ('marketplace',)
-    tourismTags = ('attraction', 'historic', 'information', 'monument', 'museum', 'artcentre', 'shops', 'shopping centre', 'department store')
+    tourismTags = ('castle', 'attraction', 'historic', 'information', 'monument', 'museum', 'zoo','artcentre', 'shops', 'shopping centre', 'department store')
     historicTags = ('monument', 'museum')
+    sportTags = ('sports_centre', 'stadium', 'swimming_pool')
 
     layerDefinition = layer.GetLayerDefn()
 
@@ -101,6 +124,15 @@ def extract_points(pbfFile, reverseGeocodeUrl):
                                         print('Historic: ' + name + ' Subcat: ' + aux)
                                         if aux in historicTags:
                                                 subcat = aux
+                                        else:
+                                                if other_tags and 'sport' in other_tags:
+                                                        feat=[x for x in other_tags.split(',') if 'sport' in x][0]
+                                                        category = 'sport'
+                                                        aux = feat[feat.rfind('>')+2:feat.rfind('"')]
+                                                        print('Sport: ' + name + ' Subcat: ' + aux)
+                                                        if aux in sportTags:
+                                                                subcat = aux
+
 
         if subcat:
                 payload = {'lon': coords[0], 'lat': coords[1]}
@@ -218,6 +250,8 @@ def create_shapefile(data_list, fileDest):
 imp.reload(sys)
 sys.setdefaultencoding('latin1')
 
-reverseGeocodeUrl = 'https://trip-planner.gvsigonline.com/geocodersolr/api/geocoder/reverseGeocode' # ?lon=-0.3576982972310994&lat=39.4767836851722
+# reverseGeocodeUrl = 'https://trip-planner.gvsigonline.com/geocodersolr/api/geocoder/reverseGeocode' # ?lon=-0.3576982972310994&lat=39.4767836851722
+reverseGeocodeUrl = 'http://www.cartociudad.es/geocoder/api/geocoder/reverseGeocode' # ?lon=-0.3576982972310994&lat=39.4767836851722
 
-extract_points('D:/otp/area_metropolitana_grande.pbf', reverseGeocodeUrl)
+# extract_points('/mnt/d/otp/area_metropolitana_grande.pbf', reverseGeocodeUrl)
+extract_points('/mnt/d/otp/cv.osm.pbf', reverseGeocodeUrl)
