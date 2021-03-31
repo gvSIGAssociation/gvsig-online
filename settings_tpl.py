@@ -501,7 +501,8 @@ except:
     }
     
 CELERY_BROKER_URL = '##CELERY_BROKER_URL##'
-SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+SENDFILE_BACKEND = 'django_sendfile.backends.xsendfile'
+SENDFILE_ROOT = '/' # note we are limitting access in Apache using XSendFilePath, so no need to limit here
 
 OSM_TILING_1 = '##OSM_TILING_1##'
 OSM_TILING_2 = '##OSM_TILING_2##'

@@ -626,7 +626,10 @@ PROXIES = {
     "ftp"   : None
 }
 
-SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+# use development backend if not using Apache/xsendfile
+#SENDFILE_BACKEND = 'django_sendfile.backends.development'
+SENDFILE_BACKEND = 'django_sendfile.backends.xsendfile'
+SENDFILE_ROOT = '/'
 SHARED_VIEW_EXPIRATION_TIME = 1
 
 VERSION_FIELD = 'feat_version_gvol'
