@@ -494,7 +494,8 @@ def search_candidates(request):
         print 'Tsuggestions: ', (t2-t1)*1000 , 'msecs Tjson=', (t3-t2)*1000 
         
         return HttpResponse(aux, content_type='application/json')
-    
+
+@csrf_exempt
 def find_candidate(request):
     suggestion = {}
     if request.method == 'POST':
