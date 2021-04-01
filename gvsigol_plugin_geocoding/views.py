@@ -492,6 +492,7 @@ def search_candidates(request):
         
         return HttpResponse(aux, content_type='application/json')
     
+@csrf_exempt
 def find_candidate(request):
     suggestion = {}
     if request.method == 'POST':
