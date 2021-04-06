@@ -23,9 +23,10 @@
 /**
  * TODO
  */
-var ImportFromService = function(conf, map) {
+var ImportFromService = function(pluginConf, conf, map) {
 	var self = this;
 	this.conf = conf;
+	this.pluginConf = pluginConf;
 	this.map = map;
 	this.wmsLayers = null;
 
@@ -76,14 +77,23 @@ ImportFromService.prototype.createServiceForm = function() {
 		self.modal += 						'<div class="row">';
 		self.modal += 							'<div class="col-md-2 form-group">';	
 		self.modal += 								'<label>' + gettext('Service') + '</label>';
-		self.modal += 								'<select id="servicetype" class="form-control">';
+		self.modal += 								'<select id="servicetype" class="form-control" style="padding: 4px;">';
 		self.modal += 									'<option value="WMS" selected>WMS</option>';
 		self.modal += 									'<option value="WFS">WFS</option>';
 		self.modal += 								'</select>';
 		self.modal += 							'</div>';
-		self.modal += 							'<div class="col-md-8 form-group">';	
+		self.modal += 							'<div class="col-md-7 form-group">';	
 		self.modal += 								'<label for="serviceurl">' + gettext('Service URL') + '</label>';
-		self.modal += 								'<input class="form-control" id="serviceurl" name="serviceurl" type="text" required="required">';
+		self.modal += 								'<input class="form-control" list="urls" id="serviceurl" name="serviceurl" required="required">';
+		self.modal += 								'<datalist id="urls">';
+		for (var i=0; i<self.pluginConf.wms.length; i++) {
+			self.modal += 								'<option value="' + self.pluginConf.wms[i] +'">' + self.pluginConf.wms[i] +'</option>';
+		}		
+		self.modal += 								'</datalist>';
+		self.modal += 							'</div>';
+		self.modal += 							'<div class="col-md-1 form-group">';
+		self.modal += 								'<label for="button-importfromservice-clean"></label>';
+		self.modal += 								'<button id="button-importfromservice-clean" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>';
 		self.modal += 							'</div>';
 		self.modal += 							'<div class="col-md-2 form-group">';
 		self.modal += 								'<label for="button-importfromservice-connect"></label>';
@@ -117,6 +127,29 @@ ImportFromService.prototype.createServiceForm = function() {
 		$('#serviceurl').on('input', function(){
 			$('#serviceurl-error').css('display', 'none');
 			$('#mixedcontent-error').css('display', 'none');
+		});
+
+		$('#button-importfromservice-clean').on('click', function(){
+			$('#importfromservice-layerlist').empty();
+			$('#serviceurl').val('');
+		});
+
+		$("#servicetype").on('change', function(){
+			var type = $('option:selected', $(this)).val();
+			$('#urls').empty();
+			$('#importfromservice-layerlist').empty();
+			$('#serviceurl').val('');
+			if (type == 'WMS') {
+				for (var i=0; i<self.pluginConf.wms.length; i++) {
+					$('#urls').append($('<option>', {value: self.pluginConf.wms[i], text: self.pluginConf.wms[i], selected: false}));
+				}
+				
+			} else if (type == 'WFS') {
+				for (var i=0; i<self.pluginConf.wfs.length; i++) {
+					$('#urls').append($('<option>', {value: self.pluginConf.wfs[i], text: self.pluginConf.wfs[i], selected: false}));
+				}
+				
+			}
 		});
 		
 		$('#button-importfromservice-connect').unbind("click").click(function(e){
