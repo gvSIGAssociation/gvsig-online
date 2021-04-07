@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-19 23:45+0000\n"
+"POT-Creation-Date: 2021-04-07 15:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -468,13 +468,13 @@ msgstr "Mostrar icono del proyecto en el TOC"
 
 #: gvsigol_core/templates/project_add.html:146
 #: gvsigol_core/templates/project_update.html:181
-msgid "Etiquetas de proyecto"
-msgstr ""
+msgid "Project tags"
+msgstr "Etiquetas de proyecto"
 
 #: gvsigol_core/templates/project_add.html:159
 #: gvsigol_core/templates/project_update.html:194
-msgid "Etiquetas añadidas"
-msgstr ""
+msgid "Added tags"
+msgstr "Etiquetas añadidas"
 
 #: gvsigol_core/templates/project_add.html:177
 #: gvsigol_core/templates/project_update.html:215
@@ -562,11 +562,11 @@ msgid "The project has to be saved first, Do you want continue?"
 msgstr "Es necesario guardar el proyecto primero, ¿Desea continuar?"
 
 #: gvsigol_core/templates/project_add.html:375
-#: gvsigol_core/templates/project_add.html:400
+#: gvsigol_core/templates/project_add.html:401
 #: gvsigol_core/templates/project_list.html:72
 #: gvsigol_core/templates/project_list.html:123
 #: gvsigol_core/templates/project_update.html:557
-#: gvsigol_core/templates/project_update.html:582
+#: gvsigol_core/templates/project_update.html:583
 #: gvsigol_core/templates/shared_view_list.html:53
 #: gvsigol_core/templates/viewer.html:289
 #: gvsigol_core/templates/viewer_compress.html:290
@@ -574,10 +574,10 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #: gvsigol_core/templates/project_add.html:376
-#: gvsigol_core/templates/project_add.html:401
+#: gvsigol_core/templates/project_add.html:402
 #: gvsigol_core/templates/project_list.html:73
 #: gvsigol_core/templates/project_update.html:558
-#: gvsigol_core/templates/project_update.html:583
+#: gvsigol_core/templates/project_update.html:584
 #: gvsigol_core/templates/shared_view_list.html:54
 #: gvsigol_core/templates/viewer.html:290
 #: gvsigol_core/templates/viewer.html:312
@@ -623,15 +623,20 @@ msgstr ""
 msgid "Additional permissions existing on the layer will not be removed."
 msgstr "Los permisos adicionales que existan en la capa no se eliminarán."
 
-#: gvsigol_core/templates/project_add.html:990
-#: gvsigol_core/templates/project_update.html:1403
+#: gvsigol_core/templates/project_add.html:397
+#: gvsigol_core/templates/project_update.html:579
+msgid "Public layers will remain public."
+msgstr "Las capas públicas seguirán siendo públicas."
+
+#: gvsigol_core/templates/project_add.html:991
+#: gvsigol_core/templates/project_update.html:1404
 msgid "Success: Project permissions were applied to layers."
 msgstr "Éxito: Los permisos de proyecto se aplicaron a las capas."
 
-#: gvsigol_core/templates/project_add.html:994
-#: gvsigol_core/templates/project_add.html:1000
-#: gvsigol_core/templates/project_update.html:1407
-#: gvsigol_core/templates/project_update.html:1413
+#: gvsigol_core/templates/project_add.html:995
+#: gvsigol_core/templates/project_add.html:1001
+#: gvsigol_core/templates/project_update.html:1408
+#: gvsigol_core/templates/project_update.html:1414
 msgid "Error: Permissions could not be extended to layers."
 msgstr "Error: Los permisos no pudieron extenderse a las capas."
 
@@ -1114,75 +1119,3 @@ msgstr "Operación no permitida sobre el proyecto: "
 #: gvsigol_core/views.py:1467
 msgid "The project was successfully cloned."
 msgstr "El proyecto se clonó con éxito."
-
-#~ msgid "Is needed to save this project first, Do you want continue?"
-#~ msgstr "Es necesario guardar el proyecto primero, ¿Desea continuar?"
-
-#~ msgid "gvsigonline docs"
-#~ msgstr "Manual gvsigOnline"
-
-#~ msgid "User groups"
-#~ msgstr "Grupos de usuarios"
-
-#~ msgid "Create"
-#~ msgstr "Crear"
-
-#~ msgid "Crear capa base"
-#~ msgstr "Buscar capa base"
-
-#~ msgid "File"
-#~ msgstr "Archivo"
-
-#~ msgid "Export to PDF"
-#~ msgstr "Exportar a PDF"
-
-#~ msgid "Exports the current view to PDF"
-#~ msgstr "Exportar vista actual a PDF"
-
-#~ msgid "Assign base layers"
-#~ msgstr "Asignar capas base"
-
-#~ msgid "Assign layer group"
-#~ msgstr "Asignar grupo de capas"
-
-#~ msgid "TOC order"
-#~ msgstr "Orden del TOC"
-
-#~ msgid "Buscar grupo de usuarios..."
-#~ msgstr "Buscar grupo de usuarios..."
-
-#~ msgid "Assign layer groups"
-#~ msgstr "Asignar grupos de capas"
-
-#~ msgid "Buscar grupo de capas..."
-#~ msgstr "Buscar grupo de capas..."
-
-#~ msgid "Define Toc Order"
-#~ msgstr "Definir orden del TOC"
-
-#~ msgid "Anonymous"
-#~ msgstr "Anónimo"
-
-#~ msgid "Anonymous user"
-#~ msgstr "Usuario anónimo"
-
-#~ msgid "Exit"
-#~ msgstr "Salir"
-
-#~ msgid "exportar pdf"
-#~ msgstr "Capturar pantalla en PDF"
-
-#~ msgid "Public viewer TOC is empty"
-#~ msgstr "Visor público"
-
-#~ msgid "Public viewer"
-#~ msgstr "Visor público"
-
-#~ msgid "Public viewer configuration"
-#~ msgstr "Configuración del visor público"
-
-#~ msgid "You are logged in as an non-administrator user"
-#~ msgstr "Ha iniciado sesión como usuario no administrador"
-
-#~ msgid "Manage projects"
-#~ msgstr "Administrar proyectos"
