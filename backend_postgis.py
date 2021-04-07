@@ -398,20 +398,25 @@ class Introspect:
     
 
     def get_mosaic_temporal_info(self, table, schema='public',default_mode=None, default_value=None):
-        query = "SELECT COALESCE(to_char(MIN(date), 'YYYY-MM-DD HH24:MI:SS'), '') FROM "+schema+"."+table+""
+         
+        query = sqlbuilder.SQL("SELECT COALESCE(to_char(MIN(date), 'YYYY-MM-DD HH24:MI:SS'), ''), COALESCE(to_char(MAX(date), 'YYYY-MM-DD HH24:MI:SS'), '') FROM {schema}.{table}").format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table)
+        )
+        
         self.cursor.execute(query, [])
         min = None
-        for r in self.cursor.fetchall():
-            min = r[0]
-        
-        query = "SELECT COALESCE(to_char(MAX(date), 'YYYY-MM-DD HH24:MI:SS'), '') FROM "+schema+"."+table+""
-        self.cursor.execute(query, [])
         max = None
-        for r in self.cursor.fetchall():
-            max = r[0]
+        r = self.cursor.fetchone()
+        if r:
+            min = r[0]
+            max = r[1]
         
         values=[]
-        query = "SELECT COALESCE(to_char(date, 'YYYY-MM-DD HH24:MI:SS'), '') FROM "+schema+"."+table+""
+        query = sqlbuilder.SQL("SELECT COALESCE(to_char(date, 'YYYY-MM-DD HH24:MI:SS'), '') FROM {schema}.{table}").format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table)
+        )
         self.cursor.execute(query, [])
         for r in self.cursor.fetchall():
             values.append(r[0])
@@ -420,41 +425,44 @@ class Introspect:
     
     
     def delete_mosaic(self, table, schema='public'):
-        query = "DROP TABLE IF EXISTS "+schema+"."+table+" CASCADE"
+        query = sqlbuilder.SQL("DROP TABLE IF EXISTS  {schema}.{table} CASCADE").format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table)
+        )
         self.cursor.execute(query, [])
-                
         return True
     
     
     def get_temporal_info(self, table, schema='public', field1=None, field2=None, default_mode=None, default_value=None):
-        query = "SELECT COALESCE(to_char(MIN(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM (SELECT "+field1+" a FROM "+schema+"."+table+") x"
+        query = sqlbuilder.SQL("SELECT COALESCE(to_char(MIN(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM (SELECT {field} a FROM {schema}.{table}) x").format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            field=sqlbuilder.Identifier(field1)
+        )
         self.cursor.execute(query, [])
         min = None
         for r in self.cursor.fetchall():
             min = r[0]
         
+        sql = sqlbuilder.SQL("""
+                    SELECT COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
+                    (
+                    SELECT {field} a FROM {schema}.{table} WHERE {field} IS NOT NULL
+                    ) x
+                    """)
+        
         if field2 == None or field2 =='' or field2 == field1:
-            query = """
-                    SELECT COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
-                    (
-                    SELECT """+field1+""" a FROM """+schema+"""."""+table+""" WHERE  """+field1+""" IS NOT NULL
-                    ) x
-                    """
+            query = sql.format(
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                field=sqlbuilder.Identifier(field1)
+            )
         else:
-            #query = """
-            #        SELECT COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
-            #        (
-            #        SELECT """+field1+""" a FROM """+schema+"""."""+table+""" WHERE  """+field2+""" IS NULL
-            #        UNION
-            #        SELECT """+field2+""" a FROM """+schema+"""."""+table+""" WHERE  """+field2+""" IS NOT NULL
-            #        ) x
-            #        """
-            query = """
-                    SELECT COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
-                    (
-                    SELECT """+field2+""" a FROM """+schema+"""."""+table+""" WHERE  """+field2+""" IS NOT NULL
-                    ) x
-                    """
+            query = sql.format(
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                field=sqlbuilder.Identifier(field2)
+            )
         self.cursor.execute(query, [])
         max = None
         for r in self.cursor.fetchall():
@@ -464,14 +472,27 @@ class Introspect:
     
     
     def get_widget_geometry_info(self, table, schema='public', field=None, value=None, default_geometry_field='wkb_geometry'):
-        
+        sql = "SELECT json_build_object('type','Feature', 'geometry', ST_AsGeoJSON({default_geometry_field})::json, 'srs', ST_SRID({default_geometry_field}), 'properties', to_json(row)) FROM (SELECT * FROM {schema}.{table} {where} LIMIT 1) row"
         if not field or not value:
-            where = ''
+            where = sqlbuilder.SQL('')
+            query = sqlbuilder.SQL(sql).format(
+                default_geometry_field=sqlbuilder.Literal(default_geometry_field),
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                field=sqlbuilder.Identifier(field),
+                where=where
+            )
+            self.cursor.execute(query, [])
         else:
-            where = " WHERE " + field + " = '" + value +"'" 
-            
-        query = "SELECT json_build_object('type','Feature', 'geometry', ST_AsGeoJSON("+ default_geometry_field +")::json, 'srs', ST_SRID("+ default_geometry_field +"), 'properties', to_json(row)) FROM (SELECT * FROM "+schema+"."+table + where+" LIMIT 1) row;"
-        self.cursor.execute(query, [])
+            where = sqlbuilder.SQL(" WHERE {field} = %s" )
+            query = sqlbuilder.SQL(sql).format(
+                default_geometry_field=sqlbuilder.Literal(default_geometry_field),
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                field=sqlbuilder.Identifier(field),
+                where=where
+            )
+            self.cursor.execute(query, [value])            
         geom = None
         for r in self.cursor.fetchall():
             geom = r[0]
