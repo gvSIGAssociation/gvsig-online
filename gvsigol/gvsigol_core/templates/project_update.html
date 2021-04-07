@@ -178,7 +178,7 @@
 								
 								<div class="row">
 									<div class="col-md-3 form-group">
-										<span class='header_project_label'>{% trans "Etiquetas de proyecto" %}</span>
+										<span class='header_project_label'>{% trans "Project tags" %}</span>
 										<select size="8" multiple='multiple' class="form-control" id="id_project_label" name="project_label" aria-hidden="true">
 											<option value="mobile">mobile</option>
 											<!--Otras etiquetas-->
@@ -186,12 +186,12 @@
 									</div>
 									<div class="col-md-1 form-group" style="width: 4%;top:40px">
 										<div style="width:25px">
-											<button id="button_add_label" type="button" >>></button>
-											<button id="button_remove_label" type="button" ><<</button>
+											<button id="button_add_label" type="button" >&gt;&gt;</button>
+											<button id="button_remove_label" type="button" >&lt;&lt;</button>
 										</div>
 									</div>
 									<div class="col-md-3 form-group">
-										<span class='header_project_label'>{% trans "Etiquetas añadidas" %}</span>
+										<span class='header_project_label'>{% trans "Added tags" %}</span>
 										<select size="8" multiple='multiple'  class="form-control" id="id_label_added" name="label_added" aria-hidden="true">
 											{% for label in labels_added %}
 												<option value='{{ label }}' selected>{{ label }}</option>
@@ -576,6 +576,7 @@
 					<li>{% trans "If the project is public, all the layers assigned to the project will become public." %}</li>
 					<li>{% trans "This action will operate on layers, layer groups and user groups currently selected, even if they have been not saved." %}</li>
 					<li>{% trans "Additional permissions existing on the layer will not be removed." %}</li>
+					<li>{% trans "Public layers will remain public." %}</li>
 					</ul>
 				</div>
 				<div class="modal-footer">

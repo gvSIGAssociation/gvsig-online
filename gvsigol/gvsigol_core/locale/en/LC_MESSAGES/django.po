@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-19 23:45+0000\n"
+"POT-Creation-Date: 2021-04-07 15:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -450,12 +450,12 @@ msgstr ""
 
 #: gvsigol_core/templates/project_add.html:146
 #: gvsigol_core/templates/project_update.html:181
-msgid "Etiquetas de proyecto"
+msgid "Project tags"
 msgstr ""
 
 #: gvsigol_core/templates/project_add.html:159
 #: gvsigol_core/templates/project_update.html:194
-msgid "Etiquetas añadidas"
+msgid "Added tags"
 msgstr ""
 
 #: gvsigol_core/templates/project_add.html:177
@@ -544,11 +544,11 @@ msgid "The project has to be saved first, Do you want continue?"
 msgstr ""
 
 #: gvsigol_core/templates/project_add.html:375
-#: gvsigol_core/templates/project_add.html:400
+#: gvsigol_core/templates/project_add.html:401
 #: gvsigol_core/templates/project_list.html:72
 #: gvsigol_core/templates/project_list.html:123
 #: gvsigol_core/templates/project_update.html:557
-#: gvsigol_core/templates/project_update.html:582
+#: gvsigol_core/templates/project_update.html:583
 #: gvsigol_core/templates/shared_view_list.html:53
 #: gvsigol_core/templates/viewer.html:289
 #: gvsigol_core/templates/viewer_compress.html:290
@@ -556,10 +556,10 @@ msgid "Cancel"
 msgstr ""
 
 #: gvsigol_core/templates/project_add.html:376
-#: gvsigol_core/templates/project_add.html:401
+#: gvsigol_core/templates/project_add.html:402
 #: gvsigol_core/templates/project_list.html:73
 #: gvsigol_core/templates/project_update.html:558
-#: gvsigol_core/templates/project_update.html:583
+#: gvsigol_core/templates/project_update.html:584
 #: gvsigol_core/templates/shared_view_list.html:54
 #: gvsigol_core/templates/viewer.html:290
 #: gvsigol_core/templates/viewer.html:312
@@ -599,15 +599,20 @@ msgstr ""
 msgid "Additional permissions existing on the layer will not be removed."
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:990
-#: gvsigol_core/templates/project_update.html:1403
+#: gvsigol_core/templates/project_add.html:397
+#: gvsigol_core/templates/project_update.html:579
+msgid "Public layers will remain public."
+msgstr ""
+
+#: gvsigol_core/templates/project_add.html:991
+#: gvsigol_core/templates/project_update.html:1404
 msgid "Success: Project permissions were applied to layers."
 msgstr ""
 
-#: gvsigol_core/templates/project_add.html:994
-#: gvsigol_core/templates/project_add.html:1000
-#: gvsigol_core/templates/project_update.html:1407
-#: gvsigol_core/templates/project_update.html:1413
+#: gvsigol_core/templates/project_add.html:995
+#: gvsigol_core/templates/project_add.html:1001
+#: gvsigol_core/templates/project_update.html:1408
+#: gvsigol_core/templates/project_update.html:1414
 msgid "Error: Permissions could not be extended to layers."
 msgstr ""
 
@@ -1087,14 +1092,3 @@ msgstr ""
 #: gvsigol_core/views.py:1467
 msgid "The project was successfully cloned."
 msgstr ""
-
-#, fuzzy
-#~| msgid "Buscar capas base..."
-#~ msgid "Crear capa base"
-#~ msgstr "Search base layers..."
-
-#~ msgid "Buscar grupo de usuarios..."
-#~ msgstr "Search user groups..."
-
-#~ msgid "Buscar grupo de capas..."
-#~ msgstr "Search user group..."
