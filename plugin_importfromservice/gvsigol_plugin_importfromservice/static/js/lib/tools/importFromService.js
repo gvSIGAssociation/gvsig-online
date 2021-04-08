@@ -75,28 +75,24 @@ ImportFromService.prototype.createServiceForm = function() {
 		self.modal += 			'<div class="modal-body">';
 		self.modal += 					'<form id="addvector_form" class="addlayer">'; 
 		self.modal += 						'<div class="row">';
-		self.modal += 							'<div class="col-md-2 form-group">';	
-		self.modal += 								'<label>' + gettext('Service') + '</label>';
+		self.modal += 							'<div class="col-md-2 form-group">';
 		self.modal += 								'<select id="servicetype" class="form-control" style="padding: 4px;">';
 		self.modal += 									'<option value="WMS" selected>WMS</option>';
 		self.modal += 									'<option value="WFS">WFS</option>';
 		self.modal += 								'</select>';
 		self.modal += 							'</div>';
-		self.modal += 							'<div class="col-md-7 form-group">';	
-		self.modal += 								'<label for="serviceurl">' + gettext('Service URL') + '</label>';
-		self.modal += 								'<input class="form-control" list="urls" id="serviceurl" name="serviceurl" required="required">';
+		self.modal += 							'<div class="col-md-7 form-group">';
+		self.modal += 								'<input class="myarrow" list="urls" id="serviceurl" name="serviceurl" required="required">';
 		self.modal += 								'<datalist id="urls">';
 		for (var i=0; i<self.pluginConf.wms.length; i++) {
-			self.modal += 								'<option value="' + self.pluginConf.wms[i] +'">' + self.pluginConf.wms[i] +'</option>';
+			self.modal += 								'<option value="' + self.pluginConf.wms[i].url +'">' + self.pluginConf.wms[i].title +'</option>';
 		}		
 		self.modal += 								'</datalist>';
 		self.modal += 							'</div>';
 		self.modal += 							'<div class="col-md-1 form-group">';
-		self.modal += 								'<label for="button-importfromservice-clean"></label>';
 		self.modal += 								'<button id="button-importfromservice-clean" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>';
 		self.modal += 							'</div>';
 		self.modal += 							'<div class="col-md-2 form-group">';
-		self.modal += 								'<label for="button-importfromservice-connect"></label>';
 		self.modal += 								'<button id="button-importfromservice-connect" type="button" class="btn btn-default">' + gettext('Connect') + '</button>';
 		self.modal += 							'</div>';
 		self.modal += 						'</div>';
@@ -141,12 +137,12 @@ ImportFromService.prototype.createServiceForm = function() {
 			$('#serviceurl').val('');
 			if (type == 'WMS') {
 				for (var i=0; i<self.pluginConf.wms.length; i++) {
-					$('#urls').append($('<option>', {value: self.pluginConf.wms[i], text: self.pluginConf.wms[i], selected: false}));
+					$('#urls').append($('<option>', {value: self.pluginConf.wms[i].url, text: self.pluginConf.wms[i].title, selected: false}));
 				}
 				
 			} else if (type == 'WFS') {
 				for (var i=0; i<self.pluginConf.wfs.length; i++) {
-					$('#urls').append($('<option>', {value: self.pluginConf.wfs[i], text: self.pluginConf.wfs[i], selected: false}));
+					$('#urls').append($('<option>', {value: self.pluginConf.wfs[i].url, text: self.pluginConf.wfs[i].title, selected: false}));
 				}
 				
 			}

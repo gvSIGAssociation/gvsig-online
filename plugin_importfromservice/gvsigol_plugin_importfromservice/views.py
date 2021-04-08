@@ -34,10 +34,16 @@ def get_conf(request):
         wfs_queryset = ServiceUrl.objects.filter(type='WFS')
         wms = []
         for wms_serv in wms_queryset:
-            wms.append(wms_serv.url)
+            wms.append({
+                'title': wms_serv.title,
+                'url': wms_serv.url
+            })
         wfs = []
         for wfs_serv in wfs_queryset:
-            wfs.append(wfs_serv.url)
+            wfs.append({
+                'title': wfs_serv.title,
+                'url': wfs_serv.url
+            })
         response = {
             'wms': wms,
             'wfs': wfs
