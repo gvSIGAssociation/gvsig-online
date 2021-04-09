@@ -23,7 +23,8 @@ from builtins import str as text
 @author: Cesar Martinez Izquierdo <cmartinez@scolab.es>
 '''
 
-from celery import shared_task, task
+from celery import shared_task
+from gvsigol.celery import app as celery_app
 from celery.exceptions import Retry
 from celery.utils.log import get_task_logger
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
@@ -1920,7 +1921,7 @@ def setup_periodic_tasks(sender, **kwargs):
     # Calls test('hello') every 10 seconds.
     sender.add_periodic_task(CLEAN_TASK_FREQUENCY, cleanOutdatedRequests.s(), options={'queue' : 'celery'})
 
-@task(bind=True)
+@celery_app.task(bind=True)
 def cleanOutdatedRequests(self):
     for root, dirs, files in os.walk(getTargetDir()):
         for f in files:
