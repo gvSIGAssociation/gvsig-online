@@ -93,22 +93,21 @@ iso-639
 
 # aquí me quedo --- python3
 # job and queque manager, for download manager and email queues
-celery==4.3.0
+celery==5.0.5
+django-celery-beat==2.2.0
 # harcode indirect celery requirements
-kombu==4.5.0
-zipp==0.6.0
-vine==1.3.0
-
-django-celery-beat==1.6.0
-
-# workaround for indirect dependencies problem when using pip 8
-more-itertools<6.0.0
+kombu==5.0.2
+billiard==3.6.4.0
+vine==5.0.0
+# necessary until Python 3.8
+zipp==3.4.1
 
 # uwsgi server
 uwsgi==2.0.18
-gevent==1.4.0 # to be updated or removed
+gevent==21.1.2
 #greenlet==0.4.12
 
+# Used by opensea2. To be removed when migrated to Celery
 APScheduler==3.7.0
 
 suds-community==0.8.4
