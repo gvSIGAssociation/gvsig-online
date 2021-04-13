@@ -1177,7 +1177,7 @@ attributeTable.prototype.getReport = function(reportInfo) {
 	  	success	:function(response){
 	  		if (response.done) {
 	  			$.overlayout();
-	  			window.open(reportInfo.downloadURL);
+	  			window.open(self.printProvider.url + reportInfo.downloadURL);
 	  		} else {
 	  			window.setTimeout(self.getReport(reportInfo), 3000);
 	  		}
