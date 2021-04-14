@@ -945,7 +945,7 @@ def backend_fields_list(request):
                             field = {}
                             field['name'] = f['name']
                             for id, language in LANGUAGES:
-                                field['title-'+id] = f['title-'+id]
+                                field['title-'+id] = f.get('title-'+id, field['name'])
                             result_resources.append(field)
                             founded = True
                     if not founded:
@@ -1575,7 +1575,7 @@ def layer_config(request, layer_id):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
             for id, language in LANGUAGES:
-                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i)).strip()
+                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i), field['name']).strip()
             field['visible'] = False
             if 'field-visible-' + str(i) in request.POST:
                 field['visible'] = True
