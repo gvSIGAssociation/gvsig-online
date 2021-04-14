@@ -79,16 +79,13 @@ viewer.core = {
 
     _authenticate: function() {
     	var self = this;
-    	
+    	var _params = "username=" + self.conf.user.credentials.username + "&password=" + self.conf.user.credentials.password;
     	for (var i=0; i<self.conf.auth_urls.length; i++) {			
 
     		$.ajax({
     			url: self.conf.auth_urls[i] + '/j_spring_security_check',
 				contentType : "application/x-www-form-urlencoded",
-    			params: {
-    				'username': self.conf.user.credentials.username,
-    				'password': self.conf.user.credentials.password
-    			},
+    			data: _params,
     			async: false,    			
     			method: 'POST',
     			error: function(xhr, textStatus, errorThrown){
