@@ -104,7 +104,8 @@ zipp==3.4.1
 
 # uwsgi server
 uwsgi==2.0.18
-gevent==21.1.2
+gevent==1.4.0
+#gevent==21.1.2
 #greenlet==0.4.12
 
 # Used by opensea2. To be removed when migrated to Celery
