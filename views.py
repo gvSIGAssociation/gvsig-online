@@ -1145,10 +1145,10 @@ def project_get_conf(request):
 
         auth_urls = []
         for s in Server.objects.all():
-            wms = s.getWmsEndpoint()
-            if wms.startswith(settings.BASE_URL):
-                wms.replace(settings.BASE_URL, '')
-            auth_urls.append(wms)
+            auth_url = s.frontend_url 
+            if auth_url.startswith(settings.BASE_URL):
+                auth_url.replace(settings.BASE_URL, '')
+            auth_urls.append(auth_url)
         project_tools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
 
         gvsigol_app = None

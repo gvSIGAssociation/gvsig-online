@@ -80,23 +80,21 @@ viewer.core = {
     _authenticate: function() {
     	var self = this;
     	
-    	for (var i=0; i<self.conf.auth_urls.length; i++) {
+    	for (var i=0; i<self.conf.auth_urls.length; i++) {			
+
     		$.ajax({
-    			url: self.conf.auth_urls[i],
+    			url: self.conf.auth_urls[i] + '/j_spring_security_check',
+				contentType : "application/x-www-form-urlencoded",
     			params: {
-    				'SERVICE': 'WMS',
-    				'VERSION': '1.1.1',
-    				'REQUEST': 'GetCapabilities'
+    				'username': self.conf.user.credentials.username,
+    				'password': self.conf.user.credentials.password
     			},
-    			async: true,
-    			xhrFields: {
-					withCredentials: true
-			   	},
-    			method: 'GET',
-    			headers: {
-    				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
-    			},
-    			error: function(jqXHR, textStatus, errorThrown){},
+    			async: false,    			
+    			method: 'POST',
+    			error: function(xhr, textStatus, errorThrown){
+					var err = eval( xhr.responseText );
+					console.log(err);
+				},
     			success: function(resp){
     				console.log('Authenticated');
     			}
