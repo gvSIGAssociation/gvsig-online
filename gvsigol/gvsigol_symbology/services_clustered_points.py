@@ -322,7 +322,7 @@ def get_conf(request, layer_id):
                     if f['name'] == field['name']:
                         for id, language in settings.LANGUAGES:
                             if 'title-'+id in f:
-                                field['title-'+id] = f['title-'+id]
+                                field['title-'+id] = f.get('title-'+id, field['name'])
                             else:
                                 field['title-'+id] = f['name']
             else:
