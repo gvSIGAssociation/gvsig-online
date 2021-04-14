@@ -83,19 +83,26 @@ viewer.core = {
     	for (var i=0; i<self.conf.auth_urls.length; i++) {			
 
     		$.ajax({
-    			url: self.conf.auth_urls[i] + '/j_spring_security_check',
-				contentType : "application/x-www-form-urlencoded",
-    			data: _params,
-    			async: false,    			
-    			method: 'POST',
-    			error: function(xhr, textStatus, errorThrown){
-					var err = eval( xhr.responseText );
-					console.log(err);
-				},
+    			url: self.conf.auth_urls[i] + "/wms",
+    			params: {
+    				'SERVICE': 'WMS',
+    				'VERSION': '1.1.1',
+    				'REQUEST': 'GetCapabilities'
+    			},
+    			async: true,
+    			xhrFields: {
+					withCredentials: true
+			   	},
+    			method: 'GET',
+    			headers: {
+    				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+    			},
+    			error: function(jqXHR, textStatus, errorThrown){},
     			success: function(resp){
     				console.log('Authenticated');
     			}
     		});
+
     	}
     },
 
