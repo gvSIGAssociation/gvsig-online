@@ -268,6 +268,13 @@ print.prototype.createPrintJob = function(template) {
 	}
 
 	var mapLayers = this.map.getLayers().getArray();
+	mapLayers.sort(function(la, lb) {
+		return (lb.getZIndex()-la.getZIndex());
+	})
+	// console.log('capas ordenadas: ');
+	// for (var i=0; i< mapLayers.length; i++)
+	// 	console.log(mapLayers[i].layer_name);
+
 	var printLayers = new Array();
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
@@ -616,15 +623,17 @@ print.prototype.getReport = function(reportInfo) {
 	var self = this;
 	$.ajax({
 		type: 'GET',
-		async: true,
+		async: false,
 	  	url: self.printProvider.url + reportInfo.statusURL,
 	  	success	:function(response){
 	  		if (response.done) {
 	  			$.overlayout();
 	  			window.open(reportInfo.downloadURL);
 	  		} else {
-	  			window.setTimeout(self.getReport(reportInfo), 3000);
-	  		}
+	  			window.setTimeout(function() {
+	  				self.getReport(reportInfo)
+	  			}, 3000);
+	  		}	  		
 	  	},
 	  	error: function(){}
 	});
