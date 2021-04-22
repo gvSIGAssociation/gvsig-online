@@ -3091,6 +3091,7 @@ def get_datatable_data(request):
                 'data': []
             }
             return HttpResponseForbidden(json.dumps(response), content_type='application/json')
+        qualified_name = workspace + ":" + layer_name
         wfs_url = request.POST.get('wfs_url')
         property_name = request.POST.get('property_name')
         properties_with_type = request.POST.get('properties_with_type')
@@ -3156,7 +3157,7 @@ def get_datatable_data(request):
                     'SERVICE': 'WFS',
                     'VERSION': '1.1.0',
                     'REQUEST': 'GetFeature',
-                    'TYPENAME': layer_name,
+                    'TYPENAME': qualified_name,
                     'OUTPUTFORMAT': 'application/json',
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
@@ -3169,8 +3170,8 @@ def get_datatable_data(request):
                 if cql_filter != '':
                     values['cql_filter'] = cql_filter.encode('utf-8')
 
-                recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
-                recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
+                recordsTotal = gs.getFeatureCount(request, wfs_url, qualified_name, None)
+                recordsFiltered = gs.getFeatureCount(request, wfs_url, qualified_name, cql_filter)
                 #recordsFiltered = recordsTotal
 
             else:
@@ -3201,7 +3202,7 @@ def get_datatable_data(request):
                     'SERVICE': 'WFS',
                     'VERSION': '1.1.0',
                     'REQUEST': 'GetFeature',
-                    'TYPENAME': layer_name,
+                    'TYPENAME': qualified_name,
                     'OUTPUTFORMAT': 'application/json',
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
@@ -3214,15 +3215,14 @@ def get_datatable_data(request):
                     values['cql_filter'] = raw_search_cql
                 else:
                     values['cql_filter'] = cql_filter.encode('utf-8') + ' AND ' + raw_search_cql
-                recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
-                recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
+                recordsTotal = gs.getFeatureCount(request, wfs_url, qualified_name, None)
+                recordsFiltered = gs.getFeatureCount(request, wfs_url, qualified_name, cql_filter)
 
             params = urllib.urlencode(values)
             req = requests.Session()
-            if 'username' in request.session and 'password' in request.session:
-                if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+            if request.session.get('username') is not None and request.session.get('password') is not None:
+                req.auth = (request.session['username'], request.session['password'])
+                #req.auth = ('admin', 'geoserver')
 
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
