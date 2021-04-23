@@ -167,14 +167,24 @@ gvsigolETL.Toolbar = Class.extend({
 			});
 		});
 
+		//this.runIcon = $('<i class="fa fa-spinner fa-spin"></i>')
+		//this.html.append(this.runIcon);
+
 		// Inject the RUN Button
-		this.runButton  = $('<button id="button-run" class="btn btn-default btn-sm"><i class="fa fa-play margin-r-5"></i>' + gettext('Run') + '</button>');
+		this.runButton  = $('<button id="button-run" class="btn btn-default btn-sm"><i class="fa fa-play margin-r-5" ></i>' + gettext('Run') + '<i id ="icon-success" class="fa fa-check" aria-hidden="true"></i> <i id = "icon-running" class="fa fa-spinner fa-spin"></i> <i id ="icon-error" class="fa fa-times" aria-hidden="true" ></i></button>');
 		this.html.append(this.runButton);
 
 		this.runButton.click(function(){
+
+            $("#button-run").attr("title", 'Running');
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "inline-block");
+            $("#icon-error").css("display", "none");
+
 			var writer = new draw2d.io.json.Writer();
 
 			writer.marshal(view, function(json){
+				
 				jsonCanvas = JSON.stringify(json)
 				
 				formData.append('jsonCanvas',jsonCanvas)
@@ -189,37 +199,8 @@ gvsigolETL.Toolbar = Class.extend({
 					cache: false, 
                     contentType: false, 
                     processData: false,
-					success: function (result) {
+					success: function () {
 
-						if(result != null){
-							message = result.error
-							role = 'class="alert alert-danger" role = "alert"'
-						}else{
-							message = gettext('Process has been executed succesfully')
-							role = 'class="alert alert-success" role = "alert"'
-						}
-
-						$("#dialog-response").remove();
-
-						$('#canvas-parent').append('<div id="dialog-response" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-							'<div class="modal-dialog" role="document">'+
-								'<div class="modal-content">'+
-									'<div class="modal-header">'+
-										'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-											'<span aria-hidden="true">&times;</span>'+
-										'</button>'+
-										'<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-									'</div>'+
-									'<div '+role+' align="center"> <p style="font-weight: 600;">'+message+'</p>'+
-									'</div>'+
-									'<div class="modal-footer">'+
-										'<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-									'</div>'+
-								'</div>'+
-							'</div>'+
-						'</div>')
-
-						$('#dialog-response').modal('show')
 					}
 				});
 			});

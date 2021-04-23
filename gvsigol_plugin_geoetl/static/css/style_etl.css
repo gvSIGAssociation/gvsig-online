@@ -45,6 +45,13 @@
 	cursor: pointer;
 }
 
+#icon-success{
+	color: green
+}
+
+#icon-error{
+	color: red
+}
 
 .palette_node_element {
 	
@@ -52,7 +59,6 @@
 	padding-left: 10px;
 
 }
-
 
 .column20
 {

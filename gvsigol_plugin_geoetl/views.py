@@ -26,25 +26,20 @@ from django.shortcuts import HttpResponse, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.utils.translation import ugettext as _
+
 from gvsigol import settings as core_settings
+
 from .forms import UploadFileForm
-from .models import ETLworkspaces
+from .models import ETLworkspaces, ETLstatus
 from . import settings
-import json
 from . import etl_tasks
 from . import etl_schema
+from .tasks import run_canvas_background
+
+import json
+
 import numpy as np
 
-class NpEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        else:
-            return super(NpEncoder, self).default(obj)
 
 def get_conf(request):
     if request.method == 'POST': 
@@ -55,6 +50,23 @@ def get_conf(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_canvas(request):
+
+    try:
+        
+        statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+        statusModel.message = ''
+        statusModel.status = ''
+        statusModel.save()    
+
+    except:
+        
+        statusModel = ETLstatus(
+            name = 'current_canvas',
+            message = '',
+            status = ''
+        )
+        statusModel.save()
+
     try:
         lgid = request.GET['lgid']
         instance  = ETLworkspaces.objects.get(id=int(lgid))
@@ -151,6 +163,24 @@ def etl_workspace_update(request):
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def etl_current_canvas_status(request):
+    try:
+        statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+        status = statusModel.status
+        msg = statusModel.message
+
+        response = {
+            'status': status, 'message': msg
+        }      
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    except:
+        response = {
+            'status': '', 'message': ''
+        }      
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_read_canvas(request):
@@ -159,115 +189,25 @@ def etl_read_canvas(request):
         
         if form.is_valid():
 
+                
+            statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+            statusModel.message = 'Running'
+            statusModel.status = 'Running'
+            statusModel.save()    
+
             jsonCanvas = json.loads(request.POST['jsonCanvas'])
 
-            nodes=[]
-            edges =[]
-
-            count = 0
-            for i in jsonCanvas:
-                if i['type'] != 'draw2d.Connection':
-                    nodes.append([count,i])
-                    count+=1
-                else:
-                    del i['id']
-                    if i not in edges:
-                        edges.append(i)
-
-            g = etl_tasks.Graph(len(nodes))
-
-            for e in edges:
-                source = -1
-                target = -1
-                for n in nodes:
-                    if e['source']['node'] == n[1]['id']:
-                        source = n[0]
-                    elif e['target']['node'] == n[1]['id']:
-                        target = n[0]
-                    elif source !=-1 and target !=-1:
-                        break
-                g.addEdge(source, target)
-
-            sortedList = g.topologicalSort()
-            try:
-                #going down the sorted list of tasks and executing them
-                for s in sortedList:
-                    for n in nodes:
-                        if s == n[0]:
-                            
-                            #get parameters for the task
-                            try:
-                                parameters = n[1]['entities'][0]['parameters'][0]
-                                
-                            except:
-                                parameters = {}
-                            
-                            #execute input task
-                            if n[1]['type'].startswith('input'):
-
-                                method_to_call = getattr(etl_tasks, n[1]['type'])
-                                result = method_to_call(parameters)
-                                n.append(result)
-                            
-                            #execute trasnformers or outputs tasks    
-                            else:
-                                
-                                for ip in n[1]['ports']:
-                                    if ip['name'].startswith('input'):
-                                        
-                                        targetPort = ip['name']
-                                        targetPortRepeated = False
-                                        for e in edges:
-                                            if e['target']['port'] == targetPort:
-
-                                                sourceNode = e['source']['node']
-                                                sourcePort = e['source']['port']
-                                                
-                                                for nd in nodes:
-                                                    if nd[1]['id'] == sourceNode:
-                                                        
-                                                        outputPortCounter=-1
-                                                        for op in nd[1]['ports']:
-                                                            
-                                                            if op['name'].startswith('output'):
-                                                                outputPortCounter+=1
-                                                            if op['name']== sourcePort:
-                                                                break
-                                                        if 'data' in parameters:
-                                                            parameters['data'].append(nd[2][outputPortCounter])
-                                                        else:
-                                                            parameters['data'] = [nd[2][outputPortCounter]]
-                                                            
-                                                        break
-                                                
-                                                #if more than an edge has the end in the same port
-                                                if targetPortRepeated == True:
-
-                                                    fc = parameters['data'][-2]
-
-                                                    
-                                                    for f in parameters['data'][-1]['features']:
-                                                        fc['features'].append(f)
-
-                                                    del parameters['data'][-1]
-                                                
-                                                targetPortRepeated = True
-                                                
-
-                                method_to_call = getattr(etl_tasks, n[1]['type'])
-                                result = method_to_call(parameters)
-                                
-                                if not n[1]['type'].startswith('output'):
-                                    n.append(result)
-            
-            except Exception as e:
-                result = {"error": "ERROR - "+str(e)}
+            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas})
  
         else:
             print ('invalid form')
             print((form.errors))
+       
+    response = {
+           'refresh': True
+       }
 
-    return HttpResponse(json.dumps(result, cls=NpEncoder), content_type="application/json")
+    return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_sheet_excel(request):

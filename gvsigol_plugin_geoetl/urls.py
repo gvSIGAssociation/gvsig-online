@@ -15,4 +15,5 @@ urlpatterns = [
     path('etl/etl_workspace_add/', views.etl_workspace_add, name='etl_workspace_add'),
     path('etl/etl_workspace_delete/', views.etl_workspace_delete, name='etl_workspace_delete'),
     path('etl/etl_workspace_update/', views.etl_workspace_update, name='etl_workspace_update'),
+    path('etl/etl_current_canvas_status/', views.etl_current_canvas_status, name='etl_current_canvas_status'),
 ]
