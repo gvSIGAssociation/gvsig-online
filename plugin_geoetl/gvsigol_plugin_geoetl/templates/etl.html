@@ -80,6 +80,70 @@
         var cnv = JSON.parse(htmlDecode(workspace))
     };
 
+    function actualizarInfoPanel(data){
+        if(data.status == ''){
+
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+
+        if(data.status == 'Running'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "inline-block");
+            $("#icon-error").css("display", "none");
+			
+        }
+        if(data.status == 'Success'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "inline");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+        if(data.status == 'Error'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "inline");
+
+        }
+
+    }
+
+    function getCurrentCanvasStatus(){
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/etl/etl_current_canvas_status/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		actualizarInfoPanel(response);  		
+			},
+		  	error: function(response){
+				actualizarInfoPanel(response);	
+		  	}
+		});
+		return false;
+    }
+
+	function startCurrentCanvasStatus(){
+		interval = setInterval(function(){ 
+			getCurrentCanvasStatus();
+		}, 5000);
+	}
+
+    startCurrentCanvasStatus();
+    getCurrentCanvasStatus()
+
 </script>
 
 <link type="text/css" rel="stylesheet" href="{% static "css/style_etl.css" %}">
