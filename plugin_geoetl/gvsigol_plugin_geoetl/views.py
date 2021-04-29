@@ -26,6 +26,7 @@ from django.shortcuts import HttpResponse, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.utils.translation import ugettext as _
+from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 
 from gvsigol import settings as core_settings
 
@@ -36,9 +37,9 @@ from . import etl_tasks
 from . import etl_schema
 from .tasks import run_canvas_background
 
-import json
-
+from datetime import datetime
 import numpy as np
+import json
 
 
 def get_conf(request):
@@ -52,10 +53,10 @@ def get_conf(request):
 def etl_canvas(request):
 
     try:
-        
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
         statusModel.message = ''
         statusModel.status = ''
+        statusModel.id_ws = None
         statusModel.save()    
 
     except:
@@ -63,7 +64,8 @@ def etl_canvas(request):
         statusModel = ETLstatus(
             name = 'current_canvas',
             message = '',
-            status = ''
+            status = '',
+            id_ws = None
         )
         statusModel.save()
 
@@ -78,7 +80,28 @@ def etl_canvas(request):
             'workspace': instance.workspace,
             'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/"
         }
+
+        try:
+            periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+instance.name+'.'+str(lgid))
+        except:
+            periodicTask = None
         
+        if periodicTask:
+            cronid = periodicTask.crontab_id
+            interid = periodicTask.interval_id
+            if cronid:
+                crontab = CrontabSchedule.objects.get(id= cronid)
+                response['minute'] = crontab.minute
+                response['hour'] = crontab.hour
+
+                days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+                response['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+            else:
+                interval = IntervalSchedule.objects.get(id= interid)
+                response['every'] = interval.every
+                response['period'] = interval.period
+
         return render(request, 'etl.html', response)
     
     except:
@@ -89,7 +112,7 @@ def etl_canvas(request):
 
 def get_list():
     etl_list = ETLworkspaces.objects.all()
-    
+
     workspaces = []
     for w in etl_list:
         workspace = {}
@@ -97,23 +120,153 @@ def get_list():
         workspace['name'] = w.name
         workspace['description'] = w.description
         workspace['workspace'] = w.workspace[:200]+" (...) ]"
+        
+        try:
+            periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
+        except:
+            periodicTask = None
+        
+        if periodicTask:
+            cronid = periodicTask.crontab_id
+            interid = periodicTask.interval_id
+            if cronid:
+                crontab = CrontabSchedule.objects.get(id= cronid)
+                workspace['minute'] = crontab.minute
+                workspace['hour'] = crontab.hour
+
+                days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+                workspace['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+            else:
+                interval = IntervalSchedule.objects.get(id= interid)
+                workspace['every'] = interval.every
+                workspace['period'] = interval.period
+
         workspaces.append(workspace)
+    
     return workspaces
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_workspace_list(request):
+
     response = {
         'workspaces': get_list()
     }
 
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
+def save_periodic_workspace(request, workspace):
+
+    day = request.POST.get('day')
+    num_program = request.POST.get('interval')
+    unit_program = request.POST.get('unit')
+
+    try:
+        jsonCanvas = json.loads(request.POST['workspace'])
+    except:
+        jsonCanvas = json.loads(workspace.workspace)
+    
+    my_task_name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id)
+
+    if day == 'all':
+        
+        if unit_program == 'minutes':
+            unit_period = IntervalSchedule.MINUTES
+        elif unit_program == 'days':
+            unit_period = IntervalSchedule.DAYS
+        elif unit_program == 'hours':
+            unit_period = IntervalSchedule.HOURS
+        
+        schedule, created = IntervalSchedule.objects.get_or_create(
+            every = num_program,
+            period=unit_period,
+        )
+
+        PeriodicTask.objects.create(
+            interval=schedule,
+            name=my_task_name,
+            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id}),
+            task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
+        )
+    else:
+
+        time = datetime.strptime(request.POST.get('time'), '%H:%M:%S').time()
+
+        days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+        day_of_week = '*'
+        for i in range(0, len(days_of_week)):
+            if day == days_of_week[i]:
+                day_of_week = str(i)
+
+        schedule, _ = CrontabSchedule.objects.get_or_create(
+            minute=time.minute,
+            hour=time.hour,
+            day_of_week = day_of_week,
+            day_of_month='*',
+            month_of_year='*'
+        )
+        PeriodicTask.objects.create(
+            crontab=schedule,
+            name=my_task_name,
+            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id}),
+            task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
+        )
+
+    statusModel = ETLstatus(
+        name = workspace.name,
+        message = '',
+        status = '',
+        id_ws = workspace.id
+    )
+    statusModel.save()
+
+def delete_periodic_workspace(workspace):
+
+    try:
+        periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id))
+    except:
+        periodicTask = None
+    
+    if periodicTask:
+        cronid = periodicTask.crontab_id
+        interid = periodicTask.interval_id
+
+        periodicTask.delete()
+
+        if interid:
+            
+            try:
+                intervalTasks = PeriodicTask.objects.get(crontab_id =interid)
+            except:
+                intervalTasks = None
+            
+            if not intervalTasks:
+
+                intervalSchedule = IntervalSchedule.objects.get(id = interid)
+                intervalSchedule.delete()
+        else:
+            try:
+                cronTasks = PeriodicTask.objects.get(crontab_id =cronid)
+            except:
+                cronTasks = None
+            
+            if not cronTasks:
+            
+                crontabSchedule = CrontabSchedule.objects.get(id = cronid)
+                crontabSchedule.delete()
+
+    try:
+        statusModel  = ETLstatus.objects.get(id_ws = workspace.id)
+        statusModel.delete()
+    except:
+        pass
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_workspace_add(request):
     if request.method == 'POST':
-       
+    
         try: 
             int(request.POST.get('id'))
             lgid = request.POST['id']
@@ -134,6 +287,12 @@ def etl_workspace_add(request):
                 workspace = request.POST.get('workspace')
             )
             workspace.save()
+        
+        delete_periodic_workspace(workspace)
+
+        if request.POST.get('checked') == 'true':
+
+            save_periodic_workspace(request, workspace)
 
         return redirect('etl_workspace_list')
         
@@ -142,8 +301,13 @@ def etl_workspace_add(request):
 def etl_workspace_delete(request):
     lgid = request.POST['lgid']
     if request.method == 'POST':
+        
         instance  = ETLworkspaces.objects.get(id=int(lgid))
+        
+        delete_periodic_workspace(instance)
+        
         instance.delete()
+
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
@@ -160,6 +324,13 @@ def etl_workspace_update(request):
             workspace = instance.workspace
         )
         workspace.save()
+
+        delete_periodic_workspace(instance)
+
+        if request.POST.get('checked') == 'true':
+
+            save_periodic_workspace(request, instance)
+            
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
@@ -181,6 +352,28 @@ def etl_current_canvas_status(request):
         }      
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def etl_list_canvas_status(request):
+
+    statusModel  = ETLstatus.objects.all()
+    
+    workspaces = []
+
+    for sm in statusModel:
+        if sm.name != 'current_canvas':
+            
+            workspace = {}
+            workspace['id_ws'] = sm.id_ws
+            workspace['status'] = sm.status
+            workspace['message'] = sm.message
+            workspaces.append(workspace)
+    
+    response = {
+        'workspaces': workspaces
+    }   
+    
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_read_canvas(request):
@@ -188,7 +381,6 @@ def etl_read_canvas(request):
         form = UploadFileForm(request.POST)
         
         if form.is_valid():
-
                 
             statusModel  = ETLstatus.objects.get(name = 'current_canvas')
             statusModel.message = 'Running'
@@ -197,7 +389,7 @@ def etl_read_canvas(request):
 
             jsonCanvas = json.loads(request.POST['jsonCanvas'])
 
-            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas})
+            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': None})
  
         else:
             print ('invalid form')

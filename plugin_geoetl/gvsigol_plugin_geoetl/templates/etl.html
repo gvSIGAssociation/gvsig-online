@@ -69,6 +69,14 @@
     workspace = '{{ workspace }}'
     fm_directory = '{{ fm_directory }}'
 
+    if('{{day_of_week}}'){
+        dataPeriodic = '{{day_of_week}}'+' '+'{{hour}}'+':'+'{{minute}}'
+    }else if('{{every}}'){
+        dataPeriodic = '{{every}}'+' '+'{{period}}'
+    }else{
+        dataPeriodic = ''
+    }
+
     function htmlDecode(input){
         var e = document.createElement('textarea');
         e.innerHTML = input;
