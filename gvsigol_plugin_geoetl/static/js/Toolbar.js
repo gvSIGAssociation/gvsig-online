@@ -105,8 +105,56 @@ gvsigolETL.Toolbar = Class.extend({
 										'<label for="etl_desc">'+gettext('Description')+'</label>'+
 										'<input value ="'+description_ws+'" placeholder="'+gettext('ETL workspace description')+'" name="etl_desc" id="etl_desc" type="text" class="form-control">'+									
 									'</div>'+
-								'</div>'+					
+								'</div>'+
 
+								'<div class="row">'+
+									'<div class="col-md-12">'+
+										'<label for="repeat_periodically">'+gettext("Run periodically?")+'</label>'+
+										'<input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>'+												
+									'</div>'+
+									
+									'<div class="col-md-6 repeat_periodically_time" >'+
+										'<select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">'+
+											'<option value="all">'+gettext('all')+'</option>'+
+											'<option value="monday">'+gettext('monday')+'</option>'+
+											'<option value="tuesday">'+gettext('tuesday')+'</option>'+
+											'<option value="wednesday">'+gettext('wednesday')+'</option>'+
+											'<option value="thursday">'+gettext('thursday')+'</option>'+
+											'<option value="friday">'+gettext('friday')+'</option>'+
+											'<option value="saturday">'+gettext('saturday')+'</option>'+
+											'<option value="sunday">'+gettext('sunday')+'</option>'+
+										'</select>'+
+									'</div>'+
+									'<div class="more-hour-options">'+
+										'<div class="col-md-6 repeat_periodically_time">'+
+											'<div class="form-group">'+
+												'<div class="input-group date">'+
+													'<input type="text" class="form-control" id="ws-program-time" name="ws-program-time" placeHolder="HH:mm:ss"/>'+
+													'<span class="input-group-addon">'+
+													'</span>'+
+												'</div>'+
+											'</div>'+
+										'</div>'+
+									'</div>'+
+									
+									'<div class="more-options">'+
+										'<div class="col-md-12 repeat_periodically_time">'+
+											'<label>'+gettext("Run workspace every...")+'</label>'+
+										'</div>'+
+									
+										'<div class="col-md-6 repeat_periodically_time">'+
+											'<input placeholder="'+gettext('Select number of...')+'" name="ws-program-interval" id="ws-program-interval" type="number" value=1 class="form-control">'+
+										'</div>'+
+										'<div class="col-md-6 repeat_periodically_time">'+
+											'<select class="form-control" style="width: 100%;" id="ws-program-unit" name="ws-program-unit">'+
+												'<option value="empty">'+gettext('... time measure')+'</option>'+
+												'<option value="minutes">'+gettext('minutes')+'</option>'+
+												'<option value="hours">'+gettext('hours')+'</option>'+
+												'<option value="days">'+gettext('days')+'</option>'+
+											'</select>'+
+										'</div>'+
+									'</div>'+
+								'</div>'+
 							'</form>'+
 						'</div>'+
 						'<div class="modal-footer">'+
@@ -117,10 +165,69 @@ gvsigolETL.Toolbar = Class.extend({
 				'</div>'+
 			'</div>')
 
+			$(".more-hour-options").slideUp("slow")
+
+			if(dataPeriodic!=''){
+				$("#repeat_periodically").prop('checked', true)
+				$(".repeat_periodically_time").slideDown("slow");
+
+				if(dataPeriodic.includes(':')){
+
+					$(".more-options").slideUp("slow"); 
+					$(".more-hour-options").slideDown("slow");
+					
+					$(".modal-body #ws-program-day").val(dataPeriodic.split(' ')[0])
+					$(".modal-body #ws-program-time").val(dataPeriodic.split(' ')[1]+':00')
+
+				}else{
+
+					$(".more-options").slideDown("slow");  // checked
+					$(".more-hour-options").slideUp("slow");
+
+					$(".modal-body #ws-program-day").val('all')
+					$(".modal-body #ws-program-interval").val(dataPeriodic.split(' ')[0])
+					$(".modal-body #ws-program-unit").val(dataPeriodic.split(' ')[1])
+
+				}
+			
+			}else{
+				$("#repeat_periodically").prop('checked', false)
+				$(".repeat_periodically_time").slideUp("slow");
+			}
+
 			$('#dialog-save').modal('show')
 
 			$("#save-etl").prop("disabled",false);
 			$('#save-etl').attr('data-toggle','');
+
+			
+	
+			$('#repeat_periodically').click(function() {
+		
+					if($("#repeat_periodically").is(':checked'))
+						$(".repeat_periodically_time").slideDown("slow");  // checked
+					else
+						$(".repeat_periodically_time").slideUp("slow"); 
+				});
+		
+		
+			function edit_progamming_form(value){
+				 if(value == "all"){
+					 $(".more-options").slideDown("slow");  // checked
+					 $(".more-hour-options").slideUp("slow"); 
+				 }else{
+					$(".more-options").slideUp("slow"); 
+					$(".more-hour-options").slideDown("slow"); 
+				 }
+			}
+		
+			$('#ws-program-time').datetimepicker({
+				format: 'HH:mm:ss' 
+			});
+			
+			$('#ws-program-day').on('change', function() {
+				edit_progamming_form($(this).val());
+			});
 
 			var writer = new draw2d.io.json.Writer();
 			
@@ -141,6 +248,17 @@ gvsigolETL.Toolbar = Class.extend({
 				formWorkspace.append('id', $('#etl_id').val())
 				formWorkspace.append('name', $('#etl_name').val())
 				formWorkspace.append('description', $('#etl_desc').val())
+				
+				if($("#repeat_periodically").is(':checked')){
+					formWorkspace.append("checked", true)
+				} else {
+					formWorkspace.append("checked", false)
+				}
+				
+				formWorkspace.append("day", $("#ws-program-day").val())
+				formWorkspace.append("time", $("#ws-program-time").val())
+				formWorkspace.append("interval", $("#ws-program-interval").val())
+				formWorkspace.append("unit", $("#ws-program-unit").val())
 			
 				writer.marshal(view, function(json){
 	

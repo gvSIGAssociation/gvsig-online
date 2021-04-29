@@ -712,7 +712,7 @@ def output_Postgis(dicc):
                     sqlInsert2 = sqlInsert2+ str(value)+','
             
             sqlInsert2=sqlInsert2+"ST_SetSRID(ST_GeomFromGeoJSON('"+str(coord)+"'), "+ str(epsg)+") )"
-
+            
             cur.execute(sqlInsert2)
 
     elif operation == 'UPDATE':
