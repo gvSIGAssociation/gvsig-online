@@ -266,27 +266,75 @@ gvsigolETL.Toolbar = Class.extend({
 	
 					formWorkspace.append('workspace',jsonCanvas)
 				});
+
+				if ($('#etl_id').val()==''){
 			
-				$.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_workspace_add/',
-					data: formWorkspace,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-					},
-					cache: false, 
-					contentType: false, 
-					processData: false,
-					success: function () {
-						$('#dialog-save').modal('hide')
-						location.href = '/gvsigonline/etl/etl_workspace_list/';
-					}
-				});		
+					$.ajax({
+						type: 'POST',
+						url: '/gvsigonline/etl/etl_workspace_add/',
+						data: formWorkspace,
+						beforeSend:function(xhr){
+							xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						},
+						cache: false, 
+						contentType: false, 
+						processData: false,
+						success: function () {
+							$('#dialog-save').modal('hide')
+							location.href = '/gvsigonline/etl/etl_workspace_list/';
+						}
+					});
+				} else {
+
+					$('#canvas-parent').append('<div class="modal fade" id="modal-overwrite-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
+						'<div class="modal-dialog" role="document">'+
+							'<div class="modal-content">'+
+								'<div class="modal-header">'+
+									'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+										'<span aria-hidden="true">&times;</span>'+
+									'</button>'+
+									'<h4 class="modal-title" id="myModalLabel">'+gettext('Overwrite workspace?')+'</h4>'+
+								'</div>'+
+								'<div class="modal-body">'+
+									'<div class="row">'+
+										'<div class="col-md-12 form-group">'+
+											'<p style="font-weight: 600;">'+gettext('Workspace')+' '+lgid+' '+gettext('will be overwrite. If you do not want to overwrite it the ID must be empty.')+'</p>'+
+										'</div>'+
+									'</div>'+
+								'</div>'+
+								'<div class="modal-footer">'+
+									'<button id="button-overwrite-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">'+gettext("Cancel")+'</button>'+
+									'<button id="button-overwrite-workspace-accept" type="button" class="btn btn-default">'+gettext("Accept")+'</button>'+
+								'</div>'+
+							'</div>'+
+						'</div>'+
+					'</div>')
+
+					$('#modal-overwrite-workspace-etl').modal('show')
+
+					$('#button-overwrite-workspace-accept').click(function() {
+
+						$('#modal-overwrite-workspace-etl').modal('hide')
+
+						$.ajax({
+							type: 'POST',
+							url: '/gvsigonline/etl/etl_workspace_add/',
+							data: formWorkspace,
+							beforeSend:function(xhr){
+								xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+							},
+							cache: false, 
+							contentType: false, 
+							processData: false,
+							success: function () {
+								$('#dialog-save').modal('hide')
+								location.href = '/gvsigonline/etl/etl_workspace_list/';
+							}
+						});
+					});
+				}		
 			});
 		});
-
-		//this.runIcon = $('<i class="fa fa-spinner fa-spin"></i>')
-		//this.html.append(this.runIcon);
 
 		// Inject the RUN Button
 		this.runButton  = $('<button id="button-run" class="btn btn-default btn-sm"><i class="fa fa-play margin-r-5" ></i>' + gettext('Run') + '<i id ="icon-success" class="fa fa-check" aria-hidden="true"></i> <i id = "icon-running" class="fa fa-spinner fa-spin"></i> <i id ="icon-error" class="fa fa-times" aria-hidden="true" ></i></button>');
