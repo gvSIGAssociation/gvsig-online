@@ -1564,11 +1564,7 @@ def layer_autoconfig(layer, featuretype):
 
     layer.conf = layer_conf
 
-def _parse_form_groups(json_str, fields):
-    try:
-        form_groups = json.loads(json_str)
-    except:
-        form_groups = None
+def _parse_form_groups(form_groups, fields):
     if not(isinstance(form_groups, list)) or len(form_groups) == 0:
         form_groups = [{
             'name': 'group1'
@@ -1644,8 +1640,12 @@ def layer_config(request, layer_id):
                     field['editable'] = False
             fields.append(field)
         conf['fields'] = fields
-        form_groups = _parse_form_groups(request.POST.get('form_groups', []), fields)
-        conf['form_groups'] = json.dumps(form_groups)
+        try:
+            form_groups = json.loads(request.POST.get('form_groups', []))
+        except:
+            form_groups = None
+        form_groups = _parse_form_groups(form_groups, fields)
+        conf['form_groups'] = form_groups
         layer.conf = conf
         layer.save()
 
