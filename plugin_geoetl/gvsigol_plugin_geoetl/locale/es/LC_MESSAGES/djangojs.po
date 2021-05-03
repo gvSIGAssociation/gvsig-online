@@ -339,3 +339,63 @@ msgstr "Si abres un nuevo canvas vacío perderás el canvas actual si no lo has 
 
 msgid "File selected is not a "
 msgstr "El archivo seleccionado no es un "
+
+msgid "Save ETL workspace"
+msgstr "Guarda el espacio de trabajo ETL"
+
+msgid "Description"
+msgstr "Descripción"
+
+msgid "Run periodically?"
+msgstr "¿Ejecutar periódicamente?"
+
+msgid "all"
+msgstr "todos"
+
+msgid "monday"
+msgstr "lunes"
+
+msgid "tuesday"
+msgstr "martes"
+
+msgid "wednesday"
+msgstr "miércoles"
+
+msgid "thursday"
+msgstr "jueves"
+
+msgid "friday"
+msgstr "viernes"
+
+msgid "saturday"
+msgstr "sábado"
+
+msgid "sunday"
+msgstr "domingo"
+
+msgid "Run workspace every..."
+msgstr "Ejecuta el espacio de trabajo cada..."
+
+msgid "Select number of..."
+msgstr "Selecciona el número de..."
+
+msgid "... time measure"
+msgstr "... medida de tiempo"
+
+msgid "minutes"
+msgstr "minutos"
+
+msgid "hours"
+msgstr "horas"
+
+msgid "days"
+msgstr "días"
+
+msgid "Overwrite workspace?"
+msgstr "¿Sobreescribir espacio de trabajo?"
+
+msgid "Workspace"
+msgstr "El espacio de trabajo"
+
+msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
+msgstr "se sobreescribirá. Si no quieres que se sobreescriba deja el ID vacío."

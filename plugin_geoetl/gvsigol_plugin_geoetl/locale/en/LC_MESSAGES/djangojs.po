@@ -339,3 +339,63 @@ msgstr ""
 
 msgid "File selected is not a "
 msgstr ""
+
+msgid "Save ETL workspace"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Run periodically?"
+msgstr ""
+
+msgid "all"
+msgstr ""
+
+msgid "monday"
+msgstr ""
+
+msgid "tuesday"
+msgstr ""
+
+msgid "wednesday"
+msgstr ""
+
+msgid "thursday"
+msgstr ""
+
+msgid "friday"
+msgstr ""
+
+msgid "saturday"
+msgstr ""
+
+msgid "sunday"
+msgstr ""
+
+msgid "Run workspace every..."
+msgstr ""
+
+msgid "Select number of..."
+msgstr ""
+
+msgid "... time measure"
+msgstr ""
+
+msgid "minutes"
+msgstr ""
+
+msgid "hours"
+msgstr ""
+
+msgid "days"
+msgstr ""
+
+msgid "Overwrite workspace?"
+msgstr ""
+
+msgid "Workspace"
+msgstr ""
+
+msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
+msgstr ""

@@ -339,3 +339,63 @@ msgstr "Si obris un nou canvas buit perdràs el canvas actual si no l'has guarda
 
 msgid "File selected is not a "
 msgstr "L'arxiu seleccionat no és un "
+
+msgid "Save ETL workspace"
+msgstr "Guarda l'espai de treball ETL"
+
+msgid "Description"
+msgstr "Descripció"
+
+msgid "Run periodically?"
+msgstr "Executar periòdicament?"
+
+msgid "all"
+msgstr "tots"
+
+msgid "monday"
+msgstr "dilluns"
+
+msgid "tuesday"
+msgstr "dimarts"
+
+msgid "wednesday"
+msgstr "dimecres"
+
+msgid "thursday"
+msgstr "dijous"
+
+msgid "friday"
+msgstr "divendres"
+
+msgid "saturday"
+msgstr "dissabte"
+
+msgid "sunday"
+msgstr "diumenge"
+
+msgid "Run workspace every..."
+msgstr "Executa l'espai de treball cada..."
+
+msgid "Select number of..."
+msgstr "Selecciona el nombre de..."
+
+msgid "... time measure"
+msgstr "... mesura de temps"
+
+msgid "minutes"
+msgstr "minuts"
+
+msgid "hours"
+msgstr "hores"
+
+msgid "days"
+msgstr "dies"
+
+msgid "Overwrite workspace?"
+msgstr "Sobreescriure espai de treball?"
+
+msgid "Workspace"
+msgstr "L'espai de treball"
+
+msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
+msgstr "es sobreescriurà. Si no vols que es sobreescriga deixa l'ID buit."
