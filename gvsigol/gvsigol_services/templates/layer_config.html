@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% load i18n %}
+{% load key %}
 
 {% block content %}	
 
@@ -41,6 +42,8 @@
 		<ul class="nav nav-tabs">
 			<li role="presentation" class="active"><a href="#tab-layer-config" data-toggle="tab">{% trans "Field management" %}</a></li>
 			<li role="presentation"><a href="#tab-layer-field-trans" data-toggle="tab">{% trans "Field titles" %}</a></li>
+			<li role="presentation"><a href="#tab-layer-fieldgroups" data-toggle="tab">{% trans "Field groups" %}</a></li>
+			<li role="presentation"><a href="#tab-layer-fieldgroup-trans" data-toggle="tab">{% trans "Group titles" %}</a></li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane active" id="tab-layer-config">
@@ -152,7 +155,7 @@
 					<div class="col-md-12">
 						<div class="box">
 							<div class="box-body">
-								<div id="layer-fields" class="row">
+								<div class="row">
 									<div class="col-md-12">
 										<div class="table-responsive">
 											<table id="field-list-table" class="table no-margin">
@@ -168,7 +171,7 @@
 													{% for f in fields %}
 														{% with counter=forloop.counter %}
 																<tr>
-																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
+																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control field-name" value="{{f.name}}"></td>
 																	{% for id, language in available_languages %}
 																	<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
 																	{% endfor %}
@@ -176,6 +179,100 @@
 																{% if forloop.last %}
 																<input type="hidden" name="counter" value="{{counter}}" />
 															{% endif %}
+														{% endwith %}
+													{% endfor %}	
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane" id="tab-layer-fieldgroups">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body">
+								<div id="field-groups-order">
+									{% for g in form_groups %}
+									{% with counter=forloop.counter %}
+									<div class="box box-default collapsed-box sortable-fieldgroup" data-groupid="{{counter}}" style="border-top: none;">
+										<div class="box-header">
+											<div class="handle form-inline">
+												<span class="" style="margin-right: 20px;"> 
+													<i class="fa fa-ellipsis-v"></i>
+													<i class="fa fa-ellipsis-v"></i>
+												</span>
+												<input type="text" class="form-control" value="{{g.name}}">
+												&nbsp;<span class="text-danger group-name-error"></span>
+											</div>
+											<div class="box-tools box-tools-buttons pull-right">
+												<button type="button" class="button-delete-group" name="button-delete-group" title="{% trans 'Delete group' %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+											</div>
+										</div>
+									</div>
+									{% for f in g.fields %}
+									<div data-name="{{f}}"  class="box box-default collapsed-box sortable-fieldgroup-field" style="padding-left: 45px; border-top: none;">
+										<div class="box-header">
+											<div class="handle">
+												<span class="" style="margin-right: 20px;"> 
+													<i class="fa fa-ellipsis-v"></i>
+													<i class="fa fa-ellipsis-v"></i>
+												</span>
+												<span class="text">{{f}}</span>
+											</div>
+										</div>
+									</div>
+									{% endfor %}
+									{% if forloop.last %}
+									<input class="hide" id="fieldgroup-total-counter" value="{{counter}}" type="text">
+									{% endif %}
+									{% endwith %}
+									{% endfor %}
+								</div>
+							</div>
+							<div class="box-footer clearfix">
+								<a id="add-field-group-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
+									<i class="fa fa-plus margin-r-5"></i>{% trans "Add field group" %}
+								</a>
+								<input class="hide form-control" id="form_groups" name="form_groups" type="text" />
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane" id="tab-layer-fieldgroup-trans">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body">
+								<div class="row">
+									<div class="col-md-12">
+										<div class="table-responsive">
+											<table id="fieldgroup-trans-table" class="table no-margin">
+												<thead>
+													<tr>
+														<th>{% trans "Group name" %}</th>
+														{% for id, language in available_languages %}
+														<th>{% trans "Group title" %}&nbsp;({{ language }})</th>
+														{% endfor %}
+													</tr>
+												</thead>
+												<tbody id="fieldgroup-trans-table-body">
+													{% for g in form_groups %}
+														{% with counter=forloop.counter %}
+															<tr class="fieldgroup-trans-row" data-groupid="{{counter}}">
+																<td><input readonly name="fieldgroup-name-{{counter}}" type="text" class="form-control" value="{{g.name}}"></td>
+																{% for id, language in available_languages %}
+																{% with thelangtitleid="title-"|add:id %}
+																<td><input name="fieldgroup-title-{{id}}-{{counter}}" type="text" data-langid="{{id}}" data-title="{{thelangtitleid}}" class="form-control fieldgroup-trans" placeHolder="{{g.name}}" value="{{g|key:thelangtitleid}}"></td>
+																{% endwith %}
+																{% endfor %}
+															</tr>
 														{% endwith %}
 													{% endfor %}	
 												</tbody>
@@ -256,13 +353,11 @@
 						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 					},
 					success	:function(response) {
-						console.log("field-mandatory-"+counter);
 						document.getElementById("field-mandatory-"+counter).disabled = true;
 						document.getElementById("field-mandatory-"+counter).checked = true;
 					},
 					error: function() {
 						obj.checked = true;
-						console.log("field-mandatory-"+counter);
 						document.getElementById("field-mandatory-"+counter).disabled = false;
 						messageBox.show('error', gettext('The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again.'));
 					}
@@ -271,16 +366,12 @@
 			else {
 				var obj = document.getElementById(evt.target.id);
 				var counter = obj.getAttribute('data-counter');
-				console.log("field-mandatory-"+counter);
 				document.getElementById("field-mandatory-"+counter).disabled = false;
 			}
 		}
 		else if (evt.target.name.startsWith('field-nullable-')){
-			console.log(evt);
 			var obj = evt.target;
-			console.log(obj);
 			var counter = obj.getAttribute('data-counter');
-			console.log("field-mandatory-"+counter);
 			if(!$(this).is(":checked")) {
 				document.getElementById("field-mandatory-"+counter).disabled = true;
 				document.getElementById("field-mandatory-"+counter).checked = true;
@@ -443,6 +534,12 @@
 					$('#my-modal-dialog').modal('hide');
 					messageBox.show('Info', gettext('Field was deleted'));
 					$('tr[data-fieldname="' + fieldName + '"]').remove();
+					$('.sortable-fieldgroup-field').filter(function(){
+						return $(this).find('span.text').text()==fieldName
+					}).remove();
+					$('#field-list-table-body tr').filter(function(){
+						return $(this).find('input.field-name').text()==fieldName
+					}).remove();
 				},
 				error: function(jqXHR) {
 					messageBox.show('error', jqXHR.responseText);
@@ -493,14 +590,20 @@
 					},
 				  	data:{
 				  		'field': fieldName,
-				  		'new_field_name': document.getElementById('new-field-name').value,
+				  		'new_field_name': new_name,
 				  		'layer_id': "{{layer_id}}"
 				  	},
 					success	:function(response) {
-						messageBox.show('Info', gettext('Field was renamed'));
 						$('#my-modal-dialog').modal('hide');
+						messageBox.show('Info', gettext('Field was renamed'));
 						$('tr[data-fieldname="' + fieldName + '"] input')[0].value = new_name;
 						$('tr[data-fieldname="' + fieldName + '"]')[0].setAttribute('data-fieldname', new_name);
+						$('.sortable-fieldgroup-field span.text').filter(function(){
+							return $(this).text()==fieldName
+						}).text(new_name);
+						$('#field-list-table-body input.field-name').filter(function(){
+							return $(this).val()==fieldName
+						}).val(new_name);
 					},
 					error: function(jqXHR) {
 						messageBox.show('error', jqXHR.responseText);
@@ -595,5 +698,165 @@
 	$("#add-field-button").on('click', function(e){
 		createModalContent(null, 'create', '{% trans "New field" %}', addFieldConfig);
 	});
+	var createFieldGroupTrans = function(groupId, groupName){
+		var clonedRow = $('.fieldgroup-trans-row').first().clone()[0];
+		clonedRow.dataset['groupid'] = groupId;
+		var tdName = $(clonedRow).find('input').first()[0];
+		tdName.name = "fieldgroup-name-" + groupId;
+		tdName.value = groupName;
+		$(clonedRow).find('input.fieldgroup-trans').each(function(idx, elem) {
+			elem.name = "fieldgroup-title-" + elem.dataset["langid"] + "-" + groupId;
+			elem.value = '';
+			elem.placeholder = groupName;
+		});
+		$(clonedRow).appendTo('#fieldgroup-trans-table-body');
+	}
+	var createFieldGroup = function(){
+		var i = 1;
+		var groupName = "group1";
+		var nameExists;
+		do {
+			nameExists = false;
+			$('.sortable-fieldgroup input').each(function(idx, elem){
+				if (elem.value == groupName) {
+					nameExists = true;
+					return false;
+				}
+			});
+			if (nameExists) {
+				i = i + 1;
+				groupName = 'group' + i;
+			}
+		} while (nameExists);
+		var groupId = parseInt($('#fieldgroup-total-counter').val()) + 1;
+		$('#fieldgroup-total-counter').val(groupId);
+
+		var ui = '<div data-groupid="'+ groupId + '" class="box box-default collapsed-box sortable-fieldgroup" style="border-top: none;">';
+		ui += '<div class="box-header"><div class="handle form-inline">';
+		ui += '<span class="" style="margin-right: 20px;">';
+		ui += '<i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i>';
+		ui += '</span>';
+		ui += '<input type="text" class="form-control" value="' + groupName + '">';
+		ui += '&nbsp;<span class="text-danger group-name-error"></span>';
+		ui += '</div>';
+		ui += '<div class="box-tools box-tools-buttons pull-right">';
+		ui += '<button type="button" class="button-delete-group" name="button-delete-group" title="{% blocktrans %}Delete group{% endblocktrans %}" class="btn btn-danger"><i class="fa fa-times"></i></button>';
+		ui += '</div>';
+		ui += '</div>';
+		ui += '</div>';
+		$('#field-groups-order').append(ui);
+
+		createFieldGroupTrans(groupId, groupName);
+		return groupName;
+	}
+	var checkUniqueGroupNames = function() {
+		var groupNames = {};
+		var unique = true;
+		$(".sortable-fieldgroup input").each(function(idx, elem) {
+			if (groupNames[elem.value]) {
+				$(elem).next('span.group-name-error').text(gettext('Group names must be unique'));
+				unique = false;
+			}
+			else {
+				groupNames[elem.value] = true;
+			}
+		});
+		return unique;
+	}
+	var installEvents = function() {
+		$('.button-delete-group').off('click').on('click', function(e) {
+			// move children fields of the deleted group to the first group
+			var selected = $(this).parents('.sortable-fieldgroup');
+			if ($('.sortable-fieldgroup').length > 0 &&
+					selected.length > 0) {
+				var first = $('.sortable-fieldgroup').first();
+				if ($('.sortable-fieldgroup').length == 1) {
+					// we must have at least a group, so just rename it using default name
+					first.find('input')[0].value = "group1";
+				}
+				else {
+					var nextGroup = selected.nextAll('.sortable-fieldgroup').first();
+					var groupChildrenFields = selected.nextUntil(nextGroup);
+					if (first[0]==selected[0]){
+						// first will be removed, consider the new first
+						first = first.nextAll('.sortable-fieldgroup').first();
+					}
+					var second = first.nextAll('.sortable-fieldgroup').first();
+					if (second.length == 1) { // insert under next group
+						groupChildrenFields.insertBefore(second);
+					}
+					else { // there is no next group, insert at the end
+						groupChildrenFields.insertAfter($('.sortable-fieldgroup-field').last());
+					}
+					selected.remove();
+				}
+			}
+			// delete group translations
+			var groupId = selected[0].dataset['groupid'];
+			$('.fieldgroup-trans-row').filter(function(){
+				return $(this).data("groupid") == groupId;
+			}).remove();
+		});
+		$("#field-groups-order").sortable({
+			placeholder: "sort-highlight",
+			handle: ".handle",
+			forcePlaceholderSize: true,
+			zIndex: 999999,
+			stop: function(event, ui) {
+				// ensure the first group is above any field
+				if (ui.item.hasClass('sortable-fieldgroup-field') &&
+						!ui.item.prev().hasClass('sortable-fieldgroup')) {
+					$('.sortable-fieldgroup').first().prependTo('#field-groups-order');
+				}
+			}
+		});
+		$(".sortable-fieldgroup input").off("input change").on("input change", function(){
+			var newGroupName = $(this).val();
+			var groupId = $(this).closest('.sortable-fieldgroup')[0].dataset['groupid'];
+			$('.fieldgroup-trans-row').filter(function(){
+				return $(this).data("groupid") == groupId;
+			}).find('input').first().val(newGroupName);
+			checkUniqueGroupNames();
+		});
+	};
+	$("#add-field-group-button").on('click', function(e){
+		createFieldGroup();
+		installEvents();
+	});
+	installEvents();
+	$('form').submit(function(e) {
+			$("body").overlay();
+			if (!checkUniqueGroupNames()) {
+				e.preventDefault();
+				$("body").overlayout();
+				return;
+			}
+			var jsonGroups = [];
+			var lastGroup;
+			$('#field-groups-order').children().each(function(idx, elem) {
+				var jqElem = $(elem);
+				if(jqElem.hasClass('sortable-fieldgroup')) {
+					var groupId = jqElem.data('groupid');
+					var groupName = jqElem.find('input')[0].value;
+					lastGroup = {
+						"name": groupName,
+						"fields": []
+					};
+					$('.fieldgroup-trans-row').filter(function(){
+						return $(this).data("groupid") == groupId;
+					}).find("input.fieldgroup-trans").each(function(idx, elem) {
+						var lang = elem.dataset['title'];
+						var trans = elem.value;
+						lastGroup[lang] = trans;
+					});
+					jsonGroups.push(lastGroup);
+				}
+				else if (jqElem.hasClass('sortable-fieldgroup-field')) {
+					var fieldName = jqElem.find('span.text').text();
+					lastGroup.fields.push(fieldName);
+				}
+			});
+			$('#form_groups').val(JSON.stringify(jsonGroups));
+		});
 </script>
 {% endblock %}
