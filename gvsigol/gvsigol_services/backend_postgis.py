@@ -487,7 +487,7 @@ class Introspect:
             return 'character varying'
         elif data_type_def == 'integer':
             return 'integer'
-        elif data_type_def == 'double':
+        elif data_type_def == 'double' or data_type_def == 'double precision':
             return 'double precision'
         elif data_type_def == 'boolean':
             return 'boolean'
