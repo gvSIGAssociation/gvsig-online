@@ -1054,6 +1054,10 @@ def layer_add_with_group(request, layergroup_id):
         if 'real_time' in request.POST:
             real_time = True
 
+        vector_tile = False
+        if 'vector_tile' in request.POST:
+            vector_tile = True
+
         assigned_read_roups = []
         for key in request.POST:
             if 'read-usergroup-' in key:
@@ -1166,6 +1170,7 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.detailed_info_html = detailed_info_html
                 newRecord.timeout = request.POST.get('timeout')
                 newRecord.real_time = real_time
+                newRecord.vector_tile = vector_tile
                 newRecord.update_interval = request.POST.get('update_interval')
                 
                 params = {}
@@ -1265,6 +1270,10 @@ def layer_update(request, layer_id):
         if 'real_time' in request.POST:
             real_time = True
 
+        vector_tile = False
+        if 'vector_tile' in request.POST:
+            vector_tile = True
+
         assigned_read_roups = []
         for key in request.POST:
             if 'read-usergroup-' in key:
@@ -1362,6 +1371,7 @@ def layer_update(request, layer_id):
             layer.detailed_info_html = detailed_info_html
             layer.timeout = request.POST.get('timeout')
             layer.real_time = real_time
+            layer.vector_tile = vector_tile
             layer.update_interval = request.POST.get('update_interval')
             
             params = {}
