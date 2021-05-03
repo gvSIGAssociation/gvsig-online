@@ -1615,3 +1615,20 @@ def get_wfs_style(request):
         except Exception as e:
             message = str(e)
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
+
+
+def get_ol_style(layer):
+    try:
+        layerStyles = StyleLayer.objects.filter(layer=layer)
+        for layerStyle in layerStyles:
+            if layerStyle.style.is_default:
+                style_rules = Rule.objects.filter(style=layerStyle.style)
+                rule = style_rules[0]
+                symbolizers = Symbolizer.objects.filter(rule=rule).order_by('order')
+                sym = utils.symbolizer_to_json(symbolizers[0])
+                default_style = sym
+                return default_style
+                
+    except Exception as e:
+        return None
+        
