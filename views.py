@@ -1564,6 +1564,35 @@ def layer_autoconfig(layer, featuretype):
 
     layer.conf = layer_conf
 
+def _parse_form_groups(json_str, fields):
+    try:
+        form_groups = json.loads(json_str)
+    except:
+        form_groups = None
+    if not(isinstance(form_groups, list)) or len(form_groups) == 0:
+        form_groups = [{
+            'name': 'group1'
+        }]
+    all_fields = { f.get('name'): True for f in fields }
+    # ensure all fields and translations are present
+    
+    for group in form_groups:
+        group_fields = group.get('fields', [])
+        for field in group_fields:
+            if all_fields.get(field):
+                del all_fields[field]
+            else:
+                group_fields.remove(field)
+        for id, language in LANGUAGES:
+            title_lang = 'title-'+id
+            if group.get(title_lang) is None:
+                group[title_lang] = ''
+        group['fields'] = group_fields
+    group0_fields = form_groups[0].get("fields", [])
+    for f in all_fields:
+        group0_fields.append(f)
+    form_groups[0]["fields"] = group0_fields
+    return form_groups
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -1615,6 +1644,8 @@ def layer_config(request, layer_id):
                     field['editable'] = False
             fields.append(field)
         conf['fields'] = fields
+        form_groups = _parse_form_groups(request.POST.get('form_groups', []), fields)
+        conf['form_groups'] = json.dumps(form_groups)
         layer.conf = conf
         layer.save()
 
@@ -1703,12 +1734,14 @@ def layer_config(request, layer_id):
         for procedure in TriggerProcedure.objects.all():
             if not procedure.signature in disabled_procedures:
                 procedures.append(procedure)
-        
+
+        form_groups = _parse_form_groups(conf.get('form_groups', []), fields)
         data = {
             'layer': layer,
             'layer_id': layer.id,
             'fields': fields,
             'fields_json': json.dumps(fields),
+            'form_groups': form_groups,
             'available_languages': LANGUAGES,
             'available_languages_array': available_languages,
             'redirect_to_layergroup': redirect_to_layergroup,
