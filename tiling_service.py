@@ -147,7 +147,8 @@ class Tiling():
             #print "downloading %r" % url
             try:
                 request = urllib.request.Request(url)
-                base64string = base64.b64encode('%s:%s' % (self.gsuser, self.gspaswd))
+                encoded = ('%s:%s' % (self.gsuser, self.gspaswd)).encode('ascii')
+                base64string = base64.b64encode(encoded)
                 request.add_header("Authorization", "Basic %s" % base64string)
                 source = urllib.request.urlopen(request, context=self.ctx)
                 content = source.read()
@@ -282,7 +283,30 @@ class Tiling():
 
 
 
-    def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y, tiling_status = None):
+    def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y, tiling_status = None, tiles_already_download = None):
+        '''
+        Parameters
+        ----------
+        base_layer_process : str
+            Estructura de datos para mantener la ejecución del proceso
+        min_x, min_y, max_x, max_y : float
+            extent de la petición
+        maxzoom : int
+            Máx nivel de zoom de la petición
+        format_ : str
+            Formato de los tiles descargados
+        start_level : int
+            Nivel de resolución inicial. Si es None empieza en el cero
+        start_x, start_y: int
+            a descarga empieza en estos tiles. Esto sirve para cuando se ha detenido y se quiere reiniciar
+            la descarga desde donde se quedó.
+        tiling_status: model
+            tabla de la bbdd para mantener el estado del proceso de descarga
+        tiles_already_download: dict
+            si se le pasa este hash comprobará si los tiles que contiene ya han sido descargados para no repetir
+            tiles existentes. Esto es útil en la descarga por interseccion de zonas ya que se llama varias veces
+            a esta función para el mismo paquete.
+        '''
         start_time = t()
         first_entry = True   
         init_processed_tiles = base_layer_process[str(self.prj_id)]['processed_tiles']
@@ -291,7 +315,7 @@ class Tiling():
 
         if self.mode  != "OSM" and start_level <= (self.level_download_all_tiles - 1):
             #Si la capa es WMTS:
-            #De los niveles 0-6 se descargan todos los tiles de la capa ajustandose al extent de esta
+            #De los niveles 0-4 se descargan todos los tiles de la capa ajustandose al extent de esta
             #para no pedir tiles que no contenga.
             # Como el extent de la capa siempre viene en geográficas se usa deg2num
             for zoom in range(start_level, self.level_download_all_tiles, 1):
@@ -333,11 +357,23 @@ class Tiling():
             #print "%d:%d-%d/%d-%d" % (zoom, xtile, final_xtile, ytile, final_ytile)
             for x in range(xtile, final_xtile + 1, 1):
                 for y in range(ytile, final_ytile - 1, -1):  
-                    if self.mode == "OSM":
-                        self._download_url(zoom, x, y)
-                    else:
-                        if self._download_wmts(zoom, x, y, format_) is False:
-                            return False
+
+                    downloadTile = True
+                    #Comprueba si el tile ya se bajó. En ese caso pasa al siguiente
+                    if tiles_already_download is not None:
+                        label = str(zoom) + "_" + str(x) + "_" + str(y)
+                        if label in tiles_already_download:
+                            print("Tile ya descargado:" + label)
+                            downloadTile = False
+                        tiles_already_download[label] = True
+
+                    if downloadTile == True:
+                        if self.mode == "OSM":
+                            self._download_url(zoom, x, y)
+                        else:
+                            if self._download_wmts(zoom, x, y, format_) is False:
+                                return False
+
                     if base_layer_process is not None:
                         if str(self.prj_id) in base_layer_process:
                             if base_layer_process[str(self.prj_id)]['stop'] == 'true':
@@ -483,14 +519,15 @@ buffer con un entero que indique el buffer en metros alrededor de la coordenada.
 
 Las coordenadas siempre serán en geográficas.
 
-Los niveles de 0 al 6 se empaquetan completos y del 7 en adelante solo los tiles que caen dentro de los polígonos o
-puntos con buffer definidos.
+Los niveles de 0 al 4 se empaquetan completos y del 5 en adelante solo los tiles que caen dentro de los polígonos o
+puntos con buffer definidos. Si se pasa el parámetro download_first_levels a False no se empaquetan los niveles del
+0 al 4.
 
 El objeto process_data es una estructura en la que se va actualizando el número de tiles procesados y otra información
 del proceso de descarga y empaquetado
 """
 @start_new_thread
-def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None, properties=None):
+def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None, properties=None, download_first_levels=True):
     if(version is None):
         version = int(round(time.time() * 1000))
 
@@ -548,7 +585,8 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
             min_lon, min_lat, max_lon, max_lat = get_extent(geojson, properties) 
             tile_min_x, tile_min_y = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), min_lon, min_lat)
             tile_max_x, tile_max_y = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), max_lon, max_lat)
-            number_of_tiles = number_of_tiles + tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, process_data, True if number_of_tiles == 0 else False) 
+            count_base_level = True if (number_of_tiles == 0 and download_first_levels == True) else False
+            number_of_tiles = number_of_tiles + tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, process_data, count_base_level) 
             tilingList.append({
                 'tiling': tiling,
                 'tile_min_x': tile_min_x,
@@ -568,11 +606,13 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
         if(number_of_tiles == 0):
             return 
 
+        if(download_first_levels == False):
+            start_level = 5
+        tiles_already_downloaded = {}
         for t in tilingList:
-            print(process_data)
-            t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None)
-            print(process_data)
+            t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None, tiling_status, tiles_already_downloaded)
             start_level =  5 #Para al 1ra geom se descargan los niveles de 0-4 completos pero para las sgtes ya no hace falta
+       
         _zipFolder(folder_lyr)
     except Exception as e:
         print(e)
