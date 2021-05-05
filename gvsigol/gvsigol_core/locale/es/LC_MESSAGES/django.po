@@ -5,19 +5,20 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-05-05 21:43+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2021-05-05 23:47+0200\n"
+"Language: es_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: es_ES\n"
 "X-Source-Language: C\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: gvsigol_core/forms.py:15
 msgid "Clone project and layer permissions"
@@ -72,10 +73,8 @@ msgid "Server does not exist"
 msgstr "El servidor no existe"
 
 #: gvsigol_core/settings.py:30
-#, fuzzy
-#| msgid "Project exists"
 msgid "Project requests"
-msgstr "El proyecto existe"
+msgstr "Peticiones de proyecto"
 
 #: gvsigol_core/settings.py:31
 #: gvsigol_core/templates/dashboard_core_menu.html:5
@@ -84,16 +83,12 @@ msgid "Projects"
 msgstr "Proyectos"
 
 #: gvsigol_core/settings.py:39
-#, fuzzy
-#| msgid "Project exists"
 msgid "Project requests by user"
-msgstr "El proyecto existe"
+msgstr "Peticiones de proyecto por usuario"
 
 #: gvsigol_core/settings.py:40
-#, fuzzy
-#| msgid "Username"
 msgid "Users"
-msgstr "Nombre de usuario"
+msgstr "Usuarios"
 
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
