@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2021-05-05 21:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,8 +54,16 @@ msgstr ""
 msgid "Repeat password"
 msgstr ""
 
-#: gvsigol_auth/services.py:72
+#: gvsigol_auth/services.py:75
 msgid "Group for admin users"
+msgstr ""
+
+#: gvsigol_auth/settings.py:30
+msgid "Login requests"
+msgstr ""
+
+#: gvsigol_auth/settings.py:31
+msgid "User"
 msgstr ""
 
 #: gvsigol_auth/templates/dashboard_auth_menu.html:4
