@@ -236,10 +236,14 @@ def statistics_list(request):
         try:
             mod = import_module('%s.settings' % app)
             if mod:
-                print(app)
+                #print(app)
                 if hasattr(mod, 'STATISTICS'):
-                    print(mod.STATISTICS)
-                    statistics_conf = statistics_conf + mod.STATISTICS
+                    #print(mod.STATISTICS)
+                    translated_stats = []
+                    for stat in mod.STATISTICS:
+                        stat["title"] = _(stat["title"])
+                        stat["target_title"] = _(stat["target_title"])
+                        statistics_conf.append(stat)
         except:
             pass
 
