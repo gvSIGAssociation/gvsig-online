@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-07 15:18+0000\n"
+"POT-Creation-Date: 2021-05-05 21:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,6 +71,30 @@ msgstr "El esquema de base de datos existe"
 msgid "Server does not exist"
 msgstr "El servidor no existe"
 
+#: gvsigol_core/settings.py:30
+#, fuzzy
+#| msgid "Project exists"
+msgid "Project requests"
+msgstr "El proyecto existe"
+
+#: gvsigol_core/settings.py:31
+#: gvsigol_core/templates/dashboard_core_menu.html:5
+#: gvsigol_core/templates/dashboard_core_menu.html:8
+msgid "Projects"
+msgstr "Proyectos"
+
+#: gvsigol_core/settings.py:39
+#, fuzzy
+#| msgid "Project exists"
+msgid "Project requests by user"
+msgstr "El proyecto existe"
+
+#: gvsigol_core/settings.py:40
+#, fuzzy
+#| msgid "Username"
+msgid "Users"
+msgstr "Nombre de usuario"
+
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
 msgid "Page not found"
@@ -129,11 +153,6 @@ msgstr "Versión"
 #: gvsigol_core/templates/ogc_services.html:103
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
-
-#: gvsigol_core/templates/dashboard_core_menu.html:5
-#: gvsigol_core/templates/dashboard_core_menu.html:8
-msgid "Projects"
-msgstr "Proyectos"
 
 #: gvsigol_core/templates/dashboard_core_menu.html:9
 msgid "Shared views"
@@ -1104,18 +1123,18 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
-#: gvsigol_core/views.py:1333 gvsigol_core/views.py:1335
+#: gvsigol_core/views.py:1339 gvsigol_core/views.py:1341
 msgid "Shared view"
 msgstr "Vista compartida"
 
-#: gvsigol_core/views.py:1336
+#: gvsigol_core/views.py:1342
 msgid "Link"
 msgstr "Enlace"
 
-#: gvsigol_core/views.py:1437 gvsigol_core/views.py:1472
+#: gvsigol_core/views.py:1443 gvsigol_core/views.py:1478
 msgid "Operation not allowed on project: "
 msgstr "Operación no permitida sobre el proyecto: "
 
-#: gvsigol_core/views.py:1467
+#: gvsigol_core/views.py:1473
 msgid "The project was successfully cloned."
 msgstr "El proyecto se clonó con éxito."
