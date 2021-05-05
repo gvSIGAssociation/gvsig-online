@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 21:43+0000\n"
+"POT-Creation-Date: 2021-05-05 22:34+0000\n"
 "PO-Revision-Date: 2021-05-05 15:16+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -57,17 +57,9 @@ msgstr "Contrasenya"
 msgid "Repeat password"
 msgstr "Repetir contrasenya"
 
-#: gvsigol_auth/services.py:75
+#: gvsigol_auth/services.py:72
 msgid "Group for admin users"
 msgstr "Grup per a usuaris administradors"
-
-#: gvsigol_auth/settings.py:30
-msgid "Login requests"
-msgstr "Inicis de sessió"
-
-#: gvsigol_auth/settings.py:31
-msgid "User"
-msgstr "Usuari"
 
 #: gvsigol_auth/templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
@@ -384,6 +376,12 @@ msgstr ""
 "Nom del grup d’usuaris no vàlid: '{value}'. Els identificadors han de "
 "començar amb una lletra o un subratllat (_). Els caràcters posteriors poden "
 "ser lletres, guions baixos o nombres"
+
+#~ msgid "Login requests"
+#~ msgstr "Inicis de sessió"
+
+#~ msgid "User"
+#~ msgstr "Usuari"
 
 #~ msgid "There must be at least one server"
 #~ msgstr "Hi ha d'haver almenys un servidor"

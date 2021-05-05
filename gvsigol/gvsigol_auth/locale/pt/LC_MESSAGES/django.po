@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 21:43+0000\n"
+"POT-Creation-Date: 2021-05-05 22:34+0000\n"
 "PO-Revision-Date: 2021-05-05 15:15+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -57,17 +57,9 @@ msgstr "Senha"
 msgid "Repeat password"
 msgstr "Repita a senha"
 
-#: gvsigol_auth/services.py:75
+#: gvsigol_auth/services.py:72
 msgid "Group for admin users"
 msgstr "Grupo para usuários administradores"
-
-#: gvsigol_auth/settings.py:30
-msgid "Login requests"
-msgstr ""
-
-#: gvsigol_auth/settings.py:31
-msgid "User"
-msgstr "Usuário"
 
 #: gvsigol_auth/templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
@@ -386,6 +378,9 @@ msgstr ""
 "Nome de grupo de usuários inválido: '{value}'. Os identificadores devem "
 "começar com uma letra ouum sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
+
+#~ msgid "User"
+#~ msgstr "Usuário"
 
 #~ msgid "%(sep)sSort descendente"
 #~ msgstr "%(sep)sSort descendente"

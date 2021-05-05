@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 21:43+0000\n"
+"POT-Creation-Date: 2021-05-05 22:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,17 +57,9 @@ msgstr "Contraseña"
 msgid "Repeat password"
 msgstr "Repetir contraseña"
 
-#: gvsigol_auth/services.py:75
+#: gvsigol_auth/services.py:72
 msgid "Group for admin users"
 msgstr "Grupo para usuarios administradores"
-
-#: gvsigol_auth/settings.py:30
-msgid "Login requests"
-msgstr "Inicios de sesión"
-
-#: gvsigol_auth/settings.py:31
-msgid "User"
-msgstr "Usuario"
 
 #: gvsigol_auth/templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
@@ -385,6 +377,12 @@ msgstr ""
 "Nombre de grupo de usuarios no válido: '{value}'. Los identificadores deben "
 "comenzar con una letra o un guión bajo (_). Los caracteres subsiguientes "
 "pueden ser letras, guiones bajos o números"
+
+#~ msgid "Login requests"
+#~ msgstr "Inicios de sesión"
+
+#~ msgid "User"
+#~ msgstr "Usuario"
 
 #~ msgid "There must be at least one server"
 #~ msgstr "Debe haber al menos un servidor"
