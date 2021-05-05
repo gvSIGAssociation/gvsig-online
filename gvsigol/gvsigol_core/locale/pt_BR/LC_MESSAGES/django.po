@@ -3,22 +3,22 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-07 15:18+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2021-05-05 21:43+0000\n"
+"PO-Revision-Date: 2021-05-05 23:41+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: gvsigol_core/forms.py:15
 msgid "Clone project and layer permissions"
@@ -29,10 +29,8 @@ msgid "Don't apply any permission. Cloned layers will become public"
 msgstr ""
 
 #: gvsigol_core/forms.py:21
-#, fuzzy
-#| msgid "Project title"
 msgid "New project title"
-msgstr "Tí­tulo do projeto"
+msgstr ""
 
 #: gvsigol_core/forms.py:26 gvsigol_core/forms.py:33 gvsigol_core/forms.py:41
 msgid ""
@@ -41,10 +39,8 @@ msgid ""
 msgstr ""
 
 #: gvsigol_core/forms.py:28 gvsigol_core/templates/project_list.html:100
-#, fuzzy
-#| msgid "Project name"
 msgid "New project name"
-msgstr "Nome do projeto"
+msgstr ""
 
 #: gvsigol_core/forms.py:36 gvsigol_core/templates/project_list.html:106
 msgid "Target workspace name"
@@ -59,10 +55,8 @@ msgid "numeric value required"
 msgstr ""
 
 #: gvsigol_core/forms.py:58
-#, fuzzy
-#| msgid "Projects list"
 msgid "Project exists"
-msgstr "Lista de projetos"
+msgstr ""
 
 #: gvsigol_core/forms.py:63
 msgid "Workspace exists"
@@ -75,6 +69,24 @@ msgstr ""
 #: gvsigol_core/forms.py:75
 msgid "Server does not exist"
 msgstr ""
+
+#: gvsigol_core/settings.py:30
+msgid "Project requests"
+msgstr ""
+
+#: gvsigol_core/settings.py:31
+#: gvsigol_core/templates/dashboard_core_menu.html:5
+#: gvsigol_core/templates/dashboard_core_menu.html:8
+msgid "Projects"
+msgstr "Projetos"
+
+#: gvsigol_core/settings.py:39
+msgid "Project requests by user"
+msgstr ""
+
+#: gvsigol_core/settings.py:40
+msgid "Users"
+msgstr "Usuários"
 
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
@@ -133,11 +145,6 @@ msgstr "Versão"
 #: gvsigol_core/templates/ogc_services.html:103
 msgid "All rights reserved"
 msgstr "Todos os direitos reservados"
-
-#: gvsigol_core/templates/dashboard_core_menu.html:5
-#: gvsigol_core/templates/dashboard_core_menu.html:8
-msgid "Projects"
-msgstr "Projetos"
 
 #: gvsigol_core/templates/dashboard_core_menu.html:9
 msgid "Shared views"
@@ -342,10 +349,8 @@ msgstr "Ferramentas"
 #: gvsigol_core/templates/project_add.html:31
 #: gvsigol_core/templates/project_clone.html:37
 #: gvsigol_core/templates/project_update.html:44
-#, fuzzy
-#| msgid "Version"
 msgid "Permissions"
-msgstr "Versão"
+msgstr ""
 
 #: gvsigol_core/templates/project_add.html:44
 #: gvsigol_core/templates/project_update.html:60
@@ -473,10 +478,8 @@ msgstr "Mostrar í­cone de projeto em TOC"
 
 #: gvsigol_core/templates/project_add.html:146
 #: gvsigol_core/templates/project_update.html:181
-#, fuzzy
-#| msgid "Projects"
 msgid "Project tags"
-msgstr "Projetos"
+msgstr ""
 
 #: gvsigol_core/templates/project_add.html:159
 #: gvsigol_core/templates/project_update.html:194
@@ -659,10 +662,8 @@ msgid "Datastore"
 msgstr ""
 
 #: gvsigol_core/templates/project_clone.html:69
-#, fuzzy
-#| msgid "Select feature"
 msgid "Select server"
-msgstr "Seleccionar caracterí­stica"
+msgstr ""
 
 #: gvsigol_core/templates/project_clone.html:83
 msgid "Options:"
@@ -689,10 +690,8 @@ msgid "Raster layers will be excluded (except base layers)"
 msgstr ""
 
 #: gvsigol_core/templates/project_clone.html:113
-#, fuzzy
-#| msgid "Version"
 msgid "Permissions cloning"
-msgstr "Versão"
+msgstr ""
 
 #: gvsigol_core/templates/project_list.html:17
 #: gvsigol_core/templates/select_public_project.html:51
@@ -710,10 +709,8 @@ msgstr "O projeto será removido. Você quer continuar?"
 
 #: gvsigol_core/templates/project_list.html:88
 #: gvsigol_core/templates/project_list.html:170
-#, fuzzy
-#| msgid "Delete project"
 msgid "Clone project"
-msgstr "Excluir projetos"
+msgstr ""
 
 #: gvsigol_core/templates/project_list.html:117
 msgid "Server"
@@ -857,10 +854,8 @@ msgid "Project"
 msgstr "Projeto"
 
 #: gvsigol_core/templates/project_update.html:482
-#, fuzzy
-#| msgid "Layer tree"
 msgid "Layer"
-msgstr "Árvore de camadas"
+msgstr "Camada"
 
 #: gvsigol_core/templates/project_update.html:492
 msgid "PNG"
@@ -883,10 +878,8 @@ msgid "Tilematrixset"
 msgstr ""
 
 #: gvsigol_core/templates/project_update.html:521
-#, fuzzy
-#| msgid "Create new layer group"
 msgid "Create layer"
-msgstr "Criar novo grupo de camadas"
+msgstr "Criar camada"
 
 #: gvsigol_core/templates/project_update.html:522
 msgid "Continue download"
@@ -897,28 +890,20 @@ msgid "Stop Process"
 msgstr ""
 
 #: gvsigol_core/templates/services_view.html:51
-#, fuzzy
-#| msgid "WMS Service"
 msgid "WMS Services"
-msgstr "Serviço WMS"
+msgstr "Serviços WMS"
 
 #: gvsigol_core/templates/services_view.html:52
-#, fuzzy
-#| msgid "WMS Service"
 msgid "WMTS Services"
-msgstr "Serviço WMS"
+msgstr "Serviços WMTS"
 
 #: gvsigol_core/templates/services_view.html:53
-#, fuzzy
-#| msgid "WFS Service"
 msgid "WFS Services"
-msgstr "Serviço WFS"
+msgstr "Serviços WFS"
 
 #: gvsigol_core/templates/services_view.html:54
-#, fuzzy
-#| msgid "WMS Service"
 msgid "CSW Services"
-msgstr "Serviço WMS"
+msgstr "Serviços CSW"
 
 #: gvsigol_core/templates/services_view.html:65
 #: gvsigol_core/templates/services_view.html:85
@@ -970,10 +955,8 @@ msgstr "Exibir 2D"
 
 #: gvsigol_core/templates/viewer.html:174
 #: gvsigol_core/templates/viewer_compress.html:174
-#, fuzzy
-#| msgid "Sign out"
 msgid "Sign in"
-msgstr "Sair"
+msgstr ""
 
 #: gvsigol_core/templates/viewer.html:207
 #: gvsigol_core/templates/viewer_compress.html:207
@@ -1125,18 +1108,18 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "O nome do projeto já existe"
 
-#: gvsigol_core/views.py:1333 gvsigol_core/views.py:1335
+#: gvsigol_core/views.py:1339 gvsigol_core/views.py:1341
 msgid "Shared view"
 msgstr "Vista compartilhada"
 
-#: gvsigol_core/views.py:1336
+#: gvsigol_core/views.py:1342
 msgid "Link"
 msgstr "Link"
 
-#: gvsigol_core/views.py:1437 gvsigol_core/views.py:1472
+#: gvsigol_core/views.py:1443 gvsigol_core/views.py:1478
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1467
+#: gvsigol_core/views.py:1473
 msgid "The project was successfully cloned."
 msgstr ""

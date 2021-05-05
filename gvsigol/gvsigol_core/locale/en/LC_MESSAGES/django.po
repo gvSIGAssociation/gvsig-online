@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-07 15:18+0000\n"
+"POT-Creation-Date: 2021-05-05 21:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -67,6 +67,24 @@ msgstr ""
 msgid "Server does not exist"
 msgstr ""
 
+#: gvsigol_core/settings.py:30
+msgid "Project requests"
+msgstr ""
+
+#: gvsigol_core/settings.py:31
+#: gvsigol_core/templates/dashboard_core_menu.html:5
+#: gvsigol_core/templates/dashboard_core_menu.html:8
+msgid "Projects"
+msgstr ""
+
+#: gvsigol_core/settings.py:39
+msgid "Project requests by user"
+msgstr ""
+
+#: gvsigol_core/settings.py:40
+msgid "Users"
+msgstr ""
+
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
 msgid "Page not found"
@@ -121,11 +139,6 @@ msgstr ""
 #: gvsigol_core/templates/base_compress.html:200
 #: gvsigol_core/templates/ogc_services.html:103
 msgid "All rights reserved"
-msgstr ""
-
-#: gvsigol_core/templates/dashboard_core_menu.html:5
-#: gvsigol_core/templates/dashboard_core_menu.html:8
-msgid "Projects"
 msgstr ""
 
 #: gvsigol_core/templates/dashboard_core_menu.html:9
@@ -1077,18 +1090,18 @@ msgstr ""
 msgid "Project name already exists"
 msgstr ""
 
-#: gvsigol_core/views.py:1333 gvsigol_core/views.py:1335
+#: gvsigol_core/views.py:1339 gvsigol_core/views.py:1341
 msgid "Shared view"
 msgstr ""
 
-#: gvsigol_core/views.py:1336
+#: gvsigol_core/views.py:1342
 msgid "Link"
 msgstr ""
 
-#: gvsigol_core/views.py:1437 gvsigol_core/views.py:1472
+#: gvsigol_core/views.py:1443 gvsigol_core/views.py:1478
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1467
+#: gvsigol_core/views.py:1473
 msgid "The project was successfully cloned."
 msgstr ""
