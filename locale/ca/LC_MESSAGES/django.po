@@ -6,8 +6,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-04 13:49+0000\n"
-"PO-Revision-Date: 2021-05-04 17:01+0200\n"
+"POT-Creation-Date: 2021-05-05 21:52+0000\n"
+"PO-Revision-Date: 2021-05-05 23:54+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: ca_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -15,8 +17,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 2.4.3\n"
 
 #: gvsigol_services/backend_geoserver.py:104
@@ -808,7 +808,7 @@ msgstr "Versió"
 msgid "URL"
 msgstr "URL"
 
-#: gvsigol_services/forms_services.py:226
+#: gvsigol_services/forms_services.py:226 gvsigol_services/settings.py:31
 #: gvsigol_services/templates/base_layer_add.html:65
 #: gvsigol_services/templates/base_layer_update.html:67
 #: gvsigol_services/templates/dashboard_services_menu.html:12
@@ -840,6 +840,18 @@ msgstr "Geocodificación inversa Cartociudad"
 #: gvsigol_services/migrations/0045_golfunc_geocoder_inv_icv_gva_es.py:59
 msgid "Inverse Geocoder ICV"
 msgstr "Geocodificació inversa ICV"
+
+#: gvsigol_services/settings.py:30
+msgid "Layer requests"
+msgstr "Peticions de capa"
+
+#: gvsigol_services/settings.py:39
+msgid "Layer requests by user"
+msgstr "Peticions de capa per usuari"
+
+#: gvsigol_services/settings.py:40
+msgid "Users"
+msgstr "Usuaris"
 
 #: gvsigol_services/templates/base_layer_add.html:12
 #: gvsigol_services/templates/datastore_add.html:12
@@ -1355,7 +1367,7 @@ msgstr "Eliminar"
 #: gvsigol_services/templates/layer_create.html:44
 #: gvsigol_services/templates/layer_update.html:36
 msgid "General"
-msgstr ""
+msgstr "General"
 
 #: gvsigol_services/templates/external_layer_add.html:32
 #: gvsigol_services/templates/external_layer_update.html:46
