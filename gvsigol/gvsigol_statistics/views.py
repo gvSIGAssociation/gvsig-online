@@ -40,7 +40,7 @@ from django.contrib.auth.tokens import default_token_generator
 import json
 import re
 
-from utils import get_actions
+from .utils import get_actions
 
 from actstream import action
 from actstream.models import Action
@@ -99,7 +99,7 @@ def register_action(request):
                 'status' : 'OK'
             }
 
-        except StandardError, e:
+        except Exception as e:
             result = {
                 'status' : 'ERROR',
                 'msg': str(e)
@@ -131,8 +131,8 @@ def get_registered_actions(request, plugin_name, action_name):
                 dt = parser.parse(end_date)
                 end_date_py = datetime(dt.year, dt.month, dt.day,dt.hour, dt.minute, dt.second)
                 end_date_string = end_date_py.strftime("'%Y/%m/%d %H:%M:%S'")
-            except StandardError, e:
-                print "Failed get end date", e
+            except Exception as e:
+                print("Failed get end date", e)
 
 
         start_date = request.POST.get('start_date')
@@ -142,8 +142,8 @@ def get_registered_actions(request, plugin_name, action_name):
                 dt = parser.parse(start_date)
                 start_date_py = datetime(dt.year, dt.month, dt.day,dt.hour, dt.minute, dt.second)
                 start_date_string = start_date_py.strftime("'%Y/%m/%d %H:%M:%S'")
-            except StandardError, e:
-                print "Failed get start date", e
+            except Exception as e:
+                print("Failed get start date", e)
 
 
         get_count = request.POST.get('get_count') == 'true'
@@ -236,10 +236,14 @@ def statistics_list(request):
         try:
             mod = import_module('%s.settings' % app)
             if mod:
-                print app
+                #print(app)
                 if hasattr(mod, 'STATISTICS'):
-                    print mod.STATISTICS
-                    statistics_conf = statistics_conf + mod.STATISTICS
+                    #print(mod.STATISTICS)
+                    translated_stats = []
+                    for stat in mod.STATISTICS:
+                        stat["title"] = _(stat["title"])
+                        stat["target_title"] = _(stat["target_title"])
+                        statistics_conf.append(stat)
         except:
             pass
 
