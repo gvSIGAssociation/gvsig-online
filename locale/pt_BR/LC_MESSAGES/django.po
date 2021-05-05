@@ -3,22 +3,22 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2021-05-05 21:43+0000\n"
+"PO-Revision-Date: 2021-05-05 15:16+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: gvsigol_auth/forms.py:30 gvsigol_auth/templates/user_list.html:23
 #: gvsigol_auth/templates/user_update.html:29
@@ -57,9 +57,17 @@ msgstr "Senha"
 msgid "Repeat password"
 msgstr "Repita a senha"
 
-#: gvsigol_auth/services.py:72
+#: gvsigol_auth/services.py:75
 msgid "Group for admin users"
 msgstr "Grupo para usuários administradores"
+
+#: gvsigol_auth/settings.py:30
+msgid "Login requests"
+msgstr ""
+
+#: gvsigol_auth/settings.py:31
+msgid "User"
+msgstr "Usuário"
 
 #: gvsigol_auth/templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
