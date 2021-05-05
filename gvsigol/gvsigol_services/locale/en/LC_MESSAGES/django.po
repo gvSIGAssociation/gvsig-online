@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-04 13:49+0000\n"
+"POT-Creation-Date: 2021-05-05 21:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -787,7 +787,7 @@ msgstr ""
 msgid "URL"
 msgstr ""
 
-#: gvsigol_services/forms_services.py:226
+#: gvsigol_services/forms_services.py:226 gvsigol_services/settings.py:31
 #: gvsigol_services/templates/base_layer_add.html:65
 #: gvsigol_services/templates/base_layer_update.html:67
 #: gvsigol_services/templates/dashboard_services_menu.html:12
@@ -818,6 +818,18 @@ msgstr ""
 
 #: gvsigol_services/migrations/0045_golfunc_geocoder_inv_icv_gva_es.py:59
 msgid "Inverse Geocoder ICV"
+msgstr ""
+
+#: gvsigol_services/settings.py:30
+msgid "Layer requests"
+msgstr ""
+
+#: gvsigol_services/settings.py:39
+msgid "Layer requests by user"
+msgstr ""
+
+#: gvsigol_services/settings.py:40
+msgid "Users"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_add.html:12
