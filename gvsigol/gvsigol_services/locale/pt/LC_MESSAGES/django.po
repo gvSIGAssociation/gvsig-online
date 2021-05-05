@@ -3,22 +3,22 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-05-04 13:49+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2021-05-04 16:58+0200\n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: gvsigol_services/backend_geoserver.py:104
 #: gvsigol_services/backend_geoserver.py:130
@@ -210,16 +210,12 @@ msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Ocorreu um erro ao construir a vista. Revisar a sentença SQL"
 
 #: gvsigol_services/backend_geoserver.py:1731
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
-#| "underscore (_). Subsequent characters can be letters, underscores or "
-#| "numbers"
+#, python-brace-format
 msgid ""
 "Invalid field name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nome da camada inválido: '{value}'. Os identificadores devem começar com uma "
+"Nome de campo inválido: '{value}'. Os identificadores devem começar com uma "
 "letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
@@ -1280,10 +1276,8 @@ msgstr "Selecionar arquivo"
 
 #: gvsigol_services/templates/datastore_add.html:70
 #: gvsigol_services/templates/datastore_update.html:71
-#, fuzzy
-#| msgid "Test database connection"
 msgid "Test connection"
-msgstr "Testar a conexão com o banco de dados"
+msgstr "Testar a conexão"
 
 #: gvsigol_services/templates/datastore_add.html:77
 #: gvsigol_services/templates/datastore_update.html:86
@@ -1856,10 +1850,8 @@ msgstr "Estado da tarefa"
 #: gvsigol_services/templates/layer_add.html:38
 #: gvsigol_services/templates/layer_create.html:47
 #: gvsigol_services/templates/layer_update.html:38
-#, fuzzy
-#| msgid "Read permissions"
 msgid "Permissions"
-msgstr "Ler permissões"
+msgstr ""
 
 #: gvsigol_services/templates/layer_add.html:52
 #: gvsigol_services/templates/layer_create.html:60
@@ -1996,28 +1988,20 @@ msgid "Choose date field"
 msgstr "Selecionar campo de data"
 
 #: gvsigol_services/templates/layer_config.html:43
-#, fuzzy
-#| msgid "Field name"
 msgid "Field management"
-msgstr "Nome do campo"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:44
-#, fuzzy
-#| msgid "Field title"
 msgid "Field titles"
-msgstr "Título do campo"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:45
-#, fuzzy
-#| msgid "Cached groups"
 msgid "Field groups"
-msgstr "Camadas em grupos"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:46
-#, fuzzy
-#| msgid "Group layers"
 msgid "Group titles"
-msgstr "Camadas de grupo"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:60
 #: gvsigol_services/templates/layer_config.html:164
@@ -2033,10 +2017,8 @@ msgid "Calculated"
 msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:63
-#, fuzzy
-#| msgid "Table"
 msgid "Nullable"
-msgstr "Tabela"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:64
 msgid "mandatory"
@@ -2069,26 +2051,20 @@ msgid "Required in editing forms"
 msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:118
-#, fuzzy
-#| msgid "Resource name"
 msgid "Rename"
-msgstr "Nome do recurso"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:119
-#, fuzzy
-#| msgid "Geom type"
 msgid "Change type"
-msgstr "Tipo de Geom"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:121
 msgid "Convert to enumerate"
 msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:127
-#, fuzzy
-#| msgid "Delete field"
 msgid "Reserved field"
-msgstr "Eliminar campo"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:146
 #: gvsigol_services/templates/layer_create.html:122
@@ -2101,28 +2077,20 @@ msgstr "Título do campo"
 
 #: gvsigol_services/templates/layer_config.html:213
 #: gvsigol_services/templates/layer_config.html:743
-#, fuzzy
-#| msgid "Delete layer group"
 msgid "Delete group"
-msgstr "Eliminar grupo de camadas"
+msgstr "Eliminar grupo"
 
 #: gvsigol_services/templates/layer_config.html:239
-#, fuzzy
-#| msgid "Add field"
 msgid "Add field group"
-msgstr "Adicionar campo"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:259
-#, fuzzy
-#| msgid "Group layers"
 msgid "Group name"
-msgstr "Camadas de grupo"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:261
-#, fuzzy
-#| msgid "Layer group title"
 msgid "Group title"
-msgstr "Título do grupo de camadas"
+msgstr "Título do grupo"
 
 #: gvsigol_services/templates/layer_config.html:404
 msgid "Convert to enum"
@@ -2135,10 +2103,8 @@ msgid ""
 msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:555
-#, fuzzy
-#| msgid "Delete field"
 msgid "Rename field"
-msgstr "Eliminar campo"
+msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:562
 msgid ""
@@ -2165,10 +2131,8 @@ msgid "Projects"
 msgstr ""
 
 #: gvsigol_services/templates/layer_list.html:31
-#, fuzzy
-#| msgid "Datastore"
 msgid "Datastore type"
-msgstr "Datastore"
+msgstr ""
 
 #: gvsigol_services/templates/layer_list.html:73
 #: gvsigol_services/templates/layer_list.html:153
@@ -2188,10 +2152,6 @@ msgid "Raster layers are not configurable"
 msgstr "As camadas rasterizadas não são configuráveis"
 
 #: gvsigol_services/templates/layer_list.html:107
-#, fuzzy
-#| msgid ""
-#| "This layer can't be remove from GeoServer, but it was delete from the "
-#| "list anyway"
 msgid ""
 "The layer could not be removed from GeoServer, but it was deleted from the "
 "list anyway"
@@ -2396,10 +2356,6 @@ msgid "Delete server"
 msgstr "Eliminar servidor"
 
 #: gvsigol_services/templates/server_list.html:62
-#, fuzzy
-#| msgid ""
-#| "The server and all associated elements will be deleted, Do you want "
-#| "continue?"
 msgid ""
 "The server and all associated elements will be deleted, Do you want to "
 "continue?"
@@ -2458,10 +2414,8 @@ msgid "Update workspace"
 msgstr "Atualizar espaço de trabalho"
 
 #: gvsigol_services/templates/workspace_update.html:26
-#, fuzzy
-#| msgid "Url"
 msgid "Uri"
-msgstr "Url"
+msgstr ""
 
 #: gvsigol_services/templates/workspace_update.html:31
 msgid "Workspace description"
@@ -2560,22 +2514,16 @@ msgid "Error: externallayer could not be published"
 msgstr "Erro: camada externa não pôde ser publicada"
 
 #: gvsigol_services/views.py:4687 gvsigol_services/views.py:4693
-#, fuzzy
-#| msgid "Connection params"
 msgid "Connection failed"
-msgstr "Parâmetros de conexão"
+msgstr ""
 
 #: gvsigol_services/views.py:4687
-#, fuzzy
-#| msgid "Status"
 msgid "Status code: "
-msgstr "Estado"
+msgstr ""
 
 #: gvsigol_services/views.py:4698
-#, fuzzy
-#| msgid "Connection params"
 msgid "Connection error"
-msgstr "Parâmetros de conexão"
+msgstr ""
 
 #: gvsigol_services/views.py:4734
 #, python-brace-format
@@ -2605,10 +2553,9 @@ msgid "Control field \"{0}\" cannot be renamed"
 msgstr ""
 
 #: gvsigol_services/views.py:4792 gvsigol_services/views.py:4867
-#, fuzzy, python-brace-format
-#| msgid "Invalid field name. '{0}' is a reserved word"
+#, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
-msgstr "Nome de campo inválido. {0}' é uma palavra reservada"
+msgstr "Nome de campo \"{0}\" é uma palavra reservada"
 
 #: gvsigol_services/views.py:4847
 msgid "String"
@@ -2619,10 +2566,9 @@ msgid "Field type not supported"
 msgstr ""
 
 #: gvsigol_services/views.py:4884
-#, fuzzy, python-brace-format
-#| msgid "Field list"
+#, python-brace-format
 msgid "Field \"{0}\" exists"
-msgstr "Lista de campos"
+msgstr ""
 
 #: gvsigol_services/views.py:4933
 #, python-brace-format
