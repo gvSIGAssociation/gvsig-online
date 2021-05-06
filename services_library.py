@@ -491,17 +491,17 @@ def export_ramp_color_library(library, library_rules):
         
    
     
-    buffer = io.StringIO()
+    buffer = io.BytesIO()
     z = zipfile.ZipFile(buffer, "w")
     relroot = dir_path
     for root, dirs, files in os.walk(dir_path):
             rel_path = os.path.relpath(root, relroot)
             if rel_path != ".":
-                z.write(root, os.path.relpath(root, relroot))
+                z.write(root, rel_path)
             for file in files:
                 filename = os.path.join(root, file)
                 if os.path.isfile(filename): 
-                    arcname = os.path.join(os.path.relpath(root, relroot), file)
+                    arcname = os.path.join(rel_path, file)
                     z.write(filename, arcname)
     z.close()
     buffer.seek(0)
