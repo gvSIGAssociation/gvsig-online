@@ -349,29 +349,32 @@ msgstr "Descripción"
 msgid "Run periodically?"
 msgstr "¿Ejecutar periódicamente?"
 
-msgid "all"
-msgstr "todos"
+msgid "All days"
+msgstr "Todos los días"
 
-msgid "monday"
-msgstr "lunes"
+msgid "Monday"
+msgstr "Lunes"
 
-msgid "tuesday"
-msgstr "martes"
+msgid "Tuesday"
+msgstr "Martes"
 
-msgid "wednesday"
-msgstr "miércoles"
+msgid "Wednesday"
+msgstr "Miércoles"
 
-msgid "thursday"
-msgstr "jueves"
+msgid "Thursday"
+msgstr "Jueves"
 
-msgid "friday"
-msgstr "viernes"
+msgid "Friday"
+msgstr "Viernes"
 
-msgid "saturday"
-msgstr "sábado"
+msgid "Saturday"
+msgstr "Sábado"
 
-msgid "sunday"
-msgstr "domingo"
+msgid "Sunday"
+msgstr "Domingo"
+
+msgid "Every"
+msgstr "Cada"
 
 msgid "Run workspace every..."
 msgstr "Ejecuta el espacio de trabajo cada..."

@@ -115,14 +115,15 @@ gvsigolETL.Toolbar = Class.extend({
 									
 									'<div class="col-md-6 repeat_periodically_time" >'+
 										'<select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">'+
-											'<option value="all">'+gettext('all')+'</option>'+
-											'<option value="monday">'+gettext('monday')+'</option>'+
-											'<option value="tuesday">'+gettext('tuesday')+'</option>'+
-											'<option value="wednesday">'+gettext('wednesday')+'</option>'+
-											'<option value="thursday">'+gettext('thursday')+'</option>'+
-											'<option value="friday">'+gettext('friday')+'</option>'+
-											'<option value="saturday">'+gettext('saturday')+'</option>'+
-											'<option value="sunday">'+gettext('sunday')+'</option>'+
+											'<option value="all">'+gettext('All days')+'</option>'+
+											'<option value="monday">'+gettext('Monday')+'</option>'+
+											'<option value="tuesday">'+gettext('Tuesday')+'</option>'+
+											'<option value="wednesday">'+gettext('Wednesday')+'</option>'+
+											'<option value="thursday">'+gettext('Thursday')+'</option>'+
+											'<option value="friday">'+gettext('Friday')+'</option>'+
+											'<option value="saturday">'+gettext('Saturday')+'</option>'+
+											'<option value="sunday">'+gettext('Sunday')+'</option>'+
+											'<option value="every">'+gettext('Every')+'...</option>'+
 										'</select>'+
 									'</div>'+
 									'<div class="more-hour-options">'+
@@ -165,7 +166,7 @@ gvsigolETL.Toolbar = Class.extend({
 				'</div>'+
 			'</div>')
 
-			$(".more-hour-options").slideUp("slow")
+			$(".more-options").slideUp("slow")
 
 			if(dataPeriodic!=''){
 				$("#repeat_periodically").prop('checked', true)
@@ -212,7 +213,7 @@ gvsigolETL.Toolbar = Class.extend({
 		
 		
 			function edit_progamming_form(value){
-				 if(value == "all"){
+				 if(value == "every"){
 					 $(".more-options").slideDown("slow");  // checked
 					 $(".more-hour-options").slideUp("slow"); 
 				 }else{
@@ -488,7 +489,7 @@ gvsigolETL.Toolbar = Class.extend({
 						
 						try{
 							if (parameters[0][key]){
-								if ($('#'+key+'-'+figure.id).is('select')){
+								if ($('#'+key+'-'+figure.id).is('select') && !key.indexOf('epsg')){
 									if (Array.isArray(schemaold[multiIn])){
 										for (k = 0; k < schemaold[multiIn].length; k++){
 											$('#'+key+'-'+figure.id).append('<option>'+schemaold[multiIn][k]+'</option>')

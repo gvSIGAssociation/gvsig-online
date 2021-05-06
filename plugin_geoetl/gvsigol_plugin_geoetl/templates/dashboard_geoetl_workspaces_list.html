@@ -136,14 +136,15 @@
 						
 						<div class="col-md-6 repeat_periodically_time" >
 							<select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">
-								<option value="all">{% trans 'all' %}</option>
-								<option value="monday">{% trans 'monday' %}</option>
-								<option value="tuesday">{% trans 'tuesday' %}</option>
-								<option value="wednesday">{% trans 'wednesday' %}</option>
-								<option value="thursday">{% trans 'thursday' %}</option>
-								<option value="friday">{% trans 'friday' %}</option>
-								<option value="saturday">{% trans 'saturday' %}</option>
-								<option value="sunday">{% trans 'sunday' %}</option>
+								<option value="all">{% trans 'All days' %}</option>
+								<option value="monday">{% trans 'Monday' %}</option>
+								<option value="tuesday">{% trans 'Tuesday' %}</option>
+								<option value="wednesday">{% trans 'Wednesday' %}</option>
+								<option value="thursday">{% trans 'Thursday' %}</option>
+								<option value="friday">{% trans 'Friday' %}</option>
+								<option value="saturday">{% trans 'Saturday' %}</option>
+								<option value="sunday">{% trans 'Sunday' %}</option>
+								<option value="every">{% trans 'Every' %} ...</option>
 							</select> 	
 						</div>
 						<div class="more-hour-options">
@@ -230,11 +231,12 @@
 			},{
 				"targets": -2,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-warning"><i class="fa fa-folder-open"></i></button>'
+				"defaultContent": '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>'
+				
 			},{
 				"targets": -3,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+				"defaultContent": '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>'
 			}],
 			"dom": 'T<"clear">lfrtip',
 			"bLengthChange": false
@@ -277,7 +279,7 @@
 						$(".more-options").slideDown("slow");  // checked
 						$(".more-hour-options").slideUp("slow");
 
-						$(".modal-body #ws-program-day").val('all')
+						$(".modal-body #ws-program-day").val('every')
 						$(".modal-body #ws-program-interval").val(data[5].split(' ')[0])
 						$(".modal-body #ws-program-unit").val(data[5].split(' ')[1])
 
@@ -381,7 +383,7 @@
 	});
 
 	function edit_progamming_form(value){
-		 if(value == "all"){
+		 if(value == "every"){
 			 $(".more-options").slideDown("slow");  // checked
 			 $(".more-hour-options").slideUp("slow"); 
 		 }else{

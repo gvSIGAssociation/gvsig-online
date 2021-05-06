@@ -29,6 +29,7 @@ from django.utils.translation import ugettext as _
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 
 from gvsigol import settings as core_settings
+from gvsigol_core import utils as core_utils
 
 from .forms import UploadFileForm
 from .models import ETLworkspaces, ETLstatus
@@ -51,6 +52,8 @@ def get_conf(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def etl_canvas(request):
+
+    srs = core_utils.get_supported_crs_array()
 
     try:
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
@@ -78,7 +81,8 @@ def etl_canvas(request):
             'name': instance.name,
             'description': instance.description,
             'workspace': instance.workspace,
-            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/"
+            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
+            'srs': srs
         }
 
         try:
@@ -95,8 +99,10 @@ def etl_canvas(request):
                 response['hour'] = crontab.hour
 
                 days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-
-                response['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+                try:
+                    response['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+                except:
+                    response['day_of_week'] = 'all'
             else:
                 interval = IntervalSchedule.objects.get(id= interid)
                 response['every'] = interval.every
@@ -106,7 +112,8 @@ def etl_canvas(request):
     
     except:
         response = {
-            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/"
+            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
+            'srs': srs
         }
         return render(request, 'etl.html', response)
 
@@ -135,8 +142,10 @@ def get_list():
                 workspace['hour'] = crontab.hour
 
                 days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-
-                workspace['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+                try:
+                    workspace['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+                except:
+                    workspace['day_of_week'] = "all"
             else:
                 interval = IntervalSchedule.objects.get(id= interid)
                 workspace['every'] = interval.every
@@ -169,7 +178,7 @@ def save_periodic_workspace(request, workspace):
     
     my_task_name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id)
 
-    if day == 'all':
+    if day == 'every':
         
         if unit_program == 'minutes':
             unit_period = IntervalSchedule.MINUTES

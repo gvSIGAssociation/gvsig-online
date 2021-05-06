@@ -3238,11 +3238,15 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("Source EPSG:")+'</label>'+
-                                '<input id="source-epsg-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder = "'+gettext('Empty to read from input layer')+'" >'+
+                                '<select id="source-epsg-'+ID+'" class="form-control js-example-basic-single">'+
+                                '<option value="">'+gettext("Empty to read from input layer")+'</option>'+
+                                '</select>'+
                             '</div>'+
                             '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("Target EPSG:")+'</label>'+
-                                '<input id="target-epsg-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                                '<select id="target-epsg-'+ID+'" class="form-control js-example-basic-single">'+ 
+                                '<option value="">------</option>'+
+                                '</select>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -3253,6 +3257,20 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+        for(i=0;i<srs.length;i++){
+
+            epsg = srs[i].code.split(":")[1]
+
+            $('#source-epsg-'+ID).append(
+                '<option value="'+epsg+'">'+srs[i].code+' - '+srs[i].title+'</option>'
+            );
+
+            $('#target-epsg-'+ID).append(
+                '<option value="'+epsg+'">'+srs[i].code+' - '+srs[i].title+'</option>'
+            );
+
+        }
 
         context = this
 
