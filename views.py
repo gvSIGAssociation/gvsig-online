@@ -22,6 +22,7 @@ from gvsigol import settings
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
+from django.urls import reverse
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -43,6 +44,7 @@ import re
 import base64
 from actstream import action
 import logging
+from gvsigol_core.utils import get_absolute_url
 logger = logging.getLogger('gvsigol')
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
@@ -204,8 +206,10 @@ def password_reset(request):
             
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token =  default_token_generator.make_token(user)
-            
-            auth_utils.send_reset_password_email(user.email, user.id, uid, token)
+
+            pass_reset_url = reverse('password_reset_confirmation', kwargs={'user_id': user.id, 'uid': uid, 'token': token})
+            pass_reset_url = get_absolute_url(pass_reset_url, request.META)
+            auth_utils.send_reset_password_email(user.email, pass_reset_url)
             return redirect('password_reset_success')
         except User.DoesNotExist:
             logger.exception("Error resetting password")
