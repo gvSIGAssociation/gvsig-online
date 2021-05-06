@@ -349,29 +349,32 @@ msgstr "Descripció"
 msgid "Run periodically?"
 msgstr "Executar periòdicament?"
 
-msgid "all"
-msgstr "tots"
+msgid "All days"
+msgstr "Tots els dies"
 
-msgid "monday"
-msgstr "dilluns"
+msgid "Monday"
+msgstr "Dilluns"
 
-msgid "tuesday"
-msgstr "dimarts"
+msgid "Tuesday"
+msgstr "Dimarts"
 
-msgid "wednesday"
-msgstr "dimecres"
+msgid "Wednesday"
+msgstr "Dimecres"
 
-msgid "thursday"
-msgstr "dijous"
+msgid "Thursday"
+msgstr "Dijous"
 
-msgid "friday"
-msgstr "divendres"
+msgid "Friday"
+msgstr "Divendres"
 
-msgid "saturday"
-msgstr "dissabte"
+msgid "Saturday"
+msgstr "Dissabte"
 
-msgid "sunday"
-msgstr "diumenge"
+msgid "Sunday"
+msgstr "Diumenge"
+
+msgid "Every"
+msgstr "Cada"
 
 msgid "Run workspace every..."
 msgstr "Executa l'espai de treball cada..."

@@ -349,28 +349,31 @@ msgstr ""
 msgid "Run periodically?"
 msgstr ""
 
-msgid "all"
+msgid "All days"
 msgstr ""
 
-msgid "monday"
+msgid "Monday"
 msgstr ""
 
-msgid "tuesday"
+msgid "Tuesday"
 msgstr ""
 
-msgid "wednesday"
+msgid "Wednesday"
 msgstr ""
 
-msgid "thursday"
+msgid "Thursday"
 msgstr ""
 
-msgid "friday"
+msgid "Friday"
 msgstr ""
 
-msgid "saturday"
+msgid "Saturday"
 msgstr ""
 
-msgid "sunday"
+msgid "Sunday"
+msgstr ""
+
+msgid "Every"
 msgstr ""
 
 msgid "Run workspace every..."

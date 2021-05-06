@@ -68,6 +68,7 @@
     description_ws = '{{ description }}'
     workspace = '{{ workspace }}'
     fm_directory = '{{ fm_directory }}'
+    
 
     if('{{day_of_week}}'){
         dataPeriodic = '{{day_of_week}}'+' '+'{{hour}}'+':'+'{{minute}}'
@@ -87,6 +88,8 @@
     if(workspace){
         var cnv = JSON.parse(htmlDecode(workspace))
     };
+
+    srs = JSON.parse(htmlDecode('{{ srs }}').replaceAll("'", '"'))
 
     function actualizarInfoPanel(data){
         if(data.status == ''){
