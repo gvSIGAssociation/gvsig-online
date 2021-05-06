@@ -481,19 +481,6 @@ def sendMail(user, password):
     toAddress = [user.email]           
     fromAddress = settings.EMAIL_HOST_USER
     send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
-    
-def send_reset_password_email(email, temp_pass):
-            
-    subject = _(u'New password')
-    
-    body = _(u'This is your new temporary password') + ':\n\n'
-    
-    body = body + '  - ' + _(u'Password') + ': ' + temp_pass + '\n\n'
-    
-    toAddress = [email]           
-    fromAddress = settings.EMAIL_HOST_USER
-    send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
-    
 
 supported_crs = {}
 supported_crs_array = []

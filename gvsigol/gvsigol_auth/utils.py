@@ -120,13 +120,12 @@ def sendMail(user, password):
         print 'Restore message: ' + body
         send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
     
-def send_reset_password_email(email, id, uid, token):
+def send_reset_password_email(email, pass_reset_url):
     if gvsigol.settings.EMAIL_BACKEND_ACTIVE:     
         subject = _(u'New password')
         
         body = _(u'This is your new temporary password') + ':\n\n'
-        
-        body = body + gvsigol.settings.BASE_URL +'/gvsigonline/auth/reset/' + str(id) + '/' + uid + '/' + token + '/ \n\n'
+        body += pass_reset_url + ' \n\n'
         
         toAddress = [email]           
         fromAddress = gvsigol.settings.EMAIL_HOST_USER
