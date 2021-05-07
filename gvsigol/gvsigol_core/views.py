@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from django.views.decorators.csrf import csrf_exempt
 from gvsigol_core.utils import get_supported_crs
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
@@ -836,6 +837,7 @@ def get_default_style(layer):
             default = stl
     return default
 
+@csrf_exempt
 def project_get_conf(request):
     if request.method == 'POST':
         errors = []
