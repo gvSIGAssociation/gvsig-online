@@ -31,6 +31,7 @@ from xml.etree import ElementTree
 
 from django.contrib.gis.geos import Polygon, Point, MultiPoint, GeometryCollection
 
+@csrf_exempt
 def get_conf(request):
     if request.method == 'POST':
         response = {
