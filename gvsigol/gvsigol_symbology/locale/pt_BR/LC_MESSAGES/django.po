@@ -469,7 +469,7 @@ msgstr "O nome do campo é obrigatório"
 #: gvsigol_symbology/templates/unique_symbol_update.html:11
 #: gvsigol_symbology/templates/unique_values_update.html:11
 msgid "Update style"
-msgstr "Estilo de atualização"
+msgstr "Atualizar estilo"
 
 #: gvsigol_symbology/templates/clustered_points_update.html:68
 #: gvsigol_symbology/templates/expressions_add.html:65
@@ -1067,14 +1067,12 @@ msgstr "Cria uma legenda definida por expressões"
 #: gvsigol_symbology/templates/select_legend_type.html:68
 #: gvsigol_symbology/templates/select_legend_type.html:99
 msgid "Custom"
-msgstr ""
+msgstr "Personalizado"
 
 #: gvsigol_symbology/templates/select_legend_type.html:69
 #: gvsigol_symbology/templates/select_legend_type.html:100
-#, fuzzy
-#| msgid "Has custom legend?"
 msgid "Creates a custom legend"
-msgstr "Tem legenda personalizada?"
+msgstr "Cria uma legenda personalizada"
 
 #: gvsigol_symbology/templates/select_legend_type.html:78
 msgid "Import from SLD"
