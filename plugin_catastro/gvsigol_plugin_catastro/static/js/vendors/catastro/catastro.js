@@ -1,11 +1,11 @@
-var CatastroForm = function(){
+var CatastroForm = function(show){
 	this.vectorSource = null;
 	this.vectorLayer = null;
 
-	this.createForm();
+	this.createForm(show);
 }
 
-CatastroForm.prototype.createForm = function(){
+CatastroForm.prototype.createForm = function(show){
 
 var self = this;
 
@@ -109,7 +109,8 @@ var	ui = '<ul class="nav nav-tabs">';
 //	$('#float-modal .modal-header').empty();
 //	$('#float-modal .modal-header').append(ui2);
 
-	$("#float-modal").modal('show');
+	if (show)
+		$("#float-modal").modal('show');
 
 	$("#float-modal-accept-coordcalc").on('click', function(){
 		var tab = $(".cadastral-tab.active").first().attr("id");
@@ -339,7 +340,7 @@ CatastroForm.prototype.getRefCatastralInfo = function(coord_x, coord_y, srs){
 	iframe.document.close();
 }
 
-CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral){
+CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral, showPopup = true){
 	var self = this;
 	var final_url = '/gvsigonline/catastro/get_referencia_catastral_polygon/'
 		$.ajax({
@@ -424,40 +425,41 @@ CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral){
 						$(this).css("display", "block");
 					});
 
+					if (showPopup) {
+						viewer.core.map.on("click", function(e) {
+							viewer.core.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+								if(layer.getProperties()['name'] == 'catastro_layer' && feature){
+									var point = ol.proj.transform(e.coordinate, viewer.core.map.getView().getProjection().getCode(), 'EPSG:4326');
+									var address_url = '/gvsigonline/catastro/get_rc_by_coords/';
+									$.ajax({
+										type: 'POST',
+										async: false,
+										url: address_url,
+										data: {
+											'xcen': point[0],
+											'ycen': point[1],
+											'srs': 'EPSG:4326'
+										},
+										success: function(data){
+											var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
+											var popup = new ol.Overlay.Popup();
+											viewer.core.map.addOverlay(popup);
+											var popupContent = '<p>'+data['address']+'</p><p>' + gettext("RC") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
+											popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
 
-					viewer.core.map.on("click", function(e) {
-						viewer.core.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
-					        if(layer.getProperties()['name'] == 'catastro_layer' && feature){
-					        	var point = ol.proj.transform(e.coordinate, viewer.core.map.getView().getProjection().getCode(), 'EPSG:4326');
-					        	var address_url = '/gvsigonline/catastro/get_rc_by_coords/';
-					        	$.ajax({
-					        		type: 'POST',
-					        		async: false,
-					        	  	url: address_url,
-					        	  	data: {
-					        	  		'xcen': point[0],
-					        	  		'ycen': point[1],
-					        	  		'srs': 'EPSG:4326'
-					        		},
-					        		success: function(data){
-					        			var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
-					    				var popup = new ol.Overlay.Popup();
-					    				viewer.core.map.addOverlay(popup);
-					    				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("RC") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
-					    				popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
+											viewer.core.map.getView().setCenter(coordinate);
+											viewer.core.map.getView().setZoom(18);
+											self.getRefCatastralPolygon(data['rc']);
 
-					    				viewer.core.map.getView().setCenter(coordinate);
-					    				viewer.core.map.getView().setZoom(18);
-					                    self.getRefCatastralPolygon(data['rc']);
-
-					                    $("#popup-show-more-info").click(function(){
-					                    	self.getRefCatastralInfo(parseFloat(data['xcen']), parseFloat(data['ycen']), data['srs'])
-					                    })
-					        		}
-					        	});
-					        }
-					    });
-					});
+											$("#popup-show-more-info").click(function(){
+												self.getRefCatastralInfo(parseFloat(data['xcen']), parseFloat(data['ycen']), data['srs'])
+											})
+										}
+									});
+								}
+							});
+						});
+					} // showPopup
 				}
 
 

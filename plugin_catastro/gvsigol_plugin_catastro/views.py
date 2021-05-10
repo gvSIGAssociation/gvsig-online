@@ -24,7 +24,7 @@
 
 from django.shortcuts import HttpResponse
 from . import settings
-import json
+import xmltodict, json
 import requests
 from django.views.decorators.csrf import csrf_exempt
 from xml.etree import ElementTree
@@ -109,6 +109,25 @@ def get_rc_by_coords(request):
                     response['address'] = aux3.text
 
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
+@csrf_exempt
+def get_rc_public_data(request):
+    if request.method == 'POST':
+        ref_catastral = request.POST.get('RC')
+
+        body = {}
+        body['Provincia'] = ''
+        body['Municipio'] = ''
+        body['RC'] = ref_catastral
+
+        address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/Consulta_DNPRC'
+        r = requests.post(address_url, data = body, verify = False)
+
+        resp_obj = xmltodict.parse(r.content)
+
+        print(json.dumps(resp_obj))
+
+        return HttpResponse(json.dumps(resp_obj, indent=4), content_type='folder/json')
 
 
 @csrf_exempt

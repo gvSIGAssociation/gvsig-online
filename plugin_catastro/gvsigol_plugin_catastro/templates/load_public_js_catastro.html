@@ -64,13 +64,13 @@
 				}
 			});
 
+			var map = viewer.core.map;
+			if(!map.hasOwnProperty('catastro')){
+					map['catastro'] = new CatastroForm(false);
+			}
+
 			$(".catastro-search-button").click(function(){
-				var map = viewer.core.map;
-				if(!map.hasOwnProperty('catastro')){
-					map['catastro'] = new CatastroForm();
-				}else{
-					map.catastro.createForm();
-				}
+				map.catastro.createForm(true);
 			})
 
 			$(".catastro-clear-button").click(function(){
