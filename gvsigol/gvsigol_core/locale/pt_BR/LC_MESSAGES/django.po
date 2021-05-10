@@ -342,7 +342,7 @@ msgstr ""
 #: gvsigol_core/templates/project_add.html:44
 #: gvsigol_core/templates/project_update.html:60
 msgid "Select main logo"
-msgstr ""
+msgstr "Selecione o logotipo principal"
 
 #: gvsigol_core/templates/project_add.html:44
 #: gvsigol_core/templates/project_add.html:132
@@ -354,7 +354,7 @@ msgstr "Formatos suportados"
 #: gvsigol_core/templates/project_add.html:49
 #: gvsigol_core/templates/project_update.html:65
 msgid "Link for logo"
-msgstr ""
+msgstr "Link para logotipo"
 
 #: gvsigol_core/templates/project_add.html:55
 #: gvsigol_core/templates/project_clone.html:51
@@ -398,7 +398,7 @@ msgstr "Descrição do projeto"
 #: gvsigol_core/templates/project_add.html:73
 #: gvsigol_core/templates/project_update.html:85
 msgid "Toc panel presentation"
-msgstr "Apresentação do painel Toc"
+msgstr "Apresentação do painel TOC"
 
 #: gvsigol_core/templates/project_add.html:75
 #: gvsigol_core/templates/project_update.html:88
@@ -451,12 +451,12 @@ msgstr "Localizar lugar..."
 #: gvsigol_core/templates/project_add.html:121
 #: gvsigol_core/templates/project_update.html:148
 msgid "Restricted extent"
-msgstr ""
+msgstr "Extensão restrita"
 
 #: gvsigol_core/templates/project_add.html:132
 #: gvsigol_core/templates/project_update.html:162
 msgid "Change image?"
-msgstr "Mudar de imagem?"
+msgstr "Modificar a imagem?"
 
 #: gvsigol_core/templates/project_add.html:139
 #: gvsigol_core/templates/project_update.html:170
@@ -466,12 +466,12 @@ msgstr "Mostrar í­cone de projeto em TOC"
 #: gvsigol_core/templates/project_add.html:146
 #: gvsigol_core/templates/project_update.html:181
 msgid "Etiquetas de proyecto"
-msgstr ""
+msgstr "Etiquetas de projeto"
 
 #: gvsigol_core/templates/project_add.html:159
 #: gvsigol_core/templates/project_update.html:194
 msgid "Etiquetas añadidas"
-msgstr ""
+msgstr "Adicionar etiquetas"
 
 #: gvsigol_core/templates/project_add.html:177
 #: gvsigol_core/templates/project_update.html:216
@@ -527,7 +527,7 @@ msgstr "É público?"
 #: gvsigol_core/templates/project_add.html:306
 #: gvsigol_core/templates/project_update.html:363
 msgid "Allow access to the project for the following user groups:"
-msgstr ""
+msgstr "Permitir o acesso ao projeto para os seguintes grupos de usuários:"
 
 #: gvsigol_core/templates/project_add.html:310
 #: gvsigol_core/templates/project_add.html:317
@@ -539,7 +539,7 @@ msgstr "Pesquisar grupo de usuários..."
 #: gvsigol_core/templates/project_add.html:313
 #: gvsigol_core/templates/project_update.html:370
 msgid "Extend to layers"
-msgstr ""
+msgstr "Estender as permissões"
 
 #: gvsigol_core/templates/project_add.html:335
 #: gvsigol_core/templates/project_add.html:337
@@ -586,7 +586,7 @@ msgstr "Aceitar"
 #: gvsigol_core/templates/project_add.html:389
 #: gvsigol_core/templates/project_update.html:572
 msgid "Extend project permissions to layers"
-msgstr ""
+msgstr "Extend project permissions to layers"
 
 #: gvsigol_core/templates/project_add.html:392
 #: gvsigol_core/templates/project_update.html:575
@@ -594,6 +594,8 @@ msgid ""
 "This action will give the selected user groups permission to read all the "
 "layers included in this project. Notes:"
 msgstr ""
+"Esta ação dará aos grupos de usuários selecionados permissão para ler todas "
+"as camadas incluídas neste projeto. Notas:"
 
 #: gvsigol_core/templates/project_add.html:394
 #: gvsigol_core/templates/project_update.html:577
@@ -601,6 +603,8 @@ msgid ""
 "If the project is public, all the layers assigned to the project will become "
 "public."
 msgstr ""
+"Se o projeto for público, todas as camadas designadas para o projeto se tornarão "
+"públicas."
 
 #: gvsigol_core/templates/project_add.html:395
 #: gvsigol_core/templates/project_update.html:578
@@ -608,11 +612,13 @@ msgid ""
 "This action will operate on layers, layer groups and user groups currently "
 "selected, even if they have been not saved."
 msgstr ""
+"A ação operará em camadas, grupos de camadas e grupos de usuários atualmente "
+"selecionados, mesmo que não tenham sido salvos."
 
 #: gvsigol_core/templates/project_add.html:396
 #: gvsigol_core/templates/project_update.html:579
 msgid "Additional permissions existing on the layer will not be removed."
-msgstr ""
+msgstr "As permissões adicionais existentes na camada não serão removidas."
 
 #: gvsigol_core/templates/project_add.html:990
 #: gvsigol_core/templates/project_update.html:1404
@@ -692,7 +698,7 @@ msgstr "O projeto será removido. Você quer continuar?"
 #: gvsigol_core/templates/project_list.html:88
 #: gvsigol_core/templates/project_list.html:170
 msgid "Clone project"
-msgstr ""
+msgstr "Clonar projeto"
 
 #: gvsigol_core/templates/project_list.html:117
 msgid "Server"
@@ -790,7 +796,7 @@ msgstr "Atualizar"
 
 #: gvsigol_core/templates/project_update.html:45
 msgid "Package the base layer"
-msgstr ""
+msgstr "Empaquetar camada base"
 
 #: gvsigol_core/templates/project_update.html:422
 msgid "Process running"
@@ -816,16 +822,16 @@ msgstr ""
 #: gvsigol_core/templates/project_update.html:448
 #: gvsigol_core/templates/project_update.html:477
 msgid "Extent"
-msgstr ""
+msgstr "Extensão"
 
 #: gvsigol_core/templates/project_update.html:454
 #: gvsigol_core/templates/project_update.html:503
 msgid "Niveles de zoom"
-msgstr ""
+msgstr "Níveis de zoom"
 
 #: gvsigol_core/templates/project_update.html:464
 msgid "Download version"
-msgstr ""
+msgstr "Baixar versão"
 
 #: gvsigol_core/templates/project_update.html:469
 msgid "Download"
@@ -853,19 +859,19 @@ msgstr ""
 
 #: gvsigol_core/templates/project_update.html:513
 msgid "Tilematrixset (WMTS)"
-msgstr ""
+msgstr "EPSG (WMTS)"
 
 #: gvsigol_core/templates/project_update.html:516
 msgid "Tilematrixset"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:522
+#: gvsigol_core/templates/project_update.html:499
 msgid "Create layer"
 msgstr "Criar camada"
 
 #: gvsigol_core/templates/project_update.html:523
 msgid "Continue download"
-msgstr ""
+msgstr "Continuar baixando"
 
 #: gvsigol_core/templates/project_update.html:524
 msgid "Stop Process"
