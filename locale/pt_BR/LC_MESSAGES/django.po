@@ -716,13 +716,7 @@ msgstr "O projeto será removido. Você quer continuar?"
 #: gvsigol_core/templates/project_list.html:88
 #: gvsigol_core/templates/project_list.html:170
 msgid "Clone project"
-<<<<<<< .mine
 msgstr "Clonar projetos"
-||||||| .r6475
-msgstr "Excluir projetos"
-=======
-msgstr ""
->>>>>>> .r6560
 
 #: gvsigol_core/templates/project_list.html:117
 msgid "Server"
