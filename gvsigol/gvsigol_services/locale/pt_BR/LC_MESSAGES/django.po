@@ -559,7 +559,7 @@ msgstr "Visível"
 #: gvsigol_services/templates/layer_create.html:147
 #: gvsigol_services/templates/layer_update.html:148
 msgid "Queryable"
-msgstr "Questões"
+msgstr "Consultável"
 
 #: gvsigol_services/forms_geoserver.py:60
 #: gvsigol_services/forms_geoserver.py:75
@@ -581,7 +581,7 @@ msgstr "Questões"
 #: gvsigol_services/templates/layer_create.html:143
 #: gvsigol_services/templates/layer_update.html:140
 msgid "Cached"
-msgstr "Em cache"
+msgstr "Cache"
 
 #: gvsigol_services/forms_geoserver.py:61
 #: gvsigol_services/forms_geoserver.py:76
@@ -1372,7 +1372,7 @@ msgstr "Espaços de trabalho"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:10
 msgid "Datastores"
-msgstr "Datastores"
+msgstr "Armazém de dados"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:11
 msgid "Layer groups"
@@ -1396,7 +1396,7 @@ msgstr ""
 
 #: gvsigol_services/templates/dashboard_services_menu.html:21
 msgid "Datatypes"
-msgstr "Datatypes"
+msgstr "Tipos de dados"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:23
 msgid "Enumerations"
@@ -1497,7 +1497,7 @@ msgstr "Geral"
 #: gvsigol_services/templates/layer_create.html:46
 #: gvsigol_services/templates/layer_update.html:39
 msgid "Display properties"
-msgstr "Exibir propriedades"
+msgstr "Propriedades da camada"
 
 #: gvsigol_services/templates/external_layer_add.html:35
 #: gvsigol_services/templates/external_layer_update.html:49
@@ -1505,7 +1505,7 @@ msgstr "Exibir propriedades"
 #: gvsigol_services/templates/layer_create.html:48
 #: gvsigol_services/templates/layer_update.html:41
 msgid "Metadata"
-msgstr "Metadata"
+msgstr "Metadado"
 
 #: gvsigol_services/templates/external_layer_add.html:36
 #: gvsigol_services/templates/external_layer_update.html:50
@@ -1520,7 +1520,7 @@ msgstr "Informações detalhadas"
 #: gvsigol_services/templates/layer_add.html:95
 #: gvsigol_services/templates/layer_update.html:112
 msgid "Timeout (miliseconds)"
-msgstr ""
+msgstr "Tempo limite (milissegundos)"
 
 #: gvsigol_services/templates/external_layer_add.html:160
 #: gvsigol_services/templates/external_layer_update.html:205
@@ -1554,7 +1554,7 @@ msgstr "Alguma descrição da camada"
 #: gvsigol_services/templates/layer_create.html:254
 #: gvsigol_services/templates/layer_update.html:315
 msgid "Enable metaquality"
-msgstr "Ativar meta qualidade"
+msgstr "Ativar"
 
 #: gvsigol_services/templates/external_layer_add.html:183
 #: gvsigol_services/templates/external_layer_update.html:237
@@ -1627,19 +1627,19 @@ msgstr "Atualizar camada externa"
 #: gvsigol_services/templates/external_layer_update.html:181
 #: gvsigol_services/templates/layer_update.html:268
 msgid "Layer metadata"
-msgstr "Metadados de camada"
+msgstr "Metadado da camada"
 
 #: gvsigol_services/templates/external_layer_update.html:186
 #: gvsigol_services/templates/layer_update.html:273
 msgid "Metadata UUID"
-msgstr "Metadata UUID"
+msgstr "Metadado UUID"
 
 #: gvsigol_services/templates/external_layer_update.html:192
 #: gvsigol_services/templates/external_layer_update.html:198
 #: gvsigol_services/templates/layer_update.html:279
 #: gvsigol_services/templates/layer_update.html:285
 msgid "Metadata tools"
-msgstr "Ferramentas de metadados"
+msgstr "Ferramentas do metadado"
 
 #: gvsigol_services/templates/external_layer_update.html:193
 #: gvsigol_services/templates/layer_update.html:280
@@ -1700,7 +1700,7 @@ msgstr "Propriedades da camada no visor"
 #: gvsigol_services/templates/layer_create.html:153
 #: gvsigol_services/templates/layer_update.html:158
 msgid "Single image (No tiles)"
-msgstr "Imagem única (sem azulejos)"
+msgstr "Imagem simples (sem mosaicos)"
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:143
 #: gvsigol_services/templates/layer_config.html:699
@@ -2003,13 +2003,13 @@ msgstr "Nome do recurso"
 #: gvsigol_services/templates/layer_add.html:99
 #: gvsigol_services/templates/layer_update.html:117
 msgid "WFS request feature limit"
-msgstr ""
+msgstr "Limite de solicitação WFS"
 
 #: gvsigol_services/templates/layer_add.html:124
 #: gvsigol_services/templates/layer_create.html:157
 #: gvsigol_services/templates/layer_update.html:166
 msgid "time_enabled"
-msgstr "tempo_activado"
+msgstr "Parâmetro temporal"
 
 #: gvsigol_services/templates/layer_add.html:128
 #: gvsigol_services/templates/layer_create.html:161
@@ -2020,7 +2020,7 @@ msgstr "Permitir downloads"
 #: gvsigol_services/templates/layer_add.html:135
 #: gvsigol_services/templates/layer_update.html:184
 msgid "View in real time"
-msgstr "Veja em tempo real"
+msgstr "Ver em tempo real"
 
 #: gvsigol_services/templates/layer_add.html:140
 #: gvsigol_services/templates/layer_update.html:189
@@ -2119,11 +2119,11 @@ msgstr "Selecionar campo de data"
 
 #: gvsigol_services/templates/layer_config.html:43
 msgid "Field management"
-msgstr ""
+msgstr "Gestão do campo"
 
 #: gvsigol_services/templates/layer_config.html:44
 msgid "Field titles"
-msgstr ""
+msgstr "Título do campo"
 
 #: gvsigol_services/templates/layer_config.html:45
 msgid "Field groups"
@@ -2144,15 +2144,15 @@ msgstr "Nome do campo"
 #: gvsigol_services/templates/layer_config.html:62
 #: gvsigol_services/templates/layer_create.html:112
 msgid "Calculated"
-msgstr ""
+msgstr "Calculado"
 
 #: gvsigol_services/templates/layer_config.html:63
 msgid "Nullable"
-msgstr ""
+msgstr "Nulo"
 
 #: gvsigol_services/templates/layer_config.html:64
 msgid "mandatory"
-msgstr ""
+msgstr "Obrigatório"
 
 #: gvsigol_services/templates/layer_config.html:65
 msgid "Is visible?"
@@ -2168,7 +2168,7 @@ msgstr "É mostrado em Obter Informações sobre o Recurso?"
 
 #: gvsigol_services/templates/layer_config.html:68
 msgid "Actions"
-msgstr ""
+msgstr "Ferramentas"
 
 #: gvsigol_services/templates/layer_config.html:79
 #: gvsigol_services/templates/layer_config.html:81
@@ -2182,19 +2182,19 @@ msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:118
 msgid "Rename"
-msgstr ""
+msgstr "Renomear"
 
 #: gvsigol_services/templates/layer_config.html:119
 msgid "Change type"
-msgstr ""
+msgstr "Tipo de Geom"
 
 #: gvsigol_services/templates/layer_config.html:121
 msgid "Convert to enumerate"
-msgstr ""
+msgstr "Converter para Enumeração"
 
 #: gvsigol_services/templates/layer_config.html:127
 msgid "Reserved field"
-msgstr ""
+msgstr "Excluir campo"
 
 #: gvsigol_services/templates/layer_config.html:146
 #: gvsigol_services/templates/layer_create.html:122
@@ -2312,11 +2312,11 @@ msgstr "Atualizar miniatura"
 
 #: gvsigol_services/templates/layer_update.html:94
 msgid "Icon"
-msgstr ""
+msgstr "Ícone"
 
 #: gvsigol_services/templates/layer_update.html:94
 msgid "Supported formats"
-msgstr ""
+msgstr "Formatos suportados"
 
 #: gvsigol_services/templates/layergroup_add.html:37
 #: gvsigol_services/templates/layergroup_update.html:38
@@ -2407,7 +2407,7 @@ msgstr "Camada de desbloqueio"
 
 #: gvsigol_services/templates/select_layer_permissions.html:7
 msgid "Give the selected groups permissions to read or write the layer"
-msgstr ""
+msgstr "Permitir que os grupos selecionados leiam ou escrevam a camada"
 
 #: gvsigol_services/templates/select_layer_permissions.html:8
 msgid "Search user group..."
@@ -2418,10 +2418,8 @@ msgid "Layer will be readable by everyone if public"
 msgstr ""
 
 #: gvsigol_services/templates/select_layer_permissions.html:14
-#, fuzzy
-#| msgid "Is public?"
 msgid "Is public"
-msgstr "É público?"
+msgstr "É pública?"
 
 #: gvsigol_services/templates/select_layer_permissions.html:31
 msgid "Read permissions"
