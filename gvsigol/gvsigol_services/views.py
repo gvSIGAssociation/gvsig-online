@@ -53,7 +53,6 @@ from django.utils.html import escape, strip_tags
 from future.moves.urllib.parse import urlparse, urlencode
 from builtins import str as text
 from geoserver import workspace
-from lxml import html
 from owslib.util import Authentication
 from owslib.wms import WebMapService
 from owslib.wmts import WebMapTileService
@@ -94,7 +93,7 @@ from actstream import action
 from actstream.models import Action
 from django_sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
-from lxml import etree
+from lxml import etree, html
 
 logger = logging.getLogger("gvsigol")
 
@@ -2947,12 +2946,11 @@ def get_feature_info(request):
                         ws = layer['workspace']
     
                     print(url)
-    
+                    auth2 = None
                     if query_layer != 'plg_catastro' and \
                             request.session.get('username') is not None and \
                             request.session.get('password') is not None:
                         servers = Server.objects.all()
-                        auth2 = None
                         url_obj = urlparse(url)
                         for server in servers:
                             server_url_obj = urlparse(server.frontend_url)
@@ -3003,8 +3001,7 @@ def get_feature_info(request):
 
             features = None
             if query_layer == 'plg_catastro':
-
-                html_content = html.document_fromstring(resultset['response'].decode('utf-8').encode('ascii'))
+                html_content = html.document_fromstring(resultset['response'].encode('ascii'))
                 for el in html_content.xpath('//body//a'):
                     feat = {}
                     feat['type'] = 'catastro'
