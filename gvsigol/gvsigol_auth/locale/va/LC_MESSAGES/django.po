@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 22:34+0000\n"
-"PO-Revision-Date: 2021-05-05 15:16+0200\n"
+"POT-Creation-Date: 2021-05-11 13:45+0000\n"
+"PO-Revision-Date: 2021-05-11 14:34+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca\n"
@@ -329,44 +329,60 @@ msgid "Account data"
 msgstr "Dades del compte"
 
 #: gvsigol_auth/utils.py:125
-msgid "New password"
-msgstr "Nova contrasenya"
+msgid "Password reset"
+msgstr "Restabliment de contrasenya"
 
 #: gvsigol_auth/utils.py:127
-msgid "This is your new temporary password"
-msgstr "Aquesta és la contrasenya temporal"
+msgid ""
+"You are receiving this email because we received a password reset request "
+"for your account."
+msgstr ""
+"Estàs rebent aquest correu electrònic perquè hem rebut una sol·licitud de "
+"restabliment de contrasenya per al teu compte."
 
-#: gvsigol_auth/views.py:79 gvsigol_auth/views.py:162 gvsigol_auth/views.py:264
+#: gvsigol_auth/utils.py:128
+msgid "You can reset your password by clicking the link bellow"
+msgstr "Pots restablir la contrasenya fent clic a l'enllaç de baix"
+
+#: gvsigol_auth/utils.py:130
+msgid ""
+"If you did not request a password reset, please ignore this email. Your "
+"password will not change."
+msgstr ""
+"Si no heu sol·licitat un restabliment de contrasenya, ignoreu aquest correu "
+"electrònic. La contrasenya no canviarà."
+
+#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:164 gvsigol_auth/views.py:268
 msgid "Your account has been disabled"
 msgstr "La contrasenya ha estat desactivada"
 
-#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:83 gvsigol_auth/views.py:164
-#: gvsigol_auth/views.py:166 gvsigol_auth/views.py:266
+#: gvsigol_auth/views.py:83 gvsigol_auth/views.py:85 gvsigol_auth/views.py:166
+#: gvsigol_auth/views.py:168 gvsigol_auth/views.py:270
 msgid "The username and password you have entered do not match our records"
 msgstr "L'usuari i contrasenya introduïts no coincideixen"
 
-#: gvsigol_auth/views.py:212
+#: gvsigol_auth/views.py:216
 msgid "User account does not exist"
 msgstr "El compte d'usuari no existeix"
 
-#: gvsigol_auth/views.py:216
+#: gvsigol_auth/views.py:220
 msgid "That did not work"
 msgstr "Això no ha funcionat"
 
-#: gvsigol_auth/views.py:270
+#: gvsigol_auth/views.py:274
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr ""
 "Token invàlid. El vostre enllaç ha caducat, heu de sol·licitar-ne un altre."
 
-#: gvsigol_auth/views.py:388
+#: gvsigol_auth/views.py:392
 msgid "User group for"
 msgstr "Grup d'usuaris per"
 
-#: gvsigol_auth/views.py:569
+#: gvsigol_auth/views.py:573
 msgid "Admin is a reserved group"
 msgstr "Admin és un grup reservat"
 
-#: gvsigol_auth/views.py:573
+#: gvsigol_auth/views.py:577
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
@@ -377,11 +393,16 @@ msgstr ""
 "començar amb una lletra o un subratllat (_). Els caràcters posteriors poden "
 "ser lletres, guions baixos o nombres"
 
-#~ msgid "Login requests"
-#~ msgstr "Inicis de sessió"
+#, fuzzy
+#~| msgid "Repeat password"
+#~ msgid "Reset password"
+#~ msgstr "Repetir contrasenya"
 
-#~ msgid "User"
-#~ msgstr "Usuari"
+#~ msgid "New password"
+#~ msgstr "Nova contrasenya"
+
+#~ msgid "This is your new temporary password"
+#~ msgstr "Aquesta és la contrasenya temporal"
 
 #~ msgid "There must be at least one server"
 #~ msgstr "Hi ha d'haver almenys un servidor"
