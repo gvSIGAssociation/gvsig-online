@@ -47,17 +47,17 @@
 	      		{% else %}
 				  	{% url 'filemanager:fdownload' file.filepath as download_url %}
 	      			{% if file.extension|lower == "shp" %}
-	      				<td><img width="32" src="{% static "img/shp.png" %}" style="margin-right: 5px;"><a href="{{download_url}}">{{file.filename}}</a></td>
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/shp.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
 	      			{% elif file.extension|lower == "dbf" %}
-	      				<td><img width="32" src="{% static "img/dbf.png" %}" style="margin-right: 5px;"><a href="{{download_url}}">{{file.filename}}</a></td>
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/dbf.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
 	      			{% elif file.extension|lower == "tif" or file.extension|lower == "tiff" or file.extension|lower == "geotiff" %}
-	      				<td><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;"><a href="{{download_url}}">{{file.filename}}</a></td>
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
 	      			{% elif file.extension|lower == "xlsx" or file.extension|lower == "xls" or file.extension|lower == "csv" %}
-	      				<td><img width="32" src="{% static "img/excel.png" %}" style="margin-right: 5px;"><a href="{{download_url}}">{{file.filename}}</a></td>
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/excel.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
 	      			{% elif file.extension|lower == "zip" %}
-	      				<td><img width="32" src="{% static "img/zip.png" %}" style="margin-right: 5px;"><a href="{{download_url}}">{{file.filename}}</a></td>
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/zip.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
 	      			{% else %}
-	      				<td><img width="32" src="{% static "img/file.png" %}" style="margin-right: 5px;"><a href="{{download_url}}">{{file.filename}}</a></td>
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/file.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
 	      			{% endif %}
 	      		{% endif %}
 	      		<td>{{file.filesize}}</td>
