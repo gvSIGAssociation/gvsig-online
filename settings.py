@@ -20,15 +20,15 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-
+from django.utils.translation import ugettext_noop as _
 
 STATISTICS=[{
     'id': 'gvsigol_core',
     'count': 1,
     'operation': 'get_conf',
     'reverse_petition': False,
-    'title': 'Project requests',
-    'target_title': 'Projects',
+    'title': _('Project requests'),
+    'target_title': _('Projects'),
     'target_field': 'title'
 },
 {
@@ -36,7 +36,7 @@ STATISTICS=[{
     'count': 2,
     'operation': 'get_conf',
     'reverse_petition': True,
-    'title': 'Project requests by user',
-    'target_title': 'Users',
+    'title': _('Project requests by user'),
+    'target_title': _('Users'),
     'target_field': 'username'
 }]
