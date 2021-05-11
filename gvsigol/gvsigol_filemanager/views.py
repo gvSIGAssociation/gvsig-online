@@ -8,7 +8,7 @@ from django.shortcuts import HttpResponse, redirect
 from django.utils.translation import ugettext as _
 from gvsigol.settings import FILEMANAGER_DIRECTORY, INSTALLED_APPS
 from django.urls import reverse_lazy
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from gvsigol_services import rest_geoserver
 from django.views.generic.base import View
 from .forms import DirectoryCreateForm
@@ -20,6 +20,7 @@ import os
 import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django_sendfile import sendfile
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
@@ -29,7 +30,7 @@ def can_manage_path(user, path):
     if path is not None:
         full_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, path))
         if not full_path.startswith(ABS_FILEMANAGER_DIRECTORY):
-            logger.warning("Suspicious path provided")
+            logger.warning("Suspicious path provided: " + path)
             return False
         if user:
             if user.is_superuser:
@@ -277,3 +278,11 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
     def form_valid(self, form):
         self.fm.create_directory(form.cleaned_data.get('directory_name'))
         return super(DirectoryCreateView, self).form_valid(form)
+
+def download_file(request, filepath):
+    abs_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, filepath))
+    if not os.path.exists(abs_path) or os.path.isfile(abs_path):
+        return HttpResponseBadRequest()
+    if not can_manage_path(request.user, filepath):
+        return HttpResponseForbidden()
+    return sendfile(request, abs_path, attachment=True)
