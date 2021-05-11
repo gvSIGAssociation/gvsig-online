@@ -281,7 +281,7 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
 
 def download_file(request, filepath):
     abs_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, filepath))
-    if not os.path.exists(abs_path) or os.path.isfile(abs_path):
+    if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
         return HttpResponseBadRequest()
     if not can_manage_path(request.user, filepath):
         return HttpResponseForbidden()
