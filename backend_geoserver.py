@@ -1071,59 +1071,7 @@ class Geoserver():
             print("__update_raster_stats failed!!")
             print(e)
             pass
-    
-    def __do_upload_postgis(self, name, datastore, form_data, zip_path):
-        tmp_dir = None
-        try: 
-            # get & sanitize parameters
-            srs = form_data.get('srs')
-            encoding = form_data.get('encoding')
-            creation_mode = form_data.get('mode')
-            if not encoding in self.supported_encodings_plain or not srs in self.supported_srs_plain:
-                raise rest_geoserver.RequestError()
-            # FIXME: sanitize connection parameters too!!!
-            # We are going to perform a command line execution with them,
-            # so we must be ABSOLUTELY sure that no code injection can be
-            # performed
-            ds_params = json.loads(datastore.connection_params) 
-            db = ds_params.get('database')
-            host = ds_params.get('host')
-            port = ds_params.get('port')
-            schema = ds_params.get('schema', "public")
-            port = str(int(port))
-            user = ds_params.get('user')
-            password = ds_params.get('passwd')
-            if _valid_sql_name_regex.search(name) == None:
-                raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
-            if _valid_sql_name_regex.search(db) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid database name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(user) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid user name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(schema) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
 
-            # extract SHP
-            tmp_dir = tempfile.mkdtemp()
-            with ZipFile(zip_path, 'r') as z:
-                z.extractall(tmp_dir)
-            files = [f for f in os.listdir(tmp_dir) if f.lower()[-4:]==".shp"]
-            
-            # import SHP to DB
-            if len(files)==1:
-                shp_abs = os.path.join(tmp_dir, files[0])
-                self.__shp2postgis(shp_abs, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
-                return
-        except (rest_geoserver.RequestError):
-            raise 
-        except gdaltools.GdalToolsError as e:
-            raise rest_geoserver.RequestError(e.code, str(e))
-        except Exception as e:
-            logging.exception(e)
-        finally:
-            if tmp_dir:
-                shutil.rmtree(tmp_dir, ignore_errors=True)
-        raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
-    
     def __fieldmapping_sql(self, creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password):
         if creation_mode == forms_geoserver.MODE_CREATE:
             # no mapping needed
@@ -1284,6 +1232,8 @@ class Geoserver():
                         trigger.install()
                     except:
                         logger.exception("Failed to install trigger: " + str(trigger))
+            for layer in Layer.objects.filter(datastore=datastore, source_name=name):
+                self.reload_featuretype(layer)
             if not stderr:
                 return True
         except rest_geoserver.RequestError as e:
