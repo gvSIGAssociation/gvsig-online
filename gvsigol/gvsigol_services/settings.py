@@ -20,15 +20,15 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-
+from django.utils.translation import ugettext_noop as _
 
 STATISTICS=[{
     'id': 'gvsigol_services',
     'count': 1,
     'operation': 'layer_activate',
     'reverse_petition': False,
-    'title': 'Layer requests',
-    'target_title': 'Layers',
+    'title': _('Layer requests'),
+    'target_title': _('Layers'),
     'target_field': 'title'
 },
 {
@@ -36,7 +36,7 @@ STATISTICS=[{
     'count': 2,
     'operation': 'layer_activate',
     'reverse_petition': True,
-    'title': 'Layer requests by user',
-    'target_title': 'Users',
+    'title': _('Layer requests by user'),
+    'target_title': _('Users'),
     'target_field': 'username'
 }]
