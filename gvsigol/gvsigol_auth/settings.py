@@ -20,14 +20,14 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-
+from django.utils.translation import ugettext_noop as _
 
 STATISTICS=[{
     'id': 'gvsigol_auth',
     'count': 1,
     'operation': 'login',
     'reverse_petition': True,
-    'title': 'Login requests',
-    'target_title': 'User',
+    'title': _('Login requests'),
+    'target_title': _('User'),
     'target_field': 'username'
 }]
