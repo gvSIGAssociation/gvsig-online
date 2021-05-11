@@ -122,10 +122,12 @@ def sendMail(user, password):
     
 def send_reset_password_email(email, pass_reset_url):
     if gvsigol.settings.EMAIL_BACKEND_ACTIVE:     
-        subject = _('New password')
+        subject = _('Password reset')
         
-        body = _('This is your new temporary password') + ':\n\n'
+        body = _('You are receiving this email because we received a password reset request for your account.') + '\n\n'
+        body = _('You can reset your password by clicking the link bellow') + ':\n\n'
         body += pass_reset_url + ' \n\n'
+        body = _('If you did not request a password reset, please ignore this email. Your password will not change.') + '\n\n'
         
         toAddress = [email]           
         fromAddress = gvsigol.settings.EMAIL_HOST_USER
