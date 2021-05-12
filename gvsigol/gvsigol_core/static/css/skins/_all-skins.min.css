@@ -292,7 +292,7 @@
  * ---------
  */
 .skin-pobla .main-header .navbar {
-  background-color: #a90000;
+  background-color: #536a94;
 }
 .skin-pobla .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -318,7 +318,7 @@
   color: #fff;
 }
 .skin-pobla .main-header .navbar .sidebar-toggle:hover {
-  background-color: #a90000;
+  background-color: #536a94;
 }
 @media (max-width: 767px) {
   .skin-pobla .main-header .navbar .dropdown-menu li.divider {
@@ -328,19 +328,19 @@
     color: #fff;
   }
   .skin-pobla .main-header .navbar .dropdown-menu li a:hover {
-    background: #a90000;
+    background: #536a94;
   }
 }
 .skin-pobla .main-header .logo {
-  background-color: #a90000;
+  background-color: #536a94;
   color: #ffffff;
   border-bottom: 0 solid transparent;
 }
 .skin-pobla .main-header .logo:hover {
-  background-color: #a90000;
+  background-color: #536a94;
 }
 .skin-pobla .main-header li.user-header {
-  background-color: #a90000;
+  background-color: #536a94;
 }
 .skin-pobla .content-header {
   background: transparent;
@@ -365,7 +365,7 @@
 .skin-pobla .sidebar-menu > li.active > a {
   color: #ffffff;
   background: #1e282c;
-  border-left-color: #a90000;
+  border-left-color: #536a94;
 }
 .skin-pobla .sidebar-menu > li > .treeview-menu {
   margin: 0 1px;
