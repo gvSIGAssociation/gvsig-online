@@ -558,8 +558,8 @@ print.prototype.createPrintJob = function(template) {
 	};
 	if (self.capabilities.layouts[0].attributes[4].name == 'overviewMap') {
 		bAcceptsOverview = true;
-		dataToPost.overviewMap = {
-				"zoomFactor":5,
+		dataToPost.attributes.overviewMap = {
+				// "zoomFactor":5,
 	            "layers": [
 		              {
 		                "type": "OSM",
