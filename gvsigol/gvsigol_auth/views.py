@@ -159,6 +159,8 @@ def login_user(request):
                                 else:
                                     response['Location'] += '?expediente=' + expediente + '&token=' + token
                                 return response
+                            if next is not None:
+                                return redirect(next)
 
                         else:
                             errors.append({'message': _("Your account has been disabled")})
