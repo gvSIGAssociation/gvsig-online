@@ -2944,11 +2944,11 @@ def get_feature_info(request):
     
                     print url
     
+                    auth2 = None
                     if query_layer != 'plg_catastro' and \
                             request.session.get('username') is not None and \
                             request.session.get('password') is not None:
                         servers = Server.objects.all()
-                        auth2 = None
                         url_obj = urlparse(url)
                         for server in servers:
                             server_url_obj = urlparse(server.frontend_url)
