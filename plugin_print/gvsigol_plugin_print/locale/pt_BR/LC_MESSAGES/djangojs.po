@@ -56,3 +56,16 @@ msgstr ""
 
 msgid "Error loading print plugin"
 msgstr ""
+
+msgid "a4_landscape"
+msgstr "A4 Oblongo"
+
+msgid "a3_sin_leyenda"
+msgstr "A3 nenhuma lenda"
+
+msgid "a4_landscape_overview"
+msgstr "A4 Oblongo con Localizador"
+
+msgid "a3_landscape"
+msgstr "A3 Oblongo"
+

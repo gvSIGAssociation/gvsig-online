@@ -63,3 +63,15 @@ msgstr ""
 
 msgid "Error loading print plugin"
 msgstr ""
+
+msgid "a4_landscape"
+msgstr "A4 Landscape"
+
+msgid "a3_sin_leyenda"
+msgstr "A3 no Legend"
+
+msgid "a4_landscape_overview"
+msgstr "A4 Landscape with Overview"
+
+msgid "a3_landscape"
+msgstr "A3 Landscape"

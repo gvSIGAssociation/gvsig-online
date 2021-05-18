@@ -122,13 +122,18 @@ print.prototype.handler = function(e) {
 		ui += 				'<label>' + gettext('Select print template') + '</label>';
 		ui += 				'<select id="print-template" class="form-control">';
 		ui += 					'<option disabled selected value="empty"> -- ' + gettext('Select template') + ' -- </option>';
+		// Los templates que empiezan por _ no los mostramos. Se supone que están ahí para fichas personalizadas.
+		// Por defecto seleccionamos el de a4_landscape
 		for (var i=0; i<templates.length; i++) {
-			if (templates[i] != 'default' && templates[i] != 'a4_landscape_att') {
-				if (templates[i] == 'a4_landscape') {
-					ui += 	'<option value="' + templates[i] + '" selected>' + templates[i] + '</option>';
-				} else {
-					ui += 	'<option value="' + templates[i] + '">' + templates[i] + '</option>';
-				}
+			if (templates[i].startsWith('_'))
+				continue;
+		 	if (templates[i] == 'default') {				
+				 continue;
+			}
+			if (templates[i] == 'a4_landscape') {
+				ui += 	'<option value="' + templates[i] + '" selected>' + gettext(templates[i]) + '</option>';
+			} else {
+				ui += 	'<option value="' + templates[i] + '">' + gettext(templates[i]) + '</option>';
 			}
 		}
 		ui += 				'</select>';
