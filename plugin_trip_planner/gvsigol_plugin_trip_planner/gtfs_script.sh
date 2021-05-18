@@ -7,7 +7,6 @@
 # $4 jar de otp
 # $5 ruter OTP
 # $6 delay para reiniciar servicios
-# $7 directorio lucene
 
 if [ -z "$1" ]; then
     echo "ERROR: gtfs_script.sh host not defined"
@@ -33,16 +32,12 @@ if [ -z "$6" ]; then
     echo "ERROR: gtfs_script.sh delay to restart OTP not defined"
     exit -1
 fi
-if [ -z "$7" ]; then
-    echo "ERROR: gtfs_script.sh lucene directory not defined"
-    exit -1
-fi
 
 
 # reiniciamos el servicio de otp a los 30 minutos
 # borramos el directorio lucene
 echo "INFO: Lanzando reinicio de OTP para dentro de $6"
-sleep $6 && (sudo systemctl stop $2; sudo rm -rf $7; sudo systemctl start $2; sudo systemctl status $2 &> $3/logs/$HOSTNAME-otp_status.log) &
+sleep $6 && (sudo systemctl stop $2; sudo systemctl start $2; sudo systemctl status $2 &> $3/logs/$HOSTNAME-otp_status.log) &
 
 if [ "$HOSTNAME" != "$1" ]; then
 	echo "WARNING: No se va a regenerar el grafo porque $HOSTNAME es distinto a $1"
