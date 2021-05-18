@@ -22,6 +22,9 @@ msgstr ""
 msgid "AutoScale"
 msgstr "Escala Automática"
 
+msgid "UserScale"
+msgstr "Escala definida por el usuario"
+
 msgid "legalwarning"
 msgstr ""
 "Todos los contenidos cartográficos de este web y de los servicios que proporciona son propiedad de esta institución." 

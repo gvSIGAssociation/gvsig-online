@@ -19,6 +19,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "AutoScale"
+msgstr "Escala Automática"
+
+msgid "UserScale"
+msgstr "Escala definida pelo usuário"
+
 msgid "legalwarning"
 msgstr ""
 "All the cartographic contents of this web and of the services that it provides are property of this institution."

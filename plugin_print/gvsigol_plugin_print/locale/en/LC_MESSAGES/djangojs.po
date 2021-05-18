@@ -22,6 +22,9 @@ msgstr ""
 msgid "AutoScale"
 msgstr "Auto Scale"
 
+msgid "UserScale"
+msgstr "User scale"
+
 msgid "legalwarning"
 msgstr ""
 "All the cartographic contents of this web and of the services that it provides are property of this institution."

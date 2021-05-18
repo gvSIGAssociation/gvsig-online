@@ -22,6 +22,9 @@ msgstr ""
 msgid "AutoScale"
 msgstr "Escala Automàtica"
 
+msgid "UserScale"
+msgstr "Escala definida per l'usuari"
+
 msgid "Format"
 msgstr "Format"
 

@@ -94,6 +94,7 @@ print.prototype.handler = function(e) {
 		  if (currZoom != newZoom) {
 			if (self.zoomChangedFromScale == false) {
 				$('#print-scale').val('');
+				$('#print-user-scale-holder').hide();
 			}
 			else
 				self.zoomChangedFromScale = false;
@@ -146,6 +147,7 @@ print.prototype.handler = function(e) {
 		ui += 				'<label>' + gettext('Scale') + '</label>';
 		ui += 				'<select id="print-scale" class="form-control">';
 		ui += 				'<option value="">' + gettext('AutoScale') + '</option>';
+		ui += 				'<option value="user-scale">' + gettext('UserScale') + '</option>';
 		if (scales) {
 			for (var i=0; i<scales.length; i++) {
 					ui += 	'<option value="' + scales[i] + '">1:' + scales[i].toLocaleString() + '</option>';
@@ -153,6 +155,7 @@ print.prototype.handler = function(e) {
 		}
 
 		ui += 				'</select>';
+		ui += 				'<span id="print-user-scale-holder" style="display: flex;justify-content: flex-end;align-items: center;padding-top: 10px;">1: &nbsp; <input type="text" id="print-userscale" name="print-userscale" class="form-control" style="width:80px" placeholder="4000" value="4000"></span>';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Resolution') + '</label>';
@@ -220,11 +223,29 @@ print.prototype.handler = function(e) {
 		
 		$('#print-scale').on('change', function(e) {
 			var scaleVal = $("#print-scale option:selected").val();
+			if (scaleVal == 'user-scale') {
+				$('#print-user-scale-holder').show();
+				var userScaleStr = $("#print-userscale").text();
+				var userScale = parseInt(userScaleStr);
+				scaleVal = userScale;
+			}
+			else {
+				$('#print-user-scale-holder').hide();
+			}
 			if (scaleVal) {
 				self.zoomChangedFromScale = true;
 				self.map.getView().setResolution(self.getResolutionForScale(scaleVal));
 			}
 		});
+
+		$('#print-userscale').on('input', function(e) {
+			var userScaleStr = $("#print-userscale").val();
+			var userScale = parseInt(userScaleStr);
+			self.zoomChangedFromScale = true;
+			self.map.getView().setResolution(self.getResolutionForScale(userScale));
+		});
+
+		$('#print-user-scale-holder').hide();
 
 
 		$('#accept-print').on('click', function () {
@@ -265,7 +286,13 @@ print.prototype.createPrintJob = function(template) {
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
 	var dpi = $('#print-dpi').val();
+
 	var scaleToSet = $('#print-scale').val();
+	if (scaleToSet == 'user-scale') {
+		var userScaleStr = $("#print-userscale").val();
+		var userScale = parseInt(userScaleStr);
+		scaleToSet = userScale;
+	}
 	var useNearestScale = true;
 	if (!scaleToSet) {
 		scaleToSet = self.getScaleForResolution(); // Actual scale of the view if the user has not selected a scale
