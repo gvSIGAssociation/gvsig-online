@@ -652,7 +652,7 @@ class Geoserver():
         else:
             return True
                 
-        raise FailedRequestError(r.status_code, r.content)
+        raise FailedRequestError(r.status_code, r.text)
     
     def create_or_update_sorted_gs_layer_group(self, toc, content_type=None, user=None, password=None):  
         
@@ -702,7 +702,7 @@ class Geoserver():
             else:
                 return True
                 
-        raise FailedRequestError(r.status_code, r.content)
+        raise FailedRequestError(r.status_code, r.text)
     
     def delete_gs_layer_group(self, layer_group, content_type=None, user=None, password=None):  
         
