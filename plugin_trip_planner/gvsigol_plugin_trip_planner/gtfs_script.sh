@@ -42,7 +42,7 @@ fi
 # reiniciamos el servicio de otp a los 30 minutos
 # borramos el directorio lucene
 echo "INFO: Lanzando reinicio de OTP para dentro de $6"
-sleep $6 && (sudo systemctl stop $2;rm -rf $7; sudo systemctl start $2; sudo systemctl status $2 &> $3/logs/$HOSTNAME-otp_status.log) &
+sleep $6 && (sudo systemctl stop $2; sudo rm -rf $7; sudo systemctl start $2; sudo systemctl status $2 &> $3/logs/$HOSTNAME-otp_status.log) &
 
 if [ "$HOSTNAME" != "$1" ]; then
 	echo "WARNING: No se va a regenerar el grafo porque $HOSTNAME es distinto a $1"
