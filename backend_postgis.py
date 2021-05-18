@@ -365,7 +365,7 @@ class Introspect:
             full_sequence = quote_ident(seq_schema, self.conn) + "." + quote_ident(seq_name, self.conn)
             query = sqlbuilder.SQL(sql).format(
                 seq=sqlbuilder.Literal(full_sequence),
-                col=sqlbuilder.Literal(col),
+                col=sqlbuilder.Identifier(col),
                 schema=sqlbuilder.Identifier(schema),
                 table=sqlbuilder.Identifier(table))
             self.cursor.execute(query)
