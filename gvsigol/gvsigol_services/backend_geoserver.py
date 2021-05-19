@@ -1202,6 +1202,8 @@ class Geoserver():
                             i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
                         except:
                             logger.exception("Error adding control field: " + control_field['name'])
+                if creation_mode == forms_geoserver.MODE_OVERWRITE:
+                    i.update_pk_sequences(name, schema=schema)
             
             if creation_mode == gdal_tools.MODE_OVERWRITE:
                 # re-install triggers
@@ -1211,8 +1213,11 @@ class Geoserver():
                         trigger.install()
                     except:
                         logger.exception("Failed to install trigger: " + str(trigger))
+                
             for layer in Layer.objects.filter(datastore=datastore, source_name=name):
                 self.reload_featuretype(layer)
+                layer.get_config_manager().refresh_field_conf()
+                layer.save()
             if not stderr:
                 return True
         except rest_geoserver.RequestError as e:

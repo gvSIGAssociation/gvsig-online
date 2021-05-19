@@ -27,9 +27,12 @@ from gvsigol_auth.models import UserGroup
 from gvsigol import settings
 from django.utils.crypto import get_random_string
 from gvsigol_services.triggers import CUSTOM_PROCEDURES
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ugettext
 from django.urls import reverse
 import os
+from .backend_postgis import Introspect
+import json, ast
+from builtins import str as text
 
 CLONE_PERMISSION_CLONE = "clone"
 CLONE_PERMISSION_SKIP = "skip"
@@ -119,6 +122,16 @@ class Datastore(models.Model):
     def __unicode__(self):
         return self.workspace.name + ":" + self.name
 
+    def get_db_connection(self):
+        params = json.loads(self.connection_params)
+        host = params['host']
+        port = params['port']
+        dbname = params['database']
+        user = params['user']
+        passwd = params['passwd']
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        return i, params
+
 class LayerGroup(models.Model):
     server_id = models.IntegerField(null=True, default=get_default_server)
     name = models.CharField(max_length=150) 
@@ -152,6 +165,148 @@ class LayerGroup(models.Model):
 
 def get_default_layer_thumbnail():
     return settings.STATIC_URL + 'img/no_thumbnail.jpg'
+
+def as_dict(in_list, key):
+    return {obj[key]: obj for obj in in_list}
+
+class LayerConfig:
+    def __init__(self, layer):
+        self.layer = layer
+        self._conf = None
+        self._field_info_dict = None
+        self._field_conf_dict = None
+        self._control_fields_dict = None
+        self._field_info = None
+        self._geometry_columns = None
+        self._pks = None
+    
+    def __query_db_fields(self):
+        i, tablename, dsname = self.layer.get_db_connection()
+        self._field_info = i.get_fields_info(tablename, dsname)
+        self._geometry_columns = i.get_geometry_columns(tablename, dsname)
+        self._pks = i.get_pk_columns(tablename, dsname)
+        i.close()
+
+    @property
+    def conf(self):
+        if self._conf is None:
+            try:
+                self._conf = ast.literal_eval(self.layer.conf)
+            except:
+                self._conf = {}
+        return self._conf
+    
+    @conf.setter
+    def conf(self, new_conf):
+        self.layer.conf = new_conf
+        self._conf = new_conf
+
+    @property
+    def field_info(self):
+        if self._field_info is None:
+            self.__query_db_fields()
+        return self._field_info
+
+    @property
+    def geometry_columns(self):
+        if self._geometry_columns is None:
+            self.__query_db_fields()
+        return self._geometry_columns
+
+    @property
+    def pks(self):
+        if self._pks is None:
+            self.__query_db_fields()
+        return self._pks
+
+    @property
+    def field_info_dict(self):
+        if self._field_info_dict is None:
+            self._field_info_dict = as_dict(self._field_info, 'name')
+        return self._field_info_dict
+
+    @property
+    def field_conf_dict(self):
+        if self._field_conf_dict is None:
+            self._field_conf_dict = as_dict(self.conf.get('fields', []), 'name')
+        return self._field_conf_dict
+    
+    @property
+    def control_fields_dict(self):
+        if self._control_fields_dict is None:
+            self._control_fields_dict = as_dict(settings.CONTROL_FIELDS, 'name')
+        return self._control_fields_dict
+
+    def init_field_conf(self, field_conf, field_info):
+        field_conf['name'] = field_conf.get('name', field_info['name'])
+        for id, language in settings.LANGUAGES:
+            field_conf['title-'+id] = field_conf.get('title-f'+id, field_info['name'])
+        field_conf['visible'] = field_conf.get('visible', True)
+        if field_conf['name'] in self.pks:
+            field_conf['editable'] = False
+            field_conf['editableactive'] = True
+        elif field_conf.get('editable') and \
+                Trigger.objects.filter(layer=self.layer, field=field_conf['name']).exists():
+            field_conf['editable'] = False
+            field_conf['editableactive'] = False
+        else:
+            field_conf['editable'] = field_conf.get('editable', True)
+            field_conf['editableactive'] = True
+        field_conf['infovisible'] = field_conf.get('infovisible', False)
+        field_conf['nullable'] = (field_info.get('nullable') != 'NO')
+        if not field_conf['nullable']:
+            field_conf['mandatory'] = True
+        else:
+            field_conf['mandatory'] = field_conf.get('mandatory', False)
+
+        if field_conf['name'] in self.control_fields_dict:
+            control_field = self.control_fields_dict.get(field_conf['name'])
+            field_conf['editableactive'] = control_field.get('editableactive', False)
+            field_conf['editable'] = control_field.get('editable', False)
+            field_conf['visible'] = control_field.get('visible', field_conf['visible'])
+            field_conf['nullable'] = control_field.get('nullable', field_conf['nullable'])
+            field_conf['mandatory'] = control_field.get('mandatory', field_conf['mandatory'])
+            
+        return field_conf
+
+    def get_field_conf(self, include_pks=False):
+        return self.conf.get('fields', [])
+
+    def get_updated_field_conf(self, include_pks=False):
+        # TODO: corregir comportamiento por defecto de 'include_pks' de acuerdo a ticket #4962
+        fields = []
+        for the_field_info in self.field_info:
+            field_name = the_field_info['name']
+            if (include_pks or not field_name in self.pks) and \
+                 (not field_name in self.geometry_columns):
+                the_field_conf = self.field_conf_dict.get(field_name, {})
+                field = self.init_field_conf(the_field_conf, the_field_info)
+                fields.append(field)
+        return fields  
+
+    def refresh_field_conf(self):
+        fields = self.get_updated_field_conf()
+        self.conf['fields'] = fields
+        self.layer.conf = self.conf
+
+    def get_field_viewconf(self):
+        fields = self.get_updated_field_conf()
+        for field in fields:
+            try:
+                enum = LayerFieldEnumeration.objects.get(layer=self.layer, field=field['name']).enumeration
+                field['type'] = text(ugettext('enumerated ({0})').format(enum.title))
+            except:
+                field['type'] = self.field_info_dict.get(field['name'], {}).get('type', '')
+            try:
+                trigger = Trigger.objects.get(layer=self.layer, field=field['name'])
+                field['calculation'] = trigger.procedure.signature
+                field['calculationLabel'] = text(trigger.procedure.localized_label)
+                field['editableactive'] = False
+                field['editable'] = False
+            except:
+                field['calculation'] = ''
+                field['calculationLabel'] = ''
+        return fields
 
 class Layer(models.Model):
     external = models.BooleanField(default=False)
@@ -206,6 +361,13 @@ class Layer(models.Model):
     def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
         from gvsigol_services.utils import clone_layer
         return clone_layer(target_datastore, self, layer_group, copy_data=copy_data, permissions=permissions)
+    
+    def get_config_manager(self):
+        return LayerConfig(self)
+
+    def get_db_connection(self):
+        i, params = self.datastore.get_db_connection()
+        return i, self.source_name, params.get('schema', 'public')
 
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer)

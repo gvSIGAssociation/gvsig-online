@@ -554,20 +554,12 @@ def get_layer_img(layerid, filename):
 def get_db_connect_from_datastore(datastore):
     if not isinstance(datastore, Datastore):
         datastore = Datastore.objects.get(id=int(datastore))
-    params = json.loads(datastore.connection_params)
-    host = params['host']
-    port = params['port']
-    dbname = params['database']
-    user = params['user']
-    passwd = params['passwd']
-    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-    return i, params
+    return datastore.get_db_connection()
 
 def get_db_connect_from_layer(layer):
     if not isinstance(layer, Layer):
         layer = Layer.objects.select_related('datastore').get(id=int(layer))
-    i, params = get_db_connect_from_datastore(layer.datastore)
-    return i, layer.source_name, params.get('schema', 'public')
+    return layer.get_db_connection()
      
 def get_exception(code, msg):
     response = HttpResponse(msg)
