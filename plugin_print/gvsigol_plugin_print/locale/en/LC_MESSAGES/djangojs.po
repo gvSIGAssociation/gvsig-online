@@ -49,10 +49,10 @@ msgid "Legal warning"
 msgstr ""
 
 msgid "Resolution"
-msgstr "Resolution"
+msgstr ""
 
 msgid "Rotation"
-msgstr "Rotación"
+msgstr ""
 
 
 msgid "Print"

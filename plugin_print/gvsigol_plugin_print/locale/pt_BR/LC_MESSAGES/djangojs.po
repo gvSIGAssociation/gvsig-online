@@ -34,25 +34,28 @@ msgid "Format"
 msgstr "Formato"
 
 msgid "Print params"
-msgstr ""
+msgstr "Parâmetros de impressão"
 
 msgid "Select print template"
-msgstr ""
+msgstr "Selecione o modelo de impressão"
 
 msgid "Select template"
-msgstr ""
+msgstr "Selecione o modelo"
 
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 msgid "Legal warning"
-msgstr ""
+msgstr "Aviso legal"
+
+msgid "Resolution"
+msgstr "Resolução"
 
 msgid "Rotation"
-msgstr ""
+msgstr "Rotação"
 
 msgid "Print"
-msgstr ""
+msgstr "Imprimir"
 
 msgid "Cancel"
 msgstr "Cancel"
