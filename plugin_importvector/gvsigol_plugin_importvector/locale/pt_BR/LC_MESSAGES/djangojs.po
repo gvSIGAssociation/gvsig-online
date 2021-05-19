@@ -29,7 +29,7 @@ msgid "Vector file"
 msgstr "Arquivo vetorial"
 
 msgid "Layer title in TOC"
-msgstr "Título da camada em TOC"
+msgstr "Título da camada no PDC"
 
 msgid "Imported vector files"
 msgstr "Arquivos vetoriais importados"
@@ -42,6 +42,9 @@ msgstr "Você deve selecionar um arquivo"
 
 msgid "You must indicate a title for the layer"
 msgstr "Você deve indicar um título para a camada"
+
+msgid "Accept"
+msgstr "Aceitar"
 
 msgid "Close"
 msgstr "Fechar"

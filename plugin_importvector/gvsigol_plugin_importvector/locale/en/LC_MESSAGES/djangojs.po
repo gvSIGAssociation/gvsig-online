@@ -43,6 +43,9 @@ msgstr ""
 msgid "You must indicate a title for the layer"
 msgstr ""
 
+msgid "Accept"
+msgstr ""
+
 msgid "Close"
 msgstr ""
 

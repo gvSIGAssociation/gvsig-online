@@ -29,7 +29,7 @@ msgid "Vector file"
 msgstr "Arquivo vetorial"
 
 msgid "Layer title in TOC"
-msgstr "Título da camada em TOC"
+msgstr "Título da camada no PDC"
 
 msgid "Imported vector files"
 msgstr "Arquivos vetoriais importados"
