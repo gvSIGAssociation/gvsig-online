@@ -130,7 +130,7 @@ msgstr "Painel de controle"
 #: gvsigol_core/templates/base.html:141
 #: gvsigol_core/templates/base_compress.html:140
 msgid "Home"
-msgstr "Inicial"
+msgstr "Início"
 
 #: gvsigol_core/templates/base.html:196
 #: gvsigol_core/templates/base_compress.html:196
@@ -977,7 +977,7 @@ msgstr "Legenda"
 #: gvsigol_core/templates/viewer.html:209
 #: gvsigol_core/templates/viewer_compress.html:209
 msgid "Filters"
-msgstr ""
+msgstr "Filtros"
 
 #: gvsigol_core/templates/viewer.html:210
 #: gvsigol_core/templates/viewer_compress.html:210
@@ -1038,7 +1038,7 @@ msgstr "Ferramentas de zoom"
 
 #: gvsigol_core/views.py:182
 msgid "Zoom in, zoom out, ..."
-msgstr "Ampliar zoom, diminuir zoom "
+msgstr "Ampliar zoom, reduzir zoom, ... "
 
 #: gvsigol_core/views.py:186
 msgid "Feature info"

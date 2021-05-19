@@ -240,6 +240,9 @@ msgstr "Show selection tools"
 msgid "Select features"
 msgstr "Select features"
 
+msgid "Select feature"
+msgstr ""
+
 msgid "Select by buffer"
 msgstr "Select by buffer"
 
@@ -599,4 +602,22 @@ msgid "You must fill in all fields"
 msgstr ""
 
 msgid "Find layer"
+msgstr ""
+
+msgid "Next view"
+msgstr ""
+
+msgid "Last view"
+msgstr ""
+
+msgid "Zoom in"
+msgstr ""
+
+msgid "Zoom out"
+msgstr ""
+
+msgid "Drag Zoom"
+msgstr ""
+
+msgid "Search in catalog"
 msgstr ""

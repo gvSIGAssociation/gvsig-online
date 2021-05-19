@@ -40,7 +40,7 @@ var navigationHistory = function(map, conf) {
 	var nextButton = document.createElement('button');
 	nextButton.setAttribute("id", this.id);
 	nextButton.setAttribute("class", "toolbar-button");
-	nextButton.setAttribute("title", gettext('Vista siguiente'));
+	nextButton.setAttribute("title", gettext('Next view'));
 	var icon = document.createElement('i');
 	icon.setAttribute("class", "fa fa-caret-right");
 	icon.setAttribute("aria-hidden", "true");
@@ -50,7 +50,7 @@ var navigationHistory = function(map, conf) {
 	var backButton = document.createElement('button');
 	backButton.setAttribute("id", this.id);
 	backButton.setAttribute("class", "toolbar-button");
-	backButton.setAttribute("title", gettext('Vista anterior'));
+	backButton.setAttribute("title", gettext('Last view'));
 	var icon = document.createElement('i');
 	icon.setAttribute("class", "fa fa-caret-left");
 	icon.setAttribute("aria-hidden", "true");
