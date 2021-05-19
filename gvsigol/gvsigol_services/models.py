@@ -245,7 +245,7 @@ class LayerConfig:
         if field_conf['name'] in self.pks:
             field_conf['editable'] = False
             field_conf['editableactive'] = True
-        elif field_conf.get('editable') and \
+        elif field_conf.get('editable', True) and \
                 Trigger.objects.filter(layer=self.layer, field=field_conf['name']).exists():
             field_conf['editable'] = False
             field_conf['editableactive'] = False
