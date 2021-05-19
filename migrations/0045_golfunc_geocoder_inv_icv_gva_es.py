@@ -54,7 +54,7 @@ def insert_def(apps, schema_editor):
         TriggerProcedure = apps.get_model("gvsigol_services", "TriggerProcedure")
         procedure = TriggerProcedure()
         procedure.signature = TRIGGER_FUNCTION_SIGNATURE
-        procedure.__name__ = TRIGGER_FUNCTION_NAME
+        procedure.func_name = TRIGGER_FUNCTION_NAME
         procedure.func_schema = TRIGGER_FUNCTION_SCHEMA
         procedure.label = _('Inverse Geocoder ICV')
         procedure.definition_tpl = TRIGGER_FUNCTION_DEF
