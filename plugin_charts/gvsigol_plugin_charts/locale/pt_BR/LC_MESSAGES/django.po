@@ -39,7 +39,7 @@ msgstr "Gráfico de linha"
 
 #: forms.py:33 templates/select_chart_type.html:39
 msgid "Pie Chart"
-msgstr "Gráfico de bolo"
+msgstr "Gráfico circular"
 
 #: forms.py:37
 msgid "Layer"
@@ -306,11 +306,11 @@ msgstr "Atualizar gráfico de linhas"
 
 #: templates/piechart_add.html:11
 msgid "Add new pie chart"
-msgstr "Adicionar novo gráfico de bolo"
+msgstr "Adicionar novo gráfico circular"
 
 #: templates/piechart_update.html:11
 msgid "Update pie chart"
-msgstr "Atualizar gráfico de bolo"
+msgstr "Atualizar gráfico circular"
 
 #: templates/select_chart_type.html:10
 msgid "Create new chart"
