@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 22:10+0000\n"
+"POT-Creation-Date: 2021-05-11 12:28+0000\n"
 "PO-Revision-Date: 2021-05-05 23:56+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -66,14 +66,14 @@ msgstr "Erro na publicação da camada. Erro backend: {msg}"
 #: gvsigol_services/backend_geoserver.py:792
 #: gvsigol_services/backend_geoserver.py:801
 #: gvsigol_services/backend_geoserver.py:811
-#: gvsigol_services/backend_geoserver.py:823 gvsigol_services/views.py:1198
-#: gvsigol_services/views.py:2556
+#: gvsigol_services/backend_geoserver.py:823 gvsigol_services/views.py:1197
+#: gvsigol_services/views.py:2555
 msgid "Error: layer could not be published"
 msgstr "Erro: a camada não pôde ser publicada"
 
 #: gvsigol_services/backend_geoserver.py:834
 #: gvsigol_services/backend_geoserver.py:843
-#: gvsigol_services/backend_geoserver.py:853 gvsigol_services/views.py:738
+#: gvsigol_services/backend_geoserver.py:853 gvsigol_services/views.py:737
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Erro na publicação do grupo de camadas. Erro backend: {msg}"
@@ -159,7 +159,7 @@ msgstr "Erro ao carregar a camada. Revisar o formato do arquivo. Causa:"
 msgid "Error creating the layer. Review the file format."
 msgstr "Erro ao criar a camada. Revisar o formato do arquivo."
 
-#: gvsigol_services/backend_geoserver.py:1566 gvsigol_services/views.py:1134
+#: gvsigol_services/backend_geoserver.py:1566 gvsigol_services/views.py:1133
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -2433,7 +2433,7 @@ msgstr ""
 msgid "Workspace description"
 msgstr "Descrição do espaço de trabalho"
 
-#: gvsigol_services/views.py:325
+#: gvsigol_services/views.py:324
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -2444,11 +2444,11 @@ msgstr ""
 "começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
-#: gvsigol_services/views.py:336
+#: gvsigol_services/views.py:335
 msgid "Error: workspace could not be created"
 msgstr "Erro: o espaço de trabalho não pôde ser criado"
 
-#: gvsigol_services/views.py:492
+#: gvsigol_services/views.py:491
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -2459,38 +2459,38 @@ msgstr ""
 "uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
-#: gvsigol_services/views.py:513
+#: gvsigol_services/views.py:512
 msgid "Error: Data store could not be created"
 msgstr "Erro: A memória de dados não pôde ser criada"
 
-#: gvsigol_services/views.py:516
+#: gvsigol_services/views.py:515
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Erro: GeoTIFF não é georreferenciado"
 
-#: gvsigol_services/views.py:564
+#: gvsigol_services/views.py:563
 msgid "Error updating datastore"
 msgstr "Erro na atualização do armazenamento de dados"
 
-#: gvsigol_services/views.py:715
+#: gvsigol_services/views.py:714
 msgid "ERROR can't connect with GeoServer"
 msgstr "ERROR não pode se conectar com GeoServer"
 
-#: gvsigol_services/views.py:723
+#: gvsigol_services/views.py:722
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 "ERROR não pode remover dados do GeoServer. Forçando a remoção de dados da "
 "Base de Dados"
 
-#: gvsigol_services/views.py:747
+#: gvsigol_services/views.py:746
 msgid "ERROR User is not authorized to perform this operation"
 msgstr ""
 
-#: gvsigol_services/views.py:1715
+#: gvsigol_services/views.py:1714
 #, python-brace-format
 msgid "enumerated ({0})"
 msgstr ""
 
-#: gvsigol_services/views.py:2145 gvsigol_services/views.py:2303
+#: gvsigol_services/views.py:2144 gvsigol_services/views.py:2302
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -2501,88 +2501,88 @@ msgstr ""
 "começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
-#: gvsigol_services/views.py:2194 gvsigol_services/views.py:2324
+#: gvsigol_services/views.py:2193 gvsigol_services/views.py:2323
 msgid "Layer group name already exists"
 msgstr "O nome do grupo de camadas já existe"
 
-#: gvsigol_services/views.py:2198
+#: gvsigol_services/views.py:2197
 msgid "You must enter a name for layer group"
 msgstr "É necessário inserir um nome para o grupo de camadas"
 
-#: gvsigol_services/views.py:2693
+#: gvsigol_services/views.py:2692
 msgid "You must enter a title for enumeration"
 msgstr "É necessário entrar um título para enumeração"
 
-#: gvsigol_services/views.py:2698
+#: gvsigol_services/views.py:2697
 msgid "Name already taken"
 msgstr "Nome já utilizado"
 
-#: gvsigol_services/views.py:3965
+#: gvsigol_services/views.py:3954
 msgid "Error: ExternalLayer could not be published"
 msgstr "Erro: Camada externa não pôde ser publicada"
 
-#: gvsigol_services/views.py:4066
+#: gvsigol_services/views.py:4055
 msgid "Error: externallayer could not be published"
 msgstr "Erro: camada externa não pôde ser publicada"
 
-#: gvsigol_services/views.py:4687 gvsigol_services/views.py:4693
+#: gvsigol_services/views.py:4676 gvsigol_services/views.py:4682
 msgid "Connection failed"
 msgstr ""
 
-#: gvsigol_services/views.py:4687
+#: gvsigol_services/views.py:4676
 msgid "Status code: "
 msgstr ""
 
-#: gvsigol_services/views.py:4698
+#: gvsigol_services/views.py:4687
 msgid "Connection error"
 msgstr ""
 
-#: gvsigol_services/views.py:4734
+#: gvsigol_services/views.py:4723
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
 msgstr ""
 
-#: gvsigol_services/views.py:4758 gvsigol_services/views.py:4820
-#: gvsigol_services/views.py:4824 gvsigol_services/views.py:4826
+#: gvsigol_services/views.py:4747 gvsigol_services/views.py:4809
+#: gvsigol_services/views.py:4813 gvsigol_services/views.py:4815
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:4760 gvsigol_services/views.py:4822
+#: gvsigol_services/views.py:4749 gvsigol_services/views.py:4811
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
 msgstr ""
 
-#: gvsigol_services/views.py:4762
+#: gvsigol_services/views.py:4751
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:4790
+#: gvsigol_services/views.py:4779
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr ""
 
-#: gvsigol_services/views.py:4792 gvsigol_services/views.py:4867
+#: gvsigol_services/views.py:4781 gvsigol_services/views.py:4856
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr "Nome de campo \"{0}\" é uma palavra reservada"
 
-#: gvsigol_services/views.py:4847
+#: gvsigol_services/views.py:4836
 msgid "String"
 msgstr ""
 
-#: gvsigol_services/views.py:4880
+#: gvsigol_services/views.py:4869
 msgid "Field type not supported"
 msgstr ""
 
-#: gvsigol_services/views.py:4884
+#: gvsigol_services/views.py:4873
 #, python-brace-format
 msgid "Field \"{0}\" exists"
 msgstr ""
 
-#: gvsigol_services/views.py:4933
+#: gvsigol_services/views.py:4922
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr ""
