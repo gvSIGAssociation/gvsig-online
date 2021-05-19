@@ -2810,7 +2810,7 @@ def base_layer_process_update(request, pid):
         global base_layer_process
         if str(pid) in base_layer_process:
             return HttpResponse(json.dumps(base_layer_process[str(pid)], indent=4), content_type='application/json')
-        else :
+        else:
             return HttpResponse('{"active" : "false"}', content_type='application/json')
         
 @login_required(login_url='/gvsigonline/auth/login_user/')

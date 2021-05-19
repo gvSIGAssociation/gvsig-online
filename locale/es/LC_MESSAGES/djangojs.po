@@ -152,3 +152,18 @@ msgstr "Falló el refrescado de capa"
 msgid "Calculated"
 msgstr "Calculado"
 
+msgid "Old name"
+msgstr "Antiguo nombre"
+
+msgid "New name"
+msgstr "Nuevo nombre"
+
+msgid "Rename"
+msgstr "Renombrar"
+
+msgid "Field to delete"
+msgstr "Campo a eliminar"
+
+msgid "You must select an extent on the map using the control"
+msgstr "Debes seleccionar una extensión en el mapa utilizando el control"
+

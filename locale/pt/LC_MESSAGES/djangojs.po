@@ -103,7 +103,7 @@ msgid "URL"
 msgstr "URL"
 
 msgid "Is master?"
-msgstr "É mestre?"
+msgstr "É superusuário?"
 
 msgid "Save node"
 msgstr "Gravar nódulo"
@@ -112,7 +112,7 @@ msgid "Edit node"
 msgstr "Editar nodulo"
 
 msgid "Convert"
-msgstr ""
+msgstr "Converter"
 
 msgid "Autogen"
 msgstr ""

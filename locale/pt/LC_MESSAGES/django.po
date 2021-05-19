@@ -693,7 +693,7 @@ msgstr "Tipo"
 #: gvsigol_services/templates/server_update.html:55
 #: gvsigol_services/templates/server_update.html:56
 msgid "Frontend URL"
-msgstr "Frontend URL"
+msgstr "URL del frontal"
 
 #: gvsigol_services/forms_services.py:85
 #: gvsigol_services/templates/server_update.html:61
