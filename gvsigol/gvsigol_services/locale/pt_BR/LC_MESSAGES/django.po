@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-10 12:21+0200\n"
+"POT-Creation-Date: 2021-05-19 14:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,12 +53,12 @@ msgstr "Erro na publicação da camada. Erro backend: {msg}"
 
 #: backend_geoserver.py:756 backend_geoserver.py:771 backend_geoserver.py:783
 #: backend_geoserver.py:793 backend_geoserver.py:802 backend_geoserver.py:812
-#: backend_geoserver.py:824 views.py:1193 views.py:2513
+#: backend_geoserver.py:824 views.py:1197 views.py:2555
 msgid "Error: layer could not be published"
 msgstr "Erro: a camada não pôde ser publicada"
 
 #: backend_geoserver.py:836 backend_geoserver.py:847 backend_geoserver.py:857
-#: views.py:738
+#: views.py:737
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Erro na publicação do grupo de camadas. Erro backend: {msg}"
@@ -76,8 +76,8 @@ msgstr "Erro ao mudar de propriedade. Erro backend: {msg}"
 msgid "Error: layer could not be updated"
 msgstr "Erro: a camada não pôde ser atualizada"
 
-#: backend_geoserver.py:1101 backend_geoserver.py:1252
-#: backend_geoserver.py:1574 backend_geoserver.py:1673
+#: backend_geoserver.py:1200 backend_geoserver.py:1524
+#: backend_geoserver.py:1623
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -87,8 +87,7 @@ msgstr ""
 "letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
-#: backend_geoserver.py:1103 backend_geoserver.py:1254
-#: backend_geoserver.py:1364
+#: backend_geoserver.py:1202 backend_geoserver.py:1314
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -99,8 +98,7 @@ msgstr ""
 "Os identificadores devem começar com uma letra ou um sublinhado (_). Os "
 "caracteres subsequentes podem ser letras, sublinhados ou números."
 
-#: backend_geoserver.py:1105 backend_geoserver.py:1256
-#: backend_geoserver.py:1366
+#: backend_geoserver.py:1204 backend_geoserver.py:1316
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -111,8 +109,7 @@ msgstr ""
 "identificadores devem começar com uma letra ou um traço (_). Os caracteres "
 "subsequentes podem ser letras, sublinhados ou números."
 
-#: backend_geoserver.py:1107 backend_geoserver.py:1258
-#: backend_geoserver.py:1368
+#: backend_geoserver.py:1206 backend_geoserver.py:1318
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -123,19 +120,15 @@ msgstr ""
 "identificadores devem começar com uma letra ou um sublinhado (_). Os "
 "caracteres subsequentes podem ser letras, sublinhados ou números"
 
-#: backend_geoserver.py:1129
-msgid "Error uploading the layer. Review the file format."
-msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"
-
-#: backend_geoserver.py:1319
+#: backend_geoserver.py:1269
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr "Erro ao carregar a camada. Revisar o formato do arquivo. Causa:"
 
-#: backend_geoserver.py:1547
+#: backend_geoserver.py:1497
 msgid "Error creating the layer. Review the file format."
 msgstr "Erro ao criar a camada. Revisar o formato do arquivo."
 
-#: backend_geoserver.py:1570 views.py:1130
+#: backend_geoserver.py:1520 views.py:1133
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -143,46 +136,46 @@ msgstr ""
 "Campos de camada inválidos: '{value}'. Camada não pode ter campos com "
 "espaços em branco"
 
-#: backend_geoserver.py:1604
+#: backend_geoserver.py:1554
 msgid "Invalid geometry type"
 msgstr "Tipo de geometria inválida"
 
-#: backend_geoserver.py:1608
+#: backend_geoserver.py:1558
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nome do campo duplicado: {0}"
 
-#: backend_geoserver.py:1610
+#: backend_geoserver.py:1560
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nome de campo inválido. {0}' é uma palavra reservada"
 
-#: backend_geoserver.py:1620 backend_geoserver.py:1655
-#: backend_geoserver.py:1656 backend_geoserver.py:1657
+#: backend_geoserver.py:1570 backend_geoserver.py:1605
+#: backend_geoserver.py:1606 backend_geoserver.py:1607
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipo de campo não suportado: {0}"
 
-#: backend_geoserver.py:1625
+#: backend_geoserver.py:1575
 #: templates/geoserver/create_layer_feature_type.html:297
 #: templates/layer_create.html:675
 msgid "At least one field must be defined"
 msgstr "Pelo menos um campo deve ser definido"
 
-#: backend_geoserver.py:1628
+#: backend_geoserver.py:1578
 msgid "Invalid field definition"
 msgstr "Definição de campo inválida"
 
-#: backend_geoserver.py:1679
+#: backend_geoserver.py:1629
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Já existe uma camada com este nome: '{value}'."
 
-#: backend_geoserver.py:1699 backend_geoserver.py:1708
+#: backend_geoserver.py:1649 backend_geoserver.py:1658
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Ocorreu um erro ao construir a vista. Revisar a sentença SQL"
 
-#: backend_geoserver.py:1735
+#: backend_geoserver.py:1685
 #, python-brace-format
 msgid ""
 "Invalid field name: '{value}'. Identifiers must begin with a letter or an "
@@ -192,7 +185,7 @@ msgstr ""
 "letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
-#: backend_geoserver.py:2199
+#: backend_geoserver.py:2149
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
@@ -396,7 +389,7 @@ msgstr "Elevação regex"
 #: forms_services.py:155 forms_services.py:182 templates/cache_list.html:26
 #: templates/layer_list.html:28
 msgid "Datastore"
-msgstr "Datastore"
+msgstr "Armazém de dados"
 
 #: forms_geoserver.py:95
 msgid "Mode"
@@ -433,15 +426,15 @@ msgstr "Tipo de geometria"
 #: templates/geoserver/create_layer_sql_view.html:141
 #: templates/layer_create.html:45
 msgid "Fields"
-msgstr "Domínios"
+msgstr "Campos"
 
 #: forms_geoserver.py:152 forms_services.py:162 forms_services.py:193
 msgid "Field"
-msgstr "Domínio"
+msgstr "Campos"
 
 #: forms_geoserver.py:153 forms_services.py:163 forms_services.py:194
 msgid "End field"
-msgstr "Fim do domínio"
+msgstr "Fim do campo"
 
 #: forms_geoserver.py:154 forms_services.py:167 forms_services.py:195
 msgid "Presentation"
@@ -479,8 +472,8 @@ msgstr "Segundo da resolução"
 msgid "Default mode"
 msgstr "Modo padrão"
 
-#: forms_geoserver.py:163 templates/layer_add.html:194
-#: templates/layer_create.html:210 templates/layer_update.html:239
+#: forms_geoserver.py:163 templates/layer_add.html:198
+#: templates/layer_create.html:210 templates/layer_update.html:247
 msgid "Default value"
 msgstr "Valor proposto"
 
@@ -544,7 +537,7 @@ msgstr "Descrição"
 #: templates/external_layer_list.html:23
 #: templates/external_layer_update.html:61
 #: templates/geoserver/create_layer_feature_type.html:75
-#: templates/layer_config.html:58 templates/lock_list.html:17
+#: templates/layer_config.html:61 templates/lock_list.html:17
 #: templates/server_list.html:25 templates/service_url_list.html:24
 msgid "Type"
 msgstr "Tipo"
@@ -552,7 +545,7 @@ msgstr "Tipo"
 #: forms_services.py:84 templates/server_list.html:26
 #: templates/server_update.html:55 templates/server_update.html:56
 msgid "Frontend URL"
-msgstr "Frontend URL"
+msgstr "URL de entrada"
 
 #: forms_services.py:85 templates/server_update.html:61
 #: templates/server_update.html:62
@@ -566,9 +559,9 @@ msgstr "Usuário"
 #: templates/geoserver/layer_upload_postgis.html:148
 #: templates/geoserver/layer_upload_raster.html:132
 #: templates/geoserver/layer_upload_vector.html:142
-#: templates/layer_add.html:626 templates/layer_create.html:642
+#: templates/layer_add.html:630 templates/layer_create.html:642
 #: templates/layer_create.html:654 templates/layer_create.html:661
-#: templates/layer_update.html:562 templates/layergroup_list.html:35
+#: templates/layer_update.html:570 templates/layergroup_list.html:35
 #: templates/server_update.html:73
 msgid "Default"
 msgstr "Padrão"
@@ -644,7 +637,7 @@ msgstr "Versão"
 msgid "URL"
 msgstr "URL"
 
-#: forms_services.py:226 templates/base_layer_add.html:65
+#: forms_services.py:226 settings.py:31 templates/base_layer_add.html:65
 #: templates/base_layer_update.html:67
 #: templates/dashboard_services_menu.html:12
 #: templates/external_layer_add.html:85
@@ -675,10 +668,26 @@ msgstr ""
 msgid "Inverse Geocoder ICV"
 msgstr ""
 
+#: settings.py:30
+#, fuzzy
+#| msgid "Layer groups"
+msgid "Layer requests"
+msgstr "Grupo de camadas"
+
+#: settings.py:39
+msgid "Layer requests by user"
+msgstr ""
+
+#: settings.py:40
+#, fuzzy
+#| msgid "User"
+msgid "Users"
+msgstr "Usuário"
+
 #: templates/base_layer_add.html:12 templates/datastore_add.html:12
 #: templates/enumeration_add.html:12 templates/enumeration_update.html:12
 #: templates/external_layer_add.html:12 templates/layer_add.html:17
-#: templates/layer_config.html:17 templates/layer_create.html:17
+#: templates/layer_config.html:18 templates/layer_create.html:17
 #: templates/layer_update.html:17 templates/layergroup_add.html:12
 #: templates/server_add.html:12 templates/service_url_add.html:12
 #: templates/workspace_add.html:12
@@ -985,7 +994,7 @@ msgstr "Selecionar arquivo"
 
 #: templates/datastore_add.html:70 templates/datastore_update.html:71
 msgid "Test connection"
-msgstr ""
+msgstr "Conexão de teste"
 
 #: templates/datastore_add.html:77 templates/datastore_update.html:86
 msgid "Temporal dimension"
@@ -997,11 +1006,11 @@ msgstr "Dimensão de elevação"
 
 #: templates/datastore_list.html:11
 msgid "Add datastore"
-msgstr "Adicionar datastore"
+msgstr "Adicionar armazém"
 
 #: templates/datastore_list.html:58
 msgid "Delete datastore"
-msgstr "Excluir datastore"
+msgstr "Excluir armazém"
 
 #: templates/datastore_list.html:63
 msgid "The data store and its registered resources will be deleted"
@@ -1013,11 +1022,11 @@ msgstr ""
 
 #: templates/datastore_list.html:116
 msgid "Remove datastore"
-msgstr "Remove datastore"
+msgstr "Excluir armazém"
 
 #: templates/datastore_list.html:120
 msgid "Update datastore"
-msgstr "Atualizar datastore"
+msgstr "Atualizar armazém"
 
 #: templates/enumeration_add.html:53 templates/enumeration_update.html:53
 msgid "Enumeration items"
@@ -1089,8 +1098,8 @@ msgstr "Tempo limite (milissegundos)"
 #: templates/geoserver/layer_upload_postgis.html:125
 #: templates/geoserver/layer_upload_raster.html:109
 #: templates/geoserver/layer_upload_vector.html:124
-#: templates/layer_add.html:220 templates/layer_create.html:236
-#: templates/layer_update.html:290
+#: templates/layer_add.html:224 templates/layer_create.html:236
+#: templates/layer_update.html:298
 msgid "Metadata: Abstract"
 msgstr "Metadados: Resumo"
 
@@ -1101,49 +1110,49 @@ msgstr "Metadados: Resumo"
 #: templates/geoserver/layer_upload_postgis.html:126
 #: templates/geoserver/layer_upload_raster.html:110
 #: templates/geoserver/layer_upload_vector.html:123
-#: templates/layer_add.html:221 templates/layer_create.html:237
+#: templates/layer_add.html:225 templates/layer_create.html:237
 msgid "Some description of the layer"
 msgstr "Alguma descrição da camada"
 
 #: templates/external_layer_add.html:176
-#: templates/external_layer_update.html:226 templates/layer_add.html:238
-#: templates/layer_create.html:254 templates/layer_update.html:313
+#: templates/external_layer_update.html:226 templates/layer_add.html:242
+#: templates/layer_create.html:254 templates/layer_update.html:321
 msgid "Enable metaquality"
 msgstr "Ativar"
 
 #: templates/external_layer_add.html:181
-#: templates/external_layer_update.html:235 templates/layer_add.html:243
-#: templates/layer_create.html:259 templates/layer_update.html:322
+#: templates/external_layer_update.html:235 templates/layer_add.html:247
+#: templates/layer_create.html:259 templates/layer_update.html:330
 msgid "Button title in the TOC"
 msgstr "Título do botão no TOC"
 
 #: templates/external_layer_add.html:182
-#: templates/external_layer_update.html:236 templates/layer_add.html:244
-#: templates/layer_create.html:260 templates/layer_update.html:323
+#: templates/external_layer_update.html:236 templates/layer_add.html:248
+#: templates/layer_create.html:260 templates/layer_update.html:331
 msgid "Button title"
 msgstr "Título do botão"
 
 #: templates/external_layer_add.html:182
-#: templates/external_layer_update.html:236 templates/layer_add.html:244
-#: templates/layer_create.html:260 templates/layer_update.html:323
+#: templates/external_layer_update.html:236 templates/layer_add.html:248
+#: templates/layer_create.html:260 templates/layer_update.html:331
 msgid "Detailed info"
 msgstr "Informação detalhada"
 
 #: templates/external_layer_add.html:188
-#: templates/external_layer_update.html:245 templates/layer_add.html:250
-#: templates/layer_create.html:266 templates/layer_update.html:332
+#: templates/external_layer_update.html:245 templates/layer_add.html:254
+#: templates/layer_create.html:266 templates/layer_update.html:340
 msgid "HTML"
 msgstr "HTML"
 
 #: templates/external_layer_add.html:245
-#: templates/external_layer_update.html:300 templates/layer_add.html:568
-#: templates/layer_create.html:613 templates/layer_update.html:512
+#: templates/external_layer_update.html:300 templates/layer_add.html:572
+#: templates/layer_create.html:613 templates/layer_update.html:520
 msgid "Layer title"
 msgstr "Título da camada"
 
 #: templates/external_layer_add.html:246
-#: templates/external_layer_update.html:301 templates/layer_add.html:569
-#: templates/layer_create.html:614 templates/layer_update.html:513
+#: templates/external_layer_update.html:301 templates/layer_add.html:573
+#: templates/layer_create.html:614 templates/layer_update.html:521
 msgid "Layer description"
 msgstr "Descrição da camada"
 
@@ -1167,25 +1176,25 @@ msgstr "Remover camada externa"
 msgid "Update external layer"
 msgstr "Atualizar camada externa"
 
-#: templates/external_layer_update.html:179 templates/layer_update.html:266
+#: templates/external_layer_update.html:179 templates/layer_update.html:274
 msgid "Layer metadata"
 msgstr "Metadado da camada"
 
-#: templates/external_layer_update.html:184 templates/layer_update.html:271
+#: templates/external_layer_update.html:184 templates/layer_update.html:279
 msgid "Metadata UUID"
 msgstr "Metadado UUID"
 
 #: templates/external_layer_update.html:190
-#: templates/external_layer_update.html:196 templates/layer_update.html:277
-#: templates/layer_update.html:283
+#: templates/external_layer_update.html:196 templates/layer_update.html:285
+#: templates/layer_update.html:291
 msgid "Metadata tools"
 msgstr "Ferramentas do metadado"
 
-#: templates/external_layer_update.html:191 templates/layer_update.html:278
+#: templates/external_layer_update.html:191 templates/layer_update.html:286
 msgid "Edit in catalog"
 msgstr "Editar no catálogo"
 
-#: templates/external_layer_update.html:197 templates/layer_update.html:284
+#: templates/external_layer_update.html:197 templates/layer_update.html:292
 msgid "Create metadata"
 msgstr "Criar metadados"
 
@@ -1240,7 +1249,7 @@ msgid "Single image (No tiles)"
 msgstr "Imagem simples (sem mosaicos)"
 
 #: templates/geoserver/create_layer_feature_type.html:141
-#: templates/layer_config.html:596 templates/layer_create.html:289
+#: templates/layer_config.html:699 templates/layer_create.html:289
 #: templates/layer_create.html:359 templates/layer_create.html:666
 msgid "New field"
 msgstr "Novo campo"
@@ -1282,9 +1291,9 @@ msgstr "Nenhum campo foi definido"
 
 #: templates/geoserver/create_layer_feature_type.html:199
 #: templates/geoserver/create_layer_feature_type.html:205
-#: templates/layer_config.html:120 templates/layer_config.html:393
+#: templates/layer_config.html:123 templates/layer_config.html:484
 msgid "Delete field"
-msgstr "Eliminar campo"
+msgstr "Excluir campo"
 
 #: templates/geoserver/create_layer_feature_type.html:229
 msgid "The name field is required"
@@ -1470,7 +1479,7 @@ msgstr "Atualizar tarefas"
 
 #: templates/group_cache_config.html:141 templates/layer_cache_config.html:141
 msgid "kill all tasks"
-msgstr "Eliminar todas as tarefas"
+msgstr "Excluir todas as tarefas"
 
 #: templates/group_cache_config.html:148 templates/layer_cache_config.html:148
 msgid "Tiles processed"
@@ -1525,179 +1534,215 @@ msgstr "Permitir downloads"
 msgid "View in real time"
 msgstr "Ver em tempo real"
 
-#: templates/layer_add.html:138 templates/layer_update.html:187
+#: templates/layer_add.html:137 templates/layer_update.html:190
+msgid "Show in vector tile format"
+msgstr ""
+
+#: templates/layer_add.html:142 templates/layer_update.html:195
 msgid "Update interval (miliseconds)"
 msgstr "Intervalo de atualização (milissegundos)"
 
-#: templates/layer_add.html:147 templates/layer_create.html:167
-#: templates/layer_update.html:195
+#: templates/layer_add.html:151 templates/layer_create.html:167
+#: templates/layer_update.html:203
 msgid "time_enabled field"
 msgstr "tempo_campo ativado"
 
-#: templates/layer_add.html:154 templates/layer_create.html:173
-#: templates/layer_update.html:201
+#: templates/layer_add.html:158 templates/layer_create.html:173
+#: templates/layer_update.html:209
 msgid "End time_enabled field"
 msgstr "Campo Hora de fim_permitido"
 
-#: templates/layer_add.html:161 templates/layer_create.html:179
-#: templates/layer_update.html:208
+#: templates/layer_add.html:165 templates/layer_create.html:179
+#: templates/layer_update.html:216
 msgid "Time resolution"
 msgstr "Resolução de tempo"
 
-#: templates/layer_add.html:167 templates/layer_create.html:185
-#: templates/layer_update.html:214
+#: templates/layer_add.html:171 templates/layer_create.html:185
+#: templates/layer_update.html:222
 msgid "Time presentation"
 msgstr "Apresentação do tempo"
 
-#: templates/layer_add.html:173 templates/layer_create.html:191
-#: templates/layer_update.html:220
+#: templates/layer_add.html:177 templates/layer_create.html:191
+#: templates/layer_update.html:228
 msgid ""
 "Time resolution (years, months, weeks, days, hours, minutes and seconds)"
 msgstr ""
 "Resolução de tempo (anos, meses, semanas, dias, horas, minutos e segundos)"
 
-#: templates/layer_add.html:188 templates/layer_create.html:204
-#: templates/layer_update.html:233
+#: templates/layer_add.html:192 templates/layer_create.html:204
+#: templates/layer_update.html:241
 msgid "Default value mode"
 msgstr "Modo valor predefinido"
 
-#: templates/layer_add.html:322 templates/layer_create.html:476
-#: templates/layer_update.html:418
+#: templates/layer_add.html:326 templates/layer_create.html:476
+#: templates/layer_update.html:426
 msgid "Resource contains no fields"
 msgstr "O recurso não contém campos"
 
-#: templates/layer_add.html:340 templates/layer_create.html:496
-#: templates/layer_update.html:444
+#: templates/layer_add.html:344 templates/layer_create.html:496
+#: templates/layer_update.html:452
 msgid "Choose field"
 msgstr "Selecionar campo"
 
-#: templates/layer_add.html:367
+#: templates/layer_add.html:371
 msgid "Data store contains no resources to publish"
 msgstr "O armazenamento de dados não contém recursos para publicar"
 
-#: templates/layer_add.html:384
+#: templates/layer_add.html:388
 msgid "Choose resource"
 msgstr "Selecionar recurso"
 
-#: templates/layer_add.html:390
+#: templates/layer_add.html:394
 msgid "Service is unavailable"
 msgstr "O serviço está indisponível"
 
-#: templates/layer_add.html:397 templates/layer_add.html:441
-#: templates/layer_add.html:507 templates/layer_create.html:553
+#: templates/layer_add.html:401 templates/layer_add.html:445
+#: templates/layer_add.html:511 templates/layer_create.html:553
 msgid "No valid data store selected"
 msgstr "Nenhum armazenamento de dados válido selecionado"
 
-#: templates/layer_add.html:411 templates/layer_add.html:434
+#: templates/layer_add.html:415 templates/layer_add.html:438
 #: templates/layer_create.html:523 templates/layer_create.html:546
 msgid "No layer groups available"
 msgstr "Nenhum grupo de camadas disponível"
 
-#: templates/layer_add.html:428 templates/layer_create.html:540
+#: templates/layer_add.html:432 templates/layer_create.html:540
 msgid "Choose layer group"
 msgstr "Selecionar grupo de camadas"
 
-#: templates/layer_add.html:469 templates/layer_add.html:497
+#: templates/layer_add.html:473 templates/layer_add.html:501
 msgid "-----------"
 msgstr "-----------"
 
-#: templates/layer_add.html:490
+#: templates/layer_add.html:494
 msgid "Choose date field"
 msgstr "Selecionar campo de data"
 
-#: templates/layer_config.html:42
+#: templates/layer_config.html:43
 msgid "Field management"
 msgstr "Gestão do campo"
 
-#: templates/layer_config.html:43
+#: templates/layer_config.html:44
 msgid "Field titles"
 msgstr "Título do campo"
 
-#: templates/layer_config.html:57 templates/layer_config.html:161
-#: templates/layer_config.html:404 templates/layer_config.html:474
+#: templates/layer_config.html:45
+msgid "Field groups"
+msgstr "Grupos de campo"
+
+#: templates/layer_config.html:46
+msgid "Group titles"
+msgstr "Títulos do grupo"
+
+#: templates/layer_config.html:60 templates/layer_config.html:164
+#: templates/layer_config.html:495 templates/layer_config.html:571
 #: templates/layer_create.html:110
 msgid "Field name"
 msgstr "Nome do campo"
 
-#: templates/layer_config.html:59 templates/layer_create.html:112
+#: templates/layer_config.html:62 templates/layer_create.html:112
 msgid "Calculated"
 msgstr "Calculado"
 
-#: templates/layer_config.html:60
+#: templates/layer_config.html:63
 msgid "Nullable"
 msgstr "Nulo"
 
-#: templates/layer_config.html:61
+#: templates/layer_config.html:64
 msgid "mandatory"
 msgstr "Obrigatório"
 
-#: templates/layer_config.html:62
+#: templates/layer_config.html:65
 msgid "Is visible?"
 msgstr "É visível?"
 
-#: templates/layer_config.html:63
+#: templates/layer_config.html:66
 msgid "Is editable?"
 msgstr "É editável?"
 
-#: templates/layer_config.html:64
+#: templates/layer_config.html:67
 msgid "Is shown in getFeatureInfo?"
 msgstr "É mostrado em Obter Informações sobre o Recurso?"
 
-#: templates/layer_config.html:65
+#: templates/layer_config.html:68
 msgid "Actions"
 msgstr "Ferramentas"
 
-#: templates/layer_config.html:76 templates/layer_config.html:78
+#: templates/layer_config.html:79 templates/layer_config.html:81
 msgid "Set at database level"
 msgstr ""
 
-#: templates/layer_config.html:81 templates/layer_config.html:83
+#: templates/layer_config.html:84 templates/layer_config.html:86
 msgid "Required in editing forms"
 msgstr ""
 
-#: templates/layer_config.html:115
+#: templates/layer_config.html:118
 msgid "Rename"
 msgstr "Renomear"
 
-#: templates/layer_config.html:116
+#: templates/layer_config.html:119
 msgid "Change type"
 msgstr "Tipo de Geom"
 
-#: templates/layer_config.html:118
+#: templates/layer_config.html:121
 msgid "Convert to enumerate"
 msgstr "Converter para Enumeração"
 
-#: templates/layer_config.html:124
+#: templates/layer_config.html:127
 msgid "Reserved field"
 msgstr "Excluir campo"
 
-#: templates/layer_config.html:143 templates/layer_create.html:122
+#: templates/layer_config.html:146 templates/layer_create.html:122
 msgid "Add field"
 msgstr "Adicionar campo"
 
-#: templates/layer_config.html:163
+#: templates/layer_config.html:166
 msgid "Field title"
 msgstr "Título do campo"
 
-#: templates/layer_config.html:313
-msgid "Convert to enum"
-msgstr ""
+#: templates/layer_config.html:213 templates/layer_config.html:743
+#, fuzzy
+#| msgid "Delete layer group"
+msgid "Delete group"
+msgstr "Eliminar grupo de camadas"
 
-#: templates/layer_config.html:398
+#: templates/layer_config.html:239
+msgid "Add field group"
+msgstr "Adicionar grupos de campo"
+
+#: templates/layer_config.html:259
+msgid "Group name"
+msgstr "Nome do grupo"
+
+#: templates/layer_config.html:261
+#, fuzzy
+#| msgid "Group titles"
+msgid "Group title"
+msgstr "Títulos do grupo"
+
+#: templates/layer_config.html:404
+msgid "Convert to enum"
+msgstr "Converter para enumeração"
+
+#: templates/layer_config.html:489
 msgid ""
 "Warning: the field will be deleted from the database. This operation cannot "
 "be undone. Type the name of the field to confirm the deletion:"
 msgstr ""
+"Atenção: o campo será excluído do banco de dados. A operação não pode ser "
+"desfeita. Digite o nome do campo e confirme a exclusão:"
 
-#: templates/layer_config.html:458
+#: templates/layer_config.html:555
 msgid "Rename field"
-msgstr "Eliminar campo"
+msgstr "Renomear campo"
 
-#: templates/layer_config.html:465
+#: templates/layer_config.html:562
 msgid ""
 "Warning: renaming a field may have side effects, such as breaking a field-"
 "based legend."
 msgstr ""
+"Aviso: a renomeação de um campo pode ter efeitos colaterais, tais como "
+"quebrar uma lenda baseada no campo"
 
 #: templates/layer_create.html:103
 msgid "Field list"
@@ -1718,7 +1763,7 @@ msgstr ""
 
 #: templates/layer_list.html:31
 msgid "Datastore type"
-msgstr "Datastore"
+msgstr "Tipo de armazém de dados"
 
 #: templates/layer_list.html:73 templates/layer_list.html:153
 #: templates/layergroup_update.html:139 templates/layergroup_update.html:141
@@ -1885,7 +1930,7 @@ msgstr "Estado"
 
 #: templates/server_add.html:62 templates/server_update.html:101
 msgid "Is master?"
-msgstr "É master?"
+msgstr "É superusuário?"
 
 #: templates/server_add.html:72 templates/server_update.html:111
 msgid "Add node"
@@ -1933,7 +1978,7 @@ msgstr "Senha"
 
 #: templates/service_url_list.html:12
 msgid "Add service URL"
-msgstr "Adicionar servidor"
+msgstr "Adicionar a URL do serviço"
 
 #: templates/service_url_list.html:57 templates/service_url_list.html:105
 msgid "Delete service URL"
@@ -1978,7 +2023,7 @@ msgstr "Url"
 msgid "Workspace description"
 msgstr "Descrição do espaço de trabalho"
 
-#: views.py:325
+#: views.py:324
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -1989,11 +2034,11 @@ msgstr ""
 "começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
-#: views.py:336
+#: views.py:335
 msgid "Error: workspace could not be created"
 msgstr "Erro: o espaço de trabalho não pôde ser criado"
 
-#: views.py:492
+#: views.py:491
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -2004,38 +2049,38 @@ msgstr ""
 "uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
-#: views.py:513
+#: views.py:512
 msgid "Error: Data store could not be created"
 msgstr "Erro: A memória de dados não pôde ser criada"
 
-#: views.py:516
+#: views.py:515
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Erro: GeoTIFF não é georreferenciado"
 
-#: views.py:564
+#: views.py:563
 msgid "Error updating datastore"
 msgstr "Erro na atualização do armazenamento de dados"
 
-#: views.py:715
+#: views.py:714
 msgid "ERROR can't connect with GeoServer"
 msgstr "ERROR não pode se conectar com GeoServer"
 
-#: views.py:723
+#: views.py:722
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 "ERROR não pode remover dados do GeoServer. Forçando a remoção de dados da "
 "Base de Dados"
 
-#: views.py:747
+#: views.py:746
 msgid "ERROR User is not authorized to perform this operation"
 msgstr ""
 
-#: views.py:1674
+#: views.py:1714
 #, python-brace-format
 msgid "enumerated ({0})"
 msgstr ""
 
-#: views.py:2102 views.py:2260
+#: views.py:2144 views.py:2302
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -2046,88 +2091,91 @@ msgstr ""
 "começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
-#: views.py:2151 views.py:2281
+#: views.py:2193 views.py:2323
 msgid "Layer group name already exists"
 msgstr "O nome do grupo de camadas já existe"
 
-#: views.py:2155
+#: views.py:2197
 msgid "You must enter a name for layer group"
 msgstr "É necessário inserir um nome para o grupo de camadas"
 
-#: views.py:2650
+#: views.py:2692
 msgid "You must enter a title for enumeration"
 msgstr "É necessário entrar um título para enumeração"
 
-#: views.py:2655
+#: views.py:2697
 msgid "Name already taken"
 msgstr "Nome já utilizado"
 
-#: views.py:3917
+#: views.py:3954
 msgid "Error: ExternalLayer could not be published"
 msgstr "Erro: Camada externa não pôde ser publicada"
 
-#: views.py:4018
+#: views.py:4055
 msgid "Error: externallayer could not be published"
 msgstr "Erro: camada externa não pôde ser publicada"
 
-#: views.py:4639 views.py:4645
+#: views.py:4676 views.py:4682
 msgid "Connection failed"
 msgstr "Parâmetros de conexão"
 
-#: views.py:4639
+#: views.py:4676
 msgid "Status code: "
 msgstr "Estado"
 
-#: views.py:4650
+#: views.py:4687
 msgid "Connection error"
 msgstr "Parâmetros de conexão"
 
-#: views.py:4686
+#: views.py:4723
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
 msgstr ""
 
-#: views.py:4710 views.py:4772 views.py:4776 views.py:4778
+#: views.py:4747 views.py:4809 views.py:4813 views.py:4815
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
 msgstr ""
 
-#: views.py:4712 views.py:4774
+#: views.py:4749 views.py:4811
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
 msgstr ""
 
-#: views.py:4714
+#: views.py:4751
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
 msgstr ""
 
-#: views.py:4742
+#: views.py:4779
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr ""
 
-#: views.py:4744 views.py:4819
+#: views.py:4781 views.py:4856
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr "Nome de campo inválido. {0}' é uma palavra reservada"
 
-#: views.py:4799
+#: views.py:4836
 msgid "String"
 msgstr ""
 
-#: views.py:4832
+#: views.py:4869
 msgid "Field type not supported"
 msgstr ""
 
-#: views.py:4836
+#: views.py:4873
 #, fuzzy, python-brace-format
 #| msgid "Field \"{0}\" exists"
 msgid "Field \"{0}\" exists"
 msgstr "Lista de campos"
 
-#: views.py:4885
+#: views.py:4922
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr ""
+
+#~ msgid "Error uploading the layer. Review the file format."
+#~ msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"

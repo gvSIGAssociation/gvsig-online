@@ -200,6 +200,7 @@ class Geoserver():
         try:
             self.getGsconfig().create_workspace(name, uri)
             return True
+            print("SE HA CREADO WORKSPACE: "+name, uri)
         except Exception as e:
             logger.exception("Error creating workspace")
             return False
@@ -821,10 +822,11 @@ class Geoserver():
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
-        
+  
     #TODO: este metodo recrea el grupo de capas en Geoserver a partir de la informacion que hay en el modelo. Se deberian implementar los metodos
     # que anyaden o borran capas de un grupo para ser mas eficiente.    
     def createOrUpdateGeoserverLayerGroup(self, layer_group):
+       
         try:
             if layer_group.name != "__default__":
                 return self.rest_catalog.create_or_update_gs_layer_group(layer_group.name, layer_group.title, user=self.user, password=self.password)
@@ -836,7 +838,9 @@ class Geoserver():
             logger.exception('ERROR createOrUpdateGeoserverLayerGroup failed. Group name: ' + layer_group.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
         
+        
     def createOrUpdateSortedGeoserverLayerGroup(self, toc):
+        
         try:
             return self.rest_catalog.create_or_update_sorted_gs_layer_group(toc, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:

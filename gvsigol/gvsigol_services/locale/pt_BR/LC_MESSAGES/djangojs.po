@@ -103,7 +103,7 @@ msgid "URL"
 msgstr "URL"
 
 msgid "Is master?"
-msgstr "É mestre?"
+msgstr "É superusuário?"
 
 msgid "Save node"
 msgstr "Gravar nódulo"
@@ -112,10 +112,10 @@ msgid "Edit node"
 msgstr "Editar nodulo"
 
 msgid "Convert"
-msgstr ""
+msgstr "Converter"
 
 msgid "Autogen"
-msgstr ""
+msgstr "Autogerar"
 
 msgid "Autogen ok"
 msgstr ""
@@ -136,10 +136,10 @@ msgid "Connection has been success"
 msgstr ""
 
 msgid "Filter by project"
-msgstr ""
+msgstr "Filtro por projeto"
 
 msgid "Show all layers"
-msgstr ""
+msgstr "Mostrar todas as camadas"
 
 msgid "The action was successfully completed"
 msgstr ""
@@ -154,5 +154,20 @@ msgid "The layer refresh failed"
 msgstr ""
 
 msgid "Calculated"
-msgstr ""
+msgstr "Calculado"
+
+msgid "Old name"
+msgstr "Nome antigo"
+
+msgid "New name"
+msgstr "Nome novo"
+
+msgid "Rename"
+msgstr "Renomear"
+
+msgid "Field to delete"
+msgstr "Campo para excluir"
+
+msgid "You must select an extent on the map using the control"
+msgstr "Você deve selecionar uma extensão no mapa usando o controle"
 
