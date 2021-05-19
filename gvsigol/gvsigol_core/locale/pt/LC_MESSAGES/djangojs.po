@@ -234,7 +234,10 @@ msgid "Show selection tools"
 msgstr "Mostrar ferramentas de seleção"
 
 msgid "Select features"
-msgstr "Selecionar recursos"
+msgstr "Selecione vários recursos"
+
+msgid "Select feature"
+msgstr "Selecione um recurso"
 
 msgid "Select by buffer"
 msgstr "Selecionar por buffer"
@@ -393,7 +396,7 @@ msgid "Zoom to layer"
 msgstr "Zoom para camada"
 
 msgid "Project zoom"
-msgstr "Zoom de projeto"
+msgstr "Zoom do projeto"
 
 msgid "Clean map"
 msgstr "Limpar mapa"
@@ -482,7 +485,7 @@ msgid "Image Mosaic"
 msgstr "Mosaico de imagens"
 
 msgid "Share view"
-msgstr "Compartilhar visão"
+msgstr "Compartilhar visualização"
 
 msgid "Report title"
 msgstr "Título do relatório"
@@ -602,4 +605,22 @@ msgid "You must fill in all fields"
 msgstr "Você deve preencher todos os campos"
 
 msgid "Find layer"
-msgstr "Pesquisar camada"
+msgstr "Buscar camada"
+
+msgid "Next view"
+msgstr "Vista seguinte"
+
+msgid "Last view"
+msgstr "Last view"
+
+msgid "Zoom in"
+msgstr "Ampliar zoom"
+
+msgid "Zoom out"
+msgstr "Reduzir zoom"
+
+msgid "Drag Zoom"
+msgstr "Lupa"
+
+msgid "Search in catalog"
+msgstr "Pesquisa no catálogo"

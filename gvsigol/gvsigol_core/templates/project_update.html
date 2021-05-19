@@ -268,8 +268,7 @@
 																			{% endif %}
 																		</label>
 																	</div>
-																</a> 
-<!-- 																<span class="product-description"><span class="searchable-layer">{{base_layers.type}}</span></span> -->
+																</a> <!-- 																<span class="product-description"><span class="searchable-layer">{{base_layers.type}}</span></span> -->
 															</div>
 														</li> 
 														{% endfor %}
@@ -919,8 +918,6 @@
 			}       
 		})
 		
-
-		
 		
 		searcheableList2.on("updated", function(){
 			$(".layergroup-input").unbind("click").click(function(){
@@ -1178,7 +1175,7 @@
 			$("#selected_base_group").val(selectedBaseGroup);
 		});
 	  	
-	  	{% if has_geocoding_plugin %}	
+	  	{% if has_geocoding_plugin %}
 	  	$(".ol-zoom").css("margin-top","50px")
 	  	
 	  	$('#location-autocomplete').autocomplete({

@@ -233,7 +233,10 @@ msgid "Show selection tools"
 msgstr "Mostrar herramientas de selección"
 
 msgid "Select features"
-msgstr "Seleccionar features"
+msgstr "Seleccionar registros"
+
+msgid "Select feature"
+msgstr "Seleccionar registro"
 
 msgid "Select by buffer"
 msgstr "Seleccionar por buffer"
@@ -611,3 +614,21 @@ msgstr "Debe rellenar todos los campos"
 
 msgid "Find layer"
 msgstr "Buscar capa"
+
+msgid "Next view"
+msgstr "Vista siguiente"
+
+msgid "Last view"
+msgstr "Vista anterior"
+
+msgid "Zoom in"
+msgstr "Ampliar zoom"
+
+msgid "Zoom out"
+msgstr "Reducir zoom"
+
+msgid "Drag Zoom"
+msgstr "Lupa"
+
+msgid "Search in catalog"
+msgstr "Busca al catálogo"

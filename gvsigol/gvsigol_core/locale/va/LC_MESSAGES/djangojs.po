@@ -235,6 +235,9 @@ msgstr "Mostrar ferramentes de selecció"
 msgid "Select features"
 msgstr ""
 
+msgid "Select feature"
+msgstr ""
+
 msgid "Select by buffer"
 msgstr ""
 
@@ -548,3 +551,21 @@ msgstr "Algun valor està fora de rang"
 
 msgid "Find layer"
 msgstr "Buscar capa"
+
+msgid "Next view"
+msgstr "Vista següent"
+
+msgid "Last view"
+msgstr "Vista anterior"
+
+msgid "Zoom in"
+msgstr "Ampliar zoom"
+
+msgid "Zoom out"
+msgstr "Reduïr zoom"
+
+msgid "Drag Zoom"
+msgstr "Lupa"
+
+msgid "Search in catalog"
+msgstr "Cerca al catàlog"
