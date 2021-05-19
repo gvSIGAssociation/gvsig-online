@@ -681,12 +681,8 @@ def layer_list(request):
     }
     return render(request, 'layer_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@staff_required
-def layer_refresh_extent(request, layer_id):
-    layer = Layer.objects.get(pk=layer_id)
-    if not utils.can_manage_layer(request.user, layer):
-        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
+
+def _layer_refresh_extent(layer):
     datastore = layer.datastore
     workspace = datastore.workspace
     #server.updateBoundingBoxFromData(layer)
@@ -698,6 +694,16 @@ def layer_refresh_extent(request, layer_id):
         server.reload_nodes()
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def layer_refresh_conf(request, layer_id):
+    layer = Layer.objects.get(pk=layer_id)
+    if not utils.can_manage_layer(request.user, layer):
+        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
+    _layer_refresh_extent(layer)
+    lyr_conf = layer.get_config_manager()
+    lyr_conf.refresh_field_conf()
     layer.save()
     return JsonResponse({"result": "ok"})
 
@@ -991,11 +997,11 @@ def do_config_layer(server, layer, featuretype):
     layer_autoconfig(layer, featuretype)
     layer.save()
     ds_type = layer.datastore.type
+    if ds_type == 'c_ImageMosaic':
+        server.updateImageMosaicTemporal(layer.datastore, layer)
+    elif ds_type[0:2] == 'v_':
+        utils.set_time_enabled(server, layer)
     if ds_type != 'e_WMS':
-        if ds_type == 'c_ImageMosaic':
-            server.updateImageMosaicTemporal(layer.datastore, layer)
-        elif ds_type[0:2] == 'v_':
-            utils.set_time_enabled(server, layer)
         create_symbology(server, layer)
         server.updateThumbnail(layer, 'create')
 
@@ -1532,33 +1538,13 @@ def layer_autoconfig(layer, featuretype):
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
     if (ds_type != 'coverage'):
-        resource_fields = utils.get_alphanumeric_fields(utils.get_fields(layer_info))    
-        for f in resource_fields:
-            field = {}
-            field['name'] = f['name']
-            for id, language in LANGUAGES:
-                field['title-'+id] = f['name']
-            field['visible'] = True
-            field['editableactive'] = True
-            field['infovisible'] = False
-            field['mandatory'] = False
-            field['nullable'] = True
-            if Trigger.objects.filter(layer=layer, field=field['name']).exists():
-                field['editable'] = False
-            else:
-                field['editable'] = True
-            for control_field in settings.CONTROL_FIELDS:
-                if field['name'] == control_field['name']:
-                    field['editableactive'] = control_field.get('editableactive', False)
-                    field['editable'] = control_field.get('editable', False)
-                    field['visible'] = control_field.get('visible', field['visible'])
-                    field['mandatory'] = control_field.get('mandatory', field['mandatory'])
-                    field['nullable'] = control_field.get('nullable', field['nullable'])
-            fields.append(field)
-
+        lyr_conf = layer.get_config_manager()
+        fields = lyr_conf.get_updated_field_conf()
+        form_groups = _parse_form_groups([], fields)
     layer_conf = {
         'fields': fields,
-        'featuretype': featuretype
+        'featuretype': featuretype,
+        'form_groups': form_groups
         }
 
     layer.conf = layer_conf
@@ -1655,86 +1641,23 @@ def layer_config(request, layer_id):
             return redirect('layer_list')
 
     else:
-        fields = []
         available_languages = []
         for lang_id, _ in LANGUAGES:
             available_languages.append(lang_id)
-
         try:
-            try:
-                conf = ast.literal_eval(layer.conf)
-            except:
-                conf = {}
-            i, tablename, dsname = utils.get_db_connect_from_layer(layer_id)
-            field_info = i.get_fields_info(tablename, dsname)
-            geometry_columns = i.get_geometry_columns(tablename, dsname)
-            pks = i.get_pk_columns(tablename, dsname)
-            i.close()
-            for f in field_info:
-                if not f['name'] in geometry_columns and not f['name'] in pks:
-                    field = None
-                    for fconf in conf.get('fields', []):
-                        if fconf['name'] == f['name']:
-                            #for id, language in LANGUAGES:
-                            #    fconf['title-'+id] = fconf.get('title-'+id)
-                            fconf['visible'] = fconf.get('visible', True)
-                            fconf['editable'] = fconf.get('editable', True)
-                            fconf['editableactive'] = True
-                            fconf['infovisible'] = fconf.get('infovisible', False)
-                            for control_field in settings.CONTROL_FIELDS:
-                                if fconf['name'] == control_field['name']:
-                                    fconf['editableactive'] = control_field.get('editableactive', False)
-                                    fconf['editable'] = control_field.get('editable', False)
-                                    fconf['visible'] = control_field.get('visible', fconf['visible'])
-                            fconf['nullable'] = (f.get('nullable') != 'NO')
-                            if not fconf['nullable']:
-                                fconf['mandatory'] = True
-                            else:
-                                fconf['mandatory'] = fconf.get('mandatory', False)
-                            field = fconf
-                            break
-                    if not field:
-                        field = {}
-                        field['name'] = f['name']
-                        for id, language in LANGUAGES:
-                            field['title-'+id] = f['name']
-                        field['visible'] = True
-                        field['editableactive'] = True
-                        field['editable'] = True
-                        for control_field in settings.CONTROL_FIELDS:
-                            if field['name'] == control_field['name']:
-                                field['editableactive'] = control_field.get('editableactive', False)
-                                field['editable'] = control_field.get('editable', False)
-                                field['visible'] = control_field.get('visible', field['visible'])
-                        field['infovisible'] = False
-                        field['nullable'] = (f.get('nullable') != 'NO')
-                        field['mandatory'] = (not field['nullable'])
-                    enum = utils.get_enum_entry(layer, field['name'])
-                    if enum:
-                        field['type'] = text(ugettext('enumerated ({0})').format(enum.title))
-                    else:
-                        field['type'] = f['type']
-                    try:
-                        trigger = Trigger.objects.get(layer=layer, field=field['name'])
-                        field['calculation'] = trigger.procedure.signature
-                        field['calculationLabel'] = text(trigger.procedure.localized_label)
-                        field['editableactive'] = False
-                        field['editable'] = False
-                    except:
-                        field['calculation'] = ''
-                        field['calculationLabel'] = ''
-                    fields.append(field)
-
+            lyr_conf = layer.get_config_manager()
+            fields = lyr_conf.get_field_viewconf()
+            form_groups = _parse_form_groups(lyr_conf._conf.get('form_groups', []), fields)
         except:
             logger.exception("Retrieving fields")
+            fields = []
+            form_groups = []
         enums = Enumeration.objects.all()
         procedures = []
         disabled_procedures = core_utils.get_setting('GVSIGOL_DISABLED_PROCEDURES', [])
         for procedure in TriggerProcedure.objects.all():
             if not procedure.signature in disabled_procedures:
                 procedures.append(procedure)
-
-        form_groups = _parse_form_groups(conf.get('form_groups', []), fields)
         data = {
             'layer': layer,
             'layer_id': layer.id,
@@ -4815,27 +4738,6 @@ def db_field_rename(request):
             logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
     return utils.get_exception(400, 'Error in the input params')
 
-    def getGeoserverBindings(self, sql_type):
-        if sql_type in ["character varying", "character", "text", "cd_json"]:
-            return "java.lang.String"
-        elif sql_type in ["integer"]:
-            return "java.lang.Integer"
-        elif sql_type in ["double"]:
-            return "java.lang.Double"
-        elif sql_type == "numeric":
-            return "java.math.BigDecimal"
-        elif sql_type == "boolean":
-            return "java.lang.Boolean"
-        elif sql_type == "date":
-            return "java.sql.Date"
-        elif sql_type == "time":
-            return "java.sql.Time"
-        elif sql_type == "timestamp":
-            return "java.sql.Timestamp"
-        sql_type = sql_type.upper()
-    return [{'name': 'character varying', 'label': ugettext_lazy('String')},
-             ]
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def db_add_field(request):
@@ -4873,26 +4775,6 @@ def db_add_field(request):
                     return utils.get_exception(400, _('Field "{0}" exists').format(field_name))
             finally:
                 con.close()
-
-            layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
-            fields = layer_conf.get('fields', [])
-            editable = False if calculation else True
-                
-            field_def = {
-                "name": field_name,
-                "visible": True,
-                "editableactive": True,
-                "editable": editable,
-                "infovisible": False,
-                "mandatory": False,
-                "nullable": True
-                }
-            for id, language in LANGUAGES:
-                field_def['title-'+id] = field_name
-            fields.append(field_def)
-            layer_conf['fields'] = fields 
-            layer.conf = layer_conf
-            layer.save()
             
             if enumkey:
                 field_enum = LayerFieldEnumeration()
@@ -4914,6 +4796,9 @@ def db_add_field(request):
                 except:
                     logger.exception("Error creating trigger for calculated field")
             
+            layer.get_config_manager().refresh_field_conf()
+            layer.save()
+
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
