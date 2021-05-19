@@ -80,7 +80,7 @@ msgid "List of layers"
 msgstr "Lista de camadas"
 
 msgid "Include only results overlapping with the selected map area"
-msgstr "Incluir apenas resultados da área seleccionada"
+msgstr "Incluir apenas resultados que se sobreponham com a área selecionada"
 
 msgid "Metadatum"
 msgstr "Metadado"
@@ -245,3 +245,9 @@ msgstr "Escala"
 
 msgid "Service type"
 msgstr "Tipo de serviço"
+
+msgid "Draw polygon"
+msgstr "Desenhar polígono"
+
+msgid "Clear selected area"
+msgstr "impar área selecionada"

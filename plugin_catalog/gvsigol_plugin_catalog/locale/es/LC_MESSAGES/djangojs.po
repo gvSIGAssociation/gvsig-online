@@ -271,3 +271,9 @@ msgstr "Escala"
 
 msgid "Service type"
 msgstr "Tipo de servicio"
+
+msgid "Draw polygon"
+msgstr "Dibuja polígono"
+
+msgid "Clear selected area"
+msgstr "Limpiar área seleccionada"
