@@ -60,7 +60,7 @@ msgid "Draw polygon"
 msgstr "Dibujar polígono"
 
 msgid "Style settings"
-msgstr "Propiedades de estilo"
+msgstr "Propietats d'estil"
 
 msgid "Circle"
 msgstr "Círculo"

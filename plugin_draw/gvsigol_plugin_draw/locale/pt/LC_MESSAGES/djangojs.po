@@ -30,16 +30,16 @@ msgstr ""
 "X-Source-Language: C\n"
 
 msgid "Show draw tools"
-msgstr "Mostrar herramientas dibujo"
+msgstr "Mostrar ferramentas de desenho"
 
 msgid "Close draw bar"
-msgstr "Cerrar barra de dibujo"
+msgstr "Fechar ferramentas de desenho"
 
 msgid "Close"
-msgstr "Cerrar"
+msgstr "Fechar"
 
 msgid "Insert text"
-msgstr "Insertar texto"
+msgstr "Inserir texto"
 
 msgid "Delete"
 msgstr "Eliminar"
@@ -48,19 +48,19 @@ msgid "Save"
 msgstr "Guardar"
 
 msgid "Clean drawings"
-msgstr "Eliminar dibujos"
+msgstr "Excluir desenhos"
 
 msgid "Draw point"
-msgstr "Dibujar punto"
+msgstr "Desenhar pontos"
 
 msgid "Draw line"
-msgstr "Dibujar línea"
+msgstr "Desenhar linhas"
 
 msgid "Draw polygon"
-msgstr "Dibujar polígono"
+msgstr "Desenhar polígonos"
 
 msgid "Style settings"
-msgstr "Propiedades de estilo"
+msgstr "Propriedades do estilo"
 
 msgid "Circle"
 msgstr "Círculo"
@@ -78,10 +78,10 @@ msgid "Cross"
 msgstr "Cruz"
 
 msgid "Point"
-msgstr "Punto"
+msgstr "Ponto"
 
 msgid "Line"
-msgstr "Línea"
+msgstr "Linha"
 
 msgid "Polygon"
 msgstr "Polígono"
@@ -90,10 +90,10 @@ msgid "Text"
 msgstr "Texto"
 
 msgid "Select shape"
-msgstr "Seleccionar forma"
+msgstr "Selecionar forma"
 
 msgid "Size"
-msgstr "Tamaño"
+msgstr "Tamanho"
 
 msgid "Fill color"
 msgstr "Color de relleno"
