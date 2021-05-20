@@ -140,3 +140,17 @@ msgstr ""
 msgid "Calculated"
 msgstr ""
 
+msgid "Old name"
+msgstr ""
+
+msgid "New name"
+msgstr ""
+
+msgid "Rename"
+msgstr ""
+
+msgid "Field to delete"
+msgstr ""
+
+msgid "You must select an extent on the map using the control"
+msgstr ""

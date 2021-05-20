@@ -811,7 +811,7 @@ msgstr "Tipo"
 #: gvsigol_services/templates/server_update.html:57
 #: gvsigol_services/templates/server_update.html:58
 msgid "Frontend URL"
-msgstr "Frontend URL"
+msgstr "URL de entrada"
 
 #: gvsigol_services/forms_services.py:85
 #: gvsigol_services/templates/server_update.html:63
