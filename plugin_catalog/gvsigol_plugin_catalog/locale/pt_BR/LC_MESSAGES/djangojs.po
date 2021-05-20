@@ -250,4 +250,7 @@ msgid "Draw polygon"
 msgstr "Desenhar polígono"
 
 msgid "Clear selected area"
-msgstr "impar área selecionada"
+msgstr "Limpar área selecionada"
+
+msgid "Search in catalog"
+msgstr "Pesquisa no catálogo"

@@ -257,3 +257,6 @@ msgstr ""
 
 msgid "Clear selected area"
 msgstr ""
+
+msgid "Search in catalog"
+msgstr ""
