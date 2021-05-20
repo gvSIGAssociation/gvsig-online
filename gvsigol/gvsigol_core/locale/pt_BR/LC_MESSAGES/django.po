@@ -72,7 +72,7 @@ msgstr ""
 
 #: gvsigol_core/settings.py:30
 msgid "Project requests"
-msgstr ""
+msgstr "Solicitações de projeto"
 
 #: gvsigol_core/settings.py:31
 #: gvsigol_core/templates/dashboard_core_menu.html:5
@@ -82,7 +82,7 @@ msgstr "Projetos"
 
 #: gvsigol_core/settings.py:39
 msgid "Project requests by user"
-msgstr ""
+msgstr "Solicitações de projeto por usuário"
 
 #: gvsigol_core/settings.py:40
 msgid "Users"
@@ -411,25 +411,25 @@ msgstr "Descrição do projeto"
 #: gvsigol_core/templates/project_add.html:73
 #: gvsigol_core/templates/project_update.html:85
 msgid "Toc panel presentation"
-msgstr "Apresentação do painel TOC"
+msgstr "Apresentar no Painel De Camadas (PDC)"
 
 #: gvsigol_core/templates/project_add.html:75
 #: gvsigol_core/templates/project_update.html:88
 #: gvsigol_core/templates/project_update.html:90
 msgid "Toc hidden"
-msgstr "Toc escondido"
+msgstr "PDC oculto"
 
 #: gvsigol_core/templates/project_add.html:76
 #: gvsigol_core/templates/project_update.html:93
 #: gvsigol_core/templates/project_update.html:95
 msgid "Show toc and groups"
-msgstr "Mostrar toc e grupos"
+msgstr "Mostrar PDC e grupos"
 
 #: gvsigol_core/templates/project_add.html:77
 #: gvsigol_core/templates/project_update.html:98
 #: gvsigol_core/templates/project_update.html:100
 msgid "Show toc, groups and layers"
-msgstr "Mostrar toc, grupos e camadas"
+msgstr "Mostrar PDC, grupos e camadas"
 
 #: gvsigol_core/templates/project_add.html:81
 #: gvsigol_core/templates/project_update.html:105
@@ -853,7 +853,7 @@ msgstr "Baixar versão"
 
 #: gvsigol_core/templates/project_update.html:468
 msgid "Download"
-msgstr ""
+msgstr "Baixar"
 
 #: gvsigol_core/templates/project_update.html:479
 msgid "Project"
