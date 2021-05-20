@@ -202,11 +202,11 @@ msgstr "Criar"
 
 #: forms_geoserver.py:40
 msgid "Append"
-msgstr "Anexar"
+msgstr "Adicionar"
 
 #: forms_geoserver.py:40
 msgid "Overwrite"
-msgstr "Substituir"
+msgstr "Sobrescrever"
 
 #: forms_geoserver.py:41
 msgid "Point"
