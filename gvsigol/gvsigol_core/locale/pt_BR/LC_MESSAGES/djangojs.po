@@ -153,7 +153,7 @@ msgid "Feature properties"
 msgstr "Propriedades"
 
 msgid "Feature resources"
-msgstr "Recursos da característica"
+msgstr "Recursos do elemento"
 
 msgid "remove"
 msgstr "Excluir"
@@ -234,7 +234,10 @@ msgid "Show selection tools"
 msgstr "Mostrar ferramentas de seleção"
 
 msgid "Select features"
-msgstr "Selecionar recursos"
+msgstr "Selecione vários recursos"
+
+msgid "Select feature"
+msgstr "Selecione um recurso"
 
 msgid "Select by buffer"
 msgstr "Selecionar por buffer"
@@ -393,7 +396,7 @@ msgid "Zoom to layer"
 msgstr "Zoom para camada"
 
 msgid "Project zoom"
-msgstr "Zoom de projeto"
+msgstr "Zoom do projeto"
 
 msgid "Clean map"
 msgstr "Limpar mapa"
@@ -482,7 +485,7 @@ msgid "Image Mosaic"
 msgstr "Mosaico de imagens"
 
 msgid "Share view"
-msgstr "Compartilhar visão"
+msgstr "Compartilhar visualização"
 
 msgid "Report title"
 msgstr "Título do relatório"
@@ -546,3 +549,21 @@ msgstr "Você deve preencher todos os valores"
 
 msgid "Some value is out of range"
 msgstr "Algum valor está fora da faixa"
+
+msgid "Find layer"
+msgstr "Buscar camada"
+
+msgid "Zoom in"
+msgstr "Ampliar zoom"
+
+msgid "Zoom out"
+msgstr "Reduzir zoom"
+
+msgid "Next view"
+msgstr "Vista seguinte"
+
+msgid "Last view"
+msgstr "Vista anterior"
+
+msgid "Drag Zoom"
+msgstr "Lupa"

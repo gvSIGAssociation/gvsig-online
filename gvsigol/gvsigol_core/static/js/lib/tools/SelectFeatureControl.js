@@ -39,7 +39,7 @@
 	this.control = new ol.control.Toggle({	
 		html: '<i class="fa fa-mouse-pointer" ></i>',
 		className: "edit",
-		title: gettext('Select features'),
+		title: gettext('Select feature'),
 		interaction: this.interaction,
 		onToggle: function(active){
 			if (active) {
