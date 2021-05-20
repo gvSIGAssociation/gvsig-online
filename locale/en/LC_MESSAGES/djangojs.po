@@ -235,3 +235,19 @@ msgstr ""
 
 msgid "The number of intervals must be greater than 0"
 msgstr ""
+
+msgid "General"
+msgstr ""
+
+msgid "Filter"
+msgstr ""
+
+msgid "Has label"
+msgstr ""
+
+msgid "Minimum scale denominator"
+msgstr ""
+
+msgid "Maximum scale denominator"
+msgstr ""
+

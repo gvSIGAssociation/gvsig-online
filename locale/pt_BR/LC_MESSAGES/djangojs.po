@@ -194,7 +194,7 @@ msgid "Is between"
 msgstr "Está entre"
 
 msgid "Font"
-msgstr "Tipo de letra"
+msgstr "Fonte"
 
 msgid "Halo"
 msgstr "Halo"
@@ -231,3 +231,18 @@ msgstr "É necessário selecionar um campo"
 
 msgid "The number of intervals must be greater than 0"
 msgstr "O número de intervalos deve ser superior a 0"
+
+msgid "General"
+msgstr "Geral"
+
+msgid "Filter"
+msgstr "Filtro"
+
+msgid "Has label"
+msgstr "Ativar rótulos"
+
+msgid "Minimum scale denominator"
+msgstr "Denominador de escala mínima"
+
+msgid "Maximum scale denominator"
+msgstr "Denominador de escala máxima"
