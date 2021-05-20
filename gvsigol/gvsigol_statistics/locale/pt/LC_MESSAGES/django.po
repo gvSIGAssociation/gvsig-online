@@ -24,7 +24,7 @@ msgstr "Petições de"
 
 #: gvsigol_statistics/templates/dashboard_statistics.html:16
 msgid "Petitions to date"
-msgstr "Petições acima"
+msgstr "Petições até"
 
 #: gvsigol_statistics/templates/dashboard_statistics.html:21
 msgid "Petitions done by"
