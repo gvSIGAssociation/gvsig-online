@@ -668,15 +668,12 @@ msgstr ""
 msgid "Inverse Geocoder ICV"
 msgstr ""
 
-#: settings.py:30
-#, fuzzy
-#| msgid "Layer groups"
 msgid "Layer requests"
-msgstr "Grupo de camadas"
+msgstr "Solicitações de camadass"
 
 #: settings.py:39
 msgid "Layer requests by user"
-msgstr ""
+msgstr "Solicitações de camadas por usuário"
 
 #: settings.py:40
 #, fuzzy
