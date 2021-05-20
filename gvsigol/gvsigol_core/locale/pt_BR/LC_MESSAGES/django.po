@@ -328,7 +328,7 @@ msgstr "Salvar"
 #: gvsigol_core/templates/project_clone.html:36
 #: gvsigol_core/templates/project_update.html:41
 msgid "General"
-msgstr ""
+msgstr "Geral"
 
 #: gvsigol_core/templates/project_add.html:28
 msgid "Base layers"
