@@ -29,7 +29,7 @@ msgid "Vector file"
 msgstr "Arquivo vetorial"
 
 msgid "Layer title in TOC"
-msgstr "Título da camada em TOC"
+msgstr "Título da camada no PDC"
 
 msgid "Imported vector files"
 msgstr "Arquivos vetoriais importados"
@@ -45,6 +45,9 @@ msgstr "Você deve indicar um título para a camada"
 
 msgid "Close"
 msgstr "Fechar"
+
+msgid "Accept"
+msgstr "Aceitar"
 
 msgid "The file is too large. You can publish it from the administrator"
 msgstr "O arquivo é muito grande. Você pode publicá-lo a partir do administrador"
