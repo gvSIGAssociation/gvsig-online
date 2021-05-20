@@ -111,7 +111,7 @@ msgstr "Adicionar novo estilo"
 #: gvsigol_symbology/templates/unique_values_add.html:13
 #: gvsigol_symbology/templates/unique_values_update.html:13
 msgid "Update preview"
-msgstr "Visualização da atualização"
+msgstr "Atualizar visualização"
 
 #: gvsigol_symbology/templates/clustered_points_add.html:14
 #: gvsigol_symbology/templates/clustered_points_update.html:14
