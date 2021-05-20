@@ -42,10 +42,10 @@ msgid "Insert text"
 msgstr "Inserir texto"
 
 msgid "Delete"
-msgstr "Eliminar"
+msgstr "Excluir"
 
 msgid "Save"
-msgstr "Guardar"
+msgstr "Salvar"
 
 msgid "Clean drawings"
 msgstr "Excluir desenhos"
@@ -66,13 +66,13 @@ msgid "Circle"
 msgstr "Círculo"
 
 msgid "Square"
-msgstr "Cuadrado"
+msgstr "Quadrado"
 
 msgid "Triangle"
 msgstr "Triángulo"
 
 msgid "Star"
-msgstr "Estrella"
+msgstr "Estrela"
 
 msgid "Cross"
 msgstr "Cruz"
@@ -96,16 +96,16 @@ msgid "Size"
 msgstr "Tamanho"
 
 msgid "Fill color"
-msgstr "Color de relleno"
+msgstr "Color de recheado"
 
 msgid "Fill opacity"
-msgstr "Opacidad del relleno"
+msgstr "Opacidade do recheado"
 
 msgid "Stroke color"
-msgstr "Color de línea"
+msgstr "Color da linha"
 
 msgid "Stroke width"
-msgstr "Grosor de línea"
+msgstr "Grossura da linha"
 
 msgid "Select pattern"
-msgstr "Seleccionar patrón"
+msgstr "Selecionar padrão"
