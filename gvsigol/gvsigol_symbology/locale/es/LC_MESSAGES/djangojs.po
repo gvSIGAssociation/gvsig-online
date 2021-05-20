@@ -280,3 +280,12 @@ msgstr "Sin valor"
 
 msgid "You must select a image"
 msgstr "Selecciona una imagen"
+
+msgid "Add"
+msgstr "Añadir"
+
+msgid "AND expression"
+msgstr "Expresión AND"
+
+msgid "OR expression"
+msgstr "Expresión OR"

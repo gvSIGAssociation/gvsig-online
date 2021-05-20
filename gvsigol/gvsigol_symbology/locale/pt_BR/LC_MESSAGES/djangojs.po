@@ -158,13 +158,13 @@ msgid "Normal"
 msgstr "Normal"
 
 msgid "Cursive"
-msgstr "Cursiva"
+msgstr "Itálico"
 
 msgid "Oblique"
 msgstr "Oblíquo"
 
 msgid "Bold"
-msgstr "Negrita"
+msgstr "Negrito"
 
 msgid "Is equal to"
 msgstr "É igual a"
@@ -194,40 +194,67 @@ msgid "Is between"
 msgstr "Está entre"
 
 msgid "Font"
-msgstr "Tipo de letra"
+msgstr "Fonte"
 
 msgid "Halo"
-msgstr "Halo"
+msgstr "Sombra"
 
 msgid "Label field"
-msgstr "Campo de etiqueta"
+msgstr "Campo do rótulo"
 
 msgid "Font family"
-msgstr "Família de fontes"
+msgstr "Fonte"
 
 msgid "Font size"
-msgstr "Tamanho de fonte"
+msgstr "Tamanho da fonte"
 
 msgid "Font color"
 msgstr "Cor da fonte"
 
 msgid "Font weight"
-msgstr "Tamanho da fonte"
+msgstr "Tipo de fonte"
 
 msgid "Font style"
-msgstr "Estilo de fonte"
+msgstr "Estilo da fonte"
 
 msgid "Halo color"
-msgstr "Cor Halo"
+msgstr "Cor da sombra"
 
 msgid "Halo opacity"
-msgstr "Halo opacidade"
+msgstr "Opacidade da sombra"
 
 msgid "Halo radius"
-msgstr "Raio de halo"
+msgstr "Raio da sombra"
 
 msgid "You must select a field"
 msgstr "É necessário selecionar um campo"
 
 msgid "The number of intervals must be greater than 0"
 msgstr "O número de intervalos deve ser superior a 0"
+
+msgid "General"
+msgstr "Geral"
+
+msgid "Filter"
+msgstr "Filtro"
+
+msgid "Has label"
+msgstr "Ativar rótulos"
+
+msgid "Minimum scale denominator"
+msgstr "Denominador de escala mínima"
+
+msgid "Maximum scale denominator"
+msgstr "Denominador de escala máxima"
+
+msgid "Label filter expressions"
+msgstr "Expressões do filtro do rótulo"
+
+msgid "Add"
+msgstr "Adicionar"
+
+msgid "AND expression"
+msgstr "Expressão AND"
+
+msgid "OR expression"
+msgstr "Expressão OR"
