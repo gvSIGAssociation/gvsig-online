@@ -91,11 +91,11 @@ msgstr "Identificador de metadados"
 
 #: templates/catalog_details.html:50 views.py:228
 msgid "Download and links"
-msgstr "Descarregar e links"
+msgstr "Baixar e links"
 
 #: templates/catalog_details.html:55
 msgid "Download"
-msgstr "Descarregar"
+msgstr "Baixar"
 
 #: templates/catalog_details.html:63
 msgid "Get shape"

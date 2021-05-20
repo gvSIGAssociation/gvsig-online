@@ -237,3 +237,12 @@ msgstr ""
 
 msgid "Service type"
 msgstr ""
+
+msgid "Draw polygon"
+msgstr ""
+
+msgid "Clear selected area"
+msgstr ""
+
+msgid "Search in catalog"
+msgstr ""
