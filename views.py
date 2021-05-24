@@ -4771,8 +4771,9 @@ def db_add_field(request):
                     return utils.get_exception(400, _('Field type not supported'))
                 try:
                     con.add_column(datastore_name, layer.source_name, field_name, sql_type)
-                except psycopg2.ProgrammingError:
-                    return utils.get_exception(400, _('Field "{0}" exists').format(field_name))
+                except psycopg2.ProgrammingError as e:
+                    logger.exception("Error adding field")
+                    return utils.get_exception(400, _('Error adding field. Probably the field "{0}" already exists. Database message: {1}').format(field_name, str(e)))
             finally:
                 con.close()
             
