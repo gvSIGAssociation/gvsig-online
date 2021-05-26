@@ -1713,7 +1713,6 @@ def convert_to_enumerate(request):
     layer = Layer.objects.get(id=layer_id)
     if not utils.can_manage_layer(request.user, layer):
         return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
-    datastore_name = layer.datastore.name
        
     is_enum, _ = utils.is_field_enumerated(layer, field)
     if is_enum:
@@ -1722,9 +1721,10 @@ def convert_to_enumerate(request):
     if autogen:
         params = json.loads(layer.datastore.connection_params)
         con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+        schema = params.get('schema', 'public')
         query = sql.SQL("SELECT {field} FROM {schema}.{table} GROUP BY {field}").format(
             field=sql.Identifier(field),
-            schema=sql.Identifier(datastore_name),
+            schema=sql.Identifier(schema),
             table=sql.Identifier(layer_name))
         con.cursor.execute(query, [])
         rows = con.cursor.fetchall()
@@ -4644,7 +4644,6 @@ def db_field_delete(request):
             #layer_name = request.POST['layer_name']
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
-            datastore_name = layer.datastore.name
             if not utils.can_manage_layer(request.user, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
             if (layer.datastore.type != 'v_PostGIS'):
@@ -4654,7 +4653,8 @@ def db_field_delete(request):
                     return utils.get_exception(400, _('Control field "{0}" cannot be deleted').format(field))
             params = json.loads(layer.datastore.connection_params)
             con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-            con.delete_column(datastore_name, layer.source_name, field)
+            schema = params.get('schema', 'public')
+            con.delete_column(schema, layer.source_name, field)
             con.close()
             
             layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
@@ -4700,7 +4700,6 @@ def db_field_rename(request):
                 utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=new_field_name))
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
-            datastore_name = layer.datastore.name
             if not utils.can_manage_layer(request.user, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
             if not (layer.datastore.type == 'v_PostGIS'):
@@ -4712,7 +4711,8 @@ def db_field_rename(request):
                     return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field))
             params = json.loads(layer.datastore.connection_params)
             con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-            con.rename_column(datastore_name, layer.source_name, field, new_field_name)
+            schema = params.get('schema', 'public')
+            con.rename_column(schema, layer.source_name, field, new_field_name)
             con.close()
 
             layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
@@ -4769,8 +4769,8 @@ def db_add_field(request):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
             if not (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
-            datastore_name = layer.datastore.name
             params = json.loads(layer.datastore.connection_params)
+            schema = params.get('schema', 'public')
             con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
             try:
                 gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
@@ -4778,7 +4778,7 @@ def db_add_field(request):
                 if not sql_type:
                     return utils.get_exception(400, _('Field type not supported'))
                 try:
-                    con.add_column(datastore_name, layer.source_name, field_name, sql_type)
+                    con.add_column(schema, layer.source_name, field_name, sql_type)
                 except psycopg2.ProgrammingError:
                     return utils.get_exception(400, _('Field "{0}" exists').format(field_name))
             finally:
@@ -4820,7 +4820,8 @@ def db_add_field(request):
                 if layer:
                     LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
                 con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-                con.delete_column(datastore_name, layer.source_name, field_name)
+                schema = params.get('schema', 'public')
+                con.delete_column(schema, layer.source_name, field_name)
             except:
                 pass
             finally:
