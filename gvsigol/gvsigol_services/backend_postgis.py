@@ -381,18 +381,20 @@ class Introspect:
         """
         self.cursor.execute("""
             SELECT a.attnum, a.attname,
-            pg_catalog.format_type(a.atttypid, a.atttypmod),
+            CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
+                 ELSE format_type(a.atttypid, null)
+            END,
             information_schema._pg_char_max_length(a.atttypid, a.atttypmod),
             information_schema._pg_numeric_precision(a.atttypid, a.atttypmod),
             information_schema._pg_numeric_scale(a.atttypid, a.atttypmod),
             a.attnotnull
             FROM pg_attribute a
-            JOIN pg_class t on a.attrelid = t.oid
-            JOIN pg_namespace s on t.relnamespace = s.oid
-            WHERE a.attnum > 0 
+            JOIN (pg_class c JOIN pg_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
+            JOIN (pg_type t JOIN pg_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
+            WHERE a.attnum > 0
             AND NOT a.attisdropped
-            AND s.nspname = %s
-            AND t.relname = %s
+            AND nc.nspname = %s
+            AND c.relname = %s
             ORDER BY a.attnum;
         """, [schema, table])
         rows = []
