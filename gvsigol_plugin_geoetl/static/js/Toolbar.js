@@ -459,6 +459,8 @@ gvsigolETL.Toolbar = Class.extend({
 					id = cnv[i]['id']
 					ports = cnv[i]['ports']
 
+					text = cnv[i]['name']
+
 					parameters = cnv[i]['entities'][0]['parameters']
 					schema = cnv[i]['entities'][0]['schema']
 					schemaold = cnv[i]['entities'][0]['schemaold']
@@ -473,6 +475,8 @@ gvsigolETL.Toolbar = Class.extend({
 							break;
 						};
 					};
+
+
 	
 					idRestore.push([id, figure.id, ports, arrayPorts])
 					
@@ -489,7 +493,9 @@ gvsigolETL.Toolbar = Class.extend({
 						
 						try{
 							if (parameters[0][key]){
-								if ($('#'+key+'-'+figure.id).is('select') && !key.indexOf('epsg')){
+								console.log(key)
+								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') ){
+									
 									if (Array.isArray(schemaold[multiIn])){
 										for (k = 0; k < schemaold[multiIn].length; k++){
 											$('#'+key+'-'+figure.id).append('<option>'+schemaold[multiIn][k]+'</option>')

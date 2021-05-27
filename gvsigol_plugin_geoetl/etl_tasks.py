@@ -79,9 +79,12 @@ def input_Excel(dicc):
                 value = xl[j][i]
                 valueFloat =float(value)
             except:
-                pass
+                valueFloat = None
             
-            if math.isnan(valueFloat):
+            if not valueFloat:
+                lista.append((j, value))
+            
+            elif math.isnan(valueFloat):
                 lista.append((j, 'NULL'))
             else:
                 value = commaToDot(xl[j][i])
@@ -380,8 +383,8 @@ def output_Postgresql(dicc):
     for f in fc['features']:
         for p in f['properties']:
             if p not in listKeys:
-                listKeys.append(p)
-                listKeysLower.append(p.lower())
+                listKeys.append(str(p))
+                listKeysLower.append(str(p).lower())
     
     #for creating a new table in database
     if operation=='CREATE':
@@ -674,7 +677,13 @@ def output_Postgis(dicc):
 
         #adding geometry column if it not exists
         try:
-            addGeomCol = "SELECT AddGeometryColumn ('"+tableName+"', 'geom',"+epsg+", 'GEOMETRY', 2)"
+            listTableName = tableName.split('.')
+
+            if len(listTableName) == 2:
+                addGeomCol = "SELECT AddGeometryColumn ('"+listTableName[0]+"','"+listTableName[1]+"', 'geom',"+epsg+", 'GEOMETRY', 2)"
+            else:
+                addGeomCol = "SELECT AddGeometryColumn ('"+tableName+"', 'geom',"+epsg+", 'GEOMETRY', 2)"
+
             cur.execute(addGeomCol)
         except:
             pass
@@ -712,7 +721,7 @@ def output_Postgis(dicc):
                     sqlInsert2 = sqlInsert2+ str(value)+','
             
             sqlInsert2=sqlInsert2+"ST_SetSRID(ST_GeomFromGeoJSON('"+str(coord)+"'), "+ str(epsg)+") )"
-            
+
             cur.execute(sqlInsert2)
 
     elif operation == 'UPDATE':
@@ -807,10 +816,14 @@ def input_Csv(dicc):
                 value = csvdata[j][i]
                 valueFloat =float(value)
             except:
-                pass
+                valueFloat = None
+
+            if not valueFloat:
+                lista.append((j, value))
             
-            if math.isnan(valueFloat):
+            elif math.isnan(valueFloat):
                 lista.append((j, 'NULL'))
+
             else:
                 value = commaToDot(csvdata[j][i])
                 lon = len(str(value).split(".")[-1])
@@ -911,6 +924,41 @@ def trans_Calculator(dicc):
         i['properties'][attr] = eval(exp)
 
     return [table]
+
+def trans_CadastralGeom(dicc):
+    from gvsigol_plugin_catastro.views import get_rc_polygon
+    
+    table = dicc['data'][0]
+    attr = dicc['attr']
+    
+    for i in table['features']:
+        coordinates =[]
+        
+        features = get_rc_polygon(i['properties'][attr])
+        for feature in features:
+            edgeCoord = []
+            
+            coords = feature['coords'].split(" ")
+
+            srs = feature['srs'].split(":")[-1]
+            
+            pairCoord = []
+            for j in range (0, len(coords)):
+                pairCoord.insert(0, float(coords[j]))
+                
+                if j != 0 and j % 2!=0:
+                    
+                    edgeCoord.append(pairCoord)
+                    pairCoord =[]
+            
+            coordinates.append(edgeCoord)
+        
+        i['geometry'] = {'type': 'MultiPolygon',
+                        'coordinates': [coordinates],
+                        'epsg': srs}
+    
+    return [table]
+
 
 
 
