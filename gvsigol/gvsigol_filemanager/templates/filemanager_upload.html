@@ -25,6 +25,7 @@
 	<script>
 	$('#menu-manage-files').addClass("active");
 	$(document).ready(function(){
+		
 	  	
 	  	var fileupload = $('#fileupload-component');
 		var path = '';
@@ -48,7 +49,11 @@
 	  	$('#upload-button').on('click', function () {
 	  		if (fileupload.getFileCount() >= 1) {
 	  			$("body").overlay();
-	  			fileupload.appendExtraParams({'path': "{{path}}"});
+				if (window.location.href.includes("popup=1")){
+					fileupload.appendExtraParams({'path': "&popup=1"});
+				}else{
+					fileupload.appendExtraParams({'path': "{{path}}"});
+				}
 				fileupload.startUpload();
 	  		} else {
 	  			messageBox.show('warning', gettext('You must select a file'));
