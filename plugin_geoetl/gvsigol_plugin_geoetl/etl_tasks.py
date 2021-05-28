@@ -114,7 +114,16 @@ def input_Shp(dicc):
             
     layer = dataSource.GetLayer()
         
-    fc = {
+    fc = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : "EPSG:-1"
+                    }
+            },
         "features": []
         }
 
@@ -124,12 +133,17 @@ def input_Shp(dicc):
         try:
             epsg = layer.GetSpatialRef().GetAuthorityCode(None)
         except:
-            epsg = '-1'
+            pass
     
+    fc['crs']['properties']['name'] = "EPSG:"+str(epsg)
+
     for feature in layer:    
-        f= feature.ExportToJson(as_object=True)
-        f['geometry']['epsg'] = epsg
-        
+        geom = feature.GetGeometryRef()
+        g = geom.ExportToWkt()
+        geo = g.replace(',', '],[').replace(')', ']').replace('(', '[').replace(' ', ',')
+        index = geo.find(',')
+        f =json.loads('{"type": "Feature", "geometry":{"type": "'+geo[:index].capitalize()+'", "coordinates": ['+geo[index+1:]+']}}')
+        f['properties']=(feature.ExportToJson(as_object=True)['properties'])
         fc['features'].append(f)
 
     return[fc]
@@ -196,18 +210,14 @@ def trans_Join(dicc):
 
     table1 = dicc['data'][0]
     table2 = dicc['data'][1]
-
-    rows = len(table1['features'])
-
-    join = {
-        'features': []
-        }
+    
+    join = copy.deepcopy(table1)
+    join['features'] = []
     
     table1NotUsed = copy.deepcopy(table1)
 
-    table2NotUsed = {
-        'features': []
-        }
+    table2NotUsed = copy.deepcopy(table2)
+    table2NotUsed['features'] = []
     
     lonMax = len(table1['features'])
     
@@ -278,13 +288,11 @@ def trans_Filter(dicc):
     
     operator = dicc['operator']
 
-    passed = {
-        "features": []
-        }
+    passed = copy.deepcopy(table)
+    passed['features'] = []
 
-    failed = {
-        "features": []
-        }
+    failed = copy.deepcopy(table)
+    failed['features'] = []
 
     for i in table['features']:
 
@@ -337,7 +345,8 @@ def trans_Filter(dicc):
                 passed['features'].append(i)
             else:
                 failed['features'].append(i)
-    
+
+    print(passed['crs'])
     return [passed, failed]
 
 def isNumber(value):
@@ -578,7 +587,7 @@ def output_Postgis(dicc):
     tableName = dicc['tablename'].lower()
     
     #epsg for geometry
-    epsg = fc['features'][0]['geometry']['epsg']
+    epsg = fc['crs']['properties']['name'].split(':')[1]
 
     operation = dicc['operation']
 
@@ -696,7 +705,7 @@ def output_Postgis(dicc):
 
             #geojson geometry
             coord = fc['features'][k]['geometry']
-            del coord['epsg']
+            #del coord['epsg']
             coord = str(coord).replace("'", '"')
 
             for attr in listKeys:
@@ -850,14 +859,14 @@ def trans_Reproject(dicc):
     source = osr.SpatialReference()
 
     if sourceepsg == '':
-        source.ImportFromEPSG(int(table['features'][0]['geometry']['epsg']))
+        source.ImportFromEPSG(int(table['crs']['properties']['name'].split(':')[1]))
     else:
         source.ImportFromEPSG(int(sourceepsg))
 
     target = osr.SpatialReference()
     target.ImportFromEPSG(int(targetepsg))
 
-    table['type'] = 'FeatureCollection'
+    #table['type'] = 'FeatureCollection'
 
     dataSet = ogr.Open(json.dumps(table))
     layer = dataSet.GetLayer()
@@ -868,7 +877,16 @@ def trans_Reproject(dicc):
 
     coordTrans= osr.CoordinateTransformation(source, target)
 
-    fc = {
+    fc = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : "EPSG:"+str(targetepsg)
+                    }
+            },
         "features": []
         }
     
@@ -880,7 +898,7 @@ def trans_Reproject(dicc):
         index = geo.find(',')
         f =json.loads('{"type": "Feature", "geometry":{"type": "'+geo[:index].capitalize()+'", "coordinates": ['+geo[index+1:]+']}}')
         f['properties']=(feature.ExportToJson(as_object=True)['properties'])
-        f['geometry']['epsg'] = targetepsg
+        #f['geometry']['epsg'] = targetepsg
         fc['features'].append(f)
     
     return[fc]
@@ -930,6 +948,8 @@ def trans_CadastralGeom(dicc):
     
     table = dicc['data'][0]
     attr = dicc['attr']
+    table["type"] = "FeatureCollection"
+    table["crs"] = {"type": "name", "properties":{"name":"empty"}}
     
     for i in table['features']:
         coordinates =[]
@@ -940,7 +960,9 @@ def trans_CadastralGeom(dicc):
             
             coords = feature['coords'].split(" ")
 
-            srs = feature['srs'].split(":")[-1]
+            if table['crs']['properties']['name'] == "empty":
+            
+                table['crs']['properties']['name'] = feature['srs']
             
             pairCoord = []
             for j in range (0, len(coords)):
@@ -954,8 +976,8 @@ def trans_CadastralGeom(dicc):
             coordinates.append(edgeCoord)
         
         i['geometry'] = {'type': 'MultiPolygon',
-                        'coordinates': [coordinates],
-                        'epsg': srs}
+                        'coordinates': [coordinates]
+                        }
     
     return [table]
 
