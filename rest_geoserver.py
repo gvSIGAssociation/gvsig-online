@@ -169,7 +169,7 @@ class Geoserver():
         r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==201:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
 
     def update_wmsstore(self, wsname, dsname, capabilitiesURL, wmsuser=None, wmspassword=None, user=None, password=None):
         url = self.service_url + "/workspaces/" + wsname + "/wmsstores/" + dsname + ".json"
@@ -193,7 +193,7 @@ class Geoserver():
         r = self.session.put(url, json=data, headers=headers, auth=auth)
         if r.status_code==200:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
     
     def create_coveragestore(self, workspace, store, filetype, file, coverage_name, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/file.imagemosaic"
@@ -221,7 +221,7 @@ class Geoserver():
         r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==202:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
 
     def create_coveragestore_layer(self, workspace, store, name, title, coverage_name, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/coverages/"
@@ -242,7 +242,7 @@ class Geoserver():
         r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==201:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
 
 
     def upload_coveragestore(self, workspace, store, user=None, password=None):
@@ -256,7 +256,7 @@ class Geoserver():
         r = self.session.post(url, auth=auth)
         if r.status_code==202:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
 
 
     def upload_feature_type(self, workspace, store, name, filetype, file, user=None, password=None):
@@ -273,7 +273,7 @@ class Geoserver():
             r = self.session.put(url, data=file, headers=headers, auth=auth)
         if r.status_code==201:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
 
     def set_queryable(self, workspace, ds_name, ds_type, name, queryable, user=None, password=None):
         url = self.service_url + '/layers/' + name + '.json'
@@ -508,7 +508,7 @@ class Geoserver():
         r = self.session.put(url, json=json_data, auth=auth)
         if r.status_code==200:
             return
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
 
     def update_featuretype(self, workspace, ds_name, name, updated_params={}, nativeBoundingBox=False, latLonBoundingBox=False, original_params=None, user=None, password=None):
         """
@@ -560,7 +560,7 @@ class Geoserver():
         r = self.session.put(url, json=data, auth=auth)
         if r.status_code==200:
             return
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
     
     def create_sql_view(self, workspace, datastore, name, sql_statement, key_column, geom_column, geom_type, srid, id_column=None, title=None, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/datastores/" + datastore + "/featuretypes.json"
@@ -848,7 +848,7 @@ class Geoserver():
         r = self.session.post(url, data=ET.tostring(tree, encoding='UTF-8'), headers=headers, auth=auth)
         if r.status_code==200:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
         
     
     def update_style(self, style_name, sld_body, user=None, password=None):
@@ -862,7 +862,7 @@ class Geoserver():
         r = self.session.put(url, data=sld_body, headers=headers, auth=auth)
         if r.status_code==200:
             return True
-        raise UploadError(r.status_code, r.content)
+        raise UploadError(r.status_code, r.text)
     
     def get_content_type(self, file_type):
         if file_type=="geotiff":
