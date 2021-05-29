@@ -67,6 +67,12 @@ msgstr ""
 msgid "Error loading print plugin"
 msgstr ""
 
+msgid "MapProjection"
+msgstr "Map Projection"
+
+msgid "MapOverview"
+msgstr "Layers in Map Overview"
+
 msgid "a4_landscape"
 msgstr "A4 Landscape"
 
@@ -78,3 +84,18 @@ msgstr "A4 Landscape with Overview"
 
 msgid "a3_landscape"
 msgstr "A3 Landscape"
+
+msgid "print-mapgrid-point"
+msgstr "Points"
+
+msgid "print-mapgrid-line"
+msgstr "Lines"
+
+msgid "print-mapgrid-spacing"
+msgstr "Spacing"
+
+msgid "print-mapgrid-indent"
+msgstr "Labels margin to border"
+
+msgid "layers_xyz_cant_be_reprojected"
+msgstr "External layers of type XYZ can't be reprojected."

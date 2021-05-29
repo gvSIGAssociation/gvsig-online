@@ -78,3 +78,29 @@ msgstr "A4 Oblongo con Localizador"
 msgid "a3_landscape"
 msgstr "A3 Oblongo"
 
+msgid "tocantins_a4_landscape"
+msgstr "Tocantins A4 Horizonal"
+
+msgid "tocantins_a4_portrait"
+msgstr "Tocantins A4 Vertical"
+
+msgid "tocantins_a3_landscape"
+msgstr "Tocantins A3 Horizonal"
+
+msgid "tocantins_a3_portrait"
+msgstr "Tocantins A3 Vertical"
+
+msgid "print-mapgrid-point"
+msgstr "Pontos"
+
+msgid "print-mapgrid-line"
+msgstr "Linhas"
+
+msgid "print-mapgrid-spacing"
+msgstr "Espaçamento"
+
+msgid "print-mapgrid-indent"
+msgstr "Recuo do rótulo"
+
+msgid "layers_xyz_cant_be_reprojected"
+msgstr "Camadas externas do tipo XYZ não podem ser reprojetadas."

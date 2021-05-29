@@ -66,6 +66,12 @@ msgstr "Heu de seleccionar una plantilla"
 msgid "Error loading print plugin"
 msgstr "Error carregant plugin d'impresió"
 
+msgid "MapProjection"
+msgstr "Projecció del mapa"
+
+msgid "MapOverview"
+msgstr "Capes en el Localitzador"
+
 msgid "a4_landscape"
 msgstr "A4 Apaïsat"
 
@@ -77,3 +83,19 @@ msgstr "A4 Apaïsat con localitzador"
 
 msgid "a3_landscape"
 msgstr "A3 Apaïsat"
+
+msgid "print-mapgrid-point"
+msgstr "Punts"
+
+msgid "print-mapgrid-line"
+msgstr "Línies"
+
+msgid "print-mapgrid-spacing"
+msgstr "Espaiament"
+
+msgid "print-mapgrid-indent"
+msgstr "Marge d'Etiquetes"
+
+msgid "layers_xyz_cant_be_reprojected"
+msgstr "Les capes externes tipus XYZ no poden ser reprojectades."
+

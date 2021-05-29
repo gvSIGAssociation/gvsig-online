@@ -40,10 +40,20 @@ var print = function(printProvider, conf, map) {
 	this.lastAngle = 0;
 	this.extentLayer = null;
 	this.capabilities = null;
+	this.projection = 'EPSG:3857';
+	this.printOverviewLayers = [
+		{
+		  "name": "OSM",
+		  "type": "OSM",
+		  "baseURL": "http://a.tile.openstreetmap.org",
+			"imageExtension": "png"		                	
+		}
+	  ];
 
 	var this_ = this;
 	var handler = function(e) {
 		this_.handler(e);
+		$('body').trigger('printtemplateselected');
 	};
 
 	this.$button.on('click', handler);
@@ -157,7 +167,66 @@ print.prototype.handler = function(e) {
 		ui += 				'</select>';
 		ui += 				'<span id="print-user-scale-holder" style="display: flex;justify-content: flex-end;align-items: center;padding-top: 10px;">1: &nbsp; <input type="text" id="print-userscale" name="print-userscale" class="form-control" style="width:80px" placeholder="4000" value="4000"></span>';
 		ui += 			'</div>';
+
+		// MapGrid
+		ui += 			'<div id="print-ui-mapgrid" class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('MapGrid') + '</label>';
+		ui += 				'<select id="print-mapgrid-gridtype" class="form-control">';
+		ui += 					'<option value="POINTS" selected>' + gettext('print-mapgrid-point') + '</option>';
+		ui += 					'<option value="LINES">' + gettext('print-mapgrid-line') + '</option>';
+		ui += 				'</select>';
+		ui += 				'<label>' + gettext('print-mapgrid-spacing') + '</label>';
+		ui += 				'<input id="print-mapgrid-spacing" type="number" step="any" class="form-control" value="1">';
+		ui += 				'<label>' + gettext('print-mapgrid-indent') + '</label>';
+		ui += 				'<input id="print-mapgrid-indent" type="number" step="any" class="form-control" value="5">';
+		ui += 			'</div>';
+
+		// MapProjection
+		ui += 			'<div id="print-ui-mapprojection" class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('MapProjection') + '</label>';
+		ui += 				'<select id="print-projection" class="form-control">';
+		var supported_crs = Object.values(this.conf.supported_crs);
+		for ( var crs of supported_crs) {
+			if (crs.code == "EPSG:3857") 
+		  		ui += '<option value="' + crs.code + '" selected>' + crs.title + '</option>'
+	  		else 
+		  		ui += '<option value="' + crs.code + '">' + crs.title + '</option>'
+		}
+		ui += 				'</select>';
+		ui += 			'</div>';
+
+		// MAPOVERVIEW
+		if (self.supportsOverview) {
+			self.baseLayers = [];
+			var layers = this.map.getLayers().getArray();
+			for (var i=0; i<layers.length; i++) {
+				if (layers[i].baselayer) {
+					var printLayer = self.convertBaseLayerToPrintLayer(layers[i], []);
+					if (printLayer) 
+						self.baseLayers.push(printLayer);
+				}
+			}
+			if (self.baseLayers.length == 0) {
+				self.baseLayers = self.printOverviewLayers; // por defecto			
+			}		
+
+			ui += 			'<div id="print-ui-mapoverview" class="col-md-12 form-group">';
+			ui += 				'<label>' + gettext('MapOverview') + '</label>';
+			ui += 				'<select id="print-overview" class="form-control">';
+		
+			for ( var bId = 0; bId < self.baseLayers.length; bId++) {
+				var lyr = self.baseLayers[bId];
+				if (lyr.type == "OSM") 
+					ui += '<option value="' + bId + '" selected>' + lyr.name + '</option>'
+				else 
+					ui += '<option value="' + bId + '">' + lyr.name + '</option>'
+			}
+			ui += 				'</select>';
+			ui += 			'</div>';
+		} // supportOverview		
 		ui += 			'<div class="col-md-12 form-group">';
+		ui += 			'<div class="container" style="display: flex; justify-content: space-between; padding:0px; width:auto;">';
+		ui += 			'	<div class="col-sm" style="width: 33%">';
 		ui += 				'<label>' + gettext('Resolution') + '</label>';
 		ui += 				'<select id="print-dpi" class="form-control">';
 		ui += 					'<option value="72">72 dpi</option>';
@@ -168,14 +237,15 @@ print.prototype.handler = function(e) {
 		ui += 					'<option value="320">320 dpi</option>';
 //		ui += 					'<option value="400">400 dpi</option>';
 		ui += 				'</select>';
-		ui += 			'</div>';
-		
-		ui += 			'<div class="col-md-12 form-group">';
+		ui += 			'	</div>'; // col-sm		
+		ui += 			'	<div class="col-sm" style="width: 33%">';
+		// ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Rotation') + '</label>';
 		ui += 				'<input id="print-rotation" type="number" step="any" class="form-control" value="0">';
 		ui += 			'</div>';
 		
-		ui += 			'<div class="col-md-12 form-group">';
+		// ui += 			'<div class="col-md-12 form-group">';
+		ui += 			'	<div class="col-sm" style="width: 33%">';
 		ui += 				'<label>' + gettext('Format') + '</label>';
 		ui += 				'<select id="print-format" class="form-control">';
 //		ui += 					'<option value="bmp">.bmp</option>';
@@ -184,7 +254,15 @@ print.prototype.handler = function(e) {
 		ui += 					'<option value="png">.png</option>';
 		ui += 					'<option value="svg">.svg</option>';
 		ui += 				'</select>';
+		ui +=	 			'</div>'; // col-sm
+		ui += 			'</div>';  // container
 		ui += 			'</div>';
+
+		ui += 			'<div id="print-ui-author" class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Author') + '</label>';
+		ui += 				'<input id="print-author" class="form-control" value="Autor">';
+		ui += 			'</div>';
+
 		
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
@@ -199,7 +277,8 @@ print.prototype.handler = function(e) {
 		ui += '</div>';
 
 		this.detailsTab.append(ui);
-		$.gvsigOL.controlSidebar.open();
+		this.updateUI();
+		$.gvsigOL.controlSidebar.open();		
 
 		$('#print-template').on('change', function(e) {
 			var template = $('#print-template').val();
@@ -208,6 +287,8 @@ print.prototype.handler = function(e) {
 			self.extentLayer.getSource().clear();
 	        self.lastAngle = 0;
 	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
+			self.updateUI();
+			$('#print-template').trigger('printtemplateselected');
 		});
 
 		$('#print-rotation').on('change', function(e) {
@@ -237,6 +318,15 @@ print.prototype.handler = function(e) {
 				self.map.getView().setResolution(self.getResolutionForScale(scaleVal));
 			}
 		});
+
+		$('#print-projection').on('change', function(e) {
+			// self.zoomChangedFromScale = true;
+			// self.map.getView().setResolution(self.getResolutionForScale(scaleVal));
+			self.extentLayer.getSource().clear();
+			self.extentLayer.getSource().dispatchEvent('change');
+			self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
+		});
+
 
 		$('#print-userscale').on('input', function(e) {
 			var userScaleStr = $("#print-userscale").val();
@@ -277,15 +367,186 @@ print.prototype.handler = function(e) {
 	}
 };
 
+print.prototype.updateUI = function() {
+	if (this.supportsGridMap(this.capabilities))
+		$('#print-ui-mapgrid').show();
+	else
+		$('#print-ui-mapgrid').hide();
+
+	if (this.supportsAuthor(this.capabilities))
+		$('#print-ui-author').show();
+	else
+		$('#print-ui-author').hide();
+
+	if (this.baseLayers.length > 1) 
+		$('#print-ui-mapoverview').show();
+	else
+		$('#print-ui-mapoverview').hide();
+	
+};
+
+print.prototype.convertBaseLayerToPrintLayer = function(bLayer, legends) {
+	if (bLayer.getSource().urls) {
+		if(bLayer.getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1) {
+			console.log(bLayer);
+			if (bLayer.getSource() instanceof ol.source.OSM) {
+				return {
+					"name": bLayer.getProperties().label,
+					"baseURL": "http://a.tile.openstreetmap.org",
+					"type": "OSM",
+					"imageExtension": "png"
+				};
+			} else if (bLayer.getSource() instanceof ol.source.WMTS) {
+				var initialScale = 559082263.950892933;
+				var scale = 0;
+				var matrices = new Array();
+				var tileGrid = bLayer.getSource().getTileGrid();
+				var lastSize = 1;
+				var format = bLayer.getSource().getFormat();
+				var tileSize = 256;
+				if (tileGrid.getTileSize(0)) {
+					tileSize = tileGrid.getTileSize();
+				}
+
+				for (var z = 0; z < tileGrid.getMatrixIds().length; ++z) {
+					var matrixSize = new Array();
+					if (z == 0) {
+						matrixSize.push(1);
+						matrixSize.push(1);
+						scale = initialScale;
+
+					} else if (z >= 1) {
+						lastSize = lastSize*2;
+						matrixSize.push(lastSize*2);
+						matrixSize.push(lastSize*2);
+						scale = scale / 2;
+					}
+					var tileSizeZ = 256;
+					if (tileGrid.getTileSize(z)) {
+						tileSizeZ = tileGrid.getTileSize(z);
+					}
+
+					matrices.push({
+						"identifier": tileGrid.getMatrixIds()[z],
+						"matrixSize": matrixSize,
+						"tileSize": [tileSizeZ, tileSizeZ],
+						"scaleDenominator": scale,
+						"topLeftCorner": [-2.003750834E7, 2.0037508E7]
+					});
+				}
+				var url = bLayer.getSource().getUrls()[0];
+				if (url.indexOf('http') == -1) {
+					url = this.origin + url;
+				}
+				return {
+					"name": bLayer.title,
+					"type": "WMTS",
+					"baseURL": url,
+					"opacity": 1.0,
+					"layer": bLayer.getSource().getLayer(),
+					"version": "1.0.0",
+					"requestEncoding": "KVP",
+					"dimensions": null,
+					"dimensionParams": {},
+					"matrixSet": bLayer.getSource().getMatrixSet(),
+					"matrices": matrices,
+					"imageFormat": format
+				};
+
+			} else if (bLayer.getSource() instanceof ol.source.TileWMS) {
+				var url = bLayer.getSource().getUrls()[0];
+				if (url.indexOf('http') == -1) {
+					url = self.origin + url;
+				}
+				return {
+					"name": bLayer.title,
+					"type": "WMS",
+					"layers": [bLayer.getSource().getParams()['LAYERS']],
+					"baseURL": url,
+					"imageFormat": bLayer.getSource().getParams()['FORMAT'],
+					"version": bLayer.getSource().getParams()['VERSION'],
+					"customParams": {
+						"TRANSPARENT": "true"
+					}
+				};
+			} else if (bLayer.getSource() instanceof ol.source.XYZ) {
+				var url = bLayer.getSource().getUrls()[0];
+				if (url.indexOf('http') == -1) {
+					url = self.origin + url;
+				}
+				return {
+					"name": bLayer.getProperties().label,
+					"baseURL": url,
+					"type": "OSM",
+					"dpi": self.dpi,
+					"resolutions": [156543.03390625,
+						78271.516953125,
+						39135.7584765625,
+						19567.87923828125,
+						9783.939619140625,
+						4891.9698095703125,
+						2445.9849047851562,
+						1222.9924523925781,
+						611.4962261962891,
+						305.74811309814453,
+						152.87405654907226,
+						76.43702827453613,
+						38.218514137268066,
+						19.109257068634033,
+						9.554628534317017,
+						4.777314267158508,
+						2.388657133579254,
+						1.194328566789627,
+						0.5971642833948135,
+						0.2984505969011938,
+						0.1492252984505969,
+						0.0746455354243517,
+						0.0373227677121758
+					   ],		
+					  "resolutionTolerance": 0.1,
+					"tileSize": [256, 256],
+					"imageExtension": "png"
+				};
+			}		
+			var legendUrl = bLayer.legend_no_auth;
+			if (legendUrl) {
+				if (legendUrl.indexOf('http') == -1) {
+					legendUrl = self.origin + legendUrl;
+				}
+				legendUrl = legendUrl.replace('getlegendgraphic', 'getlegendgraphic&transparent=true');
+				var legend = {
+					"name": bLayer.getProperties().label,
+					"icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
+				};
+				legends.push(legend);	
+			}
+		}
+	}
+	return null;
+};
+
 /**
  * TODO
  */
 print.prototype.createPrintJob = function(template) {
 	var self = this;
+
 	var title = $('#print-title').val();
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
 	var dpi = $('#print-dpi').val();
+	var projection = $('#print-projection').val();
+	var overviewLayerId = $('#print-overview').val();
+	var overviewLayer = self.baseLayers[parseInt(overviewLayerId)];
+	var mapgridType = $("#print-mapgrid-gridtype").val();
+	var mapgridIndent = $("#print-mapgrid-indent").val();
+	var mapgridSpacing = $("#print-mapgrid-spacing").val();
+
+	self.projection = projection;
+	self.dpi = parseInt(dpi);
+	self.printOverviewLayers = [overviewLayer];
+
+	self.checkReprojection();
 
 	var scaleToSet = $('#print-scale').val();
 	if (scaleToSet == 'user-scale') {
@@ -304,6 +565,40 @@ print.prototype.createPrintJob = function(template) {
 		return (lb.getZIndex()-la.getZIndex());
 	});	
 	var printLayers = new Array();
+	var spacing = parseInt(mapgridSpacing);
+
+	var layerGrid = 
+		{
+			"type": "grid",
+			"gridType": mapgridType,
+			// "numberOfLines": [
+			//   5,
+			//   5
+			// ],
+			"origin":[0,0],
+			"spacing": [spacing,spacing], 
+			"renderAsSvg": true,
+			// "haloColor": "#CCFFCC",
+			// "labelColor": "black",
+			"labelFormat": "%1.0f %s",
+			"indent": parseInt(mapgridIndent),
+			"rotateLabels": false,
+			// "haloRadius": 4,
+			"font": {
+			  "name": [
+				"Liberation Sans",
+				"Helvetica",
+				"Nimbus Sans L",
+				"Liberation Sans",
+				"FreeSans",
+				"Sans-serif"
+			  ],
+			"size": 6,
+			//   "style": "BOLD"
+			}
+		  };
+
+
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
 		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro'/* && !(mapLayers[i] instanceof ol.layer.Vector)*/) {
@@ -347,11 +642,14 @@ print.prototype.createPrintJob = function(template) {
 					
 				} else if (mapLayers[i].getSource() instanceof ol.source.Vector) {
 					if (mapLayers[i].printable) {
-						printLayers.push({
-						    "type": "geojson",
-						    "geoJson": self.getGeoJSON(mapLayers[i]),
-						    "style": self.getVectorStyles(mapLayers[i])
-						});
+						var geojson = self.getGeoJSON(mapLayers[i]);
+						if (geojson.features.length > 0) {
+							printLayers.push({
+								"type": "geojson",
+								"geoJson": geojson,
+								"style": self.getVectorStyles(mapLayers[i])
+							});
+						}
 					}	
 					
 				} else {
@@ -405,9 +703,10 @@ print.prototype.createPrintJob = function(template) {
 					if (legendUrl.indexOf('http') == -1) {
 						legendUrl = self.origin + legendUrl;
 					}
+					legendUrl = legendUrl.replace('getlegendgraphic', 'getlegendgraphic&transparent=true');
 					var legend = {
 							"name": mapLayers[i].title,
-				            "icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000')]
+				            "icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
 				        };
 					legends.push(legend);
 				}
@@ -421,163 +720,45 @@ print.prototype.createPrintJob = function(template) {
 	for (var i=0; i<baseLayers.length; i++) {
 		if (baseLayers[i].baselayer) {
 			if (baseLayers[i].getVisible()) {
-				if (baseLayers[i].getSource().urls) {
-					if(baseLayers[i].getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1) {
-						console.log(baseLayers[i]);
-						if (baseLayers[i].getSource() instanceof ol.source.OSM) {
-							printLayers.push({
-								"baseURL": "http://a.tile.openstreetmap.org",
-						  	    "type": "OSM",
-						  	    "imageExtension": "png"
-							});
-
-						} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
-							var initialScale = 559082263.950892933;
-							var scale = 0;
-							var matrices = new Array();
-							var tileGrid = baseLayers[i].getSource().getTileGrid();
-							var lastSize = 1;
-							var format = mapLayers[i].getSource().getFormat();
-							var tileSize = 256;
-							if (tileGrid.getTileSize(0)) {
-								tileSize = tileGrid.getTileSize();
-							}
-
-							for (var z = 0; z < tileGrid.getMatrixIds().length; ++z) {
-								var matrixSize = new Array();
-								if (z == 0) {
-									matrixSize.push(1);
-									matrixSize.push(1);
-									scale = initialScale;
-
-								} else if (z >= 1) {
-									lastSize = lastSize*2;
-									matrixSize.push(lastSize*2);
-									matrixSize.push(lastSize*2);
-									scale = scale / 2;
-								}
-								var tileSizeZ = 256;
-								if (tileGrid.getTileSize(z)) {
-									tileSizeZ = tileGrid.getTileSize(z);
-								}
-
-								matrices.push({
-									"identifier": tileGrid.getMatrixIds()[z],
-						            "matrixSize": matrixSize,
-						            "tileSize": [tileSizeZ, tileSizeZ],
-						            "scaleDenominator": scale,
-						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
-								});
-							}
-							var url = mapLayers[i].getSource().getUrls()[0];
-							if (url.indexOf('http') == -1) {
-								url = self.origin + url;
-							}
-							printLayers.push({
-								"type": "WMTS",
-						        "baseURL": url,
-						        "opacity": 1.0,
-						        "layer": baseLayers[i].getSource().getLayer(),
-						        "version": "1.0.0",
-						        "requestEncoding": "KVP",
-						        "dimensions": null,
-						        "dimensionParams": {},
-						        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
-						        "matrices": matrices,
-						        "imageFormat": format
-							});
-
-						} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
-							var url = mapLayers[i].getSource().getUrls()[0];
-							if (url.indexOf('http') == -1) {
-								url = self.origin + url;
-							}
-							printLayers.push({
-								"type": "WMS",
-						        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
-						        "baseURL": url,
-						        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
-						        "version": baseLayers[i].getSource().getParams()['VERSION'],
-						        "customParams": {
-						        	"TRANSPARENT": "true"
-						        }
-							});
-
-						} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
-							var url = mapLayers[i].getSource().getUrls()[0];
-							if (url.indexOf('http') == -1) {
-								url = self.origin + url;
-							}
-							printLayers.push({
-								"baseURL": url,
-							    "type": "OSM",
-							    "dpi": parseInt(dpi),
-							    "resolutions": [156543.03390625,
-						            78271.516953125,
-						            39135.7584765625,
-						            19567.87923828125,
-						            9783.939619140625,
-						            4891.9698095703125,
-						            2445.9849047851562,
-						            1222.9924523925781,
-						            611.4962261962891,
-						            305.74811309814453,
-						            152.87405654907226,
-						            76.43702827453613,
-						            38.218514137268066,
-						            19.109257068634033,
-						            9.554628534317017,
-						            4.777314267158508,
-						            2.388657133579254,
-						            1.194328566789627,
-						            0.5971642833948135,
-						            0.2984505969011938,
-						            0.1492252984505969,
-						            0.0746455354243517,
-						            0.0373227677121758
-						           ],		
-						          "resolutionTolerance": 0.1,
-							    "tileSize": [256, 256],
-							    "imageExtension": "png"
-							});
-						}
-					}
-					var legendUrl = baseLayers[i].legend_no_auth;
-					if (legendUrl) {
-						if (legendUrl.indexOf('http') == -1) {
-							legendUrl = self.origin + legendUrl;
-						}
-						var legend = {
-							"name": baseLayers[i].title,
-							"icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000')]
-						};
-						legends.push(legend);	
-					}					
-				}
-			}
-		}
-	}
+				var printLayer = self.convertBaseLayerToPrintLayer(baseLayers[i], legends);
+				if (printLayer != null ) {
+					printLayers.push(printLayer);
+				} // printLayer
+			} // getVisible
+		} // baseLayer
+	} // for
+	
 	var f = self.extentLayer.getSource().getFeatures()[0];
 	var bAcceptsOverview = false;
 	var outputFormat = $("#print-format option:selected").val();
 
+	var proj3857 = new ol.proj.Projection({code: 'EPSG:3857'});
+	var projLayout = new ol.proj.Projection({code: self.projection});
+	var geom = f.getGeometry().clone();
+	var center3857 = ol.extent.getCenter(geom.getExtent());
+	if (self.projection !== 'EPSG:3857') {
+		geom.transform(proj3857, projLayout);
+	}
+
+
 	var dataToPost = {
 	  		"layout": self.capabilities.layouts[0].name,
+			"outputFilename": gettext(self.capabilities.layouts[0].name),
 		  	"outputFormat": outputFormat,
 		  	"attributes": {
 		  		"title": title,
 		  		"scale": '1: ' + Number.parseInt(scaleToSet).toLocaleString(),
 		  		"legalWarning": legalWarning,
 		  		"map": {
-		  			"projection": "EPSG:3857",
+					"projection": self.projection,
 		  			"dpi": parseInt(dpi),
-		  			"dpiSensitiveStyle":true,
+		  			// "dpiSensitiveStyle":true,
 		  			"rotation": rotation,
 		  			// "center": self.map.getView().getCenter(),
 		  			"scale": scaleToSet,
 		  			"useNearestScale": false, //useNearestScale,
 		  			"layers": printLayers,
-		  			"bbox": f.getGeometry().getExtent()
+		  			"bbox": geom.getExtent()
 		  	    },
 		  	    "logo_url": self.origin + self.conf.project_image,
 		  	    //"logo_url": 'http://localhost' + self.conf.project_image,
@@ -585,21 +766,31 @@ print.prototype.createPrintJob = function(template) {
 		  	    	"name": "",
 		            "classes": legends
 		        },
-		        "crs": "EPSG:3857"
+		        "crs": self.projection
 		  	}
 	};
-	if (self.capabilities.layouts[0].attributes[4].name == 'overviewMap') {
+	if (self.supportsOverview(self.capabilities)) {
 		bAcceptsOverview = true;
 		dataToPost.attributes.overviewMap = {
 				// "zoomFactor":5,
-	            "layers": [
-		              {
-		                "type": "OSM",
-						"baseURL": "http://a.tile.openstreetmap.org",
-				  	    "imageExtension": "png"		                	
-		              }
-		            ]
-		          };
+				"projection": 'EPSG:3857',
+				"center": center3857,
+				"scale" : 20*scaleToSet,
+	            "layers": self.printOverviewLayers
+		    };
+	}
+	if (self.supportsGridMap(self.capabilities)) {
+		dataToPost.attributes.mapGrid = {
+			"projection": self.projection,
+			"dpi": parseInt(dpi),
+			"dpiSensitiveStyle":false,
+			"rotation": rotation,
+			"center": ol.extent.getCenter(geom.getExtent()),
+			"scale": scaleToSet,
+			"useNearestScale": false, //useNearestScale,
+			"layers": [layerGrid],
+			// "bbox": f.getGeometry().getExtent() // TODO: DEFINIR EL CENTRO EN LUGAR DEL BBOX
+		};
 	}
 	$.ajax({
 		type: 'POST',
@@ -616,10 +807,55 @@ print.prototype.createPrintJob = function(template) {
 
 };
 
+print.prototype.checkReprojection = function() {
+	if (this.projection != 'EPSG:3857') {
+		var mapLayers = this.map.getLayers().getArray();
+		for (var layer of mapLayers) {
+			if (layer.getVisible()) {
+				if (layer.getSource() instanceof ol.source.XYZ) {
+					alert(layer.getProperties().label + ':' + gettext('layers_xyz_cant_be_reprojected'));
+					layer.setVisible(false);
+				} // xyz
+			} // visible			
+		} // for
+	}
+};
+
 print.prototype.getScales = function (capabilities) {
 	// attribute 3 is 'map'
     var scales = capabilities.layouts[0].attributes[3].clientInfo.scales;
     return scales;
+};
+
+print.prototype.supportsGridMap = function (capabilities) {
+	// search for attribute 'mapGrid'
+	for (var att of capabilities.layouts[0].attributes) {
+		if (att.name == 'mapGrid') {
+			return true;
+		}
+	}
+    return false;
+};
+
+print.prototype.supportsAuthor = function (capabilities) {
+	// search for attribute 'author'
+	for (var att of capabilities.layouts[0].attributes) {
+		if (att.name == 'author') {
+			return true;
+		}
+	}
+    return false;
+};
+
+
+print.prototype.supportsOverview = function (capabilities) {
+	// search for attribute 'overviewMap'
+	for (var att of capabilities.layouts[0].attributes) {
+		if (att.name == 'overviewMap') {
+			return true;
+		}
+	}
+    return false;
 };
 
 
@@ -656,7 +892,26 @@ print.prototype.getReport = function(reportInfo) {
 	  	success	:function(response){
 	  		if (response.done) {
 	  			$.overlayout();
-	  			window.open(self.printProvider.url + reportInfo.downloadURL);
+				//   var body = '';
+				//   body += '<div class="row">';
+				//   body +=     '<center><a href="' + reportInfo.downloadURL + '" download="' + gettext('print-layout.pdf') + '" title="fichero.pdf">' + gettext('Download pdf') + '</a></center>';
+				//   body += '</div>';
+				  
+				//   $('#float-modal .modal-body').empty();
+				//   $('#float-modal .modal-body').append(body);
+				  
+				//   var buttons = '';
+				//   buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Close') + '</button>';
+				  
+				//   $('#float-modal .modal-footer').empty();
+				//   $('#float-modal .modal-footer').append(buttons);
+				  
+				//   $("#float-modal").modal('show');
+
+				//   $('#float-modal-cancel-print').on('click', function () {
+				// 	$('#float-modal').modal('hide');
+				// });
+				window.open(self.printProvider.url + reportInfo.downloadURL);
 	  		} else {
 				window.setTimeout(function() {
 					self.getReport(reportInfo)

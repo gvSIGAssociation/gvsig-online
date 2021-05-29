@@ -81,6 +81,12 @@ msgstr "Herramienta no disponible"
 msgid "This functionality is only available on Mozilla Firefox"
 msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
 
+msgid "MapProjection"
+msgstr "Proyección del mapa"
+
+msgid "MapOverview"
+msgstr "Capas en el Localizador"
+
 msgid "a4_landscape"
 msgstr "A4 Apaisado"
 
@@ -92,3 +98,30 @@ msgstr "A4 Apaisado con Localizador"
 
 msgid "a3_landscape"
 msgstr "A3 Apaisado"
+
+msgid "tocantins_a4_landscape"
+msgstr "Tocantins A4 Horizonal"
+
+msgid "tocantins_a4_portrait"
+msgstr "Tocantins A4 Vertical"
+
+msgid "tocantins_a3_landscape"
+msgstr "Tocantins A3 Horizonal"
+
+msgid "tocantins_a3_portrait"
+msgstr "Tocantins A3 Vertical"
+
+msgid "print-mapgrid-point"
+msgstr "Puntos"
+
+msgid "print-mapgrid-line"
+msgstr "Líneas"
+
+msgid "print-mapgrid-spacing"
+msgstr "Intervalo de las etiquetas"
+
+msgid "print-mapgrid-indent"
+msgstr "Márgen de las etiquetas al borde"
+
+msgid "layers_xyz_cant_be_reprojected"
+msgstr "Las capas externas tipo XYZ no pueden ser reproyectadas."
