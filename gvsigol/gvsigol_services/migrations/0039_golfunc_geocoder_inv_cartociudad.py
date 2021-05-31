@@ -14,7 +14,7 @@ def insert_def(apps, schema_editor):
         TriggerProcedure = apps.get_model("gvsigol_services", "TriggerProcedure")
         procedure = TriggerProcedure()
         procedure.signature = TRIGGER_SIGNATURE
-        procedure.__name__ = INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME
+        procedure.func_name = INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME
         procedure.func_schema = INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SCHEMA
         procedure.label = _('Inverse Geocoder Cartociudad')
         procedure.definition_tpl = InverseGeocoderCartociudad().get_definition()
