@@ -17,6 +17,9 @@
 msgid "AutoScale"
 msgstr "Escala Automática"
 
+msgid "UserScale"
+msgstr "Escala definida por el usuario"
+
 msgid "legalwarning"
 msgstr ""
 "Todos los contenidos cartográficos de este web y de los servicios que proporciona son propiedad de esta institución." 
@@ -72,3 +75,15 @@ msgstr "Herramienta no disponible"
 
 msgid "This functionality is only available on Mozilla Firefox"
 msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
+
+msgid "a4_landscape"
+msgstr "A4 Apaisado"
+
+msgid "a3_sin_leyenda"
+msgstr "A3 sin Leyenda"
+
+msgid "a4_landscape_overview"
+msgstr "A4 Apaisado con Localizador"
+
+msgid "a3_landscape"
+msgstr "A3 Apaisado"

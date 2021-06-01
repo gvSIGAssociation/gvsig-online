@@ -94,6 +94,7 @@ print.prototype.handler = function(e) {
 		  if (currZoom != newZoom) {
 			if (self.zoomChangedFromScale == false) {
 				$('#print-scale').val('');
+				$('#print-user-scale-holder').hide();
 			}
 			else
 				self.zoomChangedFromScale = false;
@@ -122,13 +123,18 @@ print.prototype.handler = function(e) {
 		ui += 				'<label>' + gettext('Select print template') + '</label>';
 		ui += 				'<select id="print-template" class="form-control">';
 		ui += 					'<option disabled selected value="empty"> -- ' + gettext('Select template') + ' -- </option>';
+		// Los templates que empiezan por _ no los mostramos. Se supone que están ahí para fichas personalizadas.
+		// Por defecto seleccionamos el de a4_landscape
 		for (var i=0; i<templates.length; i++) {
-			if (templates[i] != 'default' && templates[i] != 'a4_landscape_att') {
-				if (templates[i] == 'a4_landscape') {
-					ui += 	'<option value="' + templates[i] + '" selected>' + this.getTemplateName(templates[i]) + '</option>';
-				} else {
-					ui += 	'<option value="' + templates[i] + '">' + this.getTemplateName(templates[i]) + '</option>';
-				}
+			if (templates[i].startsWith('_'))
+				continue;
+		 	if (templates[i] == 'default') {				
+				 continue;
+			}
+			if (templates[i] == 'a4_landscape') {
+				ui += 	'<option value="' + templates[i] + '" selected>' + gettext(templates[i]) + '</option>';
+			} else {
+				ui += 	'<option value="' + templates[i] + '">' + gettext(templates[i]) + '</option>';
 			}
 		}
 		ui += 				'</select>';
@@ -141,6 +147,7 @@ print.prototype.handler = function(e) {
 		ui += 				'<label>' + gettext('Scale') + '</label>';
 		ui += 				'<select id="print-scale" class="form-control">';
 		ui += 				'<option value="">' + gettext('AutoScale') + '</option>';
+		ui += 				'<option value="user-scale">' + gettext('UserScale') + '</option>';
 		if (scales) {
 			for (var i=0; i<scales.length; i++) {
 					ui += 	'<option value="' + scales[i] + '">1:' + scales[i].toLocaleString() + '</option>';
@@ -148,6 +155,7 @@ print.prototype.handler = function(e) {
 		}
 
 		ui += 				'</select>';
+		ui += 				'<span id="print-user-scale-holder" style="display: flex;justify-content: flex-end;align-items: center;padding-top: 10px;">1: &nbsp; <input type="text" id="print-userscale" name="print-userscale" class="form-control" style="width:80px" placeholder="4000" value="4000"></span>';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Resolution') + '</label>';
@@ -215,11 +223,29 @@ print.prototype.handler = function(e) {
 		
 		$('#print-scale').on('change', function(e) {
 			var scaleVal = $("#print-scale option:selected").val();
+			if (scaleVal == 'user-scale') {
+				$('#print-user-scale-holder').show();
+				var userScaleStr = $("#print-userscale").text();
+				var userScale = parseInt(userScaleStr);
+				scaleVal = userScale;
+			}
+			else {
+				$('#print-user-scale-holder').hide();
+			}
 			if (scaleVal) {
 				self.zoomChangedFromScale = true;
 				self.map.getView().setResolution(self.getResolutionForScale(scaleVal));
 			}
 		});
+
+		$('#print-userscale').on('input', function(e) {
+			var userScaleStr = $("#print-userscale").val();
+			var userScale = parseInt(userScaleStr);
+			self.zoomChangedFromScale = true;
+			self.map.getView().setResolution(self.getResolutionForScale(userScale));
+		});
+
+		$('#print-user-scale-holder').hide();
 
 
 		$('#accept-print').on('click', function () {
@@ -260,7 +286,13 @@ print.prototype.createPrintJob = function(template) {
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
 	var dpi = $('#print-dpi').val();
+
 	var scaleToSet = $('#print-scale').val();
+	if (scaleToSet == 'user-scale') {
+		var userScaleStr = $("#print-userscale").val();
+		var userScale = parseInt(userScaleStr);
+		scaleToSet = userScale;
+	}
 	var useNearestScale = true;
 	if (!scaleToSet) {
 		scaleToSet = self.getScaleForResolution(); // Actual scale of the view if the user has not selected a scale
@@ -270,11 +302,7 @@ print.prototype.createPrintJob = function(template) {
 	var mapLayers = this.map.getLayers().getArray();
 	mapLayers.sort(function(la, lb) {
 		return (lb.getZIndex()-la.getZIndex());
-	})
-	// console.log('capas ordenadas: ');
-	// for (var i=0; i< mapLayers.length; i++)
-	// 	console.log(mapLayers[i].layer_name);
-
+	});	
 	var printLayers = new Array();
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
@@ -562,8 +590,8 @@ print.prototype.createPrintJob = function(template) {
 	};
 	if (self.capabilities.layouts[0].attributes[4].name == 'overviewMap') {
 		bAcceptsOverview = true;
-		dataToPost.overviewMap = {
-				"zoomFactor":5,
+		dataToPost.attributes.overviewMap = {
+				// "zoomFactor":5,
 	            "layers": [
 		              {
 		                "type": "OSM",
@@ -628,12 +656,12 @@ print.prototype.getReport = function(reportInfo) {
 	  	success	:function(response){
 	  		if (response.done) {
 	  			$.overlayout();
-	  			window.open(reportInfo.downloadURL);
+	  			window.open(self.printProvider.url + reportInfo.downloadURL);
 	  		} else {
-	  			window.setTimeout(function() {
-	  				self.getReport(reportInfo)
-	  			}, 3000);
-	  		}	  		
+				window.setTimeout(function() {
+					self.getReport(reportInfo)
+				}, 3000);
+			}	  							
 	  	},
 	  	error: function(){}
 	});
@@ -655,22 +683,6 @@ print.prototype.getTemplates = function() {
 	});
 	return templates;
 };
-
-print.prototype.getTemplateName = function(id) {
-	if(id == 'a3_sin_leyenda') {
-		return "A3 Sin leyenda"
-	}
-	if(id == 'a4_landscape') {
-		return "A4 Apaisado"
-	}
-	if(id == 'a4_landscape_overview') {
-		return "A4 Apaisado (Con localizador)"
-	}
-	if(id == 'a3_landscape') {
-		return "A3 Apaisado"
-	}
-};
-
 
 /**
  * TODO

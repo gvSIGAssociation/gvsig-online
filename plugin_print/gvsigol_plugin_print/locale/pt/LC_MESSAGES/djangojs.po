@@ -14,6 +14,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+msgid "AutoScale"
+msgstr "Escala Automática"
+
+msgid "UserScale"
+msgstr "Escala definida pelo usuário"
+
 msgid "legalwarning"
 msgstr ""
 "All the cartographic contents of this web and of the services that it provides are property of this institution."
