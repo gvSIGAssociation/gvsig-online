@@ -385,6 +385,27 @@ print.prototype.updateUI = function() {
 	
 };
 
+// methods to allow personalized options from outside this tool 
+// for example, from apps like tocantins, or other plugins
+// In plugin or app, add an event listener to 'printtemplateselected' event like this:
+// $('body').on('printtemplateselected', function(e) {
+print.prototype.setDefaultTemplate = function(templateName) {
+	$('#print-template option[value="' + templateName +'"]').attr('selected','selected');
+};
+
+print.prototype.setDefaultProjection = function(epsg) {
+	$('#print-projection option[value="' + epsg +'"]').attr('selected','selected');
+};
+
+// examples: mapoverview, author, mapgrid, mapprojection
+print.prototype.setSectionVisibility = function(section, visible) {
+	var s = $('#print-ui-' + section);
+	if (visible)
+		s.show();
+	else
+		s.hide();
+}
+
 print.prototype.convertBaseLayerToPrintLayer = function(bLayer, legends) {
 	if (bLayer.getSource().urls) {
 		if(bLayer.getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1) {
