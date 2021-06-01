@@ -199,7 +199,7 @@ $(document).ready(function() {
 	    	layerCacheConfig(data, row);
 			
 		} else if (this.name == "button-layer-cache-clear"){
-			layerCacheClear(data, row);
+			layerCacheClear(data, row, $(this));
 			
 		}
 	});
@@ -211,7 +211,7 @@ $(document).ready(function() {
 	    	groupCacheConfig(data, row);
 			
 		} else if (this.name == "button-group-cache-clear"){
-			groupCacheClear(data, row);
+			groupCacheClear(data, row, $(this));
 			
 		}
 	});
@@ -221,16 +221,51 @@ $(document).ready(function() {
 		location.href = '/gvsigonline/services/layer_cache_config/' + data[0] + '/';
 	}
 	
-	function layerCacheClear(data){			
-		location.href = '/gvsigonline/services/manage_cache_clear/' + data[0] + '/';
+	function layerCacheClear(data, row, button){			
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/manage_cache_clear/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layer cache was cleared"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layer cache clearing failed"));
+			}
+		});
 	}
-	
-	function groupCacheConfig(data){			
+	function groupCacheConfig(data){
 		location.href = '/gvsigonline/services/group_cache_config/' + data[0] + '/';
 	}
-	
-	function groupCacheClear(data){			
-		location.href = '/gvsigonline/services/group_cache_clear/' + data[0] + '/';
+	function groupCacheClear(data, row, button){
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layergroup_cache_clear/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layergroup cache was cleared"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layergroup cache clearing failed"));
+			}
+		});
 	}
 	    
 });

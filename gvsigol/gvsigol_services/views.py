@@ -16,8 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from django.db.utils import ProgrammingError
-from django.http.response import JsonResponse
+
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -42,6 +41,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -1867,7 +1867,7 @@ def layer_boundingbox_from_data(request):
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer.id))
 
 
-def layer_cache_clear(layer_id):
+def _layer_cache_clear(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore.id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
@@ -1883,87 +1883,47 @@ def layer_cache_clear(layer_id):
     gs.createOrUpdateGeoserverLayerGroup(layer_group)
     gs.clearLayerGroupCache(layer_group.name)
 
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@require_http_methods(["GET", "POST", "HEAD"])
+@require_POST
 @staff_required
-def cache_clear(request, layer_id):
-    redirect_to_layergroup = request.GET.get('redirect')
-
-    layer = Layer.objects.get(id=int(layer_id))
-    if not utils.can_manage_layer(request.user, layer):
-        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
-    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-    if request.method == 'GET' or request.method == 'POST':
-        layer_cache_clear(layer_id)
-        gs.reload_nodes()
-        
-    if request.method == 'GET':
-        if redirect_to_layergroup:
-            layergroup_id = layer.layer_group.id
-            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
-        else:
-            return redirect('layer_list')
-
+def layer_cache_clear(request, layer_id):
+    try:
+        layer = Layer.objects.get(id=int(layer_id))
+        if not utils.can_manage_layer(request.user, layer):
+            return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
+        layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+        server = Server.objects.get(id=layer_group.server_id)
+        gs = geographic_servers.get_instance().get_server_by_id(server.id)
+        if not layer.external:
+            _layer_cache_clear(layer_id)
+            gs.reload_nodes()
+            return HttpResponse('{"response": "ok"}', content_type='application/json')
+    except Exception as e:
+        error_message = ugettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
     else:
-        return HttpResponse('{"response": "ok"}', content_type='application/json')
+        error_message = ugettext_lazy('Not supported.')
+    return JsonResponse({"response": "error", "cause": error_message}, status=400)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@require_http_methods(["GET", "POST", "HEAD"])
-@staff_required
-def manage_cache_clear(request, layer_id):
-    layer = Layer.objects.get(id=int(layer_id))
-    if not utils.can_manage_layer(request.user, layer):
-        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
-    layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
-    server = Server.objects.get(id=layer_group.server_id)
-    gs = geographic_servers.get_instance().get_server_by_id(server.id)
-    if request.method == 'GET' or request.method == 'POST':
-        if layer.external:
-            print('TO DO')
-            
-        else:
-            layer_cache_clear(layer_id)
-            
-        gs.reload_nodes()
-        
-    if request.method == 'GET':
-        return redirect('cache_list')
-
-    else:
-        return HttpResponse('{"response": "ok"}', content_type='application/json')
-    
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@require_http_methods(["GET", "POST", "HEAD"])
-@staff_required
-def group_cache_clear(request, layergroup_id):
-    if request.method == 'GET':
-        layergroup = LayerGroup.objects.get(id=int(layergroup_id))
-        if not utils.can_manage_layergroup(request.user, layergroup):
-            return forbidden_view(request)
-        layer_group_cache_clear(layergroup)
-
-        return redirect('layergroup_list')
-
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@require_http_methods(["GET", "POST", "HEAD"])
+@require_POST
 @staff_required
 def layergroup_cache_clear(request, layergroup_id):
-    if request.method == 'GET':
+    try:
         layergroup = LayerGroup.objects.get(id=int(layergroup_id))
         if not utils.can_manage_layergroup(request.user, layergroup):
             return forbidden_view(request)
         layer_group_cache_clear(layergroup)
-
         return redirect('layergroup_list')
-
+    except Exception as e:
+        error_message = ugettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
+    return JsonResponse({"response": "error", "cause": error_message}, status=400)
 
 def layer_group_cache_clear(layergroup):
     last = None    
     layers = Layer.objects.filter(external=False).filter(layer_group_id=int(layergroup.id))
     for layer in layers:
         if not layer.external:
-            layer_cache_clear(layer.id)
+            _layer_cache_clear(layer.id)
             last = layer
 
     if last:
