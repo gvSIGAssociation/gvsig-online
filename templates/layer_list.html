@@ -190,9 +190,6 @@ $(document).ready(function() {
 		} else if (this.name == "button-update-thumbnail"){
 			updateThumbnail(data, row);
 
-		} else if (this.name == "button-clear-cache"){
-			clearCache(data, row);
-
 		} else if (this.name == "button-delete-layer"){
 	        deleteLayer(data, row);
 	        
@@ -279,10 +276,6 @@ $(document).ready(function() {
 				messageBox.show("error", gettext("The layer refresh failed"));
 			}
 		});
-	}
-
-	function clearCache(data){
-		location.href = '/gvsigonline/services/cache_clear/' + data[0] + '/';
 	}
 
 	function deleteLayer(data, row){
