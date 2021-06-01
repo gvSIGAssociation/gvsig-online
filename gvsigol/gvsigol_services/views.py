@@ -94,6 +94,7 @@ from actstream.models import Action
 from django_sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
 from lxml import etree, html
+from django.contrib import messages
 
 logger = logging.getLogger("gvsigol")
 
@@ -4201,7 +4202,6 @@ def cache_list(request):
     else:
         layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True).exclude(type='WMTS')
         group_list = LayerGroup.objects.filter(created_by__exact=request.user.username).filter(cached=True)
-
     response = {
         'layers': layer_list,
         'groups': group_list
@@ -4300,28 +4300,34 @@ def layer_cache_config(request, layer_id):
         
         
     
-    else:      
-        config = None
-        tasks = None
-        master_node = geographic_servers.get_instance().get_master_node(server.id)
-        if layer.external:
-            #config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
-            tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
-        else:
-            #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
-            tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
-           
-        response = {
-            "layer_id": layer_id,
-            "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
-            "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
-            "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-            "formats": settings.CACHE_OPTIONS['FORMATS'],
-            "tasks": tasks['long-array-array'],
-            "latlong_extent": layer.latlong_extent
-        }
+    else:
+        try:
+            config = None
+            tasks = None
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
+            if layer.external:
+                #config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
+            else:
+                #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
             
-        return render(request, 'layer_cache_config.html', response)
+            response = {
+                "layer_id": layer_id,
+                "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
+                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
+                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "tasks": tasks['long-array-array'],
+                "latlong_extent": layer.latlong_extent
+            }
+                
+            return render(request, 'layer_cache_config.html', response)
+        except Exception as e:
+            error_message = ugettext_lazy('Error accessing layer. Cause: {cause}.').format(cause=str(e))
+            logger.exception(error_message)
+            messages.error(request, error_message)
+            return redirect('cache_list')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -4395,24 +4401,30 @@ def group_cache_config(request, group_id):
         
         
     
-    else:      
-        config = None
-        tasks = None
-        master_node = geographic_servers.get_instance().get_master_node(server.id)
-        
-        #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
-        tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
-                
-        response = {
-            "group_id": group_id,
-            "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
-            "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
-            "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-            "formats": settings.CACHE_OPTIONS['FORMATS'],
-            "tasks": tasks['long-array-array']
-        }
+    else:
+        try:
+            config = None
+            tasks = None
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
             
-        return render(request, 'group_cache_config.html', response)
+            #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
+            tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
+                    
+            response = {
+                "group_id": group_id,
+                "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
+                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
+                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
+                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "tasks": tasks['long-array-array']
+            }
+                
+            return render(request, 'group_cache_config.html', response)
+        except Exception as e:
+            error_message = ugettext_lazy('Error accessing layer group. Cause: {cause}.').format(cause=str(e))
+            logger.exception(error_message)
+            messages.error(request, error_message)
+            return redirect('cache_list')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
