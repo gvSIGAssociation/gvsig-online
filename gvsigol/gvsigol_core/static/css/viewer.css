@@ -702,3 +702,7 @@ html, body {
 .ol-popup .closeBox {
 	display: block;
 }
+
+.allow-text-copy {
+	user-select: text;
+}
