@@ -228,7 +228,7 @@ $(document).ready(function() {
 		$.ajax({
 			type: 'POST',
 			async: false,
-			url: '/gvsigonline/services/manage_cache_clear/' + layerId + '/',
+			url: '/gvsigonline/services/layer_cache_clear/' + layerId + '/',
 			beforeSend:function(xhr){
 			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 			},
