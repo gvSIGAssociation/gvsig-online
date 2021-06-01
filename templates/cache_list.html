@@ -3,6 +3,17 @@
 {% load i18n %} 
 
 {% block content %}
+{% for message in messages %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="alert alert-danger" role="alert">
+			<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+			<span class="sr-only">{% trans "Error:" %}</span>
+			{{message}}
+		  </div>
+	</div>
+</div>
+{% endfor %}
 <div class="row">
 	<div class="col-md-12">
 	
