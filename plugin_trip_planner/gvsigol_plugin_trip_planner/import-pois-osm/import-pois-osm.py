@@ -72,7 +72,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
 
 
     for i in range(layerDefinition.GetFieldCount()):
-        print(layerDefinition.GetFieldDefn(i).GetName())
+        print((layerDefinition.GetFieldDefn(i).GetName()))
 
     features=[x for x in layer]
 
@@ -81,7 +81,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
     numFeatures = len(features)
     for f in features:
         if i % 100 == 0:
-                print('Processing {0} of {1}'.format(i, numFeatures))
+                print(('Processing {0} of {1}'.format(i, numFeatures)))
         i = i+1
         # if i > 1000:
         #         break
@@ -121,7 +121,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
                                         feat=[x for x in other_tags.split(',') if 'historic' in x][0]
                                         category = 'historic'
                                         aux = feat[feat.rfind('>')+2:feat.rfind('"')]
-                                        print('Historic: ' + name + ' Subcat: ' + aux)
+                                        print(('Historic: ' + name + ' Subcat: ' + aux))
                                         if aux in historicTags:
                                                 subcat = aux
                                         else:

@@ -54,7 +54,7 @@
 						{% csrf_token %}
 			  			
 						<div class="form-row">
-							<div class="form-group col-md-3">
+							<!--<div class="form-group col-md-3">
 								{% trans "Download and Rebuild Graph at:" %}
 							</div>
 							<div class="form-group col-md-2">
@@ -65,7 +65,58 @@
 							<div class="form-group col-md-2">   
 							    <input type="text" class="form-control" id="cron_minutes" name="cron_minutes" aria-describedby="cronTimeHelp" 
 							    	placeholder="{% trans "Enter minutes (from 0-59)" %}" value="{{ cron_minutes }}" />
-							</div>	  			
+							</div>-->
+							<div class="row">
+								<div class="col-md-12">
+									<label for="repeat_periodically">{% trans "Run periodically?" %}</label>&nbsp;&nbsp;
+									<input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>														
+								</div>
+								
+								<div class="col-md-6 repeat_periodically_time" >
+									<select class="form-control" style="width: 100%;" id="program-day" name="program-day">
+										<option value="all">{% trans 'All days' %}</option>
+										<option value="monday">{% trans 'Monday' %}</option>
+										<option value="tuesday">{% trans 'Tuesday' %}</option>
+										<option value="wednesday">{% trans 'Wednesday' %}</option>
+										<option value="thursday">{% trans 'Thursday' %}</option>
+										<option value="friday">{% trans 'Friday' %}</option>
+										<option value="saturday">{% trans 'Saturday' %}</option>
+										<option value="sunday">{% trans 'Sunday' %}</option>
+										<option value="every">{% trans 'Every' %} ...</option>
+									</select> 	
+								</div>
+								<div class="more-hour-options">
+									<div class="col-md-6 repeat_periodically_time">
+										<div class="form-group">
+											<div class='input-group date'>
+												<input type='text' class="form-control" id='program-time' name='program-time' placeHolder="HH:mm:ss"/>
+												<span class="input-group-addon">
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<div class="more-options">
+									<div class="col-md-12 repeat_periodically_time">
+										<label>{% trans "Download and Rebuild Graph at:" %}</label>
+									</div>
+								
+									<div class="col-md-6 repeat_periodically_time">
+										<input placeholder="{% trans 'Select number of...' %}" name="program-interval" id="program-interval" type="number" value=1 class="form-control">
+									</div>
+									
+									<div class="col-md-6 repeat_periodically_time">
+										<select class="form-control" style="width: 100%;" id="program-unit" name="program-unit">
+											<option value="empty">{% trans '... time measure' %}</option>
+											<option value="minutes">{% trans 'minutes' %}</option>
+											<option value="hours">{% trans 'hours' %}</option>
+											<option value="days">{% trans 'days' %}</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
 						</div>	  			
 			    		<input type="submit" class="btn btn-default" value="{% trans "Set up cronjob" %}">
 					</form>
@@ -187,6 +238,33 @@ $(document).ready(function() {
 		});
 	}
 	
+	$(".more-options").slideUp("slow")
+	
+	$('#repeat_periodically').click(function() {
+
+		if($("#repeat_periodically").is(':checked'))
+			$(".repeat_periodically_time").slideDown("slow");  // checked
+		else
+			$(".repeat_periodically_time").slideUp("slow"); 
+	});
+
+	function edit_progamming_form(value){
+		 if(value == "every"){
+			 $(".more-options").slideDown("slow");  // checked
+			 $(".more-hour-options").slideUp("slow"); 
+		 }else{
+			$(".more-options").slideUp("slow"); 
+			$(".more-hour-options").slideDown("slow"); 
+		 }
+	}
+
+	$('#program-time').datetimepicker({
+		format: 'HH:mm:ss' 
+	});
+	
+	$('#program-day').on('change', function() {
+		edit_progamming_form($(this).val());
+	});
 	   
 });
 </script>

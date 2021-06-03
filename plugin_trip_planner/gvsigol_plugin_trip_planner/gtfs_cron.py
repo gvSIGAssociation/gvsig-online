@@ -21,7 +21,7 @@
 '''
 
 
-from django.apps import AppConfig
+"""from django.apps import AppConfig
 from gvsigol.settings import CRONTAB_ACTIVE
 
 import threading
@@ -99,7 +99,7 @@ class trip_planner_schedule_tasks(AppConfig):
     
     def remove_job(self, id):
         global sch
-        print("############################    schedule=" + str(sch))
+        print(("############################    schedule=" + str(sch)))
         for job in sch.jobs:
             for tag in job.tags:
                 if tag == 'trip-planner-tasks':
@@ -111,7 +111,7 @@ class trip_planner_schedule_tasks(AppConfig):
                     
     def run_job(self, id):
         global sch
-        print("############################    schedule=" + str(sch))
+        print(("############################    schedule=" + str(sch)))
         for job in sch.jobs:
             for tag in job.tags:
                 if tag == 'trip-planner-tasks':
@@ -125,12 +125,12 @@ class trip_planner_schedule_tasks(AppConfig):
     
     def initialize_trip_planner_gtfs_cron(self, is_cron_activated, time_update_programmed, interval_update_programmed, unit_update_programmed):
         global sch
-        print("############################ 1- schedule.jobs=" + str(sch.jobs.__len__()))
+        print(("############################ 1- schedule.jobs=" + str(sch.jobs.__len__())))
         
         #self.remove_job(str(id))
         sch.clear('trip-planner-tasks')
         
-        from .views import cron_trip_planner_refresh
+        from .tasks import cron_trip_planner_refresh
         
         if is_cron_activated:
             days = "all"
@@ -159,5 +159,5 @@ class trip_planner_schedule_tasks(AppConfig):
             #if not is_first_time:
                 #self.run_job(str(id))
          
-        print("############################ 2- schedule.jobs=" + str(sch.jobs.__len__()))
+        print(("############################ 2- schedule.jobs=" + str(sch.jobs.__len__())))"""
                        

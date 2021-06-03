@@ -17,7 +17,9 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_plugin_trip_planner.models import GTFSProvider, APPMobileConfig
+
+from gvsigol_plugin_trip_planner import tasks
+from .models import GTFSProvider, APPMobileConfig
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -30,7 +32,7 @@ from .forms_services import GtfsProviderForm, GtfsProviderUpdateForm, GtfsCronta
 from gvsigol import settings
 from gvsigol_plugin_trip_planner.utils import *
 import json
-import logging
+
 from datetime import datetime, timedelta
 
 from gvsigol.settings import INSTALLED_APPS, CRONTAB_ACTIVE
@@ -41,6 +43,11 @@ import time
 from . import settings as priv_settings
 from django.apps import apps
 from gvsigol_plugin_trip_planner.settings import GTFS_SCRIPT
+
+from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
+
+
+
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -157,14 +164,31 @@ def gtfs_crontab_update(request):
 
         # If this is a POST request then process the Form data
         if request.method == 'POST':
-            hh = int(request.POST.get('cron_hour'))
+            my_task_name = 'gvsigol_plugin_trip_planner.trip_planner_refresh'
+            try:
+                periodicTask  = PeriodicTask.objects.get(name = my_task_name)
+            except:
+                periodicTask = None
+            
+            if periodicTask:
+                cronid = periodicTask.crontab_id
+                interid = periodicTask.interval_id
+
+                if interid:
+                    intervalSchedule = IntervalSchedule.objects.get(id = interid)
+                    intervalSchedule.delete()
+                else:
+                    crontabSchedule = CrontabSchedule.objects.get(id = cronid)
+                    crontabSchedule.delete()
+
+                periodicTask.delete()                  
+            
+            """hh = int(request.POST.get('cron_hour'))
             mm = int(request.POST.get('cron_minutes'))
             if ((hh < 0) or (hh > 23)):
                 return HttpResponse('Hours field is not correct:' + str(hh), status=500)
             if ((mm < 0) or (mm > 59)):
                 return HttpResponse('Hours field is not correct:' + str(hh), status=500)
-
-            mm = request.POST.get('cron_minutes')
             # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
             crontab_text = "{0} {1} * * *".format(hh, mm)
             priv_settings.GTFS_CRONTAB = crontab_text
@@ -173,51 +197,66 @@ def gtfs_crontab_update(request):
             tAux = "{0}:{1}:00".format(aux[0], aux[1])
             t = datetime.strptime(tAux, '%H:%M:%S')
             my_app_config = apps.get_app_config('gvsigol_plugin_trip_planner')
-            my_app_config.initialize_trip_planner_gtfs_cron(CRONTAB_ACTIVE, t, 1, 'days')
-        else: # Update now
-            cron_trip_planner_refresh(0)
+            my_app_config.initialize_trip_planner_gtfs_cron(CRONTAB_ACTIVE, t, 1, 'days')"""
             
+            if request.POST.get('program-day') != 'every':
+                time = request.POST.get('program-time')
+                mm = time.split(":")[1]
+                hh = time.split(":")[0]
 
+                days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+                day_of_week = '*'
+                for i in range(0, len(days_of_week)):
+                    if request.POST.get('program-day') == days_of_week[i]:
+                        day_of_week = str(i)
+                
+                schedule, _ = CrontabSchedule.objects.get_or_create(
+                    minute=mm,
+                    hour=hh,
+                    day_of_week = day_of_week,
+                    day_of_month='*',
+                    month_of_year='*'
+                )
+                PeriodicTask.objects.create(
+                    crontab=schedule,
+                    name=my_task_name,
+                    args=[0],
+                    task='gvsigol_plugin_trip_planner.tasks.cron_trip_planner_refresh',
+                )
+            else:
+                unit_program = request.POST.get('program-unit')
+                if  unit_program == 'minutes':
+                    unit_period = IntervalSchedule.MINUTES
+                elif unit_program == 'days':
+                    unit_period = IntervalSchedule.DAYS
+                elif unit_program == 'hours':
+                    unit_period = IntervalSchedule.HOURS
+        
+                schedule, created = IntervalSchedule.objects.get_or_create(
+                    every = request.POST.get('program-interval'),
+                    period = unit_period,
+                )
+                PeriodicTask.objects.create(
+                    interval=schedule,
+                    name=my_task_name,
+                    args=[0],
+                    task='gvsigol_plugin_trip_planner.tasks.cron_trip_planner_refresh',
+                )
+
+            
+        else: # Update now
+            tasks.cron_trip_planner_refresh.apply_async(args=[0])
 
 
     except Exception as e:
-        return HttpResponse('Error with CronTab:' + str(e), status=500)
+        return HttpResponse('Error with Celery:' + str(e), status=500)
 
     return redirect('gtfs_provider_list')
 
-# This method will download the GTFS files, stop the server, calculate Graph and start again.
-def cron_trip_planner_refresh(id):
 
-    print(('############################    '+datetime.now().strftime("%Y-%m-%d %H:%M") + ' -> Actualizando Trip-Planner: '))
 
-    providers = GTFSProvider.objects.order_by('name')
-    bChange = False
-    for p in providers:
-        path = 'data/GTFS/{0}{1}'.format(p.id, '.zip')
-        url = p.url
-        dstFile = os.path.join(settings.MEDIA_ROOT, path)
-        try:
-            if os.path.exists(dstFile):
-                aux = download_file_if_newer(url, dstFile)
-                if (aux):
-                    bChange = True
-            else:
-                download_file(url, dstFile)
-                bChange = True
-        except:
-            #Do logging
-            msg = 'File:{0} url:{1}'.format(dstFile, url)
-            logging.exception(msg)
-
-    if bChange:
-        os.system(GTFS_SCRIPT)
-
-    response = {
-           'refresh': True
-       }
-    return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
-
-def initialize_trip_planner_cron(is_first_time=False):
+"""def initialize_trip_planner_cron(is_first_time=False):
     if CRONTAB_ACTIVE:
         print("INICIO INICIALIZACIÓN TAREAS PROGRAMADAS")
         print("Borrando tareas anteriores...")
@@ -229,7 +268,7 @@ def initialize_trip_planner_cron(is_first_time=False):
 
         my_app_config.initialize_trip_planner_gtfs_cron(CRONTAB_ACTIVE, t, 1, 'days')
 
-        print("FIN INICIALIZACIÓN TAREAS PROGRAMADAS")
+        print("FIN INICIALIZACIÓN TAREAS PROGRAMADAS")"""
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
