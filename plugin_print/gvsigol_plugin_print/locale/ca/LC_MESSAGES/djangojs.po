@@ -15,53 +15,115 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-03 11:58+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "AutoScale"
-msgstr "Escala Automàtica"
-
-msgid "Format"
-msgstr "Format"
-
-msgid "legalwarning"
-msgstr ""
-"Tots els continguts cartogràfics d'aquest web i dels serveis que proporciona són propietat d'aquesta institució."
-"La institució no és responsable de la informació que es pot obtenir a través d'enllaços a sistemes externs."
-
+#: static/js/lib/tools/print.js:127
 msgid "Print params"
 msgstr "Paràmetres d'impresió"
 
-msgid "Scale"
-msgstr "Escala"
-
+#: static/js/lib/tools/print.js:133
 msgid "Select print template"
 msgstr "Seleccionar plantilla d'impressió"
 
+#: static/js/lib/tools/print.js:135
 msgid "Select template"
 msgstr "Seleccionar plantilla"
 
+#: static/js/lib/tools/print.js:153
 msgid "Title"
 msgstr "Titol"
 
-msgid "Legal warning"
-msgstr "Avís legal"
+#: static/js/lib/tools/print.js:157
+msgid "Scale"
+msgstr "Escala"
 
+#: static/js/lib/tools/print.js:159
+msgid "AutoScale"
+msgstr "Escala Automàtica"
+
+#: static/js/lib/tools/print.js:160
+#, fuzzy
+#| msgid "Scale"
+msgid "UserScale"
+msgstr "Escala"
+
+#: static/js/lib/tools/print.js:173
+msgid "MapGrid"
+msgstr ""
+
+#: static/js/lib/tools/print.js:175
+msgid "print-mapgrid-nogrid"
+msgstr ""
+
+#: static/js/lib/tools/print.js:176
+msgid "print-mapgrid-point"
+msgstr ""
+
+#: static/js/lib/tools/print.js:177
+msgid "print-mapgrid-line"
+msgstr ""
+
+#: static/js/lib/tools/print.js:179
+msgid "print-mapgrid-spacing"
+msgstr ""
+
+#: static/js/lib/tools/print.js:187
+msgid "MapProjection"
+msgstr ""
+
+#: static/js/lib/tools/print.js:215
+msgid "MapOverview"
+msgstr ""
+
+#: static/js/lib/tools/print.js:231
 msgid "Resolution"
 msgstr "Resolució"
 
+#: static/js/lib/tools/print.js:244
 msgid "Rotation"
 msgstr "Rotació"
 
+#: static/js/lib/tools/print.js:250
+msgid "Format"
+msgstr "Format"
+
+#: static/js/lib/tools/print.js:262 static/js/lib/tools/print.js:267
+msgid "Author"
+msgstr ""
+
+#: static/js/lib/tools/print.js:273
+msgid "Legal warning"
+msgstr "Avís legal"
+
+#: static/js/lib/tools/print.js:279
 msgid "Print"
 msgstr "Imprimir"
 
+#: static/js/lib/tools/print.js:280
 msgid "Cancel"
 msgstr "Cancel.lar"
 
+#: static/js/lib/tools/print.js:355
+#, fuzzy
+#| msgid "Error loading print plugin"
+msgid "Error creating print job"
+msgstr "Error carregant plugin d'impresió"
+
+#: static/js/lib/tools/print.js:358
 msgid "You must select a template"
 msgstr "Heu de seleccionar una plantilla"
 
-msgid "Error loading print plugin"
-msgstr "Error carregant plugin d'impresió"
+#: static/js/lib/tools/print.js:870
+msgid "layers_xyz_cant_be_reprojected"
+msgstr ""
+
+#~ msgid "legalwarning"
+#~ msgstr ""
+#~ "Tots els continguts cartogràfics d'aquest web i dels serveis que "
+#~ "proporciona són propietat d'aquesta institució.La institució no és "
+#~ "responsable de la informació que es pot obtenir a través d'enllaços a "
+#~ "sistemes externs."

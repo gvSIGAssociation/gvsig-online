@@ -172,13 +172,14 @@ print.prototype.handler = function(e) {
 		ui += 			'<div id="print-ui-mapgrid" class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('MapGrid') + '</label>';
 		ui += 				'<select id="print-mapgrid-gridtype" class="form-control">';
+		ui += 					'<option value="NOGRID">' + gettext('print-mapgrid-nogrid') + '</option>';
 		ui += 					'<option value="POINTS" selected>' + gettext('print-mapgrid-point') + '</option>';
 		ui += 					'<option value="LINES">' + gettext('print-mapgrid-line') + '</option>';
 		ui += 				'</select>';
 		ui += 				'<label>' + gettext('print-mapgrid-spacing') + '</label>';
 		ui += 				'<input id="print-mapgrid-spacing" type="number" step="any" class="form-control" value="1">';
-		ui += 				'<label>' + gettext('print-mapgrid-indent') + '</label>';
-		ui += 				'<input id="print-mapgrid-indent" type="number" step="any" class="form-control" value="5">';
+		// ui += 				'<label>' + gettext('print-mapgrid-indent') + '</label>';
+		// ui += 				'<input id="print-mapgrid-indent" type="number" step="any" class="form-control" value="5">';
 		ui += 			'</div>';
 
 		// MapProjection
@@ -258,9 +259,13 @@ print.prototype.handler = function(e) {
 		ui += 			'</div>';  // container
 		ui += 			'</div>';
 
+		var author = gettext('Author');
+		if (this.conf.user.username) {
+			author = this.conf.user.username;
+		}
 		ui += 			'<div id="print-ui-author" class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Author') + '</label>';
-		ui += 				'<input id="print-author" class="form-control" value="Autor">';
+		ui += 				'<input id="print-author" class="form-control" value="' + author + '">';
 		ui += 			'</div>';
 
 		
@@ -391,10 +396,18 @@ print.prototype.updateUI = function() {
 // $('body').on('printtemplateselected', function(e) {
 print.prototype.setDefaultTemplate = function(templateName) {
 	$('#print-template option[value="' + templateName +'"]').attr('selected','selected');
+	this.capabilities = this.getCapabilities(templateName);
+
+	this.extentLayer.getSource().clear();
+	this.lastAngle = 0;
+	this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
+
+	// $('#print-template').trigger('change');
 };
 
 print.prototype.setDefaultProjection = function(epsg) {
 	$('#print-projection option[value="' + epsg +'"]').attr('selected','selected');
+	// $('#print-projection').trigger('change');
 };
 
 // examples: mapoverview, author, mapgrid, mapprojection
@@ -560,8 +573,9 @@ print.prototype.createPrintJob = function(template) {
 	var overviewLayerId = $('#print-overview').val();
 	var overviewLayer = self.baseLayers[parseInt(overviewLayerId)];
 	var mapgridType = $("#print-mapgrid-gridtype").val();
-	var mapgridIndent = $("#print-mapgrid-indent").val();
+	var mapgridIndent = 5; //$("#print-mapgrid-indent").val();
 	var mapgridSpacing = $("#print-mapgrid-spacing").val();
+	var author = $("#print-author").val();
 
 	self.projection = projection;
 	self.dpi = parseInt(dpi);
@@ -599,12 +613,15 @@ print.prototype.createPrintJob = function(template) {
 			"origin":[0,0],
 			"spacing": [spacing,spacing], 
 			"renderAsSvg": true,
+			// "opacity": 0.3,
 			// "haloColor": "#CCFFCC",
 			// "labelColor": "black",
 			"labelFormat": "%1.0f %s",
 			"indent": parseInt(mapgridIndent),
 			"rotateLabels": false,
-			// "haloRadius": 4,
+			// "drawLabels": true,  // New property just if we need to put labels OUTSIDE
+			"labelColor": "black",
+			"haloRadius": 1,
 			"font": {
 			  "name": [
 				"Liberation Sans",
@@ -614,11 +631,17 @@ print.prototype.createPrintJob = function(template) {
 				"FreeSans",
 				"Sans-serif"
 			  ],
-			"size": 6,
+				"size": 6,				
 			//   "style": "BOLD"
 			}
 		  };
 
+		// var layerGridLabels = Object.assign({},layerGrid);
+		// layerGridLabels.font.size = 6;
+		// layerGridLabels.gridColor = 'white';
+		// layerGridLabels.labelColor = 'black';
+    if (mapgridType != 'NOGRID')
+		printLayers.push(layerGrid);
 
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
@@ -776,10 +799,11 @@ print.prototype.createPrintJob = function(template) {
 		  			// "dpiSensitiveStyle":true,
 		  			"rotation": rotation,
 		  			// "center": self.map.getView().getCenter(),
+					"center": ol.extent.getCenter(geom.getExtent()),
 		  			"scale": scaleToSet,
 		  			"useNearestScale": false, //useNearestScale,
 		  			"layers": printLayers,
-		  			"bbox": geom.getExtent()
+		  			// "bbox": geom.getExtent()
 		  	    },
 		  	    "logo_url": self.origin + self.conf.project_image,
 		  	    //"logo_url": 'http://localhost' + self.conf.project_image,
@@ -790,6 +814,11 @@ print.prototype.createPrintJob = function(template) {
 		        "crs": self.projection
 		  	}
 	};
+
+	if (self.supportsAuthor(self.capabilities)) {
+		dataToPost.attributes.author = author;
+	}
+
 	if (self.supportsOverview(self.capabilities)) {
 		bAcceptsOverview = true;
 		dataToPost.attributes.overviewMap = {
@@ -801,6 +830,10 @@ print.prototype.createPrintJob = function(template) {
 		    };
 	}
 	if (self.supportsGridMap(self.capabilities)) {
+		var auxLayers = [];		
+		if (mapgridType != 'NOGRID') {
+			auxLayers.push(layerGrid);
+		}
 		dataToPost.attributes.mapGrid = {
 			"projection": self.projection,
 			"dpi": parseInt(dpi),
@@ -809,7 +842,7 @@ print.prototype.createPrintJob = function(template) {
 			"center": ol.extent.getCenter(geom.getExtent()),
 			"scale": scaleToSet,
 			"useNearestScale": false, //useNearestScale,
-			"layers": [layerGrid],
+			"layers": auxLayers,
 			// "bbox": f.getGeometry().getExtent() // TODO: DEFINIR EL CENTRO EN LUGAR DEL BBOX
 		};
 	}
