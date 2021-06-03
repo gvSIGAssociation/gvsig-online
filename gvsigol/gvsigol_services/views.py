@@ -706,6 +706,10 @@ def layer_refresh_conf(request, layer_id):
     lyr_conf = layer.get_config_manager()
     lyr_conf.refresh_field_conf()
     layer.save()
+    i, source_name, schema = layer.get_db_connection()
+    with i as conn:
+        # ensure the pk sequence has a consistent status
+        conn.update_pk_sequences(source_name, schema=schema)
     return JsonResponse({"result": "ok"})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
