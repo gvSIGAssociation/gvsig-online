@@ -1,8 +1,6 @@
 from django.conf.urls import url
 from gvsigol_plugin_downloadman import views as downman_views
 
-#from views import BrowserView, ExportToDatabaseView, UploadView, UploadFileView, DeleteFileView, DirectoryCreateView
-
 
 urlpatterns = [
     #url(r'^$', BrowserView.as_view(), name='browser'),
