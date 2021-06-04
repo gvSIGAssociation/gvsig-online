@@ -25,6 +25,7 @@ from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
 from .models import UserGroup, UserGroupUser
 import gvsigol.settings
+from functools import wraps
 
 def superuser_required(function):
     def wrap(request, *args, **kwargs):
@@ -38,14 +39,12 @@ def superuser_required(function):
     return wrap
 
 def staff_required(function):
+    @wraps(function)
     def wrap(request, *args, **kwargs):
         if request.user.is_staff:
             return function(request, *args, **kwargs)
         else:
             return render(request, 'illegal_operation.html', {})
-
-    wrap.__doc__=function.__doc__
-    wrap.__name__=function.__name__
     return wrap
 
 def is_superuser(user):            
