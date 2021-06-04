@@ -29,7 +29,13 @@ msgid "Color map entry"
 msgstr "Entrada de mapa de cores"
 
 msgid "Color"
-msgstr "Cores"
+msgstr "Cor"
+
+msgid "Percentaje"
+msgstr "Porcentagem"
+
+msgid "Transparency"
+msgstr "Transparência"
 
 msgid "Quantity"
 msgstr "Quantidade"
@@ -197,7 +203,7 @@ msgid "Font"
 msgstr "Fonte"
 
 msgid "Halo"
-msgstr "Halo"
+msgstr "Sombra"
 
 msgid "Label field"
 msgstr "Campo do rótulo"
@@ -258,3 +264,12 @@ msgstr "Expressão AND"
 
 msgid "OR expression"
 msgstr "Expressão OR"
+
+msgid "Append textsymbolizer"
+msgstr "Anexar o simbolizador de texto"
+
+msgid "Single feature"
+msgstr "Característica"
+
+msgid "Default group"
+msgstr "Grupo padrão"

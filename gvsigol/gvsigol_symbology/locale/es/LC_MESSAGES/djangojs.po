@@ -41,6 +41,9 @@ msgstr "Color"
 msgid "Percentaje"
 msgstr "Porcentaje"
 
+msgid "Transparency"
+msgstr "Transparencia"
+
 msgid "Delete"
 msgstr "Borrar"
 
