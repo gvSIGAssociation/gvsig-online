@@ -699,19 +699,22 @@ def _layer_refresh_extent(layer):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def layer_refresh_conf(request, layer_id):
-    layer = Layer.objects.get(pk=layer_id)
-    if not utils.can_manage_layer(request.user, layer):
-        return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
-    _layer_refresh_extent(layer)
-    lyr_conf = layer.get_config_manager()
-    lyr_conf.refresh_field_conf()
-    layer.save()
-    i, source_name, schema = layer.get_db_connection()
-    with i as conn:
-        # ensure the pk sequence has a consistent status
-        conn.update_pk_sequences(source_name, schema=schema)
-    return JsonResponse({"result": "ok"})
-
+    try:
+        layer = Layer.objects.get(pk=layer_id)
+        if not utils.can_manage_layer(request.user, layer):
+            return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
+        _layer_refresh_extent(layer)
+        lyr_conf = layer.get_config_manager()
+        lyr_conf.refresh_field_conf()
+        layer.save()
+        i, source_name, schema = layer.get_db_connection()
+        with i as conn:
+            # ensure the pk sequence has a consistent status
+            conn.update_pk_sequences(source_name, schema=schema)
+        return JsonResponse({"result": "ok"})
+    except:
+        logger.exception("Error refreshing layer conf")
+        return JsonResponse({"result": "error"}, status=500)
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def layer_delete(request, layer_id):
