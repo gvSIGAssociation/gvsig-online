@@ -11,7 +11,7 @@
 <!-- 	</form> -->
 	<div id="fileupload-component" class="fileupload-component"></div>
 	<div style="margin-top: 30px;">
-		<button id="upload-button" type="submit" class="btn btn-default btn-block"><i class="fa fa-upload margin-r-5"></i> {% trans "Upload" %}</button>					
+		<button id="upload-button" type="submit" class="btn btn-default btn-block"><i class="fa fa-upload margin-r-5"></i> {% trans "Upload" %}</button>
 	</div>
 	
 {% endblock %}
@@ -25,8 +25,7 @@
 	<script>
 	$('#menu-manage-files').addClass("active");
 	$(document).ready(function(){
-		
-	  	
+		const csrftoken = $.gvsigOL.getCsrfCookie();
 	  	var fileupload = $('#fileupload-component');
 		var path = '';
 	  	fileupload.uploadFile({
@@ -34,7 +33,9 @@
 		   	fileName: "files",
 		   	multiple: true,
 		   	autoSubmit:false,
-		   	formData: {},
+		   	formData: {
+				'csrfmiddlewaretoken': csrftoken
+			},
 		   	onSuccess: function(files,data,xhr){
 	    		var json = JSON.parse(data);
 	    		path = json.path;
