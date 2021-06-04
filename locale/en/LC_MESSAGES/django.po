@@ -60,11 +60,6 @@ msgstr ""
 msgid "User"
 msgstr ""
 
-#: gvsigol_auth/templates/dashboard_auth_menu.html:4
-#: settings.py:31
-msgid "Login requests"
-msgstr ""
-
 #: templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
 msgstr ""
