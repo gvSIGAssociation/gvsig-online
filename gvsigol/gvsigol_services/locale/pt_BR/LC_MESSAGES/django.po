@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-19 14:19+0200\n"
+"POT-Creation-Date: 2021-06-04 13:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -258,7 +258,7 @@ msgstr "valor de referência"
 #: templates/geoserver/layer_upload_raster.html:50
 #: templates/layer_update.html:52
 msgid "Workspace"
-msgstr "Espaço de trabalho "
+msgstr "Espaço de trabalho"
 
 #: forms_geoserver.py:53 forms_geoserver.py:68 forms_geoserver.py:80
 #: forms_geoserver.py:94 forms_services.py:104
@@ -515,7 +515,7 @@ msgstr "dias"
 
 #: forms_services.py:57
 msgid "months"
-msgstr "Meses"
+msgstr "meses"
 
 #: forms_services.py:58
 msgid "years"
@@ -668,6 +668,7 @@ msgstr ""
 msgid "Inverse Geocoder ICV"
 msgstr ""
 
+#: settings.py:30
 msgid "Layer requests"
 msgstr "Solicitações de camadass"
 
@@ -1542,22 +1543,22 @@ msgstr "Intervalo de atualização (milissegundos)"
 #: templates/layer_add.html:151 templates/layer_create.html:167
 #: templates/layer_update.html:203
 msgid "time_enabled field"
-msgstr "tempo_campo ativado"
+msgstr "Campo temporal"
 
 #: templates/layer_add.html:158 templates/layer_create.html:173
 #: templates/layer_update.html:209
 msgid "End time_enabled field"
-msgstr "Campo Hora de fim_permitido"
+msgstr "Campo temporal (intervalo final)"
 
 #: templates/layer_add.html:165 templates/layer_create.html:179
 #: templates/layer_update.html:216
 msgid "Time resolution"
-msgstr "Resolução de tempo"
+msgstr "Resolução temporal"
 
 #: templates/layer_add.html:171 templates/layer_create.html:185
 #: templates/layer_update.html:222
 msgid "Time presentation"
-msgstr "Apresentação do tempo"
+msgstr "Visualização temporal"
 
 #: templates/layer_add.html:177 templates/layer_create.html:191
 #: templates/layer_update.html:228
@@ -1569,7 +1570,7 @@ msgstr ""
 #: templates/layer_add.html:192 templates/layer_create.html:204
 #: templates/layer_update.html:241
 msgid "Default value mode"
-msgstr "Modo valor predefinido"
+msgstr "Modo para atribuir valores padrão"
 
 #: templates/layer_add.html:326 templates/layer_create.html:476
 #: templates/layer_update.html:426
