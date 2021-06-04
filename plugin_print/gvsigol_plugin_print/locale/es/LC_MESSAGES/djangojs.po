@@ -51,7 +51,7 @@ msgstr "Escala definida por el usuario"
 
 #: static/js/lib/tools/print.js:173
 msgid "MapGrid"
-msgstr ""
+msgstr "Rejilla Cartográfica"
 
 #: static/js/lib/tools/print.js:175
 msgid "print-mapgrid-nogrid"
@@ -91,7 +91,7 @@ msgstr "Formato"
 
 #: static/js/lib/tools/print.js:262 static/js/lib/tools/print.js:267
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: static/js/lib/tools/print.js:273
 msgid "Legal warning"
@@ -119,48 +119,48 @@ msgstr "Ha de seleccionar una plantilla"
 msgid "layers_xyz_cant_be_reprojected"
 msgstr "Las capas externas tipo XYZ no pueden ser reproyectadas."
 
-#~ msgid "legalwarning"
-#~ msgstr ""
-#~ "Todos los contenidos cartográficos de este web y de los servicios que "
-#~ "proporciona son propiedad de esta institución.La institución no es "
-#~ "responsable de la información que se puede obtener a través de enlaces a "
-#~ "sistemas externos."
+msgid "legalwarning"
+msgstr ""
+"Todos los contenidos cartográficos de este web y de los servicios que "
+"proporciona son propiedad de esta institución.La institución no es "
+"responsable de la información que se puede obtener a través de enlaces a "
+"sistemas externos."
 
-#~ msgid "Accept"
-#~ msgstr "Aceptar"
+msgid "Accept"
+msgstr "Aceptar"
 
-#~ msgid "Print map"
-#~ msgstr "Imprimir mapa"
+msgid "Print map"
+msgstr "Imprimir mapa"
 
-#~ msgid "Function not available"
-#~ msgstr "Herramienta no disponible"
+msgid "Function not available"
+msgstr "Herramienta no disponible"
 
-#~ msgid "This functionality is only available on Mozilla Firefox"
-#~ msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
+msgid "This functionality is only available on Mozilla Firefox"
+msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
 
-#~ msgid "a4_landscape"
-#~ msgstr "A4 Apaisado"
+msgid "a4_landscape"
+msgstr "A4 Apaisado"
 
-#~ msgid "a3_sin_leyenda"
-#~ msgstr "A3 sin Leyenda"
+msgid "a3_sin_leyenda"
+msgstr "A3 sin Leyenda"
 
-#~ msgid "a4_landscape_overview"
-#~ msgstr "A4 Apaisado con Localizador"
+msgid "a4_landscape_overview"
+msgstr "A4 Apaisado con Localizador"
 
-#~ msgid "a3_landscape"
-#~ msgstr "A3 Apaisado"
+msgid "a3_landscape"
+msgstr "A3 Apaisado"
 
-#~ msgid "tocantins_a4_landscape"
-#~ msgstr "Tocantins A4 Horizonal"
+msgid "tocantins_a4_landscape"
+msgstr "Tocantins A4 Horizonal"
 
-#~ msgid "tocantins_a4_portrait"
-#~ msgstr "Tocantins A4 Vertical"
+msgid "tocantins_a4_portrait"
+msgstr "Tocantins A4 Vertical"
 
-#~ msgid "tocantins_a3_landscape"
-#~ msgstr "Tocantins A3 Horizonal"
+msgid "tocantins_a3_landscape"
+msgstr "Tocantins A3 Horizonal"
 
-#~ msgid "tocantins_a3_portrait"
-#~ msgstr "Tocantins A3 Vertical"
+msgid "tocantins_a3_portrait"
+msgstr "Tocantins A3 Vertical"
 
-#~ msgid "print-mapgrid-indent"
-#~ msgstr "Márgen de las etiquetas al borde"
+msgid "print-mapgrid-indent"
+msgstr "Márgen de las etiquetas al borde"

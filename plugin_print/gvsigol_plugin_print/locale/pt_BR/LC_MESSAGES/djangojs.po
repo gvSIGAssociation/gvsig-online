@@ -53,7 +53,7 @@ msgstr "Escala definida pelo usuário"
 
 #: static/js/lib/tools/print.js:173
 msgid "MapGrid"
-msgstr ""
+msgstr "Grade cartográfica"
 
 #: static/js/lib/tools/print.js:175
 msgid "print-mapgrid-nogrid"
@@ -73,11 +73,11 @@ msgstr "Espaçamento"
 
 #: static/js/lib/tools/print.js:187
 msgid "MapProjection"
-msgstr ""
+msgstr "Projeção"
 
 #: static/js/lib/tools/print.js:215
 msgid "MapOverview"
-msgstr ""
+msgstr "Visão geral do mapa"
 
 #: static/js/lib/tools/print.js:231
 msgid "Resolution"
@@ -93,7 +93,7 @@ msgstr "Formato"
 
 #: static/js/lib/tools/print.js:262 static/js/lib/tools/print.js:267
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: static/js/lib/tools/print.js:273
 msgid "Legal warning"
@@ -119,36 +119,36 @@ msgstr ""
 msgid "layers_xyz_cant_be_reprojected"
 msgstr "Camadas externas do tipo XYZ não podem ser reprojetadas."
 
-#~ msgid "legalwarning"
-#~ msgstr ""
-#~ "All the cartographic contents of this web and of the services that it "
-#~ "provides are property of this institution.The institution is not "
-#~ "responsible for the information that can be obtained through links to "
-#~ "external systems."
+msgid "legalwarning"
+msgstr ""
+"All the cartographic contents of this web and of the services that it "
+"provides are property of this institution.The institution is not "
+"responsible for the information that can be obtained through links to "
+"external systems."
 
-#~ msgid "a4_landscape"
-#~ msgstr "A4 Oblongo"
+msgid "a4_landscape"
+msgstr "A4 Oblongo"
 
-#~ msgid "a3_sin_leyenda"
-#~ msgstr "A3 nenhuma lenda"
+msgid "a3_sin_leyenda"
+msgstr "A3 nenhuma lenda"
 
-#~ msgid "a4_landscape_overview"
-#~ msgstr "A4 Oblongo con Localizador"
+msgid "a4_landscape_overview"
+msgstr "A4 Oblongo con Localizador"
 
-#~ msgid "a3_landscape"
-#~ msgstr "A3 Oblongo"
+msgid "a3_landscape"
+msgstr "A3 Oblongo"
 
-#~ msgid "tocantins_a4_landscape"
-#~ msgstr "Tocantins A4 Horizonal"
+msgid "tocantins_a4_landscape"
+msgstr "Tocantins A4 Horizonal"
 
-#~ msgid "tocantins_a4_portrait"
-#~ msgstr "Tocantins A4 Vertical"
+msgid "tocantins_a4_portrait"
+msgstr "Tocantins A4 Vertical"
 
-#~ msgid "tocantins_a3_landscape"
-#~ msgstr "Tocantins A3 Horizonal"
+msgid "tocantins_a3_landscape"
+msgstr "Tocantins A3 Horizonal"
 
-#~ msgid "tocantins_a3_portrait"
-#~ msgstr "Tocantins A3 Vertical"
+msgid "tocantins_a3_portrait"
+msgstr "Tocantins A3 Vertical"
 
-#~ msgid "print-mapgrid-indent"
-#~ msgstr "Recuo do rótulo"
+msgid "print-mapgrid-indent"
+msgstr "Recuo do rótulo"
