@@ -339,7 +339,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 						this.map.getView().getProjection(),
 						{'INFOFORMAT': infoFormat, 'FEATURE_COUNT': '100'}
 					);
-			}else{
+			} else {
 				url = qLayer.getSource().getGetFeatureInfoUrl(
 					evt.coordinate,
 					viewResolution,
@@ -909,13 +909,16 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 							if(item_shown){
 								infoContent += '<li class="item">';
 								infoContent += 	'<div class="feature-info">';
-								if (!value.toString().startsWith('http')) {
-									infoContent += 		'<span class="product-description">' + key + '</span>';
-									infoContent += 		'<span class="product-title">' + value + '</span>';
-	
-								} else {
+								if (value.toString().startsWith('file://')) {
 									infoContent += 		'<span class="product-description">' + key + '</span>';
 									infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
+	
+								} else if (value.toString().startsWith('http')){
+									infoContent += 		'<span class="product-description">' + key + '</span>';
+									infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
+								} else {
+									infoContent += 		'<span class="product-description">' + key + '</span>';
+									infoContent += 		'<span class="product-title">' + value + '</span>';
 								}
 								infoContent += 	'</div>';
 								infoContent += '</li>';

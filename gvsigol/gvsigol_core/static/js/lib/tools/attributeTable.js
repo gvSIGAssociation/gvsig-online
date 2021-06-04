@@ -189,6 +189,15 @@ attributeTable.prototype.createTableUI = function(featureType) {
 							if(typeof data == 'boolean' && data == false){
 								value = "<input type='checkbox' onclick=\"return false;\">";
 							}
+							if(typeof data == 'boolean' && data == false){
+								value = "<input type='checkbox' onclick=\"return false;\">";
+							}
+							if(typeof data === 'string' && (data.startsWith('http://') || data.startsWith('https://'))){
+								value = '<a href="' + data + '" target="_blank">' + data + '</a>';
+							}
+							if(typeof data === 'string' && data.startsWith('file://')){
+								value = '<a href="' + data + '" target="_blank">' + data + '</a>';
+							}
 							return value;
 						 }
 					});
