@@ -358,13 +358,20 @@ class Introspect:
     def update_pk_sequences(self, table, schema='public'):
         """
         Ensures the sequence start value is higher than any existing value for the column.
+        We combine max(id) and last_value because we want to modify the sequence ONLY if
+        'last_value' is smaller than the maximum id value.
         """
         seqs = self.get_pk_sequences(table, schema)
-        sql = "SELECT setval({seq}, max({col})) FROM {schema}.{table}"
+        sql = """SELECT setval({seq}, s3.next_val) FROM
+                    (SELECT GREATEST(max_id, last_value) next_val from
+                    (SELECT last_value from {seq_schema}.{seq_name}) s1,
+                    (SELECT MAX({col}) max_id from {schema}.{table}) s2) s3"""
         for (col, seq_schema, seq_name) in seqs:
             full_sequence = quote_ident(seq_schema, self.conn) + "." + quote_ident(seq_name, self.conn)
             query = sqlbuilder.SQL(sql).format(
                 seq=sqlbuilder.Literal(full_sequence),
+                seq_schema=sqlbuilder.Identifier(seq_schema),
+                seq_name=sqlbuilder.Identifier(seq_name),
                 col=sqlbuilder.Identifier(col),
                 schema=sqlbuilder.Identifier(schema),
                 table=sqlbuilder.Identifier(table))
