@@ -21,6 +21,10 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django_sendfile import sendfile
+from django.contrib.auth.decorators import login_required
+from gvsigol_auth.utils import staff_required
+from django.utils.decorators import method_decorator
+from django.shortcuts import render
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
@@ -178,6 +182,12 @@ class UploadView(FilemanagerMixin, TemplateView):
         'label': 'Upload'
     }]
 
+    @method_decorator(login_required(login_url='/gvsigonline/auth/login_user/'))
+    @method_decorator(staff_required)
+    def dispatch(self, request, *args, **kwargs):
+        if not can_manage_path(self.request.user, self.request.GET.get('path')):
+            return render(request, 'illegal_operation.html', {})
+        return super(UploadView, self).dispatch(request, *args, **kwargs)
 
 class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
     raise_exception = True
