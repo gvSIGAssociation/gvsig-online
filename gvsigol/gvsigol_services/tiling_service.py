@@ -149,7 +149,7 @@ class Tiling():
                 request = urllib.request.Request(url)
                 encoded = ('%s:%s' % (self.gsuser, self.gspaswd)).encode('ascii')
                 base64string = base64.b64encode(encoded)
-                request.add_header("Authorization", "Basic %s" % base64string)
+                request.add_header("Authorization", "Basic %s" % base64string.decode("ascii"))
                 source = urllib.request.urlopen(request, context=self.ctx)
                 content = source.read()
                 source.close()
