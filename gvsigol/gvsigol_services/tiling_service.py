@@ -37,7 +37,7 @@ from django.utils import timezone
 
 from gvsigol import settings
 from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
-from gvsigol_services import tasks
+#from gvsigol_services import tasks
 from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server, Layer
 from pyproj import Proj, transform
@@ -511,27 +511,27 @@ class Tiling():
 
 #***********END TILING CLASS********************
 
-"""
-Dado un extent o una lista de extents en GeoJSON genera un paquete con los tiles de la capa que caen dentro de 
-las geometrías. Las geometrías pasadas pueden ser de tipo Polygon o Point. Si son Polygon se usará la extensión
-del poligono. Si son de tipo Point se usará la extensión de un buffer definido en una propiedad del geoJson llamada 
-buffer con un entero que indique el buffer en metros alrededor de la coordenada. 
+# """
+# Dado un extent o una lista de extents en GeoJSON genera un paquete con los tiles de la capa que caen dentro de 
+# las geometrías. Las geometrías pasadas pueden ser de tipo Polygon o Point. Si son Polygon se usará la extensión
+# del poligono. Si son de tipo Point se usará la extensión de un buffer definido en una propiedad del geoJson llamada 
+# buffer con un entero que indique el buffer en metros alrededor de la coordenada. 
 
-Las coordenadas siempre serán en geográficas.
+# Las coordenadas siempre serán en geográficas.
 
-Los niveles de 0 al 4 se empaquetan completos y del 5 en adelante solo los tiles que caen dentro de los polígonos o
-puntos con buffer definidos. Si se pasa el parámetro download_first_levels a False no se empaquetan los niveles del
-0 al 4.
+# Los niveles de 0 al 4 se empaquetan completos y del 5 en adelante solo los tiles que caen dentro de los polígonos o
+# puntos con buffer definidos. Si se pasa el parámetro download_first_levels a False no se empaquetan los niveles del
+# 0 al 4.
 
-El objeto process_data es una estructura en la que se va actualizando el número de tiles procesados y otra información
-del proceso de descarga y empaquetado
-"""
-def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None, properties=None, download_first_levels=True):
-    try:
-        tasks.tiling_layer_celery_task.apply_async(args=[version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels])
-    except Exception as e:
-        print(e)
-        return
+# El objeto process_data es una estructura en la que se va actualizando el número de tiles procesados y otra información
+# del proceso de descarga y empaquetado
+# """
+# def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None, properties=None, download_first_levels=True):
+#     try:
+#         tasks.tiling_layer_celery_task.apply_async(args=[version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels])
+#     except Exception as e:
+#         print(e)
+#         return
 
 def create_status(process_data, id):
     status = TilingProcessStatus()
