@@ -1218,8 +1218,6 @@ class Geoserver():
                 self.reload_featuretype(layer)
                 layer.get_config_manager().refresh_field_conf()
                 layer.save()
-            if not stderr:
-                return True
         except rest_geoserver.RequestError as e:
             logger.exception(str(e))
             raise
