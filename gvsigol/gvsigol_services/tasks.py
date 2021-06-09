@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
 from gvsigol.celery import app as celery_app
 from gvsigol import settings
 import time
