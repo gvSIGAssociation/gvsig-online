@@ -72,12 +72,16 @@ GvsigolResourceManager.prototype.registerEvents = function() {
  */
 GvsigolResourceManager.prototype.createUploader = function() {
 	var uploader = $('#fileupload-component');
+	const csrftoken = $.gvsigOL.getCsrfCookie();
+	console.log(csrftoken);
 	uploader.uploadFile({
 	   	url: '/gvsigonline/services/upload_resources/',
 	   	fileName: 'resource',
 	   	multiple: true,
 	   	autoSubmit:false,
-	   	formData: {},
+	   	formData: {
+			'csrfmiddlewaretoken': csrftoken
+		},
 	   	showPreview: true,
 	   	previewHeight: "100px",
 	   	previewWidth: "100px",
@@ -181,11 +185,15 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	if (self.feature.getProperties().feat_date_gvol !== undefined) {
 		data.feat_date_gvol = self.feature.getProperties().feat_date_gvol;
 	}
+	const csrftoken = $.gvsigOL.getCsrfCookie();
 	$.ajax({
 		type: 'POST',
 		async: false,
 		url: '/gvsigonline/services/delete_resource/',
 		data: data,
+		headers: {
+			'X-CSRFToken': csrftoken
+		},
 		success	:function(response){
 			if (response.deleted) {
 				if (response.feat_version !== undefined) {
@@ -219,10 +227,14 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
 GvsigolResourceManager.prototype.deleteResources = function(feature) {
 	var deleted = false;
 	var self = this;
+	const csrftoken = $.gvsigOL.getCsrfCookie();
 	$.ajax({
 		type: 'POST',
 		async: false,
 		url: '/gvsigonline/services/delete_resources/',
+		headers: {
+			'X-CSRFToken': csrftoken
+		},
 		data: {
 			query_layer: this.selectedLayer.layer_name,
 			workspace: this.selectedLayer.workspace,

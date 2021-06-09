@@ -3396,7 +3396,6 @@ def get_resource(request, resource_id):
         return HttpResponseNotFound()
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@csrf_exempt
 def upload_resources(request):
     if request.method == 'POST':
         ws_name = request.POST.get('workspace')
@@ -3447,7 +3446,6 @@ def upload_resources(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@csrf_exempt
 def delete_resource(request):
     if request.method == 'POST':
         rid = request.POST.get('rid')
@@ -3491,7 +3489,6 @@ def delete_resource(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@csrf_exempt
 def delete_resources(request):
     if request.method == 'POST':
         query_layer = request.POST.get('query_layer')
