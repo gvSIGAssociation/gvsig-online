@@ -59,7 +59,7 @@ class Tiling():
     max_lon = None
     max_lat = None
     prj_id = None
-    level_download_all_tiles = 5
+    level_download_all_tiles = 2
 
     def __init__(self, folder, type_, tilematrixset, url, prj_id):
         self.prj_id = prj_id
@@ -376,25 +376,40 @@ class Tiling():
 
                     if base_layer_process is not None:
                         if str(self.prj_id) in base_layer_process:
-                            if base_layer_process[str(self.prj_id)]['stop'] == 'true':
-                                return False
+                            #if base_layer_process[str(self.prj_id)]['stop'] == 'true':
+                            #    return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
                 ytile = cpy_ytile
-                self.saveProcessInfo(base_layer_process[str(self.prj_id)], tiling_status)              
+                stop = self.saveProcessInfo(base_layer_process[str(self.prj_id)], tiling_status) 
+                if(stop == True):
+                    return False             
      
         return True
 
 
     def saveProcessInfo(self, layer_process, tiling_status):
         if(tiling_status is not None):
+            try:
+                processes = TilingProcessStatus.objects.filter(version=tiling_status.version)
+                for p in processes:
+                    tiling_status.stop = p.stop
+                    break
+            except Exception:
+                pass
+
             tiling_status.processed_tiles = layer_process['processed_tiles']
             tiling_status.time = layer_process['time']
-            if tiling_status.processed_tiles == tiling_status.total_tiles:
+            if tiling_status.processed_tiles == tiling_status.total_tiles or tiling_status.stop == 'false':
                 tiling_status.active = "false" 
                 tiling_status.end_time = timezone.now()
             tiling_status.save()
+
+        if tiling_status.stop == 'true':
+            return True
+        return False
+
 
 
     def get_estimated_time(self, start_time, base_layer_process, init_processed_tiles):
