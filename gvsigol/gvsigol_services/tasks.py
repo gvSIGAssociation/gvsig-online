@@ -11,7 +11,9 @@ import shutil
 from gvsigol_services import tiling_service as ts_ #Tiling, create_status, _zipFolder, get_extent
 from pyproj import Proj, transform
 from gvsigol_services.models import Layer
+from celery.utils.log import get_task_logger
 
+logger = get_task_logger(__name__)
 
 """
 Dado un extent o una lista de extents en GeoJSON genera un paquete con los tiles de la capa que caen dentro de 
@@ -45,7 +47,8 @@ def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_re
 
     url = None
     if lyr.datastore is not None:
-        url = lyr.datastore.workspace.wmts_endpoint
+        #url = lyr.datastore.workspace.wmts_endpoint
+        url = lyr.datastore.workspace.server.getWmtsEndpoint()
         lyr_name = lyr.datastore.workspace.name + ":" + lyr.name
     else:
         ext_lyr = json.loads(lyr.external_params)
@@ -127,6 +130,7 @@ def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_re
        
         ts_._zipFolder(folder_lyr)
     except Exception as e:
+        logger.exception(str(e))
         print e
         return
         
