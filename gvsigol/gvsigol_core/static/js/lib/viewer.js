@@ -518,12 +518,20 @@ viewer.core = {
 		}
 
     	if (externalLayer['type'] == 'XYZ') {
-    		var xyz = new ol.layer.Tile({
+    		key = externalLayer['key']
+			
+			if (key){
+				url = externalLayer['url'] + '?apikey=' + key
+			}else{
+				url = externalLayer['url']
+			}
+			
+			var xyz = new ol.layer.Tile({
     			id: layerId,
     			label: externalLayer['title'],
     		  	visible: visible,
     		  	source: new ol.source.XYZ({
-    		  		url: externalLayer['url'],
+    		  		url: url,
     		  		crossOrigin: 'anonymous'
     		    })
     		});
