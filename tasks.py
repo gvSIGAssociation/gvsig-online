@@ -5,7 +5,7 @@ import json
 import os
 import zipfile
 import shutil
-from gvsigol_services import tiling_service as ts_ #Tiling, create_status, _zipFolder, get_extent
+import gvsigol_services.tiling_service as ts_ #Tiling, create_status, _zipFolder, get_extent
 from pyproj import Proj, transform
 from gvsigol_services.models import Layer
 

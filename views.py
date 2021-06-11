@@ -4026,46 +4026,47 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         if service == 'WMS':
             if not version:
                 version = WMS_MAX_VERSION
-                print('Add base layer: ' + url+ ', version: ' + version)
-                wms = WebMapService(url, version=version, auth=auth)
+                
+            print('Add base layer: ' + url+ ', version: ' + version)
+            wms = WebMapService(url, version=version, auth=auth)
 
-                print('Add base layer type ' + wms.identification.type)
-                title = wms.identification.title
-                matrixsets = []
-                layers = list(wms.contents)
-                #all_formats = wms.getOperationByName('GetMap').formatOptions
-                #for f in all_formats:
-                #    if f == 'image/png' or f == 'image/jpeg':
-                #        formats.append(f)
-                formats.append('image/jpeg')
-                formats.append('image/png')
-                try:
-                    all_infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
-                    for i_format in all_infoformats:
-                        if i_format == 'text/plain' or i_format == 'text/html' or i_format == 'application/json' or i_format == 'application/geojson':
-                            infoformats.append(i_format)
-                except Exception:
-                    pass
+            print('Add base layer type ' + wms.identification.type)
+            title = wms.identification.title
+            matrixsets = []
+            layers = list(wms.contents)
+            #all_formats = wms.getOperationByName('GetMap').formatOptions
+            #for f in all_formats:
+            #    if f == 'image/png' or f == 'image/jpeg':
+            #        formats.append(f)
+            formats.append('image/jpeg')
+            formats.append('image/png')
+            try:
+                all_infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
+                for i_format in all_infoformats:
+                    if i_format == 'text/plain' or i_format == 'text/html' or i_format == 'application/json' or i_format == 'application/geojson':
+                        infoformats.append(i_format)
+            except Exception:
+                pass
 
-                get_map_url = wms.getOperationByName('GetMap').methods[0]['url']
+            get_map_url = wms.getOperationByName('GetMap').methods[0]['url']
 
-                lyr = wms.contents.get(layer)
-                if not lyr:
-                    for capabLyrName in wms.contents:
-                        # try discarding the workspace
-                        layer_parts = capabLyrName.split(":")
-                        if len(layer_parts) > 1 and layer_parts[1] == layer:
-                            lyr = wms.contents.get(capabLyrName)
-                            break
-                if lyr:
-                    for style_name in lyr.styles:
-                        style = lyr.styles[style_name]
-                        title = style['title'] if style['title'] else style_name
-                        style_def = {'name': style_name, 'title':title}
-                        if 'legend' in style:
-                            style_def['custom_legend_url'] = style['legend']
-                        styles.append(style_def)
-                    crs_list = lyr.crs_list
+            lyr = wms.contents.get(layer)
+            if not lyr:
+                for capabLyrName in wms.contents:
+                    # try discarding the workspace
+                    layer_parts = capabLyrName.split(":")
+                    if len(layer_parts) > 1 and layer_parts[1] == layer:
+                        lyr = wms.contents.get(capabLyrName)
+                        break
+            if lyr:
+                for style_name in lyr.styles:
+                    style = lyr.styles[style_name]
+                    title = style['title'] if style['title'] else style_name
+                    style_def = {'name': style_name, 'title':title}
+                    if 'legend' in style:
+                        style_def['custom_legend_url'] = style['legend']
+                    styles.append(style_def)
+                crs_list = lyr.crs_list
 
         elif service == 'WMTS':
             if not version:
@@ -4150,6 +4151,8 @@ def get_capabilities_from_url(request):
     layer = request.POST.get('layer')
     
     data = ows_get_capabilities(url, service, version, layer, False)
+
+    
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
 
 

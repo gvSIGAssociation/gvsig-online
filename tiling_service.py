@@ -37,7 +37,7 @@ from django.utils import timezone
 
 from gvsigol import settings
 from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
-from gvsigol_services import tasks
+from gvsigol_services.tasks import tiling_layer_celery_task
 from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server, Layer
 from pyproj import Proj, transform
@@ -531,7 +531,7 @@ del proceso de descarga y empaquetado
 
 def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None, properties=None, download_first_levels=True):
     try:
-        tasks.tiling_layer_celery_task.apply_async(args=[version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels])
+        tiling_layer_celery_task.apply_async(args=[version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels])
     except Exception as e:
         print(e)
         return

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-11 12:28+0000\n"
+"POT-Creation-Date: 2021-06-11 14:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,65 +46,63 @@ msgstr ""
 msgid "SQL View"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:752
-#: gvsigol_services/backend_geoserver.py:767
-#: gvsigol_services/backend_geoserver.py:779
-#: gvsigol_services/backend_geoserver.py:789
-#: gvsigol_services/backend_geoserver.py:799
-#: gvsigol_services/backend_geoserver.py:808
-#: gvsigol_services/backend_geoserver.py:821
+#: gvsigol_services/backend_geoserver.py:753
+#: gvsigol_services/backend_geoserver.py:768
+#: gvsigol_services/backend_geoserver.py:780
+#: gvsigol_services/backend_geoserver.py:790
+#: gvsigol_services/backend_geoserver.py:800
+#: gvsigol_services/backend_geoserver.py:809
+#: gvsigol_services/backend_geoserver.py:822
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:755
-#: gvsigol_services/backend_geoserver.py:770
-#: gvsigol_services/backend_geoserver.py:782
-#: gvsigol_services/backend_geoserver.py:792
-#: gvsigol_services/backend_geoserver.py:801
-#: gvsigol_services/backend_geoserver.py:811
-#: gvsigol_services/backend_geoserver.py:823 gvsigol_services/views.py:1197
-#: gvsigol_services/views.py:2555
+#: gvsigol_services/backend_geoserver.py:756
+#: gvsigol_services/backend_geoserver.py:771
+#: gvsigol_services/backend_geoserver.py:783
+#: gvsigol_services/backend_geoserver.py:793
+#: gvsigol_services/backend_geoserver.py:802
+#: gvsigol_services/backend_geoserver.py:812
+#: gvsigol_services/backend_geoserver.py:824 gvsigol_services/views.py:1211
+#: gvsigol_services/views.py:2446
 msgid "Error: layer could not be published"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:834
-#: gvsigol_services/backend_geoserver.py:843
-#: gvsigol_services/backend_geoserver.py:853 gvsigol_services/views.py:737
+#: gvsigol_services/backend_geoserver.py:836
+#: gvsigol_services/backend_geoserver.py:847
+#: gvsigol_services/backend_geoserver.py:857 gvsigol_services/views.py:751
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:837
-#: gvsigol_services/backend_geoserver.py:846
-#: gvsigol_services/backend_geoserver.py:856
+#: gvsigol_services/backend_geoserver.py:839
+#: gvsigol_services/backend_geoserver.py:850
+#: gvsigol_services/backend_geoserver.py:860
 msgid "Error: layer group could not be published"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:899
-#: gvsigol_services/backend_geoserver.py:909
+#: gvsigol_services/backend_geoserver.py:903
+#: gvsigol_services/backend_geoserver.py:913
 #, python-brace-format
 msgid "Error changing property. Backend error: {msg}"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:902
-#: gvsigol_services/backend_geoserver.py:912
+#: gvsigol_services/backend_geoserver.py:906
+#: gvsigol_services/backend_geoserver.py:916
 msgid "Error: layer could not be updated"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1097
-#: gvsigol_services/backend_geoserver.py:1248
-#: gvsigol_services/backend_geoserver.py:1570
-#: gvsigol_services/backend_geoserver.py:1669
+#: gvsigol_services/backend_geoserver.py:1200
+#: gvsigol_services/backend_geoserver.py:1529
+#: gvsigol_services/backend_geoserver.py:1628
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1099
-#: gvsigol_services/backend_geoserver.py:1250
-#: gvsigol_services/backend_geoserver.py:1360
+#: gvsigol_services/backend_geoserver.py:1202
+#: gvsigol_services/backend_geoserver.py:1319
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -112,9 +110,8 @@ msgid ""
 "characters can be letters, underscores or numbers"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1101
-#: gvsigol_services/backend_geoserver.py:1252
-#: gvsigol_services/backend_geoserver.py:1362
+#: gvsigol_services/backend_geoserver.py:1204
+#: gvsigol_services/backend_geoserver.py:1321
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -122,9 +119,8 @@ msgid ""
 "letters, underscores or numbers"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1103
-#: gvsigol_services/backend_geoserver.py:1254
-#: gvsigol_services/backend_geoserver.py:1364
+#: gvsigol_services/backend_geoserver.py:1206
+#: gvsigol_services/backend_geoserver.py:1323
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -132,74 +128,70 @@ msgid ""
 "letters, underscores or numbers"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1125
-msgid "Error uploading the layer. Review the file format."
-msgstr ""
-
-#: gvsigol_services/backend_geoserver.py:1315
+#: gvsigol_services/backend_geoserver.py:1274
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1543
+#: gvsigol_services/backend_geoserver.py:1502
 msgid "Error creating the layer. Review the file format."
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1566 gvsigol_services/views.py:1133
+#: gvsigol_services/backend_geoserver.py:1525 gvsigol_services/views.py:1147
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1600
+#: gvsigol_services/backend_geoserver.py:1559
 msgid "Invalid geometry type"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1604
+#: gvsigol_services/backend_geoserver.py:1563
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1606
+#: gvsigol_services/backend_geoserver.py:1565
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1616
-#: gvsigol_services/backend_geoserver.py:1651
-#: gvsigol_services/backend_geoserver.py:1652
-#: gvsigol_services/backend_geoserver.py:1653
+#: gvsigol_services/backend_geoserver.py:1575
+#: gvsigol_services/backend_geoserver.py:1610
+#: gvsigol_services/backend_geoserver.py:1611
+#: gvsigol_services/backend_geoserver.py:1612
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1621
+#: gvsigol_services/backend_geoserver.py:1580
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:297
 #: gvsigol_services/templates/layer_create.html:675
 msgid "At least one field must be defined"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1624
+#: gvsigol_services/backend_geoserver.py:1583
 msgid "Invalid field definition"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1675
+#: gvsigol_services/backend_geoserver.py:1634
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1695
-#: gvsigol_services/backend_geoserver.py:1704
+#: gvsigol_services/backend_geoserver.py:1654
+#: gvsigol_services/backend_geoserver.py:1663
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:1731
+#: gvsigol_services/backend_geoserver.py:1690
 #, python-brace-format
 msgid ""
 "Invalid field name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
 
-#: gvsigol_services/backend_geoserver.py:2195
+#: gvsigol_services/backend_geoserver.py:2154
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
@@ -297,8 +289,8 @@ msgstr ""
 #: gvsigol_services/forms_services.py:135
 #: gvsigol_services/forms_services.py:156
 #: gvsigol_services/forms_services.py:183
-#: gvsigol_services/templates/cache_list.html:24
-#: gvsigol_services/templates/cache_list.html:67
+#: gvsigol_services/templates/cache_list.html:35
+#: gvsigol_services/templates/cache_list.html:78
 #: gvsigol_services/templates/datastore_add.html:55
 #: gvsigol_services/templates/datastore_list.html:22
 #: gvsigol_services/templates/datastore_update.html:56
@@ -331,8 +323,8 @@ msgstr ""
 #: gvsigol_services/templates/base_layer_add.html:53
 #: gvsigol_services/templates/base_layer_list.html:22
 #: gvsigol_services/templates/base_layer_update.html:55
-#: gvsigol_services/templates/cache_list.html:25
-#: gvsigol_services/templates/cache_list.html:68
+#: gvsigol_services/templates/cache_list.html:36
+#: gvsigol_services/templates/cache_list.html:79
 #: gvsigol_services/templates/enumeration_add.html:44
 #: gvsigol_services/templates/enumeration_list.html:22
 #: gvsigol_services/templates/enumeration_update.html:44
@@ -368,7 +360,7 @@ msgstr ""
 #: gvsigol_services/forms_services.py:158
 #: gvsigol_services/forms_services.py:185
 #: gvsigol_services/forms_services.py:220
-#: gvsigol_services/templates/cache_list.html:27
+#: gvsigol_services/templates/cache_list.html:38
 #: gvsigol_services/templates/external_layer_add.html:73
 #: gvsigol_services/templates/external_layer_list.html:24
 #: gvsigol_services/templates/external_layer_update.html:88
@@ -390,8 +382,8 @@ msgstr ""
 #: gvsigol_services/forms_geoserver.py:85
 #: gvsigol_services/forms_geoserver.py:135
 #: gvsigol_services/forms_geoserver.py:147
-#: gvsigol_services/templates/external_layer_add.html:137
-#: gvsigol_services/templates/external_layer_update.html:155
+#: gvsigol_services/templates/external_layer_add.html:140
+#: gvsigol_services/templates/external_layer_update.html:158
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:104
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:94
 #: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:104
@@ -426,11 +418,11 @@ msgstr ""
 #: gvsigol_services/forms_geoserver.py:87
 #: gvsigol_services/forms_geoserver.py:137
 #: gvsigol_services/forms_geoserver.py:149
-#: gvsigol_services/templates/cache_list.html:28
-#: gvsigol_services/templates/cache_list.html:69
-#: gvsigol_services/templates/external_layer_add.html:142
+#: gvsigol_services/templates/cache_list.html:39
+#: gvsigol_services/templates/cache_list.html:80
+#: gvsigol_services/templates/external_layer_add.html:145
 #: gvsigol_services/templates/external_layer_list.html:25
-#: gvsigol_services/templates/external_layer_update.html:163
+#: gvsigol_services/templates/external_layer_update.html:166
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:109
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:99
 #: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:108
@@ -467,7 +459,7 @@ msgstr ""
 #: gvsigol_services/forms_geoserver.py:177
 #: gvsigol_services/forms_services.py:155
 #: gvsigol_services/forms_services.py:182
-#: gvsigol_services/templates/cache_list.html:26
+#: gvsigol_services/templates/cache_list.html:37
 #: gvsigol_services/templates/layer_list.html:28
 msgid "Datastore"
 msgstr ""
@@ -680,7 +672,7 @@ msgid "User"
 msgstr ""
 
 #: gvsigol_services/forms_services.py:87
-#: gvsigol_services/templates/external_layer_update.html:378
+#: gvsigol_services/templates/external_layer_update.html:398
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:269
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:183
 #: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:150
@@ -820,6 +812,11 @@ msgstr ""
 msgid "Inverse Geocoder ICV"
 msgstr ""
 
+#: gvsigol_services/models.py:296
+#, python-brace-format
+msgid "enumerated ({0})"
+msgstr ""
+
 #: gvsigol_services/settings.py:30
 msgid "Layer requests"
 msgstr ""
@@ -880,8 +877,8 @@ msgstr ""
 
 #: gvsigol_services/templates/base_layer_add.html:87
 #: gvsigol_services/templates/base_layer_update.html:89
-#: gvsigol_services/templates/external_layer_add.html:115
-#: gvsigol_services/templates/external_layer_update.html:130
+#: gvsigol_services/templates/external_layer_add.html:118
+#: gvsigol_services/templates/external_layer_update.html:133
 msgid "Api-key"
 msgstr ""
 
@@ -930,8 +927,8 @@ msgid "Accept"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:80
-#: gvsigol_services/templates/cache_list.html:113
-#: gvsigol_services/templates/cache_list.html:150
+#: gvsigol_services/templates/cache_list.html:124
+#: gvsigol_services/templates/cache_list.html:161
 #: gvsigol_services/templates/datastore_list.html:92
 #: gvsigol_services/templates/enumeration_list.html:77
 #: gvsigol_services/templates/external_layer_list.html:87
@@ -946,8 +943,8 @@ msgid "Processing request..."
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:81
-#: gvsigol_services/templates/cache_list.html:114
-#: gvsigol_services/templates/cache_list.html:151
+#: gvsigol_services/templates/cache_list.html:125
+#: gvsigol_services/templates/cache_list.html:162
 #: gvsigol_services/templates/datastore_list.html:93
 #: gvsigol_services/templates/enumeration_list.html:78
 #: gvsigol_services/templates/external_layer_list.html:88
@@ -963,8 +960,8 @@ msgid "Search%(sep)s"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:82
-#: gvsigol_services/templates/cache_list.html:115
-#: gvsigol_services/templates/cache_list.html:152
+#: gvsigol_services/templates/cache_list.html:126
+#: gvsigol_services/templates/cache_list.html:163
 #: gvsigol_services/templates/datastore_list.html:94
 #: gvsigol_services/templates/enumeration_list.html:79
 #: gvsigol_services/templates/external_layer_list.html:89
@@ -980,8 +977,8 @@ msgid "Showing %(numrecords)s records"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:83
-#: gvsigol_services/templates/cache_list.html:116
-#: gvsigol_services/templates/cache_list.html:153
+#: gvsigol_services/templates/cache_list.html:127
+#: gvsigol_services/templates/cache_list.html:164
 #: gvsigol_services/templates/datastore_list.html:95
 #: gvsigol_services/templates/enumeration_list.html:80
 #: gvsigol_services/templates/external_layer_list.html:90
@@ -997,8 +994,8 @@ msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:84
-#: gvsigol_services/templates/cache_list.html:117
-#: gvsigol_services/templates/cache_list.html:154
+#: gvsigol_services/templates/cache_list.html:128
+#: gvsigol_services/templates/cache_list.html:165
 #: gvsigol_services/templates/datastore_list.html:96
 #: gvsigol_services/templates/enumeration_list.html:81
 #: gvsigol_services/templates/external_layer_list.html:91
@@ -1013,8 +1010,8 @@ msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:85
-#: gvsigol_services/templates/cache_list.html:118
-#: gvsigol_services/templates/cache_list.html:155
+#: gvsigol_services/templates/cache_list.html:129
+#: gvsigol_services/templates/cache_list.html:166
 #: gvsigol_services/templates/datastore_list.html:97
 #: gvsigol_services/templates/enumeration_list.html:82
 #: gvsigol_services/templates/external_layer_list.html:92
@@ -1030,8 +1027,8 @@ msgid "Filtering %(max)s records"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:87
-#: gvsigol_services/templates/cache_list.html:120
-#: gvsigol_services/templates/cache_list.html:157
+#: gvsigol_services/templates/cache_list.html:131
+#: gvsigol_services/templates/cache_list.html:168
 #: gvsigol_services/templates/datastore_list.html:99
 #: gvsigol_services/templates/enumeration_list.html:84
 #: gvsigol_services/templates/external_layer_list.html:94
@@ -1047,10 +1044,10 @@ msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:88
 #: gvsigol_services/templates/base_layer_list.html:89
-#: gvsigol_services/templates/cache_list.html:121
-#: gvsigol_services/templates/cache_list.html:122
-#: gvsigol_services/templates/cache_list.html:158
-#: gvsigol_services/templates/cache_list.html:159
+#: gvsigol_services/templates/cache_list.html:132
+#: gvsigol_services/templates/cache_list.html:133
+#: gvsigol_services/templates/cache_list.html:169
+#: gvsigol_services/templates/cache_list.html:170
 #: gvsigol_services/templates/datastore_list.html:100
 #: gvsigol_services/templates/datastore_list.html:101
 #: gvsigol_services/templates/enumeration_list.html:85
@@ -1075,8 +1072,8 @@ msgid "No records available"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:91
-#: gvsigol_services/templates/cache_list.html:124
-#: gvsigol_services/templates/cache_list.html:161
+#: gvsigol_services/templates/cache_list.html:135
+#: gvsigol_services/templates/cache_list.html:172
 #: gvsigol_services/templates/datastore_list.html:103
 #: gvsigol_services/templates/enumeration_list.html:88
 #: gvsigol_services/templates/external_layer_list.html:98
@@ -1091,8 +1088,8 @@ msgid "First"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:92
-#: gvsigol_services/templates/cache_list.html:125
-#: gvsigol_services/templates/cache_list.html:162
+#: gvsigol_services/templates/cache_list.html:136
+#: gvsigol_services/templates/cache_list.html:173
 #: gvsigol_services/templates/datastore_list.html:104
 #: gvsigol_services/templates/enumeration_list.html:89
 #: gvsigol_services/templates/external_layer_list.html:99
@@ -1107,8 +1104,8 @@ msgid "Previous"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:93
-#: gvsigol_services/templates/cache_list.html:126
-#: gvsigol_services/templates/cache_list.html:163
+#: gvsigol_services/templates/cache_list.html:137
+#: gvsigol_services/templates/cache_list.html:174
 #: gvsigol_services/templates/datastore_list.html:105
 #: gvsigol_services/templates/enumeration_list.html:90
 #: gvsigol_services/templates/external_layer_list.html:100
@@ -1123,8 +1120,8 @@ msgid "Next"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:94
-#: gvsigol_services/templates/cache_list.html:127
-#: gvsigol_services/templates/cache_list.html:164
+#: gvsigol_services/templates/cache_list.html:138
+#: gvsigol_services/templates/cache_list.html:175
 #: gvsigol_services/templates/datastore_list.html:106
 #: gvsigol_services/templates/enumeration_list.html:91
 #: gvsigol_services/templates/external_layer_list.html:101
@@ -1139,8 +1136,8 @@ msgid "Last"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:97
-#: gvsigol_services/templates/cache_list.html:130
-#: gvsigol_services/templates/cache_list.html:167
+#: gvsigol_services/templates/cache_list.html:141
+#: gvsigol_services/templates/cache_list.html:178
 #: gvsigol_services/templates/datastore_list.html:109
 #: gvsigol_services/templates/enumeration_list.html:94
 #: gvsigol_services/templates/external_layer_list.html:104
@@ -1156,8 +1153,8 @@ msgid "%(sep)sSort ascending"
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:98
-#: gvsigol_services/templates/cache_list.html:131
-#: gvsigol_services/templates/cache_list.html:168
+#: gvsigol_services/templates/cache_list.html:142
+#: gvsigol_services/templates/cache_list.html:179
 #: gvsigol_services/templates/datastore_list.html:110
 #: gvsigol_services/templates/enumeration_list.html:95
 #: gvsigol_services/templates/external_layer_list.html:105
@@ -1190,24 +1187,28 @@ msgstr ""
 msgid "Update"
 msgstr ""
 
-#: gvsigol_services/templates/cache_list.html:10
+#: gvsigol_services/templates/cache_list.html:11
+msgid "Error:"
+msgstr ""
+
+#: gvsigol_services/templates/cache_list.html:21
 msgid "Cached layers"
 msgstr ""
 
-#: gvsigol_services/templates/cache_list.html:11
+#: gvsigol_services/templates/cache_list.html:22
 msgid "Cached groups"
 msgstr ""
 
-#: gvsigol_services/templates/cache_list.html:137
-#: gvsigol_services/templates/cache_list.html:174
+#: gvsigol_services/templates/cache_list.html:148
+#: gvsigol_services/templates/cache_list.html:185
 #: gvsigol_services/templates/layergroup_list.html:115
 #: gvsigol_services/templates/layergroup_update.html:134
 #: gvsigol_services/templates/layergroup_update.html:136
 msgid "Clear cache"
 msgstr ""
 
-#: gvsigol_services/templates/cache_list.html:141
-#: gvsigol_services/templates/cache_list.html:178
+#: gvsigol_services/templates/cache_list.html:152
+#: gvsigol_services/templates/cache_list.html:189
 msgid "Configure cache options"
 msgstr ""
 
@@ -1368,15 +1369,20 @@ msgstr ""
 msgid "Detailed information"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:132
-#: gvsigol_services/templates/external_layer_update.html:146
+#: gvsigol_services/templates/external_layer_add.html:113
+#: gvsigol_services/templates/external_layer_update.html:128
+msgid "Alert: The selected matrixset must be compatible with the map CRS"
+msgstr ""
+
+#: gvsigol_services/templates/external_layer_add.html:135
+#: gvsigol_services/templates/external_layer_update.html:149
 #: gvsigol_services/templates/layer_add.html:93
 #: gvsigol_services/templates/layer_update.html:110
 msgid "Timeout (miliseconds)"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:158
-#: gvsigol_services/templates/external_layer_update.html:203
+#: gvsigol_services/templates/external_layer_add.html:161
+#: gvsigol_services/templates/external_layer_update.html:206
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:131
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:121
 #: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:127
@@ -1389,7 +1395,7 @@ msgstr ""
 msgid "Metadata: Abstract"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:159
+#: gvsigol_services/templates/external_layer_add.html:162
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:130
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:120
 #: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:128
@@ -1401,56 +1407,56 @@ msgstr ""
 msgid "Some description of the layer"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:176
-#: gvsigol_services/templates/external_layer_update.html:226
+#: gvsigol_services/templates/external_layer_add.html:179
+#: gvsigol_services/templates/external_layer_update.html:229
 #: gvsigol_services/templates/layer_add.html:242
 #: gvsigol_services/templates/layer_create.html:254
 #: gvsigol_services/templates/layer_update.html:321
 msgid "Enable metaquality"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:181
-#: gvsigol_services/templates/external_layer_update.html:235
+#: gvsigol_services/templates/external_layer_add.html:184
+#: gvsigol_services/templates/external_layer_update.html:238
 #: gvsigol_services/templates/layer_add.html:247
 #: gvsigol_services/templates/layer_create.html:259
 #: gvsigol_services/templates/layer_update.html:330
 msgid "Button title in the TOC"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:182
-#: gvsigol_services/templates/external_layer_update.html:236
+#: gvsigol_services/templates/external_layer_add.html:185
+#: gvsigol_services/templates/external_layer_update.html:239
 #: gvsigol_services/templates/layer_add.html:248
 #: gvsigol_services/templates/layer_create.html:260
 #: gvsigol_services/templates/layer_update.html:331
 msgid "Button title"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:182
-#: gvsigol_services/templates/external_layer_update.html:236
+#: gvsigol_services/templates/external_layer_add.html:185
+#: gvsigol_services/templates/external_layer_update.html:239
 #: gvsigol_services/templates/layer_add.html:248
 #: gvsigol_services/templates/layer_create.html:260
 #: gvsigol_services/templates/layer_update.html:331
 msgid "Detailed info"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:188
-#: gvsigol_services/templates/external_layer_update.html:245
+#: gvsigol_services/templates/external_layer_add.html:191
+#: gvsigol_services/templates/external_layer_update.html:248
 #: gvsigol_services/templates/layer_add.html:254
 #: gvsigol_services/templates/layer_create.html:266
 #: gvsigol_services/templates/layer_update.html:340
 msgid "HTML"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:245
-#: gvsigol_services/templates/external_layer_update.html:300
+#: gvsigol_services/templates/external_layer_add.html:249
+#: gvsigol_services/templates/external_layer_update.html:303
 #: gvsigol_services/templates/layer_add.html:572
 #: gvsigol_services/templates/layer_create.html:613
 #: gvsigol_services/templates/layer_update.html:520
 msgid "Layer title"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_add.html:246
-#: gvsigol_services/templates/external_layer_update.html:301
+#: gvsigol_services/templates/external_layer_add.html:250
+#: gvsigol_services/templates/external_layer_update.html:304
 #: gvsigol_services/templates/layer_add.html:573
 #: gvsigol_services/templates/layer_create.html:614
 #: gvsigol_services/templates/layer_update.html:521
@@ -1477,29 +1483,29 @@ msgstr ""
 msgid "Update external layer"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_update.html:179
+#: gvsigol_services/templates/external_layer_update.html:182
 #: gvsigol_services/templates/layer_update.html:274
 msgid "Layer metadata"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_update.html:184
+#: gvsigol_services/templates/external_layer_update.html:187
 #: gvsigol_services/templates/layer_update.html:279
 msgid "Metadata UUID"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_update.html:190
-#: gvsigol_services/templates/external_layer_update.html:196
+#: gvsigol_services/templates/external_layer_update.html:193
+#: gvsigol_services/templates/external_layer_update.html:199
 #: gvsigol_services/templates/layer_update.html:285
 #: gvsigol_services/templates/layer_update.html:291
 msgid "Metadata tools"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_update.html:191
+#: gvsigol_services/templates/external_layer_update.html:194
 #: gvsigol_services/templates/layer_update.html:286
 msgid "Edit in catalog"
 msgstr ""
 
-#: gvsigol_services/templates/external_layer_update.html:197
+#: gvsigol_services/templates/external_layer_update.html:200
 #: gvsigol_services/templates/layer_update.html:292
 msgid "Create metadata"
 msgstr ""
@@ -2395,7 +2401,7 @@ msgstr ""
 msgid "Workspace description"
 msgstr ""
 
-#: gvsigol_services/views.py:324
+#: gvsigol_services/views.py:325
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -2403,11 +2409,11 @@ msgid ""
 "numbers"
 msgstr ""
 
-#: gvsigol_services/views.py:335
+#: gvsigol_services/views.py:336
 msgid "Error: workspace could not be created"
 msgstr ""
 
-#: gvsigol_services/views.py:491
+#: gvsigol_services/views.py:492
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -2415,36 +2421,40 @@ msgid ""
 "numbers"
 msgstr ""
 
-#: gvsigol_services/views.py:512
+#: gvsigol_services/views.py:513
 msgid "Error: Data store could not be created"
 msgstr ""
 
-#: gvsigol_services/views.py:515
+#: gvsigol_services/views.py:516
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr ""
 
-#: gvsigol_services/views.py:563
+#: gvsigol_services/views.py:564
 msgid "Error updating datastore"
 msgstr ""
 
-#: gvsigol_services/views.py:714
+#: gvsigol_services/views.py:728
 msgid "ERROR can't connect with GeoServer"
 msgstr ""
 
-#: gvsigol_services/views.py:722
+#: gvsigol_services/views.py:736
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 
-#: gvsigol_services/views.py:746
+#: gvsigol_services/views.py:760
 msgid "ERROR User is not authorized to perform this operation"
 msgstr ""
 
-#: gvsigol_services/views.py:1714
+#: gvsigol_services/views.py:1909 gvsigol_services/views.py:1925
 #, python-brace-format
-msgid "enumerated ({0})"
+msgid "Error clearing cache. Cause: {cause}."
 msgstr ""
 
-#: gvsigol_services/views.py:2144 gvsigol_services/views.py:2302
+#: gvsigol_services/views.py:1911
+msgid "Not supported."
+msgstr ""
+
+#: gvsigol_services/views.py:2035 gvsigol_services/views.py:2193
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -2452,88 +2462,96 @@ msgid ""
 "numbers"
 msgstr ""
 
-#: gvsigol_services/views.py:2193 gvsigol_services/views.py:2323
+#: gvsigol_services/views.py:2084 gvsigol_services/views.py:2214
 msgid "Layer group name already exists"
 msgstr ""
 
-#: gvsigol_services/views.py:2197
+#: gvsigol_services/views.py:2088
 msgid "You must enter a name for layer group"
 msgstr ""
 
-#: gvsigol_services/views.py:2692
+#: gvsigol_services/views.py:2583
 msgid "You must enter a title for enumeration"
 msgstr ""
 
-#: gvsigol_services/views.py:2697
+#: gvsigol_services/views.py:2588
 msgid "Name already taken"
 msgstr ""
 
-#: gvsigol_services/views.py:3954
+#: gvsigol_services/views.py:3842
 msgid "Error: ExternalLayer could not be published"
 msgstr ""
 
-#: gvsigol_services/views.py:4055
+#: gvsigol_services/views.py:3943
 msgid "Error: externallayer could not be published"
 msgstr ""
 
-#: gvsigol_services/views.py:4676 gvsigol_services/views.py:4682
+#: gvsigol_services/views.py:4294
+#, python-brace-format
+msgid "Error accessing layer. Cause: {cause}."
+msgstr ""
+
+#: gvsigol_services/views.py:4391
+#, python-brace-format
+msgid "Error accessing layer group. Cause: {cause}."
+msgstr ""
+
+#: gvsigol_services/views.py:4578 gvsigol_services/views.py:4584
 msgid "Connection failed"
 msgstr ""
 
-#: gvsigol_services/views.py:4676
+#: gvsigol_services/views.py:4578
 msgid "Status code: "
 msgstr ""
 
-#: gvsigol_services/views.py:4687
+#: gvsigol_services/views.py:4589
 msgid "Connection error"
 msgstr ""
 
-#: gvsigol_services/views.py:4723
+#: gvsigol_services/views.py:4624
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
 msgstr ""
 
-#: gvsigol_services/views.py:4747 gvsigol_services/views.py:4809
-#: gvsigol_services/views.py:4813 gvsigol_services/views.py:4815
+#: gvsigol_services/views.py:4649 gvsigol_services/views.py:4711
+#: gvsigol_services/views.py:4715 gvsigol_services/views.py:4717
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:4749 gvsigol_services/views.py:4811
+#: gvsigol_services/views.py:4651 gvsigol_services/views.py:4713
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
 msgstr ""
 
-#: gvsigol_services/views.py:4751
+#: gvsigol_services/views.py:4653
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:4779
+#: gvsigol_services/views.py:4680
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr ""
 
-#: gvsigol_services/views.py:4781 gvsigol_services/views.py:4856
+#: gvsigol_services/views.py:4682 gvsigol_services/views.py:4737
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr ""
 
-#: gvsigol_services/views.py:4836
-msgid "String"
-msgstr ""
-
-#: gvsigol_services/views.py:4869
+#: gvsigol_services/views.py:4750
 msgid "Field type not supported"
 msgstr ""
 
-#: gvsigol_services/views.py:4873
+#: gvsigol_services/views.py:4755
 #, python-brace-format
-msgid "Field \"{0}\" exists"
+msgid ""
+"Error adding field. Probably the field \"{0}\" already exists. Database "
+"message: {1}"
 msgstr ""
 
-#: gvsigol_services/views.py:4922
+#: gvsigol_services/views.py:4787
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr ""

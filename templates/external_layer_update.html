@@ -123,6 +123,9 @@
 									<div class="col-md-12 form-group">
 										<label for="id_format">{% trans "MatrixSet" %}</label>
 										{{ form.matrixset }}
+									</div>
+									<div class="col-md-9 form-group">
+										<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>					
 									</div>	
 								</div>
 								<div class="row layers-control bing-control xyz-control osm-control">		
@@ -353,15 +356,32 @@ $(document).ready(function(){
 	
 	check_url();
 	updateFormfields();
+
+	function showAlertMatrix(){
+		var matrixset = $("#id_matrixset").val();
+
+		if(matrixset.includes("3857") || matrixset.includes("4326")){
+			$("#matrixset-alert").css("display", "none");
+			
+		}else{
+			$("#matrixset-alert").css("display", "block");
+		}
+	}
+
+	$("#id_matrixset").on('change', function(){
+		showAlertMatrix();
+	})
+
+	showAlertMatrix();
 	
 	$("#connect-button").click(function() {
 		//getLayersFromCapabilities(this.value);
 		url = $("#id_url").val();
 		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
 		if(!url.includes(hostname+"/")){
-			$(".alert-box-message").css("display", "block");
+			$("#connect-alert").css("display", "block");
 		}else{
-			$(".alert-box-message").css("display", "none");
+			$("#connect-alert").css("display", "none");
 		}
 		type = $("#id_type option:selected").val();
 		version = "";
@@ -477,11 +497,13 @@ $(document).ready(function(){
 						var layers = data['matrixsets'];
 						for(var i=0;i<layers.length; i++){
 							if(layers[i] == matrixset){
-								$("#id_matrixset").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+								
+								$("#id_matrixset").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
 							}else{
 		 						$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 							}
 						}
+						showAlertMatrix();
 					}
 				 
 				 if(edit_version && 'version' in data){
