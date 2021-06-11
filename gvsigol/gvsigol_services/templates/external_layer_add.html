@@ -108,7 +108,10 @@
 									<div class="col-md-12 form-group">
 										<label for="id_format">{% trans "MatrixSet" %}</label>
 										{{ form.matrixset }}
-									</div>	
+									</div>
+									<div class="col-md-9 form-group">
+										<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>					
+									</div>
 								</div>
 								<div class="row layers-control bing-control xyz-control osm-control">		
 									<div class="col-md-12 form-group">
@@ -229,6 +232,7 @@ $(document).ready(function(){
 	var bing_layers = {{bing_layers|safe}};
 	
 	var detailedInfoHTML = document.getElementById('detailed_info_html');
+	
 	var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
 		mode: "text/html",
         extraKeys: {"Ctrl-Space": "autocomplete"},
@@ -278,15 +282,32 @@ $(document).ready(function(){
 	})
 	
 	updateFormfields();
+
+	function showAlertMatrix(){
+		var matrixset = $("#id_matrixset").val();
+
+		if(matrixset.includes("3857") || matrixset.includes("4326")){
+			$("#matrixset-alert").css("display", "none");
+			
+		}else{
+			$("#matrixset-alert").css("display", "block");
+		}
+	}
+
+	$("#id_matrixset").on('change', function(){
+		showAlertMatrix();
+	})
+
+	
 	
 	$("#connect-button").click(function() {
 		//getLayersFromCapabilities(this.value);
 		url = $("#id_url").val();
 		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
 		if(!url.includes(hostname+"/")){
-			$(".alert-box-message").css("display", "block");
+			$("#connect-alert").css("display", "block");
 		}else{
-			$(".alert-box-message").css("display", "none");
+			$("#connect-alert").css("display", "none");
 		}
 
 		type = $("#id_type option:selected").val();
@@ -436,8 +457,10 @@ $(document).ready(function(){
 							matrixset = $("#id_matrixset option:selected").val();
 							format_or = $("#id_format option:selected").val();
 							
-							getNewLayersFromCapabilities(url, type, version, layer, false);
 							$('#id_layers option[value="'+layer+'"]').prop('selected', true);
+							getNewLayersFromCapabilities(url, type, version, layer, false);
+							showAlertMatrix()
+							
 						});
 				 }
 				 
