@@ -332,8 +332,8 @@ class Tiling():
                         if self._download_wmts(zoom, x, y, format_) is False:
                             return False
                         if base_layer_process is not None:
-                            if base_layer_process[str(self.prj_id)]['stop'] == 'true':
-                                return False
+                            #if base_layer_process[str(self.prj_id)]['stop'] == 'true':
+                            #    return False
                             base_layer_process[str(self.prj_id)]['active'] = 'true'
                             base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
                             base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, init_processed_tiles)
@@ -401,7 +401,7 @@ class Tiling():
 
             tiling_status.processed_tiles = layer_process['processed_tiles']
             tiling_status.time = layer_process['time']
-            if tiling_status.processed_tiles == tiling_status.total_tiles or tiling_status.stop == 'false':
+            if tiling_status.processed_tiles == tiling_status.total_tiles or tiling_status.stop == 'true':
                 tiling_status.active = "false" 
                 tiling_status.end_time = timezone.now()
             tiling_status.save()
