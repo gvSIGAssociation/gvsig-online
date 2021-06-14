@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+from django.utils.translation import ugettext_noop as _
+
 APP_TITLE = 'Gestor de descargas'
 APP_DESCRIPTION = 'Gestor de descargas'
 TMP_DIR="/tmp/gol-downman"
@@ -19,8 +22,8 @@ STATISTICS=[
     'count': 1,
     'operation': 'layer_resource_downloaded',
     'reverse_petition': False,
-    'title': 'Layer resource downloads',
-    'target_title': 'LayerResourceProxy',
+    'title': _('Layer resource downloads'),
+    'target_title': _('LayerResourceProxy'),
     'target_field': 'fq_title_name'
 },
 {
@@ -28,8 +31,8 @@ STATISTICS=[
     'count': 2,
     'operation': 'layer_downloaded',
     'reverse_petition': False,
-    'title': 'Layer downloads',
-    'target_title': 'LayerProxy',
+    'title': _('Layer downloads'),
+    'target_title': _('LayerProxy'),
     'target_field': 'title'
 },
 ]
