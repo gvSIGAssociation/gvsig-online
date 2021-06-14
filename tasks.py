@@ -11,6 +11,7 @@ from gvsigol_services.models import Layer
 
 @celery_app.task
 def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels):
+    MAX_TILES_PACKAGE = 16384
     lyr = Layer.objects.get(id=lyr_id)
     
     if(version is None):
@@ -86,6 +87,11 @@ def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_re
         process_data[str(identif)]['total_tiles'] = number_of_tiles
 
         start_level = 0
+
+        if(number_of_tiles > MAX_TILES_PACKAGE):
+            process_data[str(identif)]['extent_processed'] = 'too_many_tiles'
+            process_data[str(identif)]['stop'] = 'true'
+
         tiling_status = ts_.create_status(process_data[str(identif)], lyr.id)
 
         if(number_of_tiles == 0):
