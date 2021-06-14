@@ -484,7 +484,7 @@ def requestDownload(request):
                     # return an error
                     pass
                 """
-                if request.user and not request.user.is_anonymous():
+                if request.user and not request.user.is_anonymous:
                     downRequest.requested_by_user = request.user.username
                 else:
                     downRequest.requested_by_external = json_data.get('email', '')
