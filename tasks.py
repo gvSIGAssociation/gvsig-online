@@ -98,11 +98,11 @@ def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_re
             return 
 
         if(download_first_levels == False):
-            start_level = 5
+            start_level = 2
         tiles_already_downloaded = {}
         for t in tilingList:
             t['tiling'].retry_tiles_from_utm(process_data, t['tile_min_x'], t['tile_min_y'], t['tile_max_x'], t['tile_max_y'], num_res_levels, format_, start_level, None, None, tiling_status, tiles_already_downloaded)
-            start_level =  5 #Para al 1ra geom se descargan los niveles de 0-4 completos pero para las sgtes ya no hace falta
+            start_level =  2 #Para al 1ra geom se descargan los niveles de 0-4 completos pero para las sgtes ya no hace falta
        
         ts_._zipFolder(folder_lyr)
     except Exception as e:
