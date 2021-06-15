@@ -9,6 +9,28 @@ import gvsigol_services.tiling_service as ts_ #Tiling, create_status, _zipFolder
 from pyproj import Proj, transform
 from gvsigol_services.models import Layer
 
+"""
+Dado un extent o una lista de extents en GeoJSON genera un paquete con los tiles de la capa que caen dentro de 
+las geometrías. Las geometrías pasadas pueden ser de tipo Polygon o Point. Si son Polygon se usará la extensión
+del poligono. Si son de tipo Point se usará la extensión de un buffer definido en una propiedad del geoJson llamada 
+buffer con un entero que indique el buffer en metros alrededor de la coordenada. 
+
+Las coordenadas siempre serán en geográficas.
+
+Los niveles de 0 al 4 se empaquetan completos y del 5 en adelante solo los tiles que caen dentro de los polígonos o
+puntos con buffer definidos. Si se pasa el parámetro download_first_levels a False no se empaquetan los niveles del
+0 al 4.
+
+El objeto process_data es una estructura en la que se va actualizando el número de tiles procesados y otra información
+del proceso de descarga y empaquetado
+"""
+def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilematrixset, format_='image/png', matrixset_prefix=None, properties=None, download_first_levels=True):
+    try:
+        #tiling_layer_celery_task(version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels)
+        tiling_layer_celery_task.apply_async(args=[version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels])
+    except Exception as e:
+        return
+
 @celery_app.task
 def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels):
     MAX_TILES_PACKAGE = 16384
