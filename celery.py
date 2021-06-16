@@ -20,12 +20,7 @@ app = Celery('gvsigol')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 """
 app.conf['broker_connection_max_retries'] = 1
-app.conf['broker_transport_options'] = {
-    'max_retries': 1,
-    'interval_start': 0,
-    'interval_step': 0.5,
-    'interval_max': 1,
-}
+# set timeout and retry options from workers to broker
 app.conf['task_publish_retry_policy'] = {
     'max_retries': 1,
     'interval_start': 0,
@@ -33,7 +28,16 @@ app.conf['task_publish_retry_policy'] = {
     'interval_max': 1,
 }
 """
+
 app.conf['task_acks_late'] = True
+# set timeout and retry options from producer to broker
+app.conf['broker_transport_options'] = {
+    'max_retries': 3,
+    'interval_start': 0,
+    'interval_step': 1,
+    'interval_max': 3,
+}
+
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
