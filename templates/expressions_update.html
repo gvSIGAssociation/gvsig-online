@@ -331,7 +331,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/remove_temporal_preview/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				name: "{{style.name}}",

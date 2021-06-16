@@ -775,7 +775,7 @@ ClusteredPoints.prototype.save = function(layerId) {
 		async: false,
 		url: "/gvsigonline/symbology/clustered_points_add/" + layerId + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style)
@@ -803,7 +803,7 @@ ClusteredPoints.prototype.update = function(layerId, styleId) {
 		async: false,
 		url: "/gvsigonline/symbology/clustered_points_update/" + layerId + "/" + styleId + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style)
@@ -910,7 +910,7 @@ ClusteredPoints.prototype.updatePreview = function(layerId) {
 		async: false,
 		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style),

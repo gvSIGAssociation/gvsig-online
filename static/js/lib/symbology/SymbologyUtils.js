@@ -557,7 +557,7 @@ SymbologyUtils.prototype.sld = function(layerId, type, symbology) {
 		async: false,
 		url: "/gvsigonline/symbology/create_sld/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			type: self.type,

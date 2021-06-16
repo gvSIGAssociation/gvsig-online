@@ -159,7 +159,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/symbology/color_ramp_delete/' + data + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-library').modal('hide');

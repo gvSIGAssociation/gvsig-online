@@ -423,7 +423,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/get_unique_values/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				layer_id: layerId,
@@ -467,7 +467,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/get_ramps_from_folder/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				folder_id: folderId
@@ -521,7 +521,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/get_folders_from_library/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				library_id: libraryId
@@ -558,7 +558,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/remove_temporal_preview/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				name: "{{style.name}}",

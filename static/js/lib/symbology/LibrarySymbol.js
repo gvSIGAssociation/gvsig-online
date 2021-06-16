@@ -135,7 +135,7 @@ LibrarySymbol.prototype.save = function(libraryid, name, title, filter) {
 	    enctype: 'multipart/form-data',
 		url: "/gvsigonline/symbology/symbol_add/" + libraryid + "/" + this.symbologyUtils.getFeatureType() + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			file: $("#eg-file")[0],
@@ -182,7 +182,7 @@ LibrarySymbol.prototype.update = function(id, name, title, filter) {
 		async: false,
 		url: "/gvsigonline/symbology/symbol_update/" + id + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			rule: JSON.stringify(symbol)

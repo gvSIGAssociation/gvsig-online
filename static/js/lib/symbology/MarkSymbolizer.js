@@ -301,7 +301,7 @@ MarkSymbolizer.prototype.sld2 = function() {
 		async: false,
 		url: "/gvsigonline/symbology/create_sld/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			type: this.utils.type,

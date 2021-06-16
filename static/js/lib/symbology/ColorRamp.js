@@ -280,7 +280,7 @@ ColorRamp.prototype.refreshComponentPreview = function(component_id, json_data, 
 //		async: false,
 //		url: "/gvsigonline/symbology/color_table_add/" + layerId + "/",
 //		beforeSend:function(xhr){
-//			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+//			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 //		},
 //		data: {
 //			style_data: JSON.stringify(style)
@@ -323,7 +323,7 @@ ColorRamp.prototype.refreshComponentPreview = function(component_id, json_data, 
 //		async: false,
 //		url: "/gvsigonline/symbology/color_table_update/" + layerId + "/" + styleId + "/",
 //		beforeSend:function(xhr){
-//			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+//			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 //		},
 //		data: {
 //			style_data: JSON.stringify(style)

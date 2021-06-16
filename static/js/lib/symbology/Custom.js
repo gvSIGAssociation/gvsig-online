@@ -260,7 +260,7 @@ Charts.prototype.save = function(layerId) {
 		async: false,
 		url: "/gvsigonline/symbology/charts_add/" + layerId + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style)
@@ -287,7 +287,7 @@ Charts.prototype.update = function(layerId, styleId) {
 		async: false,
 		url: "/gvsigonline/symbology/charts_update/" + layerId + "/" + styleId + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style)
@@ -390,7 +390,7 @@ Charts.prototype.updatePreview = function(layerId) {
 		async: false,
 		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style),
