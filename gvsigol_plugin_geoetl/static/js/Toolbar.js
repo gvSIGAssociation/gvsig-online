@@ -275,7 +275,7 @@ gvsigolETL.Toolbar = Class.extend({
 						url: '/gvsigonline/etl/etl_workspace_add/',
 						data: formWorkspace,
 						beforeSend:function(xhr){
-							xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+							xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 						},
 						cache: false, 
 						contentType: false, 
@@ -322,7 +322,7 @@ gvsigolETL.Toolbar = Class.extend({
 							url: '/gvsigonline/etl/etl_workspace_add/',
 							data: formWorkspace,
 							beforeSend:function(xhr){
-								xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 							},
 							cache: false, 
 							contentType: false, 
@@ -361,7 +361,7 @@ gvsigolETL.Toolbar = Class.extend({
 					url: '/gvsigonline/etl/etl_read_canvas/',
 					data: formData,
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					cache: false, 
                     contentType: false, 

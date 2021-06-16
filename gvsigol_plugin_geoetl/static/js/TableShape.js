@@ -205,7 +205,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
 					url: '/gvsigonline/etl/etl_schema_csv/',
 					data: formDataSchemaCSV,
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					cache: false, 
                     contentType: false, 
@@ -434,7 +434,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 					url: '/gvsigonline/etl/etl_sheet_excel/',
 					data: formDataSheetExcel,
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					cache: false, 
                     contentType: false, 
@@ -470,7 +470,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 					url: '/gvsigonline/etl/etl_schema_excel/',
 					data: formDataSchemaExcel,
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					cache: false, 
                     contentType: false, 
@@ -718,7 +718,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
 					url: '/gvsigonline/etl/etl_schema_shape/',
 					data: formDataSchemaShape,
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					cache: false, 
                     contentType: false, 
@@ -3837,7 +3837,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                 url: '/gvsigonline/etl/test_postgres_conexion/',
                 data: formDataPostgres,
                 beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
                 },
                 cache: false, 
                 contentType: false, 
@@ -4180,7 +4180,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 url: '/gvsigonline/etl/test_postgres_conexion/',
                 data: formDataPostgres,
                 beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
                 },
                 cache: false, 
                 contentType: false, 

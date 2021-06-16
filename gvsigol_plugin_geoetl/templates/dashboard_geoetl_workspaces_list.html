@@ -323,7 +323,7 @@
 					},
 					url: '/gvsigonline/etl/etl_workspace_delete/',
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					success	:function(response){
 						$('#modal-delete-workspace-etl').modal('hide');
@@ -360,7 +360,7 @@
 					data: updateData,
 					url: '/gvsigonline/etl/etl_workspace_update/',
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					success	:function(response){
 						$('#modal-update-workspace-etl').modal('hide');
@@ -454,7 +454,7 @@
 			async: true,
 		  	url: '/gvsigonline/etl/etl_list_canvas_status/',
 		  	beforeSend:function(xhr){
-		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		  	},
 		  	success	:function(response){
 		  		actualizarInfoPanel(response);  		

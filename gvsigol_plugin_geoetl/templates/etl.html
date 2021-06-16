@@ -135,7 +135,7 @@
 			async: true,
 		  	url: '/gvsigonline/etl/etl_current_canvas_status/',
 		  	beforeSend:function(xhr){
-		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		  	},
 		  	success	:function(response){
 		  		actualizarInfoPanel(response);  		
