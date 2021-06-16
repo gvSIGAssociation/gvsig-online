@@ -2412,7 +2412,7 @@ EditionBar.prototype.updateServiceBoundingBox = function(workspace,layerName) {
 		  	layer: layerName
 		},
 	  	beforeSend:function(xhr){
-	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+	    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 	  	}
 	});
 };
@@ -2431,7 +2431,7 @@ EditionBar.prototype.removeLayerLock = function() {
 		  	layer: self.selectedLayer.layer_name
 		},
 	  	beforeSend:function(xhr){
-	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+	    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 	  	},
 	  	success	:function(response){},
 	  	error: function(){
@@ -2506,7 +2506,7 @@ EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, f
 		data: data,
 		url: '/gvsigonline/edition/feature_version_management/',
 		beforeSend:function(xhr){
-		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		success	:function(response) {
 			//Actualiza las propiedades de versión de la feature en el  
@@ -2541,7 +2541,7 @@ EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, versi
 		data: data,
 		url: '/gvsigonline/edition/check_feat_version/',
 		beforeSend:function(xhr){
-		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		success	:function(response) {
 			success = 1; //OK

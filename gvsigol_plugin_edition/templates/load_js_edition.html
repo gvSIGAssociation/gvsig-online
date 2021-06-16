@@ -115,7 +115,7 @@
 					layertree: layerTree
 				},
 			  	beforeSend:function(xhr){
-			    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			  	},
 			  	success	:function(response){
 			  		var self = this.origdata.layertree;
