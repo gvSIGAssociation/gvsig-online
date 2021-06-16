@@ -215,7 +215,7 @@ $(document).ready(function() {
 				url: '/gvsigonline/core/project_clone/' + data[0] + '/',
 				data: $('#modal-clone-project input').serialize(),
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-clone-project').modal('hide');
@@ -252,7 +252,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/core/project_delete/' + data[0] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-project').modal('hide');

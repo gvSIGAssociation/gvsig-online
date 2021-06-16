@@ -136,7 +136,7 @@
 					'toc': JSON.stringify(toc)
 				},
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					location.href = '/gvsigonline/core/project_list/';

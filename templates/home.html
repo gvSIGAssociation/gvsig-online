@@ -152,7 +152,7 @@
 			async: false,
 			url: '/gvsigonline/auth/password_update/',
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 		  		'password1': pass1,
