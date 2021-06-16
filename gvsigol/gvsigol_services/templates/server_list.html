@@ -140,7 +140,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/services/server_delete/' + data[0] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-server').modal('hide');

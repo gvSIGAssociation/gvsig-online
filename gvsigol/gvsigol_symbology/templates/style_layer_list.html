@@ -132,7 +132,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/symbology/style_layer_delete/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				data: {
 					style_id: style_id,

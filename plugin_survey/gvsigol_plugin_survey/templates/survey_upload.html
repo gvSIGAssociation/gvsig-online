@@ -74,7 +74,7 @@ $().ready(function(){
 // 			url: '/gvsigonline/surveys/upload_db/'+ name +'/',
 // 			data: $('#id_file').attr('files'),
 // 			beforeSend:function(xhr){
-// 			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+// 			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 // 			},
 // 			success	:function(response){
 // 				alert("Hola");

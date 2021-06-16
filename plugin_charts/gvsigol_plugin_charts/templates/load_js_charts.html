@@ -19,7 +19,7 @@
 			async : false,
 			url : '/gvsigonline/charts/get_conf/',
 			beforeSend : function(xhr) {
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success : function(response) {
 				var chartLayers = response.layers;

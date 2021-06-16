@@ -19,7 +19,7 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_downloadman')) {
 		async : false,
 		url : "{% url 'download_manager_getconf' %}",
 		beforeSend : function(xhr) {
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		success : function(response) {
 			config.shopping_cart_max_items = response.shopping_cart_max_items;

@@ -230,7 +230,7 @@ $(document).ready(function() {
 			async: false,
 			url: '/gvsigonline/services/layer_cache_clear/' + layerId + '/',
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success	:function(response){
 				button.find("i").removeClass('fa-spin');
@@ -255,7 +255,7 @@ $(document).ready(function() {
 			async: false,
 			url: '/gvsigonline/services/layergroup_cache_clear/' + layerId + '/',
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success	:function(response){
 				button.find("i").removeClass('fa-spin');

@@ -296,7 +296,7 @@ $().ready(function() {
 			url: "/gvsigonline/services/get_group_cache_tasks/",
 			async: false,
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data:{
 				'group_id': '{{group_id}}'
@@ -337,7 +337,7 @@ $().ready(function() {
 			url: "/gvsigonline/services/kill_all_group_tasks/",
 			async: false,
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data:{
 				'group_id': '{{group_id}}'

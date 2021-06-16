@@ -474,7 +474,7 @@
 			async: true,
 		  	url: '/gvsigonline/geocoding/provider_import_status/{{provider_id}}/',
 		  	beforeSend:function(xhr){
-		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		  	},
 		  	success	:function(response){
 		  		actualizarInfoPanel(response);	  		
@@ -506,7 +506,7 @@
 			async: true,
 		  	url: '/gvsigonline/geocoding/provider_delta_import/{{provider_id}}/',
 		  	beforeSend:function(xhr){
-		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		  	},
 		  	success	:function(response){
 		  		getImportProcessStatus();
@@ -528,7 +528,7 @@
 			async: true,
 		  	url: '/gvsigonline/geocoding/provider_full_import/{{provider_id}}/',
 		  	beforeSend:function(xhr){
-		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		  	},
 		  	success	:function(response){
 		  		getImportProcessStatus();

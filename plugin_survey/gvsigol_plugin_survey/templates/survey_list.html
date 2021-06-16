@@ -211,7 +211,7 @@ $(document).ready(function() {
 			async: false,
 			url: '/gvsigonline/survey/survey_definition/' + data[1] + '/',
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success	:function(response){
 				console.log(response.json);
@@ -227,7 +227,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/survey/survey_update_project/' + data[1] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					if(response.result == "OK"){
@@ -255,7 +255,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/survey/survey_delete/' + data[1] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-survey').modal('hide');

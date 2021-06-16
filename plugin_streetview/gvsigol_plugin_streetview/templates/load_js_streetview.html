@@ -14,7 +14,7 @@
 			async : false,
 			url : '/gvsigonline/streetview/get_conf/',
 			beforeSend : function(xhr) {
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success : function(response) {
 				var apiKey = response.API_KEY;

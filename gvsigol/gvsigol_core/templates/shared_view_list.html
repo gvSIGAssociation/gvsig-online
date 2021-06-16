@@ -113,7 +113,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/core/shared_view_delete/' + data[0] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-view').modal('hide');

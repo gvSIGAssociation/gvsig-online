@@ -130,7 +130,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/charts/chart_delete/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				data: {
 					chart_id: chartId

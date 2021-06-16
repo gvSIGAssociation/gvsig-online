@@ -18,7 +18,7 @@
 			async : false,
 			url : '/gvsigonline/staticdownloads/get_conf/',
 			beforeSend : function(xhr) {
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success : function(response) {
 				var url = response.downloads_url;

@@ -126,7 +126,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/symbol_delete/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				symbol_id: "{{rule.id}}"

@@ -122,7 +122,7 @@ ColorTable.prototype.save = function(layerId) {
 		     	processData: false,	
 				url: "/gvsigonline/symbology/color_table_add/" + layerId + "/",
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				data: formData,
 				success: function(response){
@@ -156,7 +156,7 @@ ColorTable.prototype.save = function(layerId) {
 	     	processData: false,	
 			url: "/gvsigonline/symbology/color_table_add/" + layerId + "/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: formData,
 			success: function(response){
@@ -240,7 +240,7 @@ ColorTable.prototype.update = function(layerId, styleId) {
 		     	processData: false,	
 				url: "/gvsigonline/symbology/color_table_update/" + layerId + "/" + styleId + "/",
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				data: formData,
 				success: function(response){
@@ -274,7 +274,7 @@ ColorTable.prototype.update = function(layerId, styleId) {
 	     	processData: false,	
 			url: "/gvsigonline/symbology/color_table_update/" + layerId + "/" + styleId + "/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: formData,
 			success: function(response){
@@ -302,7 +302,7 @@ ColorTable.prototype.updatePreview = function(layerId) {
 		async: false,
 		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style),

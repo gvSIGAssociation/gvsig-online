@@ -607,7 +607,7 @@ $('#submenu-layers').addClass("active");
 		$('#create_metadata_btn').click(function() {
 			var url = '{% url 'create_metadata' layer_id %}';
 			$.ajax({url: url, type: 'post', data: {}, 
-				headers: {'X-CSRFToken': $.cookie('csrftoken')},
+				headers: {'X-CSRFToken': Cookies.get('csrftoken')},
 				success: function(data, textStatus, jqXHR) {
 					if (data.status=='ok') {
 						$('#uuid').val(data.uuid);

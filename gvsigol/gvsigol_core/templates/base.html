@@ -18,13 +18,12 @@
 	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
 	
 	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
-	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datetimepicker.css" %}">
 	<link rel="stylesheet" href="{% static "css/fontcustom2/fontcustom.css" %}">
 	<link rel="stylesheet" href="{% static "css/ionicons.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/media/css/jquery.dataTables.css" %}">
-<!-- 	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/media/css/dataTables.bootstrap.css" %}">	 -->
 	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/extensions/Select/css/select.dataTables.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/Buttons-1.2.4/css/buttons.dataTables.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol.css" %}">
@@ -201,9 +200,8 @@
 	</div>
 
 	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
-
-	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jscookie/jscookie-2.2.1.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
 	<script>
@@ -211,7 +209,7 @@
 		var IMG_PATH = '{% static "img/" %}';
 		var HTML_PATH = '{% static "html/" %}';
 	</script>
-	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/slimScroll/jquery.slimscroll.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Moment.js/moment.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/js/bootstrap-datetimepicker.js" %}"></script>
@@ -219,7 +217,6 @@
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/dataTables.buttons.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jsChart/chart.js-2.8.0.js" %}"></script>
-<!-- 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/dataTables.bootstrap.min.js" %}"></script> -->
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/extensions/Select/js/dataTables.select.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.autocomplete.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
@@ -241,6 +238,9 @@
 	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/search-in-components/select2.full.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/search-in-components/list.js" %}"></script>
+	
+	<script src="https://code.jquery.com/jquery-migrate-3.3.2.js"></script>
+
 	<script>
 		var messageBox = new messageBox();
 	</script>

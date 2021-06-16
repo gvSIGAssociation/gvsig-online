@@ -1324,7 +1324,7 @@ CatalogView.prototype.createDetailsPanel = function(layer){
 		async: false,
 		url: url,
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		success: function(response){
 			if ("html" in response) {

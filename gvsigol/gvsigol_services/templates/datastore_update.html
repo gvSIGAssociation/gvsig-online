@@ -294,7 +294,7 @@ $().ready(function(){
 				ds_type: ds_type
 			},
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success	:function(response){
 				if (response.success) {

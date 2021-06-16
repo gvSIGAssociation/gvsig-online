@@ -229,7 +229,7 @@ PolygonSymbolizer.prototype.sld = function() {
 		async: false,
 		url: "/gvsigonline/symbology/create_sld/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			type: 'EX',

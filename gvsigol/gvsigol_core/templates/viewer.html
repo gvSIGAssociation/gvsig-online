@@ -14,7 +14,7 @@
 	<link rel="shortcut icon" href="{% static "img/logo_custom_icon.png" %}">
 	
 	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
-	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datepicker.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datetimepicker.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.css" %}">
@@ -337,9 +337,9 @@
 		    };
 		}
 	</script>
-
-	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
+	
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jscookie/jscookie-2.2.1.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jsZip/jszip.min.js" %}"></script>
@@ -375,7 +375,7 @@
 			  };
 			}
 	</script>
-	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>	
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/js/bootstrap-datepicker.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Moment.js/moment.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/js/bootstrap-datetimepicker.js" %}"></script>
@@ -452,6 +452,8 @@
 
 	<script type="text/javascript" src="{% static "js/lib/viewer.js" %}"></script>
 
+	<script src="https://code.jquery.com/jquery-migrate-3.3.2.js"></script>
+
 	<script type="text/javascript">
 		$(document).ready(function(){
 	    	$("#select-language").change(function() {
@@ -505,7 +507,7 @@
 			url : '/gvsigonline/core/project_get_conf/',
 			data : data,
 			beforeSend : function(xhr) {
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success : function(response) {
 				for (var key in response.supported_crs) {

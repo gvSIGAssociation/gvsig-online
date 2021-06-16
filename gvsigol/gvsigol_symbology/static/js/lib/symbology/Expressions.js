@@ -712,7 +712,7 @@ Expressions.prototype.save = function(layerId) {
 		async: false,
 		url: "/gvsigonline/symbology/expressions_add/" + layerId + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style)
@@ -739,7 +739,7 @@ Expressions.prototype.update = function(layerId, styleId) {
 		async: false,
 		url: "/gvsigonline/symbology/expressions_update/" + layerId + "/" + styleId + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style)
@@ -843,7 +843,7 @@ Expressions.prototype.updatePreview = function(layerId) {
 		async: false,
 		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style_data: JSON.stringify(style),

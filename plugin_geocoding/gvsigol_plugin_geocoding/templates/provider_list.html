@@ -150,7 +150,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/geocoding/provider_delete/' + data[1] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-provider').modal('hide');
@@ -169,7 +169,7 @@ $(document).ready(function() {
         			  type:"POST",
         			      url:'/gvsigonline/geocoding/provider_update_order/' + $(this).children(".row-id").text() + '/'+ (index+1) + '/',
         			      beforeSend:function(xhr){
-        					    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+        					    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
         					},
         			      success: function(msg){      
         			      },

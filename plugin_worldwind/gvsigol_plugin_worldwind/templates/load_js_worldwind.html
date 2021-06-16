@@ -43,7 +43,7 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_worldwind')) {
 		async : false,
 		url : '/gvsigonline/ww_provider_conf/{{pid}}/',
 		beforeSend : function(xhr) {
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		success : function(response) {
 			var map = viewer.core.getMap();

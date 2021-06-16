@@ -350,7 +350,7 @@
 					data: data,
 					url: '/gvsigonline/services/nullable_check/',
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					success	:function(response) {
 						document.getElementById("field-mandatory-"+counter).disabled = true;
@@ -430,7 +430,7 @@
 				async: false,
 				url: '/gvsigonline/services/convert_to_enumerate/',
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 			  	data:{
 			  		'field': fieldName,
@@ -456,7 +456,7 @@
 				async: false,
 				url: '/gvsigonline/services/convert_to_enumerate/',
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 			  	data:{
 			  		'field': fieldName,
@@ -524,7 +524,7 @@
 				async: false,
 				url: '/gvsigonline/services/db_field_delete/',
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 			  	data:{
 			  		'field': fieldName,
@@ -586,7 +586,7 @@
 					async: false,
 					url: '/gvsigonline/services/db_field_rename/',
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 				  	data:{
 				  		'field': fieldName,
@@ -641,7 +641,7 @@
 			async: false,
 			url: '/gvsigonline/services/db_field_add/',
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 		  	data:{
 		  		'field': field.name,

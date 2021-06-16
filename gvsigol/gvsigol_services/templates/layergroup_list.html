@@ -154,7 +154,7 @@ $(document).ready(function() {
 			async: false,
 			url: '/gvsigonline/services/layergroup_cache_clear/' + layerId + '/',
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success	:function(response){
 				button.find("i").removeClass('fa-spin');
@@ -174,7 +174,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/services/layergroup_delete/' + data[0] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-layergroup').modal('hide');

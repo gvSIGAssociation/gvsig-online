@@ -96,7 +96,7 @@ gvsigol.tools.ShareView.prototype.save = function(description) {
 		async: true,
 	  	url: '/gvsigonline/core/save_shared_view/',
 	  	beforeSend : function(xhr) {
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 	  	data: this.getSharedViewState(description),
 	  	success	:function(response){

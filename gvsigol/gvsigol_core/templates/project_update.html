@@ -876,7 +876,7 @@
 						async: true,
 						url: '/gvsigonline/services/base_layer_process_update/{{pid}}/',
 						beforeSend:function(xhr){
-						    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 						},
 						success	:function(response){
 							if(response.active == 'true') {
@@ -1109,7 +1109,7 @@
 				},
 				url: '/gvsigonline/services/create_base_layer/{{pid}}/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					//messageBox.show('info', gettext('tile process ended'));
@@ -1127,7 +1127,7 @@
 				async: true,
 				url: '/gvsigonline/services/retry_base_layer_process/{{pid}}/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					//messageBox.show('info', gettext('tile process ended'));
@@ -1145,7 +1145,7 @@
 				async: true,
 				url: '/gvsigonline/services/stop_base_layer_process/{{pid}}/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				}
 			});
 		});
@@ -1207,7 +1207,7 @@
     				async: false,
     				url: '/gvsigonline/geocoding/find_candidate/',
     				beforeSend:function(xhr){
-    					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+    					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
     				},
     				data: {
     					'address': suggestion.data
@@ -1392,7 +1392,7 @@
 				url: "{% url 'extend_permissions_to_layer' %}",
 				data: data,
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$("#modal-extend-to-layers").modal('hide');

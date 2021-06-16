@@ -298,7 +298,7 @@ $(document).ready(function() {
 				async: false,
 				url: "/gvsigonline/charts/barchart_add/" + layerId +  "/",
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				data: {
 					title: title,

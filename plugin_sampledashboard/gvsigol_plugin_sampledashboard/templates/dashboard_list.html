@@ -140,7 +140,7 @@ $(document).ready(function() {
 		        },
 				url: '/gvsigonline/sampledashboard/sampledashboard_delete/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-samples').modal('hide');

@@ -110,7 +110,7 @@ Charts.prototype.showChartsView = function(layerId) {
 		async: false,
 	  	url: '/gvsigonline/charts/view/',
 	  	beforeSend : function(xhr) {
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 	  	data: {
 	  		layer_id: layerId
@@ -148,7 +148,7 @@ Charts.prototype.showSingleChart = function(layerId, chartId) {
 		async: false,
 	  	url: '/gvsigonline/charts/single_chart/',
 	  	beforeSend : function(xhr) {
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 	  	data: {
 			layer_id: layerId,

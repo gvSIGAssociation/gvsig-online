@@ -1553,7 +1553,7 @@ attributeTable.prototype.getAddress = function(feat) {
 			async: false,
 		  	url: '/gvsigonline/geocoding/get_location_address/',
 		  	beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 		  	data: {
 		  		'coord': tCoords.toString(),

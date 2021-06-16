@@ -133,7 +133,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/remove_temporal_preview/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				name: "{{style_name}}",
@@ -161,7 +161,7 @@ function save(layerId, codemirror) {
 		async: false,
 		url: "/gvsigonline/symbology/custom_add/" + layerId + "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style: 'CS',
@@ -195,7 +195,7 @@ function updatePreview(layerId, codemirror, map) {
 		async: false,
 		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
 		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
 			style: 'CS',

@@ -324,7 +324,7 @@ $(document).ready(function() {
 			async: false,
 			url: '/gvsigonline/symbology/get_raster_statistics/{{layer_id}}/',
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success	:function(response){
 				if(response.result){
@@ -404,7 +404,7 @@ $(document).ready(function() {
 					async: false,
 					url: '/gvsigonline/symbology/get_raster_statistics/{{layer_id}}/',
 					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					success	:function(response){
 						if(response.result){
@@ -469,7 +469,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/get_ramps_from_folder/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				folder_id: folderId
@@ -513,7 +513,7 @@ $(document).ready(function() {
 								async: false,
 								url: '/gvsigonline/symbology/get_raster_statistics/{{layer_id}}/',
 								beforeSend:function(xhr){
-									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 								},
 								success	:function(response){
 									if(response.result){
@@ -553,7 +553,7 @@ $(document).ready(function() {
 			async: false,
 			url: "/gvsigonline/symbology/get_folders_from_library/",
 			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
 				library_id: libraryId

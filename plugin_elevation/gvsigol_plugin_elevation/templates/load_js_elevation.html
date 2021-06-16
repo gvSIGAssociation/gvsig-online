@@ -18,7 +18,7 @@
 			async : false,
 			url : '/gvsigonline/elevation/get_conf/',
 			beforeSend : function(xhr) {
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success : function(response) {
 				if (response.elevation_url != '' && response.elevation_layer != '') {

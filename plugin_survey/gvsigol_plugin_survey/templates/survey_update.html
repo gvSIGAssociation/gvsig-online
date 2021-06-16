@@ -257,7 +257,7 @@ $().ready(function(){
 				async: false,
 				url: '/gvsigonline/survey/survey_section_update_project/' + section_id + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-update-survey').modal('hide');
@@ -276,7 +276,7 @@ $().ready(function(){
 				async: false,
 				url: '/gvsigonline/survey/survey_section_delete/' + section_id + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-survey').modal('hide');
