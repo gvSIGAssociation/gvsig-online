@@ -1746,7 +1746,7 @@ def packageRequest(self, request_id):
         # 1. create target zip file
         prefix = _getPackagePrefix() + link_uuid + "_"
         (fd, zip_path) = tempfile.mkstemp('.zip', prefix, getTargetDir())
-        zip_file = os.fdopen(fd, "w")
+        zip_file = os.fdopen(fd, "wb")
         with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zipobj:
             result = processLocators(request, zipobj, zip_path)
         zip_file.close()
