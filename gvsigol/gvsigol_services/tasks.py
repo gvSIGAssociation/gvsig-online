@@ -29,7 +29,7 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
         #tiling_layer_celery_task(version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels)
         tiling_layer_celery_task.apply_async(args=[version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels])
     except Exception as e:
-        return
+        raise RuntimeError
 
 @celery_app.task
 def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels):
