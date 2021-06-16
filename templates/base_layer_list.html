@@ -136,7 +136,7 @@ $(document).ready(function() {
 				async: false,
 				url: '/gvsigonline/services/base_layer/base_layer_delete/' + data[0] + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-baselayer-datastore').modal('hide');

@@ -409,7 +409,7 @@ $(document).ready(function(){
 			url: "/gvsigonline/services/get_capabilities_from_url/",
 			async: false,
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data:{
 				'url': url,

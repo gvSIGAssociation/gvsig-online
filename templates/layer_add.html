@@ -456,7 +456,7 @@
 				async: false,
 				url: '/gvsigonline/services/get_date_fields_from_resource/',
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				data: {
 					'name': resource_name, 

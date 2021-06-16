@@ -128,7 +128,7 @@
 				async: false,
 				url: '/gvsigonline/services/get_server/' + serverName + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					server = response.server;

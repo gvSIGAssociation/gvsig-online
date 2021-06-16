@@ -250,7 +250,7 @@
 			async: false,
 			url: '/gvsigonline/services/layer_cache_clear/' + data + '/',
 			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success	:function(response){
 				$.overlayout();
@@ -271,7 +271,7 @@
 				async: false,
 				url: '/gvsigonline/services/layer_delete/' + data + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-layer').modal('hide');
@@ -293,7 +293,7 @@
 				async: false,
 				url: '/gvsigonline/services/external_layer_delete/' + data + '/',
 				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				success	:function(response){
 					$('#modal-delete-layer').modal('hide');
