@@ -79,7 +79,7 @@ search.prototype.initUI = function() {
 								async: false,
 								url: '/gvsigonline/geocoding/get_location_address/',
 								beforeSend:function(xhr){
-									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 								},
 								data: {
 									'coord': coordinate[0] + ","+ coordinate[1],
@@ -105,7 +105,7 @@ search.prototype.initUI = function() {
 								async: false,
 								url: '/gvsigonline/geocoding/get_location_address/',
 								beforeSend:function(xhr){
-									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 								},
 								data: {
 									'coord': coordinate[0] + ","+ coordinate[1],
@@ -131,7 +131,7 @@ search.prototype.initUI = function() {
 								async: false,
 								url: '/gvsigonline/geocoding/get_location_address/',
 								beforeSend:function(xhr){
-									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 								},
 								data: {
 									'coord': coordinate[0] + ","+ coordinate[1],
@@ -191,7 +191,7 @@ search.prototype.initUI = function() {
 				async: false,
 				url: '/gvsigonline/geocoding/find_candidate/',
 				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
 				data: {
 					'address': suggestion.data
