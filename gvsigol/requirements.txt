@@ -1,12 +1,9 @@
 ## django
-django==2.2.21
+django==2.2.22
 djangoajax==3.2
-httplib2==0.19.0
+httplib2==0.19.1
 geopy==2.1.0
 gisdata==0.5.4
-
-# Python 2 / 3 compatibility layer
-#future==0.17.1
 
 ## auth
 python-ldap==3.3.1
