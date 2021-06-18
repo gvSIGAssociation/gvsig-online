@@ -5,6 +5,7 @@ import rest_framework_jwt
 
 urlpatterns = [
     path('login_user/', auth_views.login_user, name='login_user'), 
+    path('login_remote/', auth_views.login_remote, name='login_remote'), 
     path('logout_user/', auth_views.logout_user, name='logout_user'),
     
     #path('password_change/done/', auth_views.password_change_done, name='password_change_done'),

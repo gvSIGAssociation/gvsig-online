@@ -24,6 +24,7 @@ from gvsigol import settings
 
 from django.urls import reverse
 from django.shortcuts import render, HttpResponse, redirect
+from django.http import HttpResponseForbidden
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -38,6 +39,7 @@ from .utils import superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from . import utils as auth_utils
 import json
 import re
@@ -173,6 +175,32 @@ def login_user(request):
     if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
         external_ldap_mode = False
     return render(request, 'login.html', {'errors': errors, 'external_ldap_mode': external_ldap_mode})
+
+@ensure_csrf_cookie
+def login_remote(request):
+    username = request.GET.get('username')
+    try:
+        findUser = User.objects.get(username=username)
+    except User.DoesNotExist:
+        findUser = None
+    password = request.GET.get('password')
+    if findUser is not None or password is not None:
+        if findUser is not None:
+            request.session['username'] = username
+            request.session['password'] = password
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    response = {'success': True}
+                    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+                else:
+                    return HttpResponseForbidden("Your account has been disabled")
+            else:
+                return HttpResponseForbidden("The username and password you have entered do not match our records")
+        else:
+            return HttpResponseForbidden("The username and password you have entered do not match our records")
 
 def logout_user(request):
     logout(request)
