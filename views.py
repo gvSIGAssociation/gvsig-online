@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from django.http.response import JsonResponse
 from gvsigol import settings
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
@@ -177,30 +178,28 @@ def login_user(request):
     return render(request, 'login.html', {'errors': errors, 'external_ldap_mode': external_ldap_mode})
 
 @ensure_csrf_cookie
-def login_remote(request):
-    username = request.GET.get('username')
-    try:
-        findUser = User.objects.get(username=username)
-    except User.DoesNotExist:
-        findUser = None
-    password = request.GET.get('password')
-    if findUser is not None or password is not None:
-        if findUser is not None:
+def rest_session_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        try:
+            findUser = User.objects.get(username=username)
+            password = request.POST.get('password')
             request.session['username'] = username
             request.session['password'] = password
             user = authenticate(username=username, password=password)
             if user is not None:
                 if user.is_active:
                     login(request, user)
+                    action.send(user, verb="gvsigol_auth/login")
                     response = {'success': True}
                     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-
                 else:
                     return HttpResponseForbidden("Your account has been disabled")
-            else:
-                return HttpResponseForbidden("The username and password you have entered do not match our records")
-        else:
-            return HttpResponseForbidden("The username and password you have entered do not match our records")
+        except:
+            pass
+        return HttpResponseForbidden("The username and password you have entered do not match our records")
+    # non post requests
+    return JsonResponse({"user": request.user.username})
 
 def logout_user(request):
     logout(request)
