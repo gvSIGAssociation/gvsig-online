@@ -363,7 +363,7 @@ class GvSigOnlineServices():
     def ldap_change_user_password(self, user, password):
         if self.is_enabled:
             user_dn = str("cn=" + user.username + ",ou=users," + self.domain)
-            new_password = [(ldap.MOD_REPLACE, 'userPassword', str(password))]
+            new_password = [(ldap.MOD_REPLACE, 'userPassword', password.encode('utf-8'))]
     
             try:
                 self.ldap.modify_s(user_dn, new_password)
