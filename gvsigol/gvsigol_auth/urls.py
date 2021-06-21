@@ -5,7 +5,8 @@ import rest_framework_jwt
 
 urlpatterns = [
     path('login_user/', auth_views.login_user, name='login_user'), 
-    path('login_remote/', auth_views.login_remote, name='login_remote'), 
+    #path('login_remote/', auth_views.login_remote, name='login_remote'),
+    path('rest_session_login/', auth_views.rest_session_login, name='rest_session_login'),
     path('logout_user/', auth_views.logout_user, name='logout_user'),
     
     #path('password_change/done/', auth_views.password_change_done, name='password_change_done'),
@@ -23,11 +24,7 @@ urlpatterns = [
     path('group_list/', auth_views.group_list, name='group_list'),
     path('group_add/', auth_views.group_add, name='group_add'),
     path('group_delete/<int:gid>/', auth_views.group_delete, name='group_delete'),
-    
-    path('api-token-auth/', rest_framework_jwt.views.obtain_jwt_token, name='api-token-auth'),
-    path('api-token-refresh/', rest_framework_jwt.views.refresh_jwt_token, name='api-token-refresh'),
-    path('api-token-verify/', rest_framework_jwt.views.verify_jwt_token, name='api-token-verify'),
-    
+
     path('api-token-auth/', obtain_jwt_token, name='api-token-auth'),
     path('api-token-refresh/', refresh_jwt_token, name='api-token-refresh'),
     path('api-token-verify/', verify_jwt_token, name='api-token-verify'), 
