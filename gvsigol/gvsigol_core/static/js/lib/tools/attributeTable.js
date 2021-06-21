@@ -536,7 +536,9 @@ attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
 				if (aux == feat_name_trans) {
 					cql_filter = cql_filter.replace(feat_name_trans, feat_name);
 				}*/
-				cql_filter = cql_filter.replaceAll(feat_name_trans, feat_name);
+				//cql_filter = cql_filter.replaceAll(feat_name_trans, feat_name);
+				var re = new RegExp(feat_name_trans,"g");
+				cql_filter = cql_filter.replace(re, feat_name);
 			}
 
 		}
