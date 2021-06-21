@@ -44,9 +44,12 @@ def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_re
         url = lyr.datastore.workspace.wmts_endpoint
         lyr_name = lyr.datastore.workspace.name + ":" + lyr.name
     else:
-        ext_lyr = json.loads(lyr.external_params)
-        lyr_name = ext_lyr['layers']
-        url = ext_lyr['url']
+        try:
+            ext_lyr = json.loads(lyr.external_params)
+            lyr_name = ext_lyr['layers']
+            url = ext_lyr['url']
+        except Exception:
+            pass
     
     layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
     folder_lyr =  os.path.join(layers_dir, lyr.name) + "_lyr_" + str(version)
