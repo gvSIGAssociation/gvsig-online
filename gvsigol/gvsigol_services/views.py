@@ -70,7 +70,7 @@ from gvsigol import settings
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from gvsigol.settings import MOSAIC_DB
 from gvsigol_auth.models import UserGroup
-from gvsigol_auth.utils import superuser_required, staff_required
+from gvsigol_auth.utils import superuser_required, staff_required, get_primary_user_usergroup
 from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
 from gvsigol_core.models import Project, ProjectBaseLayerTiling
@@ -1219,7 +1219,7 @@ def layer_add_with_group(request, layergroup_id):
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
-        groups = utils.get_all_user_groups_checked_by_layer(None)
+        groups = utils.get_all_user_groups_checked_by_layer(None, get_primary_user_usergroup(request.user))
         is_public = False
 
     datastore_types = {}
@@ -2517,7 +2517,7 @@ def layer_create_with_group(request, layergroup_id):
         if 'gvsigol_plugin_form' in INSTALLED_APPS:
             from gvsigol_plugin_form.models import Form
             forms = Form.objects.all()
-        groups = utils.get_all_user_groups_checked_by_layer(None)
+        groups = utils.get_all_user_groups_checked_by_layer(None, get_primary_user_usergroup(request.user))
         data = {
             'form': form,
             'forms': forms,

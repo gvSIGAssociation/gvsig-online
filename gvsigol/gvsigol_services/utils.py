@@ -48,7 +48,7 @@ from psycopg2 import sql as sqlbuilder
 import logging
 logger = logging.getLogger("gvsigol")
 
-def get_all_user_groups_checked_by_layer(layer):
+def get_all_user_groups_checked_by_layer(layer, creator_user_group=None):
     groups_list = UserGroup.objects.all()
     if layer:
         read_groups = LayerReadGroup.objects.filter(layer=layer)
@@ -68,7 +68,8 @@ def get_all_user_groups_checked_by_layer(layer):
             for lwg in write_groups:
                 if lwg.group_id == g.id:
                     group['write_checked'] = True
-
+            if creator_user_group is not None and g.id == creator_user_group.id:
+                group['read_checked'] = True
             group['id'] = g.id
             group['name'] = g.name
             group['description'] = g.description
