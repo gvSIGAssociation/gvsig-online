@@ -133,3 +133,10 @@ def send_reset_password_email(email, pass_reset_url):
         
         #print 'Restore message: ' + body
         send_mail(subject, body, fromAddress, toAddress, False, gvsigol.settings.EMAIL_HOST_USER, gvsigol.settings.EMAIL_HOST_PASSWORD)
+
+def get_primary_user_usergroup(user):
+    try:
+        ugu = UserGroupUser.objects.get(user=user, user_group__name='ug_' + user.username.lower())
+        return ugu.user_group
+    except UserGroupUser.DoesNotExist:
+        return None
