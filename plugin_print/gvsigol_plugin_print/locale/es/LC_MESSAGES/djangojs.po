@@ -151,13 +151,13 @@ msgid "a3_landscape"
 msgstr "A3 Apaisado"
 
 msgid "tocantins_a4_landscape"
-msgstr "Tocantins A4 Horizonal"
+msgstr "Tocantins A4 Horizontal"
 
 msgid "tocantins_a4_portrait"
 msgstr "Tocantins A4 Vertical"
 
 msgid "tocantins_a3_landscape"
-msgstr "Tocantins A3 Horizonal"
+msgstr "Tocantins A3 Horizontal"
 
 msgid "tocantins_a3_portrait"
 msgstr "Tocantins A3 Vertical"
