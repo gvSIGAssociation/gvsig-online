@@ -53,7 +53,7 @@ var print = function(printProvider, conf, map) {
 	var this_ = this;
 	var handler = function(e) {
 		this_.handler(e);
-		$('body').trigger('printtoolactivated');
+		$('body').trigger('printtemplateselected');
 	};
 
 	this.$button.on('click', handler);
@@ -550,7 +550,7 @@ print.prototype.convertBaseLayerToPrintLayer = function(bLayer, legends) {
 				legendUrl = legendUrl.replace('getlegendgraphic', 'getlegendgraphic&transparent=true');
 				var legend = {
 					"name": bLayer.getProperties().label,
-					"icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
+					"icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:800;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
 				};
 				legends.push(legend);	
 			}
@@ -640,10 +640,8 @@ print.prototype.createPrintJob = function(template) {
 		// layerGridLabels.font.size = 6;
 		// layerGridLabels.gridColor = 'white';
 		// layerGridLabels.labelColor = 'black';
-	if (this.supportsGridMap(self.capabilities)) {
-    	if (mapgridType != 'NOGRID')
-			printLayers.push(layerGrid);
-	}
+    if (mapgridType != 'NOGRID')
+		printLayers.push(layerGrid);
 
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
@@ -750,9 +748,11 @@ print.prototype.createPrintJob = function(template) {
 						legendUrl = self.origin + legendUrl;
 					}
 					legendUrl = legendUrl.replace('getlegendgraphic', 'getlegendgraphic&transparent=true');
+					// NOTA: Columnheight es la forma de controlar que no se salga la leyenda del mapa, si la pones dentro. 
+					// TODO: Para los A4 horizontales, 800 va bien, para A3 se puede usar 1000, etc.
 					var legend = {
 							"name": mapLayers[i].title,
-				            "icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:1000;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
+				            "icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:800;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
 				        };
 					legends.push(legend);
 				}

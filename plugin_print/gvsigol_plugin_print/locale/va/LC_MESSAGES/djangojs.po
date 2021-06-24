@@ -53,7 +53,7 @@ msgstr "Escala definida per l'usuari"
 
 #: static/js/lib/tools/print.js:173
 msgid "MapGrid"
-msgstr "Reixeta cartogràfica"
+msgstr ""
 
 #: static/js/lib/tools/print.js:175
 msgid "print-mapgrid-nogrid"
@@ -93,7 +93,7 @@ msgstr "Format"
 
 #: static/js/lib/tools/print.js:262 static/js/lib/tools/print.js:267
 msgid "Author"
-msgstr "Autor"
+msgstr ""
 
 #: static/js/lib/tools/print.js:273
 msgid "Legal warning"
@@ -121,24 +121,24 @@ msgstr "Heu de seleccionar una plantilla"
 msgid "layers_xyz_cant_be_reprojected"
 msgstr "Les capes externes tipus XYZ no poden ser reprojectades."
 
-msgid "legalwarning"
-msgstr ""
-"Tots els continguts cartogràfics d'aquest web i dels serveis que "
-"proporciona són propietat d'aquesta institució.La institució no és "
-"responsable de la informació que es pot obtenir a través d'enllaços a "
-"sistemes externs."
+#~ msgid "legalwarning"
+#~ msgstr ""
+#~ "Tots els continguts cartogràfics d'aquest web i dels serveis que "
+#~ "proporciona són propietat d'aquesta institució.La institució no és "
+#~ "responsable de la informació que es pot obtenir a través d'enllaços a "
+#~ "sistemes externs."
 
-msgid "a4_landscape"
-msgstr "A4 Apaïsat"
+#~ msgid "a4_landscape"
+#~ msgstr "A4 Apaïsat"
 
-msgid "a3_sin_leyenda"
-msgstr "A3 sense llegenda"
+#~ msgid "a3_sin_leyenda"
+#~ msgstr "A3 sense llegenda"
 
-msgid "a4_landscape_overview"
-msgstr "A4 Apaïsat con localitzador"
+#~ msgid "a4_landscape_overview"
+#~ msgstr "A4 Apaïsat con localitzador"
 
-msgid "a3_landscape"
-msgstr "A3 Apaïsat"
+#~ msgid "a3_landscape"
+#~ msgstr "A3 Apaïsat"
 
-msgid "print-mapgrid-indent"
-msgstr "Marge d'Etiquetes"
+#~ msgid "print-mapgrid-indent"
+#~ msgstr "Marge d'Etiquetes"
