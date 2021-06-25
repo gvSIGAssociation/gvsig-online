@@ -21,6 +21,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"X-Generator: Poedit 2.4.3\n"
 
 # editionBar.js
 msgid "Add point"
@@ -68,7 +75,5 @@ msgstr "Cancelar"
 msgid "Show form"
 msgstr "Mostrar formulário"
 
-#, fuzzy
 msgid "Failed to save the new record. Please check values"
-msgstr ""
-"Não foi possível guardar o novo registo. Por favor, verifique os valores"
+msgstr "Falhou em salvar o novo registro. Por favor, verifique os valores"
