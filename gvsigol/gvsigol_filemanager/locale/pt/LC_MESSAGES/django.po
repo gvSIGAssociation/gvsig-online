@@ -3,22 +3,22 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-19 23:45+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2021-06-25 16:45+0200\n"
+"PO-Revision-Date: 2021-06-15 18:39+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: gvsigol_filemanager/forms.py:5
 msgid "Directory name"
@@ -30,7 +30,7 @@ msgstr "Exportar"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:48
 msgid "Warning!"
-msgstr "Av¡so!"
+msgstr "Avíso!"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:49
 msgid ""
@@ -67,7 +67,7 @@ msgstr "Coordenar sistema de referência"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:109
 msgid "Default"
-msgstr "Default"
+msgstr "Padrão"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:27
 msgid "Select"
@@ -83,40 +83,40 @@ msgstr "Data"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:34
 msgid "Actions"
-msgstr "Ações"
+msgstr "Ferramentas"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:73
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:74
 msgid "Delete directory"
 msgstr "Excluir diretório"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:76
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:77
 msgid "Export to database"
 msgstr "Exportar para banco de dados"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:81
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:82
 msgid "Transform to database"
 msgstr "Transformar em banco de dados"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:86
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:87
 msgid "Unzip file"
-msgstr ""
+msgstr "Descompactar arquivo"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:89
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:90
 msgid "Delete file"
 msgstr "Apagar ficheiro"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:100
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:101
 msgid "Nothing to see here."
-msgstr "Nada para ver aqui"
+msgstr "Nada para ver aquí."
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:109
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:118
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:110
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:119
 #: gvsigol_filemanager/templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Criar diretório"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:110
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:119
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:111
+#: gvsigol_filemanager/templates/browser/filemanager_list.html:120
 #: gvsigol_filemanager/templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Carregar"
@@ -125,32 +125,30 @@ msgstr "Carregar"
 msgid "File manager"
 msgstr "Gerenciador de arquivos"
 
-#: gvsigol_filemanager/views.py:136
+#: gvsigol_filemanager/views.py:141
 msgid "Export process done successfully"
 msgstr "Processo de exportação realizado com sucesso"
 
-#: gvsigol_filemanager/views.py:139
+#: gvsigol_filemanager/views.py:144
 msgid "Export process completed with warnings:"
-msgstr ""
+msgstr "Processo de exportação concluído com avisos:"
 
-#: gvsigol_filemanager/views.py:166
+#: gvsigol_filemanager/views.py:171
 msgid "Server error"
 msgstr "Erro do servidor"
 
-#: gvsigol_filemanager/views.py:170
+#: gvsigol_filemanager/views.py:175
 msgid "You must fill in all fields"
 msgstr "Você deve preencher todos os campos"
 
-#: gvsigol_filemanager/views.py:221 gvsigol_filemanager/views.py:232
+#: gvsigol_filemanager/views.py:232 gvsigol_filemanager/views.py:243
 msgid "Error deleting resource"
 msgstr "Erro ao eliminar recurso"
 
-#: gvsigol_filemanager/views.py:221
+#: gvsigol_filemanager/views.py:232
 msgid "exists in datastore"
-msgstr "existe no datastore"
+msgstr "existe no armazém de dados"
 
-#: gvsigol_filemanager/views.py:255
-#, fuzzy
-#| msgid "Error deleting resource"
+#: gvsigol_filemanager/views.py:266
 msgid "Error unzipping resource"
-msgstr "Erro ao eliminar recurso"
+msgstr "Erro ao excluir recurso"

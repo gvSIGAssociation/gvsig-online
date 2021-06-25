@@ -6,6 +6,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"X-Generator: Poedit 2.4.3\n"
 
 # gvSIG Online.
 # Copyright (C) 2010-2017 SCOLAB.
@@ -36,7 +43,7 @@ msgstr "Excluir"
 
 # Concluído
 msgid "Done"
-msgstr "C"
+msgstr "Concluído"
 
 msgid "Select"
 msgstr "Selecionar"
