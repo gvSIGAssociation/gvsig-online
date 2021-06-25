@@ -3,22 +3,22 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-03-09 16:52+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2021-06-16 14:53+0200\n"
+"Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt\n"
 "X-Source-Language: C\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: mdstandards/iso19139_2007.py:21
 msgid "author"
@@ -34,19 +34,19 @@ msgstr "Contato"
 
 #: mdstandards/iso19139_2007.py:24
 msgid "resourceProvider"
-msgstr ""
+msgstr "fornecedor de recursos"
 
 #: mdstandards/iso19139_2007.py:25
 msgid "custodian"
-msgstr ""
+msgstr "custodiante"
 
 #: mdstandards/iso19139_2007.py:26
 msgid "originator"
-msgstr ""
+msgstr "autor"
 
 #: mdstandards/iso19139_2007.py:27
 msgid "publisher"
-msgstr ""
+msgstr "editor"
 
 #: templates/catalog_details.html:12
 msgid "About this resource"
@@ -90,7 +90,7 @@ msgstr "Descarregar e links"
 
 #: templates/catalog_details.html:55
 msgid "Download"
-msgstr "Descarregar"
+msgstr "Baixar"
 
 #: templates/catalog_details.html:63
 msgid "Get shape"
@@ -142,10 +142,8 @@ msgstr "Recurso de acesso"
 
 #: views.py:252
 msgid "No resources available"
-msgstr ""
+msgstr "Não há recursos disponíveis"
 
 #: views.py:284
-#, fuzzy
-#| msgid "Metadata identifier"
 msgid "Metadata detail not available"
-msgstr "Identificador de metadados"
+msgstr "Detalhe dos metadados não disponíveis"
