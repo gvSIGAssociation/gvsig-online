@@ -21,6 +21,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"X-Generator: Poedit 2.4.3\n"
 
 msgid "Import from service"
 msgstr "Importar de serviço"
@@ -56,7 +63,7 @@ msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecu
 msgstr "Conteúdo misto: a página em foi carregada por HTTPS, mas solicitou um URL não seguro"
 
 msgid "Output format not supported"
-msgstr ""
+msgstr "Formato de saída não suportado"
 
 msgid "No layers are available"
-msgstr ""
+msgstr "Não há camadas disponíveis"
