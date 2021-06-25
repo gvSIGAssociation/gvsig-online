@@ -15,19 +15,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-03 10:59+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2021-06-16 16:21+0200\n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: forms.py:31 templates/select_chart_type.html:21
 msgid "Bar Chart"
@@ -58,10 +59,9 @@ msgstr "Tipo"
 msgid "Title"
 msgstr "Título"
 
-#: forms.py:40 templates/barchart_add.html:31
-#: templates/barchart_update.html:31 templates/linechart_add.html:31
-#: templates/linechart_update.html:31 templates/piechart_add.html:31
-#: templates/piechart_update.html:31
+#: forms.py:40 templates/barchart_add.html:31 templates/barchart_update.html:31
+#: templates/linechart_add.html:31 templates/linechart_update.html:31
+#: templates/piechart_add.html:31 templates/piechart_update.html:31
 msgid "Description"
 msgstr "Descrição"
 
@@ -78,7 +78,7 @@ msgstr "Atualizar visualização"
 #: templates/barchart_add.html:14 templates/linechart_add.html:14
 #: templates/piechart_add.html:14
 msgid "Save"
-msgstr "Salve"
+msgstr "Salvar"
 
 #: templates/barchart_add.html:26 templates/linechart_add.html:26
 #: templates/piechart_add.html:26
@@ -248,7 +248,7 @@ msgstr "Carregando..."
 #: templates/project_list.html:96 templates/project_list.html:97
 #: templates/shared_view_list.html:79 templates/shared_view_list.html:80
 msgid "No records available"
-msgstr "Nenhum registro disponí­vel"
+msgstr "Nenhum registro disponível"
 
 #: templates/project_list.html:99 templates/shared_view_list.html:82
 msgid "First"
@@ -326,4 +326,4 @@ msgstr "Criar novo gráfico de linhas"
 
 #: templates/select_chart_type.html:40
 msgid "Create new pie chart"
-msgstr "Criar novo gráfico de bolo"
+msgstr "Criar novo gráfico circular"
