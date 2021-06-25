@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-11 12:28+0000\n"
+"POT-Creation-Date: 2021-06-11 14:21+0200\n"
 "PO-Revision-Date: 2021-05-11 14:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -22,14 +22,14 @@ msgstr ""
 
 #: gvsigol_auth/forms.py:30 gvsigol_auth/templates/user_list.html:23
 #: gvsigol_auth/templates/user_update.html:29
-#: gvsigol_auth/templates/user_update.html:30 gvsigol_auth/utils.py:112
+#: gvsigol_auth/templates/user_update.html:30 gvsigol_auth/utils.py:111
 msgid "First name"
 msgstr "Nom"
 
 #: gvsigol_auth/forms.py:31 gvsigol_auth/templates/user_add.html:46
 #: gvsigol_auth/templates/user_list.html:24
 #: gvsigol_auth/templates/user_update.html:33
-#: gvsigol_auth/templates/user_update.html:34 gvsigol_auth/utils.py:113
+#: gvsigol_auth/templates/user_update.html:34 gvsigol_auth/utils.py:112
 msgid "Last name"
 msgstr "Cognom"
 
@@ -37,19 +37,19 @@ msgstr "Cognom"
 #: gvsigol_auth/templates/user_add.html:53
 #: gvsigol_auth/templates/user_list.html:22
 #: gvsigol_auth/templates/user_update.html:40
-#: gvsigol_auth/templates/user_update.html:41 gvsigol_auth/utils.py:111
+#: gvsigol_auth/templates/user_update.html:41 gvsigol_auth/utils.py:110
 msgid "Username"
 msgstr "Nom d'usuari"
 
 #: gvsigol_auth/forms.py:33 gvsigol_auth/templates/user_add.html:57
 #: gvsigol_auth/templates/user_list.html:25
 #: gvsigol_auth/templates/user_update.html:44
-#: gvsigol_auth/templates/user_update.html:45 gvsigol_auth/utils.py:114
+#: gvsigol_auth/templates/user_update.html:45 gvsigol_auth/utils.py:113
 msgid "Email"
 msgstr "Correu electrònic"
 
 #: gvsigol_auth/forms.py:34 gvsigol_auth/templates/login.html:51
-#: gvsigol_auth/templates/user_add.html:65 gvsigol_auth/utils.py:115
+#: gvsigol_auth/templates/user_add.html:65 gvsigol_auth/utils.py:114
 msgid "Password"
 msgstr "Contrasenya"
 
@@ -61,11 +61,11 @@ msgstr "Repetir contrasenya"
 msgid "Group for admin users"
 msgstr "Grup per a usuaris administradors"
 
-#: gvsigol_auth/settings.py:30
+#: gvsigol_auth/settings.py:31 gvsigol_auth/settings.py:37
 msgid "Login requests"
 msgstr "Inicis de sessió"
 
-#: gvsigol_auth/settings.py:31
+#: gvsigol_auth/settings.py:38
 msgid "User"
 msgstr "Usuari"
 
@@ -328,19 +328,19 @@ msgstr "L'usuari serà eliminat , voleu continuar?"
 msgid "Update user"
 msgstr "Actualitzar usuari"
 
-#: gvsigol_auth/utils.py:94
+#: gvsigol_auth/utils.py:93
 msgid "New user account"
 msgstr "Nou compte d'usuari"
 
-#: gvsigol_auth/utils.py:110
+#: gvsigol_auth/utils.py:109
 msgid "Account data"
 msgstr "Dades del compte"
 
-#: gvsigol_auth/utils.py:125
+#: gvsigol_auth/utils.py:124
 msgid "Password reset"
 msgstr "Restabliment de contrasenya"
 
-#: gvsigol_auth/utils.py:127
+#: gvsigol_auth/utils.py:126
 msgid ""
 "You are receiving this email because we received a password reset request "
 "for your account."
@@ -348,11 +348,11 @@ msgstr ""
 "Estàs rebent aquest correu electrònic perquè hem rebut una sol·licitud de "
 "restabliment de contrasenya per al teu compte."
 
-#: gvsigol_auth/utils.py:128
+#: gvsigol_auth/utils.py:127
 msgid "You can reset your password by clicking the link bellow"
 msgstr "Pots restablir la contrasenya fent clic a l'enllaç de baix"
 
-#: gvsigol_auth/utils.py:130
+#: gvsigol_auth/utils.py:129
 msgid ""
 "If you did not request a password reset, please ignore this email. Your "
 "password will not change."
@@ -360,37 +360,37 @@ msgstr ""
 "Si no heu sol·licitat un restabliment de contrasenya, ignoreu aquest correu "
 "electrònic. La contrasenya no canviarà."
 
-#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:164 gvsigol_auth/views.py:268
+#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:166 gvsigol_auth/views.py:270
 msgid "Your account has been disabled"
 msgstr "La contrasenya ha estat desactivada"
 
-#: gvsigol_auth/views.py:83 gvsigol_auth/views.py:85 gvsigol_auth/views.py:166
-#: gvsigol_auth/views.py:168 gvsigol_auth/views.py:270
+#: gvsigol_auth/views.py:83 gvsigol_auth/views.py:85 gvsigol_auth/views.py:168
+#: gvsigol_auth/views.py:170 gvsigol_auth/views.py:272
 msgid "The username and password you have entered do not match our records"
 msgstr "L'usuari i contrasenya introduïts no coincideixen"
 
-#: gvsigol_auth/views.py:216
+#: gvsigol_auth/views.py:218
 msgid "User account does not exist"
 msgstr "El compte d'usuari no existeix"
 
-#: gvsigol_auth/views.py:220
+#: gvsigol_auth/views.py:222
 msgid "That did not work"
 msgstr "Això no ha funcionat"
 
-#: gvsigol_auth/views.py:274
+#: gvsigol_auth/views.py:276
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr ""
 "Token invàlid. El vostre enllaç ha caducat, heu de sol·licitar-ne un altre."
 
-#: gvsigol_auth/views.py:392
+#: gvsigol_auth/views.py:394
 msgid "User group for"
 msgstr "Grup d'usuaris per"
 
-#: gvsigol_auth/views.py:573
+#: gvsigol_auth/views.py:575
 msgid "Admin is a reserved group"
 msgstr "Admin és un grup reservat"
 
-#: gvsigol_auth/views.py:577
+#: gvsigol_auth/views.py:579
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
