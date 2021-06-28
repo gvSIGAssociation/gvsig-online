@@ -1072,7 +1072,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	$.ajax({
 		type: 'POST',
 		async: true,
-	  	url: self.printProvider.url + '/print/a4_landscape_att/report.pdf',
+	  	url: self.printProvider.url + '/print/_a4_landscape_att/report.pdf',
 	  	processData: false,
 	    contentType: 'application/json',
 	  	data: JSON.stringify({
