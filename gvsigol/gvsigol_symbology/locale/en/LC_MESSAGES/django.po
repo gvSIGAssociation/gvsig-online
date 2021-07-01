@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2021-07-01 09:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,33 +50,28 @@ msgstr ""
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
 
-#: gvsigol_symbology/templates/base_symbology.html:73
-#: gvsigol_symbology/templates/base_symbology_compress.html:73
-msgid "gvsigonline docs"
-msgstr ""
-
-#: gvsigol_symbology/templates/base_symbology.html:108
-#: gvsigol_symbology/templates/base_symbology_compress.html:108
+#: gvsigol_symbology/templates/base_symbology.html:112
+#: gvsigol_symbology/templates/base_symbology_compress.html:111
 msgid "Sign out"
 msgstr ""
 
-#: gvsigol_symbology/templates/base_symbology.html:127
-#: gvsigol_symbology/templates/base_symbology_compress.html:126
+#: gvsigol_symbology/templates/base_symbology.html:131
+#: gvsigol_symbology/templates/base_symbology_compress.html:129
 msgid "Dashboard"
 msgstr ""
 
-#: gvsigol_symbology/templates/base_symbology.html:133
-#: gvsigol_symbology/templates/base_symbology_compress.html:132
+#: gvsigol_symbology/templates/base_symbology.html:137
+#: gvsigol_symbology/templates/base_symbology_compress.html:135
 msgid "Home"
 msgstr ""
 
-#: gvsigol_symbology/templates/base_symbology.html:170
-#: gvsigol_symbology/templates/base_symbology_compress.html:169
+#: gvsigol_symbology/templates/base_symbology.html:174
+#: gvsigol_symbology/templates/base_symbology_compress.html:172
 msgid "Version"
 msgstr ""
 
-#: gvsigol_symbology/templates/base_symbology.html:174
-#: gvsigol_symbology/templates/base_symbology_compress.html:173
+#: gvsigol_symbology/templates/base_symbology.html:178
+#: gvsigol_symbology/templates/base_symbology_compress.html:176
 msgid "All rights reserved"
 msgstr ""
 

@@ -6,6 +6,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"X-Generator: Poedit 2.4.3\n"
 
 # gvSIG Online.
 # Copyright (C) 2010-2017 SCOLAB.
@@ -22,11 +29,8 @@ msgstr ""
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-msgid ""
-"You can not update a data store type GeoTIFF. Delete it and create it again"
-msgstr ""
-"Você não pode atualizar um tipo de armazenamento de dados GeoTIFF. Exclua-o "
-"e crie-o novamente"
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr "Você não pode atualizar um tipo de armazenamento de dados GeoTIFF. Exclua-o e crie-o novamente"
 
 msgid "Select type"
 msgstr "Selecione o tipo"
@@ -61,13 +65,9 @@ msgstr "Verdadeiro"
 msgid "False"
 msgstr "Falso"
 
-msgid ""
-"Invalid name: Identifiers must begin with a letter or an underscore (_). "
-"Subsequent characters can be letters, underscores or numbers"
+msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nome inválido: Os identificadores devem começar com uma letra ou um "
-"sublinhado (_). Os caracteres subsequentes podem ser letras, sublinhados ou "
-"números"
+"Nome inválido: Os identificadores devem começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, sublinhados ou números"
 
 msgid "Enumeration cannot contain point-colon"
 msgstr "Enumeração não pode conter ponto-colon"
@@ -118,22 +118,24 @@ msgid "Autogen"
 msgstr "Autogerar"
 
 msgid "Autogen ok"
-msgstr "Autogerar ok"
+msgstr "Autogen ok"
 
 msgid "Convert ok"
 msgstr "Converter ok"
 
 msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
 msgstr ""
+"O campo não pode ser definido como obrigatório em nível de banco de dados porque alguns registros contêm valores NULL nesta coluna. Apague os valores NULL "
+"e tente novamente."
 
 msgid "Node has been reloaded"
-msgstr ""
+msgstr "O nó foi recarregado"
 
 msgid "Error reloading node"
-msgstr ""
+msgstr "Erro no nó de recarga"
 
 msgid "Connection has been success"
-msgstr ""
+msgstr "A conexão tem sido um sucesso"
 
 msgid "Filter by project"
 msgstr "Filtro por projeto"
@@ -142,16 +144,16 @@ msgid "Show all layers"
 msgstr "Mostrar todas as camadas"
 
 msgid "The action was successfully completed"
-msgstr ""
+msgstr "A ação foi concluída com sucesso"
 
 msgid "The action failed"
-msgstr ""
+msgstr "A ação falhou"
 
 msgid "The layer definition was refreshed"
-msgstr ""
+msgstr "A definição da camada foi atualizada"
 
 msgid "The layer refresh failed"
-msgstr ""
+msgstr "A atualização da camada falhou"
 
 msgid "Calculated"
 msgstr "Calculado"
@@ -170,5 +172,3 @@ msgstr "Campo para excluir"
 
 msgid "You must select an extent on the map using the control"
 msgstr "Você deve selecionar uma extensão no mapa usando o controle"
-
-

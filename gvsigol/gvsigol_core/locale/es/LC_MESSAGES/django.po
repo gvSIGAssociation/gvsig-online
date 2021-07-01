@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 22:34+0000\n"
+"POT-Creation-Date: 2021-07-01 09:24+0000\n"
 "PO-Revision-Date: 2021-05-05 23:47+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -72,6 +72,24 @@ msgstr "El esquema de base de datos existe"
 msgid "Server does not exist"
 msgstr "El servidor no existe"
 
+#: gvsigol_core/settings.py:30
+msgid "Project requests"
+msgstr "Peticiones de proyecto"
+
+#: gvsigol_core/settings.py:31
+#: gvsigol_core/templates/dashboard_core_menu.html:5
+#: gvsigol_core/templates/dashboard_core_menu.html:8
+msgid "Projects"
+msgstr "Proyectos"
+
+#: gvsigol_core/settings.py:39
+msgid "Project requests by user"
+msgstr "Peticiones de proyecto por usuario"
+
+#: gvsigol_core/settings.py:40
+msgid "Users"
+msgstr "Usuarios"
+
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
 msgid "Page not found"
@@ -130,11 +148,6 @@ msgstr "Versión"
 #: gvsigol_core/templates/ogc_services.html:103
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
-
-#: gvsigol_core/templates/dashboard_core_menu.html:5
-#: gvsigol_core/templates/dashboard_core_menu.html:8
-msgid "Projects"
-msgstr "Proyectos"
 
 #: gvsigol_core/templates/dashboard_core_menu.html:9
 msgid "Shared views"
@@ -236,7 +249,6 @@ msgid "Last login"
 msgstr "Último acceso"
 
 #: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
-#: gvsigol_core/utils.py:491
 msgid "Password"
 msgstr "Contraseña"
 
@@ -253,7 +265,6 @@ msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:487
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -1006,10 +1017,6 @@ msgstr "Nombre"
 msgid "Last name"
 msgstr "Apellidos"
 
-#: gvsigol_core/utils.py:489
-msgid "This is your new temporary password"
-msgstr "Esta es su contraseña temporal"
-
 #: gvsigol_core/views.py:190
 msgid "Navigation history"
 msgstr "Historial de navegación"
@@ -1116,14 +1123,8 @@ msgstr "Operación no permitida sobre el proyecto: "
 msgid "The project was successfully cloned."
 msgstr "El proyecto se clonó con éxito."
 
-#~ msgid "Project requests"
-#~ msgstr "Peticiones de proyecto"
-
-#~ msgid "Project requests by user"
-#~ msgstr "Peticiones de proyecto por usuario"
-
-#~ msgid "Users"
-#~ msgstr "Usuarios"
+#~ msgid "This is your new temporary password"
+#~ msgstr "Esta es su contraseña temporal"
 
 #~ msgid "Project tags"
 #~ msgstr "Etiquetas de proyecto"

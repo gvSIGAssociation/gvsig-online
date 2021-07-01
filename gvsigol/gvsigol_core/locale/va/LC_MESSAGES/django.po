@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 22:34+0000\n"
+"POT-Creation-Date: 2021-07-01 09:24+0000\n"
 "PO-Revision-Date: 2021-05-05 23:36+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -71,6 +71,26 @@ msgstr "L'esquema de base de dades existeix"
 msgid "Server does not exist"
 msgstr "El servidor no existeix"
 
+#: gvsigol_core/settings.py:30
+msgid "Project requests"
+msgstr "Sol·licituds de projecte"
+
+#: gvsigol_core/settings.py:31
+#: gvsigol_core/templates/dashboard_core_menu.html:5
+#: gvsigol_core/templates/dashboard_core_menu.html:8
+msgid "Projects"
+msgstr "Projectes"
+
+#: gvsigol_core/settings.py:39
+#, fuzzy
+#| msgid "Project requests"
+msgid "Project requests by user"
+msgstr "Sol·licituds de projecte"
+
+#: gvsigol_core/settings.py:40
+msgid "Users"
+msgstr "Usuaris"
+
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
 msgid "Page not found"
@@ -126,11 +146,6 @@ msgstr "Versió"
 #: gvsigol_core/templates/ogc_services.html:103
 msgid "All rights reserved"
 msgstr "Tots els drets reservats"
-
-#: gvsigol_core/templates/dashboard_core_menu.html:5
-#: gvsigol_core/templates/dashboard_core_menu.html:8
-msgid "Projects"
-msgstr "Projectes"
 
 #: gvsigol_core/templates/dashboard_core_menu.html:9
 msgid "Shared views"
@@ -232,7 +247,6 @@ msgid "Last login"
 msgstr "Última conexió"
 
 #: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
-#: gvsigol_core/utils.py:491
 msgid "Password"
 msgstr "Contrasenya"
 
@@ -249,7 +263,6 @@ msgid "Passwords doesn't match"
 msgstr "Les contrasenyes no coincideixen"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:487
 msgid "New password"
 msgstr "Nova contrasenya"
 
@@ -1002,10 +1015,6 @@ msgstr "Nom"
 msgid "Last name"
 msgstr "Cognom"
 
-#: gvsigol_core/utils.py:489
-msgid "This is your new temporary password"
-msgstr "Aquesta és la contrasenya provisionalment"
-
 #: gvsigol_core/views.py:190
 msgid "Navigation history"
 msgstr "Historial de navegació"
@@ -1112,16 +1121,8 @@ msgstr "Operació no permesa en el projecte: "
 msgid "The project was successfully cloned."
 msgstr "El projecte s'ha clonat correctament."
 
-#~ msgid "Project requests"
-#~ msgstr "Sol·licituds de projecte"
-
-#, fuzzy
-#~| msgid "Project requests"
-#~ msgid "Project requests by user"
-#~ msgstr "Sol·licituds de projecte"
-
-#~ msgid "Users"
-#~ msgstr "Usuaris"
+#~ msgid "This is your new temporary password"
+#~ msgstr "Aquesta és la contrasenya provisionalment"
 
 #~ msgid "Project tags"
 #~ msgstr "Etiquetes de projecte"

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 22:34+0000\n"
-"PO-Revision-Date: 2021-05-05 23:56+0200\n"
+"POT-Creation-Date: 2021-07-01 09:24+0000\n"
+"PO-Revision-Date: 2021-06-15 17:26+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -20,63 +20,35 @@ msgstr ""
 "X-Source-Language: C\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: gvsigol_services/backend_geoserver.bak.py:93
-#: gvsigol_services/backend_geoserver.bak.py:123
-#: gvsigol_services/backend_geoserver.bak2.py:93
-#: gvsigol_services/backend_geoserver.bak2.py:119
 #: gvsigol_services/backend_geoserver.py:105
 #: gvsigol_services/backend_geoserver.py:137
 #: gvsigol_services/forms_services.py:62
 msgid "PostGIS vector"
 msgstr "Vetor PostGIS"
 
-#: gvsigol_services/backend_geoserver.bak.py:94
-#: gvsigol_services/backend_geoserver.bak2.py:94
 #: gvsigol_services/backend_geoserver.py:106
 #: gvsigol_services/forms_services.py:63
 msgid "GeoTiff"
 msgstr "GeoTiff"
 
-#: gvsigol_services/backend_geoserver.bak.py:95
-#: gvsigol_services/backend_geoserver.bak2.py:95
 #: gvsigol_services/backend_geoserver.py:107
 #: gvsigol_services/forms_services.py:64
 msgid "Cascading WMS"
 msgstr "WMS em cache"
 
-#: gvsigol_services/backend_geoserver.bak.py:96
-#: gvsigol_services/backend_geoserver.bak2.py:96
 #: gvsigol_services/backend_geoserver.py:108
 #: gvsigol_services/forms_services.py:65
 msgid "ImageMosaic"
 msgstr "Mosaico de imagens"
 
-#: gvsigol_services/backend_geoserver.bak.py:111
-#: gvsigol_services/backend_geoserver.bak2.py:107
 #: gvsigol_services/backend_geoserver.py:125
 msgid "Vector layer"
-msgstr "Camada vectorial"
+msgstr "Camada vetorial"
 
-#: gvsigol_services/backend_geoserver.bak.py:112
-#: gvsigol_services/backend_geoserver.bak2.py:108
 #: gvsigol_services/backend_geoserver.py:126
 msgid "SQL View"
 msgstr "SQL Vista"
 
-#: gvsigol_services/backend_geoserver.bak.py:657
-#: gvsigol_services/backend_geoserver.bak.py:672
-#: gvsigol_services/backend_geoserver.bak.py:684
-#: gvsigol_services/backend_geoserver.bak.py:694
-#: gvsigol_services/backend_geoserver.bak.py:705
-#: gvsigol_services/backend_geoserver.bak.py:714
-#: gvsigol_services/backend_geoserver.bak.py:727
-#: gvsigol_services/backend_geoserver.bak2.py:656
-#: gvsigol_services/backend_geoserver.bak2.py:671
-#: gvsigol_services/backend_geoserver.bak2.py:683
-#: gvsigol_services/backend_geoserver.bak2.py:693
-#: gvsigol_services/backend_geoserver.bak2.py:704
-#: gvsigol_services/backend_geoserver.bak2.py:713
-#: gvsigol_services/backend_geoserver.bak2.py:726
 #: gvsigol_services/backend_geoserver.py:758
 #: gvsigol_services/backend_geoserver.py:773
 #: gvsigol_services/backend_geoserver.py:785
@@ -88,87 +60,44 @@ msgstr "SQL Vista"
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Erro na publicação da camada. Erro backend: {msg}"
 
-#: gvsigol_services/backend_geoserver.bak.py:660
-#: gvsigol_services/backend_geoserver.bak.py:675
-#: gvsigol_services/backend_geoserver.bak.py:687
-#: gvsigol_services/backend_geoserver.bak.py:697
-#: gvsigol_services/backend_geoserver.bak.py:707
-#: gvsigol_services/backend_geoserver.bak.py:717
-#: gvsigol_services/backend_geoserver.bak.py:729
-#: gvsigol_services/backend_geoserver.bak2.py:659
-#: gvsigol_services/backend_geoserver.bak2.py:674
-#: gvsigol_services/backend_geoserver.bak2.py:686
-#: gvsigol_services/backend_geoserver.bak2.py:696
-#: gvsigol_services/backend_geoserver.bak2.py:706
-#: gvsigol_services/backend_geoserver.bak2.py:716
-#: gvsigol_services/backend_geoserver.bak2.py:728
 #: gvsigol_services/backend_geoserver.py:761
 #: gvsigol_services/backend_geoserver.py:776
 #: gvsigol_services/backend_geoserver.py:788
 #: gvsigol_services/backend_geoserver.py:798
 #: gvsigol_services/backend_geoserver.py:807
 #: gvsigol_services/backend_geoserver.py:817
-#: gvsigol_services/backend_geoserver.py:829 gvsigol_services/views.py:1194
-#: gvsigol_services/views.py:2552
+#: gvsigol_services/backend_geoserver.py:829 gvsigol_services/views.py:1207
+#: gvsigol_services/views.py:2482
 msgid "Error: layer could not be published"
 msgstr "Erro: a camada não pôde ser publicada"
 
-#: gvsigol_services/backend_geoserver.bak.py:740
-#: gvsigol_services/backend_geoserver.bak.py:749
-#: gvsigol_services/backend_geoserver.bak.py:759
-#: gvsigol_services/backend_geoserver.bak2.py:739
-#: gvsigol_services/backend_geoserver.bak2.py:748
-#: gvsigol_services/backend_geoserver.bak2.py:758
 #: gvsigol_services/backend_geoserver.py:840
 #: gvsigol_services/backend_geoserver.py:849
-#: gvsigol_services/backend_geoserver.py:859 gvsigol_services/views.py:738
+#: gvsigol_services/backend_geoserver.py:859 gvsigol_services/views.py:751
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Erro na publicação do grupo de camadas. Erro backend: {msg}"
 
-#: gvsigol_services/backend_geoserver.bak.py:743
-#: gvsigol_services/backend_geoserver.bak.py:752
-#: gvsigol_services/backend_geoserver.bak.py:762
-#: gvsigol_services/backend_geoserver.bak2.py:742
-#: gvsigol_services/backend_geoserver.bak2.py:751
-#: gvsigol_services/backend_geoserver.bak2.py:761
 #: gvsigol_services/backend_geoserver.py:843
 #: gvsigol_services/backend_geoserver.py:852
 #: gvsigol_services/backend_geoserver.py:862
 msgid "Error: layer group could not be published"
 msgstr "Erro: o grupo de camadas não pôde ser publicado"
 
-#: gvsigol_services/backend_geoserver.bak.py:805
-#: gvsigol_services/backend_geoserver.bak.py:815
-#: gvsigol_services/backend_geoserver.bak2.py:804
-#: gvsigol_services/backend_geoserver.bak2.py:814
 #: gvsigol_services/backend_geoserver.py:905
 #: gvsigol_services/backend_geoserver.py:915
 #, python-brace-format
 msgid "Error changing property. Backend error: {msg}"
 msgstr "Erro ao mudar de propriedade. Erro backend: {msg}"
 
-#: gvsigol_services/backend_geoserver.bak.py:808
-#: gvsigol_services/backend_geoserver.bak.py:818
-#: gvsigol_services/backend_geoserver.bak2.py:807
-#: gvsigol_services/backend_geoserver.bak2.py:817
 #: gvsigol_services/backend_geoserver.py:908
 #: gvsigol_services/backend_geoserver.py:918
 msgid "Error: layer could not be updated"
 msgstr "Erro: a camada não pôde ser atualizada"
 
-#: gvsigol_services/backend_geoserver.bak.py:1011
-#: gvsigol_services/backend_geoserver.bak.py:1062
-#: gvsigol_services/backend_geoserver.bak.py:1342
-#: gvsigol_services/backend_geoserver.bak.py:1415
-#: gvsigol_services/backend_geoserver.bak2.py:1010
-#: gvsigol_services/backend_geoserver.bak2.py:1061
-#: gvsigol_services/backend_geoserver.bak2.py:1341
-#: gvsigol_services/backend_geoserver.bak2.py:1414
-#: gvsigol_services/backend_geoserver.py:1103
-#: gvsigol_services/backend_geoserver.py:1228
-#: gvsigol_services/backend_geoserver.py:1552
-#: gvsigol_services/backend_geoserver.py:1651
+#: gvsigol_services/backend_geoserver.py:1176
+#: gvsigol_services/backend_geoserver.py:1504
+#: gvsigol_services/backend_geoserver.py:1603
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -178,15 +107,8 @@ msgstr ""
 "letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
-#: gvsigol_services/backend_geoserver.bak.py:1013
-#: gvsigol_services/backend_geoserver.bak.py:1064
-#: gvsigol_services/backend_geoserver.bak.py:1134
-#: gvsigol_services/backend_geoserver.bak2.py:1012
-#: gvsigol_services/backend_geoserver.bak2.py:1063
-#: gvsigol_services/backend_geoserver.bak2.py:1133
-#: gvsigol_services/backend_geoserver.py:1105
-#: gvsigol_services/backend_geoserver.py:1230
-#: gvsigol_services/backend_geoserver.py:1342
+#: gvsigol_services/backend_geoserver.py:1178
+#: gvsigol_services/backend_geoserver.py:1294
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -197,15 +119,8 @@ msgstr ""
 "Os identificadores devem começar com uma letra ou um sublinhado (_). Os "
 "caracteres subsequentes podem ser letras, sublinhados ou números."
 
-#: gvsigol_services/backend_geoserver.bak.py:1015
-#: gvsigol_services/backend_geoserver.bak.py:1066
-#: gvsigol_services/backend_geoserver.bak.py:1136
-#: gvsigol_services/backend_geoserver.bak2.py:1014
-#: gvsigol_services/backend_geoserver.bak2.py:1065
-#: gvsigol_services/backend_geoserver.bak2.py:1135
-#: gvsigol_services/backend_geoserver.py:1107
-#: gvsigol_services/backend_geoserver.py:1232
-#: gvsigol_services/backend_geoserver.py:1344
+#: gvsigol_services/backend_geoserver.py:1180
+#: gvsigol_services/backend_geoserver.py:1296
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -216,15 +131,8 @@ msgstr ""
 "identificadores devem começar com uma letra ou um traço (_). Os caracteres "
 "subsequentes podem ser letras, sublinhados ou números."
 
-#: gvsigol_services/backend_geoserver.bak.py:1017
-#: gvsigol_services/backend_geoserver.bak.py:1068
-#: gvsigol_services/backend_geoserver.bak.py:1138
-#: gvsigol_services/backend_geoserver.bak2.py:1016
-#: gvsigol_services/backend_geoserver.bak2.py:1067
-#: gvsigol_services/backend_geoserver.bak2.py:1137
-#: gvsigol_services/backend_geoserver.py:1109
-#: gvsigol_services/backend_geoserver.py:1234
-#: gvsigol_services/backend_geoserver.py:1346
+#: gvsigol_services/backend_geoserver.py:1182
+#: gvsigol_services/backend_geoserver.py:1298
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -235,29 +143,15 @@ msgstr ""
 "identificadores devem começar com uma letra ou um sublinhado (_). Os "
 "caracteres subsequentes podem ser letras, sublinhados ou números"
 
-#: gvsigol_services/backend_geoserver.bak.py:1039
-#: gvsigol_services/backend_geoserver.bak.py:1091
-#: gvsigol_services/backend_geoserver.bak2.py:1038
-#: gvsigol_services/backend_geoserver.bak2.py:1090
-#: gvsigol_services/backend_geoserver.py:1131
-msgid "Error uploading the layer. Review the file format."
-msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"
-
-#: gvsigol_services/backend_geoserver.bak.py:1089
-#: gvsigol_services/backend_geoserver.bak2.py:1088
-#: gvsigol_services/backend_geoserver.py:1298
+#: gvsigol_services/backend_geoserver.py:1250
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr "Erro ao carregar a camada. Revisar o formato do arquivo. Causa:"
 
-#: gvsigol_services/backend_geoserver.bak.py:1315
-#: gvsigol_services/backend_geoserver.bak2.py:1314
-#: gvsigol_services/backend_geoserver.py:1525
+#: gvsigol_services/backend_geoserver.py:1477
 msgid "Error creating the layer. Review the file format."
 msgstr "Erro ao criar a camada. Revisar o formato do arquivo."
 
-#: gvsigol_services/backend_geoserver.bak.py:1338
-#: gvsigol_services/backend_geoserver.bak2.py:1337
-#: gvsigol_services/backend_geoserver.py:1548 gvsigol_services/views.py:1134
+#: gvsigol_services/backend_geoserver.py:1500 gvsigol_services/views.py:1147
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -265,76 +159,49 @@ msgstr ""
 "Campos de camada inválidos: '{value}'. Camada não pode ter campos com "
 "espaços em branco"
 
-#: gvsigol_services/backend_geoserver.bak.py:1373
-#: gvsigol_services/backend_geoserver.bak2.py:1372
-#: gvsigol_services/backend_geoserver.py:1582
+#: gvsigol_services/backend_geoserver.py:1534
 msgid "Invalid geometry type"
 msgstr "Tipo de geometria inválida"
 
-#: gvsigol_services/backend_geoserver.bak.py:1377
-#: gvsigol_services/backend_geoserver.bak2.py:1376
-#: gvsigol_services/backend_geoserver.py:1586
+#: gvsigol_services/backend_geoserver.py:1538
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nome do campo duplicado: {0}"
 
-#: gvsigol_services/backend_geoserver.bak.py:1379
-#: gvsigol_services/backend_geoserver.bak2.py:1378
-#: gvsigol_services/backend_geoserver.py:1588
+#: gvsigol_services/backend_geoserver.py:1540
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nome de campo inválido. {0}' é uma palavra reservada"
 
-#: gvsigol_services/backend_geoserver.bak.py:1401
-#: gvsigol_services/backend_geoserver.bak2.py:1400
-#: gvsigol_services/backend_geoserver.py:1598
-#: gvsigol_services/backend_geoserver.py:1633
-#: gvsigol_services/backend_geoserver.py:1634
-#: gvsigol_services/backend_geoserver.py:1635
+#: gvsigol_services/backend_geoserver.py:1550
+#: gvsigol_services/backend_geoserver.py:1585
+#: gvsigol_services/backend_geoserver.py:1586
+#: gvsigol_services/backend_geoserver.py:1587
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipo de campo não suportado: {0}"
 
-#: gvsigol_services/backend_geoserver.bak.py:1406
-#: gvsigol_services/backend_geoserver.bak2.py:1405
-#: gvsigol_services/backend_geoserver.py:1603
+#: gvsigol_services/backend_geoserver.py:1555
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:299
 #: gvsigol_services/templates/layer_create.html:675
 msgid "At least one field must be defined"
 msgstr "Pelo menos um campo deve ser definido"
 
-#: gvsigol_services/backend_geoserver.bak.py:1409
-#: gvsigol_services/backend_geoserver.bak2.py:1408
-#: gvsigol_services/backend_geoserver.py:1606
+#: gvsigol_services/backend_geoserver.py:1558
 msgid "Invalid field definition"
 msgstr "Definição de campo inválida"
 
-#: gvsigol_services/backend_geoserver.bak.py:1421
-#: gvsigol_services/backend_geoserver.bak2.py:1420
-#: gvsigol_services/backend_geoserver.py:1657
+#: gvsigol_services/backend_geoserver.py:1609
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Já existe uma camada com este nome: '{value}'."
 
-#: gvsigol_services/backend_geoserver.bak.py:1441
-#: gvsigol_services/backend_geoserver.bak.py:1450
-#: gvsigol_services/backend_geoserver.bak2.py:1440
-#: gvsigol_services/backend_geoserver.bak2.py:1449
-#: gvsigol_services/backend_geoserver.py:1677
-#: gvsigol_services/backend_geoserver.py:1686
+#: gvsigol_services/backend_geoserver.py:1629
+#: gvsigol_services/backend_geoserver.py:1638
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Ocorreu um erro ao construir a vista. Revisar a sentença SQL"
 
-#: gvsigol_services/backend_geoserver.bak.py:1883
-#: gvsigol_services/backend_geoserver.bak2.py:1881
-#: gvsigol_services/backend_geoserver.py:2179
-msgid ""
-"Bad file format. The provided zip file must not contain any subdirectory."
-msgstr ""
-"Formato de ficheiro defeituoso. O arquivo zip fornecido não deve conter "
-"nenhum subdiretório."
-
-#: gvsigol_services/backend_geoserver.py:1713
+#: gvsigol_services/backend_geoserver.py:1665
 #, python-brace-format
 msgid ""
 "Invalid field name: '{value}'. Identifiers must begin with a letter or an "
@@ -343,6 +210,13 @@ msgstr ""
 "Nome de campo inválido: '{value}'. Os identificadores devem começar com uma "
 "letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
+
+#: gvsigol_services/backend_geoserver.py:2131
+msgid ""
+"Bad file format. The provided zip file must not contain any subdirectory."
+msgstr ""
+"Formato de ficheiro defeituoso. O arquivo zip fornecido não deve conter "
+"nenhum subdiretório."
 
 #: gvsigol_services/forms_geoserver.py:33
 msgid "autodetect"
@@ -559,7 +433,7 @@ msgstr "Visível"
 #: gvsigol_services/templates/layer_create.html:147
 #: gvsigol_services/templates/layer_update.html:148
 msgid "Queryable"
-msgstr "Questões"
+msgstr " Consultável"
 
 #: gvsigol_services/forms_geoserver.py:60
 #: gvsigol_services/forms_geoserver.py:75
@@ -581,7 +455,7 @@ msgstr "Questões"
 #: gvsigol_services/templates/layer_create.html:143
 #: gvsigol_services/templates/layer_update.html:140
 msgid "Cached"
-msgstr "Em cache"
+msgstr "Cache"
 
 #: gvsigol_services/forms_geoserver.py:61
 #: gvsigol_services/forms_geoserver.py:76
@@ -589,7 +463,7 @@ msgstr "Em cache"
 #: gvsigol_services/forms_geoserver.py:138
 #: gvsigol_services/forms_geoserver.py:150
 msgid "Single image"
-msgstr "Imagem única"
+msgstr "Imagem simples"
 
 #: gvsigol_services/forms_geoserver.py:62
 msgid "Date regex"
@@ -610,7 +484,7 @@ msgstr "Elevação regex"
 #: gvsigol_services/templates/cache_list.html:26
 #: gvsigol_services/templates/layer_list.html:28
 msgid "Datastore"
-msgstr "Datastore"
+msgstr "Armazém de dados"
 
 #: gvsigol_services/forms_geoserver.py:95
 msgid "Mode"
@@ -811,7 +685,7 @@ msgstr "Tipo"
 #: gvsigol_services/templates/server_update.html:57
 #: gvsigol_services/templates/server_update.html:58
 msgid "Frontend URL"
-msgstr "URL de entrada"
+msgstr "URL del frontal"
 
 #: gvsigol_services/forms_services.py:85
 #: gvsigol_services/templates/server_update.html:63
@@ -880,7 +754,7 @@ msgstr "Parâmetros de conexão"
 
 #: gvsigol_services/forms_services.py:121
 msgid "Datastore already exists"
-msgstr "Datastore já existe"
+msgstr "O armazém já existe"
 
 #: gvsigol_services/forms_services.py:127
 #: gvsigol_services/forms_services.py:147
@@ -927,7 +801,7 @@ msgstr "Versão"
 msgid "URL"
 msgstr "URL"
 
-#: gvsigol_services/forms_services.py:226
+#: gvsigol_services/forms_services.py:226 gvsigol_services/settings.py:31
 #: gvsigol_services/templates/base_layer_add.html:67
 #: gvsigol_services/templates/base_layer_update.html:69
 #: gvsigol_services/templates/dashboard_services_menu.html:12
@@ -976,6 +850,23 @@ msgstr ""
 #: gvsigol_services/migrations/0045_golfunc_geocoder_inv_icv_gva_es.py:59
 msgid "Inverse Geocoder ICV"
 msgstr ""
+
+#: gvsigol_services/models.py:297
+#, python-brace-format
+msgid "enumerated ({0})"
+msgstr ""
+
+#: gvsigol_services/settings.py:30
+msgid "Layer requests"
+msgstr ""
+
+#: gvsigol_services/settings.py:39
+msgid "Layer requests by user"
+msgstr ""
+
+#: gvsigol_services/settings.py:40
+msgid "Users"
+msgstr "Usuários"
 
 #: gvsigol_services/templates/base_layer_add.html:12
 #: gvsigol_services/templates/datastore_add.html:12
@@ -1190,7 +1081,7 @@ msgstr "Filtragem %(max)s registros"
 #: gvsigol_services/templates/service_url_list.html:88
 #: gvsigol_services/templates/workspace_list.html:94
 msgid "Loading..."
-msgstr "Carregando"
+msgstr "Carregando..."
 
 #: gvsigol_services/templates/base_layer_list.html:88
 #: gvsigol_services/templates/base_layer_list.html:89
@@ -1430,7 +1321,7 @@ msgstr "Adicionar datastore"
 
 #: gvsigol_services/templates/datastore_list.html:58
 msgid "Delete datastore"
-msgstr "Excluir datastore"
+msgstr "Excluir Armazém"
 
 #: gvsigol_services/templates/datastore_list.html:63
 msgid "The data store and its registered resources will be deleted"
@@ -1442,11 +1333,11 @@ msgstr "Marque esta opção para remover o esquema associado ao armazém de dado
 
 #: gvsigol_services/templates/datastore_list.html:116
 msgid "Remove datastore"
-msgstr "Remove datastore"
+msgstr "Excluir armazém"
 
 #: gvsigol_services/templates/datastore_list.html:120
 msgid "Update datastore"
-msgstr "Atualizar datastore"
+msgstr "Atualizar armazém"
 
 #: gvsigol_services/templates/enumeration_add.html:53
 #: gvsigol_services/templates/enumeration_update.html:53
@@ -1465,7 +1356,7 @@ msgstr "Adicionar enumeração"
 #: gvsigol_services/templates/enumeration_list.html:53
 #: gvsigol_services/templates/enumeration_list.html:101
 msgid "Delete enumeration"
-msgstr "Eliminar enumeração"
+msgstr "Excluir enumeração"
 
 #: gvsigol_services/templates/enumeration_list.html:56
 msgid "The enumeration will be removed, Do you want continue?"
@@ -1505,7 +1396,7 @@ msgstr "Exibir propriedades"
 #: gvsigol_services/templates/layer_create.html:48
 #: gvsigol_services/templates/layer_update.html:41
 msgid "Metadata"
-msgstr "Metadata"
+msgstr "Metadado"
 
 #: gvsigol_services/templates/external_layer_add.html:36
 #: gvsigol_services/templates/external_layer_update.html:50
@@ -1520,7 +1411,7 @@ msgstr "Informações detalhadas"
 #: gvsigol_services/templates/layer_add.html:95
 #: gvsigol_services/templates/layer_update.html:112
 msgid "Timeout (miliseconds)"
-msgstr ""
+msgstr "Tempo limite (milissegundos)"
 
 #: gvsigol_services/templates/external_layer_add.html:160
 #: gvsigol_services/templates/external_layer_update.html:205
@@ -1554,7 +1445,7 @@ msgstr "Alguma descrição da camada"
 #: gvsigol_services/templates/layer_create.html:254
 #: gvsigol_services/templates/layer_update.html:315
 msgid "Enable metaquality"
-msgstr "Ativar meta qualidade"
+msgstr "Ativar"
 
 #: gvsigol_services/templates/external_layer_add.html:183
 #: gvsigol_services/templates/external_layer_update.html:237
@@ -1562,7 +1453,7 @@ msgstr "Ativar meta qualidade"
 #: gvsigol_services/templates/layer_create.html:259
 #: gvsigol_services/templates/layer_update.html:324
 msgid "Button title in the TOC"
-msgstr "Título do botão no TOC"
+msgstr "Título do botão no PDC"
 
 #: gvsigol_services/templates/external_layer_add.html:184
 #: gvsigol_services/templates/external_layer_update.html:238
@@ -1610,11 +1501,11 @@ msgstr "Adicionar camada externa"
 
 #: gvsigol_services/templates/external_layer_list.html:63
 msgid "Delete external layer"
-msgstr "Eliminar camada externa"
+msgstr "Excluir camada externa"
 
 #: gvsigol_services/templates/external_layer_list.html:66
 msgid "External layer will be deleted"
-msgstr "A camada externa será eliminada"
+msgstr "A camada externa será excluida"
 
 #: gvsigol_services/templates/external_layer_list.html:111
 msgid "Remove external layer"
@@ -1632,7 +1523,7 @@ msgstr "Metadados de camada"
 #: gvsigol_services/templates/external_layer_update.html:186
 #: gvsigol_services/templates/layer_update.html:273
 msgid "Metadata UUID"
-msgstr "Metadata UUID"
+msgstr "Metadados UUID"
 
 #: gvsigol_services/templates/external_layer_update.html:192
 #: gvsigol_services/templates/external_layer_update.html:198
@@ -1688,7 +1579,7 @@ msgstr "Adicionar campo"
 #: gvsigol_services/templates/geoserver/layer_upload_vector.html:94
 #: gvsigol_services/templates/layer_update.html:124
 msgid "Layer properties in the viewer"
-msgstr "Propriedades da camada no visor"
+msgstr "Propriedades da camada no visualizador"
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:122
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:112
@@ -1700,7 +1591,7 @@ msgstr "Propriedades da camada no visor"
 #: gvsigol_services/templates/layer_create.html:153
 #: gvsigol_services/templates/layer_update.html:158
 msgid "Single image (No tiles)"
-msgstr "Imagem única (sem azulejos)"
+msgstr " Imagem simples (sem mosaicos)"
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:143
 #: gvsigol_services/templates/layer_config.html:699
@@ -1750,7 +1641,7 @@ msgstr "Nenhum campo foi definido"
 #: gvsigol_services/templates/layer_config.html:123
 #: gvsigol_services/templates/layer_config.html:484
 msgid "Delete field"
-msgstr "Eliminar campo"
+msgstr "Excluir campo"
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:231
 msgid "The name field is required"
@@ -1848,7 +1739,7 @@ msgstr ""
 #: gvsigol_services/templates/geoserver/layer_upload_postgis.html:13
 #: gvsigol_services/templates/geoserver/layer_upload_vector.html:12
 msgid "Upload vector layer"
-msgstr "Carregar camada de vector"
+msgstr "Carregar camada de vetor"
 
 #: gvsigol_services/templates/geoserver/layer_upload_postgis.html:50
 msgid "Table creation mode"
@@ -1986,7 +1877,7 @@ msgstr "Estado da tarefa"
 #: gvsigol_services/templates/layer_create.html:47
 #: gvsigol_services/templates/layer_update.html:40
 msgid "Permissions"
-msgstr ""
+msgstr "Permissões"
 
 #: gvsigol_services/templates/layer_add.html:54
 #: gvsigol_services/templates/layer_create.html:60
@@ -2003,13 +1894,13 @@ msgstr "Nome do recurso"
 #: gvsigol_services/templates/layer_add.html:99
 #: gvsigol_services/templates/layer_update.html:117
 msgid "WFS request feature limit"
-msgstr ""
+msgstr "Limite de solicitação WFS"
 
 #: gvsigol_services/templates/layer_add.html:124
 #: gvsigol_services/templates/layer_create.html:157
 #: gvsigol_services/templates/layer_update.html:166
 msgid "time_enabled"
-msgstr "tempo_activado"
+msgstr "Parâmetro temporal"
 
 #: gvsigol_services/templates/layer_add.html:128
 #: gvsigol_services/templates/layer_create.html:161
@@ -2020,7 +1911,7 @@ msgstr "Permitir downloads"
 #: gvsigol_services/templates/layer_add.html:135
 #: gvsigol_services/templates/layer_update.html:184
 msgid "View in real time"
-msgstr "Veja em tempo real"
+msgstr "Ver em tempo real"
 
 #: gvsigol_services/templates/layer_add.html:140
 #: gvsigol_services/templates/layer_update.html:189
@@ -2031,25 +1922,25 @@ msgstr "Intervalo de atualização (milissegundos)"
 #: gvsigol_services/templates/layer_create.html:167
 #: gvsigol_services/templates/layer_update.html:197
 msgid "time_enabled field"
-msgstr "tempo_campo ativado"
+msgstr "Campo temporal"
 
 #: gvsigol_services/templates/layer_add.html:156
 #: gvsigol_services/templates/layer_create.html:173
 #: gvsigol_services/templates/layer_update.html:203
 msgid "End time_enabled field"
-msgstr "Campo Hora de fim_permitido"
+msgstr "Campo tempo (intervalo final)"
 
 #: gvsigol_services/templates/layer_add.html:163
 #: gvsigol_services/templates/layer_create.html:179
 #: gvsigol_services/templates/layer_update.html:210
 msgid "Time resolution"
-msgstr "Resolução de tempo"
+msgstr "Resolução temporal"
 
 #: gvsigol_services/templates/layer_add.html:169
 #: gvsigol_services/templates/layer_create.html:185
 #: gvsigol_services/templates/layer_update.html:216
 msgid "Time presentation"
-msgstr "Apresentação do tempo"
+msgstr "Visualização temporal"
 
 #: gvsigol_services/templates/layer_add.html:175
 #: gvsigol_services/templates/layer_create.html:191
@@ -2057,13 +1948,13 @@ msgstr "Apresentação do tempo"
 msgid ""
 "Time resolution (years, months, weeks, days, hours, minutes and seconds)"
 msgstr ""
-"Resolução de tempo (anos, meses, semanas, dias, horas, minutos e segundos)"
+"Resolução temporal (anos, meses, semanas, dias, horas, minutos e segundos)"
 
 #: gvsigol_services/templates/layer_add.html:190
 #: gvsigol_services/templates/layer_create.html:204
 #: gvsigol_services/templates/layer_update.html:235
 msgid "Default value mode"
-msgstr "Modo valor predefinido"
+msgstr "Modo para atribuir valores padrão"
 
 #: gvsigol_services/templates/layer_add.html:324
 #: gvsigol_services/templates/layer_create.html:476
@@ -2119,19 +2010,19 @@ msgstr "Selecionar campo de data"
 
 #: gvsigol_services/templates/layer_config.html:43
 msgid "Field management"
-msgstr ""
+msgstr "Gestão do campo"
 
 #: gvsigol_services/templates/layer_config.html:44
 msgid "Field titles"
-msgstr ""
+msgstr "Título do campo"
 
 #: gvsigol_services/templates/layer_config.html:45
 msgid "Field groups"
-msgstr ""
+msgstr "Grupos do campo"
 
 #: gvsigol_services/templates/layer_config.html:46
 msgid "Group titles"
-msgstr ""
+msgstr "Títulos do grupo"
 
 #: gvsigol_services/templates/layer_config.html:60
 #: gvsigol_services/templates/layer_config.html:164
@@ -2144,15 +2035,15 @@ msgstr "Nome do campo"
 #: gvsigol_services/templates/layer_config.html:62
 #: gvsigol_services/templates/layer_create.html:112
 msgid "Calculated"
-msgstr ""
+msgstr "Calculado"
 
 #: gvsigol_services/templates/layer_config.html:63
 msgid "Nullable"
-msgstr ""
+msgstr "Nulo"
 
 #: gvsigol_services/templates/layer_config.html:64
 msgid "mandatory"
-msgstr ""
+msgstr "Obrigatório"
 
 #: gvsigol_services/templates/layer_config.html:65
 msgid "Is visible?"
@@ -2168,33 +2059,33 @@ msgstr "É mostrado em Obter Informações sobre o Recurso?"
 
 #: gvsigol_services/templates/layer_config.html:68
 msgid "Actions"
-msgstr ""
+msgstr "Ferramentas"
 
 #: gvsigol_services/templates/layer_config.html:79
 #: gvsigol_services/templates/layer_config.html:81
 msgid "Set at database level"
-msgstr ""
+msgstr "Definido em nível de banco de dados"
 
 #: gvsigol_services/templates/layer_config.html:84
 #: gvsigol_services/templates/layer_config.html:86
 msgid "Required in editing forms"
-msgstr ""
+msgstr "Necessário em formulários de edição"
 
 #: gvsigol_services/templates/layer_config.html:118
 msgid "Rename"
-msgstr ""
+msgstr "Renomear"
 
 #: gvsigol_services/templates/layer_config.html:119
 msgid "Change type"
-msgstr ""
+msgstr "Tipo de modificação"
 
 #: gvsigol_services/templates/layer_config.html:121
 msgid "Convert to enumerate"
-msgstr ""
+msgstr "Converter para enumeração"
 
 #: gvsigol_services/templates/layer_config.html:127
 msgid "Reserved field"
-msgstr ""
+msgstr "Campo reservado"
 
 #: gvsigol_services/templates/layer_config.html:146
 #: gvsigol_services/templates/layer_create.html:122
@@ -2208,15 +2099,15 @@ msgstr "Título do campo"
 #: gvsigol_services/templates/layer_config.html:213
 #: gvsigol_services/templates/layer_config.html:743
 msgid "Delete group"
-msgstr "Eliminar grupo"
+msgstr "Excluir grupo"
 
 #: gvsigol_services/templates/layer_config.html:239
 msgid "Add field group"
-msgstr ""
+msgstr "Adicionar grupo de campos"
 
 #: gvsigol_services/templates/layer_config.html:259
 msgid "Group name"
-msgstr ""
+msgstr "Nome do grupo"
 
 #: gvsigol_services/templates/layer_config.html:261
 msgid "Group title"
@@ -2224,23 +2115,27 @@ msgstr "Título do grupo"
 
 #: gvsigol_services/templates/layer_config.html:404
 msgid "Convert to enum"
-msgstr ""
+msgstr "Converter em enumeração"
 
 #: gvsigol_services/templates/layer_config.html:489
 msgid ""
 "Warning: the field will be deleted from the database. This operation cannot "
 "be undone. Type the name of the field to confirm the deletion:"
 msgstr ""
+"Atenção: o campo será excluído do banco de dados. Esta operação não pode ser "
+"desfeita. Digite o nome do campo para confirmar a exclusão:"
 
 #: gvsigol_services/templates/layer_config.html:555
 msgid "Rename field"
-msgstr ""
+msgstr "Renomear campo"
 
 #: gvsigol_services/templates/layer_config.html:562
 msgid ""
 "Warning: renaming a field may have side effects, such as breaking a field-"
 "based legend."
 msgstr ""
+"Aviso: a modificação do nome de um campo pode ter efeitos colaterais, tais "
+"como quebrar uma lenda baseada em campo."
 
 #: gvsigol_services/templates/layer_create.html:103
 msgid "Field list"
@@ -2258,11 +2153,11 @@ msgstr "Pré-visualização"
 
 #: gvsigol_services/templates/layer_list.html:30
 msgid "Projects"
-msgstr ""
+msgstr "Projetos"
 
 #: gvsigol_services/templates/layer_list.html:31
 msgid "Datastore type"
-msgstr ""
+msgstr "Tipo de armazém"
 
 #: gvsigol_services/templates/layer_list.html:73
 #: gvsigol_services/templates/layer_list.html:153
@@ -2270,7 +2165,7 @@ msgstr ""
 #: gvsigol_services/templates/layergroup_update.html:141
 #: gvsigol_services/templates/layergroup_update.html:184
 msgid "Delete layer"
-msgstr "Eliminar camada"
+msgstr "Excluir camada"
 
 #: gvsigol_services/templates/layer_list.html:76
 #: gvsigol_services/templates/layergroup_update.html:187
@@ -2286,7 +2181,7 @@ msgid ""
 "The layer could not be removed from GeoServer, but it was deleted from the "
 "list anyway"
 msgstr ""
-"Esta camada não pode ser removida do GeoServer, mas foi excluída da lista de "
+"Essa camada não pode ser removida do GeoServer, mas foi excluída da lista de "
 "qualquer maneira"
 
 #: gvsigol_services/templates/layer_list.html:159
@@ -2304,7 +2199,7 @@ msgstr "Camada de atualização"
 
 #: gvsigol_services/templates/layer_list.html:175
 msgid "Refresh extent and layer definition"
-msgstr ""
+msgstr "Atualizar extensão e definição de camadas"
 
 #: gvsigol_services/templates/layer_list.html:179
 msgid "Update thumbnail"
@@ -2312,11 +2207,11 @@ msgstr "Atualizar miniatura"
 
 #: gvsigol_services/templates/layer_update.html:94
 msgid "Icon"
-msgstr ""
+msgstr "Ícone"
 
 #: gvsigol_services/templates/layer_update.html:94
 msgid "Supported formats"
-msgstr ""
+msgstr "Formatos suportados"
 
 #: gvsigol_services/templates/layergroup_add.html:37
 #: gvsigol_services/templates/layergroup_update.html:38
@@ -2367,7 +2262,7 @@ msgstr "Em conformidade com"
 #: gvsigol_services/templates/layergroup_list.html:63
 #: gvsigol_services/templates/layergroup_list.html:111
 msgid "Delete layer group"
-msgstr "Eliminar grupo de camadas"
+msgstr "Excluir grupo de camadas"
 
 #: gvsigol_services/templates/layergroup_list.html:66
 msgid "The layer group will be removed, Do you want continue?"
@@ -2379,7 +2274,7 @@ msgstr "Atualizar grupo de camadas"
 
 #: gvsigol_services/templates/layergroup_update.html:97
 msgid "Group layers"
-msgstr "Camadas de grupo"
+msgstr "Grupo de camadas"
 
 #: gvsigol_services/templates/lock_list.html:14
 msgid "Layer"
@@ -2399,7 +2294,7 @@ msgstr "GEOPORTAL"
 
 #: gvsigol_services/templates/lock_list.html:31
 msgid "MOBILE"
-msgstr "MÓVEL"
+msgstr "Celular"
 
 #: gvsigol_services/templates/lock_list.html:78
 msgid "Unlock layer"
@@ -2407,7 +2302,7 @@ msgstr "Camada de desbloqueio"
 
 #: gvsigol_services/templates/select_layer_permissions.html:7
 msgid "Give the selected groups permissions to read or write the layer"
-msgstr ""
+msgstr "Dar aos grupos selecionados permissão para ler ou escrever a camada"
 
 #: gvsigol_services/templates/select_layer_permissions.html:8
 msgid "Search user group..."
@@ -2415,13 +2310,11 @@ msgstr "Pesquisar grupo de usuários"
 
 #: gvsigol_services/templates/select_layer_permissions.html:12
 msgid "Layer will be readable by everyone if public"
-msgstr ""
+msgstr "A camada será legível por todos se for pública"
 
 #: gvsigol_services/templates/select_layer_permissions.html:14
-#, fuzzy
-#| msgid "Is public?"
 msgid "Is public"
-msgstr "É público?"
+msgstr "É público"
 
 #: gvsigol_services/templates/select_layer_permissions.html:31
 msgid "Read permissions"
@@ -2483,7 +2376,7 @@ msgstr "Adicionar servidor"
 #: gvsigol_services/templates/server_list.html:59
 #: gvsigol_services/templates/server_list.html:107
 msgid "Delete server"
-msgstr "Eliminar servidor"
+msgstr "Excluir servidor"
 
 #: gvsigol_services/templates/server_list.html:62
 msgid ""
@@ -2504,12 +2397,12 @@ msgstr "Senha"
 
 #: gvsigol_services/templates/service_url_list.html:12
 msgid "Add service URL"
-msgstr "Adicionar serviço"
+msgstr "Adicionar serviço URL"
 
 #: gvsigol_services/templates/service_url_list.html:57
 #: gvsigol_services/templates/service_url_list.html:105
 msgid "Delete service URL"
-msgstr "Excluir serviço"
+msgstr "Excluir serviço URL"
 
 #: gvsigol_services/templates/service_url_list.html:60
 msgid "Service URL will be deleted, Do you want to continue?"
@@ -2530,7 +2423,7 @@ msgstr "URI"
 #: gvsigol_services/templates/workspace_list.html:62
 #: gvsigol_services/templates/workspace_list.html:111
 msgid "Delete workspace"
-msgstr "Eliminar espaço de trabalho"
+msgstr "Excluir espaço de trabalho"
 
 #: gvsigol_services/templates/workspace_list.html:65
 msgid ""
@@ -2545,7 +2438,7 @@ msgstr "Atualizar espaço de trabalho"
 
 #: gvsigol_services/templates/workspace_update.html:26
 msgid "Uri"
-msgstr ""
+msgstr "Uri"
 
 #: gvsigol_services/templates/workspace_update.html:31
 msgid "Workspace description"
@@ -2573,7 +2466,7 @@ msgid ""
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nome do datastore inválido: '{value}'. Os identificadores devem começar com "
+"Nome do armazém inválido: '{value}'. Os identificadores devem começar com "
 "uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
@@ -2589,26 +2482,21 @@ msgstr "Erro: GeoTIFF não é georreferenciado"
 msgid "Error updating datastore"
 msgstr "Erro na atualização do armazenamento de dados"
 
-#: gvsigol_services/views.py:715
+#: gvsigol_services/views.py:728
 msgid "ERROR can't connect with GeoServer"
 msgstr "ERROR não pode se conectar com GeoServer"
 
-#: gvsigol_services/views.py:723
+#: gvsigol_services/views.py:736
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 "ERROR não pode remover dados do GeoServer. Forçando a remoção de dados da "
 "Base de Dados"
 
-#: gvsigol_services/views.py:747
+#: gvsigol_services/views.py:760
 msgid "ERROR User is not authorized to perform this operation"
-msgstr ""
+msgstr "ERROR O usuário não está autorizado a realizar esta operação"
 
-#: gvsigol_services/views.py:1711
-#, python-brace-format
-msgid "enumerated ({0})"
-msgstr ""
-
-#: gvsigol_services/views.py:2141 gvsigol_services/views.py:2299
+#: gvsigol_services/views.py:2071 gvsigol_services/views.py:2229
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -2619,94 +2507,121 @@ msgstr ""
 "começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
-#: gvsigol_services/views.py:2190 gvsigol_services/views.py:2320
+#: gvsigol_services/views.py:2120 gvsigol_services/views.py:2250
 msgid "Layer group name already exists"
 msgstr "O nome do grupo de camadas já existe"
 
-#: gvsigol_services/views.py:2194
+#: gvsigol_services/views.py:2124
 msgid "You must enter a name for layer group"
 msgstr "É necessário inserir um nome para o grupo de camadas"
 
-#: gvsigol_services/views.py:2689
+#: gvsigol_services/views.py:2619
 msgid "You must enter a title for enumeration"
 msgstr "É necessário entrar um título para enumeração"
 
-#: gvsigol_services/views.py:2694
+#: gvsigol_services/views.py:2624
 msgid "Name already taken"
 msgstr "Nome já utilizado"
 
-#: gvsigol_services/views.py:3967
+#: gvsigol_services/views.py:3886
 msgid "Error: ExternalLayer could not be published"
 msgstr "Erro: Camada externa não pôde ser publicada"
 
-#: gvsigol_services/views.py:4068
+#: gvsigol_services/views.py:3987
 msgid "Error: externallayer could not be published"
 msgstr "Erro: camada externa não pôde ser publicada"
 
-#: gvsigol_services/views.py:4692 gvsigol_services/views.py:4698
+#: gvsigol_services/views.py:4611 gvsigol_services/views.py:4617
 msgid "Connection failed"
-msgstr ""
+msgstr "A conexão falhou"
 
-#: gvsigol_services/views.py:4692
+#: gvsigol_services/views.py:4611
 msgid "Status code: "
-msgstr ""
+msgstr "Código de status:"
 
-#: gvsigol_services/views.py:4703
+#: gvsigol_services/views.py:4622
 msgid "Connection error"
-msgstr ""
+msgstr "Erro de conexão"
 
-#: gvsigol_services/views.py:4739
+#: gvsigol_services/views.py:4657
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
-msgstr ""
+msgstr "O campo de controle \"{0}\" não pode ser apagado"
 
-#: gvsigol_services/views.py:4763 gvsigol_services/views.py:4825
-#: gvsigol_services/views.py:4829 gvsigol_services/views.py:4831
+#: gvsigol_services/views.py:4682 gvsigol_services/views.py:4744
+#: gvsigol_services/views.py:4748 gvsigol_services/views.py:4750
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
-msgstr ""
+msgstr "Campo de renomeação de erro. Causa: {0}"
 
-#: gvsigol_services/views.py:4765 gvsigol_services/views.py:4827
+#: gvsigol_services/views.py:4684 gvsigol_services/views.py:4746
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
 msgstr ""
+"O campo não existe. Provavelmente, ele foi excluído ou renomeado "
+"simultaneamente por outro usuário."
 
-#: gvsigol_services/views.py:4767
+#: gvsigol_services/views.py:4686
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
-msgstr ""
+msgstr "Campo de eliminação de erros. Causa: {0}"
 
-#: gvsigol_services/views.py:4795
+#: gvsigol_services/views.py:4713
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
-msgstr ""
+msgstr "O campo de controle \"{0}\" não pode ser renomeado"
 
-#: gvsigol_services/views.py:4797 gvsigol_services/views.py:4872
+#: gvsigol_services/views.py:4715 gvsigol_services/views.py:4770
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr "Nome de campo \"{0}\" é uma palavra reservada"
 
-#: gvsigol_services/views.py:4852
-msgid "String"
-msgstr ""
-
-#: gvsigol_services/views.py:4885
+#: gvsigol_services/views.py:4783
 msgid "Field type not supported"
-msgstr ""
+msgstr "Tipo de campo não suportado"
 
-#: gvsigol_services/views.py:4889
-#, python-brace-format
+#: gvsigol_services/views.py:4787
+#, fuzzy, python-brace-format
+#| msgid "Field list"
 msgid "Field \"{0}\" exists"
-msgstr ""
+msgstr "Lista de campos"
 
-#: gvsigol_services/views.py:4938
+#: gvsigol_services/views.py:4819
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
-msgstr ""
+msgstr "Campo de criação de erros. Causa: {0}"
 
-#~ msgid "Users"
-#~ msgstr "Usuários"
+#~ msgid "Alert: The selected matrixset must be compatible with the map CRS"
+#~ msgstr ""
+#~ "Alerta: O matrixset selecionado deve ser compatível com o CRS do mapa"
+
+#~ msgid "Show in vector tile format"
+#~ msgstr "Mostrar vetor em formato de mosaico"
+
+#~ msgid "Error clearing cache. Cause: {cause}."
+#~ msgstr "Cache de compensação de erros. Causa: {cause}."
+
+#~ msgid "Not supported."
+#~ msgstr "Não é suportado."
+
+#~ msgid "Error accessing layer. Cause: {cause}."
+#~ msgstr "Camada de acesso de erro. Causa: {cause}."
+
+#, fuzzy
+#~| msgid "Error accessing layer group. Cause: {cause}."
+#~ msgid "Error accessing layer group. Cause: {cause}."
+#~ msgstr "Erro na publicação do grupo de camadas. Erro backend: {msg}"
+
+#~ msgid ""
+#~ "Error adding field. Probably the field \"{0}\" already exists. Database "
+#~ "message: {1}"
+#~ msgstr ""
+#~ "Erro ao adicionar campo. Provavelmente, o campo \"{0}\" já existe. "
+#~ "Mensagem do banco de dados: {1}"
+
+#~ msgid "Error uploading the layer. Review the file format."
+#~ msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"
 
 #, fuzzy
 #~| msgid "Make layer writeable only for the following groups"

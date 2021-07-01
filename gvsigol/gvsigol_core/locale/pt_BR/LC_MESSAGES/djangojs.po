@@ -6,6 +6,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"X-Generator: Poedit 2.4.3\n"
 
 # gvSIG Online.
 # Copyright (C) 2010-2017 SCOLAB.
@@ -306,19 +313,19 @@ msgid "Details"
 msgstr "Detalhes"
 
 msgid "Metadata"
-msgstr "Metadata"
+msgstr "Metadado"
 
 msgid "Download links"
-msgstr "Links de descarga"
+msgstr "Links para baixar "
 
 msgid "Download shapefile"
-msgstr "Descargar shapefile"
+msgstr "Baixar shapefile"
 
 msgid "Download CSV"
-msgstr "Descargar CSV"
+msgstr "Baixar CSV"
 
 msgid "Download GML"
-msgstr "Descargar GML"
+msgstr "Baixar GML"
 
 msgid "Attribute table"
 msgstr "Tabela de atributos"
@@ -363,7 +370,7 @@ msgid "Country"
 msgstr "País"
 
 msgid "Email"
-msgstr "Correio eletrónico"
+msgstr "E-mail"
 
 msgid "Name"
 msgstr "Nome"
@@ -375,7 +382,7 @@ msgid "Abstract"
 msgstr "Resumo"
 
 msgid "Queryable"
-msgstr "Questões"
+msgstr "Consultável"
 
 msgid "MaxScaleDenominator"
 msgstr "Denominador de Escala Máxima"
@@ -429,10 +436,10 @@ msgid "Range"
 msgstr "Faixa"
 
 msgid "temporary_field"
-msgstr "campo_temporário"
+msgstr "Parâmetro temporal"
 
 msgid "temporary_endfield"
-msgstr "temporário _ campofinal"
+msgstr " Campo tempo (intervalo final)"
 
 msgid "second(s)"
 msgstr "segundo(s)"
@@ -550,14 +557,62 @@ msgstr "Você deve preencher todos os valores"
 msgid "Some value is out of range"
 msgstr "Algum valor está fora da faixa"
 
+msgid "Raw filter"
+msgstr "Filtro rápido"
+
+msgid "Layer group"
+msgstr "Grupo de camadas"
+
+msgid "Select layer group"
+msgstr "Selecionar grupo de camadas"
+
+msgid "Layer"
+msgstr "Camada"
+
+msgid "Select layer"
+msgstr "Selecionar camada"
+
+msgid "Field"
+msgstr "Campo"
+
+msgid "Operator"
+msgstr "Operador"
+
+msgid "Select operator"
+msgstr "Selecionar operador"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Clean filter"
+msgstr "Limpar filtro"
+
+msgid "The selected layer group does not contain queryable layers"
+msgstr "O grupo de camadas selecionado não contém camadas consultáveis"
+
+msgid "The selected layer does not contain queryable fields"
+msgstr "A camada selecionada não contém campos consultáveis"
+
+msgid "The selected field does not contain values"
+msgstr "O campo selecionado não contém valores"
+
+msgid "No results found"
+msgstr "Não foram encontrados resultados"
+
+msgid "Equal to"
+msgstr "É o mesmo que"
+
+msgid "Smaller than"
+msgstr "É menos que"
+
+msgid "Greater than"
+msgstr "É maior que"
+
+msgid "You must fill in all fields"
+msgstr "Você deve preencher todos os campos"
+
 msgid "Find layer"
 msgstr "Buscar camada"
-
-msgid "Zoom in"
-msgstr "Ampliar zoom"
-
-msgid "Zoom out"
-msgstr "Reduzir zoom"
 
 msgid "Next view"
 msgstr "Vista seguinte"
@@ -565,5 +620,14 @@ msgstr "Vista seguinte"
 msgid "Last view"
 msgstr "Vista anterior"
 
+msgid "Zoom in"
+msgstr "Ampliar zoom"
+
+msgid "Zoom out"
+msgstr "Reduzir zoom"
+
 msgid "Drag Zoom"
 msgstr "Lupa"
+
+msgid "Search in catalog"
+msgstr "Pesquisa no catálogo"

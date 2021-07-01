@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2021-07-01 09:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,33 +55,28 @@ msgstr ""
 "Nombre inválido: '{value}'. El nombre no debe contener ningún caracter "
 "especial"
 
-#: gvsigol_symbology/templates/base_symbology.html:73
-#: gvsigol_symbology/templates/base_symbology_compress.html:73
-msgid "gvsigonline docs"
-msgstr "Manual gvSIG Online"
-
-#: gvsigol_symbology/templates/base_symbology.html:108
-#: gvsigol_symbology/templates/base_symbology_compress.html:108
+#: gvsigol_symbology/templates/base_symbology.html:112
+#: gvsigol_symbology/templates/base_symbology_compress.html:111
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: gvsigol_symbology/templates/base_symbology.html:127
-#: gvsigol_symbology/templates/base_symbology_compress.html:126
+#: gvsigol_symbology/templates/base_symbology.html:131
+#: gvsigol_symbology/templates/base_symbology_compress.html:129
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: gvsigol_symbology/templates/base_symbology.html:133
-#: gvsigol_symbology/templates/base_symbology_compress.html:132
+#: gvsigol_symbology/templates/base_symbology.html:137
+#: gvsigol_symbology/templates/base_symbology_compress.html:135
 msgid "Home"
 msgstr "Inicio"
 
-#: gvsigol_symbology/templates/base_symbology.html:170
-#: gvsigol_symbology/templates/base_symbology_compress.html:169
+#: gvsigol_symbology/templates/base_symbology.html:174
+#: gvsigol_symbology/templates/base_symbology_compress.html:172
 msgid "Version"
 msgstr "Versión"
 
-#: gvsigol_symbology/templates/base_symbology.html:174
-#: gvsigol_symbology/templates/base_symbology_compress.html:173
+#: gvsigol_symbology/templates/base_symbology.html:178
+#: gvsigol_symbology/templates/base_symbology_compress.html:176
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -1173,6 +1168,9 @@ msgstr "Debe introducir un nombre para la biblioteca"
 #: gvsigol_symbology/views.py:1195 gvsigol_symbology/views.py:1381
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
+
+#~ msgid "gvsigonline docs"
+#~ msgstr "Manual gvSIG Online"
 
 #~ msgid "Color ramp libraries"
 #~ msgstr "Bibliotecas de rampa de color"

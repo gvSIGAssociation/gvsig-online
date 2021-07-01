@@ -30,6 +30,7 @@ import django.conf.locale
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -127,7 +128,7 @@ ALLOWED_HOSTS_NAMES = ['https://localhost', 'https://host-local/']
 USE_X_FORWARDED_HOST = True
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
+#GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 
 
@@ -152,31 +153,29 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    'gvsigol_app_dev',
+    #'gvsigol_app_dev',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
+    'gvsigol_app_tocantins',
 
     ############# PLUGINS ################
     'gvsigol_plugin_catalog',
     'gvsigol_plugin_catastro',
     #'gvsigol_plugin_catastrouy',
     'gvsigol_plugin_charts',
-    #'gvsigol_plugin_downloadman',
+    'gvsigol_plugin_downloadman',
     'gvsigol_plugin_draw',
-    #'gvsigol_plugin_charts',
-    #'gvsigol_plugin_downloadman',
-    #'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
-    #'gvsigol_plugin_elevation',
+    'gvsigol_plugin_elevation',
     #'gvsigol_plugin_emergencies',
-    #'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_importfromservice',
+    'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_importvector',
-    #'gvsigol_plugin_manageaddresses',
+    'gvsigol_plugin_manageaddresses',
     #'gvsigol_plugin_opensea2',
     #'gvsigol_plugin_picassa',
     #'gvsigol_plugin_regepa',
-    #'gvsigol_plugin_print',
+    'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
     #'gvsigol_plugin_streetview',
     #'gvsigol_plugin_turiscan',

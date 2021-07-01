@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2021-07-01 09:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -123,27 +123,31 @@ msgstr "Subir"
 msgid "File manager"
 msgstr "Administrador de archivos"
 
-#: gvsigol_filemanager/views.py:136
+#: gvsigol_filemanager/views.py:140
 msgid "Export process done successfully"
 msgstr "Proceso de exportación ralizado satisfactoriamente"
 
-#: gvsigol_filemanager/views.py:161
+#: gvsigol_filemanager/views.py:145
+msgid "Export process completed with warnings:"
+msgstr ""
+
+#: gvsigol_filemanager/views.py:171
 msgid "Server error"
 msgstr "Error del servidor"
 
-#: gvsigol_filemanager/views.py:165
+#: gvsigol_filemanager/views.py:175
 msgid "You must fill in all fields"
 msgstr "Debe rellenar todos los campos"
 
-#: gvsigol_filemanager/views.py:216 gvsigol_filemanager/views.py:227
+#: gvsigol_filemanager/views.py:232 gvsigol_filemanager/views.py:243
 msgid "Error deleting resource"
 msgstr "Error borrando el recurso"
 
-#: gvsigol_filemanager/views.py:216
+#: gvsigol_filemanager/views.py:232
 msgid "exists in datastore"
 msgstr "ya que se utiliza en el almacén de datos"
 
-#: gvsigol_filemanager/views.py:250
+#: gvsigol_filemanager/views.py:266
 #, fuzzy
 #| msgid "Error deleting resource"
 msgid "Error unzipping resource"

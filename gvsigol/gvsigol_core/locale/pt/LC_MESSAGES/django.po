@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 22:34+0000\n"
-"PO-Revision-Date: 2021-05-05 23:42+0200\n"
+"POT-Creation-Date: 2021-07-01 09:24+0000\n"
+"PO-Revision-Date: 2021-06-15 19:08+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -22,53 +22,74 @@ msgstr ""
 
 #: gvsigol_core/forms.py:15
 msgid "Clone project and layer permissions"
-msgstr ""
+msgstr "Clonar projeto e permissões de camadas"
 
 #: gvsigol_core/forms.py:16
 msgid "Don't apply any permission. Cloned layers will become public"
 msgstr ""
+"Não aplique nenhuma permissão. As camadas clonadas se tornarão públicas"
 
 #: gvsigol_core/forms.py:21
 msgid "New project title"
-msgstr ""
+msgstr "Título do novo projeto"
 
 #: gvsigol_core/forms.py:26 gvsigol_core/forms.py:33 gvsigol_core/forms.py:41
 msgid ""
 "must start by a lower case alphanumeric and contain lower case alphanumerics "
 "or underscores"
 msgstr ""
+"deve começar por um alfanumérico de minúsculas e conter alfanuméricos de "
+"minúsculas ou sublinhados"
 
 #: gvsigol_core/forms.py:28 gvsigol_core/templates/project_list.html:100
 msgid "New project name"
-msgstr ""
+msgstr "Nome do novo projeto"
 
 #: gvsigol_core/forms.py:36 gvsigol_core/templates/project_list.html:106
 msgid "Target workspace name"
-msgstr ""
+msgstr "Nome do espaço de trabalho alvo"
 
 #: gvsigol_core/forms.py:44 gvsigol_core/templates/project_list.html:112
 msgid "Target datastore and database schema name"
-msgstr ""
+msgstr "Nome do armazém alvo e do esquema do banco de dados"
 
 #: gvsigol_core/forms.py:49
 msgid "numeric value required"
-msgstr ""
+msgstr "valor numérico necessário"
 
 #: gvsigol_core/forms.py:58
 msgid "Project exists"
-msgstr ""
+msgstr "O projeto existe"
 
 #: gvsigol_core/forms.py:63
 msgid "Workspace exists"
-msgstr ""
+msgstr "O espaço de trabalho existe"
 
 #: gvsigol_core/forms.py:68
 msgid "Database schema exists"
-msgstr ""
+msgstr "Existe um esquema de banco de dados"
 
 #: gvsigol_core/forms.py:75
 msgid "Server does not exist"
+msgstr "O servidor não existe"
+
+#: gvsigol_core/settings.py:30
+msgid "Project requests"
 msgstr ""
+
+#: gvsigol_core/settings.py:31
+#: gvsigol_core/templates/dashboard_core_menu.html:5
+#: gvsigol_core/templates/dashboard_core_menu.html:8
+msgid "Projects"
+msgstr "Projetos"
+
+#: gvsigol_core/settings.py:39
+msgid "Project requests by user"
+msgstr ""
+
+#: gvsigol_core/settings.py:40
+msgid "Users"
+msgstr "Usuários"
 
 #: gvsigol_core/templates/404.html:10
 #: gvsigol_core/templates/not_found_sharedview.html:10
@@ -128,11 +149,6 @@ msgstr "Versão"
 msgid "All rights reserved"
 msgstr "Todos os direitos reservados"
 
-#: gvsigol_core/templates/dashboard_core_menu.html:5
-#: gvsigol_core/templates/dashboard_core_menu.html:8
-msgid "Projects"
-msgstr "Projetos"
-
 #: gvsigol_core/templates/dashboard_core_menu.html:9
 msgid "Shared views"
 msgstr "Vista compartilhada"
@@ -150,8 +166,8 @@ msgid ""
 "Features of the platform and license. Definition of the objects and entities "
 "that are part of the environment."
 msgstr ""
-"Caracterí­sticas da plataforma e da licença. Definição dos objetos e "
-"entidades que fazem parte do ambiente"
+"Características da plataforma e da licença. Definição dos objetos e "
+"entidades que fazem parte do ambiente. "
 
 #: gvsigol_core/templates/documentation.html:68
 msgid "Administration Guide"
@@ -232,7 +248,6 @@ msgid "Last login"
 msgstr "Último Login"
 
 #: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
-#: gvsigol_core/utils.py:491
 msgid "Password"
 msgstr "Senha"
 
@@ -249,7 +264,6 @@ msgid "Passwords doesn't match"
 msgstr "As senhas não correspondem"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:487
 msgid "New password"
 msgstr "Nova senha"
 
@@ -917,7 +931,7 @@ msgstr "Excluir visão compartilhada "
 
 #: gvsigol_core/templates/toc_update.html:11
 msgid "Update TOC"
-msgstr "Atualização TOC\t"
+msgstr "Atualização PDC"
 
 #: gvsigol_core/templates/viewer.html:95 gvsigol_core/templates/viewer.html:565
 #: gvsigol_core/templates/viewer_compress.html:95
@@ -996,10 +1010,6 @@ msgstr "Nome"
 msgid "Last name"
 msgstr "Sobrenome"
 
-#: gvsigol_core/utils.py:489
-msgid "This is your new temporary password"
-msgstr "Esta é a  sua nova senha temporária"
-
 #: gvsigol_core/views.py:190
 msgid "Navigation history"
 msgstr "Histórico de navegação"
@@ -1014,7 +1024,7 @@ msgstr "Ferramentas de zoom"
 
 #: gvsigol_core/views.py:196
 msgid "Zoom in, zoom out, ..."
-msgstr "Ampliar zoom, diminuir zoom "
+msgstr "Ampliar, diminuir o zoom..."
 
 #: gvsigol_core/views.py:200
 msgid "Feature info"
@@ -1106,5 +1116,5 @@ msgstr ""
 msgid "The project was successfully cloned."
 msgstr ""
 
-#~ msgid "Users"
-#~ msgstr "Usuários"
+#~ msgid "This is your new temporary password"
+#~ msgstr "Esta é a  sua nova senha temporária"
