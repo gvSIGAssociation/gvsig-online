@@ -115,3 +115,13 @@ gevent==1.4.0
 #greenlet==0.4.12
 
 APScheduler==3.6.3
+
+## compatibilidad con python2 julio 2021
+# dependencias de drf-yasg
+ruamel.ordereddict==0.4.15
+ruamel.yaml==0.16.13
+ruamel.yaml.clib==0.2.2
+# dependencias de APScheduler, mock
+funcsigs==1.0.2
+# dependencias de django-rest-swagger-swaggerdoc, drf-yasg
+itypes==1.2.0
