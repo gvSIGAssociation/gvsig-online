@@ -354,7 +354,7 @@ viewer.core = {
 			wmsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
 			wmsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
 			wmsLayer.detailed_info_html = externalLayer['detailed_info_html'];
-			wmsLayer.layer_name = externalLayer['name'];
+			wmsLayer.layer_name = externalLayer['name'];			
 			wmsLayer.setZIndex(parseInt(externalLayer.order));
 			wmsLayer.infoFormat = externalLayer['infoformat'];
 			wmsLayer.format = externalLayer['format'];
@@ -459,6 +459,7 @@ viewer.core = {
 	    		wmtsLayer.queryable = false;
 	    		wmtsLayer.imported = false;
 				wmtsLayer.layer_name = externalLayer['name'];
+				wmtsLayer.title = externalLayer['title'];
 	    		wmtsLayer.infoFormat = externalLayer['infoformat'];
 	    		wmtsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
 	    		wmtsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
