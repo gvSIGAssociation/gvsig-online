@@ -172,8 +172,8 @@ print.prototype.handler = function(e) {
 		ui += 			'<div id="print-ui-mapgrid" class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('MapGrid') + '</label>';
 		ui += 				'<select id="print-mapgrid-gridtype" class="form-control">';
-		ui += 					'<option value="NOGRID">' + gettext('print-mapgrid-nogrid') + '</option>';
-		ui += 					'<option value="POINTS" selected>' + gettext('print-mapgrid-point') + '</option>';
+		ui += 					'<option value="NOGRID" selected >' + gettext('print-mapgrid-nogrid') + '</option>';
+		ui += 					'<option value="POINTS">' + gettext('print-mapgrid-point') + '</option>';
 		ui += 					'<option value="LINES">' + gettext('print-mapgrid-line') + '</option>';
 		ui += 				'</select>';
 		ui += 				'<label>' + gettext('print-mapgrid-spacing') + '</label>';
@@ -197,8 +197,9 @@ print.prototype.handler = function(e) {
 		ui += 			'</div>';
 
 		// MAPOVERVIEW
-		if (self.supportsOverview) {
-			self.baseLayers = [];
+		self.baseLayers = [];
+		// Cambio: metemos el combobox, y luego se pone invisible o no dependiendo de si soporta overview
+		// if (self.supportsOverview(self.capabilities)) {			
 			var layers = this.map.getLayers().getArray();
 			for (var i=0; i<layers.length; i++) {
 				if (layers[i].baselayer) {
@@ -224,7 +225,7 @@ print.prototype.handler = function(e) {
 			}
 			ui += 				'</select>';
 			ui += 			'</div>';
-		} // supportOverview		
+		// } // supportOverview		
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 			'<div class="container" style="display: flex; justify-content: space-between; padding:0px; width:auto;">';
 		ui += 			'	<div class="col-sm" style="width: 33%">';
@@ -383,7 +384,7 @@ print.prototype.updateUI = function() {
 	else
 		$('#print-ui-author').hide();
 
-	if (this.baseLayers.length > 1) 
+	if (this.supportsOverview(this.capabilities)) 
 		$('#print-ui-mapoverview').show();
 	else
 		$('#print-ui-mapoverview').hide();
