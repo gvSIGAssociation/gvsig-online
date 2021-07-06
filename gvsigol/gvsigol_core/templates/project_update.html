@@ -1115,6 +1115,9 @@
 				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},
 				success	:function(response){
+					if(response.response == 'too_many_tiles') {
+						messageBox.show('info', gettext('too_many_tiles'));
+					}
 					//messageBox.show('info', gettext('tile process ended'));
 				},
 				error: function(jqXHR, textStatus, errorThrown){

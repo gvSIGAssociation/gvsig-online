@@ -74,7 +74,7 @@ from gvsigol_auth.utils import superuser_required, staff_required, get_primary_u
 from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
 from gvsigol_core.models import Project, ProjectBaseLayerTiling
-from gvsigol_core.models import ProjectLayerGroup
+from gvsigol_core.models import ProjectLayerGroup, TilingProcessStatus
 from gvsigol_core.views import not_found_view
 from gvsigol_services.backend_resources import resource_manager 
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
@@ -96,6 +96,9 @@ from actstream.models import Action
 from sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
 import locale
+import tasks
+import time
+from django.core import serializers as serial
 
 logger = logging.getLogger("gvsigol")
 
@@ -2672,20 +2675,19 @@ def enumeration_update(request, eid):
 
         return render(request, 'enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1})
 
+#***************************************************
+# TILEADO CAPAS BASE
+#***************************************************
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def create_base_layer(request, pid):
     if request.method == 'POST': 
-        global base_layer_process
-          
         plg = ProjectLayerGroup.objects.filter(project_id=pid, baselayer_group=True)
         if plg is None or len(plg) == 0:
             return utils.get_exception(400, 'This project does not have base layer')
         id_base_lyr = plg[0].default_baselayer
         base_lyr = Layer.objects.get(id=id_base_lyr)
-                                       
-        #if tiling_service.exists_base_layer_tiled(pid):
-            #    return utils.get_exception(400, 'The base layer already exists')
             
         num_res_levels = None
         try:
@@ -2695,29 +2697,44 @@ def create_base_layer(request, pid):
             return utils.get_exception(400, 'Wrong number of tiles')
         tilematrixset = request.POST.get('tilematrixset')
         extent = request.POST.get('extent')
-        
-        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
-            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
-        
+        version = int(round(time.time() * 1000))
+
+        base_layer_process = {}
         if num_res_levels is not None:
             if num_res_levels > 22:
                 return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
             else:
-                tiling_service.tiling_base_layer(base_layer_process, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
+                tasks.tiling_base_layer(base_layer_process, version, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
                   
-    return HttpResponse('{"response": "ok"}', content_type='application/json')
+    return HttpResponse('{"response": "' + str(base_layer_process[pid]['extent_processed']) + '"}', content_type='application/json')
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def base_layer_process_update(request, pid):
+    if request.method == 'POST':
+        try:
+            base_layer_tiling = ProjectBaseLayerTiling.objects.get(id=pid)
+            version = base_layer_tiling.version
+            status_json = {}
+            status = TilingProcessStatus.objects.filter(version=version)
+            if(status is not None) :
+                for s in status:
+                    status_json = serial.serialize('json', status)
+                    status_json = json.loads(status_json)[0]['fields']
+                    return HttpResponse(json.dumps(status_json, indent=4), content_type='application/json')
+        except Exception as e:
+            pass
+        return HttpResponse('{"active" : "false"}', content_type='application/json')
+
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def retry_base_layer_process(request, pid):
     if request.method == 'POST':
-        global base_layer_process
-
-        if base_layer_process and base_layer_process[pid] and base_layer_process[pid]['active'] == 'true':
-            return utils.get_exception(400, 'There is process active for this project. Stop it before lauching another one')
 
         prj = ProjectBaseLayerTiling.objects.get(id=pid)
         if(prj is not None):
@@ -2725,29 +2742,34 @@ def retry_base_layer_process(request, pid):
                 return utils.get_exception(400, 'This project does not have a base layer downloading')
         else:
             return utils.get_exception(400, 'This project does not have base layer running')
-        tiling_service.retry_base_layer_tiling(base_layer_process, prj)
+        version = prj.version
+        processes = TilingProcessStatus.objects.filter(version=version)
+        for tiling_status in processes: #solo debería haber uno
+            tiling_status.stop = 'false'
+            tiling_status.active = 'true'
+            tiling_status.save()
+            base_layer_process[prj.id] = tiling_status
+            tasks.retry_base_layer_tiling(base_layer_process, prj, tiling_status)
 
     return HttpResponse('{"response": "ok"}', content_type='application/json')
 
-
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@staff_required
-def base_layer_process_update(request, pid):
-    if request.method == 'POST':   
-        global base_layer_process
-        if str(pid) in base_layer_process:
-            return HttpResponse(json.dumps(base_layer_process[str(pid)], indent=4), content_type='application/json')
-        else :
-            return HttpResponse('{"active" : "false"}', content_type='application/json')
         
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def stop_base_layer_process(request, pid):
-    if request.method == 'POST':   
-        if str(pid) in base_layer_process:
-            base_layer_process[str(pid)]['stop'] = 'true'
+    if request.method == 'POST':  
+        base_layer_tiling = ProjectBaseLayerTiling.objects.get(id=pid)
+        version = base_layer_tiling.version
+        status_json = {}
+        processes = TilingProcessStatus.objects.filter(version=version)
+        for tiling_status in processes: #solo debería haber uno
+            tiling_status.stop = 'true'
+            tiling_status.save()
+
         return HttpResponse('{"response": "ok"}', content_type='application/json')
-        
+
+#***************************************************
+
 @csrf_exempt
 def get_enumeration(request):
     if request.method == 'POST':
