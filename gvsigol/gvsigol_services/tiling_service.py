@@ -396,6 +396,7 @@ class Tiling():
                 processes = TilingProcessStatus.objects.filter(version=tiling_status.version)
                 for p in processes:
                     tiling_status.stop = p.stop
+                    layer_process['stop'] = p.stop
                     break
             except Exception:
                 pass
@@ -595,67 +596,6 @@ def get_extent(json, properties):
         max_lon, max_lat = transform(Proj(init='epsg:3857'), Proj(init='epsg:4326'), maxx, maxy)
         return min_lon, min_lat, max_lon, max_lat
 
-@start_new_thread
-def retry_base_layer_tiling(base_layer_process, tiling_data):
-    prj = tiling_data.project
-
-    if base_layer_process is not None:
-        lyr = Layer.objects.get(id=tiling_data.layer)
-        if lyr.datastore is not None:
-            url = lyr.datastore.workspace.wmts_endpoint
-            if(tiling_data.tilematrixset == 'EPSG:900913'):
-                dir = 'EPSG3857'
-            else:
-                dir = tiling_data.tilematrixset.replace(":", "")
-            folder_package = os.path.join(tiling_data.folder_prj, dir)
-            start_level, start_x, start_y, processed_tiles = _get_retry_titing_params(folder_package)
-
-            base_layer_process[str(prj.id)] = {
-                'active' : 'true',
-                'total_tiles' : 0,
-                'processed_tiles' : processed_tiles,
-                'version' : tiling_data.version,
-                'time' : '-',
-                'stop' : 'false',
-                'format_processed' : tiling_data.format,
-                'extent_processed' : tiling_data.extentid,
-                'zoom_levels_processed' : tiling_data.levels
-            }
-
-            tiling = Tiling(folder_package, lyr.type, tiling_data.tilematrixset, url, tiling_data.project.id)
-
-            if lyr.type != 'OSM':
-                tiling.set_layer_name(lyr.datastore.workspace.name + ":" + lyr.name)
-                extent = lyr.latlong_extent
-                extent = extent.split(',')
-                lyr_min_x = float(extent[0])
-                lyr_min_y = float(extent[1])
-                lyr_max_x = float(extent[2])
-                lyr_max_y = float(extent[3])
-                tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
-
-            if(tiling_data.extentid == 'project'):
-                if prj.extent is not None:
-                    bbox = prj.extent.split(',')
-                    min_x = float(bbox[0])
-                    min_y = float(bbox[1])
-                    max_x = float(bbox[2])
-                    max_y = float(bbox[3])
-                    min_x, min_y, max_x, max_y = _adjustExtent(min_x, min_y, max_x, max_y)
-                    number_of_tiles = tiling.get_number_of_tiles(min_x, min_y, max_x, max_y, tiling_data.levels, base_layer_process)    
-                    #Genera el tileado a partir de coords en 3857 q es en las que está el extent del proyecto
-                    status = tiling.retry_tiles_from_utm(base_layer_process, min_x, min_y, max_x, max_y, tiling_data.levels, tiling_data.format, start_level, start_x, start_y)
-            else:
-                #Si hay que usar el extent de la capa hay que transformar las coordenadas geográficas a 3857
-                inProj = Proj(init='epsg:4326')
-                outProj = Proj(init='epsg:3857')
-                tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
-                tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
-                number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, tiling_data.levels, base_layer_process) 
-                status = tiling.retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, tiling_data.levels, tiling_data.format, start_level, start_x, start_y)
-
-            _close_download(base_layer_process, prj, tiling_data.folder_prj, number_of_tiles, tiling_data.version, status)
-
 
 def _get_retry_titing_params(dir):
     """
@@ -708,101 +648,9 @@ def _delete_pending_downloads(dir, prefix):
         path = os.path.join(dir, file)
         if(os.path.isdir(path) and file.startswith(prefix)):
             shutil.rmtree(path)
-
-@start_new_thread
-def tiling_base_layer(base_layer_process, base_lyr, prj_id, num_res_levels, tilematrixset, format_='image/png', extentid='project'):
-    prj = Project.objects.get(id = prj_id)
-    millis = int(round(time.time() * 1000))
-    if(tilematrixset == 'EPSG:900913'):
-        dir = 'EPSG3857'
-    else:
-        dir = tilematrixset.replace(":", "")
-
-    url = None
-    if base_lyr.datastore is not None:
-        url = base_lyr.datastore.workspace.wmts_endpoint
-    
-    layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
-    #_delete_pending_downloads(layers_dir, prj.name + "_prj_")
-    folder_prj =  os.path.join(layers_dir, prj.name) + "_prj_" + str(millis)
-    folder_package = os.path.join(folder_prj, dir)
-    if not os.path.exists(layers_dir):
-        os.mkdir(layers_dir)
-    
-    try:
-        store = ProjectBaseLayerTiling()
-        store.id = prj_id
-        store.project = prj
-        store.format = format_
-        store.extentid = extentid
-        store.tilematrixset = tilematrixset
-        store.levels = num_res_levels
-        store.version = millis
-        store.running = True
-        store.layer = base_lyr.id 
-        store.folder_prj = folder_prj
-        store.save()
-
-        mode = base_lyr.type
-        tiling = Tiling(folder_package, mode, tilematrixset, url, prj_id)
-        #num_res_levels = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
-        
-        if mode == 'OSM':
-            base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
-            with zipfile.ZipFile(base_zip, 'r') as zipObj:
-                zipObj.extractall(path=layers_dir)
-                shutil.move(layers_dir + '/tiles_download', folder_package)
-        else:
-            lyr_name = base_lyr.datastore.workspace.name + ":" + base_lyr.name
-            tiling.set_layer_name(lyr_name)
-            
-            extent = base_lyr.latlong_extent
-            extent = extent.split(',')
-            lyr_min_x = float(extent[0])
-            lyr_min_y = float(extent[1])
-            lyr_max_x = float(extent[2])
-            lyr_max_y = float(extent[3])
-            tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
-            
-        if base_layer_process is not None:
-            base_layer_process[str(prj_id)] = {
-                'active' : 'true',
-                'total_tiles' : 0,
-                'processed_tiles' : 0,
-                'version' : millis,
-                'time' : '-',
-                'stop' : 'false',
-                'format_processed' : format_,
-                'extent_processed' : extentid,
-                'zoom_levels_processed' : num_res_levels
-            }
-
-        if(extentid == 'project'):
-            if prj.extent is not None:
-                bbox = prj.extent.split(',')
-                min_x = float(bbox[0])
-                min_y = float(bbox[1])
-                max_x = float(bbox[2])
-                max_y = float(bbox[3])
-                min_x, min_y, max_x, max_y = _adjustExtent(min_x, min_y, max_x, max_y)
-                number_of_tiles = tiling.get_number_of_tiles(min_x, min_y, max_x, max_y, num_res_levels, base_layer_process)    
-                #Genera el tileado a partir de coords en 3857 q es en las que está el extent del proyecto
-                status = tiling.retry_tiles_from_utm(base_layer_process, min_x, min_y, max_x, max_y, num_res_levels, format_, None, None, None)
-        else:
-            #Si hay que usar el extent de la capa hay que transformar las coordenadas geográficas a 3857
-            inProj = Proj(init='epsg:4326')
-            outProj = Proj(init='epsg:3857')
-            tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
-            tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
-            number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, base_layer_process) 
-            status = tiling.retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, None, None, None)
-
-        _close_download(base_layer_process, prj, folder_prj, number_of_tiles, millis, status)
-    except Exception as e:
-        return
         
 
-def _close_download(base_layer_process, prj, folder_prj, number_of_tiles, version, status):
+def _close_download(base_layer_process, prj, folder_prj, version, status):
     """
     Acciones de fin de descarga
     - Empaquetado
@@ -814,20 +662,6 @@ def _close_download(base_layer_process, prj, folder_prj, number_of_tiles, versio
     #Si se ha pulsado lo dejamos como está para poder hacer retry cuando se ponga el botón
     if base_layer_process[str(prj.id)]['stop'] == 'false': 
         _zipFolder(folder_prj)
-
-    #Actualiza la estructura de datos de refresco del interfaz web
-    if base_layer_process is not None:
-        base_layer_process[str(prj.id)] = {
-            'active' : 'false',
-            'total_tiles' : number_of_tiles,
-            'processed_tiles' : number_of_tiles,
-            'version' : version,
-            'time' : '-',
-            'stop' : 'false',
-            'format_processed' : '-',
-            'extent_processed' : '-',
-            'zoom_levels_processed' : '-'
-        }
 
     #Si no se ha parado y ha terminado bien se guarda la nueva versión en Project
     if(status is not False):
@@ -861,7 +695,21 @@ def exists_base_layer_tiled(prj_id):
     layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
     file_ =  os.path.join(layers_dir, prj.name) + "_prj.zip"
     return os.path.isfile(file_)
-                
+
+
+def load_number_of_tiles(process_data, identif, number_of_tiles):
+    MAX_TILES_PACKAGE = 32768
+    if(number_of_tiles == 0):
+        process_data[str(identif)]['active'] = 'false' 
+    process_data[str(identif)]['total_tiles'] = number_of_tiles
+
+    if(number_of_tiles > MAX_TILES_PACKAGE):
+        process_data[str(identif)]['extent_processed'] = 'too_many_tiles'
+        process_data[str(identif)]['stop'] = 'true'
+        process_data[str(identif)]['active'] = 'false' 
+
+    return process_data
+                             
 
 def _adjustExtent(minx, miny, maxx, maxy):
     """

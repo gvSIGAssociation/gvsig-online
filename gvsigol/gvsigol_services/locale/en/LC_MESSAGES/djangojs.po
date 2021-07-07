@@ -166,3 +166,6 @@ msgstr ""
 
 msgid "You must select an extent on the map using the control"
 msgstr ""
+
+msgid "too_many_files"
+msgstr "Too many files to download. Reduce the number of zoom levels or make the project size smaller"

@@ -1111,7 +1111,10 @@
 				beforeSend:function(xhr){
 				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
-				success	:function(response){
+				success	:function(response) {
+					if(response.response == 'too_many_tiles') {
+						messageBox.show('info', gettext('too_many_tiles'));
+					}
 					//messageBox.show('info', gettext('tile process ended'));
 				},
 				error: function(jqXHR, textStatus, errorThrown){
