@@ -2640,6 +2640,10 @@ def enumeration_update(request, eid):
 
         return render(request, 'enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1})
 
+#***************************************************
+# TILEADO CAPAS BASE
+#***************************************************
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def create_base_layer(request, pid):
@@ -2728,7 +2732,8 @@ def stop_base_layer_process(request, pid):
             tiling_status.stop = 'true'
             tiling_status.save()
 
-        
+#***************************************************
+
 @csrf_exempt
 def get_enumeration(request):
     if request.method == 'POST':
