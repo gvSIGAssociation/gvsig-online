@@ -39,6 +39,25 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
         raise RuntimeError 
 
 
+#@start_new_thread
+def retry_tiles_from_utm(base_layer_process, 
+    tile_min_x, 
+    tile_min_y, 
+    tile_max_x, 
+    tile_max_y, 
+    num_res_levels, 
+    format_, start_level, 
+    start_x, 
+    start_y, 
+    tiling_status,
+    prj, folder_prj, version, tiling):
+     try:
+        #retry_tiles_from_utm_celery_task(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, tiling_status, prj, folder_prj, version, tiling)
+        retry_tiles_from_utm_celery_task.apply_async(args=[base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, tiling_status, prj, folder_prj, version, tiling])
+     except Exception as e:
+        raise RuntimeError 
+
+
 @celery_app.task
 def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels):
     MAX_TILES_PACKAGE = 16384
@@ -158,23 +177,6 @@ def retry_tiles_from_utm_celery_task(base_layer_process,
     prj, folder_prj, version, tiling):
      status = tiling.retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, tiling_status)
      tiling_service._close_download(base_layer_process, prj, folder_prj, version, status)
-
-@start_new_thread
-def retry_tiles_from_utm(base_layer_process, 
-    tile_min_x, 
-    tile_min_y, 
-    tile_max_x, 
-    tile_max_y, 
-    num_res_levels, 
-    format_, start_level, 
-    start_x, 
-    start_y, 
-    tiling_status,
-    prj, folder_prj, version, tiling):
-     #retry_tiles_from_utm_celery_task.apply_async(args=[base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, tiling_status, prj, folder_prj, version, tiling])
-     status = tiling.retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, tiling_status)
-     tiling_service._close_download(base_layer_process, prj, folder_prj, version, status)
-
 
 
 def retry_base_layer_tiling(base_layer_process, tiling_data, tiling_status):
