@@ -167,3 +167,6 @@ msgstr "Campo a eliminar"
 msgid "You must select an extent on the map using the control"
 msgstr "Debes seleccionar una extensión en el mapa utilizando el control"
 
+msgid "too_many_files"
+msgstr "Demasiados ficheros para descargar. Reduzca el número de niveles de zoom o haga la extensión del proyecto más pequeña"
+
