@@ -53,7 +53,7 @@ var print = function(printProvider, conf, map) {
 	var this_ = this;
 	var handler = function(e) {
 		this_.handler(e);
-		$('body').trigger('printtemplateselected');
+		$('body').trigger('printtoolactivated');
 	};
 
 	this.$button.on('click', handler);
@@ -641,8 +641,10 @@ print.prototype.createPrintJob = function(template) {
 		// layerGridLabels.font.size = 6;
 		// layerGridLabels.gridColor = 'white';
 		// layerGridLabels.labelColor = 'black';
-    if (mapgridType != 'NOGRID')
-		printLayers.push(layerGrid);
+		if (this.supportsGridMap(self.capabilities)) {
+			if (mapgridType != 'NOGRID')
+				printLayers.push(layerGrid);
+		}
 
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
