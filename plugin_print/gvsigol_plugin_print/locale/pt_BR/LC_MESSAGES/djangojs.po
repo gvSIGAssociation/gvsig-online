@@ -136,7 +136,7 @@ msgid "a4_landscape_overview"
 msgstr "a4_landscape_overview"
 
 msgid "a3_landscape"
-msgstr "A3 Oblongo"
+msgstr "A3 Horizontal"
 
 msgid "tocantins_a4_landscape"
 msgstr "Tocantins A4 Horizontal"

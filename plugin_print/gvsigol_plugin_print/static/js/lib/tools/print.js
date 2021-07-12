@@ -50,6 +50,8 @@ var print = function(printProvider, conf, map) {
 		}
 	  ];
 
+	// We use this array to store the XYZ layers that we put temporaly invisible
+	this.invisibleLayers = [];
 	var this_ = this;
 	var handler = function(e) {
 		this_.handler(e);
@@ -270,7 +272,7 @@ print.prototype.handler = function(e) {
 		ui += 			'</div>';
 
 		
-		ui += 			'<div class="col-md-12 form-group">';
+		ui += 			'<div id="print-ui-legal-warning" class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
 		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + this.printProvider.legal_advice + '</textarea>';
 		ui += 			'</div>';
@@ -364,6 +366,10 @@ print.prototype.handler = function(e) {
 		$('#cancel-print').on('click', function () {
 			ol.Observable.unByKey(eventKey);
 			self.removeExtentLayer();
+			for (var l of self.invisibleLayers) {
+				l.setVisible(true);
+			}
+			self.invisibleLayers = [];
 			self.showLayersTab();
 			self.capabilities = null;
 			self.active = false;
@@ -374,21 +380,27 @@ print.prototype.handler = function(e) {
 };
 
 print.prototype.updateUI = function() {
-	if (this.supportsGridMap(this.capabilities))
+	if (this.supports('mapGrid'))
 		$('#print-ui-mapgrid').show();
 	else
 		$('#print-ui-mapgrid').hide();
 
-	if (this.supportsAuthor(this.capabilities))
+	if (this.supports('author'))
 		$('#print-ui-author').show();
 	else
 		$('#print-ui-author').hide();
 
-	if (this.supportsOverview(this.capabilities)) 
+	if (this.supports('overviewMap')) 
 		$('#print-ui-mapoverview').show();
 	else
 		$('#print-ui-mapoverview').hide();
-	
+
+	if (this.supports('legalWarning'))
+		$('#print-ui-legal-warning').show();
+	else
+		$('#print-ui-legal-warning').hide();
+
+		
 };
 
 // methods to allow personalized options from outside this tool 
@@ -641,7 +653,7 @@ print.prototype.createPrintJob = function(template) {
 		// layerGridLabels.font.size = 6;
 		// layerGridLabels.gridColor = 'white';
 		// layerGridLabels.labelColor = 'black';
-	if (this.supportsGridMap(self.capabilities)) {
+	if (this.supports('mapGrid')) {
     	if (mapgridType != 'NOGRID')
 			printLayers.push(layerGrid);
 	}
@@ -797,7 +809,7 @@ print.prototype.createPrintJob = function(template) {
 		  	"attributes": {
 		  		"title": title,
 		  		"scale": '1: ' + Number.parseInt(scaleToSet).toLocaleString(),
-		  		"legalWarning": legalWarning,
+		  		// "legalWarning": legalWarning,
 		  		"map": {
 					"projection": self.projection,
 		  			"dpi": parseInt(dpi),
@@ -820,11 +832,15 @@ print.prototype.createPrintJob = function(template) {
 		  	}
 	};
 
-	if (self.supportsAuthor(self.capabilities)) {
+	if (self.supports('author')) {
 		dataToPost.attributes.author = author;
 	}
 
-	if (self.supportsOverview(self.capabilities)) {
+	if (self.supports('legalWarning')) {
+		dataToPost.attributes.legalWarning = legalWarning;
+	}
+
+	if (self.supports('overviewMap')) {
 		bAcceptsOverview = true;
 		dataToPost.attributes.overviewMap = {
 				// "zoomFactor":5,
@@ -834,7 +850,7 @@ print.prototype.createPrintJob = function(template) {
 	            "layers": self.printOverviewLayers
 		    };
 	}
-	if (self.supportsGridMap(self.capabilities)) {
+	if (self.supports('mapGrid')) {
 		var auxLayers = [];		
 		if (mapgridType != 'NOGRID') {
 			auxLayers.push(layerGrid);
@@ -874,6 +890,7 @@ print.prototype.checkReprojection = function() {
 				if (layer.getSource() instanceof ol.source.XYZ) {
 					alert(layer.getProperties().label + ':' + gettext('layers_xyz_cant_be_reprojected'));
 					layer.setVisible(false);
+					this.invisibleLayers.push(layer);
 				} // xyz
 			} // visible			
 		} // for
@@ -886,31 +903,41 @@ print.prototype.getScales = function (capabilities) {
     return scales;
 };
 
-print.prototype.supportsGridMap = function (capabilities) {
-	// search for attribute 'mapGrid'
-	for (var att of capabilities.layouts[0].attributes) {
-		if (att.name == 'mapGrid') {
-			return true;
-		}
-	}
-    return false;
-};
+// print.prototype.supportsGridMap = function (capabilities) {
+// 	// search for attribute 'mapGrid'
+// 	for (var att of capabilities.layouts[0].attributes) {
+// 		if (att.name == 'mapGrid') {
+// 			return true;
+// 		}
+// 	}
+//     return false;
+// };
 
-print.prototype.supportsAuthor = function (capabilities) {
-	// search for attribute 'author'
-	for (var att of capabilities.layouts[0].attributes) {
-		if (att.name == 'author') {
-			return true;
-		}
-	}
-    return false;
-};
+// print.prototype.supportsAuthor = function (capabilities) {
+// 	// search for attribute 'author'
+// 	for (var att of capabilities.layouts[0].attributes) {
+// 		if (att.name == 'author') {
+// 			return true;
+// 		}
+// 	}
+//     return false;
+// };
 
 
-print.prototype.supportsOverview = function (capabilities) {
-	// search for attribute 'overviewMap'
-	for (var att of capabilities.layouts[0].attributes) {
-		if (att.name == 'overviewMap') {
+// print.prototype.supportsOverview = function (capabilities) {
+// 	// search for attribute 'overviewMap'
+// 	for (var att of capabilities.layouts[0].attributes) {
+// 		if (att.name == 'overviewMap') {
+// 			return true;
+// 		}
+// 	}
+//     return false;
+// };
+
+print.prototype.supports = function (param) {
+	// search for attribute param
+	for (var att of this.capabilities.layouts[0].attributes) {
+		if (att.name == param) {
 			return true;
 		}
 	}
