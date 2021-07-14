@@ -330,9 +330,11 @@ class Introspect:
         result = []
         for (col, col_default) in self.cursor.fetchall():
             try:
-                schema, seq_name = self._parse_sequence_name(col_default)
+                seq_schema, seq_name = self._parse_sequence_name(col_default)
                 if seq_name != '':
-                    result.append((col, schema, seq_name))
+                    if seq_schema == '': # for non qualified sequences
+                        seq_schema = schema
+                    result.append((col, seq_schema, seq_name))
             except:
               pass
 
