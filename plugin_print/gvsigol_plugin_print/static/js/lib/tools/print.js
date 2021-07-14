@@ -263,7 +263,7 @@ print.prototype.handler = function(e) {
 		ui += 			'</div>';
 
 		var author = gettext('Author');
-		if (this.conf.user.username) {
+		if (this.conf.user && this.conf.user.username) {
 			author = this.conf.user.username;
 		}
 		ui += 			'<div id="print-ui-author" class="col-md-12 form-group">';

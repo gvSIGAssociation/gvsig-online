@@ -57,7 +57,7 @@ msgstr "Grade cartográfica"
 
 #: static/js/lib/tools/print.js:175
 msgid "print-mapgrid-nogrid"
-msgstr "Sense grade cartográfica"
+msgstr "Sem grade cartográfica"
 
 #: static/js/lib/tools/print.js:176
 msgid "print-mapgrid-point"
