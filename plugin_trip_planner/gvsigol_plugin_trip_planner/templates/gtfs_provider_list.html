@@ -238,14 +238,16 @@ $(document).ready(function() {
 		});
 	}
 	
-	$(".more-options").slideUp("slow")
+	$(".repeat_periodically_time").slideUp("slow")
 	
 	$('#repeat_periodically').click(function() {
 
-		if($("#repeat_periodically").is(':checked'))
+		if($("#repeat_periodically").is(':checked')){
 			$(".repeat_periodically_time").slideDown("slow");  // checked
-		else
+		}
+		else{
 			$(".repeat_periodically_time").slideUp("slow"); 
+		}
 	});
 
 	function edit_progamming_form(value){
@@ -265,6 +267,8 @@ $(document).ready(function() {
 	$('#program-day').on('change', function() {
 		edit_progamming_form($(this).val());
 	});
+
+	edit_progamming_form($('#program-day').val())
 	   
 });
 </script>
