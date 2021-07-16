@@ -319,8 +319,7 @@ $(document).ready(function() {
 	});
 
 
-	$(window).unload(function(){
-		console.log("Trying to exit from this page");
+	$(window).on("beforeunload", function(){
 		$.ajax({
 			type: "POST",
 			async: false,
