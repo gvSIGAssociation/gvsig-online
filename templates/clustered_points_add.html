@@ -325,8 +325,7 @@ $(document).ready(function() {
 		clustered_points.deleteRule(this.dataset.ruleid);
 	});
 	
-	$(window).unload(function(){
-		console.log("Trying to exit from this page");
+	$(window).on("beforeunload", function(){
 		$.ajax({
 			type: "POST",
 			async: false,
