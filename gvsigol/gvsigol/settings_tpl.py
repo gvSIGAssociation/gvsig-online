@@ -83,6 +83,7 @@ if len(SECRET_KEY) == 14:
 DEBUG = ##DEBUG##
 
 ALLOWED_HOSTS = ['*']
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2048
 
 
 # Application definition
