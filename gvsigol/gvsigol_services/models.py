@@ -240,7 +240,7 @@ class LayerConfig:
     def init_field_conf(self, field_conf, field_info):
         field_conf['name'] = field_conf.get('name', field_info['name'])
         for id, language in settings.LANGUAGES:
-            field_conf['title-'+id] = field_conf.get('title-f'+id, field_info['name'])
+            field_conf['title-'+id] = field_conf.get('title-'+id, field_info['name'])
         field_conf['visible'] = field_conf.get('visible', True)
         if field_conf['name'] in self.pks:
             field_conf['editable'] = False
