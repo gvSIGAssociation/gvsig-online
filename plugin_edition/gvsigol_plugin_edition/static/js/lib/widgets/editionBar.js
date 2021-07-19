@@ -1411,7 +1411,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 
 		$('#edit_feature_properties .form-control').on('blur', function (evt) {
 			if(evt.currentTarget.value == ""){
-				delete feature.values_[evt.currentTarget.id];
+				feature.unset(evt.currentTarget.id);
 			}else{
 				var props = feature.getProperties();
 				props[evt.currentTarget.id] = evt.currentTarget.value;
@@ -2469,16 +2469,10 @@ EditionBar.prototype.verifyGeometryField = function(feature) {
 
 	if (feature.getGeometryName() == featureTypeGeometryName) {
 		return feature;
-
 	} else {
-		var props = feature.getProperties();
-		props[featureTypeGeometryName] = props[feature.getGeometryName()];
-    	delete props[feature.getGeometryName()];
-    	delete feature.values_[feature.getGeometryName()];
-    	feature.setProperties(props);
+    	feature.unset(feature.getGeometryName());
 	}
 	feature.setGeometryName(featureTypeGeometryName);
-
 	return feature;
 };
 
