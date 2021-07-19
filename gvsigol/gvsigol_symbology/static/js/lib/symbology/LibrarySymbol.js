@@ -39,7 +39,7 @@ LibrarySymbol.prototype.addRule = function(rule) {
 LibrarySymbol.prototype.addDefault = function(rule) {
 	
 	var rule = new Rule(1, "rule_1", "Rule 1", null, this.symbologyUtils);
-	$('#rules').append(rule.getTableUI(false, 'unique'));
+	$('#rules').append(rule.getTableUI(false, 'unique', false));
 	this.addRule(rule);
 	rule.registerEvents();
 	rule.addSymbolizer();
@@ -48,7 +48,7 @@ LibrarySymbol.prototype.addDefault = function(rule) {
 
 LibrarySymbol.prototype.loadRule = function(options, symbolizers) {
 	var rule = new Rule(options.id, options.name, options.title, null, this.symbologyUtils);
-	$('#rules').append(rule.getTableUI(false, 'unique'));
+	$('#rules').append(rule.getTableUI(false, 'unique', false));
 	this.addRule(rule);
 	rule.registerEvents();
 	for (var i=0; i<symbolizers.length; i++) {

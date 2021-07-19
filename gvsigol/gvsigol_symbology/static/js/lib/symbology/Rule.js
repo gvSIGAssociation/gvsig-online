@@ -58,10 +58,11 @@ var Rule = function(id, name, title, options, utils) {
 	
 };
 
-Rule.prototype.getTableUI = function(allowImport, type) {
+Rule.prototype.getTableUI = function(allowImport, type, editableRule) {
 	var self = this;
 	var ui = '';
 	this.type = type;
+	editableRule = ( editableRule !== false ) || false;
 	
 	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
 	if(type == 'unique') {
@@ -81,16 +82,18 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 		ui += 				'</button>';
 	}
 		ui += 				'<div class="btn-group">';
-		ui += 					'<button style="color:#3c8dbc;" data-toggle="dropdown" class="btn btn-box-tool btn-box-tool-custom dropdown-toggle">';
-		ui += 						'<i class="fa fa-wrench"></i>';
-		ui += 					'</button>';
-		ui += 					'<ul class="dropdown-menu" role="menu">';
-		ui += 						'<li><a href="#" id="edit-rule-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-edit m-r-5"></i> ' + gettext('Edit rule') + '</a></li>';
-		if(type == 'expressions' || type == 'clusteredpoints') {
-			ui += 					'<li><a href="#" class="create-expression" id="create-expression-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-filter m-r-5"></i> ' + gettext('Edit filter') + '</a></li>';
-			
+		if (editableRule) {
+			ui += 					'<button style="color:#3c8dbc;" data-toggle="dropdown" class="btn btn-box-tool btn-box-tool-custom dropdown-toggle">';
+			ui += 						'<i class="fa fa-wrench"></i>';
+			ui += 					'</button>';
+			ui += 					'<ul class="dropdown-menu" role="menu">';
+			ui += 						'<li><a href="#" id="edit-rule-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-edit m-r-5"></i> ' + gettext('Edit rule') + '</a></li>';
+			if(type == 'expressions' || type == 'clusteredpoints') {
+				ui += 					'<li><a href="#" class="create-expression" id="create-expression-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-filter m-r-5"></i> ' + gettext('Edit filter') + '</a></li>';
+				
+			}
+			ui += 					'</ul>';
 		}
-		ui += 					'</ul>';
 		ui += 				'</div>';
 	if(type != 'unique') {
 		ui += 				'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
