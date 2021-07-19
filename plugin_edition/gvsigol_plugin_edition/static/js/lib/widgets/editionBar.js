@@ -2322,7 +2322,8 @@ EditionBar.prototype.transactWFS = function(p,f) {
 	}
 	s = new XMLSerializer();
 	str = s.serializeToString(node);
-	$.ajax(this.selectedLayer.wfs_url,{
+	$.ajax({
+		url: this.selectedLayer.wfs_url,
 		type: 'POST',
 		async: false,
 	    dataType: 'xml',
@@ -2331,65 +2332,65 @@ EditionBar.prototype.transactWFS = function(p,f) {
 	    data: str,
 		error: function(response) {
 			console.log(response.statusText)
-		}
-	}).success(function(response, status, request) {
-		try {
-			var resp = self.formatWFS.readTransactionResponse(response);
-			//There was not geometry to insert
-			if(!resp.insertIds) {
-				return 
-			}
-			if (resp.insertIds[0] == 'none') {
-				fid = feat.getId().split('.')[1];
-			} else {
-				feat.setId(resp.insertIds[0]);
-				fid = resp.insertIds[0].split('.')[1];
-			}
-			success = true;
-			if (p=="insert"||p=="update") {
-				/* Trigger a bounding box recalculating after insertions or
-				 * updates to ensure the bounding box of the service covers
-				 * all the layer geometries.
-				 *
-				 * Avoid using it on deletions as triggering
-				 * an update on an empty layer will produce incorrect
-				 * bounding boxes.
-				 */
-				try {
-					self.updateServiceBoundingBox(self.selectedLayer.workspace, self.selectedLayer.layer_name);
-				} catch (e) {
-					// ignore errors
-					console.error(e);
+		},
+		success: function(response, status, request) {
+			try {
+				var resp = self.formatWFS.readTransactionResponse(response);
+				//There was not geometry to insert
+				if(!resp.insertIds) {
+					return 
 				}
-			}
-
-		} catch (err) {
-			$('#edition-error').empty();
-			var ui = '';
-			ui += '<div class="alert alert-danger alert-dismissible">';
-			ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
-			if('responseXML' in request){
-				var errors = $(request.responseXML).find("ExceptionText");
-				var get_error = false;
-				if(errors.length > 0){
-					var error = errors[0].textContent;
-					if(error != null || error != ""){
-						ui +=   gettext(error);
-						get_error = true;
+				if (resp.insertIds[0] == 'none') {
+					fid = feat.getId().split('.')[1];
+				} else {
+					feat.setId(resp.insertIds[0]);
+					fid = resp.insertIds[0].split('.')[1];
+				}
+				success = true;
+				if (p=="insert"||p=="update") {
+					/* Trigger a bounding box recalculating after insertions or
+					 * updates to ensure the bounding box of the service covers
+					 * all the layer geometries.
+					 *
+					 * Avoid using it on deletions as triggering
+					 * an update on an empty layer will produce incorrect
+					 * bounding boxes.
+					 */
+					try {
+						self.updateServiceBoundingBox(self.selectedLayer.workspace, self.selectedLayer.layer_name);
+					} catch (e) {
+						// ignore errors
+						console.error(e);
 					}
 				}
-				if(!get_error){
+
+			} catch (err) {
+				$('#edition-error').empty();
+				var ui = '';
+				ui += '<div class="alert alert-danger alert-dismissible">';
+				ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+				ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
+				if('responseXML' in request){
+					var errors = $(request.responseXML).find("ExceptionText");
+					var get_error = false;
+					if(errors.length > 0){
+						var error = errors[0].textContent;
+						if(error != null || error != ""){
+							ui +=   gettext(error);
+							get_error = true;
+						}
+					}
+					if(!get_error){
+						ui +=   gettext('Failed to save the new record. Please check values');
+					}
+				}else{
 					ui +=   gettext('Failed to save the new record. Please check values');
 				}
-			}else{
-				ui +=   gettext('Failed to save the new record. Please check values');
+				ui += '</div>';
+				$('#edition-error').append(ui);
+				success = false;
 			}
-			ui += '</div>';
-			$('#edition-error').append(ui);
-			success = false;
 		}
-
 	});
 
 	return {
