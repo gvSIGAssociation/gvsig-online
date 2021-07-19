@@ -19,3 +19,11 @@
 	color:#00a65a;
 	margin-bottom: 5px;
 }
+
+#icon-success{
+	color: green
+}
+
+#icon-error{
+	color: red
+}

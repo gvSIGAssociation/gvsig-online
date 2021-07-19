@@ -19,7 +19,7 @@
 '''
 
 from gvsigol_plugin_trip_planner import tasks
-from .models import GTFSProvider, APPMobileConfig
+from .models import GTFSProvider, APPMobileConfig, GTFSstatus
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -59,14 +59,77 @@ def gtfs_provider_list(request):
         providers = GTFSProvider.objects.order_by('name')
 
 
-    aux = priv_settings.GTFS_CRONTAB.split(" ")
+    try:
+        statusModel  = GTFSstatus.objects.get(name = 'update')
+
+    except:
+        
+        statusModel = GTFSstatus(
+            name = 'update',
+            message = '',
+            status = '',
+        )
+        statusModel.save()
 
     response = {
-        'providers': providers,
-        'cron_hour': aux[0],
-        'cron_minutes': aux[1]
+        'providers': providers
     }
+
+    my_task_name = 'gvsigol_plugin_trip_planner.trip_planner_refresh'
+    
+    try:
+        periodicTask  = PeriodicTask.objects.get(name = my_task_name)
+    except:
+        periodicTask = None
+    
+    if periodicTask:
+        cronid = periodicTask.crontab_id
+        interid = periodicTask.interval_id
+
+        if interid:
+            intervalSchedule = IntervalSchedule.objects.get(id = interid)
+            response['every'] = intervalSchedule.every
+            response['period'] = intervalSchedule.period
+        else:
+            crontabSchedule = CrontabSchedule.objects.get(id = cronid)
+            days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+            dow = crontabSchedule.day_of_week
+
+            if dow == '*':
+                response['day_of_week'] = 'all'
+            else:
+               response['day_of_week'] = days_of_week[int(dow)]
+            
+            response['hour'] = crontabSchedule.hour
+            response['minute'] = crontabSchedule.minute
+
+    aux = priv_settings.GTFS_CRONTAB.split(" ")
+
+
     return render(request, 'gtfs_provider_list.html', response)
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def gtfs_update_status(request):
+    try:
+        statusModel  = GTFSstatus.objects.get(name = 'update')
+        status = statusModel.status
+        msg = statusModel.message
+
+        response = {
+            'status': status, 'message': msg
+        }      
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+    except:
+        response = {
+            'status': '', 'message': ''
+        }      
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required

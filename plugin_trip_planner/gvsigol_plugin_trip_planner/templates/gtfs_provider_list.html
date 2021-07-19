@@ -121,7 +121,7 @@
 			    		<input type="submit" class="btn btn-default" value="{% trans "Set up cronjob" %}">
 					</form>
 					<div class="box-tools pull-right">
-						<button id="button-update-now" class="btn btn-block btn-default btn-sm"><i class="fa fa-check margin-r-5"></i> {% trans "Update Now" %}</button>
+						<button id="button-update-now" class="btn btn-block btn-default btn-sm"><i id ="icon-success" class="fa fa-check" aria-hidden="true"></i> <i id = "icon-running" class="fa fa-spinner fa-spin"></i> <i id ="icon-error" class="fa fa-times" aria-hidden="true" ></i></i> {% trans "Update Now" %}</button>
 					</div>
 
 				</div>
@@ -238,8 +238,29 @@ $(document).ready(function() {
 		});
 	}
 	
-	$(".repeat_periodically_time").slideUp("slow")
+	cel_hour = '{{ hour }}'
+	cel_minute = '{{ minute }}'
+	cel_day_of_week = '{{ day_of_week }}'
 	
+	cel_every = '{{ every }}'
+	cel_period = '{{ period }}'
+
+	if(cel_hour){
+		$('#repeat_periodically').prop('checked', true);
+		$('#program-day').val(cel_day_of_week);
+		$('#program-time').val(cel_hour+':'+cel_minute+':00')
+		$(".repeat_periodically_time").slideDown("fast");
+	}else if (cel_every){
+		$('#repeat_periodically').prop('checked', true);
+		$('#program-interval').val(cel_every);
+		$('#program-unit').val(cel_period);
+		$('#program-day').val("every");
+		$(".more-options").slideDown("fast");  // checked
+		$(".more-hour-options").slideUp("fast");
+	}else{
+		$(".repeat_periodically_time").slideUp("fast")
+	}
+
 	$('#repeat_periodically').click(function() {
 
 		if($("#repeat_periodically").is(':checked')){
@@ -269,6 +290,76 @@ $(document).ready(function() {
 	});
 
 	edit_progamming_form($('#program-day').val())
+
+	
+	////////////////////////////////////////////////////////////////////////
+    function actualizarInfoPanel(data){
+        if(data.status == ''){
+
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+
+        if(data.status == 'Running'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "inline-block");
+            $("#icon-error").css("display", "none");
+			
+        }
+        if(data.status == 'Success'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "inline");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+        if(data.status == 'Error'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "inline");
+
+        }
+
+    }
+
+    function getCurrentCanvasStatus(){
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/trip_planner/gtfs_update_status/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		  	},
+		  	success	:function(response){
+				  console.log(response)
+		  		actualizarInfoPanel(response);		
+			},
+		  	error: function(response){
+				actualizarInfoPanel(response);	
+		  	}
+		});
+		return false;
+    }
+
+	function startCurrentCanvasStatus(){
+		interval = setInterval(function(){ 
+			getCurrentCanvasStatus();
+		}, 3000);
+	}
+
+    startCurrentCanvasStatus();
+    getCurrentCanvasStatus()
+
+
+
 	   
 });
 </script>

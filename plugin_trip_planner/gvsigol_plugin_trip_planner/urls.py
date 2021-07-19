@@ -4,6 +4,7 @@ from gvsigol_plugin_trip_planner import views
 urlpatterns = [
     path('trip_planner/gtfs_provider_list/', views.gtfs_provider_list, name='gtfs_provider_list'),
     path('trip_planner/gtfs_provider_add/', views.gtfs_provider_add, name='gtfs_provider_add'),
+    path('trip_planner/gtfs_update_status/', views.gtfs_update_status, name='gtfs_update_status'),
     path('trip_planner/gtfs_provider_update/<int:provider_id>/', views.gtfs_provider_update, name='gtfs_provider_update'),
     path('trip_planner/gtfs_provider_delete/<int:provider_id>/', views.gtfs_provider_delete, name='gtfs_provider_delete'),
     path('trip_planner/gtfs_crontab_update/', views.gtfs_crontab_update, name='gtfs_crontab_update'),
