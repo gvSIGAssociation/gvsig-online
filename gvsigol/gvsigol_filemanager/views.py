@@ -290,9 +290,17 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
         return super(DirectoryCreateView, self).form_valid(form)
 
 def download_file(request, filepath):
+    try:
+        print('xsendfile requested file: ' + filepath)
+    except:
+        logger.exception('xsendfile error')
     abs_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, filepath))
     if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
         return HttpResponseBadRequest()
     if not can_manage_path(request.user, filepath):
         return HttpResponseForbidden()
+    try:
+        print('xsendfile served file: ' + abs_path)
+    except:
+        logger.exception('xsendfile error')
     return sendfile(request, abs_path, attachment=True)
