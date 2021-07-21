@@ -4,6 +4,10 @@ from django.apps import AppConfig
 import threading
 import schedule
 import time
+import sys
+import os
+import locale
+import logging
 
 sch = schedule.default_scheduler
 job_thread = None
@@ -30,6 +34,7 @@ class GvsigolCoreConfig(AppConfig):
     label = 'gvsigol_core'
 
     def ready(self):
+        self.output_locale_conf()
         from actstream import registry
         registry.register(self.get_model('Project'))
 
@@ -66,3 +71,34 @@ class GvsigolCoreConfig(AppConfig):
         
         if GDALTOOLS_BASEPATH and GDALTOOLS_BASEPATH != '':
             gdaltools.Wrapper.BASEPATH = GDALTOOLS_BASEPATH
+
+    def output_locale_conf(self):
+        logger = logging.getLogger('gvsigol')
+        try:
+            logger.info("sys.stdout.encoding:")
+            logger.info(sys.stdout.encoding)
+        except:
+            logger.info('sys.stdout.encoding not defined')
+        try:
+            logger.info("locale.getpreferredencoding():")
+            logger.info(locale.getpreferredencoding())
+        except:
+            logger.info('locale.getpreferredencoding() not defined')
+
+        try:
+            logger.info("locale.getdefaultlocale():")
+            logger.info(locale.getdefaultlocale())
+        except:
+            logger.info('locale.getdefaultlocale() not defined')
+
+        try:
+            logger.info("os.environ.get('LANG'):")
+            logger.info(os.environ.get('LANG'))
+        except:
+            logger.info("os.environ.get('LANG') not defined")
+
+        try:
+            logger.info("os.environ.get('LC_ALL'):")
+            logger.info(os.environ.get('LC_ALL'))
+        except:
+            logger.info("os.environ.get('LC_ALL') not defined")
