@@ -710,13 +710,15 @@ def layer_refresh_conf(request, layer_id):
         if not utils.can_manage_layer(request.user, layer):
             return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
         _layer_refresh_extent(layer)
-        lyr_conf = layer.get_config_manager()
-        lyr_conf.refresh_field_conf()
+        if layer.type.startswith('v_'):
+            lyr_conf = layer.get_config_manager()
+            lyr_conf.refresh_field_conf()
         layer.save()
-        i, source_name, schema = layer.get_db_connection()
-        with i as conn:
-            # ensure the pk sequence has a consistent status
-            conn.update_pk_sequences(source_name, schema=schema)
+        if layer.type.startswith('v_'):
+            i, source_name, schema = layer.get_db_connection()
+            with i as conn:
+                # ensure the pk sequence has a consistent status
+                conn.update_pk_sequences(source_name, schema=schema)
         return JsonResponse({"result": "ok"})
     except:
         logger.exception("Error refreshing layer conf")
@@ -1552,17 +1554,15 @@ def layer_autoconfig(layer, featuretype):
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
 
-    if (ds_type != 'coverage'):
-        if (ds_type !='wmsLayer'):
-            lyr_conf = layer.get_config_manager()
-            fields = lyr_conf.get_updated_field_conf()
-        form_groups = _parse_form_groups([], fields)
     layer_conf = {
-        'fields': fields,
         'featuretype': featuretype,
-        'form_groups': form_groups
         }
 
+    if ds_type  == 'featureType':
+        lyr_conf = layer.get_config_manager()
+        fields = lyr_conf.get_updated_field_conf()
+        layer_conf['fields'] = fields
+        layer_conf['form_groups'] = _parse_form_groups([], fields)
     layer.conf = layer_conf
 
 def _parse_form_groups(form_groups, fields):
