@@ -36,6 +36,7 @@ import string
 import unicodedata
 import urllib.request, urllib.parse, urllib.error
 import zipfile
+import xmltodict
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -1550,9 +1551,11 @@ def layer_autoconfig(layer, featuretype):
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
+
     if (ds_type != 'coverage'):
-        lyr_conf = layer.get_config_manager()
-        fields = lyr_conf.get_updated_field_conf()
+        if (ds_type !='wmsLayer'):
+            lyr_conf = layer.get_config_manager()
+            fields = lyr_conf.get_updated_field_conf()
         form_groups = _parse_form_groups([], fields)
     layer_conf = {
         'fields': fields,
@@ -4048,7 +4051,12 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     try:
         if service == 'WMS':
             if not version:
-                version = WMS_MAX_VERSION
+                try:
+                    response = requests.get(url)
+                    data = xmltodict.parse(response.content)
+                    version = data['WMT_MS_Capabilities']['@version']
+                except:
+                    version = WMS_MAX_VERSION
                 
             print('Add base layer: ' + url+ ', version: ' + version)
             wms = WebMapService(url, version=version, auth=auth)
