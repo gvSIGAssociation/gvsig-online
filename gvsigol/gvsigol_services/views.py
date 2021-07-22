@@ -3204,7 +3204,7 @@ def get_datatable_data(request):
                 else:
                     values['cql_filter'] = cql_filter.encode('utf-8') + ' AND ' + raw_search_cql
                 recordsTotal = gs.getFeatureCount(request, wfs_url, qualified_name, None)
-                recordsFiltered = gs.getFeatureCount(request, wfs_url, qualified_name, cql_filter)
+                recordsFiltered = gs.getFeatureCount(request, wfs_url, qualified_name, values['cql_filter'])
 
             params = urllib.urlencode(values)
             req = requests.Session()
