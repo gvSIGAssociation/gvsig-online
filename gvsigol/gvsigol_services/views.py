@@ -4142,11 +4142,11 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     styles.append(style_def)
                 crs_list = lyr.crs_list
 
-        except Exception as e:
-            print 'Add base layer ERROR: ' + str(e.message)
-            data = {'response': '500',
-             'message':  str(e.message)}
-            return data
+    except Exception as e:
+        print 'Add base layer ERROR: ' + str(e.message)
+        data = {'response': '500',
+         'message':  str(e.message)}
+        return data
 
     if service == 'WMTS':
         try:
