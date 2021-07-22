@@ -3064,12 +3064,12 @@ def get_datatable_data(request):
             attributes = definition['featureType']['attributes']['attribute']
             if isinstance(attributes, list):
                 for attribute in attributes:
-                    aux_property_name += attribute['name'] + ' '
+                    aux_property_name += str(attribute['name']) + ' '
                     if not sortby_field and not 'jts.geom' in attribute['binding']:
                         sortby_field = attribute['name']
             else:
                 attribute = attributes
-                aux_property_name += attribute['name'] + ' '
+                aux_property_name += str(attribute['name']) + ' '
                 if not sortby_field and not 'jts.geom' in attribute['binding']:
                     sortby_field = attribute['name']
 
@@ -3654,10 +3654,10 @@ def _describeFeatureType(layer, skip_pks):
                 attributes = definition['featureType']['attributes']['attribute']
                 if isinstance(attributes, list):
                     for attribute in attributes:
-                        aux_property_name += attribute['name'] + ' '
+                        aux_property_name += str(attribute['name']) + ' '
                 else:
                     attribute = attributes
-                    aux_property_name += attribute['name'] + ' '
+                    aux_property_name += str(attribute['name']) + ' '
 
             names = aux_property_name.split(' ');
             layer_defs_aux = []
