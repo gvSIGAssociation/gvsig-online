@@ -3164,7 +3164,7 @@ def get_datatable_data(request):
                 else:
                     values['cql_filter'] = cql_filter + ' AND ' + raw_search_cql
                 recordsTotal = gs.getFeatureCount(request, wfs_url, qualified_name, None)
-                recordsFiltered = gs.getFeatureCount(request, wfs_url, qualified_name, cql_filter)
+                recordsFiltered = gs.getFeatureCount(request, wfs_url, qualified_name, values['cql_filter'])
 
             req = requests.Session()
             if request.session.get('username') is not None and request.session.get('password') is not None:
