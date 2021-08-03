@@ -3702,6 +3702,303 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+
+//// MGRS ////
+
+trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_MGRS",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("MGRS"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        context = this
+        
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        //adding dialog for choosing parameters of the transformer
+        $('#canvas-parent').append('<div id="dialog-mgrs-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('MGRS Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<label form="attr" class="col-form-label">'+gettext('Select mode:')+'</label>'+
+                            '<select class="form-control" id="select-mgrs'+ID+'">'+
+                                '<option value="mgrstolatlon" selected>'+gettext('MGRS to geographic coordinates:')+'</option>'+
+                                '<option value="latlontomgrs">'+gettext('Geographic coordinates to MGRS:')+'</option>'+
+                            '</select>'+
+                            '<div class="column50">'+
+                                '<label form="attr" class="col-form-label">'+gettext('MGRS grid attribute:')+'</label>'+
+                                '<select class="form-control" id="mgrs-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<label form="attr" class="col-form-label">'+gettext('Longitude attribute:')+'</label>'+
+                                '<select class="form-control" id="lon-'+ID+'"> </select>'+
+                                '<label form="attr" class="col-form-label">'+gettext('Latitude attribute:')+'</label>'+
+                                '<select class="form-control" id="lat-'+ID+'"> </select>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="mgrs-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        $('#mgrs-'+ID).attr('disabled', false)
+        $('#lon-'+ID).attr('disabled', true)
+        $('#lat-'+ID).attr('disabled', true)
+
+        $('#select-mgrs'+ID).on('change', function() {
+            
+            if (this.value=='mgrstolatlon'){
+                $('#mgrs-'+ID).attr('disabled', false)
+                $('#lon-'+ID).attr('disabled', true)
+                $('#lat-'+ID).attr('disabled', true)
+            }
+            if (this.value=='latlontomgrs'){
+                $('#mgrs-'+ID).attr('disabled', true)
+                $('#lon-'+ID).attr('disabled', false)
+                $('#lat-'+ID).attr('disabled', false)
+            }
+        });
+       
+
+        icon.on("click", function(){
+
+            setTimeout(function(){
+                
+                try{
+                    // if it's not the first time opening parameters dialog
+                    //json figure task will has already the schemas
+                    //old is the schema that came from the edge
+                    //the other one is result schema depending of parameters chosen
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                //get schema from the edge
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                //if edge schema and old schema is not the same is the first time you open parameters or
+                //something was changed in the edge so we hace to create a new schema option
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+                    $('#mgrs-'+ID).empty()
+                    $('#lon-'+ID).empty()
+                    $('#lat-'+ID).empty()
+
+                    for (i = 0; i < schema.length; i++){
+                        
+                        $('#mgrs-'+ID).append('<option>'+schema[i]+'</option>')
+                        $('#lon-'+ID).append('<option>'+schema[i]+'</option>')
+                        $('#lat-'+ID).append('<option>'+schema[i]+'</option>')
+                    }
+                }
+
+            },100);
+            
+
+            $('#dialog-mgrs-'+ID).modal('show')
+
+            $('#mgrs-accept-'+ID).click(function() {
+
+                //parameters selected to json
+                var paramsMGRS = {"id": ID,
+                    "parameters": [
+                        {"select": $("#select-mgrs"+ID).val(),
+                        "mgrs": $('#mgrs-'+ID).val(),
+                        "lon": $('#lon-'+ID).val(),
+                        "lat": $('#lat-'+ID).val()}
+                    ]
+                };
+
+                schemaMod =[...schema]
+                
+                if ($('#select-mgrs'+ID).val()=='mgrstolatlon'){
+                    schemaMod.push("_lon", "_lat")
+                }else{
+                    schemaMod.push("_mgrs_grid")
+                }
+                
+                //updating schema-old and schema parameters in json
+                paramsMGRS['schema-old'] = schemaEdge
+                paramsMGRS['schema'] = schemaMod
+
+                //add the schema to a later edge if it exists
+                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+                
+                //check if parameters are already in json canvas
+                isAlreadyInCanvas(jsonParams, paramsMGRS, ID)
+
+                //set red color to another in order to know if parameters are checked
+                icon.setColor('#4682B4')
+                
+                $('#dialog-mgrs-'+ID).modal('hide')
+
+            })
+        })
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+         }
+         
+         listLabel.push([this.id, [input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
 ////////////////////////////////////////////////  SALIDAS /////////////////////////////////////////////////////////
 
 //// OUTPUT POSTGRESQL ////
@@ -3817,9 +4114,10 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                 $('#match-'+ID).attr('disabled', true)
             }
         });
+        
         $('#verify-postgresql-'+ID).click(function() {
                 
-            var paramsPostgres = {"id": ID,
+        var paramsPostgres = {"id": ID,
             "parameters": [
                 {"host": $('#host-'+ID).val(),
                 "port": $('#port-'+ID).val(),
