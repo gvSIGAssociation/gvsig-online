@@ -9,6 +9,7 @@ from collections import defaultdict
 from osgeo import ogr, osr
 import copy
 from dateutil.parser import parse
+import mgrs
 
 
 # Python class to print topological sorting of a DAG 
@@ -346,7 +347,6 @@ def trans_Filter(dicc):
             else:
                 failed['features'].append(i)
 
-    print(passed['crs'])
     return [passed, failed]
 
 def isNumber(value):
@@ -981,6 +981,35 @@ def trans_CadastralGeom(dicc):
     
     return [table]
 
+def trans_MGRS(dicc):
+    table = dicc['data'][0]
+    select = dicc['select']
 
+    m = mgrs.MGRS()
+    
+    if select == 'mgrstolatlon':
+        grid = dicc['mgrs']
+        
+        for i in table['features']:
+            try:
+                lat, lon = m.toLatLon(i['properties'][grid].replace(" ", ""))
+                i['properties']['_lat'] = lat
+                i['properties']['_lon'] = lon
+            except:
+                i['properties']['_lat'] = None
+                i['properties']['_lon'] = None
+
+    else:
+        lat = dicc['lat']
+        lon = dicc['lon']
+        
+        for i in table['features']:
+            try:
+                grid = m.toMGRS(i['properties'][lat], i['properties'][lon])
+                i['properties']['_mgrs_grid'] = grid
+            except:
+                i['properties']['_mgrs_grid'] = None
+
+    return [table]
 
 
