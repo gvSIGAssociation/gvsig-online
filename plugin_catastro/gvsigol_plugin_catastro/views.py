@@ -88,7 +88,13 @@ def get_rc_by_coords(request):
         response['srs'] = srs
 
         address_url = settings.URL_API_CATASTRO + '/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS='+srs+'&Coordenada_X='+xcen+'&Coordenada_Y='+ycen
-        r = requests.get(url = address_url, params = {})
+        # payload = {
+        #     'SRS': srs,
+        #     'Coordenada_X': xcen,
+        #     'Coordenada_Y': ycen
+        # }
+        # r = requests.get(url = address_url, params = payload, timeout=6) # timeout a 6 segundos, el servidor de catastro a veces tarda
+        r = requests.get(url = address_url, timeout=6)
 
         tree = ElementTree.fromstring(r.content)
 
