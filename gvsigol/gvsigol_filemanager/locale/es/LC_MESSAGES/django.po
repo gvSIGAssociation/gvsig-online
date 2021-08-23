@@ -126,7 +126,7 @@ msgstr "Administrador de archivos"
 
 #: gvsigol_filemanager/views.py:141
 msgid "Export process done successfully"
-msgstr "Proceso de exportación ralizado satisfactoriamente"
+msgstr "Proceso de exportación realizado satisfactoriamente"
 
 #: gvsigol_filemanager/views.py:144
 msgid "Export process completed with warnings:"
