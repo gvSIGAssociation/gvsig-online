@@ -702,7 +702,6 @@ def output_Postgis(dicc):
         for k in range(0, rows):
 
             sqlInsert2=sqlInsert
-
             #geojson geometry
             coord = fc['features'][k]['geometry']
             #del coord['epsg']
@@ -996,8 +995,8 @@ def trans_MGRS(dicc):
                 i['properties']['_lat'] = lat
                 i['properties']['_lon'] = lon
             except:
-                i['properties']['_lat'] = None
-                i['properties']['_lon'] = None
+                i['properties']['_lat'] = 'NULL'
+                i['properties']['_lon'] = 'NULL'
 
     else:
         lat = dicc['lat']
@@ -1008,8 +1007,27 @@ def trans_MGRS(dicc):
                 grid = m.toMGRS(i['properties'][lat], i['properties'][lon])
                 i['properties']['_mgrs_grid'] = grid
             except:
-                i['properties']['_mgrs_grid'] = None
+                i['properties']['_mgrs_grid'] = 'NULL'
 
     return [table]
+
+def trans_TextToPoint(dicc):
+    
+    table = dicc['data'][0]
+    lat = dicc['lat']
+    lon = dicc['lon']
+    epsg = dicc['epsg']
+    table["type"] = "FeatureCollection"
+    table["crs"] = {"type": "name", "properties":{"name":"EPSG:"+str(epsg)}}
+
+    for i in table['features']:
+        lat_ = i['properties'][lat]
+        lon_ = i['properties'][lon]
+
+        i["type"] = "Feature"
+        i["geometry"] = {"type": "Point", "coordinates": [float(lon_), float(lat_)]}
+    
+    return[table]
+    
 
 
