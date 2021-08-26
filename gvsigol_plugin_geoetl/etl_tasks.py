@@ -139,12 +139,8 @@ def input_Shp(dicc):
     fc['crs']['properties']['name'] = "EPSG:"+str(epsg)
 
     for feature in layer:    
-        geom = feature.GetGeometryRef()
-        g = geom.ExportToWkt()
-        geo = g.replace(',', '],[').replace(')', ']').replace('(', '[').replace(' ', ',')
-        index = geo.find(',')
-        f =json.loads('{"type": "Feature", "geometry":{"type": "'+geo[:index].capitalize()+'", "coordinates": ['+geo[index+1:]+']}}')
-        f['properties']=(feature.ExportToJson(as_object=True)['properties'])
+        f= feature.ExportToJson(as_object=True)
+        print(f)
         fc['features'].append(f)
 
     return[fc]
@@ -870,7 +866,7 @@ def trans_Reproject(dicc):
     dataSet = ogr.Open(json.dumps(table))
     layer = dataSet.GetLayer()
 
-    #for newers gdal versions we must use next sentences
+    #for newers gdal versions (3 or uppers) we must use next sentences
     #source.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     #target.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
@@ -889,7 +885,7 @@ def trans_Reproject(dicc):
         "features": []
         }
     
-    for feature in layer:  
+    """for feature in layer:  
         geom = feature.GetGeometryRef()
         geom.Transform(coordTrans)
         g = geom.ExportToWkt()#, as_object=True,options=["COORDINATE_PRECISION=150"])
@@ -898,7 +894,13 @@ def trans_Reproject(dicc):
         f =json.loads('{"type": "Feature", "geometry":{"type": "'+geo[:index].capitalize()+'", "coordinates": ['+geo[index+1:]+']}}')
         f['properties']=(feature.ExportToJson(as_object=True)['properties'])
         #f['geometry']['epsg'] = targetepsg
-        fc['features'].append(f)
+        fc['features'].append(f)"""
+    
+    for feature in layer:    
+        geom = feature.GetGeometryRef()
+        geom.Transform(coordTrans)
+        f = feature.ExportToJson(as_object=True)
+        fc['features'].append(f)    
     
     return[fc]
 
@@ -1024,8 +1026,11 @@ def trans_TextToPoint(dicc):
         lat_ = i['properties'][lat]
         lon_ = i['properties'][lon]
 
-        i["type"] = "Feature"
-        i["geometry"] = {"type": "Point", "coordinates": [float(lon_), float(lat_)]}
+        try:
+            i["type"] = "Feature"
+            i["geometry"] = {"type": "Point", "coordinates": [float(lon_), float(lat_)]}
+        except:
+            pass
     
     return[table]
     
