@@ -165,6 +165,7 @@ def etl_workspace_list(request):
 
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
 def save_periodic_workspace(request, workspace):
 
     day = request.POST.get('day')
@@ -231,6 +232,7 @@ def save_periodic_workspace(request, workspace):
     )
     statusModel.save()
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
 def delete_periodic_workspace(workspace):
 
     try:

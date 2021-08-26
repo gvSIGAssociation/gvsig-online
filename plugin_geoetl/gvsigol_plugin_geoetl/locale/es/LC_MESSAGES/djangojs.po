@@ -402,3 +402,42 @@ msgstr "El espacio de trabajo"
 
 msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
 msgstr "se sobreescribirá. Si no quieres que se sobreescriba deja el ID vacío."
+
+msgid "Cadastral Geom."
+msgstr "Geom. Catastral"
+
+msgid "Cadastral Geometry Parameters"
+msgstr "Parámetros Geometría Catastral"
+
+msgid "Cadastral Reference Attribute:"
+msgstr "Atributo de la Referencia Catastral:"
+
+msgid "MGRS Parameters"
+msgstr "Parámetros MGRS"
+
+msgid "Select mode:"
+msgstr "Selecciona el modo:"
+
+msgid "MGRS to geographic coordinates:"
+msgstr "MGRS a coordenadas geográficas:"
+
+msgid "Geographic coordinates to MGRS:"
+msgstr "Coordenadas geográficas a MGRS:"
+
+msgid "MGRS grid attribute:"
+msgstr "Atributo del grid MGRS:"
+
+msgid "Longitude attribute:"
+msgstr "Atributo de longitud"
+
+msgid "Latitude attribute:"
+msgstr "Atributo de latitud"
+
+msgid "Text to Point"
+msgstr "Texto a Punto"
+
+msgid "Text to Point Parameters"
+msgstr "Parámetros Texto a Punto"
+
+msgid "Insert EPSG:"
+msgstr "Inserta EPSG:"

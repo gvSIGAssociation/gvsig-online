@@ -402,3 +402,42 @@ msgstr ""
 
 msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
 msgstr ""
+
+msgid "Cadastral Geom."
+msgstr ""
+
+msgid "Cadastral Geometry Parameters"
+msgstr ""
+
+msgid "Cadastral Reference Attribute:"
+msgstr ""
+
+msgid "MGRS Parameters"
+msgstr ""
+
+msgid "Select mode:"
+msgstr ""
+
+msgid "MGRS to geographic coordinates:"
+msgstr ""
+
+msgid "Geographic coordinates to MGRS:"
+msgstr ""
+
+msgid "MGRS grid attribute:"
+msgstr ""
+
+msgid "Longitude attribute:"
+msgstr ""
+
+msgid "Latitude attribute:"
+msgstr ""
+
+msgid "Text to Point"
+msgstr ""
+
+msgid "Text to Point Parameters"
+msgstr ""
+
+msgid "Insert EPSG:"
+msgstr ""

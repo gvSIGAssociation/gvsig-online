@@ -4062,7 +4062,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="column33">'+
                                 '<label form="attr" class="col-form-label">'+gettext('Insert EPSG:')+'</label>'+
                                 '<select id="epsg-'+ID+'" class="form-control js-example-basic-single">'+ 
-                                    '<option value="">'+gettext('----')+'</option>'+
+                                    '<option value="">----</option>'+
                                 '</select>'+
                             '</div>'+
                         '</form>'+
