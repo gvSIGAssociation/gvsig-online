@@ -484,7 +484,7 @@ msgstr "Elevação regex"
 #: gvsigol_services/templates/cache_list.html:26
 #: gvsigol_services/templates/layer_list.html:28
 msgid "Datastore"
-msgstr "Armazém de dados"
+msgstr "Banco de dados"
 
 #: gvsigol_services/forms_geoserver.py:95
 msgid "Mode"
@@ -1263,7 +1263,7 @@ msgstr "Espaços de trabalho"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:10
 msgid "Datastores"
-msgstr "Armazém de dados"
+msgstr "Banco de dados"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:11
 msgid "Layer groups"
@@ -1330,7 +1330,7 @@ msgstr "O armazenamento de dados e seus recursos registrados serão excluídos"
 #: gvsigol_services/templates/datastore_list.html:69
 msgid "Check this option to remove the schema associated with the datastore"
 msgstr ""
-"Marque esta opção para remover o esquema associado com o armazém de dados "
+"Marque esta opção para remover o esquema associado com o banco de dados "
 
 #: gvsigol_services/templates/datastore_list.html:116
 msgid "Remove datastore"
@@ -1884,7 +1884,7 @@ msgstr "Ler permissões"
 #: gvsigol_services/templates/layer_create.html:60
 #: gvsigol_services/templates/layer_update.html:60
 msgid "Data Store"
-msgstr "Armazém de Dados"
+msgstr "Banco de Dados"
 
 #: gvsigol_services/templates/layer_add.html:60
 #: gvsigol_services/templates/layer_create.html:66
@@ -2158,7 +2158,7 @@ msgstr "Projetos"
 
 #: gvsigol_services/templates/layer_list.html:31
 msgid "Datastore type"
-msgstr "Tipo de armazém de dados"
+msgstr "Tipo de banco de dados"
 
 #: gvsigol_services/templates/layer_list.html:73
 #: gvsigol_services/templates/layer_list.html:153

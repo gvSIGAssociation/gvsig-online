@@ -36,7 +36,7 @@ msgstr "Espaço de trabalho"
 
 #: forms_services.py:39 forms_services.py:59
 msgid "Datastore"
-msgstr "Armazenamento de dados"
+msgstr "Banco de dados"
 
 #: forms_services.py:40 forms_services.py:60
 msgid "Resource"
@@ -329,7 +329,7 @@ msgstr "Duração"
 
 #: views.py:117 views.py:270
 msgid "Error: DataStore has not a valid CartoCiudad schema (Needed , "
-msgstr "Erro: O DataStore não possui um esquema CartoCiudad válido (Needed , "
+msgstr "Erro: O banco de dados não possui um esquema CartoCiudad válido (Needed , "
 
 #: views.py:129
 msgid "Error: this type of provider is already added to the project"

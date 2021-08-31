@@ -51,7 +51,7 @@ msgstr "Nome do espaço de trabalho alvo"
 
 #: gvsigol_core/forms.py:44 gvsigol_core/templates/project_list.html:112
 msgid "Target datastore and database schema name"
-msgstr "Nome do armazém de dados alvo e do esquema do banco de dados"
+msgstr "Nome do banco de dados alvo e do esquema do banco de dados"
 
 #: gvsigol_core/forms.py:49
 msgid "numeric value required"
@@ -661,7 +661,7 @@ msgstr "Espaço de trabalho"
 #: gvsigol_core/templates/project_list.html:111
 #: gvsigol_core/templates/project_list.html:235
 msgid "Datastore"
-msgstr "Armazém de dados"
+msgstr "Banco de dados"
 
 #: gvsigol_core/templates/project_clone.html:69
 msgid "Select server"
