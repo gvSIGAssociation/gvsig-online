@@ -487,6 +487,14 @@ class ServiceUrl(models.Model):
     def __unicode__(self):
         return self.title
 
+    @property
+    def url_path(self):
+        """
+        Returns the URL excluding the query and fragment, which is equivalent to the
+        URL part before the '?' character.
+        """
+        return self.url.split('?')[0]
+
 class TriggerProcedure(models.Model):
     """
     The definition of a PostgreSQL function designed to be used in a trigger,

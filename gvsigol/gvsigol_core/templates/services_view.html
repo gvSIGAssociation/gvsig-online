@@ -67,8 +67,8 @@
 					          			{% for s in wms %}			
 										<tr>
 											<td style="width: 30%;">{{ s.title }}</td>
-											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url }}?service=WMS&request=getCapabilities" target="_blank">{{ s.url }}</td>	
-<!-- 									    	<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" class="wms-capabilities-link" data-url="{{ s.url }}" href="#">{{ s.url }}</td>										 -->
+											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url_path }}?service=WMS&request=getCapabilities" target="_blank">{{ s.url_path }}</td>	
+<!-- 									    	<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" class="wms-capabilities-link" data-url="{{ s.url_path }}" href="#">{{ s.url_path }}</td>										 -->
 									    </tr>
 										{% endfor %}
 									</table>
@@ -87,7 +87,7 @@
 					          			{% for s in wmts %}			
 										<tr>
 											<td style="width: 30%;">{{ s.title }}</td>
-											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url }}?service=WMTS&request=getCapabilities" target="_blank">{{ s.url }}</td>	
+											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url_path }}?service=WMTS&request=getCapabilities" target="_blank">{{ s.url_path }}</td>	
 									    </tr>
 										{% endfor %}
 									</table>
@@ -106,7 +106,7 @@
 					          			{% for s in wfs %}			
 										<tr>
 											<td style="width: 30%;">{{ s.title }}</td>
-											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url }}?service=WFS&request=getCapabilities" target="_blank">{{ s.url }}</td>	
+											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url_path }}?service=WFS&request=getCapabilities" target="_blank">{{ s.url_path }}</td>	
 									    </tr>
 										{% endfor %}
 									</table>
@@ -125,7 +125,7 @@
 					          			{% for s in csw %}			
 										<tr>
 											<td style="width: 30%;">{{ s.title }}</td>
-											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url }}?service=CSW&request=getCapabilities" target="_blank">{{ s.url }}</td>	
+											<td style="width: 70%;"><a style="color: #009ABB;text-decoration: none;" href="{{ s.url_path }}?service=CSW&request=getCapabilities" target="_blank">{{ s.url_path }}</td>	
 									    </tr>
 										{% endfor %}
 									</table>
