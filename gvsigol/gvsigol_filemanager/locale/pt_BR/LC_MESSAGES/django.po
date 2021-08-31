@@ -147,7 +147,7 @@ msgstr "Erro ao excluir o recurso"
 
 #: gvsigol_filemanager/views.py:232
 msgid "exists in datastore"
-msgstr "existe no armazém de dados"
+msgstr "existe no banco de dados"
 
 #: gvsigol_filemanager/views.py:266
 msgid "Error unzipping resource"
