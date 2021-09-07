@@ -243,6 +243,14 @@ class Introspect:
         
         return [r[0] for r in self.cursor.fetchall()]
 
+    def get_fields_by_datatype(self, datatype, table, schema='public'):
+        self.cursor.execute("""
+        SELECT column_name FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s AND data_type = %s
+        """, [schema, table, datatype])
+        
+        return [r[0] for r in self.cursor.fetchall()]
+
     def _parse_sql_identifier(self, s, expected_next_char, pattern=plainIdentifierPattern):
         """
         Parses the provided string an returns a tuple with the parsed identifier and the rest of the string.
