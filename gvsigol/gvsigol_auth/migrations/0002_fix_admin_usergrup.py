@@ -7,8 +7,10 @@ def fix_admin_usergroup(apps, schema_editor):
     try:
         UserGroupUser = apps.get_model("gvsigol_auth", "UserGroupUser")
         UserGroup = apps.get_model("gvsigol_auth", "UserGroup")
-        UserGroupUser.objects.filter(user_group__name='admin')[1:].delete()
-        UserGroup.objects.filter(name='admin')[1:].delete()
+        for o in UserGroupUser.objects.filter(user_group__name='admin')[1:]:
+            o.delete()
+        for o in UserGroup.objects.filter(name='admin')[1:]:
+            o.delete()
     except Exception as error:
         print(error)
     
