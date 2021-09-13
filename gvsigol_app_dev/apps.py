@@ -10,7 +10,7 @@ class GvsigolDevConfig(AppConfig):
         try:
             # ensure we have a proper environment
             self._ensure_admin_group()
-        except:
+        except UserGroup.DoesNotExist:
             # Don't fail when we are migrating applications!!
             pass
     
@@ -19,8 +19,8 @@ class GvsigolDevConfig(AppConfig):
         from gvsigol_auth.utils import is_superuser
         from django.contrib.auth.models import User 
         try:
-            group = UserGroup.objects.get(name__exact='admin')
-        except:
+            group = UserGroup.objects.get(name='admin')
+        except UserGroup.DoesNotExist:
             group = UserGroup()
             group.name = 'admin'
             group.description = 'admin group'
