@@ -143,6 +143,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
+    'rest_framework',
 
     ############# CORE ################
     'gvsigol_statistics',
@@ -157,20 +158,21 @@ INSTALLED_APPS = [
 
     ############# PLUGINS ################
     'gvsigol_plugin_catalog',
-    #'gvsigol_plugin_catastro',
-    'gvsigol_plugin_catastrouy',
+    'gvsigol_plugin_catastro',
+    #'gvsigol_plugin_catastrouy',
     'gvsigol_plugin_charts',
     'gvsigol_plugin_downloadman',
     'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
     'gvsigol_plugin_elevation',
-    'gvsigol_plugin_emergencies',
+    #'gvsigol_plugin_emergencies',
     'gvsigol_plugin_geocoding',
     #'gvsigol_plugin_geoetl',
     'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
-    'gvsigol_plugin_opensea2',
+    'gvsigol_plugin_gestiona',
+    #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
     'actstream',
@@ -286,7 +288,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': False,
+    'ENABLED': True,
     'HOST':'localhost',
     'PORT': '389',
     'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
@@ -370,9 +372,9 @@ SITE_ID=1
 #BASE_URL = 'https://localhost'
 #MEDIA_ROOT = '/usr/local/var/www/media/'
 #MEDIA_URL = 'https://localhost/media/'
-BASE_URL = 'https://localhost'
-MEDIA_ROOT = '/var/www/media/'
-MEDIA_URL = 'https://localhost/media/'
+BASE_URL = 'https://gvsigol.localhost'
+MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
+MEDIA_URL = 'https://gvsigol.localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -397,7 +399,7 @@ GVSIGOL_VERSION = '3.x.x-dev'
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
     'dbport': '5432',
-    'dbname': 'gvsigonline_v2',
+    'dbname': 'gvsigonline_v3',
     'dbuser': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -405,7 +407,7 @@ GVSIGOL_USERS_CARTODB = {
 MOSAIC_DB = {
     'host': 'localhost',
     'port': '5432',
-    'database': 'gvsigonline_v2',
+    'database': 'gvsigonline_v3',
     'schema': 'imagemosaic',
     'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
@@ -605,7 +607,7 @@ TEMPORAL_ADVANCED_PARAMETERS = False
 
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/geoserver',
+    'URL': 'https://gvsigol.localhost/geoserver',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -650,7 +652,7 @@ RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
 LAYERS_ROOT = 'layer_downloads'
 #ALLOWED_HOST_NAMES = ['http://localhost']
-ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
+ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost', 'http://localhost:8000']
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
     'JWT_ALLOW_REFRESH': True,

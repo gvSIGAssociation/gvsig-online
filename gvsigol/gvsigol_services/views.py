@@ -4272,6 +4272,21 @@ def layer_cache_config(request, layer_id):
             return render(request, 'cache_list.html', response)
             
         except Exception as e:
+            error_message = ugettext_lazy('Error configuring layer. Cause: {cause}.').format(cause=str(e))
+            logger.exception(error_message)
+            messages.error(request, error_message)
+            response = HttpResponseRedirect(request.path)
+            response.status_code = 303
+            return response
+            #response = HttpResponse(content="", status=303)
+            #response["Location"] = request.path
+            #return redirect('cache_list')
+            #redirect_class = HttpResponsePermanentRedirect if permanent else HttpResponseRedirect
+            response = HttpResponseRedirect(request.path)
+            response.status_code = 303
+            return response
+
+            """
             message = e
             config = None
             tasks = None
@@ -4295,7 +4310,7 @@ def layer_cache_config(request, layer_id):
                 
             return render(request, 'layer_cache_config.html', response)
         
-        
+            """
         
     
     else:
