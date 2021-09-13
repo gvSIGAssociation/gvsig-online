@@ -10,7 +10,7 @@ class GvsigolDevConfig(AppConfig):
         try:
             # ensure we have a proper environment
             self._ensure_admin_group()
-        except UserGroup.DoesNotExist:
+        except:
             # Don't fail when we are migrating applications!!
             pass
     
