@@ -484,6 +484,8 @@ def datastore_add(request):
                 if output == None or output.__len__() <= 0:
                     has_errors = True
                 else:
+                    if file[-1] != '/':
+                        file = file + '/'
                     post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
             except:
                 has_errors = True
