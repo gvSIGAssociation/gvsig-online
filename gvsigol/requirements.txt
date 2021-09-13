@@ -22,9 +22,9 @@ django-rest-swagger-swaggerdoc==1.0.post3
 django-cors-headers==3.7.0
 
 ##Instalamos el driver de PostgreSQL para python:
-psycopg2>=2.8.6
+psycopg2==2.8.6
 # *NOTE:* Es necesario instalar previamente la libreria _libpq-dev_
-#psycopg2-binary>=2.7,<2.8
+#psycopg2-binary>=2.8,<2.9
 
 ##Instalamos Pillow para que django soporte la gestion de images;
 Pillow==8.2.0
@@ -114,7 +114,6 @@ suds-community==0.8.4
 django_tinymce==3.2.0
 
 # plugin geoetl
-#pandas==1.1.5
-# will not install on Ubuntu 18.04
-#gdal==1.11.2
-
+pandas==1.1.5
+#gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
+mgrs==1.4.2
