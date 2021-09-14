@@ -594,6 +594,7 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	for (var i=0; i<featureType.length; i++) {
 		if (!this.isGeomType(featureType[i].type)) {
 			var feat_name = featureType[i].name;
+			var column_shown = true
 			if(fields_trans != null && fields_trans["fields"] != undefined){
 				var fields = fields_trans["fields"];
 				for(var ix=0; ix<fields.length; ix++){
