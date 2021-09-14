@@ -27,7 +27,7 @@ psycopg2==2.8.6
 #psycopg2-binary>=2.8,<2.9
 
 ##Instalamos Pillow para que django soporte la gestion de images;
-Pillow==8.2.0
+pillow==8.3.2
 # *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
 
 ## gsconfig
