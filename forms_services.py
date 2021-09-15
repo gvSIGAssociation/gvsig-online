@@ -34,7 +34,7 @@ external_layer_supported_types = tuple((x,x) for x in EXTERNAL_LAYER_SUPPORTED_T
 layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1.3.0'))
 version = (('1.1.1', _('1.1.1')), ('1.3.0', _('1.3.0')), ('1.0.0', _('1.0.0')))
 blank = (('', '---------'),)
-servers = (('geoserver', 'geoserver'), ('mapserver', 'mapserver'))
+servers = (('geoserver', 'geoserver'),)
 
 img_formats = (('image/png', 'image/png'), ('image/jpeg', 'image/jpeg'))
 
