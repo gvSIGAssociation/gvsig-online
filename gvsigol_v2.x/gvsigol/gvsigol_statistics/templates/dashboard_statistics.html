@@ -1,0 +1,311 @@
+{% load staticfiles %}
+{% load i18n %}
+<div class="tab-pane" id="tab-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}" style="background-color:white;padding:10px">
+
+
+	<div style="background-color:#eee; padding-left:20px;padding-right:20px;padding-top:1px;padding-bottom:5px;">
+	<h3 style="font-weight:bold">{{ plugin.title }}<div id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-icon" style="float:right"><i class="fa fa-filter" aria-hidden="true"></i></div></h3>
+	<div class="row hidden" id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div" style="padding: 15px;background-color: rgba(200,200,200,0.4);">
+
+		<div class="col-md-4 form-group">
+			{% trans "Petitions from date" %}<br/>
+			<input type="date" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_start_date" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")');">
+		</div>
+
+		<div class="col-md-4 form-group">
+			{% trans "Petitions to date" %}<br/>
+			<input type="date" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_end_date" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+		</div>
+
+		<div class="col-md-4 form-group">
+			{% trans "Petitions done by" %}<br />
+			<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_username" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+		  		<option value="all">All</option>
+		  		<option value="anonymous">{% trans "Anonymous" %}</option>
+
+		  		{% for user in users %}
+		  		<option value="{{ user.username }}">{{ user.username }}</option>
+		  		{% endfor %}
+			</select>
+		</div>
+
+		<div class="col-md-4 form-group">
+			{% trans "Divide by time?" %}
+			<input type="checkbox" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time" class="form-control"  onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+		</div>
+
+		<div class="col-md-4 form-group">
+			{% trans "Time division" %}<br />
+			<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time_pattern" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+		  		<option value="YYYY">{% trans "Year" %}</option>
+		  		<option value="MM-YYYY">{% trans "Month" %}</option>
+				<option value="dd-MM-YYYY">{% trans "Day" %}</option>
+			</select>
+		</div>
+
+		<div class="col-md-12 form-group">
+			<span style="font-weight:bold">{% trans "Total petitions" %}: <span id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-total"></span></span>
+		</div>
+	</div>
+	</div>
+
+	<div class="row" style="margin-top: 15px;">
+		<div class="col-md-6 form-group">
+			<div class="col-md-12 form-group" style="overflow:auto">
+				<table id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-table" class="display" style="width:100%">
+			        <thead>
+			            <tr>
+			            	<th>{% trans "Interval" %}</th>
+			                <th>{% trans plugin.target_title %}</th>
+			                <th>{% trans "Num petitions" %}</th>
+			            </tr>
+			        </thead>
+			        <tbody id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-top">
+			        </tbody>
+			    </table>
+		    </div>
+		</div>
+		<div class="col-md-6 form-group" style="">
+
+			<div id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-chart" class="col-md-12 form-group">
+			</div>
+		</div>
+	</div>
+
+</div>
+<script type="text/javascript">
+	var users = {};
+	{% for user in users %}
+	users["{{ user.id }}"] = "{{ user.username }}"
+	{% endfor %}
+
+	var targets = {};
+
+	function random_rgba() {
+	    var o = Math.round, r = Math.random, s = 255;
+	    return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',0.2)';
+	}
+
+	function get_target_name(route, content_type_id, target_id, field_name, reverse){
+		if(content_type_id == null && target_id == null){
+			return "Anonymous";
+		}
+		if(!(content_type_id in targets)){
+			targets[content_type_id] = {};
+			$.ajax({
+				type: 'POST',
+				async: false,
+			  	url: '/gvsigonline/statistics/get-targets-from-content-type/',
+			  	data: {
+			  		'content_type_id': content_type_id,
+			  		'field_name': field_name
+				},
+			  	success	:function(response){
+			  		if("targets" in response){
+			  			targets[content_type_id] = response["targets"];
+			  		}
+				},
+			  	error: function(){
+			  		console.log("Can't get target objects")
+			  	}
+			});
+		}
+
+		if(target_id in targets[content_type_id]){
+			return targets[content_type_id][target_id];
+		}
+
+		return null;
+	}
+
+
+	function reload_data(route, count, reverse, target_title, field_name){
+		var route_path = route.replace("/", "-") + "-" + count;
+		$("#"+route_path+"-absolute-top").html("");
+
+		var username = $("select[name="+route_path+"-filter_username]").val();
+		var start_date = $("input[name="+route_path+"-filter_start_date]").val();
+		var end_date = $("input[name="+route_path+"-filter_end_date]").val();
+		var time = $("input[name="+route_path+"-filter_time]:checked").length > 0;
+		var time_pattern = $("select[name="+route_path+"-filter_time_pattern]").val();
+
+		// 'Total getConf' petitions
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/statistics/get_registered_actions/'+route+'/',
+		  	data: {
+		  		'username': username,
+				'get_count': true,
+				'start_date': start_date,
+				'end_date': end_date,
+				'reverse': reverse == "True",
+				'group_by_date': false,
+				'date_pattern': 'YYYY'
+
+			},
+		  	success	:function(response){
+		  		if("count" in response){
+		  			var total = 0;
+		  			for(var i=0; i<response["count"].length; i++){
+		  				total = total + response["count"][i][3];
+		  			}
+		  			$("#"+route.replace("/", "-")+"-"+count+"-absolute-total").html(total);
+		  		}
+			},
+		  	error: function(){}
+		});
+
+
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/statistics/get_registered_actions/'+route+'/',
+		  	data: {
+		  		'username': username,
+				'get_count': false,
+				'start_date': start_date,
+				'end_date': end_date,
+				'reverse': reverse == "True",
+				'group_by_date': time,
+				'date_pattern': time_pattern
+			},
+		  	success	:function(response){
+		  		console.log("route: " + route)
+		  		console.log(response);
+
+		  		var route_path = route.replace("/", "-") + "-" + count;
+		  		$("#"+route_path+"-target-by-user-chart").empty();
+		  		$("#"+route_path+"-target-by-user-chart").html('<canvas id="'+route_path+'-target-by-user-chart-canvas" height="400" width="400"></canvas>')
+		  		var canvas = document.getElementById(route_path+'-target-by-user-chart-canvas');
+		  		var ctx = canvas.getContext('2d');
+		  		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		  		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		  		var datasets = [];
+		  		var labels = [];
+
+		  		if("count" in response) {
+		  			var results = response["count"]
+			  		for(var key in results){
+			  			if(results[key][3] > 0){
+				  			var color = random_rgba();
+					  		var aux = {
+			  		            label: "",
+			  		            data: [],
+			  		            backgroundColor: color,
+			  		          	borderColor: color.replace("0.2)", "1)"),
+			  		            borderWidth: 1
+			  		        }
+
+					  		for(var i=0; i<labels.length; i++){
+					  			aux.data.push(null);
+					  		}
+
+					  		var reverse = false;
+					  		if(results[key].length > 4 && results[key][4] == "True"){
+					  			reverse = true;
+					  		}
+					  		var name = get_target_name(route, results[key][1], results[key][2], field_name, reverse);
+				  			if(name == null || name.length < 1){
+				  				name = results[key][2];
+				  			}
+				  			if(name == null || name.length < 1){
+				  				name = "-";
+				  			}
+
+					  		var founded = false;
+					  		for(var i=0; i<datasets.length; i++){
+					  			if(datasets[i]["label"] == name){
+					  				aux = datasets[i];
+					  				founded = true;
+					  			}
+					  		}
+					  		if(!founded){
+					  			datasets.push(aux);
+					  		}
+
+					  		var add_labels = false;
+					  		var indexof = labels.indexOf(results[key][0])
+					  		if(indexof == -1){
+					  			labels.push(results[key][0]);
+					  			add_labels = true;
+					  		}
+
+				  			aux.label = name;
+				  			if(indexof == -1){
+				  				aux.data.push(results[key][3]);
+				  			}else{
+				  				aux.data[indexof] = results[key][3];
+				  			}
+				  			for(var i=0; i<datasets.length; i++){
+					  			if(datasets[i]["label"] != name && add_labels){
+					  				datasets[i].data.push(null)
+					  			}
+					  		}
+
+				  			var interval = results[key][0];
+				  			if(!interval){
+				  				interval = '-';
+				  			}
+				  			$("#"+route_path+"-absolute-top").append("<tr><td>"+ interval +"</td><td>"+ name +"</td><td>"+ results[key][3] +"</td></tr>");
+			  			}
+			  		}
+		  		}
+
+		  		if(labels.length == 1 && labels[0] == null){
+		  			labels[0] = target_title;
+		  		}
+
+		  		var myChart = new Chart(ctx, {
+		  		    type: 'bar',
+		  		    data: {
+		  		        labels: labels,
+		  		        datasets: datasets
+		  		    },
+			  		options: {
+			  		    scales: {
+			  		        yAxes: [{
+			  		            ticks: {
+			  		                beginAtZero: true
+			  		            }
+			  		        }]
+			  		    }
+			  		}
+		  		});
+			},
+		  	error: function(){}
+		});
+	}
+
+
+	$().ready(function() {
+		$("#statistics-tab-controller").append('<li id="li-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}"><a href="#tab-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}" data-toggle="tab">{{ plugin.title }}</a></li>');
+
+		$("#li-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}").click(function(){
+			reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}");
+
+			$("#li-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}").unbind("click");
+		});
+
+		$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-icon").click(function(){
+			if($("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div").hasClass("hidden")){
+				$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div").removeClass("hidden");
+			}else{
+				$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div").addClass("hidden");
+			}
+		});
+
+		$.extend( true, $.fn.dataTable.defaults, {
+		    "searching": false,
+		    "ordering": false,
+		    "paging":   false,
+	        "info":     false
+		} );
+
+		$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-table").DataTable({
+	        "order": [[ 1, "desc" ]]
+	    } );
+
+	});
+</script>

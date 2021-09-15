@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+
+			<form role="form" enctype="multipart/form-data" method="post" action="{% url 'filemanager:export-to-database' %}">
+				<div class="box-header">
+					<div class="box-tools pull-right">
+						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans "Export" %} <i class="fa fa-upload margin-l-5"></i></button>				
+					</div>
+				</div>
+			
+				<div class="box-body">
+				{% csrf_token %}					
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+							
+					{% if messages %}
+				    <ul class="messages" style="list-style: none;margin-left: -40px;">
+				        {% for message in messages %}
+				        	{% if message.tags == "info" %}
+				            <li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+				            {% elif message.tags == "error" %}
+				            <li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+				            {% endif %}
+				        {% endfor %}
+				    </ul>
+					{% endif %}
+					
+					<div class="row" style="margin-top:20px;">
+						<div class="col-md-12 form-group">
+							<div class="alert alert-warning alert-dismissible">
+				                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+				                <h4><i class="icon fa fa-warning"></i> {% trans "Warning!" %}</h4>
+				                {% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
+				            </div>
+		            	</div>
+					</div>
+					
+					<input type="hidden" name="directory_path" value="{{file.directory}}">	
+					<input type="hidden" name="file_path" value="{{file.filepath}}">
+					<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">					
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_mode">{% trans "Table creation mode" %}</label>
+							{{ form.mode }}									
+						</div>
+					</div>
+									
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_datastore">{% trans "Data store" %}</label>
+							{{ form.datastore }}									
+						</div>
+					</div>
+							
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{ form.name }}
+							<p class="text-muted">* {% trans "Layer will be uploaded to the selected data store" %}.</p>
+						</div>	
+					</div>			
+					
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="id_encoding">{% trans "Character encoding" %}</label>	
+							{{ form.encoding }}						
+						</div>
+						<div class="col-md-6 form-group">	
+							<label for="id_srs">{% trans "Coordinate reference system" %}</label>	
+							{{ form.srs }}							
+						</div>
+					</div>
+									
+            	</div>
+			</form>		
+		</div>
+	</div>				
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-files').addClass("active");
+	$('#submenu-layers').addClass("active");
+	$(document).ready(function() {
+		// translate default layer group
+		var lgs = $("#id_layer_group");
+		var lg_options = $("#id_layer_group option");
+		for (var i=0; i<lg_options.length; i++) {
+			text = $(lg_options[i]).text();
+			if (text=="__default__") {
+				$(lg_options[i]).html('{% trans "Default" %}');
+			}
+			if (lgs.val()=="") {
+				lgs.val(1);
+			}
+		}
+	});
+	
+	$('#upload-button').click(function (e) {
+		$("body").overlay();
+	});
+</script>
+{% endblock %}

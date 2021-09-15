@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<form role="form" method="post" action="/gvsigonline/services/enumeration_update/{{eid}}/">	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>				
+			</div>
+			<div class="box">
+				{% csrf_token %}					
+				{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+						
+				{% if message %}
+				<div id="form-error" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+				<div class="box-body">				
+					<div class="row">
+						<div class="col-md-12">
+							<label for="enumeration_name">{% trans "Name" %}</label>
+							<input readonly name="enumeration_name" id="enumeration_name" type="text" class="form-control" value="{{enumeration.name}}">									
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<label for="enumeration_title">{% trans "Title" %}</label>
+							<input name="enumeration_title" id="enumeration_title" type="text" class="form-control"  value="{{enumeration.title}}">								
+						</div>
+					</div>
+					<br>
+					<div id="enumeration-items" class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-header with-border">
+									<h3 class="box-title">{% trans "Enumeration items" %}</h3>
+								</div>
+								<div id="enumeration-items-list" class="box-body">
+									{% for item in items %}
+										{% with counter=forloop.counter %} 
+										<div id="item-{{counter}}" class="row" style="margin-bottom: 15px;">
+											<div class="col-md-10">
+												<input pattern="^[^;]+$" title="{% trans "Enumeration cannot contain point-colon" %}" name="item-content-{{counter}}" id="item-content-{{counter}}" type="text" class="form-control" value="{{item.name}}">								
+											</div>
+											<div class="col-md-2">
+												<button type="button" data-itemid="{{counter}}" id="delete-item-{{counter}}" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>							
+											</div>
+										</div>
+										{% endwith %}
+									{% endfor %}
+								</div>
+								<div class="box-footer clearfix">
+									<a id="add-item-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-plus margin-r-5"></i>{% trans "Add item" %}
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>			
+			</div>
+		</div>				
+	</div>
+</form>
+{% endblock %}
+{% block extra-scripts %}
+<script>
+$('#menu-manage-datatypes').addClass("active");
+$('#submenu-enumerations').addClass("active");
+
+$(document).ready(function() {
+	var itemCount = "{{count}}";
+	
+	$(".delete-item").on('click', function(e){
+		$('#item-' + this.dataset.itemid).remove();
+	});
+	
+	$("#add-item-button").on('click', function(e){
+		
+		var ui = '';
+		
+		ui += '<div id="item-' + itemCount + '" class="row" style="margin-bottom: 15px;">';
+		ui += 	'<div class="col-md-10">';
+		ui += 		'<input  pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';								
+		ui += 	'</div>';
+		ui += 	'<div class="col-md-2">';
+		ui += 		'<button type="button" data-itemid="' + itemCount + '" id="delete-item-' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> ' + gettext('Delete') + '</button>';								
+		ui += 	'</div>';
+		ui += '</div>';
+		
+		$('#enumeration-items-list').append(ui);
+		
+		$(".delete-item").on('click', function(e){
+			$('#item-' + this.dataset.itemid).remove();
+		});
+		
+		itemCount++;
+		
+	});
+		
+});
+</script>
+{% endblock %}

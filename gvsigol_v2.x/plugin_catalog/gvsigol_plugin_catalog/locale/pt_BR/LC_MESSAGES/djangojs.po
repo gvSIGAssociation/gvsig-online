@@ -1,0 +1,256 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+
+msgid "Catalog"
+msgstr "Catálogo"
+
+msgid "Catalog and downloads"
+msgstr "Catálogo e downloads"
+
+msgid "Press Ctrl to mark an area"
+msgstr "Pressione Ctrl para marcar uma área"
+
+msgid "Clean"
+msgstr "Limpar"
+
+msgid "Search"
+msgstr "Pesquisar"
+
+msgid "Clean current search, filters and order"
+msgstr "Limpar a pesquisa atual, filtros e ordem"
+
+msgid "Categories"
+msgstr "Categorias"
+
+msgid "Separated by"
+msgstr "Separado por"
+
+msgid "Keywords"
+msgstr "Palavras-chave"
+
+msgid "Contact for the resource"
+msgstr "Contato para o recurso"
+
+msgid "Resources"
+msgstr "Recursos"
+
+msgid "From..."
+msgstr "A partir de..."
+
+msgid "To..."
+msgstr "Para..."
+
+msgid "Records"
+msgstr "Registros"
+
+msgid "Details"
+msgstr "Detalhes"
+
+msgid "Map"
+msgstr "Mapa"
+
+msgid "Download"
+msgstr "Download"
+
+msgid "No results found"
+msgstr "Nenhum resultado encontrado"
+
+msgid "Go"
+msgstr "Ir"
+
+msgid "Add"
+msgstr "Adicionar"
+
+msgid "Catalog layers"
+msgstr "Catálogo de camadas"
+
+msgid "Remove layer"
+msgstr "Remover a camada"
+
+msgid "List of downloads"
+msgstr "Lista de Downloads"
+
+msgid "List of layers"
+msgstr "Lista de camadas"
+
+msgid "Include only results overlapping with the selected map area"
+msgstr "Incluir apenas resultados que se sobreponham com a área selecionada"
+
+msgid "Metadatum"
+msgstr "Metadado"
+
+msgid "Draw rectangle"
+msgstr "Desenhar rectângulo"
+
+msgid "Order by relevance"
+msgstr "Ordenar por relevância"
+
+msgid "Order by modification date"
+msgstr "Ordenar por data de modificação"
+
+msgid "Order by title"
+msgstr "Ordenar pelo titulo"
+
+msgid "Search..."
+msgstr "Pesquisar..."
+
+msgid "The search is running..."
+msgstr "A busca está em andamento..."
+
+msgid "Loading..."
+msgstr "Carregando..."
+
+msgid "No layers available"
+msgstr "Não há camadas disponíveis"
+
+msgid "Add to map"
+msgstr "Adicionar no mapa"
+
+msgid "Add layer to map"
+msgstr "Adicionar camada no mapa"
+
+msgid "Download ShapeFile"
+msgstr "Baixar ShapeFile"
+
+msgid "Download CSV"
+msgstr "Baixar CSV"
+
+msgid "Download GML"
+msgstr "Baixar GML"
+
+msgid "Access raster data"
+msgstr "Acesso aos dados raster"
+
+msgid "Access resource"
+msgstr "Acesso aos produtos"
+
+msgid "Not filtered"
+msgstr "Não filtrado"
+msgid "keywords"
+msgstr "Palavras-chave"
+
+msgid "topicCats"
+msgstr "Categorias temáticas"
+
+msgid "categories"
+msgstr "Categorias"
+
+msgid "inspireThemes"
+msgstr "Tópicos INSPIRE"
+
+msgid "inspireThemesWithAc"
+msgstr "Tópicos INSPIRE com Ac"
+
+msgid "inspireThemesURI"
+msgstr "Tópicos INSPIRE URI"
+
+msgid "denominators"
+msgstr "Denominadores"
+
+msgid "resolutions"
+msgstr "Resoluções"
+
+msgid "spatialRepresentationTypes"
+msgstr "Tipos de representação espacial"
+
+msgid "orgNames"
+msgstr "Nomes das organizações"
+
+msgid "orgNamesTree"
+msgstr "Árvore de nomes de organizações"
+
+msgid "metadataPOCs"
+msgstr "POCs de Metadados"
+
+msgid "serviceTypes"
+msgstr "Tipos de serviços"
+
+msgid "types"
+msgstr "Tipos"
+
+msgid "createDateYears"
+msgstr "Ano de criação"
+
+msgid "formats"
+msgstr "Formatos"
+
+msgid "titles"
+msgstr "Títulos"
+
+msgid "metadataTypes"
+msgstr "Tipos de metadados"
+
+msgid "isValidInspire"
+msgstr "INSPIRE é valido"
+
+msgid "isHarvested"
+msgstr "Dados coletados de"
+
+msgid "mdStatus"
+msgstr "Estado dos metadados"
+
+msgid "status"
+msgstr "Estado"
+
+msgid "sourceCatalog"
+msgstr "Catálogo de produtos"
+
+msgid "standards"
+msgstr "Normas"
+
+msgid "subTemplateTypes"
+msgstr "Tipos de sub-modelos"
+
+msgid "recordOwner"
+msgstr "Proprietário dos metadados"
+
+msgid "groupOwners"
+msgstr "Proprietários do grupo"
+
+msgid "publishedForGroup"
+msgstr "Publicado para o público em geral"
+
+msgid "isPublishedToAll"
+msgstr "É publicado para todos"
+
+msgid "maintenanceAndUpdateFrequencies"
+msgstr "Freqüências de manutenção e atualização"
+
+msgid "mdActions"
+msgstr "Ações de metadados"
+
+msgid "Organization"
+msgstr "Organização"
+
+msgid "Source Catalog"
+msgstr "Catálogo de produtos"
+
+msgid "Year"
+msgstr "Ano"
+
+msgid "Representation type"
+msgstr "Tipo de representação"
+
+msgid "Update frequency"
+msgstr "Freqüência de atualização"
+
+msgid "Scale"
+msgstr "Escala"
+
+msgid "Service type"
+msgstr "Tipo de serviço"
+
+msgid "Draw polygon"
+msgstr "Desenhar polígono"
+
+msgid "Clear selected area"
+msgstr "Limpar área selecionada"
+
+msgid "Search in catalog"
+msgstr "Pesquisa no catálogo"

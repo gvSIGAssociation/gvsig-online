@@ -1,0 +1,21 @@
+.base_layer_check{
+	float:right
+}
+
+.base_layer_item{
+	padding-top: 10px;
+}
+
+.base_layer_remove{
+	font-size: 24px;
+    padding-top: 3px;
+	color: red;
+}
+
+#message-div-ok{
+	border: solid 1px #00a65a;
+	background-color: rgba(0,166,90,0.1);
+	padding: 5px;
+	color:#00a65a;
+	margin-bottom: 5px;
+}

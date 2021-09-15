@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+<form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_update/{{lgid}}/">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<div id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</div>					
+					</div>
+				</div>				
+			</div>
+			<div class="box">
+				{% csrf_token %}					
+				{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}			
+				{% if message %}
+				<div id="form-error" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+				
+				<div class="box-body">
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="layergroup_server_id">{% trans "Select server" %}</label>
+							<select disabled class="form-control" id="layergroup_server_id" name="layergroup_server_id">
+							{% for server in servers %}
+								{% if server.id == layergroup.server_id %}
+									<option value="{{server.id}}" selected>{{server.title}}</option>
+								{% else %}
+									<option value="{{server.id}}">{{server.title}}</option>
+								{% endif %}	
+							{% endfor %}
+							</select>
+						</div>
+					</div>
+										
+					<div class="row">
+						<div class="col-md-12">
+							<label>{% trans "Name" %}</label>	
+							<input readonly placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">							
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12">
+							<label>{% trans "Title" %}</label>
+							<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control" value="{{layergroup.title}}">							
+						</div>
+					</div>
+					<br>
+						
+					<div class="row">
+						<div class="checkbox col-md-6">								
+							<label>
+								{% if layergroup.cached %}
+									<input type="checkbox" name="cached" id="cached" checked/>{% trans "Create cache for the layer group" %}
+								{% else %}
+									<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
+								{% endif %}
+							</label>
+						</div>
+						<div class="checkbox col-md-6">								
+							<label>
+								{% if layergroup.visible %}
+									<input type="checkbox" name="visible" id="visible" checked/>{% trans "Is visible" %}
+								{% else %}
+									<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+								{% endif %}
+							</label>
+						</div>
+					</div>
+					<input type="hidden" name="toc" id="toc" value="">
+				</div>			
+			</div>
+		</div>				
+	</div>
+</form>
+	
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">			
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Group layers" %}</h3>
+				<div class="box-tools pull-right">
+						<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
+						<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>				
+					</div>
+			</div>
+					
+			<div class="box-body">					
+				<div id="toc" class="toc">
+					{% for layer in layers %}
+					<div data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default collapsed-box toc-layergroup layer-item" style="border-top: none;">
+						<div class="box-header">
+							<div class="handle">
+								<span class="" style="margin-right: 20px;"> 
+									<i class="fa fa-ellipsis-v"></i>
+									<i class="fa fa-ellipsis-v"></i>
+								</span>
+								<span class="text">{{g.1.title}}</span>
+								<div class="box-tools pull-right">
+									<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
+										<i class="fa fa-plus"></i>
+									</button>
+								</div>
+								<span class="text">{{layer.title}}</span>
+							</div>
+							<div class="box-tools box-tools-buttons pull-right">
+								{% if layer.external %}
+								<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+								{% else %}
+								<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+								{% endif %}
+								{% if layer.type == 'v_PostGIS' %}
+									<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple"><i class="fa fa-cogs"></i></button>
+								{% else %}
+									<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+								{% endif %}
+								{% if layer.cached %}
+								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
+								{% else %}
+								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+								{% endif %}
+								{% if layer.external %}
+								<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+								{% else %}
+								<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+		        </div>
+			</div>
+		</div>
+	</div>				
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-add-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel2">{% trans "Create new layer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Is needed to save this layer group first, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-add-layer-group-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-add-layer-group-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete layer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "The layer will be removed, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-layer-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-layer-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+	
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layergroups').addClass("active");
+	
+	$('#button-create-layer').click(function() {
+		$("#myModalLabel2").text(gettext("Create new layer"));
+		$('#button-add-layer-group-accept').click( function() {
+			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_update/{{lgid}}/?redirect=create-layer');
+			$('#save_button').trigger('click');
+		});
+	});
+	
+	$('#button-import-layer').click(function() {
+		$("#myModalLabel2").text(gettext("Publish layer"));
+		$('#button-add-layer-group-accept').click( function() {
+			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_update/{{lgid}}/?redirect=import-layer');
+			$('#save_button').trigger('click');
+		});
+	});
+	
+	$('#save_button').click(function() {
+		$('#toc').val("");
+		var isFirst = true;
+		$(".layer-item").each(function(){
+			var value = $(this).attr("data-name");
+			if(!isFirst){
+				$('#toc').val($('#toc').val()+',');
+			}
+			$('#toc').val($('#toc').val()+value);
+			
+			isFirst = false;
+		});
+		$('#layer-group-form').submit();
+	});
+	
+	
+	function updateLayer(data){			
+		location.href = '/gvsigonline/services/layer_update/' + data + '/?redirect=layergroup-redirect';
+	}
+	
+	function updateExternalLayer(data){			
+		location.href = '/gvsigonline/services/external_layer_update/' + data + '/?redirect=layergroup-redirect';
+	}
+	
+	function configLayer(data){			
+		location.href = '/gvsigonline/services/layer_config/' + data + '/?redirect=layergroup-redirect';
+	}
+	function clearCache(data){
+		$("body").overlay();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/manage_cache_clear/' + data + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				$.overlayout();
+				messageBox.show('Info', gettext('The action was successfully completed'));
+			},
+			error: function(){
+				$.overlayout();
+				messageBox.show('Error', gettext('The action failed'));
+			}
+		});
+	}
+	
+	function deleteLayer(data){
+		$('#button-delete-layer-accept').click( function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/layer_delete/' + data + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-layer').modal('hide');
+					$.overlayout();
+					location.reload();
+				},
+				error: function(){
+					$.overlayout();
+					messageBox.show('Error', gettext('The action failed'));
+				}
+			});
+		});
+	}
+	function deleteExternalLayer(data){
+		$('#button-delete-layer-accept').click( function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/external_layer_delete/' + data + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-layer').modal('hide');
+					$.overlayout();
+					location.reload();
+				},
+				error: function(){
+					$.overlayout();
+					messageBox.show('Error', gettext('The action failed'));
+				}
+			});
+		});
+	}
+	
+	$(document).ready(function() {
+		
+		$('.box-tools-buttons button').on('click', function (){
+			var data = $(this).attr("data-id");
+			if (this.name == "button-update-layer") {
+				updateLayer(data);
+			} else if (this.name == "button-update-externallayer") {
+				updateExternalLayer(data);
+			} else if (this.name == "button-config-layer"){
+				configLayer(data);
+				
+			} else if (this.name == "button-clear-cache"){
+				clearCache(data);
+				
+			} else if (this.name == "button-delete-layer"){
+		        deleteLayer(data);   
+		    } else if (this.name == "button-delete-externallayer"){
+		    	deleteExternalLayer(data);   
+		    }
+		});
+		
+		$(".toc").sortable({
+			placeholder: "sort-highlight",
+			handle: ".handle",
+			forcePlaceholderSize: true,
+			zIndex: 999999
+		});
+	});
+	
+</script>
+{% endblock %}

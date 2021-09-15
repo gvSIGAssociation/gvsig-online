@@ -1,0 +1,142 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		<form id="color_ramp_form" role="form" method="post" action="/gvsigonline/symbology/color_ramp_update/{{color_ramp.id}}/">
+			<div class="box-header with-border step-2">
+				<h3 class="box-title">{% trans "Update style" %}</h3>
+				<div class="box-tools pull-right">
+					<div id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</div>					
+				</div>
+			</div>
+
+			<div class="box-body">
+				{% csrf_token %}
+				<div class="row">
+					<div class="col-md-6">
+						<div id="form-error" style="color:#ff0000;">{{message}}</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Name" %}</label>
+								<input placeholder="{% trans 'Style name' %}" name="colorramp-name" id="colorramp-name" value="{{color_ramp.name}}" type="text" class="form-control">
+								<input name="colorramp-definition" id="colorramp-definition" value="" type="hidden">
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div id="map" class="preview-ramp-color"></div>
+					</div>						
+				</div>
+				
+				<div id="steps" class="row">
+					<div class="col-md-12">
+						<div id="form-error" style="color:#ff0000;"></div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Steps" %}</label>
+								<div id="add-step" class="btn btn-sm btn-default add-legend pull-right"><i class="fa fa-plus margin-r-5"></i> {% trans "Add step" %}</div>					
+							</div>
+						</div>
+					</div>
+					<div id="steps-body" class="col-md-12">
+					</div>
+				</div>
+			</div>
+		</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-color-map-entry" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Edit color ramp entry" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="nav-tabs-custom">
+	            	<ul id="tab-menu" class="nav nav-tabs">				                        
+	            	</ul>
+	            	<div id="tab-content" class="tab-content">
+	            	</div>
+       			</div>
+			</div>
+		</div>
+	</div>
+</div> 
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-colorramp').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var self = this;
+	this.colorRamp = new ColorRamp("", null);
+	
+	$("#steps-body").append(this.colorRamp.getColorRampTableUI());
+	var json_data = {{color_ramp.definition | safe}};
+	if('definition' in json_data){
+		for(var i = 0; i<json_data['definition'].length; i++){
+			var quatity = json_data['definition'][i]['quantity'];
+			var color = json_data['definition'][i]['color'];
+			var alpha = json_data['definition'][i]['alpha'];
+			self.colorRamp.addColorRamp(quatity, color, alpha);
+		}
+	}
+	this.colorRamp.refreshPreview();
+	
+	$("#add-step").on('click', function(e){
+		self.colorRamp.addColorRamp(100, "#000000", 1);
+		self.colorRamp.refreshPreview();
+	});
+	
+	$("#save-legend").on('click', function(e){
+		if ($("#style-name").val() != '') {
+			var color_tabs = $("#colorramp-table").find("tr");
+			if(color_tabs.length<3){
+				$("#form-error").empty();
+				$("#form-error").append('<p>*{% trans "Two or more color definitions are required" %}</p>');
+			}
+			else{
+				var ramp_color_array = [];
+				
+				$(".color-ramp-data").each(function(){
+					var quantity = $(this).find(".percentaje-chooser").val();
+					var color = $(this).find(".color-chooser").val();
+					var alpha = $(this).find(".alpha-chooser").val();
+					var aux_color_entry = {
+							'quantity': quantity,
+							'color': color,
+							'alpha': alpha
+					}
+					ramp_color_array.push(aux_color_entry);
+					
+				});
+				var ramp_color = {
+						'definition' : ramp_color_array
+				};
+				
+				$("#colorramp-definition").val(JSON.stringify(ramp_color));
+				
+				$("#color_ramp_form").submit();
+			}
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+	});
+	
+});
+</script>
+{% endblock %}

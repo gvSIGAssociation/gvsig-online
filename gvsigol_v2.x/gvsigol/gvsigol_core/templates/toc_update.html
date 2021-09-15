@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box">
+			
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Update TOC" %}</h3>
+					<div class="box-tools pull-right">
+						<button type="submit" id="update-toc" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>
+					
+				<div class="box-body">
+					{% csrf_token %}													
+					{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+					
+					<div id="toc" class="toc">
+					{% for g in toc %}
+						<div id="lg_{{g.1.name}}" data-name="{{g.1.name}}" data-title="{{g.1.title}}" data-order="{{g.1.order}}" class="box box-default collapsed-box toc-layergroup">
+							<div class="box-header with-border">
+								<span class="handle" style="margin-right: 20px;"> 
+									<i class="fa fa-ellipsis-v"></i>
+									<i class="fa fa-ellipsis-v"></i>
+								</span>
+								<span class="text">{{g.1.title}}</span>
+								<!-- 
+								<div class="box-tools pull-right">
+									<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
+										<i class="fa fa-plus"></i>
+									</button>
+								</div>
+								-->
+							</div>
+							<!-- 
+							<div class="box-body">
+								{% for layer in g.1.layers %}
+								<div data-name="{{layer.1.name}}" data-title="{{layer.1.title}}" data-order="{{layer.1.order}}" class="box box-default layer-item" style="border-top: none;">
+									<div class="box-header">
+										<span class="text">{{layer.1.title}}</span>
+										<div class="box-tools pull-right">
+											<button class="btn btn-box-tool btn-box-tool-custom move-down">
+												<i class="fa fa-angle-down"></i>
+											</button>
+											<button class="btn btn-box-tool btn-box-tool-custom move-up">
+												<i class="fa fa-angle-up"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+								{% endfor %}
+							</div>
+							-->
+						</div>
+		        	{% endfor %}
+		        	</div>
+												
+				</div>
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-projects').addClass("active");
+	$().ready(function() {
+		$(".toc").sortable({
+			placeholder: "sort-highlight",
+			handle: ".handle",
+			forcePlaceholderSize: true,
+			zIndex: 999999
+		});
+		
+		$(".move-up").click(function() { 
+			var before = $(this.parentNode.parentNode.parentNode).prev();
+		    $(this.parentNode.parentNode.parentNode).insertBefore(before);
+		});
+		
+		$(".move-down").click(function() {
+			var next = $(this.parentNode.parentNode.parentNode).next();
+		    $(this.parentNode.parentNode.parentNode).insertAfter(next); 
+		});
+		
+		$('#update-toc').click( function(e) {
+			
+			var toc = {}
+			
+			var root = $('#toc');
+			var groupList = root.children();
+			for (var i=0; i<groupList.length; i++) {
+				var g = groupList[i];
+				var groupOrder = (groupList.length - i) * 1000;
+				var groupName = g.dataset.name;
+				var groupTitle = g.dataset.title;
+				
+				var layers = {};
+				
+// 				var layerList = g.children[1].children;
+// 				for (var j=0; j<layerList.length; j++) {
+// 					var l = layerList[j];
+// 					var layerOrder = groupOrder + (layerList.length - j);
+// 					var layerName = l.dataset.name;
+// 					var layerTitle = l.dataset.title;
+// 					var layer = {
+// 						'name': layerName,
+// 						'title': layerTitle,
+// 						'order': layerOrder
+// 					}
+// 					layers[layerName] = layer;
+// 				}
+				
+				var group = {
+					'name': groupName,
+					'title': groupTitle,
+					'order': groupOrder,
+					'layers': layers
+				};
+				toc[groupName] = group;
+			}
+			
+			console.log(toc);
+			
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/core/toc_update/{{pid}}/',
+				data: {
+					'toc': JSON.stringify(toc)
+				},
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					location.href = '/gvsigonline/core/project_list/';
+				},
+				error: function(){}
+			});
+		});
+	});
+</script>
+{% endblock %}

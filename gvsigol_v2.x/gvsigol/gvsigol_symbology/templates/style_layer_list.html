@@ -1,0 +1,157 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  	
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+			<div class="box-body">
+				<table class="table" id="layers-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+						    <th>{% trans "Layer name" %}</th>
+						    <th>{% trans "Asigned to layer group" %}</th>
+						    <th>{% trans "Styles" %}</th>			    
+						    <th></th>
+						    <th></th>
+						    <th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for layerStyle in layerStyles %}
+							<tr>
+							    <td>{{ layerStyle.layer.id }}</td>
+								<td>{{ layerStyle.layer.title }}</td>
+								<td>{{ layerStyle.layer.layer_group.name }}</td>
+								<td> 
+									<select class="form-control" style="width: 100%;" id="select-{{ layerStyle.layer.id }}">
+									{% for style in layerStyle.styles %}
+										{% if style.is_default %}
+										<option value="{{ style.id }}" selected>{{ style.name }}</option>
+										{% else %}
+										<option value="{{ style.id }}">{{ style.name }}</option>
+										{% endif %}
+									{% endfor %}
+									</select> 		
+								</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var table = $('#layers-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		        first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		   		last		: '{% trans "Last" %}'
+		 	},
+		  	aria: {
+		     	sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	      	"targets": -3,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-add-style" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Add style" %}' + '" class="btn btn-success"><i class="fa fa-plus"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-update-style" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update style" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>'
+	  	},{
+	      	"targets": -1,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-delete-style" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Delete style" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	  	}],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+		 
+	$('#layers-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();     
+	    if (this.name == "button-update-style") {
+	        updateStyle(data);
+	        
+	    } else if (this.name == "button-add-style") {
+	        addStyle(data);
+	        
+	    } else if (this.name == "button-delete-style") {
+	        deleteStyle(data);
+	    }
+	    
+	});
+		
+
+	function updateStyle(data){
+		var optionElem = $("#select-"+data[0]).val();
+		if(optionElem != null){		
+			location.href = '/gvsigonline/symbology/style_layer_update/' + data[0] + '/' + optionElem + '/';
+		}
+	}
+		
+	function addStyle(data){
+		location.href = '/gvsigonline/symbology/select_legend_type/' + data[0] + '/';
+	}
+	
+	function deleteStyle(data){
+		var style_id = $("#select-"+data[0]).val();
+		if(style_id != null){	
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/symbology/style_layer_delete/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: {
+					style_id: style_id,
+					layer_id: data[0]
+				},
+				success	:function(response){
+					if (response.success == true) {
+						location.reload();
+						
+					} else if (response.success == false){
+						messageBox.show('warning', response.message);
+					}
+					
+				},
+				error: function(){}
+			});
+		}
+	}
+  
+});
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "Show draw tools"
+msgstr "Show draw tools"
+
+msgid "Close draw bar"
+msgstr "Close draw bar"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Insert text"
+msgstr "Insert text"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Clean drawings"
+msgstr "Clean drawings"
+
+msgid "Draw point"
+msgstr "Draw point"
+
+msgid "Draw line"
+msgstr "Draw line"
+
+msgid "Draw polygon"
+msgstr "Draw polygon"
+
+msgid "Style settings"
+msgstr "Style settings"
+
+msgid "Circle"
+msgstr "Circle"
+
+msgid "Square"
+msgstr "Square"
+
+msgid "Triangle"
+msgstr "Triangle"
+
+msgid "Star"
+msgstr "Star"
+
+msgid "Cross"
+msgstr "Cross"
+
+msgid "Point"
+msgstr "Point"
+
+msgid "Line"
+msgstr "Line"
+
+msgid "Polygon"
+msgstr "Polygon"
+
+msgid "Text"
+msgstr "Text"
+
+msgid "Select shape"
+msgstr "Select shape"
+
+msgid "Size"
+msgstr "Size"
+
+msgid "Fill color"
+msgstr "Fill color"
+
+msgid "Fill opacity"
+msgstr "Fill opacity"
+
+msgid "Stroke color"
+msgstr "Stroke color"
+
+msgid "Stroke width"
+msgstr "Stroke width"
+
+msgid "Select pattern"
+msgstr "Select pattern"

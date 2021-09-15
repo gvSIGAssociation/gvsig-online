@@ -1,0 +1,303 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "Undo"
+msgstr "Desfer"
+
+msgid "Redo"
+msgstr "Refer"
+
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "Run"
+msgstr "Executar"
+
+msgid "Zoom In"
+msgstr "Acostar"
+
+msgid "Zoom Out"
+msgstr "Allunyar"
+
+msgid "Open"
+msgstr "Obrir"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Process has been executed succesfully"
+msgstr "El procés ha sigut executat satisfactòriament"
+
+msgid "Close"
+msgstr "Tancar"
+
+msgid "Accept"
+msgstr "Acceptar"
+
+msgid "Response"
+msgstr "Resposta"
+
+msgid "Excel Parameters"
+msgstr "Paràmetres Excel"
+
+msgid "Choose excel file:"
+msgstr "Tria l'arxiu excel:"
+
+msgid "Sheet:"
+msgstr "Fulla:"
+
+msgid "Attribute columns:"
+msgstr "Columnes d'atributs"
+
+msgid "Skip header:"
+msgstr "Evitar capçalera:"
+
+msgid "Input"
+msgstr "Entrada"
+
+msgid "Output"
+msgstr "Eixida"
+
+msgid "Shapefile Parameters"
+msgstr "Paràmetres Shapefile"
+
+msgid "Choose shapefile files:"
+msgstr "Tria els arxius shapefile:"
+
+msgid "Join"
+msgstr "Unió"
+
+msgid "Join Parameters"
+msgstr "Paràmetres Unió"
+
+msgid "Main table attribute:"
+msgstr "Atribut de la taula principal:"
+
+msgid "Secondary table attribute:"
+msgstr "Atribut de la tabla secundària:"
+
+msgid "Input Main"
+msgstr "Pr. Entrada"
+
+msgid "Input Sec."
+msgstr "Sec. Entrada"
+
+msgid "Main Not Used"
+msgstr "Pr. Sense Usar"
+
+msgid "Sec. Not Used"
+msgstr "Sec. Sense Usar"
+
+msgid "Remove Attribute"
+msgstr "Elimina Atribut"
+
+msgid "Remove Attribute Parameters"
+msgstr "Paràmetres Elimina Atribut"
+
+msgid "Attribute to remove:"
+msgstr "Atribut a eliminar:"
+
+msgid "Rename Attribute"
+msgstr "Reanomena Atribut"
+
+msgid "Rename Attribute Parameters"
+msgstr "Paràmetres Reanomena Atribut"
+
+msgid "Attribute to rename:"
+msgstr "Atribut a reanomenar:"
+
+msgid "New name:"
+msgstr "Nou nom:"
+
+msgid "Modify Value"
+msgstr "Modifica Valor"
+
+msgid "Modify Value Parameters"
+msgstr "Paràmetres Modifica Valor"
+
+msgid "Attribute to modify:"
+msgstr "Atribut a modificar:"
+
+msgid "New value:"
+msgstr "Nou valor:"
+
+msgid "Create Attribute"
+msgstr "Crea Atribut"
+
+msgid "Create Attribute Parameters"
+msgstr "Paràmetres Crea Atribut"
+
+msgid "New attribute:"
+msgstr "Nou atribut:"
+
+msgid "Value:"
+msgstr "Valor:"
+
+msgid "Filter"
+msgstr "Filtre"
+
+msgid "Filter Parameters"
+msgstr "Paràmetres Filtre"
+
+msgid "Attribute:"
+msgstr "Atribut:"
+
+msgid "Operator:"
+msgstr "Operador:"
+
+msgid "Starts with"
+msgstr "Compença per"
+
+msgid "Ends with"
+msgstr "Acaba per"
+
+msgid "Contains"
+msgstr "Conté"
+
+msgid "True"
+msgstr "Vertader"
+
+msgid "False"
+msgstr "Fals"
+
+msgid "Keep Attribute"
+msgstr "Mantén Atribut"
+
+msgid "Keep Attribute Parameters"
+msgstr "Paràmetres Mantén Atribut"
+
+msgid "Attribute to keep:"
+msgstr "Atribut a mantindre:"
+
+msgid "PostgreSQL Parameters"
+msgstr "Paràmetres PostgreSQL"
+
+msgid "PostGIS Parameters"
+msgstr "Paràmetres PostGIS"
+
+msgid "Host:"
+msgstr "Amfitrió:"
+
+msgid "Port:"
+msgstr "Port:"
+
+msgid "Database:"
+msgstr "Base de dades:"
+
+msgid "User:"
+msgstr "Usuari:"
+
+msgid "Password:"
+msgstr "Contrasenya:"
+
+msgid "Table name:"
+msgstr "Nom de la taula:"
+
+msgid "Operation:"
+msgstr "Operació:"
+
+msgid "CREATE"
+msgstr "CREAR"
+
+msgid "UPDATE"
+msgstr "ACTUALITZAR"
+
+msgid "DELETE"
+msgstr "ELIMINA"
+
+msgid "Match column:"
+msgstr "Columna coincident:"
+
+msgid "Verify connection"
+msgstr "Verifica connexió"
+
+msgid "New name"
+msgstr "Nou nom"
+
+msgid "New attribute value"
+msgstr "Nou valor d'atribut"
+
+msgid "New attribute name"
+msgstr "Nou nom d'atribut"
+
+msgid "Name of your database"
+msgstr "Nom de la teua base de dades"
+
+msgid "schema.tablename"
+msgstr "esquema.nomdelataula"
+
+msgid "Connection parameters are valids."
+msgstr "Els paràmetres de connexió son vàlids."
+
+msgid "Connection parameters are not valids."
+msgstr "Els paràmetres de connexió no son vàlids."
+
+msgid "CSV Parameters"
+msgstr "Paràmetres CSV"
+
+msgid "Choose csv file:"
+msgstr "Tria l'arxiu csv:"
+
+msgid "Column separator:"
+msgstr "Separador de columna:"
+
+msgid "Insert if PRJ is not loaded"
+msgstr "Insertar si no es carrega el PRJ"
+
+msgid "Reproject"
+msgstr "Reprojectar"
+
+msgid "Reproject Parameters"
+msgstr "Paràmetres Reprojectar"
+
+msgid "Source EPSG:"
+msgstr "EPSG origen:"
+
+msgid "Target EPSG:"
+msgstr "EPSG destí:"
+
+msgid "Counter Parameters"
+msgstr "Paràmetres Contador"
+
+msgid "New counter attribute:"
+msgstr "Nou atribut contador:"
+
+msgid "Group by:"
+msgstr "Agrupa per:"
+
+msgid "Counter"
+msgstr "Contador"
+
+msgid "Calculator"
+msgstr "Calculador"
+
+msgid "Calculator Parameters"
+msgstr "Paràmetres Calculador"
+
+msgid "Math functions:"
+msgstr "Funcions matemàtiques:"
+
+msgid "Attributes:"
+msgstr "Atributs:"
+
+msgid "Expression:"
+msgstr "Expressió:"
+
+msgid "For more math functions check above link."
+msgstr "Per a més funcions matemàtiques consulta l'enllaç de dalt."
+
+msgid "Set all transformers parameters in canvas"
+msgstr "Configura tots els paràmetres dels transformadors al canvas"

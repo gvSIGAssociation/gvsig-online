@@ -1,0 +1,201 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box">
+			
+				<form role="form" method="post" action="/gvsigonline/symbology/color_ramp_library_update/{{library.id}}/">
+				
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Update ramp color library" %}</h3>
+						<div class="box-tools pull-right">
+							<button id="update-library" type="submit" class="btn btn-sm btn-default"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+
+					<div class="box-body">					
+						{% csrf_token %}					
+						{% if form.errors %}
+						<div id="form-error" style="color:#ff0000;">
+							<ul>
+							{% for field in form %}
+								{% if field.errors %}
+									<li>{{field.label}}. {{ field.errors|striptags }}</li>
+								{% endif %}	
+							{% endfor %}
+							</ul>
+						</div>
+						{% endif %}
+							
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+									
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Name" %}</label>
+								<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control" disabled value="{{library.name}}">	
+							</div>
+						</div>
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Description" %}</label>
+					    		<input placeholder="{% trans 'Description' %}" name="library-description" id="library-description" type="text" class="form-control" value="{{library.description}}">
+							</div>
+						</div>
+						
+					</form>
+					
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Categories" %}</h3>
+						<div class="box-tools pull-right">
+							<div id="add-folder" class="btn btn-sm btn-default"><i class="fa fa-plus margin-r-5"></i> {% trans "Add category" %}</button>					
+						</div>
+					</div>
+					
+					<div class="box-body">
+						<table class="table" id="folders-table">
+							<thead>
+								<tr>
+									<th>ID</th>
+								    <th>{% trans "Category" %}</th>
+								    <th>{% trans "Description" %}</th>
+								    <th></th>
+								    <th></th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for folder in folders %}
+									<tr>
+										<td>{{ folder.id }}</td>
+									    <td>{{ folder.name }}</td>
+										<td>{{ folder.description }}</td>
+										<td></td>
+										<td></td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>							
+            	</div>	
+			</div>
+		</div>				
+	</div>
+	
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-library" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete folder" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Folder will be removed, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-library-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-library-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-colorramp').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var table = $('#folders-table').DataTable({
+		responsive: true,
+		paging: false,
+		searching: false,
+        sorting: false,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		        first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		   		last		: '{% trans "Last" %}'
+		 	},
+		  	aria: {
+		     	sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	        "targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-library" data-toggle="modal" data-target="#modal-delete-library" data-placement="bottom" title="' + '{% trans "Delete category" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	    },{
+	        "targets": -2,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-update-library" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update category" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	    }],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+		 
+	$('#folders-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();     
+	    if (this.name == "button-update-library") {
+	        updateLibrary(data);
+	    } else if (this.name == "button-delete-library") {
+	    	deleteLibrary(data);
+	    } 
+	});
+	
+	$('#add-folder').on('click', function (){
+		location.href = '/gvsigonline/symbology/color_ramp_folder_add/{{library.id}}/';
+	});
+	
+
+	function updateLibrary(data){
+		location.href = '/gvsigonline/symbology/color_ramp_folder_update/' + data[0] + '/';
+	}
+	
+	function deleteLibrary(data){
+		$('#button-delete-library-accept').click( function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/symbology/color_ramp_folder_delete/' + data[0] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-library').modal('hide');
+					$.overlayout();
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	}
+});
+</script>
+{% endblock %}

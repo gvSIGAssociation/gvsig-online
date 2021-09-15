@@ -1,0 +1,144 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr "No puede actualizar un almacén de tipo GeoTIFF. Borrelo y creelo de nuevo."
+
+msgid "Select type"
+msgstr "Seleccionar tipo"
+
+msgid "Select enumeration"
+msgstr "Seleccionar enumeración"
+
+msgid "Select multiple enumeration"
+msgstr "Seleccionar enumeración multiple"
+
+msgid "Field name"
+msgstr "Nombre del campo"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Save field"
+msgstr "Guardar campo"
+
+msgid "Edit field"
+msgstr "Editar campo"
+
+msgid "true"
+msgstr "Verdadero"
+
+msgid "false"
+msgstr "Falso"
+
+msgid "True"
+msgstr "Verdadero"
+
+msgid "False"
+msgstr "Falso"
+
+msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
+msgstr "Nombre no válido: Los identificadores deben empezar con una letra o guión bajo (_). Los siguientes caracteres pueden ser letras, guión bajo o números"
+
+msgid "Enumeration cannot contain point-colon"
+msgstr "los valores no pueden contener valores (;)"
+
+msgid "Create new layer"
+msgstr "Crear capa vacía"
+
+msgid "Publish layer"
+msgstr "Publicar capa"
+
+msgid "Error in GetCapabilities"
+msgstr "Error en GetCapabilities"
+
+msgid "Error trying to connect"
+msgstr "Error intentando conectar"
+
+msgid "Insert item name"
+msgstr "Inserte nombre del item"
+
+msgid "Select form"
+msgstr "Seleccionar formulario"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "active"
+msgstr "activo"
+
+msgid "inactive"
+msgstr "inactivo"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Is master?"
+msgstr "Es maestro?"
+
+msgid "Save node"
+msgstr "Guardar nodo"
+
+msgid "Edit node"
+msgstr "Editar nodo"
+
+msgid "Convert"
+msgstr "Convertir"
+
+msgid "Autogen"
+msgstr "Autogenerar"
+
+msgid "Autogen ok"
+msgstr "Generación correcta del campo enumerado"
+
+msgid "Convert ok"
+msgstr "Se ha asignado el campo enumerado correctamente"
+
+msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
+msgstr "El campo no se puede configurar como obligatorio a nivel de base de datos porque algunos registros contienen valores nulos en esta columna. Borre los valores nulos y vuelva a intentarlo."
+
+msgid "Node has been reloaded"
+msgstr "El nodo ha sido recargado"
+
+msgid "Error reloading node"
+msgstr "Error recargando nodo"
+
+msgid "Connection has been success"
+msgstr "La conexión ha sido exitosa"
+
+msgid "Filter by project"
+msgstr "Filtrar por proyecto"
+
+msgid "Show all layers"
+msgstr "Mostrar todas las capas"
+
+msgid "The action was successfully completed"
+msgstr "La acción se completó correctamente"
+
+msgid "The action failed"
+msgstr "La acción falló"
+
+msgid "The layer definition was refreshed"
+msgstr "La definición de capa fue refrescada"
+
+msgid "The layer refresh failed"
+msgstr "Falló el refrescado de capa"
+
+msgid "Calculated"
+msgstr "Calculado"
+
+msgid "too_many_files"
+msgstr "Demasiados ficheros para descargar. Reduzca el número de niveles de zoom o haga la extensión del proyecto más pequeña"

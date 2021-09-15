@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<form id="main_form" role="form" method="post" action="/gvsigonline/services/datastore_add/">
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<div id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</div>					
+				</div>
+			</div>				
+		</div>
+		<div class="box padding-20">	
+			{% csrf_token %}
+			{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					{% for field, msg in form.errors.iteritems %}
+						<li>{{ msg|striptags }}</li>
+					{% endfor %}
+					</ul>
+				</div>
+			{% endif %}				
+			<div class="box-body">		
+				<div class="row">
+					<div class="col-md-12 form-group">	
+						<label for="id_workspace">{% trans "Workspace" %}</label>
+						{{ form.workspace }}
+					</div>
+				</div>			
+				<div class="row">
+					<div class="col-md-12 form-group">	
+						<label for="id_workspace">{% trans "Type" %}</label>
+						{{ form.type }}
+					</div>
+				</div>	
+					
+				<div class="row" id="select-file-row" style="display: none;">
+					<div class="col-md-2">
+						<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
+					</div>
+					<div class="col-md-10">
+						{{ form.file }}
+					</div>
+				</div>		
+					
+				<div class="row">		
+					<div class="col-md-12 form-group">
+						<label for="id_name">{% trans "Name" %}</label>
+						{{ form.name }}
+					</div>	
+				</div>
+					
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_description">{% trans "Description" %}</label>
+						{{ form.description }}
+					</div>
+				</div>	
+					
+				<div class="row" id="connection-params-row">
+					<div class="col-md-12 form-group">
+						<label for="id_connection_params">{% trans "Connection params" %}</label>
+						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
+						{{ form.connection_params }}
+					</div>
+				</div>
+					
+				<div class="row select-mosaic_dimension" style="display: none;">
+					<div class="col-md-12">
+						<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
+					</div>
+					<div class="col-md-6">
+						 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
+					</div>
+					<div class="col-md-6">
+						 <input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
+					</div>
+				</div>				
+				<div  style="display: none;">
+					<div class="row select-mosaic_dimension" style="display: none;">
+						<div class="col-md-12">
+							<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
+						</div>
+						<div class="col-md-6">
+							<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>	
+						</div>
+						<div class="col-md-6">
+							<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-datastores').addClass("active");
+</script>
+<script type="text/javascript">
+$().ready(function(){ 
+	var connectionParams = document.getElementById('id_connection_params');
+	var codemirror = CodeMirror.fromTextArea(connectionParams, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	window.GOL = window.GOL || {};
+	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
+	window.GOL.DS_ADD.dstypeChanged = function(type, value) {
+		if (!value) {
+			value = '';
+		}
+		codemirror.setValue(value)
+		//codemirror.setValue('');
+		var code = '';
+		
+		if (type == 'v_SHP') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'none');
+			$('.select-mosaic_dimension').css('display', 'none');
+			code += '{ \n';
+			code += '\t "url": "file:data/valencia-osm" \n';
+			code += '}';
+		} else if (type == 'v_PostGIS') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			$('.select-mosaic_dimension').css('display', 'none');
+			code += '{ \n';
+			code += '\t "host": "localhost", \n';
+			code += '\t "port": "5432", \n';
+			code += '\t "database": "mydatabase", \n';
+			code += '\t "schema": "public", \n';
+			code += '\t "user": "postgres", \n';
+			code += '\t "passwd": "postgres", \n';
+			code += '\t "dbtype": "postgis" \n';
+			code += '}';
+			
+		} else if (type == 'c_GeoTIFF') {
+			$('#select-file-row').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
+			$('.select-mosaic_dimension').css('display', 'none');
+			code += '{ \n';
+			code += '\t "url": "url_replace" \n';
+			code += '}';
+			
+		}  else if (type == 'e_WMS') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			$('.select-mosaic_dimension').css('display', 'none');
+			code += '{ \n';
+			code += '\t "url": "https://demo.gvsigonline.com/geoserver/wms?request=getcapabilities", \n';
+			code += '\t "username": "", \n';
+			code += '\t "password": "" \n';
+			code += '}';
+			
+// 			code += '{ \n';
+// 			code += '\t "url": "https://test.scolab.eu/geoserver/wms?request=getcapabilities", // ' + gettext('URL to capabilities document') + ' \n';
+// 			code += '\t "user": "wmsuser", // * ' + gettext('Only required if service is authenticated') + ' \n';
+// 			code += '\t "password": "wmspassword", // * ' + gettext('Only required if service is authenticated') + ' \n';
+// 			code += '}';
+		
+		}  else if (type == 'c_ImageMosaic') {
+			$('#select-file-row').css('display', 'block');
+			$('.select-mosaic_dimension').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
+			code += '{ \n';
+			code += '\t "url": "url_replace", \n';
+			code += '\t "date_regex": "", \n';
+			code += '\t "date_format": "", \n';
+			code += '\t "ele_regex": "", \n';
+			code += '\t "ele_format": "" \n';
+			code += '}';
+			
+		}
+		
+		if (value == '') {
+			codemirror.setValue(code);
+		}
+
+	}
+	
+	$('#select-file-button').click(function (e) {
+		window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+	});
+	
+	window.filemanagerCallback = function(url) {
+		document.querySelector("input[id=id_file]").value = "file://" + "{{fm_directory}}" + url;
+	};
+	
+	$("#id_type").change(function() {
+		var type = $('option:selected', $(this)).val();
+		GOL.DS_ADD.dstypeChanged(type, );
+	});
+	
+	$("#time_dimension_input").change(function() {
+		$("#time_dimension_text").prop("disabled", !$("#time_dimension_input").prop('checked'));
+		$("#time_dimension_format").prop("disabled", !$("#time_dimension_input").prop('checked'));
+	});
+	
+	$("#elevation_dimension_input").change(function() {
+		$("#elevation_dimension_text").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
+		$("#elevation_dimension_format").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
+	});
+	GOL.DS_ADD.dstypeChanged($("#id_type").val(), $('#id_connection_params').val());
+	
+	$('#save_button').click(function (e) {
+		var type = $("#id_type").val();
+		if(type == 'c_ImageMosaic'){
+			var code = '{ \n';
+			code += '\t "url": "url_replace", \n';
+			if($("#time_dimension_input").prop('checked') == true){
+				if($("#time_dimension_text").val() == ""){
+					code += '\t "date_regex": "(?<=_)[0-9]{8}", \n';
+				}else{
+					code += '\t "date_regex": "'+$("#time_dimension_text").val()+'", \n';
+				}
+				if($("#time_dimension_format").val() == ""){
+					code += '\t "date_format": "yyyyMMdd", \n';
+				}else{
+					code += '\t "date_format": "'+$("#time_dimension_format").val()+'", \n';
+				}
+			}else{
+				code += '\t "date_regex": "", \n';
+				code += '\t "date_format": "", \n';
+			}
+			
+			if($("#elevation_dimension_input").prop('checked') == true){
+				if($("#elevation_dimension_text").val() == ""){
+					code += '\t "ele_regex": "(?<=_)[0-9]{4}.[0-9]{3}", \n';
+				}else{
+					code += '\t "ele_regex": "'+$("#elevation_dimension_text").val()+'", \n';
+				}
+				if($("#elevation_dimension_format").val() == ""){
+					code += '\t "ele_format": "" \n';
+				}else{
+					code += '\t "ele_format": "'+$("#elevation_dimension_format").val()+'" \n';
+				}
+			}else{
+				code += '\t "ele_regex": "", \n';
+				code += '\t "ele_format": "" \n';
+			}
+			code += '}';
+			
+			codemirror.setValue(code);
+		}
+		
+		$('#main_form').submit();
+	});
+	
+	$('#test_connection').click(function (e) {
+		var connectionParams = JSON.parse(codemirror.getValue());
+		var ds_type = $("#id_type").val();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/test_connection/',
+			data: {
+				connection_params: JSON.stringify(connectionParams),
+				ds_type: ds_type
+			},
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				if (response.success) {
+					messageBox.show('info', gettext('Connection has been success'));
+					
+				} else {
+					messageBox.show('warning', response.error);
+				}
+			},
+			error: function(){}
+		});
+	});
+});
+</script>
+{% endblock %}

@@ -1,0 +1,159 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr ""
+
+msgid "Select type"
+msgstr ""
+
+msgid "Select enumeration"
+msgstr ""
+
+msgid "Select multiple enumeration"
+msgstr ""
+
+msgid "Field name"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Save field"
+msgstr ""
+
+msgid "Edit field"
+msgstr ""
+
+msgid "true"
+msgstr ""
+
+msgid "false"
+msgstr ""
+
+msgid "True"
+msgstr ""
+
+msgid "False"
+msgstr ""
+
+msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
+msgstr ""
+
+msgid "Enumeration cannot contain point-colon"
+msgstr ""
+
+msgid "Create new layer"
+msgstr ""
+
+msgid "Publish layer"
+msgstr ""
+
+msgid "Error in GetCapabilities"
+msgstr ""
+
+msgid "Error trying to connect"
+msgstr ""
+
+msgid "Insert item name"
+msgstr ""
+
+msgid "Select form"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "active"
+msgstr ""
+
+msgid "inactive"
+msgstr ""
+
+msgid "URL"
+msgstr ""
+
+msgid "Is master?"
+msgstr ""
+
+msgid "Save node"
+msgstr ""
+
+msgid "Edit node"
+msgstr ""
+
+msgid "Convert"
+msgstr ""
+
+msgid "Autogen"
+msgstr ""
+
+msgid "Autogen ok"
+msgstr ""
+
+msgid "Convert ok"
+msgstr ""
+
+msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
+msgstr ""
+
+msgid "Node has been reloaded"
+msgstr ""
+
+msgid "Error reloading node"
+msgstr ""
+
+msgid "Connection has been success"
+msgstr ""
+
+msgid "Filter by project"
+msgstr ""
+
+msgid "Show all layers"
+msgstr ""
+
+msgid "The action was successfully completed"
+msgstr ""
+
+msgid "The action failed"
+msgstr ""
+
+msgid "The layer definition was refreshed"
+msgstr ""
+
+msgid "The layer refresh failed"
+msgstr ""
+
+msgid "Calculated"
+msgstr ""
+
+msgid "Old name"
+msgstr ""
+
+msgid "New name"
+msgstr ""
+
+msgid "Rename"
+msgstr ""
+
+msgid "Field to delete"
+msgstr ""
+
+msgid "You must select an extent on the map using the control"
+msgstr ""
+
+msgid "too_many_files"
+msgstr "Too many files to download. Reduce the number of zoom levels or make the project size smaller"

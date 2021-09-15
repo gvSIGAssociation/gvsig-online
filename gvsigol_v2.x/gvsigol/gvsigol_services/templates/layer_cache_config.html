@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<form id="cache-config-form" role="form" method="post" action="/gvsigonline/services/layer_cache_config/{{layer_id}}/">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}													
+				{% if message %}
+				<div id="form-error" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+					
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#tab-create-new-task" data-toggle="tab">{% trans "Create a new task" %}</a></li>
+	    	<li><a href="#tab-currently-executing-tasks" data-toggle="tab">{% trans "Currently executing tasks" %}</a></li>
+	    </ul>
+	            	
+		<div class="tab-content">  	
+	       	<div class="tab-pane active" id="tab-create-new-task">
+	       		<div class="box">
+	       			<div class="box-body">
+	       				<div class="row">
+							<div class="col-md-12 form-group">
+								<div class="box-tools pull-right">
+									<button id="execute_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-cogs margin-r-5"></i> {% trans "Execute" %}</button>					
+								</div>
+							</div>				
+						</div> 
+	       				<div class="row">
+							<div class="col-md-3 form-group">
+								<label for="input_number_of_task">{% trans "Number of tasks to use" %}</label>
+								<select class="form-control" id="input_number_of_task" name="input_number_of_task" tabindex="1" aria-hidden="true">
+									<option value="1">01</option>
+									<option value="2">02</option>
+									<option value="3">03</option>
+									<option value="4">04</option>
+									<option value="5">05</option>
+									<option value="6">06</option>
+									<option value="7">07</option>
+									<option value="8">08</option>
+									<option value="9">09</option>
+									<option value="10">10</option>
+									<option value="11">11</option>
+									<option value="12">12</option>
+									<option value="13">13</option>
+									<option value="14">14</option>
+									<option value="15">15</option>
+									<option value="16">16</option>
+								</select>														
+							</div>
+							<div class="col-md-9 form-group">
+								<label for="input_operation_type">{% trans "Type of operation" %}</label>
+								<select class="form-control" id="input_operation_type" name="input_operation_type" tabindex="2" aria-hidden="true">
+									<option value="seed">{% trans "Seed - generate missing tiles" %}</option>
+									<option value="reseed">{% trans "Reseed - regenerate all tiles" %}</option>
+									<option value="truncate">{% trans "Truncate - remove tiles" %}</option>
+								</select>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-3 form-group">
+								<label for="input_grid_set">{% trans "Grid set" %}</label>
+ 								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true">
+ 									{% for gs in grid_subsets %}
+ 										<option value="{{gs}}">{{gs}}</option>
+ 									{% endfor %}
+ 								</select>
+<!-- 								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true">
+									<option value="EPSG:3857">EPSG:3857</option>
+								</select> -->
+							</div>
+							<div class="col-md-3 form-group">
+								<label for="input_format">{% trans "Format" %}</label>
+								<select class="form-control" id="input_format" name="input_format" tabindex="2" aria-hidden="true">
+									{% for f in formats %}
+										<option value="{{f}}">{{f}}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="col-md-3 form-group">
+								<label for="input_zoom_start">{% trans "Zoom start" %}</label>
+								<select class="form-control" id="input_zoom_start" name="input_zoom_start" tabindex="2" aria-hidden="true">
+									{% for i in max_zoom_level %}
+									<option value="{{i}}">{{i}}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="col-md-3 form-group">
+								<label for="input_zoom_stop">{% trans "Zoom stop" %}</label>
+								<select class="form-control" id="input_zoom_stop" name="input_zoom_stop" tabindex="2" aria-hidden="true">
+									{% for i in max_zoom_level %}
+									<option value="{{i}}">{{i}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-3 form-group">
+								<label for="input_min_x">{% trans "MinX" %}</label>
+								<input readonly name="input_min_x" id="input_min_x" type="text" class="form-control" value="null">						
+							</div>
+							<div class="col-md-3 form-group">
+								<label for="input_min_y">{% trans "MinY" %}</label>
+								<input readonly name="input_min_y" id="input_min_y" type="text" class="form-control" value="null">						
+							</div>
+							<div class="col-md-3 form-group">
+								<label for="input_max_x">{% trans "MaxX" %}</label>
+								<input readonly name="input_max_x" id="input_max_x" type="text" class="form-control" value="null">						
+							</div>
+							<div class="col-md-3 form-group">
+								<label for="input_max_y">{% trans "MaxY" %}</label>
+								<input readonly name="input_max_y" id="input_max_y" type="text" class="form-control" value="null">						
+							</div>
+						</div>
+	       				<div class="row">
+							<div id="project-map" class="mini-map"></div>
+						</div>
+						<div>
+							<input hidden name="min_x" id="min_x" type="text">
+							<input hidden name="min_y" id="min_y" type="text">
+							<input hidden name="max_x" id="max_x" type="text">
+							<input hidden name="max_y" id="max_y" type="text">
+						</div>
+					</div>
+	       		</div>
+	       	</div>
+	       	
+	       	<div class="tab-pane" id="tab-currently-executing-tasks">
+	       		<div class="box">
+	       			<div class="box-body">
+	       				<div class="row">
+							<div class="col-md-12 form-group">
+								<div class="box-tools pull-right">
+									<button id="refresh_tasks" type="button" class="btn btn-default btn-sm"><i class="fa fa-refresh margin-r-5"></i> {% trans "Refresh tasks" %}</button>
+									<button id="kill_all_tasks" type="button" class="btn btn-default btn-sm"><i class="fa fa-times margin-r-5"></i> {% trans "kill all tasks" %}</button>					
+								</div>
+							</div>				
+						</div>
+						<div class="row">
+	       					<table id="table-tasks" class="table table-bordered" style="margin-left: 20px;">
+	       						<tr>
+									<th>{% trans "Tiles processed" %}</th>
+								    <th>{% trans "Total of tiles to process" %}</th> 
+								    <th>{% trans "Total of remaining tiles" %}</th>
+								    <th>{% trans "Task ID" %}</th>
+								    <th>{% trans "Task status" %}</th>
+								</tr>
+								{% for task in tasks %}
+								<tr>
+								    <td>{{task.0}}</td>
+								    <td>{{task.1}}</td> 
+								    <td>{{task.2}}</td>
+								    <td>{{task.3}}</td>
+								    <td>{{task.4}}</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+					</div>
+	       		</div>
+	       	</div>
+	       	
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+$('#menu-manage-services').addClass("active");
+$('#submenu-cache').addClass("active");
+$().ready(function() {
+	
+	var latLongExtentString = '{{ latlong_extent }}';
+	var latLongExtent = latLongExtentString.split(',');
+      
+	/**
+	  * Create the map.
+	  */
+	var map = new ol.Map({
+		layers : [ new ol.layer.Tile({
+			source : new ol.source.OSM()
+		})],
+		target : 'project-map',
+		view : new ol.View({
+			center : [ 0, 0 ],
+			zoom : 2
+		})
+	});
+	
+	var interaction = new ol.interaction.Extent({
+		condition: ol.events.condition.always
+	});
+	interaction.on('extentchanged', function(e) {
+		if (e.b) {
+			var epsg = $('option:selected', $('#input_grid_set')).val();
+			var minXY = ol.proj.transform([e.b[0], e.b[1]], 'EPSG:3857', epsg);
+			var maxXY = ol.proj.transform([e.b[2], e.b[3]], 'EPSG:3857', epsg);
+			$('#min_x').val(minXY[0]);
+			$('#min_y').val(minXY[1]);
+			$('#max_x').val(maxXY[0]);
+			$('#max_y').val(maxXY[1]);
+
+			var epsg = $('option:selected', $('#input_grid_set')).val();
+			var minXY = ol.proj.transform([e.b[0], e.b[1]], 'EPSG:3857', 'EPSG:4326');
+			var maxXY = ol.proj.transform([e.b[2], e.b[3]], 'EPSG:3857', 'EPSG:4326');
+			$('#input_min_x').val(minXY[0]);
+			$('#input_min_y').val(minXY[1]);
+			$('#input_max_x').val(maxXY[0]);
+			$('#input_max_y').val(maxXY[1]);	
+		}
+	});
+	
+	var dragBoxCtrl = new ol.control.Toggle({
+		html: '<i class="fa fa-pencil-square-o"></i>',
+		className: "dragbox-custom",
+		title: "Select extent",
+		//interaction: interaction,
+		active: false,
+		onToggle: function(active){	
+			if (active) {
+				map.addInteraction(interaction);
+				
+			} else {
+				map.removeInteraction(interaction);
+			}
+		}
+	});
+	map.addControl(dragBoxCtrl);
+	
+	if (Array.isArray(latLongExtent) && latLongExtent.length==4) { // use extent from metadata if available
+		var extent = ol.proj.transformExtent([parseFloat(latLongExtent[0]), parseFloat(latLongExtent[1]), parseFloat(latLongExtent[2]), parseFloat(latLongExtent[3])], ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+		map.getView().fit(extent, map.getSize());
+		/*$('#input_min_x').val(extent[0]);
+		$('#input_min_y').val(extent[1]);
+		$('#input_max_x').val(extent[2]);
+		$('#input_max_y').val(extent[3]);*/
+	}
+	
+	/*var extent = map.getView().calculateExtent(map.getSize());
+	$('#input_min_x').val(extent[0]);
+	$('#input_min_y').val(extent[1]);
+	$('#input_max_x').val(extent[2]);
+	$('#input_max_y').val(extent[3]);*/
+	
+	/*map.on('moveend', function (){
+		var extent = map.getView().calculateExtent(map.getSize());
+		$('#input_min_x').val(extent[0]);
+		$('#input_min_y').val(extent[1]);
+		$('#input_max_x').val(extent[2]);
+		$('#input_max_y').val(extent[3]);
+	});*/
+	
+	var gridSubsets = {{json_grid_subsets|safe}};
+	for (var i=0; i<gridSubsets.length; i++) {
+		if (gridSubsets[i] == $("#input_grid_set option:first").val()) {
+			if (gridSubsets[i].zoomStart && gridSubsets[i].zoomStop) {
+				var zoomStart = gridSubsets[i].zoomStart;
+				var zoomStop = gridSubsets[i].zoomStop;
+				$('#input_zoom_start option[value=' + zoomStart + ']').attr('selected','selected');
+				$('#input_zoom_stop option[value=' + zoomStop + ']').attr('selected','selected');
+			}
+			if (gridSubsets[i].extent) {
+				/*$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
+				$('#input_min_y').val(gridSubsets[i].extent.coords[1]);
+				$('#input_max_x').val(gridSubsets[i].extent.coords[2]);
+				$('#input_max_y').val(gridSubsets[i].extent.coords[3]);*/
+			}
+		}
+	}
+	
+	for (var i=0; i<gridSubsets.length; i++) {
+		if (gridSubsets[i] == 'EPSG:3857') {
+			if (gridSubsets[i].extent) {
+				map.getView().fit([gridSubsets[i].extent.coords[0], gridSubsets[i].extent.coords[1], gridSubsets[i].extent.coords[2], gridSubsets[i].extent.coords[3]], map.getSize());
+			}
+		}
+	}
+	
+	$('#input_grid_set').change(function(e) {
+		for (var i=0; i<gridSubsets.length; i++) {
+			if (gridSubsets[i] == $("#input_grid_set option:selected").val()) {
+				var zoomStart = gridSubsets[i].zoomStart;
+				var zoomStop = gridSubsets[i].zoomStop;
+				$('#input_zoom_start option[value=' + zoomStart + ']').attr('selected','selected');
+				$('#input_zoom_stop option[value=' + zoomStop + ']').attr('selected','selected');
+				/*$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
+				$('#input_min_y').val(gridSubsets[i].extent.coords[1]);
+				$('#input_max_x').val(gridSubsets[i].extent.coords[2]);
+				$('#input_max_y').val(gridSubsets[i].extent.coords[3]);*/
+			}
+		}
+  	});
+	
+	$("#refresh_tasks").click(function() {
+		$.ajax({
+	        type: "POST",
+			url: "/gvsigonline/services/get_cache_tasks/",
+			async: false,
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data:{
+				'layer_id': '{{layer_id}}'
+			},
+			success: function(response) {
+				var tasks = response['long-array-array'];
+				$('#table-tasks').empty();
+				var header = '';
+				header += '<tr>';
+				header += 	'<th>' + gettext('Tiles processed') + '</th>';
+				header += 	'<th>' + gettext('Total of tiles to process') + '</th>';
+				header += 	'<th>' + gettext('Total of remaining tiles') + '</th>';
+				header += 	'<th>' + gettext('Task ID') + '</th>';
+				header += 	'<th>' + gettext('Task status') + '</th>';
+				header += '</tr>';
+				$('#table-tasks').append(header);
+				for (var i=0; i<tasks.length; i++) {
+					var task = '';
+					task += '<tr>';
+					task += 	'<td>' + tasks[i][0] + '</td>';
+					task += 	'<td>' + tasks[i][1] + '</td>';
+					task += 	'<td>' + tasks[i][2] + '</td>';
+					task += 	'<td>' + tasks[i][3] + '</td>';
+					task += 	'<td>' + tasks[i][4] + '</td>';
+					task += '</tr>';
+					$('#table-tasks').append(task);
+				}
+			},
+			error: function(err){
+				alert(gettext("Error getting tasks"));
+			}
+		});
+	});
+	
+	$("#kill_all_tasks").click(function() {
+		$.ajax({
+	        type: "POST",
+			url: "/gvsigonline/services/kill_all_tasks/",
+			async: false,
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data:{
+				'layer_id': '{{layer_id}}'
+			},
+			success: function(response) {
+				$('#table-tasks').empty();
+			},
+			error: function(err){
+				alert(gettext("Error getting tasks"));
+			}
+		});
+	});
+	
+	$('#cache-config-form').submit(function(event) {
+		event.preventDefault();
+		 
+		var minX = $('#input_min_x').val();
+		var minY = $('#input_min_y').val();
+		var maxX = $('#input_max_x').val();
+		var maxY = $('#input_max_y').val();
+		 
+		 if (minX == 'null' || minY == 'null' || maxX == 'null' || maxY == 'null') {
+			 messageBox.show('warning', gettext('You must select an extent on the map using the control'));
+			 
+		 } else {
+			 $(this).unbind('submit').submit();	 
+		 }
+	})
+	
+});
+</script>
+{% endblock %}

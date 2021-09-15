@@ -1,0 +1,275 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border step-2">
+				<h3 class="box-title">{% trans "Add new style" %}</h3>
+				<div class="box-tools pull-right">
+					<button id="refresh-preview" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
+					<button id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+				</div>
+			</div>
+
+			<div class="box-body">
+				<div class="row">
+					<div id="form-error" style="color:#ff0000;"></div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Name" %}</label>
+						<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Title" %}</label>
+						<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" value="{{style_name}}" type="text" class="form-control">	
+					</div>
+				</div>
+				<div class="row">
+					<div class="checkbox col-md-12">								
+						<label>
+							<input checked type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<div id="map" class="preview-map"></div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<textarea class="form-control" name="sld_content" id="sld_content" rows="10"></textarea>						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	
+	var layerId = "{{layer_id}}";
+	var layerUrl = "{{layer_url}}";
+	var layerName = "{{layer_name}}";
+	
+	var map = new ol.Map({
+		layers: [
+		    new ol.layer.Tile({
+            	source: new ol.source.OSM()
+          	})
+		],
+		target: "map",
+		view: new ol.View({
+		    center:[0,0],
+		    zoom: '2'
+		})
+	});
+	var wmsSource = new ol.source.TileWMS({
+		url: layerUrl,
+		visible: true,
+		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+		serverType: 'geoserver',
+		tileLoadFunction: function(image, src) {
+			imagePostFunction(image, src);
+		}
+	});
+	wmsLayer = new ol.layer.Tile({
+		id: 'preview-layer',
+		source: wmsSource,
+		visible: true
+	});
+	map.addLayer(wmsLayer);
+
+	var sldContent = document.getElementById('sld_content');
+	var codemirror = CodeMirror.fromTextArea(sldContent, {
+		mode: "text/xml",
+        extraKeys: {"Ctrl-Space": "autocomplete"},
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	var code = '';
+	code += '<?xml version="1.0" encoding="UTF-8"?> \n';
+	code += '<sld:StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:sld="http://www.opengis.net/sld" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0"> \n';
+	code += '\t <!--  Contenido SLD  --> \n';
+	code += '</sld:StyledLayerDescriptor> \n';
+	
+	codemirror.setValue(code);
+	codemirror.refresh();
+
+	$("#save-legend").on('click', function(e){
+		if ($("#style-name").val() != '') {
+			save(layerId, codemirror);
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
+	});
+	
+	$("#refresh-preview").on('click', function(e){
+		updatePreview(layerId, codemirror, map);
+	});
+	
+	$(window).unload(function(){
+		console.log("Trying to exit from this page");
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/remove_temporal_preview/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: {
+				name: "{{style_name}}",
+				layer_id: "{{layer_id}}"
+			},
+			success: function(response){
+				
+			},
+		    error: function(){}
+		});
+	});
+	
+});
+
+function save(layerId, codemirror) {
+	var self = this;
+	
+	var sld = codemirror.getValue();
+	var isDefault = $('#style-is-default').is(":checked");
+	var styleName = $("#style-name").val();
+	var styleTitle = $("#style-title").val();
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/custom_add/" + layerId + "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style: 'CS',
+			style_name: styleName,
+			style_title: styleTitle,
+			is_default: isDefault,
+			sld: sld
+		},
+		success: function(response){
+			if (response.success) {
+				location.href = "/gvsigonline/symbology/style_layer_list/";
+			} else {
+				alert('Error');
+			}
+
+		},
+		error: function(){}
+	});
+}
+
+function updatePreview(layerId, codemirror, map) {
+	var self = this;
+	
+	var sld = codemirror.getValue();
+	var isDefault = $('#style-is-default').is(":checked");
+	var styleName = $("#style-name").val();
+	var styleTitle = $("#style-title").val();
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style: 'CS',
+			style_name: styleName,
+			style_title: styleTitle,
+			is_default: isDefault,
+			sld: sld
+			
+		},
+		success: function(response){
+			if (response.success) {
+				reloadLayerPreview(map);
+				
+			} else {
+				alert('Error');
+			}
+
+		},
+		error: function(){}
+	});
+}
+
+function reloadLayerPreview (map){
+	var styleName = $("#style-name").val();
+	var layers = map.getLayers();
+	layers.forEach(function(layer){
+		if (!layer.baselayer && !layer.external) {
+			if (layer.get("id") === 'preview-layer') {
+				layer.getSource().updateParams({'STYLES': styleName + "__tmp", "_time": (new Date()).getTime()});
+				map.render();
+			}
+		};
+	}, this);
+}
+
+function imagePostFunction(image, src) {
+	var img = image.getImage();
+	if (typeof window.btoa === 'function') {
+		var xhr = new XMLHttpRequest();
+	  	var dataEntries = src.split("&");
+	  	var url;
+	  	var params = "";
+	  	for (var i = 0 ; i< dataEntries.length ; i++){
+	    	if (i===0){
+	      		url = dataEntries[i];  
+	      		
+	      	} else {
+	      		params = params + "&"+dataEntries[i];
+	      	}
+	  	}
+	  	xhr.open('POST', url, true);
+
+	  	xhr.responseType = 'arraybuffer';
+	  	xhr.onload = function(e) {
+	    	if (this.status === 200) {
+	      		var uInt8Array = new Uint8Array(this.response);
+	      		var i = uInt8Array.length;
+	      		var binaryString = new Array(i);
+	      		while (i--) {
+	        		binaryString[i] = String.fromCharCode(uInt8Array[i]);
+	      		}
+	      		var data = binaryString.join('');
+	      		var type = xhr.getResponseHeader('content-type');
+	      		if (type.indexOf('image') === 0) {
+	        		img.src = 'data:' + type + ';base64,' + window.btoa(data);
+	      		}
+	    	}
+	  	};
+	  	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	  	xhr.send(params);
+	  	
+	} else {
+		img.src = src;
+	}
+}
+</script>
+{% endblock %}

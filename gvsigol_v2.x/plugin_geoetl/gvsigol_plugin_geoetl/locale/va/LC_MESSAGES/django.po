@@ -1,0 +1,83 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-11 08:49+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:9
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:17
+msgid "Extract, Transform & Load"
+msgstr "Extrau, Transforma i Carrega"
+
+#: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:15
+msgid "Plugins"
+msgstr ""
+
+#: gvsigol_plugin_geoetl/templates/etl.html:16
+msgid "ETL - Extract, Transform & Load"
+msgstr "ETL - Extrau, Transforma i Carrega"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:19
+msgid "Inputs"
+msgstr "Entrades"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:28
+msgid "Transformers"
+msgstr "Transformadors"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:30
+msgid "Calculator"
+msgstr "Calculador"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:31
+msgid "Counter"
+msgstr "Contador"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:32
+msgid "Create Attribute"
+msgstr "Crea Atribut"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:33
+msgid "Filter"
+msgstr "Filtre"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:34
+msgid "Join"
+msgstr "Unió"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:35
+msgid "Keep Attribute"
+msgstr "Mantén Atribut"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:36
+msgid "Modify Value"
+msgstr "Modifica Valor"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:37
+msgid "Remove Attribute"
+msgstr "Elimina Atribut"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:38
+msgid "Rename Attribute"
+msgstr "Reanomena Atribut"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:39
+msgid "Reproject"
+msgstr "Reprojectar"
+
+#: gvsigol_plugin_geoetl/templates/etl.html:44
+msgid "Outputs"
+msgstr "Eixides"

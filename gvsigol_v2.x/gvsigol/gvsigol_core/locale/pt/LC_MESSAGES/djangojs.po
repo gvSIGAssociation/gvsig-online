@@ -1,0 +1,605 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+
+# gvSIG Online.
+# Copyright (C) 2010-2017 SCOLAB.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# export_a4h.html
+msgid "Printing date"
+msgstr "Data de impressão"
+
+msgid "Printing message"
+msgstr "Impressão da mensagem"
+
+# viewer.js
+msgid "Blank"
+msgstr "Em branco"
+
+msgid "OpenStreetMap"
+msgstr "OpenStreetMap"
+
+# attributeTable.js
+msgid "Processing request"
+msgstr "Processando solicitação"
+
+msgid "Search"
+msgstr "Procurar"
+
+msgid "Showing"
+msgstr "Exibição"
+
+msgid "Showing from"
+msgstr "a partir de"
+
+msgid "registers"
+msgstr "Cadastros"
+
+msgid "to"
+msgstr "a"
+
+msgid "of"
+msgstr "de"
+
+msgid "Filtering"
+msgstr "Filtro"
+
+msgid "Loading"
+msgstr "Carregando"
+
+msgid "No records available"
+msgstr "Nenhum registro disponível"
+
+msgid "First"
+msgstr "Primeiro"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Next"
+msgstr "Seguinte"
+
+msgid "Last"
+msgstr "Último"
+
+msgid "Sort ascending"
+msgstr "Ordenar por ordem crescente"
+
+msgid "Sort descending"
+msgstr "Ordenação decrescente"
+
+msgid "Zoom to selection"
+msgstr "Zoom para seleção"
+
+msgid "Select all"
+msgstr "Selecionar todos"
+
+msgid "Clear selection"
+msgstr "Limpar seleção"
+
+msgid "You must select at least one row"
+msgstr "Você deve selecionar pelo menos uma linha"
+
+msgid "Print selection"
+msgstr "Seleção de impressão"
+
+msgid "Advanced filter"
+msgstr "Filtro avançado"
+
+msgid "A visible layer with temporal properties is needed"
+msgstr "Uma camada visível com propriedades temporais é necessária"
+
+msgid "Select field"
+msgstr "Selecionar campo"
+
+msgid "Select value"
+msgstr "Selecionar valor"
+
+msgid "Apply filter"
+msgstr "Aplicar filtro"
+
+msgid "Clear filter"
+msgstr "Limpar filtro"
+
+# editionBar.js
+msgid "Add point to center"
+msgstr "Adicionar um ponto ao centro"
+
+msgid "can't be empty"
+msgstr "Não pode estar vazio"
+
+msgid "can't be null"
+msgstr "não pode ser nulo"
+
+msgid "Add point"
+msgstr "Adicionar ponto"
+
+msgid "Add line"
+msgstr "Adicionar linha"
+
+msgid "Add polygon"
+msgstr "Adicionar poligono"
+
+msgid "Edit feature"
+msgstr "Editar função"
+
+msgid "Remove feature"
+msgstr "Excluir função"
+
+msgid "Stop edition"
+msgstr "Parar Edição"
+
+msgid "Error starting edition"
+msgstr "Erro na edição inicial"
+
+msgid "Feature properties"
+msgstr "Propriedades"
+
+msgid "Feature resources"
+msgstr "Recursos da característica"
+
+msgid "remove"
+msgstr "Excluir"
+
+msgid "Failed to remove layer lock"
+msgstr "Falha ao remover ou bloqueio da camada"
+
+msgid "New feature"
+msgstr "novo recurso"
+
+msgid "Save"
+msgstr "Salvar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Failed to save the new record. Please check values"
+msgstr ""
+"Não foi possível guardar o novo registo. Por favor, verifique os valores"
+
+# exportToPDF.js
+msgid "Map title"
+msgstr "Título do mapa"
+
+msgid "Print"
+msgstr "Imprimir"
+
+# geolocation.js
+msgid "Get current location"
+msgstr "Obter localização atual"
+
+# getFeatureInfo.js
+msgid "Point information"
+msgstr "Informação do ponto"
+
+msgid "No layers available"
+msgstr "Não há camadas disponíveis"
+
+msgid "More info"
+msgstr "Mais informação"
+
+msgid "Coordinates"
+msgstr "Coordenadas"
+
+msgid "View resources"
+msgstr "Ver recursos"
+
+msgid "Feature info"
+msgstr "Informação"
+
+msgid "Multimedia resources"
+msgstr "Recursos multimédia"
+
+# measureArea.js
+msgid "Show measure tools"
+msgstr "Mostrar ferramentas de medida"
+
+msgid "Measure area and perimeter"
+msgstr "Medir área e perímetro"
+
+msgid "Click to continue measuring"
+msgstr "Clique para continuar a medição"
+
+msgid "Click to start measuring"
+msgstr "Clique para iniciar a medição"
+
+# measureLength.js
+msgid "Measure length"
+msgstr "Medir comprimento"
+
+msgid "Measure angle"
+msgstr "Medir ângulo"
+
+msgid "Close measure tools"
+msgstr "Fechar ferramentas de medida"
+
+msgid "Show selection tools"
+msgstr "Mostrar ferramentas de seleção"
+
+msgid "Select features"
+msgstr "Selecionar recursos"
+
+msgid "Select by buffer"
+msgstr "Selecionar por buffer"
+
+msgid "Close selection tools"
+msgstr "Fechar ferramentas de seleção"
+
+# measureLength.js
+msgid "Search by coordinate"
+msgstr "Busca por coordenadas"
+
+msgid "Select projection"
+msgstr "Seleccionar projecção"
+
+msgid "Coordinate Reference System"
+msgstr "Sistema de Referência de Coordenadas"
+
+msgid "Latitude"
+msgstr "Latitude"
+
+msgid "Longitude"
+msgstr "Longitude"
+
+msgid "Find"
+msgstr "Procurar"
+
+# messageBox.js
+msgid "Success"
+msgstr "Sucesso"
+
+msgid "Warning"
+msgstr "Aviso"
+
+# layerTree.js
+msgid "The layer you are trying to edit is locked"
+msgstr "A camada que você está tentando editar está bloqueada"
+
+msgid "Base layers"
+msgstr "Camadas de base"
+
+msgid "None"
+msgstr "nenhum"
+
+msgid "No layer"
+msgstr "Nenhuma camada"
+
+msgid "Bing roads"
+msgstr "Bing estradas"
+
+msgid "Bing aerial"
+msgstr "Bing aéreo"
+
+msgid "Bing aerial with labels"
+msgstr "Bing aéreo com marcadores"
+
+msgid "You are editing the layer"
+msgstr "Você está editando a camada"
+
+msgid "Downloads"
+msgstr "Baixar"
+
+msgid "Layer metadata"
+msgstr "Metadados de camada"
+
+msgid "Details"
+msgstr "Detalhes"
+
+msgid "Metadata"
+msgstr "Metadata"
+
+msgid "Download links"
+msgstr "Links de descarga"
+
+msgid "Download shapefile"
+msgstr "Descargar shapefile"
+
+msgid "Download CSV"
+msgstr "Descargar CSV"
+
+msgid "Download GML"
+msgstr "Descargar GML"
+
+msgid "Attribute table"
+msgstr "Tabela de atributos"
+
+msgid "Edit layer"
+msgstr "Editar camada"
+
+msgid "Opacity"
+msgstr "Opacidade"
+
+msgid "Show in geonetwork"
+msgstr "Mostrar em Geonetwork"
+
+msgid "Version"
+msgstr "Version"
+
+msgid "Summary"
+msgstr "Sumário"
+
+msgid "Requests"
+msgstr "Solicitações"
+
+msgid "Supported CRS"
+msgstr "CRS Suportado"
+
+msgid "Layers"
+msgstr "Camadas"
+
+msgid "Organization"
+msgstr "Organização"
+
+msgid "Contact person"
+msgstr "Pessoa de contacto"
+
+msgid "Address"
+msgstr "Endereço"
+
+msgid "City"
+msgstr "Cidade"
+
+msgid "Country"
+msgstr "País"
+
+msgid "Email"
+msgstr "Correio eletrónico"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Abstract"
+msgstr "Resumo"
+
+msgid "Queryable"
+msgstr "Questões"
+
+msgid "MaxScaleDenominator"
+msgstr "Denominador de Escala Máxima"
+
+msgid "MinScaleDenominator"
+msgstr "Denominador de Escala Mínima"
+
+msgid "Default CRS"
+msgstr "SRC padrão"
+
+msgid "BoundingBox"
+msgstr "Caixa de delimitação"
+
+msgid "GeographicBoundingBox"
+msgstr "Caixa de delimitação geográfica"
+
+msgid "Zoom to layer"
+msgstr "Zoom para camada"
+
+msgid "Project zoom"
+msgstr "Zoom de projeto"
+
+msgid "Clean map"
+msgstr "Limpar mapa"
+
+msgid "Inverse geocoding"
+msgstr "Geocodificação Inversa"
+
+msgid "More element info"
+msgstr "Mais informações sobre o elemento"
+
+msgid "Invalid identifier. Unable to get requested geometry"
+msgstr "Identificador inválido. Não é possível obter a geometria solicitada"
+
+msgid "Temporary layers"
+msgstr "Camadas temporárias"
+
+msgid "From"
+msgstr "Desde"
+
+msgid "To"
+msgstr "a"
+
+msgid "Step"
+msgstr "Passo"
+
+msgid "Single"
+msgstr "Individual"
+
+msgid "Range"
+msgstr "Faixa"
+
+msgid "temporary_field"
+msgstr "campo_temporário"
+
+msgid "temporary_endfield"
+msgstr "temporário _ campofinal"
+
+msgid "second(s)"
+msgstr "segundo(s)"
+
+msgid "minute(s)"
+msgstr "minuto(s)"
+
+msgid "hour(s)"
+msgstr "hora(s)"
+
+msgid "day(s)"
+msgstr "dia(s)"
+
+msgid "month(s)"
+msgstr "mês(es)"
+
+msgid "year(s)"
+msgstr "ano(s)"
+
+msgid "Attribute details"
+msgstr "Detalhes do atributo"
+
+msgid "Show resources"
+msgstr "Mostrar recursos"
+
+msgid "Enable temporary features"
+msgstr "Ativar recursos temporários"
+
+msgid "apply relative date"
+msgstr "aplicar data de referência"
+
+msgid "Temporary range"
+msgstr "Intervalo temporário"
+
+msgid ""
+"Only relative intervals can be defined if the other field is PRESENT or a "
+"concrete date."
+msgstr ""
+"Apenas intervalos relativos podem ser definidos se o outro campo for "
+"PRESENTE ou uma data concreta"
+
+msgid ""
+"Only PRESENT is available in Instant mode. You need to define a RANGE to use "
+"relative intervals"
+msgstr ""
+"Somente a opção PRESENT está disponível no modo Instantâneo. Você precisa "
+"definir uma escala para usar intervalos relativos"
+
+msgid "Image Mosaic"
+msgstr "Mosaico de imagens"
+
+msgid "Share view"
+msgstr "Compartilhar visão"
+
+msgid "Report title"
+msgstr "Título do relatório"
+
+msgid "Report description"
+msgstr "Descrição do relatório"
+
+msgid "Insert title"
+msgstr "Digite o título"
+
+msgid "Insert description"
+msgstr "Digite a descrição"
+
+msgid "Include images related to report elements"
+msgstr "Incluir imagens relacionadas aos elementos do relatório"
+
+msgid "Include the address related to report elements"
+msgstr "Incluir endereços relacionados aos elementos do relatório"
+
+msgid "Fields to include"
+msgstr "Campos a incluir"
+
+msgid "Generate PDF"
+msgstr "Gerar PDF"
+
+msgid "Origin coordinates"
+msgstr "Coordenadas de origem"
+
+msgid "Select reference system"
+msgstr "Selecionar sistema de coordenadas"
+
+msgid "Format"
+msgstr "Formato"
+
+msgid "Destination coordinates"
+msgstr "Coordenadas de destino"
+
+msgid "Calculate"
+msgstr "Calcular"
+
+msgid "Select format"
+msgstr "Selecionar formato"
+
+msgid "Decimal degrees"
+msgstr "Graus decimais"
+
+msgid "Degrees, minutes and seconds"
+msgstr "Graus, minutos e segundos"
+
+msgid "Degrees"
+msgstr "Graus"
+
+msgid "Minutes"
+msgstr "Minutos"
+
+msgid "Seconds"
+msgstr "Segundos"
+
+msgid "You must fill in all the values"
+msgstr "Você deve preencher todos os valores"
+
+msgid "Some value is out of range"
+msgstr "Algum valor está fora da faixa"
+
+msgid "Raw filter"
+msgstr "Filtro rápido"
+
+msgid "Layer group"
+msgstr "Grupo de camadas"
+
+msgid "Select layer group"
+msgstr "Selecionar grupo de camadas"
+
+msgid "Layer"
+msgstr "Camada"
+
+msgid "Select layer"
+msgstr "Selecionar camada"
+
+msgid "Field"
+msgstr "Campo"
+
+msgid "Operator"
+msgstr "Operador"
+
+msgid "Select operator"
+msgstr "Selecionar operador"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Clean filter"
+msgstr "Limpar filtro"
+
+msgid "The selected layer group does not contain queryable layers"
+msgstr "O grupo de camadas selecionado não contém camadas consultáveis"
+
+msgid "The selected layer does not contain queryable fields"
+msgstr "A camada selecionada não contém campos consultáveis"
+
+msgid "The selected field does not contain values"
+msgstr "O campo selecionado não contém valores"
+
+msgid "No results found"
+msgstr "Não foram encontrados resultados"
+
+msgid "Equal to"
+msgstr "É o mesmo que"
+
+msgid "Smaller than"
+msgstr "É menos que"
+
+msgid "Greater than"
+msgstr "É maior que"
+
+msgid "You must fill in all fields"
+msgstr "Você deve preencher todos os campos"
+
+msgid "Find layer"
+msgstr "Pesquisar camada"

@@ -1,0 +1,88 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-22 17:12+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: templates/index.html:8
+msgid "Home"
+msgstr ""
+
+#: templates/index.html:75
+msgid "Dashboard"
+msgstr ""
+
+#: templates/index.html:78
+msgid "Sign out"
+msgstr ""
+
+#: templates/index.html:98
+msgid "Sign in"
+msgstr ""
+
+#: templates/index.html:137
+msgid "Welcome to gvSIG Online"
+msgstr ""
+
+#: templates/index.html:146
+msgid "Public viewers"
+msgstr ""
+
+#: templates/index.html:148
+msgid "Display the territory, orthophotos and thematic mapping"
+msgstr ""
+
+#: templates/index.html:149
+msgid "Access to the list of public viewers"
+msgstr ""
+
+#: templates/index.html:158
+msgid "Mapping services"
+msgstr ""
+
+#: templates/index.html:160
+msgid "Look up OGC services available"
+msgstr ""
+
+#: templates/index.html:161
+msgid "Show available services"
+msgstr ""
+
+#: templates/index.html:174
+msgid "Metadata catalog"
+msgstr ""
+
+#: templates/index.html:176
+msgid ""
+"Search the metadata catalog for get information about the data and SDI "
+"services"
+msgstr ""
+
+#: templates/index.html:177
+msgid "Access to metadata catalog"
+msgstr ""
+
+#: templates/index.html:188
+msgid "Download app"
+msgstr ""
+
+#: templates/index.html:190
+msgid "Download"
+msgstr ""
+
+#: templates/index.html:190
+msgid "mobile application"
+msgstr ""

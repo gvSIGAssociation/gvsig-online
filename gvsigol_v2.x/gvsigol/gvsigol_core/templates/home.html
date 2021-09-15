@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-4">
+
+		<div class="box">
+		
+			<div class="box-body box-profile">
+				<img class="profile-user-img img-responsive img-circle"
+					src="{% static "img/user.png" %}" alt="User profile picture">
+				<h3 class="profile-username text-center">{{user.first_name}} {{user.last_name}}</h3>
+			</div>
+
+			<div class="box-body">
+				<strong><i class="fa fa-user margin-r-5"></i> {% trans "Username" %}</strong>
+				<p class="text-muted">{{user.username}}</p><hr>
+				<strong><i class="fa fa-envelope margin-r-5"></i> {% trans "Email" %}</strong>
+				<p class="text-muted">{{user.email}}</p><hr>
+				<strong><i class="fa fa-shield margin-r-5"></i> {% trans "Is admin?" %}</strong>
+				{% if user.is_superuser %}
+				<p class="text-muted">{% trans "You are logged in as root" %}</p><hr>
+				{% elif not user.is_superuser and user.is_staff %}
+				<p class="text-muted">{% trans "You are logged in as management user" %}</p><hr>
+				{% else %}
+				<p class="text-muted">{% trans "You are logged in as basic user" %}</p><hr>
+				{% endif %}
+				<strong><i class="fa fa-clock-o margin-r-5"></i> {% trans "Last login" %}</strong>
+				<p class="text-muted">{{user.last_login}}</p><hr>
+				
+				{% if external_ldap_mode %}
+				<strong><i class="fa fa-lock margin-r-5"></i> {% trans "Password" %}</strong>
+				<p class="text-muted"><a href="" id="show-hide-pass-update-link">{% trans "Click here" %}</a> {% trans "to update your password" %}</p>
+
+				<div id="show-hide-pass-update-div" class="hide">
+					<div id="form-error" class="hide" style="color: #ff0000;">
+						<p>* {% trans "Passwords doesn't match" %}</p>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="password1">{% trans "New password" %}</label>
+							<input placeholder='{% trans "New password" %}' name="password1" id="password1" type="password" class="form-control"> 
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="password2">{%trans "Repeat new password" %}</label>
+							<input placeholder='{% trans "Repeat new password" %}' name="password2" id="password2" type="password" class="form-control"> 							
+						</div>
+					</div>
+
+					<div class="box-footer">
+						<button id="update-password-submit" class="btn btn-default">{%trans "Update password" %}</button>
+					</div>
+				</div>
+				{% endif %}
+
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-8">
+		<div id="project-list-box" class="box searchable-list-box">
+			<div class="box-header with-border">
+				<h3 class="box-title col-md-6">{% trans "Private projects list" %}</h3>
+				<div class="col-md-6">
+					{% if user.is_staff %}
+					<button id="button-add-project" class="btn btn-box-tool" title='{% trans "Add project" %}' style="float:right;position:relative;z-index:10;"><i class="fa fa-plus margin-r-5"></i></button>
+					{% endif %}
+					<input type="text" class="search form-control" style="padding-right: 30px;position: absolute;" placeHolder="{% trans 'Search projects...' %}" />
+				</div>
+			</div>
+			<div class="box-body">
+				<ul class="products-list product-list-in-box list">
+					{% for project in projects %}
+					<li class="item">
+						<div class="product-img">
+							<img src={{project.image}} alt="Project Image">
+						</div>
+						<div class="product-info">
+							<a href="/gvsigonline/core/load/{{project.name}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
+							<span class="product-description"> {{project.description}}</span>
+						</div>
+					</li>
+					{% endfor %}
+				</ul>
+				<ul class="pagination"></ul>
+			</div>
+			
+		</div>
+		<!-- /.box -->
+	</div>
+	
+	<div class="col-md-8">
+		<div id="project-list-box2" class="box searchable-list-box">
+			<div class="box-header with-border">
+				<h3 class="box-title col-md-6">{% trans "Public projects list" %}</h3>
+				<div class="col-md-6">
+					<input type="text" class="search2 form-control" style="padding-right: 30px;position: absolute;" placeHolder="{% trans 'Search projects...' %}" />
+				</div>
+			</div>
+			<div class="box-body">
+				<ul class="products-list product-list-in-box list2">
+					{% for project in public_projects %}
+					<li class="item">
+						<div class="product-img">
+							<img src={{project.image}} alt="Project Image">
+						</div>
+						<div class="product-info">
+							<a href="/gvsigonline/core/load/{{project.name}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
+							<span class="product-description"> {{project.description}}</span>
+						</div>
+					</li>
+					{% endfor %}
+				</ul>
+				<ul class="pagination"></ul>
+			</div>
+			
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-home').addClass("active");
+</script>
+<script>
+	$('#show-hide-pass-update-link').click( function(e) {
+		e.preventDefault();
+		var div = $('#show-hide-pass-update-div')[0];
+		if (div.className == 'hide') {
+			div.className = div.className.replace('hide', 'show');
+		} else if (div.className == 'show') {
+			div.className = div.className.replace('show', 'hide');
+		}
+	});
+	
+	$('#button-add-project').click( function() {
+		location.href = '/gvsigonline/core/project_add/';
+	});
+	
+	$('#update-password-submit').click( function() {
+		var pass1 = $('#password1').val();
+		var pass2 = $('#password2').val();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/auth/password_update/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: {
+		  		'password1': pass1,
+				'password2': pass2
+		  	},
+			success	:function(response){
+				if (response.success == true) {
+					location.href = '/gvsigonline/auth/logout_user/';
+				} else {
+					var error = $('#form-error')[0];
+					if (error.className == 'hide') {
+						error.className = error.className.replace('hide', 'show');
+					} else if (error.className == 'show') {
+						error.className = error.className.replace('show', 'hide');
+					}
+				} 
+				
+			},
+			error: function(){}
+		});
+	});
+	
+	$().ready(function() {
+		var searcheableList = new List('project-list-box', {
+  		  valueNames: ['product-title'],
+  		  listClass:'list',
+  		  searchClass: 'search',
+  		  page: 5,
+  		  pagination: false
+  		});
+		
+		var searcheableList2 = new List('project-list-box2', {
+	  		  valueNames: ['product-title'],
+	  		  listClass:'list2',
+	  		  searchClass: 'search2',
+	  		  page: 5,
+	  		  pagination: false
+	  		});
+	});
+</script>
+{% endblock %}

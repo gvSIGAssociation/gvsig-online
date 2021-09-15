@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+
+{% if redirect_to_layergroup %}
+<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/?redirect=layergroup-redirect">
+{% else %}
+<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/">
+{% endif %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button id="submit-button" class="btn btn-default btn-sm save-button">{% trans "Save" %}</button>
+				</div>
+			</div>
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					{% for field, msg in form.errors.iteritems %}
+						<li>{{ msg|striptags }}</li>
+					{% endfor %}
+					</ul>
+				</div>
+			</div>				
+		</div>
+		
+		<ul class="nav nav-tabs">
+          	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
+          	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
+          	<li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+          	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
+          	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
+        </ul>
+        	
+        <div class="tab-content">
+        
+          	<div class="tab-pane active" id="tab-layer-general">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_datastore">{% trans "Data Store" %}</label>
+										{{ form.datastore }}						
+									</div>
+								</div>								
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_name">{% trans "Resource name" %}</label>
+										{{ form.name }}						
+									</div>
+								</div>							
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_title">{% trans "Title" %}</label>
+										{{ form.title }}						
+									</div>
+								</div>				
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_layer_group">{% trans "Layer group" %}</label>
+										{{ form.layer_group }}						
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_format">{% trans "Format" %}</label>
+										{{ form.format }}						
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+          	
+          	<div class="tab-pane" id="tab-layer-properties">
+		    	<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+		          			<div class="box-body">
+		          				<div class="row">
+		          					<div class="col-md-4 form-group">
+										<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
+										<input name="timeout" id="timeout" value="30000" type="number" class="form-control">														
+									</div>
+		          					<div class="col-md-4 form-group vector_fields">
+										<label for="max_features">{% trans "WFS request feature limit" %}</label>
+										<input name="max_features" id="max_features" value="0" type="number" class="form-control">														
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="visible" id="visible"/>
+										<label for="visible">{% trans "Visible" %}</label>														
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="cached" id="cached"/>
+										<label for="cached">{% trans "Cached" %}</label>	
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="queryable" id="queryable" checked/>
+										<label for="queryable">{% trans "Queryable" %}</label>
+									</div>						
+								</div>					
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="single_image" id="single_image" />	
+										<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="time_enabled"  id="time_enabled"/>
+										<label for="time_enabled">{% trans "time_enabled" %}</label>
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="allow_download"  id="allow_download"/>
+										<label for="allow_download">{% trans "Allow downloads" %}</label>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="real_time" id="real_time"/>
+										<label for="real_time">{% trans "View in real time" %}</label>														
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-4 form-group">
+									  	<label for="update_interval">{% trans "Update interval (miliseconds)" %}</label>
+									  	<input name="update_interval" id="update_interval" value="1000" type="number" class="form-control">														
+								  	</div>
+							  	</div>
+								
+								<div class="box-body time_enabled-check">
+									<div class="image_mosaic_tmp_fields">
+										<div class="row">
+											<div class="col-md-12 form-group">
+												<label class="active" for="id_time_enabled_field">{% trans "time_enabled field" %}</label>
+												{{ form.time_enabled_field }}
+											</div>
+										</div>
+								
+										<div class="row">
+											<div class="col-md-12 form-group">
+												<label class="active" for="id_time_enabled_endfield">{% trans "End time_enabled field" %}</label>
+												{{ form.time_enabled_endfield }}
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_resolution">{% trans "Time resolution" %}</label>
+											{{ form.time_resolution }}
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_presentation">{% trans "Time presentation" %}</label>
+											{{ form.time_presentation }}
+										</div>
+									</div>	
+									<div class="row time_presentation">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_resolution">{% trans "Time resolution (years, months, weeks, days, hours, minutes and seconds)" %}</label><br />
+											
+											{{ form.time_resolution_year }}
+											{{ form.time_resolution_month }}
+											{{ form.time_resolution_week }}
+											{{ form.time_resolution_day }}
+											{{ form.time_resolution_hour }}
+											{{ form.time_resolution_minute }}
+											{{ form.time_resolution_second }}
+											
+											<div style="clear:both"></div>
+										</div>
+									</div>			
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_default_value_mode">{% trans "Default value mode" %}</label>
+											{{ form.time_default_value_mode }}
+										</div>
+									</div>					
+									<div class="row time_default_value">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_default_value">{% trans "Default value" %}</label>
+											<div class="input-group date col-md-12" id="datetimepicker">
+												{{ form.time_default_value }}
+												<!--  <input id="id_time_default_value" name="time_default_value" class="form-control"/>-->
+												<span class="input-group-addon">
+													<span class="glyphicon glyphicon-calendar"></span>
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>	
+							</div>
+						</div>
+					</div>
+				</div>
+		    </div>
+			<div class="tab-pane" id="tab-layer-permissions">
+				{% include "select_layer_permissions.html" %}
+			</div>
+		    <div class="tab-pane" id="tab-layer-metadata">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
+							        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
+							        </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+          	
+          	<div class="tab-pane" id="tab-layer-detailedinfo">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+          						<div class="row">
+	          						<div class="col-md-6 form-group">
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
+										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+									</div>
+								</div>	
+	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
+										<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+									</div>
+								</div>	
+									
+								<div style="display: none;" class="row" id="detailed_info_html-row">
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_html">{% trans "HTML" %}</label>
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>						
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+        		
+		</div> 	
+	</div>		
+</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	var datastore_types = {{ datastore_types|safe }};
+	
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layers').addClass("active");
+	
+	$('.save-button').click( function() {
+		$("body").overlay();
+	});
+
+	function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
+		selectObj.empty().html(' ');
+		var attribs = {
+			value: '__disabled__',
+			text: placeholderOptionText,
+			disabled: 'disabled',
+			
+		};
+		if (placeholderSelected) {
+			attribs['selected'] = 'selected';
+		} 
+		selectObj.append($('<option>', attribs));
+		if (extraOptions) {
+			for (var i=0; i<extraOptions.length; i++) {
+				selectObj.append(extraOptions[i]);
+			}
+		}
+	};
+	
+	function make_temporal_form(){
+		$(".time_presentation").css("display", "none");
+		$(".time_default_value").css("display", "none");
+		
+		var tm_pr = $("#id_time_presentation option:selected").text();
+		if(tm_pr == "DISCRETE_INTERVAL"){
+			$(".time_presentation").css("display", "block");
+		}
+		
+		var tm_dv = $("#id_time_default_value_mode option:selected").text();
+		if(tm_dv == "NEAREST" || tm_dv == "FIXED"){
+			$(".time_default_value").css("display", "block");
+			$('#datetimepicker').datetimepicker({
+				format: 'DD-MM-YYYY HH:mm:ss',
+				showClose: true
+			});
+		}
+		
+	};
+	
+	function create_date_select(field, data, previousValue){
+		var language = $("#select-language").val();
+		var name_select = $("#"+field);
+		var placeholderSelected = true;
+		
+		if (data==null || data.length==0) {
+			var text = "{% trans 'Resource contains no fields' %}";
+			rebuildSelect(name_select, text, true);
+			$.overlayout();
+			return;
+		}
+		var options = [];
+		options.push($('<option>'));
+		for (var i=0; i<data.length; i++) {
+			var attribs = {
+				value: data[i]["name"],
+				text: data[i]["title-" + language]
+			};
+			if (previousValue == data[i]["name"]) {
+				attribs['selected']='true';
+				placeholderSelected = false;
+			}
+			options.push($('<option>', attribs));
+		}
+		var text = '{% trans "Choose field" %}';
+		rebuildSelect(name_select, text, placeholderSelected, options);
+	};
+
+	
+	function temporary_field(field){
+		if(field.prop("checked")){
+			field.parent().addClass("time_enabled-check");
+			$(".box-body.time_enabled-check").css("display", "block");
+			$("#select2-id_layer_group-container").parent().each(function(){
+				//field.css("width", "100%");
+			});
+		}else{
+			field.parent().removeClass("time_enabled-check");
+			$(".box-body.time_enabled-check").css("display", "none");
+		}
+	};
+
+	function updateResourceList(id_datastore) {
+		if (id_datastore) {
+			$("body").overlay();
+			$.getJSON("{% url 'backend_resource_list_available' %}", {id_datastore: id_datastore}, function(data){
+				var name_select = $("#id_name");
+				var previousValue = name_select.val();
+				var placeholderSelected = true;
+				
+				if (data==null || data.length==0) {
+					var text = "{% trans 'Data store contains no resources to publish' %}";
+					rebuildSelect(name_select, text, true);
+					$.overlayout();
+					return;
+				}
+				var options = [];
+				for (var i=0; i<data.length; i++) {
+					var attribs = {
+						value: data[i],
+						text: data[i]
+					};
+					if (previousValue == data[i]) {
+						attribs['selected']='true';
+						placeholderSelected = false;
+					}
+					options.push($('<option>', attribs));
+				}
+				var text = '{% trans "Choose resource" %}';
+				rebuildSelect(name_select, text, placeholderSelected, options);
+				$.overlayout();
+				
+			}).fail(function() {
+				var name_select = $("#id_name");
+				var text = "{% trans 'Service is unavailable' %}";
+				rebuildSelect(name_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var name_select = $("#id_name");
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(name_select, text, true);
+		}
+	};
+	
+	function updateLayerGroupList(id_datastore) {
+		if (id_datastore) {
+			$("body").overlay();
+			$.getJSON("{% url 'backend_layergroup_list_available' %}", {id_datastore: id_datastore}, function(data){
+				var layer_group_select = $("#id_layer_group");
+				var previousValue = layer_group_select.val();
+				var placeholderSelected = true;
+				
+				if (data==null || data.length==0) {
+					var text = "{% trans 'No layer groups available' %}";
+					rebuildSelect(layer_group_select, text, true);
+					$.overlayout();
+					return;
+				}
+				var options = [];
+				for (var i=0; i<data.length; i++) {
+					var attribs = {
+						value: data[i].value,
+						text: data[i].text
+					};
+					if (previousValue == data[i]) {
+						attribs['selected']='true';
+						placeholderSelected = false;
+					}
+					options.push($('<option>', attribs));
+				}
+				var text = '{% trans "Choose layer group" %}';
+				rebuildSelect(layer_group_select, text, placeholderSelected, options);
+				$.overlayout();
+				
+			}).fail(function() {
+				var layer_group_select = $("#id_layer_group");
+				var text = "{% trans 'No layer groups available' %}";
+				rebuildSelect(layer_group_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var layer_group_select = $("#id_layer_group");
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(layer_group_select, text, true);
+		}
+	};
+	
+	
+	function updateDateFieldList(resource_name, id_datastore) {
+		if (id_datastore) {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/get_date_fields_from_resource/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: {
+					'name': resource_name, 
+					'datastore': id_datastore
+				},
+				success	:function(response){
+					var data = response['date_fields'];
+					var name_select = $("#id_time_enabled_field");
+					var name_select2 = $("#id_time_enabled_endfield");
+					var previousValue = name_select.val();
+					var placeholderSelected = true;
+					
+					if (data==null || data.length==0) {
+						var text = "{% trans '-----------' %}";
+						rebuildSelect(name_select, text, true);
+						rebuildSelect(name_select2, text, true);
+						$.overlayout();
+						return;
+					}
+					var options = [];
+					var options2 = [];
+					options2.push($('<option>'));
+					for (var i=0; i<data.length; i++) {
+						var attribs = {
+							value: data[i],
+							text: data[i]
+						};
+						if (previousValue == data[i]) {
+							attribs['selected']='true';
+							placeholderSelected = false;
+						}
+						options.push($('<option>', attribs));
+						options2.push($('<option>', attribs));
+					}
+					var text = '{% trans "Choose date field" %}';
+					rebuildSelect(name_select, text, placeholderSelected, options);
+					rebuildSelect(name_select2, text, placeholderSelected, options2);
+					$.overlayout();
+				},
+				error: function(){
+					var name_select = $("#id_time_enabled_field");
+					var text = "{% trans '-----------' %}";
+					rebuildSelect(name_select, text, true);
+					rebuildSelect(name_select2, text, true);
+					$.overlayout();
+				}
+			});
+			
+		}
+		else {
+			var name_select = $("#id_name");
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(name_select, text, true);
+			rebuildSelect(name_select2, text, true);
+		}
+	};
+	
+	function fileExists(url) {
+	    if(url){
+	        var req = new XMLHttpRequest();
+	        req.open('GET', url, false);
+	        req.send();
+	        return req.status==200;
+	        
+	    } else {
+	        return false;
+	    }
+	};
+	
+	$(document).ready(function() {
+		var searcheableReadList = new List('read-list-box', {
+			valueNames: ['product-title'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 5,
+			pagination: false
+		});
+		var searcheableWriteList = new List('write-list-box', {
+				valueNames: ['product-title'],
+				listClass:'list',
+				searchClass: 'search',
+				page: 5,
+				pagination: false
+			});
+		$("#submit-button").click(function(e){
+			for(var i=0; i<searcheableReadList.items.length; i++){
+				var item = searcheableReadList.items[i];
+				item.show();
+			}
+			for(var i=0; i<searcheableWriteList.items.length; i++){
+				var item = searcheableWriteList.items[i];
+				item.show();
+			}
+			$(".layer-read-checkbox").prop( "disabled", false)
+			$("#layer-add-form").submit();
+			return false; 
+		});
+		
+		var detailedInfoHTML = document.getElementById('detailed_info_html');
+		var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
+			mode: "text/html",
+	        extraKeys: {"Ctrl-Space": "autocomplete"},
+			theme: "xq-dark",
+			lineNumbers: true
+		});
+		
+		var code = '';
+		if (fileExists(HTML_PATH + 'detailed_info.html')) {
+			code += '<iframe width="800" height="600" src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
+			
+		} else {
+			code += '<div class="col-md-12"> \n';
+			code += '\t <h2>{% trans "Layer title" %}</h2> \n';
+			code += '\t <p>{% trans "Layer description" %}</p> \n';
+			code += '</div> \n';
+		}
+		
+		$('#detailed_info_enabled').click(function(){
+			if ($('#detailed_info_enabled').is(":checked")) {
+				$('#detailed_info_button_title-row').css('display', 'block');
+				$('#detailed_info_html-row').css('display', 'block');
+				codemirror.setValue(code);
+				codemirror.refresh();
+				
+			} else {
+				$('#detailed_info_button_title-row').css('display', 'none');
+				$('#detailed_info_html-row').css('display', 'none');
+			}
+		});
+		
+		updateResourceList($("#id_datastore").val());
+		updateLayerGroupList($("#id_datastore").val());
+		
+	
+		$("#id_datastore").change(function() {
+			var id_datastore = $('option:selected', $(this)).val();
+			updateResourceList(id_datastore);
+			updateLayerGroupList(id_datastore);
+			
+			if (id_datastore in datastore_types) {
+				if(datastore_types[id_datastore].startsWith('v_')){
+					$(".vector_fields").css("display", "block");
+				}
+				else {
+					$(".vector_fields").css("display", "none");
+				}
+				if(datastore_types[id_datastore].startsWith('c_')){
+					$(".image_mosaic_tmp_fields").css("display", "none");
+				}else{
+					$(".image_mosaic_tmp_fields").css("display", "block");
+				}
+
+			}/* else {
+				$(".image_mosaic_tmp_fields").css("display", "block");
+			}*/
+			
+		});
+		
+		$("#id_name").change(function() {
+			var id_resource = $('option:selected', $(this)).val();
+			var id_datastore = $('#id_datastore option:selected').val();
+			updateDateFieldList(id_resource, id_datastore);
+		});
+
+		// translate default layer group
+		var lgs = $("#id_layer_group");
+		var lg_options = $("#id_layer_group option");
+		for (var i=0; i<lg_options.length; i++) {
+			text = $(lg_options[i]).text();
+			if (text=="__default__") {
+				$(lg_options[i]).html('{% trans "Default" %}');
+			}
+		}
+		
+		$('#time_enabled').click(function(){
+			temporary_field($(this));
+		});
+		
+		temporary_field($('#time_enabled'));
+
+		$("#id_time_presentation").change(function(){
+			make_temporal_form();
+		});
+		
+		$("#id_time_default_value_mode").change(function(){
+			make_temporal_form();
+		})
+		
+		make_temporal_form();
+		
+		var layergroup_id = "{{layergroup_id}}";
+		if(layergroup_id != "None"){
+			$("#id_layer_group").val(layergroup_id).trigger('change');
+		}
+		handleIsPublicResourceCheckbox(searcheableReadList);
+	});
+</script>
+{% endblock %}

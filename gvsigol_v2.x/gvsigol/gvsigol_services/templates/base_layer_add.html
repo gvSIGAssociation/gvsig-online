@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<form role="form" method="post" action="/gvsigonline/services/base_layer/base_layer_add/">
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+				</div>
+			</div>				
+		</div>
+		<div class="box padding-20">
+			{% csrf_token %}
+			<div id="form-error" style="color:#ff0000;">
+				<ul>
+				{% if form.errors %}
+				{% for field in form %}
+					{% if field.errors %}
+						<li>{{field.label}}. {{ field.errors|striptags }}</li>
+					{% endif %}	
+				{% endfor %}
+				{% for field, msg in form.errors.iteritems %}
+					<li>{{ msg|striptags }}</li>
+				{% endfor %}
+				{% endif %}
+				</ul>
+			</div>				
+			<div class="box-body">
+				<div class="row">		
+					<div class="col-md-12 form-group">
+						<label for="id_type">{% trans "Type" %}</label>
+						{{ form.type }}
+					</div>	
+				</div>	
+				<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_url">{% trans "Url" %}</label>
+						{{ form.url }}
+					</div>	
+				</div>
+				<div class="row layers-control wms-control wmts-control">
+					<div class="col-md-9 form-group">
+						<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>					
+					</div>
+					<div class="col-md-3 form-group">
+						<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>					
+					</div>
+				</div>
+				<div class="row">		
+					<div class="col-md-12 form-group">
+						<label for="id_title">{% trans "Title" %}</label>
+						{{ form.title }}
+					</div>	
+				</div>
+				<div class="row layers-control wms-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_version">{% trans "Version" %}</label>
+						{{ form.version }}
+					</div>	
+				</div>
+				<div class="row layers-control bing-control wms-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_layers">{% trans "Layers" %}</label>
+						{{ form.layers }}
+						<datalist id="id_layer_list">
+						</datalist>
+					</div>	
+				</div>
+				<div class="row layers-control wms-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_format">{% trans "Format" %}</label>
+						{{ form.format }}
+						<datalist id="id_format_list">
+						</datalist>
+					</div>	
+				</div>
+				<div class="row layers-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_format">{% trans "MatrixSet" %}</label>
+						{{ form.matrixset }}
+					</div>	
+				</div>
+				<div class="row layers-control bing-control xyz-control osm-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_apikey">{% trans "Api-key" %}</label>
+						{{ form.key }}
+					</div>	
+				</div>												
+			</div>									
+		</div>
+	</div>				
+</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-baselayers').addClass("active");
+</script>
+
+<script type="text/javascript">
+	
+
+$().ready(function(){ 
+	var url = "";
+	var format_or = "";
+	var matrixset = "";
+	var version = "";
+	var layer = "";
+	var bing_layers = {{bing_layers|safe}};
+	
+	function updateFormfields(){
+		var type = $("#id_type option:selected").val();
+		$(".layers-control").css("display","none");
+		$("."+type.toLowerCase()+"-control").css("display","block");
+		
+		if(type == "Bing"){
+			$("#id_layers").empty();
+			for(index in bing_layers){
+				$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
+			}
+		}
+	};
+	
+	$("#id_type").change(function(){
+		updateFormfields();
+	})
+	
+	updateFormfields();
+	
+	$("#connect-button").click(function() {
+		//getLayersFromCapabilities(this.value);
+		url = $("#id_url").val();
+		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
+		if(!url.includes(hostname+"/")){
+			$(".alert-box-message").css("display", "block");
+		}else{
+			$(".alert-box-message").css("display", "none");
+		}
+
+		type = $("#id_type option:selected").val();
+		version = "";
+		
+		getNewLayersFromCapabilities(url, type, version, "", true);
+	});
+	
+	function getNewLayersFromCapabilities(url, type, version, layer, edit_version){
+		$.ajax({
+	        type: "POST",
+			url: "/gvsigonline/services/base_layer/get_capabilities_from_url/",
+			async: false,
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data:{
+				'url': url,
+				'type': type,
+				'version': version,
+				'layer': layer
+			},
+			success: function(data) {
+				if('response' in data && data['response'] == '500'){
+					$("#form-error ul").empty().append("<li>"+gettext('Error in GetCapabilities')+': '+data['message']+'</li>')
+				}else{		
+				if('title' in data){
+					if($("#id_title").val() == ""){
+						$("#id_title").val(data['title']);
+					}
+				}
+				
+				 if('layers' in data){
+					$("#id_layers").empty();
+					var layers = data['layers'];
+					for(var i=0;i<layers.length; i++){
+	 					if(layers[i] == layer){
+							$("#id_layers").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+						}else{
+	 						$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+						}
+					}
+				}
+				 
+				 if('formats' in data){
+					 $("#id_format").empty();
+						var layers = data['formats'];
+						for(var i=0;i<layers.length; i++){
+		 					if(layers[i] == format_or){
+								$("#id_format").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
+						}
+					}
+				 
+				 if(type == "WMTS" && 'matrixsets' in data){
+					 $("#id_matrixset").empty();
+						var layers = data['matrixsets'];
+						for(var i=0;i<layers.length; i++){
+		 					if(layers[i] == matrixset){
+								$("#id_matrixset").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
+						}
+					}
+				 
+				 if(edit_version && 'version' in data){
+					 var version = data['version'];
+					 $("#id_version").empty();
+					 if(version == '1.0.0'){
+						 $("#id_version").append("<option value=\"1.0.0\" selected>1.0.0</option>")
+					 }
+					 
+					 if(version == '1.1.1'){
+						 $("#id_version").append("<option value=\"1.1.1\" selected>1.1.1</option>")
+					 }else{
+						 if(version != '1.0.0'){
+						 	$("#id_version").append("<option value=\"1.1.1\">1.1.1</option>")
+						 }
+					 }
+					 
+					 if(version == '1.3.0'){
+						 $("#id_version").append("<option value=\"1.3.0\" selected>1.3.0</option>")
+					 }
+					 
+					 $("#id_version").unbind("change").change(function() {
+							url = $("#id_url").val();
+							type = $("#id_type option:selected").val();
+							version = $("#id_version option:selected").val();
+							layer = $("#id_layers option:selected").val();
+							matrixset = $("#id_matrixset option:selected").val();
+							format_or = $("#id_format option:selected").val();
+							
+							getNewLayersFromCapabilities(url, type, version, layer, false);
+							$('#id_version option[value="'+version+'"]').prop('selected', true);
+						});
+						
+					$("#id_layers").unbind("change").change(function() {
+							url = $("#id_url").val();
+							type = $("#id_type option:selected").val();
+							version = $("#id_version option:selected").val();
+							layer = $( this ).val();
+							matrixset = $("#id_matrixset option:selected").val();
+							format_or = $("#id_format option:selected").val();
+							
+							getNewLayersFromCapabilities(url, type, version, layer, false);
+							$('#id_layers option[value="'+layer+'"]').prop('selected', true);
+						});
+				 }
+				 
+			  }
+			},
+			error: function(err){
+				alert(gettext("Error trying to connect"));
+			}
+		});
+		
+	}
+	
+});
+</script>
+{% endblock %}

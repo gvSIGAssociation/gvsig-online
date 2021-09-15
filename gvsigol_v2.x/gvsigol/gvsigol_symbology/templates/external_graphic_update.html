@@ -1,0 +1,173 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<form role="form">	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button id="delete-symbol" type="button" class="btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>	
+						<button id="save-symbol" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</button>					
+					</div>
+				</div>				
+			</div>
+			<div class="box">	
+				<div class="box-body">
+					{% csrf_token %}					
+					<div class="row">
+						<div class="col-md-2">
+							<div class="output-eg-div">
+								<img id="output-eg" src="{{rule.symbolizer_online_resource}}" class="output-eg"/>
+							</div>
+						</div>
+						<div class="col-md-10">
+							<div id="form-error" style="color:#ff0000;"></div>
+							<div class="form-group">
+								<label>{% trans "Name" %}</label>
+								<input disabled placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
+							</div>	
+							<div class="form-group">
+								<label>{% trans "Title" %}</label>
+					    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" value="{{rule.title}}" class="form-control">
+							</div>
+							<div class="form-group">
+								<p class="text-muted">* {% trans "Specifies a title for the rule. The title is used in display lists and legends" %}.</p>
+							</div>
+							<div class="form-group">
+								<label>{% trans "Select image" %}</label>
+								<input id="eg-file" name="eg-file" type="file" accept=".png" onchange="loadFile(event)" class="file" data-show-preview="true">
+							</div>
+							<div class="form-group">
+								<label>{% trans "Size" %}</label>
+					    		<input placeholder="{% trans 'Symbol size (in pixels)' %}" name="symbol-size" id="symbol-size" type="number" value="{{rule.symbolizer_size}}" class="form-control">
+							</div>
+							<div class="form-group">
+								<label>{% trans "Select format" %}</label>
+								<select id="eg-format" class="form-control">
+									<option value="image/png" selected>{{rule.symbolizer_format}}</option>
+								</select>
+							</div>
+						</div>						
+					</div>						
+	           	</div>	
+			</div>
+		</div>				
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-libraries').addClass("active");
+	var loadFile = function(event) {
+		$("#form-error").empty();
+		if (event.target.files[0].type == 'image/png') {
+			var output = document.getElementById('output-eg');
+		   	output.src = URL.createObjectURL(event.target.files[0]);
+		   	
+		} else {
+			$("#eg-file").val("");
+			$("#form-error").append('<p>*{% trans "The file format is not supported" %}</p>');
+		}
+	 };
+</script>
+<script>
+$(document).ready(function() {
+	
+	var output = document.getElementById('output-eg');
+	var old = output.src;
+	
+	var size = $("#symbol-size").val();
+	$('#output-eg').css("height",size+"px");
+	$('#output-eg').css("width","auto");
+	
+	$("#symbol-size").on('change', function(){
+		var size = $("#symbol-size").val();
+		$('#output-eg').css("height",size+"px");
+		$('#output-eg').css("width","auto");
+	});
+	
+	$("form").submit(function(evt){	 
+		evt.preventDefault();
+
+		$("#form-error").empty();
+		var name = $("#symbol-name").val();
+		var title = $("#symbol-title").val();
+		var format = $("#eg-format").val();
+		var size = $("#symbol-size").val();
+		
+	   	var formData = new FormData($(this)[0]); 	   	
+	   	
+   		var externalGraphic = new ExternalGraphicSymbolizer(name, format, size, '{{rule.symbolizer_online_resource}}');
+		var symbolizer = {
+			type: externalGraphic.type,
+			json: externalGraphic.toJSON(),
+			order: 0
+		};
+		
+		var symbol = {
+			file_name: old,
+			name: name,
+			title: title,
+			order: 0,
+			symbolizers: [symbolizer]
+		};
+		
+		formData.append('rule', JSON.stringify(symbol));
+		
+		$.ajax({
+			url: "/gvsigonline/symbology/symbol_update/{{rule.id}}/",
+			type: "POST",
+			async: false,
+			cache: false,
+	     	contentType: false,
+	     	enctype: 'multipart/form-data',
+	     	processData: false,			
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: formData,
+			success: function(response){
+				if (response.success) {
+					location.href = "/gvsigonline/symbology/library_update/" + response.library_id + "/";
+				} else {
+					$("#form-error").append('<p>*' + response.message + '</p>');
+				}
+				
+			},
+		    error: function(){}
+		});
+	   	
+		return false;
+	});
+	
+	$("#delete-symbol").on('click', function(){
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/symbol_delete/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: {
+				symbol_id: "{{rule.id}}"
+			},
+			success: function(response){
+				if (response.success) {
+					location.href = "/gvsigonline/symbology/library_update/" + response.library_id + "/";
+				} else {
+					$("#form-error").append('<p>*' + response.message + '</p>');
+				}
+				
+			},
+		    error: function(){}
+		});
+	});
+
+});
+</script>
+{% endblock %}

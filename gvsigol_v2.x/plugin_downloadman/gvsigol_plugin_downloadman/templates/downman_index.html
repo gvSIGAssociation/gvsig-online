@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">	
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					{% for field, msg in form.errors.iteritems %}
+						<li>{{ msg|striptags }}</li>
+					{% endfor %}
+					</ul>
+				</div>
+			</div>			
+		</div>
+		
+		<ul id="navigationTabs" class="nav nav-tabs">
+			{% if activetab == "pendingauth" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting approval" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting approval" %}</a></li>
+			{% endif %}
+			{% if activetab == "active" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=active" >{% trans "Active download requests" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=active" >{% trans "Active download requests" %}</a></li>
+			{% endif %}
+			{% if activetab == "archived" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=archived" >{% trans "Archived download requests" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=archived" >{% trans "Archived download requests" %}</a></li>
+			{% endif %}
+			{% if activetab == "settings" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=settings" >{% trans "Download manager settings" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=settings" >{% trans "Download manager settings" %}</a></li>
+			{% endif %}
+		</ul>
+		
+		<div class="tab-content">
+			{% if activetab != "settings" %}
+			<div class="tab-pane active" id="tab-download-requests">
+			{% else %}
+			<div class="tab-pane" id="tab-download-requests">
+			{% endif %}
+				<div class="box">
+					<div id="form-error" style="color:#ff0000;">
+					</div>
+					<div class="box-body">
+						<table class="table" id="requests-table">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>{% trans "Date" %}</th>
+									<th>{% trans "Status" %}</th>
+									<th>{% trans "User" %}</th>
+									<th>{% trans "Contents" %}</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for download_request in download_requests %}
+								<tr>
+									<td>{{ download_request.id }}</td>
+									<td>{{ download_request.requested_date }}</td>
+									<td>{{ download_request.status_authorization }}</td>
+									<td>{% if download_request.requested_by_user %} {{ download_request.requested_by_user}} {% else %} {{ download_request.requested_by_external}} {% trans '(External user)' %} {% endif %}</td>
+									<td>{{ download_request.contents_details }}</td>
+									<td><a href="{% url 'downman-update-request' request_id=download_request.id %}"><button type="button" name="button-update-request" data-toggle="tooltip" data-placement="bottom" title="{% trans 'Update request' %}" class="btn btn-success"><i class="fa fa-edit"></i></button></a></td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			{% if activetab == "settings" %}
+			<div class="tab-pane active" id="tab-downman-settings">
+			{% else %}
+			<div class="tab-pane" id="tab-downman-settings">
+			{% endif %}
+				<form role="form" method="post" action="{% url 'downman-settings-store' %}?tab=settings">
+					{% csrf_token %}
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-body">
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="validity">{% trans "Default validity (seconds)" %}</label>
+											<div class="input-group">
+												<input class="form-control" type="number" name="validity" id="validity" value="{{ validity }}" />
+												<span class="input-group-addon" id="validity_human_readable"></span>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="max_public_download_size">{% trans "Maximum size for public downloads (MB)" %}</label>
+											<div class="input-group">
+												<input class="form-control" type="number" name="max_public_download_size" id="max_public_download_size" value="{{max_public_download_size}}" />
+												<span class="input-group-addon" id="max_public_download_size_human_readable"></span>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="shopping_cart_max_items">{% trans "Maximum number of allowed items in the download list" %}</label>
+											<input class="form-control" type="number" name="shopping_cart_max_items" id="shopping_cart_max_items" value="{{shopping_cart_max_items}}" />
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="notifications_admin_emails">{% trans "Notifications: admin emails" %}</label>
+											<input class="form-control" name="notifications_admin_emails" id="notifications_admin_emails" value="{{notifications_admin_emails}}" />
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<div class="box-tools pull-right">
+												<button id="form-submit-button" type="submit" class="btn btn-default btn-sm">{% trans "Save" %}</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div> 
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+
+$('#menu-manage-plugins').addClass("active");
+$('#submenu-downloadman').addClass("active");
+
+	$(document).ready(function() {
+		var table = $('#requests-table').DataTable({
+			responsive: true,
+			language: {
+				processing		: '{% trans "Processing request..." %}',
+				search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+				lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+				info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+				infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+				infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+				infoPostFix		: "",
+				loadingRecords	: '{% trans "Loading..." %}',
+				zeroRecords		: '{% trans "No records available" %}',
+				emptyTable		: '{% trans "No records available" %}',
+				paginate: {
+					first		: '{% trans "First" %}',
+					previous	: '{% trans "Previous" %}',
+					next		: '{% trans "Next" %}',
+					last		: '{% trans "Last" %}'
+				},
+				aria: {
+					sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+					sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+				}
+			},
+			"order": [["0", "desc"]],
+			"dom": 'T<"clear">lfrtip',
+			"bLengthChange": false
+		});
+		
+		var getHumanReadableSeconds = function(validity) {
+			var val = parseInt(validity);
+			if (isNaN(val)) {
+				return "";
+			}
+			if (val/(60*60*24) > 1) {
+				var fmt = gettext("%(number)s days");
+				var valTxt = (val/(60*60*24)).toFixed(2);
+				return interpolate(fmt, {number: valTxt}, true);
+			}
+			else if (val/(60*60) > 1) {
+				var fmt = gettext("%(number)s hours");
+				var valTxt = (val/(60*60)).toFixed(2);
+				return interpolate(fmt, {number: valTxt}, true);
+			}
+			var fmt = gettext("%(number)s minutes");
+			var valTxt = (val/60).toFixed(2);
+			return interpolate(fmt, {number: valTxt}, true);
+		};
+		var getHumanReadableMegabytes = function(megabytes) {
+			var val = parseInt(megabytes);
+			if (isNaN(val)) {
+				return "";
+			}
+			if (val/(1024*1024) > 1) {
+				var fmt = gettext("%(number)s TB");
+				var valTxt = (val/(1024*1024)).toFixed(2);
+				return interpolate(fmt, {number: valTxt}, true);
+			}
+			else if (val/(1024) > 1) {
+				var fmt = gettext("%(number)s GB");
+				var valTxt = (val/(1024)).toFixed(2);
+				return interpolate(fmt, {number: valTxt}, true);
+			}
+			var fmt = gettext("%(number)s MB");
+			return interpolate(fmt, {number: val}, true);
+		};
+		
+		$('#validity_human_readable').html(getHumanReadableSeconds($('#validity').val()));
+		$('#validity').on('input', function(e) {
+			var val = $(this).val();
+			$('#validity_human_readable').html(getHumanReadableSeconds(val));
+		});
+		$('#max_public_download_size_human_readable').html(getHumanReadableMegabytes($('#max_public_download_size').val()));
+		$('#max_public_download_size').on('input', function(e) {
+			var val = $(this).val();
+			$('#max_public_download_size_human_readable').html(getHumanReadableMegabytes(val));
+		});
+	});
+
+</script>
+{% endblock %}
