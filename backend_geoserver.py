@@ -287,7 +287,27 @@ class Geoserver():
             logger.exception("Error creating datastore")
             print("Backend MapService - createDatastore Error", e)
             return False
-        
+
+    def get_datastore_params(self, datastore):
+        try:
+            ds = self.getGsconfig().get_store(datastore.name, workspace=datastore.workspace.name)
+            if ds is None:
+                return {}
+            else:
+                return ds.connection_parameters
+        except Exception as e:
+            print(str(e))
+            return {}
+
+    def datastore_check_exposed_pks(self, datastore):
+        """
+        Checks whether the datastore is configured to expose primary keys.
+        Returns True if the primary keys of the tables in the datastore are exposed
+        and False if they are hidden
+        """
+        params = self.get_datastore_params(datastore)
+        return True if params.get('Expose primary keys', 'false') == 'true' else False
+
     def datastore_exists(self, workspace, name):
         try:
             if self.getGsconfig().get_store(name, workspace=workspace):
@@ -651,26 +671,10 @@ class Geoserver():
         """
         updated_params = {}
         if attributes:
-            """
-            We need to refresh the datastore connection params to check whether primary keys are exposed
-            """
-            ds_conf = self.rest_catalog.get_datastore(layer.datastore.workspace.name, layer.datastore.name, user=self.user, password=self.password)
-            conn_param_list = ds_conf.get('dataStore', {}).get('connectionParameters', {}).get('entry', {})
-            conn_params = {}
-            for param in conn_param_list:
-                conn_params[param.get('@key')] = param.get('$')
-            include_pk = (conn_params.get('Expose primary keys', "false") == 'true')
-            """
-            Should we update datastore connection_params in gvsigol model?
-            It may become a confusing side effect of reloading the featuretype.
-            
-            layer.datastore.connection_params = json.dumps(conn_params)
-            layer.datastore.save()
-            """
-
+            include_pks = self.datastore_check_exposed_pks(layer.datastore)
             try:
                 conn, tablename, schema = utils.get_db_connect_from_layer(layer)
-                new_attrs = self._featuretype_attributes(conn, schema, tablename, include_pk=include_pk)
+                new_attrs = self._featuretype_attributes(conn, schema, tablename, include_pk=include_pks)
                 updated_params['attributes'] = {'attribute': new_attrs}
             finally:
                 conn.close()
@@ -1241,7 +1245,8 @@ class Geoserver():
                 
             for layer in Layer.objects.filter(datastore=datastore, source_name=name):
                 self.reload_featuretype(layer)
-                layer.get_config_manager().refresh_field_conf()
+                expose_pks = self.datastore_check_exposed_pks(datastore)
+                layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
                 layer.save()
             if not stderr:
                 return True
