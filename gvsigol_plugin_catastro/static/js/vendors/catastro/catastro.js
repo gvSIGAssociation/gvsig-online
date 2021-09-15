@@ -264,10 +264,10 @@ var	ui = '<ul class="nav nav-tabs">';
 	$.ajax({
 		type: 'POST',
 		async: false,
+		dataType: "xml",
 	  	url: provincias_url,
 		success: function(data){
 	  		var options = "<option value=\"---\">---</option>";
-
 	  		$(data).find('prov').each(function() {
                 var key = $(this).find("cpine").text();
                 var value = $(this).find("np").text();
@@ -277,7 +277,6 @@ var	ui = '<ul class="nav nav-tabs">';
 	  		$("#provincia-input").unbind("change").change(function(){
 	  			self.onMunicipallyKeyPress($(this).attr("id"));
 	  		})
-
 	  		$(".js-example-basic-single").select2();
 		},
 	  	error: function(){
