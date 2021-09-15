@@ -1,1 +1,0 @@
-default_app_config = 'gvsigol_plugin_trip_planner.gtfs_cron.trip_planner_schedule_tasks'
