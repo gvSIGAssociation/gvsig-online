@@ -324,7 +324,7 @@ RawFilter.prototype.getFields = function(layer, workspace) {
 	  	data: {
 	  		layer: layer,
 	  		workspace: workspace,
-	  		skip_pks: true
+	  		skip_pks: false
 	  	},
 	  	success	:function(response){
 	  		if("fields" in response){

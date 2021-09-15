@@ -693,7 +693,7 @@ attributeTable.prototype.describeFeatureType = function() {
 	  	data: {
 	  		'layer': this.layer.layer_name,
 			'workspace': this.layer.workspace,
-			'skip_pks': true
+			'skip_pks': false
 		},
 	  	success	:function(response){
 	  		if("fields" in response){
