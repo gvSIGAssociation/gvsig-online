@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 APP_TITLE = 'Catálogo de metadatos'
 APP_DESCRIPTION = 'Catálogo de metadatos'
-CATALOG_BASE_URL = 'https://gvsigol.localhost/geonetwork'
+CATALOG_BASE_URL = 'http://gvsigol.localhost/geonetwork'
 CATALOG_URL = CATALOG_BASE_URL + '/srv/eng/'
 CATALOG_QUERY_URL = CATALOG_BASE_URL + '/srv/eng/q'
 CATALOG_USER = 'admin'

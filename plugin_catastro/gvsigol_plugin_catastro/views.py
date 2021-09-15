@@ -39,7 +39,7 @@ def get_conf(request):
         response = {
             'url_catastro': settings.URL_CATASTRO
         }
-        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+        return JsonResponse(response)
 
 
 @csrf_exempt
