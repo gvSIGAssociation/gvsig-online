@@ -243,7 +243,7 @@ class LayerConfig:
             field_conf['title-'+id] = field_conf.get('title-'+id, field_info['name'])
         field_conf['visible'] = field_conf.get('visible', True)
         if field_conf['name'] in self.pks:
-            field_conf['editable'] = False
+            field_conf['editable'] = field_conf.get('editable', False)
             field_conf['editableactive'] = True
         elif field_conf.get('editable', True) and \
                 Trigger.objects.filter(layer=self.layer, field=field_conf['name']).exists():
@@ -273,7 +273,6 @@ class LayerConfig:
         return self.conf.get('fields', [])
 
     def get_updated_field_conf(self, include_pks=False):
-        # TODO: corregir comportamiento por defecto de 'include_pks' de acuerdo a ticket #4962
         fields = []
         for the_field_info in self.field_info:
             field_name = the_field_info['name']
@@ -284,13 +283,13 @@ class LayerConfig:
                 fields.append(field)
         return fields  
 
-    def refresh_field_conf(self):
-        fields = self.get_updated_field_conf()
+    def refresh_field_conf(self, include_pks=False):
+        fields = self.get_updated_field_conf(include_pks=include_pks)
         self.conf['fields'] = fields
         self.layer.conf = self.conf
 
-    def get_field_viewconf(self):
-        fields = self.get_updated_field_conf()
+    def get_field_viewconf(self, include_pks=False):
+        fields = self.get_updated_field_conf(include_pks=include_pks)
         for field in fields:
             try:
                 enum = LayerFieldEnumeration.objects.get(layer=self.layer, field=field['name']).enumeration

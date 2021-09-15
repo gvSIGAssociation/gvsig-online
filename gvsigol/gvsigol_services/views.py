@@ -556,6 +556,7 @@ def datastore_update(request, datastore_id):
                     connection_params = json.dumps(got_params)
 
                 gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+                expose_pks_old = gs.datastore_check_exposed_pks(datastore)
                 if gs.updateDatastore(datastore.workspace.name, datastore.name,
                                                       description, dstype, connection_params):
                     # REST API does not allow to can't change the workspace or name of a datastore
@@ -564,7 +565,14 @@ def datastore_update(request, datastore_id):
                     datastore.description = description
                     datastore.connection_params = connection_params
                     datastore.save()
+                    expose_pks_new = gs.datastore_check_exposed_pks(datastore)
+                    if expose_pks_old != expose_pks_new:
+                        for layer in datastore.layer_set.all():
+                            gs.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
+                            layer.get_config_manager().refresh_field_conf(include_pks=expose_pks_new)
+                            layer.save()
                     gs.reload_nodes()
+
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     form.add_error(None, _("Error updating datastore"))
@@ -711,8 +719,9 @@ def layer_refresh_conf(request, layer_id):
             return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
         _layer_refresh_extent(layer)
         if layer.type.startswith('v_'):
-            lyr_conf = layer.get_config_manager()
-            lyr_conf.refresh_field_conf()
+            server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            expose_pks = server.datastore_check_exposed_pks(layer.datastore)
+            layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
         layer.save()
         if layer.type.startswith('v_'):
             i, source_name, schema = layer.get_db_connection()
@@ -1555,8 +1564,9 @@ def layer_autoconfig(layer, featuretype):
         }
 
     if ds_type  == 'featureType':
+        expose_pks = server.datastore_check_exposed_pks(datastore)
         lyr_conf = layer.get_config_manager()
-        fields = lyr_conf.get_updated_field_conf()
+        fields = lyr_conf.get_updated_field_conf(include_pks=expose_pks)
         layer_conf['fields'] = fields
         layer_conf['form_groups'] = _parse_form_groups([], fields)
     layer.conf = layer_conf
@@ -1657,8 +1667,10 @@ def layer_config(request, layer_id):
         for lang_id, _ in LANGUAGES:
             available_languages.append(lang_id)
         try:
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            expose_pks = gs.datastore_check_exposed_pks(layer.datastore)
             lyr_conf = layer.get_config_manager()
-            fields = lyr_conf.get_field_viewconf()
+            fields = lyr_conf.get_field_viewconf(include_pks=expose_pks)
             form_groups = _parse_form_groups(lyr_conf._conf.get('form_groups', []), fields)
         except:
             logger.exception("Retrieving fields")
@@ -3674,15 +3686,19 @@ def _describeFeatureType(layer, skip_pks):
         geom_defs = i.get_geometry_columns_info(layer.name, schema)
         pk_defs = i.get_pk_columns(layer.name, schema)
         i.close()
+
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        expose_pks = gs.datastore_check_exposed_pks(layer.datastore)        
         
         for layer_def in layer_defs:
             for geom_def in geom_defs:
                 if layer_def['name'] == geom_def[2]:
                     layer_def['type'] = geom_def[5]
                     layer_def['length'] = geom_def[4]
+        
         for layer_def in layer_defs:
-            for pk_def in pk_defs:
-                if layer_def['name'] == pk_def:
+            if not expose_pks or skip_pks == 'true':
+                if layer_def['name'] in pk_defs:
                     layer_defs.remove(layer_def)
             enum, multiple = utils.is_field_enumerated(layer, layer_def['name'])
             if enum:
@@ -3691,29 +3707,8 @@ def _describeFeatureType(layer, skip_pks):
                 else:
                     layer_def['type'] = 'enumeration'
 
-        if skip_pks == 'true':        
-            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-            definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
-            aux_encoded_property_name = ''
-            if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
-                attributes = definition['featureType']['attributes']['attribute']
-                if isinstance(attributes, list):
-                    for attribute in attributes:
-                        aux_encoded_property_name += str(attribute['name']) + ' '
-                else:
-                    attribute = attributes
-                    aux_encoded_property_name += str(attribute['name']) + ' '
-
-            names = aux_encoded_property_name.split(' ');
-            layer_defs_aux = []
-            for layer_def in layer_defs:
-                if layer_def.get('name') in names:
-                    layer_defs_aux.append(layer_def)
-
-            layer_defs = layer_defs_aux
-
         response = {'fields': layer_defs}
-
+        response = {'fields': layer_defs}
 
     except Exception as e:
         print e.message
@@ -4808,9 +4803,9 @@ def db_add_field(request):
                 return utils.get_exception(400, 'Error in the input params')
             params = json.loads(layer.datastore.connection_params)
             schema = params.get('schema', 'public')
-            con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-            try:
-                gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            iconn = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            with iconn as con:
                 sql_type = gs.gvsigol_to_sql_type(field_type)
                 if not sql_type:
                     return utils.get_exception(400, _('Field type not supported'))
@@ -4818,8 +4813,6 @@ def db_add_field(request):
                     con.add_column(schema, layer.source_name, field_name, sql_type)
                 except psycopg2.ProgrammingError:
                     return utils.get_exception(400, _('Field "{0}" exists').format(field_name))
-            finally:
-                con.close()
             
             if enumkey:
                 field_enum = LayerFieldEnumeration()
@@ -4841,28 +4834,21 @@ def db_add_field(request):
                 except:
                     logger.exception("Error creating trigger for calculated field")
             
-            layer.get_config_manager().refresh_field_conf()
-            layer.save()
-
-            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            expose_pks = gs.datastore_check_exposed_pks(layer.datastore)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
+            layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
+            layer.save()
             return HttpResponse('{"response": "ok"}', content_type='application/json') 
         except Exception as e:
             logger.exception(_('Error creating field. Cause: {0}').format(e.message))
             
             # clean potential half created field
-            con = None
-            try:
-                if layer:
-                    LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
-                con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            if layer:
+                LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
+            iconn = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            with iconn as con:
                 schema = params.get('schema', 'public')
                 con.delete_column(schema, layer.source_name, field_name)
-            except:
-                pass
-            finally:
-                if con:
-                    con.close()
 
     return utils.get_exception(400, 'Error in the input params')
