@@ -34,7 +34,9 @@ class GvsigolCoreConfig(AppConfig):
     label = 'gvsigol_core'
 
     def ready(self):
-        self.output_locale_conf()
+        from gvsigol_core.utils import is_gvsigol_process
+        if is_gvsigol_process():
+            self.output_locale_conf()
         from actstream import registry
         registry.register(self.get_model('Project'))
 
