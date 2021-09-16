@@ -784,7 +784,7 @@ class Geoserver():
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             logger.exception('ERROR createImageMosaicLayer failed. Name ' + name + ' - Store: ' + store.name)
-            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published") + ": Error " + str(e.status_code) + " - " + e.server_message)
+            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published") + ": Error " + str(e))
     
     def updateImageMosaicTemporal(self, store, layer):
         try:
