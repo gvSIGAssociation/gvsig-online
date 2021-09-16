@@ -747,9 +747,12 @@ class Geoserver():
                     return self.createImageMosaicLayer(workspace, store, name, title, coverage_name)
                 else:    
                     return self.createCoverage(workspace, store, name, title)
-        except Exception as e:
+        except rest_geoserver.RequestError as e:
             logger.exception('Creando capa: ' + name)
             raise rest_geoserver.FailedRequestError(-1, str(e.server_message))
+        except Exception as e:
+            logger.exception('Creando capa: ' + name)
+            raise rest_geoserver.FailedRequestError(-1, str(e))
         
     def getFeaturetype(self, workspace, datastore, name, title):
         return self.rest_catalog.get_feature_type(workspace.name, datastore.name, name, user=self.user, password=self.password)
