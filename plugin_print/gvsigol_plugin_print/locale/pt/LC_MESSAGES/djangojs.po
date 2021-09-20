@@ -107,6 +107,9 @@ msgstr ""
 msgid "Legal warning"
 msgstr ""
 
+msgid "Legend"
+msgstr "Legenda"
+
 #: static/js/lib/tools/print.js:279
 msgid "Print"
 msgstr "Imprimir"
@@ -126,3 +129,4 @@ msgstr "Você deve selecionar um modelo"
 #: static/js/lib/tools/print.js:870
 msgid "layers_xyz_cant_be_reprojected"
 msgstr "Erro no carregamento do plugin de impressão"
+

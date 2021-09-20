@@ -127,3 +127,8 @@ msgstr ""
 "proporciona són propietat d'aquesta institució.La institució no és "
 "responsable de la informació que es pot obtenir a través d'enllaços a "
 "sistemes externs."
+
+msgid "Legend"
+msgstr "Llegenda"
+
+

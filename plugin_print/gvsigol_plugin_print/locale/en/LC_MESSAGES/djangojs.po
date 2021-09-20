@@ -138,5 +138,8 @@ msgstr "A4 Landscape with Overview"
 msgid "a3_landscape"
 msgstr "A3 Landscape"
 
+msgid "Legend"
+msgstr "Legend"
+
 msgid "print-mapgrid-indent"
 msgstr "Labels margin to border"

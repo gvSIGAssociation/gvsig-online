@@ -126,29 +126,32 @@ msgstr "Camadas externas do tipo XYZ não podem ser reprojetadas."
 msgid "Error loading print plugin"
 msgstr "Erro no carregamento do plugin de impressão"
 
+msgid "Legend"
+msgstr "Legenda"
+
 msgid "a4_landscape"
-msgstr "a4_landscape"
+msgstr "A4 paisagem sem localização"
 
 msgid "a3_sin_leyenda"
-msgstr "A3_sem_legenda"
+msgstr "A3 paisagem sem legenda"
 
 msgid "a4_landscape_overview"
-msgstr "a4_landscape_overview"
+msgstr "A4 paisagem com localização"
 
 msgid "a3_landscape"
-msgstr "A3 Horizontal"
+msgstr "A3 paisagem com legenda"
 
 msgid "tocantins_a4_landscape"
-msgstr "Tocantins A4 Horizontal"
+msgstr "A4 paisagem"
 
 msgid "tocantins_a4_portrait"
-msgstr "Tocantins A4 Vertical"
+msgstr "A4 retrato"
 
 msgid "tocantins_a3_landscape"
-msgstr "Tocantins A3 Horizontal"
+msgstr "A3 paisagem"
 
 msgid "tocantins_a3_portrait"
-msgstr "Tocantins A3 Vertical"
+msgstr "A3 retrato"
 
 msgid "print-mapgrid-indent"
 msgstr "Recuo do rótulo"
