@@ -131,12 +131,7 @@ def get_groups():
 
 
 def get_all_groups_checked_by_project(request, project):
-    groups_list = None
-    if request.user.is_superuser:
-        groups_list = UserGroup.objects.all()
-    else:
-        groups_list = UserGroup.objects.filter(name__exact='ug_' + request.user.username)
-        
+    groups_list = UserGroup.objects.all()
     groups_by_project = ProjectUserGroup.objects.filter(project_id=project.id)
     checked = False
     
