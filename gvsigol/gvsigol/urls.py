@@ -36,6 +36,12 @@ for app in packages:
         urlpatterns += [
             path('gvsigonline/', include(app + '.urls')),
         ]
+        try:
+            urlpatterns += [
+                path('gvsigonline/fileserver/', include(app + '.urls_fileserver')),
+            ]
+        except:
+            pass
 
         
 for plugin in settings.INSTALLED_APPS:
@@ -43,6 +49,12 @@ for plugin in settings.INSTALLED_APPS:
         urlpatterns += [
             path('gvsigonline/', include(plugin + '.urls')),
         ]
+        try:
+            urlpatterns += [
+                path('gvsigonline/fileserver/', include((plugin + '.urls_fileserver', plugin), namespace=plugin)),
+            ]
+        except:
+            pass
     
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += [
@@ -58,6 +70,9 @@ if 'gvsigol_services' in settings.INSTALLED_APPS:
     urlpatterns += [
         path('gvsigonline/services/', include('gvsigol_services.urls')),
     ]
+    urlpatterns += [
+        path('gvsigonline/fileserver/', include('gvsigol_services.urls_fileserver')),
+    ]
     
 if 'gvsigol_symbology' in settings.INSTALLED_APPS:
     urlpatterns += [
@@ -66,7 +81,10 @@ if 'gvsigol_symbology' in settings.INSTALLED_APPS:
     
 if 'gvsigol_filemanager' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
+        path('gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),
+    ]
+    urlpatterns += [
+        path('gvsigonline/fileserver/filemanager/', include('gvsigol_filemanager.urls_fileserver', namespace='fsfilemanager')),
     ]
 
 if 'gvsigol_statistics' in settings.INSTALLED_APPS:

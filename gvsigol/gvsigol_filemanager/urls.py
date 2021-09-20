@@ -13,5 +13,7 @@ urlpatterns = [
     path('unzip/file/', UnzipFileView.as_view(), name='unzip-file'),
     path('create/directory/', DirectoryCreateView.as_view(), name='create-directory'),
     path('export_to_database/', ExportToDatabaseView.as_view(), name='export-to-database'),
-    path('download/<path:filepath>', download_file, name='fdownload'),
+
+    # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
+    path('download/<path:filepath>', download_file, name='fmdownload'),
 ]

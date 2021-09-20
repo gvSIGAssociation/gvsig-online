@@ -45,7 +45,7 @@
 	      		{% if file.filetype == "Directory" %}
 	      			<td><img src="{% static "img/folder.png" %}" style="margin-right: 5px;"><a href="?path={{file.filepath}}{% if popup %}&amp;popup=1{% endif %}">{{file.filename}}</a></td>
 	      		{% else %}
-				  	{% url 'filemanager:fdownload' file.filepath as download_url %}
+				  	{% url 'fsfilemanager:fdownload' file.filepath as download_url %}
 	      			{% if file.extension|lower == "shp" %}
 	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/shp.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
 	      			{% elif file.extension|lower == "dbf" %}
