@@ -443,7 +443,7 @@ class LayerResource(models.Model):
         return os.path.join(settings.MEDIA_ROOT, self.path)
     
     def get_url(self):
-        return reverse('get_layer_resource', args=[self.pk])
+        return reverse('layer_resource', args=[self.pk])
     
 class Enumeration(models.Model):
     name = models.CharField(max_length=150) 

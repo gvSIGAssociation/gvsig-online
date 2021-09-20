@@ -57,7 +57,6 @@ urlpatterns = [
     path('get_feature_wfs/', services_views.get_feature_wfs, name='get_feature_wfs'),
     path('get_unique_values/', services_views.get_unique_values, name='get_unique_values'),
     path('get_feature_resources/', services_views.get_feature_resources, name='get_feature_resources'),
-    path('get_resource/<int:resource_id>/', services_views.get_resource, name='get_layer_resource'),
     path('upload_resources/', services_views.upload_resources, name='upload_resources'),
     path('delete_resource/', services_views.delete_resource, name='delete_resource'),
     path('delete_resources/', services_views.delete_resources, name='delete_resources'),
@@ -95,4 +94,7 @@ urlpatterns = [
     #path('db_field_changetype/', services_views.db_field_changetype, name='db_field_changetype'),
     path('db_field_rename/', services_views.db_field_rename, name='db_field_rename'),
     path('db_field_add/', services_views.db_add_field, name='db_field_add'),
+
+    # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
+    path('get_resource/<int:resource_id>/', services_views.get_resource, name='get_layer_resource'),
 ]
