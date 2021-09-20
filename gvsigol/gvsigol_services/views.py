@@ -879,7 +879,11 @@ def backend_layergroup_list_available(request):
             return HttpResponseForbidden("[]")
         if ds:
             layer_groups = []
-            for lg in LayerGroup.objects.filter(server_id=ds.workspace.server.id):
+            if request.user.is_superuser:
+                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id)
+            else:
+                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id, created_by__exact=request.user.username)
+            for lg in lg_list:
                 layer_group = {
                     'value': lg.id,
                     'text': lg.name
