@@ -418,6 +418,18 @@ print.prototype.setDefaultTemplate = function(templateName) {
 	// $('#print-template').trigger('change');
 };
 
+print.prototype.setTemplateOrder = function( orderedTemplates ) {
+	$('#print-template').empty();
+
+	for (var t of orderedTemplates) {
+		if (t == 'a4_landscape') {
+			$('#print-template').append('<option value="' + t + '" selected>' + gettext(t) + '</option>');
+		} else {
+			$('#print-template').append('<option value="' + t + '">' + gettext(t) + '</option>');
+		}
+	}
+};
+
 print.prototype.setDefaultProjection = function(epsg) {
 	$('#print-projection option[value="' + epsg +'"]').attr('selected','selected');
 	// $('#print-projection').trigger('change');
@@ -825,7 +837,7 @@ print.prototype.createPrintJob = function(template) {
 		  	    "logo_url": self.origin + self.conf.project_image,
 		  	    //"logo_url": 'http://localhost' + self.conf.project_image,
 		  	    "legend": {
-		  	    	"name": "",
+		  	    	"name": gettext('Legend'),
 		            "classes": legends
 		        },
 		        "crs": self.projection

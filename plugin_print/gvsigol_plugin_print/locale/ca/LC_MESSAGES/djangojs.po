@@ -121,9 +121,14 @@ msgstr "Heu de seleccionar una plantilla"
 msgid "layers_xyz_cant_be_reprojected"
 msgstr ""
 
-#~ msgid "legalwarning"
-#~ msgstr ""
-#~ "Tots els continguts cartogràfics d'aquest web i dels serveis que "
-#~ "proporciona són propietat d'aquesta institució.La institució no és "
-#~ "responsable de la informació que es pot obtenir a través d'enllaços a "
-#~ "sistemes externs."
+msgid "legalwarning"
+msgstr ""
+"Tots els continguts cartogràfics d'aquest web i dels serveis que "
+"proporciona són propietat d'aquesta institució.La institució no és "
+"responsable de la informació que es pot obtenir a través d'enllaços a "
+"sistemes externs."
+
+msgid "Legend"
+msgstr "Llegenda"
+
+

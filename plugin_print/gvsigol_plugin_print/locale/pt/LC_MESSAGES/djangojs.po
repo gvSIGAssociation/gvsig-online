@@ -20,6 +20,13 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt\n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: static/js/lib/tools/print.js:127
 msgid "Print params"
@@ -38,8 +45,6 @@ msgid "Title"
 msgstr ""
 
 #: static/js/lib/tools/print.js:157
-#, fuzzy
-#| msgid "AutoScale"
 msgid "Scale"
 msgstr "Escala Automática"
 
@@ -51,6 +56,9 @@ msgstr "Escala Automática"
 msgid "UserScale"
 msgstr "Escala definida pelo usuário"
 
+msgid "legalwarning"
+msgstr "aviso legal"
+
 #: static/js/lib/tools/print.js:173
 msgid "MapGrid"
 msgstr ""
@@ -61,23 +69,23 @@ msgstr ""
 
 #: static/js/lib/tools/print.js:176
 msgid "print-mapgrid-point"
-msgstr ""
+msgstr "Parâmetros de impressão"
 
 #: static/js/lib/tools/print.js:177
 msgid "print-mapgrid-line"
-msgstr ""
+msgstr "Selecione o modelo de impressão"
 
 #: static/js/lib/tools/print.js:179
 msgid "print-mapgrid-spacing"
-msgstr ""
+msgstr "Selecione o modelo"
 
 #: static/js/lib/tools/print.js:187
 msgid "MapProjection"
-msgstr ""
+msgstr "Título"
 
 #: static/js/lib/tools/print.js:215
 msgid "MapOverview"
-msgstr ""
+msgstr "Aviso Legal"
 
 #: static/js/lib/tools/print.js:231
 msgid "Resolution"
@@ -85,7 +93,7 @@ msgstr ""
 
 #: static/js/lib/tools/print.js:244
 msgid "Rotation"
-msgstr ""
+msgstr "Rotação"
 
 #: static/js/lib/tools/print.js:250
 msgid "Format"
@@ -99,13 +107,16 @@ msgstr ""
 msgid "Legal warning"
 msgstr ""
 
+msgid "Legend"
+msgstr "Legenda"
+
 #: static/js/lib/tools/print.js:279
 msgid "Print"
-msgstr ""
+msgstr "Imprimir"
 
 #: static/js/lib/tools/print.js:280
 msgid "Cancel"
-msgstr "Cancel"
+msgstr "Cancelar"
 
 #: static/js/lib/tools/print.js:355
 msgid "Error creating print job"
@@ -113,15 +124,9 @@ msgstr ""
 
 #: static/js/lib/tools/print.js:358
 msgid "You must select a template"
-msgstr ""
+msgstr "Você deve selecionar um modelo"
 
 #: static/js/lib/tools/print.js:870
 msgid "layers_xyz_cant_be_reprojected"
-msgstr ""
+msgstr "Erro no carregamento do plugin de impressão"
 
-#~ msgid "legalwarning"
-#~ msgstr ""
-#~ "All the cartographic contents of this web and of the services that it "
-#~ "provides are property of this institution.The institution is not "
-#~ "responsible for the information that can be obtained through links to "
-#~ "external systems."
