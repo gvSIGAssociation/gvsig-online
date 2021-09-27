@@ -88,3 +88,7 @@ def get_instance():
     if __geographic_servers is None:
         __geographic_servers = GeographicServers()
     return __geographic_servers
+
+def reset_instance():
+    global __geographic_servers
+    __geographic_servers = GeographicServers()

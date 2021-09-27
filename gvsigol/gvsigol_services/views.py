@@ -253,7 +253,7 @@ def server_update(request, svid):
                 is_master = n['is_master']
             )
             node.save()
-
+        geographic_servers.reset_instance()
         return redirect('server_list')
 
     else:
@@ -2312,6 +2312,7 @@ def layergroup_delete(request, lgid):
             gs.reload_nodes()
             
         except Exception:
+            logger.exception("Error deleting layer group")
             layergroup.delete()
         
         response = {
