@@ -514,7 +514,7 @@
 	function updateLayerGroupList(id_datastore) {
 		if (id_datastore) {
 			$("body").overlay();
-			$.getJSON("{% url 'backend_layergroup_list_available' %}", {id_datastore: id_datastore}, function(data){
+			$.getJSON("{% url 'layergroup_list_editable' %}", {id_datastore: id_datastore}, function(data){
 				var layer_group_select = $("#id_layer_group");
 				var previousValue = layer_group_select.val();
 				var placeholderSelected = true;
