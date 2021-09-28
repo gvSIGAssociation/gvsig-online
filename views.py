@@ -866,11 +866,9 @@ def backend_resource_list_available(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
-def backend_layergroup_list_available(request):
+def layergroup_list_editable(request):
     """
-    Lists the resources existing on a data store, retrieving the information
-    directly from the backend (which may differ from resurces available on
-    Django DB). Useful to register new resources on Django DB.
+    Lists the layer groups editable by the current user
     """
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
@@ -880,16 +878,16 @@ def backend_layergroup_list_available(request):
         if ds:
             layer_groups = []
             if request.user.is_superuser:
-                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id)
+                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id).order_by('name')
             else:
-                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id, created_by__exact=request.user.username)
+                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id, created_by__exact=request.user.username).order_by('name')
             for lg in lg_list:
                 layer_group = {
                     'value': lg.id,
                     'text': lg.name
                 }
                 layer_groups.append(layer_group)
-            return HttpResponse(json.dumps(layer_groups))
+            return JsonResponse(layer_groups, safe=False)
         
     return HttpResponseBadRequest()
 
