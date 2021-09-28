@@ -3817,7 +3817,7 @@ def external_layer_list(request):
 @staff_required
 def external_layer_add(request):
     if request.method == 'POST':
-        form = ExternalLayerForm(request.POST)
+        form = ExternalLayerForm(request.user, request.POST)
         
         try:
             is_visible = False
@@ -3910,7 +3910,7 @@ def external_layer_add(request):
             form.add_error(None, msg)
 
     else:
-        form = ExternalLayerForm()
+        form = ExternalLayerForm(request.user)
 
     return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
 
@@ -3925,7 +3925,7 @@ def external_layer_update(request, external_layer_id):
     layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     if request.method == 'POST':
-        form = ExternalLayerForm(request.POST)
+        form = ExternalLayerForm(request.user, request.POST)
         try:
             is_visible = False
             if 'visible' in request.POST:
@@ -4020,7 +4020,7 @@ def external_layer_update(request, external_layer_id):
             }
 
     else:
-        form = ExternalLayerForm(instance=external_layer)
+        form = ExternalLayerForm(request.user, instance=external_layer)
 
         if external_layer.external_params:
             params = json.loads(external_layer.external_params)
