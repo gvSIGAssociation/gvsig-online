@@ -35,7 +35,7 @@ debug.HIDDEN_SETTINGS = re.compile(
     flags=re.IGNORECASE,
 )
 
-GVSIGOL_VERSION = '2.10.8-dev'
+GVSIGOL_VERSION = '2.10.9-dev'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
