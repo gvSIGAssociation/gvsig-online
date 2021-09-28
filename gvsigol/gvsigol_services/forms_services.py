@@ -230,7 +230,7 @@ class ExternalLayerForm(forms.ModelForm):
     key = forms.CharField(label=_(u'Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
 
     def __init__(self, user, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(ExternalLayerForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
             self.fields['layer_group'].queryset = LayerGroup.objects.all().order_by('name')
         else:
