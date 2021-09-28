@@ -291,7 +291,7 @@ def get_feature_type(fields):
             auxType = field.get('binding').split('.')[-1]
             if auxType == "Point" or auxType == "MultiPoint":
                 featureType = "PointSymbolizer"
-            if auxType == "Line" or auxType == "MultiLineString":
+            if auxType == "Line" or auxType == "LineString" or auxType == "MultiLineString":
                 featureType = "LineSymbolizer"
             if auxType == "Polygon" or auxType == "MultiPolygon":
                 featureType = "PolygonSymbolizer"
