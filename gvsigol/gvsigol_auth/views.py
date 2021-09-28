@@ -282,7 +282,7 @@ def password_reset_success(request):
     return render(request, 'password_reset_success.html', {})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@staff_required
+@superuser_required
 def user_list(request):
     
     users_list = User.objects.exclude(username='root')
