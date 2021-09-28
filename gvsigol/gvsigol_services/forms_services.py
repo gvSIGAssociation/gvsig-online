@@ -216,8 +216,7 @@ class ExternalLayerForm(forms.ModelForm):
         
     #name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     title = forms.CharField(label=_('Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    
-    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=None, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     
     type = forms.ChoiceField(label=_('Type'), choices=external_layer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
     version = forms.ChoiceField(label=_('Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
@@ -229,6 +228,13 @@ class ExternalLayerForm(forms.ModelForm):
     infoformat = forms.ChoiceField(label=_('Featureinfo format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     matrixset = forms.ChoiceField(label=_('Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     key = forms.CharField(label=_('Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user.is_superuser:
+            self.fields['layer_group'].queryset = LayerGroup.objects.all().order_by('name')
+        else:
+            self.fields['layer_group'].queryset = LayerGroup.objects.filter(created_by=user.username).order_by('name')
  
 class ServiceUrlForm(forms.ModelForm):
     class Meta:
