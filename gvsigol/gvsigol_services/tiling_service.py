@@ -575,10 +575,10 @@ def get_extent(json, properties):
         coords = json['coordinates']
         for coord in coords:
             for c in coord:
-                min_lon = min(c[1], min_lon)
-                min_lat = min(c[0], min_lat)
-                max_lon = max(c[1], max_lon)
-                max_lat = max(c[0], max_lat)
+                min_lon = min(c[0], min_lon)
+                min_lat = min(c[1], min_lat)
+                max_lon = max(c[0], max_lon)
+                max_lat = max(c[1], max_lat)
         return min_lon, min_lat, max_lon, max_lat
     if(json['type'] == 'Point'):
         try:
