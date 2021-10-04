@@ -264,7 +264,8 @@ function configure() {
 
 	echo "INFO: Replace ALLOWED_HOST_NAMES"
 	if [ -z $ALLOWED_HOST_NAMES ]; then
-		echo "WARNING: ALLOWED_HOST_NAMES is not defined."
+		echo "WARNING: ALLOWED_HOST_NAMES is not defined. Using https://${GVSIGOL_HOST}"
+		ALLOWED_HOST_NAMES="https://${GVSIGOL_HOST}"
 	fi
 	grep -rl "##ALLOWED_HOST_NAMES##"  | xargs sed -i "s ##ALLOWED_HOST_NAMES## $ALLOWED_HOST_NAMES g"
 	
