@@ -364,12 +364,12 @@ def user_add(request):
                 is_superuser = True
                 is_staff = True
             
-            assigned_groups = []   
-            for key in form.data:
-                if 'group-' in key:
-                    assigned_groups.append(int(key.split('-')[1]))
+            try:
+                assigned_groups = []   
+                for key in form.data:
+                    if 'group-' in key:
+                        assigned_groups.append(int(key.split('-')[1]))
             
-            try: 
                 gs = geographic_servers.get_instance().get_default_server()
                 server_object = Server.objects.get(id=int(gs.id))
                                 
