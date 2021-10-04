@@ -413,11 +413,8 @@ MOSAIC_DB = {
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 },
 
-SHP2PGSQL_PATH = '/Library/PostgreSQL/9.6/bin/shp2pgsql'
 GDALTOOLS_BASEPATH = '/usr/bin'
 #GDALTOOLS_BASEPATH = '/usr/local/bin'
-GDALSRSINFO_PATH = GDALTOOLS_BASEPATH + '/gdalsrsinfo'
-GDALINFO_PATH = GDALTOOLS_BASEPATH + '/gdalinfo'
 OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
 
 TILE_SIZE = 256
