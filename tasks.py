@@ -11,6 +11,9 @@ from gvsigol_services.models import Layer
 from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
 from gvsigol_services.decorators import start_new_thread
 
+import logging
+logger = logging.getLogger('gvsigol')
+
 """
 Dado un extent o una lista de extents en GeoJSON genera un paquete con los tiles de la capa que caen dentro de 
 las geometrías. Las geometrías pasadas pueden ser de tipo Polygon o Point. Si son Polygon se usará la extensión
@@ -397,3 +400,12 @@ def tiling_base_layer(base_layer_process, version, base_lyr, prj_id, num_res_lev
        
     except Exception as e:
         return
+
+@celery_app.task
+def check_gdal_env():
+    try:
+        import osgeo
+        gdal_version = osgeo.__version__
+        logger.info("GDAL correctly configured. Version {0}".format(gdal_version))
+    except:
+        logger.exception("GDAL not correclty configured")
