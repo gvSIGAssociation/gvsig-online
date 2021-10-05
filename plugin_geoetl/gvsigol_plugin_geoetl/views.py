@@ -24,6 +24,7 @@
 
 from django.shortcuts import HttpResponse, render, redirect
 from django.contrib.auth.decorators import login_required
+from gvsigol_auth.utils import superuser_required, staff_required
 from django.core import serializers
 from django.utils.translation import ugettext as _
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
@@ -51,6 +52,7 @@ def get_conf(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_canvas(request):
 
     srs = core_utils.get_supported_crs_array()
@@ -127,6 +129,7 @@ def get_list():
         workspace['name'] = w.name
         workspace['description'] = w.description
         workspace['workspace'] = w.workspace[:200]+" (...) ]"
+        workspace['username'] = w.username
         
         try:
             periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
@@ -157,6 +160,7 @@ def get_list():
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_workspace_list(request):
 
     response = {
@@ -165,7 +169,6 @@ def etl_workspace_list(request):
 
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
 def save_periodic_workspace(request, workspace):
 
     day = request.POST.get('day')
@@ -232,7 +235,7 @@ def save_periodic_workspace(request, workspace):
     )
     statusModel.save()
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+
 def delete_periodic_workspace(workspace):
 
     try:
@@ -275,27 +278,30 @@ def delete_periodic_workspace(workspace):
         pass
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_workspace_add(request):
     if request.method == 'POST':
     
         try: 
-            int(request.POST.get('id'))
-            lgid = request.POST['id']
 
             workspace = ETLworkspaces(
                 id = int(request.POST.get('id')),
                 name = request.POST.get('name'),
                 description = request.POST.get('description'),
-                workspace = request.POST.get('workspace')
+                workspace = request.POST.get('workspace'),
+                username = request.POST.get('username')
+                
             )
             workspace.save()
             
         except:
+            print("---->", request.POST.get('username'))
 
             workspace = ETLworkspaces(
                 name = request.POST.get('name'),
                 description = request.POST.get('description'),
-                workspace = request.POST.get('workspace')
+                workspace = request.POST.get('workspace'),
+                username = request.POST.get('username')
             )
             workspace.save()
         
@@ -309,6 +315,7 @@ def etl_workspace_add(request):
         
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_workspace_delete(request):
     lgid = request.POST['lgid']
     if request.method == 'POST':
@@ -323,6 +330,7 @@ def etl_workspace_delete(request):
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_workspace_update(request):
     if request.method == 'POST':
         lgid = request.POST['id']
@@ -346,6 +354,7 @@ def etl_workspace_update(request):
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_current_canvas_status(request):
     try:
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
@@ -365,6 +374,7 @@ def etl_current_canvas_status(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_list_canvas_status(request):
 
     statusModel  = ETLstatus.objects.all()
@@ -387,6 +397,7 @@ def etl_list_canvas_status(request):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_read_canvas(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -413,6 +424,7 @@ def etl_read_canvas(request):
     return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_sheet_excel(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -425,6 +437,7 @@ def etl_sheet_excel(request):
             return HttpResponse(response, content_type="application/json")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_schema_excel(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -436,6 +449,7 @@ def etl_schema_excel(request):
             return HttpResponse(response, content_type="application/json")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def etl_schema_shape(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -447,7 +461,8 @@ def etl_schema_shape(request):
 
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')    
+@login_required(login_url='/gvsigonline/auth/login_user/')   
+@staff_required 
 def test_postgres_conexion(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -460,7 +475,8 @@ def test_postgres_conexion(request):
             return HttpResponse(json.dumps(response), content_type="application/json")
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required    
 def etl_schema_csv(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)

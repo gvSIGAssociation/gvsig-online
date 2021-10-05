@@ -250,6 +250,8 @@ gvsigolETL.Toolbar = Class.extend({
 				formWorkspace.append('name', $('#etl_name').val())
 				formWorkspace.append('description', $('#etl_desc').val())
 				
+				formWorkspace.append('username', username)
+
 				if($("#repeat_periodically").is(':checked')){
 					formWorkspace.append("checked", true)
 				} else {

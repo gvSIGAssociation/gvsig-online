@@ -3,193 +3,224 @@
 {% load i18n %} 
 
 {% block content %}
-<div class="row">
-	<div class="col-md-12">
-		<div class="row">
-			<div class="col-md-12 form-group">
-				<div class="box-tools pull-right">
-					<button id="button-new-empty-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-file-o margin-r-5"></i> {% trans "New" %}</button>
+{% if user.is_staff %}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button id="button-new-empty-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-file-o margin-r-5"></i> {% trans "New" %}</button>
+					</div>
+					<div class="box-tools pull-right">
+						<button id="button-back-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i> {% trans "Back" %}</button>
+					</div>
 				</div>
-				<div class="box-tools pull-right">
-					<button id="button-back-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i> {% trans "Back" %}</button>
+			</div>
+			<div class="box">
+				<div class="box-body">
+					<table class="table" id="etl-table">
+						<thead>
+							<tr>
+								<th>{% trans "ID" %}</th>
+								<th>{% trans "Status" %}</th>
+								<th>{% trans "Name" %}</th>
+								<th>{% trans "Description" %}</th>
+								<th>{% trans "Workspace" %}</th>
+								<th>{% trans "Periodicity" %}</th>
+								<th>{% trans "User" %}</th>
+								<th></th>
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for workspace in workspaces %}
+								{% if user.is_superuser %}
+									<tr>
+										<td> {{ workspace.id }} </td>
+										{% if workspace.every or workspace.day_of_week %}
+											<td>
+												<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green;" aria-hidden="true"></i> 
+												<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin"></i> 
+												<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red;" aria-hidden="true" ></i>
+											</td>
+										{% else %}
+											<td></td>
+										{% endif %}
+										<td>{{ workspace.name }}</td>
+										<td>{{ workspace.description }}</td>
+										<td>{{ workspace.workspace }}</td>
+										{% if workspace.every %}
+											<td>{{ workspace.every }} {{ workspace.period }}</td>
+										{% elif workspace.day_of_week%}
+											<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
+										{% else %}
+											<td></td>
+										{% endif %}
+										<td> {{ workspace.username }} </td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+								{% elif user.username == workspace.username %}
+									<tr>
+										<td> {{ workspace.id }} </td>
+										{% if workspace.every or workspace.day_of_week %}
+											<td>
+												<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green;" aria-hidden="true"></i> 
+												<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin"></i> 
+												<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red;" aria-hidden="true" ></i>
+											</td>
+										{% else %}
+											<td></td>
+										{% endif %}
+										<td>{{ workspace.name }}</td>
+										<td>{{ workspace.description }}</td>
+										<td>{{ workspace.workspace }}</td>
+										{% if workspace.every %}
+											<td>{{ workspace.every }} {{ workspace.period }}</td>
+										{% elif workspace.day_of_week%}
+											<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
+										{% else %}
+											<td></td>
+										{% endif %}
+										<td> {{ workspace.username }} </td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+								{% endif %}
+							{% endfor %}
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
-		<div class="box">
-			<div class="box-body">
-				<table class="table" id="etl-table">
-					<thead>
-						<tr>
-							<th>{% trans "ID" %}</th>
-							<th>{% trans "Status" %}</th>
-							<th>{% trans "Name" %}</th>
-							<th>{% trans "Description" %}</th>
-							<th>{% trans "Workspace" %}</th>
-							<th>{% trans "Periodicity" %}</th>
-							<th></th>
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for workspace in workspaces %}
-						<tr>
-							<td> {{ workspace.id }} </td>
-							{% if workspace.every or workspace.day_of_week %}
-								<td>
-									<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green;" aria-hidden="true"></i> 
-									<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin"></i> 
-									<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red;" aria-hidden="true" ></i>
-								</td>
-							{% else %}
-								<td></td>
-							{% endif %}
-							<td>{{ workspace.name }}</td>
-							<td>{{ workspace.description }}</td>
-							<td>{{ workspace.workspace }}</td>
-							{% if workspace.every %}
-								<td>{{ workspace.every }} {{ workspace.period }}</td>
-							{% elif workspace.day_of_week%}
-								<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
-							{% else %}
-								<td></td>
-							{% endif %}
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						{% endfor %}
-					</tbody>
-				</table>
+	</div>      
+
+	<!-- Modals -->
+	<div class="modal fade" id="modal-delete-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel">{% trans "Delete workspace" %}</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<p style="font-weight: 600;">{% trans "The ETL workspace and its parameters will be deleted" %}</p>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button id="button-delete-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-delete-workspace-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>      
 
-<!-- Modals -->
-<div class="modal fade" id="modal-delete-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-				<h4 class="modal-title" id="myModalLabel">{% trans "Delete workspace" %}</h4>
-			</div>
-			<div class="modal-body">
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<p style="font-weight: 600;">{% trans "The ETL workspace and its parameters will be deleted" %}</p>
-					</div>
+
+	<div id="modal-update-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+			
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">{% trans "Update ETL Workspace" %}</h4>
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button id="button-delete-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button id="button-delete-workspace-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
-			</div>
-		</div>
-	</div>
-</div>
 
+				<div class="modal-body">
+					<form id="layer-group-form" role="form">
 
-<div id="modal-update-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-		
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-				<h4 class="modal-title">{% trans "Update ETL Workspace" %}</h4>
-			</div>
-
-			<div class="modal-body">
-				<form id="layer-group-form" role="form">
-
-					<div class="row">
-						<div class="col-md-12">
-							<label for="etl_id">ID</label>
-							<input placeholder = "{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+						<div class="row">
+							<div class="col-md-12">
+								<label for="etl_id">ID</label>
+								<input placeholder = "{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+							</div>
 						</div>
-					</div>
 
-					<div class="row">
-						<div class="col-md-12">
-							<label for="etl_name">{% trans "Name" %}</label>
-							<input placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name" type="text" class="form-control">							
+						<div class="row">
+							<div class="col-md-12">
+								<label for="etl_name">{% trans "Name" %}</label>
+								<input placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name" type="text" class="form-control">							
+							</div>
 						</div>
-					</div>
 
-					<div class="row">
-						<div class="col-md-12">
-							<label for="etl_desc">{% trans "Description" %}</label>
-							<input placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">								
+						<div class="row">
+							<div class="col-md-12">
+								<label for="etl_desc">{% trans "Description" %}</label>
+								<input placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">								
+							</div>
 						</div>
-					</div>
 
-					<div class="row">
-						<div class="col-md-12">
-							<label for="repeat_periodically">{% trans "Run periodically?" %}</label>&nbsp;&nbsp;
-							<input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>														
-						</div>
-						
-						<div class="col-md-6 repeat_periodically_time" >
-							<select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">
-								<option value="all">{% trans 'All days' %}</option>
-								<option value="monday">{% trans 'Monday' %}</option>
-								<option value="tuesday">{% trans 'Tuesday' %}</option>
-								<option value="wednesday">{% trans 'Wednesday' %}</option>
-								<option value="thursday">{% trans 'Thursday' %}</option>
-								<option value="friday">{% trans 'Friday' %}</option>
-								<option value="saturday">{% trans 'Saturday' %}</option>
-								<option value="sunday">{% trans 'Sunday' %}</option>
-								<option value="every">{% trans 'Every' %} ...</option>
-							</select> 	
-						</div>
-						<div class="more-hour-options">
-							<div class="col-md-6 repeat_periodically_time">
-								<div class="form-group">
-									<div class='input-group date'>
-										<input type='text' class="form-control" id='ws-program-time' name='ws-program-time' placeHolder="HH:mm:ss"/>
-										<span class="input-group-addon">
-										</span>
+						<div class="row">
+							<div class="col-md-12">
+								<label for="repeat_periodically">{% trans "Run periodically?" %}</label>&nbsp;&nbsp;
+								<input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>														
+							</div>
+							
+							<div class="col-md-6 repeat_periodically_time" >
+								<select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">
+									<option value="all">{% trans 'All days' %}</option>
+									<option value="monday">{% trans 'Monday' %}</option>
+									<option value="tuesday">{% trans 'Tuesday' %}</option>
+									<option value="wednesday">{% trans 'Wednesday' %}</option>
+									<option value="thursday">{% trans 'Thursday' %}</option>
+									<option value="friday">{% trans 'Friday' %}</option>
+									<option value="saturday">{% trans 'Saturday' %}</option>
+									<option value="sunday">{% trans 'Sunday' %}</option>
+									<option value="every">{% trans 'Every' %} ...</option>
+								</select> 	
+							</div>
+							<div class="more-hour-options">
+								<div class="col-md-6 repeat_periodically_time">
+									<div class="form-group">
+										<div class='input-group date'>
+											<input type='text' class="form-control" id='ws-program-time' name='ws-program-time' placeHolder="HH:mm:ss"/>
+											<span class="input-group-addon">
+											</span>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						
-						<div class="more-options">
-							<div class="col-md-12 repeat_periodically_time">
-								<label>{% trans "Run workspace every..." %}</label>
-							</div>
-						
-							<div class="col-md-6 repeat_periodically_time">
-								<input placeholder="{% trans 'Select number of...' %}" name="ws-program-interval" id="ws-program-interval" type="number" value=1 class="form-control">
-							</div>
 							
-							<div class="col-md-6 repeat_periodically_time">
-								<select class="form-control" style="width: 100%;" id="ws-program-unit" name="ws-program-unit">
-									<option value="empty">{% trans '... time measure' %}</option>
-									<option value="minutes">{% trans 'minutes' %}</option>
-									<option value="hours">{% trans 'hours' %}</option>
-									<option value="days">{% trans 'days' %}</option>
-								</select>
+							<div class="more-options">
+								<div class="col-md-12 repeat_periodically_time">
+									<label>{% trans "Run workspace every..." %}</label>
+								</div>
+							
+								<div class="col-md-6 repeat_periodically_time">
+									<input placeholder="{% trans 'Select number of...' %}" name="ws-program-interval" id="ws-program-interval" type="number" value=1 class="form-control">
+								</div>
+								
+								<div class="col-md-6 repeat_periodically_time">
+									<select class="form-control" style="width: 100%;" id="ws-program-unit" name="ws-program-unit">
+										<option value="empty">{% trans '... time measure' %}</option>
+										<option value="minutes">{% trans 'minutes' %}</option>
+										<option value="hours">{% trans 'hours' %}</option>
+										<option value="days">{% trans 'days' %}</option>
+									</select>
+								</div>
 							</div>
 						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
-				<button type="button" class="btn btn-default btn-sm" id="update-etl-workspace">{% trans "Update" %}</button>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
+					<button type="button" class="btn btn-default btn-sm" id="update-etl-workspace">{% trans "Update" %}</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-
-
+{% endif %}
 
 {% endblock %}
 
