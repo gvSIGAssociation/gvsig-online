@@ -21,33 +21,6 @@ gvsigolETL.Toolbar = Class.extend({
 		this.html.append(this.emptyButton);
 		this.emptyButton.click( function() {
 
-			$("#modal-new-empy-canvas").remove();
-			
-			$('#canvas-parent').append('<div class="modal fade" id="modal-new-empy-canvas" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
-				'<div class="modal-dialog" role="document">'+
-					'<div class="modal-content">'+
-						'<div class="modal-header">'+
-							'<button type="button" class="close" data-dismiss="modal"'+
-								'aria-label="Close">'+
-								'<span aria-hidden="true">&times;</span>'+
-							'</button>'+
-							'<h4 class="modal-title" id="myModalLabel">' + gettext('Are you sure?')+'</h4>'+
-						'</div>'+
-						'<div class="modal-body">'+
-							'<div class="row">'+
-								'<div class="col-md-12 form-group">'+
-									'<p style="font-weight: 600;">' + gettext('If you open a new empty canvas you will lost your current canvas if you have not saved it before')+'</p>'+
-								'</div>'+
-							'</div>'+
-						'</div>'+
-						'<div class="modal-footer">'+
-							'<button id="button-empty-canvas-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel')+'</button>'+
-							'<button id="button-empty-canvas-accept" type="button" class="btn btn-default">' + gettext('Accept')+'</button>'+
-						'</div>'+
-					'</div>'+
-				'</div>'+
-			'</div>')
-
 			$('#modal-new-empy-canvas').modal('show')
 
 			$('#button-empty-canvas-accept').click(function() {
@@ -62,7 +35,7 @@ gvsigolETL.Toolbar = Class.extend({
 		this.html.append(this.openButton);
 		this.openButton.click( function() {
 
-			location.href = '/gvsigonline/etl/etl_workspace_list/';
+			location.href = '/gvsigonline/etl/etl_workspace_list/?user=' + username;
 		});
 
 		
@@ -70,165 +43,8 @@ gvsigolETL.Toolbar = Class.extend({
 		this.saveButton  = $('<button id="button-save" class="btn btn-default btn-sm"><i class="fa fa-save margin-r-5"></i>' + gettext('Save') + '</button>');
 		this.html.append(this.saveButton);
 		this.saveButton.click( function() {
-
-			$("#dialog-save").remove();
 			
-			$('#canvas-parent').append('<div id="dialog-save" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-				'<div class="modal-dialog" role="document">'+
-					'<div class="modal-content">'+
-						'<div class="modal-header">'+
-							'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-								'<span aria-hidden="true">&times;</span>'+
-							'</button>'+
-							'<h4 class="modal-title">'+gettext('Save ETL workspace')+'</h4>'+
-						'</div>'+
-
-						'<div class="modal-body">'+
-							'<form id="layer-group-form" role="form">'+
-
-								'<div class="row">'+
-									'<div class="col-md-12">'+
-										'<label for="etl_id" >ID</label>'+
-										'<input value ="'+lgid+'" placeholder="'+gettext('ETL workspace ID')+'" name="etl_id" id="etl_id" type="text" class="form-control">'+
-									'</div>'+
-								'</div>'+
-
-								'<div class="row">'+
-									'<div class="col-md-12">'+
-										'<label for="etl_name">'+gettext('Name')+'</label>'+
-										'<input value ="'+name_ws+'" placeholder="'+gettext('ETL workspace name')+'" name="etl_name" id="etl_name" type="text" class="form-control">'+									
-									'</div>'+
-								'</div>'+
-
-								'<div class="row">'+
-									'<div class="col-md-12">'+
-										'<label for="etl_desc">'+gettext('Description')+'</label>'+
-										'<input value ="'+description_ws+'" placeholder="'+gettext('ETL workspace description')+'" name="etl_desc" id="etl_desc" type="text" class="form-control">'+									
-									'</div>'+
-								'</div>'+
-
-								'<div class="row">'+
-									'<div class="col-md-12">'+
-										'<label for="repeat_periodically">'+gettext("Run periodically?")+'</label>'+
-										'<input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>'+												
-									'</div>'+
-									
-									'<div class="col-md-6 repeat_periodically_time" >'+
-										'<select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">'+
-											'<option value="all">'+gettext('All days')+'</option>'+
-											'<option value="monday">'+gettext('Monday')+'</option>'+
-											'<option value="tuesday">'+gettext('Tuesday')+'</option>'+
-											'<option value="wednesday">'+gettext('Wednesday')+'</option>'+
-											'<option value="thursday">'+gettext('Thursday')+'</option>'+
-											'<option value="friday">'+gettext('Friday')+'</option>'+
-											'<option value="saturday">'+gettext('Saturday')+'</option>'+
-											'<option value="sunday">'+gettext('Sunday')+'</option>'+
-											'<option value="every">'+gettext('Every')+'...</option>'+
-										'</select>'+
-									'</div>'+
-									'<div class="more-hour-options">'+
-										'<div class="col-md-6 repeat_periodically_time">'+
-											'<div class="form-group">'+
-												'<div class="input-group date">'+
-													'<input type="text" class="form-control" id="ws-program-time" name="ws-program-time" placeHolder="HH:mm:ss"/>'+
-													'<span class="input-group-addon">'+
-													'</span>'+
-												'</div>'+
-											'</div>'+
-										'</div>'+
-									'</div>'+
-									
-									'<div class="more-options">'+
-										'<div class="col-md-12 repeat_periodically_time">'+
-											'<label>'+gettext("Run workspace every...")+'</label>'+
-										'</div>'+
-									
-										'<div class="col-md-6 repeat_periodically_time">'+
-											'<input placeholder="'+gettext('Select number of...')+'" name="ws-program-interval" id="ws-program-interval" type="number" value=1 class="form-control">'+
-										'</div>'+
-										'<div class="col-md-6 repeat_periodically_time">'+
-											'<select class="form-control" style="width: 100%;" id="ws-program-unit" name="ws-program-unit">'+
-												'<option value="empty">'+gettext('... time measure')+'</option>'+
-												'<option value="minutes">'+gettext('minutes')+'</option>'+
-												'<option value="hours">'+gettext('hours')+'</option>'+
-												'<option value="days">'+gettext('days')+'</option>'+
-											'</select>'+
-										'</div>'+
-									'</div>'+
-								'</div>'+
-							'</form>'+
-						'</div>'+
-						'<div class="modal-footer">'+
-							'<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-							'<button type="button" class="btn btn-default btn-sm" id="save-etl" title="'+gettext('Set parameters of all tasks before save')+'">'+gettext('Save')+'</button>'+
-						'</div>'+
-					'</div>'+
-				'</div>'+
-			'</div>')
-
-			$(".more-options").slideUp("slow")
-
-			if(dataPeriodic!=''){
-				$("#repeat_periodically").prop('checked', true)
-				$(".repeat_periodically_time").slideDown("slow");
-
-				if(dataPeriodic.includes(':')){
-
-					$(".more-options").slideUp("slow"); 
-					$(".more-hour-options").slideDown("slow");
-					
-					$(".modal-body #ws-program-day").val(dataPeriodic.split(' ')[0])
-					$(".modal-body #ws-program-time").val(dataPeriodic.split(' ')[1]+':00')
-
-				}else{
-
-					$(".more-options").slideDown("slow");  // checked
-					$(".more-hour-options").slideUp("slow");
-
-					$(".modal-body #ws-program-day").val('all')
-					$(".modal-body #ws-program-interval").val(dataPeriodic.split(' ')[0])
-					$(".modal-body #ws-program-unit").val(dataPeriodic.split(' ')[1])
-
-				}
-			
-			}else{
-				$("#repeat_periodically").prop('checked', false)
-				$(".repeat_periodically_time").slideUp("slow");
-			}
-
 			$('#dialog-save').modal('show')
-
-			$("#save-etl").prop("disabled",false);
-			$('#save-etl').attr('data-toggle','');
-
-			
-	
-			$('#repeat_periodically').click(function() {
-		
-					if($("#repeat_periodically").is(':checked'))
-						$(".repeat_periodically_time").slideDown("slow");  // checked
-					else
-						$(".repeat_periodically_time").slideUp("slow"); 
-				});
-		
-		
-			function edit_progamming_form(value){
-				 if(value == "every"){
-					 $(".more-options").slideDown("slow");  // checked
-					 $(".more-hour-options").slideUp("slow"); 
-				 }else{
-					$(".more-options").slideUp("slow"); 
-					$(".more-hour-options").slideDown("slow"); 
-				 }
-			}
-		
-			$('#ws-program-time').datetimepicker({
-				format: 'HH:mm:ss' 
-			});
-			
-			$('#ws-program-day').on('change', function() {
-				edit_progamming_form($(this).val());
-			});
 
 			var writer = new draw2d.io.json.Writer();
 			
@@ -257,6 +73,12 @@ gvsigolETL.Toolbar = Class.extend({
 				} else {
 					formWorkspace.append("checked", false)
 				}
+
+				if($("#change_superuser").is(':checked')){
+					formWorkspace.append("superuser", true)
+				} else {
+					formWorkspace.append("superuser", false)
+				}
 				
 				formWorkspace.append("day", $("#ws-program-day").val())
 				formWorkspace.append("time", $("#ws-program-time").val())
@@ -282,36 +104,17 @@ gvsigolETL.Toolbar = Class.extend({
 						cache: false, 
 						contentType: false, 
 						processData: false,
-						success: function () {
+						success: function (response) {
 							$('#dialog-save').modal('hide')
-							location.href = '/gvsigonline/etl/etl_workspace_list/';
+							if(response['exists']=="true"){
+								$('#modal-ws-exists').modal('show')
+							}else{
+								location.href = '/gvsigonline/etl/etl_workspace_list/?user=' + username;
+							}
 						}
 					});
 				} else {
-
-					$('#canvas-parent').append('<div class="modal fade" id="modal-overwrite-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
-						'<div class="modal-dialog" role="document">'+
-							'<div class="modal-content">'+
-								'<div class="modal-header">'+
-									'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-										'<span aria-hidden="true">&times;</span>'+
-									'</button>'+
-									'<h4 class="modal-title" id="myModalLabel">'+gettext('Overwrite workspace?')+'</h4>'+
-								'</div>'+
-								'<div class="modal-body">'+
-									'<div class="row">'+
-										'<div class="col-md-12 form-group">'+
-											'<p style="font-weight: 600;">'+gettext('Workspace')+' '+lgid+' '+gettext('will be overwrite. If you do not want to overwrite it the ID must be empty.')+'</p>'+
-										'</div>'+
-									'</div>'+
-								'</div>'+
-								'<div class="modal-footer">'+
-									'<button id="button-overwrite-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">'+gettext("Cancel")+'</button>'+
-									'<button id="button-overwrite-workspace-accept" type="button" class="btn btn-default">'+gettext("Accept")+'</button>'+
-								'</div>'+
-							'</div>'+
-						'</div>'+
-					'</div>')
+					$('#dialog-save').modal('hide')
 
 					$('#modal-overwrite-workspace-etl').modal('show')
 
@@ -329,9 +132,13 @@ gvsigolETL.Toolbar = Class.extend({
 							cache: false, 
 							contentType: false, 
 							processData: false,
-							success: function () {
+							success: function (response) {
 								$('#dialog-save').modal('hide')
-								location.href = '/gvsigonline/etl/etl_workspace_list/';
+								if(response['exists']=="true"){
+									$('#modal-ws-exists').modal('show')
+								}else{
+									location.href = '/gvsigonline/etl/etl_workspace_list/?user=' + username;
+								}
 							}
 						});
 					});
@@ -477,8 +284,6 @@ gvsigolETL.Toolbar = Class.extend({
 							break;
 						};
 					};
-
-
 	
 					idRestore.push([id, figure.id, ports, arrayPorts])
 					
@@ -495,7 +300,7 @@ gvsigolETL.Toolbar = Class.extend({
 						
 						try{
 							if (parameters[0][key]){
-								console.log(key)
+								
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') ){
 									
 									if (Array.isArray(schemaold[multiIn])){

@@ -4134,7 +4134,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                         "lat": $('#lat-'+ID).val()}
                     ]
                 };
-                console.log(paramsTextToPoint)
+                
                 schemaMod =[...schema]
                 
                 //updating schema-old and schema parameters in json
