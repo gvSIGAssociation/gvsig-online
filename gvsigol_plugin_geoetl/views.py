@@ -34,10 +34,12 @@ from gvsigol_core import utils as core_utils
 
 from .forms import UploadFileForm
 from .models import ETLworkspaces, ETLstatus
+from django.contrib.auth.models import User
 from . import settings
 from . import etl_tasks
 from . import etl_schema
 from .tasks import run_canvas_background
+
 
 from datetime import datetime
 import numpy as np
@@ -56,6 +58,7 @@ def get_conf(request):
 def etl_canvas(request):
 
     srs = core_utils.get_supported_crs_array()
+    srs_string = json.dumps(srs)
 
     try:
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
@@ -84,7 +87,7 @@ def etl_canvas(request):
             'description': instance.description,
             'workspace': instance.workspace,
             'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
-            'srs': srs
+            'srs': srs_string
         }
 
         try:
@@ -119,42 +122,46 @@ def etl_canvas(request):
         }
         return render(request, 'etl.html', response)
 
-def get_list():
+def get_list(user):
+    
     etl_list = ETLworkspaces.objects.all()
+    
+    user_ob = User.objects.get(username = user)
 
     workspaces = []
     for w in etl_list:
-        workspace = {}
-        workspace['id'] = w.id
-        workspace['name'] = w.name
-        workspace['description'] = w.description
-        workspace['workspace'] = w.workspace[:200]+" (...) ]"
-        workspace['username'] = w.username
-        
-        try:
-            periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
-        except:
-            periodicTask = None
-        
-        if periodicTask:
-            cronid = periodicTask.crontab_id
-            interid = periodicTask.interval_id
-            if cronid:
-                crontab = CrontabSchedule.objects.get(id= cronid)
-                workspace['minute'] = crontab.minute
-                workspace['hour'] = crontab.hour
+        if w.username == user or user_ob.is_superuser:
+            workspace = {}
+            workspace['id'] = w.id
+            workspace['name'] = w.name
+            workspace['description'] = w.description
+            #workspace['workspace'] = w.workspace[:200]+" (...) ]"
+            workspace['username'] = w.username
 
-                days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-                try:
-                    workspace['day_of_week'] = days_of_week[int(crontab.day_of_week)]
-                except:
-                    workspace['day_of_week'] = "all"
-            else:
-                interval = IntervalSchedule.objects.get(id= interid)
-                workspace['every'] = interval.every
-                workspace['period'] = interval.period
+            try:
+                periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
+            except:
+                periodicTask = None
+            
+            if periodicTask:
+                cronid = periodicTask.crontab_id
+                interid = periodicTask.interval_id
+                if cronid:
+                    crontab = CrontabSchedule.objects.get(id= cronid)
+                    workspace['minute'] = crontab.minute
+                    workspace['hour'] = crontab.hour
 
-        workspaces.append(workspace)
+                    days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                    try:
+                        workspace['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+                    except:
+                        workspace['day_of_week'] = "all"
+                else:
+                    interval = IntervalSchedule.objects.get(id= interid)
+                    workspace['every'] = interval.every
+                    workspace['period'] = interval.period
+
+            workspaces.append(workspace)
     
     return workspaces
 
@@ -162,9 +169,11 @@ def get_list():
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def etl_workspace_list(request):
+    
+    username = request.GET['user']
 
     response = {
-        'workspaces': get_list()
+        'workspaces': get_list(username)
     }
 
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
@@ -277,31 +286,79 @@ def delete_periodic_workspace(workspace):
     except:
         pass
 
+def name_user_exists(id, name, user):
+    workspaces = ETLworkspaces.objects.all()
+    for w in workspaces:
+        if w.name == name and w.username == user and id != w.id:
+            return True
+    return False
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def etl_workspace_add(request):
     if request.method == 'POST':
     
         try: 
-
-            workspace = ETLworkspaces(
-                id = int(request.POST.get('id')),
-                name = request.POST.get('name'),
-                description = request.POST.get('description'),
-                workspace = request.POST.get('workspace'),
-                username = request.POST.get('username')
+            ws = ETLworkspaces.objects.get(id = int(request.POST.get('id')))
+            id = int(request.POST.get('id'))
+            user = ws.username
+            name = request.POST.get('name')
+            exists = name_user_exists(id, name, user)
+            if exists:
+                response = {
+                    'exists': 'true',
+                }   
+                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+            
+            if request.POST.get('superuser') == 'false':
                 
-            )
-            workspace.save()
+                workspace = ETLworkspaces(
+                    id = id,
+                    name = name,
+                    description = request.POST.get('description'),
+                    workspace = request.POST.get('workspace'),
+                    username = user
+                    
+                )
+                workspace.save()
+            
+            else:
+                user = request.POST.get('username')
+                id = int(request.POST.get('id'))
+                name = request.POST.get('name')
+                exists = name_user_exists(id, name, user)
+                if exists:
+                    response = {
+                        'exists': 'true',
+                    }   
+                    return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
+                workspace = ETLworkspaces(
+                    id = id,
+                    name = name,
+                    description = request.POST.get('description'),
+                    workspace = request.POST.get('workspace'),
+                    username = user
+                    
+                )
+                workspace.save()
             
         except:
-            print("---->", request.POST.get('username'))
+            user = request.POST.get('username')
+            id = None
+            name = request.POST.get('name')
+            exists = name_user_exists(id, name, user)
+            if exists:
+                response = {
+                    'exists': 'true',
+                }   
+                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
             workspace = ETLworkspaces(
                 name = request.POST.get('name'),
                 description = request.POST.get('description'),
                 workspace = request.POST.get('workspace'),
-                username = request.POST.get('username')
+                username = user
             )
             workspace.save()
         
@@ -311,7 +368,11 @@ def etl_workspace_add(request):
 
             save_periodic_workspace(request, workspace)
 
-        return redirect('etl_workspace_list')
+        response = {
+            'workspaces': get_list(user)
+        }
+
+        return render(request, 'dashboard_geoetl_workspaces_list.html', response)
         
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -335,14 +396,46 @@ def etl_workspace_update(request):
     if request.method == 'POST':
         lgid = request.POST['id']
         instance  = ETLworkspaces.objects.get(id=int(lgid))
+        if request.POST.get('superuser') == 'false':
+            
+            user = instance.username
+            id = int(request.POST.get('id'))
+            name = request.POST.get('name')
+            exists = name_user_exists(id, name, user)
+            if exists:
+                response = {
+                    'exists': 'true',
+                }   
+                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+            
+            workspace = ETLworkspaces(
+                id = id,
+                name = name,
+                description = request.POST.get('description'),
+                workspace = instance.workspace,
+                username = user
+            )
+            workspace.save()
+        else:
 
-        workspace = ETLworkspaces(
-            id = int(request.POST.get('id')),
-            name = request.POST.get('name'),
-            description = request.POST.get('description'),
-            workspace = instance.workspace
-        )
-        workspace.save()
+            user = request.POST.get('username')
+            id = int(request.POST.get('id'))
+            name = request.POST.get('name')
+            exists = name_user_exists(id, name, user)
+            if exists:
+                response = {
+                    'exists': 'true',
+                }   
+                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
+            workspace = ETLworkspaces(
+                id = id,
+                name = name,
+                description = request.POST.get('description'),
+                workspace = instance.workspace,
+                username = user
+            )
+            workspace.save()            
 
         delete_periodic_workspace(instance)
 

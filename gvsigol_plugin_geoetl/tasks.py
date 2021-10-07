@@ -101,7 +101,7 @@ def run_canvas_background(**kwargs):
                                                     
                                                 break
                                         
-                                        #if more than an edge has the end in the same port
+                                        #if more than one edge have the end in the same port
                                         if targetPortRepeated == True:
 
                                             fc = parameters['data'][-2]
