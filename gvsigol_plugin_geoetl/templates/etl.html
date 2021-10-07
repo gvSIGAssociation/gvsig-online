@@ -174,7 +174,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <p style="font-weight: 600;">{% trans 'Workspace' %} {{ lgid }} {% trans 'will be overwrite. If you do not want to overwrite it the ID must be empty' %}</p>
+                            <p style="font-weight: 600;">{% trans 'Workspace' %} {{ id }} {% trans 'will be overwrite. If you do not want to overwrite it the ID must be empty' %}</p>
                         </div>
                     </div>
                 </div>
@@ -260,16 +260,9 @@
     }else{
         dataPeriodic = ''
     }
-
-    function htmlDecode(input){
-        var e = document.createElement('textarea');
-        e.innerHTML = input;
-        // handle case of empty input
-        return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
-    };
-
+    
     if(workspace){
-        var cnv = JSON.parse(htmlDecode(workspace))
+        var cnv = JSON.parse({{ workspace|safe }})
     };
 
     var srs = {{ srs|safe }}
