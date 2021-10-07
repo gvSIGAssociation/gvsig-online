@@ -85,7 +85,7 @@ def etl_canvas(request):
             'id':lgid,
             'name': instance.name,
             'description': instance.description,
-            'workspace': instance.workspace,
+            'workspace': json.dumps(instance.workspace),
             'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
             'srs': srs_string
         }
