@@ -45,6 +45,9 @@ gvsigolETL.Toolbar = Class.extend({
 		this.saveButton.click( function() {
 			
 			$('#dialog-save').modal('show')
+			
+			$("#save-etl").prop("disabled",false)
+			$('#save-etl').attr('data-toggle','');
 
 			var writer = new draw2d.io.json.Writer();
 			
@@ -257,10 +260,15 @@ gvsigolETL.Toolbar = Class.extend({
 		/*Draw Nodes if a workspace is restored*/
 		if (cnv != null){
 
-			for(i=0 ;i < cnv.length;i++){
+			console.log(cnv, cnv.length)
 
+			for(i=0 ;i < cnv.length;i++){
+				console.log(cnv[i])
+				
 				if (cnv[i]['type'] != 'draw2d.Connection'){
 					
+					console.log('trans', i)
+
 					type = cnv[i]['type']
 					x = cnv[i]['x']
 					y = cnv[i]['y']
@@ -325,7 +333,7 @@ gvsigolETL.Toolbar = Class.extend({
 					})
 			
 				}else{
-					
+					console.log('edge',i)
 					s = false
 					t = false
 	
