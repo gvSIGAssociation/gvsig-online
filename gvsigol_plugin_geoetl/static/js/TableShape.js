@@ -655,7 +655,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="column20">'+
                                 '<label class="col-form-label">EPSG:</label>'+
-                                '<select id="epsg-'+ID+'" class="form-control js-example-basic-single">'+ 
+                                '<select id="epsg-'+ID+'" class="form-control">'+ 
                                     '<option value="">'+gettext('Insert if PRJ is not loaded')+'</option>'+
                                 '</select>'+
                             '</div>'+
@@ -3249,13 +3249,13 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("Source EPSG:")+'</label>'+
-                                '<select id="source-epsg-'+ID+'" class="form-control js-example-basic-single">'+
+                                '<select id="source-epsg-'+ID+'" class="form-control">'+
                                 '<option value="">'+gettext("Empty to read from input layer")+'</option>'+
                                 '</select>'+
                             '</div>'+
                             '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext("Target EPSG:")+'</label>'+
-                                '<select id="target-epsg-'+ID+'" class="form-control js-example-basic-single">'+ 
+                                '<select id="target-epsg-'+ID+'" class="form-control">'+ 
                                 '<option value="">------</option>'+
                                 '</select>'+
                             '</div>'+
@@ -4061,7 +4061,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="column33">'+
                                 '<label form="attr" class="col-form-label">'+gettext('Insert EPSG:')+'</label>'+
-                                '<select id="epsg-'+ID+'" class="form-control js-example-basic-single">'+ 
+                                '<select id="epsg-'+ID+'" class="form-control">'+ 
                                     '<option value="">----</option>'+
                                 '</select>'+
                             '</div>'+

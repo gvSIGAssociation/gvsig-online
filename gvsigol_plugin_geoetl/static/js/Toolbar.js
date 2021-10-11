@@ -259,44 +259,39 @@ gvsigolETL.Toolbar = Class.extend({
 		
 		/*Draw Nodes if a workspace is restored*/
 		if (cnv != null){
-
-			console.log(cnv, cnv.length)
-
-			for(i=0 ;i < cnv.length;i++){
-				console.log(cnv[i])
+			
+			for(o=0 ;o < cnv.length;o++){
 				
-				if (cnv[i]['type'] != 'draw2d.Connection'){
+				if (cnv[o]['type'] != 'draw2d.Connection'){
 					
-					console.log('trans', i)
-
-					type = cnv[i]['type']
-					x = cnv[i]['x']
-					y = cnv[i]['y']
+					type = cnv[o]['type']
+					x = cnv[o]['x']
+					y = cnv[o]['y']
 	
-					id = cnv[i]['id']
-					ports = cnv[i]['ports']
+					id = cnv[o]['id']
+					ports = cnv[o]['ports']
 
-					text = cnv[i]['name']
-
-					parameters = cnv[i]['entities'][0]['parameters']
-					schema = cnv[i]['entities'][0]['schema']
-					schemaold = cnv[i]['entities'][0]['schemaold']
-				
+					text = cnv[o]['name']
+					
+					parameters = cnv[o]['entities'][0]['parameters']
+					schema = cnv[o]['entities'][0]['schema']
+					schemaold = cnv[o]['entities'][0]['schemaold']
+					
 					var figure = eval("new "+type+"();");
 					
 					figure.addEntity("id");
-
+					
 					for(j=0;j<listLabel.length;j++){
 						if(listLabel[j][0]==figure.id){
 							arrayPorts = listLabel[j][1].concat(listLabel[j][2])
 							break;
 						};
 					};
-	
+					
 					idRestore.push([id, figure.id, ports, arrayPorts])
 					
 					taskparameters = {"id": figure.id, "parameters": parameters, "schema": schema, "schema-old": schemaold}
-
+					
 					isAlreadyInCanvas(jsonParams, taskparameters, figure.id)
 					
 					// create a command for the undo/redo support
@@ -304,6 +299,7 @@ gvsigolETL.Toolbar = Class.extend({
 					view.getCommandStack().execute(command);
 					
 					multiIn = 0
+					
 					Object.keys(parameters[0]).forEach(function(key){
 						
 						try{
@@ -331,18 +327,19 @@ gvsigolETL.Toolbar = Class.extend({
 						}catch{
 						}
 					})
+
+					
 			
 				}else{
-					console.log('edge',i)
 					s = false
 					t = false
 	
 					for(j=0;j<idRestore.length;j++){
-						if(cnv[i]['source']['node'] == idRestore[j][0]){
-							cnv[i]['source']['node'] = idRestore[j][1]
+						if(cnv[o]['source']['node'] == idRestore[j][0]){
+							cnv[o]['source']['node'] = idRestore[j][1]
 							for (k=0; k<idRestore[j][2].length;k++){
-								if(idRestore[j][2][k]['name'] == cnv[i]['source']['port']){
-									cnv[i]['source']['port'] = idRestore[j][3][k]
+								if(idRestore[j][2][k]['name'] == cnv[o]['source']['port']){
+									cnv[o]['source']['port'] = idRestore[j][3][k]
 									break;
 								};
 							};
@@ -350,11 +347,11 @@ gvsigolETL.Toolbar = Class.extend({
 							s = true
 						};
 	
-						if(cnv[i]['target']['node'] == idRestore[j][0]){
-							cnv[i]['target']['node'] = idRestore[j][1]
+						if(cnv[o]['target']['node'] == idRestore[j][0]){
+							cnv[o]['target']['node'] = idRestore[j][1]
 							for (k=0; k<idRestore[j][2].length;k++){
-								if(idRestore[j][2][k]['name'] == cnv[i]['target']['port']){
-									cnv[i]['target']['port'] = idRestore[j][3][k]
+								if(idRestore[j][2][k]['name'] == cnv[o]['target']['port']){
+									cnv[o]['target']['port'] = idRestore[j][3][k]
 									break;
 								};
 							};
@@ -368,9 +365,10 @@ gvsigolETL.Toolbar = Class.extend({
 					};
 
 					var reader = new draw2d.io.json.Reader();
-					reader.unmarshal(view, [cnv[i]]);
+					reader.unmarshal(view, [cnv[o]]);
 
 				};
+
 			};
 		};
     },
