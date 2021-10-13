@@ -218,7 +218,23 @@ class Introspect:
             """, [schema])
         
         return [(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]) for r in self.cursor.fetchall()]
-    
+
+    def is_view(self, schema, table):
+        query = "SELECT COUNT(*) FROM information_schema.views WHERE table_schema = %s AND table_name = %s"
+        self.cursor.execute(query, [schema, table])
+        r = self.cursor.fetchone()
+        return r[0] > 0
+
+    def get_geoserver_view_pk_columns(self, schema, table):
+        try:
+            query = sqlbuilder.SQL("""
+            SELECT pk_column FROM {schema}.gt_pk_metadata WHERE table_name = %s AND table_schema = %s
+            """).format(schema=sqlbuilder.Identifier(schema))
+            self.cursor.execute(query, [table, schema])
+            return [r[0] for r in self.cursor.fetchall()]
+        except:
+            # the table may not exist, this is not an error
+            return []
 
     def get_pk_columns(self, table, schema='public'):
         qualified_table = quote_ident(schema, self.conn) + "." + quote_ident(table, self.conn) 
@@ -233,7 +249,10 @@ class Introspect:
                         AND i.indisprimary
         """).format(schema_table=sqlbuilder.Literal(qualified_table))
         self.cursor.execute(query)
-        return [r[0] for r in self.cursor.fetchall()]
+        pks = self.cursor.fetchall()
+        if len(pks) == 0 and self.is_view(schema, table):
+            return self.get_geoserver_view_pk_columns(schema, table)
+        return [r[0] for r in pks]
     
     def get_fields(self, table, schema='public'):
         self.cursor.execute("""
