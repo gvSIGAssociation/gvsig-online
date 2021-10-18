@@ -165,5 +165,11 @@ msgstr "Tocantins A3 Horizontal"
 msgid "tocantins_a3_portrait"
 msgstr "Tocantins A3 Vertical"
 
+msgid "a4_landscape_overview_durazno"
+msgstr "Durazno A4 Horizontal"
+
+msgid "a3_landscape_overview_durazno"
+msgstr "Durazno A3 Horizontal"
+
 msgid "print-mapgrid-indent"
 msgstr "Márgen de las etiquetas al borde"

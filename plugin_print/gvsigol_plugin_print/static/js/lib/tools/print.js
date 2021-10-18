@@ -400,6 +400,13 @@ print.prototype.updateUI = function() {
 	else
 		$('#print-ui-legal-warning').hide();
 
+	if (this.supports('crsPermanent')) {
+		$('#print-ui-mapprojection').hide();
+	}
+	else {
+		$('#print-ui-mapprojection').show();
+	}
+
 		
 };
 
@@ -595,6 +602,11 @@ print.prototype.createPrintJob = function(template) {
 	var rotation = $('#print-rotation').val();
 	var dpi = $('#print-dpi').val();
 	var projection = $('#print-projection').val();
+
+	if (this.supports('crsPermanent')) {
+		projection = this.getAttributeDefaultValue('crs');
+	}
+
 	var overviewLayerId = $('#print-overview').val();
 	var overviewLayer = self.baseLayers[parseInt(overviewLayerId)];
 	var mapgridType = $("#print-mapgrid-gridtype").val();
@@ -954,6 +966,16 @@ print.prototype.supports = function (param) {
 		}
 	}
     return false;
+};
+
+print.prototype.getAttributeDefaultValue = function (paramName) {
+	// search for attribute param
+	for (var att of this.capabilities.layouts[0].attributes) {
+		if (att.name == paramName) {
+			return att.default;
+		}
+	}
+    return undefined;
 };
 
 
