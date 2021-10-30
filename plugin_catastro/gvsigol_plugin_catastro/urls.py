@@ -11,5 +11,6 @@ urlpatterns = [
     url(r'^catastro/get_referencia_catastral/$', views.get_referencia_catastral, name='get_referencia_catastral'),
     url(r'^catastro/get_referencia_catastral_polygon/$', views.get_referencia_catastral_polygon, name='get_referencia_catastral_polygon'),
     url(r'^catastro/get_rc_info/$', views.get_rc_info, name='get_rc_info'),
-    url(r'^catastro/get_rc_by_coords/$', views.get_rc_by_coords, name='get_rc_by_coords')
+    url(r'^catastro/get_rc_by_coords/$', views.get_rc_by_coords, name='get_rc_by_coords'),
+    url(r'^catastro/get_rc_public_data/$', views.get_rc_public_data, name='get_rc_public_data')
 ]

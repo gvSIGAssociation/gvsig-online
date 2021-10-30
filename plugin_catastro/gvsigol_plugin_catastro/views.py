@@ -24,30 +24,31 @@
 
 from django.shortcuts import HttpResponse
 import settings
-import json
+import json, xmltodict
 import requests
 from django.views.decorators.csrf import csrf_exempt
 from xml.etree import ElementTree
 
 from django.contrib.gis.geos import Polygon, Point, MultiPoint, GeometryCollection
+import re
 
 def get_conf(request):
     if request.method == 'POST':
         response = {
             'url_catastro': settings.URL_CATASTRO
         }
-        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+		return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
 
 @csrf_exempt
 def get_provincias(request):
     if request.method == 'POST':
         provincias_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaProvincia';
-
         r = requests.get(url = provincias_url, params = {})
         response = r.content
 
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
 
 
 @csrf_exempt
@@ -61,6 +62,7 @@ def get_municipios(request):
         response = r.content
 
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
 
 
 
@@ -79,6 +81,7 @@ def get_vias(request):
 
 
 
+
 @csrf_exempt
 def get_rc_by_coords(request):
     if request.method == 'POST':
@@ -92,7 +95,13 @@ def get_rc_by_coords(request):
         response['srs'] = srs
 
         address_url = settings.URL_API_CATASTRO + '/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS='+srs+'&Coordenada_X='+xcen+'&Coordenada_Y='+ycen
-        r = requests.get(url = address_url, params = {})
+        # payload = {
+        #     'SRS': srs,
+        #     'Coordenada_X': xcen,
+        #     'Coordenada_Y': ycen
+        # }
+        # r = requests.get(url = address_url, params = payload, timeout=6) # timeout a 6 segundos, el servidor de catastro a veces tarda
+        r = requests.get(url = address_url, timeout=6)
 
         tree = ElementTree.fromstring(r.content)
 
@@ -106,9 +115,23 @@ def get_rc_by_coords(request):
 
                 for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
                     response['address'] = aux3.text
-
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
+@csrf_exempt
+def get_rc_public_data(request):
+    if request.method == 'POST':
+        ref_catastral = request.POST.get('RC')
+
+        body = {}
+        body['Provincia'] = ''
+        body['Municipio'] = ''
+        body['RC'] = ref_catastral
+
+        address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/Consulta_DNPRC'
+        r = requests.post(address_url, data = body, verify = False)
+
+        resp_obj = xmltodict.parse(r.content)
+        return JsonResponse(resp_obj)
 
 @csrf_exempt
 def get_rc_info(request):
@@ -122,9 +145,12 @@ def get_rc_info(request):
 
         if xcen and ycen and srs:
             address_url = 'https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCListaBienes.aspx?origen=Carto&huso='+srs+'&x='+xcen+'&y='+ycen
+            print(address_url)
 
             r = requests.get(url = address_url, params = {})
-            response = r.content
+            
+            response = r.text
+            response = re.sub(r"""<a onclick="javascript:CargarBien\('(?P<del>[^']*)',\s*'(?P<mun>[^']*)',\s*'(?P<UrbRus>[^']*)',\s*'(?P<RefC>[^']*)'(,\s*('[^']*'|true|false)){11},\s*'(?P<from>[^']*)',\s*'(?P<ZV>[^']*)'[^>]*>[^<]*</a>""", '<a href="https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCConCiud.aspx?del=\\g<del>&mun=\\g<mun>&UrbRus=\\g<UrbRus>&RefC=\\g<RefC>&Apenom=&esBice=&RCBice1=&RCBice2=&DenoBice=&from=\\g<from>&ZV=\\g<ZV>" target="_blank">\\g<RefC> </a>', response)
             response = response.replace('<script src="/MasterPage/js/jquery.min.js"></script>','')
             response = response.replace('<link href="../RecursosComunes/Estilos/jquery-ui.css" rel="stylesheet" type="text/css">','')
             response = response.replace('../Cartografia', 'https://www1.sedecatastro.gob.es/Cartografia')
@@ -137,6 +163,7 @@ def get_rc_info(request):
             response = response.replace('<link href="https://www1.sedecatastro.gob.es/MasterPage/css/bootstrap.min.css" rel="stylesheet">','')
             response = response.replace('<link href="https://www1.sedecatastro.gob.es/MasterPage/css/print.css" type="text/css" rel="stylesheet" media="print">','')
             response = response.replace('<script src="https://www1.sedecatastro.gob.es/MasterPage/js/bootstrap.min.js"  type="text/javascript"></script>','')
+            response = re.sub('<script .*></script>', '', response)
 
         else:
             response = ''
@@ -184,7 +211,7 @@ def get_referencia_catastral_polygon(request):
             'featureCollection': features
         }
 
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+        return JsonResponse(response)
 
 
 @csrf_exempt
@@ -237,7 +264,7 @@ def get_referencia_catastral(request):
                 url = settings.URL_API_CATASTRO + "/OVCCallejero.asmx/Consulta_DNPPP"
                 url += "?Provincia="+provincia+"&Municipio="+municipio+"&Poligono="+poligonovia+"&Parcela="+parcelavia
 
-            print 'Location url: ' + url
+            print('Location url: ' + url)
             r = requests.get(url = url, params = {})
             tree = ElementTree.fromstring(r.content)
 
@@ -249,7 +276,7 @@ def get_referencia_catastral(request):
                                 rc = aux5.text
                             for aux5 in aux4.iter('{http://www.catastro.meh.es/}pc2'):
                                 rc += aux5.text
-                            print 'Referencia catastral: ' + rc
+                            print('Referencia catastral: ' + rc)
 
 
             for aux1 in tree.iter('{http://www.catastro.meh.es/}lrcdnp'):
@@ -259,7 +286,7 @@ def get_referencia_catastral(request):
                             rc = aux5.text
                         for aux5 in aux4.iter('{http://www.catastro.meh.es/}pc2'):
                             rc += aux5.text
-                        print 'Referencia catastral: ' + rc
+                        print('Referencia catastral: ' + rc)
 
         if typex == 'reg_code':
             address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaVia?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia="
@@ -286,5 +313,4 @@ def get_referencia_catastral(request):
                     for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
                         response['address'] = aux3.text
 
-
-        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+        return JsonResponse(response)
