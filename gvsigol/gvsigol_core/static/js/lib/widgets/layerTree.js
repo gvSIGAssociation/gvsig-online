@@ -259,7 +259,7 @@ layerTree.prototype.createTree = function() {
 		data: availableLayers,
 		placeholder: gettext('Find layer'),
 		allowClear: true,
-		width: '380px'
+		width: '100%'
 	});
 	
 	$('#combo-layers').on('select2:select', function (e) {
