@@ -10,6 +10,10 @@ from osgeo import ogr, osr
 import copy
 from dateutil.parser import parse
 import mgrs
+import gdaltools
+import tempfile
+import cx_Oracle
+from geomet import wkt
 
 
 # Python class to print topological sorting of a DAG 
@@ -140,7 +144,6 @@ def input_Shp(dicc):
 
     for feature in layer:    
         f= feature.ExportToJson(as_object=True)
-        print(f)
         fc['features'].append(f)
 
     return[fc]
@@ -580,6 +583,44 @@ def output_Postgis(dicc):
 
     fc = dicc['data'][0]
 
+    tfile = tempfile.NamedTemporaryFile(mode="w+", delete = False)
+    json.dump(fc, tfile)
+    tfile.flush()
+    
+    schemaTable= dicc['tablename'].lower()
+    if "." in schemaTable:
+        schema = schemaTable.split(".")[0]
+        table_name = schemaTable.split(".")[1]
+    else:
+        schema = "public"
+        table_name = schemaTable
+    #epsg for geometry
+    srs = fc['crs']['properties']['name']
+    operation = dicc['operation']
+    ogr = gdaltools.ogr2ogr()
+    ogr.set_encoding('UTF-8')
+    ogr.set_input(tfile.name, srs=srs)
+    conn = gdaltools.PgConnectionString(host=dicc["host"], port=dicc["port"], dbname=dicc["database"], schema=schema, user=dicc["user"], password=dicc["password"])
+    ogr.set_output(conn, table_name=table_name)
+    if operation == "CREATE":
+        ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
+    #elif operation == "UPDATE":
+
+    ogr.layer_creation_options = {
+        "LAUNDER": "YES",
+        "precision": "NO"
+    }
+    ogr.config_options = {
+        "OGR_TRUNCATE": "NO"
+    }
+    ogr.set_dim("2")
+    ogr.execute()
+
+
+"""def output_Postgis(dicc):
+
+    fc = dicc['data'][0]
+
     tableName = dicc['tablename'].lower()
     
     #epsg for geometry
@@ -798,7 +839,7 @@ def output_Postgis(dicc):
 
     conn.commit()
     conn.close()
-    cur.close()
+    cur.close()"""
 
 def input_Csv(dicc):
 
@@ -1033,6 +1074,108 @@ def trans_TextToPoint(dicc):
             pass
     
     return[table]
+
+def input_Oracle(dicc):
     
+    conn = cx_Oracle.connect(
+        dicc['username'],
+        dicc['password'],
+        dicc['dsn']
+    )
+    
+    fc = {
+        "features":[]
+        }
 
+    c = conn.cursor()
+    c.execute("SELECT column_name FROM ALL_TAB_COLUMNS WHERE table_name = '"+dicc['table-name']+"' AND owner = '"+dicc['owner-name']+"'")
 
+    attrnames =[]
+    for attr in c:
+        attrnames.append(attr[0])
+
+    c.execute("SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name'])
+
+    for row in c:
+        attrvalues = []
+        for i in row:
+            
+            if type(i) == cx_Oracle.LOB:
+
+                attrvalues.append(i.read())
+            else:
+                attrvalues.append(i)
+
+        dicc = dict(zip(attrnames, attrvalues))
+        
+        fc['features'].append({'properties': dicc})
+    
+    return[fc]
+
+def trans_WktGeom(dicc):
+    
+    table = dicc['data'][0]
+    tablecopy = copy.deepcopy(table)
+    attr = dicc['attr']
+    epsg = dicc['epsg']
+
+    table["type"] = "FeatureCollection"
+    table["crs"] = {"type": "name", "properties":{"name":"EPSG:"+str(epsg)}}
+
+    k = 0
+    for i in table['features']:
+        wkt_string = i['properties'][attr]
+        i["type"] = "Feature"
+        tablecopy['features'][k]["geometry"] = wkt.loads(wkt_string)
+        
+        for j in i['properties']:
+            if j == attr:
+                del tablecopy['features'][k]['properties'][attr]
+
+        k+=1
+        
+    return [tablecopy]
+
+    
+def trans_SplitAttr(dicc):
+
+    table = dicc['data'][0]
+    tablecopy = copy.deepcopy(table)
+    attr = dicc['attr']
+    _list = dicc['list']
+    _split = dicc['split']
+    
+    k = 0
+    for i in table['features']:
+        str_list = i['properties'][attr].split(_split)
+        
+        tablecopy['features'][k]["properties"][_list] = str_list
+        
+        for j in i['properties']:
+            if j == attr:
+                del tablecopy['features'][k]['properties'][attr]
+
+        k+=1
+    
+    return [tablecopy]
+
+def trans_ExplodeList(dicc):
+    table = dicc['data'][0]
+    tablecopy = copy.deepcopy(table)
+    attr = dicc['attr']
+    list_name = dicc['list']
+    
+    k = 0
+    for i in table['features']:
+        _list = i['properties'][list_name]
+
+        for l in range (0, len(_list)):
+            
+            tablecopy['features'].append(tablecopy['features'][k])
+            if l == 0:
+                del tablecopy['features'][-1]['properties'][list_name]
+                tablecopy['features'][-1]['properties'][attr] = _list[l]
+        
+        del tablecopy['features'][k]
+
+    return [tablecopy]

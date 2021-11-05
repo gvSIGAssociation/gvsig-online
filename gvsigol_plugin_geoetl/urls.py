@@ -17,4 +17,8 @@ urlpatterns = [
     path('etl/etl_workspace_update/', views.etl_workspace_update, name='etl_workspace_update'),
     path('etl/etl_current_canvas_status/', views.etl_current_canvas_status, name='etl_current_canvas_status'),
     path('etl/etl_list_canvas_status/', views.etl_list_canvas_status, name='etl_list_canvas_status'),
+    path('etl/test_oracle_conexion/', views.test_oracle_conexion, name='test_oracle_conexion'),
+    path('etl/etl_owners_oracle/', views.etl_owners_oracle, name='etl_owners_oracle'),
+    path('etl/etl_tables_oracle/', views.etl_tables_oracle, name='etl_tables_oracle'),
+    path('etl/etl_schema_oracle/', views.etl_schema_oracle, name='etl_schema_oracle'),
 ]

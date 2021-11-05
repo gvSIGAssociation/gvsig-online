@@ -505,6 +505,7 @@ def etl_read_canvas(request):
             jsonCanvas = json.loads(request.POST['jsonCanvas'])
 
             run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': None})
+            #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': None})
  
         else:
             print ('invalid form')
@@ -580,4 +581,59 @@ def etl_schema_csv(request):
             response = etl_schema.get_schema_csv(jsParams['parameters'][0])
             
             return HttpResponse(json.dumps(response), content_type="application/json")
+
+@login_required(login_url='/gvsigonline/auth/login_user/')   
+@staff_required 
+def test_oracle_conexion(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+
+            jsParams = json.loads(request.POST['jsonParamsOracle'])
+
+            response = etl_schema.test_oracle(jsParams['parameters'][0])
+
+            return HttpResponse(json.dumps(response), content_type="application/json")
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def etl_owners_oracle(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            
+            jsParams = json.loads(request.POST['jsonParamsOracle'])
+
+            listOwners = etl_schema.get_owners_oracle(jsParams['parameters'][0])
+            response = json.dumps(listOwners)
+
+            return HttpResponse(response, content_type="application/json")
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def etl_tables_oracle(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            
+            jsParams = json.loads(request.POST['jsonParamsOracle'])
+
+            listtabl = etl_schema.get_tables_oracle(jsParams['parameters'][0])
+            response = json.dumps(listtabl)
+
+            return HttpResponse(response, content_type="application/json")
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def etl_schema_oracle(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            
+            jsParams = json.loads(request.POST['jsonParamsOracle'])
+
+            listSchema = etl_schema.get_schema_oracle(jsParams['parameters'][0])
+            response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")
 
