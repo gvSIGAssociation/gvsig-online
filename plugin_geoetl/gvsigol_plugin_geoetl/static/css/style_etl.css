@@ -66,6 +66,13 @@
     width: 20%;
 }
 
+.column30
+{
+    float: left;
+    width: 30%;
+}
+
+
 .column33
 {
     float: left;
