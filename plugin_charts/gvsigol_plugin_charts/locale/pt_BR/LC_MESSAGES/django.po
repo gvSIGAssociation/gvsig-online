@@ -206,7 +206,7 @@ msgstr "Título da camada"
 
 #: templates/chart_list.html:15
 msgid "Datastore"
-msgstr "Armazem de dados"
+msgstr "Armazém de dados"
 
 #: templates/chart_list.html:16 templates/dashboard_charts_menu.html:9
 #: templates/dashboard_charts_menu.html:17
