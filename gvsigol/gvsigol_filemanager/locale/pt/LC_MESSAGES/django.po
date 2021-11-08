@@ -46,7 +46,7 @@ msgstr "Modo de criação de tabela"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:69
 msgid "Data store"
-msgstr "Armazenamento de dados"
+msgstr "Armazém de dados"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:76
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:29

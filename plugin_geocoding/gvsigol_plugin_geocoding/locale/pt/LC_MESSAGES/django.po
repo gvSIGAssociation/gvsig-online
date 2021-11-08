@@ -36,7 +36,7 @@ msgstr "Espaço de trabalho"
 
 #: forms_services.py:39 forms_services.py:59
 msgid "Datastore"
-msgstr "Armazén de dados"
+msgstr "Armazém de dados"
 
 #: forms_services.py:40 forms_services.py:60
 msgid "Resource"
@@ -106,7 +106,7 @@ msgstr "Salvar"
 
 #: templates/provider_add.html:57 templates/provider_update.html.py:59
 msgid "Data Store"
-msgstr "Armazén de dados"
+msgstr "Armazém de dados"
 
 #: templates/provider_add.html:64 templates/provider_update.html.py:67
 msgid "Resource name"
@@ -135,11 +135,11 @@ msgstr "Parâmetros avançados"
 #: templates/provider_add.html:225 templates/provider_add.html.py:272
 #: templates/provider_update.html:282
 msgid "Data store contains no resources to publish"
-msgstr "O armazén de dados não contém recursos para publicar"
+msgstr "O armazém de dados não contém recursos para publicar"
 
 #: templates/provider_add.html:242
 msgid "Choose dataStore"
-msgstr "Selecionar armazén de dados"
+msgstr "Selecionar armazém de dados"
 
 #: templates/provider_add.html:248 templates/provider_add.html.py:294
 #: templates/provider_add.html:302 templates/provider_add.html.py:348
@@ -159,7 +159,7 @@ msgstr "Selecionar recurso"
 #: templates/provider_add.html:309 templates/provider_add.html.py:355
 #: templates/provider_update.html:319 templates/provider_update.html.py:363
 msgid "No valid data store selected"
-msgstr "Nenhum armazén de dados válido selecionado"
+msgstr "Nenhum armazém de dados válido selecionado"
 
 #: templates/provider_add.html:325 templates/provider_update.html.py:333
 msgid "Resource contains no fields"
@@ -329,7 +329,7 @@ msgstr "Duração"
 
 #: views.py:117 views.py:270
 msgid "Error: DataStore has not a valid CartoCiudad schema (Needed , "
-msgstr "Erro: O armazén de dados não possui um esquema CartoCiudad válido (Needed , "
+msgstr "Erro: O armazém de dados não possui um esquema CartoCiudad válido (Needed , "
 
 #: views.py:129
 msgid "Error: this type of provider is already added to the project"
