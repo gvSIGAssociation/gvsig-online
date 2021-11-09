@@ -484,7 +484,7 @@ msgstr "Elevação regex"
 #: gvsigol_services/templates/cache_list.html:26
 #: gvsigol_services/templates/layer_list.html:28
 msgid "Datastore"
-msgstr "Banco de dados"
+msgstr "Armazém de dados"
 
 #: gvsigol_services/forms_geoserver.py:95
 msgid "Mode"
@@ -1325,12 +1325,12 @@ msgstr "Excluir armazém"
 
 #: gvsigol_services/templates/datastore_list.html:63
 msgid "The data store and its registered resources will be deleted"
-msgstr "O armazén de dados e seus recursos registrados serão excluídos"
+msgstr "O armazém de dados e seus recursos registrados serão excluídos"
 
 #: gvsigol_services/templates/datastore_list.html:69
 msgid "Check this option to remove the schema associated with the datastore"
 msgstr ""
-"Marque esta opção para remover o esquema associado com o armazén de dados "
+"Marque esta opção para remover o esquema associado com o armazém de dados "
 
 #: gvsigol_services/templates/datastore_list.html:116
 msgid "Remove datastore"
@@ -1553,7 +1553,7 @@ msgstr "Criar camada"
 #: gvsigol_services/templates/geoserver/layer_upload_postgis.html:57
 #: gvsigol_services/templates/geoserver/layer_upload_vector.html:54
 msgid "Data store"
-msgstr "Armazén de dados"
+msgstr "Armazém de dados"
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:45
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:43
@@ -1700,7 +1700,7 @@ msgstr "Aviso"
 
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:167
 msgid "Select a data store before using Autocomplete"
-msgstr "Selecione um armazén de dados antes de usar o Autocompletar"
+msgstr "Selecione um armazém de dados antes de usar o Autocompletar"
 
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:273
 msgid "Select row"
@@ -1717,7 +1717,7 @@ msgstr "Publicar camada"
 #: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:61
 #: gvsigol_services/templates/geoserver/layer_upload_raster.html:61
 msgid "A new data store will be automatically created"
-msgstr "Um novo armazén de dados será criado automaticamente"
+msgstr "Um novo armazém de dados será criado automaticamente"
 
 #: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:82
 #, python-format
@@ -1749,7 +1749,7 @@ msgstr "Modo de criação de tabela"
 #: gvsigol_services/templates/geoserver/layer_upload_postgis.html:66
 #: gvsigol_services/templates/geoserver/layer_upload_vector.html:65
 msgid "Layer will be uploaded to the selected data store"
-msgstr "A camada será carregada para o armazén de dados selecionados"
+msgstr "A camada será carregada para o armazém de dados selecionados"
 
 #: gvsigol_services/templates/geoserver/layer_upload_postgis.html:86
 msgid "Character encoding"
@@ -1884,7 +1884,7 @@ msgstr "Ler permissões"
 #: gvsigol_services/templates/layer_create.html:60
 #: gvsigol_services/templates/layer_update.html:60
 msgid "Data Store"
-msgstr "Armazén de dados"
+msgstr "Armazém de dados"
 
 #: gvsigol_services/templates/layer_add.html:60
 #: gvsigol_services/templates/layer_create.html:66
@@ -1971,7 +1971,7 @@ msgstr "Selecionar campo"
 
 #: gvsigol_services/templates/layer_add.html:369
 msgid "Data store contains no resources to publish"
-msgstr "O armazén de dados não contém recursos para publicar"
+msgstr "O armazém de dados não contém recursos para publicar"
 
 #: gvsigol_services/templates/layer_add.html:386
 msgid "Choose resource"
@@ -1986,7 +1986,7 @@ msgstr "O serviço está indisponível"
 #: gvsigol_services/templates/layer_add.html:509
 #: gvsigol_services/templates/layer_create.html:553
 msgid "No valid data store selected"
-msgstr "Nenhum armazén de dados válido selecionado"
+msgstr "Nenhum armazém de dados válido selecionado"
 
 #: gvsigol_services/templates/layer_add.html:413
 #: gvsigol_services/templates/layer_add.html:436
@@ -2158,7 +2158,7 @@ msgstr "Projetos"
 
 #: gvsigol_services/templates/layer_list.html:31
 msgid "Datastore type"
-msgstr "Tipo de armazén de dados"
+msgstr "Tipo de armazém de dados"
 
 #: gvsigol_services/templates/layer_list.html:73
 #: gvsigol_services/templates/layer_list.html:153
@@ -2481,7 +2481,7 @@ msgstr "Erro: GeoTIFF não é georreferenciado"
 
 #: gvsigol_services/views.py:564
 msgid "Error updating datastore"
-msgstr "Erro na atualização do armazén de dados"
+msgstr "Erro na atualização do armazém de dados"
 
 #: gvsigol_services/views.py:728
 msgid "ERROR can't connect with GeoServer"
