@@ -341,6 +341,9 @@ def user_list(request):
     }     
     return render(request, 'user_list.html', response)
 
+def _get_user_group_name(username):
+    return 'ug_' + username.lower()
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
 def user_add(request):        
@@ -364,6 +367,12 @@ def user_add(request):
                 is_superuser = True
                 is_staff = True
             
+            # flag what has been done to be able to revert if needed
+            ldap_user_created = False
+            ldap_user_group_created = False
+            ldap_group_membership_added = []
+            django_user_group_created = False
+            user = None
             try:
                 assigned_groups = []   
                 for key in form.data:
@@ -385,25 +394,20 @@ def user_add(request):
                     user.set_password(form.data['password1'])
                     user.save()
                     
-                    #admin_group = UserGroup.objects.get(name__exact='admin')
-                    aux = UserGroup.objects.filter(name="admin")
-                    if aux.count() > 1:
-                        print("WARNING: table gvsigol_auth_usergroup inconsistent !!!!!!!!!!!")
-                    
-                    admin_group = aux[0]
-                    
+                    admin_group = UserGroup.objects.get(name='admin')
                     if user.is_superuser:
-                        auth_services.get_services().ldap_add_user(user, form.data['password1'], True)                        
-                        auth_services.get_services().ldap_add_group_member(user, admin_group)
+                        auth_services.get_services().ldap_add_user(user, form.data['password1'], True)
+                        ldap_user_created = True
+                        if auth_services.get_services().ldap_add_group_member(user, admin_group) != False:
+                            ldap_group_membership_added.append(admin_group)
                         usergroup_user = UserGroupUser(
                             user = user,
                             user_group = admin_group
                         )
                         usergroup_user.save()
-                        
                     else:
                         auth_services.get_services().ldap_add_user(user, form.data['password1'], False)
-                        #auth_services.get_services().ldap_add_group_member(user, admin_group)
+                        ldap_user_created = True
                         
                     for ag in assigned_groups:
                         user_group = UserGroup.objects.get(id=ag)
@@ -412,29 +416,35 @@ def user_add(request):
                             user_group = user_group
                         )
                         usergroup_user.save()
-                        auth_services.get_services().ldap_add_group_member(user, user_group)
+                        if auth_services.get_services().ldap_add_group_member(user, user_group) != False:
+                            ldap_group_membership_added.append(user_group)
                      
                     #User backend 
-                    if is_superuser or is_staff:  
-                        ugroup = UserGroup(
-                            name = 'ug_' + form.data['username'].lower(),
-                            description = _('User group for') + ': ' + form.data['username'].lower()
-                        )
-                        ugroup.save()
+                    if is_superuser or is_staff:
+                        try:
+                            ug = UserGroup.objects.get(name=_get_user_group_name(user.username))
+                        except:
+                            ugroup = UserGroup(
+                                name = _get_user_group_name(form.data['username']),
+                                description = _('User group for') + ': ' + form.data['username'].lower()
+                            )
+                            ugroup.save()
+                            django_user_group_created = True
                         
                         ugroup_user = UserGroupUser(
                             user = user,
                             user_group = ugroup
                         )
                         ugroup_user.save()
-                            
-                        auth_services.get_services().ldap_add_group(ugroup)
+                        
+                        if auth_services.get_services().ldap_add_group(ugroup) != False:
+                            ldap_user_group_created = True
                         auth_services.get_services().add_data_directory(ugroup)
-                        auth_services.get_services().ldap_add_group_member(user, ugroup)
+                        if auth_services.get_services().ldap_add_group_member(user, ugroup) != False:
+                            ldap_group_membership_added(ugroup)
                         
                         url = server_object.frontend_url + '/'
                         ws_name = 'ws_' + form.data['username'].lower()
-                        
                         if gs.createWorkspace(ws_name, url + ws_name):          
                             # save it on DB if successfully created
                             newWs = Workspace(
@@ -471,6 +481,46 @@ def user_add(request):
                 errors = []
                 errors.append({'message': "ERROR: Problem creating user " + str(e)})
                 groups = auth_utils.get_all_groups()
+
+                # reverting changes
+                if user:
+                    for ugu in UserGroupUser.objects.filter(user=user):
+                        try:
+                            if ugu.user_group in ldap_group_membership_added:
+                                auth_services.get_services().ldap_delete_group_member(user, ugu.user_group)                                
+                        except:
+                            pass
+                        try:
+                            ugu.delete()
+                        except:
+                            pass
+
+                    if django_user_group_created:
+                        try:
+                            ug = UserGroup.objects.get(name=_get_user_group_name(user.username))
+                            if ldap_user_group_created:
+                                try:
+                                    auth_services.get_services().ldap_delete_group(ug)
+                                except:
+                                    pass
+                            ug.delete()
+                        except:
+                            pass
+
+                    if ldap_user_created:
+                        try:
+                            auth_services.get_services().ldap_delete_default_group_member(user)
+                        except:
+                            pass
+                        try:
+                            auth_services.get_services().ldap_delete_user(user)
+                        except:
+                            pass
+                    try:
+                        user.delete()
+                    except:
+                        pass
+
                 return render(request, 'user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form})
 
         else:
