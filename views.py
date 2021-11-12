@@ -441,7 +441,7 @@ def user_add(request):
                             ldap_user_group_created = True
                         auth_services.get_services().add_data_directory(ugroup)
                         if auth_services.get_services().ldap_add_group_member(user, ugroup) != False:
-                            ldap_group_membership_added(ugroup)
+                            ldap_group_membership_added.append(ugroup)
                         
                         url = server_object.frontend_url + '/'
                         ws_name = 'ws_' + form.data['username'].lower()
