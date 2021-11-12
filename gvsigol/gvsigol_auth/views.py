@@ -466,6 +466,7 @@ def user_add(request):
                     return redirect('user_list')
             
             except Exception as e:
+                logger.exception("ERROR: Problem creating user")
                 print("ERROR: Problem creating user " + str(e))
                 errors = []
                 errors.append({'message': "ERROR: Problem creating user " + str(e)})
