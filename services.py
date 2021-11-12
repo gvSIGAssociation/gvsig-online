@@ -136,9 +136,8 @@ class GvSigOnlineServices():
         
     def ldap_add_group(self, group):
         if self.is_enabled:
-            last_gid = self.ldap_get_last_gid()    
-            
             try:
+                last_gid = self.ldap_get_last_gid()
                 last_gid = last_gid + 1
                 dn=str("cn=" + group.name + ",ou=groups," + self.domain)
                     
@@ -152,7 +151,8 @@ class GvSigOnlineServices():
                 self.ldap.add_s(dn,ldif)                        
                 
             except ldap.LDAPError as e:
-                print(e) 
+                print(e)
+                return False
         
         
     def ldap_modify_group(self, old_group_name, new_group_name):
@@ -212,9 +212,8 @@ class GvSigOnlineServices():
             
     def ldap_add_group_member(self, user, group):
         if self.is_enabled:
-            add_member = [(ldap.MOD_ADD, 'memberUid', user.username.encode(LDAP_ENCODING))]
-    
             try:
+                add_member = [(ldap.MOD_ADD, 'memberUid', user.username.encode(LDAP_ENCODING))]
                 group_dn = str("cn=" + group.name + ",ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, add_member)
                     
