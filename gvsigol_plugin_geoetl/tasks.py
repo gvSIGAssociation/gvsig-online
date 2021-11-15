@@ -11,7 +11,7 @@ import json
 
 
 @celery_app.task
-def run_canvas_background(**kwargs):
+def run_canvas_background(kwargs):
 
     jsonCanvas = kwargs["jsonCanvas"]
     id_ws = kwargs["id_ws"]
