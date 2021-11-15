@@ -6,6 +6,9 @@ import shutil
 from osgeo import ogr, osr
 import psycopg2
 import cx_Oracle
+import base64
+import requests
+import json
 
 def get_sheets_excel(excel):
     
@@ -103,14 +106,78 @@ def get_schema_oracle(dicc):
         dicc['password'],
         dicc['dsn']
     )
-
     c = conn.cursor()
-    c.execute("SELECT column_name FROM ALL_TAB_COLUMNS WHERE table_name = '"+dicc['table-name']+"' AND owner = '"+dicc['owner-name']+"'")
+
+    if dicc['check'] == True:
+        try:   
+            create_type = "create type cols_name as table of varchar2(32767)"
+
+            c.execute(create_type)
+        except:
+            print ('Existe el type cols_name')
+        try:
+            create_function = "CREATE OR REPLACE FUNCTION GET_COLUMNS_NAME(p_selectQuery IN VARCHAR2) RETURN cols_name PIPELINED IS "
+            create_function+= "v_cursor_id integer; v_col_cnt integer; v_columns dbms_sql.desc_tab; "
+            create_function+= "begin v_cursor_id := dbms_sql.open_cursor; dbms_sql.parse(v_cursor_id, p_selectQuery, dbms_sql.native); "
+            create_function+= "dbms_sql.describe_columns(v_cursor_id, v_col_cnt, v_columns); "
+            create_function+= "for i in 1 .. v_columns.count loop pipe row(v_columns(i).col_name); end loop; "
+            create_function+= "dbms_sql.close_cursor(v_cursor_id); return; exception when others then "
+            create_function+= "dbms_sql.close_cursor(v_cursor_id); raise; end;"
+            
+            c.execute(create_function)
+        except:
+            print ('Existe la función get_columns_name')
+
+        sql = "select * from TABLE(GET_COLUMNS_NAME('"+dicc['sql']+"'))"
+
+    else:
+        sql = "SELECT column_name FROM ALL_TAB_COLUMNS WHERE table_name = '"+dicc['table-name']+"' AND owner = '"+dicc['owner-name']+"'"
+
+
+    c.execute(sql)
 
     attrnames =[]
     for attr in c:
         attrnames.append(attr[0])
 
+    """if dicc['check'] == True:
+        try:
+            drop_type = "DROP TYPE cols_name FORCE"
+            c.execute(drop_type)
+        except:
+            print("No se ha borrado el type cols_name")
+
+        try:
+            drop_func = "DROP FUNCTION GET_COLUMNS_NAME"
+            c.execute(drop_func)
+        except:
+            print("No se ha borrado la función get_columns_name")"""
+
     conn.close()
 
     return attrnames
+
+def get_proced_indenova(dicc):
+
+    domain = dicc['domain']
+
+    api_key = dicc['api-key']
+
+    url_list = domain + "//api/rest/process/v1/process/list?idsection=27"
+
+    headers_list = {'esigna-auth-api-key': api_key}
+
+    r_list = requests.get(url_list, headers = headers_list)
+    
+    listProd = []
+    for i in json.loads(r_list.content.decode('utf8')):
+        listProd.append([i['id'], i['name']])
+    
+    return listProd
+
+def get_schema_indenova(dicc):
+    
+    domain = dicc['domain']
+    api_key = dicc['api-key']
+    client_id = dicc['client-id']
+    secret = dicc['secret']

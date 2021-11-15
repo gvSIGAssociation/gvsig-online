@@ -14,6 +14,7 @@ import gdaltools
 import tempfile
 import cx_Oracle
 from geomet import wkt
+from . import etl_schema
 
 
 # Python class to print topological sorting of a DAG 
@@ -582,202 +583,116 @@ def output_Postgresql(dicc):
 def output_Postgis(dicc):
 
     fc = dicc['data'][0]
-
-    tfile = tempfile.NamedTemporaryFile(mode="w+", delete = False)
-    json.dump(fc, tfile)
-    tfile.flush()
     
-    schemaTable= dicc['tablename'].lower()
-    if "." in schemaTable:
-        schema = schemaTable.split(".")[0]
-        table_name = schemaTable.split(".")[1]
+    operation = dicc['operation']
+    
+    if operation == "CREATE" or operation == 'APPEND' or operation == 'OVERWRITE':
+        
+        tfile = tempfile.NamedTemporaryFile(mode="w+", delete = False)
+        json.dump(fc, tfile)
+        tfile.flush()
+        
+        schemaTable= dicc['tablename'].lower()
+        if "." in schemaTable:
+            schema = schemaTable.split(".")[0]
+            table_name = schemaTable.split(".")[1]
+        else:
+            schema = "public"
+            table_name = schemaTable
+        
+        #epsg for geometry
+        srs = fc['crs']['properties']['name']
+        
+        ogr = gdaltools.ogr2ogr()
+        ogr.set_encoding('UTF-8')
+        ogr.set_input(tfile.name, srs=srs)
+        conn = gdaltools.PgConnectionString(host=dicc["host"], port=dicc["port"], dbname=dicc["database"], schema=schema, user=dicc["user"], password=dicc["password"])
+        ogr.set_output(conn, table_name=table_name)
+        
+        if operation == "CREATE":
+            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
+        elif operation == "APPEND":
+            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_APPEND, data_source_mode=ogr.MODE_DS_UPDATE)
+        else:
+            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_OVERWRITE, data_source_mode=ogr.MODE_DS_UPDATE)
+        
+        ogr.layer_creation_options = {
+            "LAUNDER": "YES",
+            "precision": "NO"
+        }
+        ogr.config_options = {
+            "OGR_TRUNCATE": "NO"
+        }
+        ogr.set_dim("2")
+        ogr.execute()
+
+
     else:
-        schema = "public"
-        table_name = schemaTable
-    #epsg for geometry
-    srs = fc['crs']['properties']['name']
-    operation = dicc['operation']
-    ogr = gdaltools.ogr2ogr()
-    ogr.set_encoding('UTF-8')
-    ogr.set_input(tfile.name, srs=srs)
-    conn = gdaltools.PgConnectionString(host=dicc["host"], port=dicc["port"], dbname=dicc["database"], schema=schema, user=dicc["user"], password=dicc["password"])
-    ogr.set_output(conn, table_name=table_name)
-    if operation == "CREATE":
-        ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
-    #elif operation == "UPDATE":
 
-    ogr.layer_creation_options = {
-        "LAUNDER": "YES",
-        "precision": "NO"
-    }
-    ogr.config_options = {
-        "OGR_TRUNCATE": "NO"
-    }
-    ogr.set_dim("2")
-    ogr.execute()
+        fc = dicc['data'][0]
 
+        tableName = dicc['tablename'].lower()
 
-"""def output_Postgis(dicc):
+        operation = dicc['operation']
 
-    fc = dicc['data'][0]
-
-    tableName = dicc['tablename'].lower()
-    
-    #epsg for geometry
-    epsg = fc['crs']['properties']['name'].split(':')[1]
-
-    operation = dicc['operation']
-
-    rows = len(fc['features'])
-
-    #postgres connection
-    conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
-    cur = conn.cursor()
-
-    listKeys =[]
-    listKeysLower =[]
+        rows = len(fc['features'])
         
-    for f in fc['features']:
-        for p in f['properties']:
-            if p not in listKeys:
-                listKeys.append(p)
-                listKeysLower.append(p.lower())
+        #postgres connection
+        conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+        cur = conn.cursor()
 
-    if operation=='CREATE':
-        
-        sqlCreate="CREATE TABLE IF NOT EXISTS "+tableName+" ("
-        sqlInsert = "INSERT INTO "+tableName+" ("
+        listKeys =[]
+        listKeysLower =[]
+            
+        for f in fc['features']:
+            for p in f['properties']:
+                if p not in listKeys:
+                    listKeys.append(p)
+                    listKeysLower.append(p.lower())
 
-        for i in listKeys:
+        if operation == 'UPDATE':
 
-            attr = isNumber(i)
+            m = dicc['match']
+            
+            for k in range(0, rows):
 
-            sqlCreate = sqlCreate + str(attr).lower().replace(": ","_").replace(" ","_")
-                
-            sqlInsert = sqlInsert + str(attr).lower().replace(": ","_").replace(" ","_")+","
+                sqlUpdate = 'UPDATE '+tableName+' SET '
 
-            longitud=0
-            tipo = 'None'
+                for i in listKeys:
 
-            for j in range(0,rows):
+                    try:
+                        value = fc['features'][k]['properties'][i]
+                    except:
+                        value = None
 
-                try:
-                    v = fc['features'][j]['properties'][i]
-                except:
-                    v = None
+                    if type(value) is str or type(value) is str and value !='NULL':
 
-                value = commaToDot(v)
+                        value ="'"+ str(value).replace("'", "''")+"'"
 
-                if type(value) is int or type(value) == np.dtype('int64'):
-                    if tipo=='None':
-                        tipo = 'INTEGER'
-                        longitud = len(str(value))
+                    elif type(value) is float and math.isnan(value) or value==None:
+                        value = 'NULL'
 
-                    elif longitud < len(str(value)):
-                        longitud = len(str(value))
-
-                if type(value) is float or type(value) == np.dtype('float64'):
-
-                    if tipo=='None' or 'INTEGER':
-                        longi = len(str(value).split(".")[-1])
-                        valor = str(value).split(".")[-1]
-                        if longi == 1 and valor == '0':
-                            tipo = 'INTEGER'
-                        else:
-                            tipo = 'DECIMAL'
-                        if longitud < len(str(value)):
-                            longitud = len(str(value)) 
                     else:
-                        if longitud < len(str(value)):
-                            longitud = len(str(value))     
-                    
-                if type(value) is str and value != 'NULL' :
-                    if tipo=='None':
-                        tipo = 'VARCHAR'
-                        longitud=len(value)
-                    
+                        value = str(value)
+
+                    if i != m:
+                        
+                        sqlUpdate = sqlUpdate + i.lower() + " = "+ value +', '
                     else:
-                        tipo='VARCHAR'
-                        if longitud < len(value):
-                            longitud=len(value)
+                        
+                        macthValue = value
 
-                if is_date(value) == True:
-                    if tipo=='None' or tipo == 'VARCHAR':
-                        tipo = 'DATE'
-                        longitud = len(str(value))
-
-                    elif longitud < len(str(value)):
-                        longitud = len(str(value))
+                sqlUpdate = sqlUpdate[:-2]+' WHERE '+ m.lower()+' = ' + macthValue+';'
                 
-                if type(value) is str and value == 'NULL':
-                    pass
-            
-            if tipo == 'INTEGER' or tipo == 'DECIMAL' or tipo == 'DATE':
-                sqlCreate = sqlCreate+' '+tipo+', '
-            else:
-                sqlCreate = sqlCreate+' '+tipo+'('+str(longitud)+'), '
-            
-        sqlCreate=sqlCreate[:-2]+')'
-
-        cur.execute(sqlCreate)
-
-        #adding geometry column if it not exists
-        try:
-            listTableName = tableName.split('.')
-
-            if len(listTableName) == 2:
-                addGeomCol = "SELECT AddGeometryColumn ('"+listTableName[0]+"','"+listTableName[1]+"', 'geom',"+epsg+", 'GEOMETRY', 2)"
-            else:
-                addGeomCol = "SELECT AddGeometryColumn ('"+tableName+"', 'geom',"+epsg+", 'GEOMETRY', 2)"
-
-            cur.execute(addGeomCol)
-        except:
-            pass
-
-        sqlInsert = sqlInsert+'geom) VALUES ('
-
-        for k in range(0, rows):
-
-            sqlInsert2=sqlInsert
-            #geojson geometry
-            coord = fc['features'][k]['geometry']
-            #del coord['epsg']
-            coord = str(coord).replace("'", '"')
-
-            for attr in listKeys:
-
-                try:
-                    v = fc['features'][k]['properties'][attr]
-                except:
-                    v = None
-
-                value = commaToDot(v)
-
-                if type(value) is str and value !='NULL':
-
-                    sqlInsert2 = sqlInsert2+"'"+str(value).replace("'", "''")+"',"
-
-                elif (type(value) is float and math.isnan(value)) or value==None or value =='NULL':
-
-                    sqlInsert2 = sqlInsert2+"NULL,"
-
-                else:
-
-                    sqlInsert2 = sqlInsert2+ str(value)+','
-            
-            sqlInsert2=sqlInsert2+"ST_SetSRID(ST_GeomFromGeoJSON('"+str(coord)+"'), "+ str(epsg)+") )"
-
-            cur.execute(sqlInsert2)
-
-    elif operation == 'UPDATE':
+                cur.execute(sqlUpdate)
         
-        m = dicc['match']
-        
-        for k in range(0, rows):
+        elif operation == 'DELETE':
+            
+            m = dicc['match']
+            
+            for k in range(0, rows):
 
-            sqlUpdate = 'UPDATE '+tableName+' SET '
-
-            for i in listKeys:
+                sqlDelete = 'DELETE FROM '+tableName+' WHERE '
 
                 try:
                     value = fc['features'][k]['properties'][i]
@@ -785,7 +700,7 @@ def output_Postgis(dicc):
                     value = None
 
                 if type(value) is str or type(value) is str and value !='NULL':
-
+                            
                     value ="'"+ str(value).replace("'", "''")+"'"
 
                 elif type(value) is float and math.isnan(value) or value==None:
@@ -794,52 +709,15 @@ def output_Postgis(dicc):
                 else:
                     value = str(value)
 
-                if i != m:
-                    
-                    attr = isNumber(i)
-                    sqlUpdate = sqlUpdate + attr.lower().replace(": ","_") + " = "+ value +', '
-                else:
-                    match = isNumber(m)
-                    macthValue = value
-
-            
-            sqlUpdate = sqlUpdate[:-2]+' WHERE '+ match.lower().replace(": ","_")+' = ' + macthValue+';'
-
-            cur.execute(sqlUpdate)
-    
-    elif operation == 'DELETE':
-        
-        i = dicc['match']
-        
-        for k in range(0, rows):
-
-            sqlDelete = 'DELETE FROM '+tableName+' WHERE '
-
-            try:
-                value = fc['features'][k]['properties'][i]
-            except:
-                value = None
-
-            if type(value) is str or type(value) is str and value !='NULL':
+                macthValue = value
                         
-                value ="'"+ str(value).replace("'", "''")+"'"
+                sqlDelete = sqlDelete+ m.lower()+' = ' + macthValue+';'
+                
+                cur.execute(sqlDelete)
 
-            elif type(value) is float and math.isnan(value) or value==None:
-                value = 'NULL'
-
-            else:
-                value = str(value)
-
-            match = isNumber(i)
-            macthValue = value
-                    
-            sqlDelete = sqlDelete+ match.lower().replace(": ","_")+' = ' + macthValue+';'
- 
-            cur.execute(sqlDelete)
-
-    conn.commit()
-    conn.close()
-    cur.close()"""
+        conn.commit()
+        conn.close()
+        cur.close()
 
 def input_Csv(dicc):
 
@@ -1017,6 +895,7 @@ def trans_CadastralGeom(dicc):
             
             coordinates.append(edgeCoord)
         
+        i["type"] = "Feature"
         i['geometry'] = {'type': 'MultiPolygon',
                         'coordinates': [coordinates]
                         }
@@ -1088,13 +967,13 @@ def input_Oracle(dicc):
         }
 
     c = conn.cursor()
-    c.execute("SELECT column_name FROM ALL_TAB_COLUMNS WHERE table_name = '"+dicc['table-name']+"' AND owner = '"+dicc['owner-name']+"'")
+    
+    attrnames = etl_schema.get_schema_oracle(dicc)
 
-    attrnames =[]
-    for attr in c:
-        attrnames.append(attr[0])
-
-    c.execute("SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name'])
+    if dicc['check'] == True:
+        c.execute(dicc['sql'])
+    else:
+        c.execute("SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name'])
 
     for row in c:
         attrvalues = []
@@ -1119,13 +998,13 @@ def trans_WktGeom(dicc):
     attr = dicc['attr']
     epsg = dicc['epsg']
 
-    table["type"] = "FeatureCollection"
-    table["crs"] = {"type": "name", "properties":{"name":"EPSG:"+str(epsg)}}
+    tablecopy["type"] = "FeatureCollection"
+    tablecopy["crs"] = {"type": "name", "properties":{"name":"EPSG:"+str(epsg)}}
 
     k = 0
     for i in table['features']:
         wkt_string = i['properties'][attr]
-        i["type"] = "Feature"
+        tablecopy['features'][k]["type"] = "Feature"
         tablecopy['features'][k]["geometry"] = wkt.loads(wkt_string)
         
         for j in i['properties']:
@@ -1162,20 +1041,116 @@ def trans_SplitAttr(dicc):
 def trans_ExplodeList(dicc):
     table = dicc['data'][0]
     tablecopy = copy.deepcopy(table)
+
     attr = dicc['attr']
     list_name = dicc['list']
     
-    k = 0
     for i in table['features']:
         _list = i['properties'][list_name]
 
         for l in range (0, len(_list)):
+            insert = copy.deepcopy(tablecopy['features'][0])
             
-            tablecopy['features'].append(tablecopy['features'][k])
-            if l == 0:
-                del tablecopy['features'][-1]['properties'][list_name]
-                tablecopy['features'][-1]['properties'][attr] = _list[l]
+            tablecopy['features'].append(insert)
+            del tablecopy['features'][-1]['properties'][list_name]
+            tablecopy['features'][-1]['properties'][attr] = _list[l]
         
-        del tablecopy['features'][k]
+        del tablecopy['features'][0]
 
     return [tablecopy]
+
+def trans_Union(dicc):
+
+    table = dicc['data'][0]
+
+    groupby = dicc['group-by-attr']
+    dataSet = ogr.Open(json.dumps(table))
+        
+
+    layer = dataSet.GetLayer()
+
+    listAttr = []
+
+    fc = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    if groupby != "":
+
+        for feature in layer:
+            attr = feature.GetField(groupby)
+            if attr not in listAttr:
+                listAttr.append(attr)
+
+        for i in range (0, len(listAttr)):
+            layer.SetAttributeFilter(groupby + ' = ' + str(listAttr[i]))
+            k=1
+
+            for f in layer:
+
+                if k == 1:
+                    try:
+                        geojson = union.ExportToJson()
+                        
+                        fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i-1]}})
+                    except:
+                        pass
+                    
+                    geom1 = f.GetGeometryRef()
+                    poly1 = ogr.CreateGeometryFromWkt(str(geom1))
+                    
+                elif k==2:
+                    geom2 = f.GetGeometryRef()
+                    poly2 = ogr.CreateGeometryFromWkt(str(geom2))
+                    union = poly1.Union(poly2)
+                    
+                else:
+                    geomx = f.GetGeometryRef()
+                    polyx = ogr.CreateGeometryFromWkt(str(geomx))
+                    union = union.Union(polyx)
+
+                k+=1
+
+        geojson = union.ExportToJson()
+
+        fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i]}})
+
+    else:
+
+        k=1
+        for f in layer:
+
+            if k == 1:
+                
+                geom1 = f.GetGeometryRef()
+                poly1 = ogr.CreateGeometryFromWkt(str(geom1))
+                
+            elif k==2:
+                geom2 = f.GetGeometryRef()
+                poly2 = ogr.CreateGeometryFromWkt(str(geom2))
+                union = poly1.Union(poly2)
+                
+            else:
+                geomx = f.GetGeometryRef()
+                polyx = ogr.CreateGeometryFromWkt(str(geomx))
+                union = union.Union(polyx)
+
+            k+=1
+
+    geojson = union.ExportToJson()
+
+    fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson)})
+
+
+    return [fc]
+
+

@@ -21,4 +21,6 @@ urlpatterns = [
     path('etl/etl_owners_oracle/', views.etl_owners_oracle, name='etl_owners_oracle'),
     path('etl/etl_tables_oracle/', views.etl_tables_oracle, name='etl_tables_oracle'),
     path('etl/etl_schema_oracle/', views.etl_schema_oracle, name='etl_schema_oracle'),
+    path('etl/etl_proced_indenova/', views.etl_proced_indenova, name='etl_proced_indenova'),
+    path('etl/etl_schema_indenova/', views.etl_schema_indenova, name='etl_schema_indenova'),
 ]

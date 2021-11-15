@@ -504,8 +504,8 @@ def etl_read_canvas(request):
 
             jsonCanvas = json.loads(request.POST['jsonCanvas'])
 
-            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': None})
-            #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': None})
+            #run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': None})
+            run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': None})
  
         else:
             print ('invalid form')
@@ -637,3 +637,29 @@ def etl_schema_oracle(request):
 
             return HttpResponse(response, content_type="application/json")
 
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def etl_proced_indenova(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParamsProced'])
+
+            listProcedures = etl_schema.get_proced_indenova(jsParams['parameters'][0])
+            response = json.dumps(listProcedures)
+            
+            return HttpResponse(response, content_type="application/json")
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def etl_schema_indenova(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParamsProced'])
+
+            listSchema = etl_schema.get_schema_indenova(jsParams['parameters'][0])
+            response = json.dumps(listSchema)
+            
+            return HttpResponse(response, content_type="application/json")
