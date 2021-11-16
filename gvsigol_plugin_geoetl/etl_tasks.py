@@ -15,6 +15,8 @@ import tempfile
 import cx_Oracle
 from geomet import wkt
 from . import etl_schema
+import requests
+import base64
 
 
 # Python class to print topological sorting of a DAG 
@@ -1150,7 +1152,74 @@ def trans_Union(dicc):
 
     fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson)})
 
-
     return [fc]
 
+def input_Indenova(dicc):
+    
+    domain = dicc['domain']
+    api_key = dicc['api-key']
+    client_id = dicc['client-id']
+    secret = dicc['secret']
+    auth = (client_id+':'+secret).encode()
 
+    in_d_list = dicc['init-date'].split('-')
+    init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
+
+    proced_list = dicc['proced-list']
+
+    schema = dicc['schema']
+
+    url_auth = domain + "//api/rest/security/v1/authentication/authenticate"
+    headers_auth = {'esigna-auth-api-key': api_key, 'Authorization': "Basic ".encode()+ base64.b64encode(auth) }
+    r_auth = requests.get(url_auth, headers = headers_auth)
+    token = r_auth.content
+
+    fc ={
+        'features':[]
+    }
+
+    for i in proced_list:
+        if i != 'all':
+            if dicc['check'] is True:
+                end_d_list = dicc['end-date'].split('-')
+                end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
+
+                url_date = domain + '//api/rest/bpm/v1/search//'+i+'//getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
+            else:
+                url_date = domain + "//api/rest/bpm/v1/search//"+i+"//getOpenExpsByTramAndDateIni?dateIni="+init_date
+            
+            headers_token = {'esigna-auth-api-key': api_key, "Authorization": "Bearer "+token.decode()}
+            r_date = requests.get(url_date, headers = headers_token)
+
+            if r_date.status_code == 200:
+                for j in json.loads(r_date.content.decode('utf8')):
+                    numExp = j['numExp']
+            
+                    url_cad = domain + '//api/rest/bpm/v1/search/getDataFileByNumber?numExp='+numExp+'&listMetadata=adirefcatt'
+                    r_cad = requests.get(url_cad, headers = headers_token)
+                    
+                    expedient = json.loads(r_cad.content.decode('utf-8'))
+                    
+                    exp_copy = expedient.copy()
+
+                    for key in expedient.keys():
+                        if isinstance(expedient[key], list):
+                            del exp_copy[key]
+                            if key != 'metadata':
+                                for k in expedient[key]:
+                                    exp_copy.update(k)
+                            else:
+                                for k in expedient[key]:
+                                    exp_copy[k['varName']] = k['varValue']
+                        
+                    list_keys = list(exp_copy.keys())
+                    
+                    for attr in schema:
+                        if attr not in list_keys:
+                            exp_copy[attr] ='-'
+                    
+                    exp_copy['url'] = "https://devempleadopublico.alzira.es/PortalFuncionario/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
+                        
+                    fc['features'].append({'properties': exp_copy})
+    
+    return[fc]

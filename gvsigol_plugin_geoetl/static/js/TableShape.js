@@ -209,6 +209,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
         var context = this
 
         $('#end-date-'+ID).prop('disabled', true)
+        check = false
         
         $('input:radio[name="date-indenova-'+ID+'"]').change(function(){
             if ($('#check-init-date-'+ID).is(':checked')){
@@ -221,62 +222,64 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                 $('#end-date-'+ID).prop('disabled', false)
             }
         });
-        
+
+        $('#proced-list-'+ID).click(function(){
+            if($(this).val()=='all'){
+                $('#proced-list-'+ID+' option').prop('selected', true)
+            }
+        });
+
+        $('#get-proced-'+ID).click(function(){
+                
+            $(this).hover(function(){
+                $(this).css('cursor','wait');
+                
+            });
+            
+            var paramsProced = {"id": ID,
+            "parameters": [
+                {"domain": $('#domain-'+ID).val(),
+                "api-key": $('#api-key-'+ID).val()/*,
+                "client-id": $('#client-id-'+ID).val(),
+                "secret": $('#secret-'+ID).val()*/
+                }
+            ]};
+
+            var formDataProced = new FormData();
+
+            formDataProced.append('jsonParamsProced', JSON.stringify(paramsProced))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_proced_indenova/',
+                data: formDataProced,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    
+                    $('#get-proced-'+ID).hover(function(){
+                        $(this).css('cursor','pointer');
+                    });
+                    
+                    for(i=0;i<data.length;i++){
+                        $('#proced-list-'+ID).append('<option value="'+data[i][0]+'">'+data[i][1]+'</option>')
+                    };
+                },
+                error: function(){
+                    $('#get-proced-'+ID).hover(function(){
+                        $(this).css('cursor','pointer');
+                    });
+                }
+            })
+        });
         
         icon.on("click", function(){
 
             $('#dialog-input-indenova-'+ID).modal('show')
-
-
-            $('#get-proced-'+ID).click(function(){
-                
-                $(this).hover(function(){
-                    $(this).css('cursor','wait');
-                    
-                });
-                
-                var paramsProced = {"id": ID,
-                "parameters": [
-                    {"domain": $('#domain-'+ID).val(),
-                    "api-key": $('#api-key-'+ID).val()/*,
-                    "client-id": $('#client-id-'+ID).val(),
-                    "secret": $('#secret-'+ID).val()*/
-                    }
-                ]};
-
-                var formDataProced = new FormData();
-
-                formDataProced.append('jsonParamsProced', JSON.stringify(paramsProced))
-
-                $.ajax({
-                    type: 'POST',
-                    url: '/gvsigonline/etl/etl_proced_indenova/',
-                    data: formDataProced,
-                    beforeSend:function(xhr){
-                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                    },
-                    cache: false, 
-                    contentType: false, 
-                    processData: false,
-                    success: function (data) {
-                        
-                        $('#get-proced-'+ID).hover(function(){
-                            $(this).css('cursor','pointer');
-                        });
-                        
-                        for(i=0;i<data.length;i++){
-
-                            $('#proced-list-'+ID).append('<option value="'+data[i][0]+'">'+data[i][1]+'</option>')
-
-                        };
-                    },
-                    error: function(){
-                        $('#get-proced-'+ID).hover(function(){
-                            $(this).css('cursor','pointer');
-                        });
-                    }
-                })
-            });
 
             $('#input-indenova-accept-'+ID).click(function() {
 
@@ -294,12 +297,10 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                     }
                 ]};
 
-                console.log(paramsIndenova)
-
                 var formDataIndenova = new FormData();
 
                 formDataIndenova.append('jsonParamsIndenova', JSON.stringify(paramsIndenova))
-
+                $("#canvas-parent").css('cursor','wait');
                 $.ajax({
 					type: 'POST',
 					url: '/gvsigonline/etl/etl_schema_indenova/',
@@ -312,16 +313,21 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                     processData: false,
 					success: function (data) {
                         paramsIndenova['schema'] = data
+                        paramsIndenova['parameters'][0]['schema'] = data
                         
                         passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                        
+                        isAlreadyInCanvas(jsonParams, paramsIndenova, ID)
+
+                        icon.setColor('#01b0a0')
+                        
+                        $('#dialog-input-indenova-'+ID).modal('hide')
+
+                        $("#canvas-parent").css('cursor','default');
                         }
                     })
         
-                isAlreadyInCanvas(jsonParams, paramsIndenova, ID)
 
-                icon.setColor('#01b0a0')
-                
-                $('#dialog-input-indenova-'+ID).modal('hide')
             })
         })
     },

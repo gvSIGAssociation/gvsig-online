@@ -181,3 +181,55 @@ def get_schema_indenova(dicc):
     api_key = dicc['api-key']
     client_id = dicc['client-id']
     secret = dicc['secret']
+    auth = (client_id+':'+secret).encode()
+
+    in_d_list = dicc['init-date'].split('-')
+    init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
+
+    proced_list = dicc['proced-list']
+
+    url_auth = domain + "//api/rest/security/v1/authentication/authenticate"
+    headers_auth = {'esigna-auth-api-key': api_key, 'Authorization': "Basic ".encode()+ base64.b64encode(auth) }
+    r_auth = requests.get(url_auth, headers = headers_auth)
+    token = r_auth.content
+
+    listSchema = []
+
+    for i in proced_list:
+        if i != 'all':
+            if dicc['check'] is True:
+                end_d_list = dicc['end-date'].split('-')
+                end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
+
+                url_date = domain + '//api/rest/bpm/v1/search//'+i+'//getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
+            else:
+                url_date = domain + "//api/rest/bpm/v1/search//"+i+"//getOpenExpsByTramAndDateIni?dateIni="+init_date
+            
+            headers_token = {'esigna-auth-api-key': api_key, "Authorization": "Bearer "+token.decode()}
+            r_date = requests.get(url_date, headers = headers_token)
+
+            if r_date.status_code == 200:
+                for j in json.loads(r_date.content.decode('utf8')):
+                    numExp = j['numExp']
+            
+                    url_cad = domain + '//api/rest/bpm/v1/search/getDataFileByNumber?numExp='+numExp+'&listMetadata=adirefcatt'
+                    r_cad = requests.get(url_cad, headers = headers_token)
+                    
+                    expedient = json.loads(r_cad.content.decode('utf-8'))
+
+                    for key in expedient.keys():
+                        if isinstance(expedient[key], list):
+                            if key != 'metadata':
+                                for k in expedient[key]:
+                                    for ke in k.keys():
+                                        if ke not in listSchema:
+                                            listSchema.append(ke)
+                            else:
+                                for k in expedient[key]:
+                                    if k['varName'] not in listSchema:
+                                        listSchema.append(k['varName'])
+                        else:
+                            if key not in listSchema:
+                                listSchema.append(key)
+    
+    return listSchema
