@@ -657,7 +657,7 @@ def etl_schema_indenova(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            jsParams = json.loads(request.POST['jsonParamsProced'])
+            jsParams = json.loads(request.POST['jsonParamsIndenova'])
 
             listSchema = etl_schema.get_schema_indenova(jsParams['parameters'][0])
             response = json.dumps(listSchema)
