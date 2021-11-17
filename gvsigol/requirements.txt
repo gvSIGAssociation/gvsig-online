@@ -118,3 +118,4 @@ pandas==1.1.5
 #gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
 mgrs==1.4.2
 cx-Oracle==8.2.1
+geomet==0.3.0
