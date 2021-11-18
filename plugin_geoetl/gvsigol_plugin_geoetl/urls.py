@@ -23,4 +23,5 @@ urlpatterns = [
     path('etl/etl_schema_oracle/', views.etl_schema_oracle, name='etl_schema_oracle'),
     path('etl/etl_proced_indenova/', views.etl_proced_indenova, name='etl_proced_indenova'),
     path('etl/etl_schema_indenova/', views.etl_schema_indenova, name='etl_schema_indenova'),
+    path('etl/etl_schema_postgresql/', views.etl_schema_postgresql, name='etl_schema_postgresql'),
 ]

@@ -17,6 +17,7 @@ from geomet import wkt
 from . import etl_schema
 import requests
 import base64
+from datetime import date
 
 
 # Python class to print topological sorting of a DAG 
@@ -587,88 +588,125 @@ def output_Postgis(dicc):
     fc = dicc['data'][0]
     
     operation = dicc['operation']
-    
-    if operation == "CREATE" or operation == 'APPEND' or operation == 'OVERWRITE':
-        
-        tfile = tempfile.NamedTemporaryFile(mode="w+", delete = False)
-        json.dump(fc, tfile)
-        tfile.flush()
-        
-        schemaTable= dicc['tablename'].lower()
-        if "." in schemaTable:
-            schema = schemaTable.split(".")[0]
-            table_name = schemaTable.split(".")[1]
-        else:
-            schema = "public"
-            table_name = schemaTable
-        
-        #epsg for geometry
-        srs = fc['crs']['properties']['name']
-        
-        ogr = gdaltools.ogr2ogr()
-        ogr.set_encoding('UTF-8')
-        ogr.set_input(tfile.name, srs=srs)
-        conn = gdaltools.PgConnectionString(host=dicc["host"], port=dicc["port"], dbname=dicc["database"], schema=schema, user=dicc["user"], password=dicc["password"])
-        ogr.set_output(conn, table_name=table_name)
-        
-        if operation == "CREATE":
-            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
-        elif operation == "APPEND":
-            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_APPEND, data_source_mode=ogr.MODE_DS_UPDATE)
-        else:
-            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_OVERWRITE, data_source_mode=ogr.MODE_DS_UPDATE)
-        
-        ogr.layer_creation_options = {
-            "LAUNDER": "YES",
-            "precision": "NO"
-        }
-        ogr.config_options = {
-            "OGR_TRUNCATE": "NO"
-        }
-        ogr.set_dim("2")
-        ogr.execute()
 
+    rows = len(fc['features'])
 
+    if rows == 0:
+        print('No hay features que insertar')
     else:
-
-        fc = dicc['data'][0]
-
-        tableName = dicc['tablename'].lower()
-
-        operation = dicc['operation']
-
-        rows = len(fc['features'])
-        
-        #postgres connection
-        conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
-        cur = conn.cursor()
-
-        listKeys =[]
-        listKeysLower =[]
+        if operation == "CREATE" or operation == 'APPEND' or operation == 'OVERWRITE':
             
-        for f in fc['features']:
-            for p in f['properties']:
-                if p not in listKeys:
-                    listKeys.append(p)
-                    listKeysLower.append(p.lower())
-
-        if operation == 'UPDATE':
-
-            m = dicc['match']
+            tfile = tempfile.NamedTemporaryFile(mode="w+", delete = False)
+            json.dump(fc, tfile)
+            tfile.flush()
             
-            for k in range(0, rows):
+            schemaTable= dicc['tablename'].lower()
+            if "." in schemaTable:
+                schema = schemaTable.split(".")[0]
+                table_name = schemaTable.split(".")[1]
+            else:
+                schema = "public"
+                table_name = schemaTable
+            
+            #epsg for geometry
+            srs = fc['crs']['properties']['name']
+            
+            ogr = gdaltools.ogr2ogr()
+            ogr.set_encoding('UTF-8')
+            ogr.set_input(tfile.name, srs=srs)
+            conn = gdaltools.PgConnectionString(host=dicc["host"], port=dicc["port"], dbname=dicc["database"], schema=schema, user=dicc["user"], password=dicc["password"])
+            ogr.set_output(conn, table_name=table_name)
+            
+            if operation == "CREATE":
+                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
+            elif operation == "APPEND":
+                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_APPEND, data_source_mode=ogr.MODE_DS_UPDATE)
+            else:
+                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_OVERWRITE, data_source_mode=ogr.MODE_DS_UPDATE)
+            
+            ogr.layer_creation_options = {
+                "LAUNDER": "YES",
+                "precision": "NO"
+            }
+            ogr.config_options = {
+                "OGR_TRUNCATE": "NO"
+            }
+            ogr.set_dim("2")
+            ogr.execute()
 
-                sqlUpdate = 'UPDATE '+tableName+' SET '
 
-                for i in listKeys:
+        else:
+
+            fc = dicc['data'][0]
+
+            tableName = dicc['tablename'].lower()
+
+            operation = dicc['operation']
+            
+            #postgres connection
+            conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+            cur = conn.cursor()
+
+            listKeys =[]
+            listKeysLower =[]
+                
+            for f in fc['features']:
+                for p in f['properties']:
+                    if p not in listKeys:
+                        listKeys.append(p)
+                        listKeysLower.append(p.lower())
+
+            if operation == 'UPDATE':
+
+                m = dicc['match']
+                
+                for k in range(0, rows):
+
+                    sqlUpdate = 'UPDATE '+tableName+' SET '
+
+                    for i in listKeys:
+
+                        try:
+                            value = fc['features'][k]['properties'][i]
+                        except:
+                            value = None
+
+                        if type(value) is str or type(value) is str and value !='NULL':
+
+                            value ="'"+ str(value).replace("'", "''")+"'"
+
+                        elif type(value) is float and math.isnan(value) or value==None:
+                            value = 'NULL'
+
+                        else:
+                            value = str(value)
+
+                        if i != m:
+                            
+                            sqlUpdate = sqlUpdate + i.lower() + " = "+ value +', '
+                        else:
+                            
+                            macthValue = value
+
+                    sqlUpdate = sqlUpdate[:-2]+' WHERE '+ m.lower()+' = ' + macthValue+';'
+                    
+                    cur.execute(sqlUpdate)
+            
+            elif operation == 'DELETE':
+                
+                m = dicc['match']
+                
+                for k in range(0, rows):
+
+                    sqlDelete = 'DELETE FROM '+tableName+' WHERE '
 
                     try:
-                        value = fc['features'][k]['properties'][i]
+                        value = fc['features'][k]['properties'][m]
                     except:
                         value = None
 
                     if type(value) is str or type(value) is str and value !='NULL':
-
+                                
                         value ="'"+ str(value).replace("'", "''")+"'"
 
                     elif type(value) is float and math.isnan(value) or value==None:
@@ -677,49 +715,15 @@ def output_Postgis(dicc):
                     else:
                         value = str(value)
 
-                    if i != m:
-                        
-                        sqlUpdate = sqlUpdate + i.lower() + " = "+ value +', '
-                    else:
-                        
-                        macthValue = value
-
-                sqlUpdate = sqlUpdate[:-2]+' WHERE '+ m.lower()+' = ' + macthValue+';'
-                
-                cur.execute(sqlUpdate)
-        
-        elif operation == 'DELETE':
-            
-            m = dicc['match']
-            
-            for k in range(0, rows):
-
-                sqlDelete = 'DELETE FROM '+tableName+' WHERE '
-
-                try:
-                    value = fc['features'][k]['properties'][i]
-                except:
-                    value = None
-
-                if type(value) is str or type(value) is str and value !='NULL':
+                    macthValue = value
                             
-                    value ="'"+ str(value).replace("'", "''")+"'"
+                    sqlDelete = sqlDelete+ m.lower()+' = ' + macthValue+';'
+                    
+                    cur.execute(sqlDelete)
 
-                elif type(value) is float and math.isnan(value) or value==None:
-                    value = 'NULL'
-
-                else:
-                    value = str(value)
-
-                macthValue = value
-                        
-                sqlDelete = sqlDelete+ m.lower()+' = ' + macthValue+';'
-                
-                cur.execute(sqlDelete)
-
-        conn.commit()
-        conn.close()
-        cur.close()
+            conn.commit()
+            conn.close()
+            cur.close()
 
 def input_Csv(dicc):
 
@@ -879,6 +883,8 @@ def trans_CadastralGeom(dicc):
         features = get_rc_polygon(i['properties'][attr])
         for feature in features:
             edgeCoord = []
+
+            print(feature['srs'])
             
             coords = feature['coords'].split(" ")
 
@@ -1162,8 +1168,19 @@ def input_Indenova(dicc):
     secret = dicc['secret']
     auth = (client_id+':'+secret).encode()
 
-    in_d_list = dicc['init-date'].split('-')
-    init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
+    if dicc['checkbox-init'] is True:
+        today = date.today()
+        init_date = today.strftime("%d/%m/%Y")
+    else:
+        in_d_list = dicc['init-date'].split('-')
+        init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
+    
+    if dicc['checkbox-end'] is True:
+        today = date.today()
+        end_date = today.strftime("%d/%m/%Y")
+    else:
+        end_d_list = dicc['end-date'].split('-')
+        end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
 
     proced_list = dicc['proced-list']
 
@@ -1181,8 +1198,6 @@ def input_Indenova(dicc):
     for i in proced_list:
         if i != 'all':
             if dicc['check'] is True:
-                end_d_list = dicc['end-date'].split('-')
-                end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
 
                 url_date = domain + '//api/rest/bpm/v1/search//'+i+'//getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
             else:
@@ -1213,13 +1228,94 @@ def input_Indenova(dicc):
                                     exp_copy[k['varName']] = k['varValue']
                         
                     list_keys = list(exp_copy.keys())
+
+                    list_keys_low = [x.lower() for x in list_keys]
                     
                     for attr in schema:
-                        if attr not in list_keys:
+                        if attr not in list_keys_low and attr != 'adirefcatt':
                             exp_copy[attr] ='-'
+                        elif attr not in list_keys_low and attr == 'adirefcatt':
+                            exp_copy[attr] ='00000000000000000000'
                     
-                    exp_copy['url'] = "https://devempleadopublico.alzira.es/PortalFuncionario/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
+                    if domain == 'https://devempleadopublico.alzira.es/PortalFuncionario':
+                        exp_copy['url'] = "https://devempleadopublico.alzira.es/PortalFuncionario/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
                         
-                    fc['features'].append({'properties': exp_copy})
+                    exp_copy_low = {x.lower(): v for x, v in exp_copy.items()}
+                    
+                    fc['features'].append({'properties': exp_copy_low})
     
     return[fc]
+
+def input_Postgis(dicc):
+
+    schemaTable = dicc['tablename'].lower()
+    """if "." in schemaTable:
+        schema = schemaTable.split(".")[0]
+        table_name = schemaTable.split(".")[1]
+    else:
+        schema = "public"
+        table_name = schemaTable"""
+    
+    #postgres connection
+    conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+    cur = conn.cursor()
+
+    schemaAttr = ','.join(dicc['schema'])
+
+    sql = "select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(t.*)::json) ) from ( Select "+schemaAttr+",wkb_geometry from "+schemaTable+") as t("+schemaAttr+",wkb_geometry);"
+    cur.execute(sql)
+    
+    for i in cur:
+        geojson = i[0]
+    
+    sql_srid = "SELECT ST_SRID(wkb_geometry) FROM "+schemaTable+" LIMIT 1;"
+    cur.execute(sql_srid)
+
+    for s in cur:
+        srid = str(s[0])
+    
+    geojson['crs'] = {"type" : "name", "properties" : { "name" : "EPSG:"+srid }}
+    
+    conn.commit()
+    conn.close()
+    cur.close()
+
+    return [geojson]
+
+def trans_CompareRows(dicc):
+
+    attr = dicc['attr']
+
+    table1 = dicc['data'][0]
+    table2 = dicc['data'][1]
+    
+    equals = copy.deepcopy(table1)
+    equals['features'] = []
+    
+    news = copy.deepcopy(table1)
+    news['features'] = []
+
+    changes = copy.deepcopy(table1)
+    changes['features'] = []
+    
+    lonMax = len(table2['features'])
+    
+    k=0
+    for i in table1['features']:
+        value2 = str(i['properties'][attr])
+        count1 = 0
+        for j in table2['features']:
+            value1 = str(j['properties'][attr])
+            if value1 == value2:
+                if i['properties'] == j['properties']:
+                    equals['features'].append(i)
+                else:
+                    changes['features'].append(i)
+                k+=1
+                break
+            else:
+                count1+=1
+                if count1 == lonMax:
+                    news['features'].append(i)
+
+    return [equals, news, changes]
