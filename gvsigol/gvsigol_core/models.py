@@ -223,3 +223,26 @@ class TilingProcessStatus(models.Model):
     zoom_levels_processed = models.IntegerField(null=False, default=0)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
+
+
+class ProjectZone(models.Model):
+    title = models.CharField(max_length=50) 
+    project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
+    levels = models.IntegerField(null=False, default=14)
+    extent4326_minx = models.FloatField(null=True,blank=True)
+    extent4326_miny = models.FloatField(null=True,blank=True)
+    extent4326_maxx = models.FloatField(null=True,blank=True)
+    extent4326_maxy = models.FloatField(null=True,blank=True)
+
+
+class ZoneLayers(models.Model):
+    zone = models.ForeignKey(ProjectZone, default=None, on_delete=models.CASCADE)
+    layer = models.IntegerField(null=False, default=14)
+    levels = models.IntegerField(null=False, default=0)
+    tilematrixset = models.CharField(max_length=50) 
+    format = models.CharField(max_length=50)
+    extentid = models.CharField(max_length=50)
+    version = models.BigIntegerField(null=True, blank=True)
+    folder_prj = models.CharField(max_length=1024)
+    running = models.BooleanField(default=False)
+    bboxes = models.TextField(null=True, blank=True)
