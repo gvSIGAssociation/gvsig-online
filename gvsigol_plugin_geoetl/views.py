@@ -504,8 +504,8 @@ def etl_read_canvas(request):
 
             jsonCanvas = json.loads(request.POST['jsonCanvas'])
 
-            #run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': None})
-            run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': None})
+            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': None})
+            #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': None})
  
         else:
             print ('invalid form')
@@ -662,4 +662,18 @@ def etl_schema_indenova(request):
             listSchema = etl_schema.get_schema_indenova(jsParams['parameters'][0])
             response = json.dumps(listSchema)
             
+            return HttpResponse(response, content_type="application/json")
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def etl_schema_postgresql(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParamsPostgres'])
+
+            listSchema = etl_schema.get_schema_postgres(jsParams['parameters'][0])
+            #listSchema = ['idexp', 'numexp', 'issue', 'idtram', 'nametram', 'initdate', 'status', 'regnumber', 'regdate', 'adirefcatt', 'identifier', 'name', 'town', 'city', 'postalcode', 'country', 'enddate']
+            response = json.dumps(listSchema)
             return HttpResponse(response, content_type="application/json")

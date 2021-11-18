@@ -9,6 +9,7 @@ import cx_Oracle
 import base64
 import requests
 import json
+from datetime import date
 
 def get_sheets_excel(excel):
     
@@ -183,8 +184,19 @@ def get_schema_indenova(dicc):
     secret = dicc['secret']
     auth = (client_id+':'+secret).encode()
 
-    in_d_list = dicc['init-date'].split('-')
-    init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
+    if dicc['checkbox-init'] is True:
+        today = date.today()
+        init_date = today.strftime("%d/%m/%Y")
+    else:
+        in_d_list = dicc['init-date'].split('-')
+        init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
+    
+    if dicc['checkbox-end'] is True:
+        today = date.today()
+        end_date = today.strftime("%d/%m/%Y")
+    else:
+        end_d_list = dicc['end-date'].split('-')
+        end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
 
     proced_list = dicc['proced-list']
 
@@ -198,18 +210,17 @@ def get_schema_indenova(dicc):
     for i in proced_list:
         if i != 'all':
             if dicc['check'] is True:
-                end_d_list = dicc['end-date'].split('-')
-                end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
 
-                url_date = domain + '//api/rest/bpm/v1/search//'+i+'//getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
+                url_date = domain + '/api/rest/bpm/v1/search/'+i+'/getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
             else:
-                url_date = domain + "//api/rest/bpm/v1/search//"+i+"//getOpenExpsByTramAndDateIni?dateIni="+init_date
-            
+                url_date = domain + "/api/rest/bpm/v1/search/"+i+"/getOpenExpsByTramAndDateIni?dateIni="+init_date
+
             headers_token = {'esigna-auth-api-key': api_key, "Authorization": "Bearer "+token.decode()}
             r_date = requests.get(url_date, headers = headers_token)
-
+            
             if r_date.status_code == 200:
                 for j in json.loads(r_date.content.decode('utf8')):
+                    
                     numExp = j['numExp']
             
                     url_cad = domain + '//api/rest/bpm/v1/search/getDataFileByNumber?numExp='+numExp+'&listMetadata=adirefcatt'
@@ -232,4 +243,31 @@ def get_schema_indenova(dicc):
                             if key not in listSchema:
                                 listSchema.append(key)
     
+    return [x.lower() for x in listSchema]
+
+def get_schema_postgres(dicc):
+    schemaTable = dicc['tablename'].lower()
+    if "." in schemaTable:
+        schema = schemaTable.split(".")[0]
+        table_name = schemaTable.split(".")[1]
+    else:
+        schema = "public"
+        table_name = schemaTable
+    
+    #postgres connection
+    conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+    cur = conn.cursor()
+
+    sql ="SELECT column_name FROM information_schema.columns WHERE table_schema = '"+schema+"' AND table_name   = '"+table_name+"';"
+
+    cur.execute(sql)
+    listSchema = []
+    for col in cur:
+        if col[0] != "wkb_geometry":
+            listSchema.append(col[0])
+
+    conn.commit()
+    conn.close()
+    cur.close()
+
     return listSchema
