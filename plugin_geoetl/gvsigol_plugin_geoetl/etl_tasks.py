@@ -239,7 +239,7 @@ def trans_Join(dicc):
                 join['features'][k]['properties'].update(i['properties'])
 
                 for l in table1NotUsed['features']:
-                    if l['properties'][attr1] == value1:
+                    if str(l['properties'][attr1]) == value1:
                         table1NotUsed['features'].remove(l)
                         break
                 k+=1
@@ -592,8 +592,9 @@ def output_Postgis(dicc):
     rows = len(fc['features'])
 
     if rows == 0:
-        print('No hay features que insertar')
+        print('No hay features para '+operation)
     else:
+        print(str(rows)+' features para '+ operation)
         if operation == "CREATE" or operation == 'APPEND' or operation == 'OVERWRITE':
             
             tfile = tempfile.NamedTemporaryFile(mode="w+", delete = False)
@@ -883,8 +884,6 @@ def trans_CadastralGeom(dicc):
         features = get_rc_polygon(i['properties'][attr])
         for feature in features:
             edgeCoord = []
-
-            print(feature['srs'])
             
             coords = feature['coords'].split(" ")
 
@@ -1175,12 +1174,13 @@ def input_Indenova(dicc):
         in_d_list = dicc['init-date'].split('-')
         init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
     
-    if dicc['checkbox-end'] is True:
-        today = date.today()
-        end_date = today.strftime("%d/%m/%Y")
-    else:
-        end_d_list = dicc['end-date'].split('-')
-        end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
+    if dicc['check'] is True:
+        if dicc['checkbox-end'] is True:
+            today = date.today()
+            end_date = today.strftime("%d/%m/%Y")
+        else:
+            end_d_list = dicc['end-date'].split('-')
+            end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
 
     proced_list = dicc['proced-list']
 
@@ -1233,7 +1233,7 @@ def input_Indenova(dicc):
                     
                     for attr in schema:
                         if attr not in list_keys_low and attr != 'adirefcatt':
-                            exp_copy[attr] ='-'
+                            exp_copy[attr] =''
                         elif attr not in list_keys_low and attr == 'adirefcatt':
                             exp_copy[attr] ='00000000000000000000'
                     
@@ -1297,25 +1297,31 @@ def trans_CompareRows(dicc):
 
     changes = copy.deepcopy(table1)
     changes['features'] = []
+
+    table2NotUsed = copy.deepcopy(table2)
     
     lonMax = len(table2['features'])
     
-    k=0
+    
     for i in table1['features']:
-        value2 = str(i['properties'][attr])
+        value1 = str(i['properties'][attr])
         count1 = 0
         for j in table2['features']:
-            value1 = str(j['properties'][attr])
+            value2 = str(j['properties'][attr])
             if value1 == value2:
                 if i['properties'] == j['properties']:
                     equals['features'].append(i)
                 else:
                     changes['features'].append(i)
-                k+=1
+                
+                for l in table2NotUsed['features']:
+                    if str(l['properties'][attr]) == value2:
+                        table2NotUsed['features'].remove(l)
+                        break
                 break
             else:
                 count1+=1
                 if count1 == lonMax:
                     news['features'].append(i)
-
-    return [equals, news, changes]
+    
+    return [equals, news, changes, table2NotUsed]

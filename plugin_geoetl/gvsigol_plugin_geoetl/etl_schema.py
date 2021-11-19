@@ -176,7 +176,7 @@ def get_proced_indenova(dicc):
     
     return listProd
 
-def get_schema_indenova(dicc):
+"""def get_schema_indenova(dicc):
     
     domain = dicc['domain']
     api_key = dicc['api-key']
@@ -243,7 +243,7 @@ def get_schema_indenova(dicc):
                             if key not in listSchema:
                                 listSchema.append(key)
     
-    return [x.lower() for x in listSchema]
+    return [x.lower() for x in listSchema]"""
 
 def get_schema_postgres(dicc):
     schemaTable = dicc['tablename'].lower()
