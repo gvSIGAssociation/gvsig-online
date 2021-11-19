@@ -182,11 +182,11 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                             '</div><br>'+
                             '<div class="column33">'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-date-'+ID+'" checked="checked">'+	
+                                    '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-date-'+ID+'" value="check-init-date">'+	
                                     '<label for="init-date">'+gettext('From an initial date')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-end-date-'+ID+'">'+	
+                                    '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-end-date-'+ID+'" value="check-init-end-date">'+	
                                     '<label for="init-end-date">'+gettext('Between dates')+'</label>'+
                                 '</div>'+
                             '</div>'+
@@ -227,34 +227,32 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                 $('#end-date-'+ID).val("")
                 $("#checkbox-"+ID).prop('disabled', true)
                 $("#checkbox-"+ID).prop('checked', false)
+                
             }
             else{
                 check = true
+            
                 $('#end-date-'+ID).prop('disabled', false)
                 $("#checkbox-"+ID).prop('disabled', false)
             }
         });
 
-        checkendtoday = false
+        //checkendtoday = false
         $("#checkbox-end-"+ID).click(function() {
             if($("#checkbox-end-"+ID).is(':checked')){
-                checkendtoday = true
+                //checkendtoday = true
                 //let today = new Date().toISOString().slice(0, 10)
                 $('#end-date-'+ID).val("")
-            }else{
-                checkendtoday = false
-            }
+            }//else{                checkendtoday = false            }
         });
 
-        checkinittoday = false
+        //checkinittoday = false
         $("#checkbox-init-"+ID).click(function() {
             if($("#checkbox-init-"+ID).is(':checked')){
-                checkinittoday = true
+                //checkinittoday = true
                 //let today = new Date().toISOString().slice(0, 10)
                 $('#init-date-'+ID).val("")
-            }else{
-                checkinittoday = false
-            }
+            }//else{                checkinittoday = false            }
         });
 
         $('#proced-list-'+ID).click(function(){
@@ -317,6 +315,23 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#input-indenova-accept-'+ID).click(function() {
 
+                if($("#checkbox-init-"+ID).is(':checked')){
+                    checkinittoday = true
+                    //let today = new Date().toISOString().slice(0, 10)
+                    
+                }else{
+                    checkinittoday = false
+                };
+
+                if($("#checkbox-end-"+ID).is(':checked')){
+                    checkendtoday = true
+                    //let today = new Date().toISOString().slice(0, 10)
+                    
+                }else{
+                    checkendtoday = false
+                };
+                
+                console.log($('input:radio[name="date-indenova-'+ID+'"]:checked').val())
                 var paramsIndenova = {"id": ID,
                 "parameters": [
                     {
@@ -329,7 +344,8 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                         "init-date": $('#init-date-'+ID).val(),
                         "end-date": $('#end-date-'+ID).val(),
                         "checkbox-end": checkendtoday,
-                        "checkbox-init": checkinittoday
+                        "checkbox-init": checkinittoday,
+                        "date-indenova":$('input:radio[name="date-indenova-'+ID+'"]:checked').val()
                     }
                 ]};
 
@@ -2325,7 +2341,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
                 paramsCompare['schema-old'] = schemaEdge
 
                 if (Array.isArray(schema[0])){
-                    schemaMod = [schema[0], schema[0], schema[0]]
+                    schemaMod = [schema[0], schema[0], schema[0], schema[1]]
                 }
                 else{
                     schemaMod = [...schema]
@@ -2404,6 +2420,16 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             resizeable:true
         });
 
+        var label6 =new draw2d.shape.basic.Label({
+            text: gettext("Comp. Not Used"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
         var input1 = label1.createPort("input");
         input1.setName("input_"+label1.id);
 
@@ -2418,6 +2444,9 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
 
 	    var output3= label5.createPort("output");
         output3.setName("output_"+label5.id);
+    
+        var output4= label6.createPort("output");
+        output4.setName("output_"+label6.id);
 
 	    if($.isNumeric(optionalIndex)){
             this.add(label1, null, optionalIndex+1);
@@ -2425,6 +2454,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             this.add(label3, null, optionalIndex+1);
             this.add(label4, null, optionalIndex+1);
             this.add(label5, null, optionalIndex+1);
+            this.add(label6, null, optionalIndex+1);
 	    }
 	    else{
             this.add(label1);
@@ -2432,11 +2462,12 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             this.add(label3);
             this.add(label4);
             this.add(label5);
+            this.add(label6);
         }
          
-        listLabel.push([this.id, [input1.name, input2.name], [output1.name, output2.name, output3.name]])
+        listLabel.push([this.id, [input1.name, input2.name], [output1.name, output2.name, output3.name, output4.name]])
 
-	    return label1, label2, label3, label4, label5;
+	    return label1, label2, label3, label4, label5, label6;
     },
         /**
      * @method
@@ -7106,7 +7137,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                     '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="append" name="operation-'+ID+'" class="form-check-input" value="APPEND">'+
+                                    '<input type="radio" id="append-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="APPEND">'+
                                     '<label for="append" class="form-check-label">'+gettext('APPEND')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
@@ -7117,7 +7148,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="column25">'+
                             '<br><br>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="update" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
+                                    '<input type="radio" id="update-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
                                     '<label for="update" class="form-check-label">'+gettext('UPDATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+

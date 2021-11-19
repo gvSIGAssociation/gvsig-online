@@ -321,10 +321,21 @@ gvsigolETL.Toolbar = Class.extend({
 
 								multiIn = multiIn + 1
 								
-								$('#'+key+'-'+figure.id).val(parameters[0][key]);
+								if($('input:radio[name="'+key+'-'+figure.id+'"]').is(':radio')){
+								
+									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).attr('checked', true)
+
+								}else if($('#'+key+'-'+figure.id).is(':checkbox')){
+
+									$('#'+key+'-'+figure.id).attr('checked', true)
+
+								}else{
+									$('#'+key+'-'+figure.id).val(parameters[0][key]);
+								}
 							}
 
 						}catch{
+							
 						}
 					})
 

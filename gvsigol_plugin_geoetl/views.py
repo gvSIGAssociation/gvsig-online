@@ -135,7 +135,7 @@ def get_list(user):
             workspace['id'] = w.id
             workspace['name'] = w.name
             workspace['description'] = w.description
-            #workspace['workspace'] = w.workspace[:200]+" (...) ]"
+            #workspace['workspace'] = w.workspace
             workspace['username'] = w.username
 
             try:
@@ -659,7 +659,9 @@ def etl_schema_indenova(request):
         if form.is_valid():
             jsParams = json.loads(request.POST['jsonParamsIndenova'])
 
-            listSchema = etl_schema.get_schema_indenova(jsParams['parameters'][0])
+            #listSchema = etl_schema.get_schema_indenova(jsParams['parameters'][0])
+            listSchema = ['idexp', 'numexp', 'issue', 'idtram', 'nametram', 'initdate', 'status', 'regnumber', 'regdate', 'adirefcatt', 'identifier', 'name', 'town', 'city', 'postalcode', 'country', 'enddate']
+
             response = json.dumps(listSchema)
             
             return HttpResponse(response, content_type="application/json")
@@ -674,6 +676,5 @@ def etl_schema_postgresql(request):
             jsParams = json.loads(request.POST['jsonParamsPostgres'])
 
             listSchema = etl_schema.get_schema_postgres(jsParams['parameters'][0])
-            #listSchema = ['idexp', 'numexp', 'issue', 'idtram', 'nametram', 'initdate', 'status', 'regnumber', 'regdate', 'adirefcatt', 'identifier', 'name', 'town', 'city', 'postalcode', 'country', 'enddate']
             response = json.dumps(listSchema)
             return HttpResponse(response, content_type="application/json")
