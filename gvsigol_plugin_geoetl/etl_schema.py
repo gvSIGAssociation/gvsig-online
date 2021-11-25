@@ -109,7 +109,7 @@ def get_schema_oracle(dicc):
     )
     c = conn.cursor()
 
-    if dicc['check'] == True:
+    if dicc['checkbox'] == "true":
         try:   
             create_type = "create type cols_name as table of varchar2(32767)"
 
@@ -128,12 +128,13 @@ def get_schema_oracle(dicc):
             c.execute(create_function)
         except:
             print ('Existe la función get_columns_name')
-
-        sql = "select * from TABLE(GET_COLUMNS_NAME('"+dicc['sql']+"'))"
-
+        
+        sql_w = dicc['sql'].replace("'", "''")
+        
+        sql = "select * from TABLE(GET_COLUMNS_NAME('"+sql_w+"'))"
+        
     else:
         sql = "SELECT column_name FROM ALL_TAB_COLUMNS WHERE table_name = '"+dicc['table-name']+"' AND owner = '"+dicc['owner-name']+"'"
-
 
     c.execute(sql)
 

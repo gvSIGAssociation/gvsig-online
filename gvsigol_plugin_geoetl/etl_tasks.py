@@ -228,7 +228,7 @@ def trans_Join(dicc):
     k=0
     for i in table2['features']:
         value2 = str(i['properties'][attr2])
-
+        
         count1 = 0
         for j in table1['features']:
             value1 = str(j['properties'][attr1])
@@ -977,8 +977,9 @@ def input_Oracle(dicc):
     
     attrnames = etl_schema.get_schema_oracle(dicc)
 
-    if dicc['check'] == True:
-        c.execute(dicc['sql'])
+    if dicc['checkbox'] == "true":
+        sql = dicc['sql']
+        c.execute(sql)
     else:
         c.execute("SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name'])
 
@@ -995,7 +996,7 @@ def input_Oracle(dicc):
         dicc = dict(zip(attrnames, attrvalues))
         
         fc['features'].append({'properties': dicc})
-    
+
     return[fc]
 
 def trans_WktGeom(dicc):
@@ -1073,7 +1074,6 @@ def trans_Union(dicc):
     groupby = dicc['group-by-attr']
     dataSet = ogr.Open(json.dumps(table))
         
-
     layer = dataSet.GetLayer()
 
     listAttr = []
@@ -1167,15 +1167,15 @@ def input_Indenova(dicc):
     secret = dicc['secret']
     auth = (client_id+':'+secret).encode()
 
-    if dicc['checkbox-init'] is True:
+    if dicc['checkbox-init'] == "true":
         today = date.today()
         init_date = today.strftime("%d/%m/%Y")
     else:
         in_d_list = dicc['init-date'].split('-')
         init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
     
-    if dicc['check'] is True:
-        if dicc['checkbox-end'] is True:
+    if dicc['date-indenova'] == "check-init-end-date":
+        if dicc['checkbox-end'] == "true":
             today = date.today()
             end_date = today.strftime("%d/%m/%Y")
         else:
@@ -1197,12 +1197,12 @@ def input_Indenova(dicc):
 
     for i in proced_list:
         if i != 'all':
-            if dicc['check'] is True:
+            if dicc['date-indenova'] == "check-init-end-date":
 
                 url_date = domain + '//api/rest/bpm/v1/search//'+i+'//getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
             else:
                 url_date = domain + "//api/rest/bpm/v1/search//"+i+"//getOpenExpsByTramAndDateIni?dateIni="+init_date
-            
+
             headers_token = {'esigna-auth-api-key': api_key, "Authorization": "Bearer "+token.decode()}
             r_date = requests.get(url_date, headers = headers_token)
 
@@ -1325,3 +1325,161 @@ def trans_CompareRows(dicc):
                     news['features'].append(i)
     
     return [equals, news, changes, table2NotUsed]
+
+def trans_RemoveSmallPoly(dicc):
+    tol = float(dicc['tolerance'])
+
+    table = dicc['data'][0]
+    dataSet = ogr.Open(json.dumps(table))
+        
+    layer = dataSet.GetLayer()
+
+    fc = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+    
+    for f in layer:
+        
+        geom = f.GetGeometryRef()
+
+        if geom.GetGeometryName() == 'MULTIPOLYGON':
+            
+            k=0
+            for p in geom:
+                
+                area = p.GetArea()
+                if area > tol:
+                    
+                    if k == 0:
+                        poly = ogr.Geometry(ogr.wkbPolygon)
+                        poly.AddGeometry(p)
+                        geom_poly = p
+
+                    elif k == 1:
+                        multipolygon = ogr.Geometry(ogr.wkbMultiPolygon)
+                        multipolygon.AddGeometry(geom_poly)
+                        multipolygon.AddGeometry(p)
+                        
+                    else:
+                        multipolygon.AddGeometry(p)
+                    k+=1
+                    
+            if k==0:
+                geojson = poly.ExportToJson()
+            
+            else:
+                geojson = multipolygon.ExportToJson()
+        
+        else:
+            geojson = geom.ExportToJson()
+
+        properties = f.ExportToJson(as_object=True)['properties']
+        fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':properties})
+
+    return[fc]
+
+def trans_FilterGeom(dicc):
+    table = dicc['data'][0]
+
+    points = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    multipoints = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    lines = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    multilines = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    polygons = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    multipolygons = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    for i in table['features']:
+        if i['geometry']['type'] == 'Point':
+            points['features'].append(i)
+        elif i['geometry']['type'] == 'MultiPoint':
+            multipoints['features'].append(i)
+        elif i['geometry']['type'] == 'LineString':
+            lines['features'].append(i)
+        elif i['geometry']['type'] == 'MultiLineString':
+            multilines['features'].append(i)
+        elif i['geometry']['type'] == 'Polygon':
+            polygons['features'].append(i)
+        elif i['geometry']['type'] == 'MultiPolygon':
+            multipolygons['features'].append(i)
+
+    return [points, multipoints, lines, multilines, polygons, multipolygons]

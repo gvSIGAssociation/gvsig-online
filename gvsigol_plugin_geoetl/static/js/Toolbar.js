@@ -308,6 +308,7 @@ gvsigolETL.Toolbar = Class.extend({
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') ){
 									
 									if (Array.isArray(schemaold[multiIn])){
+										
 										for (k = 0; k < schemaold[multiIn].length; k++){
 											$('#'+key+'-'+figure.id).append('<option>'+schemaold[multiIn][k]+'</option>')
 										};
@@ -322,24 +323,21 @@ gvsigolETL.Toolbar = Class.extend({
 								multiIn = multiIn + 1
 								
 								if($('input:radio[name="'+key+'-'+figure.id+'"]').is(':radio')){
-								
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).attr('checked', true)
+									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).val(parameters[0][key])
 
 								}else if($('#'+key+'-'+figure.id).is(':checkbox')){
-
 									$('#'+key+'-'+figure.id).attr('checked', true)
+									$('#'+key+'-'+figure.id).val(parameters[0][key])
+									
 
 								}else{
 									$('#'+key+'-'+figure.id).val(parameters[0][key]);
 								}
 							}
 
-						}catch{
-							
-						}
+						} catch {}
 					})
-
-					
 			
 				}else{
 					s = false
@@ -379,7 +377,6 @@ gvsigolETL.Toolbar = Class.extend({
 					reader.unmarshal(view, [cnv[o]]);
 
 				};
-
 			};
 		};
     },
