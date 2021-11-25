@@ -143,7 +143,6 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
-
         $('#canvas-parent').append('<div id="dialog-input-indenova-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
                 '<div class="modal-content">'+
@@ -198,10 +197,10 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="column33">'+
                                 
-                                '<input type="checkbox" name="checkbox-init-indenova" id="checkbox-init-'+ID+'"/>'+
+                                '<input type="checkbox" name="checkbox-init-indenova" id="checkbox-init-'+ID+'" value=""/>'+
                                 '<label for="checkbox">'+gettext('Current date for initial')+'</label>'+
                                 '<br><br>'+
-                                '<input type="checkbox" name="checkbox-end-indenova" id="checkbox-end-'+ID+'"/>'+
+                                '<input type="checkbox" name="checkbox-end-indenova" id="checkbox-end-'+ID+'" value=""/>'+
                                 '<label for="checkbox">'+gettext('Current date for end')+'</label>'+
                             '</div>'+
                         '</form>'+
@@ -219,10 +218,10 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
         $('#end-date-'+ID).prop('disabled', true)
         $("#checkbox-"+ID).prop('disabled', true)
 
-        check = false
+        
         $('input:radio[name="date-indenova-'+ID+'"]').change(function(){
             if ($('#check-init-date-'+ID).is(':checked')){
-                check = false
+                
                 $('#end-date-'+ID).prop('disabled', true)
                 $('#end-date-'+ID).val("")
                 $("#checkbox-"+ID).prop('disabled', true)
@@ -230,7 +229,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                 
             }
             else{
-                check = true
+                
             
                 $('#end-date-'+ID).prop('disabled', false)
                 $("#checkbox-"+ID).prop('disabled', false)
@@ -313,25 +312,39 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-indenova-'+ID).modal('show')
 
+            if ($('#check-init-date-'+ID).is(':checked')){
+                
+                $('#end-date-'+ID).prop('disabled', true)
+                $('#end-date-'+ID).val("")
+                $("#checkbox-"+ID).prop('disabled', true)
+                $("#checkbox-"+ID).prop('checked', false)
+                
+            }
+            else{
+            
+                $('#end-date-'+ID).prop('disabled', false)
+                $("#checkbox-"+ID).prop('disabled', false)
+            }
+
             $('#input-indenova-accept-'+ID).click(function() {
 
                 if($("#checkbox-init-"+ID).is(':checked')){
-                    checkinittoday = true
+                    $("#checkbox-init-"+ID).val("true")
+                    
                     //let today = new Date().toISOString().slice(0, 10)
                     
                 }else{
-                    checkinittoday = false
+                    $("#checkbox-init-"+ID).val("")
                 };
 
                 if($("#checkbox-end-"+ID).is(':checked')){
-                    checkendtoday = true
+                    $("#checkbox-end-"+ID).val("true")
                     //let today = new Date().toISOString().slice(0, 10)
                     
                 }else{
-                    checkendtoday = false
+                    $("#checkbox-end-"+ID).val("")
                 };
-                
-                console.log($('input:radio[name="date-indenova-'+ID+'"]:checked').val())
+
                 var paramsIndenova = {"id": ID,
                 "parameters": [
                     {
@@ -340,11 +353,10 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                         "client-id": $('#client-id-'+ID).val(),
                         "secret": $('#secret-'+ID).val(),
                         "proced-list": $('#proced-list-'+ID).val(),
-                        "check": check,
                         "init-date": $('#init-date-'+ID).val(),
                         "end-date": $('#end-date-'+ID).val(),
-                        "checkbox-end": checkendtoday,
-                        "checkbox-init": checkinittoday,
+                        "checkbox-end": $("#checkbox-end-"+ID).val(),
+                        "checkbox-init": $("#checkbox-init-"+ID).val(),
                         "date-indenova":$('input:radio[name="date-indenova-'+ID+'"]:checked').val()
                     }
                 ]};
@@ -1310,7 +1322,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                                 '<input type="checkbox" name="checkbox-oracle" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL statement')+'</label>'+											
                             '</div>'+
-                            '<div class="more-options">'+
+                            '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label">'+gettext('SQL statement:')+'</label>'+
                                 '<textarea id="sql-'+ID+'" rows="10" class="form-control" placeholder=""></textarea>'+
                             '</div>'+
@@ -1327,16 +1339,16 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
 
         var context = this
 
-        $(".more-options").slideUp("slow")
-        check = false
+        $(".more-options-"+ID).slideUp("slow")
+        
 
-        $("#checkbox-"+ID).click(function() {
+        $("#checkbox-"+ID).change(function() {
             if($("#checkbox-"+ID).is(':checked')){
-                $(".more-options").slideDown("slow")
-                check = true
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
             }else{
-                $(".more-options").slideUp("slow")
-                check = false
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
             }
         });
         
@@ -1407,6 +1419,14 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
         icon.on("click", function(){
 
             $('#dialog-input-oracle-'+ID).modal('show')
+
+            if($("#checkbox-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
+            }
             
             $('#get-owners-'+ID).on("click", function(){
                                 
@@ -1489,10 +1509,10 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                     "password": $('#password-'+ID).val(),
                     "owner-name": $('#owner-name-'+ID).val(),
                     "table-name": $('#table-name-'+ID).val(),
-                    "check": check,
+                    "checkbox": $("#checkbox-"+ID).val(),
                     "sql": $('#sql-'+ID).val()}
                 ]}
-    
+
                 var formDataSchemaOracle = new FormData();
                 
                 formDataSchemaOracle.append('jsonParamsOracle', JSON.stringify(paramsOracle))
@@ -6073,6 +6093,8 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
                 paramsSplitAttr['schema-old'] = schemaEdge
                 paramsSplitAttr['schema'] = schemaMod
 
+                //console.log(schemaMod)
+
                 //add the schema to a later edge if it exists
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 
@@ -6570,8 +6592,9 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
                     {"group-by-attr": $('#group-by-attr-'+ID).val()}
                 ]}
 
-                if($('#group-by-attr-'+ID).val()== ""){
-                    schemaMod =[]
+
+                if($('#group-by-attr-'+ID).val()=== ""){
+                    schemaMod =[...schema]
                 }else{
                     schemaMod=[$('#group-by-attr-'+ID).val()]
                 }
@@ -6579,7 +6602,7 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
                 paramsUnion['schema'] = schemaMod
                 paramsUnion['schema-old'] = schemaEdge
 
-                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 isAlreadyInCanvas(jsonParams, paramsUnion, ID)
 
                 icon.setColor('#4682B4')
@@ -6684,6 +6707,502 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
       * @returns {Object}
       */
      getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+//// Remove Small Polygons from a mulipolygon ////
+
+trans_RemoveSmallPoly = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_RemoveSmallPoly",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Rem. Small Poly."), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-small-pol-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('Remove Small Polygons Parameters')+'</h4>'+
+                        gettext('Removes small polygons from a multipolygon geometry froma a certain tolerance')+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Tolerance (in m<sup>2</sup>)')+'</label>'+
+                                '<input id="tolerance-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[0-9]+">'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="small-pol-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+        
+        context = this
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+                }
+
+            },100);
+            
+
+            $('#dialog-small-pol-'+ID).modal('show')
+
+            $('#small-pol-accept-'+ID).click(function() {
+
+                var paramsSmall = {"id": ID,
+                "parameters": [
+                    {"tolerance": $('#tolerance-'+ID).val()}
+                ]}
+                
+                paramsSmall['schema'] = schema
+                paramsSmall['schema-old'] = schemaEdge
+
+                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+                isAlreadyInCanvas(jsonParams, paramsSmall, ID)
+
+                icon.setColor('#4682B4')
+                
+                $('#dialog-small-pol-'+ID).modal('hide')
+
+            })
+        })
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+         }
+         
+         listLabel.push([this.id,[input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+//// GEOMETRY FILTER ////
+
+trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_FilterGeom",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext('Filter Geom.'), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+        
+        context = this
+
+        icon.on("click", function(){
+            schema = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+            var paramsFGeom = {"id": ID}
+
+            paramsFGeom['schema-old'] = schema
+
+            if (Array.isArray(schema[0])){
+                schemaMod = [schema[0], schema[0], schema[0], schema[0], schema[0], schema[0]]
+            }
+            else{
+                schemaMod = [...schema]
+            }
+
+            paramsFGeom['schema'] = schemaMod
+
+            //console.log(schemaMod)
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+
+            isAlreadyInCanvas(jsonParams, paramsFGeom, ID)
+
+            icon.setColor('#4682B4')
+                
+        })
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext('Input'),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext('Points'),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label3 =new draw2d.shape.basic.Label({
+            text: gettext('Multipoints'),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label4 =new draw2d.shape.basic.Label({
+            text: gettext("Lines"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label5 =new draw2d.shape.basic.Label({
+            text: gettext("Multilines"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label6 =new draw2d.shape.basic.Label({
+            text: gettext("Polygons"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label7 =new draw2d.shape.basic.Label({
+            text: gettext("Multipolygons"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var input1 = label1.createPort("input");
+        input1.setName("input_"+label1.id);
+
+        var output = label2.createPort("output");
+        output.setName("output_"+label2.id);
+
+	    var output1= label3.createPort("output");
+        output1.setName("output_"+label3.id);
+
+	    var output2= label4.createPort("output");
+        output2.setName("output_"+label4.id);
+
+	    var output3= label5.createPort("output");
+        output3.setName("output_"+label5.id);
+    
+        var output4= label6.createPort("output");
+        output4.setName("output_"+label6.id);
+
+        var output5= label7.createPort("output");
+        output5.setName("output_"+label7.id);
+
+	    if($.isNumeric(optionalIndex)){
+            this.add(label1, null, optionalIndex+1);
+            this.add(label2, null, optionalIndex+1);
+            this.add(label3, null, optionalIndex+1);
+            this.add(label4, null, optionalIndex+1);
+            this.add(label5, null, optionalIndex+1);
+            this.add(label6, null, optionalIndex+1);
+            this.add(label7, null, optionalIndex+1);
+	    }
+	    else{
+            this.add(label1);
+            this.add(label2);
+            this.add(label3);
+            this.add(label4);
+            this.add(label5);
+            this.add(label6);
+            this.add(label7);
+        }
+         
+        listLabel.push([this.id, [input1.name], [output.name, output1.name, output2.name, output3.name, output4.name, output5.name]])
+
+	    return label1, label2, label3, label4, label5, label6;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
      
      /**
       * @method 
