@@ -44,6 +44,7 @@ from .tasks import run_canvas_background
 from datetime import datetime
 import numpy as np
 import json
+import os
 
 
 def get_conf(request):
@@ -173,7 +174,8 @@ def etl_workspace_list(request):
     username = request.GET['user']
 
     response = {
-        'workspaces': get_list(username)
+        'workspaces': get_list(username),
+        'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
     }
 
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
@@ -678,3 +680,58 @@ def etl_schema_postgresql(request):
             listSchema = etl_schema.get_schema_postgres(jsParams['parameters'][0])
             response = json.dumps(listSchema)
             return HttpResponse(response, content_type="application/json")
+
+def etl_workspace_download(request):
+    lgid = request.GET['lgid']
+
+    workspace = ETLworkspaces.objects.get(id=int(lgid))
+
+    folder = "etl_workspaces"
+
+    folder_path = os.path.join(core_settings.FILEMANAGER_DIRECTORY, folder)
+
+    try:
+        os.mkdir(folder_path)
+    except:
+        pass
+
+    file_path = os.path.join(folder_path, workspace.name.replace(' ', '_')+'.json')
+
+    with open(file_path, 'w') as f:
+        f.write(workspace.workspace)
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/txt")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+
+def etl_workspace_upload(request):
+    name = request.POST['name']
+    desc = request.POST['description']
+    file = request.POST['file']
+    user = request.POST['username']
+    id = None
+    
+    exists = name_user_exists(id, name, user)
+    
+    if exists:
+        response = {
+            'exists': 'true',
+        }
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
+    f = open(file[7:], 'r')
+
+    workspace = ETLworkspaces(
+        name = name,
+        description = desc,
+        workspace = f.read(),
+        username = user
+    )
+    workspace.save()
+
+    f.close()
+
+    response = {}
+    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
