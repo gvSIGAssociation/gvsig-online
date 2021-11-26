@@ -93,12 +93,15 @@ function getPathFile(fileType, ID){
         window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
     });
     window.filemanagerCallback = function(url) {
+
         if(fileType == 'csv' && url.endsWith('.csv')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'excel' && (url.endsWith('.xls') || url.endsWith('.xlsx'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'shp' && url.endsWith('.shp')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        } else if(fileType == 'json' && url.endsWith('.json') && ID == '0'){
+            $("#etl_json_upload").val("file://" + fm_directory + url)
         } else{
             messageBox.show('warning', gettext('File selected is not a ')+fileType)
         }
@@ -558,7 +561,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                                 '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
                             '</div>'+ 
                             '<div class="column60">'+
-                            '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
                                 '<input type="text" id="csv-file-'+ID+'" name="file" class="form-control"></input>'+
                             '</div>'+ 
                             '<div class="column20">'+
@@ -6917,7 +6920,6 @@ trans_RemoveSmallPoly = draw2d.shape.layout.VerticalLayout.extend({
     {
         return this.children.get(index+1).figure;
     },
-     
 
      /**
       * @method
