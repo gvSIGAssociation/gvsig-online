@@ -2321,10 +2321,6 @@ def layergroup_delete(request, lgid):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-def prepare_string(s):
-    return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
-
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -2419,81 +2415,84 @@ def layer_create_with_group(request, layergroup_id):
             try:
                 datastore = form.cleaned_data['datastore']
                 server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
-                form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
-                server.normalizeTableFields(form.cleaned_data['fields'])
-                server.createTable(form.cleaned_data)
-                extraParams = {}
-                if datastore.type == 'v_PostGIS':
-                    extraParams['maxFeatures'] = maxFeatures
-
-                # first create the resource on the backend
-                do_add_layer(server, datastore, form.cleaned_data['name'], form.cleaned_data['title'], is_queryable, extraParams)
-
-                # save it on DB if successfully created
-                newRecord = Layer(
-                    datastore = datastore,
-                    layer_group = form.cleaned_data['layer_group'],
-                    name = form.cleaned_data['name'],
-                    title = form.cleaned_data['title'],
-                    abstract = abstract,
-                    created_by = request.user.username,
-                    type = form.cleaned_data['datastore'].type,
-                    visible = is_visible,
-                    queryable = is_queryable,
-                    allow_download = allow_download,
-                    cached = cached,
-                    single_image = single_image
-                )
-                if not newRecord.source_name:
-                    newRecord.source_name = newRecord.name
-                newRecord.time_enabled = time_enabled
-                newRecord.time_enabled_field = time_field
-                newRecord.time_enabled_endfield = time_endfield
-                newRecord.time_presentation = time_presentation
-                newRecord.time_resolution_year = time_resolution_year
-                newRecord.time_resolution_month = time_resolution_month
-                newRecord.time_resolution_week = time_resolution_week
-                newRecord.time_resolution_day = time_resolution_day
-                newRecord.time_resolution_hour = time_resolution_hour
-                newRecord.time_resolution_minute = time_resolution_minute
-                newRecord.time_resolution_second = time_resolution_second
-                newRecord.time_default_value_mode = time_default_value_mode
-                newRecord.time_default_value = time_default_value
-                newRecord.time_resolution = time_resolution
-                newRecord.save()
-                
-                for i in form.cleaned_data['fields']:
-                    if 'enumkey' in i:
-                        field_enum = LayerFieldEnumeration()
-                        field_enum.layer = newRecord
-                        field_enum.field = i['name']
-                        field_enum.enumeration_id = int(i['enumkey']) 
-                        field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
-                        field_enum.save()
-                    if i.get('calculation'):
-                        try:
-                            calculation = i.get('calculation')
-                            procedure = TriggerProcedure.objects.get(signature=calculation)
-                            trigger = Trigger()
-                            trigger.layer = newRecord
-                            trigger.field = i['name']
-                            trigger.procedure = procedure
-                            trigger.save()
-                            
-                            trigger.install()
-                        except:
-                            logger.exception("Error creating trigger for calculated field")
-                         
-                featuretype = {
-                    'max_features': maxFeatures
-                }
-                utils.set_layer_permissions(newRecord, is_public, assigned_read_roups, assigned_write_groups)
-                do_config_layer(server, newRecord, featuretype)
-                if redirect_to_layergroup:
-                    layergroup_id = newRecord.layer_group.id
-                    return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
+                if _valid_name_regex.search(form.cleaned_data['name']) == None:
+                    msg = _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.cleaned_data['name'])
+                    form.add_error(None, msg)
                 else:
-                    return redirect('layer_list')
+                    server.normalizeTableFields(form.cleaned_data['fields'])
+                    server.createTable(form.cleaned_data)
+                    extraParams = {}
+                    if datastore.type == 'v_PostGIS':
+                        extraParams['maxFeatures'] = maxFeatures
+
+                    # first create the resource on the backend
+                    do_add_layer(server, datastore, form.cleaned_data['name'], form.cleaned_data['title'], is_queryable, extraParams)
+
+                    # save it on DB if successfully created
+                    newRecord = Layer(
+                        datastore = datastore,
+                        layer_group = form.cleaned_data['layer_group'],
+                        name = form.cleaned_data['name'],
+                        title = form.cleaned_data['title'],
+                        abstract = abstract,
+                        created_by = request.user.username,
+                        type = form.cleaned_data['datastore'].type,
+                        visible = is_visible,
+                        queryable = is_queryable,
+                        allow_download = allow_download,
+                        cached = cached,
+                        single_image = single_image
+                    )
+                    if not newRecord.source_name:
+                        newRecord.source_name = newRecord.name
+                    newRecord.time_enabled = time_enabled
+                    newRecord.time_enabled_field = time_field
+                    newRecord.time_enabled_endfield = time_endfield
+                    newRecord.time_presentation = time_presentation
+                    newRecord.time_resolution_year = time_resolution_year
+                    newRecord.time_resolution_month = time_resolution_month
+                    newRecord.time_resolution_week = time_resolution_week
+                    newRecord.time_resolution_day = time_resolution_day
+                    newRecord.time_resolution_hour = time_resolution_hour
+                    newRecord.time_resolution_minute = time_resolution_minute
+                    newRecord.time_resolution_second = time_resolution_second
+                    newRecord.time_default_value_mode = time_default_value_mode
+                    newRecord.time_default_value = time_default_value
+                    newRecord.time_resolution = time_resolution
+                    newRecord.save()
+                    
+                    for i in form.cleaned_data['fields']:
+                        if 'enumkey' in i:
+                            field_enum = LayerFieldEnumeration()
+                            field_enum.layer = newRecord
+                            field_enum.field = i['name']
+                            field_enum.enumeration_id = int(i['enumkey']) 
+                            field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
+                            field_enum.save()
+                        if i.get('calculation'):
+                            try:
+                                calculation = i.get('calculation')
+                                procedure = TriggerProcedure.objects.get(signature=calculation)
+                                trigger = Trigger()
+                                trigger.layer = newRecord
+                                trigger.field = i['name']
+                                trigger.procedure = procedure
+                                trigger.save()
+                                
+                                trigger.install()
+                            except:
+                                logger.exception("Error creating trigger for calculated field")
+                            
+                    featuretype = {
+                        'max_features': maxFeatures
+                    }
+                    utils.set_layer_permissions(newRecord, is_public, assigned_read_roups, assigned_write_groups)
+                    do_config_layer(server, newRecord, featuretype)
+                    if redirect_to_layergroup:
+                        layergroup_id = newRecord.layer_group.id
+                        return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
+                    else:
+                        return redirect('layer_list')
 
             except Exception as e:
                 logger.exception("Error creating layer")
@@ -2503,16 +2502,17 @@ def layer_create_with_group(request, layergroup_id):
                     msg = _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
-                groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
-                data = {
-                    'form': form,
-                    'message': msg,
-                    'layer_type': layer_type,
-                    'enumerations': get_currentuser_enumerations(request),
-                    'groups': groups,
-                    'resource_is_public': is_public
-                }
-                return render(request, "layer_create.html", data)
+
+            groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
+            data = {
+                'form': form,
+                'message': msg,
+                'layer_type': layer_type,
+                'enumerations': get_currentuser_enumerations(request),
+                'groups': groups,
+                'resource_is_public': is_public
+            }
+            return render(request, "layer_create.html", data)
 
         else:
             forms = []
