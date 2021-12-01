@@ -108,7 +108,7 @@ class PostgisLayerUploadForm(forms.Form):
         user = kwargs.pop('user', None)  
         super(PostgisLayerUploadForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
-            qs = Datastore.objects.all().order_by('name')
+            qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
         else:
             qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username).order_by('name')
             
@@ -166,7 +166,7 @@ class CreateFeatureTypeForm(forms.Form):
         user = kwargs.pop('user', None)  
         super(CreateFeatureTypeForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
-            qs = Datastore.objects.all().order_by('name')
+            qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
             qs_lg = LayerGroup.objects.all().order_by('name')
             
         else:
