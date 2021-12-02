@@ -154,11 +154,7 @@ def get_all_groups_checked_by_project(request, project):
 def get_all_layer_groups_checked_by_project(request, project):
     
     groups_list = None
-    if request.user.is_superuser:
-        groups_list = LayerGroup.objects.all()
-    else:
-        groups_list = LayerGroup.objects.filter(created_by__exact=request.user.username)
-
+    groups_list = LayerGroup.objects.all()
     layer_groups_by_project = ProjectLayerGroup.objects.filter(project_id=project.id)
     checked = False
     
@@ -168,13 +164,17 @@ def get_all_layer_groups_checked_by_project(request, project):
             layer_group = {}
             for lgba in layer_groups_by_project:
                 if lgba.layer_group_id == g.id:
-                    checked = True
-                    layer_group['checked'] = checked
-                    #layer_group['multiselect'] = lgba.multiselect
+                    layer_group['checked'] = True
                     layer_group['baselayer_group'] = lgba.baselayer_group
                     if lgba.baselayer_group:
                         layer_group['default_baselayer'] = lgba.default_baselayer
-                           
+            if request.user.is_superuser or g.created_by == request.user.username:
+                layer_group['editable'] = True
+            elif layer_group.get('checked'):
+                layer_group['editable'] = False
+            else:
+                # skip any group not created by the user nor previously checked
+                continue
             layer_group['id'] = g.id
             layer_group['name'] = g.name
             layer_group['title'] = g.title

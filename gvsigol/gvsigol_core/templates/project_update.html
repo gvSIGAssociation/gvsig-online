@@ -226,21 +226,21 @@
 												</div>
 												<div class="product-info">
 													<a href="javascript:void(0)" class="product-title"><span class="searchable-layer">{{layergroup.title}}</span>
-														<div style="margin-right: 10px;" class="radio pull-right">													
+														<div style="margin-right: 10px;" class="radio pull-right{% if layergroup.editable is False %} disabled{% endif%}">													
 															<label>
 																{% if layergroup.baselayer_group %}
-																	<input type="radio" class="selected-base-group" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}" checked/>{% trans "Base group" %}
+																	<input type="radio" class="selected-base-group" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
 																{% else %}
-																	<input type="radio" class="selected-base-group" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}"/>{% trans "Base group" %}
+																	<input type="radio" class="selected-base-group" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
 																{% endif %}
 															</label>
 														</div>
-														<div style="margin-right: 10px;" class="checkbox pull-right">													
+														<div style="margin-right: 10px;" class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">
 															<label>
 																{% if layergroup.checked %}
-																	<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked/>{% trans "Add" %}
+																	<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
 																{% else %}
-																	<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
+																	<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
 																{% endif %}
 															</label>
 														</div>
@@ -260,12 +260,12 @@
 																	<div class="checkbox pull-left">	
 																		<span class="searchable-base-layer">{{l.title}}</span><br />
 																	</div>
-																	<div class="checkbox pull-right">													
+																	<div class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">													
 																		<label>
 																			{% if l.baselayer %}
-																				<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																				<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
 																			{% else %}
-																				<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																				<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
 																			{% endif %}
 																		</label>
 																	</div>
