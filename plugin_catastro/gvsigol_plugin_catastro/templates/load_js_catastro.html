@@ -1,5 +1,5 @@
 {% load staticfiles %}
-{% if project %}
+{% if is_viewer_template %}
 <script type="text/javascript" src="{% static "js/vendors/catastro/select2/select2.js" %}"></script>
 <script type="text/javascript" src="{% static "js/vendors/catastro/catastro.js" %}"></script>
 <script type="text/javascript">
