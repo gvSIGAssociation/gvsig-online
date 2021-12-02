@@ -79,9 +79,6 @@
 				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"> <span class="sr-only">Toggle navigation</span></a>				
 				<div class="navbar-custom-menu">
 					<ul class="nav navbar-nav">	
-						{% with DOCS.URL|add:"/"|add:LANGUAGE_CODE|add:"/"|add:DOCS.NAME as DOC_URL %}
-							<li><a href="{{ DOC_URL }}" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
-						{% endwith %}
 						<li>
 							<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
 								<input name="next" type="hidden" value="{{ request.get_full_path }}" />
@@ -134,7 +131,7 @@
 						<p>{% trans "Dashboard" %}</p>
 					</div>
 				</div>
-				<ul class="sidebar-menu">				
+				<ul id="admin-left-menu" class="sidebar-menu">				
 					<li class="header"></li>					
 					<li id="menu-home">
 						<a href="/gvsigonline/core/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
