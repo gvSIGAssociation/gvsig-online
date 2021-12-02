@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% if project %}
 <script type="text/javascript" src="{% static "js/vendors/catastro/select2/select2.js" %}"></script>
 <script type="text/javascript" src="{% static "js/vendors/catastro/catastro.js" %}"></script>
 <script type="text/javascript">
@@ -84,3 +85,4 @@
 	});
 
 </script>
+{% endif %}
