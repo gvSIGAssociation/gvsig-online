@@ -60,12 +60,26 @@ for app in settings.INSTALLED_APPS:
         urlpatterns += [
             url(r'^gvsigonline/', include(app + '.urls')),
         ]
+        try:
+            urlpatterns += [
+                url('^gvsigonline/fileserver/', include(app + '.urls_fileserver')),
+            ]
+        except:
+            pass
+
         
 for plugin in settings.INSTALLED_APPS:
     if 'gvsigol_plugin_' in plugin:
         urlpatterns += [
             url(r'^gvsigonline/', include(plugin + '.urls')),
         ]
+        try:
+            urlpatterns += [
+                url('^gvsigonline/fileserver/', include(plugin + '.urls_fileserver')),
+            ]
+        except:
+            pass
+
     
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += [
