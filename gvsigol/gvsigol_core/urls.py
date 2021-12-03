@@ -19,6 +19,7 @@ urlpatterns = [
     path('blank_page/', core_views.blank_page, name='blank_page'),
     path('portable_project_load/<project_name>/', core_views.portable_project_load, name='portable_project_load'),
     path('save_shared_view/', core_views.save_shared_view, name='save_shared_view'),
+    path('create_shared_view/', core_views.create_shared_view, name='create_shared_view'),
     path('load_shared_view/<view_name>/', core_views.load_shared_view, name='load_shared_view'),
     path('shared_view_list/', core_views.shared_view_list, name='shared_view_list'),
     path('shared_view_delete/<int:svid>/', core_views.shared_view_delete, name='shared_view_delete'),
