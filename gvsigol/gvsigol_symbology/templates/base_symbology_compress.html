@@ -129,7 +129,7 @@
 						<p>{% trans "Dashboard" %}</p>
 					</div>
 				</div>
-				<ul class="sidebar-menu">				
+				<ul id="admin-left-menu" class="sidebar-menu">				
 					<li class="header"></li>					
 					<li {% block home_active %}{% endblock %}>
 						<a href="/gvsigonline/core/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
@@ -225,6 +225,14 @@
 	</script>
 
 	{% block extra-scripts %}{% endblock %}
+
+	{% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
 	
 </body>
 </html>
