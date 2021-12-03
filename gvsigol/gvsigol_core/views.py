@@ -1347,21 +1347,45 @@ def documentation(request):
     }
     return render(request, 'documentation.html', response)
 
-def do_save_shared_view(pid, description, view_state, expiration, user, internal=False):
-    name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
-    shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
-    shared_project = SharedView(
-        name=name,
-        project_id=pid,
-        description=description,
-        url=shared_url,
-        state=view_state,
-        expiration_date=expiration,
-        created_by=user.username,
-        internal=internal
-    )
+def do_save_shared_view(pid, description, view_state, expiration, user, internal = False, url = False):
+    
+    if url:
+        shared_url = url
+        name = url.split('/')[-1]
+    else:
+        name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+        shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
+
+    try:
+        shared_project = SharedView.objects.get(name = name)
+        shared_project.expiration_date = expiration
+
+    except:
+
+        shared_project = SharedView(
+            name=name,
+            project_id=pid,
+            description=description,
+            url=shared_url,
+            state=view_state,
+            expiration_date=expiration,
+            created_by=user.username,
+            internal=internal
+        )
+        
     shared_project.save()
+
     return shared_project
+
+def create_shared_view(request):
+    if request.method == 'POST':
+
+        name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+        shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
+        response = {
+            'shared_url': shared_url
+        }
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
 #@login_required(login_url='/gvsigonline/auth/login_user/')
 def save_shared_view(request):
@@ -1372,12 +1396,22 @@ def save_shared_view(request):
         #emails = request.POST.get('emails')
         description = request.POST.get('description')
         view_state = request.POST.get('view_state')
-        expiration_date = datetime.datetime.now() + datetime.timedelta(days = settings.SHARED_VIEW_EXPIRATION_TIME)
-        shared_view = do_save_shared_view(pid, description, view_state, expiration_date, request.user)
+        
+        if request.POST.get('checked') == 'false':
+            expiration_date = datetime.datetime.now() + datetime.timedelta(days = settings.SHARED_VIEW_EXPIRATION_TIME)
+        else:
+            expiration_date = datetime.datetime.max
+        
+        if request.POST.get('shared_url'):
+            shared_url = request.POST.get('shared_url')
+            do_save_shared_view(pid, description, view_state, expiration_date, request.user, False, shared_url)
+        else:
+            shared_view = do_save_shared_view(pid, description, view_state, expiration_date, request.user)
+            shared_url = shared_view.shared_url
         #for email in emails.split(';'):
         #    send_shared_view(email, shared_url)
         response = {
-            'shared_url': shared_view.url
+            'shared_url': shared_url
         }
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
     

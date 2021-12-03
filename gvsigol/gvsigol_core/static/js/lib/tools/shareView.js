@@ -79,7 +79,7 @@ gvsigol.tools.ShareView.prototype.getViewState = function() {
 gvsigol.tools.ShareView.prototype.getSharedViewState = function(description) {
 	var description = description || '';
 	return {
-		'pid': self.conf.pid,
+		'pid': self.data.pid,
 		'description': description,
 		'view_state': JSON.stringify(this.getViewState())
 	};
@@ -88,22 +88,25 @@ gvsigol.tools.ShareView.prototype.getSharedViewState = function(description) {
 /**
  * TODO
  */
-gvsigol.tools.ShareView.prototype.save = function(description) {
+ gvsigol.tools.ShareView.prototype.save = function(description) {
 	var self = this;
 	var viewState = this.getViewState();
+	desc = this.getSharedViewState(description)
+	
 	$.ajax({
 		type: 'POST',
 		async: true,
-	  	url: '/gvsigonline/core/save_shared_view/',
+	  	url: '/gvsigonline/core/create_shared_view/',
 	  	beforeSend : function(xhr) {
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
-	  	data: this.getSharedViewState(description),
+	  	data: desc,
 	  	success	:function(response){
 	  		var ui = '';
 	  		ui += '<div class="row">';
 	  		ui += 	'<div class="col-md-12 form-group">';	
-	  		ui +=   	'<input type="text" class="form-control url-to-copy" value="' + response.shared_url + '"></input>';
+	  		ui +=   	'<input id="url-to-copy" type="text" class="form-control url-to-copy" disabled value="' + response.shared_url + '"></input>';
+			ui +=       '<input type="checkbox" id="no-expiration"> <label for="cbox2">' + gettext('Marque para que la URL no expire') +'</label>';
 	  		ui += 	'</div>';
 	  		ui += '</div>';
 	  		
@@ -111,7 +114,9 @@ gvsigol.tools.ShareView.prototype.save = function(description) {
 	  		$('#float-modal .modal-body').append(ui);
 	  		
 	  		var buttons = '';
-	  		buttons += '<button id="float-modal-accept-shareview" type="button" class="btn btn-default">' + gettext('Copiar URL') + '</button>';
+			
+	  		buttons += '<button id="float-modal-save-shareview" type="button" class="btn btn-default">' + gettext('Guardar URL') + '</button>';
+			buttons += '<button id="float-modal-copy-shareview" type="button" class="btn btn-default" disabled >' + gettext('Copiar URL') + '</button>';
 	  		
 	  		$('#float-modal .modal-footer').empty();
 	  		$('#float-modal .modal-footer').append(buttons);
@@ -119,7 +124,9 @@ gvsigol.tools.ShareView.prototype.save = function(description) {
 	  		$("#float-modal").modal('show');
 	  		
 	  		var self = this;	
-	  		$('#float-modal-accept-shareview').on('click', function () {
+	  		
+			$('#float-modal-copy-shareview').on('click', function () {
+				$('#url-to-copy').prop('disabled', false);
 	  			var urlToCopy = document.querySelector('.url-to-copy');
 	  			urlToCopy.select();
 	  			
@@ -130,7 +137,38 @@ gvsigol.tools.ShareView.prototype.save = function(description) {
 	  			  } catch(err) {
 	  			    console.log('Oops, unable to cut');
 	  			  }
+				
+				$('#url-to-copy').prop('disabled', true);
 	  		});
+
+			$('#float-modal-save-shareview').on('click', function () {
+
+				desc['shared_url'] = response.shared_url
+				
+				if ($("#no-expiration").is(':checked')){
+					desc['checked'] = 'true'
+				}else{
+					desc['checked'] = 'false'
+				}
+
+				$.ajax({
+					type: 'POST',
+					async: true,
+					  url: '/gvsigonline/core/save_shared_view/',
+					  beforeSend : function(xhr) {
+						xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					},
+					  data: desc,
+					  success	:function(response){
+						$('#float-modal-copy-shareview').prop('disabled', false);
+						
+					  },
+					  error: function(){}
+				});
+				
+			})
+
+
 	  	},
 	  	error: function(){}
 	});
