@@ -51,7 +51,7 @@ python-dateutil==2.8.1
 numpy==1.19.1 # latest version supporting Python 3.6
 
 cmislib3==1.0.8
-lxml==4.6.3
+lxml==4.6.5
 
 # Cron para aguas de valencia
 schedule==1.0.0
