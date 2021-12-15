@@ -2618,7 +2618,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<label form="attr" class="col-form-label">'+gettext('Attribute to remove:')+'</label>'+
-                            '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                            '<select class="form-control" size="8" multiple  id="attr-'+ID+'"> </select>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -2678,8 +2678,16 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
 
                 //schema handling depending the parameters chosen
                 //this case we remove an attribute
-                schemaMod =[...schema]
-                schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
+                schemaMod =[...schemaEdge]
+                //schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
+                
+                for (oa = 0; oa < $('#attr-'+ID).val().length; oa++){
+                    
+                    _Attr = $('#attr-'+ID).val()[oa]
+                    
+                    schemaMod.splice(schemaMod.indexOf(_Attr), 1)
+
+                }
                 
                 //updating schema-old and schema parameters in json
                 paramsRemove['schema-old'] = schemaEdge
@@ -2869,11 +2877,11 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
+                            '<div>'+
                                 '<label class="col-form-label">'+gettext('Attribute to rename:')+'</label>'+
-                                '<select class="form-control" id="old-attr-'+ID+'"> </select>'+
+                                '<select class="form-control" size="8" multiple id="old-attr-'+ID+'"> </select>'+
                             '</div>'+
-                            '<div class="column50">'+
+                            '<div>'+
                             '<label class="col-form-label">'+gettext('New name:')+'</label>'+
                                 '<input id="new-attr-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New name')+'">'+
                             '</div>'+
@@ -2918,6 +2926,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
             $('#dialog-rename-attr-'+ID).modal('show')
 
             $('#rename-attr-accept-'+ID).click(function() {
+
                 
                 var paramsRename = {"id": ID,
                 "parameters": [
@@ -2926,8 +2935,17 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
                 ]}
 
                 schemaMod =[...schema]
-                schemaMod.splice($('#old-attr-'+ID).prop('selectedIndex'), 1, $('#new-attr-'+ID).val())
+                
+                for (oa = 0; oa < $('#old-attr-'+ID).val().length; oa++){
+                    
+                    oldAttr = $('#old-attr-'+ID).val()[oa]
 
+                    newAttr = $('#new-attr-'+ID).val().split(" ")[oa]
+                    
+                    schemaMod.splice(schemaMod.indexOf(oldAttr), 1, newAttr)
+
+                }
+                
                 paramsRename['schema-old'] = schemaEdge
                 paramsRename['schema'] = schemaMod
 
@@ -3380,6 +3398,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                     schemas = getOwnSchemas(context.canvas, ID)
                     schema = schemas[0]
                     schemaOld = schemas[1]
+                    console.log(schemaOld)
                 }catch{ 
                     schema=[]
                     schemaOld =[]
@@ -3416,6 +3435,8 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                 schemaMod.push($('#attr-'+ID).val())
                 
                 paramsCounter['schema'] = schemaMod
+                paramsCounter['schema-old'] = schemaEdge
+                
 
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 isAlreadyInCanvas(jsonParams, paramsCounter, ID)
@@ -4435,7 +4456,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<label form="attr" class="col-form-label">'+gettext("Attribute to keep:")+'</label>'+
-                            '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                            '<select class="form-control" size = "8" multiple id="attr-'+ID+'"> </select>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -4484,7 +4505,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                     {"attr": $('#attr-'+ID).val()}
                 ]}
 
-                schemaMod =[$('#attr-'+ID).val()]
+                schemaMod =$('#attr-'+ID).val()
 
                 paramsKeep['schema-old'] = schemaEdge
                 paramsKeep['schema'] = schemaMod

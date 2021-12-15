@@ -142,6 +142,6 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Error'
             statusModel.save()
 
-        print('ERROR: '+ str(e))
+        print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
     
     
