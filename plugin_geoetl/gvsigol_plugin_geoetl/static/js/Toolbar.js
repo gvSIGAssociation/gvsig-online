@@ -299,6 +299,8 @@ gvsigolETL.Toolbar = Class.extend({
 					view.getCommandStack().execute(command);
 					
 					multiIn = 0
+
+					if (parameters){
 					
 					Object.keys(parameters[0]).forEach(function(key){
 						
@@ -338,6 +340,7 @@ gvsigolETL.Toolbar = Class.extend({
 
 						} catch {}
 					})
+				}
 			
 				}else{
 					s = false

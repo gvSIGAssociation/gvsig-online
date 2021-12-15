@@ -17,7 +17,7 @@ from geomet import wkt
 from . import etl_schema
 import requests
 import base64
-from datetime import date
+from datetime import date, datetime
 
 
 # Python class to print topological sorting of a DAG 
@@ -155,7 +155,7 @@ def input_Shp(dicc):
 
 def trans_RemoveAttr(dicc):
 
-    attr = dicc['attr']
+    attrList = dicc['attr']
     table = dicc['data'][0]
     tableWithoutAttr = copy.deepcopy(table)
     
@@ -163,16 +163,17 @@ def trans_RemoveAttr(dicc):
     
     for i in table['features']:
         for j in i['properties']:
-            if j == attr:
-                del tableWithoutAttr['features'][k]['properties'][attr]
-                break
+            for attr in attrList:
+                if j == attr:
+                    del tableWithoutAttr['features'][k]['properties'][attr]
+                    
         k+=1
 
     return [tableWithoutAttr]
 
 def trans_KeepAttr(dicc):
 
-    attr = dicc['attr']
+    attrList = dicc['attr']
     table = dicc['data'][0]
     tableWithAttr = copy.deepcopy(table)
     
@@ -180,29 +181,31 @@ def trans_KeepAttr(dicc):
     
     for i in table['features']:
         for j in i['properties']:
-            if j != attr:
+            if j not in attrList:
                 del tableWithAttr['features'][k]['properties'][j]
                 
         k+=1
-    
+
     return [tableWithAttr]
 
 def trans_RenameAttr(dicc):
 
     oldAttr = dicc['old-attr']
-    newAttr = dicc['new-attr']
+    newAttr = dicc['new-attr'].split(" ")
+
     
     table = dicc['data'][0]
     
-    tableRenamedAttr = dicc['data'][0]
+    tableRenamedAttr = copy.deepcopy(dicc['data'][0])
     
     k=0
     
     for i in table['features']:
         for j in i['properties']:
-            if j == oldAttr:
-                tableRenamedAttr['features'][k]['properties'][newAttr] = tableRenamedAttr['features'][k]['properties'].pop(oldAttr)
-                break
+            for x in range(0, len(oldAttr)):
+                if j == oldAttr[x]:
+                    tableRenamedAttr['features'][k]['properties'][newAttr[x]] = tableRenamedAttr['features'][k]['properties'].pop(oldAttr[x])
+                    
         k+=1
 
     return [tableRenamedAttr]
@@ -214,7 +217,7 @@ def trans_Join(dicc):
 
     table1 = dicc['data'][0]
     table2 = dicc['data'][1]
-    
+
     join = copy.deepcopy(table1)
     join['features'] = []
     
@@ -988,8 +991,9 @@ def input_Oracle(dicc):
         for i in row:
             
             if type(i) == cx_Oracle.LOB:
-
                 attrvalues.append(i.read())
+            elif type(i) == datetime:
+                attrvalues.append(i.__str__())
             else:
                 attrvalues.append(i)
 
@@ -1020,7 +1024,7 @@ def trans_WktGeom(dicc):
                 del tablecopy['features'][k]['properties'][attr]
 
         k+=1
-        
+
     return [tablecopy]
 
     
@@ -1105,12 +1109,6 @@ def trans_Union(dicc):
             for f in layer:
 
                 if k == 1:
-                    try:
-                        geojson = union.ExportToJson()
-                        
-                        fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i-1]}})
-                    except:
-                        pass
                     
                     geom1 = f.GetGeometryRef()
                     poly1 = ogr.CreateGeometryFromWkt(str(geom1))
@@ -1127,9 +1125,12 @@ def trans_Union(dicc):
 
                 k+=1
 
-        geojson = union.ExportToJson()
-
-        fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i]}})
+            try:
+                geojson = union.ExportToJson()
+                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i-1]}})
+            except:
+                geojson = poly1.ExportToJson()
+                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i-1]}})
 
     else:
 
@@ -1152,10 +1153,15 @@ def trans_Union(dicc):
                 union = union.Union(polyx)
 
             k+=1
+        
+        try:
+            geojson = union.ExportToJson()
 
-    geojson = union.ExportToJson()
+            fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson)})
+        except:
+            geojson = poly1.ExportToJson()
 
-    fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson)})
+            fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson)})
 
     return [fc]
 
@@ -1348,7 +1354,7 @@ def trans_RemoveSmallPoly(dicc):
         }
     
     for f in layer:
-        
+
         geom = f.GetGeometryRef()
 
         if geom.GetGeometryName() == 'MULTIPOLYGON':
@@ -1371,20 +1377,21 @@ def trans_RemoveSmallPoly(dicc):
                         
                     else:
                         multipolygon.AddGeometry(p)
-                    k+=1
                     
-            if k==0:
-                geojson = poly.ExportToJson()
-            
-            else:
+                    k+=1
+                
+            try:
                 geojson = multipolygon.ExportToJson()
+                
+            except:
+                geojson = poly.ExportToJson()
         
         else:
             geojson = geom.ExportToJson()
 
         properties = f.ExportToJson(as_object=True)['properties']
         fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':properties})
-
+    
     return[fc]
 
 def trans_FilterGeom(dicc):
