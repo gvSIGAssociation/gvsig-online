@@ -1,5 +1,5 @@
 ## django
-django==2.2.24
+django==2.2.25
 djangoajax==3.2
 httplib2==0.19.1
 geopy==2.1.0
@@ -111,7 +111,7 @@ APScheduler==3.7.0
 suds-community==0.8.4
 
 # plugin_widget
-django_tinymce==3.2.0
+django_tinymce==3.4.0
 
 # plugin geoetl
 pandas==1.1.5
