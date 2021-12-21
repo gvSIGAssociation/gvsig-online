@@ -189,7 +189,8 @@ gvsigolETL.Toolbar = Class.extend({
 		this.deleteButton  = $('<button id="button-remove" class="btn btn-default btn-sm"><i class="fa fa-times margin-r-5"></i>' + gettext('Remove') + '</button>');
 		this.html.append(this.deleteButton);
 		this.deleteButton.click($.proxy(function(){
-			var node = this.view.getPrimarySelection();		
+			var node = this.view.getPrimarySelection();
+			$('div[id*="'+node.id+'"]').remove()
 			var command= new draw2d.command.CommandDelete(node);
 			this.view.getCommandStack().execute(command);
 			this.disableButton(this.deleteButton, true);

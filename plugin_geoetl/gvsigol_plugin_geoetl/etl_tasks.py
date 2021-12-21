@@ -986,6 +986,7 @@ def input_Oracle(dicc):
     else:
         c.execute("SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name'])
 
+    d =0
     for row in c:
         attrvalues = []
         for i in row:
@@ -1000,6 +1001,9 @@ def input_Oracle(dicc):
         dicc = dict(zip(attrnames, attrvalues))
         
         fc['features'].append({'properties': dicc})
+        d+=1
+        if d%10 == 0:
+            print(d)
 
     return[fc]
 
@@ -1106,10 +1110,16 @@ def trans_Union(dicc):
             layer.SetAttributeFilter(groupby + ' = ' + str(listAttr[i]))
             k=1
 
+            unionBool = False
             for f in layer:
-
+                
                 if k == 1:
-                    
+                    if dicc['keep-attr'] == "true":
+                        properties = f.ExportToJson(as_object=True)['properties']
+                        
+                    else:
+                        properties = {groupby: listAttr[i]}
+
                     geom1 = f.GetGeometryRef()
                     poly1 = ogr.CreateGeometryFromWkt(str(geom1))
                     
@@ -1117,6 +1127,7 @@ def trans_Union(dicc):
                     geom2 = f.GetGeometryRef()
                     poly2 = ogr.CreateGeometryFromWkt(str(geom2))
                     union = poly1.Union(poly2)
+                    unionBool = True
                     
                 else:
                     geomx = f.GetGeometryRef()
@@ -1125,12 +1136,14 @@ def trans_Union(dicc):
 
                 k+=1
 
-            try:
+            if unionBool:
+                
                 geojson = union.ExportToJson()
-                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i-1]}})
-            except:
+                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties': properties})
+                
+            else:
                 geojson = poly1.ExportToJson()
-                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':{groupby: listAttr[i-1]}})
+                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties': properties})
 
     else:
 
@@ -1360,6 +1373,7 @@ def trans_RemoveSmallPoly(dicc):
         if geom.GetGeometryName() == 'MULTIPOLYGON':
             
             k=0
+            is_multi = False
             for p in geom:
                 
                 area = p.GetArea()
@@ -1374,23 +1388,28 @@ def trans_RemoveSmallPoly(dicc):
                         multipolygon = ogr.Geometry(ogr.wkbMultiPolygon)
                         multipolygon.AddGeometry(geom_poly)
                         multipolygon.AddGeometry(p)
+                        is_multi = True
                         
                     else:
                         multipolygon.AddGeometry(p)
                     
                     k+=1
-                
-            try:
+            
+            if is_multi:
                 geojson = multipolygon.ExportToJson()
+                properties = f.ExportToJson(as_object=True)['properties']
+                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':properties})
                 
-            except:
+            elif not is_multi and k !=0:
                 geojson = poly.ExportToJson()
+                properties = f.ExportToJson(as_object=True)['properties']
+                fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':properties})
         
         else:
             geojson = geom.ExportToJson()
 
-        properties = f.ExportToJson(as_object=True)['properties']
-        fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':properties})
+            properties = f.ExportToJson(as_object=True)['properties']
+            fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':properties})
     
     return[fc]
 
@@ -1490,3 +1509,54 @@ def trans_FilterGeom(dicc):
             multipolygons['features'].append(i)
 
     return [points, multipoints, lines, multilines, polygons, multipolygons]
+
+def trans_CalcArea(dicc):
+    
+    table = dicc['data'][0]
+    attr = dicc['attr']
+    
+    dataSet = ogr.Open(json.dumps(table))
+        
+    layer = dataSet.GetLayer()
+
+    fc = { 
+        "type" : "FeatureCollection", 
+        "crs" : 
+            {
+                "type" : "name", 
+                "properties" : 
+                    {
+                    "name" : table['crs']['properties']['name']
+                    }
+            },
+        "features": []
+        }
+
+    for f in layer:
+
+        geom = f.GetGeometryRef()
+                
+        area = geom.GetArea()
+
+        geojson = geom.ExportToJson()
+
+        properties = f.ExportToJson(as_object=True)['properties']
+        properties[attr] = area
+
+        fc['features'].append({'type': 'Feature', 'geometry': json.loads(geojson), 'properties':properties})
+
+    return[fc]
+
+def trans_CurrentDate(dicc):
+    
+    table = dicc['data'][0]
+    attr = dicc['attr']
+    format = dicc['format']
+
+    today = date.today()
+    date_f = today.strftime(format)
+
+    for i in table['features']:
+        i['properties'][attr] = date_f
+    
+    return [table]
