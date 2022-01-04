@@ -31,6 +31,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSch
 
 from gvsigol import settings as core_settings
 from gvsigol_core import utils as core_utils
+from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
 from .models import ETLworkspaces, ETLstatus
@@ -40,7 +41,7 @@ from . import etl_tasks
 from . import etl_schema
 from .tasks import run_canvas_background
 
-
+import psycopg2
 from datetime import datetime
 import numpy as np
 import json
@@ -54,12 +55,41 @@ def get_conf(request):
         }       
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
+def create_schema(connection_params):
+
+    user = connection_params.get('user')
+    schema = connection_params.get('schema')
+
+    connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
+    cursor = connection.cursor()
+
+    try:
+        create_schema = "CREATE SCHEMA IF NOT EXISTS " + schema + " AUTHORIZATION " + user + ";"
+        cursor.execute(create_schema)
+
+    except Exception as e:
+        print("SQL Error", e)
+        if e.pgcode == '42710':
+            return True
+        else:
+            return False
+
+    connection.commit()
+    connection.close()
+    cursor.close()
+    return True
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def etl_canvas(request):
+    
+    #from gvsigol.celery import app as celery_app
+    #celery_app.control.purge()
 
     srs = core_utils.get_supported_crs_array()
     srs_string = json.dumps(srs)
+
+    create_schema(settings.GEOETL_DB)
 
     try:
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
@@ -659,8 +689,7 @@ def etl_schema_indenova(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            jsParams = json.loads(request.POST['jsonParamsIndenova'])
-
+            #jsParams = json.loads(request.POST['jsonParamsIndenova'])
             #listSchema = etl_schema.get_schema_indenova(jsParams['parameters'][0])
             listSchema = ['idexp', 'numexp', 'issue', 'idtram', 'nametram', 'initdate', 'status', 'regnumber', 'regdate', 'adirefcatt', 'identifier', 'name', 'town', 'city', 'postalcode', 'country', 'enddate']
 

@@ -140,7 +140,7 @@ def get_schema_oracle(dicc):
 
     attrnames =[]
     for attr in c:
-        attrnames.append(attr[0])
+        attrnames.append(attr[0].lower())
 
     """if dicc['check'] == True:
         try:
@@ -259,12 +259,14 @@ def get_schema_postgres(dicc):
     conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
     cur = conn.cursor()
 
-    sql ="SELECT column_name FROM information_schema.columns WHERE table_schema = '"+schema+"' AND table_name   = '"+table_name+"';"
+    sql ="SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '"+schema+"' AND table_name   = '"+table_name+"';"
 
     cur.execute(sql)
     listSchema = []
     for col in cur:
-        if col[0] != "wkb_geometry":
+        if col[1] == 'USER-DEFINED' or col[1] == 'geometry':
+            pass
+        else:
             listSchema.append(col[0])
 
     conn.commit()

@@ -3,11 +3,11 @@ from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 
 from .models import ETLstatus
+from . import settings
 
 from . import etl_tasks
 
-import json
-
+import psycopg2
 
 
 @celery_app.task
@@ -60,6 +60,7 @@ def run_canvas_background(**kwargs):
                     #get parameters for the task
                     try:
                         parameters = n[1]['entities'][0]['parameters'][0]
+                        parameters['id'] = n[1]['id']
                         
                     except:
                         parameters = {}
@@ -104,17 +105,15 @@ def run_canvas_background(**kwargs):
                                         
                                         #if more than one edge have the end in the same port
                                         if targetPortRepeated == True:
-
-                                            fc = parameters['data'][-2]
                                             
-                                            for f in parameters['data'][-1]['features']:
-                                                fc['features'].append(f)
+                                            result = etl_tasks.merge_tables(parameters['data'])
 
-                                            del parameters['data'][-1]
+                                            parameters['data'] = result
                                         
                                         targetPortRepeated = True      
 
                         method_to_call = getattr(etl_tasks, n[1]['type'])
+                        parameters['id'] = n[1]['id']
                         result = method_to_call(parameters)
                         
                         if not n[1]['type'].startswith('output'):
@@ -129,6 +128,8 @@ def run_canvas_background(**kwargs):
             statusModel.message ='Process has been executed successfully'
             statusModel.status = 'Success'
             statusModel.save()
+
+        delete_tables(nodes)
     
     except Exception as e:
         if id_ws:
@@ -141,7 +142,36 @@ def run_canvas_background(**kwargs):
             statusModel.message = str(e)[:250]
             statusModel.status = 'Error'
             statusModel.save()
+        
+        delete_tables(nodes)
 
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
     
-    
+def delete_tables(nodes):
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    tables = []
+    for n in nodes:
+        if n[1]['type'].startswith('input'):
+            for table_name in n[-1]:
+                if table_name not in tables:
+                    tables.append(table_name)
+        
+        else:
+            for table_name in n[-1]:
+                if table_name not in tables:
+                    tables.append(table_name)
+
+            for table_name in n[1]['entities'][0]['parameters'][0]['data']:
+                if table_name not in tables:
+                    tables.append(table_name)
+
+    string_tables = ('", '+settings.GEOETL_DB["schema"]+ '."').join(tables)
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+ '."'+string_tables+'" '
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    conn.close()
+    cur.close()
