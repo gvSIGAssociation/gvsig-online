@@ -50,6 +50,8 @@ def run_canvas_background(**kwargs):
         g.addEdge(source, target)
 
     sortedList = g.topologicalSort()
+
+    tables_list_name =[]
     
     try:
         #going down the sorted list of tasks and executing them
@@ -61,6 +63,7 @@ def run_canvas_background(**kwargs):
                     try:
                         parameters = n[1]['entities'][0]['parameters'][0]
                         parameters['id'] = n[1]['id']
+                        tables_list_name.append(n[1]['id'])
                         
                     except:
                         parameters = {}
@@ -71,6 +74,7 @@ def run_canvas_background(**kwargs):
                         method_to_call = getattr(etl_tasks, n[1]['type'])
                         result = method_to_call(parameters)
                         n.append(result)
+                        tables_list_name.append(result)
                     
                     #execute trasnformers or outputs tasks    
                     else:
@@ -107,14 +111,16 @@ def run_canvas_background(**kwargs):
                                         if targetPortRepeated == True:
                                             
                                             result = etl_tasks.merge_tables(parameters['data'])
-
                                             parameters['data'] = result
+                                            print(result)
+                                            tables_list_name.append(result)
                                         
                                         targetPortRepeated = True      
 
                         method_to_call = getattr(etl_tasks, n[1]['type'])
                         parameters['id'] = n[1]['id']
                         result = method_to_call(parameters)
+                        tables_list_name.append(result)
                         
                         if not n[1]['type'].startswith('output'):
                             n.append(result)
@@ -128,8 +134,8 @@ def run_canvas_background(**kwargs):
             statusModel.message ='Process has been executed successfully'
             statusModel.status = 'Success'
             statusModel.save()
-
-        delete_tables(nodes)
+        
+        delete_tables(tables_list_name)
     
     except Exception as e:
         if id_ws:
@@ -143,7 +149,7 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Error'
             statusModel.save()
         
-        delete_tables(nodes)
+        delete_tables(tables_list_name)
 
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
     
@@ -153,19 +159,13 @@ def delete_tables(nodes):
 
     tables = []
     for n in nodes:
-        if n[1]['type'].startswith('input'):
-            for table_name in n[-1]:
-                if table_name not in tables:
-                    tables.append(table_name)
-        
+        if isinstance(n, list):
+            for t in n:
+                if t not in tables and t != None:
+                    tables.append(t)
         else:
-            for table_name in n[-1]:
-                if table_name not in tables:
-                    tables.append(table_name)
-
-            for table_name in n[1]['entities'][0]['parameters'][0]['data']:
-                if table_name not in tables:
-                    tables.append(table_name)
+            if n not in tables and n != None:
+                tables.append(n)
 
     string_tables = ('", '+settings.GEOETL_DB["schema"]+ '."').join(tables)
 
