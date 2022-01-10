@@ -7658,13 +7658,12 @@ trans_ExplodeGeom = draw2d.shape.layout.VerticalLayout.extend({
 
             },100);
             
-            var paramsExplodGeom = {"id": ID,
-            "parameters": [ ]}
+            var paramsExplodGeom = {"id": ID}
             
-            paramsExplodGeom['schema'] = schema
+            paramsExplodGeom['schema'] = schemaEdge
             paramsExplodGeom['schema-old'] = schemaEdge
 
-            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+            passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsExplodGeom, ID)
 
             icon.setColor('#4682B4')
