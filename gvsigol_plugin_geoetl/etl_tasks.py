@@ -867,6 +867,10 @@ def trans_WktGeom(dicc):
         cur.execute(sqlDup)
         conn.commit()
 
+    sqlRemov = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN "'+ attr + '"'
+    cur.execute(sqlRemov)
+    conn.commit()
+
     return [table_name_target]
 
     
@@ -1394,7 +1398,7 @@ def drop_geom_column(table_name,  srid=0, type_geom = ''):
     cur.execute(sqlDrop2)
     conn.commit()
 
-    sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
+    sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  ADD COLUMN wkb_geometry geometry(Geometry, '+str(srid)+')'
     cur.execute(sqlAlter2)
     conn.commit()
 
