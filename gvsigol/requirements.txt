@@ -103,7 +103,7 @@ celery==4.3.0
 # harcode indirect celery requirements
 kombu==4.5.0
 zipp==0.6.0
-uritemplate=3.0.1
+uritemplate==3.0.1
 
 django-celery-beat==1.6.0
 
