@@ -301,8 +301,8 @@ gvsigolETL.Toolbar = Class.extend({
 					
 					multiIn = 0
 
-					if (parameters){
-					
+					if (parameters && parameters.length != 0){
+
 					Object.keys(parameters[0]).forEach(function(key){
 						
 						try{
