@@ -6,22 +6,19 @@ from . import settings
 import pandas as pd
 import psycopg2
 import json
-import math
-import numpy as np
 from collections import defaultdict
-from osgeo import ogr, osr
-import copy
-from dateutil.parser import parse
+#from dateutil.parser import parse
 import mgrs
 import gdaltools
-import tempfile
-import cx_Oracle
-from geomet import wkt
+
+#import cx_Oracle
+#from geomet import wkt
 from . import etl_schema
 import requests
 import base64
 from datetime import date, datetime
 from sqlalchemy import create_engine
+from django.contrib.gis.gdal import DataSource
 
 
 # Python class to print topological sorting of a DAG 
@@ -93,16 +90,15 @@ def input_Shp(dicc):
 
     shp = dicc['shp-file'][7:]
   
-    driver = ogr.GetDriverByName('ESRI Shapefile')
-    dataSource = driver.Open(shp, 0)
+    dataSource = DataSource(shp)
             
-    layer = dataSource.GetLayer()
+    layer = dataSource[0]
 
     epsg = str(dicc['epsg'])
     
     if epsg == '':
         try:
-            epsg = layer.GetSpatialRef().GetAuthorityCode(None)
+            epsg = layer.srs['AUTHORITY', 1]
         except:
             pass
     
@@ -820,12 +816,6 @@ def trans_TextToPoint(dicc):
     return[table]
 
 def input_Oracle(dicc):
-    
-    conn = cx_Oracle.connect(
-        dicc['username'],
-        dicc['password'],
-        dicc['dsn']
-    )
 
     conn_string_source = 'oracle+cx_oracle://'+dicc['username']+':'+dicc['password']+'@'+dicc['dsn'].split('/')[0]+'/?service_name='+dicc['dsn'].split('/')[1]
     db_source = create_engine(conn_string_source)
@@ -833,15 +823,53 @@ def input_Oracle(dicc):
     
     if dicc['checkbox'] == "true":
         sql = dicc['sql']
-        df = pd.read_sql(sql, con = conn_source)
+        idx = sql.index('SELECT')+len('SELECT')
+        sql = 'SELECT * FROM ( ' + sql[:idx] + ' rownum AS rwn, ' + sql[idx:] + ')'
     else:
-        df = pd.read_sql("SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name'], con = conn_source)
-
-    conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
-    db_target = create_engine(conn_string_target)
-    conn_target = db_target.connect()
+        sql = "SELECT * FROM ( SELECT rownum AS rwn, * FROM "+dicc['owner-name']+"."+dicc['table-name'] + ')'
+    
+    init = 1
+    end = 1000
     table_name = dicc['id']
-    df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+
+    while True:
+
+        print(init)
+    
+        df = pd.read_sql(sql + 'WHERE rwn >= '+str(init)+' AND rwn <= '+ str(end), con = conn_source)
+
+        conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+        db_target = create_engine(conn_string_target)
+        conn_target = db_target.connect()
+
+        if init == 1:
+            df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        else:
+            df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+        
+        if df.shape[0] != 1000:
+
+            break
+        else:
+
+            init += 1000
+            end += 1000
+
+    conn_source.close()
+    db_source.dispose()
+
+    conn_target.close()
+    db_target.dispose()
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlRemov = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name+'" DROP COLUMN rwn'
+    cur.execute(sqlRemov)
+    conn.commit()
+
+    conn.close()
+    cur.close()
 
     return [table_name]
 
@@ -870,6 +898,9 @@ def trans_WktGeom(dicc):
     sqlRemov = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN "'+ attr + '"'
     cur.execute(sqlRemov)
     conn.commit()
+
+    conn.close()
+    cur.close()
 
     return [table_name_target]
 
@@ -1074,6 +1105,11 @@ def input_Indenova(dicc):
 
 def input_Postgres(dicc, geom_column_name = ''):
 
+    order_attr = etl_schema.get_schema_postgres(dicc)[0]
+    table_name = dicc['id']
+
+    offset = 0
+
     conn_string_source = 'postgresql://'+dicc['user']+':'+dicc['password']+'@'+dicc['host']+':'+dicc['port']+'/'+dicc['database']
 
     schemaTable = dicc['tablename'].lower()
@@ -1081,18 +1117,28 @@ def input_Postgres(dicc, geom_column_name = ''):
     conn_source = db_source.connect()
 
     if geom_column_name == '':
-        df = pd.read_sql("SELECT * FROM " + schemaTable, con = conn_source)
+        sql = "SELECT * FROM " + schemaTable 
     else:
-        df = pd.read_sql("SELECT *, ST_ASTEXT ("+geom_column_name+") AS _st_astext_temp FROM " + schemaTable, con = conn_source)
+        sql = "SELECT *, ST_ASTEXT ("+geom_column_name+") AS _st_astext_temp FROM " + schemaTable
 
-    table_name = dicc['id']
+    while True:
 
-    conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+'/'+settings.GEOETL_DB['database']
-  
-    db_target = create_engine(conn_string_target)
-    conn_target = db_target.connect()
+        df = pd.read_sql(sql +' ORDER BY "'+order_attr+'" LIMIT 1000 OFFSET '+ str(offset), con = conn_source)
 
-    df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+'/'+settings.GEOETL_DB['database']
+    
+        db_target = create_engine(conn_string_target)
+        conn_target = db_target.connect()
+
+        if offset == 0:
+            df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        else:
+            df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+
+        if df.shape[0] != 1000:
+            break
+        else:
+            offset+=1000
 
     return [table_name]
 
