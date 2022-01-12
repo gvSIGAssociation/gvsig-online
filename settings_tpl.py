@@ -515,3 +515,12 @@ DOCS = {
 }
 
 CHECK_TILELOAD_ERROR = ##CHECK_TILELOAD_ERROR##
+
+GEOETL_DB = {
+    'host': '##DB_HOST##',
+    'port': '##DB_PORT##',
+    'database': '##DB_NAME##',
+    'user': '##DB_USER##',
+    'password': '##DB_PASSWD##',
+    'schema': 'ds_plugin_geoetl'
+}
