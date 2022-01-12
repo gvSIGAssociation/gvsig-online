@@ -422,7 +422,7 @@ def user_add(request):
                     #User backend 
                     if is_superuser or is_staff:
                         try:
-                            ug = UserGroup.objects.get(name=_get_user_group_name(user.username))
+                            ugroup = UserGroup.objects.get(name=_get_user_group_name(user.username))
                         except:
                             ugroup = UserGroup(
                                 name = _get_user_group_name(form.data['username']),
