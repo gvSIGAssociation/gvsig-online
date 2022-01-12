@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-import tempfile
-import shutil
-from osgeo import ogr, osr
 import psycopg2
 import cx_Oracle
-import base64
+#import base64
 import requests
 import json
-from datetime import date
+#from datetime import date
+from django.contrib.gis.gdal import DataSource
 
 def get_sheets_excel(excel):
     
@@ -25,15 +23,11 @@ def get_schema_shape(file):
 
     shp = file[7:]
 
-    driver = ogr.GetDriverByName('ESRI Shapefile')
-    dataSource = driver.Open(shp, 0)
+    dataSource = DataSource(shp)
             
-    layer = dataSource.GetLayer()
-    schema = []
-    ldefn = layer.GetLayerDefn()
-    for n in range(ldefn.GetFieldCount()):
-        fdefn = ldefn.GetFieldDefn(n)
-        schema.append(fdefn.name)
+    layer = dataSource[0]
+
+    schema = [x.lower() for x in layer.fields] 
 
     return schema
 
