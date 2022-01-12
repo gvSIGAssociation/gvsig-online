@@ -143,6 +143,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
+    'django_extensions',
     'rest_framework',
 
     ############# CORE ################
@@ -154,20 +155,25 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    'gvsigol_app_dev',
+    #'gvsigol_app_dev',
+    #'gvsigol_app_ideuy',
+    #'gvsigol_app_librapicassa',
+    #'gvsigol_app_tocantins',
 
     ############# PLUGINS ################
+    #'gvsigol_plugin_alfresco',
     'gvsigol_plugin_catalog',
     'gvsigol_plugin_catastro',
     #'gvsigol_plugin_catastrouy',
     'gvsigol_plugin_charts',
-    'gvsigol_plugin_downloadman',
+    #'gvsigol_plugin_downloadman',
     'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
-    'gvsigol_plugin_elevation',
+    #'gvsigol_plugin_elevation',
     #'gvsigol_plugin_emergencies',
     'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_geoetl',
+    'gvsigol_plugin_geoetl',
+    #-#'gvsigol_plugin_shps_folder',
     'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
@@ -175,6 +181,12 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
+    #'gvsigol_plugin_streetview',
+    #'gvsigol_plugin_sync',
+    'gvsigol_plugin_trip_planner',
+    #'gvsigol_plugin_turiscan',
+    #'gvsigol_plugin_worldwind',
+    #'gvsigol_plugin_mobileproject',
     'actstream',
     #### DEPENDENCIES ######,
     'django_celery_beat'
@@ -411,11 +423,11 @@ MOSAIC_DB = {
     'schema': 'imagemosaic',
     'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-},
+}
 
-GDALTOOLS_BASEPATH = '/usr/bin'
+#GDALTOOLS_BASEPATH = '/usr/bin'
 #GDALTOOLS_BASEPATH = '/usr/local/bin'
-OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
+#OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 18 
@@ -663,3 +675,17 @@ DOCS = {
 
 CHECK_TILELOAD_ERROR = False
 
+GRAPH_MODELS = {
+    'all_applications': False,
+    'group_models': True,
+    'app_labels': ['gvsigol_app_tocantins','gvsigol_plugin_print','gvsigol_plugin_edition','gvsigol_plugin_catalog','gvsigol_plugin_importvector','gvsigol_plugin_importfromservice','gvsigol_plugin_draw','gvsigol_plugin_geocoding','gvsigol_plugin_charts']
+    }
+
+GEOETL_DB = {
+    'host': 'localhost',
+    'port': '5432',
+    'database': 'gvsigonline_v3',
+    'user': 'postgres',
+    'password': 'postgres',
+    'schema': 'ds_plugin_geoetl'
+}
