@@ -29,14 +29,14 @@ from django.core import serializers
 from django.utils.translation import ugettext as _
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 
-from gvsigol import settings as core_settings
+from gvsigol import settings
 from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
 from .models import ETLworkspaces, ETLstatus
 from django.contrib.auth.models import User
-from . import settings
+from . import settings as settings_geoetl
 from . import etl_tasks
 from . import etl_schema
 from .tasks import run_canvas_background
@@ -51,7 +51,7 @@ import os
 def get_conf(request):
     if request.method == 'POST': 
         response = {
-            'etl_url': settings.ETL_URL
+            'etl_url': settings_geoetl.ETL_URL
         }       
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
@@ -117,7 +117,7 @@ def etl_canvas(request):
             'name': instance.name,
             'description': instance.description,
             'workspace': json.dumps(instance.workspace),
-            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
+            'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
             'srs': srs_string
         }
 
@@ -148,7 +148,7 @@ def etl_canvas(request):
     
     except:
         response = {
-            'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
+            'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
             'srs': srs
         }
         return render(request, 'etl.html', response)
@@ -205,7 +205,7 @@ def etl_workspace_list(request):
 
     response = {
         'workspaces': get_list(username),
-        'fm_directory': core_settings.FILEMANAGER_DIRECTORY + "/",
+        'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
     }
 
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
@@ -717,7 +717,7 @@ def etl_workspace_download(request):
 
     folder = "etl_workspaces"
 
-    folder_path = os.path.join(core_settings.FILEMANAGER_DIRECTORY, folder)
+    folder_path = os.path.join(settings.FILEMANAGER_DIRECTORY, folder)
 
     try:
         os.mkdir(folder_path)

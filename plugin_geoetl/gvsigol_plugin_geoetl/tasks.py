@@ -3,7 +3,7 @@ from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 
 from .models import ETLstatus
-from . import settings
+from gvsigol import settings
 
 from . import etl_tasks
 
