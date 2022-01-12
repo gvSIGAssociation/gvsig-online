@@ -101,6 +101,8 @@ def get_schema_oracle(dicc):
         dicc['password'],
         dicc['dsn']
     )
+
+    
     c = conn.cursor()
 
     if dicc['checkbox'] == "true":

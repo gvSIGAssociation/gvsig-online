@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from itertools import count
-from . import settings
+from gvsigol import settings
 
 import pandas as pd
 import psycopg2
@@ -11,7 +11,7 @@ from collections import defaultdict
 import mgrs
 import gdaltools
 
-#import cx_Oracle
+import cx_Oracle
 #from geomet import wkt
 from . import etl_schema
 import requests
@@ -817,59 +817,70 @@ def trans_TextToPoint(dicc):
 
 def input_Oracle(dicc):
 
+    table_name = dicc['id']
+
     conn_string_source = 'oracle+cx_oracle://'+dicc['username']+':'+dicc['password']+'@'+dicc['dsn'].split('/')[0]+'/?service_name='+dicc['dsn'].split('/')[1]
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
     
     if dicc['checkbox'] == "true":
         sql = dicc['sql']
-        idx = sql.index('SELECT')+len('SELECT')
-        sql = 'SELECT * FROM ( ' + sql[:idx] + ' rownum AS rwn, ' + sql[idx:] + ')'
     else:
-        sql = "SELECT * FROM ( SELECT rownum AS rwn, * FROM "+dicc['owner-name']+"."+dicc['table-name'] + ')'
+        sql = "SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name']
     
-    init = 1
-    end = 1000
-    table_name = dicc['id']
+    df = pd.read_sql(sql + " WHERE rownum = 1" , con = conn_source)
 
-    while True:
+    conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    db_target = create_engine(conn_string_target)
+    conn_target = db_target.connect()
 
-        print(init)
+    df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
     
-        df = pd.read_sql(sql + 'WHERE rwn >= '+str(init)+' AND rwn <= '+ str(end), con = conn_source)
-
-        conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
-        db_target = create_engine(conn_string_target)
-        conn_target = db_target.connect()
-
-        if init == 1:
-            df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
-        else:
-            df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
-        
-        if df.shape[0] != 1000:
-
-            break
-        else:
-
-            init += 1000
-            end += 1000
-
     conn_source.close()
     db_source.dispose()
 
     conn_target.close()
     db_target.dispose()
+    
+    conn_ORA = cx_Oracle.connect(
+        dicc['username'],
+        dicc['password'],
+        dicc['dsn']
+    )
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
-    cur = conn.cursor()
+    c_ORA = conn_ORA.cursor()
+    c_ORA.execute(sql)
 
-    sqlRemov = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name+'" DROP COLUMN rwn'
-    cur.execute(sqlRemov)
-    conn.commit()
+    conn_PG = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur_PG = conn_PG.cursor()
 
-    conn.close()
-    cur.close()
+    sqlTruncate = 'TRUNCATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name+'"'
+    cur_PG.execute(sqlTruncate)
+    conn_PG.commit()
+
+    count = 1
+    for row in c_ORA:
+        sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name+'" VALUES ('
+        for i in row:
+            if type(i) == cx_Oracle.LOB:
+                sqlInsert += "'"+i.read()+"'"
+            elif type(i) == datetime:
+                sqlInsert += "'"+i.__str__()+"'"
+            elif i == None:
+                sqlInsert += 'NULL'
+            else:
+                sqlInsert += "'"+ str(i)+"'"
+            sqlInsert += ', '
+        sqlInsert = sqlInsert[:-2]+')'
+        count+=1
+        cur_PG.execute(sqlInsert)
+        conn_PG.commit()
+        
+        if count%100 == 0:
+            print(count)
+
+    conn_PG.close()
+    cur_PG.close()
 
     return [table_name]
 
