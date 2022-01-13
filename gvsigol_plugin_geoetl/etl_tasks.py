@@ -1136,7 +1136,7 @@ def input_Postgres(dicc, geom_column_name = ''):
 
         df = pd.read_sql(sql +' ORDER BY "'+order_attr+'" LIMIT 1000 OFFSET '+ str(offset), con = conn_source)
 
-        conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+'/'+settings.GEOETL_DB['database']
+        conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
     
         db_target = create_engine(conn_string_target)
         conn_target = db_target.connect()
@@ -1150,6 +1150,12 @@ def input_Postgres(dicc, geom_column_name = ''):
             break
         else:
             offset+=1000
+    
+    conn_source.close()
+    db_source.dispose()
+
+    conn_target.close()
+    db_target.dispose()
 
     return [table_name]
 
