@@ -443,6 +443,10 @@
 				openWorkspace(data);  
 			}
 
+			else if (this.name == "button-download-workspace-etl"){
+				location.href = '/gvsigonline/etl/etl_workspace_download/?lgid=' + data[0]
+			}
+
 		});
 			
 		function openWorkspace(data){	
