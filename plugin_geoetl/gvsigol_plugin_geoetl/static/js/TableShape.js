@@ -3446,7 +3446,7 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="column20">'+
                             '<label class="col-form-label">'+gettext('Separator (opt.):')+'</label>'+
-                                '<input id="sep-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Separator')+'">'+
+                                '<input id="separator-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Separator')+'">'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -3495,7 +3495,7 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
                 "parameters": [
                     {"attr": $('#attr-'+ID).val(),
                     "new-attr": $('#new-attr-'+ID).val(),
-                    "separator": $('#sep-'+ID).val() }
+                    "separator": $('#separator-'+ID).val() }
                 ]}
 
                 schemaMod =[...schemaEdge]
