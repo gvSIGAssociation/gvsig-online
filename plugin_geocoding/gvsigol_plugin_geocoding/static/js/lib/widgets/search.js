@@ -405,6 +405,11 @@ search.prototype.initUI = function() {
 				success	:function(response){
 					if (response.address) {
 						window.lastgeolocationsearch = response;
+						
+						if(window.geocoding_event != null) {
+							window.geocoding_event.dispatchEvent(new Event('onnewcandidate'));
+						}
+
 						if (Array.isArray(response.address)) {
 							var epsg = 'EPSG:4326'; // Por defecto
 							if (response.address.srs) { 
