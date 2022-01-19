@@ -49,7 +49,8 @@ def test_postgres(dicc):
         conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
         conn.close()
         return {"result": True}
-    except:
+    except Exception as e:
+        print ('Connection postgres: ' + e)
         return {"result": False}
 
 def get_schema_csv(dicc):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from itertools import count
+from xml.dom.minidom import Attr
 from gvsigol import settings
 
 import pandas as pd
@@ -10,6 +11,7 @@ from collections import defaultdict
 #from dateutil.parser import parse
 import mgrs
 import gdaltools
+import os
 
 import cx_Oracle
 #from geomet import wkt
@@ -539,12 +541,18 @@ def output_Postgis(dicc):
         srid = row[0]
         break
 
-    sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+    sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
     cur.execute(sqlTypeGeom)
     con_source.commit()
+    type_geom = ''
     for row in cur:
-        type_geom = row[0].split('(')[0]
-        break
+        if type_geom == '':
+            type_geom = row[0]
+        elif type_geom != row[0]:
+            type_geom = 'GEOMETRY'
+            break
+        else:
+            pass
 
     if dicc['operation'] == 'CREATE':
 
@@ -677,16 +685,30 @@ def trans_Counter(dicc):
 
 def trans_Calculator(dicc):
 
-    table = dicc['data'][0]
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
     attr = dicc['attr']
     expression= dicc['expression']
 
-    exp = expression.replace("[", "i['properties'][")
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
 
-    for i in table['features']:
-        i['properties'][attr] = eval(exp)
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
 
-    return [table]
+    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET "'+ attr + '" = ' + expression
+    cur.execute(sqlInsert)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
 
 def trans_CadastralGeom(dicc):
     from gvsigol_plugin_catastro.views import get_rc_polygon
@@ -862,6 +884,7 @@ def input_Oracle(dicc):
     for row in c_ORA:
         sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name+'" VALUES ('
         for i in row:
+            i = i.replace("'","''")
             if type(i) == cx_Oracle.LOB:
                 sqlInsert += "'"+i.read()+"'"
             elif type(i) == datetime:
@@ -875,9 +898,6 @@ def input_Oracle(dicc):
         count+=1
         cur_PG.execute(sqlInsert)
         conn_PG.commit()
-        
-        if count%100 == 0:
-            print(count)
 
     conn_PG.close()
     cur_PG.close()
@@ -1098,9 +1118,8 @@ def input_Indenova(dicc):
                             exp_copy[attr] =''
                         elif attr not in list_keys_low and attr == 'adirefcatt':
                             exp_copy[attr] ='00000000000000000000'
-                    
-                    if domain == 'https://devempleadopublico.alzira.es/PortalFuncionario':
-                        exp_copy['url'] = "https://devempleadopublico.alzira.es/PortalFuncionario/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
+                                      
+                    exp_copy['url'] = os.path.join(domain, "/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"]))
                         
                     exp_copy_low = {x.lower(): v for x, v in exp_copy.items()}
 
@@ -1200,12 +1219,18 @@ def input_Postgis(dicc):
         srid = row[0]
         break
 
-    sqlTypeGeom = 'SELECT ST_ASTEXT ('+geom_column_name+') FROM '+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL LIMIT 1'
+    sqlTypeGeom = "SELECT split_part (ST_ASTEXT ("+geom_column_name+"), '(', 1) FROM "+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL GROUP BY split_part'
     cur.execute(sqlTypeGeom)
     con_source.commit()
+    type_geom = ''
     for row in cur:
-        type_geom = row[0].split('(')[0]
-        break
+        if type_geom == '':
+            type_geom = row[0]
+        elif type_geom != row[0]:
+            type_geom = 'GEOMETRY'
+            break
+        else:
+            pass
 
     con_source.close()
     cur.close()
@@ -1225,6 +1250,7 @@ def input_Postgis(dicc):
     con_target.commit()
 
     sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
+
     cur2.execute(sqlAlter2)
     con_target.commit()
 
@@ -1433,12 +1459,19 @@ def get_type_n_srid(table_name):
     cur.execute(sqlUpdate)
     conn.commit()"""
 
-    sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+settings.GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+    #sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+settings.GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+    sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+settings.GEOETL_DB["schema"]+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
     cur.execute(sqlTypeGeom)
     conn.commit()
+    type_geom = ''
     for row in cur:
-        type_geom = row[0].split('(')[0]
-        break
+        if type_geom == '':
+            type_geom = row[0]
+        elif type_geom != row[0]:
+            type_geom = 'GEOMETRY'
+            break
+        else:
+            pass
 
     sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+settings.GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
     cur.execute(sqlSrid)
@@ -1461,7 +1494,7 @@ def drop_geom_column(table_name,  srid=0, type_geom = ''):
     cur.execute(sqlDrop2)
     conn.commit()
 
-    sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  ADD COLUMN wkb_geometry geometry(Geometry, '+str(srid)+')'
+    sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
     cur.execute(sqlAlter2)
     conn.commit()
 
@@ -1549,6 +1582,59 @@ def trans_ConcatAttr(dicc):
 
     sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, concat_ws('+"'"+separator+"', "+attrs+') as "'+new_attr+'" from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
     cur.execute(sqlDup)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+def trans_Intersection(dicc):
+
+    table_name_source_0 = dicc['data'][0]
+    table_name_source_1 = dicc['data'][1]
+
+    table_name_target = dicc['id']
+
+    merge = dicc['merge']
+
+    schemas = dicc['schema']
+
+    if merge == 'true':
+    
+        for name in schemas[0]:
+            if name in schemas[1]:
+                schemas[1].remove(name)
+        if len(schemas[0]) != 0:
+            schema_0 = 'A0."' + '", A0."'.join(schemas[0]) + '"'
+        else:
+            schema_0 = ""
+
+        if len(schemas[1]) != 0:
+            schema_1 = 'A1."' + '", A1."'.join(schemas[1]) + '"'
+        else:
+            schema_1 = ""
+        
+        schema = schema_0 +' , ' + schema_1
+
+    else:
+        if len(schemas) != 0:
+            schema = 'A0."' + '", A0."'.join(schemas) + '"'
+        else:
+            schema = ""
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlInter = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select '+ schema+' st_intersection( st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) as wkb_geometry from '
+    sqlInter += settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" AS A0, '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 '
+    sqlInter += 'WHERE st_intersects(A0.wkb_geometry, A1.wkb_geometry) = true)'
+
+    cur.execute(sqlInter)
     conn.commit()
 
     conn.close()
