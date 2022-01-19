@@ -42,7 +42,12 @@
 	    	},
 		   	afterUploadAll: function(files,data,xhr){
 	    		$.overlayout();
-	    		location.href = '/gvsigonline/filemanager/?path=' + path;
+				if (window.location.href.includes("popup=1")){
+					location.href = '/gvsigonline/filemanager/?path=' + path + '&popup=1';
+				} else{
+					location.href = '/gvsigonline/filemanager/?path=' + path ;
+				}
+	    		
 	    	},
 	    	onError: function(files,status,errMsg){}
 		});
@@ -50,11 +55,7 @@
 	  	$('#upload-button').on('click', function () {
 	  		if (fileupload.getFileCount() >= 1) {
 	  			$("body").overlay();
-				if (window.location.href.includes("popup=1")){
-					fileupload.appendExtraParams({'path': "&popup=1"});
-				}else{
-					fileupload.appendExtraParams({'path': "{{path}}"});
-				}
+				fileupload.appendExtraParams({'path': "{{path}}"});
 				fileupload.startUpload();
 	  		} else {
 	  			messageBox.show('warning', gettext('You must select a file'));
