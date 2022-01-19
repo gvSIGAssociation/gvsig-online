@@ -2379,7 +2379,14 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
                 paramsJoin['schema-old'] = schemaEdge
 
                 if (Array.isArray(schemaEdge[0])){
-                    schemaMod = [schemaEdge[0].concat(schemaEdge[1]), schemaEdge[0],schemaEdge[1]]
+                    
+                    chars = schemaEdge[0].concat(schemaEdge[1])
+
+                    let unique = chars.filter((c, index) => {
+                        return chars.indexOf(c) === index;
+                    });
+
+                    schemaMod = [unique, schemaEdge[0],schemaEdge[1]]
                 }
                 else{
                     schemaMod = [...schemaEdge]
@@ -4194,22 +4201,22 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                                             '<a class="nav-link active" name="/">&#247;</a>'+
                                         '</li>'+
                                         '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="math.sqrt()">&#8730;x</a>'+
+                                            '<a class="nav-link active" name="|/">&#8730;x</a>'+
                                         '</li>'+
                                         '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="math.pow()">x&#178;</a>'+
+                                            '<a class="nav-link active" name="^2">x&#178;</a>'+
                                         '</li>'+
                                         '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="math.sin()">sin(x)</a>'+
+                                            '<a class="nav-link active" name="sin()">sin(x)</a>'+
                                         '</li>'+
                                         '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="math.cos()">cos(x)</a>'+
+                                            '<a class="nav-link active" name="cos()">cos(x)</a>'+
                                         '</li>'+
                                         '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="math.tan()">tan(x)</a>'+
+                                            '<a class="nav-link active" name="tan()">tan(x)</a>'+
                                         '</li>'+
                                         '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="math.pi">&#960;</a>'+
+                                            '<a class="nav-link active" name="pi()">&#960;</a>'+
                                         '</li>'+
                                     '</ul>'+
                                 '</div><br><br><br><br><br><br><br><br><br><br>'+
@@ -4221,7 +4228,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
                             '</div>'+
                             '<div class="column66">'+
-                                '<label class="col-form-label"><a href="https://www.w3schools.com/python/module_math.asp" target="_blank">'+gettext('Expression:')+'</a></label>'+
+                                '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.0/functions-math.html" target="_blank">'+gettext('Expression:')+'</a></label>'+
                                 '<textarea id="expression-'+ID+'" rows="20" class="form-control" placeholder="'+gettext('For more math functions check above link.')+'"></textarea>'+
                             '</div>'+
                         '</form>'+
@@ -4233,8 +4240,6 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
-        
-
         
         context = this
 
@@ -4277,7 +4282,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
             $(document).off("dblclick", "#schema-calculator-"+ID+" > li > a")
 
             $(document).on("dblclick", "#schema-calculator-"+ID+" > li > a", function(){
-                var text = "['"+this.text+"']"
+                var text = '"'+this.text+'"'
                 var textarea = document.getElementById('expression-'+ID)
                 
                 if (textarea.value.charAt(textarea.value.length-1) == ')'){
@@ -4970,7 +4975,281 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
-/// keep Attribute ////
+//// INTERSECTION ////
+
+trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_Intersection",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Intersection"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-intersection-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('Intersection Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<input type="checkbox" name="merge" id="merge-'+ID+'" value=""/>'+
+                                '<label for="checkbox">'+gettext('Merge attributes of the secondary input to the final output')+'</label>'+                         
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="intersection-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        context = this
+
+        icon.on("click", function(){
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+            },100);
+
+            $('#dialog-intersection-'+ID).modal('show')
+
+            $('#intersection-accept-'+ID).click(function() {
+
+                
+
+                if ($('#merge-'+ID).is(':checked')) {
+                    $('#merge-'+ID).val('true')
+
+                    if (Array.isArray(schemaEdge[0])){
+
+                        chars = schemaEdge[0].concat(schemaEdge[1])
+
+                        let unique = chars.filter((c, index) => {
+                            return chars.indexOf(c) === index;
+                        });
+
+                        schemaMod = unique
+
+                    }
+                    else{
+                        schemaMod = [...schemaEdge]
+                    }
+
+                }else{
+
+                    $('#merge-'+ID).val('')
+
+                    if (Array.isArray(schemaEdge[0])){
+                        schemaMod = schemaEdge[0]
+                    }
+                    else{
+                        schemaMod = [...schemaEdge]
+                    }
+                }
+
+                var paramsInter = {"id": ID,
+                "parameters": [
+                {"merge": $('#merge-'+ID).val(),
+                "schema": schemaEdge}
+                ]}
+
+                paramsInter['schema-old'] = schemaEdge
+                paramsInter['schema'] = schemaMod
+
+                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+
+                isAlreadyInCanvas(jsonParams, paramsInter, ID)
+
+                icon.setColor('#4682B4')
+                
+                $('#dialog-intersection-'+ID).modal('hide')
+
+            })
+        })
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Main"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Second."),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:10, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label3 =new draw2d.shape.basic.Label({
+            text:gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+         var input2 = label2.createPort("input");
+         input2.setName("input_"+label2.id);
+
+	     var output= label3.createPort("output");
+         output.setName("output_"+label3.id);
+
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+             this.add(label3, null, optionalIndex+1);
+
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+             this.add(label3);
+         }
+         
+         listLabel.push([this.id, [input.name, input2.name], [output.name]])
+
+	     return label1, label2, label3;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+/// KEEP ATTRIBUTE ////
 
 trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
 
