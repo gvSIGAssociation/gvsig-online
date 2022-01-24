@@ -456,6 +456,22 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 					txtPopup += '<br> (Aproximado)';
 				}
 			}
+			if (address.localidad)
+			{
+				txtPopup += '<br>Localidad: ' + address.localidad;				
+			}
+			if (address.departamento)
+			{
+				txtPopup += '<br>Departamento:' + address.departamento;				
+			}
+			if (address.olc)
+			{
+				txtPopup += '<br>OLC: ' + address.olc;				
+			}
+			if (address.olc_Asignado)
+			{
+				txtPopup += '<br>OLC Asignado: ' + address.olc_Asignado;				
+			}
 			
 			this.popup.show(coordinate, '<div><p>' + txtPopup + '</p></div>');
 		}else{			
@@ -483,18 +499,24 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 					if(address.address && (address.address.trim() != 0)){
 						callejero = callejero + address.address;
 					}
-//					if(address.portalNumber && (address.portalNumber != 0)){
-//						callejero = callejero + " " + address.portalNumber;
-//					}
-//					if(address.localidad && (address.localidad.trim() != 0)){
-//						if (callejero.trim() != 0)
-//							callejero = callejero + ", " + address.localidad;
-//						else
-//							callejero = address.localidad;
-//					}
-//					if(address.departamento && (address.departamento.trim() != 0)){
-//						callejero = callejero + " (" + address.departamento + ")";
-//					}					
+					if ((address.localidad) && (address.type !== 'LOCALIDAD'))
+					{
+						callejero += '<br>Localidad: ' + address.localidad;				
+					}
+					if ((address.departamento) && (address.type !== 'LOCALIDAD'))
+					{
+						callejero += '<br>Departamento:' + address.departamento;				
+					}
+					if (address.olc)
+					{
+						callejero += '<br><span style="color:grey">OLC: ' + address.olc + '</span> <button onclick="navigator.clipboard.writeText(\''
+						 + address.olc + '\');">Copiar</button>' ;				
+					}
+					if (address.olc_Asignado)
+					{
+						callejero += '<br>OLC Asignado: ' + address.olc_Asignado;				
+					}					
+					
 					this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');					
 				}
 				else
@@ -539,6 +561,23 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 					if(a.state && (a.state == 2)){
 						txtPopup += '<br> (Aproximado)';
 					}
+					if ((a.localidad) && (a.type !== 'LOCALIDAD'))
+					{
+						txtPopup += '<br>Localidad: ' + a.localidad;				
+				}
+					if ((a.departamento) && (a.type !== 'LOCALIDAD'))
+					{
+						txtPopup += '<br>Departamento:' + a.departamento;				
+					}
+					if (a.olc)
+					{
+						txtPopup += '<br><span style="color:grey">OLC: ' + a.olc + '</span> <button onclick="navigator.clipboard.writeText(\''
+						 + a.olc + '\');">Copiar</button>' ;				
+					}
+					if (a.olc_Asignado)
+					{
+						txtPopup += '<br>OLC Asignado: ' + a.olc_Asignado;				
+					}					
 				}
 
 				nPopup.show(coordinate, txtPopup);
