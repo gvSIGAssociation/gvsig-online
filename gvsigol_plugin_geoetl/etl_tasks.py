@@ -858,11 +858,10 @@ def input_Oracle(dicc):
 
     df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
     
+    col = list(df.columns.values)
+
     conn_source.close()
     db_source.dispose()
-
-    conn_target.close()
-    db_target.dispose()
     
     conn_ORA = cx_Oracle.connect(
         dicc['username'],
@@ -881,26 +880,25 @@ def input_Oracle(dicc):
     conn_PG.commit()
 
     count = 1
-    for row in c_ORA:
-        sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name+'" VALUES ('
-        for i in row:
-            i = i.replace("'","''")
-            if type(i) == cx_Oracle.LOB:
-                sqlInsert += "'"+i.read()+"'"
-            elif type(i) == datetime:
-                sqlInsert += "'"+i.__str__()+"'"
-            elif i == None:
-                sqlInsert += 'NULL'
-            else:
-                sqlInsert += "'"+ str(i)+"'"
-            sqlInsert += ', '
-        sqlInsert = sqlInsert[:-2]+')'
-        count+=1
-        cur_PG.execute(sqlInsert)
-        conn_PG.commit()
+    for r in c_ORA:
+        row = list(r)
+        for i in range (0, len(row)):
+            if type(row[i]) == cx_Oracle.LOB:
+                row[i] = row[i].read().replace("\x00", "\uFFFD")
+
+        df_tar = pd.DataFrame([row], columns = col)
+        if count ==1:
+            df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        else:
+            df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+
+        count +=1
 
     conn_PG.close()
     cur_PG.close()
+
+    conn_target.close()
+    db_target.dispose()
 
     return [table_name]
 
