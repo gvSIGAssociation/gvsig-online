@@ -145,9 +145,8 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                     msg = _('Export process completed with warnings:') + ' ' + e.server_message
                     messages.add_message(request, messages.INFO, msg)
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
-                message = e.server_message
-                #request.session['message'] = str(message)
-                messages.add_message(request, messages.ERROR, str(message))
+                message = e.server_message if isinstance(e.server_message, unicode) else unicode(e.server_message, 'utf-8', 'replace')
+                messages.add_message(request, messages.ERROR, message)
                 """
                 if e.status_code == -1:
                     name = form.data['name']
