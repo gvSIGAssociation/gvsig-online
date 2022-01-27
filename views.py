@@ -62,7 +62,7 @@ from requests_futures.sessions import FuturesSession
 
 from .backend_postgis import Introspect
 from .forms_geoserver import CreateFeatureTypeForm
-from .forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
+from .forms_services import ServerForm, SqlViewForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
 from gdaltools import gdalsrsinfo
 from . import geographic_servers
 from gvsigol import settings
@@ -79,7 +79,7 @@ from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
 import gvsigol_services.tiling_service as tiling_service
 from . import locks_utils
-from .models import LayerFieldEnumeration
+from .models import LayerFieldEnumeration, SqlView
 from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
     LayerLock, Server, Node, ServiceUrl
 from .rest_geoserver import RequestError
@@ -951,52 +951,55 @@ def backend_fields_list(request):
         id_ws = request.GET['id_workspace']
         ws = Workspace.objects.get(id=id_ws)
         ds = Datastore.objects.get(name=ds_name, workspace=ws)
-        if ds:
-            if not utils.can_manage_datastore(request.user, ds):
-                return HttpResponseForbidden("[]") 
-            layer = Layer.objects.filter(external=False).filter(datastore=ds, name=name).first()
-
-            params = json.loads(ds.connection_params)
-            host = params['host']
-            port = params['port']
-            dbname = params['database']
-            user = params['user']
-            passwd = params['passwd']
-            schema = params.get('schema', 'public')
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            layer_defs = i.get_fields_info(name, schema)
-            i.close()
-            result_resources = []
-            conf = None
-            if layer and layer.conf:
-                conf = ast.literal_eval(layer.conf)
-            for resource_def in layer_defs:
-                resource = resource_def['name']
-                if conf:
-                    founded = False
-                    for f in conf['fields']:
-                        if f['name'] == resource:
-                            field = {}
-                            field['name'] = f['name']
-                            for id, language in LANGUAGES:
-                                field['title-'+id] = f.get('title-'+id, field['name'])
-                            result_resources.append(field)
-                            founded = True
-                    if not founded:
+    elif 'datastore_id' in request.GET and 'table_name' in request.GET:
+        datastore_id = request.GET['datastore_id']
+        name = request.GET['table_name']
+        ds = Datastore.objects.get(id=datastore_id)
+    if ds:
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden("[]") 
+        layer = Layer.objects.filter(external=False).filter(datastore=ds, name=name).first()
+        params = json.loads(ds.connection_params)
+        host = params['host']
+        port = params['port']
+        dbname = params['database']
+        user = params['user']
+        passwd = params['passwd']
+        schema = params.get('schema', 'public')
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        layer_defs = i.get_fields_info(name, schema)
+        i.close()
+        result_resources = []
+        conf = None
+        if layer and layer.conf:
+            conf = ast.literal_eval(layer.conf)
+        for resource_def in layer_defs:
+            resource = resource_def['name']
+            if conf:
+                founded = False
+                for f in conf['fields']:
+                    if f['name'] == resource:
                         field = {}
-                        field['name'] = resource
+                        field['name'] = f['name']
                         for id, language in LANGUAGES:
-                            field['title-'+id] = resource
+                            field['title-'+id] = f.get('title-'+id, field['name'])
                         result_resources.append(field)
-                else:
+                        founded = True
+                if not founded:
                     field = {}
                     field['name'] = resource
                     for id, language in LANGUAGES:
                         field['title-'+id] = resource
                     result_resources.append(field)
+            else:
+                field = {}
+                field['name'] = resource
+                for id, language in LANGUAGES:
+                    field['title-'+id] = resource
+                result_resources.append(field)
 
-            result_resources_sorted = sorted(result_resources, key=lambda rk: rk.get('name', ''))
-            return HttpResponse(json.dumps(result_resources_sorted))
+        result_resources_sorted = sorted(result_resources, key=lambda rk: rk.get('name', ''))
+        return HttpResponse(json.dumps(result_resources_sorted))
 
     return HttpResponseBadRequest()
 
@@ -4837,3 +4840,142 @@ def db_add_field(request):
                 con.delete_column(schema, layer.source_name, field_name)
 
     return utils.get_exception(400, 'Error in the input params')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@superuser_required
+def sqlview_list(request):
+    response = {
+        'sqlviews': SqlView.objects.all()
+    }
+    return render(request, 'sqlview_list.html', response)
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def sqlview_add(request):
+    if request.method == 'POST':
+        pass
+        """
+        form = ExternalLayerForm(request.user, request.POST)
+        
+        try:
+            is_visible = False
+            if 'visible' in request.POST:
+                is_visible = True
+    
+            cached = False
+            if 'cached' in request.POST:
+                cached = True
+                
+            detailed_info_enabled = False
+            detailed_info_button_title = request.POST.get('detailed_info_button_title')
+            detailed_info_html = request.POST.get('detailed_info_html')
+            if 'detailed_info_enabled' in request.POST:
+                detailed_info_enabled = True
+                detailed_info_button_title = request.POST.get('detailed_info_button_title')
+                detailed_info_html = request.POST.get('detailed_info_html')
+                
+            crs_list = []
+            for key in request.POST:
+                if 'crs_' in key:
+                    crs_list.append({
+                        'key': key.split('_')[1],
+                        'value': request.POST[key]
+                    })
+            
+            layer_group = LayerGroup.objects.get(id=int(request.POST.get('layer_group')))
+            server = Server.objects.get(id=layer_group.server_id)
+                
+            external_layer = Layer()
+            external_layer.external = True
+            external_layer.public = True
+            external_layer.title = request.POST.get('title')
+            external_layer.layer_group_id = layer_group.id
+            external_layer.type = request.POST.get('type')
+            external_layer.visible = is_visible
+            external_layer.queryable = False
+            external_layer.cached = cached
+            external_layer.single_image = False
+            external_layer.time_enabled = False
+            external_layer.detailed_info_enabled = detailed_info_enabled
+            external_layer.detailed_info_button_title = detailed_info_button_title
+            external_layer.detailed_info_html = detailed_info_html
+            external_layer.created_by = request.user.username
+            external_layer.timeout = request.POST.get('timeout')
+            
+            params = {}
+            if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
+                params['version'] = request.POST.get('version')
+                params['url'] = request.POST.get('url')
+                params['get_map_url'] = request.POST.get('get_map_url')
+                params['cache_url'] = server.getCacheEndpoint()
+                params['layers'] = request.POST.get('layers')
+                params['format'] = request.POST.get('format')
+                params['infoformat'] = request.POST.get('infoformat')
+                
+            if external_layer.type == 'WMTS':
+                params['matrixset'] = request.POST.get('matrixset')
+                params['capabilities'] = request.POST.get('capabilities')
+
+            if external_layer.type == 'Bing':
+                params['key'] = request.POST.get('key')
+                params['layers'] = request.POST.get('layers')
+
+            if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
+                params['url'] = request.POST.get('url')
+                params['key'] = request.POST.get('key')
+
+            external_layer.external_params = json.dumps(params)
+
+            external_layer.save()
+
+            external_layer.name = 'externallayer_' + str(external_layer.id)
+            external_layer.save()
+            
+            if external_layer.cached:
+                if external_layer.type == 'WMS':
+                    master_node = geographic_servers.get_instance().get_master_node(server.id)
+                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+
+            return redirect('external_layer_list')
+
+        except Exception as e:
+            logger.exception("Error creating external layer")
+            try:
+                msg = e.get_message()
+            except:
+                msg = _("Error: ExternalLayer could not be published")
+            form.add_error(None, msg)
+        """
+    else:
+        # TODO
+        form = SqlViewForm()
+        if not request.user.is_superuser:
+            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+            form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
+    return render(request, 'sqlview_add.html', {
+            'form': form
+        })
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def list_datastore_tables(request):
+    """
+    Lists the tables existing on a data store.
+    """
+    if 'id_datastore' in request.GET:
+        id_ds = request.GET['id_datastore']
+        ds = Datastore.objects.get(id=id_ds)
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden(json.dumps([]))
+        if ds:
+            c, params = ds.get_db_connection()
+            i = utils.get_db_connect_from_datastore(ds)
+            with c as i:
+                schema = params.get('schema', 'public')
+                tables = sorted(i.get_tables(schema))
+                return HttpResponse(json.dumps(tables))
+    return HttpResponseBadRequest()
