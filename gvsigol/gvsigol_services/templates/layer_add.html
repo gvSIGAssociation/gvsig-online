@@ -17,19 +17,19 @@
 					<button id="submit-button" class="btn btn-default btn-sm save-button">{% trans "Save" %}</button>
 				</div>
 			</div>
-			<div class="row" style="padding-left: 30px;">
-				{% csrf_token %}
-				<div id="form-error" style="color:#ff0000;">
-					<ul>
-					{{ form.non_field_errors }}
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}	
-					{% endfor %}
-					</ul>
-				</div>
-			</div>				
+		</div>
+		<div class="row" style="padding-left: 30px;">
+			{% csrf_token %}
+			<div id="form-error" style="color:#ff0000;">
+				<ul>
+				{{ form.non_field_errors }}
+				{% for field in form %}
+					{% if field.errors %}
+						<li>{{field.label}}. {{ field.errors|striptags }}</li>
+					{% endif %}	
+				{% endfor %}
+				</ul>
+			</div>
 		</div>
 		
 		<ul class="nav nav-tabs">

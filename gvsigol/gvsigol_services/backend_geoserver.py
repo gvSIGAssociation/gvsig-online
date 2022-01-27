@@ -1213,7 +1213,7 @@ class Geoserver():
             sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
             stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
             if stderr.startswith("ERROR"): # some errors don't return non-0 status so will not directly raise an exception
-                raise gdaltools.GdalToolsError(message=stderr)
+                raise rest_geoserver.RequestError(-1, stderr)
             with Introspect(db, host=host, port=port, user=user, password=password) as i:
                 # add control fields
                 db_fields = i.get_fields(name, schema=schema)
@@ -1269,7 +1269,7 @@ class Geoserver():
                 try:
                     stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                     if stderr:
-                        raise rest_geoserver.RequestWarning(stderr)
+                        raise rest_geoserver.RequestError(-1, stderr)
                     return True
                 except gdaltools.GdalToolsError as e:
                     raise rest_geoserver.RequestError(e.code, str(e))

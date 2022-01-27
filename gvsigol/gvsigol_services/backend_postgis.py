@@ -17,7 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from psycopg2._psycopg import quote_ident
+
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -38,6 +38,26 @@ import random, string
 
 plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
+
+class SqlFrom():
+    """ Used to define View FROM table and joins """
+    INNER_JOIN = 'INNER'
+    LEFT_OUTER = 'LEFT OUTER'
+    RIGHT_OUTER = 'RIGHT OUTER'
+    VALID_JOIN_TYPES = (INNER_JOIN, LEFT_OUTER, RIGHT_OUTER)
+    def __init__(self, schema, table, join_field=None, join_type=INNER_JOIN):
+        self.schema = schema
+        self.table = table
+        self.join_field = join_field
+        self.join_type = join_type
+
+class SqlField():
+    """ Used to define View fields and alias """
+    def __init__(self, schema, table, field, alias=None):
+        self.schema = schema
+        self.table = table
+        self.field = field
+        self.alias = alias
 
 
 class Introspect:
@@ -224,6 +244,135 @@ class Introspect:
         self.cursor.execute(query, [schema, table])
         r = self.cursor.fetchone()
         return r[0] > 0
+  
+    def create_view(self, schema, view_name, from_tables, fields):
+        """
+        Creates a SQL view that joins 2 tables using a joining field from
+        each table. Only the provided fields will be included in the created view.
+        """
+        try:
+            view_from_tables = []
+            prev_table = None
+            table_aliases = {}
+            for idx, table in enumerate(from_tables):
+                table_alias = "t"+str(idx)
+                table_aliases[table.schema] = table_aliases.get(table.schema, {})
+                table_aliases[table.schema][table.table] = table_alias
+                if prev_table is None:
+                    f = sqlbuilder.SQL("""FROM {table_schema}.{table} {table_alias}""").format(
+                        table_schema=sqlbuilder.Identifier(table.schema),
+                        table=sqlbuilder.Identifier(table.table),
+                        table_alias=sqlbuilder.Identifier(table_alias))
+                    prev_table = table
+                    prev_table_alias = table_alias
+                else:
+                    if table.join_type in SqlFrom.VALID_JOIN_TYPES:
+                        join_type = table.join_type
+                    else:
+                        join_type = SqlFrom.INNER_JOIN
+                    f = sqlbuilder.SQL("""{join_type} JOIN {table2_schema}.{table2} {table2_alias}
+                    ON {table1_alias}.{join_field1} = {table2_alias}.{join_field2}""").format(
+                        join_type=sqlbuilder.SQL(join_type),
+                        table2_schema=sqlbuilder.Identifier(table.schema),
+                        table2=sqlbuilder.Identifier(table.table),
+                        table1_alias=sqlbuilder.Identifier(prev_table_alias),
+                        join_field1=sqlbuilder.Identifier(prev_table.join_field),
+                        table2_alias=sqlbuilder.Identifier(table_alias),
+                        join_field2=sqlbuilder.Identifier(table.join_field))
+                    prev_table = table
+                    prev_table_alias = table_alias
+                view_from_tables.append(f)
+
+            view_fields = []
+            for field in fields:
+                table_alias = table_aliases[field.schema][field.table]
+                field_sql = sqlbuilder.SQL("{table_alias}.{field}").format(
+                    table_alias=sqlbuilder.Identifier(table_alias),
+                    field=sqlbuilder.Identifier(field.field)
+                )
+                if field.alias:
+                    field_sql = sqlbuilder.SQL(" ").join([field_sql, sqlbuilder.SQL("{alias}").format(alias=sqlbuilder.Identifier(field.alias))])
+                view_fields.append(field_sql)
+
+            query = sqlbuilder.SQL("""
+            CREATE VIEW {schema}.{view_name} AS
+            SELECT {fields_sql}
+            {view_from}
+            """).format(
+                schema=sqlbuilder.Identifier(schema),
+                view_name=sqlbuilder.Identifier(view_name),
+                fields_sql=sqlbuilder.SQL(', ').join(view_fields),
+                view_from = sqlbuilder.SQL(" ").join(view_from_tables)           
+            )
+            self.cursor.execute(query)
+            return True
+        except Exception as e:
+            import logging
+            logger = logging.getLogger()
+            logger.exception("error")
+            print(str(e))
+            return False
+
+
+    def create_simple_view(self, view_name,
+            table1_schema,
+            table1,
+            table1_fields,
+            table1_field_alias,
+            table1_join_field,
+            table2_schema,
+            table2,
+            table2_fields,
+            table2_field_alias,
+            table2_join_field):
+        """
+        Creates a SQL view that joins 2 tables using a joining field from
+        each table. Only the provided fields will be included in the created view.
+        """
+        try:
+            view_fields = []
+            for idx, field in enumerate(table1_fields):
+                if table1_field_alias[idx]:
+                    sql = sqlbuilder.SQL("t1.{field} {alias}").format(
+                        field=sqlbuilder.Identifier(field),
+                        alias=sqlbuilder.Identifier(table1_field_alias[idx])
+                    )
+                else:
+                    sql = sqlbuilder.SQL("t1.{field}").format(
+                        field=sqlbuilder.Identifier(field)
+                    )
+                view_fields.append(sql)
+            for idx, field in enumerate(table2_fields):
+                if table2_field_alias[idx]:
+                    sql = sqlbuilder.SQL("t2.{field} {alias}").format(
+                        field=sqlbuilder.Identifier(field),
+                        alias=sqlbuilder.Identifier(table2_field_alias[idx])
+                    )
+                else:
+                    sql = sqlbuilder.SQL("t2.{field}").format(
+                        field=sqlbuilder.Identifier(field)
+                    )
+                view_fields.append(sql)
+            query = sqlbuilder.SQL("""
+            CREATE VIEW {table1_schema}.{view_name} AS
+            SELECT {fields_sql}
+            FROM {table1_schema}.{table1} t1 JOIN {table2_schema}.{table2} t2
+            ON t1.{join_field1} = t2.{join_field2}
+            """).format(
+                table1_schema=sqlbuilder.Identifier(table1_schema),
+                table2_schema=sqlbuilder.Identifier(table2_schema),
+                view_name=sqlbuilder.Identifier(view_name),
+                table1=sqlbuilder.Identifier(table1),
+                table2=sqlbuilder.Identifier(table2),
+                join_field1=sqlbuilder.Identifier(table1_join_field),
+                join_field2=sqlbuilder.Identifier(table2_join_field),
+                fields_sql=sqlbuilder.SQL(', ').join(view_fields)
+            )
+            self.cursor.execute(query)
+            return True
+        except Exception as e:
+            print(str(e))
+            return False
 
     def get_geoserver_view_pk_columns(self, schema, table):
         try:

@@ -20,7 +20,7 @@
 '''
 @author: César Martinez <cmartinez@scolab.es>
 '''
-from .models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl
+from .models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl, SqlView
 from django.utils.translation import ugettext as _
 from gvsigol_services import geographic_servers
 from django import forms
@@ -243,3 +243,13 @@ class ServiceUrlForm(forms.ModelForm):
     title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
     type = forms.ChoiceField(label=_('Type'), required=False, choices=service_types, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '2'}))
     url = forms.CharField(label=_('URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))   
+
+
+class SqlViewForm(forms.ModelForm):
+    class Meta:
+        model = SqlView
+        fields = ['datastore', 'name', 'related_tables', 'fields']
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    name = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    related_tables = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    fields = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))

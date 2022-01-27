@@ -94,6 +94,9 @@ urlpatterns = [
     #path('db_field_changetype/', services_views.db_field_changetype, name='db_field_changetype'),
     path('db_field_rename/', services_views.db_field_rename, name='db_field_rename'),
     path('db_field_add/', services_views.db_add_field, name='db_field_add'),
+    path('sqlview_list/', services_views.sqlview_list, name='sqlview_list'),
+    path('sqlview_add/', services_views.sqlview_add, name='sqlview_add'),
+    path('list_datastore_tables/', services_views.list_datastore_tables, name='list_datastore_tables'),
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
     path('get_resource/<int:resource_id>/', services_views.get_resource, name='get_layer_resource'),

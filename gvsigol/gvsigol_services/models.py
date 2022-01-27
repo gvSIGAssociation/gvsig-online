@@ -32,6 +32,7 @@ from django.urls import reverse
 import os
 from .backend_postgis import Introspect
 import json, ast
+from django.contrib.postgres.fields import JSONField
 
 CLONE_PERMISSION_CLONE = "clone"
 CLONE_PERMISSION_SKIP = "skip"
@@ -556,3 +557,37 @@ class Trigger(models.Model):
         i, target_table, target_schema = get_db_connect_from_layer(self.layer)
         i.drop_trigger(trigger_name, target_schema, target_table)
         i.close()
+
+class SqlView(models.Model):
+    name = models.TextField()
+    datastore = models.ForeignKey(Datastore, on_delete=models.CASCADE)
+    """
+     {
+        "fields":  [
+            {"schema": "sch1", "name": "f1", "alias": "f1"},
+            {"schema": "sch2", "name": "f1", "alias": "ff1"},
+            {"schema": "sch1", "name": "f2", "alias": "f2"},
+            {"schema": "sch2", "name": "f2", "alias": "ff2"}
+        ],
+        "from": [
+            {
+                "schema": "sch1",
+                "table": "table1",
+                "join_field": "f1"
+            },
+            {
+                "schema": "sch1",
+                "table": "table2",
+                "join_field": "f2",
+                "join_type": "INNER"
+            }
+        ]
+    }
+
+    Limitaciones de este esquema de almacenado de vistas:
+    - no podemos hacer JOIN con una misma tabla
+    - no podemos hacer JOIN usando claves primarias complejas (p. ej: ON t1.f1 = t2.t1_id AND t1.type = t2.type)
+    """
+    json_def =  JSONField()
+
+
