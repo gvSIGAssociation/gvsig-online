@@ -110,6 +110,12 @@ layerTree.prototype.createTree = function() {
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
 			var layerGroup = this.conf.layerGroups[i];
 			if (!layerGroup.basegroup) {
+				// FJP: Los grupos que empiezan por _ en nombre y título, están en el mapa pero no en el TOC
+				if (layerGroup.groupName.startsWith('_') && layerGroup.groupTitle.startsWith('_')) {
+					continue;
+				}
+				// Fin Grupos invisibles en Toc
+				
 				tree += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
 				tree += '				<div class="box-header with-border">';
 				if (this.conf.selectable_groups) {
