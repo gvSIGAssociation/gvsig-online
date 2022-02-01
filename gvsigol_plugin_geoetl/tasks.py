@@ -112,7 +112,6 @@ def run_canvas_background(**kwargs):
                                             
                                             result = etl_tasks.merge_tables(parameters['data'])
                                             parameters['data'] = result
-                                            print(result)
                                             tables_list_name.append(result)
                                         
                                         targetPortRepeated = True      

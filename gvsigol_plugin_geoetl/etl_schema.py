@@ -50,7 +50,7 @@ def test_postgres(dicc):
         conn.close()
         return {"result": True}
     except Exception as e:
-        print ('Connection postgres: ' + e)
+        print ('Connection postgres: ' + str(e))
         return {"result": False}
 
 def get_schema_csv(dicc):
