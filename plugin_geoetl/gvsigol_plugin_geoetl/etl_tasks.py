@@ -113,12 +113,14 @@ def input_Shp(dicc):
     sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name+'"'
     cur.execute(sqlDrop)
     conn.commit()
+
+    encoding = dicc['encode']
     
     _ogr = gdaltools.ogr2ogr()
-    _ogr.set_encoding('UTF-8')
+    _ogr.set_encoding(encoding)
     _ogr.set_input(shp, srs=srs)
-    conn = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=schema, user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
-    _ogr.set_output(conn, table_name=table_name)
+    _conn = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=schema, user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+    _ogr.set_output(_conn, table_name=table_name)
     _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE, data_source_mode=_ogr.MODE_DS_UPDATE)
 
     _ogr.layer_creation_options = {
@@ -130,7 +132,7 @@ def input_Shp(dicc):
     }
     _ogr.set_dim("2")
     _ogr.execute()
-
+    
     return [table_name]
     
 
@@ -872,14 +874,15 @@ def input_Oracle(dicc):
     c_ORA = conn_ORA.cursor()
     c_ORA.execute(sql)
 
-    conn_PG = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
-    cur_PG = conn_PG.cursor()
+    #conn_PG = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    #cur_PG = conn_PG.cursor()
 
-    sqlTruncate = 'TRUNCATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name+'"'
-    cur_PG.execute(sqlTruncate)
-    conn_PG.commit()
+    #sqlTruncate = 'TRUNCATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name+'"'
+    #cur_PG.execute(sqlTruncate)
+    #conn_PG.commit()
 
     count = 1
+
     for r in c_ORA:
         row = list(r)
         for i in range (0, len(row)):
@@ -887,15 +890,16 @@ def input_Oracle(dicc):
                 row[i] = row[i].read().replace("\x00", "\uFFFD")
 
         df_tar = pd.DataFrame([row], columns = col)
-        if count ==1:
+
+        if count == 1:
             df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
         else:
             df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
 
         count +=1
 
-    conn_PG.close()
-    cur_PG.close()
+    #conn_PG.close()
+    #cur_PG.close()
 
     conn_target.close()
     db_target.dispose()
@@ -1117,7 +1121,7 @@ def input_Indenova(dicc):
                         elif attr not in list_keys_low and attr == 'adirefcatt':
                             exp_copy[attr] ='00000000000000000000'
                                       
-                    exp_copy['url'] = os.path.join(domain, "/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"]))
+                    exp_copy['url'] = domain + "/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
                         
                     exp_copy_low = {x.lower(): v for x, v in exp_copy.items()}
 
@@ -1133,7 +1137,7 @@ def input_Indenova(dicc):
 
 def input_Postgres(dicc, geom_column_name = ''):
 
-    order_attr = etl_schema.get_schema_postgres(dicc)[0]
+    #order_attr = etl_schema.get_schema_postgres(dicc)[0]
     table_name = dicc['id']
 
     offset = 0
@@ -1144,19 +1148,24 @@ def input_Postgres(dicc, geom_column_name = ''):
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
 
-    if geom_column_name == '':
-        sql = "SELECT * FROM " + schemaTable 
+    if dicc['checkbox'] == "true":
+        clause = ' WHERE ' + dicc['clause']
     else:
-        sql = "SELECT *, ST_ASTEXT ("+geom_column_name+") AS _st_astext_temp FROM " + schemaTable
+        clause = ' '
+
+    if geom_column_name == '':
+        sql = "SELECT * FROM " + schemaTable  + clause
+    else:
+        sql = "SELECT *, ST_ASTEXT ("+geom_column_name+") AS _st_astext_temp FROM " + schemaTable + clause
+
+    conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+
+    db_target = create_engine(conn_string_target)
+    conn_target = db_target.connect()
 
     while True:
 
-        df = pd.read_sql(sql +' ORDER BY "'+order_attr+'" LIMIT 1000 OFFSET '+ str(offset), con = conn_source)
-
-        conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
-    
-        db_target = create_engine(conn_string_target)
-        conn_target = db_target.connect()
+        df = pd.read_sql(sql +' LIMIT 1000 OFFSET '+ str(offset), con = conn_source)
 
         if offset == 0:
             df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
@@ -1217,7 +1226,12 @@ def input_Postgis(dicc):
         srid = row[0]
         break
 
-    sqlTypeGeom = "SELECT split_part (ST_ASTEXT ("+geom_column_name+"), '(', 1) FROM "+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL GROUP BY split_part'
+    if dicc['checkbox'] == "true":
+        clause = ' AND ' + dicc['clause']
+    else:
+        clause = ' '
+
+    sqlTypeGeom = "SELECT split_part (ST_ASTEXT ("+geom_column_name+"), '(', 1) FROM "+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL '+clause+' GROUP BY split_part'
     cur.execute(sqlTypeGeom)
     con_source.commit()
     type_geom = ''
@@ -1633,6 +1647,97 @@ def trans_Intersection(dicc):
     sqlInter += 'WHERE st_intersects(A0.wkb_geometry, A1.wkb_geometry) = true)'
 
     cur.execute(sqlInter)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+def trans_FilterDupli(dicc):
+
+    attr = dicc['attr']
+
+    table_name_source = dicc['data'][0]
+    table_name_target_unique = dicc['id']+'_0'
+    table_name_target_dupli = dicc['id']+'_1'
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target_unique+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDrop2 = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target_dupli+'"'
+    cur.execute(sqlDrop2)
+    conn.commit()
+
+    sqlAdd = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'+' ADD COLUMN "_id_temp" SERIAL'
+    cur.execute(sqlAdd)
+    conn.commit()
+
+    if len(attr) != 0:
+        attrs = '('
+        
+        for a in attr:
+            attrs += '"'+a + '", '
+        attrs = attrs[:-2]+')'
+        
+        sqlUn = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_unique+'" as (SELECT DISTINCT ON '+attrs+'* from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'       
+        cur.execute(sqlUn)
+        conn.commit()
+    else:
+        sqlUn = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_unique+'" as (SELECT DISTINCT * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+        cur.execute(sqlUn)
+        conn.commit()
+    
+    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_dupli+'" as '
+    sqlDup += '( SELECT * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" as A0 WHERE A0._id_temp NOT IN '
+    sqlDup += '( SELECT _id_temp FROM '+ settings.GEOETL_DB["schema"]+'."'+table_name_target_unique+'" ))'
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlDrop3 = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" DROP COLUMN _id_temp; '
+    sqlDrop3 += 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target_unique+'" DROP COLUMN _id_temp; '
+    sqlDrop3 += 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target_dupli+'" DROP COLUMN _id_temp; '
+    cur.execute(sqlDrop3)
+    conn.commit()
+
+    conn.close()
+    cur.close()          
+
+    return [table_name_target_unique, table_name_target_dupli]
+
+def trans_PadAttr(dicc):
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    print(dicc)
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    if dicc['side'] == 'Right':
+        side = 'rpad'
+    else:
+        side = 'lpad'
+
+    sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, '+side+'('+'"'+dicc['attr']+'", '+dicc['length']+", '"+dicc['string']+"'"+') from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlRemov = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN "'+ dicc['attr'] + '"'
+    cur.execute(sqlRemov)
+    conn.commit()
+
+    sqlRename = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" RENAME COLUMN "'+ side + '" TO "'+dicc['attr']+'";'
+    cur.execute(sqlRename)
     conn.commit()
 
     conn.close()

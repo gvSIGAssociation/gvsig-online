@@ -1050,11 +1050,20 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label for ="shp-file" class="col-form-label">'+gettext('Choose shapefile:')+'</label><br>'+
                                 '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a><br>'+
                             '</div>'+
-                            '<div class="column60">'+
+                            '<div class="column80">'+
                                 '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
                                 '<input type="text" id="shp-file-'+ID+'" name="file" class="form-control"></input>'+
                             '</div>'+
                             '<div class="column20">'+
+                                '<label class="col-form-label">Encoding:</label>'+
+                                '<select id="encode-'+ID+'" class="form-control">'+ 
+                                    '<option value="LATIN1">LATIN1</option>'+
+                                    '<option value="UTF-8">UTF-8</option>'+
+                                    '<option value="ISO-8859-15">ISO-8859-15</option>'+
+                                    '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<div class="column80">'+
                                 '<label class="col-form-label">EPSG:</label>'+
                                 '<select id="epsg-'+ID+'" class="form-control">'+ 
                                     '<option value="">'+gettext('Insert if PRJ is not loaded')+'</option>'+
@@ -1092,7 +1101,8 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                 var paramsSHP = {"id": ID,
                 "parameters": [
                 { "shp-file": $('#shp-file-'+ID).val(),
-                    "epsg": $('#epsg-'+ID).val()}
+                  "encode": $('#encode-'+ID).val(),
+                  "epsg": $('#epsg-'+ID).val()}
                 ]}
 
                 
@@ -1726,6 +1736,14 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
                                 '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
                             '</div>'+
+                            '<div class="col-md-12">'+
+                                '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
+                                '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
+                            '</div>'+
+                            '<div class="more-options-'+ID+'">'+
+                                '<label class="col-form-label">'+gettext('SQL WHERE Clause:')+'</label>'+
+                                '<textarea id="clause-'+ID+'" rows="1" class="form-control" placeholder=""></textarea>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -1736,6 +1754,17 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+
+        $("#checkbox-"+ID).change(function() {
+            if($("#checkbox-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
+            }
+        });
 
         var context = this
 
@@ -1807,6 +1836,14 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-postgis-'+ID).modal('show')
 
+            if($("#checkbox-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
+            }
+
             $('#input-postgis-accept-'+ID).click(function() {
                 
                 var paramsPostgis = {"id": ID,
@@ -1816,7 +1853,9 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                     "database": $('#database-'+ID).val(),
                     "user": $('#user-'+ID).val(),
                     "password": $('#password-'+ID).val(),
-                    "tablename": $('#tablename-'+ID).val()}
+                    "tablename": $('#tablename-'+ID).val(),
+                    "checkbox": $("#checkbox-"+ID).val(),
+                    "clause": $('#clause-'+ID).val()}
                 ]}
     
                 var formDataSchemaPostgis = new FormData();
@@ -2032,6 +2071,14 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
                                 '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
                             '</div>'+
+                            '<div class="col-md-12">'+
+                                '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
+                                '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
+                            '</div>'+
+                            '<div class="more-options-'+ID+'">'+
+                                '<label class="col-form-label">'+gettext('SQL WHERE Clause:')+'</label>'+
+                                '<textarea id="clause-'+ID+'" rows="1" class="form-control" placeholder=""></textarea>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -2042,6 +2089,17 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+
+        $("#checkbox-"+ID).change(function() {
+            if($("#checkbox-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
+            }
+        });
 
         var context = this
 
@@ -2113,6 +2171,14 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-postgis-'+ID).modal('show')
 
+            if($("#checkbox-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
+            }
+
             $('#input-postgis-accept-'+ID).click(function() {
                 
                 var paramsPostgis = {"id": ID,
@@ -2122,7 +2188,9 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     "database": $('#database-'+ID).val(),
                     "user": $('#user-'+ID).val(),
                     "password": $('#password-'+ID).val(),
-                    "tablename": $('#tablename-'+ID).val()}
+                    "tablename": $('#tablename-'+ID).val(),
+                    "checkbox": $("#checkbox-"+ID).val(),
+                    "clause": $('#clause-'+ID).val()}
                 ]}
     
                 var formDataSchemaPostgis = new FormData();
@@ -3617,6 +3685,527 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
       * @returns {Object}
       */
      getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+//// PAD ATTRIBUTE////
+
+trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
+
+    NAME: "trans_PadAttr",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Pad Attribute"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-pad-attr-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext("Pad Attribute Parameters")+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Attribute to pad:')+'</label>'+
+                                '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Length desired:')+'</label>'+
+                                '<input id="length-'+ID+'" type="number" value="0" class="form-control" >'+
+                            '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Side to pad:')+'</label>'+
+                                '<select class="form-control" id="side-'+ID+'">' +
+                                    '<option>'+gettext('Right')+'</option>'+
+                                    '<option>'+gettext('Left')+'</option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<div>'+
+                            '<label class="col-form-label">'+gettext('Pad String:')+'</label>'+
+                                '<input id="string-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="pad-attr-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+        
+        context = this
+
+        icon.on("click", function(){
+
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+                    $('#attr-'+ID).empty()
+
+                    for (i = 0; i < schema.length; i++){
+                        
+                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                    }
+                }
+
+            },100);
+
+            $('#dialog-pad-attr-'+ID).modal('show')
+
+            $('#pad-attr-accept-'+ID).click(function() {
+
+                
+                var paramsPad = {"id": ID,
+                "parameters": [
+                    {"attr": $('#attr-'+ID).val(),
+                    "length": $('#length-'+ID).val(),
+                    "side": $('#side-'+ID).val(),
+                    "string": $('#string-'+ID).val()}
+                ]}
+
+                //schemaMod =[...schemaEdge]
+                
+                //schemaMod.push($('#new-attr-'+ID).val())
+
+                paramsPad['schema-old'] = schemaEdge
+                paramsPad['schema'] = schemaEdge
+
+
+                passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
+
+                isAlreadyInCanvas(jsonParams, paramsPad, ID)
+
+                icon.setColor('#4682B4')
+                
+                $('#dialog-pad-attr-'+ID).modal('hide')
+
+            })
+        })
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+	     }
+
+         listLabel.push([this.id, [input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+//// FILTER DUPLICATES ////
+
+trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_FilterDupli",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Filter Duplicate"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        context = this
+        
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        //adding dialog for choosing parameters of the transformer
+        $('#canvas-parent').append('<div id="dialog-filter-dupli-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('Filter Duplicate Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<label form="attr" class="col-form-label">'+gettext('Attributes that must be uniques:')+'</label>'+
+                            '<select class="form-control" size="8" multiple  id="attr-'+ID+'"> </select>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="filter-dupli-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        icon.on("click", function(){
+
+            setTimeout(function(){
+                
+                try{
+                    // if it's not the first time opening parameters dialog
+                    //json figure task will has already the schemas
+                    //old is the schema that came from the edge
+                    //the other one is result schema depending of parameters chosen
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                //get schema from the edge
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                //if edge schema and old schema is not the same is the first time you open parameters or
+                //something was changed in the edge so we hace to create a new schema option
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+                    $('#attr-'+ID).empty()
+
+                    for (i = 0; i < schema.length; i++){
+                        
+                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                    }
+                }
+
+            },100);
+            
+
+            $('#dialog-filter-dupli-'+ID).modal('show')
+
+            $('#filter-dupli-accept-'+ID).click(function() {
+
+                //parameters selected to json
+                var paramsRemove = {"id": ID,
+                "parameters": [
+                {"attr": $('#attr-'+ID).val()}
+                ]}
+                
+                //updating schema-old and schema parameters in json
+                paramsRemove['schema-old'] = schemaEdge
+                paramsRemove['schema'] = schemaEdge
+
+                //add the schema to a later edge if it exists
+                passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
+                
+                //check if parameters are already in json canvas
+                isAlreadyInCanvas(jsonParams, paramsRemove, ID)
+
+                //set red color to another in order to know if parameters are checked
+                icon.setColor('#4682B4')
+                
+                $('#dialog-filter-dupli-'+ID).modal('hide')
+
+            })
+        })
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Unique"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label3 =new draw2d.shape.basic.Label({
+            text: gettext("Duplicated"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     var output2= label3.createPort("output");
+         output.setName("output_"+label3.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+             this.add(label3, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+             this.add(label3);
+         }
+         
+         listLabel.push([this.id, [input.name], [output.name, output2.name]])
+
+	     return label1, label2, label3;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
      
      /**
       * @method 
