@@ -1,0 +1,565 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<form id="main_form" role="form" method="post" action="/gvsigonline/services/sqlview_add/">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<div id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i>
+							{% trans "Save" %}</div>
+					</div>
+				</div>
+			</div>
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+						{{ form.non_field_errors }}
+						{% for field in form %}
+						{% if field.errors %}
+						<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}
+						{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+			</div>
+
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab-sqlview-general" data-toggle="tab">{% trans "General" %}</a></li>
+				<li><a href="#tab-sqlview-tables" data-toggle="tab">{% trans "Tables" %}</a></li>
+				<li><a href="#tab-sqlview-fields" data-toggle="tab">{% trans "Fields" %}</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="tab-sqlview-general">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-body">
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="id_datastore">{% trans "Data Store" %}</label>
+											{{ form.datastore }}
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="id_name">{% trans "Name" %}</label>
+											{{ form.name }}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane" id="tab-sqlview-tables">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-body">
+									<div class="table-responsive">
+										<table id="from-table-list-table" class="table no-margin">
+											<thead>
+												<tr>
+													<th>{% trans "Datastore" %}</th>
+													<th>{% trans "Table" %}</th>
+													<th>{% trans "Table alias" %}</th>
+													<th>{% trans "Join Field" %}</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody id="from-table-list-table-body"></tbody>
+										</table>
+									</div>
+								</div>
+								<div class="box-footer clearfix" style="border-top: 0px">
+									<a id="add-table-button" href="javascript:void(0)"
+										class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-plus margin-r-5"></i>{% trans "Add table" %}
+									</a>
+								</div>
+								<input type="hidden" name="from_tables" id="from_tables"
+									value="{{form.from_tables.value|default_if_none:''}}" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane" id="tab-sqlview-fields">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-header with-border">
+									<h3 class="box-title">{% trans "Included fields" %}</h3>
+								</div>
+								<div class="box-body">
+									<div class="table-responsive">
+										<table id="field-list-table" class="table no-margin">
+											<thead>
+												<tr>
+													<th>{% trans "Field" %}</th>
+													<th>{% trans "Datastore" %}</th>
+													<th>{% trans "Table" %}</th>
+													<th>{% trans "Table alias" %}</th>
+													<th>{% trans "Alias" %}</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody id="field-list-table-body"></tbody>
+										</table>
+									</div>
+								</div>
+								<div class="box-footer clearfix" style="border-top: 0px">
+									<a id="all-fields" href="javascript:void(0)"
+										class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-plus margin-r-5"></i>{% trans "Select all" %}
+									</a>
+									<a id="none-field" href="javascript:void(0)"
+										class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-minus margin-r-5"></i>{% trans "None" %}
+									</a>
+								</div>
+								<input type="hidden" name="fields" id="fields"
+									value="{{form.fields.value|default_if_none:''}}" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-sqlviews').addClass("active");
+</script>
+<script type="text/javascript">
+
+	$().ready(function () {
+		function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
+			selectObj.empty().html(' ');
+			var attribs = {
+				value: '__disabled__',
+				text: placeholderOptionText,
+				disabled: 'disabled',
+
+			};
+			if (placeholderSelected) {
+				attribs['selected'] = 'selected';
+			}
+			selectObj.append($('<option>', attribs));
+			if (extraOptions) {
+				for (var i = 0; i < extraOptions.length; i++) {
+					selectObj.append(extraOptions[i]);
+				}
+			}
+		};
+
+		function updateDatastores(id_datastore) {
+			if (id_datastore !== "" && id_datastore !== null) {
+				$("body").overlay();
+				$.getJSON("{% url 'list_datastores_in_db' %}", { id_datastore: id_datastore }, function (data) {
+					$(".from-table-datastore").each(function () {
+						var selectObj = $(this);
+						var previousValue = selectObj.val();
+						var placeholderSelected = true;
+
+						if (data == null || data.length == 0) {
+							var text = "{% trans 'Target datastore is empty' %}";
+							rebuildSelect(selectObj, text, true);
+							$(".from-table-datastore").change();
+							return;
+						}
+						var options = [];
+						for (var i = 0; i < data.length; i++) {
+							var attribs = {
+								value: data[i]["id"],
+								text: data[i]["name"]
+							};
+							if (previousValue == data[i]["id"]) {
+								attribs['selected'] = 'true';
+								placeholderSelected = false;
+							}
+							options.push($('<option>', attribs));
+						}
+						var text = '{% trans "Choose datastore" %}';
+						rebuildSelect(selectObj, text, placeholderSelected, options);
+						var updatedValue = selectObj.val();
+						if (previousValue !== updatedValue) {
+							$(".from-table-datastore").change();
+						}
+					});
+					$.overlayout();
+				}).fail(function () {
+					$(".from-table-datastore").each(function () {
+						var selectObj = $(this);
+						var text = "{% trans 'Service is unavailable' %}";
+						rebuildSelect(selectObj, text, true);
+						$(".from-table-datastore").change();
+					});
+					$.overlayout();
+				});
+			}
+			else {
+				$(".from-table-datastore").each(function () {
+					var selectObj = $(this);
+					var text = "{% trans 'No valid data store selected' %}";
+					rebuildSelect(selectObj, text, true);
+					$(".from-table-datastore").change();
+				});
+			}
+		};
+
+		function updateTables(id_datastore, selectObj) {
+			if (id_datastore) {
+				$("body").overlay();
+				$.getJSON("{% url 'list_datastore_tables' %}", { id_datastore: id_datastore }, function (data) {
+					var previousValue = selectObj.val();
+					var placeholderSelected = true;
+
+					if (data == null || data.length == 0) {
+						var text = "{% trans 'Data store is empty' %}";
+						rebuildSelect(selectObj, text, true);
+						selectObj.change();
+						$.overlayout();
+						return;
+					}
+					var options = [];
+					for (var i = 0; i < data.length; i++) {
+						var attribs = {
+							value: data[i],
+							text: data[i]
+						};
+						if (previousValue == data[i]) {
+							attribs['selected'] = 'true';
+							placeholderSelected = false;
+						}
+						options.push($('<option>', attribs));
+					}
+					var text = '{% trans "Choose table" %}';
+					rebuildSelect(selectObj, text, placeholderSelected, options);
+					var updatedValue = selectObj.val();
+					if (previousValue !== updatedValue) {
+						selectObj.change();
+					}
+					$.overlayout();
+
+				}).fail(function () {
+					var text = "{% trans 'Service is unavailable' %}";
+					rebuildSelect(selectObj, text, true);
+					selectObj.change();
+					$.overlayout();
+				});
+			}
+			else {
+				var text = "{% trans 'No valid data store selected' %}";
+				rebuildSelect(selectObj, text, true);
+				selectObj.change();
+			}
+		};
+
+		function udateFieldsCombo(id_datastore, table_name, selectObj) {
+			if (id_datastore) {
+				$("body").overlay();
+				$.getJSON("{% url 'backend_fields_list' %}", { datastore_id: id_datastore, table_name: table_name }, function (data) {
+					var previousValue = selectObj.val();
+					var placeholderSelected = true;
+
+					if (data == null || data.length == 0) {
+						var text = "{% trans 'Table has no fields' %}";
+						rebuildSelect(selectObj, text, true);
+						$.overlayout();
+						return;
+					}
+					var options = [];
+					for (var i = 0; i < data.length; i++) {
+						var attribs = {
+							value: data[i].name,
+							text: data[i].name
+						};
+						if (previousValue == data[i].name) {
+							attribs['selected'] = 'true';
+							placeholderSelected = false;
+						}
+						options.push($('<option>', attribs));
+					}
+					var text = '{% trans "Choose field" %}';
+					rebuildSelect(selectObj, text, placeholderSelected, options);
+					$.overlayout();
+
+				}).fail(function () {
+					var text = "{% trans 'Service is unavailable' %}";
+					rebuildSelect(selectObj, text, true);
+					$.overlayout();
+				});
+			}
+			else {
+				var text = "{% trans 'No valid table selected' %}";
+				rebuildSelect(selectObj, text, true);
+			}
+		};
+
+		function addFieldsUi(fromTable, selectedFieldAliases, previousValues) {
+			console.log(previousValues);
+			$.getJSON("{% url 'backend_fields_list' %}", { datastore_id: fromTable.datastore_id, table_name: fromTable.table_name }, function (data) {
+				var row, fieldName, previousVal, alias, selected;
+				for (var i = 0; i < data.length; i++) {
+					fieldName = data[i]["name"];
+					if (previousValues !== null) {
+						try {
+							previousVal = previousValues[fromTable.table_alias][fieldName];
+							alias = previousVal.alias;
+							selected = previousVal.selected;
+						}
+						catch {
+							alias = fieldName;
+							selected = false;
+						}
+					}
+					else {
+						alias = fieldName;
+						selected = true;
+					}
+					var aliasSuffix = 1;
+					while (selectedFieldAliases.indexOf(alias) != -1) {
+						alias = fieldName + "_" + aliasSuffix++;
+					}
+					selectedFieldAliases.push(alias);
+					row = '<tr>';
+					row += '<td class="form-group form-check col-md-3">';
+					if (selected) {
+						row += '<input type="checkbox" class="form-check-input selected-field" id="selected-field-' + i + '" checked>';
+					}
+					else {
+						row += '<input type="checkbox" class="form-check-input selected-field" id="selected-field-' + i + '">';
+					}
+					row += '<label class="form-check-label field-name" style="font-weight:400">' + fieldName + '</label>';
+					//row += '<input type="checkbox" class="form-check-input" id="selected-field-' + j +'">';
+					//row += '<label class="form-check-label" for="selected-form-field-' + j +'">'+ data[j]["name"] + '</label>';
+					row += '</td>';
+					row += '<td class="form-group form-check col-md-3 datastore" data-datastoreid="' + fromTable.datastore_id + '">';
+					row += fromTable.datastore_name;
+					row += '</td>';
+					row += '<td class="form-group form-check col-md-2 table-name">';
+					row += fromTable.table_name;
+					row += '</td>';
+					row += '<td class="form-group form-check col-md-1 table-alias">';
+					row += fromTable.table_alias;
+					row += '</td>';
+					row += '<td class="form-group form-check col-md-3">';
+					row += '<input type="text" class="form-control selected-field-alias" id="selected-field-alias-' + i + '" value="' + alias + '">';
+					row += '</td></tr>';
+					$("#field-list-table-body").append(row);
+				}
+			});
+		}
+
+		function addTableUi(datastoreIdVal, datastoreNameVal, tableVal, tableAliasVal, joinFieldVal) {
+			var nextId = 0;
+			$("tr[data-rowid]").each(function () {
+				var rowId = parseInt($(this).attr('data-rowid'));
+				if (rowId > nextId) {
+					nextId = rowId;
+				}
+			});
+			nextId = nextId + 1;
+
+			var row = $('<tr data-rowid="' + nextId + '" class="from-tables">');
+			var datastoreCol = $('<td id="from-table-col-datastore-' + nextId + '" class="form-group col-md-5"></td>');
+			var datastoreSelect = $('<select id="from-table-datastore-' + nextId + '" class="js-example-basic-single form-control from-table-datastore"></select');
+			if (typeof(datastoreIdVal) != "undefined") {
+				datastoreSelect.append($('<option value="' +datastoreIdVal+ '" selected>'+datastoreNameVal+'</option>'));
+			}
+			datastoreCol.append(datastoreSelect);
+			row.append(datastoreCol);
+			var table_select_id = "form-table-col-table-select-" + nextId;
+			var joinfield_select_id = "form-table-col-join-field-select-" + nextId;
+
+			var tableCol = $('<td class="form-group col-md-3"></td>');
+			var tableSelect = $('<select class="form-control js-example-basic-single from-table" id="' + table_select_id + '"tabindex="-1" aria-hidden="true"</select>');
+			if (typeof(tableVal) != "undefined") {
+				tableSelect.append($('<option value="' +tableVal+ '" selected>'+tableVal+'</option>'));
+			}
+			tableCol.append(tableSelect);
+			row.append(tableCol);
+			var tableAliasCol = $('<td class="form-group col-md-2"></td>');
+			var tableAliasInput = $('<input class="form-control from-table-alias" value="t' + nextId + '" readonly>');
+			if (typeof(tableAlias) != "undefined") {
+				tableAliasInput.val(tableAlias);
+			}
+			tableAliasCol.append(tableAliasInput);
+			row.append(tableAliasCol);
+			var joinFieldCol = $('<td class="form-group col-md-3"></td>');
+			var joinFieldSelect = $('<select class="form-control js-example-basic-single from-table-join-field" id="' + joinfield_select_id + '" tabindex="-1" aria-hidden="true"></select>');
+			if (typeof(joinFieldVal) != "undefined") {
+				joinFieldSelect.append($('<option value="' +joinFieldVal+ '" selected>'+joinFieldVal+'</option>'));
+			}
+			joinFieldCol
+				.append(joinFieldSelect);
+			row.append(joinFieldCol);
+			row.append($('<td class="col-md-1" style="padding-top: 12px;padding-bottom:12px"><a class="delete-table-' + nextId + '" data-fieldid="' + nextId + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>'));
+			$('#from-table-list-table tbody').append(row);
+			updateDatastores($("#id_datastore option:selected").val());
+			datastoreSelect.change(function (evt) {
+				var id_datastore = $('option:selected', $(this)).val();
+				updateTables(id_datastore, $('#' + table_select_id));
+			});
+			$('#' + table_select_id).change(function () {
+				var table_name = $('option:selected', $(this)).val();
+				var id_datastore = datastoreSelect.val();
+				udateFieldsCombo(id_datastore, table_name, $('#' + joinfield_select_id));
+				$("#field-list-table-body").empty();
+			});
+			$('.js-example-basic-single').select2();
+
+			$(".delete-table-" + nextId).on('click', function (e) {
+				e.preventDefault();
+				$('#from-table-list-table tr[data-rowid=' + nextId + ']').remove();
+			});
+		}
+
+
+		function udateFieldsTab(previousValues) {
+			var fromTables = [];
+			$(".from-tables").each(function () {
+				var selection = $(".from-table-datastore option:selected", $(this));
+				var datastore_id = selection.val();
+				var datastore_name = selection.text();
+				var table_name = $(".from-table option:selected", $(this)).val();
+				var table_alias = $(".from-table-alias", $(this)).val();
+				var join_field = $(".from-table-join-field option:selected", $(this)).val();
+				fromTables.push({
+					"datastore_id": datastore_id,
+					"datastore_name": datastore_name,
+					"table_name": table_name,
+					"table_alias": table_alias,
+					"join_field": join_field
+				});
+			});
+			var id_datastore = $('option:selected', $(".from-table-datastore")).val();
+			if (typeof(previousValues) == "undefined") {
+				previousValues = null;
+				$("#field-list-table-body tr").each(function () {
+					console.log($(this));
+					var checked = $(".selected-field", this).prop("checked");
+					var fieldName = $(".field-name", this).text();
+					var alias = $(".selected-field-alias", this).val();
+					var table_alias = $(".table-alias", this).text();
+					previousValues = previousValues || {};
+					previousValues[table_alias] = previousValues[table_alias] || {}
+					previousValues[table_alias][fieldName] = {
+						"selected": checked,
+						"alias": alias
+					}
+				});
+			}
+			$("#field-list-table-body").empty();
+			var selectedFieldAliases = [];
+			for (var i = 0; i < fromTables.length; i++) {
+				addFieldsUi(fromTables[i], selectedFieldAliases, previousValues);
+			}
+		};
+
+		function deserializeTables(fromTables) {
+			var fromtablesDict = JSON.parse(fromTables);
+			var table;
+			for (var i=0; i<fromtablesDict.length; i++) {
+				table = fromtablesDict[i];
+				addTableUi(table["datastore_id"], table["datastore_name"], table["name"], table["alias"], table["join_field"]);
+			}
+		}
+
+		function deserializeFields(fields) {
+			var fields = JSON.parse(fields);
+			var field;
+			var fieldsDict = {};
+			for (var i=0; i<fields.length; i++) {
+				field = fields[i];
+				fieldsDict[field["table_alias"]] = fieldsDict[field["table_alias"]] || {};
+				fieldsDict[field["table_alias"]][field["name"]] = {
+					"selected": true,
+					"alias": field["alias"]
+				};
+			}
+			updateFieldsTab(fieldsDict);
+		}
+
+		function serializeTables() {
+			var fromTables = [];
+			var table;
+			$("#from-table-list-table-body tr").each(function () {
+				table = {};
+				var datastore_id = $(this).find(".from-table-datastore").val();
+				var tableName = $(this).find('.from-table').val();
+				var alias = $(this).find('.from-table-alias').val();
+				var joinField = $(this).find('.from-table-join-field').val();
+				table["datastore_id"] = datastore_id;
+				table["datastore_name"] = $(this).find(".from-table-datastore option:selected").text();
+				table["name"] = tableName;
+				table["alias"] = alias;
+				table["join_field"] = joinField;
+				fromTables.push(table);
+			});
+			return JSON.stringify(fromTables);
+		}
+
+		function serializeFields() {
+			var fields = [];
+			var field;
+			$("#field-list-table-body tr .selected-field:checked").parents("tr").each(function () {
+				field = {};
+				var datastore_id = $(this).find(".datastore").attr("data-datastoreid");
+				var datastore_name = $(this).find(".datastore").text();
+				var field_name = $(this).find(".field-name").text();
+				var table_name = $(this).find(".table-name").text();
+				var table_alias = $(this).find(".table-alias").text();
+				var field_alias = $(this).find(".selected-field-alias").val();
+				field["table_alias"] = table_alias;
+				field["name"] = field_name;
+				field["alias"] = field_alias;
+				fields.push(field);
+			});
+			return JSON.stringify(fields);
+		}
+
+		$('.js-example-basic-single').select2();
+		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+			$('.js-example-basic-single').select2();
+		});
+		$('a[data-toggle="tab"][href="#tab-sqlview-fields"]').on('shown.bs.tab', function (e) {
+			udateFieldsTab();
+		});
+
+		$("#add-table-button").on('click', function (e) {
+			addTableUi();
+		});
+
+		$("#all-fields").on('click', function (e) {
+			$("#field-list-table-body .form-check-input").prop('checked', true);
+		});
+		$("#none-field").on('click', function (e) {
+			$("#field-list-table-body .form-check-input").prop('checked', false);
+		});
+		$("#id_datastore").change(function () {
+			updateDatastores($('option:selected', $(this)).val());
+		});
+
+		$('#save_button').click(function (e) {
+			$("#fields").val(serializeFields());
+			$("#from_tables").val(serializeTables());
+			$('#main_form').submit();
+		});
+
+		deserializeTables($("#from_tables").val());
+		deserializeFields($("#fields").val());
+	});
+</script>
+{% endblock %}

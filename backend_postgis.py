@@ -45,17 +45,17 @@ class SqlFrom():
     LEFT_OUTER = 'LEFT OUTER'
     RIGHT_OUTER = 'RIGHT OUTER'
     VALID_JOIN_TYPES = (INNER_JOIN, LEFT_OUTER, RIGHT_OUTER)
-    def __init__(self, schema, table, join_field=None, join_type=INNER_JOIN):
+    def __init__(self, schema, table, table_alias, join_field=None, join_type=INNER_JOIN):
         self.schema = schema
         self.table = table
+        self.table_alias = table_alias
         self.join_field = join_field
         self.join_type = join_type
 
 class SqlField():
     """ Used to define View fields and alias """
-    def __init__(self, schema, table, field, alias=None):
-        self.schema = schema
-        self.table = table
+    def __init__(self, table_alias, field, alias=None):
+        self.table_alias = table_alias
         self.field = field
         self.alias = alias
 
@@ -255,9 +255,10 @@ class Introspect:
             prev_table = None
             table_aliases = {}
             for idx, table in enumerate(from_tables):
-                table_alias = "t"+str(idx)
-                table_aliases[table.schema] = table_aliases.get(table.schema, {})
-                table_aliases[table.schema][table.table] = table_alias
+                table_alias = table.alias
+                if table_alias in table_aliases:
+                    return False
+                table_aliases[table_alias] = (table.schema, table.table)
                 if prev_table is None:
                     f = sqlbuilder.SQL("""FROM {table_schema}.{table} {table_alias}""").format(
                         table_schema=sqlbuilder.Identifier(table.schema),
@@ -285,9 +286,8 @@ class Introspect:
 
             view_fields = []
             for field in fields:
-                table_alias = table_aliases[field.schema][field.table]
                 field_sql = sqlbuilder.SQL("{table_alias}.{field}").format(
-                    table_alias=sqlbuilder.Identifier(table_alias),
+                    table_alias=sqlbuilder.Identifier(field.table_alias),
                     field=sqlbuilder.Identifier(field.field)
                 )
                 if field.alias:

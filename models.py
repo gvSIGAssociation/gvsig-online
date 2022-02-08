@@ -562,32 +562,35 @@ class SqlView(models.Model):
     name = models.TextField()
     datastore = models.ForeignKey(Datastore, on_delete=models.CASCADE)
     """
+    In order to avoid SQL injections, we only accept a particular type of views
+    that fit in the following JSON schema:
      {
         "fields":  [
-            {"schema": "sch1", "name": "f1", "alias": "f1"},
-            {"schema": "sch2", "name": "f1", "alias": "ff1"},
-            {"schema": "sch1", "name": "f2", "alias": "f2"},
-            {"schema": "sch2", "name": "f2", "alias": "ff2"}
+            {"table_alias": "t1", "name": "f1", "alias": "f1"},
+            {"table_alias": "t2", "name": "f1", "alias": "ff1"},
+            {"table_alias": "t1", "name": "f2", "alias": "f2"},
+            {"table_alias": "t2", "name": "f2", "alias": "ff2"}
         ],
         "from": [
             {
                 "schema": "sch1",
                 "table": "table1",
+                "alias": "t1",
                 "join_field": "f1"
             },
             {
                 "schema": "sch1",
                 "table": "table2",
+                "alias": "t1",
                 "join_field": "f2",
                 "join_type": "INNER"
             }
-        ]
+        ],
+        "primary_key": "f1"
     }
 
-    Limitaciones de este esquema de almacenado de vistas:
-    - no podemos hacer JOIN con una misma tabla
-    - no podemos hacer JOIN usando claves primarias complejas (p. ej: ON t1.f1 = t2.t1_id AND t1.type = t2.type)
+    The main limitations of this schema are:
+    - complex ON conditions are not allowed (i.e. ON t1.f1 = t2.t1_id AND t1.type = t2.type)
+    - where clauses are not allowed (although the schema could be extended to accept WHERE clauses)
     """
     json_def =  JSONField()
-
-
