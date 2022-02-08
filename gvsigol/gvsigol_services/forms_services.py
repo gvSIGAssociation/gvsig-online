@@ -248,8 +248,22 @@ class ServiceUrlForm(forms.ModelForm):
 class SqlViewForm(forms.ModelForm):
     class Meta:
         model = SqlView
-        fields = ['datastore', 'name', 'related_tables', 'fields']
-    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+        fields = ['datastore', 'name', 'from_tables', 'fields']
+    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=None, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     name = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    related_tables = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    from_tables = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     fields = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+
+    """
+    def clean(self):
+        cleaned_data = super(SqlViewForm, self).clean()
+        l = cleaned_data.get_list('from_table')
+        cleaned_data['from_table'] = l
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user.is_superuser:            
+            self.fields['datastore'].queryset = Datastore.objects.filter(type__startswith='v_').order_by('name')
+        else:
+            self.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=user.username, type__startswith='v_').order_by('name')

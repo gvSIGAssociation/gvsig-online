@@ -4855,7 +4855,25 @@ def sqlview_list(request):
 @staff_required
 def sqlview_add(request):
     if request.method == 'POST':
-        pass
+        for key in request.POST:
+            print(key + ":" + request.POST[key])
+        """
+        l = request.POST.getlist('from-table-datastore')
+        print(l)
+        l = request.POST.getlist('from-table-name')
+        print(l)
+        l = request.POST.getlist('from-table-alias')
+        print(l)
+        l = request.POST.getlist('from-table-join-field')
+        print(l)
+        """
+        try:
+            form = SqlViewForm(request.user, request.POST)
+        except:
+            logger.exception("error")
+            pass
+        
+        
         """
         form = ExternalLayerForm(request.user, request.POST)
         
@@ -4951,10 +4969,10 @@ def sqlview_add(request):
         """
     else:
         # TODO
-        form = SqlViewForm()
+        form = SqlViewForm(request.user)
         if not request.user.is_superuser:
-            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
-            form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
+            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username, type__startswith='v_').order_by('name')
+            # form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
     return render(request, 'sqlview_add.html', {
             'form': form
         })
@@ -4978,4 +4996,36 @@ def list_datastore_tables(request):
                 schema = params.get('schema', 'public')
                 tables = sorted(i.get_tables(schema))
                 return HttpResponse(json.dumps(tables))
+    return HttpResponseBadRequest()
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def list_datastores_in_db(request):
+    """
+    Lists the datastores that belong to the same database
+    as the provided datastore.
+    """
+    if 'id_datastore' in request.GET:
+        id_ds = request.GET['id_datastore']
+        ds = Datastore.objects.get(id=id_ds)
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden(json.dumps([]))
+        params = json.loads(ds.connection_params)
+        host = params.get('host')
+        port = params.get('port')
+        database = params.get('database')
+        if request.user.is_superuser:
+            datastore_list = Datastore.objects.filter(type__startswith='v_').order_by('name')
+        else:
+            datastore_list = Datastore.objects.filter(created_by=request.user.username, type__startswith='v_').order_by('name')
+        filtered_datastores = []
+        for datastore in datastore_list:
+            params = json.loads(datastore.connection_params)
+            if params.get('host') == host and \
+               params.get('port') == port and \
+                params.get('database') == database:
+                    filtered_datastores.append({"id": datastore.id, "name": str(datastore)})
+        
+        return HttpResponse(json.dumps(filtered_datastores))
     return HttpResponseBadRequest()
