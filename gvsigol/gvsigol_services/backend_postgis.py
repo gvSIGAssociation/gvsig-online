@@ -39,18 +39,35 @@ import random, string
 plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
 
+class SqlJoinFields():
+    def __init__(self, join_field1, join_field2):
+        self.join_field1 = join_field1
+        self.join_field2 = join_field2
+
+
 class SqlFrom():
     """ Used to define View FROM table and joins """
     INNER_JOIN = 'INNER'
     LEFT_OUTER = 'LEFT OUTER'
     RIGHT_OUTER = 'RIGHT OUTER'
     VALID_JOIN_TYPES = (INNER_JOIN, LEFT_OUTER, RIGHT_OUTER)
-    def __init__(self, schema, table, table_alias, join_field=None, join_type=INNER_JOIN):
+    def __init__(self, schema, table, table_alias, join_fields=None, join_type=INNER_JOIN):
         self.schema = schema
         self.table = table
         self.table_alias = table_alias
-        self.join_field = join_field
+        self.join_fields = join_fields
         self.join_type = join_type
+    def to_json(self):
+        r = {
+            "schema": self.schema,
+            "table": self.table,
+            "alias": self.table_alias
+        }
+        if self.join_fields and len(self.join_fields)>0:
+            r["join_type"] = self.join_type
+            r["join_field1"] = self.join_fields[0].join_field1.to_json()
+            r["join_field2"] = self.join_fields[0].join_field2.to_json()
+        return r
 
 class SqlField():
     """ Used to define View fields and alias """
@@ -58,7 +75,13 @@ class SqlField():
         self.table_alias = table_alias
         self.field = field
         self.alias = alias
-
+    
+    def to_json(self):
+        return {
+            "table_alias": self.table_alias,
+            "name": self.field,
+            "alias": self.alias
+        }
 
 class Introspect:
     def __init__(self, database, host='localhost', port='5432', user='postgres', password='postgres'):
@@ -96,6 +119,19 @@ class Introspect:
         SELECT 1 FROM information_schema.tables
         WHERE table_name = %s and table_schema = %s 
         """, [table_name, schema])
+        return (self.cursor.rowcount == 1)
+
+    def object_exists(self, schema, object_name):
+        """
+        Returns True if an object (table, view, index, etc) with the
+        provided name exists in the schema. Returns False otherwise.
+        """
+        self.cursor.execute("""
+        SELECT FROM pg_catalog.pg_class c
+        JOIN   pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+        WHERE  n.nspname = %s
+        AND    c.relname = %s
+        """, [schema, object_name])
         return (self.cursor.rowcount == 1)
     
     def get_geometry_tables(self, schema='public'):
@@ -255,7 +291,7 @@ class Introspect:
             prev_table = None
             table_aliases = {}
             for idx, table in enumerate(from_tables):
-                table_alias = table.alias
+                table_alias = table.table_alias
                 if table_alias in table_aliases:
                     return False
                 table_aliases[table_alias] = (table.schema, table.table)
@@ -272,14 +308,15 @@ class Introspect:
                     else:
                         join_type = SqlFrom.INNER_JOIN
                     f = sqlbuilder.SQL("""{join_type} JOIN {table2_schema}.{table2} {table2_alias}
+
                     ON {table1_alias}.{join_field1} = {table2_alias}.{join_field2}""").format(
                         join_type=sqlbuilder.SQL(join_type),
                         table2_schema=sqlbuilder.Identifier(table.schema),
                         table2=sqlbuilder.Identifier(table.table),
                         table1_alias=sqlbuilder.Identifier(prev_table_alias),
-                        join_field1=sqlbuilder.Identifier(prev_table.join_field),
+                        join_field1=sqlbuilder.Identifier(table.join_fields[0].join_field1.field),
                         table2_alias=sqlbuilder.Identifier(table_alias),
-                        join_field2=sqlbuilder.Identifier(table.join_field))
+                        join_field2=sqlbuilder.Identifier(table.join_fields[0].join_field2.field))
                     prev_table = table
                     prev_table_alias = table_alias
                 view_from_tables.append(f)
@@ -313,62 +350,67 @@ class Introspect:
             print(str(e))
             return False
 
+    def delete_view(self, schema, view_name):
+        query = sqlbuilder.SQL("DROP VIEW IF EXISTS {schema}.{view}").format(
+            schema=sqlbuilder.Identifier(schema),
+            view=sqlbuilder.Identifier(view_name))
+        self.cursor.execute(query,  [])
 
-    def create_simple_view(self, view_name,
-            table1_schema,
-            table1,
-            table1_fields,
-            table1_field_alias,
-            table1_join_field,
-            table2_schema,
-            table2,
-            table2_fields,
-            table2_field_alias,
-            table2_join_field):
-        """
-        Creates a SQL view that joins 2 tables using a joining field from
-        each table. Only the provided fields will be included in the created view.
-        """
+    def create_geoserver_pk_metadata_table(self, schema):
         try:
-            view_fields = []
-            for idx, field in enumerate(table1_fields):
-                if table1_field_alias[idx]:
-                    sql = sqlbuilder.SQL("t1.{field} {alias}").format(
-                        field=sqlbuilder.Identifier(field),
-                        alias=sqlbuilder.Identifier(table1_field_alias[idx])
-                    )
-                else:
-                    sql = sqlbuilder.SQL("t1.{field}").format(
-                        field=sqlbuilder.Identifier(field)
-                    )
-                view_fields.append(sql)
-            for idx, field in enumerate(table2_fields):
-                if table2_field_alias[idx]:
-                    sql = sqlbuilder.SQL("t2.{field} {alias}").format(
-                        field=sqlbuilder.Identifier(field),
-                        alias=sqlbuilder.Identifier(table2_field_alias[idx])
-                    )
-                else:
-                    sql = sqlbuilder.SQL("t2.{field}").format(
-                        field=sqlbuilder.Identifier(field)
-                    )
-                view_fields.append(sql)
             query = sqlbuilder.SQL("""
-            CREATE VIEW {table1_schema}.{view_name} AS
-            SELECT {fields_sql}
-            FROM {table1_schema}.{table1} t1 JOIN {table2_schema}.{table2} t2
-            ON t1.{join_field1} = t2.{join_field2}
-            """).format(
-                table1_schema=sqlbuilder.Identifier(table1_schema),
-                table2_schema=sqlbuilder.Identifier(table2_schema),
-                view_name=sqlbuilder.Identifier(view_name),
-                table1=sqlbuilder.Identifier(table1),
-                table2=sqlbuilder.Identifier(table2),
-                join_field1=sqlbuilder.Identifier(table1_join_field),
-                join_field2=sqlbuilder.Identifier(table2_join_field),
-                fields_sql=sqlbuilder.SQL(', ').join(view_fields)
+                CREATE TABLE {schema}.gt_pk_metadata (
+                    table_schema TEXT NOT NULL,
+                    table_name TEXT NOT NULL,
+                    pk_column TEXT NOT NULL,
+                    pk_column_idx INTEGER,
+                    pk_policy VARCHAR(32),
+                    pk_sequence TEXT,
+                    unique (table_schema, table_name, pk_column),
+                    check (pk_policy in ('sequence', 'assigned', 'autogenerated'))
+                )"""
+            ).format(
+                schema=sqlbuilder.Identifier(schema)
             )
             self.cursor.execute(query)
+            return True
+        except Exception as e:
+            print(str(e))
+            return False       
+
+    def insert_geoserver_view_pk_columns(self, schema, table, pks):
+        try:
+            if not self.table_exists('gt_pk_metadata', schema=schema):
+                self.create_geoserver_pk_metadata_table(schema)
+            query = sqlbuilder.SQL("""
+                INSERT INTO {schema}.gt_pk_metadata
+                (table_schema, table_name, pk_column)
+                VALUES (%s, %s, %s)
+            """).format(
+                schema=sqlbuilder.Identifier(schema)
+            )
+            for pk in pks:
+                self.cursor.execute(query, [schema, table, pk])
+            return True
+        except Exception as e:
+            import logging
+            logging.basicConfig()
+            logger = logging.getLogger()
+            logger.exception(str(e))
+            print(str(e))
+            return False
+    
+    def delete_geoserver_view_pk_columns(self, schema, table):
+        try:
+            if not self.table_exists('gt_pk_metadata', schema=schema):
+                pass
+            query = sqlbuilder.SQL("""
+                DELETE FROM {schema}.gt_pk_metadata
+                WHERE table_schema = %s AND table_name = %s
+            """).format(
+                schema=sqlbuilder.Identifier(schema)
+            )
+            self.cursor.execute(query, [schema, table])
             return True
         except Exception as e:
             print(str(e))

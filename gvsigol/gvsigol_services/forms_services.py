@@ -20,14 +20,16 @@
 '''
 @author: César Martinez <cmartinez@scolab.es>
 '''
+from xml.dom import ValidationErr
 from .models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl, SqlView
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext_lazy
 from gvsigol_services import geographic_servers
 from django import forms
 import string
 import random
 import json
 from gvsigol.settings import EXTERNAL_LAYER_SUPPORTED_TYPES
+from django.core.exceptions import ValidationError
 
 
 external_layer_supported_types = tuple((x,x) for x in EXTERNAL_LAYER_SUPPORTED_TYPES)
@@ -251,15 +253,46 @@ class SqlViewForm(forms.ModelForm):
         fields = ['datastore', 'name', 'from_tables', 'fields']
     datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=None, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     name = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    from_tables = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    fields = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    from_tables = forms.CharField(label=_('Tables'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    fields = forms.CharField(label=_('Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
-    """
-    def clean(self):
-        cleaned_data = super(SqlViewForm, self).clean()
-        l = cleaned_data.get_list('from_table')
-        cleaned_data['from_table'] = l
-    """
+    def clean_from_tables(self):
+        from_tables = json.loads(self.cleaned_data.get('from_tables', []))
+        if len(from_tables) == 0:
+            raise ValidationError(ugettext_lazy('At least one table must be selected'), code='from_table')
+        
+        table_aliases = []
+        for idx, table in enumerate(from_tables, start=1):
+            alias = table.get('alias')
+            if not table.get('name') or not alias \
+                or not table.get('datastore_id') \
+                or not table.get('datastore_name'):
+                raise ValidationError(ugettext_lazy('Invalid table definition'), code='from_table')
+            join_field = table.get('join_field')
+            if idx > 1:
+                join_field1 = table.get('join_field1')
+                if not join_field1:
+                    raise ValidationError(ugettext_lazy('Invalid table definition. Join field 1 is missing'), code='from_table_join_field1')
+                join_field2 = table.get('join_field2')
+                if not join_field2:
+                    raise ValidationError(ugettext_lazy('Invalid table definition. Join field 2 is missing'), code='from_table_join_field2')
+            if alias in table_aliases:
+                raise ValidationError(ugettext_lazy('Duplicated alias'), code='from_table_alias')
+            table_aliases.append(alias)
+        return from_tables
+    
+    def clean_fields(self):
+        fields = json.loads(self.cleaned_data.get('fields', []))
+        if len(fields) == 0:
+            raise ValidationError(ugettext_lazy('At least one field must be selected'), code='view_fields')
+        field_aliases = []
+        for field in fields:
+            if not field.get('name') or not field.get('alias') or not field.get('table_alias'):
+                raise ValidationError(ugettext_lazy('Invalid field definition'), code='view_fields')
+            if field.get('alias') in field_aliases:
+                raise ValidationError(ugettext_lazy('Duplicated alias'), code='view_field_alias')
+            field_aliases.append(field.get('alias'))
+        return fields
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -70,11 +70,12 @@
 													<th>{% trans "Datastore" %}</th>
 													<th>{% trans "Table" %}</th>
 													<th>{% trans "Table alias" %}</th>
-													<th>{% trans "Join Field" %}</th>
+													<th>{% trans "Join Field 1" %}</th>
+													<th>{% trans "Join Field 2" %}</th>
 													<th></th>
 												</tr>
 											</thead>
-											<tbody id="from-table-list-table-body"></tbody>
+											<tbody></tbody>
 										</table>
 									</div>
 								</div>
@@ -308,7 +309,6 @@
 		};
 
 		function addFieldsUi(fromTable, selectedFieldAliases, previousValues) {
-			console.log(previousValues);
 			$.getJSON("{% url 'backend_fields_list' %}", { datastore_id: fromTable.datastore_id, table_name: fromTable.table_name }, function (data) {
 				var row, fieldName, previousVal, alias, selected;
 				for (var i = 0; i < data.length; i++) {
@@ -362,9 +362,10 @@
 			});
 		}
 
-		function addTableUi(datastoreIdVal, datastoreNameVal, tableVal, tableAliasVal, joinFieldVal) {
+		function addTableUi(datastoreIdVal, datastoreNameVal, tableVal, tableAliasVal, joinFieldVal1, joinFieldVal2) {
 			var nextId = 0;
-			$("tr[data-rowid]").each(function () {
+			var numRows = $("#from-table-list-table tr.from-tables").length;
+			$("#from-table-list-table tr[data-rowid]").each(function () {
 				var rowId = parseInt($(this).attr('data-rowid'));
 				if (rowId > nextId) {
 					nextId = rowId;
@@ -373,18 +374,16 @@
 			nextId = nextId + 1;
 
 			var row = $('<tr data-rowid="' + nextId + '" class="from-tables">');
-			var datastoreCol = $('<td id="from-table-col-datastore-' + nextId + '" class="form-group col-md-5"></td>');
+			var datastoreCol = $('<td id="from-table-col-datastore-' + nextId + '" class="form-group col-md-3"></td>');
 			var datastoreSelect = $('<select id="from-table-datastore-' + nextId + '" class="js-example-basic-single form-control from-table-datastore"></select');
 			if (typeof(datastoreIdVal) != "undefined") {
 				datastoreSelect.append($('<option value="' +datastoreIdVal+ '" selected>'+datastoreNameVal+'</option>'));
 			}
 			datastoreCol.append(datastoreSelect);
 			row.append(datastoreCol);
-			var table_select_id = "form-table-col-table-select-" + nextId;
-			var joinfield_select_id = "form-table-col-join-field-select-" + nextId;
 
-			var tableCol = $('<td class="form-group col-md-3"></td>');
-			var tableSelect = $('<select class="form-control js-example-basic-single from-table" id="' + table_select_id + '"tabindex="-1" aria-hidden="true"</select>');
+			var tableCol = $('<td class="form-group col-md-2"></td>');
+			var tableSelect = $('<select class="form-control js-example-basic-single from-table" tabindex="-1" aria-hidden="true"</select>');
 			if (typeof(tableVal) != "undefined") {
 				tableSelect.append($('<option value="' +tableVal+ '" selected>'+tableVal+'</option>'));
 			}
@@ -397,35 +396,59 @@
 			}
 			tableAliasCol.append(tableAliasInput);
 			row.append(tableAliasCol);
-			var joinFieldCol = $('<td class="form-group col-md-3"></td>');
-			var joinFieldSelect = $('<select class="form-control js-example-basic-single from-table-join-field" id="' + joinfield_select_id + '" tabindex="-1" aria-hidden="true"></select>');
-			if (typeof(joinFieldVal) != "undefined") {
-				joinFieldSelect.append($('<option value="' +joinFieldVal+ '" selected>'+joinFieldVal+'</option>'));
+			if (numRows > 0) {
+				var joinFieldCol1 = $('<td class="form-group col-md-2"></td>');
+				var joinFieldSelect1 = $('<select class="form-control js-example-basic-single from-table-join-field1" tabindex="-1" aria-hidden="true"></select>');
+				if (typeof(joinFieldVal1) != "undefined") {
+					joinFieldSelect1.append($('<option value="' +joinFieldVal1+ '" selected>'+joinFieldVal1+'</option>'));
+				}
+				joinFieldCol1
+					.append(joinFieldSelect1);
+				row.append(joinFieldCol1);
+				var table1Select = $("#from-table-list-table tr").last().find('select.from-table');
+				var datastore1Select = $("#from-table-list-table tr").last().find('select.from-table-datastore');
+				table1Select.change(function () {
+					var table_name = $('option:selected', $(this)).val();
+					var id_datastore = datastore1Select.val();
+					udateFieldsCombo(id_datastore, table_name, joinFieldSelect1);
+					//$("#field-list-table-body").empty();
+				});
+				table1Select.change();
+
+				var joinFieldCol2 = $('<td class="form-group col-md-2"></td>');
+				var joinFieldSelect2 = $('<select class="form-control js-example-basic-single from-table-join-field2" tabindex="-1" aria-hidden="true"></select>');
+				if (typeof(joinFieldVal2) != "undefined") {
+					joinFieldSelect2.append($('<option value="' +joinFieldVal2+ '" selected>'+joinFieldVal2+'</option>'));
+				}
+				joinFieldCol2
+					.append(joinFieldSelect2);
+				row.append(joinFieldCol2);
+
+				tableSelect.change(function () {
+				var table_name = $('option:selected', $(this)).val();
+				var id_datastore = datastoreSelect.val();
+				udateFieldsCombo(id_datastore, table_name, joinFieldSelect2);
+				//$("#field-list-table-body").empty();
+			});
 			}
-			joinFieldCol
-				.append(joinFieldSelect);
-			row.append(joinFieldCol);
+			else {
+				row.append('<td class="form-group col-md-2"></td><td class="form-group col-md-2"></td>');
+			}
 			row.append($('<td class="col-md-1" style="padding-top: 12px;padding-bottom:12px"><a class="delete-table-' + nextId + '" data-fieldid="' + nextId + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>'));
 			$('#from-table-list-table tbody').append(row);
 			updateDatastores($("#id_datastore option:selected").val());
 			datastoreSelect.change(function (evt) {
 				var id_datastore = $('option:selected', $(this)).val();
-				updateTables(id_datastore, $('#' + table_select_id));
-			});
-			$('#' + table_select_id).change(function () {
-				var table_name = $('option:selected', $(this)).val();
-				var id_datastore = datastoreSelect.val();
-				udateFieldsCombo(id_datastore, table_name, $('#' + joinfield_select_id));
-				$("#field-list-table-body").empty();
+				updateTables(id_datastore, tableSelect);
 			});
 			$('.js-example-basic-single').select2();
 
 			$(".delete-table-" + nextId).on('click', function (e) {
 				e.preventDefault();
-				$('#from-table-list-table tr[data-rowid=' + nextId + ']').remove();
+				$(this).closest('tr').remove();
+				//$('#from-table-list-table tr[data-rowid=' + nextId + ']').remove();
 			});
 		}
-
 
 		function udateFieldsTab(previousValues) {
 			var fromTables = [];
@@ -435,20 +458,17 @@
 				var datastore_name = selection.text();
 				var table_name = $(".from-table option:selected", $(this)).val();
 				var table_alias = $(".from-table-alias", $(this)).val();
-				var join_field = $(".from-table-join-field option:selected", $(this)).val();
 				fromTables.push({
 					"datastore_id": datastore_id,
 					"datastore_name": datastore_name,
 					"table_name": table_name,
-					"table_alias": table_alias,
-					"join_field": join_field
+					"table_alias": table_alias
 				});
 			});
 			var id_datastore = $('option:selected', $(".from-table-datastore")).val();
 			if (typeof(previousValues) == "undefined") {
 				previousValues = null;
 				$("#field-list-table-body tr").each(function () {
-					console.log($(this));
 					var checked = $(".selected-field", this).prop("checked");
 					var fieldName = $(".field-name", this).text();
 					var alias = $(".selected-field-alias", this).val();
@@ -466,46 +486,53 @@
 			for (var i = 0; i < fromTables.length; i++) {
 				addFieldsUi(fromTables[i], selectedFieldAliases, previousValues);
 			}
-		};
+		}
 
 		function deserializeTables(fromTables) {
-			var fromtablesDict = JSON.parse(fromTables);
-			var table;
-			for (var i=0; i<fromtablesDict.length; i++) {
-				table = fromtablesDict[i];
-				addTableUi(table["datastore_id"], table["datastore_name"], table["name"], table["alias"], table["join_field"]);
+			if (fromTables) {
+				var fromTablesDict = JSON.parse(fromTables);
+				var table;
+				for (var i=0; i<fromTablesDict.length; i++) {
+					table = fromTablesDict[i];
+					addTableUi(table["datastore_id"], table["datastore_name"], table["name"], table["alias"], table["join_field1"]["name"], table["join_field2"]["name"]);
+				}
 			}
 		}
 
 		function deserializeFields(fields) {
-			var fields = JSON.parse(fields);
-			var field;
-			var fieldsDict = {};
-			for (var i=0; i<fields.length; i++) {
-				field = fields[i];
-				fieldsDict[field["table_alias"]] = fieldsDict[field["table_alias"]] || {};
-				fieldsDict[field["table_alias"]][field["name"]] = {
-					"selected": true,
-					"alias": field["alias"]
-				};
+			if (fields) {
+				var fields = JSON.parse(fields);
+				var field;
+				var fieldsDict = {};
+				for (var i=0; i<fields.length; i++) {
+					field = fields[i];
+					fieldsDict[field["table_alias"]] = fieldsDict[field["table_alias"]] || {};
+					fieldsDict[field["table_alias"]][field["name"]] = {
+						"selected": true,
+						"alias": field["alias"]
+					};
+				}
+				udateFieldsTab(fieldsDict);
 			}
-			updateFieldsTab(fieldsDict);
 		}
 
 		function serializeTables() {
 			var fromTables = [];
 			var table;
-			$("#from-table-list-table-body tr").each(function () {
+			$("#from-table-list-table tbody tr").each(function () {
 				table = {};
 				var datastore_id = $(this).find(".from-table-datastore").val();
 				var tableName = $(this).find('.from-table').val();
 				var alias = $(this).find('.from-table-alias').val();
-				var joinField = $(this).find('.from-table-join-field').val();
+				var joinField1 = $(this).find('.from-table-join-field1').val();
+				var joinField2 = $(this).find('.from-table-join-field2').val();
 				table["datastore_id"] = datastore_id;
 				table["datastore_name"] = $(this).find(".from-table-datastore option:selected").text();
 				table["name"] = tableName;
 				table["alias"] = alias;
-				table["join_field"] = joinField;
+				var table1Alias = $(this).prev().find('.from-table-alias').val();
+				table["join_field1"] = {"table_alias": table1Alias, "name": joinField1}
+				table["join_field2"] = {"table_alias": alias, "name": joinField2}
 				fromTables.push(table);
 			});
 			return JSON.stringify(fromTables);
@@ -516,10 +543,7 @@
 			var field;
 			$("#field-list-table-body tr .selected-field:checked").parents("tr").each(function () {
 				field = {};
-				var datastore_id = $(this).find(".datastore").attr("data-datastoreid");
-				var datastore_name = $(this).find(".datastore").text();
 				var field_name = $(this).find(".field-name").text();
-				var table_name = $(this).find(".table-name").text();
 				var table_alias = $(this).find(".table-alias").text();
 				var field_alias = $(this).find(".selected-field-alias").val();
 				field["table_alias"] = table_alias;
@@ -553,6 +577,7 @@
 		});
 
 		$('#save_button').click(function (e) {
+			//udateFieldsTab();
 			$("#fields").val(serializeFields());
 			$("#from_tables").val(serializeTables());
 			$('#main_form').submit();
