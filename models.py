@@ -559,6 +559,10 @@ class Trigger(models.Model):
         i.close()
 
 class SqlView(models.Model):
+    class Meta:
+        constraints = [
+           models.UniqueConstraint(fields=['datastore', 'name'], name='unique_name_per_datastore')
+        ]
     name = models.TextField()
     datastore = models.ForeignKey(Datastore, on_delete=models.CASCADE)
     """
@@ -575,18 +579,24 @@ class SqlView(models.Model):
             {
                 "schema": "sch1",
                 "table": "table1",
-                "alias": "t1",
-                "join_field": "f1"
+                "alias": "t1"
             },
             {
                 "schema": "sch1",
                 "table": "table2",
                 "alias": "t1",
-                "join_field": "f2",
-                "join_type": "INNER"
+                "join_type": "INNER",
+                "join_field1": {
+                    "table_alias": "t1",
+                    "name": "f1"
+                },
+                "join_field2": {
+                    "table_alias": "t2",
+                    "name": "f1"
+                }
             }
         ],
-        "primary_key": "f1"
+        "pks": ["f1"]
     }
 
     The main limitations of this schema are:
@@ -594,3 +604,4 @@ class SqlView(models.Model):
     - where clauses are not allowed (although the schema could be extended to accept WHERE clauses)
     """
     json_def =  JSONField()
+    # FIXME: created_by is needed to check permissions

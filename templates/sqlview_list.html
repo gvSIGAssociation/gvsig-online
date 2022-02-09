@@ -8,7 +8,7 @@
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
-					<a title="{% trans 'Add SQL View' %}"  href="/gvsigonline/services/sqlview_add/" data-toggle="tooltip" data-placement="bottom" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i>{% trans "Add SQL View" %}</a>';
+					<a title="{% trans 'Add SQL View' %}"  href="/gvsigonline/services/sqlview_add/" data-toggle="tooltip" data-placement="bottom" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i>{% trans "Add SQL View" %}</a>
 				</div>
 			</div>				
 		</div>
@@ -134,7 +134,13 @@ $(document).ready(function() {
 					$('#modal-delete-sqlview').modal('hide');
 					location.reload();
 				},
-				error: function(){}
+				error: function(e, b, c){
+					$('#modal-delete-sqlview').modal('hide');
+					messageBox.show('error', e.responseText);
+					$('#modal-error').on('hide.bs.modal', function (e) {
+						location.reload();
+					})
+				}
 			});
 		});
 	}

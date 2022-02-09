@@ -61,6 +61,7 @@ import requests
 from requests_futures.sessions import FuturesSession
 
 from .backend_postgis import Introspect
+from .backend_postgis import SqlFrom, SqlField, SqlJoinFields
 from .forms_geoserver import CreateFeatureTypeForm
 from .forms_services import ServerForm, SqlViewForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
 from gdaltools import gdalsrsinfo
@@ -4855,118 +4856,100 @@ def sqlview_list(request):
 @staff_required
 def sqlview_add(request):
     if request.method == 'POST':
-        for key in request.POST:
-            print(key + ":" + request.POST[key])
-        """
-        l = request.POST.getlist('from-table-datastore')
-        print(l)
-        l = request.POST.getlist('from-table-name')
-        print(l)
-        l = request.POST.getlist('from-table-alias')
-        print(l)
-        l = request.POST.getlist('from-table-join-field')
-        print(l)
-        """
-        try:
-            form = SqlViewForm(request.user, request.POST)
-        except:
-            logger.exception("error")
-            pass
-        
-        
-        """
-        form = ExternalLayerForm(request.user, request.POST)
-        
-        try:
-            is_visible = False
-            if 'visible' in request.POST:
-                is_visible = True
-    
-            cached = False
-            if 'cached' in request.POST:
-                cached = True
-                
-            detailed_info_enabled = False
-            detailed_info_button_title = request.POST.get('detailed_info_button_title')
-            detailed_info_html = request.POST.get('detailed_info_html')
-            if 'detailed_info_enabled' in request.POST:
-                detailed_info_enabled = True
-                detailed_info_button_title = request.POST.get('detailed_info_button_title')
-                detailed_info_html = request.POST.get('detailed_info_html')
-                
-            crs_list = []
-            for key in request.POST:
-                if 'crs_' in key:
-                    crs_list.append({
-                        'key': key.split('_')[1],
-                        'value': request.POST[key]
-                    })
-            
-            layer_group = LayerGroup.objects.get(id=int(request.POST.get('layer_group')))
-            server = Server.objects.get(id=layer_group.server_id)
-                
-            external_layer = Layer()
-            external_layer.external = True
-            external_layer.public = True
-            external_layer.title = request.POST.get('title')
-            external_layer.layer_group_id = layer_group.id
-            external_layer.type = request.POST.get('type')
-            external_layer.visible = is_visible
-            external_layer.queryable = False
-            external_layer.cached = cached
-            external_layer.single_image = False
-            external_layer.time_enabled = False
-            external_layer.detailed_info_enabled = detailed_info_enabled
-            external_layer.detailed_info_button_title = detailed_info_button_title
-            external_layer.detailed_info_html = detailed_info_html
-            external_layer.created_by = request.user.username
-            external_layer.timeout = request.POST.get('timeout')
-            
-            params = {}
-            if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
-                params['version'] = request.POST.get('version')
-                params['url'] = request.POST.get('url')
-                params['get_map_url'] = request.POST.get('get_map_url')
-                params['cache_url'] = server.getCacheEndpoint()
-                params['layers'] = request.POST.get('layers')
-                params['format'] = request.POST.get('format')
-                params['infoformat'] = request.POST.get('infoformat')
-                
-            if external_layer.type == 'WMTS':
-                params['matrixset'] = request.POST.get('matrixset')
-                params['capabilities'] = request.POST.get('capabilities')
-
-            if external_layer.type == 'Bing':
-                params['key'] = request.POST.get('key')
-                params['layers'] = request.POST.get('layers')
-
-            if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
-                params['url'] = request.POST.get('url')
-                params['key'] = request.POST.get('key')
-
-            external_layer.external_params = json.dumps(params)
-
-            external_layer.save()
-
-            external_layer.name = 'externallayer_' + str(external_layer.id)
-            external_layer.save()
-            
-            if external_layer.cached:
-                if external_layer.type == 'WMS':
-                    master_node = geographic_servers.get_instance().get_master_node(server.id)
-                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-
-            return redirect('external_layer_list')
-
-        except Exception as e:
-            logger.exception("Error creating external layer")
+        form = SqlViewForm(request.user, request.POST)
+        if form.is_valid():
             try:
-                msg = e.get_message()
-            except:
-                msg = _("Error: ExternalLayer could not be published")
-            form.add_error(None, msg)
-        """
+                new_view = SqlView()
+                new_view.name = form.cleaned_data.get('name')
+                new_view.datastore = form.cleaned_data.get('datastore')
+                
+                from_objs = []
+                table_fields = {}
+                field_aliases = {}
+                pks = []
+                main_table = None
+                for idx, table in enumerate(form.cleaned_data.get('from_tables')):
+                    table_alias = table.get('alias')
+                    table_name = table.get('name')
+                    field_aliases[table_alias] = {}
+                    ds = Datastore.objects.get(pk=int(table.get('datastore_id')))
+                    i, params = ds.get_db_connection()
+                    with i as c:
+                        if idx == 0:
+                            pks = c.get_pk_columns(table_name, schema=ds.name)
+                            if len(pks) == 0:
+                                form.add_error(None, ugettext_lazy('The main table must have a primary key'))
+                                raise Exception
+                            main_table = table_alias
+                        table_fields[table_alias] = c.get_fields(table_name, schema=ds.name)
+                
+                    if not utils.can_manage_datastore(request.user, ds):
+                        return HttpResponseForbidden("The user can't manage this datastore: {}".format(table.get('datastore_id')))
+                    if idx > 0:
+                        join_field1 = table.get('join_field1')
+                        join_field2 = table.get('join_field2')
+                        join_fields = [
+                            SqlJoinFields(
+                                SqlField(join_field1.get('table_alias'), join_field1.get('name')),
+                                SqlField(join_field2.get('table_alias'), join_field2.get('name'))
+                            )
+                        ]
+                    else:
+                        join_fields = None
+
+                    ft_obj = SqlFrom(ds.name, table_name, table_alias, join_fields=join_fields)
+                    from_objs.append(ft_obj)
+                    
+                field_objs = []
+                for idx, field in enumerate(form.cleaned_data.get('fields')):
+                    table_alias = field.get('table_alias')
+                    field_name = field.get('name')
+                    field_alias = field.get('alias')
+                    if not field_name in table_fields[table_alias]:
+                        form.add_error(None, ugettext_lazy('Field does not exist: {field}').format(field_name))
+                        raise Exception
+
+                    field_obj = SqlField(table_alias, field_name, field_alias)
+
+                    field_objs.append(field_obj)
+                    field_aliases[table_alias][field_name] = field_alias
+                try:
+                    pk_aliases = [ field_aliases[main_table][p] for p in pks]
+                except:
+                    form.add_error(None, ugettext_lazy('The field {field} is the primary key of main table and must be included').format(field=", ".join(pks)))
+                    raise Exception
+                from_def = [ f.to_json() for f in from_objs]
+                field_defs = [ f.to_json() for f in field_objs]
+                new_view.json_def = {
+                    'fields':field_defs,
+                    'from': from_def,
+                    'pks': pk_aliases
+                }
+                new_view.save()
+                try:
+                    i, params = new_view.datastore.get_db_connection()
+                    with i as c:
+                        if c.object_exists(new_view.datastore.name, new_view.name):
+                            form.add_error(None, ugettext_lazy('An object already exists with name: {}').format(new_view.name))
+                            raise Exception
+                        if not c.create_view(new_view.datastore.name, new_view.name, from_objs, field_objs):
+                            form.add_error(None, ugettext_lazy('The view could not be created'))
+                            raise Exception
+                        if not c.insert_geoserver_view_pk_columns(new_view.datastore.name, new_view.name, pks):
+                            form.add_error(None, ugettext_lazy('Pk columns could not be inserted'))
+                            raise Exception
+                    return redirect('sqlview_list')
+                except Exception as e:
+                    if len(form.errors) == 0:
+                        form.add_error(None, str(e))
+                    i, params = new_view.datastore.get_db_connection()
+                    with i as c:
+                        c.delete_view(new_view.datastore.name, new_view.name)
+                    new_view.delete()
+            except Exception as e:
+                logger.exception(str(e))
+                if len(form.errors) == 0:
+                    form.add_error(None, str(e))
     else:
         # TODO
         form = SqlViewForm(request.user)
@@ -4977,6 +4960,22 @@ def sqlview_add(request):
             'form': form
         })
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["POST", "HEAD"])
+@staff_required
+def sqlview_delete(request, view_id):
+    if request.method == 'POST':
+        try:
+            view = SqlView.objects.get(pk=view_id)
+            i, params = view.datastore.get_db_connection()
+            with i as c:
+                c.delete_view(view.datastore.name, view.name)
+                c.delete_geoserver_view_pk_columns(view.datastore.name, view.name)
+            view.delete()
+            return HttpResponseRedirect(reverse('sqlview_list'))
+        except Exception as e:
+            logger.exception(str(e))
+            return HttpResponseBadRequest(_('Error deleting view: {0}').format(view_id))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
