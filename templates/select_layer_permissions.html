@@ -31,8 +31,12 @@
 															<span>{% trans "Read permissions" %}</span>
 														</label>
 														<label style="margin-left:10px">
+															{% if is_view %}
+															<input type="checkbox" name="write-usergroup-{{group.id}}" id="write-usergroup-{{group.id}}" title="{% trans 'SQL views can\'t be edited.' %}" disabled />
+															{% else %}
 															<input type="checkbox" name="write-usergroup-{{group.id}}" id="write-usergroup-{{group.id}}" {% if group.write_checked %}checked {% endif %}/>
 															<span>{% trans "Write permissions" %}</span>
+															{% endif %}
 														</label>
 												</div>
 											</span> 

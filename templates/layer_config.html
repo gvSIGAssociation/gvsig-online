@@ -111,6 +111,11 @@
 																		{% else %}
 																		<div class="btn-group">
 																		{% endif %}
+																			{% if is_view %}
+																			<button type="button" class="btn btn-box-tool dropdown-toggle" title="{% trans 'SQL views can\'t be edited.' %}" disabled>
+																				<i class="fa fa-wrench"></i>
+																			</button>
+																			{% else %}
 																			<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 																				<i class="fa fa-wrench"></i>
 																			</button>
@@ -122,6 +127,7 @@
 																				{% endif %}
 																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
 																			</ul>
+																			{% endif %}
 																		</div>
 																	{% else %}
 																		<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" disabled aria-expanded="false" title="{% trans "Reserved field" %}">
@@ -142,9 +148,15 @@
 								</div>
 							</div>
 							<div class="box-footer clearfix">
+								{% if is_view %}
+								<button type="button" class="btn btn-box-tool pull-left margin-r-5" title="{% trans 'SQL views can\'t be edited.' %}" disabled>
+									<i class="fa fa-plus margin-r-5"></i>{% trans "Add field" %}
+								</button>
+								{% else %}
 								<a id="add-field-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
 									<i class="fa fa-plus margin-r-5"></i>{% trans "Add field" %}
 								</a>
+								{% endif %}
 							</div>
 						</div>
 					</div>
