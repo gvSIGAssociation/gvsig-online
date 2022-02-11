@@ -1318,9 +1318,13 @@ def layer_update(request, layer_id):
                 assigned_read_roups.append(int(key.split('-')[2]))
 
         assigned_write_groups = []
-        for key in request.POST:
-            if 'write-usergroup-' in key:
-                assigned_write_groups.append(int(key.split('-')[2]))
+        i, params = layer.datastore.get_db_connection()
+        with i as c:
+            is_view = c.is_view(layer.datastore.name, layer.source_name)
+        if not is_view:
+            for key in request.POST:
+                if 'write-usergroup-' in key:
+                    assigned_write_groups.append(int(key.split('-')[2]))
 
         is_public = (request.POST.get('resource-is-public') is not None)
 
@@ -1487,6 +1491,9 @@ def layer_update(request, layer_id):
         md_uuid = core_utils.get_layer_metadata_uuid(layer)
         plugins_config = core_utils.get_plugins_config()
         html = True
+        i, params = layer.datastore.get_db_connection()
+        with i as c:
+            is_view = c.is_view(layer.datastore.name, layer.source_name)
         if layer.detailed_info_html == None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
             html = False
         
@@ -1505,7 +1512,8 @@ def layer_update(request, layer_id):
             'layer_image_url': layer_image_url,
             'datastore_type': layer.datastore.type,
             'groups': groups,
-            'resource_is_public': layer.public
+            'resource_is_public': layer.public,
+            'is_view': is_view
         })
 
 def get_date_fields(layer_id):
@@ -1618,6 +1626,9 @@ def layer_config(request, layer_id):
     if not utils.can_manage_layer(request.user, layer):
         return forbidden_view(request)
     if request.method == 'POST':
+        i, params = layer.datastore.get_db_connection()
+        with i as c:
+            is_view = c.is_view(layer.datastore.name, layer.source_name)
         old_conf = ast.literal_eval(layer.conf) if layer.conf else {}
 
         conf = {
@@ -1644,7 +1655,7 @@ def layer_config(request, layer_id):
             else:
                 field['mandatory'] = (request.POST.get('field-mandatory-' + str(i), False) != False)
             field['editable'] = False
-            if 'field-editable-' + str(i) in request.POST:
+            if not is_view and 'field-editable-' + str(i) in request.POST:
                 field['editableactive'] = True
                 field['editable'] = True
             for control_field in settings.CONTROL_FIELDS:
@@ -1684,6 +1695,9 @@ def layer_config(request, layer_id):
             lyr_conf = layer.get_config_manager()
             fields = lyr_conf.get_field_viewconf(include_pks=expose_pks)
             form_groups = _parse_form_groups(lyr_conf._conf.get('form_groups', []), fields)
+            i, params = layer.datastore.get_db_connection()
+            with i as c:
+                is_view = c.is_view(layer.datastore.name, layer.source_name)
         except:
             logger.exception("Retrieving fields")
             fields = []
@@ -1704,7 +1718,8 @@ def layer_config(request, layer_id):
             'available_languages_array': available_languages,
             'redirect_to_layergroup': redirect_to_layergroup,
             'enumerations': enums,
-            'procedures':  procedures
+            'procedures':  procedures,
+            'is_view': is_view
         }
         return render(request, 'layer_config.html', data)
 
