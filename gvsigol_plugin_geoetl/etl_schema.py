@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from attr import attr
 import pandas as pd
 import psycopg2
 import cx_Oracle
 #import base64
 import requests
 import json
+import re
 #from datetime import date
 from django.contrib.gis.gdal import DataSource
 
@@ -260,11 +262,50 @@ def get_schema_postgres(dicc):
 
     cur.execute(sql)
     listSchema = []
-    for col in cur:
-        if col[1] == 'USER-DEFINED' or col[1] == 'geometry':
-            pass
-        else:
-            listSchema.append(col[0])
+
+    if "query" in dicc:
+        attr_query = re.search('SELECT(.*)FROM', dicc['query'])
+        attr_query = attr_query.group(1).replace(' ', '')
+        list_attr_query = attr_query.split(',')
+        for attr in list_attr_query:
+            if attr == '*':
+                
+                for col in cur:
+                    if col[1] == 'USER-DEFINED' or col[1] == 'geometry':
+                        pass
+                    else:
+                        listSchema.append(col[0])
+
+            elif attr[0] =='"' and attr[-1] == '"':
+                listSchema.append(attr[1:-1])
+
+            elif attr[0] =='"' and '"AS' in attr:
+
+                at = attr.split('"AS')[-1]
+
+                if at[0] =='"' and at[-1] == '"':
+                    listSchema.append(at[1:-1])
+                else:
+                    listSchema.append(at)
+
+            elif ')AS' in attr:
+
+                at = attr.split(')AS')[-1]
+
+                if at[0] =='"' and at[-1] == '"':
+                    listSchema.append(at[1:-1])
+                else:
+                    listSchema.append(at)
+
+            else:
+                listSchema.append(attr)
+
+    else:
+        for col in cur:
+            if col[1] == 'USER-DEFINED' or col[1] == 'geometry':
+                pass
+            else:
+                listSchema.append(col[0])
 
     conn.commit()
     conn.close()
