@@ -35,6 +35,7 @@
 	overflow: auto;
 	cursor: pointer;
 }
+
 #functions-calculator{
 	list-style-type: none;
 	width: 31%;
@@ -44,6 +45,32 @@
 	overflow: auto;
 	cursor: pointer;
 }
+
+#attrs-execute-sql{
+	list-style-type: none;
+	width: 42%;
+	background-color: #f1f1f1;
+	position: fixed;
+	height: 20%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+#attrs-values{
+	list-style-type: none;
+	width: 42%;
+	background-color: #f1f1f1;
+	position: fixed;
+	height: 20%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+.right {
+	float: right;
+	width: 300px;
+	padding: 10px;
+  }
 
 #icon-success{
 	color: green

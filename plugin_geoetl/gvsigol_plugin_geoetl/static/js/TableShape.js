@@ -5050,6 +5050,451 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// EXECUTE SQL Postgres///
+
+trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_ExecuteSQL",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Execute SQL"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-execute-sql-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('Execute SQL Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div  class="modal-body">'+
+                        '<form>'+
+                        
+                            '<div class="column50">'+
+                                '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
+                                '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '</div>'+
+                            '<div class="column50">'+    
+                                '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
+                                '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
+                                '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
+                            '</div>'+
+                            '<div class="column50">'+                                
+                                '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
+                                '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
+                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
+                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                            '</div>'+
+
+                            '<div class="right">'+
+                                '<button type="button" class="btn btn-default btn-sm" id="get-schema-'+ID+'">'+gettext('Get attributes')+'</button>'+
+                            '</div>'+
+                            
+                            '<div class="column50">'+
+                                '<label class="col-form-label">'+gettext('Attributes from input:')+'</label>'+
+                                '<div id ="attrs-values">'+
+                                    '<ul id ="attrs-values-'+ID+'" class="nav flex-column" style= "height:100px;">'+
+                                    '</ul>'+
+                                '</div>'+
+                            '</div>'+
+
+                            '<div class="column50">'+
+                                '<label class="col-form-label">'+gettext('Attributes from new connection:')+'</label>'+
+                                '<div id ="attrs-execute-sql">'+
+                                    '<ul id ="attrs-execute-sql-'+ID+'" class="nav flex-column" style= "height:100px;">'+
+                                    '</ul>'+
+                                '</div>'+
+                            '</div>'+
+
+                            '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>'+
+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Query:')+'</label>'+
+                                '<textarea id="query-'+ID+'" rows="4" class="form-control" ></textarea>'+
+                            '</div>'+   
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="verify-postgis-'+ID+'">'+gettext('Verify connection')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="execute-sql-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        $('#verify-postgis-'+ID).click(function() {
+                
+            var paramsPostgres = {"id": ID,
+                "parameters": [
+                    {"host": $('#host-'+ID).val(),
+                    "port": $('#port-'+ID).val(),
+                    "database": $('#database-'+ID).val(),
+                    "user": $('#user-'+ID).val(),
+                    "password": $('#password-'+ID).val()}
+                ]}
+    
+                var formDataPostgres = new FormData();
+                
+                formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
+    
+                $.ajax({
+                    type: 'POST',
+                    url: '/gvsigonline/etl/test_postgres_conexion/',
+                    data: formDataPostgres,
+                    beforeSend:function(xhr){
+                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                    },
+                    cache: false, 
+                    contentType: false, 
+                    processData: false,
+                    success: function (response) {
+    
+                        if(response.result == true){
+                            textConnection = gettext('Connection parameters are valids.')
+                        }else{
+                            textConnection = gettext('Connection parameters are not valids.')
+                        }
+    
+                        $("#dialog-test-postgres-connection").remove();
+                            
+                        $('#canvas-parent').append('<div id="dialog-test-postgres-connection" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+                            '<div class="modal-dialog" role="document">'+
+                                '<div class="modal-content">'+
+                                    '<div class="modal-header">'+
+                                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                                            '<span aria-hidden="true">&times;</span>'+
+                                        '</button>'+
+                                        '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
+                                    '</div>'+
+                                    '<div class="modal-body" align="center">'+textConnection+
+                                    '</div>'+
+                                    '<div class="modal-footer">'+
+                                        '<button id= "close-test-postgres-connection" type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>')
+    
+                        $('#dialog-test-postgres-connection').modal('show')
+    
+                        $('#close-test-postgres-connection').click(function() {
+                            
+                            $('#dialog-test-postgres-connection').modal('hide')
+                            
+                        })
+                    }
+                })
+        });
+
+        $('#get-schema-'+ID).click(function() {
+            
+            var paramsPostgis = {"id": ID,
+            "parameters": [
+                {"host": $('#host-'+ID).val(),
+                "port": $('#port-'+ID).val(),
+                "database": $('#database-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val(),
+                "tablename": $('#tablename-'+ID).val()}
+            ]}
+
+            var formDataSchemaPostgis = new FormData();
+            
+            formDataSchemaPostgis.append('jsonParamsPostgres', JSON.stringify(paramsPostgis))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_postgresql/',
+                data: formDataSchemaPostgis,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    $('#attrs-execute-sql-'+ID).empty()
+
+                    for (i = 0; i < data.length; i++){
+                        $('#attrs-execute-sql-'+ID).append('<li class="nav-item"><a class="nav-link active">'+data[i]+'</a></li>')
+                    }
+                }
+            })
+        })
+        
+        context = this
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                    
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+
+                    $('#attrs-values-'+ID).empty()
+
+                    for (i = 0; i < schema.length; i++){
+                        $('#attrs-values-'+ID).append('<li class="nav-item"><a class="nav-link active">'+schema[i]+'</a></li>')
+                    }
+                //this "else" is only for this transformer for selecting attributes
+                }else{
+                    schema = schemaEdge
+                    $('#attrs-values-'+ID).empty()
+                    for (i = 0; i < schema.length; i++){
+                        $('#attrs-values-'+ID).append('<li class="nav-item"><a class="nav-link active">'+schema[i]+'</a></li>')
+                    }
+                }
+
+            },100);
+
+            $(document).off("dblclick", "#attrs-values-"+ID+" > li > a")
+
+            $(document).on("dblclick", "#attrs-values-"+ID+" > li > a", function(){
+                var text = '##"'+this.text+'"##'
+                var textarea = document.getElementById('query-'+ID)
+                textarea.value = textarea.value + text
+
+            });
+
+             $(document).off("dblclick", "#attrs-execute-sql-"+ID+" > li > a")
+
+             $(document).on("dblclick", "#attrs-execute-sql-"+ID+" > li > a", function(){
+                 var text = '"'+this.text+'"'
+                 var textarea = document.getElementById('query-'+ID)
+                 textarea.value = textarea.value + text
+ 
+            });
+            
+            $('#dialog-execute-sql-'+ID).modal('show')
+
+            $('#execute-sql-accept-'+ID).click(function() {
+
+                var paramsExecute= {"id": ID,
+                "parameters": [
+                    {"host": $('#host-'+ID).val(),
+                    "port": $('#port-'+ID).val(),
+                    "database": $('#database-'+ID).val(),
+                    "user": $('#user-'+ID).val(),
+                    "password": $('#password-'+ID).val(),
+                    "tablename": $('#tablename-'+ID).val(),
+                    "query": $('#query-'+ID).val()}
+                ]}
+    
+                var formDataSchemaExecute = new FormData();
+                
+                formDataSchemaExecute.append('jsonParamsPostgres', JSON.stringify(paramsExecute))
+    
+                $.ajax({
+                    type: 'POST',
+                    url: '/gvsigonline/etl/etl_schema_postgresql/',
+                    data: formDataSchemaExecute,
+                    beforeSend:function(xhr){
+                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                    },
+                    cache: false, 
+                    contentType: false, 
+                    processData: false,
+                    success: function (data) {
+
+                        schemaMod =[...schemaEdge]
+                        
+                        for (i = 0; i < data.length; i++){
+                            schemaMod.push(data[i])
+                        }
+                        
+                        paramsExecute['schema'] = schemaMod
+                        paramsExecute['schema-old'] = schemaEdge
+
+                    }
+                })
+               
+
+
+                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+                isAlreadyInCanvas(jsonParams, paramsExecute, ID)
+
+                icon.setColor('#4682B4')
+                
+                $('#dialog-execute-sql-'+ID).modal('hide')
+
+            })
+        })
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+         }
+         
+         listLabel.push([this.id,[input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 
+                 entity.id = e.id;
+                 
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
 //// CREATE ATTRIBUTE ////
 
 trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
@@ -5112,7 +5557,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+     
                             '<div class="column40">'+
                                 '<label class="col-form-label">'+gettext("Value:")+'</label>'+
-                                '<input id="value-'+ID+'" type="text" size="40" value="Default value" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
+                                '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
