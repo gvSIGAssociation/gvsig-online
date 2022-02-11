@@ -83,8 +83,8 @@ def create_schema(connection_params):
 @staff_required
 def etl_canvas(request):
     
-    from gvsigol.celery import app as celery_app
-    celery_app.control.purge()
+    #from gvsigol.celery import app as celery_app
+    #celery_app.control.purge()
 
     srs = core_utils.get_supported_crs_array()
     srs_string = json.dumps(srs)
