@@ -1933,3 +1933,41 @@ def trans_ExecuteSQL(dicc):
     cur_2.close()
 
     return [table_name_target]
+
+def trans_SpatialRel(dicc):
+
+    table_name_source_0 = dicc['data'][0]
+    table_name_source_1 = dicc['data'][1]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+    cur_3 = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" AS (SELECT * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" );'
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlAlter = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" ADD COLUMN _id_temp SERIAL, ADD COLUMN _related TEXT DEFAULT ' + "'False'"
+    cur.execute(sqlAlter)
+    conn.commit()
+
+    sqlUpdate = 'UPDATE '+ settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET _related ='+"'True' WHERE _id_temp IN ("
+    sqlUpdate += 'SELECT main._id_temp FROM '+ settings.GEOETL_DB["schema"]+'."'+table_name_target+'" main, ' + settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" sec'
+    sqlUpdate += ' WHERE '+dicc['rel']+'(main.wkb_geometry, sec.wkb_geometry))'
+    cur.execute(sqlUpdate)
+    conn.commit()
+
+    sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN _id_temp '
+    cur.execute(sqlAlter2)
+    conn.commit()
+
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
