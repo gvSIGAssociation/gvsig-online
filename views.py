@@ -4859,10 +4859,14 @@ def db_add_field(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-@superuser_required
+@staff_required
 def sqlview_list(request):
+    if request.user.is_superuser:
+        sql_views = SqlView.objects.all().order_by('name')
+    else:
+        sql_views = SqlView.objects.filter(created_by=request.user.username).order_by('name')
     response = {
-        'sqlviews': SqlView.objects.all()
+        'sqlviews': sql_views
     }
     return render(request, 'sqlview_list.html', response)
 
@@ -4877,6 +4881,7 @@ def sqlview_add(request):
                 new_view = SqlView()
                 new_view.name = form.cleaned_data.get('name')
                 new_view.datastore = form.cleaned_data.get('datastore')
+                new_view.created_by = request.user.username
                 
                 from_objs = []
                 table_fields = {}
@@ -4888,6 +4893,8 @@ def sqlview_add(request):
                     table_name = table.get('name')
                     field_aliases[table_alias] = {}
                     ds = Datastore.objects.get(pk=int(table.get('datastore_id')))
+                    if not utils.can_manage_datastore(request.user, ds):
+                        return HttpResponseForbidden("The user can't manage this datastore: {}".format(table.get('datastore_id')))
                     i, params = ds.get_db_connection()
                     with i as c:
                         if idx == 0:
@@ -4898,8 +4905,6 @@ def sqlview_add(request):
                             main_table = table_alias
                         table_fields[table_alias] = c.get_fields(table_name, schema=ds.name)
                 
-                    if not utils.can_manage_datastore(request.user, ds):
-                        return HttpResponseForbidden("The user can't manage this datastore: {}".format(table.get('datastore_id')))
                     if idx > 0:
                         join_field1 = table.get('join_field1')
                         join_field2 = table.get('join_field2')
@@ -4982,6 +4987,8 @@ def sqlview_delete(request, view_id):
     if request.method == 'POST':
         try:
             view = SqlView.objects.get(pk=view_id)
+            if not request.user.is_superuser and view.created_by != request.user.username:
+                return HttpResponseForbidden(_('Not allowed'))
             i, params = view.datastore.get_db_connection()
             with i as c:
                 c.delete_view(view.datastore.name, view.name)

@@ -604,4 +604,4 @@ class SqlView(models.Model):
     - where clauses are not allowed (although the schema could be extended to accept WHERE clauses)
     """
     json_def =  JSONField()
-    # FIXME: created_by is needed to check permissions
+    created_by = models.CharField(max_length=100, default='')
