@@ -4873,21 +4873,40 @@ def sqlview_list(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
+def sqlview_update(request, view_id):
+    sql_view = SqlView.objects.get(pk=view_id)
+    return _sqlview_update(request, True, sql_view)
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
 def sqlview_add(request):
+    return _sqlview_update(request, False)
+
+def _sqlview_update(request, is_update, sql_view=None):
+    view_id = ''
     if request.method == 'POST':
-        form = SqlViewForm(request.user, request.POST)
+        if sql_view is None:
+            sql_view = SqlView()
+            sql_view.created_by = request.user.username
+            form = SqlViewForm(request.user, request.POST)
+        else:
+            form = SqlViewForm(request.user, request.POST, instance=sql_view)
+            if not request.user.is_superuser and sql_view.created_by != request.user.username:
+                form.add_error(None, ugettext_lazy("The user can't manage this SQL view"))
+                raise Exception
+            view_id = sql_view.id
         if form.is_valid():
             try:
-                new_view = SqlView()
-                new_view.name = form.cleaned_data.get('name')
-                new_view.datastore = form.cleaned_data.get('datastore')
-                new_view.created_by = request.user.username
+                sql_view.name = form.cleaned_data.get('name')
+                sql_view.datastore = form.cleaned_data.get('datastore')
                 
                 from_objs = []
                 table_fields = {}
                 field_aliases = {}
                 pks = []
                 main_table = None
+                from_def = []
                 for idx, table in enumerate(form.cleaned_data.get('from_tables')):
                     table_alias = table.get('alias')
                     table_name = table.get('name')
@@ -4918,6 +4937,10 @@ def sqlview_add(request):
                         join_fields = None
 
                     ft_obj = SqlFrom(ds.name, table_name, table_alias, join_fields=join_fields)
+                    ft_json = ft_obj.to_json()
+                    ft_json['datastore_id'] = ds.id
+                    ft_json['datastore_name'] = str(ds)
+                    from_def.append(ft_json)
                     from_objs.append(ft_obj)
                     
                 field_objs = []
@@ -4938,46 +4961,61 @@ def sqlview_add(request):
                 except:
                     form.add_error(None, ugettext_lazy('The field {field} is the primary key of main table and must be included').format(field=", ".join(pks)))
                     raise Exception
-                from_def = [ f.to_json() for f in from_objs]
                 field_defs = [ f.to_json() for f in field_objs]
-                new_view.json_def = {
+                sql_view.json_def = {
                     'fields':field_defs,
                     'from': from_def,
                     'pks': pk_aliases
                 }
-                new_view.save()
+                sql_view.save()
+                view_id = sql_view.id
+                # re-set the form in case there are some error after this point
+                form.cleaned_data['from_tables'] = json.dumps(sql_view.json_def['from'])
+                form.cleaned_data['fields'] = json.dumps(sql_view.json_def['fields'])
                 try:
-                    i, params = new_view.datastore.get_db_connection()
+                    i, params = sql_view.datastore.get_db_connection()
                     with i as c:
-                        if c.object_exists(new_view.datastore.name, new_view.name):
-                            form.add_error(None, ugettext_lazy('An object already exists with name: {}').format(new_view.name))
-                            raise Exception
-                        if not c.create_view(new_view.datastore.name, new_view.name, from_objs, field_objs):
+                        if c.object_exists(sql_view.datastore.name, sql_view.name):
+                            if is_update:
+                                c.delete_view(sql_view.datastore.name, sql_view.name)
+                            else:
+                                form.add_error(None, ugettext_lazy('An object already exists with name: {}').format(sql_view.name))
+                                raise Exception
+                        if not c.create_view(sql_view.datastore.name, sql_view.name, from_objs, field_objs):
                             form.add_error(None, ugettext_lazy('The view could not be created'))
                             raise Exception
-                        if not c.insert_geoserver_view_pk_columns(new_view.datastore.name, new_view.name, pks):
+                        if not is_update and not c.insert_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name, pks):
                             form.add_error(None, ugettext_lazy('Pk columns could not be inserted'))
                             raise Exception
                     return redirect('sqlview_list')
                 except Exception as e:
                     if len(form.errors) == 0:
                         form.add_error(None, str(e))
-                    i, params = new_view.datastore.get_db_connection()
-                    with i as c:
-                        c.delete_view(new_view.datastore.name, new_view.name)
-                    new_view.delete()
+                    if not is_update:
+                        i, params = sql_view.datastore.get_db_connection()
+                        with i as c:
+                            c.delete_view(sql_view.datastore.name, sql_view.name)
+                            c.delete_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name)
+                        sql_view.delete()
+                        view_id = ''
+                        
             except Exception as e:
                 logger.exception(str(e))
                 if len(form.errors) == 0:
                     form.add_error(None, str(e))
     else:
-        # TODO
-        form = SqlViewForm(request.user)
+        if sql_view is None:
+            form = SqlViewForm(request.user)
+        else:
+            initial = {'from_tables': json.dumps(sql_view.json_def['from']), 'fields': json.dumps(sql_view.json_def['fields'])}
+            form = SqlViewForm(request.user, initial=initial, instance=sql_view)
+            view_id = sql_view.id
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username, type__startswith='v_').order_by('name')
-            # form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
     return render(request, 'sqlview_add.html', {
-            'form': form
+            'form': form,
+            'view_id': view_id,
+            'is_update': is_update
         })
 
 @login_required(login_url='/gvsigonline/auth/login_user/')

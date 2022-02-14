@@ -3,7 +3,11 @@
 {% load i18n %}
 
 {% block content %}
-<form id="main_form" role="form" method="post" action="/gvsigonline/services/sqlview_add/">
+{% if is_update %}
+<form id="main_form" role="form" method="post" action="{% url 'sqlview_update' view_id=view_id %}">
+{% else %}
+<form id="main_form" role="form" method="post" action="{% url 'sqlview_add' %}">
+{% endif %}
 	<div class="row">
 		<div class="col-md-12">
 			<div class="row">
@@ -307,9 +311,38 @@
 				rebuildSelect(selectObj, text, true);
 			}
 		};
+		
+		var OrderedAsyncProcessor = function(expectedResults,processorFunc, sorterFunc) {
+			this.expectedResults = expectedResults;
+			this.sorterFunc = sorterFunc || null;
+			this.processorFunc = processorFunc;
+			this.results = {};
+		};
+		OrderedAsyncProcessor.prototype.defaultSorter = function(results) {
+			var sortedResults = [];
+			var sortedKeys = Object.keys(results).sort();
+			for (var i=0; i<sortedKeys.length; i++) {
+				sortedResults.push(results[sortedKeys[i]]);
+			}
+			return sortedResults;
+		};
+		OrderedAsyncProcessor.prototype.addResult = function(name, result) {
+			this.results[name] = result;
+			if (Object.keys(this.results).length == this.expectedResults) {
+				var sortedResults;
+				if (this.sorterFunc !== null) {
+					sortedResults = this.sorterFunc(this.results);
+				}
+				else {
+					sortedResults = this.defaultSorter(this.results);
+				}
+				this.processorFunc(sortedResults);
+			}
+		};
 
-		function addFieldsUi(fromTable, selectedFieldAliases, previousValues) {
+		function addFieldsUi(fromTable, selectedFieldAliases, previousValues, uiProcessor) {
 			$.getJSON("{% url 'backend_fields_list' %}", { datastore_id: fromTable.datastore_id, table_name: fromTable.table_name }, function (data) {
+				var rows = [];
 				var row, fieldName, previousVal, alias, selected;
 				for (var i = 0; i < data.length; i++) {
 					fieldName = data[i]["name"];
@@ -357,8 +390,9 @@
 					row += '<td class="form-group form-check col-md-3">';
 					row += '<input type="text" class="form-control selected-field-alias" id="selected-field-alias-' + i + '" value="' + alias + '">';
 					row += '</td></tr>';
-					$("#field-list-table-body").append(row);
+					rows.push(row);
 				}
+				uiProcessor.addResult(fromTable.table_alias, rows);
 			});
 		}
 
@@ -483,8 +517,19 @@
 			}
 			$("#field-list-table-body").empty();
 			var selectedFieldAliases = [];
+			// since getJSON is async and returns in random order, we use an ordered ui processor
+			// to ensure fields are always added in the same order
+			var uiProcessor = new OrderedAsyncProcessor(fromTables.length, function(sortedResults){
+				var row;
+				for (var i=0; i<sortedResults.length; i++) {
+					for (var j=0; j<sortedResults[i].length; j++) {
+						row = sortedResults[i][j];
+						$("#field-list-table-body").append(row);
+					}
+				}
+			});
 			for (var i = 0; i < fromTables.length; i++) {
-				addFieldsUi(fromTables[i], selectedFieldAliases, previousValues);
+				addFieldsUi(fromTables[i], selectedFieldAliases, previousValues, uiProcessor);
 			}
 		}
 
@@ -494,7 +539,12 @@
 				var table;
 				for (var i=0; i<fromTablesDict.length; i++) {
 					table = fromTablesDict[i];
-					addTableUi(table["datastore_id"], table["datastore_name"], table["name"], table["alias"], table["join_field1"]["name"], table["join_field2"]["name"]);
+					if (i>0) {
+						addTableUi(table["datastore_id"], table["datastore_name"], table["name"], table["alias"], table["join_field1"]["name"], table["join_field2"]["name"]);
+					}
+					else {
+						addTableUi(table["datastore_id"], table["datastore_name"], table["name"], table["alias"]);
+					}
 				}
 			}
 		}
@@ -541,7 +591,7 @@
 		function serializeFields() {
 			var fields = [];
 			var field;
-			$("#field-list-table-body tr .selected-field:checked").parents("tr").each(function () {
+			$("#field-list-table-body tr").has(".selected-field:checked").each(function () {
 				field = {};
 				var field_name = $(this).find(".field-name").text();
 				var table_alias = $(this).find(".table-alias").text();

@@ -60,7 +60,7 @@ class SqlFrom():
     def to_json(self):
         r = {
             "schema": self.schema,
-            "table": self.table,
+            "name": self.table,
             "alias": self.table_alias
         }
         if self.join_fields and len(self.join_fields)>0:
@@ -77,11 +77,14 @@ class SqlField():
         self.alias = alias
     
     def to_json(self):
-        return {
+        r = {
             "table_alias": self.table_alias,
-            "name": self.field,
-            "alias": self.alias
+            "name": self.field
         }
+        if self.alias:
+            r["alias"] = self.alias
+        return r
+            
 
 class Introspect:
     def __init__(self, database, host='localhost', port='5432', user='postgres', password='postgres'):
