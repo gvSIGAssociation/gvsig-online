@@ -4984,9 +4984,14 @@ def _sqlview_update(request, is_update, sql_view=None):
                         if not c.create_view(sql_view.datastore.name, sql_view.name, from_objs, field_objs):
                             form.add_error(None, ugettext_lazy('The view could not be created'))
                             raise Exception
-                        if not is_update and not c.insert_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name, pks):
+                        if is_update: # delete and insert again in case the pk field has a new alias
+                            c.delete_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name)
+                        if not c.insert_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name, pk_aliases):
                             form.add_error(None, ugettext_lazy('Pk columns could not be inserted'))
                             raise Exception
+                        # TODO: we should add indexes to the join fields to ensure optimal performance
+                        # TODO: maybe we should warn the user if a view name is changed and some layer relies in the old name
+                        # TODO: maybe we should warn the user if a view is deleted and some layer relies in the old name
                     return redirect('sqlview_list')
                 except Exception as e:
                     if len(form.errors) == 0:
