@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from attr import attr
 import pandas as pd
 import psycopg2
 import cx_Oracle
