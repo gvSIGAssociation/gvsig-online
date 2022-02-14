@@ -496,6 +496,13 @@ def output_Postgresql(dicc, geom_column_name = ''):
         df.to_sql(table_name, con=conn_target, schema= esq, if_exists='append', index=False)
     elif dicc['operation'] == 'OVERWRITE':
         df.to_sql(table_name, con=conn_target, schema= esq, if_exists='replace', index=False)
+        sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
+        executePostgres(dicc, sqlAlter)
+        sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY ogc_fid'
+        try:
+            executePostgres(dicc, sqlAlter_)
+        except:
+            pass
     elif dicc['operation'] == 'UPDATE':
         
         attr_list = list(df.columns)
@@ -797,56 +804,98 @@ def trans_CadastralGeom(dicc):
     return [table_name_target]
 
 def trans_MGRS(dicc):
-    table = dicc['data'][0]
+    
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+    cur_2 = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" AS (SELECT * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" );'
+    cur.execute(sqlDup)
+    conn.commit()
+    
     select = dicc['select']
 
     m = mgrs.MGRS()
     
     if select == 'mgrstolatlon':
         grid = dicc['mgrs']
+
+        sqlAdd = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'+' ADD COLUMN _lat FLOAT DEFAULT NULL, ADD COLUMN _lon FLOAT DEFAULT NULL'
+        cur.execute(sqlAdd)
+        conn.commit()
+
+        sqlSelect = 'SELECT "'+grid+'" FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+        cur.execute(sqlSelect)
+        conn.commit()
         
-        for i in table['features']:
+        for row in cur:
             try:
-                lat, lon = m.toLatLon(i['properties'][grid].replace(" ", ""))
-                i['properties']['_lat'] = lat
-                i['properties']['_lon'] = lon
+                lat, lon = m.toLatLon(row[0].replace(" ", ""))
+
+                sqlUpdate = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"  SET _lat = '+ str(lat)+', _lon = '+ str(lon) +' WHERE "'+grid+'" = '+"'"+ row[0]+"'"
+                cur_2.execute(sqlUpdate)
+                conn.commit()
+
             except:
-                i['properties']['_lat'] = 'NULL'
-                i['properties']['_lon'] = 'NULL'
+                pass
 
     else:
         lat = dicc['lat']
         lon = dicc['lon']
-        
-        for i in table['features']:
-            try:
-                grid = m.toMGRS(i['properties'][lat], i['properties'][lon])
-                i['properties']['_mgrs_grid'] = grid
-            except:
-                i['properties']['_mgrs_grid'] = 'NULL'
 
-    return [table]
+        sqlAdd = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'+' ADD COLUMN _grid TEXT DEFAULT NULL'
+        cur.execute(sqlAdd)
+        conn.commit()
+
+        sqlSelect = 'SELECT "'+lat+'", "'+lon+'" FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+        cur.execute(sqlSelect)
+        conn.commit()
+        
+        for row in cur:
+            try:
+                grid = m.toMGRS(row[0], row[1])
+
+                sqlUpdate = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"  SET _grid = '+"'"+grid+"'"+' WHERE "'+lat+'" = '+ "'"+str(row[0])+"'" + ' AND "'+lon+'" = '+"'"+str(row[1])+"'"
+                cur_2.execute(sqlUpdate)
+                conn.commit()
+
+            except:
+                pass
+
+    conn.close()
+    cur.close()
+    cur_2.close()
+
+    return [table_name_target]
 
 def trans_TextToPoint(dicc):
     
-    table = dicc['data'][0]
     lat = dicc['lat']
     lon = dicc['lon']
     epsg = dicc['epsg']
-    table["type"] = "FeatureCollection"
-    table["crs"] = {"type": "name", "properties":{"name":"EPSG:"+str(epsg)}}
 
-    for i in table['features']:
-        lat_ = i['properties'][lat]
-        lon_ = i['properties'][lon]
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
 
-        try:
-            i["type"] = "Feature"
-            i["geometry"] = {"type": "Point", "coordinates": [float(lon_), float(lat_)]}
-        except:
-            pass
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" AS (SELECT *, ST_SetSRID(ST_MakePoint("'+lon+'"::float, "'+lat+'"::float), '+epsg+') AS wkb_geometry FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" );'
+    cur.execute(sqlDup)
+    conn.commit()
     
-    return[table]
+    return[table_name_target]
 
 def input_Oracle(dicc):
 
@@ -1167,7 +1216,7 @@ def input_Postgres(dicc, geom_column_name = ''):
     else:
         sql = "SELECT *, ST_ASTEXT ("+geom_column_name+") AS _st_astext_temp FROM " + schemaTable + clause
 
-    df = pd.read_sql(sql + ' LIMIT 1 ', con = conn_source)
+    df = pd.read_sql('SELECT * FROM ('+ sql + ') AS FOO LIMIT 1 ', con = conn_source)
 
     conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
     db_target = create_engine(conn_string_target)
@@ -1942,7 +1991,6 @@ def trans_SpatialRel(dicc):
 
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
-    cur_3 = conn.cursor()
 
     sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
     cur.execute(sqlDrop)
