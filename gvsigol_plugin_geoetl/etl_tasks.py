@@ -68,10 +68,11 @@ class Graph:
 
 #functions associated to tasks. 
 #All of them receive a dictionary with the parameters for the task
-#and the data -if task is not an input task-
-#the output for each function must be a list of json. 
-# list will be as longer as outputs has the task. e.g filter has two outputs True ans False
-#so output list will be [jsonTrue, jsonFalse]
+#and the name of a table postgres -if task is not an input task-
+#The output for each function must be the name of a table postgres/postgis in an array.
+#Name must be the identifier of the task 
+#Array will be as longer as outputs has the task. e.g filter has two outputs True and False
+#so output array will be [idTrue, idFalse]
 
 def input_Excel(dicc):
 
