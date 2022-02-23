@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-15 11:09+0000\n"
-"PO-Revision-Date: 2021-06-15 18:32+0200\n"
+"POT-Creation-Date: 2022-02-23 11:25+0000\n"
+"PO-Revision-Date: 2022-02-22 18:06+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: gvsigol_services/backend_geoserver.py:104
 #: gvsigol_services/backend_geoserver.py:130
@@ -117,7 +117,7 @@ msgid ""
 msgstr ""
 "Os parâmetros de conexão contêm um nome de banco de dados inválido: {value}. "
 "Os identificadores devem começar com uma letra ou um sublinhado (_). Os "
-"caracteres subsequentes podem ser letras, sublinhados ou números."
+"caracteres subsequentes podem ser letras, sublinhados ou números"
 
 #: gvsigol_services/backend_geoserver.py:1208
 #: gvsigol_services/backend_geoserver.py:1326
@@ -129,7 +129,7 @@ msgid ""
 msgstr ""
 "Os parâmetros de conexão contêm um nome de usuário inválido: {value}. Os "
 "identificadores devem começar com uma letra ou um traço (_). Os caracteres "
-"subsequentes podem ser letras, sublinhados ou números."
+"subsequentes podem ser letras, sublinhados ou números"
 
 #: gvsigol_services/backend_geoserver.py:1210
 #: gvsigol_services/backend_geoserver.py:1328
@@ -544,7 +544,7 @@ msgstr "Campos"
 #: gvsigol_services/forms_services.py:195
 #: gvsigol_services/templates/sqlview_add.html:110
 msgid "Field"
-msgstr "Campos"
+msgstr "Campo"
 
 #: gvsigol_services/forms_geoserver.py:153
 #: gvsigol_services/forms_services.py:165
@@ -556,7 +556,7 @@ msgstr "Fim do campo"
 #: gvsigol_services/forms_services.py:169
 #: gvsigol_services/forms_services.py:197
 msgid "Presentation"
-msgstr "Formato de apresentação"
+msgstr "Apresentação"
 
 #: gvsigol_services/forms_geoserver.py:155
 #: gvsigol_services/forms_services.py:170
@@ -837,41 +837,31 @@ msgstr "Apikey"
 
 #: gvsigol_services/forms_services.py:256
 #: gvsigol_services/templates/sqlview_add.html:39
-#, fuzzy
-#| msgid "Table"
 msgid "Tables"
 msgstr "Tabela"
 
 #: gvsigol_services/forms_services.py:262
-#, fuzzy
-#| msgid "At least one node must be defined"
 msgid "At least one table must be selected"
-msgstr "Pelo menos um nó deve ser definido"
+msgstr "Pelo menos uma tabela deve ser definido"
 
 #: gvsigol_services/forms_services.py:270
-#, fuzzy
-#| msgid "Invalid field definition"
 msgid "Invalid table definition"
-msgstr "Definição de campo inválida"
+msgstr "Definição da tabela inválida"
 
 #: gvsigol_services/forms_services.py:275
 msgid "Invalid table definition. Join field 1 is missing"
-msgstr ""
+msgstr "Definição da tabela inválida. Falta o campo 1 está faltando"
 
 #: gvsigol_services/forms_services.py:278
 msgid "Invalid table definition. Join field 2 is missing"
-msgstr ""
+msgstr "Definição da tabela inválida. Falta o campo 2 está faltando"
 
 #: gvsigol_services/forms_services.py:280
 #: gvsigol_services/forms_services.py:293
-#, fuzzy
-#| msgid "Duplicated field name"
 msgid "Duplicated alias"
 msgstr "Nome do campo duplicado"
 
 #: gvsigol_services/forms_services.py:287
-#, fuzzy
-#| msgid "At least one field must be defined"
 msgid "At least one field must be selected"
 msgstr "Pelo menos um campo deve ser definido"
 
@@ -942,7 +932,7 @@ msgstr ""
 #: gvsigol_services/templates/external_layer_add.html:62
 #: gvsigol_services/templates/external_layer_update.html:77
 msgid "Connect"
-msgstr "Conectar"
+msgstr "Conexão"
 
 #: gvsigol_services/templates/base_layer_add.html:81
 #: gvsigol_services/templates/base_layer_update.html:83
@@ -1264,11 +1254,13 @@ msgstr "%(sep)sSort descendente"
 
 #: gvsigol_services/templates/base_layer_list.html:104
 msgid "Remove baselayer"
-msgstr "Remover a camada de base"
+msgstr ""
+"Remover a camada \n"
+"base"
 
 #: gvsigol_services/templates/base_layer_list.html:108
 msgid "Update baselayer"
-msgstr "Atualizar camada de base"
+msgstr "Atualizar camada base"
 
 #: gvsigol_services/templates/base_layer_update.html:13
 #: gvsigol_services/templates/datastore_update.html:12
@@ -1278,11 +1270,11 @@ msgstr "Atualizar camada de base"
 #: gvsigol_services/templates/service_url_update.html:12
 #: gvsigol_services/templates/workspace_update.html:12
 msgid "Update"
-msgstr "Atualização "
+msgstr "Atualização"
 
 #: gvsigol_services/templates/cache_list.html:11
 msgid "Error:"
-msgstr ""
+msgstr "Erro:"
 
 #: gvsigol_services/templates/cache_list.html:21
 msgid "Cached layers"
@@ -1342,8 +1334,6 @@ msgid "Services URL"
 msgstr "Serviços"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:17
-#, fuzzy
-#| msgid "SQL View"
 msgid "SQL Views"
 msgstr "SQL Vista"
 
@@ -1391,8 +1381,7 @@ msgstr "O armazém de dados e seus recursos registrados serão excluídos"
 
 #: gvsigol_services/templates/datastore_list.html:69
 msgid "Check this option to remove the schema associated with the datastore"
-msgstr ""
-"Marque esta opção para remover o esquema associado com o armazém de dados "
+msgstr "Marque esta opção para remover o esquema associado ao armazém de dados"
 
 #: gvsigol_services/templates/datastore_list.html:116
 msgid "Remove datastore"
@@ -1917,7 +1906,7 @@ msgstr "Atualizar tarefas"
 #: gvsigol_services/templates/group_cache_config.html:141
 #: gvsigol_services/templates/layer_cache_config.html:141
 msgid "kill all tasks"
-msgstr "Excluir todas as tarefas"
+msgstr "excluir todas as tarefas"
 
 #: gvsigol_services/templates/group_cache_config.html:148
 #: gvsigol_services/templates/layer_cache_config.html:148
@@ -1972,7 +1961,7 @@ msgstr "Limite de solicitação WFS"
 #: gvsigol_services/templates/layer_create.html:157
 #: gvsigol_services/templates/layer_update.html:164
 msgid "time_enabled"
-msgstr "Parâmetro temporal"
+msgstr "parâmetro temporal"
 
 #: gvsigol_services/templates/layer_add.html:126
 #: gvsigol_services/templates/layer_create.html:161
@@ -1999,7 +1988,7 @@ msgstr "Intervalo de atualização (milissegundos)"
 #: gvsigol_services/templates/layer_create.html:167
 #: gvsigol_services/templates/layer_update.html:203
 msgid "time_enabled field"
-msgstr "Campo temporal"
+msgstr "campo temporal"
 
 #: gvsigol_services/templates/layer_add.html:158
 #: gvsigol_services/templates/layer_create.html:173
@@ -2157,8 +2146,6 @@ msgstr "Necessário em formulários de edição"
 #: gvsigol_services/templates/layer_config.html:115
 #: gvsigol_services/templates/layer_config.html:152
 #: gvsigol_services/templates/select_layer_permissions.html:35
-#, fuzzy
-#| msgid "SQL View"
 msgid "SQL views can\\"
 msgstr "SQL Vista"
 
@@ -2191,7 +2178,7 @@ msgstr "Título do campo"
 #: gvsigol_services/templates/layer_config.html:225
 #: gvsigol_services/templates/layer_config.html:755
 msgid "Delete group"
-msgstr "Excluir grupo de camadas"
+msgstr "Excluir grupo"
 
 #: gvsigol_services/templates/layer_config.html:251
 msgid "Add field group"
@@ -2273,7 +2260,7 @@ msgid ""
 "The layer could not be removed from GeoServer, but it was deleted from the "
 "list anyway"
 msgstr ""
-"Esta camada não pode ser removida do GeoServer, mas foi excluída da lista de "
+"Essa camada não pode ser removida do GeoServer, mas foi excluída da lista de "
 "qualquer maneira"
 
 #: gvsigol_services/templates/layer_list.html:159
@@ -2308,7 +2295,7 @@ msgstr "Formatos suportados"
 #: gvsigol_services/templates/layergroup_add.html:37
 #: gvsigol_services/templates/layergroup_update.html:38
 msgid "Select server"
-msgstr "Seleccionar servidor"
+msgstr "Selecione o servidor"
 
 #: gvsigol_services/templates/layergroup_add.html:49
 #: gvsigol_services/templates/layergroup_update.html:54
@@ -2354,7 +2341,7 @@ msgstr "Em conformidade com"
 #: gvsigol_services/templates/layergroup_list.html:63
 #: gvsigol_services/templates/layergroup_list.html:111
 msgid "Delete layer group"
-msgstr "Eliminar grupo de camadas"
+msgstr "Excluir grupo de camadas"
 
 #: gvsigol_services/templates/layergroup_list.html:66
 msgid "The layer group will be removed, Do you want continue?"
@@ -2394,11 +2381,11 @@ msgstr "Camada de desbloqueio"
 
 #: gvsigol_services/templates/select_layer_permissions.html:7
 msgid "Give the selected groups permissions to read or write the layer"
-msgstr "Permitir que os grupos selecionados leiam ou escrevam a camada"
+msgstr "Dar aos grupos selecionados permissão para ler ou escrever a camada"
 
 #: gvsigol_services/templates/select_layer_permissions.html:8
 msgid "Search user group..."
-msgstr "Pesquisar grupo de usuários"
+msgstr "Pesquisar grupo de usuários..."
 
 #: gvsigol_services/templates/select_layer_permissions.html:12
 msgid "Layer will be readable by everyone if public"
@@ -2480,7 +2467,7 @@ msgstr ""
 
 #: gvsigol_services/templates/server_list.html:111
 msgid "Update server"
-msgstr "Atualizar servidor"
+msgstr "Atualização do servidor"
 
 #: gvsigol_services/templates/server_update.html:67
 #: gvsigol_services/templates/server_update.html:68
@@ -2502,114 +2489,88 @@ msgstr "A camada será removida. Quer continuar?"
 
 #: gvsigol_services/templates/service_url_list.html:109
 msgid "Update service URL"
-msgstr "Atualizar servidor"
+msgstr "Atualizar URL do serviço"
 
 #: gvsigol_services/templates/sqlview_add.html:76
 #: gvsigol_services/templates/sqlview_add.html:113
-#, fuzzy
-#| msgid "Table"
 msgid "Table alias"
-msgstr "Tabela"
+msgstr "Tabela alias"
 
 #: gvsigol_services/templates/sqlview_add.html:77
 msgid "Join Field 1"
-msgstr ""
+msgstr "Campo 1 do Join"
 
 #: gvsigol_services/templates/sqlview_add.html:78
 msgid "Join Field 2"
-msgstr ""
+msgstr "Campo 2 do Join"
 
 #: gvsigol_services/templates/sqlview_add.html:89
-#, fuzzy
-#| msgid "Add item"
 msgid "Add table"
-msgstr "Adicionar item"
+msgstr "Adicionar tabela"
 
 #: gvsigol_services/templates/sqlview_add.html:103
-#, fuzzy
-#| msgid "End field"
 msgid "Included fields"
-msgstr "Fim do campo"
+msgstr "Campos incluídos"
 
 #: gvsigol_services/templates/sqlview_add.html:114
 msgid "Alias"
-msgstr ""
+msgstr "Alias"
 
 #: gvsigol_services/templates/sqlview_add.html:125
-#, fuzzy
-#| msgid "Select file"
 msgid "Select all"
-msgstr "Selecionar arquivo"
+msgstr "Selecione todos"
 
 #: gvsigol_services/templates/sqlview_add.html:129
 msgid "None"
-msgstr ""
+msgstr "Nenhuma"
 
 #: gvsigol_services/templates/sqlview_add.html:181
 msgid "Target datastore is empty"
-msgstr ""
+msgstr "O armazém de dados de destino está vazio"
 
 #: gvsigol_services/templates/sqlview_add.html:198
-#, fuzzy
-#| msgid "Remove datastore"
 msgid "Choose datastore"
-msgstr "Excluir armazém"
+msgstr "Selecionar armazém de dados"
 
 #: gvsigol_services/templates/sqlview_add.html:234
-#, fuzzy
-#| msgid "Datastore type"
 msgid "Data store is empty"
-msgstr "Tipo de armazém de dados"
+msgstr "O armazém de dados está vazio"
 
 #: gvsigol_services/templates/sqlview_add.html:252
-#, fuzzy
-#| msgid "Choose field"
 msgid "Choose table"
-msgstr "Selecionar campo"
+msgstr "Selecionar tabela"
 
 #: gvsigol_services/templates/sqlview_add.html:282
-#, fuzzy
-#| msgid "Resource contains no fields"
 msgid "Table has no fields"
-msgstr "O recurso não contém campos"
+msgstr "A tabela não contém campos"
 
 #: gvsigol_services/templates/sqlview_add.html:310
-#, fuzzy
-#| msgid "No valid data store selected"
 msgid "No valid table selected"
-msgstr "Nenhum armazém de dados válido selecionado"
+msgstr "Nenhuma tabela selecionada"
 
 #: gvsigol_services/templates/sqlview_list.html:11
-#, fuzzy
-#| msgid "SQL View"
 msgid "Add SQL View"
-msgstr "SQL Vista"
+msgstr "Adicionar Vista SQL"
 
 #: gvsigol_services/templates/sqlview_list.html:24
 msgid "def"
-msgstr ""
+msgstr "def"
 
 #: gvsigol_services/templates/sqlview_list.html:56
-#, fuzzy
-#| msgid "SQL View"
 msgid "Delete SQL View"
-msgstr "SQL Vista"
+msgstr "Excluir Vista SQL"
 
 #: gvsigol_services/templates/sqlview_list.html:59
 msgid "The SQL View and all layers using this view will be deleted"
-msgstr ""
+msgstr "A Vista SQL e todas as camadas que utilizam esta vista serão excluídas"
 
 #: gvsigol_services/templates/sqlview_list.html:104
-#, fuzzy
-#| msgid "SQL View"
 msgid "Remove SQL View"
-msgstr "SQL Vista"
+msgstr "Remover Vista SQL"
 
 #: gvsigol_services/templates/sqlview_list.html:109
-#, fuzzy
-#| msgid "SQL View"
 msgid "Update SQL View"
-msgstr "SQL Vista"
+msgstr "Atualizar Vista SQL"
 
 #: gvsigol_services/templates/workspace_list.html:11
 msgid "Add workspace"
@@ -2637,7 +2598,7 @@ msgstr "Atualizar espaço de trabalho"
 
 #: gvsigol_services/templates/workspace_update.html:26
 msgid "Uri"
-msgstr "Url"
+msgstr "Uri"
 
 #: gvsigol_services/templates/workspace_update.html:31
 msgid "Workspace description"
@@ -2665,9 +2626,9 @@ msgid ""
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nome do datastore inválido: '{value}'. Os identificadores devem começar com "
-"uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
-"sublinhados ou números"
+"Nome do armazém de dados inválido: '{value}'. Os identificadores devem "
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
+"ser letras, sublinhados ou números"
 
 #: gvsigol_services/views.py:522
 msgid "Error: Data store could not be created"
@@ -2683,29 +2644,26 @@ msgstr "Erro na atualização do armazém de dados"
 
 #: gvsigol_services/views.py:748
 msgid "ERROR can't connect with GeoServer"
-msgstr "ERROR não pode se conectar com GeoServer"
+msgstr "ERRO: não pode se conetar com GeoServer"
 
 #: gvsigol_services/views.py:756
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
-"ERROR não pode remover dados do GeoServer. Forçando a remoção de dados da "
+"ERRO: não pode remover dados do GeoServer. Forçando a remoção de dados da "
 "Base de Dados"
 
 #: gvsigol_services/views.py:780
 msgid "ERROR User is not authorized to perform this operation"
-msgstr "ERROR O usuário não está autorizado a realizar esta operação"
+msgstr "ERRO: O usuário não está autorizado a realizar esta operação"
 
 #: gvsigol_services/views.py:1952 gvsigol_services/views.py:1968
-#, fuzzy, python-brace-format
-#| msgid "Error creating field. Cause: {0}"
+#, python-brace-format
 msgid "Error clearing cache. Cause: {cause}."
-msgstr "Campo de criação de erros. Causa: {0}"
+msgstr "Cache de compensação de erros. Causa: {cause}."
 
 #: gvsigol_services/views.py:1954
-#, fuzzy
-#| msgid "Field type not supported"
 msgid "Not supported."
-msgstr "Tipo de campo não suportado"
+msgstr "Não suportado"
 
 #: gvsigol_services/views.py:2078 gvsigol_services/views.py:2236
 #, python-brace-format
@@ -2743,34 +2701,31 @@ msgid "Error: externallayer could not be published"
 msgstr "Erro: camada externa não pôde ser publicada"
 
 #: gvsigol_services/views.py:4293
-#, fuzzy, python-brace-format
-#| msgid "Error creating field. Cause: {0}"
+#, python-brace-format
 msgid "Error configuring layer. Cause: {cause}."
-msgstr "Campo de criação de erros. Causa: {0}"
+msgstr "Erro de configuração da camada. Causa: {cause}"
 
 #: gvsigol_services/views.py:4358
-#, fuzzy, python-brace-format
-#| msgid "Error creating field. Cause: {0}"
+#, python-brace-format
 msgid "Error accessing layer. Cause: {cause}."
-msgstr "Campo de criação de erros. Causa: {0}"
+msgstr "Erro na camada de acesso. Causa: {cause}"
 
 #: gvsigol_services/views.py:4455
-#, fuzzy, python-brace-format
-#| msgid "Error publishing the layer group. Backend error: {msg}"
+#, python-brace-format
 msgid "Error accessing layer group. Cause: {cause}."
-msgstr "Erro na publicação do grupo de camadas. Erro backend: {msg}"
+msgstr "Erro ao acessar grupo de camadas. {cause}."
 
 #: gvsigol_services/views.py:4642 gvsigol_services/views.py:4648
 msgid "Connection failed"
-msgstr "Parâmetros de conexão"
+msgstr "A conexão falhou"
 
 #: gvsigol_services/views.py:4642
 msgid "Status code: "
-msgstr "Estado"
+msgstr "Código de situação:"
 
 #: gvsigol_services/views.py:4653
 msgid "Connection error"
-msgstr "Parâmetros de conexão"
+msgstr "Erro de conexão"
 
 #: gvsigol_services/views.py:4688
 #, python-brace-format
@@ -2794,7 +2749,7 @@ msgstr ""
 #: gvsigol_services/views.py:4717
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
-msgstr "Campo de eliminação de erros. Causa: {0}"
+msgstr "Erro no campo de exclusão. Causa: {0}"
 
 #: gvsigol_services/views.py:4744
 #, python-brace-format
@@ -2816,58 +2771,59 @@ msgid ""
 "Error adding field. Probably the field \"{0}\" already exists. Database "
 "message: {1}"
 msgstr ""
+"Erro ao adicionar campo. Provavelmente, o campo \"{0}\" já existe. Mensagem "
+"do banco de dados: {1}"
 
 #: gvsigol_services/views.py:4848
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr "Campo de criação de erros. Causa: {0}"
 
-#: gvsigol_services/views.py:4896
+#: gvsigol_services/views.py:4915
+#, python-brace-format
+msgid ""
+"Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
+msgstr "Os campos do JOIN devem ter o mesmo tipo: {field1}({type1}) - {field2}({type2})"
+
+#: gvsigol_services/views.py:4929
 msgid "The user can't manage this SQL view"
-msgstr ""
+msgstr "O usuário não pode gerenciar esta vista SQL"
 
-#: gvsigol_services/views.py:4922
+#: gvsigol_services/views.py:4955
 msgid "The main table must have a primary key"
-msgstr ""
+msgstr "A tabela principal deve ter uma chave primária"
 
-#: gvsigol_services/views.py:4952
-#, fuzzy, python-brace-format
-#| msgid "Field type not supported"
+#: gvsigol_services/views.py:4985
+#, python-brace-format
 msgid "Field does not exist: {field}"
-msgstr "Tipo de campo não suportado"
+msgstr "O campo não existe: {field}"
 
-#: gvsigol_services/views.py:4962
+#: gvsigol_services/views.py:4995
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
+"O campo {field} é a chave primária da tabela principal e deve ser incluído"
 
-#: gvsigol_services/views.py:4982
-#, fuzzy
-#| msgid "A layer already exists with this name: '{value}'"
+#: gvsigol_services/views.py:5015
 msgid "An object already exists with name: {}"
-msgstr "Já existe uma camada com este nome: '{value}'."
+msgstr "Já existe um objeto com nome:: {}"
 
-#: gvsigol_services/views.py:4985
-#, fuzzy
-#| msgid "Error: workspace could not be created"
+#: gvsigol_services/views.py:5022
 msgid "The view could not be created"
-msgstr "Erro: o espaço de trabalho não pôde ser criado"
+msgstr "A vista não pôde ser criada"
 
-#: gvsigol_services/views.py:4990
-#, fuzzy
-#| msgid "Error: workspace could not be created"
+#: gvsigol_services/views.py:5027
 msgid "Pk columns could not be inserted"
-msgstr "Erro: o espaço de trabalho não pôde ser criado"
+msgstr "As colunas Pk não puderam ser inseridas"
 
-#: gvsigol_services/views.py:5034
+#: gvsigol_services/views.py:5072
 msgid "Not allowed"
-msgstr ""
+msgstr "Não permitido"
 
-#: gvsigol_services/views.py:5043
-#, fuzzy, python-brace-format
-#| msgid "Error deleting field. Cause: {0}"
+#: gvsigol_services/views.py:5081
+#, python-brace-format
 msgid "Error deleting view: {0}"
-msgstr "Campo de eliminação de erros. Causa: {0}"
+msgstr "Erro ao excluir a vista: {0}"
 
 #~ msgid "String"
 #~ msgstr "String"
