@@ -459,11 +459,12 @@
 				row.append(joinFieldCol2);
 
 				tableSelect.change(function () {
-				var table_name = $('option:selected', $(this)).val();
-				var id_datastore = datastoreSelect.val();
-				udateFieldsCombo(id_datastore, table_name, joinFieldSelect2);
-				//$("#field-list-table-body").empty();
-			});
+					var table_name = $('option:selected', $(this)).val();
+					var id_datastore = datastoreSelect.val();
+					udateFieldsCombo(id_datastore, table_name, joinFieldSelect2);
+					//$("#field-list-table-body").empty();
+				});
+				tableSelect.change(); // the fields combo is not filled when the value of tableSelect is set programatically
 			}
 			else {
 				row.append('<td class="form-group col-md-2"></td><td class="form-group col-md-2"></td>');

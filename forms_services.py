@@ -271,10 +271,10 @@ class SqlViewForm(forms.ModelForm):
             join_field = table.get('join_field')
             if idx > 1:
                 join_field1 = table.get('join_field1')
-                if not join_field1:
+                if not join_field1 or not join_field1.get('name'):
                     raise ValidationError(ugettext_lazy('Invalid table definition. Join field 1 is missing'), code='from_table_join_field1')
                 join_field2 = table.get('join_field2')
-                if not join_field2:
+                if not join_field2 or not join_field2.get('name'):
                     raise ValidationError(ugettext_lazy('Invalid table definition. Join field 2 is missing'), code='from_table_join_field2')
             if alias in table_aliases:
                 raise ValidationError(ugettext_lazy('Duplicated alias'), code='from_table_alias')
