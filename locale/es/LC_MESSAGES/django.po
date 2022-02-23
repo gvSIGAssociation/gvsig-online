@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-15 11:09+0000\n"
+"POT-Creation-Date: 2022-02-23 11:25+0000\n"
 "PO-Revision-Date: 2022-02-15 12:28+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -2777,42 +2777,49 @@ msgstr ""
 msgid "Error creating field. Cause: {0}"
 msgstr "Error creando el campo. Causa: {0}"
 
-#: gvsigol_services/views.py:4896
+#: gvsigol_services/views.py:4915
+#, python-brace-format
+msgid ""
+"Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
+msgstr ""
+"Los campos de JOIN deben tener el mismo tipo: {field1}({type1}) - {field2}({type2})"
+
+#: gvsigol_services/views.py:4929
 msgid "The user can't manage this SQL view"
 msgstr "El usuario no puede gestionar esta vista SQL"
 
-#: gvsigol_services/views.py:4922
+#: gvsigol_services/views.py:4955
 msgid "The main table must have a primary key"
 msgstr "La tabla principal debe tener una clave primaria"
 
-#: gvsigol_services/views.py:4952
+#: gvsigol_services/views.py:4985
 #, python-brace-format
 msgid "Field does not exist: {field}"
 msgstr "El campo no existe: {field}"
 
-#: gvsigol_services/views.py:4962
+#: gvsigol_services/views.py:4995
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
 "El campo {field} es la clave primaria de la tabla principal y debe incluirse"
 
-#: gvsigol_services/views.py:4982
+#: gvsigol_services/views.py:5015
 msgid "An object already exists with name: {}"
 msgstr "Ya existe un objeto con este nombre: {}"
 
-#: gvsigol_services/views.py:4985
+#: gvsigol_services/views.py:5022
 msgid "The view could not be created"
 msgstr "No se pudo crear la vista"
 
-#: gvsigol_services/views.py:4990
+#: gvsigol_services/views.py:5027
 msgid "Pk columns could not be inserted"
 msgstr "No se pudieron insertar las claves primarias"
 
-#: gvsigol_services/views.py:5034
+#: gvsigol_services/views.py:5072
 msgid "Not allowed"
 msgstr "No permitido"
 
-#: gvsigol_services/views.py:5043
+#: gvsigol_services/views.py:5081
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr "Error borrando la vista: {0}"

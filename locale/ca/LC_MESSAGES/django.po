@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-15 11:09+0000\n"
+"POT-Creation-Date: 2022-02-23 11:25+0000\n"
 "PO-Revision-Date: 2021-05-05 23:54+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -2821,48 +2821,54 @@ msgstr ""
 msgid "Error creating field. Cause: {0}"
 msgstr "Error al crear el camp. Causa: {0}"
 
-#: gvsigol_services/views.py:4896
+#: gvsigol_services/views.py:4915
+#, python-brace-format
+msgid ""
+"Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
+msgstr ""
+
+#: gvsigol_services/views.py:4929
 msgid "The user can't manage this SQL view"
 msgstr ""
 
-#: gvsigol_services/views.py:4922
+#: gvsigol_services/views.py:4955
 msgid "The main table must have a primary key"
 msgstr ""
 
-#: gvsigol_services/views.py:4952
+#: gvsigol_services/views.py:4985
 #, fuzzy, python-brace-format
 #| msgid "Field type not supported"
 msgid "Field does not exist: {field}"
 msgstr "Tipus de camp no admès"
 
-#: gvsigol_services/views.py:4962
+#: gvsigol_services/views.py:4995
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
 
-#: gvsigol_services/views.py:4982
+#: gvsigol_services/views.py:5015
 #, fuzzy
 #| msgid "A layer already exists with this name: '{value}'"
 msgid "An object already exists with name: {}"
 msgstr "Ja existeis una capa amb aquest nom: '{value}'"
 
-#: gvsigol_services/views.py:4985
+#: gvsigol_services/views.py:5022
 #, fuzzy
 #| msgid "Error: workspace could not be created"
 msgid "The view could not be created"
 msgstr "Error: L'espai de treball no pot ser creat"
 
-#: gvsigol_services/views.py:4990
+#: gvsigol_services/views.py:5027
 #, fuzzy
 #| msgid "Error: workspace could not be created"
 msgid "Pk columns could not be inserted"
 msgstr "Error: L'espai de treball no pot ser creat"
 
-#: gvsigol_services/views.py:5034
+#: gvsigol_services/views.py:5072
 msgid "Not allowed"
 msgstr ""
 
-#: gvsigol_services/views.py:5043
+#: gvsigol_services/views.py:5081
 #, fuzzy, python-brace-format
 #| msgid "Error deleting field. Cause: {0}"
 msgid "Error deleting view: {0}"

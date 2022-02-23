@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-15 11:09+0000\n"
+"POT-Creation-Date: 2022-02-23 11:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2722,41 +2722,47 @@ msgstr ""
 msgid "Error creating field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:4896
+#: gvsigol_services/views.py:4915
+#, python-brace-format
+msgid ""
+"Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
+msgstr ""
+
+#: gvsigol_services/views.py:4929
 msgid "The user can't manage this SQL view"
 msgstr ""
 
-#: gvsigol_services/views.py:4922
+#: gvsigol_services/views.py:4955
 msgid "The main table must have a primary key"
 msgstr ""
 
-#: gvsigol_services/views.py:4952
+#: gvsigol_services/views.py:4985
 #, python-brace-format
 msgid "Field does not exist: {field}"
 msgstr ""
 
-#: gvsigol_services/views.py:4962
+#: gvsigol_services/views.py:4995
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
 
-#: gvsigol_services/views.py:4982
+#: gvsigol_services/views.py:5015
 msgid "An object already exists with name: {}"
 msgstr ""
 
-#: gvsigol_services/views.py:4985
+#: gvsigol_services/views.py:5022
 msgid "The view could not be created"
 msgstr ""
 
-#: gvsigol_services/views.py:4990
+#: gvsigol_services/views.py:5027
 msgid "Pk columns could not be inserted"
 msgstr ""
 
-#: gvsigol_services/views.py:5034
+#: gvsigol_services/views.py:5072
 msgid "Not allowed"
 msgstr ""
 
-#: gvsigol_services/views.py:5043
+#: gvsigol_services/views.py:5081
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
