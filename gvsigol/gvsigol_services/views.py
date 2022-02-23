@@ -4883,6 +4883,39 @@ def sqlview_update(request, view_id):
 def sqlview_add(request):
     return _sqlview_update(request, False)
 
+def _check_join_field_types(from_def):
+    table_aliases = {}
+    for idx, from_table in enumerate(from_def):
+        alias = from_table.get('alias', from_table.get('name'))
+        table_aliases[alias] = from_table
+        if idx > 0:
+            join_field1 = from_table.get('join_field1')
+            table_alias = join_field1.get('table_alias')
+            t = table_aliases.get(table_alias)
+            ds = Datastore.objects.get(pk=t.get('datastore_id'))
+            i, params = ds.get_db_connection()
+            join_field1_type = None
+            join_field2_type = None
+            with i as c:
+                info = c.get_fields_info(t.get('name'), schema=t.get('schema'))
+            for field in info:
+                if field.get('name') == join_field1.get('name'):
+                    join_field1_type = field.get('type')
+            join_field2 = from_table.get('join_field2')
+            table_alias = join_field2.get('table_alias')
+            t = table_aliases.get(table_alias)
+            ds = Datastore.objects.get(pk=t.get('datastore_id'))
+            i, params = ds.get_db_connection()
+            with i as c:
+                info = c.get_fields_info(t.get('name'), schema=t.get('schema'))
+            for field in info:
+                if field.get('name') == join_field2.get('name'):
+                    join_field2_type = field.get('type')
+            if join_field1_type != join_field2_type:
+                return ugettext("Join fields must have the same type: {field1}({type1}) - {field2}({type2})".format(field1=join_field1.get('name'), type1=join_field1_type, field2=join_field2.get('name'), type2=join_field2_type))
+    return ""
+
+
 def _sqlview_update(request, is_update, sql_view=None):
     view_id = ''
     if request.method == 'POST':
@@ -4982,7 +5015,11 @@ def _sqlview_update(request, is_update, sql_view=None):
                                 form.add_error(None, ugettext_lazy('An object already exists with name: {}').format(sql_view.name))
                                 raise Exception
                         if not c.create_view(sql_view.datastore.name, sql_view.name, from_objs, field_objs):
-                            form.add_error(None, ugettext_lazy('The view could not be created'))
+                            msg = _check_join_field_types(from_def)
+                            if msg:
+                                form.add_error(None, msg)
+                            else:
+                                form.add_error(None, ugettext_lazy('The view could not be created'))
                             raise Exception
                         if is_update: # delete and insert again in case the pk field has a new alias
                             c.delete_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name)
@@ -4994,6 +5031,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                         # TODO: maybe we should warn the user if a view is deleted and some layer relies in the old name
                     return redirect('sqlview_list')
                 except Exception as e:
+                    logger.exception("error")
                     if len(form.errors) == 0:
                         form.add_error(None, str(e))
                     if not is_update:
