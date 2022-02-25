@@ -1612,7 +1612,7 @@ def merge_tables(_list):
 
     
     if 'wkb_geometry' in attr_target_list:
-        srid, type_geom = get_type_n_srid(table_name_target)
+        srid, type_geom1 = get_type_n_srid(table_name_target)
         geomTar = True
     else:
         geomTar = False
@@ -1624,8 +1624,17 @@ def merge_tables(_list):
         geomSour = False
 
     if geomTar and geomSour:
+        if type_geom1 != type_geom2:
+            type_geom = 'GEOMETRY'
+
         if srid != srid2:
             print('Las tablas que se quieren unir tienen diferentes sistemas de referencia')
+    
+    elif geomTar and not geomSour:
+        type_geom = type_geom1
+
+    elif not geomTar and geomSour:
+        type_geom = type_geom2
 
     db = create_engine(conn_string)
     conn = db.connect()
@@ -2007,7 +2016,7 @@ def trans_SpatialRel(dicc):
 
     sqlUpdate = 'UPDATE '+ settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET _related ='+"'True' WHERE _id_temp IN ("
     sqlUpdate += 'SELECT main._id_temp FROM '+ settings.GEOETL_DB["schema"]+'."'+table_name_target+'" main, ' + settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" sec'
-    sqlUpdate += ' WHERE '+dicc['rel']+'(main.wkb_geometry, sec.wkb_geometry))'
+    sqlUpdate += ' WHERE '+dicc['option']+'(main.wkb_geometry, sec.wkb_geometry))'
     cur.execute(sqlUpdate)
     conn.commit()
 

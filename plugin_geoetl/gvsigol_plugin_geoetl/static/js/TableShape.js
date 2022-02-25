@@ -3831,15 +3831,14 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
                     "string": $('#string-'+ID).val()}
                 ]}
 
-                //schemaMod =[...schemaEdge]
-                
-                //schemaMod.push($('#new-attr-'+ID).val())
+                schemaMod =[...schemaEdge]
+                schemaMod.splice(schemaMod.indexOf($('#attr-'+ID).val()), 1)
+                schemaMod.push($('#attr-'+ID).val())
 
                 paramsPad['schema-old'] = schemaEdge
-                paramsPad['schema'] = schemaEdge
+                paramsPad['schema'] = schemaMod
 
-
-                passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
+                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
                 isAlreadyInCanvas(jsonParams, paramsPad, ID)
 
@@ -6334,7 +6333,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<div>'+
                                 '<label class="col-form-label">'+gettext('Spatial relation')+'</label>'+
-                                '<select class="form-control" id="rel-'+ID+'">'+
+                                '<select class="form-control" id="option-'+ID+'">'+
                                     '<option value="ST_CONTAINS"> Main Contains Secondary</option>'+
                                     '<option value="ST_EQUALS"> Main Equals Secondary</option>'+
                                     '<option value="ST_INTERSECTS"> Main Intersects Secondary</option>'+
@@ -6375,7 +6374,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
 
                 var paramsSpatialRel = {"id": ID,
                 "parameters": [
-                {"rel": $('#rel-'+ID).val()}
+                {"option": $('#option-'+ID).val()}
                 ]}
                 
                 schemaMod =[...schemaEdge[0]]
