@@ -578,12 +578,12 @@ class SqlView(models.Model):
         "from": [
             {
                 "schema": "sch1",
-                "table": "table1",
+                "name": "table1",
                 "alias": "t1"
             },
             {
                 "schema": "sch1",
-                "table": "table2",
+                "name": "table2",
                 "alias": "t1",
                 "join_type": "INNER",
                 "join_field1": {
@@ -605,3 +605,8 @@ class SqlView(models.Model):
     """
     json_def =  JSONField()
     created_by = models.CharField(max_length=100, default='')
+
+    @property
+    def tables_str(self):
+        tables = [ t.get('schema', '')+'.'+t.get('name', '') for t in self.json_def.get('from', [])]
+        return ", ".join(tables)
