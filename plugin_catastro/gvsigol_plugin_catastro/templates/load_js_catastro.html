@@ -3,7 +3,7 @@
 <script type="text/javascript" src="{% static "js/vendors/catastro/select2/select2.js" %}"></script>
 <script type="text/javascript" src="{% static "js/vendors/catastro/catastro.js" %}"></script>
 <script type="text/javascript">
-
+if (viewer.core.ifToolInConf('gvsigol_plugin_catastro')) {
 	$.ajax({
 		type : 'POST',
 		async : false,
@@ -83,6 +83,6 @@
 			alert("Error loading plugin");
 		}
 	});
-
+}
 </script>
 {% endif %}
