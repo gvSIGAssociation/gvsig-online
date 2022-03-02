@@ -3,7 +3,7 @@
 from django.db import models
 from gvsigol import settings
 from gvsigol_auth.models import UserGroup
-from gvsigol_services.models import LayerGroup
+from gvsigol_services.models import LayerGroup, Layer
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
 
@@ -224,7 +224,6 @@ class TilingProcessStatus(models.Model):
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 
-
 class ProjectZone(models.Model):
     title = models.CharField(max_length=50) 
     project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
@@ -237,7 +236,7 @@ class ProjectZone(models.Model):
 
 class ZoneLayers(models.Model):
     zone = models.ForeignKey(ProjectZone, default=None, on_delete=models.CASCADE)
-    layer = models.IntegerField(null=False, default=14)
+    layer = models.ForeignKey(Layer, default=None, on_delete=models.CASCADE)
     levels = models.IntegerField(null=False, default=0)
     tilematrixset = models.CharField(max_length=50) 
     format = models.CharField(max_length=50)
