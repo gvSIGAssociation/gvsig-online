@@ -524,3 +524,5 @@ GEOETL_DB = {
     'password': '##DB_PASSWD##',
     'schema': 'ds_plugin_geoetl'
 }
+
+PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
