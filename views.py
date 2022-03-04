@@ -675,9 +675,17 @@ def project_update(request, pid):
         if(project.baselayer_version is not None and project.baselayer_version > 0):
             url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
                     
-        labels = []
+        labels_added = []
         if project.labels:
-            labels = project.labels.split(',')   
+            labels_added = project.labels.split(',')   
+
+        labels = []
+        for l in settings.PRJ_LABELS:
+            check = ''
+            for la in labels_added:
+                if l == la:
+                    check = 'checked'
+            labels.append({'label': l, 'checked': check})
         
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
@@ -689,7 +697,7 @@ def project_update(request, pid):
                                                        'superuser' : is_superuser(request.user), 
                                                        'processing_icon' : icon,
                                                        'url_base_lyr' : url_base_lyr,
-                                                       'labels_added' : labels
+                                                       'label_list': labels
                                                        })
 
 
