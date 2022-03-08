@@ -292,10 +292,10 @@
  * ---------
  */
 .skin-pobla .main-header .navbar {
-  background-color: #536a94;
+  background-color: #fdc252;
 }
 .skin-pobla .main-header .navbar .nav > li > a {
-  color: #ffffff;
+  color: #000000;
 }
 .skin-pobla .main-header .navbar .nav > li > a:hover,
 .skin-pobla .main-header .navbar .nav > li > a:active,
@@ -305,42 +305,42 @@
 .skin-pobla .main-header .navbar .nav .open > a:focus,
 .skin-pobla .main-header .navbar .nav > .active > a {
   background: rgba(0, 0, 0, 0.1);
-  color: #f6f6f6;
+  color: #000000;
 }
 .skin-pobla .main-header .navbar .sidebar-toggle {
-  color: #ffffff;
+  color: #000000;
 }
 .skin-pobla .main-header .navbar .sidebar-toggle:hover {
-  color: #f6f6f6;
+  color: #000000;
   background: rgba(0, 0, 0, 0.1);
 }
 .skin-pobla .main-header .navbar .sidebar-toggle {
-  color: #fff;
+  color: #000000;
 }
 .skin-pobla .main-header .navbar .sidebar-toggle:hover {
-  background-color: #536a94;
+  background-color: #fdc252;
 }
 @media (max-width: 767px) {
   .skin-pobla .main-header .navbar .dropdown-menu li.divider {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.1);
   }
   .skin-pobla .main-header .navbar .dropdown-menu li a {
-    color: #fff;
+    color: #000000;
   }
   .skin-pobla .main-header .navbar .dropdown-menu li a:hover {
-    background: #536a94;
+    background: #fdc252;
   }
 }
 .skin-pobla .main-header .logo {
-  background-color: #536a94;
-  color: #ffffff;
+  background-color: #fdc252;
+  color: #000000;
   border-bottom: 0 solid transparent;
 }
 .skin-pobla .main-header .logo:hover {
-  background-color: #536a94;
+  background-color: #fdc252;
 }
 .skin-pobla .main-header li.user-header {
-  background-color: #536a94;
+  background-color: #fdc252;
 }
 .skin-pobla .content-header {
   background: transparent;
@@ -352,7 +352,7 @@
 }
 .skin-pobla .user-panel > .info,
 .skin-pobla .user-panel > .info > a {
-  color: #fff;
+  color: #ffffff;
 }
 .skin-pobla .sidebar-menu > li.header {
   color: #4b646f;
@@ -365,7 +365,7 @@
 .skin-pobla .sidebar-menu > li.active > a {
   color: #ffffff;
   background: #1e282c;
-  border-left-color: #536a94;
+  border-left-color: #fdc252;
 }
 .skin-pobla .sidebar-menu > li > .treeview-menu {
   margin: 0 1px;
