@@ -21,11 +21,12 @@
 '''
 @author: jrodrigo <jrodrigo@scolab.es>
 '''
-
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import HttpResponse
 from . import settings
 import json
 
+@csrf_exempt
 def get_conf(request):
     if request.method == 'POST': 
         response = {
