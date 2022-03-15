@@ -519,7 +519,7 @@ class Geoserver():
         
         except Exception as ex:
                 logger.exception('Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
-                print(str(ex.message))
+                print(str(ex))
                 return False
      
         try:
