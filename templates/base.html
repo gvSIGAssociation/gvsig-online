@@ -113,7 +113,10 @@
 								</li>
 								<li class="user-footer">
 									<div class="pull-right">
-										<a href="/gvsigonline/auth/logout_user/" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
+										<form id="logout-form" method="post" action="{% url 'gvsigol_logout_user' %}">
+											{% csrf_token %}
+											<button type="submit" class="btn btn-default btn-flat">{% trans "Sign out" %}</button>
+										</form>
 									</div>
 								</li>
 							</ul>

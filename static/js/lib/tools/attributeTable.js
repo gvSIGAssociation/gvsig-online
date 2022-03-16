@@ -437,10 +437,16 @@ attributeTable.prototype.selectTableEvent = function(e, dt, items, indexes) {
 
 attributeTable.prototype.getSelectedFeatures = function(fids){
 	var self = this;
+	var headers = {}
+	// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+	if (this.conf.user.token && !this.layer.external) {
+		headers["Authorization"] = 'Bearer ' + this.conf.user.token;
+	};
 	$.ajax({
 		type: 'POST',
 		async: false,
 	  	url: this.layer.wfs_url,
+		headers: headers,
 	  	data: {
 	  		'service': 'WFS',
 			'version': '1.1.0',

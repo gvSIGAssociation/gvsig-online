@@ -76,7 +76,7 @@ def not_found_view(request):
 def forbidden_view(request):
     return render(request, 'illegal_operation.html', {}, status=403)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def home(request):
     user = User.objects.get(username=request.user.username)
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
@@ -144,7 +144,7 @@ def home(request):
 
     return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def project_list(request):
 
@@ -242,7 +242,7 @@ def get_available_tools(core_enabled=True, plugin_enabled=True):
     """
     return get_core_tools(core_enabled) + get_plugin_tools(plugin_enabled)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def project_add(request):
 
@@ -463,7 +463,7 @@ def project_add(request):
         return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def project_update(request, pid):
 
@@ -701,7 +701,7 @@ def project_update(request, pid):
                                                        })
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def project_delete(request, pid):
     if request.method == 'POST':
@@ -731,7 +731,7 @@ def load(request, project_name):
     else:
         return redirect('load_project', project_name=project.name)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @cache_control(max_age=86400)
 def load_project(request, project_name):
     if core_utils.can_read_project(request.user, project_name):
@@ -800,7 +800,7 @@ def load_public_project(request, project_name):
     return response
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @xframe_options_exempt
 @cache_control(max_age=86400)
 def portable_project_load(request, project_name):
@@ -817,7 +817,7 @@ def portable_project_load(request, project_name):
         return render(request, 'illegal_operation.html', {})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def blank_page(request):
     return render(request, 'blank_page.html', {})
 
@@ -1218,12 +1218,16 @@ def project_get_conf(request):
                 'permissions': {
                     'is_superuser': is_superuser(request.user),
                     'roles': core_utils.get_group_names_by_user(request.user)
-                },
-                'credentials': {
+                }
+            }
+            # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+            if request.session.get('oidc_access_token'):
+                conf['user']['token'] = request.session.get('oidc_access_token')
+            else:
+                conf['user']['credentials'] = {
                     'username': request.session['username'],
                     'password': request.session['password']
                 }
-            }
         if is_shared_view:
             view_name = request.POST.get('shared_view_name')
             shared_view = SharedView.objects.get(name__exact=view_name)
@@ -1430,7 +1434,7 @@ def load_shared_view(request, view_name):
     except Exception:
         return redirect('not_found_sharedview')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def shared_view_list(request):
 
@@ -1450,7 +1454,7 @@ def shared_view_list(request):
     }
     return render(request, 'shared_view_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def shared_view_delete(request, svid):
     if request.method == 'POST':
@@ -1467,7 +1471,7 @@ def not_found_sharedview(request):
     response.status_code = 404
     return response
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def project_clone(request, pid):
     try:

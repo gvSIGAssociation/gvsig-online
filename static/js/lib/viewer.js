@@ -79,31 +79,33 @@ viewer.core = {
 
     _authenticate: function() {
     	var self = this;
-    	var _params = "username=" + self.conf.user.credentials.username + "&password=" + self.conf.user.credentials.password;
-    	for (var i=0; i<self.conf.auth_urls.length; i++) {			
+		if (self.conf.user.credentials) {
+			var _params = "username=" + self.conf.user.credentials.username + "&password=" + self.conf.user.credentials.password;
+			for (var i=0; i<self.conf.auth_urls.length; i++) {			
 
-    		$.ajax({
-    			url: self.conf.auth_urls[i] + "/wms",
-    			params: {
-    				'SERVICE': 'WMS',
-    				'VERSION': '1.1.1',
-    				'REQUEST': 'GetCapabilities'
-    			},
-    			async: true,
-    			xhrFields: {
-					withCredentials: true
-			   	},
-    			method: 'GET',
-    			headers: {
-    				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
-    			},
-    			error: function(jqXHR, textStatus, errorThrown){},
-    			success: function(resp){
-    				console.log('Authenticated');
-    			}
-    		});
+				$.ajax({
+					url: self.conf.auth_urls[i] + "/wms",
+					params: {
+						'SERVICE': 'WMS',
+						'VERSION': '1.1.1',
+						'REQUEST': 'GetCapabilities'
+					},
+					async: true,
+					xhrFields: {
+						withCredentials: true
+					},
+					method: 'GET',
+					headers: {
+						"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+					},
+					error: function(jqXHR, textStatus, errorThrown){},
+					success: function(resp){
+						console.log('Authenticated');
+					}
+				});
 
-    	}
+			}
+		}
     },
 
     _createMap: function() {
@@ -574,14 +576,42 @@ viewer.core = {
 	    if (layerConf.format) {
 	    	format = internalLayer['format'];
 	    }
+		var customLoadFunction = function(image, src) {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", src);
+			if (self.conf.user.token) {
+			// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				var bearer_token = "Bearer " + self.conf.user.token;
+				xhr.setRequestHeader('Authorization', bearer_token);
+			}
+			xhr.withCredentials = true;
+			xhr.responseType = "arraybuffer";
+			xhr.onload = function () {
+				var blob;
+				var arrayBufferView = new Uint8Array(this.response);
+				if (format.toLowerCase().indexOf("png") != -1) {
+					blob = new Blob([arrayBufferView], { type: 'image/png' });
+				}
+				else {
+					blob = new Blob([arrayBufferView], { type: 'image/jpeg' });
+				}
+				var urlCreator = window.URL || window.webkitURL;
+				var imageUrl = urlCreator.createObjectURL(blob);
+				image.getImage().src = imageUrl;
+			};
+			xhr.send();
+		};
 		if (layerConf.single_image) {
 			var wmsSource = new ol.source.ImageWMS({
 				url: url,
 				visible: layerConf.visible,
 				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
 				serverType: 'geoserver',
-				crossOrigin: 'anonymous',
+				crossOrigin: 'anonymous'
 			});
+			if (self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				wmsSource.imageLoadFunction(customLoadFunction);
+			};
 			wmsLayer = new ol.layer.Image({
 				id: layerId,
 				source: wmsSource,
@@ -618,8 +648,11 @@ viewer.core = {
 					format:format,
 					tileGrid: tileGrid,
 					crossOrigin: 'anonymous',
-		            wrapX: true
+					wrapX: true
 				});
+				if (self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+					wmsSource.imageLoadFunction(customLoadFunction);
+				};
 		        var wmsLayer = new ol.layer.Tile({
 			 		id: layerId,
 			 		source: wmtsSource,
@@ -642,8 +675,13 @@ viewer.core = {
 					url: url,
 					visible: layerConf.visible,
 					params: wmsParams,
-					serverType: 'geoserver'
+					serverType: 'geoserver',
+					crossOrigin: 'anonymous'
 				});
+				if (self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+					wmsSource.setTileLoadFunction(customLoadFunction);
+				};
+				
 				wmsLayer = new ol.layer.Tile({
 					id: layerId,
 					source: wmsSource,
