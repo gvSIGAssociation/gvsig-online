@@ -165,13 +165,16 @@
 									<a href="/gvsigonline/core/" id="goto-dashboard" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
 								</div>
 								<div class="pull-right">
-									<a href="/gvsigonline/auth/logout_user/" id="goto-logout" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
+									<form id="logout-form" method="post" action="{% url 'gvsigol_logout_user' %}">
+										{% csrf_token %}
+										<button type="submit" class="btn btn-default btn-flat">{% trans "Sign out" %}</button>
+									</form>
 								</div>
 							</li>
 							{% else %}
 							<li class="user-footer">
 								<div class="pull-right">
-									<a href="/gvsigonline/auth/login_user/" class="btn btn-default btn-flat">{% trans "Sign in" %}</a>
+									<a href="{% url 'gvsigol_authenticate_user' %}" class="btn btn-default btn-flat">{% trans "Sign in" %}</a>
 								</div>
 							</li>
 							{% endif %}

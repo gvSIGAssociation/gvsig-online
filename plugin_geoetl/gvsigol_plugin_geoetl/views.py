@@ -79,7 +79,7 @@ def create_schema(connection_params):
     cursor.close()
     return True
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_canvas(request):
     
@@ -197,7 +197,7 @@ def get_list(user):
     return workspaces
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_workspace_list(request):
     
@@ -325,7 +325,7 @@ def name_user_exists(id, name, user):
             return True
     return False
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_workspace_add(request):
     if request.method == 'POST':
@@ -407,7 +407,7 @@ def etl_workspace_add(request):
         return render(request, 'dashboard_geoetl_workspaces_list.html', response)
         
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_workspace_delete(request):
     lgid = request.POST['lgid']
@@ -422,7 +422,7 @@ def etl_workspace_delete(request):
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_workspace_update(request):
     if request.method == 'POST':
@@ -478,7 +478,7 @@ def etl_workspace_update(request):
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_current_canvas_status(request):
     try:
@@ -498,7 +498,7 @@ def etl_current_canvas_status(request):
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_list_canvas_status(request):
 
@@ -521,7 +521,7 @@ def etl_list_canvas_status(request):
     
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_read_canvas(request):
     if request.method == 'POST':
@@ -549,7 +549,7 @@ def etl_read_canvas(request):
 
     return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_sheet_excel(request):
     if request.method == 'POST':
@@ -562,7 +562,7 @@ def etl_sheet_excel(request):
 
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_schema_excel(request):
     if request.method == 'POST':
@@ -574,7 +574,7 @@ def etl_schema_excel(request):
 
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_schema_shape(request):
     if request.method == 'POST':
@@ -601,7 +601,7 @@ def test_postgres_conexion(request):
             return HttpResponse(json.dumps(response), content_type="application/json")
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required    
 def etl_schema_csv(request):
     if request.method == 'POST':
@@ -627,7 +627,7 @@ def test_oracle_conexion(request):
 
             return HttpResponse(json.dumps(response), content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_owners_oracle(request):
     if request.method == 'POST':
@@ -641,7 +641,7 @@ def etl_owners_oracle(request):
 
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_tables_oracle(request):
     if request.method == 'POST':
@@ -655,7 +655,7 @@ def etl_tables_oracle(request):
 
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_schema_oracle(request):
     if request.method == 'POST':
@@ -670,7 +670,7 @@ def etl_schema_oracle(request):
             return HttpResponse(response, content_type="application/json")
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_proced_indenova(request):
     if request.method == 'POST':
@@ -683,7 +683,7 @@ def etl_proced_indenova(request):
             
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_schema_indenova(request):
     if request.method == 'POST':
@@ -698,7 +698,7 @@ def etl_schema_indenova(request):
             return HttpResponse(response, content_type="application/json")
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def etl_schema_postgresql(request):
     if request.method == 'POST':

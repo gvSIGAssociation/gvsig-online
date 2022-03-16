@@ -67,7 +67,7 @@ def get_conf(request):
         }       
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')   
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def chart_list(request):
     
@@ -77,7 +77,7 @@ def chart_list(request):
     }
     return render(request, 'chart_list.html', response)     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def select_chart_type(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
@@ -88,7 +88,7 @@ def select_chart_type(request, layer_id):
     
     return render(request, 'select_chart_type.html', response)  
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def chart_update(request, layer_id, chart_id):
     chart = Chart.objects.get(id=int(chart_id))
@@ -102,7 +102,7 @@ def chart_update(request, layer_id, chart_id):
     elif (chart.type == 'piechart'):
         return redirect('piechart_update', layer_id=layer_id, chart_id=chart_id)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def barchart_add(request, layer_id):
@@ -149,7 +149,7 @@ def barchart_add(request, layer_id):
         return render(request, 'barchart_add.html', conf)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def barchart_update(request, layer_id, chart_id):
@@ -209,7 +209,7 @@ def barchart_update(request, layer_id, chart_id):
         })
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def linechart_add(request, layer_id):
@@ -255,7 +255,7 @@ def linechart_add(request, layer_id):
     
         return render(request, 'linechart_add.html', conf)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def linechart_update(request, layer_id, chart_id):
@@ -314,7 +314,7 @@ def linechart_update(request, layer_id, chart_id):
             'selected_columns': json.dumps(conf['columns'])
         })
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def piechart_add(request, layer_id):
@@ -361,7 +361,7 @@ def piechart_add(request, layer_id):
         return render(request, 'piechart_add.html', conf)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def piechart_update(request, layer_id, chart_id):
@@ -414,7 +414,7 @@ def piechart_update(request, layer_id, chart_id):
         })
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def chart_delete(request):
     try:

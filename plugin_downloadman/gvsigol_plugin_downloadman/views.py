@@ -730,7 +730,7 @@ def render_settings(request):
     return render(request, 'downman_index.html', response)
 
 @require_safe
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def dashboard_index(request):
     selected_tab = request.GET.get("tab", "pendingauth")
@@ -768,7 +768,7 @@ def dashboard_index(request):
     }
     return render(request, 'downman_index.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def update_request(request, request_id):
     try:
@@ -789,7 +789,7 @@ def update_request(request, request_id):
         raise Http404
 
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def settings_store(request):
     validity = int(request.POST.get('validity'))
@@ -803,7 +803,7 @@ def settings_store(request):
     return redirect(reverse('downman-dashboard-index') + "?tab=settings")
 
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def cancel_locator(request, resource_id):
     try:
@@ -827,7 +827,7 @@ def cancel_locator(request, resource_id):
         raise Http404
 
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def cancel_link(request, link_id):
     try:
@@ -845,7 +845,7 @@ def cancel_link(request, link_id):
         raise Http404
 
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def cancel_request(request, request_id):
     try:
@@ -868,7 +868,7 @@ def cancel_request(request, request_id):
 
 
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def accept_resource_authorization(request, resource_id):
     try:
@@ -883,7 +883,7 @@ def accept_resource_authorization(request, resource_id):
     
 
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def reject_resource_authorization(request, resource_id):
     try:
@@ -897,7 +897,7 @@ def reject_resource_authorization(request, resource_id):
         raise Http404
     
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def complete_generic_request(request, request_id):
     try:
@@ -914,7 +914,7 @@ def complete_generic_request(request, request_id):
 
     
 @require_POST
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def reject_generic_request(request, request_id):
     try:

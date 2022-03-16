@@ -41,7 +41,7 @@ import re
 import logging
 logger = logging.getLogger("gvsigol")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def get_raster_statistics(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
@@ -73,7 +73,7 @@ def delete_preview_style(request, name, gs):
         
     return success
   
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def style_layer_list(request):
     ls = []
@@ -97,7 +97,7 @@ def style_layer_list(request):
     }
     return render(request, 'style_layer_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def style_layer_update(request, layer_id, style_id):
     style = Style.objects.get(id=int(style_id))
@@ -123,7 +123,7 @@ def style_layer_update(request, layer_id, style_id):
     elif (style.type == 'CS'):
         return redirect('custom_update', layer_id=layer_id, style_id=style_id)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def style_layer_delete(request):
     if request.method == 'POST':
@@ -154,7 +154,7 @@ def style_layer_delete(request):
             
         return HttpResponse(json.dumps({'success': success, 'message': message}, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def select_legend_type(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
@@ -194,7 +194,7 @@ def select_legend_type(request, layer_id):
         
     return render(request, 'select_legend_type.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def custom_add(request, layer_id):
     if request.method == 'POST':
@@ -222,7 +222,7 @@ def custom_add(request, layer_id):
         response = services_custom.get_conf(request, layer_id)     
         return render(request, 'custom_add.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def custom_update(request, layer_id, style_id):  
     if request.method == 'POST':
@@ -255,7 +255,7 @@ def custom_update(request, layer_id, style_id):
          
         return render(request, 'custom_update.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def unique_symbol_add(request, layer_id):
     if request.method == 'POST':
@@ -281,7 +281,7 @@ def unique_symbol_add(request, layer_id):
         response = services_unique_symbol.get_conf(request, layer_id)     
         return render(request, 'unique_symbol_add.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def unique_symbol_update(request, layer_id, style_id):  
     if request.method == 'POST':
@@ -349,7 +349,7 @@ def unique_symbol_update(request, layer_id, style_id):
         return render(request, 'unique_symbol_update.html', response)
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def unique_values_add(request, layer_id):
     if request.method == 'POST':
@@ -378,7 +378,7 @@ def unique_values_add(request, layer_id):
         
         return render(request, 'unique_values_add.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def unique_values_update(request, layer_id, style_id):  
     if request.method == 'POST':
@@ -448,7 +448,7 @@ def unique_values_update(request, layer_id, style_id):
         
         return render(request, 'unique_values_update.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def get_unique_values(request):
     if request.method == 'POST':
@@ -470,7 +470,7 @@ def get_unique_values(request):
         return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def remove_temporal_preview(request):
     if request.method == 'POST':
@@ -483,7 +483,7 @@ def remove_temporal_preview(request):
         
     return HttpResponse(json.dumps({'success': 'OK'}, indent=4), content_type='application/json')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def intervals_add(request, layer_id):
     if request.method == 'POST':
@@ -513,7 +513,7 @@ def intervals_add(request, layer_id):
         return render(request, 'intervals_add.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def update_preview(request, layer_id):
     if request.method == 'POST':
@@ -587,7 +587,7 @@ def update_preview(request, layer_id):
     return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
  
    
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def intervals_update(request, layer_id, style_id):  
     if request.method == 'POST':
@@ -664,7 +664,7 @@ def intervals_update(request, layer_id, style_id):
         
         return render(request, 'intervals_update.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def get_minmax_values(request):
     layer_id = request.POST.get('layer_id')
@@ -684,7 +684,7 @@ def get_minmax_values(request):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def clustered_points_add(request, layer_id):
     if request.method == 'POST':
@@ -711,7 +711,7 @@ def clustered_points_add(request, layer_id):
         response = services_expressions.get_conf(request, layer_id) 
         return render(request, 'clustered_points_add.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def clustered_points_update(request, layer_id, style_id):  
     if request.method == 'POST':
@@ -768,7 +768,7 @@ def clustered_points_update(request, layer_id, style_id):
         return render(request, 'clustered_points_update.html', response)
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def expressions_add(request, layer_id):
     if request.method == 'POST':
@@ -792,7 +792,7 @@ def expressions_add(request, layer_id):
         response = services_expressions.get_conf(request, layer_id) 
         return render(request, 'expressions_add.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def create_sld(request):  
     if request.method == 'POST':
@@ -810,7 +810,7 @@ def create_sld(request):
     return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
   
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def expressions_update(request, layer_id, style_id):  
     if request.method == 'POST':
@@ -866,7 +866,7 @@ def expressions_update(request, layer_id, style_id):
         return render(request, 'expressions_update.html', response)
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_table_add(request, layer_id):
     if request.method == 'POST':
@@ -896,7 +896,7 @@ def color_table_add(request, layer_id):
         response["ramp_libraries"] = color_ramps 
         return render(request, 'color_table_add.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_table_update(request, layer_id, style_id):  
     if request.method == 'POST':
@@ -955,7 +955,7 @@ def color_table_update(request, layer_id, style_id):
         return render(request, 'color_table_update.html', response)
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def sld_import(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
@@ -1011,7 +1011,7 @@ def color_ramp_list(request):
     return render(request, 'color_ramp_list.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_add(request, color_ramp_folder_id):
     folder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))
@@ -1050,7 +1050,7 @@ def color_ramp_add(request, color_ramp_folder_id):
         return render(request, 'color_ramp_add.html', response)
   
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_update(request, color_ramp_id):      
     cramp = ColorRamp.objects.get(id=int(color_ramp_id))
@@ -1079,7 +1079,7 @@ def color_ramp_update(request, color_ramp_id):
         }
         return render(request, 'color_ramp_update.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_library_export(request, color_ramp_library_id):
     library = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
@@ -1098,7 +1098,7 @@ def color_ramp_library_export(request, color_ramp_library_id):
         return HttpResponse(json.dumps({'message':message}, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_delete(request, color_ramp_id):
     colorramp = ColorRamp.objects.get(id=int(color_ramp_id))
@@ -1117,7 +1117,7 @@ def color_ramp_library_list(request):
     return render(request, 'color_ramp_library_list.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_library_add(request):
     if request.method == 'POST': 
@@ -1140,7 +1140,7 @@ def color_ramp_library_add(request):
         return render(request, 'color_ramp_library_add.html', {})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_library_update(request, color_ramp_library_id):      
     if request.method == 'POST': 
@@ -1162,7 +1162,7 @@ def color_ramp_library_update(request, color_ramp_library_id):
         return render(request, 'color_ramp_library_update.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_library_delete(request, color_ramp_library_id):
     lib = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
@@ -1170,7 +1170,7 @@ def color_ramp_library_delete(request, color_ramp_library_id):
     return redirect('color_ramp_library_list')
 
  
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_library_import(request):
     if request.method == 'POST': 
@@ -1205,7 +1205,7 @@ def color_ramp_library_import(request):
         return render(request, 'color_ramp_library_import.html', {})
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_folder_add(request, color_ramp_library_id):
     if request.method == 'POST': 
@@ -1240,7 +1240,7 @@ def color_ramp_folder_add(request, color_ramp_library_id):
         return render(request, 'color_ramp_folder_add.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_folder_update(request, color_ramp_folder_id):      
     if request.method == 'POST': 
@@ -1268,7 +1268,7 @@ def color_ramp_folder_update(request, color_ramp_folder_id):
         }
         return render(request, 'color_ramp_folder_update.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def color_ramp_folder_delete(request, color_ramp_folder_id):
     folder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))
@@ -1289,7 +1289,7 @@ def library_list(request):
     }
     return render(request, 'library_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def library_add(request):
     if request.method == 'POST': 
@@ -1312,7 +1312,7 @@ def library_add(request):
         return render(request, 'library_add.html', {})
 
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def library_update(request, library_id):      
     if request.method == 'POST': 
@@ -1356,7 +1356,7 @@ def library_update(request, library_id):
         }
         return render(request, 'library_update.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def library_import(request):
     if request.method == 'POST': 
@@ -1391,7 +1391,7 @@ def library_import(request):
         return render(request, 'library_import.html', {})
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def library_export(request, library_id):
     library = Library.objects.get(id=library_id)
@@ -1407,7 +1407,7 @@ def library_export(request, library_id):
     
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def get_ramps_from_folder(request):      
     if request.method == 'POST':  
@@ -1427,7 +1427,7 @@ def get_ramps_from_folder(request):
         }
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def get_folders_from_library(request):      
     if request.method == 'POST':  
@@ -1443,7 +1443,7 @@ def get_folders_from_library(request):
         }
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def get_symbols_from_library(request):      
     if request.method == 'POST':  
@@ -1475,7 +1475,7 @@ def get_symbols_from_library(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def library_delete(request, library_id):
     library_rules = LibraryRule.objects.filter(library_id=library_id)
@@ -1495,7 +1495,7 @@ def library_delete(request, library_id):
     return redirect('library_list')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def symbol_add(request, library_id, symbol_type):
     if request.method == 'POST':
@@ -1534,7 +1534,7 @@ def symbol_add(request, library_id, symbol_type):
             return render(request, 'symbol_add.html', response)
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def symbol_update(request, symbol_id):
     if request.method == 'POST':
@@ -1576,7 +1576,7 @@ def symbol_update(request, symbol_id):
             }
             return render(request, 'symbol_update.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def symbol_delete(request):
     if request.method == 'POST':

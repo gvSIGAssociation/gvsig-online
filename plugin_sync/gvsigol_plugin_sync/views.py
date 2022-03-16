@@ -162,7 +162,7 @@ def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[
     layerStr = json.dumps(result)
     return layerStr
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 def sync_download(request):
     locks = []
@@ -220,12 +220,12 @@ def sync_download(request):
         return HttpResponseBadRequest("Bad request")
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 def sync_commit(request):
     return sync_upload(request, False)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 def sync_upload(request, release_locks=True):
     tmpfile = None

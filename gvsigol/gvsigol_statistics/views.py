@@ -228,7 +228,7 @@ def get_targets_from_content_type(request):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def statistics_list(request):
     statistics_conf = []

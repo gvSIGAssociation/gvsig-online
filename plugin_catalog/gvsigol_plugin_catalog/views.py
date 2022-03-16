@@ -88,7 +88,7 @@ def get_metadata_id(request, layer_ws, layer_name):
         logger.exception(e)
     return HttpResponse(json.dumps(response), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 @require_http_methods(["POST"])
 def create_metadata(request, layer_id):

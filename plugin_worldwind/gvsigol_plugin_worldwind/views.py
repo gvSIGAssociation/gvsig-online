@@ -41,7 +41,7 @@ from django.db import IntegrityError
 def index(request):
     return redirect('home')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def list(request):
     
@@ -64,7 +64,7 @@ def list(request):
     }     
     return render(request, 'ww_providers_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def add(request):
     try:
@@ -106,7 +106,7 @@ def add(request):
         return render(request, 'ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def delete(request,id):
     try:

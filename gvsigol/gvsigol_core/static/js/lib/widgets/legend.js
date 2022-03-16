@@ -77,6 +77,31 @@ legend.prototype.reloadLegend = function() {
 	});
 };
 
+legend.prototype._loadLegendImg = function(image, src) {
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", src);
+	if (this.conf.user.token) {
+		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+		var bearer_token = "Bearer " + this.conf.user.token;
+		xhr.setRequestHeader('Authorization', bearer_token);
+	}
+	xhr.withCredentials = true;
+	xhr.responseType = "arraybuffer";
+	xhr.onload = function () {
+		var blob;
+		var arrayBufferView = new Uint8Array(this.response);
+		if (src.toLowerCase().indexOf("png") != -1) { // FIXME: weak format detection
+			blob = new Blob([arrayBufferView], { type: 'image/png' });
+		}
+		else {
+			blob = new Blob([arrayBufferView], { type: 'image/jpeg' });
+		}
+		var urlCreator = window.URL || window.webkitURL;
+		var imageUrl = urlCreator.createObjectURL(blob);
+		image.src = imageUrl;
+	};
+	xhr.send();
+}
 
 /**
  * TODO.
@@ -86,30 +111,42 @@ legend.prototype.getLegendsFromVisibleLayers = function() {
 	var html = '';
 	html += '<div class="box">';
 	html += '	<div class="box-body">';
+	html += '	</div>';
+	html += '</div>';
+	html = $(html);
+	var layerLegend, img;
 	var layers = this.map.getLayers().getArray();
 	for (var i=0; i<layers.length; i++) {
 		if (!layers[i].baselayer) {
 			if (layers[i].wms_url && layers[i].getVisible()) {
 				if (layers[i].legend) {
 					if (layers[i].legend != "") {
-						html += 		'<div class="box box-widget">';
-						html += 			'<div class="box-header with-border">';
-						html += 				'<div class="user-block" data-legend="' + layers[i].legend + '">';
-						html += 					'<span class="username">' + layers[i].title + '</span>';
-						html +=						'<i class="fa fa-expand"></i>';
-						html += 				'</div>';
-						html += 			'</div>';
-						html += 			'<div class="box-body">';
-						html += 				'<img class="img-responsive pad" src="' + layers[i].legend + '" alt="Photo">';
-						html += 			'</div>';
-						html += 		'</div>';
+						console.log(layers[i]);
+						layerLegend = 		'<div class="box box-widget">';
+						layerLegend += 			'<div class="box-header with-border">';
+						layerLegend += 				'<div class="user-block" data-legend="' + layers[i].legend + '">';
+						layerLegend += 					'<span class="username">' + layers[i].title + '</span>';
+						layerLegend +=						'<i class="fa fa-expand"></i>';
+						layerLegend += 				'</div>';
+						layerLegend += 			'</div>';
+						layerLegend += 			'<div class="box-body">';
+						layerLegend += 				'<img class="img-responsive pad" src="" alt="Photo">';
+						layerLegend += 			'</div>';
+						layerLegend += 		'</div>';
+						layerLegend = $(layerLegend);
+						img = layerLegend.find('img')[0];
+						if (this.conf.user.token && !layers[i].external) {
+							this._loadLegendImg(img, layers[i].legend);
+						}
+						else {
+							img.src = layers[i].legend;
+						}
+						html.append(layerLegend);
 					}	
 				}
 			}						
 		}
-	}	
-	html += '	</div>';
-	html += '</div>';
+	}
 	
 	return html;
 };

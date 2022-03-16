@@ -72,7 +72,7 @@ logger = logging.getLogger(__name__)
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def survey_list(request):
@@ -100,7 +100,7 @@ def survey_list(request):
     return render(request, 'survey_list.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def surveys(request):
@@ -140,7 +140,7 @@ def surveys(request):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_add(request):
@@ -198,7 +198,7 @@ def survey_add(request):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_update(request, survey_id):
@@ -259,7 +259,7 @@ def survey_update(request, survey_id):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def survey_delete(request, survey_id):
@@ -274,7 +274,7 @@ def survey_delete(request, survey_id):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def survey_definition_by_name(request, survey_name):
@@ -284,7 +284,7 @@ def survey_definition_by_name(request, survey_name):
     return survey_definition(request, survey.id)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def survey_definition(request, survey_id):
@@ -315,7 +315,7 @@ def survey_definition(request, survey_id):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_section_add(request, survey_id):
@@ -357,7 +357,7 @@ def survey_section_add(request, survey_id):
     return render(request, 'survey_section_add.html', {'form': form, 'survey': survey})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_section_update(request, survey_section_id):
@@ -402,7 +402,7 @@ def survey_section_update(request, survey_section_id):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_section_delete(request, survey_section_id):
@@ -433,7 +433,7 @@ def survey_section_delete(request, survey_section_id):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def survey_permissions(request, survey_id):
     if request.method == 'POST':
@@ -532,7 +532,7 @@ def prepare_string(s):
     return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def survey_update_project(request, survey_id):
@@ -627,7 +627,7 @@ def survey_update_project(request, survey_id):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def survey_section_update_project(request, section_id):
@@ -860,7 +860,7 @@ def handle_uploaded_file(f):
     return path
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_upload_db(request):
@@ -918,7 +918,7 @@ def survey_upload_db(request):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_upload(request):

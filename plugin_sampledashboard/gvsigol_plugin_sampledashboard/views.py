@@ -35,7 +35,7 @@ def get_conf(request):
         }       
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')           
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def sampledashboard_list(request):
     response = {
         'samples': get_list()
@@ -55,7 +55,7 @@ def get_list():
         samples.append(sample)
     return samples
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def sampledashboard_add(request):
     if request.method == 'POST':
         sample = SampleDashboard(
@@ -71,7 +71,7 @@ def sampledashboard_add(request):
         }
         return render(request, 'dashboard_add.html', response)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def sampledashboard_update(request):
     if request.method == 'GET':
         lgid = request.GET['lgid']
@@ -93,7 +93,7 @@ def sampledashboard_update(request):
         sample.save()
         return redirect('sampledashboard_list')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def sampledashboard_delete(request):
     lgid = request.POST['lgid']
     if request.method == 'POST':

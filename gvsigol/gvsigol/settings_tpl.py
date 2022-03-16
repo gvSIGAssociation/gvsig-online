@@ -29,6 +29,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 from django.views import debug
 import re
+from gvsigol.utils import import_settings
+
 debug.HIDDEN_SETTINGS = re.compile(
     # exclude these variables from debug output
     debug.HIDDEN_SETTINGS.pattern + '|CELERY_BROKER_URL|USERNAME|HOST_USER|DBUSER|^USER$',
@@ -235,6 +237,12 @@ AUTH_LDAP_SERVER_URI = "ldap://##LDAP_HOST##:##LDAP_PORT##"
 AUTH_LDAP_ROOT_DN = "##LDAP_ROOT_DN##"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("##LDAP_ROOT_DN##", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
+LOGIN_URL = 'gvsigol_authenticate_user'
+GVSIGOL_AUTH_BACKEND = '##GVSIGOL_AUTH_BACKEND##'
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "index"
+if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth.django_auth':
+    import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/

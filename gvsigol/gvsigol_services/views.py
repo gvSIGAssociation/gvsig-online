@@ -111,7 +111,7 @@ CONNECT_TIMEOUT = 3.05
 READ_TIMEOUT = 30
 base_layer_process = {}
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @superuser_required
 def server_list(request):
@@ -120,7 +120,7 @@ def server_list(request):
     }
     return render(request, 'server_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def server_add(request):
@@ -173,7 +173,7 @@ def server_add(request):
             
     return render(request, 'server_add.html', {'form': form})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @superuser_required
 def server_delete(request, svid):
@@ -205,7 +205,7 @@ def server_delete(request, svid):
         return HttpResponseNotFound(str(e) ) 
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def server_update(request, svid):
     if request.method == 'POST':
@@ -273,7 +273,7 @@ def server_update(request, svid):
 
         return render(request, 'server_update.html', {'svid': svid, 'server': server, 'nodes': json.dumps(nodes)})
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @superuser_required
 def get_server(request, svid):
@@ -296,7 +296,7 @@ def get_server(request, svid):
     except:
         return HttpResponseNotFound('<h1>Server not found{0}</h1>'.format(s.name))
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 @csrf_exempt   
 def reload_node(request, nid):
@@ -311,7 +311,7 @@ def reload_node(request, nid):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @superuser_required
 def workspace_list(request):
@@ -320,7 +320,7 @@ def workspace_list(request):
     }
     return render(request, 'workspace_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def workspace_add(request):
@@ -355,7 +355,7 @@ def workspace_add(request):
 
     return render(request, 'workspace_add.html', {'form': form})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @superuser_required
 def workspace_import(request):
@@ -385,7 +385,7 @@ def workspace_import(request):
         return render(request, 'workspace_import.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @superuser_required
 def workspace_delete(request, wsid):
@@ -407,7 +407,7 @@ def workspace_delete(request, wsid):
         return HttpResponseNotFound('<h1>Workspace not found{0}</h1>'.format(ws.name))
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def workspace_update(request, wid):
     if request.method == 'POST':
@@ -430,7 +430,7 @@ def workspace_update(request, wid):
         return render(request, 'workspace_update.html', {'wid': wid, 'workspace': workspace})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def datastore_list(request):
@@ -458,7 +458,7 @@ def datastore_list(request):
     return render(request, 'datastore_list.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def datastore_add(request):
@@ -530,7 +530,7 @@ def datastore_add(request):
             form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username).order_by('name')
     return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def datastore_update(request, datastore_id):
@@ -592,7 +592,7 @@ def datastore_update(request, datastore_id):
         form = DatastoreUpdateForm(instance=datastore)
     return render(request, 'datastore_update.html', {'form': form, 'datastore_id': datastore_id, 'workspace_name': datastore.workspace.name})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def datastore_delete(request, dsid):
@@ -649,7 +649,7 @@ def datastore_delete(request, dsid):
     except:
         return HttpResponseNotFound('<h1>Datastore not found{0}</h1>'.format(ds.name))
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def layer_list(request):
@@ -713,7 +713,7 @@ def _layer_refresh_extent(layer):
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layer_refresh_conf(request, layer_id):
     try:
@@ -735,7 +735,7 @@ def layer_refresh_conf(request, layer_id):
     except:
         logger.exception("Error refreshing layer conf")
         return JsonResponse({"result": "error"}, status=500)
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layer_delete(request, layer_id):
     try:
@@ -772,61 +772,70 @@ def layer_delete(request, layer_id):
     except Exception as e:
         return HttpResponseNotFound('<h1>Error deleting layer: {0}</h1>'.format(layer_id))
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layer_delete_operation(request, layer_id):
-    layer = Layer.objects.get(pk=layer_id)
-    if not utils.can_manage_layer(request.user, layer):
-        msg = _('ERROR User is not authorized to perform this operation')
+    try:
+        layer = Layer.objects.get(pk=layer_id)
+        if not utils.can_manage_layer(request.user, layer):
+            msg = _('ERROR User is not authorized to perform this operation')
+            data = {
+                    'status': 'ERROR',
+                    'status_code': 403,
+                    'message': msg,
+                }
+            return HttpResponse(json.dumps(data), status_code=403)
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        if layer.layer_group.name != '__default__':
+            try:
+                gs.deleteGeoserverLayerGroup(layer.layer_group)
+            except:
+                logger.exception("Error deleting layer group")
+        gs.deleteResource(layer.datastore.workspace, layer.datastore, layer)
+        gs.deleteLayerStyles(layer)
+        signals.layer_deleted.send(sender=None, layer=layer)
+
+        if layer.datastore.type == 'c_ImageMosaic':
+            got_params = json.loads(layer.datastore.connection_params)
+            mosaic_url = got_params["url"].replace("file://", "")
+            split_mosaic_url = mosaic_url.split("/")
+            mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+
+            if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
+                os.remove(mosaic_url + "/" + mosaic_name + ".properties")
+            if os.path.isfile(mosaic_url + "/sample_image.dat"):
+                os.remove(mosaic_url + "/sample_image.dat")
+
+            host = MOSAIC_DB['host']
+            port = MOSAIC_DB['port']
+            dbname = MOSAIC_DB['database']
+            user = MOSAIC_DB['user']
+            passwd = MOSAIC_DB['passwd']
+            schema = 'imagemosaic'
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            i.delete_mosaic(layer.datastore.name, schema)
+            i.close()
+
+        if not 'no_thumbnail.jpg' in layer.thumbnail.name:
+            if os.path.isfile(layer.thumbnail.path):
+                os.remove(layer.thumbnail.path)
+        Layer.objects.filter(pk=layer_id).delete()
+        gs.deleteLayerRules(layer)
+        core_utils.toc_remove_layer(layer)
+        gs.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+        gs.reload_nodes()
+    except Exception as e:
+        logger.exception("error deleting layer")
         data = {
                 'status': 'ERROR',
-                'status_code': 403,
-                'message': msg,
+                'status_code': 400,
+                'message': str(e),
             }
-        return HttpResponse(json.dumps(data))
-    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-    if layer.layer_group.name != '__default__':
-        try:
-            gs.deleteGeoserverLayerGroup(layer.layer_group)
-        except:
-            logger.exception("Error deleting layer group")
-    gs.deleteResource(layer.datastore.workspace, layer.datastore, layer)
-    gs.deleteLayerStyles(layer)
-    signals.layer_deleted.send(sender=None, layer=layer)
-
-    if layer.datastore.type == 'c_ImageMosaic':
-        got_params = json.loads(layer.datastore.connection_params)
-        mosaic_url = got_params["url"].replace("file://", "")
-        split_mosaic_url = mosaic_url.split("/")
-        mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
-
-        if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
-            os.remove(mosaic_url + "/" + mosaic_name + ".properties")
-        if os.path.isfile(mosaic_url + "/sample_image.dat"):
-            os.remove(mosaic_url + "/sample_image.dat")
-
-        host = MOSAIC_DB['host']
-        port = MOSAIC_DB['port']
-        dbname = MOSAIC_DB['database']
-        user = MOSAIC_DB['user']
-        passwd = MOSAIC_DB['passwd']
-        schema = 'imagemosaic'
-        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-        i.delete_mosaic(layer.datastore.name, schema)
-        i.close()
-
-    if not 'no_thumbnail.jpg' in layer.thumbnail.name:
-        if os.path.isfile(layer.thumbnail.path):
-            os.remove(layer.thumbnail.path)
-    Layer.objects.filter(pk=layer_id).delete()
-    gs.deleteLayerRules(layer)
-    core_utils.toc_remove_layer(layer)
-    gs.createOrUpdateGeoserverLayerGroup(layer.layer_group)
-    gs.reload_nodes()
+        return JsonResponse(data, status_code=400)
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def backend_datastore_list(request):
     """
@@ -845,7 +854,7 @@ def backend_datastore_list(request):
     return HttpResponseBadRequest()
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def backend_resource_list_available(request):
     """
@@ -865,7 +874,7 @@ def backend_resource_list_available(request):
             return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layergroup_list_editable(request):
     """
@@ -892,7 +901,7 @@ def layergroup_list_editable(request):
         
     return HttpResponseBadRequest()
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def backend_resource_list_configurable(request):
     """
@@ -913,7 +922,7 @@ def backend_resource_list_configurable(request):
     return HttpResponseBadRequest()
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def backend_resource_list(request):
     """
@@ -937,7 +946,7 @@ def backend_resource_list(request):
     return HttpResponseBadRequest()
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def backend_fields_list(request):
     """
@@ -1050,14 +1059,14 @@ def create_symbology(server, layer):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_add(request):
     return layer_add_with_group(request, None)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_add_with_group(request, layergroup_id):
@@ -1259,7 +1268,7 @@ def layer_add_with_group(request, layergroup_id):
             'groups': groups,
             'resource_is_public': is_public})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_update(request, layer_id):
@@ -1617,7 +1626,7 @@ def _parse_form_groups(form_groups, fields):
     form_groups[0]["fields"] = group0_fields
     return form_groups
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_config(request, layer_id):
@@ -1737,7 +1746,7 @@ def _set_field_nullable(layer_id, field_name, nullable):
         return False
     return True
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["POST"])
 @staff_required
 def check_nullable(request):
@@ -1750,7 +1759,7 @@ def check_nullable(request):
     return HttpResponse('{"response": "ok"}', content_type='application/json')
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["POST"])
 @staff_required
 def convert_to_enumerate(request):
@@ -1933,7 +1942,7 @@ def _layer_cache_clear(layer_id):
     gs.createOrUpdateGeoserverLayerGroup(layer_group)
     gs.clearLayerGroupCache(layer_group.name)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def layer_cache_clear(request, layer_id):
@@ -1954,7 +1963,7 @@ def layer_cache_clear(request, layer_id):
         error_message = ugettext_lazy('Not supported.')
     return JsonResponse({"response": "error", "cause": error_message}, status=400)
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def layergroup_cache_clear(request, layergroup_id):
@@ -2016,7 +2025,7 @@ def resource_published(resource):
     return published
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layergroup_list(request):
 
@@ -2050,13 +2059,13 @@ def layergroup_list(request):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layergroup_add(request):
     return layergroup_add_with_project(request, None)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layergroup_add_with_project(request, project_id):
     if request.method == 'POST':
@@ -2181,7 +2190,7 @@ def layergroup_mapserver_toc(group, toc_string):
             gs.reload_nodes()
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layergroup_update(request, lgid):
     if request.method == 'POST':
@@ -2272,7 +2281,7 @@ def layergroup_update(request, lgid):
         return render(request, 'layergroup_update.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def layergroup_delete(request, lgid):
     if request.method == 'POST':
@@ -2308,14 +2317,14 @@ def layergroup_delete(request, lgid):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_create(request):
     return layer_create_with_group(request, None)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_create_with_group(request, layergroup_id):
@@ -2555,7 +2564,7 @@ def get_currentuser_enumerations(request):
                 enumeration_list = enumeration_list | enumeration_list2
     return enumeration_list
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def enumeration_list(request):
 
@@ -2579,7 +2588,7 @@ def enumeration_list(request):
     return render(request, 'enumeration_list.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def enumeration_add(request):
     if request.method == 'POST':
@@ -2640,7 +2649,7 @@ def enumeration_add(request):
         return render(request, 'enumeration_add.html', {'enum_name': enum_name})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def enumeration_update(request, eid):
     if request.method == 'POST':
@@ -2684,7 +2693,7 @@ def enumeration_update(request, eid):
 # TILEADO CAPAS BASE
 #***************************************************
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def create_base_layer(request, pid):
     if request.method == 'POST': 
@@ -2718,7 +2727,7 @@ def create_base_layer(request, pid):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def retry_base_layer_process(request, pid):
     if request.method == 'POST':
@@ -2741,7 +2750,7 @@ def retry_base_layer_process(request, pid):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def base_layer_process_update(request, pid):
     if request.method == 'POST':
@@ -2760,7 +2769,7 @@ def base_layer_process_update(request, pid):
         return HttpResponse('{"active" : "false"}', content_type='application/json')
 
         
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def stop_base_layer_process(request, pid):
     if request.method == 'POST':  
@@ -2810,7 +2819,7 @@ def get_enumeration(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def enumeration_delete(request, eid):
     if request.method == 'POST':
@@ -2823,7 +2832,7 @@ def enumeration_delete(request, eid):
 
 
 @require_GET
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def get_geom_tables(request, datastore_id):
     if request.method == 'GET':
@@ -3206,6 +3215,9 @@ def get_datatable_data(request):
             if request.session.get('username') is not None and request.session.get('password') is not None:
                 req.auth = (request.session['username'], request.session['password'])
                 #req.auth = ('admin', 'geoserver')
+            elif request.session.get('oidc_access_token'):
+                # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+                req.headers.update({'Authorization': 'Bearer ' + request.session.get('oidc_access_token')})
 
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
             geojson = response.json()
@@ -3316,7 +3328,7 @@ def get_feature_wfs(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def add_layer_lock(request):
     layer_name = None
     try:
@@ -3332,7 +3344,7 @@ def add_layer_lock(request):
         return HttpResponseNotFound('<h1>Layer is locked: {0}</h1>'.format(layer_name))
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def remove_layer_lock(request):
     try:
         ws_name = request.POST['workspace']
@@ -3345,7 +3357,7 @@ def remove_layer_lock(request):
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def lock_list(request):
@@ -3361,7 +3373,7 @@ def lock_list(request):
     }
     return render(request, 'lock_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def unlock_layer(request, lock_id):
@@ -3413,7 +3425,7 @@ def get_resource(request, resource_id):
     except LayerResource.DoesNotExist:
         return HttpResponseNotFound()
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def upload_resources(request):
     if request.method == 'POST':
         ws_name = request.POST.get('workspace')
@@ -3463,7 +3475,7 @@ def upload_resources(request):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def delete_resource(request):
     if request.method == 'POST':
         rid = request.POST.get('rid')
@@ -3506,7 +3518,7 @@ def delete_resource(request):
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def delete_resources(request):
     if request.method == 'POST':
         query_layer = request.POST.get('query_layer')
@@ -3771,7 +3783,7 @@ def describeFeatureTypeWithPk(request):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def external_layer_list(request):
@@ -3789,7 +3801,7 @@ def external_layer_list(request):
         }
         return render(request, 'external_layer_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def external_layer_add(request):
@@ -3891,7 +3903,7 @@ def external_layer_add(request):
 
     return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def external_layer_update(request, external_layer_id):
@@ -4021,7 +4033,7 @@ def external_layer_update(request, external_layer_id):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def external_layer_delete(request, external_layer_id):
@@ -4190,7 +4202,7 @@ def get_capabilities(request):
     data = ows_get_capabilities(url, service, version, layer)
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def get_capabilities_from_url(request):
@@ -4205,7 +4217,7 @@ def get_capabilities_from_url(request):
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def cache_list(request):
@@ -4224,7 +4236,7 @@ def cache_list(request):
     }
     return render(request, 'cache_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_cache_config(request, layer_id):
@@ -4360,7 +4372,7 @@ def layer_cache_config(request, layer_id):
             messages.error(request, error_message)
             return redirect('cache_list')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def group_cache_config(request, group_id):
@@ -4457,7 +4469,7 @@ def group_cache_config(request, group_id):
             messages.error(request, error_message)
             return redirect('cache_list')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def get_cache_tasks(request):
@@ -4475,7 +4487,7 @@ def get_cache_tasks(request):
     
     return HttpResponse(json.dumps(tasks, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def get_group_cache_tasks(request):
@@ -4488,7 +4500,7 @@ def get_group_cache_tasks(request):
     
     return HttpResponse(json.dumps(tasks, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def kill_all_tasks(request):
@@ -4507,7 +4519,7 @@ def kill_all_tasks(request):
     
     return HttpResponse(json.dumps({}, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @staff_required
 def kill_all_group_tasks(request):
@@ -4522,7 +4534,7 @@ def kill_all_group_tasks(request):
     
     return HttpResponse(json.dumps({}, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def update_thumbnail(request, layer_id):
@@ -4540,7 +4552,7 @@ def update_thumbnail(request, layer_id):
         return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @superuser_required
 def service_url_list(request):
@@ -4549,7 +4561,7 @@ def service_url_list(request):
     }
     return render(request, 'service_url_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def service_url_add(request):
@@ -4567,7 +4579,7 @@ def service_url_add(request):
             
     return render(request, 'service_url_add.html', {'form': form})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_POST
 @superuser_required
 def service_url_delete(request, svid):
@@ -4581,7 +4593,7 @@ def service_url_delete(request, svid):
         return HttpResponseNotFound(str(e) ) 
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def service_url_update(request, svid):
     if request.method == 'POST':
@@ -4604,7 +4616,7 @@ def service_url_update(request, svid):
         
         return render(request, 'service_url_update.html', {'svid': svid, 'form': form})
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def test_connection(request):
     if request.method == 'POST':
@@ -4670,7 +4682,7 @@ def register_action(request):
 
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def db_field_delete(request):
     if request.method == 'POST':
@@ -4718,13 +4730,13 @@ def db_field_delete(request):
     return utils.get_exception(400, 'Error in the input params')
 
 """
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def db_field_changetype(request):
     pass
 """
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def db_field_rename(request):
     if request.method == 'POST':
@@ -4781,7 +4793,7 @@ def db_field_rename(request):
             logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
     return utils.get_exception(400, 'Error in the input params')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def db_add_field(request):
     if request.method == 'POST':
@@ -4857,7 +4869,7 @@ def db_add_field(request):
 
     return utils.get_exception(400, 'Error in the input params')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_safe
 @staff_required
 def sqlview_list(request):
@@ -4870,14 +4882,14 @@ def sqlview_list(request):
     }
     return render(request, 'sqlview_list.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def sqlview_update(request, view_id):
     sql_view = SqlView.objects.get(pk=view_id)
     return _sqlview_update(request, True, sql_view)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def sqlview_add(request):
@@ -5061,7 +5073,7 @@ def _sqlview_update(request, is_update, sql_view=None):
             'is_update': is_update
         })
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["POST", "HEAD"])
 @staff_required
 def sqlview_delete(request, view_id):
@@ -5080,7 +5092,7 @@ def sqlview_delete(request, view_id):
             logger.exception(str(e))
             return HttpResponseBadRequest(_('Error deleting view: {0}').format(view_id))
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def list_datastore_tables(request):
     """
@@ -5101,7 +5113,7 @@ def list_datastore_tables(request):
     return HttpResponseBadRequest()
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def list_datastores_in_db(request):
     """

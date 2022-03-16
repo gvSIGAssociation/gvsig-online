@@ -49,7 +49,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSch
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def gtfs_provider_list(request):
     ls = []
@@ -110,7 +110,7 @@ def gtfs_provider_list(request):
     return render(request, 'gtfs_provider_list.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def gtfs_update_status(request):
     try:
         statusModel  = GTFSstatus.objects.get(name = 'update')
@@ -131,7 +131,7 @@ def gtfs_update_status(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def gtfs_provider_add(request):
     if request.method == 'POST':
@@ -164,7 +164,7 @@ def gtfs_provider_add(request):
 
     return render(request,'gtfs_provider_add.html',{'form': form })
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def gtfs_provider_update(request, provider_id):
@@ -202,7 +202,7 @@ def gtfs_provider_update(request, provider_id):
 
     return render(request, 'gtfs_provider_update.html', context)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def gtfs_provider_delete(request, provider_id):
     try:
@@ -216,7 +216,7 @@ def gtfs_provider_delete(request, provider_id):
 
     return redirect('gtfs_provider_list')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def gtfs_crontab_update(request):
     try:
@@ -334,7 +334,7 @@ def gtfs_crontab_update(request):
         print("FIN INICIALIZACIÓN TAREAS PROGRAMADAS")"""
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def app_mobile_config_update(request):
 

@@ -33,7 +33,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @csrf_exempt
 def get_sites(request):    
     try:
@@ -49,7 +49,7 @@ def get_sites(request):
     except Exception as e:
         return HttpResponseBadRequest(str(e))
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @csrf_exempt
 def get_folder_content(request):
     if request.method == 'POST':      
@@ -68,7 +68,7 @@ def get_folder_content(request):
         except:
             return HttpResponseBadRequest('<h1>Failed to get folder content</h1>')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @csrf_exempt
 def save_resource(request):
     if request.method == 'POST':      
@@ -98,7 +98,7 @@ def save_resource(request):
         except:
             return HttpResponseBadRequest('<h1>Failed to get folder content</h1>')
         
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @csrf_exempt
 def update_resource(request):
     if request.method == 'POST':      
@@ -134,7 +134,7 @@ def update_resource(request):
         except:
             return HttpResponseBadRequest('<h1>Failed to get folder content</h1>')
         
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @csrf_exempt
 def delete_resource(request):
     if request.method == 'POST':
