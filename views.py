@@ -49,6 +49,7 @@ from actstream import action
 import logging
 from gvsigol_core.utils import get_absolute_url
 logger = logging.getLogger('gvsigol')
+from gvsigol_auth import auth_backend
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
@@ -205,7 +206,7 @@ def logout_user(request):
     logout(request)
     return redirect(LOGOUT_PAGE_URL)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 def password_update(request):  
     if request.method == 'POST':
         password1 = request.POST.get('password1')
@@ -310,7 +311,7 @@ def password_reset_complete(request):
 def password_reset_success(request):
     return render(request, 'password_reset_success.html', {})
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def user_list(request):
     
@@ -344,7 +345,7 @@ def user_list(request):
 def _get_user_group_name(username):
     return 'ug_' + username.lower()
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def user_add(request):        
     ad_suffix = GVSIGOL_LDAP['AD']
@@ -534,7 +535,7 @@ def user_add(request):
         return render(request, 'user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form})
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def user_update(request, uid):        
     if request.method == 'POST':
@@ -601,7 +602,7 @@ def user_update(request, uid):
         return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': groups})
         
         
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def user_delete(request, uid):        
     if request.method == 'POST':
@@ -621,7 +622,7 @@ def user_delete(request, uid):
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def group_list(request):
     
@@ -641,7 +642,7 @@ def group_list(request):
     return render(request, 'group_list.html', response)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def group_add(request):        
     if request.method == 'POST':
@@ -680,7 +681,7 @@ def group_add(request):
         return render(request, 'group_add.html', {'form': form})
          
         
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def group_delete(request, gid):        
     if request.method == 'POST':
@@ -695,3 +696,29 @@ def group_delete(request, gid):
             'deleted': True
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+@login_required()
+def has_group(request):
+    group = request.GET.get('group')
+    if not group:
+        return JsonResponse({"response": "error"}, status=400)
+    return JsonResponse({
+        "response": auth_backend.has_group(request, group)
+    })
+
+@login_required()
+def has_role(request):
+    role = request.GET.get('role')
+    if not role:
+        return JsonResponse({"response": "error"}, status=400)
+    return JsonResponse({
+        "response": auth_backend.has_role(request, role)
+    })
+
+@login_required()
+def get_groups(request):
+    return JsonResponse(auth_backend.get_groups(request), safe=False)
+
+@login_required()
+def get_roles(request):
+    return JsonResponse(auth_backend.get_roles(request), safe=False)
