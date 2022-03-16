@@ -127,7 +127,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 USE_X_FORWARDED_HOST = True
-#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
 #GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
@@ -139,7 +139,7 @@ USE_X_FORWARDED_HOST = True
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    #'mozilla_django_oidc',
+    'mozilla_django_oidc',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -158,7 +158,7 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    #'gvsigol_app_test',
+    'gvsigol_app_test',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
     #'gvsigol_app_tocantins',
@@ -181,7 +181,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
     'gvsigol_plugin_gestiona',
-    #'gvsigol_plugin_oidc_mozilla',
+    'gvsigol_plugin_oidc_mozilla',
     #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
@@ -218,6 +218,7 @@ ACTSTREAM_SETTINGS = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware', 
+    #'mozilla_django_oidc.middleware.SessionRefresh',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -317,13 +318,13 @@ GVSIGOL_LDAP = {
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
     #'django_auth_ldap.backend.LDAPBackend',
-    #'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
+    #'django.contrib.auth.backends.ModelBackend',
 )
 
 LOGIN_URL = 'gvsigol_authenticate_user'
-#GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
-GVSIGOL_AUTH_BACKEND = 'gvsigol_auth.django'
+GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
+#GVSIGOL_AUTH_BACKEND = 'gvsigol_auth.django'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "index"
 if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth.django_auth':
@@ -705,3 +706,4 @@ GEOETL_DB = {
 }
 
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096

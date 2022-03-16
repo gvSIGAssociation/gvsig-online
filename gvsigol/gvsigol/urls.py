@@ -25,21 +25,23 @@ packages = [ app for app in settings.INSTALLED_APPS
                  or app.startswith('gvsigol_app_')
             ]
 
+GVSIGOL_URL_PREFIX = settings.GVSIGOL_PATH + '/'
 urlpatterns = [
-    path('gvsigonline/i18n/', include(i18n)),
-    path('gvsigonline/jsi18n/', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
-    path('gvsigonline/admin/', admin.site.urls) #,
-    #path('gvsigonline/oidc/', include('mozilla_django_oidc.urls')),
+    path(GVSIGOL_URL_PREFIX, include([
+        path('i18n/', include(i18n)),
+        path('jsi18n/', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
+        path('admin/', admin.site.urls)
+    ])),
 ]
 
 for app in packages:
     if 'gvsigol_app_' in app:
         urlpatterns += [
-            path('gvsigonline/', include(app + '.urls')),
+            path(GVSIGOL_URL_PREFIX, include(app + '.urls')),
         ]
         try:
             urlpatterns += [
-                path('gvsigonline/fileserver/', include(app + '.urls_fileserver')),
+                path(GVSIGOL_URL_PREFIX + 'fileserver/', include(app + '.urls_fileserver')),
             ]
         except:
             pass
@@ -48,47 +50,47 @@ for app in packages:
 for plugin in settings.INSTALLED_APPS:
     if 'gvsigol_plugin_' in plugin:
         urlpatterns += [
-            path('gvsigonline/', include(plugin + '.urls')),
+            path(GVSIGOL_URL_PREFIX, include(plugin + '.urls')),
         ]
         try:
             urlpatterns += [
-                path('gvsigonline/fileserver/', include((plugin + '.urls_fileserver', plugin), namespace=plugin)),
+                path(GVSIGOL_URL_PREFIX + 'fileserver/', include((plugin + '.urls_fileserver', plugin), namespace=plugin)),
             ]
         except:
             pass
     
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('gvsigonline/core/', include('gvsigol_core.urls')),
+        path(GVSIGOL_URL_PREFIX + 'core/', include('gvsigol_core.urls')),
     ]
   
 if 'gvsigol_auth' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('gvsigonline/auth/', include('gvsigol_auth.urls')),
+        path(GVSIGOL_URL_PREFIX + 'auth/', include('gvsigol_auth.urls')),
     ]
 
 if 'gvsigol_services' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('gvsigonline/services/', include('gvsigol_services.urls')),
+        path(GVSIGOL_URL_PREFIX + 'services/', include('gvsigol_services.urls')),
     ]
     urlpatterns += [
-        path('gvsigonline/fileserver/', include('gvsigol_services.urls_fileserver')),
+        path(GVSIGOL_URL_PREFIX + 'fileserver/', include('gvsigol_services.urls_fileserver')),
     ]
     
 if 'gvsigol_symbology' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('gvsigonline/symbology/', include('gvsigol_symbology.urls')),
+        path(GVSIGOL_URL_PREFIX + 'symbology/', include('gvsigol_symbology.urls')),
     ]
     
 if 'gvsigol_filemanager' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),
+        path(GVSIGOL_URL_PREFIX + 'filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),
     ]
     urlpatterns += [
-        path('gvsigonline/fileserver/filemanager/', include('gvsigol_filemanager.urls_fileserver', namespace='fsfilemanager')),
+        path(GVSIGOL_URL_PREFIX + 'fileserver/filemanager/', include('gvsigol_filemanager.urls_fileserver', namespace='fsfilemanager')),
     ]
 
 if 'gvsigol_statistics' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('gvsigonline/statistics/', include('gvsigol_statistics.urls', namespace='statistics')),
+        path(GVSIGOL_URL_PREFIX + 'statistics/', include('gvsigol_statistics.urls', namespace='statistics')),
     ]
