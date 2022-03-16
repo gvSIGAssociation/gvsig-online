@@ -51,7 +51,7 @@ logger = logging.getLogger("gvsigol")
 providers_order = []
 geocoder = None
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def provider_list(request):
     ls = []
@@ -80,7 +80,7 @@ def provider_list(request):
 
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @superuser_required
 def provider_add(request):        
     if request.method == 'POST':
@@ -221,7 +221,7 @@ def isValidCartociudadDB(datastore):
     return resources_needed
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def provider_update(request, provider_id):
@@ -346,7 +346,7 @@ def provider_update(request, provider_id):
     return render(request, 'provider_update.html', context)
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def provider_update_order(request, provider_id, order):
@@ -361,7 +361,7 @@ def provider_update_order(request, provider_id, order):
         
     return HttpResponse(status=500)
  
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def provider_delete(request, provider_id):
     try:
@@ -379,7 +379,7 @@ def provider_delete(request, provider_id):
     
     return redirect('provider_list')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def provider_full_import(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
@@ -401,7 +401,7 @@ def provider_full_import(request, provider_id):
     full_import_solr_data(provider)
     return redirect('provider_list')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def provider_import_status(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
@@ -426,7 +426,7 @@ def provider_import_status(request, provider_id):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def provider_delta_import(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
@@ -448,7 +448,7 @@ def get_conf(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')           
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required    
 def upload_shp_cartociudad(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
@@ -456,7 +456,7 @@ def upload_shp_cartociudad(request, provider_id):
      
     return HttpResponse('OK ', status=200)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required 
 def upload_shp_cartociudad_status(request):
     status = {}
@@ -536,7 +536,7 @@ def get_providers_activated(request):
     
     
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required()
 @staff_required
 def get_geocoding_resource_list_available(request):
     """
