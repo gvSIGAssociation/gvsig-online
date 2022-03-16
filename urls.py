@@ -28,7 +28,8 @@ packages = [ app for app in settings.INSTALLED_APPS
 urlpatterns = [
     path('gvsigonline/i18n/', include(i18n)),
     path('gvsigonline/jsi18n/', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
-    path('gvsigonline/admin/', admin.site.urls),
+    path('gvsigonline/admin/', admin.site.urls) #,
+    #path('gvsigonline/oidc/', include('mozilla_django_oidc.urls')),
 ]
 
 for app in packages:

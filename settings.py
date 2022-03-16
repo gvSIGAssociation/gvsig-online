@@ -126,6 +126,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 USE_X_FORWARDED_HOST = True
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
 #GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
@@ -137,6 +138,7 @@ USE_X_FORWARDED_HOST = True
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    #'mozilla_django_oidc',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -155,7 +157,7 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    #'gvsigol_app_dev',
+    #'gvsigol_app_test',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
     #'gvsigol_app_tocantins',
@@ -178,6 +180,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
     'gvsigol_plugin_gestiona',
+    #'gvsigol_plugin_oidc_mozilla',
     #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
@@ -313,8 +316,18 @@ GVSIGOL_LDAP = {
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
     #'django_auth_ldap.backend.LDAPBackend',
+    #'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+LOGIN_URL = 'gvsigol_authenticate_user'
+#GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
+GVSIGOL_AUTH_BACKEND = 'gvsigol_auth.django'
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "index"
+if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth.django_auth':
+    import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
+
 AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
 #AUTH_LDAP_ROOT_DN = "dc=dev,dc=gvsigonline,dc=com"
 #AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
