@@ -528,16 +528,20 @@ def etl_read_canvas(request):
         form = UploadFileForm(request.POST)
         
         if form.is_valid():
+
+            if request.POST['jsonCanvas'] == 'false':
                 
-            statusModel  = ETLstatus.objects.get(name = 'current_canvas')
-            statusModel.message = 'Running'
-            statusModel.status = 'Running'
-            statusModel.save()    
+                id_ws = request.POST['id_ws']
+                ws  = ETLworkspaces.objects.get(id=int(id_ws))
+                jsonCanvas = json.loads(ws.workspace)
 
-            jsonCanvas = json.loads(request.POST['jsonCanvas'])
+            else:
 
-            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': None})
-            #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': None})
+                jsonCanvas = json.loads(request.POST['jsonCanvas'])
+                id_ws = None
+
+            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws})
+            #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': id_ws})
  
         else:
             print ('invalid form')
