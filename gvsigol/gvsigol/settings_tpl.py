@@ -239,7 +239,7 @@ LOGIN_URL = 'gvsigol_authenticate_user'
 GVSIGOL_AUTH_BACKEND = '##GVSIGOL_AUTH_BACKEND##'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "index"
-if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth.django_auth':
+if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
     import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 
 # Internationalization
