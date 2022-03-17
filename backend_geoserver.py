@@ -107,8 +107,8 @@ class Geoserver():
             ('c_ImageMosaic', _('ImageMosaic')),
         )
 
-        if settings.GDALTOOLS_BASEPATH:
-            gdaltools.Wrapper.BASEPATH = settings.GDALTOOLS_BASEPATH
+        if getattr(settings, "GDALTOOLS_BASEPATH", ''):
+            gdaltools.Wrapper.BASEPATH = getattr(settings, "GDALTOOLS_BASEPATH")
         
         self.supported_srs_plain = [ x[0] for x in forms_geoserver.supported_srs ]
         self.supported_encodings_plain = [ x[0] for x in forms_geoserver.supported_encodings ]
