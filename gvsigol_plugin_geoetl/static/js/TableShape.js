@@ -5791,7 +5791,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="column20">'+
                                 '<label class="col-form-label">'+gettext('Operator:')+'</label>'+
-                                '<select class="form-control" id="operator-'+ID+'">'+
+                                '<select class="form-control" id="option-'+ID+'">'+
                                     '<option value="="> = </option>'+
                                     '<option value="!="> != </option>'+
                                     '<option value="<"> < </option>'+
@@ -5852,7 +5852,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                 var paramsFilter = {"id": ID,
                 "parameters": [
                 {"attr": $('#attr-'+ID).val(),
-                "operator": $('#operator-'+ID).val(),
+                "option": $('#option-'+ID).val(),
                 "value": $('#value-'+ID).val()}
                 ]}
                 

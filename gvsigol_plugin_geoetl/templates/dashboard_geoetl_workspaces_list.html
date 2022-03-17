@@ -25,6 +25,7 @@
 						<thead>
 							<tr>
 								<th>{% trans "ID" %}</th>
+								<th></th>
 								<th>{% trans "Status" %}</th>
 								<th>{% trans "Name" %}</th>
 								<th>{% trans "Description" %}</th>
@@ -40,15 +41,15 @@
 							{% for workspace in workspaces %}
 								<tr>
 									<td> {{ workspace.id }} </td>
-									{% if workspace.every or workspace.day_of_week %}
+									<td></td>
+									
 										<td>
-											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green;" aria-hidden="true"></i> 
-											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin"></i> 
-											<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red;" aria-hidden="true" ></i>
+											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
+											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
+											<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
 										</td>
-									{% else %}
-										<td></td>
-									{% endif %}
+
+
 									<td>{{ workspace.name }}</td>
 									<td>{{ workspace.description }}</td>
 									{% if workspace.every %}
@@ -331,6 +332,10 @@
 				"targets": -1,
 				"data": null,
 				"defaultContent": '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>'
+			},{
+				"targets": 1,
+				"data": null,
+				"defaultContent": '<button type="button" name="button-run-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Run workspace" %}' + '" class="btn btn-light"><i class="fa fa-play"></i></button>'
 			}],
 			"dom": 'T<"clear">lfrtip',
 			"bLengthChange": false
@@ -387,9 +392,7 @@
 					error: function(){}
 				});
 
-		}
-
-		)
+		})
 		
 
 		$('#etl-table tbody').on('click', 'button', function (){
@@ -447,7 +450,30 @@
 				location.href = '/gvsigonline/etl/etl_workspace_download/?lgid=' + data[0]
 			}
 
+			else if (this.name == "button-run-workspace-etl"){
+				runWorkspace(data);  
+			}
+
 		});
+
+		function runWorkspace(data){
+
+			$.ajax({
+				type: 'POST',
+				async: false,
+				data: {
+					"id_ws": data[0],
+					'jsonCanvas': false
+				},
+				url: '/gvsigonline/etl/etl_read_canvas/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(){},
+				error: function(){}
+			});
+
+		}
 			
 		function openWorkspace(data){	
 				
@@ -595,7 +621,6 @@
 			}
 			if(status == 'Success'){
 
-				
 				$("#icon-success-"+id).css("display", "inline");
 				$("#icon-success-"+id).attr("title", msg);
 				$("#icon-running-"+id).css("display", "none");

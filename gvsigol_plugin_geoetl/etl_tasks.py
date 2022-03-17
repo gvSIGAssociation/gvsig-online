@@ -527,6 +527,11 @@ def output_Postgresql(dicc, geom_column_name = ''):
             sqlDelete = sqlDelete + ' WHERE "'+dicc['match']+'" = '+"'"+value+"'"
             executePostgres(dicc, sqlDelete)
 
+    conn_source.close()
+    db_source.dispose()
+    conn_target.close()
+    db_target.dispose()
+
     return [table_name]
 
 

@@ -17,10 +17,29 @@ def run_canvas_background(**kwargs):
     id_ws = kwargs["id_ws"]
     
     if id_ws:
-        statusModel  = ETLstatus.objects.get(id_ws = id_ws)
+        try:
+
+            statusModel  = ETLstatus.objects.get(id_ws = id_ws)
+            statusModel.message = 'Running'
+            statusModel.status = 'Running'
+            statusModel.save()
+
+        except:
+
+            statusModel = ETLstatus(
+                name = 'name',
+                message = 'Running',
+                status = 'Running',
+                id_ws = id_ws
+            )
+            
+            statusModel.save()
+    else:
+
+        statusModel  = ETLstatus.objects.get(name = 'current_canvas')
         statusModel.message = 'Running'
         statusModel.status = 'Running'
-        statusModel.save()  
+        statusModel.save()         
     
     nodes=[]
     edges =[]
@@ -138,6 +157,7 @@ def run_canvas_background(**kwargs):
         delete_tables(tables_list_name)
     
     except Exception as e:
+
         if id_ws:
             statusModel  = ETLstatus.objects.get(id_ws = id_ws)
             statusModel.message = str(e)[:250]
@@ -149,13 +169,31 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Error'
             statusModel.save()
         
+        
         delete_tables(tables_list_name)
 
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
     
 def delete_tables(nodes):
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
-    cur = conn.cursor()
+    conn_ = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur_ = conn_.cursor()
+
+    sqlBlocks = "SELECT pid, query FROM pg_stat_activity WHERE query != '<IDLE>' AND query NOT ILIKE '%pg_stat_activity%' ORDER BY query_start desc"
+    cur_.execute(sqlBlocks)
+    conn_.commit()
+
+    pids = []
+
+    for c in cur_:
+
+        if 'ds_plugin_geoetl.' in c[1]:
+            print(c[0])
+            pids.append(c[0])
+
+    for pid in pids:
+        sqlTerm = "select pg_terminate_backend("+str(pid)+")"
+        cur_.execute(sqlTerm)
+        conn_.commit()
 
     tables = []
     for n in nodes:
@@ -169,9 +207,9 @@ def delete_tables(nodes):
 
     string_tables = ('", '+settings.GEOETL_DB["schema"]+ '."').join(tables)
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+ '."'+string_tables+'" '
-    cur.execute(sqlDrop)
-    conn.commit()
-
-    conn.close()
-    cur.close()
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+ '."'+string_tables+'" CASCADE'
+    print(sqlDrop)
+    cur_.execute(sqlDrop)
+    conn_.commit()
+    conn_.close()
+    cur_.close()
