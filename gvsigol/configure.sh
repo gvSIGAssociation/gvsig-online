@@ -306,6 +306,16 @@ function configure() {
 		DJANGO_AUTHENTICATION_BACKENDS="'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
 	fi
 	grep -rl "##DJANGO_AUTHENTICATION_BACKENDS##"  | xargs sed -i "s/##DJANGO_AUTHENTICATION_BACKENDS##/$DJANGO_AUTHENTICATION_BACKENDS/g"
+	if [ -z $USE_X_FORWARDED_HOST ]; then
+		echo "WARNING: USE_X_FORWARDED_HOST is not defined, using 'False'"
+		USE_X_FORWARDED_HOST="False"
+	fi
+	grep -rl "##USE_X_FORWARDED_HOST##"  | xargs sed -i "s/##USE_X_FORWARDED_HOST##/$USE_X_FORWARDED_HOST/g"
+	if [ -z $SECURE_PROXY_SSL_HEADER ]; then
+		echo "WARNING: SECURE_PROXY_SSL_HEADER is not defined, using None"
+		SECURE_PROXY_SSL_HEADER="None"
+	fi
+	grep -rl "##SECURE_PROXY_SSL_HEADER##"  | xargs sed -i "s/##SECURE_PROXY_SSL_HEADER##/$SECURE_PROXY_SSL_HEADER/g"
 
 }
 
