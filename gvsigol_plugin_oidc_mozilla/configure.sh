@@ -13,7 +13,7 @@ if [ -z "$OIDC_OP_REALM_BASE_URL" ]; then
 fi
 if [ -z "$OIDC_OP_AUTHORIZATION_ENDPOINT" ]; then
         echo "WARNING: OIDC_OP_AUTHORIZATION_ENDPOINT is not defined, using OIDC_OP_REALM_BASE_URL + '/protocol/openid-connect/auth'."
-        OIDC_OP_REALM_BASE_URL="$OIDC_OP_REALM_BASE_URL/protocol/openid-connect/auth"
+        OIDC_OP_AUTHORIZATION_ENDPOINT="$OIDC_OP_REALM_BASE_URL/protocol/openid-connect/auth"
 fi
 if [ -z "$OIDC_OP_TOKEN_ENDPOINT" ]; then
         echo "WARNING: OIDC_OP_TOKEN_ENDPOINT is not defined, using OIDC_OP_REALM_BASE_URL + '/protocol/openid-connect/token'."
@@ -56,6 +56,8 @@ grep -rl "##OIDC_OP_REALM_BASE_URL##"  | xargs sed -i "s ##OIDC_OP_REALM_BASE_UR
 grep -rl "##OIDC_OP_AUTHORIZATION_ENDPOINT##"  | xargs sed -i "s ##OIDC_OP_AUTHORIZATION_ENDPOINT## $OIDC_OP_AUTHORIZATION_ENDPOINT g"
 grep -rl "##OIDC_OP_TOKEN_ENDPOINT##"  | xargs sed -i "s ##OIDC_OP_TOKEN_ENDPOINT## $OIDC_OP_TOKEN_ENDPOINT g"
 grep -rl "##OIDC_OP_USER_ENDPOINT##" | xargs sed -i "s ##OIDC_OP_USER_ENDPOINT## $OIDC_OP_USER_ENDPOINT g" 
+grep -rl "##OIDC_OP_JWKS_ENDPOINT##" | xargs sed -i "s ##OIDC_OP_JWKS_ENDPOINT## $OIDC_OP_JWKS_ENDPOINT g" 
+grep -rl "##OIDC_OP_LOGOUT_ENDPOINT##" | xargs sed -i "s ##OIDC_OP_LOGOUT_ENDPOINT## $OIDC_OP_LOGOUT_ENDPOINT g" 
 grep -rl "##OIDC_RP_CLIENT_ID##" | xargs sed -i "s/##OIDC_RP_CLIENT_ID##/$OIDC_RP_CLIENT_ID/g"
 grep -rl "##OIDC_RP_CLIENT_ID##" | xargs sed -i "s/##OIDC_RP_CLIENT_ID##/$OIDC_RP_CLIENT_ID/g"
 grep -rl "##OIDC_RP_CLIENT_SECRET##" | xargs sed -i "s/##OIDC_RP_CLIENT_SECRET##/$OIDC_RP_CLIENT_SECRET/g"
