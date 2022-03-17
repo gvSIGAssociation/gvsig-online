@@ -296,6 +296,16 @@ function configure() {
 		fi		
 	fi
 	grep -rl "##CHECK_TILELOAD_ERROR##"  | xargs sed -i "s/##CHECK_TILELOAD_ERROR##/$CHECK_TILELOAD_ERROR/g"
+	if [ -z $GVSIGOL_AUTH_BACKEND ]; then
+		echo "WARNING: GVSIGOL_AUTH_BACKEND is not defined, using 'gvsigol_auth'"
+		GVSIGOL_AUTH_BACKEND="gvsigol_auth"
+	fi
+	grep -rl "##GVSIGOL_AUTH_BACKEND##"  | xargs sed -i "s/##GVSIGOL_AUTH_BACKEND##/$GVSIGOL_AUTH_BACKEND/g"
+	if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
+		echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
+		DJANGO_AUTHENTICATION_BACKENDS="'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
+	fi
+	grep -rl "##DJANGO_AUTHENTICATION_BACKENDS##"  | xargs sed -i "s/##DJANGO_AUTHENTICATION_BACKENDS##/$DJANGO_AUTHENTICATION_BACKENDS/g"
 
 }
 
