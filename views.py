@@ -1122,7 +1122,7 @@ def project_get_conf(request):
                                 version = params['version']
                             wmts = WebMapTileService(params['url'], version=version)
                             capabilities = wmts.getServiceXML()
-                            params['capabilities'] = capabilities
+                            params['capabilities'] = capabilities.decode('utf-8')
                             l.external_params = json.dumps(params)
                             l.save()
                         layer.update(params)
