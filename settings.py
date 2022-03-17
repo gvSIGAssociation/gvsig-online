@@ -323,11 +323,11 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_URL = 'gvsigol_authenticate_user'
-GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
-#GVSIGOL_AUTH_BACKEND = 'gvsigol_auth.django'
+#GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
+GVSIGOL_AUTH_BACKEND = 'gvsigol_auth'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "index"
-if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth.django_auth':
+if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
     import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 
 AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
