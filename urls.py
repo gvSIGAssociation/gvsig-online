@@ -7,8 +7,8 @@ from django.utils.module_loading import import_string
 
 LOGIN_VIEW = import_string(getattr(settings, "GVSIGOL_LOGIN_VIEW",  'gvsigol_auth.views.login_user'))
 LOGOUT_VIEW = import_string(getattr(settings, "GVSIGOL_LOGOUT_VIEW", 'gvsigol_auth.views.logout_user'))
-GVSIGOL_AUTH_BACKEND = getattr(settings, "GVSIGOL_AUTH_BACKEND",  'gvsigol_auth.django_auth')
-if GVSIGOL_AUTH_BACKEND == 'gvsigol_auth.django':
+GVSIGOL_AUTH_BACKEND = getattr(settings, "GVSIGOL_AUTH_BACKEND",  'gvsigol_auth')
+if GVSIGOL_AUTH_BACKEND == 'gvsigol_auth':
     LOGIN_PATHS = [
         path('login_user/', LOGIN_VIEW, name='gvsigol_authenticate_user'),
         path('logout_user/', LOGOUT_VIEW, name='gvsigol_logout_user'),

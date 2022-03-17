@@ -2,7 +2,11 @@ import importlib
 
 try:
     from gvsigol import settings
-    auth_backend = importlib.import_module(settings.GVSIGOL_AUTH_BACKEND)
+    if settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_auth':
+        import gvsigol_auth
+        auth_backend = gvsigol_auth.django_auth
+    else:
+        auth_backend = importlib.import_module(settings.GVSIGOL_AUTH_BACKEND)
 except:
     auth_backend = importlib.import_module('gvsigol_auth.django_auth')
 
