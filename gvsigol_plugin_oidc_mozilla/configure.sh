@@ -4,8 +4,8 @@ echo "Running install script for oidc_mozilla plugin ..."
 mv settings_tpl.py settings.py
 
 if [ -z "$GVSIGOL_AUTH_BACKEND" ]; then
-        echo "WARNING: GVSIGOL_AUTH_BACKEND is not defined, using 'gvsigol_auth.django_auth'."
-        GVSIGOL_AUTH_BACKEND="gvsigol_auth.django_auth"
+        echo "WARNING: GVSIGOL_AUTH_BACKEND is not defined, using 'gvsigol_auth'."
+        GVSIGOL_AUTH_BACKEND="gvsigol_auth"
 fi
 if [ -z "$OIDC_OP_REALM_BASE_URL" ]; then
         echo "WARNING: OIDC_OP_REALM_BASE_URL is not defined, using BASE_URL + 'auth'."
