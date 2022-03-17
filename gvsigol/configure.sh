@@ -298,7 +298,7 @@ function configure() {
 	grep -rl "##CHECK_TILELOAD_ERROR##"  | xargs sed -i "s/##CHECK_TILELOAD_ERROR##/$CHECK_TILELOAD_ERROR/g"
 	if [ -z $GVSIGOL_AUTH_BACKEND ]; then
 		echo "WARNING: GVSIGOL_AUTH_BACKEND is not defined, using 'gvsigol_auth'"
-		GVSIGOL_AUTH_BACKEND="gvsigol_auth"
+		GVSIGOL_AUTH_BACKEND="gvsigol_auth.django_auth"
 	fi
 	grep -rl "##GVSIGOL_AUTH_BACKEND##"  | xargs sed -i "s/##GVSIGOL_AUTH_BACKEND##/$GVSIGOL_AUTH_BACKEND/g"
 	if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
