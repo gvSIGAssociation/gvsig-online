@@ -51,7 +51,7 @@ from gvsigol_core.utils import get_absolute_url
 logger = logging.getLogger('gvsigol')
 from gvsigol_auth import auth_backend
 
-from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
+from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_REDIRECT_URL, AUTH_WITH_REMOTE_USER
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -204,7 +204,7 @@ def rest_session_login(request):
 
 def logout_user(request):
     logout(request)
-    return redirect(LOGOUT_PAGE_URL)
+    return redirect(LOGOUT_REDIRECT_URL)
 
 @login_required()
 def password_update(request):  
