@@ -24,7 +24,7 @@ def has_role(request, role):
         True if the user has the provided role, False otherwise
     """
     claims = request.session.get('oidc_access_token_payload', {})
-    roles = claims.get('geoserver_roles', [])
+    roles = claims.get('gvsigol_roles', [])
     return (role in roles)
 
 def has_group(request, group):
@@ -64,7 +64,7 @@ def get_roles(request):
         The list of roles of the user
     """
     claims = request.session.get('oidc_access_token_payload', {})
-    return claims.get('geoserver_roles', [])
+    return claims.get('gvsigol_roles', [])
 
 def get_groups(request):
     """Gets the groups of the user.
