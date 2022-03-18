@@ -328,7 +328,6 @@ GVSIGOL_AUTH_BACKEND = 'gvsigol_auth'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "index"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-LOGOUT_PAGE_URL = '/gvsigonline/'
 if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
     import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 

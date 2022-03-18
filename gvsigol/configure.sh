@@ -215,11 +215,11 @@ function configure() {
 	
 
 	#TODO: Pendiente de revisar ...
-	if [ -z $LOGOUT_PAGE_URL ]; then
-		echo "WARNING: LOGOUT_PAGE_URL is not defined, using default value /gvsigonline"					
-		LOGOUT_PAGE_URL="/gvsigonline/"
+	if [ -z $LOGOUT_REDIRECT_URL ]; then
+		echo "WARNING: LOGOUT_REDIRECT_URL is not defined, using default value 'index'"
+		LOGOUT_REDIRECT_URL="index" # normally this is equivalent to /gvsigonline"
 	fi
-	grep -rl "##LOGOUT_PAGE_URL##"  | xargs sed -i "s ##LOGOUT_PAGE_URL## $LOGOUT_PAGE_URL g"
+	grep -rl "##LOGOUT_REDIRECT_URL##"  | xargs sed -i "s ##LOGOUT_REDIRECT_URL## $LOGOUT_REDIRECT_URL g"
 
 	if [ -z $CELERY_BROKER_URL ]; then
 		echo "WARNING: CELERY_BROKER_URL is not defined, deriving one assuming localhost and GVSIGOL_PASSWD"
