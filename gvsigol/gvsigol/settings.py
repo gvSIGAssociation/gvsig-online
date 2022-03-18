@@ -126,8 +126,8 @@ finally:
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#USE_X_FORWARDED_HOST = True
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
 #GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
@@ -139,7 +139,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'mozilla_django_oidc',
+    #'mozilla_django_oidc',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -181,7 +181,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
     'gvsigol_plugin_gestiona',
-    'gvsigol_plugin_oidc_mozilla',
+    #'gvsigol_plugin_oidc_mozilla',
     #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
@@ -327,6 +327,8 @@ LOGIN_URL = 'gvsigol_authenticate_user'
 GVSIGOL_AUTH_BACKEND = 'gvsigol_auth'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "index"
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+LOGOUT_PAGE_URL = '/gvsigonline/'
 if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
     import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 
@@ -379,9 +381,6 @@ LOCALE_PATHS =  [
 for app in INSTALLED_APPS:
     if app.startswith('gvsigol_app_') or app.startswith('gvsigol_plugin_'):
         LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
-
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-LOGOUT_PAGE_URL = '/gvsigonline/'
 
 # Email settings
 EMAIL_BACKEND_ACTIVE = True
