@@ -10,20 +10,45 @@ from django.urls import reverse
 LOGGER = logging.getLogger(__name__)
 
 class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
-    def create_user(self, claims):
-        user = super(GvsigolOIDCAuthenticationBackend, self).create_user(claims)
-        user.username = claims.get('username', '')
-        user.first_name = claims.get('first_name', '')
-        user.last_name = claims.get('last_name', '')
-        django_roles = claims.get('gvsigol_roles', [])
-        user.is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles)
-        user.is_staff = ('GVSIGOL_DJANGO_STAFF' in django_roles)
-        user.save()
+    def describe_user_by_claims(self, claims):
+            username = claims.get('username')
+            return 'username {}'.format(username)
 
-        return user
+    def filter_users_by_claims(self, claims):
+        """Return all users matching the specified email."""
+        username = claims.get('username')
+        if not username:
+            return self.UserModel.objects.none()
+        return self.UserModel.objects.filter(username=username)
+
+    def verify_claims(self, claims):
+        """Verify the provided claims to decide if authentication should be allowed."""
+
+        # Verify claims required by default configuration
+        scopes_str = self.get_settings('OIDC_RP_SCOPES', 'openid email username')
+        scopes = scopes_str.split()
+        if 'email' in scopes and 'username' in scopes:
+            return 'email' in claims and 'username' in claims
+
+        LOGGER.warning('Custom OIDC_RP_SCOPES defined. '
+                       'You need to override `verify_claims` for custom claims verification.')
+
+        return True
+            
+    def create_user(self, claims):
+        email = claims.get('email')
+        username = claims.get('username', '')
+        django_roles = claims.get('gvsigol_roles', [])
+        return self.UserModel.objects.create_user(username,
+            email=email,
+            first_name = claims.get('first_name', ''),
+            last_name = claims.get('last_name', ''),
+            is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles),
+            is_staff = ('GVSIGOL_DJANGO_STAFF' in django_roles)
+        )
 
     def update_user(self, user, claims):
-        user.username = claims.get('username', '')
+        user.email = claims.get('email')
         user.first_name = claims.get('first_name', '')
         user.last_name = claims.get('last_name', '')
         django_roles = claims.get('gvsigol_roles', [])
