@@ -78,7 +78,7 @@
 											<a href="/gvsigonline/core/" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
 										</div>
 										<div class="pull-right">
-											<a href="/gvsigonline/auth/logout_user/" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
+											<a href="{% url 'gvsigol_logout_user' %}" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
 										</div>
 									</li>
 								</ul>
@@ -98,7 +98,7 @@
 								    </select>		
 							    </form>							 
 						    </li>
-							<li><a href="/gvsigonline/auth/login_user/">{% trans "Sign in" %}</a></li>
+							<li><a href="{% url 'gvsigol_authenticate_user' %}">{% trans "Sign in" %}</a></li>
 							{% endif %}
 						</ul>
 					</div>

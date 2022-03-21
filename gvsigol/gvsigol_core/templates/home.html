@@ -160,7 +160,7 @@
 		  	},
 			success	:function(response){
 				if (response.success == true) {
-					location.href = '/gvsigonline/auth/logout_user/';
+					location.href = '{% url 'gvsigol_logout_user' %}';
 				} else {
 					var error = $('#form-error')[0];
 					if (error.className == 'hide') {
