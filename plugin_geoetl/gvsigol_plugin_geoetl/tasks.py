@@ -170,7 +170,7 @@ def run_canvas_background(**kwargs):
             statusModel.save()
         
         
-        delete_tables(tables_list_name)
+        #delete_tables(tables_list_name)
 
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
     
@@ -187,7 +187,6 @@ def delete_tables(nodes):
     for c in cur_:
 
         if 'ds_plugin_geoetl.' in c[1]:
-            print(c[0])
             pids.append(c[0])
 
     for pid in pids:
@@ -207,8 +206,7 @@ def delete_tables(nodes):
 
     string_tables = ('", '+settings.GEOETL_DB["schema"]+ '."').join(tables)
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+ '."'+string_tables+'" CASCADE'
-    print(sqlDrop)
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+ '."'+string_tables+'"'
     cur_.execute(sqlDrop)
     conn_.commit()
     conn_.close()

@@ -232,7 +232,6 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                 
             }
             else{
-                
             
                 $('#end-date-'+ID).prop('disabled', false)
                 $("#checkbox-"+ID).prop('disabled', false)
@@ -298,9 +297,12 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                     $('#get-proced-'+ID).hover(function(){
                         $(this).css('cursor','pointer');
                     });
+
+                    get_ = []
                     
                     for(i=0;i<data.length;i++){
                         $('#proced-list-'+ID).append('<option value="'+data[i][0]+'">'+data[i][0]+' - '+data[i][1]+'</option>')
+                        get_.push([data[i][0], data[i][0]+' - '+data[i][1]])
                     };
                 },
                 error: function(){
@@ -350,7 +352,8 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
                 var paramsIndenova = {"id": ID,
                 "parameters": [
-                    {
+                    {   
+                        "get_proced-list": get_,
                         "domain": $('#domain-'+ID).val(),
                         "api-key": $('#api-key-'+ID).val(),
                         "client-id": $('#client-id-'+ID).val(),
@@ -844,8 +847,11 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 
                         $('#sheet-name-'+ID).empty()
 
+                        get_ = []
+
                         for (i = 0; i < data.length; i++){
                             $('#sheet-name-'+ID).append('<option>'+data[i]+'</option>')
+                            get_.push(data[i])
 
                         }
                     }
@@ -856,10 +862,12 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                 
                 var paramsExcel = {"id": ID,
                 "parameters": [
-                    { "excel-file": $('#excel-file-'+ID).val(),
+                    { "get_sheet-name":  get_ ,
+                    "excel-file": $('#excel-file-'+ID).val(),
                     "sheet-name": $('#sheet-name-'+ID).val(),
                     "usecols": $('#usecols-'+ID).val(),
-                    "header": $('#header-'+ID).val() }
+                    "header": $('#header-'+ID).val()
+                    }
                 ]}
 
                 var formDataSchemaExcel = new FormData();
@@ -7076,7 +7084,7 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<label form="attr" class="col-form-label">'+gettext('Cadastral Reference Attribute:')+'</label>'+
+                            '<label form="attr" class="col-form-label">'+gettext('Cadastral Reference Attribute (output in EPSG - 4326):')+'</label>'+
                             '<select class="form-control" id="attr-'+ID+'"> </select>'+
                         '</form>'+
                     '</div>'+
@@ -7327,8 +7335,8 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<label form="attr" class="col-form-label">'+gettext('Select mode:')+'</label>'+
                             '<select class="form-control" id="select-mgrs'+ID+'">'+
-                                '<option value="mgrstolatlon" selected>'+gettext('MGRS to geographic coordinates:')+'</option>'+
-                                '<option value="latlontomgrs">'+gettext('Geographic coordinates to MGRS:')+'</option>'+
+                                '<option value="mgrstolatlon" selected>'+gettext('MGRS to geographic coordinates (EPSG - 4326):')+'</option>'+
+                                '<option value="latlontomgrs">'+gettext('Geographic coordinates (EPSG - 4326) to MGRS:')+'</option>'+
                             '</select>'+
                             '<div class="column50">'+
                                 '<label form="attr" class="col-form-label">'+gettext('MGRS grid attribute:')+'</label>'+
