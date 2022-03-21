@@ -10,4 +10,4 @@ OIDC_OP_LOGOUT_URL_METHOD = GVSIGOL_AUTH_BACKEND + ".provider_logout"
 OIDC_RP_SIGN_ALGO = 'RS256'
 OIDC_STORE_ACCESS_TOKEN = True
 OIDC_STORE_ID_TOKEN = True
-OIDC_RP_SCOPES = 'openid email geoserver-client'
+OIDC_RP_SCOPES = 'openid email username geoserver-client'
