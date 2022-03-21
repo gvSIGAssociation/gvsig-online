@@ -76,7 +76,12 @@ class Graph:
 
 def input_Excel(dicc):
 
+    import warnings
+
+    warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+
     df = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+    df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
     table_name = dicc['id']
 
     conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
@@ -388,7 +393,7 @@ def trans_Filter(dicc):
     
     value=dicc['value']
     
-    operator = dicc['operator']
+    operator = dicc['option']
 
     table_name_source = dicc['data'][0]
     table_name_target_passed = dicc['id']+'_0'
@@ -487,7 +492,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
         df.to_sql(table_name, con=conn_target, schema= esq, if_exists='fail', index=False)
         sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
         executePostgres(dicc, sqlAlter)
-        sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY ogc_fid'
+        sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
         try:
             executePostgres(dicc, sqlAlter_)
         except:
@@ -496,10 +501,23 @@ def output_Postgresql(dicc, geom_column_name = ''):
     elif dicc['operation'] == 'APPEND':
         df.to_sql(table_name, con=conn_target, schema= esq, if_exists='append', index=False)
     elif dicc['operation'] == 'OVERWRITE':
+
+        if geom_column_name != '':
+
+            sqlA = 'ALTER TABLE '+esq+'."'+table_name+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
+            executePostgres(dicc, sqlA)
+
+            sqlU = 'UPDATE '+esq+'."'+table_name+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
+            executePostgres(dicc, sqlU)
+
+            sqlD = 'ALTER TABLE '+esq+'."'+table_name+'"  DROP COLUMN wkb_geometry'
+            executePostgres(dicc, sqlD)
+        
+        
         df.to_sql(table_name, con=conn_target, schema= esq, if_exists='replace', index=False)
         sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
         executePostgres(dicc, sqlAlter)
-        sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY ogc_fid'
+        sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
         try:
             executePostgres(dicc, sqlAlter_)
         except:
