@@ -41,7 +41,7 @@
         		{% for error in errors %}
 					<div style="color: #ff0000;">* {{error.message}}</div>
 				{% endfor %}
-		        <form action="/gvsigonline/auth/login_user/" method="post">
+		        <form action="{% url 'gvsigol_authenticate_user' %}" method="post">
 		        	{% csrf_token %}
 		          	<div class="form-group has-feedback">
 		            	<input type="text" name="username" class="form-control" placeholder="{% trans "Username" %}">
