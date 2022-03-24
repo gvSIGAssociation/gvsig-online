@@ -243,8 +243,14 @@ def trans_RenameAttr(dicc):
 
 def trans_Join(dicc):
 
-    attr1 = dicc['attr1']
-    attr2 = dicc['attr2']
+    attr1 = dicc['attr-1'].split(" ")
+    attr2 = dicc['attr-2'].split(" ")
+
+    on =''
+    for pos in range (0, len(attr1)):
+        on += 'A0."'+attr1[pos]+'"::TEXT = A1."'+attr2[pos]+'"::TEXT AND '
+
+    on = on[:-5]
 
     table_name_source_0 = dicc['data'][0]
     table_name_source_1 = dicc['data'][1]
@@ -285,17 +291,17 @@ def trans_Join(dicc):
         conn.commit()
 
     sqlJoin = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_join+'" as (select '+ schema+' from '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" AS A0'
-    sqlJoin += ' INNER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON A0."'+attr1+'" = A1."'+attr2+'" );'
+    sqlJoin += ' INNER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON '+on+' );'
     cur.execute(sqlJoin)
     conn.commit()
 
     sqlNotJoin1 = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_0_not_used+'" as (select A0.* from '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" AS A0'
-    sqlNotJoin1 += ' LEFT OUTER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON A0."'+attr1+'" = A1."'+attr2+'" WHERE '+schema_1.split(",")[0] +' IS NULL );'
+    sqlNotJoin1 += ' LEFT OUTER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON '+on+' WHERE '+schema_1.split(",")[0] +' IS NULL );'
     cur.execute(sqlNotJoin1)
     conn.commit()
 
     sqlNotJoin2 = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_1_not_used+'" as (select A1.* from '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" AS A0'
-    sqlNotJoin2 += ' RIGHT OUTER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON A0."'+attr1+'" = A1."'+attr2+'" WHERE '+schema_0.split(",")[0] +' IS NULL );'
+    sqlNotJoin2 += ' RIGHT OUTER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON '+on+' WHERE '+schema_0.split(",")[0] +' IS NULL );'
     cur.execute(sqlNotJoin2)
     conn.commit()
 
@@ -780,7 +786,7 @@ def trans_CadastralGeom(dicc):
     
     for row in cur:
         cur2 = conn.cursor()
-        features = get_rc_polygon(row[0])
+        features = get_rc_polygon(row[0].replace(' ', ''))
         
         i ={}
         coordinates =[]
@@ -867,8 +873,8 @@ def trans_MGRS(dicc):
                 cur_2.execute(sqlUpdate)
                 conn.commit()
 
-            except:
-                pass
+            except Exception as e:
+                print('GRID: '+grid + ' ERROR:'+ e)
 
     else:
         lat = dicc['lat']
@@ -890,8 +896,8 @@ def trans_MGRS(dicc):
                 cur_2.execute(sqlUpdate)
                 conn.commit()
 
-            except:
-                pass
+            except Exception as e:
+                print("latitud: "+lat+" longitud: "+ lon+" ERROR:"+ e)
 
     conn.close()
     cur.close()

@@ -2399,6 +2399,17 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="attr2" class="col-form-label">'+gettext('Secondary table attribute:')+'</label>'+
                                 '<select class="form-control" id="attr2-'+ID+'"> </select>'+
                             '</div>'+
+                            '<br><br><br>'+
+                            '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
+                            '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                            
+                            '<br><br><br>'+
+                            '<div class="column50">'+
+                                '<input id="attr-1-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<input id="attr-2-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -2408,6 +2419,38 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+        $('#attr-1-'+ID).attr('disabled', true)
+        $('#attr-2-'+ID).attr('disabled', true)
+        
+        $( "#add-"+ID ).click(function() {
+
+            if ($("#attr-1-"+ID).val()=='' && $("#attr-2-"+ID).val()==''){
+                $("#attr-1-"+ID).val($("#attr1-"+ID).val())
+                $("#attr-2-"+ID).val($("#attr2-"+ID).val())
+            }else{
+                $("#attr-1-"+ID).val($("#attr-1-"+ID).val() +' '+ $("#attr1-"+ID).val())
+                $("#attr-2-"+ID).val($("#attr-2-"+ID).val() +' ' +$("#attr2-"+ID).val())
+            }
+
+          });
+
+          $( "#quit-"+ID ).click(function() {
+            
+            at1 = $("#attr-1-"+ID).val().split(" ")
+            at1.pop()
+            at1 = at1.join(" ")
+            
+            at2 = $("#attr-2-"+ID).val().split(" ")
+            at2.pop()
+            at2 = at2.join(" ")
+
+            $("#attr-1-"+ID).val(at1)
+            $("#attr-2-"+ID).val(at2)
+
+
+          });
+        
         
         context = this
 
@@ -2427,15 +2470,15 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
 
                 if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
                     schema = schemaEdge
-                   
+
                     $('#attr1-'+ID).empty()
                     $('#attr2-'+ID).empty()
 
-                    for (i = 0; i < schema[0].length; i++){
-                        $('#attr1-'+ID).append('<option>'+schema[0][i]+'</option>')
+                    for (i = 0; i < schemaEdge[0].length; i++){
+                        $('#attr1-'+ID).append('<option>'+schemaEdge[0][i]+'</option>')
                     }
-                    for (i = 0; i < schema[1].length; i++){
-                        $('#attr2-'+ID).append('<option>'+schema[1][i]+'</option>')
+                    for (i = 0; i < schemaEdge[1].length; i++){
+                        $('#attr2-'+ID).append('<option>'+schemaEdge[1][i]+'</option>')
                     }
                 }
 
@@ -2444,11 +2487,13 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             $('#dialog-join-'+ID).modal('show')
 
             $('#join-accept-'+ID).click(function() {
-
+                //importante el orden de estos parametros, los mismos que en el formulario
                 var paramsJoin = {"id": ID,
                 "parameters": [
                     {"attr1": $('#attr1-'+ID).val(),
                     "attr2": $('#attr2-'+ID).val(),
+                    "attr-1": $('#attr-1-'+ID).val(),
+                    "attr-2": $('#attr-2-'+ID).val(),
                     "schemas": schemaEdge}
                 ]}
 
@@ -8959,8 +9004,6 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             }
 
             paramsFGeom['schema'] = schemaMod
-
-            //console.log(schemaMod)
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 

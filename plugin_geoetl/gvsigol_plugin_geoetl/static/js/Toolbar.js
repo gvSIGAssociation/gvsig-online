@@ -190,7 +190,7 @@ gvsigolETL.Toolbar = Class.extend({
 		this.html.append(this.deleteButton);
 		this.deleteButton.click($.proxy(function(){
 			var node = this.view.getPrimarySelection();
-			$('div[id*="'+node.id+'"]').remove()
+			//$('div[id*="'+node.id+'"]').remove()
 			var command= new draw2d.command.CommandDelete(node);
 			this.view.getCommandStack().execute(command);
 			this.disableButton(this.deleteButton, true);
@@ -309,7 +309,7 @@ gvsigolETL.Toolbar = Class.extend({
 							if (parameters[0][key]){
 								
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') && !key.includes('option') ){
-									
+									console.log(multiIn)
 									if (Array.isArray(schemaold[multiIn])){
 										
 										for (k = 0; k < schemaold[multiIn].length; k++){
