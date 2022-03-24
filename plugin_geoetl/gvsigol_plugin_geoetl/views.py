@@ -560,7 +560,8 @@ def etl_sheet_excel(request):
         form = UploadFileForm(request.POST)
         if form.is_valid():
             f= request.POST['file']
-            listSheets = etl_schema.get_sheets_excel(f)
+            r = request.POST['reading']
+            listSheets = etl_schema.get_sheets_excel(f, r)
 
             response = json.dumps(listSheets)
 

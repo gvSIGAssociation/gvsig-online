@@ -80,8 +80,32 @@ def input_Excel(dicc):
 
     warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
 
-    df = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
-    df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+    if dicc['reading'] == 'single':
+
+        df = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+        df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+    
+    else:
+        x = 0
+        for file in os.listdir(dicc["excel-file"]):
+            if file.endswith(".xls") or file.endswith(".xlsx"):
+
+                if x == 0:
+                    df0 = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+                    df0 = df0.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+                    df0['_filename'] = file
+                elif x == 1:
+                    df1 = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+                    df1 = df1.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+                    df1['_filename'] = file
+                    df = df0.append(df1, sort = False)
+                else:
+                    dfx = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+                    dfx = dfx.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+                    dfx['_filename'] = file
+                    df = df.append(dfx, sort = False)
+                x += 1
+
     table_name = dicc['id']
 
     conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
