@@ -293,6 +293,9 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                 contentType: false, 
                 processData: false,
                 success: function (data) {
+
+                    $('#proced-list-'+ID).empty()
+                    $('#proced-list-'+ID).append('<option value="all">'+gettext('ALL')+'</option>')
                     
                     $('#get-proced-'+ID).hover(function(){
                         $(this).css('cursor','pointer');
