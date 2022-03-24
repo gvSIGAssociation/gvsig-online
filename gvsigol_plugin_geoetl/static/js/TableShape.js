@@ -103,10 +103,21 @@ function getPathFile(fileType, ID){
         } else if(fileType == 'json' && url.endsWith('.json') && ID == '0'){
             $("#etl_json_upload").val("file://" + fm_directory + url)
         } else if(fileType.endsWith('/')){
-            $("#"+fileType.replace('/', '')+"-file-"+ID).val("file://" + fm_directory + url)
+            $("#"+fileType.replace('/', '')+"-file-"+ID).val(fm_directory + url)
         }else{
             messageBox.show('warning', gettext('File selected is not a ')+fileType)
         }
+    }
+};
+
+function getFolderPath(ID){
+    $('#select-folder-button-'+ID).click(function (e) {
+        window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+    });
+    window.filemanagerCallback = function(url) {
+
+        $("#folder-"+ID).val(fm_directory + url)
+
     }
 };
 
@@ -827,16 +838,34 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                                 '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
                             '</div>'+
                             '<div>'+
-                                '<label class="col-form-label">'+gettext('Reading options')+'</label>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
-                                    '<label for="single" class="form-check-label">'+gettext('Single excel file')+'</label>'+
+                                '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
+                            '</div>'+
+                            '<div id ="more-options-'+ID+'">'+
+                                '<div class="column30">'+
+                                    '<label class="col-form-label">'+gettext('Reading options')+'</label>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
+                                        '<label for="single" class="form-check-label">'+gettext('Single excel file')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
+                                        '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                    '</div>'+
                                 '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
-                                    '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                '<div class="column70">'+
+                                    '<input type="checkbox" name="checkbox-excel" id="move-'+ID+'"/>'+
+                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                '</div>'+
+                                '<div class="column20">'+
+                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
+                                '</div>'+
+                                '<div class="column50">'+
+                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder='+gettext('"For removing file leave this input empty"')+'></input>'+
                                 '</div>'+
                             '</div>'+
+                            '<br><br><br>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -857,11 +886,39 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             }else{
                 getPathFile('excel/', ID)
             }
+        });        
+
+        $("#advanced-param-"+ID).click(function(){
+            $("#more-options-"+ID).slideToggle("slow");
         });
 
         var context = this
 
+        getFolderPath(ID)
+
+        $("#move-"+ID).change(function() {
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+            }
+        });
+
         icon.on("click", function(){
+
+            if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
+                $("#more-options-"+ID).slideUp("slow");
+            }
+
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+            }
 
             $('#dialog-input-excel-'+ID).modal('show')
 
@@ -870,6 +927,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                 var formDataSheetExcel = new FormData();
 
                 formDataSheetExcel.append('file', $('#excel-file-'+ID).val())
+                formDataSheetExcel.append('reading', $('input:radio[name="reading-'+ID+'"]:checked').val())
 
                 $.ajax({
 					type: 'POST',

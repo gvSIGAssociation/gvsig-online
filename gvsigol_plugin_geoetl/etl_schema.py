@@ -11,13 +11,25 @@ import re
 from django.contrib.gis.gdal import DataSource
 import os
 
-def get_sheets_excel(excel):
+def get_sheets_excel(excel, r):
     import warnings
 
     warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+
+    if r == 'single':
     
-    xl = pd.ExcelFile(excel)
-    return xl.sheet_names
+        xl = pd.ExcelFile(excel)
+        return xl.sheet_names
+    else:
+        sheets_array = []
+        for file in os.listdir(excel):
+            if file.endswith(".xls") or file.endswith(".xlsx"):
+                xl = pd.ExcelFile(excel+'//'+file)
+                for sh in list(xl.sheet_names):
+                    if sh not in sheets_array:
+                        sheets_array.append(sh)
+        return sheets_array
+        
 
 def get_schema_excel(dicc):
     import warnings
@@ -33,10 +45,11 @@ def get_schema_excel(dicc):
         column_array = []
         for file in os.listdir(dicc["excel-file"]):
             if file.endswith(".xls") or file.endswith(".xlsx"):
-                xl = pd.read_excel(file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+                xl = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
                 for col in list(xl.columns):
                     if col not in column_array:
                         column_array.append(col)
+        column_array.append('_filename')
         return column_array
 
 
