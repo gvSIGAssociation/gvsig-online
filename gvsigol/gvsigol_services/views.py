@@ -1327,8 +1327,8 @@ def layer_update(request, layer_id):
                 assigned_read_roups.append(int(key.split('-')[2]))
 
         assigned_write_groups = []
-        i, params = layer.datastore.get_db_connection()
         if layer.type == 'v_PostGIS':
+            i, params = layer.datastore.get_db_connection()
             with i as c:
                 is_view = c.is_view(layer.datastore.name, layer.source_name)
         else:
