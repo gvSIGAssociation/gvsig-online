@@ -1328,8 +1328,11 @@ def layer_update(request, layer_id):
 
         assigned_write_groups = []
         i, params = layer.datastore.get_db_connection()
-        with i as c:
-            is_view = c.is_view(layer.datastore.name, layer.source_name)
+        if layer.type == 'v_PostGIS':
+            with i as c:
+                is_view = c.is_view(layer.datastore.name, layer.source_name)
+        else:
+            is_view = False
         if not is_view:
             for key in request.POST:
                 if 'write-usergroup-' in key:
