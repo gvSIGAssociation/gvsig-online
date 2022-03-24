@@ -102,7 +102,9 @@ function getPathFile(fileType, ID){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'json' && url.endsWith('.json') && ID == '0'){
             $("#etl_json_upload").val("file://" + fm_directory + url)
-        } else{
+        } else if(fileType.endsWith('/')){
+            $("#"+fileType.replace('/', '')+"-file-"+ID).val("file://" + fm_directory + url)
+        }else{
             messageBox.show('warning', gettext('File selected is not a ')+fileType)
         }
     }
@@ -352,6 +354,18 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                 }else{
                     $("#checkbox-end-"+ID).val("")
                 };
+
+                if (typeof get_ === 'undefined'){
+                    get_ = []
+                    $("#proced-list-"+ID+" option").each(function()
+                        {  
+                            if ($(this).val() != 'all'){
+                                get_.push([$(this).val(), $(this).text()])
+                            }
+                            
+                        }
+                    );
+                }
 
                 var paramsIndenova = {"id": ID,
                 "parameters": [
@@ -789,8 +803,8 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div class="column20">'+
-                                '<label for ="excel-file" class="col-form-label">'+gettext('Choose excel file:')+'</label><br>'+
-                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a><br>'+
+                                '<label for ="excel-file" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select path')+'</a><br>'+
                             '</div>'+
                             '<div class="column80">'+
                                 '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
@@ -812,6 +826,17 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="header" class="col-form-label">'+gettext('Skip header:')+'</label>'+
                                 '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
                             '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Reading options')+'</label>'+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
+                                    '<label for="single" class="form-check-label">'+gettext('Single excel file')+'</label>'+
+                                '</div>'+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
+                                    '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                '</div>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -823,6 +848,16 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
         '</div>')
 
         getPathFile('excel', ID)
+
+        $('input:radio[name="reading-'+ID+'"]').change(function(){
+            
+            if ($(this).val() == 'single'){
+                getPathFile('excel', ID)
+                
+            }else{
+                getPathFile('excel/', ID)
+            }
+        });
 
         var context = this
 
@@ -849,7 +884,6 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 					success: function (data) {
 
                         $('#sheet-name-'+ID).empty()
-
                         get_ = []
 
                         for (i = 0; i < data.length; i++){
@@ -862,6 +896,14 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             });
 
             $('#input-excel-accept-'+ID).click(function() {
+
+                if (typeof get_ === 'undefined'){
+                    get_ = []
+                    $("#sheet-name-"+ID+" option").each(function()
+                        {
+                            get_.push($(this).val())
+                        });
+                }
                 
                 var paramsExcel = {"id": ID,
                 "parameters": [
@@ -869,7 +911,8 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     "excel-file": $('#excel-file-'+ID).val(),
                     "sheet-name": $('#sheet-name-'+ID).val(),
                     "usecols": $('#usecols-'+ID).val(),
-                    "header": $('#header-'+ID).val()
+                    "header": $('#header-'+ID).val(),
+                    "reading": $('input:radio[name="reading-'+ID+'"]:checked').val()
                     }
                 ]}
 

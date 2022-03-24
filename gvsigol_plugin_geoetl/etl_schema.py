@@ -9,6 +9,7 @@ import json
 import re
 #from datetime import date
 from django.contrib.gis.gdal import DataSource
+import os
 
 def get_sheets_excel(excel):
     import warnings
@@ -22,9 +23,23 @@ def get_schema_excel(dicc):
     import warnings
 
     warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+
+    if dicc['reading'] == 'single':
     
-    xl = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
-    return list(xl.columns)
+        xl = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+        return list(xl.columns)
+    
+    else:
+        column_array = []
+        for file in os.listdir(dicc["excel-file"]):
+            if file.endswith(".xls") or file.endswith(".xlsx"):
+                xl = pd.read_excel(file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+                for col in list(xl.columns):
+                    if col not in column_array:
+                        column_array.append(col)
+        return column_array
+
+
 
 def get_schema_shape(file):
 
