@@ -581,7 +581,7 @@ def output_Postgis(dicc):
     sqlUpdate = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
     cur.execute(sqlUpdate)
     con_source.commit()"""
-
+    srid = 0
     sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
     cur.execute(sqlSrid)
     con_source.commit()
@@ -869,12 +869,12 @@ def trans_MGRS(dicc):
             try:
                 lat, lon = m.toLatLon(row[0].replace(" ", ""))
 
-                sqlUpdate = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"  SET _lat = '+ str(lat)+', _lon = '+ str(lon) +' WHERE "'+grid+'" = '+"'"+ row[0]+"'"
+                sqlUpdate = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"  SET _lat = '+ str(lat)+', _lon = '+ str(lon) +' WHERE "'+grid+'" = '+"'"+ str(row[0])+"'"
                 cur_2.execute(sqlUpdate)
                 conn.commit()
 
             except Exception as e:
-                print('GRID: '+grid + ' ERROR:'+ e)
+                print('GRID: '+grid + ' ERROR: '+ str(e))
 
     else:
         lat = dicc['lat']
@@ -897,7 +897,7 @@ def trans_MGRS(dicc):
                 conn.commit()
 
             except Exception as e:
-                print("latitud: "+lat+" longitud: "+ lon+" ERROR:"+ e)
+                print("latitud: "+lat+" longitud: "+ lon+" ERROR: "+ str(e))
 
     conn.close()
     cur.close()

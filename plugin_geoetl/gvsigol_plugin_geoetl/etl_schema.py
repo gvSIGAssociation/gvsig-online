@@ -11,11 +11,17 @@ import re
 from django.contrib.gis.gdal import DataSource
 
 def get_sheets_excel(excel):
+    import warnings
+
+    warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
     
     xl = pd.ExcelFile(excel)
     return xl.sheet_names
 
 def get_schema_excel(dicc):
+    import warnings
+
+    warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
     
     xl = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
     return list(xl.columns)
