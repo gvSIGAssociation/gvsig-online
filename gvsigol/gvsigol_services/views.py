@@ -1496,13 +1496,15 @@ def layer_update(request, layer_id):
                     for data_field in aux_fields:
                         if field['name'] == data_field:
                             date_fields.append(field)
+            i, params = layer.datastore.get_db_connection()
+            with i as c:
+                is_view = c.is_view(layer.datastore.name, layer.source_name)
+        else:
+            is_view = False
 
         md_uuid = core_utils.get_layer_metadata_uuid(layer)
         plugins_config = core_utils.get_plugins_config()
         html = True
-        i, params = layer.datastore.get_db_connection()
-        with i as c:
-            is_view = c.is_view(layer.datastore.name, layer.source_name)
         if layer.detailed_info_html == None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
             html = False
         
