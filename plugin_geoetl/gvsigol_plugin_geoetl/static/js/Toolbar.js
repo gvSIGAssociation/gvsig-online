@@ -309,7 +309,7 @@ gvsigolETL.Toolbar = Class.extend({
 							if (parameters[0][key]){
 								
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') && !key.includes('option') ){
-									console.log(multiIn)
+									
 									if (Array.isArray(schemaold[multiIn])){
 										
 										for (k = 0; k < schemaold[multiIn].length; k++){
