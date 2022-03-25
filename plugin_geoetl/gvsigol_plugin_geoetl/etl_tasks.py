@@ -11,7 +11,7 @@ from collections import defaultdict
 #from dateutil.parser import parse
 import mgrs
 import gdaltools
-import os
+import os, shutil
 
 import cx_Oracle
 #from geomet import wkt
@@ -87,6 +87,8 @@ def input_Excel(dicc):
     
     else:
         x = 0
+        if not os.listdir(dicc["excel-file"]):
+            raise Exception("No Excel files in folder "+dicc["excel-file"])
         for file in os.listdir(dicc["excel-file"]):
             if file.endswith(".xls") or file.endswith(".xlsx"):
 
@@ -2082,3 +2084,18 @@ def trans_SpatialRel(dicc):
     cur.close()
 
     return [table_name_target]
+
+def move(name, dicc):
+
+    if name == 'input_Excel':
+        source = dicc["excel-file"]
+        target = dicc["folder"]
+        suffixes = (".xls", ".xlsx")
+
+    for file in os.listdir(source):
+        if file.endswith(suffixes):
+            if target != '':
+                shutil.move (source+'//'+file, target+'//'+file)
+            else:
+                os.remove(source+'//'+file)
+

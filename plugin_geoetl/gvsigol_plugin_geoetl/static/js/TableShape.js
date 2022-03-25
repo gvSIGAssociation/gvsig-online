@@ -89,9 +89,15 @@ function setColorIfIsOpened(jsonParams, type, ID, icon){
 };
 
 function getPathFile(fileType, ID){
+
     $('#select-file-button-'+ID).click(function (e) {
         window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
     });
+
+    $('#select-folder-button-'+ID).click(function (e) {
+        window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+    });
+
     window.filemanagerCallback = function(url) {
 
         if(fileType == 'csv' && url.endsWith('.csv')){
@@ -104,20 +110,12 @@ function getPathFile(fileType, ID){
             $("#etl_json_upload").val("file://" + fm_directory + url)
         } else if(fileType.endsWith('/')){
             $("#"+fileType.replace('/', '')+"-file-"+ID).val(fm_directory + url)
-        }else{
+        } else if(fileType=='folder'){
+            $("#folder-"+ID).val(fm_directory + url)
+            delete fileType
+        } else{
             messageBox.show('warning', gettext('File selected is not a ')+fileType)
         }
-    }
-};
-
-function getFolderPath(ID){
-    $('#select-folder-button-'+ID).click(function (e) {
-        window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
-    });
-    window.filemanagerCallback = function(url) {
-
-        $("#folder-"+ID).val(fm_directory + url)
-
     }
 };
 
@@ -862,7 +860,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
                                 '<div class="column50">'+
                                     '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder='+gettext('"For removing file leave this input empty"')+'></input>'+
+                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder='+gettext('"For removing files leave this input empty"')+'></input>'+
                                 '</div>'+
                             '</div>'+
                             '<br><br><br>'+
@@ -874,19 +872,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                 '</div>'+
             '</div>'+
-        '</div>')
-
-        getPathFile('excel', ID)
-
-        $('input:radio[name="reading-'+ID+'"]').change(function(){
-            
-            if ($(this).val() == 'single'){
-                getPathFile('excel', ID)
-                
-            }else{
-                getPathFile('excel/', ID)
-            }
-        });        
+        '</div>') 
 
         $("#advanced-param-"+ID).click(function(){
             $("#more-options-"+ID).slideToggle("slow");
@@ -894,30 +880,72 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 
         var context = this
 
-        getFolderPath(ID)
-
         $("#move-"+ID).change(function() {
             if($("#move-"+ID).is(':checked')){
                 $("#select-folder-button-"+ID).attr('disabled', false)
                 $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
             }else{
                 $("#select-folder-button-"+ID).attr('disabled', true)
                 $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
             }
         });
 
+        $('input:radio[name="reading-'+ID+'"]').change(function() {
+
+            if($(this).val()=='single'){
+                $("#move-"+ID).prop('checked', false)
+                $("#move-"+ID).attr('disabled', true)
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+            }else{
+                $("#move-"+ID).attr('disabled', false)
+
+            }
+
+        })
+
+        
+
         icon.on("click", function(){
 
+            
+
+            $('#select-file-button-'+ID).click(function (e) {
+                if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
+                    window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                    getPathFile('excel', ID)
+                }else{
+                    window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                    getPathFile('excel/', ID)
+                }
+            });
+
+            $('#select-folder-button-'+ID).click(function (e) {
+                window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                getPathFile('folder', ID)
+            });
+
             if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
+                $("#move-"+ID).prop('checked', false)
+                $("#move-"+ID).attr('disabled', true)
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
                 $("#more-options-"+ID).slideUp("slow");
             }
 
             if($("#move-"+ID).is(':checked')){
                 $("#select-folder-button-"+ID).attr('disabled', false)
                 $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
             }else{
                 $("#select-folder-button-"+ID).attr('disabled', true)
                 $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
             }
 
             $('#dialog-input-excel-'+ID).modal('show')
@@ -970,7 +998,9 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     "sheet-name": $('#sheet-name-'+ID).val(),
                     "usecols": $('#usecols-'+ID).val(),
                     "header": $('#header-'+ID).val(),
-                    "reading": $('input:radio[name="reading-'+ID+'"]:checked').val()
+                    "reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
+                    "move": $('#move-'+ID).val(),
+                    "folder": $('#folder-'+ID).val()
                     }
                 ]}
 
@@ -994,7 +1024,6 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                         
                         }
                     })
-                
                 isAlreadyInCanvas(jsonParams, paramsExcel, ID)
 
                 icon.setColor('#01b0a0')

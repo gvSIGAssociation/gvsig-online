@@ -71,6 +71,8 @@ def run_canvas_background(**kwargs):
     sortedList = g.topologicalSort()
 
     tables_list_name =[]
+
+    move = []
     
     try:
         #going down the sorted list of tasks and executing them
@@ -90,6 +92,9 @@ def run_canvas_background(**kwargs):
                     print('Task ' + n[1]['type'] + ' starts.')
                     #execute input task
                     if n[1]['type'].startswith('input'):
+
+                        if 'move' in parameters:
+                            move.append(n[1])
 
                         method_to_call = getattr(etl_tasks, n[1]['type'])
                         result = method_to_call(parameters)
@@ -143,6 +148,12 @@ def run_canvas_background(**kwargs):
                         
                         if not n[1]['type'].startswith('output'):
                             n.append(result)
+        
+        if move:
+            for m in move:
+                parameters = m['entities'][0]['parameters'][0]
+                method_to_call = etl_tasks.move (m['type'], parameters)
+
         if id_ws:
             statusModel  = ETLstatus.objects.get(id_ws = id_ws)
             statusModel.message = 'Process has been executed successfully'
