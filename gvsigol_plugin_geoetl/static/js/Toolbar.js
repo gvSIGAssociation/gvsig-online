@@ -309,19 +309,21 @@ gvsigolETL.Toolbar = Class.extend({
 							if (parameters[0][key]){
 								
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') && !key.includes('option') ){
+
+									if ( typeof schemaold !== 'undefined'){
 									
-									if (Array.isArray(schemaold[multiIn])){
-										
-										for (k = 0; k < schemaold[multiIn].length; k++){
-											$('#'+key+'-'+figure.id).append('<option>'+schemaold[multiIn][k]+'</option>')
-										};
-									}
-									else{
-										for (k = 0; k < schemaold.length; k++){
-											$('#'+key+'-'+figure.id).append('<option>'+schemaold[k]+'</option>')
-										};
-									}
+										if (Array.isArray(schemaold[multiIn])){
+											for (k = 0; k < schemaold[multiIn].length; k++){
+												$('#'+key+'-'+figure.id).append('<option>'+schemaold[multiIn][k]+'</option>')
+											};
+										}
+										else{
+											for (k = 0; k < schemaold.length; k++){
+												$('#'+key+'-'+figure.id).append('<option>'+schemaold[k]+'</option>')
+											};
+										}
 								}
+								};	
 								
 								if(key.startsWith('get_')){
 
@@ -338,22 +340,26 @@ gvsigolETL.Toolbar = Class.extend({
 								}
 
 								multiIn = multiIn + 1
-								
+
 								if($('input:radio[name="'+key+'-'+figure.id+'"]').is(':radio')){
+									
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).attr('checked', true)
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).val(parameters[0][key])
 
 								}else if($('#'+key+'-'+figure.id).is(':checkbox')){
+									
 									$('#'+key+'-'+figure.id).attr('checked', true)
 									$('#'+key+'-'+figure.id).val(parameters[0][key])
 									
 
 								}else{
+									
 									$('#'+key+'-'+figure.id).val(parameters[0][key]);
 								}
 							}
 
-						} catch {}
+						} catch {
+						}
 					})
 				}
 			
