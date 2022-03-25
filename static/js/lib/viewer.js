@@ -650,7 +650,7 @@ viewer.core = {
 					wrapX: true
 				});
 				if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
-					wmsSource.imageLoadFunction(customLoadFunction);
+					wmtsSource.imageLoadFunction(customLoadFunction);
 				};
 		        var wmsLayer = new ol.layer.Tile({
 			 		id: layerId,
