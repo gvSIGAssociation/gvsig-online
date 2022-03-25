@@ -80,7 +80,7 @@ legend.prototype.reloadLegend = function() {
 legend.prototype._loadLegendImg = function(image, src) {
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", src);
-	if (this.conf.user.token) {
+	if (this.conf.user && this.conf.user.token) {
 		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 		var bearer_token = "Bearer " + this.conf.user.token;
 		xhr.setRequestHeader('Authorization', bearer_token);
@@ -135,7 +135,7 @@ legend.prototype.getLegendsFromVisibleLayers = function() {
 						layerLegend += 		'</div>';
 						layerLegend = $(layerLegend);
 						img = layerLegend.find('img')[0];
-						if (this.conf.user.token && !layers[i].external) {
+						if (this.conf.user && this.conf.user.token && !layers[i].external) {
 							this._loadLegendImg(img, layers[i].legend);
 						}
 						else {
