@@ -193,6 +193,19 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value="all">'+gettext('ALL')+'</option>'+
                                 '</select>'+
                             '</div><br>'+
+                            '<div class="column40">'+
+                                '<label class="col-form-label" >'+gettext('idTram:')+'</label>'+
+                                '<input type="text" id="idtram-'+ID+'"  class="form-control"></input>'+
+                            '</div>'+
+                            '<div class="column40">'+
+                                '<label class="col-form-label" >'+gettext('Description:')+'</label>'+
+                                '<input type="text" id="description-'+ID+'"  class="form-control"></input>'+
+                            '</div>'+
+                            '<div class="column20">'+
+                                '<label class="col-form-label" >'+gettext('Add Procedure:')+'</label>'+
+                                '<button type="button"  class="btn btn-default btn-sm" id="add-proced-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                            '</div><br>'+
+
                             '<div class="column33">'+
                                 '<div class="form-check">'+
                                     '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-date-'+ID+'" value="check-init-date">'+	
@@ -231,6 +244,28 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
         $('#end-date-'+ID).prop('disabled', true)
         $("#checkbox-"+ID).prop('disabled', true)
+
+        $("#add-proced-"+ID).click(function() {
+
+            if($("#idtram-"+ID).val() != ''){                
+                if (typeof get_ === 'undefined'){
+                    get_ = []
+                    $("#proced-list-"+ID+" option").each(function()
+                        {  
+                            if ($(this).val() != 'all'){
+                                get_.push([$(this).val(), $(this).text()])
+                            }
+                        }
+                    );
+                }
+                
+                $('#proced-list-'+ID).append('<option value="'+$("#idtram-"+ID).val()+'">'+$("#idtram-"+ID).val()+' - '+$("#description-"+ID).val()+'</option>')
+                get_.push([$("#idtram-"+ID).val(), $("#idtram-"+ID).val()+' - '+$("#description-"+ID).val()])
+
+            }
+
+        })
+
 
         
         $('input:radio[name="date-indenova-'+ID+'"]').change(function(){

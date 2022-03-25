@@ -447,6 +447,8 @@ def trans_Filter(dicc):
     cur.execute(sqlDatetype)
     conn.commit()
 
+    data_type = ''
+
     for row in cur:
         data_type = row[0]
 
@@ -833,6 +835,8 @@ def trans_CadastralGeom(dicc):
                     pairCoord =[]
         
             coordinates.append(edgeCoord)
+
+        insert = False
 
         if len(coordinates) >= 1:
 
