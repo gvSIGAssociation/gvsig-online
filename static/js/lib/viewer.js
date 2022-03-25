@@ -79,7 +79,7 @@ viewer.core = {
 
     _authenticate: function() {
     	var self = this;
-		if (self.conf.user.credentials) {
+		if (self.conf.user && self.conf.user.credentials) {
 			var _params = "username=" + self.conf.user.credentials.username + "&password=" + self.conf.user.credentials.password;
 			for (var i=0; i<self.conf.auth_urls.length; i++) {			
 
@@ -579,8 +579,7 @@ viewer.core = {
 		var customLoadFunction = function(image, src) {
 			var xhr = new XMLHttpRequest();
 			xhr.open("GET", src);
-			if (self.conf.user.token) {
-			// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+			if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 				var bearer_token = "Bearer " + self.conf.user.token;
 				xhr.setRequestHeader('Authorization', bearer_token);
 			}
@@ -609,7 +608,7 @@ viewer.core = {
 				serverType: 'geoserver',
 				crossOrigin: 'anonymous'
 			});
-			if (self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+			if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 				wmsSource.imageLoadFunction(customLoadFunction);
 			};
 			wmsLayer = new ol.layer.Image({
@@ -650,7 +649,7 @@ viewer.core = {
 					crossOrigin: 'anonymous',
 					wrapX: true
 				});
-				if (self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 					wmsSource.imageLoadFunction(customLoadFunction);
 				};
 		        var wmsLayer = new ol.layer.Tile({
@@ -678,7 +677,7 @@ viewer.core = {
 					serverType: 'geoserver',
 					crossOrigin: 'anonymous'
 				});
-				if (self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 					wmsSource.setTileLoadFunction(customLoadFunction);
 				};
 				
