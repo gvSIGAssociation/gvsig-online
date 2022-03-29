@@ -109,6 +109,10 @@
 										<input type="checkbox" name="selectable_groups"  id="selectable_groups"/>
 										{% endif %}								
 									</div>
+									<div class="col-md-3 form-group">
+										<label for="id_expiration_date">{% trans "expiration_date" %}</label>
+										<input type="datetime-local" name="expiration_date"  id="expiration_date" class="form-control" value="{{project.expiration_date}}"/>							
+									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-3 form-group">

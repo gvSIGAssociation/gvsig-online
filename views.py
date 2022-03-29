@@ -489,6 +489,7 @@ def project_update(request, pid):
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
         tools = request.POST.get('project_tools')
+        expiration_date = request.POST.get('expiration_date')
 
         is_public = False
         if 'is_public' in request.POST:
@@ -569,6 +570,7 @@ def project_update(request, pid):
         project.extent4326_maxx = extent4326_maxx
         project.extent4326_maxy = extent4326_maxy
         project.labels = labels_added
+        project.expiration_date = None if expiration_date == '' else expiration_date
 
         if has_image:
             project.image = request.FILES['project-image']
@@ -687,6 +689,8 @@ def project_update(request, pid):
                     check = 'checked'
             labels.append({'label': l, 'checked': check})
         
+        if project.expiration_date is not None:
+            project.expiration_date = project.expiration_date.strftime("%Y-%m-%dT%H:%M")
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
                                                        'project': project,
