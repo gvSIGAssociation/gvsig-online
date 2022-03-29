@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-11 14:20+0200\n"
+"POT-Creation-Date: 2022-03-02 13:06+0100\n"
 "PO-Revision-Date: 2021-05-11 14:34+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -61,11 +61,11 @@ msgstr "Repetir contrasenya"
 msgid "Group for admin users"
 msgstr "Grup per a usuaris administradors"
 
-#: gvsigol_auth/settings.py:31 gvsigol_auth/settings.py:37
+#: gvsigol_auth/settings.py:30
 msgid "Login requests"
 msgstr "Inicis de sessió"
 
-#: gvsigol_auth/settings.py:38
+#: gvsigol_auth/settings.py:31
 msgid "User"
 msgstr "Usuari"
 
@@ -360,37 +360,37 @@ msgstr ""
 "Si no heu sol·licitat un restabliment de contrasenya, ignoreu aquest correu "
 "electrònic. La contrasenya no canviarà."
 
-#: gvsigol_auth/views.py:81 gvsigol_auth/views.py:166 gvsigol_auth/views.py:270
+#: gvsigol_auth/views.py:84 gvsigol_auth/views.py:169 gvsigol_auth/views.py:297
 msgid "Your account has been disabled"
 msgstr "La contrasenya ha estat desactivada"
 
-#: gvsigol_auth/views.py:83 gvsigol_auth/views.py:85 gvsigol_auth/views.py:168
-#: gvsigol_auth/views.py:170 gvsigol_auth/views.py:272
+#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:88 gvsigol_auth/views.py:171
+#: gvsigol_auth/views.py:173 gvsigol_auth/views.py:299
 msgid "The username and password you have entered do not match our records"
 msgstr "L'usuari i contrasenya introduïts no coincideixen"
 
-#: gvsigol_auth/views.py:218
+#: gvsigol_auth/views.py:245
 msgid "User account does not exist"
 msgstr "El compte d'usuari no existeix"
 
-#: gvsigol_auth/views.py:222
+#: gvsigol_auth/views.py:249
 msgid "That did not work"
 msgstr "Això no ha funcionat"
 
-#: gvsigol_auth/views.py:276
+#: gvsigol_auth/views.py:303
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr ""
 "Token invàlid. El vostre enllaç ha caducat, heu de sol·licitar-ne un altre."
 
-#: gvsigol_auth/views.py:394
+#: gvsigol_auth/views.py:429
 msgid "User group for"
 msgstr "Grup d'usuaris per"
 
-#: gvsigol_auth/views.py:575
+#: gvsigol_auth/views.py:653
 msgid "Admin is a reserved group"
 msgstr "Admin és un grup reservat"
 
-#: gvsigol_auth/views.py:579
+#: gvsigol_auth/views.py:657
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
