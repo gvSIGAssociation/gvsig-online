@@ -1156,6 +1156,15 @@ def trans_Union(dicc):
 
     groupby = dicc['group-by-attr']
 
+    multi =dicc['multi']
+
+    st_multi_start = ''
+    st_multi_ends = ''
+
+    if multi == 'true':
+        st_multi_start = 'ST_Multi('
+        st_multi_ends = ')'
+
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
@@ -1168,7 +1177,7 @@ def trans_Union(dicc):
         cur.execute(sqlDup)
         conn.commit()
     else:
-        sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select "'+groupby+'", ST_Union(wkb_geometry) as wkb_geometry from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" GROUP BY "'+groupby+'");'
+        sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select "'+groupby+'", '+st_multi_start+' ST_Union(wkb_geometry)'+st_multi_ends+' as wkb_geometry from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" GROUP BY "'+groupby+'");'
         cur.execute(sqlDup)
         conn.commit()
 
@@ -1702,6 +1711,8 @@ def merge_tables(_list):
     if geomTar and geomSour:
         if type_geom1 != type_geom2:
             type_geom = 'GEOMETRY'
+        else:
+            type_geom = type_geom1
 
         if srid != srid2:
             print('Las tablas que se quieren unir tienen diferentes sistemas de referencia')
