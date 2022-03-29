@@ -427,6 +427,8 @@ def trans_Filter(dicc):
     
     operator = dicc['option']
 
+    expression = dicc['filter-expression']
+
     table_name_source = dicc['data'][0]
     table_name_target_passed = dicc['id']+'_0'
     table_name_target_failed = dicc['id']+'_1'
@@ -442,46 +444,66 @@ def trans_Filter(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDatetype = 'SELECT  data_type from information_schema.columns '
-    sqlDatetype += "where table_schema = '"+ settings.GEOETL_DB["schema"]+"' and table_name ='"+table_name_source+"' and column_name = '" + attr[1:-1] + "'"
-    cur.execute(sqlDatetype)
-    conn.commit()
+    if expression == "":
 
-    data_type = ''
+        sqlDatetype = 'SELECT  data_type from information_schema.columns '
+        sqlDatetype += "where table_schema = '"+ settings.GEOETL_DB["schema"]+"' and table_name ='"+table_name_source+"' and column_name = '" + attr[1:-1] + "'"
+        cur.execute(sqlDatetype)
+        conn.commit()
 
-    for row in cur:
-        data_type = row[0]
+    
+    
+        data_type = ''
 
-    if operator == 'starts-with':
-        operator = 'LIKE'
-        value = value + '%'
-    elif operator == 'ends-with':
-        operator = 'LIKE'
-        value = '%' + value
-    elif operator == 'contains':
-        operator = 'LIKE'
-        value = '%' + value + '%'
+        for row in cur:
+            data_type = row[0]
 
-    if 'char' in data_type or data_type == 'text':
-        value = "'"+value+"'"
-    elif operator == 'LIKE':
-        attr = attr + "::varchar"
-        value = "'"+value+"'"
+        if operator == 'starts-with':
+            operator = 'LIKE'
+            value = value + '%'
+        elif operator == 'ends-with':
+            operator = 'LIKE'
+            value = '%' + value
+        elif operator == 'contains':
+            operator = 'LIKE'
+            value = '%' + value + '%'
+
+        if 'char' in data_type or data_type == 'text':
+            value = "'"+value+"'"
+        elif operator == 'LIKE':
+            attr = attr + "::varchar"
+            value = "'"+value+"'"
+        else:
+            value = str(value)
+
+        sqlFilPassed = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_passed+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
+        sqlFilPassed += ' WHERE '+attr+' '+ operator + ' ' + value+ ');'
+        cur.execute(sqlFilPassed)
+        conn.commit()
+
+        sqlFilFailed = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_failed+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
+        sqlFilFailed += ' WHERE NOT '+attr+' '+ operator + ' ' + value+ ');'
+        cur.execute(sqlFilFailed)
+        conn.commit()
+
+        conn.close()
+        cur.close()
+
     else:
-        value = str(value)
 
-    sqlFilPassed = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_passed+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
-    sqlFilPassed += ' WHERE '+attr+' '+ operator + ' ' + value+ ');'
-    cur.execute(sqlFilPassed)
-    conn.commit()
+        sqlFilPassed = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_passed+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
+        sqlFilPassed += ' WHERE ('+expression+ '));'
+        cur.execute(sqlFilPassed)
+        conn.commit()
 
-    sqlFilFailed = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_failed+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
-    sqlFilFailed += ' WHERE NOT '+attr+' '+ operator + ' ' + value+ ');'
-    cur.execute(sqlFilFailed)
-    conn.commit()
+        sqlFilFailed = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_failed+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
+        sqlFilFailed += ' WHERE NOT ('+expression+ '));'
+        cur.execute(sqlFilFailed)
+        conn.commit()
 
-    conn.close()
-    cur.close()
+        conn.close()
+        cur.close()
+
 
     return [table_name_target_passed, table_name_target_failed]
 
@@ -836,22 +858,17 @@ def trans_CadastralGeom(dicc):
         
             coordinates.append(edgeCoord)
 
-        insert = False
 
         if len(coordinates) >= 1:
 
             i['geometry'] = {"type": 'MultiPolygon',
                             'coordinates': [coordinates]
                             }
-            insert = True
-
-
-        if insert:
-            
+     
             sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON(' +"'"+ str(json.dumps(i["geometry"])) +"'), "+ srs +') WHERE "_id_temp" = ' + str(row[1])
             cur2.execute(sqlInsert)
             conn.commit()
-            insert = False
+            
     
     sqlDropCol = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN _id_temp;'
     cur.execute(sqlDropCol)

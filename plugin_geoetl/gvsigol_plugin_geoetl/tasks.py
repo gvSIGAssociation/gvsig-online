@@ -94,7 +94,8 @@ def run_canvas_background(**kwargs):
                     if n[1]['type'].startswith('input'):
 
                         if 'move' in parameters:
-                            move.append(n[1])
+                            if parameters['move'] != '':
+                                move.append(n[1])
 
                         method_to_call = getattr(etl_tasks, n[1]['type'])
                         result = method_to_call(parameters)
