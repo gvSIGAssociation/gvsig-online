@@ -40,6 +40,7 @@ class Project(models.Model):
     tools = models.TextField(null=True, blank=True) 
     baselayer_version = models.BigIntegerField(null=True, blank=True)
     labels =  models.CharField(max_length=250, null=True, blank=True)
+    expiration_date = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     
     def __str__(self):
         return self.name + ' - ' + self.description
