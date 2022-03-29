@@ -8972,10 +8972,10 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label class="col-form-label">'+gettext('Group by:')+'</label>'+
                                 '<select class="form-control" id="group-by-attr-'+ID+'"> </select>'+
                             '</div>'+
-                            /*'<div>'+
-                                '<input type="checkbox" name="keep-attr" id="keep-attr-'+ID+'" value=""/>'+
-                                '<label for="checkbox">'+gettext('Keep attributes of the first feature after union')+'</label>'+
-                            '</div>'+*/
+                            '<div>'+
+                                '<input type="checkbox" name="multi" id="multi-'+ID+'" value=""/>'+
+                                '<label for="checkbox">'+gettext('Multigeometry for all features of the output')+'</label>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -9020,17 +9020,17 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#union-accept-'+ID).click(function() {
 
-                /*if($("#keep-attr-"+ID).is(':checked')){
-                    $("#keep-attr-"+ID).val("true")
+                if($("#multi-"+ID).is(':checked')){
+                    $("#multi-"+ID).val("true")
                     
                 }else{
-                    $("#keep-attr-"+ID).val("")
-                };*/
+                    $("#multi-"+ID).val("")
+                };
 
                 var paramsUnion = {"id": ID,
                 "parameters": [
                     {"group-by-attr": $('#group-by-attr-'+ID).val(),
-                    /*"keep-attr": $('#keep-attr-'+ID).val()*/}
+                    "multi": $('#multi-'+ID).val()}
                 ]}
 
 
