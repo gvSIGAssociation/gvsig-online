@@ -230,6 +230,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                                 '<input type="checkbox" name="checkbox-end-indenova" id="checkbox-end-'+ID+'" value=""/>'+
                                 '<label for="checkbox">'+gettext('Current date for end')+'</label>'+
                             '</div>'+
+                            '<br><br><br><br><br><br><br><br><br><br><br><br><br><br>'+ 
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -635,6 +636,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value=","> , </option>'+
                                 '</select>'+
                             '</div>'+ 
+                            '<br><br><br>'+ 
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -870,12 +872,13 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="header" class="col-form-label">'+gettext('Skip header:')+'</label>'+
                                 '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
                             '</div>'+
+                            '<br><br><br>'+
                             '<div>'+
                                 '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
                             '</div>'+
                             '<div id ="more-options-'+ID+'">'+
                                 '<div class="column30">'+
-                                    '<label class="col-form-label">'+gettext('Reading options')+'</label>'+
+                                    '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
                                     '<div class="form-check">'+
                                         '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
                                         '<label for="single" class="form-check-label">'+gettext('Single excel file')+'</label>'+
@@ -897,8 +900,8 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                                     '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
                                     '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder='+gettext('"For removing files leave this input empty"')+'></input>'+
                                 '</div>'+
+                                '<br><br><br>'+
                             '</div>'+
-                            '<br><br><br>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -1245,6 +1248,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value="">'+gettext('Insert if PRJ is not loaded')+'</option>'+
                                 '</select>'+
                             '</div>'+
+                            '<br><br><br><br><br><br>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -1507,6 +1511,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="table-name" class="col-form-label">'+gettext('Tables:')+'</label>'+
                                 '<select class="form-control" id="table-name-'+ID+'"> </select>'+
                             '</div>'+
+                            '<br><br><br><br><br><br><br><br><br>'+ 
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-oracle" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL statement')+'</label>'+											
@@ -1515,6 +1520,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label class="col-form-label">'+gettext('SQL statement:')+'</label>'+
                                 '<textarea id="sql-'+ID+'" rows="10" class="form-control" placeholder=""></textarea>'+
                             '</div>'+
+                            
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -1912,6 +1918,7 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
                                 '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
                             '</div>'+
+                            '<br><br><br><br><br><br><br><br><br>'+
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
@@ -2247,6 +2254,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
                                 '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
                             '</div>'+
+                            '<br><br><br><br><br><br><br><br><br>'+
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
@@ -6028,7 +6036,17 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="value" class="col-form-label">'+gettext('Value:')+'</label>'+
                                 '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
                             '</div>'+
-                        '</form>'+
+                            '<div>'+
+                                '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                                '<button type="button" style="float: right;" class="btn btn-default btn-sm" value = "AND" id="and-'+ID+'">AND</button>'+
+                                '<button type="button" style="float: right;" class="btn btn-default btn-sm" value = "OR" id="or-'+ID+'">OR</button>'+
+                                
+                            '</div>'+
+                            '<div>'+
+                                '<label form="" class="col-form-label">'+gettext('Composite Filter:')+'</label>'+
+                                '<input id="filter-expression-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                            '</div>'+
+                            '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
                         '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
@@ -6039,6 +6057,45 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
         '</div>')
 
         context = this
+
+        input = $("#filter-expression-"+ID)
+
+        $( "#add-"+ID ).click(function() {
+
+            if($("#option-"+ID).val() == 'starts-with'){
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '"+$("#value-"+ID).val()+"%' " )
+
+            }else if($("#option-"+ID).val() == 'ends-with'){
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"' " )
+
+            }else if($("#option-"+ID).val() == 'contains'){
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"%' " )
+                
+            }else if($("#value-"+ID).val() == 'NULL'){
+                if($("#option-"+ID).val() == '='){
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS '+$("#value-"+ID).val()+" " )
+                }else if($("#option-"+ID).val() == '!='){
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS NOT '+$("#value-"+ID).val()+" " )
+                }else {
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " "+$("#value-"+ID).val()+" " )
+                }
+            }else {
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " '"+$("#value-"+ID).val()+"' " )
+
+            }
+
+        });
+
+        $( "#and-"+ID ).click(function() {
+            input.val(input.val()+'AND ') 
+
+        });
+
+        $( "#or-"+ID ).click(function() {
+            input.val(input.val()+'OR ') 
+
+        });
+
 
         icon.on("click", function(){
             setTimeout(function(){
@@ -6074,7 +6131,8 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                 "parameters": [
                 {"attr": $('#attr-'+ID).val(),
                 "option": $('#option-'+ID).val(),
-                "value": $('#value-'+ID).val()}
+                "value": $('#value-'+ID).val(),
+                "filter-expression": input.val()}
                 ]}
                 
                 paramsFilter['schema-old'] = schemaEdge
