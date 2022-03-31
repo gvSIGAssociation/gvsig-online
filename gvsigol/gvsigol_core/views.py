@@ -103,8 +103,9 @@ def home(request):
     media_url = settings.MEDIA_URL[:-1]
     projects = []
     public_projects = []
+    query = Project.objects.filter(expiration_date__gte=datetime.datetime.now()) | Project.objects.filter(expiration_date=None)
     if request.user.is_superuser:
-        for p in Project.objects.all():
+        for p in query:
             image = p.image_url
             project = {}
             project['id'] = p.id
@@ -118,7 +119,7 @@ def home(request):
             else:
                 projects.append(project)
     else:
-        for p in Project.objects.all():
+        for p in query:
             image = p.image_url
             project = {}
             project['id'] = p.id
