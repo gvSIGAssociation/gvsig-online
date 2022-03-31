@@ -111,7 +111,8 @@
 									</div>
 									<div class="col-md-3 form-group">
 										<label for="id_expiration_date">{% trans "expiration_date" %}</label>
-										<input type="datetime-local" name="expiration_date"  id="expiration_date" class="form-control" value="{{project.expiration_date}}"/>							
+										<input type="datetime-local" name="expiration_date"  id="expiration_date" class="form-control" />
+										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />							
 									</div>
 								</div>
 								<div class="row">
@@ -820,6 +821,46 @@
 		$("#extent4326_maxy").on('change', function(evt) {
 			updateMapSelectedExtent(map, vector_source);
 		});
+
+		$("#expiration_date_utc").val("{{project.expiration_date}}")
+		$("#expiration_date").val(getLocalFromUTCMillis("{{project.expiration_date}}"))
+
+		$("#expiration_date").on('change', function(evt) {
+			let localDateStr = $("#expiration_date").val()
+			$("#expiration_date_utc").val(getUTCMillisFromLocal(localDateStr))
+		});
+
+		function getUTCMillisFromLocal(localDateStr) {
+			if(localDateStr == null || localDateStr == '') {
+				return null
+			}
+			try {
+				let localDate = new Date(localDateStr)
+				return Date.parse(localDate.toUTCString())
+			}catch(error) {
+				return null
+			}
+		};
+
+		function getLocalFromUTCMillis(millis) {
+			if(millis == null || millis == '') {
+				return null
+			}
+			try {
+				let localDate = new Date(parseInt(millis))
+				return getFormattedDate(localDate)
+			}catch(error) {
+				return null
+			}
+		};
+
+		//Recibe objeto fecha y devuelve YYYY-MM-DDTHH:MM
+		function getFormattedDate(t) {
+			let month = (t.getMonth() + 1) > 9 ? (t.getMonth() + 1) : ("0" + (t.getMonth() + 1))
+			let day = t.getDate() > 9 ? t.getDate() : ("0" + t.getDate())
+			let time = (t.getHours() > 9 ? t.getHours() : ("0" + t.getHours())) + ":" + (t.getMinutes() > 9 ? t.getMinutes() : ("0" + t.getMinutes()))
+			return t.getFullYear() + '-' + month + '-' + day + "T" + time
+		};
 		
 		var searcheableList = new List('user-list-box', {
 	  		  valueNames: ['searchable-user'],
