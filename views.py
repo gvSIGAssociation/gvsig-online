@@ -576,6 +576,8 @@ def project_update(request, pid):
                 project.expiration_date = datetime.datetime.fromtimestamp(ts)
             except Exception as e:
                 pass
+        else:
+            project.expiration_date = None
         
 
         if has_image:
