@@ -76,7 +76,7 @@ from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup, TilingProcessStatus
 from gvsigol_core.views import not_found_view
 from gvsigol_services.backend_resources import resource_manager 
-from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger
+from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger, LayerReadRole, LayerWriteRole
 import gvsigol_services.tiling_service as tiling_service
 from . import locks_utils
 from .models import LayerFieldEnumeration, SqlView
@@ -102,6 +102,7 @@ from . import tasks
 import time
 from django.core import serializers as serial
 from django.core.exceptions import PermissionDenied
+from gvsigol_auth import signals
 
 logger = logging.getLogger("gvsigol")
 
@@ -110,6 +111,22 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 CONNECT_TIMEOUT = 3.05
 READ_TIMEOUT = 30
 base_layer_process = {}
+
+
+def role_deleted_handler(sender, **kwargs):
+    try:
+        role = kwargs['role']
+        LayerReadRole.objects.filter(role=role).delete()
+        LayerWriteRole.objects.filter(role=role).delete()
+    except Exception as e:
+        print(e)
+        pass
+
+def connect_signals():
+    signals.role_deleted.connect(role_deleted_handler)
+
+connect_signals()
+
 
 @login_required()
 @require_safe
