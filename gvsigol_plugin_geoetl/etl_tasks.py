@@ -92,14 +92,9 @@ def input_Excel(dicc):
             if file.endswith(".xls") or file.endswith(".xlsx"):
 
                 if x == 0:
-                    df0 = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
-                    df0 = df0.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
-                    df0['_filename'] = file
-                elif x == 1:
-                    df1 = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
-                    df1 = df1.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
-                    df1['_filename'] = file
-                    df = df0.append(df1, sort = False)
+                    df = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+                    df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+                    df['_filename'] = file
                 else:
                     dfx = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
                     dfx = dfx.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
