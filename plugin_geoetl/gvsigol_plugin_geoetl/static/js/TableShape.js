@@ -6058,45 +6058,6 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
 
         context = this
 
-        input = $("#filter-expression-"+ID)
-
-        $( "#add-"+ID ).click(function() {
-
-            if($("#option-"+ID).val() == 'starts-with'){
-                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '"+$("#value-"+ID).val()+"%' " )
-
-            }else if($("#option-"+ID).val() == 'ends-with'){
-                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"' " )
-
-            }else if($("#option-"+ID).val() == 'contains'){
-                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"%' " )
-                
-            }else if($("#value-"+ID).val() == 'NULL'){
-                if($("#option-"+ID).val() == '='){
-                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS '+$("#value-"+ID).val()+" " )
-                }else if($("#option-"+ID).val() == '!='){
-                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS NOT '+$("#value-"+ID).val()+" " )
-                }else {
-                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " "+$("#value-"+ID).val()+" " )
-                }
-            }else {
-                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " '"+$("#value-"+ID).val()+"' " )
-
-            }
-
-        });
-
-        $( "#and-"+ID ).click(function() {
-            input.val(input.val()+'AND ') 
-
-        });
-
-        $( "#or-"+ID ).click(function() {
-            input.val(input.val()+'OR ') 
-
-        });
-
-
         icon.on("click", function(){
             setTimeout(function(){
                 try{
@@ -6124,6 +6085,44 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             },100);
 
             $('#dialog-filter-'+ID).modal('show')
+
+            input = $("#filter-expression-"+ID)
+
+            $( "#add-"+ID ).click(function() {
+    
+                if($("#option-"+ID).val() == 'starts-with'){
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '"+$("#value-"+ID).val()+"%' " )
+    
+                }else if($("#option-"+ID).val() == 'ends-with'){
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"' " )
+    
+                }else if($("#option-"+ID).val() == 'contains'){
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"%' " )
+                    
+                }else if($("#value-"+ID).val() == 'NULL'){
+                    if($("#option-"+ID).val() == '='){
+                        input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS '+$("#value-"+ID).val()+" " )
+                    }else if($("#option-"+ID).val() == '!='){
+                        input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS NOT '+$("#value-"+ID).val()+" " )
+                    }else {
+                        input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " "+$("#value-"+ID).val()+" " )
+                    }
+                }else {
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " '"+$("#value-"+ID).val()+"' " )
+    
+                }
+    
+            });
+
+            $( "#and-"+ID ).click(function() {
+                input.val(input.val()+'AND ') 
+    
+            });
+    
+            $( "#or-"+ID ).click(function() {
+                input.val(input.val()+'OR ') 
+    
+            });
 
             $('#filter-accept-'+ID).click(function() {
 

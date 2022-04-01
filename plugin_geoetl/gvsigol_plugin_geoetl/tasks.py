@@ -89,7 +89,7 @@ def run_canvas_background(**kwargs):
                     except:
                         parameters = {}
                     
-                    print('Task ' + n[1]['type'] + ' starts.')
+                    print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
                     #execute input task
                     if n[1]['type'].startswith('input'):
 
@@ -166,7 +166,7 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Success'
             statusModel.save()
         
-        delete_tables(tables_list_name)
+        #delete_tables(tables_list_name)
     
     except Exception as e:
 
@@ -182,7 +182,7 @@ def run_canvas_background(**kwargs):
             statusModel.save()
         
         
-        delete_tables(tables_list_name)
+        #delete_tables(tables_list_name)
 
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
     

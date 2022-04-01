@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from itertools import count
-from xml.dom.minidom import Attr
+from sre_constants import SRE_INFO_CHARSET
 from gvsigol import settings
 
 import pandas as pd
@@ -530,83 +529,89 @@ def output_Postgresql(dicc, geom_column_name = ''):
     else:
         df = pd.read_sql("SELECT *, ST_ASTEXT ("+geom_column_name+") AS _st_astext_temp FROM " + settings.GEOETL_DB["schema"]+'."'+table_name_source+'"', con = conn_source)
 
-
-    schemaTable = dicc['tablename'].lower()
-
-    if '.' in schemaTable:
-        esq = schemaTable.split(".")[0]
-        table_name = schemaTable.split(".")[1]
-    else:
-        esq = 'public'
-        table_name = schemaTable
-
-    conn_string_target= 'postgresql://'+dicc['user']+':'+dicc['password']+'@'+dicc['host']+':'+dicc['port']+'/'+dicc['database']
-    db_target = create_engine(conn_string_target)
-    conn_target = db_target.connect()
-
-    if dicc['operation'] == 'CREATE':
-        df.to_sql(table_name, con=conn_target, schema= esq, if_exists='fail', index=False)
-        sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
-        executePostgres(dicc, sqlAlter)
-        sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
-        try:
-            executePostgres(dicc, sqlAlter_)
-        except:
-            pass
-
-    elif dicc['operation'] == 'APPEND':
-        df.to_sql(table_name, con=conn_target, schema= esq, if_exists='append', index=False)
-    elif dicc['operation'] == 'OVERWRITE':
-
-        if geom_column_name != '':
-
-            sqlA = 'ALTER TABLE '+esq+'."'+table_name+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
-            executePostgres(dicc, sqlA)
-
-            sqlU = 'UPDATE '+esq+'."'+table_name+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
-            executePostgres(dicc, sqlU)
-
-            sqlD = 'ALTER TABLE '+esq+'."'+table_name+'"  DROP COLUMN wkb_geometry'
-            executePostgres(dicc, sqlD)
-        
-        
-        df.to_sql(table_name, con=conn_target, schema= esq, if_exists='replace', index=False)
-        sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
-        executePostgres(dicc, sqlAlter)
-        sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
-        try:
-            executePostgres(dicc, sqlAlter_)
-        except:
-            pass
-    elif dicc['operation'] == 'UPDATE':
-        
-        attr_list = list(df.columns)
-        
-        for row in df.iterrows():
-            sqlUpdate = 'UPDATE '+ esq+'."'+table_name+'" SET '
-            row_list = list(row[1])
-            for i in range (0, len(row_list)):
-                sqlUpdate += '"'+attr_list[i]+'" = '+"'"+str(row_list[i]).replace("'","''")+"',"
-            value = str(row[1][dicc['match']]).replace("'","''")
-        
-            sqlUpdate = sqlUpdate[:-1] + ' WHERE "'+dicc['match']+'" = '+"'"+value+"'"
-
-            executePostgres(dicc, sqlUpdate)
+    if df.empty:
+        print('There is no features in output')
     
-    elif dicc['operation'] == 'DELETE':
+    else:
+        schemaTable = dicc['tablename'].lower()
+
+        if '.' in schemaTable:
+            esq = schemaTable.split(".")[0]
+            table_name = schemaTable.split(".")[1]
+        else:
+            esq = 'public'
+            table_name = schemaTable
+
+        conn_string_target= 'postgresql://'+dicc['user']+':'+dicc['password']+'@'+dicc['host']+':'+dicc['port']+'/'+dicc['database']
+        db_target = create_engine(conn_string_target)
+        conn_target = db_target.connect()
+
+        if dicc['operation'] == 'CREATE':
+            df.to_sql(table_name, con=conn_target, schema= esq, if_exists='fail', index=False)
+            sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
+            executePostgres(dicc, sqlAlter)
+            sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
+            try:
+                executePostgres(dicc, sqlAlter_)
+            except:
+                pass
+
+        elif dicc['operation'] == 'APPEND':
+            df.to_sql(table_name, con=conn_target, schema= esq, if_exists='append', index=False)
+        elif dicc['operation'] == 'OVERWRITE':
+
+            if geom_column_name != '':
+
+                sqlA = 'ALTER TABLE '+esq+'."'+table_name+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
+                executePostgres(dicc, sqlA)
+
+                sqlU = 'UPDATE '+esq+'."'+table_name+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
+                executePostgres(dicc, sqlU)
+
+                sqlD = 'ALTER TABLE '+esq+'."'+table_name+'"  DROP COLUMN wkb_geometry'
+                executePostgres(dicc, sqlD)
+            
+            
+            df.to_sql(table_name, con=conn_target, schema= esq, if_exists='replace', index=False)
+            sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
+            executePostgres(dicc, sqlAlter)
+            sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
+            try:
+                executePostgres(dicc, sqlAlter_)
+            except:
+                pass
+        elif dicc['operation'] == 'UPDATE':
+            
+            attr_list = list(df.columns)
+            
+            for row in df.iterrows():
+                sqlUpdate = 'UPDATE '+ esq+'."'+table_name+'" SET '
+                row_list = list(row[1])
+                for i in range (0, len(row_list)):
+                    if row_list[i] is None:
+                        pass
+                    else:
+                        sqlUpdate += '"'+attr_list[i]+'" = '+"'"+str(row_list[i]).replace("'","''")+"',"
+                value = str(row[1][dicc['match']]).replace("'","''")
+            
+                sqlUpdate = sqlUpdate[:-1] + ' WHERE "'+dicc['match']+'" = '+"'"+value+"'"
+
+                executePostgres(dicc, sqlUpdate)
         
-        for row in df.iterrows():
-            sqlDelete = 'DELETE FROM '+ esq+'."'+table_name+'" '
-            value = str(row[1][dicc['match']]).replace("'","''")
-            sqlDelete = sqlDelete + ' WHERE "'+dicc['match']+'" = '+"'"+value+"'"
-            executePostgres(dicc, sqlDelete)
+        elif dicc['operation'] == 'DELETE':
+            
+            for row in df.iterrows():
+                sqlDelete = 'DELETE FROM '+ esq+'."'+table_name+'" '
+                value = str(row[1][dicc['match']]).replace("'","''")
+                sqlDelete = sqlDelete + ' WHERE "'+dicc['match']+'" = '+"'"+value+"'"
+                executePostgres(dicc, sqlDelete)
 
-    conn_source.close()
-    db_source.dispose()
-    conn_target.close()
-    db_target.dispose()
+        conn_source.close()
+        db_source.dispose()
+        conn_target.close()
+        db_target.dispose()
 
-    return [table_name]
+        return [table_name]
 
 
 def output_Postgis(dicc):
@@ -624,78 +629,98 @@ def output_Postgis(dicc):
     con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = con_source.cursor()
 
-    """sqlAlter = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"  ADD COLUMN _st_astext_temp TEXT'
-    cur.execute(sqlAlter)
-    con_source.commit()
-
-    sqlUpdate = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
-    cur.execute(sqlUpdate)
-    con_source.commit()"""
-    srid = 0
-    sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
-    cur.execute(sqlSrid)
+    sqlCount = "SELECT COUNT(*) FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
+    cur.execute(sqlCount)
     con_source.commit()
     for row in cur:
-        srid = row[0]
+        count = row[0]
         break
-
-    sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
-    cur.execute(sqlTypeGeom)
-    con_source.commit()
-    type_geom = ''
-    for row in cur:
-        if type_geom == '':
-            type_geom = row[0]
-        elif type_geom != row[0]:
-            type_geom = 'GEOMETRY'
-            break
-        else:
-            pass
-
-    if dicc['operation'] == 'CREATE':
-
-        output_Postgresql(dicc,'wkb_geometry')
+    
+    if count == 0:
+        print('There is no features in output')
 
     else:
 
-        sqlAlter = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
-        cur.execute(sqlAlter)
-        con_source.commit()
+        if dicc['operation'] == 'CREATE':
 
-        sqlUpdate = 'UPDATE '+esq+'."'+tab+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
-        cur.execute(sqlUpdate)
-        con_source.commit()
+            srid = 0
+            sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+            cur.execute(sqlSrid)
+            con_source.commit()
+            for row in cur:
+                srid = row[0]
+                break
 
-        output_Postgresql(dicc,'wkb_geometry')
+            sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
+            cur.execute(sqlTypeGeom)
+            con_source.commit()
+            type_geom = ''
+            for row in cur:
+                if type_geom == '':
+                    type_geom = row[0]
+                elif type_geom != row[0]:
+                    type_geom = 'GEOMETRY'
+                    break
+                else:
+                    pass
 
-    """sqlDrop = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"  DROP COLUMN _st_astext_temp '
-    cur.execute(sqlDrop)
-    con_source.commit()"""
-    
-    con_source.close()
-    cur.close()
+            output_Postgresql(dicc,'wkb_geometry')
 
-    con_target = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
-    cur2 = con_target.cursor()
+        else:
 
-    sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN "wkb_geometry"'
-    cur2.execute(sqlDrop2)
-    con_target.commit()
+            srid = 0
+            sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+esq+'."'+tab+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+            cur.execute(sqlSrid)
+            con_source.commit()
+            for row in cur:
+                srid = row[0]
+                break
 
-    sqlAlter2 = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
-    cur2.execute(sqlAlter2)
-    con_target.commit()
+            sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+esq+'."'+tab+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
+            cur.execute(sqlTypeGeom)
+            con_source.commit()
+            type_geom = ''
+            for row in cur:
+                if type_geom == '':
+                    type_geom = row[0]
+                    break
 
-    sqlUpdate2 = 'UPDATE '+esq+'."'+tab+'"  SET wkb_geometry = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
-    cur2.execute(sqlUpdate2)
-    con_target.commit()
+            sqlAlter = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
+            cur.execute(sqlAlter)
+            con_source.commit()
 
-    sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN _st_astext_temp'
-    cur2.execute(sqlDrop2)
-    con_target.commit()
+            sqlUpdate = 'UPDATE '+esq+'."'+tab+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
+            cur.execute(sqlUpdate)
+            con_source.commit()
 
-    con_target.close()
-    cur2.close()
+            output_Postgresql(dicc,'wkb_geometry')
+        
+        con_source.close()
+        cur.close()
+
+        con_target = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+        cur2 = con_target.cursor()
+
+        if srid != 0 and type_geom != '':
+
+            sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN "wkb_geometry"'
+            cur2.execute(sqlDrop2)
+            con_target.commit()
+
+            sqlAlter2 = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
+            cur2.execute(sqlAlter2)
+            con_target.commit()
+
+            sqlUpdate2 = 'UPDATE '+esq+'."'+tab+'"  SET wkb_geometry = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
+            cur2.execute(sqlUpdate2)
+            con_target.commit()
+
+        sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN _st_astext_temp'
+        cur2.execute(sqlDrop2)
+        con_target.commit()
+
+        con_target.close()
+        cur2.close()
 
 
 def input_Csv(dicc):
@@ -1271,6 +1296,8 @@ def input_Indenova(dicc):
 
                     df = pd.json_normalize(exp_copy_low)
 
+                    df = df[schema]
+
                     if first:
                         df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
                         first = False
@@ -1413,6 +1440,8 @@ def input_Postgis(dicc):
 
     con_target = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur2 = con_target.cursor()
+
+    
     
     sqlDrop2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  DROP COLUMN "'+ geom_column_name+'"'
     cur2.execute(sqlDrop2)
@@ -1490,6 +1519,7 @@ def trans_CompareRows(dicc):
                 cur2.execute(sqlInsert)
                 conn.commit()
             else:
+                print(row, row2)
                 sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name_target_changes+'" SELECT  * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" WHERE "'+attr+'" = '+"'"+str(row[0])+"'"
                 cur2.execute(sqlInsert)
                 conn.commit()
@@ -1660,17 +1690,19 @@ def drop_geom_column(table_name,  srid=0, type_geom = ''):
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  DROP COLUMN "wkb_geometry"'
-    cur.execute(sqlDrop2)
-    conn.commit()
+    if srid != 0 and type_geom != '':
 
-    sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
-    cur.execute(sqlAlter2)
-    conn.commit()
+        sqlDrop2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  DROP COLUMN "wkb_geometry"'
+        cur.execute(sqlDrop2)
+        conn.commit()
 
-    sqlUpdate2 = 'UPDATE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  SET wkb_geometry = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
-    cur.execute(sqlUpdate2)
-    conn.commit()
+        sqlAlter2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
+        cur.execute(sqlAlter2)
+        conn.commit()
+
+        sqlUpdate2 = 'UPDATE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  SET wkb_geometry = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
+        cur.execute(sqlUpdate2)
+        conn.commit()
     
     sqlDrop2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  DROP COLUMN _st_astext_temp'
     cur.execute(sqlDrop2)
@@ -1697,7 +1729,7 @@ def merge_tables(_list):
 
     
     if 'wkb_geometry' in attr_target_list:
-        srid, type_geom1 = get_type_n_srid(table_name_target)
+        srid1, type_geom1 = get_type_n_srid(table_name_target)
         geomTar = True
     else:
         geomTar = False
@@ -1707,21 +1739,6 @@ def merge_tables(_list):
         geomSour = True
     else:
         geomSour = False
-
-    if geomTar and geomSour:
-        if type_geom1 != type_geom2:
-            type_geom = 'GEOMETRY'
-        else:
-            type_geom = type_geom1
-
-        if srid != srid2:
-            print('Las tablas que se quieren unir tienen diferentes sistemas de referencia')
-    
-    elif geomTar and not geomSour:
-        type_geom = type_geom1
-
-    elif not geomTar and geomSour:
-        type_geom = type_geom2
 
     db = create_engine(conn_string)
     conn = db.connect()
@@ -1736,9 +1753,55 @@ def merge_tables(_list):
     else:
         df_source = pd.read_sql("SELECT * FROM " + settings.GEOETL_DB['schema']+'."'+table_name_source+'"', con = conn)
 
-    merge_ = df_target.append(df_source, sort = False)
+    if not df_source.empty and not df_target.empty:
+        merge_ = df_target.append(df_source, sort = False)
+        print('Both tables to merge have features')
+        
+        if geomTar and geomSour:
+            
+            if type_geom1 != type_geom2:
+                type_geom = 'GEOMETRY'
 
-    table_name = table_name_source[:15]+';'+table_name_target[:15]
+            else:
+                type_geom= type_geom1
+
+            if srid1 != srid2:
+                srid = srid1
+                print('Las tablas que se quieren unir tienen diferentes sistemas de referencia')
+            else:
+                srid = srid1
+    
+        elif geomTar and not geomSour:
+            type_geom = type_geom1
+            srid = srid1
+
+        elif not geomTar and geomSour:
+            type_geom = type_geom2
+            srid = srid2
+
+    elif df_source.empty and not df_target.empty:
+        merge_ = df_target
+        print('Only one table has features')
+        if geomTar:
+            type_geom = type_geom1
+            srid = srid1
+    elif not df_source.empty and df_target.empty:
+        merge_ = df_source
+        print('Only one table has features')
+        if geomSour:
+            type_geom = type_geom2
+            srid = srid2
+    else:
+        print('No one table has features')
+        merge_ = df_target
+        if geomTar:
+            type_geom = type_geom1
+            srid = srid1
+        if geomSour:
+            type_geom = type_geom2
+            srid = srid2
+
+    table_name = table_name_source[15:]+';'+table_name_target[15:]
 
     merge_.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
     
