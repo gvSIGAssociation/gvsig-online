@@ -30,7 +30,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from .forms import UserCreateForm, UserGroupForm
-from .models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
@@ -314,36 +313,14 @@ def password_reset_success(request):
 @login_required()
 @superuser_required
 def user_list(request):
-    
-    users_list = User.objects.exclude(username='root')
-    
-    users = []
-    for u in users_list:
-        groups_by_user = UserGroupUser.objects.filter(user_id=u.id)
-        
-        groups = ''
-        for usergroup_user in groups_by_user:
-            user_group = UserGroup.objects.get(id=usergroup_user.user_group_id)
-            groups += user_group.name + '; '
-            
-        user = {}
-        user['id'] = u.id
-        user['username'] = u.username
-        user['first_name'] = u.first_name
-        user['last_name'] = u.last_name
-        user['is_superuser'] = u.is_superuser
-        user['is_staff'] = u.is_staff
-        user['email'] = u.email
-        user['groups'] = groups
-        users.append(user)
+    users = auth_backend.get_users_details(exclude_system=True)
+    for user in users:
+        user["roles"] = "; ".join(user["roles"])
                       
     response = {
         'users': users
     }     
     return render(request, 'user_list.html', response)
-
-def _get_user_group_name(username):
-    return 'ug_' + username.lower()
 
 @login_required()
 @superuser_required
@@ -369,81 +346,73 @@ def user_add(request):
                 is_staff = True
             
             # flag what has been done to be able to revert if needed
-            ldap_user_created = False
-            ldap_user_group_created = False
-            ldap_group_membership_added = []
-            django_user_group_created = False
+            user_created = False
+            user_group_created = False
+            role_membership_added = []
+            user_role_created = False
             user = None
             try:
-                assigned_groups = []   
+                assigned_roles = []   
                 for key in form.data:
                     if 'group-' in key:
-                        assigned_groups.append(int(key.split('-')[1]))
+                        assigned_roles.append(key[len('group-'):])
             
                 gs = geographic_servers.get_instance().get_default_server()
                 server_object = Server.objects.get(id=int(gs.id))
                                 
                 if form.data['password1'] == form.data['password2']:
-                    user = User(
-                        username = form.data['username'].lower(),
-                        first_name = ''.join(form.data['first_name']),
-                        last_name = ''.join(form.data['last_name']),
-                        email = form.data['email'].lower(),
-                        is_superuser = is_superuser,
-                        is_staff = is_staff
+                    user = auth_backend.add_user(
+                        form.data['username'].lower(),
+                        form.data['password1'],
+                        form.data['email'].lower(),
+                        ''.join(form.data['first_name'],
+                        ''.join(form.data['last_name']),
+                        superuser=is_superuser,
+                        staff=is_staff
+                        )
                     )
-                    user.set_password(form.data['password1'])
-                    user.save()
-                    
-                    admin_group = UserGroup.objects.get(name='admin')
+                    user_created = True
+
                     if user.is_superuser:
-                        auth_services.get_services().ldap_add_user(user, form.data['password1'], True)
-                        ldap_user_created = True
-                        if auth_services.get_services().ldap_add_group_member(user, admin_group) != False:
-                            ldap_group_membership_added.append(admin_group)
-                        usergroup_user = UserGroupUser(
-                            user = user,
-                            user_group = admin_group
-                        )
-                        usergroup_user.save()
-                    else:
-                        auth_services.get_services().ldap_add_user(user, form.data['password1'], False)
-                        ldap_user_created = True
+                        admin_role = auth_backend.get_admin_role()
+                        if auth_backend.add_to_role(user, admin_role):
+                            role_membership_added.append(admin_role)
                         
-                    for ag in assigned_groups:
-                        user_group = UserGroup.objects.get(id=ag)
-                        usergroup_user = UserGroupUser(
-                            user = user,
-                            user_group = user_group
-                        )
-                        usergroup_user.save()
-                        if auth_services.get_services().ldap_add_group_member(user, user_group) != False:
-                            ldap_group_membership_added.append(user_group)
+                    for role in assigned_roles:
+                        if auth_backend.add_to_role(user, role):
+                            role_membership_added.append(role)
                      
-                    #User backend 
+                    #User backend
                     if is_superuser or is_staff:
+                        role = auth_utils._get_primary_user_rolename(user.username)
+                        if auth_backend.add_role(role):
+                            user_role_created = True
+                        """
                         try:
-                            ugroup = UserGroup.objects.get(name=_get_user_group_name(user.username))
+                            role = Role.objects.get(name=auth_utils._get_primary_user_rolename(user.username))
                         except:
-                            ugroup = UserGroup(
-                                name = _get_user_group_name(form.data['username']),
+                            role = Role(
+                                name = auth_utils._get_primary_user_rolename(form.data['username']),
                                 description = _('User group for') + ': ' + form.data['username'].lower()
                             )
-                            ugroup.save()
+                            role.save()
                             django_user_group_created = True
-                        
-                        ugroup_user = UserGroupUser(
-                            user = user,
-                            user_group = ugroup
-                        )
-                        ugroup_user.save()
-                        
-                        if auth_services.get_services().ldap_add_group(ugroup) != False:
+                        role.users.add(user)
+                        """
+                        """
+                        if auth_services.get_services().ldap_add_group(role) != False:
                             ldap_user_group_created = True
-                        auth_services.get_services().add_data_directory(ugroup)
-                        if auth_services.get_services().ldap_add_group_member(user, ugroup) != False:
-                            ldap_group_membership_added.append(ugroup)
+                        """
+                        auth_backend.add_to_role(user, role)
+                        role_membership_added.append(role)
+                        # FIXME OIDC CMI deberia hacerse solo si no existe el rol???
+                        auth_services.get_services().add_data_directory(role)
+                        """
+                        auth_services.get_services().add_data_directory(role)
                         
+                        if auth_services.get_services().ldap_add_group_member(user, role) != False:
+                            ldap_group_membership_added.append(role)
+                        """
                         url = server_object.frontend_url + '/'
                         ws_name = 'ws_' + form.data['username'].lower()
                         if gs.createWorkspace(ws_name, url + ws_name):          
@@ -481,70 +450,52 @@ def user_add(request):
                 print("ERROR: Problem creating user " + str(e))
                 errors = []
                 errors.append({'message': "ERROR: Problem creating user " + str(e)})
-                groups = auth_utils.get_all_groups()
+                roles = auth_backend.get_all_roles_details(exclude_system=True)
 
                 # reverting changes
                 if user:
-                    for ugu in UserGroupUser.objects.filter(user=user):
+                    user_roles = auth_backend.get_roles(user)
+                    for role in user_roles:
                         try:
-                            if ugu.user_group in ldap_group_membership_added:
-                                auth_services.get_services().ldap_delete_group_member(user, ugu.user_group)                                
-                        except:
-                            pass
-                        try:
-                            ugu.delete()
-                        except:
-                            pass
-
-                    if django_user_group_created:
-                        try:
-                            ug = UserGroup.objects.get(name=_get_user_group_name(user.username))
-                            if ldap_user_group_created:
-                                try:
-                                    auth_services.get_services().ldap_delete_group(ug)
-                                except:
-                                    pass
-                            ug.delete()
+                            if role in role_membership_added:
+                                auth_backend.remove_from_role(user, role)
+                                #auth_services.get_services().ldap_delete_group_member(user, ugu.user_group)                                
                         except:
                             pass
 
-                    if ldap_user_created:
+                    if user_role_created:
                         try:
-                            auth_services.get_services().ldap_delete_default_group_member(user)
+                            user_role = auth_utils._get_primary_user_rolename(user.username)
+                            auth_backend.delete_role(user_role)
                         except:
                             pass
-                        try:
-                            auth_services.get_services().ldap_delete_user(user)
-                        except:
-                            pass
-                    try:
-                        user.delete()
-                    except:
-                        pass
 
-                return render(request, 'user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form})
+                    if user_created:
+                        try:
+                            auth_backend.delete_user(user)
+                        except:
+                            pass
+                return render(request, 'user_add.html', {'form': form, 'groups': roles, 'errors': errors,'show_pass_form':show_pass_form})
 
         else:
-            groups = auth_utils.get_all_groups()
-            return render(request, 'user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form})
-        
+            roles = auth_backend.get_all_roles_details(exclude_system=True)
+            return render(request, 'user_add.html', {'form': form, 'groups': roles, 'show_pass_form':show_pass_form})
     else:
-        
         form = UserCreateForm()
-        groups = auth_utils.get_all_groups()
-        return render(request, 'user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form})
+        roles = auth_backend.get_all_roles_details(exclude_system=True)
+        return render(request, 'user_add.html', {'form': form, 'groups': roles, 'show_pass_form':show_pass_form})
     
     
 @login_required()
 @superuser_required
-def user_update(request, uid):        
+def user_update(request, uid):
     if request.method == 'POST':
         user = User.objects.get(id=int(uid))
         
-        assigned_groups = []
+        assigned_roles = []
         for key in request.POST:
             if 'group-' in key:
-                assigned_groups.append(int(key.split('-')[1]))
+                assigned_roles.append(key[len('group-'):])
             
         is_staff = False
         if 'is_staff' in request.POST:
@@ -561,62 +512,44 @@ def user_update(request, uid):
         user.is_staff = is_staff
         user.save()
         
+        admin_role =auth_backend.get_admin_role()
         if user.is_superuser and is_superuser:
-            admin_group = UserGroup.objects.get(name__exact='admin')
-            assigned_groups.append(admin_group.id)
+            auth_backend.add_to_role(user, admin_role) # FIXME  OIDC CMI ldap
+            assigned_roles.append(admin_role)
             
         if not user.is_superuser and is_superuser:
+            # FIXME OIDC CMI: we need to set superuser in OIDC
+            # FIXME OIDC CMI: discrepancia entre DJANGO_GVSIGOL_ADMIN y ADMIN
             user.is_superuser = True
             user.save()
-            admin_group = UserGroup.objects.get(name__exact='admin')
-            auth_services.get_services().ldap_add_group_member(user, admin_group)
-            assigned_groups.append(admin_group.id)
+            auth_backend.add_to_role(user, admin_role) # FIXME ldap
+            #admin_group = UserGroup.objects.get(name__exact='admin')
+            #auth_services.get_services().ldap_add_group_member(user, admin_group)
+            assigned_roles.append(admin_role)
         
         if user.is_superuser and not is_superuser:
+            # FIXME OIDC CMI: we need to unset superuser in OIDC
+            # FIXME OIDC CMI: discrepancia entre DJANGO_GVSIGOL_ADMIN y ADMIN
             user.is_superuser = False
             user.save()
-            admin_group = UserGroup.objects.get(name__exact='admin')
-            auth_services.get_services().ldap_delete_group_member(user, admin_group)
+            auth_backend.remove_from_role(user, admin_role)
+            #admin_group = UserGroup.objects.get(name__exact='admin')
+            #auth_services.get_services().ldap_delete_group_member(user, admin_group)
         
-        groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
-        for ugu in  groups_by_user:
-            user_group = UserGroup.objects.get(id=ugu.user_group.id)
-            auth_services.get_services().ldap_delete_group_member(user, user_group)
-            ugu.delete()
-                  
-        for ag in assigned_groups:
-            user_group = UserGroup.objects.get(id=ag)
-            usergroup_user = UserGroupUser(
-                user = user,
-                user_group = user_group
-            )
-            usergroup_user.save()
-            auth_services.get_services().ldap_add_group_member(user, user_group)
-            
+        auth_backend.set_roles(user, assigned_roles)
         return redirect('user_list')
-                
         
     else:
         selected_user = User.objects.get(id=int(uid))    
-        groups = auth_utils.get_all_groups_checked_by_user(selected_user)
-        return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': groups})
+        roles = auth_utils.get_all_roles_checked_by_user(selected_user)
+        return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': roles})
         
         
 @login_required()
 @superuser_required
-def user_delete(request, uid):        
+def user_delete(request, uid):
     if request.method == 'POST':
-        user = User.objects.get(id=uid)
-        
-        groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
-        for ugu in  groups_by_user:
-            user_group = UserGroup.objects.get(id=ugu.user_group.id)
-            auth_services.get_services().ldap_delete_group_member(user, user_group)
-        
-        auth_services.get_services().ldap_delete_default_group_member(user)   
-        auth_services.get_services().ldap_delete_user(user)           
-        user.delete()
-            
+        auth_backend.delete_user(uid)
         response = {
             'deleted': True
         }     
@@ -625,19 +558,8 @@ def user_delete(request, uid):
 @login_required()
 @superuser_required
 def group_list(request):
-    
-    groups_list = UserGroup.objects.exclude(name='admin')
-    
-    groups = []
-    for g in groups_list:
-        group = {}
-        group['id'] = g.id
-        group['name'] = g.name
-        group['description'] = g.description
-        groups.append(group)
-                      
     response = {
-        'groups': groups
+        'groups': auth_backend.get_all_groups_details()
     }     
     return render(request, 'group_list.html', response)
 
@@ -657,16 +579,7 @@ def group_add(request):
                 if _valid_name_regex.search(form.data['name']) == None:
                     message = _("Invalid user group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.data['name'])
                     raise Exception
-            
-                group = UserGroup(
-                    name = form.data['name'],
-                    description = form.data['description']
-                )
-                group.save()
-                    
-                auth_services.get_services().ldap_add_group(group)
-                auth_services.get_services().add_data_directory(group)                               
-                          
+                auth_backend.add_group(form.data['name'], desc=form.data['description'])       
                 return redirect('group_list')
             
             except Exception as e:
@@ -685,13 +598,7 @@ def group_add(request):
 @superuser_required
 def group_delete(request, gid):        
     if request.method == 'POST':
-        group = UserGroup.objects.get(id=int(gid))
-        
-        auth_services.get_services().ldap_delete_group(group)           
-        auth_services.get_services().delete_data_directory(group)
-        
-        group.delete()
-            
+        auth_backend.delete_group(gid)
         response = {
             'deleted': True
         }     
@@ -699,6 +606,12 @@ def group_delete(request, gid):
 
 @login_required()
 def has_group(request):
+    """
+    GET /gvsigonline/auth/has-group/?group=groupname
+    returns {"response": true} or {"response": false} para el usuario actual
+    returns 401 si no está autenticado
+    returns 400 para otros errores (por ejemplo falta el parámetro group)
+    """
     group = request.GET.get('group')
     if not group:
         return JsonResponse({"response": "error"}, status=400)
@@ -708,6 +621,12 @@ def has_group(request):
 
 @login_required()
 def has_role(request):
+    """
+    GET /gvsigonline/auth/has-role/?role=rolename
+    returns {"response": true} or {"response": false} para el usuario actual
+    returns 401 si no está autenticado
+    returns 400 para otros errores (por ejemplo falta el parámetro role)
+    """
     role = request.GET.get('role')
     if not role:
         return JsonResponse({"response": "error"}, status=400)
@@ -717,8 +636,45 @@ def has_role(request):
 
 @login_required()
 def get_groups(request):
+    """
+    GET /gvsigonline/auth/get-groups/
+    returns ["group1", "group2"] para el usuario actual
+    returns 401 si no está autenticado
+    """
     return JsonResponse(auth_backend.get_groups(request), safe=False)
 
 @login_required()
 def get_roles(request):
+    """
+    GET /gvsigonline/auth/get-roles/
+    returns ["role1", "role2"] para el usuario actual
+    returns 401 si no está autenticado
+    """
     return JsonResponse(auth_backend.get_roles(request), safe=False)
+
+
+"""
+TODO:
+
+GET /gvsigonline/auth/has-role/?user=username&role=rolename
+returns {"response": true} or {"response": false}
+returns 401 si no está autenticado
+returns 403 si no lo invoca un superusuario o username
+returns 400 para otros errores (por ejemplo falta el parámetro role)
+
+GET /gvsigonline/auth/has-group/?user=username&group=groupname
+returns {"response": true} or {"response": false}
+returns 401 si no está autenticado
+returns 403 si no lo invoca un superusuario o username
+returns 400 para otros errores (por ejemplo falta el parámetro group)
+
+GET /gvsigonline/auth/get-roles/?user=username
+returns ["role1", "role2"]
+returns 403 si no lo invoca un superusuario o username
+returns 401 si no está autenticado
+
+GET /gvsigonline/auth/get-groups/?user=username
+returns ["group1", "group2"]
+returns 403 si no lo invoca un superusuario o username
+returns 401 si no está autenticado
+"""
