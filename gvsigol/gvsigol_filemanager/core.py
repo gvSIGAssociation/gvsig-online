@@ -3,6 +3,8 @@ import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 
+from gvsigol_auth import auth_backend
+
 from . import signals
 from gvsigol.settings import FILEMANAGER_DIRECTORY, FILEMANAGER_STORAGE, INSTALLED_APPS
 from .utils import sizeof_fmt
@@ -88,13 +90,13 @@ class Filemanager(object):
                 'filesize': sizeof_fmt(FILEMANAGER_STORAGE.size(os.path.join(self.path, name))),
             }
 
-        groups = core_utils.get_group_names_by_user(request.user)
+        groups = auth_backend.get_roles(request)
         for directoryname in directories:
             '''if first_level:
                 if request.user.is_superuser:
                     groups = core_utils.get_groups()
                 else:
-                    groups = core_utils.get_group_names_by_user(request.user)
+                    groups = auth_backend.get_roles(request)
                 for g in groups:
                     if directoryname == g:
                         listing.append(_helper(directoryname, 'Directory', ''))

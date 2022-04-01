@@ -17,26 +17,25 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+'''
+@author: Javier Rodrigo <jrodrigo@scolab.es>
+'''
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol_core.utils import get_supported_crs
+from gvsigol_core.utils import get_supported_crs, get_user_projects
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
 from django.http.response import JsonResponse
 from gvsigol_core import forms
-'''
-@author: Javier Rodrigo <jrodrigo@scolab.es>
-'''
-
+from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
-from .models import Project, ProjectUserGroup, ProjectLayerGroup
-from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadGroup
-from gvsigol_auth.models import UserGroup, UserGroupUser
+from .models import Project, ProjectLayerGroup, ProjectRole
+from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User, AnonymousUser
-from gvsigol_auth.utils import superuser_required, is_superuser, staff_required
+from gvsigol_auth.utils import superuser_required, is_superuser, staff_required, get_primary_user_role_details
 from . import utils as core_utils
 from gvsigol_services import geographic_servers, utils, backend_postgis
 from django.views.decorators.cache import cache_control
@@ -78,8 +77,8 @@ def forbidden_view(request):
 
 @login_required()
 def home(request):
-    user = User.objects.get(username=request.user.username)
-    groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
+    """
+    # Not used. Remove?
 
     from_login = False
     if 'HTTP_REFERER' in request.META:
@@ -87,57 +86,27 @@ def home(request):
             from_login = True
     if settings.AUTH_WITH_REMOTE_USER == True:
             from_login = True
-
-    projects_by_user = []
-    for usergroup_user in groups_by_user:
-        user_group = UserGroup.objects.get(id=usergroup_user.user_group_id)
-        projects_by_group = ProjectUserGroup.objects.filter(user_group_id=user_group.id)
-        for project_group in projects_by_group:
-            exists = False
-            for aux in projects_by_user:
-                if aux.project_id == project_group.project_id:
-                    exists = True
-            if not exists:
-                projects_by_user.append(project_group)
-
-    media_url = settings.MEDIA_URL[:-1]
+    """
+    
     projects = []
     public_projects = []
-    query = Project.objects.filter(expiration_date__gte=datetime.datetime.now()) | Project.objects.filter(expiration_date=None)
     if request.user.is_superuser:
-        for p in query:
-            image = p.image_url
-            project = {}
-            project['id'] = p.id
-            project['name'] = p.name
-            project['title'] = p.title
-            project['description'] = p.description
-            project['image'] = urllib.parse.unquote(image)
-
-            if p.is_public:
-                public_projects.append(project)
-            else:
-                projects.append(project)
+        query = Project.objects.filter(expiration_date__gte=datetime.datetime.now()) | Project.objects.filter(expiration_date=None)
     else:
-        for p in query:
-            image = p.image_url
-            project = {}
-            project['id'] = p.id
-            project['name'] = p.name
-            project['title'] = p.title
-            project['description'] = p.description
-            project['image'] = urllib.parse.unquote(image)
+        query = get_user_projects(request)
+    for p in query:
+        image = p.image_url
+        project = {}
+        project['id'] = p.id
+        project['name'] = p.name
+        project['title'] = p.title
+        project['description'] = p.description
+        project['image'] = urllib.parse.unquote(image)
 
-            if p.is_public:
-                public_projects.append(project)
-            else:
-                if p.created_by == request.user.username:
-                    projects.append(project)
-                if p.created_by != request.user.username:
-                    for ua in projects_by_user:
-                        if p.id == ua.project_id:
-                            projects.append(project)
-                            break
+        if p.is_public:
+            public_projects.append(project)
+        else:
+            projects.append(project)
 
     external_ldap_mode = True
     if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
@@ -314,12 +283,12 @@ def project_add(request):
             labels_added = request.POST.get('labels_added')
 
         assigned_layergroups = []
-        assigned_usergroups = []
+        assigned_roles = []
         for key in request.POST:
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
-                assigned_usergroups.append(int(key.split('-')[1]))
+                assigned_roles.append(key[len('usergroup-'):])
 
         layergroups = None
         if request.user.is_superuser:
@@ -344,9 +313,9 @@ def project_add(request):
 
         groups = None
         if request.user.is_superuser:
-            groups = core_utils.get_all_groups()
+            groups = auth_backend.get_all_roles_details(exclude_system=True)
         else:
-            groups = core_utils.get_user_groups(request.user.username)
+            groups = get_primary_user_role_details(request)
 
         if name == '':
             message = _('You must enter an project name')
@@ -409,20 +378,20 @@ def project_add(request):
                 project_layergroup.default_baselayer = selected_base_layer
                 project_layergroup.save()
 
-        for aug in assigned_usergroups:
-            usergroup = UserGroup.objects.get(id=aug)
-            project_usergroup = ProjectUserGroup(
-                project = project,
-                user_group = usergroup
-            )
-            project_usergroup.save()
+        roles = auth_backend.get_all_roles()
+        for assigned_role in assigned_roles:
+            if assigned_role in roles:
+                project_role = ProjectRole(
+                    project = project,
+                    role = assigned_role
+                )
+                project_role.save()
 
-        admin_group = UserGroup.objects.get(name__exact='admin')
-        project_usergroup = ProjectUserGroup(
+        project_role = ProjectRole(
             project = project,
-            user_group = admin_group
+            role = 'admin'
         )
-        project_usergroup.save()
+        project_role.save()
 
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')
@@ -440,11 +409,11 @@ def project_add(request):
         else:
             layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by__exact=request.user.username)
 
-        groups = None
+        roles = None
         if request.user.is_superuser:
-            groups = core_utils.get_all_groups()
+            roles = auth_backend.get_all_roles_details(exclude_system=True)
         else:
-            groups = core_utils.get_user_groups(request.user.username)
+            roles = get_primary_user_role_details(request)
         
         prepared_layer_groups = []
         for lg in layergroups:
@@ -461,7 +430,7 @@ def project_add(request):
                 })
             prepared_layer_groups.append(layer_group)
 
-        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin})
 
 
 @login_required()
@@ -522,12 +491,12 @@ def project_update(request, pid):
             labels_added = request.POST.get('labels_added')
 
         assigned_layergroups = []
-        assigned_usergroups = []
+        assigned_roles = []
         for key in request.POST:
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
-                assigned_usergroups.append(int(key.split('-')[1]))
+                assigned_roles.append(key[len('usergroup-'):])
 
         has_image = False
         if 'project-image' in request.FILES:
@@ -591,9 +560,6 @@ def project_update(request, pid):
 
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             lg.delete()
-
-        for ug in ProjectUserGroup.objects.filter(project_id=project.id):
-            ug.delete()
             
         for alg in assigned_layergroups:
             layergroup = LayerGroup.objects.get(id=alg)
@@ -614,20 +580,21 @@ def project_update(request, pid):
                 project_layergroup.default_baselayer = selected_base_layer
                 project_layergroup.save()
 
-        for aug in assigned_usergroups:
-            usergroup = UserGroup.objects.get(id=aug)
-            project_usergroup = ProjectUserGroup(
-                project = project,
-                user_group = usergroup
-            )
-            project_usergroup.save()
+        ProjectRole.objects.filter(project_id=project.id).delete()
+        roles = auth_backend.get_all_roles()
+        for role in assigned_roles:
+            if role in roles:
+                project_role = ProjectRole(
+                    project = project,
+                    role = role
+                )
+                project_role.save()
 
-        admin_group = UserGroup.objects.get(name__exact='admin')
-        project_usergroup = ProjectUserGroup(
+        project_role = ProjectRole(
             project = project,
-            user_group = admin_group
+            role = 'admin'
         )
-        project_usergroup.save()
+        project_role.save()
 
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')
@@ -639,7 +606,7 @@ def project_update(request, pid):
 
     else:
         project = Project.objects.get(id=int(pid))
-        groups = core_utils.get_all_groups_checked_by_project(request, project)
+        roles = core_utils.get_all_roles_checked_by_project(project)
         layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)
 
         if project.toc_order:
@@ -703,7 +670,7 @@ def project_update(request, pid):
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
                                                        'project': project,
-                                                       'groups': groups, 
+                                                       'groups': roles,
                                                        'layergroups': layer_groups, 
                                                        'has_geocoding_plugin': has_geocoding_plugin, 
                                                        'toc': ordered_toc, 
@@ -747,7 +714,7 @@ def load(request, project_name):
 @login_required()
 @cache_control(max_age=86400)
 def load_project(request, project_name):
-    if core_utils.can_read_project(request.user, project_name):
+    if core_utils.can_read_project(request, project_name):
         project = Project.objects.get(name__exact=project_name)
 
         plugins_config = core_utils.get_plugins_config()
@@ -783,7 +750,7 @@ def load_project(request, project_name):
 @cache_control(max_age=86400)
 def load_public_project(request, project_name):
     project = Project.objects.get(name__exact=project_name)
-    if not core_utils.can_read_project(request.user, project):
+    if not core_utils.can_read_project(request, project):
         return render(request, 'illegal_operation.html', {})
 
     plugins_config = core_utils.get_plugins_config()
@@ -817,7 +784,7 @@ def load_public_project(request, project_name):
 @xframe_options_exempt
 @cache_control(max_age=86400)
 def portable_project_load(request, project_name):
-    if core_utils.can_read_project(request.user, project_name):
+    if core_utils.can_read_project(request, project_name):
         project = Project.objects.get(name__exact=project_name)
         response = render(request, 'portable_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)})
         #Expira la caché cada día
@@ -916,7 +883,7 @@ def project_get_conf(request):
             conf_group['cache_endpoint'] = server.getCacheEndpoint()
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
-            user_roles = core_utils.get_group_names_by_user(request.user)
+            user_roles = auth_backend.get_roles(request)
             
             allows_getmap = True
             servers_list = []
@@ -932,11 +899,10 @@ def project_get_conf(request):
                         if l.public:
                             readable = True
                         else:
-                            for ur in user_roles:
-                                for rr in read_roles:
-                                    if ur == rr:
-                                        readable = True
-    
+                            for user_role in user_roles:
+                                if user_role in read_roles:
+                                    readable = True
+                                    break
                         if readable:
                             layer = {}
                             layer['external'] = False
@@ -1230,7 +1196,7 @@ def project_get_conf(request):
                 'email': request.user.email,
                 'permissions': {
                     'is_superuser': is_superuser(request.user),
-                    'roles': core_utils.get_group_names_by_user(request.user)
+                    'roles': auth_backend.get_roles(request)
                 }
             }
             # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
@@ -1367,7 +1333,7 @@ def create_shared_view(request):
 def save_shared_view(request):
     if request.method == 'POST':
         pid = int(request.POST.get('pid'))
-        if not core_utils.can_read_project(request.user, pid):
+        if not core_utils.can_read_project(request, pid):
             return HttpResponse(json.dumps({'result': 'illegal_operation', 'shared_url': ''}, indent=4), content_type='folder/json')
         #emails = request.POST.get('emails')
         description = request.POST.get('description')
@@ -1548,21 +1514,21 @@ def project_permissions_to_layer(request, pid):
             print(request.POST.get("usergroups[]"))
             print(request.POST.get("is_public"))
             project = Project.objects.get(pk=pid)
-            project_user_groups = project.projectusergroup_set.all()
+            roles = project.projectrole_set.all().values_list('role', flat=True)
             last_server_id = None
             for prlg in project.projectlayergroup_set.all():
                 for layer in prlg.layer_group.layer_set.filter(external=False):
-                    for prug in project_user_groups:
-                        if not LayerReadGroup.objects.filter(layer=layer, group=prug.user_group).exists():
-                            lrg = LayerReadGroup()
-                            lrg.layer = layer
-                            lrg.group = prug.user_group
-                            lrg.save()
+                    for role in roles:
+                        if not LayerReadRole.objects.filter(layer=layer, role=role).exists():
+                            lyr_role = LayerReadRole()
+                            lyr_role.layer = layer
+                            lyr_role.role = role
+                            lyr_role.save()
                     if layer.datastore.workspace.server_id != last_server_id:
                         last_server_id = layer.datastore.workspace.server_id
                         server = geographic_servers.get_instance().get_server_by_id(last_server_id)
-                    read_groups = [ lrg.group for lrg in LayerReadGroup.objects.filter(layer=layer) ]
-                    server.setLayerReadRules(layer, read_groups)
+                    read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
+                    server.setLayerReadRules(layer, read_roles)
             return JsonResponse({"status": "success"})
         except Project.DoesNotExist:
             return JsonResponse({"status": "error"}, status_code=404)
@@ -1578,11 +1544,10 @@ def extend_permissions_to_layer(request):
     """
     if request.POST:
         try:
-            assigned_read_roups = []
+            assigned_read_roles = []
             public_project = (request.POST.get("is_public") == 'true')
             for key in request.POST.getlist("usergroups[]", []):
-                assigned_read_roups.append(int(key.split('-')[1]))
-            #assigned_layergroups = [ int(id) for id in request.POST.getlist("layergroups[]", []) ]
+                assigned_read_roles.append(key[len('usergroup-'):])
             assigned_layergroups = request.POST.getlist("layergroups[]", [])
             # not used for the moment
             #is_public = request.POST.get("is_public")
@@ -1592,17 +1557,17 @@ def extend_permissions_to_layer(request):
                     if public_project:
                         layer.public = True
                         layer.save()
-                    for gid in assigned_read_roups:
-                        if not LayerReadGroup.objects.filter(layer=layer, group_id=gid).exists():
-                            lrg = LayerReadGroup()
-                            lrg.layer = layer
-                            lrg.group_id = gid
-                            lrg.save()
+                    for role in assigned_read_roles:
+                        if not LayerReadRole.objects.filter(layer=layer, role=role).exists():
+                            lyr_read_role = LayerReadRole()
+                            lyr_read_role.layer = layer
+                            lyr_read_role.role = role
+                            lyr_read_role.save()
                     if layer.datastore.workspace.server_id != last_server_id:
                         last_server_id = layer.datastore.workspace.server_id
                         server = geographic_servers.get_instance().get_server_by_id(last_server_id)
-                    read_groups = [ lrg.group for lrg in LayerReadGroup.objects.filter(layer=layer) ]
-                    server.setLayerReadRules(layer, read_groups)
+                    read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role').distinct()
+                    server.setLayerReadRules(layer, read_roles)
             return JsonResponse({"status": "success"})
         except Project.DoesNotExist:
             return JsonResponse({"status": "error"}, status=404)

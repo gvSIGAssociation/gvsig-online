@@ -52,7 +52,8 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         user.first_name = claims.get('first_name', '')
         user.last_name = claims.get('last_name', '')
         django_roles = claims.get('gvsigol_roles', [])
-        user.is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles)
+        #user.is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles)
+        user.is_superuser = False
         user.is_staff = ('GVSIGOL_DJANGO_STAFF' in django_roles)
         user.save()
 
@@ -99,6 +100,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         access_token_bytes = force_bytes(access_token)
         key = self._get_key(access_token_bytes)
         access_token_payload = self.verify_token(access_token_bytes, key, nonce=nonce)
+        print(access_token_payload)
         self.request.session['oidc_access_token_payload'] = access_token_payload
         self.request.session['oidc_id_token_payload'] = payload
 
@@ -143,6 +145,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         return payload
     """
     TODO: map claims to django permissions (if needed)
-    def has_perm(self, user_obj: _AnyUser, perm: str, obj: Optional[Model] = ...) -> bool:
+    def has_perm(self, user_obj, perm: str, obj) -> bool:
+        print(user_obj)
         return super().has_perm(user_obj, perm, obj)
     """

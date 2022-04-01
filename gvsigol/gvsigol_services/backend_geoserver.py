@@ -23,7 +23,7 @@ from gvsigol_core.geom import RASTER
 from django.contrib.gis import gdal
 from gvsigol.settings import CONTROL_FIELDS
 from django.db.backends.base import creation
-from .models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup, Trigger
+from .models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadRole, Trigger, LayerWriteRole
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.utils.translation import ugettext_lazy as _
@@ -1757,16 +1757,16 @@ class Geoserver():
             raise
     
     def setDataRules(self):
-        
         url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
         layers = Layer.objects.filter(external=False)
         for layer in layers:
             if layer.public:
                 who_can_read = [ "*" ]
             else:
-                read_groups_query = LayerReadGroup.objects.filter(layer=layer)
-                if read_groups_query.count()>0: # layer is not public
-                    who_can_read = [ "ROLE_"+ g.group.name.upper() for g in read_groups_query ]
+                read_roles_query = LayerReadRole.objects.filter(layer=layer)
+                # FIXME OIDC CMI role prefix?
+                if read_roles_query.count()>0: # layer is not public
+                    who_can_read = [ "ROLE_"+ read_roles.role.upper() for read_roles in read_roles_query ]
                 else:
                     who_can_read = [ "ROLE_ADMIN"]
             
@@ -1793,9 +1793,9 @@ class Geoserver():
                 result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
 
             who_can_write = []
-            write_groups_query = LayerWriteGroup.objects.filter(layer=layer)
-            if write_groups_query.count()>0:
-                who_can_write = [ "ROLE_"+ g.group.name.upper() for g in write_groups_query ]
+            write_roles_query = LayerWriteRole.objects.filter(layer=layer)
+            if write_roles_query.count()>0:
+                who_can_write = [ "ROLE_"+ write_role.role.upper() for write_role in write_roles_query ]
             write_rule_path = workspace.name + "." + layer.name + ".w"
             if  len(who_can_write) > 0:
                 write_rule_roles =  ",".join(who_can_write)
@@ -1821,18 +1821,18 @@ class Geoserver():
                 rules.delete()
         self.setWfsTransactionRules()
 
-    def setLayerDataRules(self, layer, read_groups, write_groups):
-        self.setLayerReadRules(layer, read_groups)
-        self.setLayerWriteRules(layer, write_groups)
+    def setLayerDataRules(self, layer, read_roles, write_roles):
+        self.setLayerReadRules(layer, read_roles)
+        self.setLayerWriteRules(layer, write_roles)
         self.setWfsTransactionRules()
     
-    def setLayerReadRules(self, layer, read_groups):
+    def setLayerReadRules(self, layer, read_roles):
         url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
         if layer.public:
             who_can_read = [ "*" ]
         else:
-            if len(read_groups) > 0:
-                who_can_read = [ "ROLE_"+ g.name.upper() for g in read_groups]
+            if len(read_roles) > 0:
+                who_can_read = [ "ROLE_"+ g.upper() for g in read_roles]
                 if not 'ROLE_ADMIN' in who_can_read:
                     who_can_read.append('ROLE_ADMIN')
             else:
@@ -1855,9 +1855,9 @@ class Geoserver():
             # It also safe if the geoserver/gvsigol rules get incoherent
             result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
     
-    def setLayerWriteRules(self, layer, write_groups):
+    def setLayerWriteRules(self, layer, write_roles):
         url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
-        who_can_write = [ "ROLE_"+ g.name.upper() for g in write_groups ]
+        who_can_write = [ "ROLE_"+ g.upper() for g in write_roles ]
         write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
         # now add the rule if necessary
         if len(who_can_write)>0:
@@ -1884,8 +1884,8 @@ class Geoserver():
             rules.delete()
     
     def setWfsTransactionRules(self):
-        write_groups_query = LayerWriteGroup.objects.all()
-        transaction_roles = [ "ROLE_"+ g.group.name.upper() for g in write_groups_query ]
+        write_roles = LayerWriteRole.objects.all().values_list('role', flat=True).distinct()
+        transaction_roles = [ "ROLE_"+ role for role in write_roles ]
         if  len(transaction_roles) > 0:
             services_url = self.rest_catalog.get_service_url() + "/security/acl/services.json"
             service = {}

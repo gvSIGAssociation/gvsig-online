@@ -18,14 +18,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from geoserver.workspace import Workspace
+
+from gvsigol_auth import auth_backend
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup
 from gvsigol_services.models import LayerGroup, Layer
-from gvsigol_auth.models import UserGroup, UserGroupUser
 from gvsigol import settings
 import json
 import psycopg2
@@ -42,7 +43,7 @@ import sys
 logger = logging.getLogger("gvsigol")
 
 
-def can_read_project(user, project):
+def can_read_project(request, project):
     """
     Checks whether the user has permissions to read provied project.
     It accepts a project instance, a project name or a project id.
@@ -54,102 +55,27 @@ def can_read_project(user, project):
             project = Project.objects.get(pk=project)
         if project.is_public:
             return True
-        if user.is_superuser:
+        if request.user.is_superuser:
             return True
-        if UserGroupUser.objects.filter(user_id=user.id, user_group__projectusergroup__project_id=project.id).count() > 0:
+        if project.created_by == request.user.username:
             return True
+        roles = auth_backend.get_roles(request)
+        return project.projectrole_set.filter(role__in=roles).exists()
     except Exception as e:
         print(e)
     return False
 
-def get_all_groups():
-    groups_list = UserGroup.objects.all()
-    
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin':
-            group = {}
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
-        
-    return groups
-
-def get_user_groups(user):
-    groups_list = UserGroup.objects.filter(name__exact='ug_' + user)
-    
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin':
-            group = {}
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            group['checked'] = True
-            groups.append(group)
-        
-    return groups
-
-def get_all_groups_checked_by_user(user):
-    groups_list = UserGroup.objects.all()
-    groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
-    checked = False
-    
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin':
-            group = {}
-            for gbu in groups_by_user:
-                if gbu.user_group_id == g.id:
-                    checked = True
-                    group['checked'] = checked
-                           
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
-        
-    return groups
-
-def get_group_names_by_user(user):
-    groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
-    
-    groups = []
-    for g in groups_by_user:
-        user_group = UserGroup.objects.get(id=g.user_group_id)
-        groups.append(user_group.name)
-        
-    return groups
-
-def get_groups():
-    groups = []
-    for g in UserGroup.objects.all():
-        groups.append(g.name)
-        
-    return groups
-
-
-def get_all_groups_checked_by_project(request, project):
-    groups_list = UserGroup.objects.all()
-    groups_by_project = ProjectUserGroup.objects.filter(project_id=project.id)
-    checked = False
-    
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin':
-            group = {}
-            for gbu in groups_by_project:
-                if gbu.user_group_id == g.id:
-                    checked = True
-                    group['checked'] = checked
-                           
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
-        
-    return groups
+def get_all_roles_checked_by_project(project):
+    role_list = auth_backend.get_all_roles_details()
+    roles_by_project = ProjectRole.objects.filter(project_id=project.id)
+    roles = []
+    for role in role_list:
+        if role['name'] != 'admin':
+            for gbu in roles_by_project:
+                if gbu.role == role['name']:
+                    role['checked'] = True
+            roles.append(role)
+    return roles
 
 def get_all_layer_groups_checked_by_project(request, project):
     
@@ -727,3 +653,12 @@ def get_setting(key, default=None):
     the variable is not defined on those settings.py files.
     """
     return get_app_setting(key, getattr(settings, key, default))
+
+def get_user_projects(request):
+    roles = auth_backend.get_roles(request)
+    projects = Project.objects.filter(projectrole_set__role__in=roles) \
+            | Project.objects.filter(is_public=True)
+    if request.user:
+        projects = projects \
+            | Project.objects.filter(created_by=request.user.username)
+    return projects.distinct()

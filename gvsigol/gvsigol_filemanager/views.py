@@ -1,3 +1,4 @@
+from gvsigol_auth import auth_backend
 from gvsigol_services.models import Datastore
 from gvsigol_services import geographic_servers
 from gvsigol_services.backend_postgis import Introspect
@@ -30,31 +31,31 @@ logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
-def can_manage_path(user, path):
+def can_manage_path(request, path):
     if path is not None:
         full_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, path))
         if not full_path.startswith(ABS_FILEMANAGER_DIRECTORY):
             logger.warning("Suspicious path provided: " + path)
             return False
-        if user:
-            if user.is_superuser:
+        if request.user:
+            if request.user.is_superuser:
                 return True
-            if not user.is_staff:
+            if not request.user.is_staff:
                 return False
             first_level_path = os.path.relpath(full_path, ABS_FILEMANAGER_DIRECTORY).split("/")[0]
             first_level_abspath = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, first_level_path))
             if os.path.isdir(first_level_abspath):
-                for g in core_utils.get_group_names_by_user(user):
+                for g in auth_backend.get_roles(request):
                     if first_level_path == g:
                         return True
             elif os.path.isfile(first_level_abspath):
                 return False
     return False
 
-def can_browse_path(user, path):
-    if path == '' and (user.is_superuser or user.is_staff):
+def can_browse_path(request, path):
+    if path == '' and (request.user.is_superuser or request.user.is_staff):
         return True
-    return can_manage_path(user, path)
+    return can_manage_path(request, path)
 
 class FilemanagerMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -87,7 +88,7 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
     template_name = 'browser/filemanager_list.html'
     raise_exception = True
     def test_func(self):
-        return can_browse_path(self.request.user, self.request.GET.get('path', ''))
+        return can_browse_path(self.request, self.request.GET.get('path', ''))
 
     def dispatch(self, request, *args, **kwargs):
         self.popup = self.request.GET.get('popup', 0) == '1'
@@ -117,8 +118,8 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         # Note: user permissions in the target datastore are specifically checked in form validation
         if self.request.user.is_superuser or self.request.user.is_staff:
             if self.request.method in SAFE_METHODS:
-                return can_manage_path(self.request.user, self.request.GET.get('path'))
-            return can_manage_path(self.request.user, self.request.POST.get('file'))
+                return can_manage_path(self.request, self.request.GET.get('path'))
+            return can_manage_path(self.request, self.request.POST.get('file'))
         return False
 
     def get_context_data(self, **kwargs):
@@ -185,14 +186,14 @@ class UploadView(FilemanagerMixin, TemplateView):
     @method_decorator(login_required(login_url='/gvsigonline/auth/login_user/'))
     @method_decorator(staff_required)
     def dispatch(self, request, *args, **kwargs):
-        if not can_manage_path(self.request.user, self.request.GET.get('path')):
+        if not can_manage_path(self.request, self.request.GET.get('path')):
             return render(request, 'illegal_operation.html', {})
         return super(UploadView, self).dispatch(request, *args, **kwargs)
 
 class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
     raise_exception = True
     def test_func(self):
-        return can_manage_path(self.request.user, self.request.POST.get('path'))
+        return can_manage_path(self.request, self.request.POST.get('path'))
     
     def post(self, request, *args, **kwargs):
         if len(request.FILES) != 1:
@@ -219,7 +220,7 @@ class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
 class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
     raise_exception = True
     def test_func(self):
-        return can_manage_path(self.request.user, self.request.POST.get('path'))
+        return can_manage_path(self.request, self.request.POST.get('path'))
     
     def post(self, request, *args, **kwargs):
         path = FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
@@ -246,7 +247,7 @@ class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
 class UnzipFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
     raise_exception = True
     def test_func(self):
-        return can_manage_path(self.request.user, self.request.POST.get('path'))
+        return can_manage_path(self.request, self.request.POST.get('path'))
     
     def post(self, request, *args, **kwargs):
         path = os.path.join(FILEMANAGER_DIRECTORY, request.POST.get('path'))
@@ -277,7 +278,7 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
     def test_func(self):
         if self.request.method in SAFE_METHODS:
             return (self.request.user.is_superuser or self.request.user.is_staff)
-        return can_manage_path(self.request.user, self.request.POST.get('path'))
+        return can_manage_path(self.request, self.request.POST.get('path'))
 
     def get_success_url(self):
         url = '%s?path=%s' % (reverse_lazy('filemanager:browser'), self.fm.path)
@@ -297,7 +298,7 @@ def download_file(request, filepath):
     abs_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, filepath))
     if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
         return HttpResponseBadRequest()
-    if not can_manage_path(request.user, filepath):
+    if not can_manage_path(request, filepath):
         return HttpResponseForbidden()
     try:
         print('xsendfile served file: ' + abs_path)

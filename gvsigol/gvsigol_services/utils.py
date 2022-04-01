@@ -17,122 +17,86 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from django.http import response
-from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
-from django.contrib.auth.models import AnonymousUser
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-
+from django.http import response
+from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
+from django.contrib.auth.models import AnonymousUser
 import hashlib
 import json
 import os
-
 from django.http.response import HttpResponse
+from django.db.models.query import QuerySet
+from django.db.models import Q
 import psycopg2
-
 from . import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import MEDIA_ROOT
-from gvsigol_auth.models import UserGroup, UserGroupUser, User
+from gvsigol_auth.models import UserGroup, User
+from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace
-from .models import LayerReadGroup, LayerWriteGroup
+from .models import LayerReadRole, LayerWriteRole
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
 from psycopg2 import sql as sqlbuilder
 import logging
 logger = logging.getLogger("gvsigol")
+from gvsigol_auth import auth_backend
 
-def get_all_user_groups_checked_by_layer(layer, creator_user_group=None):
-    groups_list = UserGroup.objects.all()
+def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
+    role_list = auth_backend.get_all_roles_details()
     if layer:
-        read_groups = LayerReadGroup.objects.filter(layer=layer)
-        write_groups = LayerWriteGroup.objects.filter(layer=layer)
+        read_roles = LayerReadRole.objects.filter(layer=layer)
+        write_roles = LayerWriteRole.objects.filter(layer=layer)
     else:
-        read_groups = []
-        write_groups = []
-
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin' and g.name != 'public':
-            group = {}
-            for lrg in read_groups:
-                if lrg.group_id == g.id:
-                    group['read_checked'] = True
-
-            for lwg in write_groups:
-                if lwg.group_id == g.id:
-                    group['write_checked'] = True
-            if creator_user_group is not None and g.id == creator_user_group.id:
-                group['read_checked'] = True
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
-
-    return groups
-
+        read_roles = []
+        write_roles = []
+    return get_checked_roles_from_user_input(read_roles, write_roles, creator_user_role=creator_user_role)
+ 
 def get_read_roles(layer):
-    roles = []
-    layer_read_groups = LayerReadGroup.objects.filter(layer_id=layer.id)
-    for layer_read_group in layer_read_groups:
-        group = UserGroup.objects.get(id=layer_read_group.group_id)
-        roles.append(group.name)
-
-    return roles
+    return list(LayerReadRole.objects.filter(layer_id=layer.id).values_list('role', flat=True))
 
 def get_write_roles(layer):
-    roles = []
-    layer_write_groups = LayerWriteGroup.objects.filter(layer_id=layer.id)
-    for layer_write_group in layer_write_groups:
-        group = UserGroup.objects.get(id=layer_write_group.group_id)
-        roles.append(group.name)
+    return list(LayerWriteRole.objects.filter(layer_id=layer.id).values_list('role', flat=True))
 
-    return roles
-
-def can_write_layer(user, layer):
+def can_write_layer(request, layer):
     """
     Checks whether the user has permissions to write the provided layer.
     It accepts a layer instance or a layer id.
     """
     try:
-        if isinstance(user, str):
-            user = User.objects.get(username=user)
         if not isinstance(layer, Layer):
             layer = Layer.objects.get(id=layer)
         
-        if user.is_superuser:
+        if request.user.is_superuser:
             return True
-        if isinstance(user, AnonymousUser):
+        if isinstance(request.user, AnonymousUser):
             return False
-        if UserGroupUser.objects.filter(user=user, user_group__layerwritegroup__layer=layer).count() > 0:
-            return True
+        roles = get_roles(request)
+        return LayerWriteRole.objects.filter(layer=layer, role__in=roles).exists()
     except Exception as e:
         print(e)
     return False
 
-def can_read_layer(user, layer):
+def can_read_layer(request, layer):
     """
     Checks whether the user has permissions to manage the provided layer.
     It accepts a layer instance or a layer id.
     """
     try:
-        if isinstance(user, str):
-            user = User.objects.get(username=user)
         if not isinstance(layer, Layer):
             layer = Layer.objects.get(id=layer)
 
-        if user.is_superuser:
+        if layer.public or request.user.is_superuser:
             return True
-        if layer.public:
-            return True
-        if isinstance(user, AnonymousUser):
+        if isinstance(request.user, AnonymousUser):
             return False
-        if UserGroupUser.objects.filter(user=user, user_group__layerreadgroup__layer=layer).count() > 0:
-            return True
+        roles = get_roles(request)
+        return LayerReadRole.objects.filter(layer=layer, role__in=roles).exists()
     except Exception as e:
         print(e)
     return False
@@ -659,22 +623,22 @@ def clone_layer(target_datastore, layer, layer_group, copy_data=True, permission
         old_instance = Layer.objects.get(id=old_id)
         
         if permissions != CLONE_PERMISSION_SKIP:
-            admin_group = UserGroup.objects.get(name__exact='admin')
-            read_groups = [ admin_group ]
-            write_groups = [ admin_group ]
+            admin_role = auth_backend.get_admin_role()
+            read_roles = [ admin_role ]
+            write_roles = [ admin_role ]
 
-            for lrg in LayerReadGroup.objects.filter(layer=old_instance):
-                lrg.pk = None
-                lrg.layer = new_layer_instance
-                lrg.save()
-                read_groups.append(lrg.group)
+            for layer_read_role in LayerReadRole.objects.filter(layer=old_instance):
+                layer_read_role.pk = None
+                layer_read_role.layer = new_layer_instance
+                layer_read_role.save()
+                read_roles.append(layer_read_role.role)
             
-            for lwg in LayerWriteGroup.objects.filter(layer=old_instance):
-                lwg.pk = None
-                lwg.layer = new_layer_instance
-                lwg.save()
-                write_groups.append(lwg.group)
-            server.setLayerDataRules(layer, read_groups, write_groups)
+            for layer_write_role in LayerWriteRole.objects.filter(layer=old_instance):
+                layer_write_role.pk = None
+                layer_write_role.layer = new_layer_instance
+                layer_write_role.save()
+                write_roles.append(layer_write_role.role)
+            server.setLayerDataRules(layer, read_roles, write_roles)
         
         set_time_enabled(server, new_layer_instance)
         
@@ -763,59 +727,99 @@ def update_feat_version(layer, featid):
         logger.exception("Error updating feature version")
     return None, None
 
-def set_layer_permissions(layer, is_public, assigned_read_groups, assigned_write_groups):
+def set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles):
     layer.public = is_public
     layer.save()
-    admin_group = UserGroup.objects.get(name__exact='admin')
-    assigned_read_groups.append(admin_group.pk)
-    if not layer.type.startswith('c_'):
-        assigned_write_groups.append(admin_group.pk)
+    admin_role = auth_backend.get_admin_role()
+    assigned_read_roles.append(admin_role)
+    if layer.type.startswith('c_'):
+        assigned_write_roles = []
+    else:
+        assigned_write_roles.append(admin_role)
 
-    read_groups = []
-    write_groups = []
+    read_roles = []
+    write_roles = []
 
     # clean existing groups and assign them again if necessary
-    LayerReadGroup.objects.filter(layer=layer).delete()
-    for group in assigned_read_groups:
+    LayerReadRole.objects.filter(layer=layer).delete()
+    all_roles = auth_backend.get_all_roles()
+    for role in assigned_read_roles:
         try:
-            group = UserGroup.objects.get(id=group)
-            lrg = LayerReadGroup()
-            lrg.layer = layer
-            lrg.group = group
-            lrg.save()
-            read_groups.append(group)
+            if role in all_roles:
+                lyr_read_role = LayerReadRole()
+                lyr_read_role.layer = layer
+                lyr_read_role.role = role
+                lyr_read_role.save()
+                read_roles.append(role)
         except:
             pass
 
-    LayerWriteGroup.objects.filter(layer=layer).delete()
-    for group in assigned_write_groups:
+    LayerWriteRole.objects.filter(layer=layer).delete()
+    for role in assigned_write_roles:
         try:
-            group = UserGroup.objects.get(id=group)
-            lwg = LayerWriteGroup()
-            lwg.layer = layer
-            lwg.group = group
-            lwg.save()
-            write_groups.append(group)
+            if role in all_roles:
+                layer_write_role = LayerWriteRole()
+                layer_write_role.layer = layer
+                layer_write_role.role = role
+                layer_write_role.save()
+                write_roles.append(role)
         except:
             pass
             
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-    gs.setLayerDataRules(layer, read_groups, write_groups)
+    gs.setLayerDataRules(layer, read_roles, write_roles)
 
-def get_checked_usergroups_from_user_input(read_groups, write_groups):
-    groups_list = UserGroup.objects.all()
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin' and g.name != 'public':
-            group = {}
-            for lrg in read_groups:
-                if lrg == g.id:
-                    group['read_checked'] = True
-            for lwg in write_groups:
-                if lwg == g.id:
-                    group['write_checked'] = True
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
-    return groups
+def get_checked_roles_from_user_input(layer_read_roles, layer_write_roles, creator_user_role=None):
+    role_list = auth_backend.get_all_roles_details()
+    roles = []
+    admin_roles = [ auth_backend.get_admin_role()]
+    for role in role_list:
+        # FIXME OIDC CMI: ROLE_ prefix?
+        if role['name'] not in admin_roles:
+            for layer_read_role in layer_read_roles:
+                if layer_read_role.role == role['name']:
+                    role['read_checked'] = True
+
+            for layer_write_role in layer_write_roles:
+                if layer_write_role.role == role['name']:
+                    role['write_checked'] = True
+            if creator_user_role is not None and role['name'] == creator_user_role:
+                role['read_checked'] = True
+            roles.append(role)
+    return roles
+
+def get_public_layers_query():
+    '''
+    Devuelve un objecto Q con la query para obtener las capas públicas.
+    '''
+    return Q(public=True)
+
+def get_layerread_by_user_query(user_roles):
+    '''
+    Devuelve un objecto Q con la query para obtener las capas sobre las que
+    el usuario tiene permisos explícitos de lectura.
+
+    Parámetros
+    ==========
+    user_roles: List[str]
+        Lista de roles del usuario
+    '''
+    return Q(layerreadrole__role__in=user_roles)
+
+
+def get_layerread_by_user(request):
+    '''
+    Obtiene las capas en las que el usuario tiene permiso de lectura.
+    Estas son todas las públicas más todas las privadas sobre las que tiene permisos
+    explícitos de lectura.
+
+    Parámetros
+    ==========
+    request: HttpRequest
+        Objeto HttpRequest de Django con la petición en curso
+    '''    
+    if request.user.is_superuser:
+        return Layer.objects.all()
+    roles = get_roles(request)
+    return Layer.objects.filter(get_layerread_by_user_query(roles) \
+             | get_public_layers_query()).distinct()

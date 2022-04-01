@@ -214,7 +214,6 @@ function configure() {
 	grep -rl "##CRONTAB_ACTIVE##"  | xargs sed -i "s/##CRONTAB_ACTIVE##/$CRONTAB_ACTIVE/g"
 	
 
-	#TODO: Pendiente de revisar ...
 	if [ -z $LOGOUT_REDIRECT_URL ]; then
 		echo "WARNING: LOGOUT_REDIRECT_URL is not defined, using default value 'index'"
 		LOGOUT_REDIRECT_URL="index" # normally this is equivalent to /gvsigonline"

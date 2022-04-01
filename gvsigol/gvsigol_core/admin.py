@@ -21,8 +21,8 @@
 
 from django.contrib import admin
 
-from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup
 
 admin.site.register(Project)
-admin.site.register(ProjectUserGroup)
+admin.site.register(ProjectRole)
 admin.site.register(ProjectLayerGroup)
