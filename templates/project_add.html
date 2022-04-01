@@ -332,9 +332,9 @@
 														<div class="checkbox pull-right">													
 															<label>
 																{% if group.checked %}
-																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}" checked/>{% trans "Assign user group" %}
 																{% else %}
-																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}"/>{% trans "Assign user group" %}
 																{% endif %}
 															</label>
 														</div>

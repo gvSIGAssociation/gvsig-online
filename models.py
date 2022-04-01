@@ -6,6 +6,7 @@ from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup, Layer
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
+from django.contrib.auth.models import Group
 
 def get_default_logo_image():
     return settings.STATIC_URL + 'img/logo_principal.png'
@@ -109,7 +110,25 @@ class ProjectUserGroup(models.Model):
         self.project = project
         self.save()
         return ProjectUserGroup.objects.get(id=self.pk)
-        
+
+class ProjectRole(models.Model):
+    project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
+    role = models.TextField()
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['project', 'role']),
+        ]
+    
+    def __str__(self):
+        return self.project.name + ' - ' + self.role
+    
+    def clone(self, project):
+        self.pk = None
+        self.project = project
+        self.save()
+        return ProjectRole.objects.get(id=self.pk)
+
 class ProjectLayerGroup(models.Model):
     project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
     layer_group = models.ForeignKey(LayerGroup, default=None, on_delete=models.CASCADE)
