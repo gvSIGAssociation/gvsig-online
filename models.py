@@ -33,6 +33,7 @@ import os
 from .backend_postgis import Introspect
 import json, ast
 from django.contrib.postgres.fields import JSONField
+from django.contrib.auth.models import Group
 
 CLONE_PERMISSION_CLONE = "clone"
 CLONE_PERMISSION_SKIP = "skip"
@@ -372,13 +373,29 @@ class Layer(models.Model):
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
-    
-    
+
 class LayerWriteGroup(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
-    
-    
+
+class LayerReadRole(models.Model):
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
+    role = models.TextField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'role']),
+        ]
+
+class LayerWriteRole(models.Model):
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
+    role = models.TextField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'role']),
+        ]
+
 class DataRule(models.Model):
     path = models.CharField(max_length=500)
     roles = models.CharField(max_length=500)

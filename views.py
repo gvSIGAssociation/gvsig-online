@@ -69,8 +69,7 @@ from . import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from gvsigol.settings import MOSAIC_DB
-from gvsigol_auth.models import UserGroup
-from gvsigol_auth.utils import superuser_required, staff_required, get_primary_user_usergroup
+from gvsigol_auth.utils import superuser_required, staff_required, get_primary_user_role
 from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
 from gvsigol_core.models import Project, ProjectBaseLayerTiling
@@ -102,6 +101,7 @@ from django.contrib import messages
 from . import tasks
 import time
 from django.core import serializers as serial
+from django.core.exceptions import PermissionDenied
 
 logger = logging.getLogger("gvsigol")
 
@@ -1105,16 +1105,6 @@ def layer_add_with_group(request, layergroup_id):
         if 'vector_tile' in request.POST:
             vector_tile = True
 
-        assigned_read_roups = []
-        for key in request.POST:
-            if 'read-usergroup-' in key:
-                assigned_read_roups.append(int(key.split('-')[2]))
-
-        assigned_write_groups = []
-        for key in request.POST:
-            if 'write-usergroup-' in key:
-                assigned_write_groups.append(int(key.split('-')[2]))
-
         is_public = (request.POST.get('resource-is-public') is not None)
 
         try:
@@ -1229,7 +1219,24 @@ def layer_add_with_group(request, layergroup_id):
                 featuretype = {
                     'max_features': maxFeatures
                 }
-                utils.set_layer_permissions(newRecord, is_public, assigned_read_roups, assigned_write_groups)
+
+                assigned_read_roles = []
+                for key in request.POST:
+                    if 'read-usergroup-' in key:
+                        assigned_read_roles.append(key[len('read-usergroup-'):])
+
+                if newRecord.type == 'v_PostGIS':
+                    i, params = newRecord.datastore.get_db_connection()
+                    with i as c:
+                        is_view = c.is_view(newRecord.datastore.name, newRecord.source_name)
+                else:
+                    is_view = False
+                assigned_write_roles = []
+                if not is_view:
+                    for key in request.POST:
+                        if 'write-usergroup-' in key:
+                            assigned_write_roles.append(key[len('write-usergroup-'):])
+                utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles)
                 do_config_layer(server, newRecord, featuretype)
 
                 if redirect_to_layergroup:
@@ -1246,13 +1253,13 @@ def layer_add_with_group(request, layergroup_id):
                 logger.exception(msg)
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
-        groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
+        groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
     else:
         form = LayerForm()
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
-        groups = utils.get_all_user_groups_checked_by_layer(None, get_primary_user_usergroup(request.user))
+        groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
         is_public = False
 
     datastore_types = {}
@@ -1321,12 +1328,12 @@ def layer_update(request, layer_id):
         if 'vector_tile' in request.POST:
             vector_tile = True
 
-        assigned_read_roups = []
+        assigned_read_roles = []
         for key in request.POST:
             if 'read-usergroup-' in key:
-                assigned_read_roups.append(int(key.split('-')[2]))
+                assigned_read_roles.append(key[len('read-usergroup-'):])
 
-        assigned_write_groups = []
+        assigned_write_roles = []
         if layer.type == 'v_PostGIS':
             i, params = layer.datastore.get_db_connection()
             with i as c:
@@ -1336,7 +1343,7 @@ def layer_update(request, layer_id):
         if not is_view:
             for key in request.POST:
                 if 'write-usergroup-' in key:
-                    assigned_write_groups.append(int(key.split('-')[2]))
+                    assigned_write_roles.append(key[len('write-usergroup-'):])
 
         is_public = (request.POST.get('resource-is-public') is not None)
 
@@ -1460,7 +1467,7 @@ def layer_update(request, layer_id):
                 gs.createOrUpdateGeoserverLayerGroup(old_layer_group)
                 gs.createOrUpdateGeoserverLayerGroup(new_layer_group)
 
-            utils.set_layer_permissions(layer, is_public, assigned_read_roups, assigned_write_groups)
+            utils.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles)
             gs.reload_nodes()
         
         if redirect_to_layergroup:
@@ -1512,7 +1519,7 @@ def layer_update(request, layer_id):
             html = False
         
         _, layer_image_url = utils.get_layer_img(layer.id, None)
-        groups = utils.get_all_user_groups_checked_by_layer(layer)
+        groups = utils.get_all_user_roles_checked_by_layer(layer)
         return render(request, 'layer_update.html', {
             'html': html, 'layer': layer,
             'workspace': workspace,
@@ -2359,16 +2366,16 @@ def layer_create_with_group(request, layergroup_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
-            
-        assigned_read_roups = []
+        
+        assigned_read_roles = []
         for key in request.POST:
             if 'read-usergroup-' in key:
-                assigned_read_roups.append(int(key.split('-')[2]))
+                assigned_read_roles.append(key[len('read-usergroup-'):])
 
-        assigned_write_groups = []
+        assigned_write_roles = []
         for key in request.POST:
             if 'write-usergroup-' in key:
-                assigned_write_groups.append(int(key.split('-')[2]))
+                assigned_write_roles.append(key[len('write-usergroup-'):])
 
         is_public = (request.POST.get('resource-is-public') is not None)
 
@@ -2487,7 +2494,7 @@ def layer_create_with_group(request, layergroup_id):
                     featuretype = {
                         'max_features': maxFeatures
                     }
-                    utils.set_layer_permissions(newRecord, is_public, assigned_read_roups, assigned_write_groups)
+                    utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles)
                     do_config_layer(server, newRecord, featuretype)
                     if redirect_to_layergroup:
                         layergroup_id = newRecord.layer_group.id
@@ -2504,7 +2511,7 @@ def layer_create_with_group(request, layergroup_id):
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
 
-            groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
+            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
             data = {
                 'form': form,
                 'message': msg,
@@ -2520,7 +2527,7 @@ def layer_create_with_group(request, layergroup_id):
             if 'gvsigol_plugin_form' in INSTALLED_APPS:
                 from gvsigol_plugin_form.models import Form
                 forms = Form.objects.all()
-            groups = utils.get_checked_usergroups_from_user_input(assigned_read_roups, assigned_write_groups)
+            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
             data = {
                 'form': form,
                 'forms': forms,
@@ -2539,7 +2546,7 @@ def layer_create_with_group(request, layergroup_id):
         if 'gvsigol_plugin_form' in INSTALLED_APPS:
             from gvsigol_plugin_form.models import Form
             forms = Form.objects.all()
-        groups = utils.get_all_user_groups_checked_by_layer(None, get_primary_user_usergroup(request.user))
+        groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
         data = {
             'form': form,
             'forms': forms,
@@ -3051,7 +3058,7 @@ def get_unique_values(request):
 
         workspace = Workspace.objects.get(name__exact=layer_ws)
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace.name)
-        if not utils.can_read_layer(request.user, layer):
+        if not utils.can_read_layer(request, layer):
             return HttpResponseForbidden(json.dumps({'values': []}), content_type='application/json')
         connection = ast.literal_eval(layer.datastore.connection_params)
 
@@ -3084,7 +3091,7 @@ def get_datatable_data(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-        if not utils.can_read_layer(request.user, layer):
+        if not utils.can_read_layer(request, layer):
             response = {
                 'draw': 0,
                 'recordsTotal': 0,
@@ -3261,7 +3268,7 @@ def get_feature_wfs(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-        if not utils.can_read_layer(request.user, layer):
+        if not utils.can_read_layer(request, layer):
             return HttpResponseForbidden('{"data": []}', content_type='application/json')
         wfs_url = request.POST.get('wfs_url')
         field = request.POST.get('field')
@@ -3339,11 +3346,7 @@ def add_layer_lock(request):
     try:
         ws_name = request.POST['workspace']
         layer_name = request.POST['layer']
-
-        if ":" in layer_name:
-            layer_name = layer_name.split(":")[1]
-        qualified_layer_name = ws_name + ":" + layer_name
-        locks_utils.add_layer_lock(qualified_layer_name, request.user)
+        locks_utils.add_layer_lock(layer_name, request.user, ws_name=ws_name)
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer is locked: {0}</h1>'.format(layer_name))
@@ -3357,7 +3360,7 @@ def remove_layer_lock(request):
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
-        locks_utils.remove_layer_lock(layer, request.user, check_writable=True)
+        locks_utils.remove_layer_lock(layer, request, check_writable=True)
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
@@ -3394,7 +3397,7 @@ def get_feature_resources(request):
         fid = request.POST.get('fid')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
-            if not utils.can_read_layer(request.user, layer):
+            if not utils.can_read_layer(request, layer):
                 return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             resources = []
@@ -3424,7 +3427,7 @@ def get_feature_resources(request):
 def get_resource(request, resource_id):
     try:
         resource = LayerResource.objects.get(id=resource_id)
-        if not utils.can_read_layer(request.user, resource.layer):
+        if not utils.can_read_layer(request, resource.layer):
             return HttpResponseForbidden()
         return sendfile(request, resource.get_abspath(), attachment=False)
     except LayerResource.DoesNotExist:
@@ -3440,7 +3443,7 @@ def upload_resources(request):
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
-        if not utils.can_write_layer(request.user, layer):
+        if not utils.can_write_layer(request, layer):
             return HttpResponseForbidden()
         if 'resource' in request.FILES:
             """
@@ -3487,7 +3490,7 @@ def delete_resource(request):
         version = request.POST.get(settings.VERSION_FIELD, 0)
         try:
             resource = LayerResource.objects.get(id=int(rid))
-            if not utils.can_write_layer(request.user, resource.layer):
+            if not utils.can_write_layer(request, resource.layer):
                 return HttpResponseForbidden()
             check_version = utils.check_feature_version(resource.layer, resource.feature, int(version))
             if check_version == False:
@@ -3532,7 +3535,7 @@ def delete_resources(request):
         version = request.POST.get('feat_version_gvol')
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
-            if not utils.can_write_layer(request.user, layer):
+            if not utils.can_write_layer(request, layer):
                 return HttpResponseForbidden()
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             pathlist = []
@@ -3656,7 +3659,7 @@ def describeFeatureType(request):
         workspace = request.POST.get('workspace')
         try:
             layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            if not utils.can_read_layer(request.user, layer):
+            if not utils.can_read_layer(request, layer):
                 response = {'fields': [], 'error': 'Not authorized'}
                 return HttpResponseForbidden(response, content_type='application/json')
             skip_pks = request.POST.get('skip_pks')
@@ -3753,7 +3756,7 @@ def describeFeatureTypeWithPk(request):
         workspace = request.POST.get('workspace')
         try:
             layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            if not utils.can_read_layer(request.user, layer):
+            if not utils.can_read_layer(request, layer):
                 response = {'fields': [], 'error': 'Not authorized'}
                 return HttpResponseForbidden(response, content_type='application/json')
 
