@@ -337,10 +337,10 @@ def delete_role(role):
     if isinstance(role, str):
         role_instance = Role.objects.get(name=role)
     else:
-        role_instance = role.objects.get(id=role)
+        role_instance = Role.objects.get(id=role)
     # TODO improve error handling
-    auth_services.get_services().ldap_delete_group(role.name)
-    if not auth_services.get_services().delete_data_directory(role.name):
+    auth_services.get_services().ldap_delete_group(role_instance.name)
+    if not auth_services.get_services().delete_data_directory(role_instance.name):
         return False
     role_instance.delete()
     return True
@@ -534,6 +534,10 @@ def get_users_details(exclude_system=False):
 
 def get_role_details(role):
     try:
-        return Role.objects.get(name=role).values()
-    except Role.DoesNotExist:
+        if isinstance(role, str):
+            roles = Role.objects.filter(name=role)
+        else:
+            roles = Role.objects.filter(id=role)
+            return roles.values()[0]
+    except:
         return None

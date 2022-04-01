@@ -64,10 +64,24 @@ from django.utils.crypto import get_random_string
 from gvsigol_core.forms import CloneProjectForm
 from django.contrib import messages
 from django.shortcuts import redirect
+from gvsigol_auth import signals
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 import logging
 logger = logging.getLogger("gvsigol")
+
+def role_deleted_handler(sender, **kwargs):
+    try:
+        role = kwargs['role']
+        ProjectRole.objects.filter(role=role).delete()
+    except Exception as e:
+        print(e)
+        pass
+
+def connect_signals():
+    signals.role_deleted.connect(role_deleted_handler)
+
+connect_signals()
 
 def not_found_view(request):
     return render(request, '404.html', {}, status=404)
