@@ -233,6 +233,7 @@ class ProjectZone(models.Model):
     extent4326_miny = models.FloatField(null=True,blank=True)
     extent4326_maxx = models.FloatField(null=True,blank=True)
     extent4326_maxy = models.FloatField(null=True,blank=True)
+    pkgassigned = models.CharField(max_length=50, null=True)
 
 
 class ZoneLayers(models.Model):
@@ -246,3 +247,4 @@ class ZoneLayers(models.Model):
     folder_prj = models.CharField(max_length=1024)
     running = models.BooleanField(default=False)
     bboxes = models.TextField(null=True, blank=True)
+    pkgassigned = models.CharField(max_length=50, null=True)
