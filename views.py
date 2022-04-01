@@ -48,8 +48,7 @@ from actstream import action
 import logging
 from gvsigol_core.utils import get_absolute_url
 logger = logging.getLogger('gvsigol')
-from gvsigol_auth import auth_backend
-
+from gvsigol_auth import auth_backend, signals
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_REDIRECT_URL, AUTH_WITH_REMOTE_USER
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -579,7 +578,8 @@ def group_add(request):
                 if _valid_name_regex.search(form.data['name']) == None:
                     message = _("Invalid user group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.data['name'])
                     raise Exception
-                auth_backend.add_group(form.data['name'], desc=form.data['description'])       
+                auth_backend.add_group(form.data['name'], desc=form.data['description'])
+                signals.role_added.send(sender=None, role=form.data.get('name'))
                 return redirect('group_list')
             
             except Exception as e:
@@ -598,7 +598,9 @@ def group_add(request):
 @superuser_required
 def group_delete(request, gid):        
     if request.method == 'POST':
+        role = auth_backend.get_role_details(gid) # FIXME OIDC CMI: debería hacer se de alguna forma más limpia
         auth_backend.delete_group(gid)
+        signals.role_deleted.send(sender=None, role=role.get('name'))
         response = {
             'deleted': True
         }     
