@@ -44,11 +44,12 @@ import gdaltools
 from spatialiteintrospect import introspect as sq_introspect
 
 from gvsigol import settings
+from gvsigol_auth import auth_backend
 from gvsigol_core import geom
 from gvsigol_services import utils
 from gvsigol_services import geographic_servers
 from gvsigol_services import backend_postgis as pg_introspect
-from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock, \
+from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerLock, \
     LayerResource
 from gvsigol_services.locks_utils import *
 
@@ -68,22 +69,9 @@ logger = logging.getLogger(__name__)
 
 @require_safe
 def get_layerinfo(request):
-    """
-    For the moment return only writable layers, until we manage read-only layers
-    in Geopaparazzi
-    
-    universallyReadableLayers = Layer.objects.exclude(layerreadgroup__layer__isnull=False)
     if not isinstance(request.user, AnonymousUser) :
-        user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True)
-        readOnlyLayers = Layer.objects.filter(layerreadgroup__group__usergroupuser__user=user).exclude(layerwritegroup__group__usergroupuser__user=user)
-        layerJson = layersToJson(universallyReadableLayers, readOnlyLayers, readWriteLayers)
-    else:
-        layerJson = layersToJson(universallyReadableLayers)
-    """
-    if not isinstance(request.user, AnonymousUser) :
-        user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True)
+        roles = auth_backend.get_roles(request)
+        readWriteLayers = Layer.objects.filter(layerwriterole__role__in=roles, layerlock__isnull=True)
         layerJson = layersToJson([], [], readWriteLayers)
     else:
         layerJson = layersToJson([], [], [])
@@ -92,22 +80,9 @@ def get_layerinfo(request):
 
 @require_GET
 def get_layerinfo_by_project(request, project):
-    """
-    For the moment return only writable layers, until we manage read-only layers
-    in Geopaparazzi
-    
-    universallyReadableLayers = Layer.objects.exclude(layerreadgroup__layer__isnull=False).filter(layer_group__projectlayergroup__project=project)
     if not isinstance(request.user, AnonymousUser) :
-        user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True).filter(layer_group__projectlayergroup__project=project)
-        readOnlyLayers = Layer.objects.filter(layerreadgroup__group__usergroupuser__user=user).filter(layer_group__projectlayergroup__project=project).exclude(layerwritegroup__group__usergroupuser__user=user)
-        layerJson = layersToJson(universallyReadableLayers, readOnlyLayers, readWriteLayers)
-    else:
-        layerJson = layersToJson(universallyReadableLayers)
-    """
-    if not isinstance(request.user, AnonymousUser) :
-        user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True).filter(layer_group__projectlayergroup__project=project)
+        roles = auth_backend.get_roles(request)
+        readWriteLayers = Layer.objects.filter(layerwriterole__role__in=roles, layerlock__isnull=True).filter(layer_group__projectlayergroup__project=project)
         layerJson = layersToJson([], [], readWriteLayers)
     else:
         layerJson = layersToJson([], [], [])
@@ -174,7 +149,7 @@ def sync_download(request):
         bbox = request_params.get("bbox", None)
         for layer in layers:
             #FIXME: maybe we need to specify if we want the layer for reading or writing!!!! Assume we always want to write for the moment
-            lock = add_layer_lock(layer, request.user, lock_type=LayerLock.SYNC_LOCK)
+            lock = add_layer_lock(layer, request, lock_type=LayerLock.SYNC_LOCK)
             locks.append(lock)
             conn = _get_layer_conn(lock.layer)
             if not conn:
@@ -215,7 +190,7 @@ def sync_download(request):
 
     except Exception as exc:
         for layer in locks:
-            remove_layer_lock(lock.layer, request.user)
+            remove_layer_lock(lock.layer, request)
         logger.exception("sync_download error")
         return HttpResponseBadRequest("Bad request")
 
@@ -258,7 +233,10 @@ def sync_upload(request, release_locks=True):
                 locks = []
                 for t in tables:
                     # first check all the layers are properly locked and writable
-                    lock = get_layer_lock(t, request.user, check_writable=True, lock_type=LayerLock.SYNC_LOCK)
+                    layer_parts = t.split(":")
+                    if len(layer_parts) == 2:
+                        ws_name, layer_name = layer_parts
+                    lock = get_layer_lock(ws_name, layer_name, request, check_writable=True, lock_type=LayerLock.SYNC_LOCK)
                     locks.append(lock)
                 for lock in locks:
                     ogr = gdaltools.ogr2ogr()
