@@ -148,7 +148,7 @@ def input_Shp(dicc):
     _ogr.set_input(shp, srs=srs)
     _conn = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=schema, user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
     _ogr.set_output(_conn, table_name=table_name)
-    _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE, data_source_mode=_ogr.MODE_DS_UPDATE)
+    _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
 
     _ogr.layer_creation_options = {
         "LAUNDER": "YES",
@@ -2188,4 +2188,63 @@ def move(name, dicc):
                 shutil.move (source+'//'+file, target+'//'+file)
             else:
                 os.remove(source+'//'+file)
+
+def input_Kml(dicc):
+
+    table_name = dicc['id'].replace('-','_')
+
+    file = dicc['kml-kmz-file'][7:]
+
+    if file.endswith('.kmz'):
+        kmz_file = file
+        path_list = kmz_file.split('/')[:-1]
+        filename = kmz_file.split('/')[-1].split('.')[0]
+
+        kml_file = '//'+os.path.join(*path_list, filename, 'doc.kml')
+
+    elif file.endswith('.kml'):
+        kml_file = file
+  
+    dataSource = DataSource(kml_file)
+            
+    layer = dataSource[0]
+
+    epsg = str(dicc['epsg'])
+    
+    if epsg == '':
+        try:
+            epsg = layer.srs['AUTHORITY', 1]
+        except:
+            pass
+    
+    srs = "EPSG:"+str(epsg)
+    schema = settings.GEOETL_DB['schema']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    encoding = dicc['encode']
+    
+    _ogr = gdaltools.ogr2ogr()
+    _ogr.set_encoding(encoding)
+    _ogr.set_input(kml_file, srs=srs)
+    _conn = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=schema, user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+    _ogr.set_output(_conn, table_name=table_name)
+    _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
+
+    _ogr.layer_creation_options = {
+        "LAUNDER": "YES",
+        "precision": "NO"
+    }
+    _ogr.config_options = {
+        "OGR_TRUNCATE": "NO"
+    }
+    _ogr.set_dim("2")
+    _ogr.execute()
+    
+    return [table_name]
 
