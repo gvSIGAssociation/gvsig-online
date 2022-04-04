@@ -192,7 +192,7 @@ def add_user(username,
         superuser=False,
         staff=False):
     # TODO: error handling
-    auth_services.get_services().ldap_add_user(username, password, superuser)
+    auth_services.get_services().ldap_add_user(username, first_name, password, superuser)
     User = get_user_model()
     user = User(
         username = username,
@@ -204,7 +204,7 @@ def add_user(username,
     )
     user.set_password(password)
     user.save()
-    return User          
+    return user          
 
 def _get_user(user):
     """
