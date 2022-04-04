@@ -364,11 +364,10 @@ def user_add(request):
                         form.data['username'].lower(),
                         form.data['password1'],
                         form.data['email'].lower(),
-                        ''.join(form.data['first_name'],
-                        ''.join(form.data['last_name']),
+                        form.data['first_name'],
+                        form.data['last_name'],
                         superuser=is_superuser,
                         staff=is_staff
-                        )
                     )
                     user_created = True
 
