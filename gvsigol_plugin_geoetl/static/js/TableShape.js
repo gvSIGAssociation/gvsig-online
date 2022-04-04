@@ -106,6 +106,8 @@ function getPathFile(fileType, ID){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'shp' && url.endsWith('.shp')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        } else if(fileType == 'kml-kmz' && (url.endsWith('.kml') || url.endsWith('.kmz'))){
+            $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'json' && url.endsWith('.json') && ID == '0'){
             $("#etl_json_upload").val("file://" + fm_directory + url)
         } else if(fileType.endsWith('/')){
@@ -2514,6 +2516,250 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
          return this;
      }
+
+});
+
+//// INPUT KMZ/KML ////
+
+input_Kml = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "input_Kml",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"KML/KMZ",
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+       
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-input-kml-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+gettext('KML/KMZ Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div class="column20">'+
+                                '<label for ="shp-file" class="col-form-label">'+gettext('Choose file:')+'</label><br>'+
+                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a><br>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                '<input type="text" id="kml-kmz-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+
+                            '<div class="column20">'+
+                                '<label class="col-form-label">Encoding:</label>'+
+                                '<select id="encode-'+ID+'" class="form-control">'+ 
+                                    '<option value="LATIN1">LATIN1</option>'+
+                                    '<option value="UTF-8">UTF-8</option>'+
+                                    '<option value="ISO-8859-15">ISO-8859-15</option>'+
+                                    '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<label class="col-form-label">EPSG:</label>'+
+                                '<select id="epsg-'+ID+'" class="form-control">'+ 
+                                    '<option value="">'+gettext('Insert if needed')+'</option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<br><br><br><br><br><br>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-kml-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        for(i=0;i<srs.length;i++){
+
+            epsg = srs[i].code.split(":")[1]
+
+            $('#epsg-'+ID).append(
+                '<option value="'+epsg+'">'+srs[i].code+' - '+srs[i].title+'</option>'
+            );
+        }
+
+        getPathFile('kml-kmz', ID)
+
+        var context = this
+
+        icon.on("click", function(){
+
+            $('#dialog-input-kml-'+ID).modal('show')
+        })
+
+        $('#input-kml-accept-'+ID).click(function() {
+
+            var paramsKml = {"id": ID,
+            "parameters": [
+            { "kml-kmz-file": $('#kml-kmz-file-'+ID).val(),
+              "encode": $('#encode-'+ID).val(),
+              "epsg": $('#epsg-'+ID).val()}
+            ]}
+
+            var formDataSchemaKML = new FormData();
+            formDataSchemaKML.append('file', $('#kml-kmz-file-'+ID).val())
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_kml/',
+                data: formDataSchemaKML,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsKml['schema'] = data
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    }
+                })
+    
+            isAlreadyInCanvas(jsonParams, paramsKml, ID)
+
+            icon.setColor('#01b0a0')
+            
+            $('#dialog-input-kml-'+ID).modal('hide')
+        })
+
+
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+	   	 var label =new draw2d.shape.basic.Label({
+	   	     text:gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#009688",
+             resizeable:true
+	   	 });
+
+	     var output= label.createPort("output");
+	     
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     }
+	     else{
+	         this.add(label);
+	     }
+         
+         listLabel.push([this.id, [], [output.name]])
+         
+         return label;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
 
 });
 
@@ -6059,6 +6305,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
         context = this
 
         icon.on("click", function(){
+
             setTimeout(function(){
                 try{
                     schemas = getOwnSchemas(context.canvas, ID)
@@ -6085,68 +6332,69 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             },100);
 
             $('#dialog-filter-'+ID).modal('show')
-
-            input = $("#filter-expression-"+ID)
-
-            $( "#add-"+ID ).click(function() {
-    
-                if($("#option-"+ID).val() == 'starts-with'){
-                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '"+$("#value-"+ID).val()+"%' " )
-    
-                }else if($("#option-"+ID).val() == 'ends-with'){
-                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"' " )
-    
-                }else if($("#option-"+ID).val() == 'contains'){
-                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"%' " )
-                    
-                }else if($("#value-"+ID).val() == 'NULL'){
-                    if($("#option-"+ID).val() == '='){
-                        input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS '+$("#value-"+ID).val()+" " )
-                    }else if($("#option-"+ID).val() == '!='){
-                        input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS NOT '+$("#value-"+ID).val()+" " )
-                    }else {
-                        input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " "+$("#value-"+ID).val()+" " )
-                    }
-                }else {
-                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " '"+$("#value-"+ID).val()+"' " )
-    
-                }
-    
-            });
-
-            $( "#and-"+ID ).click(function() {
-                input.val(input.val()+'AND ') 
-    
-            });
-    
-            $( "#or-"+ID ).click(function() {
-                input.val(input.val()+'OR ') 
-    
-            });
-
-            $('#filter-accept-'+ID).click(function() {
-
-                var paramsFilter = {"id": ID,
-                "parameters": [
-                {"attr": $('#attr-'+ID).val(),
-                "option": $('#option-'+ID).val(),
-                "value": $('#value-'+ID).val(),
-                "filter-expression": input.val()}
-                ]}
-                
-                paramsFilter['schema-old'] = schemaEdge
-                paramsFilter['schema'] = schema
-
-                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-
-                isAlreadyInCanvas(jsonParams, paramsFilter, ID)
-
-                icon.setColor('#4682B4')
-                
-                $('#dialog-filter-'+ID).modal('hide')
-
-            })
         })
+
+        var input = $("#filter-expression-"+ID)
+
+        $( "#add-"+ID ).click(function() {
+
+            if($("#option-"+ID).val() == 'starts-with'){
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '"+$("#value-"+ID).val()+"%' " )
+
+            }else if($("#option-"+ID).val() == 'ends-with'){
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"' " )
+
+            }else if($("#option-"+ID).val() == 'contains'){
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + "LIKE '%"+$("#value-"+ID).val()+"%' " )
+                
+            }else if($("#value-"+ID).val() == 'NULL'){
+                if($("#option-"+ID).val() == '='){
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS '+$("#value-"+ID).val()+" " )
+                }else if($("#option-"+ID).val() == '!='){
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" IS NOT '+$("#value-"+ID).val()+" " )
+                }else {
+                    input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " "+$("#value-"+ID).val()+" " )
+                }
+            }else {
+                input.val(input.val() + '"'+$("#attr-"+ID).val()+'" ' + $("#option-"+ID).val() + " '"+$("#value-"+ID).val()+"' " )
+
+            }
+
+        });
+
+        $( "#and-"+ID ).click(function() {
+            input.val(input.val()+'AND ') 
+
+        });
+
+        $( "#or-"+ID ).click(function() {
+            input.val(input.val()+'OR ') 
+
+        });
+
+        $('#filter-accept-'+ID).click(function() {
+
+            var paramsFilter = {"id": ID,
+            "parameters": [
+            {"attr": $('#attr-'+ID).val(),
+            "option": $('#option-'+ID).val(),
+            "value": $('#value-'+ID).val(),
+            "filter-expression": input.val()}
+            ]}
+            
+            paramsFilter['schema-old'] = schemaEdge
+            paramsFilter['schema'] = schema
+
+            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+
+            isAlreadyInCanvas(jsonParams, paramsFilter, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-filter-'+ID).modal('hide')
+
+        })
+
     },
      
     /**

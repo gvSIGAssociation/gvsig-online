@@ -10,6 +10,8 @@ import re
 #from datetime import date
 from django.contrib.gis.gdal import DataSource
 import os
+import shutil
+from zipfile import ZipFile
 
 def get_sheets_excel(excel, r):
     import warnings
@@ -52,7 +54,36 @@ def get_schema_excel(dicc):
         column_array.append('_filename')
         return column_array
 
+def get_schema_kml(file):
 
+    print(file)
+
+    if file.endswith('.kmz'):
+        kmz_file = file[7:]
+        path_list = kmz_file.split('/')[:-1]
+        filename = kmz_file.split('/')[-1].split('.')[0]
+
+        kmz_zip = '//'+os.path.join(*path_list, filename+'.zip')
+
+        shutil.copy(kmz_file, kmz_zip)
+
+        with ZipFile(kmz_zip) as zf:
+            zf.extractall('//'+os.path.join(*path_list, filename))
+
+        kml_file = '//'+os.path.join(*path_list, filename, 'doc.kml')
+
+    elif file.endswith('.kml'):
+        kml_file = file[7:]
+        
+    dataSource = DataSource(kml_file)
+            
+    layer = dataSource[0]
+
+    schema = [x.lower() for x in layer.fields]
+
+    print(schema)
+
+    return schema
 
 def get_schema_shape(file):
 

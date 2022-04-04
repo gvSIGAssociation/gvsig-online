@@ -769,3 +769,18 @@ def etl_workspace_upload(request):
 
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+
+@login_required()
+@staff_required
+def etl_schema_kml(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            f = request.POST['file']
+
+            print('---------------------->',f)
+
+            listSchema = etl_schema.get_schema_kml(f)
+            response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")
