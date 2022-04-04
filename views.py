@@ -3363,7 +3363,7 @@ def add_layer_lock(request):
     try:
         ws_name = request.POST['workspace']
         layer_name = request.POST['layer']
-        locks_utils.add_layer_lock(layer_name, request.user, ws_name=ws_name)
+        locks_utils.add_layer_lock(layer_name, request, ws_name=ws_name)
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer is locked: {0}</h1>'.format(layer_name))
