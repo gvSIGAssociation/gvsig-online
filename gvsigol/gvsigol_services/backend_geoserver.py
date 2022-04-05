@@ -1885,7 +1885,7 @@ class Geoserver():
     
     def setWfsTransactionRules(self):
         write_roles = LayerWriteRole.objects.all().values_list('role', flat=True).distinct()
-        transaction_roles = [ "ROLE_"+ role for role in write_roles ]
+        transaction_roles = [ "ROLE_"+ role.upper() for role in write_roles ]
         if  len(transaction_roles) > 0:
             services_url = self.rest_catalog.get_service_url() + "/security/acl/services.json"
             service = {}
