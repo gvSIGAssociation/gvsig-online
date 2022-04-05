@@ -50,8 +50,8 @@ from gvsigol_auth import auth_backend
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
     role_list = auth_backend.get_all_roles_details()
     if layer:
-        read_roles = LayerReadRole.objects.filter(layer=layer)
-        write_roles = LayerWriteRole.objects.filter(layer=layer)
+        read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
+        write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True)
     else:
         read_roles = []
         write_roles = []
@@ -777,11 +777,11 @@ def get_checked_roles_from_user_input(layer_read_roles, layer_write_roles, creat
         # FIXME OIDC CMI: ROLE_ prefix?
         if role['name'] not in admin_roles:
             for layer_read_role in layer_read_roles:
-                if layer_read_role.role == role['name']:
+                if layer_read_role == role['name']:
                     role['read_checked'] = True
 
             for layer_write_role in layer_write_roles:
-                if layer_write_role.role == role['name']:
+                if layer_write_role == role['name']:
                     role['write_checked'] = True
             if creator_user_role is not None and role['name'] == creator_user_role:
                 role['read_checked'] = True
