@@ -289,37 +289,7 @@ def get_connection(host, port, database, user, password):
         print("Failed to connect!", e)
         return []
 
-    return conn;
-
-def get_distinct_query(host, port, schema, database, user, password, layer, field, where=None):
-    values = []
-    conn = get_connection(host, port, database, user, password)
-    cursor = conn.cursor()
-
-    where_query = ''
-    if where:
-        where_query = " " + str(where) + " "
-
-    try:
-        sql = 'SELECT DISTINCT("' + field + '") FROM ' + schema + '.' + layer + where_query + ' ORDER BY "' + field + '" ASC;'
-
-        cursor.execute(sql);
-        rows = cursor.fetchall()
-        for row in rows:
-            if row[0] is not None:
-                val = row[0]
-                if isinstance(val, str):
-                    values.append(val)
-                else:
-                    val = str(val)
-                    values.append(val)
-
-    except Exception as e:
-        print("Query error!", e)
-        return []
-
-    close_connection(cursor, conn)
-    return values
+    return conn
 
 def get_minmax_query(host, port, schema, database, user, password, layer, field):
     conn = get_connection(host, port, database, user, password)

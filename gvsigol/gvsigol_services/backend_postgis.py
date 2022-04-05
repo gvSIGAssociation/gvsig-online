@@ -1437,7 +1437,36 @@ class Introspect:
             new_type=sqlbuilder.Identifier(new_type))
         self.cursor.execute(query,  [])
     """
-        
+
+    def get_unique_values(self, schema, table_name, column_name, where=None):
+        values = []
+
+        if not where:
+            where = sqlbuilder.SQL("")
+
+        try:
+            query = sqlbuilder.SQL("SELECT DISTINCT({column_name}) FROM {schema}.{table} {where} ORDER BY {column_name} ASC)").format(
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table_name),
+                column_name=sqlbuilder.Identifier(column_name),
+                where=where
+            )
+            self.cursor.execute(query,  [])
+            rows = self.cursor.fetchall()
+            for row in rows:
+                if row[0] is not None:
+                    val = row[0]
+                    if isinstance(val, str):
+                        values.append(val)
+                    else:
+                        val = str(val)
+                        values.append(val)
+
+        except Exception as e:
+            print("Query error!", e)
+            return []
+        return values
+
     def close(self):
         """
         Closes the connection. The Introspect object can't be used afterwards
