@@ -102,7 +102,7 @@ from . import tasks
 import time
 from django.core import serializers as serial
 from django.core.exceptions import PermissionDenied
-from gvsigol_auth import signals
+from gvsigol_auth.signals import role_deleted
 
 logger = logging.getLogger("gvsigol")
 
@@ -123,7 +123,7 @@ def role_deleted_handler(sender, **kwargs):
         pass
 
 def connect_signals():
-    signals.role_deleted.connect(role_deleted_handler)
+    role_deleted.connect(role_deleted_handler)
 
 connect_signals()
 
