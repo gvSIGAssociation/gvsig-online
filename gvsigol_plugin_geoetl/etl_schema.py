@@ -56,8 +56,6 @@ def get_schema_excel(dicc):
 
 def get_schema_kml(file):
 
-    print(file)
-
     if file.endswith('.kmz'):
         kmz_file = file[7:]
         path_list = kmz_file.split('/')[:-1]
