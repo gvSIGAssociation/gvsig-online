@@ -2,8 +2,8 @@
  * Skin: alzira
  * ---------
  */
-.skin-alzira .main-header .navbar {
-  background-color: #8a3410;
+ .skin-alzira .main-header .navbar {
+  background-color: #A02739;
 }
 .skin-alzira .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -29,7 +29,7 @@
   color: #fff;
 }
 .skin-alzira .main-header .navbar .sidebar-toggle:hover {
-  background-color: #8a3410;
+  background-color: #A02739;
 }
 @media (max-width: 767px) {
   .skin-alzira .main-header .navbar .dropdown-menu li.divider {
@@ -39,19 +39,19 @@
     color: #fff;
   }
   .skin-alzira .main-header .navbar .dropdown-menu li a:hover {
-    background: #8a3410;
+    background: #A02739;
   }
 }
 .skin-alzira .main-header .logo {
-  background-color: #8a3410;
+  background-color: #A02739;
   color: #ffffff;
   border-bottom: 0 solid transparent;
 }
 .skin-alzira .main-header .logo:hover {
-  background-color: #d33724;
+  background-color: #A02739;
 }
 .skin-alzira .main-header li.user-header {
-  background-color: #8a3410;
+  background-color: #A02739;
 }
 .skin-alzira .content-header {
   background: transparent;
@@ -76,7 +76,7 @@
 .skin-alzira .sidebar-menu > li.active > a {
   color: #ffffff;
   background: #1e282c;
-  border-left-color: #8a3410;
+  border-left-color: #A02739;
 }
 .skin-alzira .sidebar-menu > li > .treeview-menu {
   margin: 0 1px;
