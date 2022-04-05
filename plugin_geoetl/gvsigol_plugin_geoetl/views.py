@@ -778,8 +778,6 @@ def etl_schema_kml(request):
         if form.is_valid():
             f = request.POST['file']
 
-            print('---------------------->',f)
-
             listSchema = etl_schema.get_schema_kml(f)
             response = json.dumps(listSchema)
 

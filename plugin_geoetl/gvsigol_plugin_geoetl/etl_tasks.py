@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sre_constants import SRE_INFO_CHARSET
+#from sre_constants import SRE_INFO_CHARSET
 from gvsigol import settings
 
 import pandas as pd
@@ -21,6 +21,7 @@ from datetime import date, datetime
 from sqlalchemy import create_engine
 from django.contrib.gis.gdal import DataSource
 import re
+from zipfile import ZipFile
 
 
 # Python class to print topological sorting of a DAG 
@@ -828,6 +829,8 @@ def trans_Calculator(dicc):
 
     return [table_name_target]
 
+counter_cadastral_petitions = 0
+
 def trans_CadastralGeom(dicc):
     from gvsigol_plugin_catastro.views import get_rc_polygon
     
@@ -835,6 +838,8 @@ def trans_CadastralGeom(dicc):
 
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
+
+    global counter_cadastral_petitions
 
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
@@ -855,39 +860,52 @@ def trans_CadastralGeom(dicc):
     cur.execute(sqlSel)
     
     for row in cur:
-        cur2 = conn.cursor()
-        features = get_rc_polygon(row[0].replace(' ', ''))
-        
-        i ={}
-        coordinates =[]
-        
-        for feature in features:
-            edgeCoord = []
-            
-            coords = feature['coords'].split(" ")
-            srs = feature['srs'].split(":")[1]
-            
-            pairCoord = []
-            for j in range (0, len(coords)):
-                pairCoord.insert(0, float(coords[j]))
+        print(counter_cadastral_petitions)
+
+        if counter_cadastral_petitions < 3500:
+            try:
+                cur2 = conn.cursor()
                 
-                if j != 0 and j % 2!=0:
+                features = get_rc_polygon(row[0].replace(' ', ''))
+                counter_cadastral_petitions += 1
+                
+                i ={}
+                coordinates =[]
+                
+                for feature in features:
+                    edgeCoord = []
                     
-                    edgeCoord.append(pairCoord)
-                    pairCoord =[]
-        
-            coordinates.append(edgeCoord)
+                    coords = feature['coords'].split(" ")
+                    srs = feature['srs'].split(":")[1]
+                    
+                    pairCoord = []
+                    for j in range (0, len(coords)):
+                        pairCoord.insert(0, float(coords[j]))
+                        
+                        if j != 0 and j % 2!=0:
+                            
+                            edgeCoord.append(pairCoord)
+                            pairCoord =[]
+                
+                    coordinates.append(edgeCoord)
 
+                if len(coordinates) >= 1:
 
-        if len(coordinates) >= 1:
+                    i['geometry'] = {"type": 'MultiPolygon',
+                                    'coordinates': [coordinates]
+                                    }
+            
+                    sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON(' +"'"+ str(json.dumps(i["geometry"])) +"'), "+ srs +') WHERE "_id_temp" = ' + str(row[1])
+                    cur2.execute(sqlInsert)
+                    conn.commit()
+            except Exception as e:
+                print(str(e))
 
-            i['geometry'] = {"type": 'MultiPolygon',
-                            'coordinates': [coordinates]
-                            }
-     
-            sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON(' +"'"+ str(json.dumps(i["geometry"])) +"'), "+ srs +') WHERE "_id_temp" = ' + str(row[1])
-            cur2.execute(sqlInsert)
-            conn.commit()
+        else:
+            print("Take a coffee. The maximum number of requests to cadastre has been reached. The process will continue in an hour.")
+            time.sleep(3600)
+            counter_cadastral_petitions = 0
+
             
     
     sqlDropCol = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN _id_temp;'
@@ -2199,6 +2217,13 @@ def input_Kml(dicc):
         kmz_file = file
         path_list = kmz_file.split('/')[:-1]
         filename = kmz_file.split('/')[-1].split('.')[0]
+
+        kmz_zip = '//'+os.path.join(*path_list, filename+'.zip')
+
+        shutil.copy(kmz_file, kmz_zip)
+
+        with ZipFile(kmz_zip) as zf:
+            zf.extractall('//'+os.path.join(*path_list, filename))
 
         kml_file = '//'+os.path.join(*path_list, filename, 'doc.kml')
 
