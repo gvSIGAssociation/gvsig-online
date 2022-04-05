@@ -456,19 +456,10 @@ def get_unique_values(request):
         field = request.POST.get('field')
         
         layer = Layer.objects.get(id=layer_id)
-        connection = ast.literal_eval(layer.datastore.connection_params)
-        
-        host = connection.get('host')
-        port = connection.get('port')
-        schema = connection.get('schema')
-        database = connection.get('database')
-        user = connection.get('user')
-        password = connection.get('passwd')
-        
-        unique_fields = service_utils.get_distinct_query(host, port, schema, database, user, password, layer.name, field)
-    
-        return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
-
+        i, source_name, schema = layer.get_db_connection()
+        with i as c:
+            unique_fields = c.get_unique_values(schema, source_name, field)
+            return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
 
 @login_required()
 @staff_required
