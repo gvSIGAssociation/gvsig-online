@@ -656,7 +656,7 @@ def get_setting(key, default=None):
 
 def get_user_projects(request):
     roles = auth_backend.get_roles(request)
-    projects = Project.objects.filter(projectrole_set__role__in=roles) \
+    projects = Project.objects.filter(projectrole__role__in=roles) \
             | Project.objects.filter(is_public=True)
     if request.user:
         projects = projects \
