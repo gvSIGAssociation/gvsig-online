@@ -195,6 +195,28 @@ def add_user(username,
         last_name,
         superuser=False,
         staff=False):
+    """
+    Adds a user
+
+    Parameters
+    ----------
+    username: str
+        User name
+    password: str
+        Password
+    first_name: str
+        First name
+    last_name: str
+        Last name
+    [superuser]: boolean
+        Whether the user is superuser (default: False)
+    [staff]: boolean
+        Whether the user is staff (default: False)
+    Returns
+    -------
+        User
+        A Django User instance
+    """
     # TODO: error handling
     auth_services.get_services().ldap_add_user(username, first_name, password, superuser)
     User = get_user_model()
@@ -208,7 +230,7 @@ def add_user(username,
     )
     user.set_password(password)
     user.save()
-    return user          
+    return user
 
 def _get_user(user):
     """
@@ -537,11 +559,27 @@ def get_users_details(exclude_system=False):
     return users
 
 def get_role_details(role):
+    """
+    Gets a dictionary of role details (id, name and description).
+    Note that id can be an integer or a string
+    depending on the backend in use.
+
+    Parameters
+    ----------
+    role: str | int
+        A role name | A role id
+
+    Returns
+    -------
+    dict()
+        A dictionary containing the role details. Example:
+        {"id": 1, "name": "role_name1", "description": "bla bla bla"}
+    """
     try:
         if isinstance(role, str):
             roles = Role.objects.filter(name=role)
         else:
             roles = Role.objects.filter(id=role)
-            return roles.values()[0]
+        return roles.values()[0]
     except:
         return None

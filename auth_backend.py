@@ -146,19 +146,267 @@ list[dict()]
 """
 
 add_user  = auth_backend.add_user
+"""
+Adds a user
+
+Parameters
+----------
+username: str
+    User name
+password: str
+    Password
+first_name: str
+    First name
+last_name: str
+    Last name
+[superuser]: boolean
+    Whether the user is superuser (default: False)
+[staff]: boolean
+    Whether the user is staff (default: False)
+Returns
+-------
+    User
+    A Django User instance
+"""
+
 delete_user  = auth_backend.delete_user
+"""
+Deletes a user
+
+Parameters
+----------
+user: str|integer|User
+    User name|User id|Django User object
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 add_group  = auth_backend.add_group
+"""
+Adds a group
+
+Parameters
+----------
+group_name: str
+    Group name
+[desc]: str
+    Group description
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 delete_group  = auth_backend.delete_group
+"""
+Deletes a group
+
+Parameters
+----------
+group: str|integer
+    Group name|Group id
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 add_role  = auth_backend.add_role
+"""
+Adds a role
+
+Parameters
+----------
+role_name: str
+    Role name
+[desc]: str
+    Role description
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 delete_role  = auth_backend.delete_role
+"""
+Deletes a role
+
+Parameters
+----------
+role: str|integer
+    Role name|Role id
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 set_groups  = auth_backend.set_groups
+"""
+Sets the groups of a user, replacing existing groups
+
+Parameters
+----------
+user: str|integer|User
+    User name|User id|Django User object
+roles: [str]
+    List of roles
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 set_roles  = auth_backend.set_roles
+"""
+Sets the roles of a user, replacing existing roles
+
+Parameters
+----------
+user: str|integer|User
+    User name|User id|Django User object
+roles: [str]
+    List of roles
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 add_to_group  = auth_backend.add_to_group
+"""
+Adds a user to a group
+
+Parameters
+----------
+user: str|integer|User
+    User name|User id|Django User object
+group: str
+    Group name
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 remove_from_group  = auth_backend.remove_from_group
+"""
+Remove a user from a group
+
+Parameters
+----------
+user: str|integer|User
+    User name|User id|Django User object
+group: str
+    Group name
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 add_to_role  = auth_backend.add_to_role
+"""
+Adds a role to the list of assigned roles of a user
+
+Parameters
+----------
+user: str|integer|User
+    User name|User id|Django User object
+role: str
+    Role name
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 remove_from_role  = auth_backend.remove_from_role
+"""
+Remove a role from the list of assigned roles of the user
+
+Parameters
+----------
+user: str|integer|User
+    User name|User id|Django User object
+role: str
+    Role name
+
+Returns
+-------
+    boolean
+    True if the operation was successfull, False otherwise
+"""
+
 get_users_details = auth_backend.get_users_details
+"""
+Gets the list of the users and details (id, username, first_name, last_name
+is_superuser, is_staff, email, roles) available in the system.
+
+Parameters
+----------
+exclude_system: boolean (default: False)
+    Exclude system users, as defined by get_system_users()
+
+Returns
+-------
+list[dict()]
+    A list of dictionaries containing the group details. Example:
+    [{
+        "id": 1,
+        "username": "username1",
+        "first_name": "Firstname1",
+        "last_name": "Lastname1",
+        "is_superuser": True,
+        "is_staff": True,
+        "email": "example1@example.com",
+        roles": ["role1", "role2"]},
+    },
+    {
+        "id": 2,
+        "username": "username2",
+        "first_name": "Firstname2",
+        "last_name": "Lastname2",
+        "is_superuser": False,
+        "is_staff": True,
+        "email": "example2@example.com",
+        roles": ["role2", "role3"]},
+    }]
+"""
+
 get_role_details = auth_backend.get_role_details
+"""
+Gets a dictionary of role details (id, name and description).
+Note that id can be an integer or a string
+depending on the backend in use.
+
+Parameters
+----------
+role: str | int
+    A role name | A role id
+
+Returns
+-------
+dict()
+    A dictionary containing the role details. Example:
+    {"id": 1, "name": "role_name1", "description": "bla bla bla"}
+"""
 
 def get_admin_role():
+    """
+    Gets the name of the admin role, that is, a role that is always
+    assigned to superusers.
+    """
     return 'admin'
