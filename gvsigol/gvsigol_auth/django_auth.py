@@ -41,7 +41,9 @@ def has_role(request_or_user, role):
         user = request_or_user.user
     else:
         user = request_or_user
-    return Role.objects.filter(name=role, users=user).exists()
+    if user.is_authenticated:
+        return Role.objects.filter(name=role, users=user).exists()
+    return False
 
 def has_group(request_or_user, group):
     """Checks whether the user has the provided group. Important: provide a
@@ -93,8 +95,10 @@ def get_roles(request_or_user):
         user = request_or_user.user
     else:
         user = request_or_user
-    query =  Role.objects.filter(users=user)
-    return list(query.values_list("name", flat=True))
+    if user.is_authenticated:
+        query =  Role.objects.filter(users=user)
+        return list(query.values_list("name", flat=True))
+    return []
 
 def get_groups(request_or_user):
     """Gets the groups of the user. Important: provide a Django HttpRequest
