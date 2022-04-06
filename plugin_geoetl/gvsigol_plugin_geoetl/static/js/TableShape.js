@@ -2874,7 +2874,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
           });
         
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -3179,7 +3179,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -3455,7 +3455,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -3751,7 +3751,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
 
@@ -4008,7 +4008,7 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
 
@@ -4265,7 +4265,7 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
 
@@ -4478,7 +4478,7 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -4775,7 +4775,7 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -5015,7 +5015,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -5248,7 +5248,14 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="column33">'+
                                 '<label class="col-form-label">'+gettext('Attribute:')+'</label>'+
                                 '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                                '<label class="col-form-label">'+gettext('Math functions:')+'</label>'+
+                                '<label class="col-form-label">'+gettext('Attributes:')+'</label>'+
+                                '<div id ="schema-calculator">'+
+                                    '<ul id ="schema-calculator-'+ID+'" class="nav flex-column">'+
+                                    '</ul>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="column33">'+
+                                '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.1/functions-math.html" target="_blank">'+gettext('Math functions:')+'</a></label>'+
                                 '<div id ="functions-calculator">'+
                                     '<ul id ="functions-'+ID+'" class="nav flex-column">'+
                                         '<li class="nav-item">'+
@@ -5282,17 +5289,40 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                                             '<a class="nav-link active" name="pi()">&#960;</a>'+
                                         '</li>'+
                                     '</ul>'+
-                                '</div><br><br><br><br><br><br><br><br><br><br>'+
-
-                                '<label class="col-form-label">'+gettext('Attributes:')+'</label>'+
-                                '<div id ="schema-calculator">'+
-                                    '<ul id ="schema-calculator-'+ID+'" class="nav flex-column">'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="column33">'+
+                                '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.1/functions-string.html" target="_blank">'+gettext('String functions:')+'</a></label>'+
+                                '<div id ="functions-string">'+
+                                    '<ul id ="functions-'+ID+'" class="nav flex-column">'+
+                                        '<li class="nav-item">'+
+                                            '<a class="nav-link active" name="||">Concatenate string</a>'+
+                                        '</li>'+
+                                        '<li class="nav-item">'+
+                                            '<a class="nav-link active" name="lower()">Lower case</a>'+
+                                        '</li>'+
+                                        '<li class="nav-item">'+
+                                            '<a class="nav-link active" name="upper()">Upper case</a>'+
+                                        '</li>'+
+                                        '<li class="nav-item">'+
+                                            '<a class="nav-link active" name="substring('+"'string'"+' from 2 for 3)">Substring</a>'+
+                                        '</li>'+
+                                        '<li class="nav-item">'+
+                                            '<a class="nav-link active" name="trim(both '+ "'s'  from 'string')"+'">Trim string</a>'+
+                                        '</li>'+
+                                        '<li class="nav-item">'+
+                                            '<a class="nav-link active" name="length()">Lenght string</a>'+
+                                        '</li>'+
+                                        '<li class="nav-item">'+
+                                            '<a class="nav-link active" name="replace('+"'string', 'from', 'to'"+')">Replace</a>'+
+                                        '</li>'+
                                     '</ul>'+
                                 '</div>'+
                             '</div>'+
-                            '<div class="column66">'+
-                                '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.0/functions-math.html" target="_blank">'+gettext('Expression:')+'</a></label>'+
-                                '<textarea id="expression-'+ID+'" rows="20" class="form-control" placeholder="'+gettext('For more math functions check above link.')+'"></textarea>'+
+                            '<br><br><br><br><br><br><br><br><br><br><br><br><br><br>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Expression:')+'</a></label>'+
+                                '<textarea id="expression-'+ID+'" rows="10" class="form-control" placeholder="'+gettext('For more math functions check above link.')+'"></textarea>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -5304,7 +5334,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -5524,6 +5554,254 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// CHANGE ATTRIBUTE TYPE ////
+
+trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_ChangeAttrType",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Change Attr. Type"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-change-attr-type-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext("Change Attribute Type Parameters")+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div class="column50">'+
+                                '<label class="col-form-label">'+gettext('Attribute to change type:')+'</label>'+
+                                '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<div class="column50">'+
+                                '<label class="col-form-label">'+gettext('To data type:')+'</label>'+
+                                '<select class="form-control" id="data-type-'+ID+'">'+
+                                    '<option value="VARCHAR"> Varchar </option>'+
+                                    '<option value="INTEGER"> Integer </option>'+
+                                    '<option value="FLOAT"> Float </option>'+
+                                    '<option value="DATE"> Date </option>'+
+                                '</select>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="change-attr-type-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+        
+      var context = this
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+                schema = schemaEdge
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+                    $('#attr-'+ID).empty()
+    
+                    for (i = 0; i < schema.length; i++){
+                        
+                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                    }
+                }   
+
+            },100);
+
+            $('#dialog-change-attr-type-'+ID).modal('show')
+        })
+        
+        $('#change-attr-type-accept-'+ID).click(function() {
+
+            var paramsCreateAttr = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "data-type": $('#data-type-'+ID).val()}
+            ]}
+            
+            schemaMod =[...schemaEdge]
+           
+            paramsCreateAttr['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-change-attr-type-'+ID).modal('hide')
+
+        })
+
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+         }
+         
+         listLabel.push([this.id,[input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+
+
 //// EXECUTE SQL Postgres///
 
 trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
@@ -5736,7 +6014,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
             })
         })
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -6027,6 +6305,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value="VARCHAR"> Varchar </option>'+
                                     '<option value="INTEGER"> Integer </option>'+
                                     '<option value="FLOAT"> Float </option>'+
+                                    '<option value="DATE"> Date </option>'+
                                 '</select>'+
                             '</div>'+     
                             '<div class="column40">'+
@@ -6043,7 +6322,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -6064,31 +6343,32 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
             
 
             $('#dialog-create-attr-'+ID).modal('show')
-
-            $('#create-attr-accept-'+ID).click(function() {
-
-                var paramsCreateAttr = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    "value": $('#value-'+ID).val(),
-                    "data-type": $('#data-type-'+ID).val()}
-                ]}
-                
-                schemaMod =[...schemaEdge]
-                
-                schemaMod.push($('#attr-'+ID).val())
-               
-                paramsCreateAttr['schema'] = schemaMod
-
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
-
-                icon.setColor('#4682B4')
-                
-                $('#dialog-create-attr-'+ID).modal('hide')
-
-            })
         })
+
+        $('#create-attr-accept-'+ID).click(function() {
+
+            var paramsCreateAttr = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "value": $('#value-'+ID).val(),
+                "data-type": $('#data-type-'+ID).val()}
+            ]}
+            
+            schemaMod =[...schemaEdge]
+            
+            schemaMod.push($('#attr-'+ID).val())
+           
+            paramsCreateAttr['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-create-attr-'+ID).modal('hide')
+
+        })
+
     },
      
     /**
@@ -6302,7 +6582,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        context = this
+      var context = this
 
         icon.on("click", function(){
 
@@ -6597,7 +6877,7 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        context = this
+      var context = this
 
         icon.on("click", function(){
             setTimeout(function(){
@@ -6877,7 +7157,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        context = this
+      var context = this
 
         icon.on("click", function(){
             setTimeout(function(){
@@ -7120,7 +7400,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        context = this
+      var context = this
 
         icon.on("click", function(){
 
@@ -7380,7 +7660,7 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
 
         }
 
-        context = this
+      var context = this
 
         icon.on("click", function(){
 
@@ -7584,7 +7864,7 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -7833,7 +8113,7 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -8130,7 +8410,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -8407,7 +8687,7 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -8675,7 +8955,7 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -8940,7 +9220,7 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
 
         this.add(this.classLabel);
 
-        context = this
+      var context = this
         
         var ID = this.id
 
@@ -9233,7 +9513,7 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -9460,7 +9740,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
 
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             schema = passSchemaWhenInputTask(context.canvas, listLabel, ID)
@@ -9722,7 +10002,7 @@ trans_ExplodeGeom = draw2d.shape.layout.VerticalLayout.extend({
 
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -9942,7 +10222,7 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -10180,7 +10460,7 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
         
-        context = this
+      var context = this
 
         icon.on("click", function(){
             
@@ -10394,7 +10674,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
 
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
-        context = this
+      var context = this
 
         $('#canvas-parent').append('<div id="dialog-output-postgresql-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -10898,7 +11178,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             })
         });
         
-        context = this
+      var context = this
         icon.on("click", function(){
 
             setTimeout(function(){

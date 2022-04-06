@@ -861,9 +861,8 @@ def trans_CadastralGeom(dicc):
     cur.execute(sqlSel)
     
     for row in cur:
-        print(counter_cadastral_petitions)
 
-        if counter_cadastral_petitions < 3500:
+        if counter_cadastral_petitions < 3000:
             try:
                 cur2 = conn.cursor()
                 
@@ -2274,3 +2273,34 @@ def input_Kml(dicc):
     
     return [table_name]
 
+def trans_ChangeAttrType(dicc):
+
+    attr = dicc['attr']
+    data_type = dicc['data-type']
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, "'+attr+'"::'+data_type+' as "'+attr+'_temp" from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlRemov = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN "'+ attr + '"'
+    cur.execute(sqlRemov)
+    conn.commit()
+
+    sqlRename = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" RENAME COLUMN "'+attr+'_temp" TO "'+attr+'"'
+    cur.execute(sqlRename)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
