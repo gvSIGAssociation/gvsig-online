@@ -591,14 +591,13 @@ def group_add(request):
     else:
         form = UserGroupForm()
         return render(request, 'group_add.html', {'form': form})
-         
-        
+  
 @login_required()
 @superuser_required
-def group_delete(request, gid):        
+def group_delete(request, gid):
     if request.method == 'POST':
         role = auth_backend.get_role_details(gid) # FIXME OIDC CMI: debería hacer se de alguna forma más limpia
-        auth_backend.delete_group(gid)
+        auth_backend.delete_role(gid)
         signals.role_deleted.send(sender=None, role=role.get('name'))
         response = {
             'deleted': True
