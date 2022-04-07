@@ -1,3 +1,4 @@
+from rest_framework.request import Request
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from gvsigol_auth.models import Role
@@ -91,7 +92,7 @@ def get_roles(request_or_user):
     """
     if isinstance(request_or_user, str):
         query = Role.objects.filter(users__username=request_or_user)
-    if isinstance(request_or_user, HttpRequest):
+    if isinstance(request_or_user, HttpRequest) or isinstance(request_or_user, Request):
         user = request_or_user.user
     else:
         user = request_or_user
