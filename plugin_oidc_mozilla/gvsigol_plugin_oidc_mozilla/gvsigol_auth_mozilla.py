@@ -180,7 +180,7 @@ class KeycloakAdminSession(OIDCSession):
             for r in response
         ]
 
-def _get_admIn_session():
+def _get_admin_session():
     s = getattr(thread_local_data, 'KC_ADMIN_SESSION', None)
     if s:
         return s
@@ -294,7 +294,7 @@ def get_all_groups():
     list[str]
         The list of groups available on the system
     """
-    return _get_admIn_session().get_all_groups()
+    return _get_admin_session().get_all_groups()
 
 def get_all_groups_details():
     """
@@ -309,7 +309,7 @@ def get_all_groups_details():
         [{"id": 1, "name": "group_name1", "description": "bla bla bla"},
         {"id": 2, "name": "group_name2", "description": "bla bla bla"}]
     """
-    return _get_admIn_session().get_all_groups_details()
+    return _get_admin_session().get_all_groups_details()
 
 def get_all_roles(exclude_system=False):
     """
@@ -325,7 +325,7 @@ def get_all_roles(exclude_system=False):
     list[str]
         The list of roles available on the system
     """
-    return _get_admIn_session().get_all_roles(exclude_system=exclude_system)
+    return _get_admin_session().get_all_roles(exclude_system=exclude_system)
 
 
 def get_all_roles_details(exclude_system=False):
@@ -346,7 +346,7 @@ def get_all_roles_details(exclude_system=False):
         [{"id": 1, "name": "role_name1", "description": "bla bla bla"},
         {"id": 2, "name": "role_name2", "description": "bla bla bla"}]
     """
-    return _get_admIn_session().get_all_roles_details(exclude_system=exclude_system)
+    return _get_admin_session().get_all_roles_details(exclude_system=exclude_system)
 
 def add_user(username,
         password,
