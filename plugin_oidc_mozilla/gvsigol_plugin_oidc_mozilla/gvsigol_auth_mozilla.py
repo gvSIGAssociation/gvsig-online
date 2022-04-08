@@ -3,8 +3,9 @@ import logging
 from urllib.parse import urlencode
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT, OIDC_OP_TOKEN_ENDPOINT
-from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET, KEYCLOAK_ADMIN_BASE_URL
+from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT
+from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET
+from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
@@ -33,7 +34,8 @@ def provider_logout(request):
     return url
 
 
-class KeycloakSession():
+
+class OIDCSession():
     def __init__(self, client_id, client_secret, token_url, refresh_url=None) -> None:
         self.client_id = client_id
         self.client_secret = client_secret
@@ -113,11 +115,76 @@ class KeycloakSession():
             self._create_session()
             return self.post(url, data, retry=False)
 
-def _get_session():
+class KeycloakAdminSession(OIDCSession):
+    def __init__(self, client_id, client_secret, base_url, realm) -> None:
+        token_url = base_url + '/realms/' + realm + '/protocol/openid-connect/token'
+        self.admin_url = base_url + '/admin/realms/' + realm
+        super().__init__(client_id, client_secret, token_url)
+
+    def _flatten_groups(self, group_list, subgroup=False):
+        for g in group_list:
+            if subgroup:
+                # TODO OIDC CMI: decide how to deal with subgroups
+                p = g.get('path')
+                if p.startswith("/"):
+                    yield p[1:]
+                else:
+                    yield p
+            else:
+                yield g.get('name')
+            yield from self._flatten_groups(g.get('subGroups'), subgroup=True)
+
+    def _get_group_details(self, g, subgroup=False):
+        if subgroup:
+            # TODO OIDC CMI: decide how to deal with subgroups
+            p = g.get('path')
+            if p.startswith("/"):
+                name = p[1:]
+            else:
+                name = p
+        else:
+            name = g.get('name')
+        return {
+            'id': g.get('id'),
+            'name': name,
+            'description': g.get('attributes', {}).get('description', [''])[0]
+        }
+
+    def _flatten_group_details(self, group_list, subgroup=False):
+        for g in group_list:
+            yield self._get_group_details(g, subgroup=subgroup)
+            yield from self._flatten_group_details(g.get('subGroups'), subgroup=True)
+
+    def get_all_groups(self):
+        response = self.get(self.admin_url + '/groups').json()
+        return list(self._flatten_groups(response))
+
+    def get_all_groups_details(self):
+        response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False}).json()
+        return list(self._flatten_group_details(response))
+
+    def get_all_roles(self, exclude_system=False):
+        # FIXME OIDC CMI exclude_system
+        response = self.get(self.admin_url + '/roles').json()
+        return [r.get('name') for r in response]
+
+    def get_all_roles_details(self, exclude_system=False):
+        # FIXME OIDC CMI exclude_system
+        response = self.get(self.admin_url + '/roles').json()
+        return [
+            {
+                'id': r.get('id'),
+                'name': r.get('name'),
+                'description': ''
+            }
+            for r in response
+        ]
+
+def _get_admIn_session():
     s = getattr(thread_local_data, 'KC_ADMIN_SESSION', None)
     if s:
         return s
-    thread_local_data.KC_ADMIN_SESSION = KeycloakSession(KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET, OIDC_OP_TOKEN_ENDPOINT)
+    thread_local_data.KC_ADMIN_SESSION = KeycloakAdminSession(KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET, OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME)
     return thread_local_data.KC_ADMIN_SESSION
 
 def has_group(request_or_user, group):
@@ -227,7 +294,7 @@ def get_all_groups():
     list[str]
         The list of groups available on the system
     """
-    pass
+    return _get_admIn_session().get_all_groups()
 
 def get_all_groups_details():
     """
@@ -242,7 +309,7 @@ def get_all_groups_details():
         [{"id": 1, "name": "group_name1", "description": "bla bla bla"},
         {"id": 2, "name": "group_name2", "description": "bla bla bla"}]
     """
-    pass
+    return _get_admIn_session().get_all_groups_details()
 
 def get_all_roles(exclude_system=False):
     """
@@ -258,8 +325,7 @@ def get_all_roles(exclude_system=False):
     list[str]
         The list of roles available on the system
     """
-    response = _get_session().get(KEYCLOAK_ADMIN_BASE_URL + '/roles').json()
-    return [r.get('name') for r in response]
+    return _get_admIn_session().get_all_roles(exclude_system=exclude_system)
 
 
 def get_all_roles_details(exclude_system=False):
@@ -280,8 +346,7 @@ def get_all_roles_details(exclude_system=False):
         [{"id": 1, "name": "role_name1", "description": "bla bla bla"},
         {"id": 2, "name": "role_name2", "description": "bla bla bla"}]
     """
-    pass
-
+    return _get_admIn_session().get_all_roles_details(exclude_system=exclude_system)
 
 def add_user(username,
         password,
