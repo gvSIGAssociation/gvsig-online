@@ -598,7 +598,6 @@ def group_delete(request, gid):
     if request.method == 'POST':
         role = auth_backend.get_role_details(gid) # FIXME OIDC CMI: debería hacer se de alguna forma más limpia
         auth_backend.delete_role(gid)
-        signals.role_deleted.send(sender=None, role=role.get('name'))
         response = {
             'deleted': True
         }     
