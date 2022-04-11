@@ -1,20 +1,31 @@
 
 import logging
+from re import M
 from urllib.parse import urlencode
 from django.urls import reverse
+from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT
 from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
+from requests.exceptions import RequestException
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
 try:
     import threading
 except ImportError: # remove in python 3.7
     import dummy_threading as threading
 LOGGER = logging.getLogger('gvsigol')
+KEYCLOAK_TIMEOUT = 30
 
+def get_system_users():
+    # TODO parametrize?
+    return ['root']
+
+def get_system_roles():
+    # TODO parametrize?
+    return ['admin']
 
 # we need to ensure that we get a different requests session for each
 # thread, since requests is not thread safe
@@ -76,7 +87,7 @@ class OIDCSession():
         try:
             if not params:
                 params = {}
-            r = self._get_session().get(url, params=params)
+            r = self._get_session().get(url, params=params, timeout=KEYCLOAK_TIMEOUT)
             if r.status_code == 401:
                 self._create_session()
                 return self.get(url, params=params, retry=False)
@@ -95,25 +106,45 @@ class OIDCSession():
             self._create_session()
             return self.get(url, params=params, retry=False)
     
-    def post(self, url, data, retry=True):
+    def post(self, url, data=None, json=None, retry=True):
         try:
-            r = self._get_session().post(url, data=data)
+            r = self._get_session().post(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT)
             if r.status_code == 401:
                 self._create_session()
-                return self.post(url, data, retry=False)
+                return self.post(url, data=data, json=json, retry=False)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.post(url, data, retry=False)
+            return self.post(url, data=data, json=json, retry=False)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.post(url, data, retry=False)
+            return self.post(url, data=data, json=json, retry=False)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.post(url, data, retry=False)
+            return self.post(url, data=data, json=json, retry=False)
+    
+    def delete(self, url, retry=True):
+        try:
+            r = self._get_session().delete(url, timeout=KEYCLOAK_TIMEOUT)
+            if r.status_code == 401:
+                self._create_session()
+                return self.delete(url, retry=False)
+            return r
+        except InvalidClientIdError as e:
+            # No refresh token
+            self._create_session()
+            return self.delete(url, retry=False)
+        except TokenExpiredError as e:
+            # (token_expired) cuando caduca access token y no se renueva
+            self._create_session()
+            return self.delete(url, retry=False)
+        except InvalidGrantError:
+            # refresh token is expired (Keycloak session is expired)
+            self._create_session()
+            return self.delete(url, retry=False)
 
 class KeycloakAdminSession(OIDCSession):
     def __init__(self, client_id, client_secret, base_url, realm) -> None:
@@ -156,29 +187,164 @@ class KeycloakAdminSession(OIDCSession):
             yield from self._flatten_group_details(g.get('subGroups'), subgroup=True)
 
     def get_all_groups(self):
-        response = self.get(self.admin_url + '/groups').json()
-        return list(self._flatten_groups(response))
+        try:
+            response = self.get(self.admin_url + '/groups').json()
+            return list(self._flatten_groups(response))
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return []
 
     def get_all_groups_details(self):
-        response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False}).json()
-        return list(self._flatten_group_details(response))
+        try:
+            response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False}).json()
+            return list(self._flatten_group_details(response))
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return []
 
     def get_all_roles(self, exclude_system=False):
-        # FIXME OIDC CMI exclude_system
-        response = self.get(self.admin_url + '/roles').json()
-        return [r.get('name') for r in response]
+        try:
+            response = self.get(self.admin_url + '/roles').json()
+            system_roles = get_system_roles()
+            return [r.get('name') for r in response if r.get('name') not in system_roles]
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return []
 
     def get_all_roles_details(self, exclude_system=False):
-        # FIXME OIDC CMI exclude_system
-        response = self.get(self.admin_url + '/roles').json()
-        return [
-            {
-                'id': r.get('id'),
-                'name': r.get('name'),
-                'description': ''
+        try:
+            response = self.get(self.admin_url + '/roles').json()
+            system_roles = get_system_roles()
+            return [
+                {
+                    'id': r.get('id'),
+                    'name': r.get('name'),
+                    'description': ''
+                }
+                for r in response if r.get('name') not in system_roles
+            ]
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return []
+
+    def add_user(self,
+            username,
+            password,
+            email,
+            first_name,
+            last_name,
+            superuser=False,
+            staff=False):
+        try:
+            if superuser:
+                realm_roles = ["ADMIN", "DJANGO_GVSIGOL_SUPERUSER", "GVSIGOL_DJANGO_STAFF"]
+            elif staff:
+                realm_roles = ["GVSIGOL_DJANGO_STAFF"]
+            else:
+                realm_roles = []
+            user_rep = {
+                "credentials": [{"value": password}],
+                "email": email,
+                "firstName": first_name,
+                "lastName": last_name,
+                "realmRoles": realm_roles,
+                "username": username
             }
-            for r in response
-        ]
+            response = self.post(self.admin_url + '/users', json=user_rep)
+            if response.status_code == 201:
+                User = get_user_model()
+                try:
+                    user = User(
+                        username=username,
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name,
+                        is_superuser=superuser,
+                        is_staff=staff)
+                    user.save()
+                except IntegrityError:
+                    # accept users already existing in Django to allow creating the user in Keycloak
+                    LOGGER.exception('error creating user in django after keycloak creation')
+                    pass
+                return user
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+
+    def get_user_id(self, username):
+        response = self.get(self.admin_url + '/users', params={"username": username}).json()
+        if len(response) > 0:
+            return response[0].get('id')
+
+    def get_group_id(self, group_name):
+        response = self.get(self.admin_url + '/groups', params={"search": group_name}).json()
+        print(response)
+        if len(response) > 0:
+            return response[0].get('id')
+
+    def delete_user(self, username):
+        try:
+            user_id = self.get_user_id(username)
+            url = "{base}/users/{id}".format(base=self.admin_url, id=user_id)
+            response = self.delete(url)
+            if response.status_code == 204:
+                try:
+                    User = get_user_model()
+                    User.objects.filter(username=username).delete()
+                except User.DoesNotExist:
+                    # ignore to allow deleting keycloak users that have not been localy created in Django
+                    pass
+                return True
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return False
+
+    def add_group(self, group_name, desc=''):
+        try:
+            group_rep = {
+                "attributes": {"description": [desc]},
+                "name": group_name
+            }
+            response = self.post(self.admin_url + '/groups', json=group_rep)
+            if response.status_code == 201:
+                return True
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return False
+
+    def add_role(self, role_name, desc=''):
+        try:
+            role_rep = {
+                "description": desc,
+                "name": role_name
+            }
+            response = self.post(self.admin_url + '/roles', json=role_rep)
+            if response.status_code == 201:
+                return True
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return False
+
+    def delete_group(self, group_name):
+        try:
+            group_id = self.get_group_id(group_name)
+            url = "{base}/groups/{id}".format(base=self.admin_url, id=group_id)
+            response = self.delete(url)
+            if response.status_code == 204:
+                return True
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return False
+
+    def delete_role(self, role_name):
+        try:
+            url = "{base}/roles/{role_name}".format(base=self.admin_url, role_name=role_name)
+            response = self.delete(url)
+            if response.status_code == 204:
+                return True
+        except RequestException:
+            LOGGER.exception('requests error adding group')
+        return False
 
 def _get_admin_session():
     s = getattr(thread_local_data, 'KC_ADMIN_SESSION', None)
@@ -375,26 +541,9 @@ def add_user(username,
     Returns
     -------
         User
-        A Django User instance
+        A Django User instance or None if an error happened
     """
-
-    """
-    # TODO: error handling
-    auth_services.get_services().ldap_add_user(username, first_name, password, superuser)
-    User = get_user_model()
-    user = User(
-        username = username,
-        first_name = first_name,
-        last_name = last_name,
-        email = email,
-        is_superuser = superuser,
-        is_staff = staff
-    )
-    user.set_password(password)
-    user.save()
-    return user
-    """
-    pass
+    return _get_admin_session().add_user(username, password, email, first_name, last_name, superuser=superuser, staff=staff)
 
 def _get_user(user):
     """
@@ -418,6 +567,27 @@ def _get_user(user):
         user_instance = user
     return user_instance
 
+def _get_user_name(user):
+    """
+    Gets the Django User instance from username or user id
+
+    Parameters
+    ----------
+    user: str|integer|User
+        User name|User id|Django User object
+    Returns
+    -------
+        User
+        A Django User instance
+    """
+    User = get_user_model()
+    if isinstance(user, User):
+        return user.username
+    elif isinstance(user, str):
+        return user
+    elif isinstance(user, int):
+        return User.objects.get(id=user).username
+
 def delete_user(user):
     """
     Deletes a user
@@ -432,9 +602,7 @@ def delete_user(user):
         boolean
         True if the operation was successfull, False otherwise
     """
-    user_instance = _get_user(user)
-
-    pass
+    return _get_admin_session().delete_user(_get_user_name(user))
 
 def add_group(group_name, desc=''):
     """
@@ -452,7 +620,7 @@ def add_group(group_name, desc=''):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    return _get_admin_session().add_group(group_name, desc=desc)
 
 def delete_group(group):
     """
@@ -460,15 +628,15 @@ def delete_group(group):
 
     Parameters
     ----------
-    group: str|integer
-        Group name|Group id
+    group: str
+        Group name
     
     Returns
     -------
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    return _get_admin_session().delete_group(group)
 
 def add_role(role_name, desc=''):
     """
@@ -486,7 +654,8 @@ def add_role(role_name, desc=''):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    return _get_admin_session().add_role(role_name, desc=desc)
+
 
 def delete_role(role):
     """
@@ -502,7 +671,9 @@ def delete_role(role):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+
+    return _get_admin_session().delete_role(role)
+
 
 
 def set_groups(user, groups):

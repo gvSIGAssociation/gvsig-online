@@ -410,3 +410,6 @@ def get_admin_role():
     assigned to superusers.
     """
     return 'admin'
+
+get_system_users = auth_backend.get_system_users
+get_system_roles = auth_backend.get_system_roles
