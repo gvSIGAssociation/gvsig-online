@@ -12,6 +12,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from requests.exceptions import RequestException
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
+from gvsigol_auth import signals
 try:
     import threading
 except ImportError: # remove in python 3.7
@@ -672,9 +673,10 @@ def delete_role(role):
         True if the operation was successfull, False otherwise
     """
 
-    return _get_admin_session().delete_role(role)
-
-
+    if _get_admin_session().delete_role(role):
+        signals.role_deleted.send(sender=None, role=role)
+        return True
+    return False
 
 def set_groups(user, groups):
     """
