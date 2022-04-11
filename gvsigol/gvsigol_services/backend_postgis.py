@@ -1445,7 +1445,7 @@ class Introspect:
             where = sqlbuilder.SQL("")
 
         try:
-            query = sqlbuilder.SQL("SELECT DISTINCT({column_name}) FROM {schema}.{table} {where} ORDER BY {column_name} ASC)").format(
+            query = sqlbuilder.SQL("SELECT DISTINCT({column_name}) FROM {schema}.{table} {where} ORDER BY {column_name} ASC").format(
                 schema=sqlbuilder.Identifier(schema),
                 table=sqlbuilder.Identifier(table_name),
                 column_name=sqlbuilder.Identifier(column_name),
