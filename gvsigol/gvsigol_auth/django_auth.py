@@ -3,6 +3,7 @@ from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from gvsigol_auth.models import Role
 import gvsigol_auth.services as auth_services
+from gvsigol_auth import signals
 
 def get_system_users():
     # TODO parametrize?
@@ -370,6 +371,7 @@ def delete_role(role):
     if not auth_services.get_services().delete_data_directory(role_instance.name):
         return False
     role_instance.delete()
+    signals.role_deleted.send(sender=None, role=role.name)
     return True
 
 
