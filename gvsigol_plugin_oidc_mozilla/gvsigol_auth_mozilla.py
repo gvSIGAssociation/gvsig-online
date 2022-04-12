@@ -126,26 +126,46 @@ class OIDCSession():
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
             return self.post(url, data=data, json=json, retry=False)
-    
-    def delete(self, url, retry=True):
+
+    def put(self, url, data=None, json=None, retry=True):
         try:
-            r = self._get_session().delete(url, timeout=KEYCLOAK_TIMEOUT)
+            r = self._get_session().put(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT)
             if r.status_code == 401:
                 self._create_session()
-                return self.delete(url, retry=False)
+                return self.put(url, data=data, json=json, retry=False)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.delete(url, retry=False)
+            return self.put(url, data=data, json=json, retry=False)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.delete(url, retry=False)
+            return self.put(url, data=data, json=json, retry=False)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.delete(url, retry=False)
+            return self.put(url, data=data, json=json, retry=False)
+    
+    def delete(self, url,  data=None, json=None, retry=True):
+        try:
+            r = self._get_session().delete(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT)
+            if r.status_code == 401:
+                self._create_session()
+                return self.delete(url, data=data, json=json, retry=False)
+            return r
+        except InvalidClientIdError as e:
+            # No refresh token
+            self._create_session()
+            return self.delete(url, data=data, json=json, retry=False)
+        except TokenExpiredError as e:
+            # (token_expired) cuando caduca access token y no se renueva
+            self._create_session()
+            return self.delete(url, data=data, json=json, retry=False)
+        except InvalidGrantError:
+            # refresh token is expired (Keycloak session is expired)
+            self._create_session()
+            return self.delete(url, data=data, json=json, retry=False)
 
 class KeycloakAdminSession(OIDCSession):
     def __init__(self, client_id, client_secret, base_url, realm) -> None:
@@ -192,7 +212,7 @@ class KeycloakAdminSession(OIDCSession):
             response = self.get(self.admin_url + '/groups').json()
             return list(self._flatten_groups(response))
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error getting group')
         return []
 
     def get_all_groups_details(self):
@@ -200,7 +220,7 @@ class KeycloakAdminSession(OIDCSession):
             response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False}).json()
             return list(self._flatten_group_details(response))
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error getting group')
         return []
 
     def get_all_roles(self, exclude_system=False):
@@ -209,7 +229,7 @@ class KeycloakAdminSession(OIDCSession):
             system_roles = get_system_roles()
             return [r.get('name') for r in response if r.get('name') not in system_roles]
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error getting roles')
         return []
 
     def get_all_roles_details(self, exclude_system=False):
@@ -225,7 +245,7 @@ class KeycloakAdminSession(OIDCSession):
                 for r in response if r.get('name') not in system_roles
             ]
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error getting roles')
         return []
 
     def add_user(self,
@@ -270,7 +290,7 @@ class KeycloakAdminSession(OIDCSession):
                     pass
                 return user
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error adding user')
 
     def get_user_id(self, username):
         response = self.get(self.admin_url + '/users', params={"username": username}).json()
@@ -279,9 +299,14 @@ class KeycloakAdminSession(OIDCSession):
 
     def get_group_id(self, group_name):
         response = self.get(self.admin_url + '/groups', params={"search": group_name}).json()
-        print(response)
         if len(response) > 0:
             return response[0].get('id')
+
+    def get_role_id(self, role_name):
+        url = "{base_url}/roles/{role_name}".format(base_url=self.admin_url, role_name=role_name)
+        response = self.get(url)
+        if response.status_code == 200:
+            return response.json().get('id')
 
     def delete_user(self, username):
         try:
@@ -297,7 +322,7 @@ class KeycloakAdminSession(OIDCSession):
                     pass
                 return True
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error deleting user')
         return False
 
     def add_group(self, group_name, desc=''):
@@ -323,7 +348,7 @@ class KeycloakAdminSession(OIDCSession):
             if response.status_code == 201:
                 return True
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error adding role')
         return False
 
     def delete_group(self, group_name):
@@ -334,7 +359,7 @@ class KeycloakAdminSession(OIDCSession):
             if response.status_code == 204:
                 return True
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error deleting group')
         return False
 
     def delete_role(self, role_name):
@@ -344,7 +369,67 @@ class KeycloakAdminSession(OIDCSession):
             if response.status_code == 204:
                 return True
         except RequestException:
-            LOGGER.exception('requests error adding group')
+            LOGGER.exception('requests error deleting role')
+        return False
+
+    def add_to_role(self, username, role_name):
+        try:
+            user_id = self.get_user_id(username)
+            # TODO: we could handle client roles too
+            url = "{base}/users/{user_id}/role-mappings/realm".format(base=self.admin_url, user_id=user_id)
+            body = [{
+                "id": self.get_role_id(role_name),
+                "name": role_name
+            }]
+            response = self.post(url, json=body)
+            if response.status_code == 204:
+                return True
+        except RequestException:
+            LOGGER.exception('requests error adding user to role')
+        return False
+
+    def remove_from_role(self, username, role_name):
+        try:
+            user_id = self.get_user_id(username)
+            # TODO: we could handle client roles too
+            url = "{base}/users/{user_id}/role-mappings/realm".format(base=self.admin_url, user_id=user_id)
+            body = [{
+                "id": self.get_role_id(role_name),
+                "name": role_name
+            }]
+            response = self.delete(url, json=body)
+            if response.status_code == 204:
+                return True
+        except RequestException:
+            LOGGER.exception('requests error removing user to role')
+        return False
+
+    def add_to_group(self, username, group_name):
+        try:
+            user_id = self.get_user_id(username)
+            group_id = self.get_group_id(group_name)
+            url = "{base}/users/{user_id}/groups/{group_id}".format(base=self.admin_url, user_id=user_id, group_id=group_id)
+            print(url)
+            response = self.put(url)
+            print(response.status_code)
+            if response.status_code == 204:
+                return True
+        except RequestException as e:
+            LOGGER.exception('requests error adding user to role')
+            print(str(e))
+        return False
+
+
+    def remove_from_group(self, username, group_name):
+        try:
+            user_id = self.get_user_id(username)
+            group_id = self.get_group_id(group_name)
+            url = "{base}/users/{user_id}/groups/{group_id}".format(base=self.admin_url, user_id=user_id, group_id=group_id)
+            response = self.delete(url)
+            if response.status_code == 204:
+                return True
+        except RequestException:
+            LOGGER.exception('requests error adding user to role')
         return False
 
 def _get_admin_session():
@@ -740,7 +825,10 @@ def add_to_group(user, group):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    username = _get_user_name(user)
+    if _get_admin_session().add_to_group(username, group):
+        return True
+    return False
 
 def remove_from_group(user, group):
     """
@@ -758,7 +846,10 @@ def remove_from_group(user, group):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    username = _get_user_name(user)
+    if _get_admin_session().remove_from_group(username, group):
+        return True
+    return False
 
 def add_to_role(user, role):
     """
@@ -776,7 +867,10 @@ def add_to_role(user, role):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    username = _get_user_name(user)
+    if _get_admin_session().add_to_role(username, role):
+        return True
+    return False
 
 def remove_from_role(user, role):
     """
@@ -794,7 +888,10 @@ def remove_from_role(user, role):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    username = _get_user_name(user)
+    if _get_admin_session().remove_from_role(username, role):
+        return True
+    return False
 
 def get_users_details(exclude_system=False):
     """
