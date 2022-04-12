@@ -111,15 +111,10 @@ def send_reset_password_email(email, pass_reset_url):
         #print 'Restore message: ' + body
         send_mail(subject, body, fromAddress, toAddress, False, gvsigol.settings.EMAIL_HOST_USER, gvsigol.settings.EMAIL_HOST_PASSWORD)
 
-
-def _get_primary_user_rolename(username):
-    # FIXME CMI OIDC: ROLE_ prefix? move to auth_backend?
-    return 'ug_' + username.lower()
-
 def get_primary_user_role(request):
     # FIXME CMI OIDC: ROLE_ prefix? move to auth_backend?
     if request.user and request.user.username:
-        role = _get_primary_user_rolename(request.user.username)
+        role = auth_backend.get_primary_role(request.user.username)
         if auth_backend.has_role(request, role):
             return role
     return None

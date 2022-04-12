@@ -1,5 +1,7 @@
 import importlib
 
+from gvsigol_auth.django_auth import get_primary_role
+
 try:
     from gvsigol import settings
     if settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_auth':
@@ -431,3 +433,6 @@ def get_admin_role():
 
 get_system_users = auth_backend.get_system_users
 get_system_roles = auth_backend.get_system_roles
+get_primary_role = auth_backend.get_primary_role
+to_provider_rolename = auth_backend.to_provider_rolename
+from_provider_rolename = auth_backend.from_provider_rolename
