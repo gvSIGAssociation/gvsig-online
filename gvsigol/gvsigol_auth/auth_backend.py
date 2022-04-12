@@ -404,6 +404,24 @@ dict()
     {"id": 1, "name": "role_name1", "description": "bla bla bla"}
 """
 
+get_group_details = auth_backend.get_group_details
+"""
+Gets a dictionary of group details (id, name and description).
+Note that id can be an integer or a string
+depending on the backend in use.
+
+Parameters
+----------
+group: str | int
+    A group name | A group id
+
+Returns
+-------
+dict()
+    A dictionary containing the group details. Example:
+    {"id": 1, "name": "group_name1", "description": "bla bla bla"}
+"""
+
 def get_admin_role():
     """
     Gets the name of the admin role, that is, a role that is always
