@@ -1079,3 +1079,14 @@ def get_group_details(group):
         {"id": 1, "name": "group_name1", "description": "bla bla bla"}
     """
     return _get_admin_session().get_group_details(group)
+
+def get_primary_role(username):
+    return 'ROLE_UG_' + username.upper()
+
+def to_provider_rolename(role, provider=None):
+    # only used for Geoserver at the moment, ignoring provider
+    return role
+
+def from_provider_rolename(role, provider=None):
+    # only used for Geoserver at the moment, ignoring provider
+    return role

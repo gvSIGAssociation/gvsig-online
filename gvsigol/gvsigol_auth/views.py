@@ -382,15 +382,15 @@ def user_add(request):
                      
                     #User backend
                     if is_superuser or is_staff:
-                        role = auth_utils._get_primary_user_rolename(user.username)
+                        role = auth_backend.get_primary_role(user.username)
                         if auth_backend.add_role(role):
                             user_role_created = True
                         """
                         try:
-                            role = Role.objects.get(name=auth_utils._get_primary_user_rolename(user.username))
+                            role = Role.objects.get(name=auth_backend.get_primary_role(user.username))
                         except:
                             role = Role(
-                                name = auth_utils._get_primary_user_rolename(form.data['username']),
+                                name = auth_backend.get_primary_role(form.data['username']),
                                 description = _('User group for') + ': ' + form.data['username'].lower()
                             )
                             role.save()
@@ -463,7 +463,7 @@ def user_add(request):
 
                     if user_role_created:
                         try:
-                            user_role = auth_utils._get_primary_user_rolename(user.username)
+                            user_role = auth_backend.get_primary_role(user.username)
                             auth_backend.delete_role(user_role)
                         except:
                             pass

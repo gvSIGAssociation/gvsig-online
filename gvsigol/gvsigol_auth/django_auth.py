@@ -588,3 +588,15 @@ def get_role_details(role):
 
 def get_group_details(group):
     return get_role_details(group)
+
+def get_primary_role(username):
+    return 'ug_' + username.lower()
+
+def to_provider_rolename(role, provider=None):
+    # only used for Geoserver at the moment, ignoring provider
+    return 'ROLE_' + role.upper()
+
+def from_provider_rolename(role, provider=None):
+    # only used for Geoserver at the moment, ignoring provider
+    return role[5:].lower()
+    
