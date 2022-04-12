@@ -1,4 +1,3 @@
-from rest_framework.request import Request
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from gvsigol_auth.models import Role
@@ -586,3 +585,6 @@ def get_role_details(role):
         return roles.values()[0]
     except:
         return None
+
+def get_group_details(group):
+    return get_role_details(group)
