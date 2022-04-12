@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
+from django.http import HttpRequest
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT
 from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
@@ -24,9 +25,13 @@ def get_system_users():
     # TODO parametrize?
     return ['root']
 
+SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
+STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
+
 def get_system_roles():
     # TODO parametrize?
-    return ['admin']
+    return ['admin', SUPERUSER_ROLE, STAFF_ROLE]
+
 
 # we need to ensure that we get a different requests session for each
 # thread, since requests is not thread safe
@@ -258,9 +263,9 @@ class KeycloakAdminSession(OIDCSession):
             staff=False):
         try:
             if superuser:
-                realm_roles = ["ADMIN", "DJANGO_GVSIGOL_SUPERUSER", "GVSIGOL_DJANGO_STAFF"]
+                realm_roles = ["ADMIN", SUPERUSER_ROLE, STAFF_ROLE]
             elif staff:
-                realm_roles = ["GVSIGOL_DJANGO_STAFF"]
+                realm_roles = [STAFF_ROLE]
             else:
                 realm_roles = []
             user_rep = {
@@ -296,6 +301,12 @@ class KeycloakAdminSession(OIDCSession):
         response = self.get(self.admin_url + '/users', params={"username": username}).json()
         if len(response) > 0:
             return response[0].get('id')
+    
+    def _get_user_role_mappings(self, user_id):
+        url = "{base_url}/users/{user_id}/role-mappings".format(base_url=self.admin_url, user_id=user_id)
+        response = self.get(url)
+        if response.status_code == 200:
+            return response.json()
 
     def get_group_id(self, group_name):
         response = self.get(self.admin_url + '/groups', params={"search": group_name}).json()
@@ -303,10 +314,8 @@ class KeycloakAdminSession(OIDCSession):
             return response[0].get('id')
 
     def get_role_id(self, role_name):
-        url = "{base_url}/roles/{role_name}".format(base_url=self.admin_url, role_name=role_name)
-        response = self.get(url)
-        if response.status_code == 200:
-            return response.json().get('id')
+        role_repr = self._get_role_repr(role_name)
+        return role_repr.get('id')
 
     def delete_user(self, username):
         try:
@@ -409,16 +418,13 @@ class KeycloakAdminSession(OIDCSession):
             user_id = self.get_user_id(username)
             group_id = self.get_group_id(group_name)
             url = "{base}/users/{user_id}/groups/{group_id}".format(base=self.admin_url, user_id=user_id, group_id=group_id)
-            print(url)
             response = self.put(url)
-            print(response.status_code)
             if response.status_code == 204:
                 return True
         except RequestException as e:
             LOGGER.exception('requests error adding user to role')
             print(str(e))
         return False
-
 
     def remove_from_group(self, username, group_name):
         try:
@@ -431,6 +437,96 @@ class KeycloakAdminSession(OIDCSession):
         except RequestException:
             LOGGER.exception('requests error adding user to role')
         return False
+
+    def _get_role_repr(self, role_name):
+        url = "{base_url}/roles/{role_name}".format(base_url=self.admin_url, role_name=role_name)
+        response = self.get(url)
+        if response.status_code == 200:
+            return response.json()
+
+    def _get_group_repr(self, group_name):
+        group_id = self.get_group_id(group_name)
+        url = "{base_url}/groups/{group_id}".format(base_url=self.admin_url, group_id=group_id)
+        response = self.get(url)
+        if response.status_code == 200:
+            return response.json()
+
+    def get_group_details(self, group_name):
+        try:
+            group_repr = self._get_group_repr(group_name)
+            if group_repr:
+                desc = group_repr.get('attributes', {}).get('description', [''])[0]
+                return {
+                    "id": group_repr.get('name'),
+                    "name": group_repr.get('name'),
+                    "description": desc
+                }
+        except RequestException:
+            LOGGER.exception('requests error getting group details')
+
+    def get_role_details(self, role_name):
+        try:
+            role_repr = self._get_role_repr(role_name)
+            if role_repr:
+                return {
+                    "id": role_repr.get('name'),
+                    "name": role_repr.get('name'),
+                    "description": role_repr.get('description'),
+                }
+        except RequestException:
+            LOGGER.exception('requests error adding user to role')
+
+    def get_user_repr(self, user_id):
+        url = '{base_url}/users/{user_id}'.format(base_url=self.admin_url, user_id=user_id)
+        response = self.get(url)
+        if response.status_code == 200:
+            return response.json()
+
+    def _get_user_roles(self, user_id):
+        # FIXME: we could also include client mappings
+        role_mappings = self._get_user_role_mappings(user_id)
+        return [r.get('name') for r in role_mappings.get('realmMappings')]
+    
+    def get_roles(self, username):
+        user_id = self.get_user_id(username)
+        return self._get_user_roles(user_id)
+
+    def get_groups(self, username):
+        try:
+            user_id = self.get_user_id(username)
+            url = "{base}/users/{user_id}/groups".format(base=self.admin_url, user_id=user_id)
+            response = self.get(url)
+            if response.status_code == 200:
+                return [ g.get('name') for g in response.json() ]
+        except RequestException as e:
+            LOGGER.exception('requests error adding user to role')
+        return []
+        
+    def get_users_details(self, exclude_system=False):
+        users = []
+        try:
+            response = self.get(self.admin_url + '/users', params={"briefRepresentation": True})
+            if response.status_code == 200:
+                if exclude_system:
+                    system_users = get_system_users()
+                else:
+                    system_users = []
+                for user in response.json():
+                    if user.get('username') not in system_users:
+                        user_id = user.get('id')
+                        roles = self._get_user_roles(user_id)
+                        users.append({
+                            "id": user.get('id'),
+                            "username": user.get('username'),
+                            "first_name": user.get('firstName', ''),
+                            "last_name": user.get('lastName', ''),
+                            "is_superuser": SUPERUSER_ROLE in roles,
+                            "is_staff": STAFF_ROLE in roles,
+                            "email": user.get('email')
+                        })
+        except RequestException:
+            LOGGER.exception('requests error getting users details')
+        return users
 
 def _get_admin_session():
     s = getattr(thread_local_data, 'KC_ADMIN_SESSION', None)
@@ -462,9 +558,7 @@ def has_group(request_or_user, group):
     boolean
         True if the user has the provided group, False otherwise
     """
-    claims = request_or_user.session.get('oidc_access_token_payload', {})
-    groups = claims.get('groups', [])
-    return (group in groups)
+    return (group in get_groups(request_or_user))
 
 def has_role(request_or_user, role):
     """Checks whether a user has the provided role. Important: provide a
@@ -489,9 +583,7 @@ def has_role(request_or_user, role):
     boolean
         True if the user has the provided role, False otherwise
     """
-    claims = request_or_user.session.get('oidc_access_token_payload', {})
-    roles = claims.get('gvsigol_roles', [])
-    return (role in roles)
+    return (role in get_roles(request_or_user))
 
 def get_groups(request_or_user):
     """Gets the groups of the user. Important: provide a Django HttpRequest
@@ -512,8 +604,18 @@ def get_groups(request_or_user):
     list[str]
         The list of groups of the user
     """
-    claims = request_or_user.session.get('oidc_access_token_payload', {})
-    return claims.get('groups', [])
+    if isinstance(request_or_user, HttpRequest):
+        claims = request_or_user.session.get('oidc_access_token_payload', {})
+        return claims.get('groups', [])
+    User = get_user_model()
+    if isinstance(request_or_user, str):
+        username = request_or_user
+    else:
+        if request_or_user.is_authenticated:
+            username = request_or_user.username
+        else:
+            return []
+    return _get_admin_session().get_groups(username)
 
 def get_roles(request_or_user):
     """Gets the roles of the user. Important: provide a Django HttpRequest
@@ -534,8 +636,18 @@ def get_roles(request_or_user):
     list[str]
         The list of roles of the user
     """
-    claims = request_or_user.session.get('oidc_access_token_payload', {})
-    return claims.get('gvsigol_roles', [])
+    if isinstance(request_or_user, HttpRequest):
+        claims = request_or_user.session.get('oidc_access_token_payload', {})
+        return claims.get('gvsigol_roles', [])
+    User = get_user_model()
+    if isinstance(request_or_user, str):
+        username = request_or_user
+    else:
+        if request_or_user.is_authenticated:
+            username = request_or_user.username
+        else:
+            return []
+    return _get_admin_session().get_roles(username)
 
 def get_all_groups():
     """
@@ -928,7 +1040,7 @@ def get_users_details(exclude_system=False):
             roles": ["role2", "role3"]},
         }]
     """
-    pass
+    return _get_admin_session().get_users_details(exclude_system=exclude_system)
 
 def get_role_details(role):
     """
@@ -947,4 +1059,23 @@ def get_role_details(role):
         A dictionary containing the role details. Example:
         {"id": 1, "name": "role_name1", "description": "bla bla bla"}
     """
-    pass
+    return _get_admin_session().get_role_details(role)
+
+def get_group_details(group):
+    """
+    Gets a dictionary of group details (id, name and description).
+    Note that id can be an integer or a string
+    depending on the backend in use.
+
+    Parameters
+    ----------
+    group: str | int
+        A group name | A group id
+
+    Returns
+    -------
+    dict()
+        A dictionary containing the group details. Example:
+        {"id": 1, "name": "group_name1", "description": "bla bla bla"}
+    """
+    return _get_admin_session().get_group_details(group)
