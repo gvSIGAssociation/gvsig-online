@@ -356,6 +356,7 @@ class KeycloakAdminSession(OIDCSession):
             response = self.post(self.admin_url + '/roles', json=role_rep)
             if response.status_code == 201:
                 return True
+            LOGGER.error('requests error adding role. Status code: {}'.format(response.status_code))
         except RequestException:
             LOGGER.exception('requests error adding role')
         return False
@@ -522,7 +523,8 @@ class KeycloakAdminSession(OIDCSession):
                             "last_name": user.get('lastName', ''),
                             "is_superuser": SUPERUSER_ROLE in roles,
                             "is_staff": STAFF_ROLE in roles,
-                            "email": user.get('email')
+                            "email": user.get('email'),
+                            "roles": roles
                         })
         except RequestException:
             LOGGER.exception('requests error getting users details')
