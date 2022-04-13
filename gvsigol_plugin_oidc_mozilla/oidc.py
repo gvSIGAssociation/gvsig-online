@@ -52,8 +52,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         user.first_name = claims.get('first_name', '')
         user.last_name = claims.get('last_name', '')
         django_roles = claims.get('gvsigol_roles', [])
-        #user.is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles)
-        user.is_superuser = False
+        user.is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles)
         user.is_staff = ('GVSIGOL_DJANGO_STAFF' in django_roles)
         user.save()
 
