@@ -1,3 +1,4 @@
+from rest_framework.request import Request
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from gvsigol_auth.models import Role
