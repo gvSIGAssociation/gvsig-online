@@ -1767,7 +1767,7 @@ class Geoserver():
                 read_roles_query = LayerReadRole.objects.filter(layer=layer)
                 # FIXME OIDC CMI role prefix?
                 if read_roles_query.count()>0: # layer is not public
-                    who_can_read = [ auth_backend.to_provider_role(g, provider="geoserver") for read_roles in read_roles_query ]
+                    who_can_read = [ auth_backend.to_provider_rolename(read_role, provider="geoserver") for read_role in read_roles_query ]
                 else:
                     who_can_read = [ "ROLE_ADMIN"]
             
@@ -1796,7 +1796,7 @@ class Geoserver():
             who_can_write = []
             write_roles_query = LayerWriteRole.objects.filter(layer=layer)
             if write_roles_query.count()>0:
-                who_can_write = [ auth_backend.to_provider_role(g, provider="geoserver") for write_role in write_roles_query ]
+                who_can_write = [ auth_backend.to_provider_rolename(write_role, provider="geoserver") for write_role in write_roles_query ]
             write_rule_path = workspace.name + "." + layer.name + ".w"
             if  len(who_can_write) > 0:
                 write_rule_roles =  ",".join(who_can_write)
@@ -1833,7 +1833,7 @@ class Geoserver():
             who_can_read = [ "*" ]
         else:
             if len(read_roles) > 0:
-                who_can_read = [ auth_backend.to_provider_role(g, provider="geoserver") for g in read_roles]
+                who_can_read = [ auth_backend.to_provider_rolename(g, provider="geoserver") for g in read_roles]
                 if not 'ROLE_ADMIN' in who_can_read:
                     who_can_read.append('ROLE_ADMIN')
             else:
@@ -1858,7 +1858,7 @@ class Geoserver():
     
     def setLayerWriteRules(self, layer, write_roles):
         url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
-        who_can_write = [ auth_backend.to_provider_role(g, provider="geoserver") for g in write_roles ]
+        who_can_write = [ auth_backend.to_provider_rolename(g, provider="geoserver") for g in write_roles ]
         write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
         # now add the rule if necessary
         if len(who_can_write)>0:
@@ -1886,7 +1886,7 @@ class Geoserver():
     
     def setWfsTransactionRules(self):
         write_roles = LayerWriteRole.objects.all().values_list('role', flat=True).distinct()
-        transaction_roles = [ auth_backend.to_provider_role(g, provider="geoserver") for role in write_roles ]
+        transaction_roles = [ auth_backend.to_provider_rolename(role, provider="geoserver") for role in write_roles ]
         if  len(transaction_roles) > 0:
             services_url = self.rest_catalog.get_service_url() + "/security/acl/services.json"
             service = {}
