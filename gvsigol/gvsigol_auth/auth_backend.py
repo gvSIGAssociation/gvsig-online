@@ -171,14 +171,19 @@ Returns
     A Django User instance
 """
 
+update_user = auth_backend.update_user
+
 delete_user  = auth_backend.delete_user
 """
 Deletes a user
 
 Parameters
 ----------
-user: str|integer|User
-    User name|User id|Django User object
+user: str | User
+    User name | Django User object
+user_id: str | integer
+    The user identifier. When 'user_id' is provided, then the 'user' parameter is ignored.
+    Note that user_id can be a string or an integer depending on the auth backend implementation.
 
 Returns
 -------
@@ -388,6 +393,35 @@ list[dict()]
     }]
 """
 
+get_user_details = auth_backend.get_user_details
+"""
+Gets a dictionary of user attributes (id, username, first_name, last_name
+is_superuser, is_staff, email, roles) available in the system. The
+
+Parameters
+----------
+user: str | User
+    User name|Django User object
+user_id: str | int
+    The user identifier. When 'user_id' is provided, then the 'user' parameter is ignored.
+    Note that user_id can be a string or an integer depending on the auth backend implementation.
+
+Returns
+-------
+dict()
+    A dictionary containing the user attributes or None if an invalid user is provided. Example:
+    {
+        "id": 1,
+        "username": "username1",
+        "first_name": "Firstname1",
+        "last_name": "Lastname1",
+        "is_superuser": True,
+        "is_staff": True,
+        "email": "example1@example.com",
+        roles": ["role1", "role2"]},
+    }
+"""
+
 get_role_details = auth_backend.get_role_details
 """
 Gets a dictionary of role details (id, name and description).
@@ -424,13 +458,11 @@ dict()
     {"id": 1, "name": "group_name1", "description": "bla bla bla"}
 """
 
-def get_admin_role():
-    """
-    Gets the name of the admin role, that is, a role that is always
-    assigned to superusers.
-    """
-    return 'admin'
-
+get_admin_role = auth_backend.get_admin_role
+"""
+Gets the name of the admin role, that is, a role that is always
+assigned to superusers.
+"""
 get_system_users = auth_backend.get_system_users
 get_system_roles = auth_backend.get_system_roles
 get_primary_role = auth_backend.get_primary_role

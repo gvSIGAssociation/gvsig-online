@@ -19,6 +19,8 @@
 '''
 from django.http.response import JsonResponse
 from gvsigol import settings
+from gvsigol.services_base import BackendNotAvailable
+from gvsigol_auth.django_auth import get_admin_role
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -332,9 +334,7 @@ def user_add(request):
         
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
-        if form.is_valid():            
-            assigned_groups = []
-                
+        if form.is_valid():
             is_staff = False
             if 'is_staff' in form.data:
                 is_staff = True
@@ -346,10 +346,10 @@ def user_add(request):
             
             # flag what has been done to be able to revert if needed
             user_created = False
-            user_group_created = False
             role_membership_added = []
             user_role_created = False
             user = None
+            errors = []
             try:
                 assigned_roles = []   
                 for key in form.data:
@@ -366,114 +366,85 @@ def user_add(request):
                         form.data['email'].lower(),
                         form.data['first_name'],
                         form.data['last_name'],
+                        roles=assigned_roles,
                         superuser=is_superuser,
                         staff=is_staff
                     )
-                    user_created = True
+                    if user:
+                        user_created = True
 
-                    if user.is_superuser:
-                        admin_role = auth_backend.get_admin_role()
-                        if auth_backend.add_to_role(user, admin_role):
-                            role_membership_added.append(admin_role)
-                        
-                    for role in assigned_roles:
-                        if auth_backend.add_to_role(user, role):
+                        #User backend
+                        if is_superuser or is_staff:
+                            role = auth_backend.get_primary_role(user.username)
+                            if auth_backend.add_role(role):
+                                user_role_created = True
+
+                            auth_backend.add_to_role(user, role)
                             role_membership_added.append(role)
-                     
-                    #User backend
-                    if is_superuser or is_staff:
-                        role = auth_backend.get_primary_role(user.username)
-                        if auth_backend.add_role(role):
-                            user_role_created = True
-                        """
-                        try:
-                            role = Role.objects.get(name=auth_backend.get_primary_role(user.username))
-                        except:
-                            role = Role(
-                                name = auth_backend.get_primary_role(form.data['username']),
-                                description = _('User group for') + ': ' + form.data['username'].lower()
-                            )
-                            role.save()
-                            django_user_group_created = True
-                        role.users.add(user)
-                        """
-                        """
-                        if auth_services.get_services().ldap_add_group(role) != False:
-                            ldap_user_group_created = True
-                        """
-                        auth_backend.add_to_role(user, role)
-                        role_membership_added.append(role)
-                        # FIXME OIDC CMI deberia hacerse solo si no existe el rol???
-                        auth_services.get_services().add_data_directory(role)
-                        """
-                        auth_services.get_services().add_data_directory(role)
-                        
-                        if auth_services.get_services().ldap_add_group_member(user, role) != False:
-                            ldap_group_membership_added.append(role)
-                        """
-                        url = server_object.frontend_url + '/'
-                        ws_name = 'ws_' + form.data['username'].lower()
-                        if gs.createWorkspace(ws_name, url + ws_name):          
-                            # save it on DB if successfully created
-                            newWs = Workspace(
-                                server = server_object,
-                                name = ws_name,
-                                description = '',
-                                uri = url + ws_name,
-                                wms_endpoint = url + ws_name + '/wms',
-                                wfs_endpoint = url + ws_name + '/wfs',
-                                wcs_endpoint = url + ws_name + '/wcs',
-                                wmts_endpoint = url + 'gwc/service/wmts',
-                                cache_endpoint = url + 'gwc/service/wms',
-                                created_by = user.username,
-                                is_public = False
-                            )
-                            newWs.save()
+                            # FIXME OIDC CMI deberia hacerse solo si no existe el rol???
+                            auth_services.get_services().add_data_directory(role)
+                            url = server_object.frontend_url + '/'
+                            ws_name = 'ws_' + form.data['username'].lower()
+                            if gs.createWorkspace(ws_name, url + ws_name):          
+                                # save it on DB if successfully created
+                                newWs = Workspace(
+                                    server = server_object,
+                                    name = ws_name,
+                                    description = '',
+                                    uri = url + ws_name,
+                                    wms_endpoint = url + ws_name + '/wms',
+                                    wfs_endpoint = url + ws_name + '/wfs',
+                                    wcs_endpoint = url + ws_name + '/wcs',
+                                    wmts_endpoint = url + 'gwc/service/wmts',
+                                    cache_endpoint = url + 'gwc/service/wms',
+                                    created_by = user.username,
+                                    is_public = False
+                                )
+                                newWs.save()
+                                
+                                ds_name = 'ds_' + form.data['username'].lower()
+                                services_utils.create_datastore(user.username, ds_name, newWs)
+                                
+                                gs.reload_nodes()
                             
-                            ds_name = 'ds_' + form.data['username'].lower()
-                            services_utils.create_datastore(user.username, ds_name, newWs)
-                            
-                            gs.reload_nodes()
-                        
-                    try:    
-                        auth_utils.sendMail(user, form.data['password1'])
-                    except Exception as ex:
-                        print(str(ex))
-                        pass
-    
-                    return redirect('user_list')
-            
+                        try:    
+                            auth_utils.sendMail(user, form.data['password1'])
+                        except Exception as ex:
+                            print(str(ex))
+                            pass
+        
+                        return redirect('user_list')
+                    errors.append({"message": _("User creation failed")}) # FIXME OIDC CMI should get a reason
             except Exception as e:
                 logger.exception("ERROR: Problem creating user")
-                print("ERROR: Problem creating user " + str(e))
-                errors = []
-                errors.append({'message': "ERROR: Problem creating user " + str(e)})
-                roles = auth_backend.get_all_roles_details(exclude_system=True)
+                message = "ERROR: Problem creating user " + str(e)
+                print(message)
+                errors.append({'message': message})
+            roles = auth_backend.get_all_roles_details(exclude_system=True)
 
-                # reverting changes
-                if user:
-                    user_roles = auth_backend.get_roles(user)
-                    for role in user_roles:
-                        try:
-                            if role in role_membership_added:
-                                auth_backend.remove_from_role(user, role)
-                                #auth_services.get_services().ldap_delete_group_member(user, ugu.user_group)                                
-                        except:
-                            pass
+            # reverting changes
+            if user:
+                user_roles = auth_backend.get_roles(user)
+                for role in user_roles:
+                    try:
+                        if role in role_membership_added:
+                            auth_backend.remove_from_role(user, role)
+                    except:
+                        pass
 
-                    if user_role_created:
-                        try:
-                            user_role = auth_backend.get_primary_role(user.username)
-                            auth_backend.delete_role(user_role)
-                        except:
-                            pass
+                if user_role_created:
+                    try:
+                        user_role = auth_backend.get_primary_role(user.username)
+                        auth_backend.delete_role(user_role)
+                    except:
+                        pass
 
-                    if user_created:
-                        try:
-                            auth_backend.delete_user(user)
-                        except:
-                            pass
-                return render(request, 'user_add.html', {'form': form, 'groups': roles, 'errors': errors,'show_pass_form':show_pass_form})
+                if user_created:
+                    try:
+                        auth_backend.delete_user(user)
+                    except:
+                        pass
+            return render(request, 'user_add.html', {'form': form, 'groups': roles, 'errors': errors,'show_pass_form':show_pass_form})
 
         else:
             roles = auth_backend.get_all_roles_details(exclude_system=True)
@@ -488,7 +459,7 @@ def user_add(request):
 @superuser_required
 def user_update(request, uid):
     if request.method == 'POST':
-        user = User.objects.get(id=int(uid))
+        #user = User.objects.get(id=int(uid))
         
         assigned_roles = []
         for key in request.POST:
@@ -503,61 +474,52 @@ def user_update(request, uid):
         if 'is_superuser' in request.POST:
             is_superuser = True
             is_staff = True
-            
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
-        user.is_staff = is_staff
-        user.save()
-        
-        admin_role =auth_backend.get_admin_role()
-        if user.is_superuser and is_superuser:
-            auth_backend.add_to_role(user, admin_role) # FIXME  OIDC CMI ldap
-            assigned_roles.append(admin_role)
-            
-        if not user.is_superuser and is_superuser:
-            # FIXME OIDC CMI: we need to set superuser in OIDC
-            # FIXME OIDC CMI: discrepancia entre DJANGO_GVSIGOL_ADMIN y ADMIN
-            user.is_superuser = True
-            user.save()
-            auth_backend.add_to_role(user, admin_role) # FIXME ldap
-            #admin_group = UserGroup.objects.get(name__exact='admin')
-            #auth_services.get_services().ldap_add_group_member(user, admin_group)
-            assigned_roles.append(admin_role)
-        
-        if user.is_superuser and not is_superuser:
-            # FIXME OIDC CMI: we need to unset superuser in OIDC
-            # FIXME OIDC CMI: discrepancia entre DJANGO_GVSIGOL_ADMIN y ADMIN
-            user.is_superuser = False
-            user.save()
-            auth_backend.remove_from_role(user, admin_role)
-            #admin_group = UserGroup.objects.get(name__exact='admin')
-            #auth_services.get_services().ldap_delete_group_member(user, admin_group)
-        
-        auth_backend.set_roles(user, assigned_roles)
-        return redirect('user_list')
-        
+
+        username = request.POST.get('username')
+        try:
+            user = auth_backend.update_user(
+                    uid,
+                    username,
+                    request.POST.get('email'),
+                    request.POST.get('first_name'),
+                    request.POST.get('last_name'),
+                    superuser=is_superuser,
+                    staff=is_staff,
+                    roles=assigned_roles
+            )
+            return redirect('user_list')
+        except BackendNotAvailable:
+            message = _("The authentication server is not available. Try again later or contact system administrators.")
+            return render(request, 'user_update.html', {'uid': uid, 'selected_user': None, 'user': None, 'groups': [], "message": message})
     else:
-        selected_user = User.objects.get(id=int(uid))    
-        roles = auth_utils.get_all_roles_checked_by_user(selected_user)
-        return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': roles})
-        
+        try:
+            selected_user = auth_backend.get_user_details(user_id=uid)
+            username = selected_user.get('username')
+            roles = auth_utils.get_all_roles_checked_by_user(username)
+            return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': roles})
+        except BackendNotAvailable:
+            message = _("The authentication server is not available. Try again later or contact system administrators.")
+            return render(request, 'user_update.html', {'uid': uid, 'selected_user': None, 'user': None, 'groups': []})
         
 @login_required()
 @superuser_required
 def user_delete(request, uid):
     if request.method == 'POST':
-        auth_backend.delete_user(uid)
+        deleted = auth_backend.delete_user(user_id=uid)
         response = {
-            'deleted': True
-        }     
+            'deleted': deleted
+        }
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+def sort_by_name(a_dict):
+    return a_dict.get('name')
 
 @login_required()
 @superuser_required
 def group_list(request):
     response = {
-        'groups': auth_backend.get_all_groups_details()
+        'groups': sorted(auth_backend.get_all_roles_details(), key=sort_by_name)
+        #'groups': auth_backend.get_all_groups_details()
     }     
     return render(request, 'group_list.html', response)
 
@@ -577,7 +539,8 @@ def group_add(request):
                 if _valid_name_regex.search(form.data['name']) == None:
                     message = _("Invalid user group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.data['name'])
                     raise Exception
-                auth_backend.add_group(form.data['name'], desc=form.data['description'])
+                #auth_backend.add_group(form.data['name'], desc=form.data['description'])
+                auth_backend.add_role(form.data['name'], desc=form.data['description'])
                 signals.role_added.send(sender=None, role=form.data.get('name'))
                 return redirect('group_list')
             

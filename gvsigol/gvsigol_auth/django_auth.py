@@ -4,6 +4,16 @@ from django.contrib.auth import get_user_model
 from gvsigol_auth.models import Role
 import gvsigol_auth.services as auth_services
 from gvsigol_auth import signals
+import logging
+LOGGER = logging.getLogger('gvsigol')
+
+
+def get_admin_role():
+    """
+    Gets the name of the admin role, that is, a role that is always
+    assigned to superusers.
+    """
+    return 'admin'
 
 def get_system_users():
     # TODO parametrize?
@@ -195,6 +205,7 @@ def add_user(username,
         email,
         first_name,
         last_name,
+        roles=None,
         superuser=False,
         staff=False):
     """
@@ -232,6 +243,36 @@ def add_user(username,
     )
     user.set_password(password)
     user.save()
+    if roles is not None:
+        if superuser:
+            roles.append(get_admin_role())
+        set_roles(username, roles)
+    return user
+
+def update_user(
+        user_id,
+        username,
+        email,
+        first_name,
+        last_name,
+        superuser,
+        staff,
+        roles=None,
+        password=None):
+    User = get_user_model()
+    user = User.objects.get(id=int(user_id))
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.is_superuser = superuser
+    user.is_staff = staff
+    if password:
+        user.set_password(password)
+    user.save()
+    if roles is not None:
+        set_roles(username, roles)
+    if superuser:
+        add_to_role(username, get_admin_role())
     return user
 
 def _get_user(user):
@@ -256,7 +297,7 @@ def _get_user(user):
         user_instance = user
     return user_instance
 
-def delete_user(user):
+def delete_user(user=None, user_id=None):
     """
     Deletes a user
 
@@ -270,7 +311,11 @@ def delete_user(user):
         boolean
         True if the operation was successfull, False otherwise
     """
-    user_instance = _get_user(user)
+    if user_id:
+        User = get_user_model()
+        user_instance = User.objects.get(id=user_id)
+    else:
+        user_instance = _get_user(user)
 
     # TODO improve error handling and op reversion    
     for role in get_roles(user_instance):
@@ -414,7 +459,7 @@ def set_roles(user, roles):
     
     #TODO: improve error handling and op reversion
     for role in old_roles:
-        if not remove_from_role(user, role.name):
+        if not remove_from_role(user, role):
             return False
     for role in roles:
         if not add_to_role(user, role):
@@ -497,12 +542,26 @@ def remove_from_role(user, role):
         boolean
         True if the operation was successfull, False otherwise
     """
+    # FIXME OIDC CMI puede recibir un username o userid
     if auth_services.get_services().ldap_delete_group_member(user, role) == False:
         return False
     user = _get_user(user)
     role = Role.objects.get(name=role)
     role.users.remove(user)
     return True
+
+def _get_user_representation(user):
+    user_repr = {
+        "id": u.id,
+        "username": u.username,
+        "first_name": u.first_name,
+        "last_name": u.last_name,
+        "is_superuser": u.is_superuser,
+        "is_staff": u.is_staff,
+        "email": u.email
+    }
+    user_repr["roles"] = u.role_set.all().values_list('name', flat=True)
+    return user_repr
 
 def get_users_details(exclude_system=False):
     """
@@ -547,19 +606,51 @@ def get_users_details(exclude_system=False):
     user_list = base_query.prefetch_related('role_set')
     
     users = []
-    for u in user_list:
-        user = {
-            "id": u.id,
-            "username": u.username,
-            "first_name": u.first_name,
-            "last_name": u.last_name,
-            "is_superuser": u.is_superuser,
-            "is_staff": u.is_staff,
-            "email": u.email
-        }
-        user["roles"] = u.role_set.all().values_list('name', flat=True)
-        users.append(user)
+    for user in user_list:
+        users.append(_get_user_representation(user))
     return users
+
+
+def get_user_details(user=None, user_id=None):
+    """
+    Gets a dictionary of user attributes (id, username, first_name, last_name
+    is_superuser, is_staff, email, roles) available in the system. The
+
+    Parameters
+    ----------
+    user: str | User
+        User name|Django User object
+    user_id: str | int
+        The user identifier. When 'user_id' is provided, then the 'user' parameter is ignored.
+        Note that user_id can be a string or an integer depending on the auth backend implementation.
+
+    Returns
+    -------
+    dict()
+        A dictionary containing the user attributes or None if an invalid user is provided. Example:
+        {
+            "id": 1,
+            "username": "username1",
+            "first_name": "Firstname1",
+            "last_name": "Lastname1",
+            "is_superuser": True,
+            "is_staff": True,
+            "email": "example1@example.com",
+            roles": ["role1", "role2"]},
+        }
+    """
+    User = get_user_model()
+    try:
+        if user_id:
+            user_instance = User.objects.get(id=user_id).prefetch_related('role_set')
+            return _get_user_representation(user)
+        if isinstance(user, str):
+            user_instance = User.objects.get(username=user)
+        else:
+            user_instance = user
+        return _get_user_representation(user)
+    except User.DoesNotExist:
+        LOGGER.exception('requests error getting users details')
 
 def get_role_details(role):
     """
