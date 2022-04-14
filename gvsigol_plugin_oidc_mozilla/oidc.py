@@ -6,6 +6,7 @@ from django.core.exceptions import SuspiciousOperation, ImproperlyConfigured
 from django.utils.encoding import force_bytes
 from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
+from gvsigol_plugin_oidc_mozilla.gvsigol_auth_mozilla import SUPERUSER_ROLE, STAFF_ROLE
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,8 +44,8 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             email=email,
             first_name = claims.get('first_name', ''),
             last_name = claims.get('last_name', ''),
-            is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles),
-            is_staff = ('GVSIGOL_DJANGO_STAFF' in django_roles)
+            is_superuser = (SUPERUSER_ROLE in django_roles),
+            is_staff = (STAFF_ROLE in django_roles)
         )
 
     def update_user(self, user, claims):
@@ -52,8 +53,8 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         user.first_name = claims.get('first_name', '')
         user.last_name = claims.get('last_name', '')
         django_roles = claims.get('gvsigol_roles', [])
-        user.is_superuser = ('GVSIGOL_DJANGO_SUPERUSER' in django_roles)
-        user.is_staff = ('GVSIGOL_DJANGO_STAFF' in django_roles)
+        user.is_superuser = (SUPERUSER_ROLE in django_roles)
+        user.is_staff = (STAFF_ROLE in django_roles)
         user.save()
 
         return user

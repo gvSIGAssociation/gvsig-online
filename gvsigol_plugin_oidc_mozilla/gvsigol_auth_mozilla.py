@@ -1,17 +1,19 @@
 
 import logging
 from re import M
+from this import d
 from urllib.parse import urlencode
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
+from gvsigol.services_base import BackendNotAvailable
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT
 from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
-from requests.exceptions import RequestException
+from requests.exceptions import RequestException, ConnectionError, Timeout, TooManyRedirects
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
 from gvsigol_auth import signals
 try:
@@ -21,17 +23,24 @@ except ImportError: # remove in python 3.7
 LOGGER = logging.getLogger('gvsigol')
 KEYCLOAK_TIMEOUT = 30
 
-def get_system_users():
-    # TODO parametrize?
-    return ['root']
 
 SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
 STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
 
+def get_admin_role():
+    """
+    Gets the name of the admin role, that is, a role that is always
+    assigned to superusers.
+    """
+    return SUPERUSER_ROLE
+
+def get_system_users():
+    # TODO parametrize?
+    return ['root']
+
 def get_system_roles():
     # TODO parametrize?
     return ['admin', SUPERUSER_ROLE, STAFF_ROLE]
-
 
 # we need to ensure that we get a different requests session for each
 # thread, since requests is not thread safe
@@ -191,6 +200,11 @@ class KeycloakAdminSession(OIDCSession):
                 yield g.get('name')
             yield from self._flatten_groups(g.get('subGroups'), subgroup=True)
 
+    def _get_user_name_from_id(self, user_id):
+        repr = self.get_user_repr(user_id=user_id)
+        if repr:
+            return repr.get('id')
+    
     def _get_group_details(self, g, subgroup=False):
         if subgroup:
             # TODO OIDC CMI: decide how to deal with subgroups
@@ -216,6 +230,8 @@ class KeycloakAdminSession(OIDCSession):
         try:
             response = self.get(self.admin_url + '/groups').json()
             return list(self._flatten_groups(response))
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error getting group')
         return []
@@ -224,6 +240,8 @@ class KeycloakAdminSession(OIDCSession):
         try:
             response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False}).json()
             return list(self._flatten_group_details(response))
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error getting group')
         return []
@@ -233,6 +251,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.get(self.admin_url + '/roles').json()
             system_roles = get_system_roles()
             return [r.get('name') for r in response if r.get('name') not in system_roles]
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error getting roles')
         return []
@@ -249,6 +269,8 @@ class KeycloakAdminSession(OIDCSession):
                 }
                 for r in response if r.get('name') not in system_roles
             ]
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error getting roles')
         return []
@@ -259,6 +281,7 @@ class KeycloakAdminSession(OIDCSession):
             email,
             first_name,
             last_name,
+            roles=None,
             superuser=False,
             staff=False):
         try:
@@ -268,6 +291,8 @@ class KeycloakAdminSession(OIDCSession):
                 realm_roles = [STAFF_ROLE]
             else:
                 realm_roles = []
+            if roles is not None:
+                realm_roles += roles
             user_rep = {
                 "credentials": [{"value": password}],
                 "email": email,
@@ -292,15 +317,70 @@ class KeycloakAdminSession(OIDCSession):
                 except IntegrityError:
                     # accept users already existing in Django to allow creating the user in Keycloak
                     LOGGER.exception('error creating user in django after keycloak creation')
-                    pass
+                    user = User.objects.get(username=username)
                 return user
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
+        except RequestException:
+            LOGGER.exception('requests error adding user')
+
+    def update_user(self,
+            user_id,
+            username,
+            email,
+            first_name,
+            last_name,
+            superuser,
+            staff,
+            roles=None,
+            password=None):
+        try:
+            user_rep = {
+                "email": email,
+                "firstName": first_name,
+                "lastName": last_name,
+                "id": user_id
+            }
+            if password:
+                user_rep["credentials"] =  [{"value": password}]
+            url = "{base_url}/users/{user_id}".format(base_url=self.admin_url, user_id=user_id)
+            response = self.put(url, json=user_rep)
+            if response.status_code == 204:
+                User = get_user_model()
+                
+                try:
+                    user = User.objects.get(username=username)
+                    user.first_name = first_name
+                    user.last_name = last_name
+                    user.email = email
+                    user.is_staff = staff
+                    user.is_superuser = superuser
+                    if password:
+                        user.set_password(password)
+                    user.save()
+                except User.DoesNotExist:
+                    # accept non-existing Django users to allow updating users created in Keycloak
+                    pass
+                if roles is not None:
+                    set_roles(username, roles)
+                if superuser:
+                    # ensure roles
+                    for role in ["ADMIN", SUPERUSER_ROLE, STAFF_ROLE]:
+                        self.add_to_role(username, role)
+                if staff:
+                    self.add_to_role(username, STAFF_ROLE)
+                return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error adding user')
 
     def get_user_id(self, username):
-        response = self.get(self.admin_url + '/users', params={"username": username}).json()
-        if len(response) > 0:
-            return response[0].get('id')
+        response = self.get(self.admin_url + '/users', params={"username": username})
+        if response.status_code == 200:
+            user_list = response.json()
+            if len(user_list) > 0:
+                return user_list[0].get('id')
     
     def _get_user_role_mappings(self, user_id):
         url = "{base_url}/users/{user_id}/role-mappings".format(base_url=self.admin_url, user_id=user_id)
@@ -317,9 +397,13 @@ class KeycloakAdminSession(OIDCSession):
         role_repr = self._get_role_repr(role_name)
         return role_repr.get('id')
 
-    def delete_user(self, username):
+    def delete_user(self, user=None, user_id=None):
         try:
-            user_id = self.get_user_id(username)
+            if not user_id:
+                username = _get_user_name(user)
+                user_id = self.get_user_id(username)
+            else:
+                username = self._get_user_name_from_id(user_id)
             url = "{base}/users/{id}".format(base=self.admin_url, id=user_id)
             response = self.delete(url)
             if response.status_code == 204:
@@ -330,6 +414,8 @@ class KeycloakAdminSession(OIDCSession):
                     # ignore to allow deleting keycloak users that have not been localy created in Django
                     pass
                 return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error deleting user')
         return False
@@ -343,6 +429,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.post(self.admin_url + '/groups', json=group_rep)
             if response.status_code == 201:
                 return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error adding group')
         return False
@@ -357,6 +445,8 @@ class KeycloakAdminSession(OIDCSession):
             if response.status_code == 201:
                 return True
             LOGGER.error('requests error adding role. Status code: {}'.format(response.status_code))
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error adding role')
         return False
@@ -368,6 +458,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.delete(url)
             if response.status_code == 204:
                 return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error deleting group')
         return False
@@ -378,6 +470,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.delete(url)
             if response.status_code == 204:
                 return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error deleting role')
         return False
@@ -394,6 +488,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.post(url, json=body)
             if response.status_code == 204:
                 return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error adding user to role')
         return False
@@ -410,6 +506,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.delete(url, json=body)
             if response.status_code == 204:
                 return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error removing user to role')
         return False
@@ -435,6 +533,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.delete(url)
             if response.status_code == 204:
                 return True
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error adding user to role')
         return False
@@ -462,6 +562,8 @@ class KeycloakAdminSession(OIDCSession):
                     "name": group_repr.get('name'),
                     "description": desc
                 }
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error getting group details')
 
@@ -474,6 +576,8 @@ class KeycloakAdminSession(OIDCSession):
                     "name": role_repr.get('name'),
                     "description": role_repr.get('description'),
                 }
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error adding user to role')
 
@@ -490,7 +594,9 @@ class KeycloakAdminSession(OIDCSession):
     
     def get_roles(self, username):
         user_id = self.get_user_id(username)
-        return self._get_user_roles(user_id)
+        if user_id:
+            return self._get_user_roles(user_id)
+        return []
 
     def get_groups(self, username):
         try:
@@ -526,9 +632,38 @@ class KeycloakAdminSession(OIDCSession):
                             "email": user.get('email'),
                             "roles": roles
                         })
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error getting users details')
         return users
+
+    def _get_user_details(self, user_id):
+        user_repr = self.get_user_repr(user_id)
+        if user_repr:
+            roles = self._get_user_roles(user_id)
+            return {
+                "id": user_repr.get('id'),
+                "username": user_repr.get('username'),
+                "first_name": user_repr.get('firstName', ''),
+                "last_name": user_repr.get('lastName', ''),
+                "is_superuser": SUPERUSER_ROLE in roles,
+                "is_staff": STAFF_ROLE in roles,
+                "email": user_repr.get('email'),
+                "roles": roles
+            }
+
+    def get_user_details(self, user=None, user_id=None):
+        try:
+            if not user_id:
+                username = _get_user_name(user)
+                user_id = self.get_user_id(username)
+            return self._get_user_details(user_id)
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
+        except RequestException:
+            LOGGER.exception('requests error getting users details')
+
 
 def _get_admin_session():
     s = getattr(thread_local_data, 'KC_ADMIN_SESSION', None)
@@ -719,6 +854,7 @@ def add_user(username,
         email,
         first_name,
         last_name,
+        roles=None,
         superuser=False,
         staff=False):
     """
@@ -743,29 +879,7 @@ def add_user(username,
         User
         A Django User instance or None if an error happened
     """
-    return _get_admin_session().add_user(username, password, email, first_name, last_name, superuser=superuser, staff=staff)
-
-def _get_user(user):
-    """
-    Gets the Django User instance from username or user id
-
-    Parameters
-    ----------
-    user: str|integer|User
-        User name|User id|Django User object
-    Returns
-    -------
-        User
-        A Django User instance
-    """
-    User = get_user_model()
-    if isinstance(user, str):
-        user_instance = User.objects.get(username=user)
-    elif isinstance(user, int):
-        user_instance = User.objects.get(id=user)
-    else:
-        user_instance = user
-    return user_instance
+    return _get_admin_session().add_user(username, password, email, first_name, last_name, roles=roles, superuser=superuser, staff=staff)
 
 def _get_user_name(user):
     """
@@ -788,21 +902,44 @@ def _get_user_name(user):
     elif isinstance(user, int):
         return User.objects.get(id=user).username
 
-def delete_user(user):
+def update_user(user_id,
+            username,
+            email,
+            first_name,
+            last_name,
+            superuser,
+            staff,
+            roles=None,
+            password=None):
+
+    return _get_admin_session().update_user(user_id,
+            username,
+            email,
+            first_name,
+            last_name,
+            superuser=superuser,
+            staff=staff,
+            roles=roles,
+            password=password)
+
+def delete_user(user=None, user_id=None):
     """
     Deletes a user
 
     Parameters
     ----------
-    user: str|integer|User
-        User name|User id|Django User object
+    user: str | User
+        User name | Django User object
+    user_id: str | integer
+        The user identifier. When 'user_id' is provided, then the 'user' parameter is ignored.
+        Note that user_id can be a string or an integer depending on the auth backend implementation.
     
     Returns
     -------
         boolean
         True if the operation was successfull, False otherwise
     """
-    return _get_admin_session().delete_user(_get_user_name(user))
+    return _get_admin_session().delete_user(user=user, user_id=user_id)
 
 def add_group(group_name, desc=''):
     """
@@ -911,15 +1048,15 @@ def set_roles(user, roles):
         boolean
         True if the operation was successfull, False otherwise
     """
-    user = _get_user(user)
-    old_roles = get_roles(user)
+    username = _get_user_name(user)
+    old_roles = get_roles(username)
     
     #TODO: improve error handling and op reversion
     for role in old_roles:
-        if not remove_from_role(user, role.name):
+        if not remove_from_role(username, role):
             return False
     for role in roles:
-        if not add_to_role(user, role):
+        if not add_to_role(username, role):
             return False
     return True
 
@@ -1043,6 +1180,36 @@ def get_users_details(exclude_system=False):
         }]
     """
     return _get_admin_session().get_users_details(exclude_system=exclude_system)
+
+def get_user_details(user=None, user_id=None):
+    """
+    Gets a dictionary of user attributes (id, username, first_name, last_name
+    is_superuser, is_staff, email, roles) available in the system. The
+
+    Parameters
+    ----------
+    user: str | User
+        User name|Django User object
+    user_id: str | int
+        The user identifier. When 'user_id' is provided, then the 'user' parameter is ignored.
+        Note that user_id can be a string or an integer depending on the auth backend implementation.
+
+    Returns
+    -------
+    dict()
+        A dictionary containing the user attributes or None if an invalid user is provided. Example:
+        {
+            "id": 1,
+            "username": "username1",
+            "first_name": "Firstname1",
+            "last_name": "Lastname1",
+            "is_superuser": True,
+            "is_staff": True,
+            "email": "example1@example.com",
+            roles": ["role1", "role2"]},
+        }
+    """
+    return _get_admin_session().get_user_details(user=user, user_id=user_id)
 
 def get_role_details(role):
     """
