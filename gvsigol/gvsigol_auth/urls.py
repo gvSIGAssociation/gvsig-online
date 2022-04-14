@@ -28,8 +28,8 @@ urlpatterns = LOGIN_PATHS + [
     
     path('user_list/', auth_views.user_list, name='user_list'),
     path('user_add/', auth_views.user_add, name='user_add'),
-    path('user_update/<int:uid>/', auth_views.user_update, name='user_update'),
-    path('user_delete/<int:uid>/', auth_views.user_delete, name='user_delete'),
+    path('user_update/<uid>/', auth_views.user_update, name='user_update'),
+    path('user_delete/<uid>/', auth_views.user_delete, name='user_delete'),
     
     path('group_list/', auth_views.group_list, name='group_list'),
     path('group_add/', auth_views.group_add, name='group_add'),
