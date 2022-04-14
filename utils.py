@@ -23,10 +23,14 @@
 from django.shortcuts import render
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
+from gvsigol.services_base import BackendNotAvailable
 import gvsigol.settings
 from functools import wraps
 from django.contrib.auth.models import User
 from gvsigol_auth import auth_backend
+import logging
+
+LOGGER_NAME = 'gvsigol'
 
 def superuser_required(function):
     def wrap(request, *args, **kwargs):
@@ -54,9 +58,9 @@ def is_superuser(user):
 def is_staff(user):
     return user.is_staff
 
-def get_all_roles_checked_by_user(user):  # FIXME OIDC CMI
+def get_all_roles_checked_by_user(username):  # FIXME OIDC CMI
     all_roles = auth_backend.get_all_roles_details(exclude_system=True)
-    user_roles = auth_backend.get_roles(user)
+    user_roles = auth_backend.get_roles(username)
     roles = []
     for role in all_roles:
         for user_role_name in user_roles:
@@ -130,11 +134,14 @@ def ensure_admin_group():
     """
     Ensures the admin group exists and it is assigned to all superusers
     """
-    admin_role = auth_backend.get_admin_role()
-    if not admin_role in auth_backend.get_all_roles():
-        auth_backend.add_role(admin_role)
-    
-    superusers = User.objects.filter(is_superuser=True)
-    for user in superusers:
-        if not auth_backend.has_role(user, admin_role):
-            auth_backend.add_to_role(user, admin_role)
+    try:
+        admin_role = auth_backend.get_admin_role()
+        if not admin_role in auth_backend.get_all_roles():
+            auth_backend.add_role(admin_role)
+        
+        superusers = User.objects.filter(is_superuser=True)
+        for user in superusers:
+            if not auth_backend.has_role(user, admin_role):
+                auth_backend.add_to_role(user, admin_role)
+    except BackendNotAvailable:
+        logging.getLogger(LOGGER_NAME).warning("Authentication backend is not available. Check configuration and connectivity")
