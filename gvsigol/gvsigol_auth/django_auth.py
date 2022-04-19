@@ -415,7 +415,7 @@ def delete_role(role):
     auth_services.get_services().ldap_delete_group(role_instance.name)
     auth_services.get_services().delete_data_directory(role_instance.name)
     role_instance.delete()
-    signals.role_deleted.send(sender=None, role=role.name)
+    signals.role_deleted.send(sender=None, role=role)
     return True
 
 
