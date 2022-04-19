@@ -265,7 +265,7 @@ class KeycloakAdminSession(OIDCSession):
                 {
                     'id': r.get('id'),
                     'name': r.get('name'),
-                    'description': ''
+                    'description': r.get('description', '')
                 }
                 for r in response if r.get('name') not in system_roles
             ]
