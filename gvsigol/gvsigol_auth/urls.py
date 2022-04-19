@@ -33,7 +33,11 @@ urlpatterns = LOGIN_PATHS + [
     
     path('group_list/', auth_views.group_list, name='group_list'),
     path('group_add/', auth_views.group_add, name='group_add'),
-    path('group_delete/<int:gid>/', auth_views.group_delete, name='group_delete'),
+    path('group_delete/<role_name>/', auth_views.group_delete, name='group_delete'),
+
+    path('role_list/', auth_views.group_list, name='role_list'),
+    path('role_add/', auth_views.group_add, name='role_add'),
+    path('role_delete/<role_name>/', auth_views.group_delete, name='role_delete'),
 
     path('api-token-auth/', obtain_jwt_token, name='api-token-auth'),
     path('api-token-refresh/', refresh_jwt_token, name='api-token-refresh'),

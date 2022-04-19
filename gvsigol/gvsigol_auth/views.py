@@ -557,10 +557,9 @@ def group_add(request):
   
 @login_required()
 @superuser_required
-def group_delete(request, gid):
+def group_delete(request, role_name):
     if request.method == 'POST':
-        role = auth_backend.get_role_details(gid) # FIXME OIDC CMI: debería hacer se de alguna forma más limpia
-        auth_backend.delete_role(gid)
+        auth_backend.delete_role(role_name)
         response = {
             'deleted': True
         }     

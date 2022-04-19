@@ -100,7 +100,8 @@ $(document).ready(function() {
 	        "defaultContent": '<button type="button" name="button-delete-group" data-toggle="modal" data-target="#modal-delete-group" data-placement="bottom" title="' + '{% trans "Delete group" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
 	    }],
 	    "dom": 'T<"clear">lfrtip',
-		"bLengthChange": false
+		"bLengthChange": false,
+		"order": [[ 1, 'asc' ]]
 	});
 		 
 	$('#groups-table tbody').on('click', 'button', function (){
@@ -120,7 +121,7 @@ $(document).ready(function() {
 			$.ajax({
 				type: 'POST',
 				async: false,
-				url: '/gvsigonline/auth/group_delete/' + data[0] + '/',
+				url: '/gvsigonline/auth/group_delete/' + data[1] + '/',
 				beforeSend:function(xhr){
 				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},

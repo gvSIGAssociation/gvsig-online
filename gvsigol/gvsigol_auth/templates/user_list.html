@@ -116,7 +116,8 @@ $(document).ready(function() {
 	        "defaultContent": '<button type="button" name="button-update-user" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update user" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	    }],
 	    "dom": 'T<"clear">lfrtip',
-		"bLengthChange": false
+		"bLengthChange": false,
+		"order": [[ 1, 'asc' ]]
 	});
 		 
 	$('#users-table tbody').on('click', 'button', function (){
