@@ -360,7 +360,7 @@ $(document).ready(function(){
 	function showAlertMatrix(){
 		var matrixset = $("#id_matrixset").val();
 
-		if(matrixset.includes("3857") || matrixset.includes("4326")){
+		if(matrixset && (matrixset.includes("3857") || matrixset.includes("4326"))) {
 			$("#matrixset-alert").css("display", "none");
 			
 		}else{
