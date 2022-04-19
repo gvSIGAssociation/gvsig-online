@@ -103,7 +103,7 @@ def get_roles(request_or_user):
     """
     if isinstance(request_or_user, str):
         query = Role.objects.filter(users__username=request_or_user)
-    if isinstance(request_or_user, HttpRequest) or isinstance(request_or_user, Request):
+    if isinstance(request_or_user, HttpRequest) or isinstance(request_or_user, Request): # FIXME OIDC CMI desde DRF se puede pasar request._request?
         user = request_or_user.user
     else:
         user = request_or_user
@@ -413,8 +413,7 @@ def delete_role(role):
         role_instance = Role.objects.get(id=role)
     # TODO improve error handling
     auth_services.get_services().ldap_delete_group(role_instance.name)
-    if not auth_services.get_services().delete_data_directory(role_instance.name):
-        return False
+    auth_services.get_services().delete_data_directory(role_instance.name)
     role_instance.delete()
     signals.role_deleted.send(sender=None, role=role.name)
     return True
