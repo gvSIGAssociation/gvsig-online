@@ -102,7 +102,7 @@ def get_roles(request_or_user):
         The list of roles of the user
     """
     if isinstance(request_or_user, str):
-        query = Role.objects.filter(users__username=request_or_user, users__is_authenticated=True)
+        query = Role.objects.filter(users__username=request_or_user)
     else:
         if isinstance(request_or_user, HttpRequest) or isinstance(request_or_user, Request): # FIXME OIDC CMI desde DRF se puede pasar request._request?
             user = request_or_user.user
