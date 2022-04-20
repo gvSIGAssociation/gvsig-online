@@ -453,17 +453,19 @@ def set_roles(user, roles):
         boolean
         True if the operation was successfull, False otherwise
     """
-    user = _get_user(user)
-    old_roles = Role.objects.filter(users=user)
-    
+    old_roles = set(get_roles(user))
+    roles = set(roles)
+    to_remove = old_roles - roles
     #TODO: improve error handling and op reversion
-    for role in old_roles:
+    success = True
+    for role in to_remove:
         if not remove_from_role(user, role):
-            return False
-    for role in roles:
+            success = False
+    to_add = roles - old_roles
+    for role in to_add:
         if not add_to_role(user, role):
-            return False
-    return True
+            success = False
+    return success
 
 def add_to_group(user, group):
     """
