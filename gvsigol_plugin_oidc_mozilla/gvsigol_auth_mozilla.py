@@ -249,8 +249,10 @@ class KeycloakAdminSession(OIDCSession):
     def get_all_roles(self, exclude_system=False):
         try:
             response = self.get(self.admin_url + '/roles').json()
-            system_roles = get_system_roles()
-            return [r.get('name') for r in response if r.get('name') not in system_roles]
+            if exclude_system:
+                system_roles = get_system_roles()
+                return [r.get('name') for r in response if r.get('name') not in system_roles]
+            return [r.get('name') for r in response]
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
         except RequestException:
@@ -260,7 +262,10 @@ class KeycloakAdminSession(OIDCSession):
     def get_all_roles_details(self, exclude_system=False):
         try:
             response = self.get(self.admin_url + '/roles').json()
-            system_roles = get_system_roles()
+            if exclude_system:
+                system_roles = get_system_roles()
+            else:
+                system_roles = []
             return [
                 {
                     'id': r.get('id'),
