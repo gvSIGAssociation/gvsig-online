@@ -24,23 +24,24 @@ LOGGER = logging.getLogger('gvsigol')
 KEYCLOAK_TIMEOUT = 30
 
 
-SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
+MAIN_SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
 STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
+SUPERUSER_ROLES = {MAIN_SUPERUSER_ROLE, 'ADMIN', 'ROLE_ADMIN'}
 
 def get_admin_role():
     """
     Gets the name of the admin role, that is, a role that is always
     assigned to superusers.
     """
-    return SUPERUSER_ROLE
+    return MAIN_SUPERUSER_ROLE
 
 def get_system_users():
     # TODO parametrize?
-    return ['root']
+    return {'root'}
 
 def get_system_roles():
     # TODO parametrize?
-    return ['admin', SUPERUSER_ROLE, STAFF_ROLE]
+    return SUPERUSER_ROLES | {STAFF_ROLE}
 
 # we need to ensure that we get a different requests session for each
 # thread, since requests is not thread safe
@@ -290,14 +291,16 @@ class KeycloakAdminSession(OIDCSession):
             superuser=False,
             staff=False):
         try:
-            if superuser:
-                realm_roles = ["ADMIN", SUPERUSER_ROLE, STAFF_ROLE]
-            elif staff:
-                realm_roles = [STAFF_ROLE]
+            if roles is None:
+                roles = set()
             else:
-                realm_roles = []
-            if roles is not None:
-                realm_roles += roles
+                roles = set(roles) # remove duplicates
+            if superuser:
+                realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
+            elif staff:
+                realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
+            else:
+                realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
             user_rep = {
                 "credentials": [{"value": password}],
                 "email": email,
@@ -366,14 +369,27 @@ class KeycloakAdminSession(OIDCSession):
                 except User.DoesNotExist:
                     # accept non-existing Django users to allow updating users created in Keycloak
                     pass
-                if roles is not None:
-                    set_roles(username, roles)
+                if roles is None:
+                    roles = set()
+                else:
+                    roles = set(roles) # remove duplicates
+                if superuser:
+                    realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
+                elif staff:
+                    realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
+                else:
+                    realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
+
+                
+                set_roles(username, realm_roles)
+                """
                 if superuser:
                     # ensure roles
-                    for role in ["ADMIN", SUPERUSER_ROLE, STAFF_ROLE]:
+                    for role in ["ADMIN", MAIN_SUPERUSER_ROLE, STAFF_ROLE]:
                         self.add_to_role(username, role)
                 if staff:
                     self.add_to_role(username, STAFF_ROLE)
+                """
                 return True
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
@@ -381,12 +397,18 @@ class KeycloakAdminSession(OIDCSession):
             LOGGER.exception('requests error adding user')
 
     def get_user_id(self, username):
-        response = self.get(self.admin_url + '/users', params={"username": username})
+        response = self.get(self.admin_url + '/users', params={"username": username, "exact": True})
         if response.status_code == 200:
             user_list = response.json()
             if len(user_list) > 0:
                 return user_list[0].get('id')
-    
+
+    def _get_user_role_mappings_realm_composite(self, user_id):
+        url = "{base_url}/users/{user_id}/role-mappings/realm/composite".format(base_url=self.admin_url, user_id=user_id)
+        response = self.get(url)
+        if response.status_code == 200:
+            return response.json()
+
     def _get_user_role_mappings(self, user_id):
         url = "{base_url}/users/{user_id}/role-mappings".format(base_url=self.admin_url, user_id=user_id)
         response = self.get(url)
@@ -594,8 +616,8 @@ class KeycloakAdminSession(OIDCSession):
 
     def _get_user_roles(self, user_id):
         # FIXME: we could also include client mappings
-        role_mappings = self._get_user_role_mappings(user_id)
-        return [r.get('name') for r in role_mappings.get('realmMappings')]
+        role_mappings = self._get_user_role_mappings_realm_composite(user_id)
+        return [r.get('name') for r in role_mappings]
     
     def get_roles(self, username):
         user_id = self.get_user_id(username)
@@ -632,7 +654,7 @@ class KeycloakAdminSession(OIDCSession):
                             "username": user.get('username'),
                             "first_name": user.get('firstName', ''),
                             "last_name": user.get('lastName', ''),
-                            "is_superuser": SUPERUSER_ROLE in roles,
+                            "is_superuser": MAIN_SUPERUSER_ROLE in roles,
                             "is_staff": STAFF_ROLE in roles,
                             "email": user.get('email'),
                             "roles": roles
@@ -652,7 +674,7 @@ class KeycloakAdminSession(OIDCSession):
                 "username": user_repr.get('username'),
                 "first_name": user_repr.get('firstName', ''),
                 "last_name": user_repr.get('lastName', ''),
-                "is_superuser": SUPERUSER_ROLE in roles,
+                "is_superuser": MAIN_SUPERUSER_ROLE in roles,
                 "is_staff": STAFF_ROLE in roles,
                 "email": user_repr.get('email'),
                 "roles": roles
@@ -1054,16 +1076,19 @@ def set_roles(user, roles):
         True if the operation was successfull, False otherwise
     """
     username = _get_user_name(user)
-    old_roles = get_roles(username)
-    
+    old_roles = set(get_roles(username))
+    roles = set(roles)
+    to_remove = old_roles - roles
     #TODO: improve error handling and op reversion
-    for role in old_roles:
+    success = True
+    for role in to_remove:
         if not remove_from_role(username, role):
-            return False
-    for role in roles:
+            success = False
+    to_add = roles - old_roles
+    for role in to_add:
         if not add_to_role(username, role):
-            return False
-    return True
+            success = False
+    return success
 
 def add_to_group(user, group):
     """
