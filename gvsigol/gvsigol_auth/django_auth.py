@@ -645,11 +645,12 @@ def get_user_details(user=None, user_id=None):
     """
     User = get_user_model()
     try:
+        users = None
         if user_id:
             users = User.objects.filter(id=user_id).prefetch_related('role_set')
         elif isinstance(user, str):
             users = User.objects.filter(username=user).prefetch_related('role_set')
-        if len(users) > 0:
+        if users and len(users) > 0:
             return _get_user_representation(users[0])
         return _get_user_representation(user)
     except User.DoesNotExist:
