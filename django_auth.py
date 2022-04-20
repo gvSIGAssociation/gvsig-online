@@ -102,15 +102,18 @@ def get_roles(request_or_user):
         The list of roles of the user
     """
     if isinstance(request_or_user, str):
-        query = Role.objects.filter(users__username=request_or_user)
-    if isinstance(request_or_user, HttpRequest) or isinstance(request_or_user, Request): # FIXME OIDC CMI desde DRF se puede pasar request._request?
-        user = request_or_user.user
+        query = Role.objects.filter(users__username=request_or_user, users__is_authenticated=True)
     else:
-        user = request_or_user
-    if user.is_authenticated:
-        query =  Role.objects.filter(users=user)
-        return list(query.values_list("name", flat=True))
-    return []
+        if isinstance(request_or_user, HttpRequest) or isinstance(request_or_user, Request): # FIXME OIDC CMI desde DRF se puede pasar request._request?
+            user = request_or_user.user
+        else:
+            user = request_or_user
+        if user.is_authenticated:
+            query =  Role.objects.filter(users=user)
+        else:
+            return []
+    return list(query.values_list("name", flat=True))
+    
 
 def get_groups(request_or_user):
     """Gets the groups of the user. Important: provide a Django HttpRequest
