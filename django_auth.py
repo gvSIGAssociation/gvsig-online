@@ -553,15 +553,15 @@ def remove_from_role(user, role):
 
 def _get_user_representation(user):
     user_repr = {
-        "id": u.id,
-        "username": u.username,
-        "first_name": u.first_name,
-        "last_name": u.last_name,
-        "is_superuser": u.is_superuser,
-        "is_staff": u.is_staff,
-        "email": u.email
+        "id": user.id,
+        "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "is_superuser": user.is_superuser,
+        "is_staff": user.is_staff,
+        "email": user.email
     }
-    user_repr["roles"] = u.role_set.all().values_list('name', flat=True)
+    user_repr["roles"] = user.role_set.all().values_list('name', flat=True)
     return user_repr
 
 def get_users_details(exclude_system=False):
