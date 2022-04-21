@@ -323,6 +323,41 @@ def user_list(request):
     }     
     return render(request, 'user_list.html', response)
 
+def _config_staff_user(username):
+    gs = geographic_servers.get_instance().get_default_server()
+    server_object = Server.objects.get(id=int(gs.id))
+
+    role = auth_backend.get_primary_role(username)
+    user_role_created = auth_backend.add_role(role)
+
+    auth_backend.add_to_role(username, role)
+    # FIXME OIDC CMI deberia hacerse solo si no existe el rol???
+    auth_services.get_services().add_data_directory(role)
+    url = server_object.frontend_url + '/'
+    ws_name = 'ws_' + username.lower()
+    if gs.createWorkspace(ws_name, url + ws_name):          
+        # save it on DB if successfully created
+        newWs = Workspace(
+            server = server_object,
+            name = ws_name,
+            description = '',
+            uri = url + ws_name,
+            wms_endpoint = url + ws_name + '/wms',
+            wfs_endpoint = url + ws_name + '/wfs',
+            wcs_endpoint = url + ws_name + '/wcs',
+            wmts_endpoint = url + 'gwc/service/wmts',
+            cache_endpoint = url + 'gwc/service/wms',
+            created_by = username,
+            is_public = False
+        )
+        newWs.save()
+        
+        ds_name = 'ds_' + username.lower()
+        services_utils.create_datastore(username, ds_name, newWs)
+        gs.reload_nodes()
+    return (user_role_created, role)
+    
+
 @login_required()
 @superuser_required
 def user_add(request):        
@@ -356,8 +391,6 @@ def user_add(request):
                     if 'group-' in key:
                         assigned_roles.append(key[len('group-'):])
             
-                gs = geographic_servers.get_instance().get_default_server()
-                server_object = Server.objects.get(id=int(gs.id))
                                 
                 if form.data['password1'] == form.data['password2']:
                     user = auth_backend.add_user(
@@ -375,37 +408,8 @@ def user_add(request):
 
                         #User backend
                         if is_superuser or is_staff:
-                            role = auth_backend.get_primary_role(user.username)
-                            if auth_backend.add_role(role):
-                                user_role_created = True
-
-                            auth_backend.add_to_role(user, role)
+                            user_role_created, role =_config_staff_user(user.username)
                             role_membership_added.append(role)
-                            # FIXME OIDC CMI deberia hacerse solo si no existe el rol???
-                            auth_services.get_services().add_data_directory(role)
-                            url = server_object.frontend_url + '/'
-                            ws_name = 'ws_' + form.data['username'].lower()
-                            if gs.createWorkspace(ws_name, url + ws_name):          
-                                # save it on DB if successfully created
-                                newWs = Workspace(
-                                    server = server_object,
-                                    name = ws_name,
-                                    description = '',
-                                    uri = url + ws_name,
-                                    wms_endpoint = url + ws_name + '/wms',
-                                    wfs_endpoint = url + ws_name + '/wfs',
-                                    wcs_endpoint = url + ws_name + '/wcs',
-                                    wmts_endpoint = url + 'gwc/service/wmts',
-                                    cache_endpoint = url + 'gwc/service/wms',
-                                    created_by = user.username,
-                                    is_public = False
-                                )
-                                newWs.save()
-                                
-                                ds_name = 'ds_' + form.data['username'].lower()
-                                services_utils.create_datastore(user.username, ds_name, newWs)
-                                
-                                gs.reload_nodes()
                             
                         try:    
                             auth_utils.sendMail(user, form.data['password1'])
@@ -477,7 +481,7 @@ def user_update(request, uid):
 
         username = request.POST.get('username')
         try:
-            user = auth_backend.update_user(
+            success = auth_backend.update_user(
                     uid,
                     username,
                     request.POST.get('email'),
@@ -487,6 +491,10 @@ def user_update(request, uid):
                     staff=is_staff,
                     roles=assigned_roles
             )
+                                    #User backend
+            if success and (is_superuser or is_staff):
+                _config_staff_user(username)
+
             return redirect('user_list')
         except BackendNotAvailable:
             message = _("The authentication server is not available. Try again later or contact system administrators.")
