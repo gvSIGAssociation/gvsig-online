@@ -12,6 +12,8 @@ from gvsigol_core import utils as core_utils
 import zipfile
 import shutil
 
+def sorter(item):
+    return item.get('filename', '').lower()
 
 class Filemanager(object):
     def __init__(self, path=None):
@@ -71,8 +73,6 @@ class Filemanager(object):
         }
 
     def directory_list(self, request, first_level):
-        listing = []
-        
         visible_extensions = ['shp', 'dbf', 'geotif', 'geotiff', 'tif', 'tiff', 'zip']
         
         if 'gvsigol_plugin_etl' in INSTALLED_APPS:
@@ -91,6 +91,7 @@ class Filemanager(object):
             }
 
         groups = auth_backend.get_roles(request)
+        dir_list = []
         for directoryname in directories:
             '''if first_level:
                 if request.user.is_superuser:
@@ -103,23 +104,23 @@ class Filemanager(object):
             else:
                 listing.append(_helper(directoryname, 'Directory', ''))'''
             if request.user.is_superuser:
-                listing.append(_helper(directoryname, 'Directory', ''))
+                dir_list.append(_helper(directoryname, 'Directory', ''))
             else: 
                 if first_level:
                     for g in groups:
                         if directoryname == g:
-                            listing.append(_helper(directoryname, 'Directory', ''))
+                            dir_list.append(_helper(directoryname, 'Directory', ''))
                 else:
-                    listing.append(_helper(directoryname, 'Directory', ''))
-
+                    dir_list.append(_helper(directoryname, 'Directory', ''))
+        file_list = []
         for filename in files:
             parts = filename.split('.')
             if len(parts) > 1:
                 extension = parts[1]
                 #if extension.lower() in visible_extensions:
                 #    listing.append(_helper(filename, 'File', extension))
-                listing.append(_helper(filename, 'File', extension))
-
+                file_list.append(_helper(filename, 'File', extension))
+        listing = sorted(dir_list, key=sorter) + sorted(file_list, key=sorter)
         return listing
 
     def upload_file(self, filedata):
