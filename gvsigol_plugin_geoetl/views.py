@@ -696,7 +696,7 @@ def etl_schema_indenova(request):
         if form.is_valid():
             #jsParams = json.loads(request.POST['jsonParamsIndenova'])
             #listSchema = etl_schema.get_schema_indenova(jsParams['parameters'][0])
-            listSchema = ['idexp', 'numexp', 'issue', 'idtram', 'nametram', 'initdate', 'status', 'regnumber', 'regdate', 'adirefcatt', 'identifier', 'name', 'town', 'city', 'postalcode', 'country', 'enddate']
+            listSchema = ['idexp', 'numexp', 'issue', 'idtram', 'nametram', 'initdate', 'status', 'regnumber', 'regdate', 'adirefcatt', 'identifier', 'name', 'town', 'city', 'postalcode', 'country', 'enddate', 'url']
 
             response = json.dumps(listSchema)
             

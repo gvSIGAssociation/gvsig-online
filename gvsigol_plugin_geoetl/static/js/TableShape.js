@@ -269,8 +269,6 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
         })
 
-
-        
         $('input:radio[name="date-indenova-'+ID+'"]').change(function(){
             if ($('#check-init-date-'+ID).is(':checked')){
                 
@@ -382,88 +380,86 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                 $('#end-date-'+ID).prop('disabled', false)
                 $("#checkbox-"+ID).prop('disabled', false)
             }
+        });
 
-            $('#input-indenova-accept-'+ID).click(function() {
+        $('#input-indenova-accept-'+ID).click(function() {
 
-                if($("#checkbox-init-"+ID).is(':checked')){
-                    $("#checkbox-init-"+ID).val("true")
-                    
-                    //let today = new Date().toISOString().slice(0, 10)
-                    
-                }else{
-                    $("#checkbox-init-"+ID).val("")
-                };
+            if($("#checkbox-init-"+ID).is(':checked')){
+                $("#checkbox-init-"+ID).val("true")
+                
+                //let today = new Date().toISOString().slice(0, 10)
+                
+            }else{
+                $("#checkbox-init-"+ID).val("")
+            };
 
-                if($("#checkbox-end-"+ID).is(':checked')){
-                    $("#checkbox-end-"+ID).val("true")
-                    //let today = new Date().toISOString().slice(0, 10)
-                    
-                }else{
-                    $("#checkbox-end-"+ID).val("")
-                };
+            if($("#checkbox-end-"+ID).is(':checked')){
+                $("#checkbox-end-"+ID).val("true")
+                //let today = new Date().toISOString().slice(0, 10)
+                
+            }else{
+                $("#checkbox-end-"+ID).val("")
+            };
 
-                if (typeof get_ === 'undefined'){
-                    get_ = []
-                    $("#proced-list-"+ID+" option").each(function()
-                        {  
-                            if ($(this).val() != 'all'){
-                                get_.push([$(this).val(), $(this).text()])
-                            }
-                            
+            if (typeof get_ === 'undefined'){
+                get_ = []
+                $("#proced-list-"+ID+" option").each(function()
+                    {  
+                        if ($(this).val() != 'all'){
+                            get_.push([$(this).val(), $(this).text()])
                         }
-                    );
-                }
-
-                var paramsIndenova = {"id": ID,
-                "parameters": [
-                    {   
-                        "get_proced-list": get_,
-                        "domain": $('#domain-'+ID).val(),
-                        "api-key": $('#api-key-'+ID).val(),
-                        "client-id": $('#client-id-'+ID).val(),
-                        "secret": $('#secret-'+ID).val(),
-                        "proced-list": $('#proced-list-'+ID).val(),
-                        "init-date": $('#init-date-'+ID).val(),
-                        "end-date": $('#end-date-'+ID).val(),
-                        "checkbox-end": $("#checkbox-end-"+ID).val(),
-                        "checkbox-init": $("#checkbox-init-"+ID).val(),
-                        "date-indenova":$('input:radio[name="date-indenova-'+ID+'"]:checked').val()
+                        
                     }
-                ]};
+                );
+            }
 
-                var formDataIndenova = new FormData();
+            var paramsIndenova = {"id": ID,
+            "parameters": [
+                {   
+                    "get_proced-list": get_,
+                    "domain": $('#domain-'+ID).val(),
+                    "api-key": $('#api-key-'+ID).val(),
+                    "client-id": $('#client-id-'+ID).val(),
+                    "secret": $('#secret-'+ID).val(),
+                    "proced-list": $('#proced-list-'+ID).val(),
+                    "init-date": $('#init-date-'+ID).val(),
+                    "end-date": $('#end-date-'+ID).val(),
+                    "checkbox-end": $("#checkbox-end-"+ID).val(),
+                    "checkbox-init": $("#checkbox-init-"+ID).val(),
+                    "date-indenova":$('input:radio[name="date-indenova-'+ID+'"]:checked').val()
+                }
+            ]};
 
-                formDataIndenova.append('jsonParamsIndenova', JSON.stringify(paramsIndenova))
-                $("#canvas-parent").css('cursor','wait');
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_schema_indenova/',
-					data: formDataIndenova,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-                        paramsIndenova['schema'] = data
-                        paramsIndenova['parameters'][0]['schema'] = data
-                        
-                        passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                        
-                        isAlreadyInCanvas(jsonParams, paramsIndenova, ID)
+            var formDataIndenova = new FormData();
 
-                        icon.setColor('#01b0a0')
-                        
-                        $('#dialog-input-indenova-'+ID).modal('hide')
+            formDataIndenova.append('jsonParamsIndenova', JSON.stringify(paramsIndenova))
+            $("#canvas-parent").css('cursor','wait');
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_indenova/',
+                data: formDataIndenova,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsIndenova['schema'] = data
+                    paramsIndenova['parameters'][0]['schema'] = data
+                    
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    
+                    isAlreadyInCanvas(jsonParams, paramsIndenova, ID)
 
-                        $("#canvas-parent").css('cursor','default');
-                        }
-                    })
-        
+                    icon.setColor('#01b0a0')
+                    
+                    $('#dialog-input-indenova-'+ID).modal('hide')
 
+                    $("#canvas-parent").css('cursor','default');
+                }
             })
-        })
+        });
     },
      
     /**
@@ -657,42 +653,43 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-csv-'+ID).modal('show')
 
-            $('#input-csv-accept-'+ID).click(function() {
+        });
 
-                var paramsCSV = {"id": ID,
-                "parameters": [
-                    {"csv-file": $('#csv-file-'+ID).val(),
-                    "separator": $('#separator-'+ID).val()}
-                ]}
+        $('#input-csv-accept-'+ID).click(function() {
 
-                var formDataSchemaCSV = new FormData();
+            var paramsCSV = {"id": ID,
+            "parameters": [
+                {"csv-file": $('#csv-file-'+ID).val(),
+                "separator": $('#separator-'+ID).val()}
+            ]}
 
-                formDataSchemaCSV.append('jsonParamsCSV', JSON.stringify(paramsCSV))
+            var formDataSchemaCSV = new FormData();
 
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_schema_csv/',
-					data: formDataSchemaCSV,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-                        paramsCSV['schema'] = data
-                        
-                        passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                        }
-                    })
-        
-                isAlreadyInCanvas(jsonParams, paramsCSV, ID)
+            formDataSchemaCSV.append('jsonParamsCSV', JSON.stringify(paramsCSV))
 
-                icon.setColor('#01b0a0')
-                
-                $('#dialog-input-csv-'+ID).modal('hide')
-            })
-        })
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_csv/',
+                data: formDataSchemaCSV,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsCSV['schema'] = data
+                    
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    }
+                })
+    
+            isAlreadyInCanvas(jsonParams, paramsCSV, ID)
+
+            icon.setColor('#01b0a0')
+            
+            $('#dialog-input-csv-'+ID).modal('hide')
+        });
     },
      
     /**
@@ -990,86 +987,87 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-excel-'+ID).modal('show')
 
-            $('#get-sheets-'+ID).on("click", function(){
+        });
+
+        $('#get-sheets-'+ID).on("click", function(){
                                 
-                var formDataSheetExcel = new FormData();
+            var formDataSheetExcel = new FormData();
 
-                formDataSheetExcel.append('file', $('#excel-file-'+ID).val())
-                formDataSheetExcel.append('reading', $('input:radio[name="reading-'+ID+'"]:checked').val())
+            formDataSheetExcel.append('file', $('#excel-file-'+ID).val())
+            formDataSheetExcel.append('reading', $('input:radio[name="reading-'+ID+'"]:checked').val())
 
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_sheet_excel/',
-					data: formDataSheetExcel,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_sheet_excel/',
+                data: formDataSheetExcel,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
 
-                        $('#sheet-name-'+ID).empty()
-                        get_ = []
+                    $('#sheet-name-'+ID).empty()
+                    get_ = []
 
-                        for (i = 0; i < data.length; i++){
-                            $('#sheet-name-'+ID).append('<option>'+data[i]+'</option>')
-                            get_.push(data[i])
+                    for (i = 0; i < data.length; i++){
+                        $('#sheet-name-'+ID).append('<option>'+data[i]+'</option>')
+                        get_.push(data[i])
 
-                        }
+                    }
+                }
+            })
+        });
+
+        $('#input-excel-accept-'+ID).click(function() {
+
+            if (typeof get_ === 'undefined'){
+                get_ = []
+                $("#sheet-name-"+ID+" option").each(function()
+                    {
+                        get_.push($(this).val())
+                    });
+            }
+            
+            var paramsExcel = {"id": ID,
+            "parameters": [
+                { "get_sheet-name":  get_ ,
+                "excel-file": $('#excel-file-'+ID).val(),
+                "sheet-name": $('#sheet-name-'+ID).val(),
+                "usecols": $('#usecols-'+ID).val(),
+                "header": $('#header-'+ID).val(),
+                "reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
+                "move": $('#move-'+ID).val(),
+                "folder": $('#folder-'+ID).val()
+                }
+            ]}
+
+            var formDataSchemaExcel = new FormData();
+            
+            formDataSchemaExcel.append('jsonParamsExcel', JSON.stringify(paramsExcel))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_excel/',
+                data: formDataSchemaExcel,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsExcel['schema'] = data
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    
                     }
                 })
-            });
+            isAlreadyInCanvas(jsonParams, paramsExcel, ID)
 
-            $('#input-excel-accept-'+ID).click(function() {
+            icon.setColor('#01b0a0')
 
-                if (typeof get_ === 'undefined'){
-                    get_ = []
-                    $("#sheet-name-"+ID+" option").each(function()
-                        {
-                            get_.push($(this).val())
-                        });
-                }
-                
-                var paramsExcel = {"id": ID,
-                "parameters": [
-                    { "get_sheet-name":  get_ ,
-                    "excel-file": $('#excel-file-'+ID).val(),
-                    "sheet-name": $('#sheet-name-'+ID).val(),
-                    "usecols": $('#usecols-'+ID).val(),
-                    "header": $('#header-'+ID).val(),
-                    "reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
-                    "move": $('#move-'+ID).val(),
-                    "folder": $('#folder-'+ID).val()
-                    }
-                ]}
-
-                var formDataSchemaExcel = new FormData();
-                
-                formDataSchemaExcel.append('jsonParamsExcel', JSON.stringify(paramsExcel))
-
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_schema_excel/',
-					data: formDataSchemaExcel,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-                        paramsExcel['schema'] = data
-                        passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                        
-                        }
-                    })
-                isAlreadyInCanvas(jsonParams, paramsExcel, ID)
-
-                icon.setColor('#01b0a0')
-
-                $('#dialog-input-excel-'+ID).modal('hide')
-            })
+            $('#dialog-input-excel-'+ID).modal('hide')
         })
     },
     
@@ -1278,57 +1276,42 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-shp-'+ID).modal('show')
 
-            $('#input-shp-accept-'+ID).click(function() {
+        });
 
-                var paramsSHP = {"id": ID,
-                "parameters": [
-                { "shp-file": $('#shp-file-'+ID).val(),
-                  "encode": $('#encode-'+ID).val(),
-                  "epsg": $('#epsg-'+ID).val()}
-                ]}
+        $('#input-shp-accept-'+ID).click(function() {
 
-                
+            var paramsSHP = {"id": ID,
+            "parameters": [
+            { "shp-file": $('#shp-file-'+ID).val(),
+              "encode": $('#encode-'+ID).val(),
+              "epsg": $('#epsg-'+ID).val()}
+            ]}
 
-                var formDataSchemaShape = new FormData();
-                formDataSchemaShape.append('file', $('#shp-file-'+ID).val())
-                
+            var formDataSchemaShape = new FormData();
+            formDataSchemaShape.append('file', $('#shp-file-'+ID).val())
 
-                /*for (i = 0; i < $('#shp-file-'+ID)[0].files.length; i++) {
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_shape/',
+                data: formDataSchemaShape,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsSHP['schema'] = data
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    }
+                })
+    
+            isAlreadyInCanvas(jsonParams, paramsSHP, ID)
 
-                    formData.append(ID+'_'+i, $('#shp-file-'+ID)[0].files[i])
-                    formDataSchemaShape.append('file_'+i, $('#shp-file-'+ID)[0].files[i])
-
-                    paramsSHP = paramsSHP+'{"shp-file_'+i+'":"'+$('#shp-file-'+ID)[0].files[i].name+'"},'
-
-                }
-
-                paramsSHP = paramsSHP.slice(0,-1) + ']}'
-                
-                var jsonParamsSHP = JSON.parse(paramsSHP)*/
-
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_schema_shape/',
-					data: formDataSchemaShape,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-                        paramsSHP['schema'] = data
-                        passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                        }
-                    })
-        
-                isAlreadyInCanvas(jsonParams, paramsSHP, ID)
-
-                icon.setColor('#01b0a0')
-                
-                $('#dialog-input-shp-'+ID).modal('hide')
-            })
-        })
+            icon.setColor('#01b0a0')
+            
+            $('#dialog-input-shp-'+ID).modal('hide')
+        });
     },
      
     /**
@@ -1625,120 +1608,122 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                 $("#checkbox-"+ID).val("")
             }
             
-            $('#get-owners-'+ID).on("click", function(){
+        });
+
+        $('#get-owners-'+ID).on("click", function(){
                                 
-                var paramsOracleOwners = {"id": ID,
-                "parameters": [
-                    {"username": $('#username-'+ID).val(),
-                    "dsn": $('#dsn-'+ID).val(),
-                    "password": $('#password-'+ID).val()}
-                ]}
-    
-                var formDataOracleOwners = new FormData();
-                
-                formDataOracleOwners.append('jsonParamsOracle', JSON.stringify(paramsOracleOwners))
+            var paramsOracleOwners = {"id": ID,
+            "parameters": [
+                {"username": $('#username-'+ID).val(),
+                "dsn": $('#dsn-'+ID).val(),
+                "password": $('#password-'+ID).val()}
+            ]}
 
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_owners_oracle/',
-					data: formDataOracleOwners,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
+            var formDataOracleOwners = new FormData();
+            
+            formDataOracleOwners.append('jsonParamsOracle', JSON.stringify(paramsOracleOwners))
 
-                        $('#owner-name-'+ID).empty()
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_owners_oracle/',
+                data: formDataOracleOwners,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
 
-                        for (i = 0; i < data.length; i++){
-                            $('#owner-name-'+ID).append('<option>'+data[i]+'</option>')
+                    $('#owner-name-'+ID).empty()
 
-                        }
+                    for (i = 0; i < data.length; i++){
+                        $('#owner-name-'+ID).append('<option>'+data[i]+'</option>')
+
                     }
-                })
-            });
-
-            $('#get-tables-'+ID).on("click", function(){
-                                
-                var paramsOracleTables = {"id": ID,
-                "parameters": [
-                    {"username": $('#username-'+ID).val(),
-                    "dsn": $('#dsn-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
-                    "owner-name": $('#owner-name-'+ID).val()}
-                ]}
-    
-                var formDataOracleTables = new FormData();
-                
-                formDataOracleTables.append('jsonParamsOracle', JSON.stringify(paramsOracleTables))
-
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_tables_oracle/',
-					data: formDataOracleTables,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-
-                        $('#table-name-'+ID).empty()
-
-                        for (i = 0; i < data.length; i++){
-                            $('#table-name-'+ID).append('<option>'+data[i]+'</option>')
-
-                        }
-                    }
-                })
-            });
-
-
-            $('#input-oracle-accept-'+ID).click(function() {
-                
-                var paramsOracle = {"id": ID,
-                "parameters": [
-                    {"username": $('#username-'+ID).val(),
-                    "dsn": $('#dsn-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
-                    "owner-name": $('#owner-name-'+ID).val(),
-                    "table-name": $('#table-name-'+ID).val(),
-                    "checkbox": $("#checkbox-"+ID).val(),
-                    "sql": $('#sql-'+ID).val()}
-                ]}
-
-                var formDataSchemaOracle = new FormData();
-                
-                formDataSchemaOracle.append('jsonParamsOracle', JSON.stringify(paramsOracle))
-
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_schema_oracle/',
-					data: formDataSchemaOracle,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-                        paramsOracle['schema'] = data
-
-                        passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                        
-                        }
-                    })
-                
-                isAlreadyInCanvas(jsonParams, paramsOracle, ID)
-
-                icon.setColor('#01b0a0')
-
-                $('#dialog-input-oracle-'+ID).modal('hide')
+                }
             })
-        })
+        });
+
+        $('#get-tables-'+ID).on("click", function(){
+                            
+            var paramsOracleTables = {"id": ID,
+            "parameters": [
+                {"username": $('#username-'+ID).val(),
+                "dsn": $('#dsn-'+ID).val(),
+                "password": $('#password-'+ID).val(),
+                "owner-name": $('#owner-name-'+ID).val()}
+            ]}
+
+            var formDataOracleTables = new FormData();
+            
+            formDataOracleTables.append('jsonParamsOracle', JSON.stringify(paramsOracleTables))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_tables_oracle/',
+                data: formDataOracleTables,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    $('#table-name-'+ID).empty()
+
+                    for (i = 0; i < data.length; i++){
+                        $('#table-name-'+ID).append('<option>'+data[i]+'</option>')
+
+                    }
+                }
+            })
+        });
+
+
+        $('#input-oracle-accept-'+ID).click(function() {
+            
+            var paramsOracle = {"id": ID,
+            "parameters": [
+                {"username": $('#username-'+ID).val(),
+                "dsn": $('#dsn-'+ID).val(),
+                "password": $('#password-'+ID).val(),
+                "owner-name": $('#owner-name-'+ID).val(),
+                "table-name": $('#table-name-'+ID).val(),
+                "checkbox": $("#checkbox-"+ID).val(),
+                "sql": $('#sql-'+ID).val()}
+            ]}
+
+            var formDataSchemaOracle = new FormData();
+            
+            formDataSchemaOracle.append('jsonParamsOracle', JSON.stringify(paramsOracle))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_oracle/',
+                data: formDataSchemaOracle,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsOracle['schema'] = data
+
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    
+                    }
+                })
+            
+            isAlreadyInCanvas(jsonParams, paramsOracle, ID)
+
+            icon.setColor('#01b0a0')
+
+            $('#dialog-input-oracle-'+ID).modal('hide')
+        });
+
     },
     
     /**
@@ -2029,52 +2014,52 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                 $("#checkbox-"+ID).val("")
             }
 
-            $('#input-postgis-accept-'+ID).click(function() {
-                
-                var paramsPostgis = {"id": ID,
-                "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
-                    "tablename": $('#tablename-'+ID).val(),
-                    "checkbox": $("#checkbox-"+ID).val(),
-                    "clause": $('#clause-'+ID).val()}
-                ]}
-    
-                var formDataSchemaPostgis = new FormData();
-                
-                formDataSchemaPostgis.append('jsonParamsPostgres', JSON.stringify(paramsPostgis))
+        });
 
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_schema_postgresql/',
-					data: formDataSchemaPostgis,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-                        paramsPostgis['schema'] = data
-                        paramsPostgis['parameters'][0]['schema'] = data
-
-                        passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                        
-                        isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
-                        
-                        icon.setColor('#01b0a0')
-                        
-                        $('#dialog-input-postgis-'+ID).modal('hide')
-                        
-                        }
-                    })
+        $('#input-postgis-accept-'+ID).click(function() {
                 
+            var paramsPostgis = {"id": ID,
+            "parameters": [
+                {"host": $('#host-'+ID).val(),
+                "port": $('#port-'+ID).val(),
+                "database": $('#database-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val(),
+                "tablename": $('#tablename-'+ID).val(),
+                "checkbox": $("#checkbox-"+ID).val(),
+                "clause": $('#clause-'+ID).val()}
+            ]}
 
-            })
-        })
+            var formDataSchemaPostgis = new FormData();
+            
+            formDataSchemaPostgis.append('jsonParamsPostgres', JSON.stringify(paramsPostgis))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_postgresql/',
+                data: formDataSchemaPostgis,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsPostgis['schema'] = data
+                    paramsPostgis['parameters'][0]['schema'] = data
+
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    
+                    isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
+                    
+                    icon.setColor('#01b0a0')
+                    
+                    $('#dialog-input-postgis-'+ID).modal('hide')
+                    
+                    }
+                })
+        });
+
     },
     
     /**
@@ -2364,53 +2349,51 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
             }
+        });
 
-            $('#input-postgis-accept-'+ID).click(function() {
+        $('#input-postgis-accept-'+ID).click(function() {
                 
-                var paramsPostgis = {"id": ID,
-                "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
-                    "tablename": $('#tablename-'+ID).val(),
-                    "checkbox": $("#checkbox-"+ID).val(),
-                    "clause": $('#clause-'+ID).val()}
-                ]}
-    
-                var formDataSchemaPostgis = new FormData();
-                
-                formDataSchemaPostgis.append('jsonParamsPostgres', JSON.stringify(paramsPostgis))
+            var paramsPostgis = {"id": ID,
+            "parameters": [
+                {"host": $('#host-'+ID).val(),
+                "port": $('#port-'+ID).val(),
+                "database": $('#database-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val(),
+                "tablename": $('#tablename-'+ID).val(),
+                "checkbox": $("#checkbox-"+ID).val(),
+                "clause": $('#clause-'+ID).val()}
+            ]}
 
-                $.ajax({
-					type: 'POST',
-					url: '/gvsigonline/etl/etl_schema_postgresql/',
-					data: formDataSchemaPostgis,
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					cache: false, 
-                    contentType: false, 
-                    processData: false,
-					success: function (data) {
-                        paramsPostgis['schema'] = data
-                        paramsPostgis['parameters'][0]['schema'] = data
+            var formDataSchemaPostgis = new FormData();
+            
+            formDataSchemaPostgis.append('jsonParamsPostgres', JSON.stringify(paramsPostgis))
 
-                        passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                        
-                        isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
-                        
-                        icon.setColor('#01b0a0')
-                        
-                        $('#dialog-input-postgis-'+ID).modal('hide')
-                        
-                        }
-                    })
-                
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_postgresql/',
+                data: formDataSchemaPostgis,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsPostgis['schema'] = data
+                    paramsPostgis['parameters'][0]['schema'] = data
 
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    
+                    isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
+                    
+                    icon.setColor('#01b0a0')
+                    
+                    $('#dialog-input-postgis-'+ID).modal('hide')
+                    
+                }
             })
-        })
+        });
     },
     
     /**
@@ -2908,45 +2891,46 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-join-'+ID).modal('show')
 
-            $('#join-accept-'+ID).click(function() {
-                //importante el orden de estos parametros, los mismos que en el formulario
-                var paramsJoin = {"id": ID,
-                "parameters": [
-                    {"attr1": $('#attr1-'+ID).val(),
-                    "attr2": $('#attr2-'+ID).val(),
-                    "attr-1": $('#attr-1-'+ID).val(),
-                    "attr-2": $('#attr-2-'+ID).val(),
-                    "schemas": schemaEdge}
-                ]}
+        });
 
-                paramsJoin['schema-old'] = schemaEdge
+        $('#join-accept-'+ID).click(function() {
+            //importante el orden de estos parametros, los mismos que en el formulario
+            var paramsJoin = {"id": ID,
+            "parameters": [
+                {"attr1": $('#attr1-'+ID).val(),
+                "attr2": $('#attr2-'+ID).val(),
+                "attr-1": $('#attr-1-'+ID).val(),
+                "attr-2": $('#attr-2-'+ID).val(),
+                "schemas": schemaEdge}
+            ]}
 
-                if (Array.isArray(schemaEdge[0])){
-                    
-                    chars = schemaEdge[0].concat(schemaEdge[1])
+            paramsJoin['schema-old'] = schemaEdge
 
-                    let unique = chars.filter((c, index) => {
-                        return chars.indexOf(c) === index;
-                    });
-
-                    schemaMod = [unique, schemaEdge[0],schemaEdge[1]]
-                }
-                else{
-                    schemaMod = [...schemaEdge]
-                }
-
-                paramsJoin['schema'] = schemaMod
-
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-
-                isAlreadyInCanvas(jsonParams, paramsJoin, ID)
-
-                icon.setColor('#4682B4')
+            if (Array.isArray(schemaEdge[0])){
                 
-                $('#dialog-join-'+ID).modal('hide')
+                chars = schemaEdge[0].concat(schemaEdge[1])
 
-            })
-        })
+                let unique = chars.filter((c, index) => {
+                    return chars.indexOf(c) === index;
+                });
+
+                schemaMod = [unique, schemaEdge[0],schemaEdge[1]]
+            }
+            else{
+                schemaMod = [...schemaEdge]
+            }
+
+            paramsJoin['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+
+            isAlreadyInCanvas(jsonParams, paramsJoin, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-join-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -3209,35 +3193,36 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-compare-'+ID).modal('show')
 
-            $('#compare-accept-'+ID).click(function() {
+        });
 
-                var paramsCompare = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    }
-                ]}
+        $('#compare-accept-'+ID).click(function() {
 
-                paramsCompare['schema-old'] = schemaEdge
-
-                if (Array.isArray(schemaEdge[0])){
-                    schemaMod = [schemaEdge[0], schemaEdge[0], schemaEdge[0], schemaEdge[1]]
+            var paramsCompare = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
                 }
-                else{
-                    schemaMod = [...schemaEdge]
-                }
+            ]}
 
-                paramsCompare['schema'] = schemaMod
+            paramsCompare['schema-old'] = schemaEdge
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            if (Array.isArray(schemaEdge[0])){
+                schemaMod = [schemaEdge[0], schemaEdge[0], schemaEdge[0], schemaEdge[1]]
+            }
+            else{
+                schemaMod = [...schemaEdge]
+            }
 
-                isAlreadyInCanvas(jsonParams, paramsCompare, ID)
+            paramsCompare['schema'] = schemaMod
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-compare-'+ID).modal('hide')
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
-            })
-        })
+            isAlreadyInCanvas(jsonParams, paramsCompare, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-compare-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -3520,48 +3505,48 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
                 }
 
             },100);
-            
 
             $('#dialog-remove-attr-'+ID).modal('show')
 
-            $('#remove-attr-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsRemove = {"id": ID,
-                "parameters": [
-                {"attr": $('#attr-'+ID).val()}
-                ]}
+        $('#remove-attr-accept-'+ID).click(function() {
 
-                //schema handling depending the parameters chosen
-                //this case we remove an attribute
-                schemaMod =[...schemaEdge]
-                //schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
+            //parameters selected to json
+            var paramsRemove = {"id": ID,
+            "parameters": [
+            {"attr": $('#attr-'+ID).val()}
+            ]}
+
+            //schema handling depending the parameters chosen
+            //this case we remove an attribute
+            schemaMod =[...schemaEdge]
+            //schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
+            
+            for (oa = 0; oa < $('#attr-'+ID).val().length; oa++){
                 
-                for (oa = 0; oa < $('#attr-'+ID).val().length; oa++){
-                    
-                    _Attr = $('#attr-'+ID).val()[oa]
-                    
-                    schemaMod.splice(schemaMod.indexOf(_Attr), 1)
-
-                }
+                _Attr = $('#attr-'+ID).val()[oa]
                 
-                //updating schema-old and schema parameters in json
-                paramsRemove['schema-old'] = schemaEdge
-                paramsRemove['schema'] = schemaMod
+                schemaMod.splice(schemaMod.indexOf(_Attr), 1)
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsRemove, ID)
+            }
+            
+            //updating schema-old and schema parameters in json
+            paramsRemove['schema-old'] = schemaEdge
+            paramsRemove['schema'] = schemaMod
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-remove-attr-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsRemove, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-remove-attr-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -3781,41 +3766,40 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-rename-attr-'+ID).modal('show')
 
-            $('#rename-attr-accept-'+ID).click(function() {
+        });
 
+        $('#rename-attr-accept-'+ID).click(function() {
+
+            var paramsRename = {"id": ID,
+            "parameters": [
+                {"old-attr": $('#old-attr-'+ID).val(),
+                "new-attr": $('#new-attr-'+ID).val() }
+            ]}
+
+            schemaMod =[...schemaEdge]
+            
+            for (oa = 0; oa < $('#old-attr-'+ID).val().length; oa++){
                 
-                var paramsRename = {"id": ID,
-                "parameters": [
-                    {"old-attr": $('#old-attr-'+ID).val(),
-                    "new-attr": $('#new-attr-'+ID).val() }
-                ]}
+                oldAttr = $('#old-attr-'+ID).val()[oa]
 
-                schemaMod =[...schemaEdge]
+                newAttr = $('#new-attr-'+ID).val().split(" ")[oa]
                 
-                for (oa = 0; oa < $('#old-attr-'+ID).val().length; oa++){
-                    
-                    oldAttr = $('#old-attr-'+ID).val()[oa]
+                schemaMod.splice(schemaMod.indexOf(oldAttr), 1, newAttr)
 
-                    newAttr = $('#new-attr-'+ID).val().split(" ")[oa]
-                    
-                    schemaMod.splice(schemaMod.indexOf(oldAttr), 1, newAttr)
+            }
+            
+            paramsRename['schema-old'] = schemaEdge
+            paramsRename['schema'] = schemaMod
 
-                }
-                
-                paramsRename['schema-old'] = schemaEdge
-                paramsRename['schema'] = schemaMod
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
+            isAlreadyInCanvas(jsonParams, paramsRename, ID)
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            icon.setColor('#4682B4')
+            
+            $('#dialog-rename-attr-'+ID).modal('hide')
 
-                isAlreadyInCanvas(jsonParams, paramsRename, ID)
-
-                icon.setColor('#4682B4')
-                
-                $('#dialog-rename-attr-'+ID).modal('hide')
-
-            })
-        })
+        });
     },
      
     /**
@@ -4038,34 +4022,35 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-concat-attr-'+ID).modal('show')
 
-            $('#concat-attr-accept-'+ID).click(function() {
+        });
 
-                
-                var paramsConcat = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    "new-attr": $('#new-attr-'+ID).val(),
-                    "separator": $('#separator-'+ID).val() }
-                ]}
+        $('#concat-attr-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                
-                schemaMod.push($('#new-attr-'+ID).val())
+            var paramsConcat = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "new-attr": $('#new-attr-'+ID).val(),
+                "separator": $('#separator-'+ID).val() }
+            ]}
 
-                paramsConcat['schema-old'] = schemaEdge
-                paramsConcat['schema'] = schemaMod
+            schemaMod =[...schemaEdge]
+            
+            schemaMod.push($('#new-attr-'+ID).val())
+
+            paramsConcat['schema-old'] = schemaEdge
+            paramsConcat['schema'] = schemaMod
 
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
-                isAlreadyInCanvas(jsonParams, paramsConcat, ID)
+            isAlreadyInCanvas(jsonParams, paramsConcat, ID)
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-concat-attr-'+ID).modal('hide')
+            icon.setColor('#4682B4')
+            
+            $('#dialog-concat-attr-'+ID).modal('hide')
 
-            })
-        })
+        });
+
     },
      
     /**
@@ -4295,34 +4280,34 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-pad-attr-'+ID).modal('show')
 
-            $('#pad-attr-accept-'+ID).click(function() {
+        });
 
-                
-                var paramsPad = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    "length": $('#length-'+ID).val(),
-                    "side": $('#side-'+ID).val(),
-                    "string": $('#string-'+ID).val()}
-                ]}
+        $('#pad-attr-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                schemaMod.splice(schemaMod.indexOf($('#attr-'+ID).val()), 1)
-                schemaMod.push($('#attr-'+ID).val())
+            var paramsPad = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "length": $('#length-'+ID).val(),
+                "side": $('#side-'+ID).val(),
+                "string": $('#string-'+ID).val()}
+            ]}
 
-                paramsPad['schema-old'] = schemaEdge
-                paramsPad['schema'] = schemaMod
+            schemaMod =[...schemaEdge]
+            schemaMod.splice(schemaMod.indexOf($('#attr-'+ID).val()), 1)
+            schemaMod.push($('#attr-'+ID).val())
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            paramsPad['schema-old'] = schemaEdge
+            paramsPad['schema'] = schemaMod
 
-                isAlreadyInCanvas(jsonParams, paramsPad, ID)
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-pad-attr-'+ID).modal('hide')
+            isAlreadyInCanvas(jsonParams, paramsPad, ID)
 
-            })
-        })
+            icon.setColor('#4682B4')
+            
+            $('#dialog-pad-attr-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -4542,34 +4527,35 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
 
             },100);
             
-
             $('#dialog-filter-dupli-'+ID).modal('show')
 
-            $('#filter-dupli-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsRemove = {"id": ID,
-                "parameters": [
-                {"attr": $('#attr-'+ID).val()}
-                ]}
-                
-                //updating schema-old and schema parameters in json
-                paramsRemove['schema-old'] = schemaEdge
-                paramsRemove['schema'] = schemaEdge
+        $('#filter-dupli-accept-'+ID).click(function() {
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsRemove, ID)
+            //parameters selected to json
+            var paramsRemove = {"id": ID,
+            "parameters": [
+            {"attr": $('#attr-'+ID).val()}
+            ]}
+            
+            //updating schema-old and schema parameters in json
+            paramsRemove['schema-old'] = schemaEdge
+            paramsRemove['schema'] = schemaEdge
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-filter-dupli-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsRemove, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-filter-dupli-'+ID).modal('hide')
+
+        });
+
     },
      
     /**
@@ -4802,30 +4788,31 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
                 }
 
             },100);
-            
 
             $('#dialog-modify-value-'+ID).modal('show')
 
-            $('#modify-value-accept-'+ID).click(function() {
+        });
 
-                var paramsModifyValue = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    "value": $('#value-'+ID).val() }
-                ]}
+        $('#modify-value-accept-'+ID).click(function() {
 
-                paramsModifyValue['schema-old'] = schemaEdge
-                paramsModifyValue['schema'] = schema
+            var paramsModifyValue = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "value": $('#value-'+ID).val() }
+            ]}
 
-                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsModifyValue, ID)
+            paramsModifyValue['schema-old'] = schemaEdge
+            paramsModifyValue['schema'] = schema
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-modify-value-'+ID).modal('hide')
+            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsModifyValue, ID)
 
-            })
-        })
+            icon.setColor('#4682B4')
+            
+            $('#dialog-modify-value-'+ID).modal('hide')
+
+        });
+
     },
      
     /**
@@ -5043,35 +5030,34 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                 }
 
             },100);
-            
 
             $('#dialog-counter-'+ID).modal('show')
 
-            $('#counter-accept-'+ID).click(function() {
+        });
 
-                var paramsCounter = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    "group-by-attr": $('#group-by-attr-'+ID).val()}
-                ]}
+        $('#counter-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                
-                schemaMod.push($('#attr-'+ID).val())
-                
-                paramsCounter['schema'] = schemaMod
-                paramsCounter['schema-old'] = schemaEdge
-                
+            var paramsCounter = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "group-by-attr": $('#group-by-attr-'+ID).val()}
+            ]}
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsCounter, ID)
+            schemaMod =[...schemaEdge]
+            
+            schemaMod.push($('#attr-'+ID).val())
+            
+            paramsCounter['schema'] = schemaMod
+            paramsCounter['schema-old'] = schemaEdge
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-counter-'+ID).modal('hide')
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsCounter, ID)
 
-            })
-        })
+            icon.setColor('#4682B4')
+            
+            $('#dialog-counter-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -5371,63 +5357,63 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                 }
 
             },100);
-
-            $(document).off("dblclick", "#schema-calculator-"+ID+" > li > a")
-
-            $(document).on("dblclick", "#schema-calculator-"+ID+" > li > a", function(){
-                var text = '"'+this.text+'"'
-                var textarea = document.getElementById('expression-'+ID)
-                
-                if (textarea.value.charAt(textarea.value.length-1) == ')'){
-
-                    textarea.value = textarea.value.substring(0,textarea.value.length-1) + text + ')'
-
-                }else{
-
-                    textarea.value = textarea.value + text
-
-                }
-             });
-             
-            $(document).off("dblclick", "#functions-"+ID+" > li > a")
-
-            $(document).on("dblclick", "#functions-"+ID+" > li > a", function(){
-                var text = this.name
-                var textarea = document.getElementById('expression-'+ID)
-                textarea.value = textarea.value + text
-                var end = textarea.selectionEnd;
-                
-                if (textarea.value.charAt(textarea.value.length-1) == ')'){
-
-                    textarea.focus()
-                    textarea.selectionEnd= end - 1;
-
-                };
-
-            });
              
             
             $('#dialog-calculator-'+ID).modal('show')
+        });
 
-            $('#calculator-accept-'+ID).click(function() {
+        $(document).off("dblclick", "#schema-calculator-"+ID+" > li > a")
 
-                var paramsCalculator = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    "expression": $('#expression-'+ID).val()}
-                ]}
-               
-                paramsCalculator['schema'] = schema
-                paramsCalculator['schema-old'] = schemaEdge
+        $(document).on("dblclick", "#schema-calculator-"+ID+" > li > a", function(){
+            var text = '"'+this.text+'"'
+            var textarea = document.getElementById('expression-'+ID)
+            
+            if (textarea.value.charAt(textarea.value.length-1) == ')'){
 
-                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsCalculator, ID)
+                textarea.value = textarea.value.substring(0,textarea.value.length-1) + text + ')'
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-calculator-'+ID).modal('hide')
+            }else{
 
-            })
+                textarea.value = textarea.value + text
+
+            }
+         });
+         
+        $(document).off("dblclick", "#functions-"+ID+" > li > a")
+
+        $(document).on("dblclick", "#functions-"+ID+" > li > a", function(){
+            var text = this.name
+            var textarea = document.getElementById('expression-'+ID)
+            textarea.value = textarea.value + text
+            var end = textarea.selectionEnd;
+            
+            if (textarea.value.charAt(textarea.value.length-1) == ')'){
+
+                textarea.focus()
+                textarea.selectionEnd= end - 1;
+
+            };
+
+        });
+
+        $('#calculator-accept-'+ID).click(function() {
+
+            var paramsCalculator = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "expression": $('#expression-'+ID).val()}
+            ]}
+           
+            paramsCalculator['schema'] = schema
+            paramsCalculator['schema-old'] = schemaEdge
+
+            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsCalculator, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-calculator-'+ID).modal('hide')
+
         })
     },
      
@@ -6049,79 +6035,82 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                 }
 
             },100);
-
-            $(document).off("dblclick", "#attrs-values-"+ID+" > li > a")
-
-            $(document).on("dblclick", "#attrs-values-"+ID+" > li > a", function(){
-                var text = '##"'+this.text+'"##'
-                var textarea = document.getElementById('query-'+ID)
-                textarea.value = textarea.value + text
-
-            });
-
-             $(document).off("dblclick", "#attrs-execute-sql-"+ID+" > li > a")
-
-             $(document).on("dblclick", "#attrs-execute-sql-"+ID+" > li > a", function(){
-                 var text = '"'+this.text+'"'
-                 var textarea = document.getElementById('query-'+ID)
-                 textarea.value = textarea.value + text
- 
-            });
             
             $('#dialog-execute-sql-'+ID).modal('show')
 
-            $('#execute-sql-accept-'+ID).click(function() {
+        });
 
-                var paramsExecute= {"id": ID,
-                "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
-                    "tablename": $('#tablename-'+ID).val(),
-                    "query": $('#query-'+ID).val()}
-                ]}
-    
-                var formDataSchemaExecute = new FormData();
-                
-                formDataSchemaExecute.append('jsonParamsPostgres', JSON.stringify(paramsExecute))
-    
-                $.ajax({
-                    type: 'POST',
-                    url: '/gvsigonline/etl/etl_schema_postgresql/',
-                    data: formDataSchemaExecute,
-                    beforeSend:function(xhr){
-                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                    },
-                    cache: false, 
-                    contentType: false, 
-                    processData: false,
-                    success: function (data) {
+        $(document).off("dblclick", "#attrs-values-"+ID+" > li > a")
 
-                        schemaMod =[...schemaEdge]
-                        
-                        for (i = 0; i < data.length; i++){
-                            schemaMod.push(data[i])
-                        }
-                        
-                        paramsExecute['schema'] = schemaMod
-                        paramsExecute['schema-old'] = schemaEdge
+        $(document).on("dblclick", "#attrs-values-"+ID+" > li > a", function(){
+            var text = '##"'+this.text+'"##'
+            var textarea = document.getElementById('query-'+ID)
+            textarea.value = textarea.value + text
 
+        });
+
+         $(document).off("dblclick", "#attrs-execute-sql-"+ID+" > li > a")
+
+         $(document).on("dblclick", "#attrs-execute-sql-"+ID+" > li > a", function(){
+             var text = '"'+this.text+'"'
+             var textarea = document.getElementById('query-'+ID)
+             textarea.value = textarea.value + text
+
+        });
+
+        $('#execute-sql-accept-'+ID).click(function() {
+
+            var paramsExecute= {"id": ID,
+            "parameters": [
+                {"host": $('#host-'+ID).val(),
+                "port": $('#port-'+ID).val(),
+                "database": $('#database-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val(),
+                "tablename": $('#tablename-'+ID).val(),
+                "query": $('#query-'+ID).val()}
+            ]}
+
+            var formDataSchemaExecute = new FormData();
+            
+            formDataSchemaExecute.append('jsonParamsPostgres', JSON.stringify(paramsExecute))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_postgresql/',
+                data: formDataSchemaExecute,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    schemaMod =[...schemaEdge]
+                    
+                    for (i = 0; i < data.length; i++){
+                        schemaMod.push(data[i])
                     }
-                })
-               
+                    
+                    paramsExecute['schema'] = schemaMod
+                    paramsExecute['schema-old'] = schemaEdge
 
-
-                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsExecute, ID)
-
-                icon.setColor('#4682B4')
-                
-                $('#dialog-execute-sql-'+ID).modal('hide')
-
+                }
             })
+           
+
+
+            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsExecute, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-execute-sql-'+ID).modal('hide')
+
         })
+
+
     },
      
     /**
@@ -6896,59 +6885,58 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-intersection-'+ID).modal('show')
 
-            $('#intersection-accept-'+ID).click(function() {
+        });
 
-                
+        $('#intersection-accept-'+ID).click(function() {
 
-                if ($('#merge-'+ID).is(':checked')) {
-                    $('#merge-'+ID).val('true')
+            if ($('#merge-'+ID).is(':checked')) {
+                $('#merge-'+ID).val('true')
 
-                    if (Array.isArray(schemaEdge[0])){
+                if (Array.isArray(schemaEdge[0])){
 
-                        chars = schemaEdge[0].concat(schemaEdge[1])
+                    chars = schemaEdge[0].concat(schemaEdge[1])
 
-                        let unique = chars.filter((c, index) => {
-                            return chars.indexOf(c) === index;
-                        });
+                    let unique = chars.filter((c, index) => {
+                        return chars.indexOf(c) === index;
+                    });
 
-                        schemaMod = unique
+                    schemaMod = unique
 
-                    }
-                    else{
-                        schemaMod = [...schemaEdge]
-                    }
-
-                }else{
-
-                    $('#merge-'+ID).val('')
-
-                    if (Array.isArray(schemaEdge[0])){
-                        schemaMod = schemaEdge[0]
-                    }
-                    else{
-                        schemaMod = [...schemaEdge]
-                    }
+                }
+                else{
+                    schemaMod = [...schemaEdge]
                 }
 
-                var paramsInter = {"id": ID,
-                "parameters": [
-                {"merge": $('#merge-'+ID).val(),
-                "schema": schemaEdge}
-                ]}
+            }else{
 
-                paramsInter['schema-old'] = schemaEdge
-                paramsInter['schema'] = schemaMod
+                $('#merge-'+ID).val('')
 
-                passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+                if (Array.isArray(schemaEdge[0])){
+                    schemaMod = schemaEdge[0]
+                }
+                else{
+                    schemaMod = [...schemaEdge]
+                }
+            }
 
-                isAlreadyInCanvas(jsonParams, paramsInter, ID)
+            var paramsInter = {"id": ID,
+            "parameters": [
+            {"merge": $('#merge-'+ID).val(),
+            "schema": schemaEdge}
+            ]}
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-intersection-'+ID).modal('hide')
+            paramsInter['schema-old'] = schemaEdge
+            paramsInter['schema'] = schemaMod
 
-            })
-        })
+            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+
+            isAlreadyInCanvas(jsonParams, paramsInter, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-intersection-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -7176,30 +7164,31 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-spatial-rel-'+ID).modal('show')
 
-            $('#spatial-rel-accept-'+ID).click(function() {
+        });
 
-                var paramsSpatialRel = {"id": ID,
-                "parameters": [
-                {"option": $('#option-'+ID).val()}
-                ]}
-                
-                schemaMod =[...schemaEdge[0]]
-                
-                schemaMod.push('_related')
-               
-                paramsSpatialRel['schema-old'] = schemaEdge
-                paramsSpatialRel['schema'] = schemaMod
+        $('#spatial-rel-accept-'+ID).click(function() {
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            var paramsSpatialRel = {"id": ID,
+            "parameters": [
+            {"option": $('#option-'+ID).val()}
+            ]}
+            
+            schemaMod =[...schemaEdge[0]]
+            
+            schemaMod.push('_related')
+           
+            paramsSpatialRel['schema-old'] = schemaEdge
+            paramsSpatialRel['schema'] = schemaMod
 
-                isAlreadyInCanvas(jsonParams, paramsSpatialRel, ID)
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-spatial-rel-'+ID).modal('hide')
+            isAlreadyInCanvas(jsonParams, paramsSpatialRel, ID)
 
-            })
-        })
+            icon.setColor('#4682B4')
+            
+            $('#dialog-spatial-rel-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -7431,28 +7420,30 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-keep-attr-'+ID).modal('show')
 
-            $('#keep-attr-accept-'+ID).click(function() {
+        });
 
-                var paramsKeep = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val()}
-                ]}
+        $('#keep-attr-accept-'+ID).click(function() {
 
-                schemaMod =$('#attr-'+ID).val()
+            var paramsKeep = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val()}
+            ]}
 
-                paramsKeep['schema-old'] = schemaEdge
-                paramsKeep['schema'] = schemaMod
+            schemaMod =$('#attr-'+ID).val()
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                
-                isAlreadyInCanvas(jsonParams, paramsKeep, ID)
+            paramsKeep['schema-old'] = schemaEdge
+            paramsKeep['schema'] = schemaMod
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-keep-attr-'+ID).modal('hide')
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            isAlreadyInCanvas(jsonParams, paramsKeep, ID)
 
-            })
-        })
+            icon.setColor('#4682B4')
+            
+            $('#dialog-keep-attr-'+ID).modal('hide')
+
+        });
+
     },
      
     /**
@@ -7683,32 +7674,34 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-reproject-'+ID).modal('show')
 
-            $('#reproject-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsReproject = {"id": ID,
-                "parameters": [
-                {"source-epsg": $('#source-epsg-'+ID).val(),
-                "target-epsg": $('#target-epsg-'+ID).val() }
-                ]}
-                
-                //updating schema-old and schema parameters in json
-                paramsReproject['schema-old'] = schemaEdge
-                paramsReproject['schema'] = schemaEdge
+        $('#reproject-accept-'+ID).click(function() {
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsReproject, ID)
+            //parameters selected to json
+            var paramsReproject = {"id": ID,
+            "parameters": [
+            {"source-epsg": $('#source-epsg-'+ID).val(),
+            "target-epsg": $('#target-epsg-'+ID).val() }
+            ]}
+            
+            //updating schema-old and schema parameters in json
+            paramsReproject['schema-old'] = schemaEdge
+            paramsReproject['schema'] = schemaEdge
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-reproject-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsReproject, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-reproject-'+ID).modal('hide')
+
+        });
+
     },
      
     /**
@@ -7931,31 +7924,32 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-cadastral-geom-'+ID).modal('show')
 
-            $('#cadastral-geom-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsCadGeom = {"id": ID,
-                "parameters": [
-                {"attr": $('#attr-'+ID).val()}
-                ]}
+        $('#cadastral-geom-accept-'+ID).click(function() {
 
-                //updating schema-old and schema parameters in json
-                paramsCadGeom['schema-old'] = schemaEdge
-                paramsCadGeom['schema'] = schemaEdge
+            //parameters selected to json
+            var paramsCadGeom = {"id": ID,
+            "parameters": [
+            {"attr": $('#attr-'+ID).val()}
+            ]}
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsCadGeom, ID)
+            //updating schema-old and schema parameters in json
+            paramsCadGeom['schema-old'] = schemaEdge
+            paramsCadGeom['schema'] = schemaEdge
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-cadastral-geom-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsCadGeom, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-cadastral-geom-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -8215,43 +8209,44 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-mgrs-'+ID).modal('show')
 
-            $('#mgrs-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsMGRS = {"id": ID,
-                    "parameters": [
-                        {"select": $("#select-mgrs"+ID).val(),
-                        "mgrs": $('#mgrs-'+ID).val(),
-                        "lon": $('#lon-'+ID).val(),
-                        "lat": $('#lat-'+ID).val()}
-                    ]
-                };
+        $('#mgrs-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                
-                if ($('#select-mgrs'+ID).val()=='mgrstolatlon'){
-                    schemaMod.push("_lon", "_lat")
-                }else{
-                    schemaMod.push("_mgrs_grid")
-                }
-                
-                //updating schema-old and schema parameters in json
-                paramsMGRS['schema-old'] = schemaEdge
-                paramsMGRS['schema'] = schemaMod
+            //parameters selected to json
+            var paramsMGRS = {"id": ID,
+                "parameters": [
+                    {"select": $("#select-mgrs"+ID).val(),
+                    "mgrs": $('#mgrs-'+ID).val(),
+                    "lon": $('#lon-'+ID).val(),
+                    "lat": $('#lat-'+ID).val()}
+                ]
+            };
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsMGRS, ID)
+            schemaMod =[...schemaEdge]
+            
+            if ($('#select-mgrs'+ID).val()=='mgrstolatlon'){
+                schemaMod.push("_lon", "_lat")
+            }else{
+                schemaMod.push("_mgrs_grid")
+            }
+            
+            //updating schema-old and schema parameters in json
+            paramsMGRS['schema-old'] = schemaEdge
+            paramsMGRS['schema'] = schemaMod
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-mgrs-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsMGRS, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-mgrs-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -8501,36 +8496,37 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-texttoepsg-'+ID).modal('show')
 
-            $('#texttoepsg-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsTextToPoint = {"id": ID,
-                    "parameters": [
-                        {"epsg": $('#epsg-'+ID).val(),
-                        "lon": $('#lon-'+ID).val(),
-                        "lat": $('#lat-'+ID).val()}
-                    ]
-                };
-                
-                schemaMod =[...schemaEdge]
-                
-                //updating schema-old and schema parameters in json
-                paramsTextToPoint['schema-old'] = schemaEdge
-                paramsTextToPoint['schema'] = schemaMod
+        $('#texttoepsg-accept-'+ID).click(function() {
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsTextToPoint, ID)
+            //parameters selected to json
+            var paramsTextToPoint = {"id": ID,
+                "parameters": [
+                    {"epsg": $('#epsg-'+ID).val(),
+                    "lon": $('#lon-'+ID).val(),
+                    "lat": $('#lat-'+ID).val()}
+                ]
+            };
+            
+            schemaMod =[...schemaEdge]
+            
+            //updating schema-old and schema parameters in json
+            paramsTextToPoint['schema-old'] = schemaEdge
+            paramsTextToPoint['schema'] = schemaMod
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-texttoepsg-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsTextToPoint, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-texttoepsg-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -8770,35 +8766,36 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-wkt-geom-'+ID).modal('show')
 
-            $('#wkt-geom-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsWktGeom = {"id": ID,
-                "parameters": [
-                {"attr": $('#attr-'+ID).val(),
-                "epsg": $('#epsg-'+ID).val()}
-                ]}
+        $('#wkt-geom-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
+            //parameters selected to json
+            var paramsWktGeom = {"id": ID,
+            "parameters": [
+            {"attr": $('#attr-'+ID).val(),
+            "epsg": $('#epsg-'+ID).val()}
+            ]}
 
-                //updating schema-old and schema parameters in json
-                paramsWktGeom['schema-old'] = schemaEdge
-                paramsWktGeom['schema'] = schemaMod
+            schemaMod =[...schemaEdge]
+            schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsWktGeom, ID)
+            //updating schema-old and schema parameters in json
+            paramsWktGeom['schema-old'] = schemaEdge
+            paramsWktGeom['schema'] = schemaMod
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-wkt-geom-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsWktGeom, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-wkt-geom-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -9032,38 +9029,39 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-split-attr-'+ID).modal('show')
 
-            $('#split-attr-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsSplitAttr = {"id": ID,
-                "parameters": [
-                {"attr": $('#attr-'+ID).val(),
-                "list": $('#list-'+ID).val(),
-                "split": $('#split-'+ID).val()}
-                ]}
+        $('#split-attr-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
-                schemaMod.push($('#list-'+ID).val())
+            //parameters selected to json
+            var paramsSplitAttr = {"id": ID,
+            "parameters": [
+            {"attr": $('#attr-'+ID).val(),
+            "list": $('#list-'+ID).val(),
+            "split": $('#split-'+ID).val()}
+            ]}
 
-                //updating schema-old and schema parameters in json
-                paramsSplitAttr['schema-old'] = schemaEdge
-                paramsSplitAttr['schema'] = schemaMod
+            schemaMod =[...schemaEdge]
+            schemaMod.splice($('#attr-'+ID).prop('selectedIndex'), 1)
+            schemaMod.push($('#list-'+ID).val())
+
+            //updating schema-old and schema parameters in json
+            paramsSplitAttr['schema-old'] = schemaEdge
+            paramsSplitAttr['schema'] = schemaMod
 
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsSplitAttr, ID)
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsSplitAttr, ID)
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-split-attr-'+ID).modal('hide')
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-split-attr-'+ID).modal('hide')
 
-            })
-        })
+        });
     },
      
     /**
@@ -9293,36 +9291,38 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-explode-list-'+ID).modal('show')
 
-            $('#explode-list-accept-'+ID).click(function() {
+        });
 
-                //parameters selected to json
-                var paramsSplitAttr = {"id": ID,
-                "parameters": [
-                {"attr": $('#attr-'+ID).val(),
-                "list": $('#list-'+ID).val()}
-                ]}
+        $('#explode-list-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                schemaMod.splice($('#list-'+ID).prop('selectedIndex'), 1)
-                schemaMod.push($('#attr-'+ID).val())
+            //parameters selected to json
+            var paramsSplitAttr = {"id": ID,
+            "parameters": [
+            {"attr": $('#attr-'+ID).val(),
+            "list": $('#list-'+ID).val()}
+            ]}
 
-                //updating schema-old and schema parameters in json
-                paramsSplitAttr['schema-old'] = schemaEdge
-                paramsSplitAttr['schema'] = schemaMod
+            schemaMod =[...schemaEdge]
+            schemaMod.splice($('#list-'+ID).prop('selectedIndex'), 1)
+            schemaMod.push($('#attr-'+ID).val())
 
-                //add the schema to a later edge if it exists
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                
-                //check if parameters are already in json canvas
-                isAlreadyInCanvas(jsonParams, paramsSplitAttr, ID)
+            //updating schema-old and schema parameters in json
+            paramsSplitAttr['schema-old'] = schemaEdge
+            paramsSplitAttr['schema'] = schemaMod
 
-                //set red color to another in order to know if parameters are checked
-                icon.setColor('#4682B4')
-                
-                $('#dialog-explode-list-'+ID).modal('hide')
+            //add the schema to a later edge if it exists
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            //check if parameters are already in json canvas
+            isAlreadyInCanvas(jsonParams, paramsSplitAttr, ID)
 
-            })
-        })
+            //set red color to another in order to know if parameters are checked
+            icon.setColor('#4682B4')
+            
+            $('#dialog-explode-list-'+ID).modal('hide')
+
+        });
+
     },
      
     /**
@@ -9545,40 +9545,41 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-union-'+ID).modal('show')
 
-            $('#union-accept-'+ID).click(function() {
+        });
 
-                if($("#multi-"+ID).is(':checked')){
-                    $("#multi-"+ID).val("true")
-                    
-                }else{
-                    $("#multi-"+ID).val("")
-                };
+        $('#union-accept-'+ID).click(function() {
 
-                var paramsUnion = {"id": ID,
-                "parameters": [
-                    {"group-by-attr": $('#group-by-attr-'+ID).val(),
-                    "multi": $('#multi-'+ID).val()}
-                ]}
-
-
-                if($('#group-by-attr-'+ID).val()=== ""){
-                    schemaMod =[...schemaEdge]
-                }else{
-                    schemaMod=[$('#group-by-attr-'+ID).val()]
-                }
-
-                paramsUnion['schema'] = schemaMod
-                paramsUnion['schema-old'] = schemaEdge
-
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsUnion, ID)
-
-                icon.setColor('#4682B4')
+            if($("#multi-"+ID).is(':checked')){
+                $("#multi-"+ID).val("true")
                 
-                $('#dialog-union-'+ID).modal('hide')
+            }else{
+                $("#multi-"+ID).val("")
+            };
 
-            })
-        })
+            var paramsUnion = {"id": ID,
+            "parameters": [
+                {"group-by-attr": $('#group-by-attr-'+ID).val(),
+                "multi": $('#multi-'+ID).val()}
+            ]}
+
+
+            if($('#group-by-attr-'+ID).val()=== ""){
+                schemaMod =[...schemaEdge]
+            }else{
+                schemaMod=[$('#group-by-attr-'+ID).val()]
+            }
+
+            paramsUnion['schema'] = schemaMod
+            paramsUnion['schema-old'] = schemaEdge
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsUnion, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-union-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -10247,28 +10248,29 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
             
             $('#dialog-calc-area-'+ID).modal('show')
 
-            $('#calc-area--accept-'+ID).click(function() {
+        });
 
-                var paramsCalcArea = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val()}
-                ]}
+        $('#calc-area--accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                schemaMod.push($('#attr-'+ID).val())
-                
-                paramsCalcArea['schema'] = schemaMod
-                paramsCalcArea['schema-old'] = schemaEdge
-                
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsCalcArea, ID)
+            var paramsCalcArea = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val()}
+            ]}
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-calc-area-'+ID).modal('hide')
+            schemaMod =[...schemaEdge]
+            schemaMod.push($('#attr-'+ID).val())
+            
+            paramsCalcArea['schema'] = schemaMod
+            paramsCalcArea['schema-old'] = schemaEdge
+            
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsCalcArea, ID)
 
-            })
-        })
+            icon.setColor('#4682B4')
+            
+            $('#dialog-calc-area-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -10485,30 +10487,31 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-current-date-'+ID).modal('show')
 
-            $('#current-date-accept-'+ID).click(function() {
+        });
 
-                var paramsDate = {"id": ID,
-                "parameters": [
-                    {"attr": $('#attr-'+ID).val(),
-                    "format": $('#format-'+ID).val()}
-                ]}
+        $('#current-date-accept-'+ID).click(function() {
 
-                schemaMod =[...schemaEdge]
-                
-                schemaMod.push($('#attr-'+ID).val())
-                
-                paramsDate['schema'] = schemaMod
-                paramsDate['schema-old'] = schemaEdge
+            var paramsDate = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "format": $('#format-'+ID).val()}
+            ]}
 
-                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-                isAlreadyInCanvas(jsonParams, paramsDate, ID)
+            schemaMod =[...schemaEdge]
+            
+            schemaMod.push($('#attr-'+ID).val())
+            
+            paramsDate['schema'] = schemaMod
+            paramsDate['schema-old'] = schemaEdge
 
-                icon.setColor('#4682B4')
-                
-                $('#dialog-current-date-'+ID).modal('hide')
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsDate, ID)
 
-            })
-        })
+            icon.setColor('#4682B4')
+            
+            $('#dialog-current-date-'+ID).modal('hide')
+
+        });
     },
      
     /**
@@ -10855,9 +10858,11 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-output-postgresql-'+ID).modal('show')
 
-            $('#output-postgresql-accept-'+ID).click(function() {
+        });
 
-                var paramsPostgreSQL = {"id": ID,
+        $('#output-postgresql-accept-'+ID).click(function() {
+
+            var paramsPostgreSQL = {"id": ID,
                 "parameters": [
                     {"host": $('#host-'+ID).val(),
                     "port": $('#port-'+ID).val(),
@@ -10867,19 +10872,20 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                     "tablename": $('#tablename-'+ID).val(),
                     "match": $('#match-'+ID).val(),
                     "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
-                ]}
-                
-                paramsPostgreSQL['schema-old'] = schemaEdge
-                paramsPostgreSQL['schema'] = schema
-                
-                isAlreadyInCanvas(jsonParams, paramsPostgreSQL, ID)
+                ]
+            }
+            
+            paramsPostgreSQL['schema-old'] = schemaEdge
+            paramsPostgreSQL['schema'] = schema
+            
+            isAlreadyInCanvas(jsonParams, paramsPostgreSQL, ID)
 
-                icon.setColor('#e79600')
-                
-                $('#dialog-output-postgresql-'+ID).modal('hide')
+            icon.setColor('#e79600')
+            
+            $('#dialog-output-postgresql-'+ID).modal('hide')
 
-            })
-        })
+        });
+
     },
      
     /**
@@ -11207,31 +11213,32 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-output-postgis-'+ID).modal('show')
 
-            $('#output-postgis-accept-'+ID).click(function() {
+        });
 
-                var paramsPostgis = {"id": ID,
-                "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
-                    "tablename": $('#tablename-'+ID).val(),
-                    "match": $('#match-'+ID).val(),
-                    "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
-                ]}
-                
-                paramsPostgis['schema-old'] = schemaEdge
-                paramsPostgis['schema'] = schema
-                
-                isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
+        $('#output-postgis-accept-'+ID).click(function() {
 
-                icon.setColor('#e79600')
-                
-                $('#dialog-output-postgis-'+ID).modal('hide')
+            var paramsPostgis = {"id": ID,
+            "parameters": [
+                {"host": $('#host-'+ID).val(),
+                "port": $('#port-'+ID).val(),
+                "database": $('#database-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val(),
+                "tablename": $('#tablename-'+ID).val(),
+                "match": $('#match-'+ID).val(),
+                "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
+            ]}
+            
+            paramsPostgis['schema-old'] = schemaEdge
+            paramsPostgis['schema'] = schema
+            
+            isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
 
-            })
-        })
+            icon.setColor('#e79600')
+            
+            $('#dialog-output-postgis-'+ID).modal('hide')
+
+        });
     },
      
     /**
