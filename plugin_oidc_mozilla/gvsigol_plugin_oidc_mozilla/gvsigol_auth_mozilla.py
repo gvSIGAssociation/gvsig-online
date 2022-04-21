@@ -204,7 +204,7 @@ class KeycloakAdminSession(OIDCSession):
     def _get_user_name_from_id(self, user_id):
         repr = self.get_user_repr(user_id=user_id)
         if repr:
-            return repr.get('id')
+            return repr.get('username')
     
     def _get_group_details(self, g, subgroup=False):
         if subgroup:
@@ -306,7 +306,7 @@ class KeycloakAdminSession(OIDCSession):
                 "email": email,
                 "firstName": first_name,
                 "lastName": last_name,
-                "realmRoles": realm_roles,
+                "realmRoles": list(realm_roles),
                 "username": username
             }
             response = self.post(self.admin_url + '/users', json=user_rep)
@@ -381,7 +381,7 @@ class KeycloakAdminSession(OIDCSession):
                     realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
 
                 
-                set_roles(username, realm_roles)
+                set_roles(username, list(realm_roles))
                 """
                 if superuser:
                     # ensure roles
@@ -436,7 +436,7 @@ class KeycloakAdminSession(OIDCSession):
             if response.status_code == 204:
                 try:
                     User = get_user_model()
-                    User.objects.filter(username=username).delete()
+                    User.objects.get(username=username).delete()
                 except User.DoesNotExist:
                     # ignore to allow deleting keycloak users that have not been localy created in Django
                     pass
