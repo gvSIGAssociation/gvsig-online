@@ -73,11 +73,6 @@ class Filemanager(object):
         }
 
     def directory_list(self, request, first_level):
-        visible_extensions = ['shp', 'dbf', 'geotif', 'geotiff', 'tif', 'tiff', 'zip']
-        
-        if 'gvsigol_plugin_etl' in INSTALLED_APPS:
-            visible_extensions = visible_extensions + ['xlsx', 'xls', 'csv']
-        
         directories, files = FILEMANAGER_STORAGE.listdir(self.location)
 
         def _helper(name, filetype, extension):
@@ -93,23 +88,12 @@ class Filemanager(object):
         groups = auth_backend.get_roles(request)
         dir_list = []
         for directoryname in directories:
-            '''if first_level:
-                if request.user.is_superuser:
-                    groups = core_utils.get_groups()
-                else:
-                    groups = auth_backend.get_roles(request)
-                for g in groups:
-                    if directoryname == g:
-                        listing.append(_helper(directoryname, 'Directory', ''))
-            else:
-                listing.append(_helper(directoryname, 'Directory', ''))'''
             if request.user.is_superuser:
                 dir_list.append(_helper(directoryname, 'Directory', ''))
             else: 
                 if first_level:
-                    for g in groups:
-                        if directoryname == g:
-                            dir_list.append(_helper(directoryname, 'Directory', ''))
+                    if directoryname in groups:
+                        dir_list.append(_helper(directoryname, 'Directory', ''))
                 else:
                     dir_list.append(_helper(directoryname, 'Directory', ''))
         file_list = []
@@ -117,8 +101,6 @@ class Filemanager(object):
             parts = filename.split('.')
             if len(parts) > 1:
                 extension = parts[1]
-                #if extension.lower() in visible_extensions:
-                #    listing.append(_helper(filename, 'File', extension))
                 file_list.append(_helper(filename, 'File', extension))
         listing = sorted(dir_list, key=sorter) + sorted(file_list, key=sorter)
         return listing
