@@ -7,6 +7,8 @@ from gvsigol_auth import signals
 import logging
 LOGGER = logging.getLogger('gvsigol')
 
+def check_group_support():
+    return False
 
 def get_admin_role():
     """

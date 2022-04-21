@@ -468,3 +468,11 @@ get_system_roles = auth_backend.get_system_roles
 get_primary_role = auth_backend.get_primary_role
 to_provider_rolename = auth_backend.to_provider_rolename
 from_provider_rolename = auth_backend.from_provider_rolename
+
+
+check_group_support = auth_backend.check_group_support
+"""
+Checks whether this backend provides support for user groups.
+All the backends provide support for user roles, but only some
+backends support user groups.
+"""
