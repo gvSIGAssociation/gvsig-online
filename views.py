@@ -37,7 +37,7 @@ from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
-from .utils import superuser_required, staff_required
+from .utils import role_sorter, superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
@@ -448,14 +448,17 @@ def user_add(request):
                         auth_backend.delete_user(user)
                     except:
                         pass
+            roles.sort(key=role_sorter)
             return render(request, 'user_add.html', {'form': form, 'groups': roles, 'errors': errors,'show_pass_form':show_pass_form})
 
         else:
             roles = auth_backend.get_all_roles_details(exclude_system=True)
+            roles.sort(key=role_sorter)
             return render(request, 'user_add.html', {'form': form, 'groups': roles, 'show_pass_form':show_pass_form})
     else:
         form = UserCreateForm()
         roles = auth_backend.get_all_roles_details(exclude_system=True)
+        roles.sort(key=role_sorter)
         return render(request, 'user_add.html', {'form': form, 'groups': roles, 'show_pass_form':show_pass_form})
     
     
