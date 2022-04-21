@@ -578,7 +578,6 @@ def output_Postgresql(dicc, geom_column_name = ''):
             except:
                 pass
         elif dicc['operation'] == 'UPDATE':
-            
             attr_list = list(df.columns)
             
             for row in df.iterrows():
@@ -1532,7 +1531,6 @@ def trans_CompareRows(dicc):
                 cur2.execute(sqlInsert)
                 conn.commit()
             else:
-                print(row, row2)
                 sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name_target_changes+'" SELECT  * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" WHERE "'+attr+'" = '+"'"+str(row[0])+"'"
                 cur2.execute(sqlInsert)
                 conn.commit()

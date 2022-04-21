@@ -79,8 +79,6 @@ def get_schema_kml(file):
 
     schema = [x.lower() for x in layer.fields]
 
-    print(schema)
-
     return schema
 
 def get_schema_shape(file):
