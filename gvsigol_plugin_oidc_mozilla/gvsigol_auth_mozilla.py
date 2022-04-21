@@ -61,7 +61,8 @@ def provider_logout(request):
     print(url)
     return url
 
-
+def check_group_support():
+    return True
 
 class OIDCSession():
     def __init__(self, client_id, client_secret, token_url, refresh_url=None) -> None:
