@@ -32,6 +32,9 @@ import logging
 
 LOGGER_NAME = 'gvsigol'
 
+def role_sorter(item):
+    return item.get('name').lower()
+
 def superuser_required(function):
     def wrap(request, *args, **kwargs):
         if request.user.is_superuser:
@@ -62,7 +65,7 @@ def get_all_roles_checked_by_user(username):  # FIXME OIDC CMI
     all_roles = auth_backend.get_all_roles_details(exclude_system=True)
     user_roles = auth_backend.get_roles(username)
     roles = []
-    for role in all_roles:
+    for role in sorted(all_roles, key=role_sorter):
         for user_role_name in user_roles:
             if role['name'] == user_role_name:
                 role['checked'] = True
