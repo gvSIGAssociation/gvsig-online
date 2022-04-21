@@ -27,6 +27,7 @@ KEYCLOAK_TIMEOUT = 30
 MAIN_SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
 STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
 SUPERUSER_ROLES = {MAIN_SUPERUSER_ROLE, 'ADMIN', 'ROLE_ADMIN'}
+SYSTEM_ROLES = SUPERUSER_ROLES | {STAFF_ROLE} | {'AUTHENTICATED', 'offline_access', 'uma_authorization'}
 
 def get_admin_role():
     """
@@ -41,7 +42,7 @@ def get_system_users():
 
 def get_system_roles():
     # TODO parametrize?
-    return SUPERUSER_ROLES | {STAFF_ROLE}
+    return SYSTEM_ROLES
 
 # we need to ensure that we get a different requests session for each
 # thread, since requests is not thread safe
