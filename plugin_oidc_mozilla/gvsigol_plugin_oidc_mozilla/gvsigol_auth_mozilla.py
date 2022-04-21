@@ -497,6 +497,8 @@ class KeycloakAdminSession(OIDCSession):
             url = "{base}/roles/{role_name}".format(base=self.admin_url, role_name=role_name)
             response = self.delete(url)
             if response.status_code == 204:
+                from gvsigol_auth import services as auth_services
+                auth_services.get_services().delete_data_directory(role_name)
                 return True
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
