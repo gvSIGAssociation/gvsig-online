@@ -304,13 +304,14 @@ class KeycloakAdminSession(OIDCSession):
             user_rep = {
                 "credentials": [{"value": password}],
                 "email": email,
+                "enabled": True,
                 "firstName": first_name,
                 "lastName": last_name,
-                "realmRoles": list(realm_roles),
                 "username": username
             }
             response = self.post(self.admin_url + '/users', json=user_rep)
             if response.status_code == 201:
+                set_roles(username, list(realm_roles))
                 User = get_user_model()
                 try:
                     user = User(
