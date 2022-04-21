@@ -31,7 +31,7 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from .forms import UserCreateForm, UserGroupForm
+from .forms import UserCreateForm, UserGroupForm, UserRoleForm
 from django.contrib.auth.models import User
 from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
@@ -529,11 +529,9 @@ def sort_by_name(a_dict):
 @superuser_required
 def group_list(request):
     response = {
-        'groups': sorted(auth_backend.get_all_roles_details(), key=sort_by_name)
-        #'groups': auth_backend.get_all_groups_details()
+        'groups': sorted(auth_backend.get_all_groups_details(), key=sort_by_name)
     }     
     return render(request, 'group_list.html', response)
-
 
 @login_required()
 @superuser_required
@@ -543,16 +541,10 @@ def group_add(request):
         message = None
         if form.is_valid():
             try:
-                if form.data['name'] == 'admin':
-                    message = _("Admin is a reserved group")
-                    raise Exception
-                
                 if _valid_name_regex.search(form.data['name']) == None:
                     message = _("Invalid user group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.data['name'])
                     raise Exception
-                #auth_backend.add_group(form.data['name'], desc=form.data['description'])
-                auth_backend.add_role(form.data['name'], desc=form.data['description'])
-                signals.role_added.send(sender=None, role=form.data.get('name'))
+                auth_backend.add_group(form.data['name'], desc=form.data['description'])
                 return redirect('group_list')
             
             except Exception as e:
@@ -568,13 +560,63 @@ def group_add(request):
   
 @login_required()
 @superuser_required
-def group_delete(request, role_name):
+def group_delete(request, group_name):
+    if request.method == 'POST':
+        auth_backend.delete_group(group_name)
+        response = {
+            'deleted': True
+        }     
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+@login_required()
+@superuser_required
+def role_list(request):
+    response = {
+        'roles': sorted(auth_backend.get_all_roles_details(), key=sort_by_name)
+    }     
+    return render(request, 'role_list.html', response)
+
+
+@login_required()
+@superuser_required
+def role_add(request):        
+    if request.method == 'POST':
+        form = UserRoleForm(request.POST)
+        message = None
+        if form.is_valid():
+            try:
+                if form.data['name'] == 'admin':
+                    message = _("Admin is a reserved role")
+                    raise Exception
+                
+                if _valid_name_regex.search(form.data['name']) == None:
+                    message = _("Invalid user role name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.data['name'])
+                    raise Exception
+                auth_backend.add_role(form.data['name'], desc=form.data['description'])
+                signals.role_added.send(sender=None, role=form.data.get('name'))
+                return redirect('role_list')
+            
+            except Exception as e:
+                print(str(e))
+                return render(request, 'role_add.html', {'form': form, 'message': message})
+                
+        else:
+            return render(request, 'role_add.html', {'form': form})
+        
+    else:
+        form = UserRoleForm()
+        return render(request, 'role_add.html', {'form': form})
+  
+@login_required()
+@superuser_required
+def role_delete(request, role_name):
     if request.method == 'POST':
         auth_backend.delete_role(role_name)
         response = {
             'deleted': True
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
 
 @login_required()
 def has_group(request):

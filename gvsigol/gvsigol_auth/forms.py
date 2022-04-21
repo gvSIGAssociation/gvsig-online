@@ -51,4 +51,8 @@ class UserCreateForm(UserCreationForm):
 
 class UserGroupForm(forms.Form):   
     name = forms.CharField(required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
-    description = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'})) 
+    description = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
+
+class UserRoleForm(forms.Form):   
+    name = forms.CharField(required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
+    description = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
