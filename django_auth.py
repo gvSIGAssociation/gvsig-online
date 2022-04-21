@@ -547,9 +547,9 @@ def remove_from_role(user, role):
         True if the operation was successfull, False otherwise
     """
     # FIXME OIDC CMI puede recibir un username o userid
+    user = _get_user(user)
     if auth_services.get_services().ldap_delete_group_member(user, role) == False:
         return False
-    user = _get_user(user)
     role = Role.objects.get(name=role)
     role.users.remove(user)
     return True
