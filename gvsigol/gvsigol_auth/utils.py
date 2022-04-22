@@ -27,13 +27,11 @@ from gvsigol.services_base import BackendNotAvailable
 import gvsigol.settings
 from functools import wraps
 from django.contrib.auth.models import User
+from gvsigol.utils import default_sorter
 from gvsigol_auth import auth_backend
 import logging
 
 LOGGER_NAME = 'gvsigol'
-
-def role_sorter(item):
-    return item.get('name').lower()
 
 def superuser_required(function):
     def wrap(request, *args, **kwargs):
@@ -61,14 +59,27 @@ def is_superuser(user):
 def is_staff(user):
     return user.is_staff
 
+def get_all_groups_checked_by_user(username):  # FIXME OIDC CMI
+    all_groups = auth_backend.get_all_groups_details(exclude_system=True)
+    user_groups = auth_backend.get_groups(username)
+    groups = []
+    for group in sorted(all_groups, key=default_sorter):
+        for user_group_name in user_groups:
+            if group['name'] == user_group_name:
+                group['checked'] = True
+                break
+        groups.append(group)
+    return groups
+
 def get_all_roles_checked_by_user(username):  # FIXME OIDC CMI
     all_roles = auth_backend.get_all_roles_details(exclude_system=True)
     user_roles = auth_backend.get_roles(username)
     roles = []
-    for role in sorted(all_roles, key=role_sorter):
+    for role in sorted(all_roles, key=default_sorter):
         for user_role_name in user_roles:
             if role['name'] == user_role_name:
                 role['checked'] = True
+                break
         roles.append(role)
     return roles
 

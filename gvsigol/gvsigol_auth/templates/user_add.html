@@ -13,107 +13,162 @@
 						</div>
 					</div>
 				</div>
-			
-				<div class="box">
-					<div class="box-body">
-					{% csrf_token %}					
-						{% if form.errors %}
-						<div id="form-error" style="color:#ff0000;">
-							<ul>
-							{% for field in form %}
-								{% if field.errors %}
-									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}	
-							{% endfor %}
-							</ul>
-						</div>
-						{% endif %}
-								
-						{% if errors %}
-						<div id="form-error" style="color:#ff0000;">
-							{% for error in errors %}
-							<p>* {{ error.message }}</p>
-							{% endfor %}
-						</div>
-						{% endif %}
-										
+				<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+							
+					{% if errors %}
+					<div id="form-error" style="color:#ff0000;">
+						{% for error in errors %}
+						<p>* {{ error.message }}</p>
+						{% endfor %}
+					</div>
+					{% endif %}
+				</div>
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="#tab-general" data-toggle="tab">{% trans "General" %}</a></li>
+					{% if AUTH_GROUPS %}
+					<li><a href="#tab-user-groups" data-toggle="tab">{% trans "Groups" %}</a></li>
+					{% endif %}
+					<li><a href="#tab-roles" data-toggle="tab">{% trans "Roles" %}</a></li>
+			    </ul>
+			  
+				<div class="tab-content">
+					<div class="tab-pane active" id="tab-general">
 						<div class="row">
-							<div class="col-md-6">
-								<label for="id_first_name">{% trans "First Name" %}</label>
-								{{ form.first_name }}
-							</div>
-							<div class="col-md-6">
-								<label for="id_last_name">{% trans "Last name" %}</label>
-							    {{ form.last_name }}
-							</div>
-						</div>
-										
-						<div class="row">
-							<div class="col-md-6 form-group">
-								<label for="id_username">{% trans "Username" %}</label>
-							    {{ form.username }}
-							</div>
-							<div class="col-md-6 form-group">
-								<label for="id_email">{% trans "Email" %}</label>
-							    {{ form.email }}
-							</div>
-						</div>
-						
-						{% if show_pass_form %}			
-						<div class="row">
-							<div class="col-md-6">
-								<label for="id_password">{% trans "Password" %}</label>
-							    {{ form.password1 }}
-							</div>
-							<div class="col-md-6">
-								<label for="id_password2">{% trans "Repeat password" %}</label>
-							    {{ form.password2 }}
-							</div>
-						</div>
-						{% else %}
-							<input type="hidden" name="password1" value="your_active_directory_password">
-							<input type="hidden" name="password2" value="your_active_directory_password">  
-						{% endif %}
-						
-						<br>
-						
-						<div class="row">
-							<div class="checkbox col-md-6">								
-								<label>
-									<input type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
-								</label>
-							</div>
-							<div class="checkbox col-md-6">								
-								<label>
-									<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
-								</label>
-							</div>
-						</div>
-
-						<div class="box">
-							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Assign groups" %}</h3>
-							</div>
-							<div class="box-body">
-								<ul class="products-list product-list-in-box">
-									{% for group in groups %}
-									<li class="item">
-										<div class="product-img">
-											<img src="{% static "img/users.png" %}" alt="Users Image">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-body">
+										<div class="row">
+											<div class="col-md-6">
+												<label for="id_first_name">{% trans "First Name" %}</label>
+												{{ form.first_name }}
+											</div>
+											<div class="col-md-6">
+												<label for="id_last_name">{% trans "Last name" %}</label>
+												{{ form.last_name }}
+											</div>
 										</div>
-										<div class="product-info">
-											<a href="javascript:void(0)" class="product-title">{{group.name}}
-												<div class="checkbox pull-right">													
-													<label>
-														<input type="checkbox" name="group-{{group.name}}" id="group-{{group.name}}"/>{% trans "Assign group" %}
-													</label>
+														
+										<div class="row">
+											<div class="col-md-6 form-group">
+												<label for="id_username">{% trans "Username" %}</label>
+												{{ form.username }}
+											</div>
+											<div class="col-md-6 form-group">
+												<label for="id_email">{% trans "Email" %}</label>
+												{{ form.email }}
+											</div>
+										</div>
+										
+										{% if show_pass_form %}			
+										<div class="row">
+											<div class="col-md-6">
+												<label for="id_password">{% trans "Password" %}</label>
+												{{ form.password1 }}
+											</div>
+											<div class="col-md-6">
+												<label for="id_password2">{% trans "Repeat password" %}</label>
+												{{ form.password2 }}
+											</div>
+										</div>
+										{% else %}
+											<input type="hidden" name="password1" value="your_active_directory_password">
+											<input type="hidden" name="password2" value="your_active_directory_password">  
+										{% endif %}
+										
+										<br>
+										
+										<div class="row">
+											<div class="checkbox col-md-6">								
+												<label>
+													<input type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
+												</label>
+											</div>
+											<div class="checkbox col-md-6">								
+												<label>
+													<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% if AUTH_GROUPS %}
+					<div class="tab-pane" id="tab-user-groups">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-header with-border">
+										<h3 class="box-title">{% trans "Assign groups" %}</h3>
+									</div>
+									<div class="box-body">
+										<ul class="products-list product-list-in-box">
+											{% for group in groups %}
+											<li class="item">
+												<div class="product-img">
+													<img src="{% static "img/users.png" %}" alt="Users Image">
 												</div>
-											</a> 
-											<span class="product-description">{{group.description}}</span>
-										</div>
-									</li> 
-									{% endfor %}
-								</ul>
+												<div class="product-info">
+													<a href="javascript:void(0)" class="product-title">{{group.name}}
+														<div class="checkbox pull-right">													
+															<label>
+																<input type="checkbox" name="group-{{group.name}}" id="group-{{group.name}}"/>{% trans "Assign group" %}
+															</label>
+														</div>
+													</a> 
+													<span class="product-description">{{group.description}}</span>
+												</div>
+											</li> 
+											{% endfor %}
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endif %}
+					<div class="tab-pane" id="tab-roles">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-header with-border">
+										<h3 class="box-title">{% trans "Assign roles" %}</h3>
+									</div>
+									<div class="box-body">
+										<ul class="products-list product-list-in-box">
+											{% for role in roles %}
+											<li class="item">
+												<div class="product-img">
+													<img src="{% static "img/users.png" %}" alt="Users Image">
+												</div>
+												<div class="product-info">
+													<a href="javascript:void(0)" class="product-title">{{role.name}}
+														<div class="checkbox pull-right">													
+															<label>
+																<input type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}"/>{% trans "Assign role" %}
+															</label>
+														</div>
+													</a> 
+													<span class="product-description">{{role.description}}</span>
+												</div>
+											</li> 
+											{% endfor %}
+										</ul>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>				

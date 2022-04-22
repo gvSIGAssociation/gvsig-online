@@ -20,6 +20,7 @@
 '''
 
 import gvsigol.settings
+from gvsigol_auth import auth_backend
 
 def global_settings(request):
     # return any necessary values
@@ -36,4 +37,5 @@ def global_settings(request):
         'TEMPORAL_ADVANCED_PARAMETERS': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
         'PUBLIC_PLUGINS': gvsigol.settings.PUBLIC_PLUGINS,
         'DOCS': gvsigol.settings.DOCS,
+        'AUTH_GROUPS': auth_backend.check_group_support()
     }

@@ -20,6 +20,7 @@
 from django.http.response import JsonResponse
 from gvsigol import settings
 from gvsigol.services_base import BackendNotAvailable
+from gvsigol.utils import default_sorter
 from gvsigol_auth.django_auth import get_admin_role
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
@@ -37,7 +38,7 @@ from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
-from .utils import role_sorter, superuser_required, staff_required
+from .utils import superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
@@ -386,11 +387,15 @@ def user_add(request):
             user = None
             errors = []
             try:
-                assigned_roles = []   
+                assigned_groups = []
                 for key in form.data:
                     if 'group-' in key:
-                        assigned_roles.append(key[len('group-'):])
-            
+                        assigned_groups.append(key[len('group-'):])
+
+                assigned_roles = []
+                for key in form.data:
+                    if 'role-' in key:
+                        assigned_roles.append(key[len('role-'):])
                                 
                 if form.data['password1'] == form.data['password2']:
                     user = auth_backend.add_user(
@@ -399,6 +404,7 @@ def user_add(request):
                         form.data['email'].lower(),
                         form.data['first_name'],
                         form.data['last_name'],
+                        groups=groups,
                         roles=assigned_roles,
                         superuser=is_superuser,
                         staff=is_staff
@@ -448,42 +454,51 @@ def user_add(request):
                         auth_backend.delete_user(user)
                     except:
                         pass
-            roles.sort(key=role_sorter)
-            return render(request, 'user_add.html', {'form': form, 'groups': roles, 'errors': errors,'show_pass_form':show_pass_form})
+            roles.sort(key=default_sorter)
+            groups = auth_backend.get_all_groups_details(exclude_system=True)
+            groups.sort(key=default_sorter)
+            return render(request, 'user_add.html', {'form': form, 'groups': groups, 'roles': roles, 'errors': errors,'show_pass_form':show_pass_form})
 
         else:
             roles = auth_backend.get_all_roles_details(exclude_system=True)
-            roles.sort(key=role_sorter)
-            return render(request, 'user_add.html', {'form': form, 'groups': roles, 'show_pass_form':show_pass_form})
+            roles.sort(key=default_sorter)
+            groups = auth_backend.get_all_groups_details(exclude_system=True)
+            groups.sort(key=default_sorter)
+            return render(request, 'user_add.html', {'form': form, 'groups': groups, 'roles': roles, 'show_pass_form':show_pass_form})
     else:
         form = UserCreateForm()
         roles = auth_backend.get_all_roles_details(exclude_system=True)
-        roles.sort(key=role_sorter)
-        return render(request, 'user_add.html', {'form': form, 'groups': roles, 'show_pass_form':show_pass_form})
+        roles.sort(key=default_sorter)
+        groups = auth_backend.get_all_groups_details(exclude_system=True)
+        groups.sort(key=default_sorter)
+        return render(request, 'user_add.html', {'form': form, 'groups': groups, 'roles': roles, 'show_pass_form':show_pass_form})
     
     
 @login_required()
 @superuser_required
 def user_update(request, uid):
-    if request.method == 'POST':
-        #user = User.objects.get(id=int(uid))
-        
-        assigned_roles = []
-        for key in request.POST:
-            if 'group-' in key:
-                assigned_roles.append(key[len('group-'):])
-            
-        is_staff = False
-        if 'is_staff' in request.POST:
-            is_staff = True
-            
-        is_superuser = False
-        if 'is_superuser' in request.POST:
-            is_superuser = True
-            is_staff = True
+    try:
+        if request.method == 'POST':
+            assigned_groups = []
+            for key in request.POST:
+                if 'group-' in key:
+                    assigned_groups.append(key[len('group-'):])
 
-        username = request.POST.get('username')
-        try:
+            assigned_roles = []
+            for key in request.POST:
+                if 'role-' in key:
+                    assigned_roles.append(key[len('role-'):])
+                
+            is_staff = False
+            if 'is_staff' in request.POST:
+                is_staff = True
+                
+            is_superuser = False
+            if 'is_superuser' in request.POST:
+                is_superuser = True
+                is_staff = True
+
+            username = request.POST.get('username')
             success = auth_backend.update_user(
                     uid,
                     username,
@@ -492,25 +507,22 @@ def user_update(request, uid):
                     request.POST.get('last_name'),
                     superuser=is_superuser,
                     staff=is_staff,
+                    groups=assigned_groups,
                     roles=assigned_roles
             )
-                                    #User backend
             if success and (is_superuser or is_staff):
                 _config_staff_user(username)
 
             return redirect('user_list')
-        except BackendNotAvailable:
-            message = _("The authentication server is not available. Try again later or contact system administrators.")
-            return render(request, 'user_update.html', {'uid': uid, 'selected_user': None, 'user': None, 'groups': [], "message": message})
-    else:
-        try:
+        else:
             selected_user = auth_backend.get_user_details(user_id=uid)
             username = selected_user.get('username')
             roles = auth_utils.get_all_roles_checked_by_user(username)
-            return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': roles})
-        except BackendNotAvailable:
-            message = _("The authentication server is not available. Try again later or contact system administrators.")
-            return render(request, 'user_update.html', {'uid': uid, 'selected_user': None, 'user': None, 'groups': []})
+            groups = auth_utils.get_all_groups_checked_by_user(username)
+            return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': groups, 'roles': roles})
+    except BackendNotAvailable:
+        message = _("The authentication server is not available. Try again later or contact system administrators.")
+        return render(request, 'user_update.html', {'uid': uid, 'selected_user': None, 'user': None, 'groups': [], 'roles': []})
         
 @login_required()
 @superuser_required
