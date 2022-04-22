@@ -210,6 +210,7 @@ def add_user(username,
         email,
         first_name,
         last_name,
+        groups=None,
         roles=None,
         superuser=False,
         staff=False):
@@ -226,6 +227,10 @@ def add_user(username,
         First name
     last_name: str
         Last name
+    [groups]: [str]
+        Groups to assign to the user. Ignored by this backend.
+    [roles]: [str]
+        Roles to assign to the user. It is ignored if not provided.
     [superuser]: boolean
         Whether the user is superuser (default: False)
     [staff]: boolean
@@ -262,8 +267,40 @@ def update_user(
         last_name,
         superuser,
         staff,
+        groups=None,
         roles=None,
         password=None):
+    """
+    Updates a user
+
+    Parameters
+    ----------
+    user_id: str
+        The user id
+    username: str
+        User name
+
+    first_name: str
+        First name
+    last_name: str
+        Last name
+    superuser: boolean
+        Whether the user is superuser
+    staff: boolean
+        Whether the user is staff
+    [groups]: [str]
+        Groups to assign to the user. Ignored by this backend.
+    [roles]: [str]
+        Roles to assign to the user. The provided roles will replace
+        the existing user roles. It is ignored if not provided.
+    [password]: str
+        The new password. The password is not modified if this paramter is
+        not provied.
+    Returns
+    -------
+        User
+        A Django User instance or None if an error happened
+    """
     User = get_user_model()
     user = User.objects.get(id=int(user_id))
     user.first_name = first_name
