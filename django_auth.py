@@ -179,9 +179,9 @@ def get_all_roles(exclude_system=False):
         The list of roles available on the system
     """
     if exclude_system:
-        return Role.objects.all().exclude(name__in=get_system_roles()) \
-            .values_list("name", flat=True)
-    return Role.objects.all().values_list("name", flat=True)
+        return list(Role.objects.all().exclude(name__in=get_system_roles()) \
+            .values_list("name", flat=True))
+    return list(Role.objects.all().values_list("name", flat=True))
 
 def get_all_roles_details(exclude_system=False):
     """
@@ -202,8 +202,8 @@ def get_all_roles_details(exclude_system=False):
         {"id": 2, "name": "role_name2", "description": "bla bla bla"}]
     """
     if exclude_system:
-        return Role.objects.all().exclude(name__in=get_system_roles()).values()
-    return Role.objects.all().values()
+        return list(Role.objects.all().exclude(name__in=get_system_roles()).values())
+    return list(Role.objects.all().values())
 
 def add_user(username,
         password,
