@@ -152,7 +152,7 @@ class GvSigOnlineServices():
         
                 ldif = modlist.addModlist(attrs)
                 self.ldap.add_s(dn,ldif)                        
-            except ldap.ALREADY_ALREADY_EXISTS as e:
+            except ldap.ALREADY_EXISTS as e:
                 if ignore_existing:
                     return True
                 else:
