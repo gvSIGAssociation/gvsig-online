@@ -455,23 +455,32 @@ def user_add(request):
                     except:
                         pass
             roles.sort(key=default_sorter)
-            groups = auth_backend.get_all_groups_details(exclude_system=True)
-            groups.sort(key=default_sorter)
-            return render(request, 'user_add.html', {'form': form, 'groups': groups, 'roles': roles, 'errors': errors,'show_pass_form':show_pass_form})
+            response = {'form': form, 'roles': roles, 'errors': errors,'show_pass_form':show_pass_form}
+            if auth_backend.check_group_support():
+                groups = auth_backend.get_all_groups_details(exclude_system=True)
+                groups.sort(key=default_sorter)
+                response['groups'] = groups
+            return render(request, 'user_add.html', response)
 
         else:
             roles = auth_backend.get_all_roles_details(exclude_system=True)
             roles.sort(key=default_sorter)
-            groups = auth_backend.get_all_groups_details(exclude_system=True)
-            groups.sort(key=default_sorter)
-            return render(request, 'user_add.html', {'form': form, 'groups': groups, 'roles': roles, 'show_pass_form':show_pass_form})
+            response = {'form': form, 'roles': roles, 'show_pass_form':show_pass_form}
+            if auth_backend.check_group_support():
+                groups = auth_backend.get_all_groups_details(exclude_system=True)
+                groups.sort(key=default_sorter)
+                response['groups'] = groups
+            return render(request, 'user_add.html', response)
     else:
         form = UserCreateForm()
         roles = auth_backend.get_all_roles_details(exclude_system=True)
         roles.sort(key=default_sorter)
-        groups = auth_backend.get_all_groups_details(exclude_system=True)
-        groups.sort(key=default_sorter)
-        return render(request, 'user_add.html', {'form': form, 'groups': groups, 'roles': roles, 'show_pass_form':show_pass_form})
+        response = {'form': form, 'roles': roles, 'show_pass_form':show_pass_form}
+        if auth_backend.check_group_support():
+            groups = auth_backend.get_all_groups_details(exclude_system=True)
+            groups.sort(key=default_sorter)
+            response['groups'] = groups
+        return render(request, 'user_add.html', response)
     
     
 @login_required()
@@ -518,8 +527,10 @@ def user_update(request, uid):
             selected_user = auth_backend.get_user_details(user_id=uid)
             username = selected_user.get('username')
             roles = auth_utils.get_all_roles_checked_by_user(username)
-            groups = auth_utils.get_all_groups_checked_by_user(username)
-            return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': groups, 'roles': roles})
+            response = {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'roles': roles}
+            if auth_backend.check_group_support():
+                response['groups'] = auth_utils.get_all_groups_checked_by_user(username)
+            return render(request, 'user_update.html', response)
     except BackendNotAvailable:
         message = _("The authentication server is not available. Try again later or contact system administrators.")
         return render(request, 'user_update.html', {'uid': uid, 'selected_user': None, 'user': None, 'groups': [], 'roles': []})

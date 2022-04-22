@@ -60,7 +60,7 @@ def is_staff(user):
     return user.is_staff
 
 def get_all_groups_checked_by_user(username):  # FIXME OIDC CMI
-    all_groups = auth_backend.get_all_groups_details(exclude_system=True)
+    all_groups = auth_backend.get_all_groups_details()
     user_groups = auth_backend.get_groups(username)
     groups = []
     for group in sorted(all_groups, key=default_sorter):
