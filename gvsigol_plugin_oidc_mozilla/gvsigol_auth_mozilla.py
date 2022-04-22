@@ -208,28 +208,25 @@ class KeycloakAdminSession(OIDCSession):
         if repr:
             return repr.get('username')
     
-    def _get_group_details(self, g, subgroup=False):
-        if subgroup:
-            # TODO OIDC CMI: decide how to deal with subgroups
-            p = g.get('path')
-            if p.startswith("/"):
-                name = p[1:]
-            else:
-                name = p
+    def _get_group_details(self, g):
+        # TODO OIDC CMI: decide how to deal with subgroups
+        p = g.get('path')
+        if p.startswith("/"):
+            name = p[1:]
         else:
-            name = g.get('name')
+            name = p
         return {
             'id': g.get('id'),
             'name': name,
             'description': g.get('attributes', {}).get('description', [''])[0]
         }
 
-    def _flatten_group_details(self, group_list, subgroup=False):
+    def _flatten_group_details(self, group_list):
         for g in group_list:
-            yield self._get_group_details(g, subgroup=subgroup)
-            yield from self._flatten_group_details(g.get('subGroups'), subgroup=True)
+            yield self._get_group_details(g)
+            yield from self._flatten_group_details(g.get('subGroups'))
 
-    def get_all_groups(self):
+    def get_all_groups(self, exclude_system=False):
         try:
             response = self.get(self.admin_url + '/groups').json()
             return list(self._flatten_groups(response))
@@ -239,7 +236,7 @@ class KeycloakAdminSession(OIDCSession):
             LOGGER.exception('requests error getting group')
         return []
 
-    def get_all_groups_details(self):
+    def get_all_groups_details(self, exclude_system=False):
         try:
             response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False}).json()
             return list(self._flatten_group_details(response))
@@ -289,6 +286,7 @@ class KeycloakAdminSession(OIDCSession):
             email,
             first_name,
             last_name,
+            groups=None,
             roles=None,
             superuser=False,
             staff=False):
@@ -314,6 +312,8 @@ class KeycloakAdminSession(OIDCSession):
             response = self.post(self.admin_url + '/users', json=user_rep)
             if response.status_code == 201:
                 set_roles(username, list(realm_roles))
+                if groups is not None:
+                    set_groups(username, groups)
                 User = get_user_model()
                 try:
                     user = User(
@@ -343,6 +343,7 @@ class KeycloakAdminSession(OIDCSession):
             last_name,
             superuser,
             staff,
+            groups=None,
             roles=None,
             password=None):
         try:
@@ -385,6 +386,8 @@ class KeycloakAdminSession(OIDCSession):
 
                 
                 set_roles(username, list(realm_roles))
+                if groups is not None:
+                    set_groups(username, groups)
                 """
                 if superuser:
                     # ensure roles
@@ -418,10 +421,18 @@ class KeycloakAdminSession(OIDCSession):
         if response.status_code == 200:
             return response.json()
 
-    def get_group_id(self, group_name):
-        response = self.get(self.admin_url + '/groups', params={"search": group_name}).json()
-        if len(response) > 0:
-            return response[0].get('id')
+    def get_group_id(self, group_path):
+        """
+        Since keycloak allows several groups having the same name (located at
+        different paths/parent groups), in this implementation we use the
+        group path as group name
+        """
+        group_name = group_path.split("/")[-1]
+        response = self.get(self.admin_url + '/groups', params={"search": group_name})
+        if response.status_code == 200:
+            for group in self._flatten_group_details(response.json()):
+                if group.get('name') == group_path:
+                    return group.get('id')
 
     def get_role_id(self, role_name):
         role_repr = self._get_role_repr(role_name)
@@ -636,7 +647,7 @@ class KeycloakAdminSession(OIDCSession):
             url = "{base}/users/{user_id}/groups".format(base=self.admin_url, user_id=user_id)
             response = self.get(url)
             if response.status_code == 200:
-                return [ g.get('name') for g in response.json() ]
+                return [ g.get('path')[1:] for g in response.json() ]
         except RequestException as e:
             LOGGER.exception('requests error adding user to role')
         return []
@@ -818,7 +829,7 @@ def get_roles(request_or_user):
             return []
     return _get_admin_session().get_roles(username)
 
-def get_all_groups():
+def get_all_groups(exclude_system=False):
     """
     Gets the list of the groups available in the system.
 
@@ -827,9 +838,9 @@ def get_all_groups():
     list[str]
         The list of groups available on the system
     """
-    return _get_admin_session().get_all_groups()
+    return _get_admin_session().get_all_groups(exclude_system=exclude_system)
 
-def get_all_groups_details():
+def get_all_groups_details(exclude_system=False):
     """
     Gets the list of the groups and details (id, name and description)
     available in the system. Note that id can be an integer or a string
@@ -842,7 +853,7 @@ def get_all_groups_details():
         [{"id": 1, "name": "group_name1", "description": "bla bla bla"},
         {"id": 2, "name": "group_name2", "description": "bla bla bla"}]
     """
-    return _get_admin_session().get_all_groups_details()
+    return _get_admin_session().get_all_groups_details(exclude_system=exclude_system)
 
 def get_all_roles(exclude_system=False):
     """
@@ -886,6 +897,7 @@ def add_user(username,
         email,
         first_name,
         last_name,
+        groups=None,
         roles=None,
         superuser=False,
         staff=False):
@@ -902,6 +914,10 @@ def add_user(username,
         First name
     last_name: str
         Last name
+    [groups]: [str]
+        Groups to assign to the user. It is ignored if not provided.
+    [roles]: [str]
+        Roles to assign to the user. It is ignored if not provided.
     [superuser]: boolean
         Whether the user is superuser (default: False)
     [staff]: boolean
@@ -911,7 +927,15 @@ def add_user(username,
         User
         A Django User instance or None if an error happened
     """
-    return _get_admin_session().add_user(username, password, email, first_name, last_name, roles=roles, superuser=superuser, staff=staff)
+    return _get_admin_session().add_user(username,
+                password,
+                email,
+                first_name,
+                last_name,
+                groups=groups,
+                roles=roles,
+                superuser=superuser,
+                staff=staff)
 
 def _get_user_name(user):
     """
@@ -941,9 +965,41 @@ def update_user(user_id,
             last_name,
             superuser,
             staff,
+            groups=None,
             roles=None,
             password=None):
+    """
+    Updates a user
 
+    Parameters
+    ----------
+    user_id: str
+        The user id
+    username: str
+        User name
+
+    first_name: str
+        First name
+    last_name: str
+        Last name
+    superuser: boolean
+        Whether the user is superuser
+    staff: boolean
+        Whether the user is staff
+    [groups]: [str]
+        Groups to assign to the user. The provided groups will replace
+        the existing user groups. It is ignored if not provided.
+    [roles]: [str]
+        Roles to assign to the user. The provided roles will replace
+        the existing user roles. It is ignored if not provided.
+    [password]: str
+        The new password. The password is not modified if this paramter is
+        not provied.
+    Returns
+    -------
+        User
+        A Django User instance or None if an error happened
+    """
     return _get_admin_session().update_user(user_id,
             username,
             email,
@@ -951,6 +1007,7 @@ def update_user(user_id,
             last_name,
             superuser=superuser,
             staff=staff,
+            groups=groups,
             roles=roles,
             password=password)
 
@@ -1062,7 +1119,20 @@ def set_groups(user, groups):
         boolean
         True if the operation was successfull, False otherwise
     """
-    pass
+    username = _get_user_name(user)
+    old_groups = set(get_groups(username))
+    groups = set(groups)
+    to_remove = old_groups - groups
+    #TODO: improve error handling and op reversion
+    success = True
+    for group in to_remove:
+        if not remove_from_group(username, group):
+            success = False
+    to_add = groups - old_groups
+    for group in to_add:
+        if not add_to_group(username, group):
+            success = False
+    return success
 
 def set_roles(user, roles):
     """
