@@ -404,7 +404,7 @@ def user_add(request):
                         form.data['email'].lower(),
                         form.data['first_name'],
                         form.data['last_name'],
-                        groups=groups,
+                        groups=assigned_groups,
                         roles=assigned_roles,
                         superuser=is_superuser,
                         staff=is_staff
