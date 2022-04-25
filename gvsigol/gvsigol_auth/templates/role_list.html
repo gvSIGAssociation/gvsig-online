@@ -124,12 +124,20 @@ $(document).ready(function() {
 				url: '/gvsigonline/auth/role_delete/' + data[1] + '/',
 				beforeSend:function(xhr){
 				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-				success	:function(response){
-					$('#modal-delete-role').modal('hide');
-					location.reload();
-				},
-				error: function(){}
+				}
+			}).done(function(response){
+				console.log(response);
+				$('#modal-delete-role').modal('hide');
+				location.reload();
+			}).fail(function(jqXHR){
+				console.log(jqXHR);
+				$('#modal-delete-role').modal('hide');
+				if (jqXHR.responseJSON.message) {
+					messageBox.show("error", jqXHR.responseJSON.message);
+				}
+				else {
+					messageBox.show("error", gettext('Error deleting role'));
+				}
 			});
 		});
 	}
