@@ -634,12 +634,19 @@ def role_add(request):
 @superuser_required
 def role_delete(request, role_name):
     if request.method == 'POST':
-        auth_backend.delete_role(role_name)
-        response = {
-            'deleted': True
-        }     
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-
+        if role_name in auth_backend.get_system_roles():
+            status = 400
+            response = {
+                'deleted': False,
+                'message': _("System roles can't be deleted")
+            }
+        else:
+            auth_backend.delete_role(role_name)
+            response = {
+               'deleted': True
+            }
+            status = 200
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json', status=status)
 
 @login_required()
 def has_group(request):
