@@ -330,6 +330,13 @@ class KeycloakAdminSession(OIDCSession):
                     LOGGER.exception('error creating user in django after keycloak creation')
                     user = User.objects.get(username=username)
                 return user
+            elif response.status_code == 409:
+                error = response.json()
+                msg = error.get('errorMessage', response.text)
+                raise(Exception(msg))
+            else:
+                LOGGER.debug(response.status_code)
+                LOGGER.debug(response.text)
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
         except RequestException:
