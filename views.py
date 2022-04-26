@@ -427,7 +427,7 @@ def user_add(request):
                     errors.append({"message": _("User creation failed")}) # FIXME OIDC CMI should get a reason
             except Exception as e:
                 logger.exception("ERROR: Problem creating user")
-                message = "ERROR: Problem creating user " + str(e)
+                message = "ERROR: Problem creating user - " + str(e)
                 print(message)
                 errors.append({'message': message})
             roles = auth_backend.get_all_roles_details(exclude_system=True)
