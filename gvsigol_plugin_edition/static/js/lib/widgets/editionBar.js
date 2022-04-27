@@ -2000,7 +2000,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 					}
 					
 					if(self.featureType[i].name == 'modified_by') {
-						properties['modified_by'] = self.layerTree.conf.user.credentials.username;
+						properties['modified_by'] = self.layerTree.conf.user.login;
 					}
 					if(self.featureType[i].name == 'last_modification') {
 						var today = new Date();
