@@ -152,6 +152,12 @@ $(document).ready(function() {
 					location.reload();
 				},
 				error: function(){}
+			}).done(function(response){
+				$('#modal-delete-workspace').modal('hide');
+				location.reload();
+			}).fail(function(jqXHR){
+				$('#modal-delete-workspace').modal('hide');
+				messageBox.show("error", jqXHR.responseText);
 			});
 		});
 	}
