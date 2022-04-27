@@ -19,6 +19,7 @@
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
+from gvsigol.services_base import BackendNotAvailable
 from gvsigol_core.geom import RASTER
 from django.contrib.gis import gdal
 from gvsigol.settings import CONTROL_FIELDS
@@ -56,6 +57,7 @@ from builtins import str as text
 from django.utils.html import escape, strip_tags
 import threading
 from . import geographic_servers
+from requests.exceptions import RetryError, ConnectionError, Timeout, TooManyRedirects
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -226,6 +228,8 @@ class Geoserver():
             ws = catalog.get_workspace(workspace.name)
             catalog.delete(ws, recurse=True)
             return True
+        except (RetryError, ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
         except Exception as e:
             print(str(e))
             return False

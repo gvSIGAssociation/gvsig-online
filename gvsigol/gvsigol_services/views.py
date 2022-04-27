@@ -41,7 +41,7 @@ import xmltodict
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden, HttpResponseServerError
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.shortcuts import render, redirect
@@ -59,6 +59,8 @@ from owslib.wms import WebMapService
 from owslib.wmts import WebMapTileService
 import requests
 from requests_futures.sessions import FuturesSession
+
+from gvsigol.services_base import BackendNotAvailable
 
 from .backend_postgis import Introspect
 from .backend_postgis import SqlFrom, SqlField, SqlJoinFields
@@ -406,23 +408,27 @@ def workspace_import(request):
 @require_POST
 @superuser_required
 def workspace_delete(request, wsid):
+    ws = None
     try:
         ws = Workspace.objects.get(id=wsid)
         gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
-        if gs.deleteWorkspace(ws):
-            datastores = Datastore.objects.filter(workspace_id=ws.id)
-            for ds in datastores:
-                layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
-                for l in layers:
-                    gs.deleteLayerStyles(l)
-            ws.delete()
-            gs.reload_nodes()
-            return HttpResponseRedirect(reverse('workspace_list'))
-        else:
-            return HttpResponseBadRequest()
+        gs.deleteWorkspace(ws)
+        datastores = Datastore.objects.filter(workspace_id=ws.id)
+        for ds in datastores:
+            layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
+            for l in layers:
+                gs.deleteLayerStyles(l)
+        ws.delete()
+        gs.reload_nodes()
+        return HttpResponseRedirect(reverse('workspace_list'))
+    except BackendNotAvailable:
+        return HttpResponse('The map server is not available. Try again later or contact the system administrators', status=503)
     except:
-        return HttpResponseNotFound('<h1>Workspace not found{0}</h1>'.format(ws.name))
-
+        if ws:
+            ws_str = ws.name
+        else:
+            ws_str = wsid
+        return HttpResponseNotFound('Workspace not found: {0}'.format(ws_str))
 
 @login_required()
 @superuser_required
