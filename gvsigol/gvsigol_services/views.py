@@ -3286,18 +3286,14 @@ def get_feature_wfs(request):
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
         if not utils.can_read_layer(request, layer):
             return HttpResponseForbidden('{"data": []}', content_type='application/json')
-        wfs_url = request.POST.get('wfs_url')
         field = request.POST.get('field')
         field_type = request.POST.get('field_type')
         value = request.POST.get('value')
         operator = request.POST.get('operator')
 
         try:
-            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-            if wfs_url == None:
-                wfs_url = layer.datastore.workspace.wfs_endpoint
-            else:
-                wfs_url = core_utils.get_absolute_url(wfs_url, request.META)
+            wfs_url = layer.datastore.workspace.server.getWfsEndpoint(workspace)
+            wfs_url = core_utils.get_absolute_url(wfs_url, request.META)
               
             cql_filter = None  
             if operator == 'equal_to':
@@ -3323,16 +3319,20 @@ def get_feature_wfs(request):
             }
             
             params = urllib.parse.urlencode(data)
-            req = requests.Session()
-            if 'username' in request.session and 'password' in request.session:
-                if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
-
+            session = requests.Session()
+            if not layer.external:
+                if 'username' in request.session and 'password' in request.session:
+                    if request.session['username'] is not None and request.session['password'] is not None:
+                        session.auth = (request.session['username'], request.session['password'])
+                        #session.auth = ('admin', 'geoserver')
+                elif request.session.get('oidc_access_token'):
+                    # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+                    session.headers.update({'Authorization': 'Bearer ' + request.session.get('oidc_access_token')})
+                    print(request.session.get('oidc_access_token_payload'))
             print(wfs_url + "?" + params)
-            response = req.post(wfs_url, data=data, verify=False, proxies=settings.PROXIES)
-            jsonString = response.text
-            geojson = json.loads(jsonString)
+            
+            response = session.post(wfs_url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
+            geojson = response.json()
 
             data = []
             for f in geojson['features']:

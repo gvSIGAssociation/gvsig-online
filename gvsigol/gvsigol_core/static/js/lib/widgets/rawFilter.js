@@ -192,6 +192,7 @@ RawFilter.prototype.registerEvents = function() {
 		var operator = $('option:selected', $(this)).val();
 		
 		if (operator == 'equal_to') {
+			$("#rawfilter-inputvalue-div").css('display', 'none');
 			$("#rawfilter-selectvalue-div").css('display', 'block');
 			$("#rawfilter-selectvalue").prop('disabled', false);
 			$("#rawfilter-selectvalue").empty().append('<option selected value="__disabled__">' + gettext('Select value') + ' ...</option>');
