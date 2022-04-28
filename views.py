@@ -2944,26 +2944,37 @@ def get_feature_info(request):
     
                     print(url)
                     auth2 = None
+                    headers = None
                     if query_layer != 'plg_catastro' and \
-                            request.session.get('username') is not None and \
-                            request.session.get('password') is not None:
+                            ((request.session.get('username') is not None and \
+                            request.session.get('password') is not None) or \
+                            request.session.get('oidc_access_token')):
                         servers = Server.objects.all()
                         url_obj = urlparse(url)
                         for server in servers:
                             server_url_obj = urlparse(server.frontend_url)
                             if url_obj.netloc == server_url_obj.netloc:
-                                auth2 = (request.session['username'], request.session['password'])
-                                break
+                                if request.session.get('password') is not None:
+                                    auth2 = (request.session['username'], request.session['password'])
+                                    break
+                                elif request.session.get('oidc_access_token'):
+                                    # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+                                    headers = {'Authorization': 'Bearer ' + request.session.get('oidc_access_token')}
+                                    break
                             elif server_url_obj.netloc == '':
                                 for host in settings.ALLOWED_HOST_NAMES:
                                     host_obj = urlparse(host)
                                     if url_obj.netloc == host_obj.netloc:
                                         auth2 = (request.session['username'], request.session['password'])
                                         break
-                                if auth2:
+                                    elif request.session.get('oidc_access_token'):
+                                        # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+                                        headers = {'Authorization': 'Bearer ' + request.session.get('oidc_access_token')}
+                                        break
+                                if auth2 or headers:
                                     break
     
-                    aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
+                    aux_response = fut_session.get(url, auth=auth2, headers=headers, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
                     rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
 
             i=0
