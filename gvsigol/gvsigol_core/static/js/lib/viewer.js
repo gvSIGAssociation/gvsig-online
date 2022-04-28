@@ -609,7 +609,7 @@ viewer.core = {
 				crossOrigin: 'anonymous'
 			});
 			if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
-				wmsSource.imageLoadFunction(customLoadFunction);
+				wmsSource.setImageLoadFunction(customLoadFunction);
 			};
 			wmsLayer = new ol.layer.Image({
 				id: layerId,
