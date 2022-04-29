@@ -33,7 +33,7 @@ from .backend_postgis import Introspect
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
 from geoserver.support import DimensionInfo
-from gvsigol_core import geom
+from gvsigol_core import geom, utils as core_utils
 from gvsigol import settings
 from zipfile import ZipFile
 import tempfile, zipfile
@@ -2061,12 +2061,7 @@ class Geoserver():
         req.auth = (self.user, self.password)
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
-        host = server.frontend_url
-        if len(settings.ALLOWED_HOST_NAMES) > 0:
-            host = settings.ALLOWED_HOST_NAMES[0]
-            wms = host + ws.wms_endpoint.replace(settings.BASE_URL, '')
-        else:
-            wms = ws.wms_endpoint
+        wms = core_utils.get_absolute_url(ws.wms_endpoint, {})
         response = req.get(wms, params=values, verify=False, stream=True, proxies=settings.PROXIES)
         print(response.url)
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
