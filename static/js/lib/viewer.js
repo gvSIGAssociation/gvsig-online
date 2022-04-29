@@ -583,7 +583,6 @@ viewer.core = {
 				var bearer_token = "Bearer " + self.conf.user.token;
 				xhr.setRequestHeader('Authorization', bearer_token);
 			}
-			xhr.withCredentials = true;
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function () {
 				var blob;
@@ -605,8 +604,7 @@ viewer.core = {
 				url: url,
 				visible: layerConf.visible,
 				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
-				serverType: 'geoserver',
-				crossOrigin: 'anonymous'
+				serverType: 'geoserver'
 			});
 			if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 				wmsSource.setImageLoadFunction(customLoadFunction);
@@ -646,7 +644,6 @@ viewer.core = {
 					matrixSet: default_srs,
 					format:format,
 					tileGrid: tileGrid,
-					crossOrigin: 'anonymous',
 					wrapX: true
 				});
 				if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
@@ -674,8 +671,7 @@ viewer.core = {
 					url: url,
 					visible: layerConf.visible,
 					params: wmsParams,
-					serverType: 'geoserver',
-					crossOrigin: 'anonymous'
+					serverType: 'geoserver'
 				});
 				if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 					wmsSource.setTileLoadFunction(customLoadFunction);
