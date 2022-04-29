@@ -85,7 +85,6 @@ legend.prototype._loadLegendImg = function(image, src) {
 		var bearer_token = "Bearer " + this.conf.user.token;
 		xhr.setRequestHeader('Authorization', bearer_token);
 	}
-	xhr.withCredentials = true;
 	xhr.responseType = "arraybuffer";
 	xhr.onload = function () {
 		var blob;
