@@ -209,8 +209,13 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer, buildDrawC
 			var url = this_.selectedLayer.wfs_url + '?service=WFS&' +
 				'version=1.1.0&request=GetFeature&typename=' + ws + ':' + this_.selectedLayer.layer_name +
 				'&outputFormat=json&srsName='+this_.mapSRS;
+			var headers = {};
+			if (this_.layerTree.conf.user.token && this_.layerTree.conf.user.token) {
+				headers["Authorization"] = 'Bearer ' + this_.layerTree.conf.user.token;
+			};
 			$.ajax({
 				url: url,
+				headers: headers,
 				EditionBar: this_,
 				success: function(response) {
 					try{
@@ -2322,9 +2327,14 @@ EditionBar.prototype.transactWFS = function(p,f) {
 	}
 	s = new XMLSerializer();
 	str = s.serializeToString(node);
+	var headers = {};
+	if (self.layerTree.conf.user && self.layerTree.conf.user.token) {
+		headers["Authorization"] = 'Bearer ' + self.layerTree.conf.user.token;
+	};
 	$.ajax({
 		url: this.selectedLayer.wfs_url,
 		type: 'POST',
+		headers: headers,
 		async: false,
 	    dataType: 'xml',
 	    processData: false,
