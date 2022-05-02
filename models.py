@@ -82,6 +82,10 @@ class Server(models.Model):
     def __str__(self):
         return self.name
     
+    @property
+    def title_name(self):
+        return "{title} [{name}]".format(title=self.title, name=self.name)
+    
 class Node(models.Model):
     server = models.ForeignKey(Server, on_delete=models.CASCADE)
     status = models.CharField(max_length=25)
