@@ -334,8 +334,18 @@ def reload_node(request, nid):
 @require_safe
 @superuser_required
 def workspace_list(request):
+    workspaces = [ {
+        'id': w.id,
+        'name': w.name,
+        'description': w.description,
+        'uri': w.uri,
+        'is_public': w.is_public,
+        'server': w.server.title_name
+        }
+        for w in Workspace.objects.all()
+    ]
     response = {
-        'workspaces': list(Workspace.objects.values())
+        'workspaces': workspaces
     }
     return render(request, 'workspace_list.html', response)
 
@@ -3339,7 +3349,7 @@ def get_feature_wfs(request):
                 elif request.session.get('oidc_access_token'):
                     # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
                     session.headers.update({'Authorization': 'Bearer ' + request.session.get('oidc_access_token')})
-                    print(request.session.get('oidc_access_token_payload'))
+                    print(request.session.get('oidc_access_token'))
             print(wfs_url + "?" + params)
             
             response = session.post(wfs_url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
