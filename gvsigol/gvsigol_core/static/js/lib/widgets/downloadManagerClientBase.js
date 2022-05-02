@@ -48,6 +48,9 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 	if (!layer.baselayer) {
 		if (layer.wfs_url) {
 			var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
+            if (viewer.core.conf.SHP_DOWNLOAD_DEFAULT_ENCODING) {
+                shapeLink = shapeLink + "&format_options=CHARSET:" + viewer.core.conf.SHP_DOWNLOAD_DEFAULT_ENCODING;
+            }
 			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
 			var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
 			var ui = '';
