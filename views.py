@@ -1192,7 +1192,9 @@ def project_get_conf(request):
             'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
             'errors': errors,
             'auth_urls': auth_urls,
-            'check_tileload_error': settings.CHECK_TILELOAD_ERROR
+            'check_tileload_error': settings.CHECK_TILELOAD_ERROR,
+            'SHP_DOWNLOAD_DEFAULT_ENCODING': getattr(settings, 'SHP_DOWNLOAD_DEFAULT_ENCODING', 'UTF-8')
+            
         }
         
         if language:
