@@ -120,7 +120,6 @@ legend.prototype.getLegendsFromVisibleLayers = function() {
 			if (layers[i].wms_url && layers[i].getVisible()) {
 				if (layers[i].legend) {
 					if (layers[i].legend != "") {
-						console.log(layers[i]);
 						layerLegend = 		'<div class="box box-widget">';
 						layerLegend += 			'<div class="box-header with-border">';
 						layerLegend += 				'<div class="user-block" data-legend="' + layers[i].legend + '">';
