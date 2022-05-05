@@ -3292,7 +3292,7 @@ def get_datatable_data(request):
             }
 
         except Exception as e:
-            logger.exception("Error building feature info")
+            logger.exception("Error building get_datatable_data")
             response = {
                 'draw': 0,
                 'recordsTotal': 0,
