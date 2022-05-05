@@ -92,8 +92,6 @@ SelectByBufferControl.prototype.activate = function(e) {
 	}
 	this.active = true;
 	this.addLayer();
-	this.map.un('click', this.showPopup, this);
-    console.log("this.map.on('click', this.showPopup, this);");
 	this.map.on('click', this.showPopup, this);
 	this.addPopup();
 };
@@ -183,7 +181,7 @@ SelectByBufferControl.prototype.clickHandler = function(geom, isArea) {
 				}
 			}
 		}
-		console.log(queryLayers);
+
 		var viewResolution = (this.map.getView().getResolution());
 		var url = null;
 		var ajaxRequests = new Array();
