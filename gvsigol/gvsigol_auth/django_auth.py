@@ -1,5 +1,6 @@
 from rest_framework.request import Request
 from django.http import HttpRequest
+from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from gvsigol_auth.models import Role
 import gvsigol_auth.services as auth_services
@@ -428,11 +429,14 @@ def add_role(role_name, desc=''):
     except Exception as e:
         print(str(e))
         return False
-    role = Role(
-        name = role_name,
-        description = desc
-    )
-    role.save()
+    try:
+        role = Role(
+            name = role_name,
+            description = desc
+        )
+        role.save()
+    except IntegrityError: # ignore if already exists
+        pass
     return True
 
 def delete_role(role):
