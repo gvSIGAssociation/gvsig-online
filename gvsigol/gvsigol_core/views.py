@@ -163,7 +163,7 @@ def project_add(request):
         providers = Provider.objects.all()
         has_geocoding_plugin = providers.__len__() > 0
 
-    project_tools = get_available_tools()
+    project_tools = get_available_tools(True, False)
 
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -562,18 +562,14 @@ def project_update(request, pid):
             for g in layer_groups:
                 ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': 1000, 'layers': {}}
             ordered_toc = sorted(iter(ordered_toc.items()), key=lambda x_y2: x_y2[1]['order'], reverse=True)
-        projectTools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
+        all_tools = get_available_tools(False, False)
+        projectTools = json.loads(project.tools) if project.tools else all_tools
 
-        for defaultTool in get_available_tools(True, True):
-            founded = False
+        for defaultTool in all_tools:
             for projectTool in projectTools:
                 if projectTool['name'] == defaultTool['name']:
-                    founded = True
+                    defaultTool['checked'] = True
                     break
-
-            if not founded:
-                defaultTool['checked'] = False
-                projectTools.append(defaultTool)
               
         for lg in layer_groups:
             lg['layers'] = []
@@ -1085,7 +1081,7 @@ def project_get_conf(request):
             if auth_url.startswith(settings.BASE_URL):
                 auth_url.replace(settings.BASE_URL, '')
             auth_urls.append(auth_url)
-        project_tools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
+        project_tools = json.loads(project.tools) if project.tools else get_available_tools(False, False)
 
         gvsigol_app = None
         for app in settings.INSTALLED_APPS:
