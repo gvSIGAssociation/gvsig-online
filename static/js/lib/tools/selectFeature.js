@@ -261,7 +261,6 @@ selectFeature.prototype.clickHandler = function(evt, isArea) {
 				}
 			}
 		}
-        console.log(layers);
 
 		var viewResolution = /** @type {number} */ (this.map.getView().getResolution());
 		var url = null;
