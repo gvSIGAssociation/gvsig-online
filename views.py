@@ -3269,7 +3269,12 @@ def get_datatable_data(request):
                 req.headers.update({'Authorization': 'Bearer ' + request.session.get('oidc_access_token')})
 
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
-            geojson = response.json()
+            try:
+                geojson = response.json()
+            except:
+                logger.error("wfs request error. Status_code: {}".format(response.status))
+                logger.error(response.text)
+                raise
 
             data = []
             for f in geojson['features']:
