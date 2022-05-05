@@ -54,12 +54,10 @@
 		{% endif %}
 	{% endfor %}
 
-	{% for plugin in INSTALLED_APPS %}
-		{% if 'gvsigol_plugin_' in plugin %}
-			{% with "load_css_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}
-				{% include_if_exists aux %}
-			{% endwith %}
-		{% endif %}
+	{% for plugin in enabled_plugins %}
+		{% with "load_css_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}
+			{% include_if_exists aux %}
+		{% endwith %}
 	{% endfor %}
 
 </head>
@@ -497,12 +495,10 @@
 		{% endif %}
 	{% endfor %}
 
-	{% for plugin in INSTALLED_APPS %}
-		{% if 'gvsigol_plugin_' in plugin %}
-			{% with "load_js_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}
-				{% include_if_exists aux %}
-			{% endwith %}
-		{% endif %}
+	{% for plugin in enabled_plugins %}
+		{% with "load_js_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}
+			{% include_if_exists aux %}
+		{% endwith %}
 	{% endfor %}
 	<script>
 	$(document).ready(function() {
