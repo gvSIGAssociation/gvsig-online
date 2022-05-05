@@ -1081,7 +1081,7 @@ def project_get_conf(request):
             if auth_url.startswith(settings.BASE_URL):
                 auth_url.replace(settings.BASE_URL, '')
             auth_urls.append(auth_url)
-        project_tools = json.loads(project.tools) if project.tools else get_available_tools(False, False)
+        project_tools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
 
         gvsigol_app = None
         for app in settings.INSTALLED_APPS:
