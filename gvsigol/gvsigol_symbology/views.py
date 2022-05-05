@@ -23,6 +23,7 @@
 '''
 
 from django.shortcuts import render, redirect, HttpResponse
+from django.http import HttpResponseForbidden
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer
 from gvsigol_services import utils as service_utils
@@ -456,6 +457,8 @@ def get_unique_values(request):
         field = request.POST.get('field')
         
         layer = Layer.objects.get(id=layer_id)
+        if not (layer.created_by == request.user.username or service_utils.can_read_layer(request, layer)):
+            return HttpResponseForbidden(json.dumps({'values': []}), content_type='application/json')
         i, source_name, schema = layer.get_db_connection()
         with i as c:
             unique_fields = c.get_unique_values(schema, source_name, field)

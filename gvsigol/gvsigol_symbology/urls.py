@@ -13,7 +13,7 @@ urlpatterns = [
     
     path('unique_values_add/<int:layer_id>/', symbology_views.unique_values_add, name='unique_values_add'),
     path('unique_values_update/<int:layer_id>/<int:style_id>/', symbology_views.unique_values_update, name='unique_values_update'),
-    path('get_unique_values/', symbology_views.get_unique_values, name='get_unique_values'),
+    path('get_unique_values/', symbology_views.get_unique_values, name='symbology_get_unique_values'),
     
     path('intervals_add/<int:layer_id>/', symbology_views.intervals_add, name='intervals_add'),
     path('intervals_update/<int:layer_id>/<int:style_id>/', symbology_views.intervals_update, name='intervals_update'),
