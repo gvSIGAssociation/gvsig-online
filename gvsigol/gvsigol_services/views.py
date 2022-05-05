@@ -3272,7 +3272,7 @@ def get_datatable_data(request):
             try:
                 geojson = response.json()
             except:
-                logger.error("wfs request error. Status_code: {}".format(response.status))
+                logger.error("wfs request error. Status_code: {}".format(response.status_code))
                 logger.error(response.text)
                 raise
 

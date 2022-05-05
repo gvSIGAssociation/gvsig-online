@@ -328,6 +328,7 @@ selectFeatureByBuffer.prototype.clickHandler = function(coords, isArea) {
 				}
 			}
 		}
+        console.log(layers);
 
 		var viewResolution = /** @type {number} */ (this.map.getView().getResolution());
 		var url = null;
@@ -386,16 +387,14 @@ selectFeatureByBuffer.prototype.clickHandler = function(coords, isArea) {
 			url = href.toString()
 
 			$.ajax({
-				url: url,
-				success: function(response) {
-					var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
-					var features = formatGeoJSON.readFeatures(response);
-					self.viewer.addSelectedFeaturesSource(qLayer.workspace+":"+qLayer.layer_name, features);
-					if(self.popup) self.popup.hide();
-				},
-				error: function(jqXHR, textStatus) {
-					console.log(textStatus);
-				}
+				url: url
+			}).done(function(response) {
+				var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
+				var features = formatGeoJSON.readFeatures(response);
+				self.viewer.addSelectedFeaturesSource(qLayer.workspace+":"+qLayer.layer_name, features);
+				if(self.popup) self.popup.hide();
+			}).fail(function(jqXHR, textStatus) {
+				console.log(textStatus);
 			});
 		}
 

@@ -126,8 +126,8 @@ finally:
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-#USE_X_FORWARDED_HOST = True
-#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
 #GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
@@ -139,7 +139,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    #'mozilla_django_oidc',
+    'mozilla_django_oidc',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -181,7 +181,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
     'gvsigol_plugin_gestiona',
-    #'gvsigol_plugin_oidc_mozilla',
+    'gvsigol_plugin_oidc_mozilla',
     #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
     'gvsigol_plugin_restapi',
@@ -323,8 +323,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_URL = 'gvsigol_authenticate_user'
-#GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
-GVSIGOL_AUTH_BACKEND = 'gvsigol_auth'
+GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
+#GVSIGOL_AUTH_BACKEND = 'gvsigol_auth'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "index"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -397,7 +397,7 @@ SITE_ID=1
 #BASE_URL = 'https://localhost'
 #MEDIA_ROOT = '/usr/local/var/www/media/'
 #MEDIA_URL = 'https://localhost/media/'
-BASE_URL = 'https://gvsigol.localhost'
+BASE_URL = 'https://localhost'
 MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
 MEDIA_URL = 'https://gvsigol.localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
@@ -629,7 +629,7 @@ TEMPORAL_ADVANCED_PARAMETERS = False
 
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://gvsigol.localhost/geoserver',
+    'URL': 'https://localhost/geoserver',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }

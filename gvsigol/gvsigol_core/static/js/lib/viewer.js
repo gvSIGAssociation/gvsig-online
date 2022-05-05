@@ -79,10 +79,22 @@ viewer.core = {
 
     _authenticate: function() {
     	var self = this;
-		if (self.conf.user && self.conf.user.credentials) {
-			var _params = "username=" + self.conf.user.credentials.username + "&password=" + self.conf.user.credentials.password;
-			for (var i=0; i<self.conf.auth_urls.length; i++) {			
-
+		//if (self.conf.user && self.conf.user.credentials) {
+		if (self.conf.user &&(self.conf.user.credentials || self.conf.user.token)) {
+			var headers;
+			if (self.conf.user.credentials) {
+				headers = {
+					"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+				};
+			}
+			else {
+				// Token authentication will only help if 'access-control-allow-origin' CORS header is set specifically
+				// for the domain hosting gvsigol. In the rest of cases we will need to inject the header in each XHR request.
+				headers = {
+					"Authorization": "Bearer " + self.conf.user.token
+				};
+			}
+			for (var i=0; i<self.conf.auth_urls.length; i++) {
 				$.ajax({
 					url: self.conf.auth_urls[i] + "/wms",
 					params: {
@@ -95,15 +107,12 @@ viewer.core = {
 						withCredentials: true
 					},
 					method: 'GET',
-					headers: {
-						"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
-					},
+					headers: headers,
 					error: function(jqXHR, textStatus, errorThrown){},
 					success: function(resp){
 						console.log('Authenticated');
 					}
 				});
-
 			}
 		}
     },
@@ -585,6 +594,16 @@ viewer.core = {
 			}
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function () {
+				if (xhr.status == 401) {
+					console.log(xhr.getAllResponseHeaders());
+					messageBox.show("error", "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+				}
+				// respuesta vista en un servidor en otro dominio en lugar del 401. Necesitamos testear mejor
+				else if (xhr.getResponseHeader("content-type").indexOf("application/vnd.ogc.se_xml") !== -1) {
+					console.log(xhr.getAllResponseHeaders());
+					console.log(xhr.getAllResponseHeaders());
+					// messageBox.show("error", "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+				}
 				var blob;
 				var arrayBufferView = new Uint8Array(this.response);
 				if (format.toLowerCase().indexOf("png") != -1) {
