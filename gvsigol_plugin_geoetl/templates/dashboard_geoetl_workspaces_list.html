@@ -404,17 +404,17 @@
 				$(".modal-body #etl_name").val( data[3] );
 				$(".modal-body #etl_desc").val( data[4] );
 
-				if(data[4]!=''){
+				if(data[5]!=''){
 					$("#repeat_periodically").prop('checked', true)
 					$(".repeat_periodically_time").slideDown("slow");
 
-					if(data[4].includes(':')){
+					if(data[5].includes(':')){
 
 						$(".more-options").slideUp("slow"); 
 						$(".more-hour-options").slideDown("slow");
 						
-						$(".modal-body #ws-program-day").val(data[4].split(' ')[0])
-						$(".modal-body #ws-program-time").val(data[4].split(' ')[1]+':00')
+						$(".modal-body #ws-program-day").val(data[5].split(' ')[0])
+						$(".modal-body #ws-program-time").val(data[5].split(' ')[1]+':00')
 
 					}else{
 
@@ -422,8 +422,8 @@
 						$(".more-hour-options").slideUp("slow");
 
 						$(".modal-body #ws-program-day").val('every')
-						$(".modal-body #ws-program-interval").val(data[4].split(' ')[0])
-						$(".modal-body #ws-program-unit").val(data[4].split(' ')[1])
+						$(".modal-body #ws-program-interval").val(data[5].split(' ')[0])
+						$(".modal-body #ws-program-unit").val(data[5].split(' ')[1])
 
 					}
 				
@@ -432,11 +432,9 @@
 					$(".repeat_periodically_time").slideUp("slow");
 				}
 				
-
 				$('#modal-update-workspace-etl').modal('show')
 				
 				updateWorkspace(data)
-				
 				
 			} else if (this.name == "button-delete-workspace-etl"){
 				deleteWorkspace(data);   
