@@ -21,7 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol_core.utils import get_supported_crs, get_user_projects
+from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
@@ -42,7 +42,6 @@ from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
 from operator import itemgetter
-from django import apps
 from django.core.mail import send_mail
 from owslib.util import Authentication
 from owslib.wmts import WebMapTileService
@@ -153,78 +152,6 @@ def project_list(request):
         'servers': Server.objects.all().order_by('-default')
     }
     return render(request, 'project_list.html', response)
-
-def get_core_tools(enabled=True):
-    return [{
-        'name': 'gvsigol_tool_navigationhistory',
-        'checked': enabled,
-        'title': _('Navigation history'),
-        'description': _('Browse the view forward and backward')
-    },{
-        'name': 'gvsigol_tool_zoom',
-        'checked': enabled,
-        'title': _('Zoom tools'),
-        'description': _('Zoom in, zoom out, ...')
-    }, {
-        'name': 'gvsigol_tool_info',
-        'checked': enabled,
-        'title': _('Feature info'),
-        'description': _('Map information at point')
-    }, {
-        'name': 'gvsigol_tool_measure',
-        'checked': enabled,
-        'title': _('Measure tools'),
-        'description': _('It allows to measure areas and distances')
-    }, {
-        'name': 'gvsigol_tool_coordinate',
-        'checked': enabled,
-        'title': _('Search coordinates'),
-        'description': _('Center the map at given coordinates')
-    }, {
-        'name': 'gvsigol_tool_coordinatecalc',
-        'checked': enabled,
-        'title': _('Coordinate calculator'),
-        'description': _('Transform coordinates between different systems')
-    }, {
-        'name': 'gvsigol_tool_location',
-        'checked': enabled,
-        'title': _('Geolocation'),
-        'description': _('Center the map in the current position')
-    }, {
-        'name': 'gvsigol_tool_shareview',
-        'checked': enabled,
-        'title': _('Share view'),
-        'description': _('Allows you to share the view in its current state')
-    }, {
-        'name': 'gvsigol_tool_selectfeature',
-        'checked': enabled,
-        'title': _('Select feature'),
-        'description': _('Select features from current layers')
-    }]
-
-def get_plugin_tools(enabled=False):
-    project_tools = []
-    for key in apps.apps.app_configs:
-        app = apps.apps.app_configs[key]
-        if 'gvsigol_plugin_' in app.name:
-            project_tools.append({
-                'name': app.name,
-                'checked': enabled,
-                'title': app.name,
-                'description': app.verbose_name
-            })
-    return project_tools
-
-def get_available_tools(core_enabled=True, plugin_enabled=True):
-    """
-    Gets the definition of available tools
-    (core tools plus plugin tools)
-
-    Parameters:
-    :param core_enabled: Whether the core tools should enabled. Defaults to True
-    :param plugin_enabled: Whether the plugin tools should enabled. Defaults to False
-    """
-    return get_core_tools(core_enabled) + get_plugin_tools(plugin_enabled)
 
 @login_required()
 @staff_required
@@ -732,6 +659,7 @@ def load_project(request, project_name):
         project = Project.objects.get(name__exact=project_name)
 
         plugins_config = core_utils.get_plugins_config()
+        enabled_plugins = core_utils.get_enabled_plugins(project)
         resp = {
             'has_image': bool(project.image),
             'supported_crs': core_utils.get_supported_crs(),
@@ -741,6 +669,7 @@ def load_project(request, project_name):
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
+            'enabled_plugins': enabled_plugins,
             'is_shared_view': False,
             'main_page': settings.LOGOUT_REDIRECT_URL,
             'is_viewer_template': True
@@ -768,6 +697,7 @@ def load_public_project(request, project_name):
         return render(request, 'illegal_operation.html', {})
 
     plugins_config = core_utils.get_plugins_config()
+    enabled_plugins = core_utils.get_enabled_plugins(project)
     response = render(request, 'viewer.html', {
         'has_image': bool(project.image),
         'supported_crs': core_utils.get_supported_crs(),
@@ -777,6 +707,7 @@ def load_public_project(request, project_name):
         'pid': project.id,
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
+        'enabled_plugins': enabled_plugins,
         'is_shared_view': False,
         'main_page': settings.LOGOUT_REDIRECT_URL,
         'is_viewer_template': True
