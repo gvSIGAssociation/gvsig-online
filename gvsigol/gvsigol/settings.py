@@ -397,9 +397,9 @@ SITE_ID=1
 #BASE_URL = 'https://localhost'
 #MEDIA_ROOT = '/usr/local/var/www/media/'
 #MEDIA_URL = 'https://localhost/media/'
-BASE_URL = 'https://gvsigol.localhost'
-MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
-MEDIA_URL = 'https://gvsigol.localhost/media/'
+BASE_URL = 'https://localhost'
+MEDIA_ROOT = '/var/www/sites/localhost/media/'
+MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -608,19 +608,28 @@ SWAGGER_SETTINGS = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'gvsigol.format': {
+            'format' : '[%(asctime)s]%(levelname)s:%(name)s: %(message)s',
+            'datefmt' : '%Y/%m/%d %H:%M:%S'
+        }
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'gvsigol.format',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False
         },
         'gvsigol': {
             'handlers': ['console'],
             'level': 'DEBUG',
+            'propagate': False
         },
     },
 }
@@ -629,7 +638,7 @@ TEMPORAL_ADVANCED_PARAMETERS = False
 
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://gvsigol.localhost/geoserver',
+    'URL': 'https://localhost/geoserver',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -674,7 +683,7 @@ RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
 LAYERS_ROOT = 'layer_downloads'
 #ALLOWED_HOST_NAMES = ['http://localhost']
-ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost', 'http://localhost:8000']
+ALLOWED_HOST_NAMES = ['http://localhost', 'http://localhost', 'http://localhost:8000']
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
     'JWT_ALLOW_REFRESH': True,
