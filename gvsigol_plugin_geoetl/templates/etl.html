@@ -271,7 +271,151 @@
                 </div>
             </div>
         </div>
-    </div>   
+    </div>
+
+    <!-- Modal add connection in database-->
+    <div class="modal fade" id="modal-add-db" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">{% trans 'Add DataBase Connection' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="layer-group-form" role="form">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="type-db" >{% trans 'Type' %}</label>
+                                <select  class="form-control" style="width: 100%;" id="type-db" name="type-db">
+                                    <option value="">---</option>
+                                    <option value="PostgreSQL">PostgreSQL/PostGIS</option>
+                                    <option value="Oracle">Oracle</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label form="name" class="col-form-label">{% trans 'Name' %}</label>
+                                <input id="name-db" type="text" value="" class="form-control" pattern="[A-Za-z]{3}">
+                            </div>
+                        </div>
+
+                        <div id="postgresql-db" name = "db-form" style = "display:none;">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="host" class="col-form-label">{% trans 'Host' %}</label>
+                                    <input id="host" type="text" value="localhost" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="port" class="col-form-label">{% trans 'Port:' %}</label>
+                                    <input id="port" type="text" value="5432" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="database" class="col-form-label">{% trans 'Database:' %}</label>
+                                    <input id="database" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="{% trans 'Name of your database' %}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">                          
+                                    <label form="user" class="col-form-label">{% trans 'User:' %}</label>
+                                    <input id="user" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="password" class="col-form-label">{% trans 'Password:' %}</label>
+                                    <input type="password" id = "password-postgres" class="form-control" value="">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="schema" class="col-form-label">{% trans 'Schema:' %}</label>
+                                    <input id="schema" type="text" value="public" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="oracle-db" name = "db-form" style = "display:none;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="username" class="col-form-label">{% trans 'User name:' %}</label>
+                                    <input id="username" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="password" class="col-form-label">{% trans 'Password:' %}</label>
+                                    <input type="password" id="password-oracle" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="dsn" class="col-form-label">{% trans 'Data source name:' %}</label>
+                                    <input type="text" id="dsn" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="text-test-connection"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" id="close-db">{% trans 'Close' %}</button>
+                    <button type="button" class="btn btn-default btn-sm" id="verify-db">{% trans 'Verify connection' %}</button>
+                    <button type="button" class="btn btn-default btn-sm" id="save-db">{% trans 'Save' %}</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal database not saved-->
+    <div class="modal fade" id="modal-db-exists" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Not allowed' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'DataBase Connection not saved. Probably, database name already exists.' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-db-exists-accept" type="button" class="btn btn-default">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endif %} 
 {% endblock %}
@@ -302,6 +446,8 @@
     };
 
     var srs = {{ srs|safe }}
+
+    var dbc = {{dbc|safe}}
 
     function actualizarInfoPanel(data){
         if(data.status == ''){
@@ -432,6 +578,129 @@
         $('#dialog-save').modal('show')
 
     })
+
+    $('#button-db-exists-accept').on('click', function(){
+        $('#modal-db-exists').modal('hide')
+        $('#modal-add-db').modal('show')
+
+    })
+
+    $('#type-db').on('change', function() {
+
+        $("[name = 'db-form']").slideUp();
+        $("#text-test-connection").text('')
+        
+        if ($("#type-db").val() == 'PostgreSQL'){
+            $("#postgresql-db").slideDown();
+        }else if ($("#type-db").val() == 'Oracle'){
+            $("#oracle-db").slideDown();
+        }
+        
+    });
+
+    $('#verify-db').click(function() {
+    
+        if ($("#type-db").val() == 'PostgreSQL'){
+            var params = {"type-db": $("#type-db").val(),
+                "parameters": [
+                    {"host": $('#host').val(),
+                    "port": $('#port').val(),
+                    "database": $('#database').val(),
+                    "user": $('#user').val(),
+                    "password": $('#password-postgres').val(),
+                    "schema": $('#schema').val()}
+                ]}
+        }else if ($("#type-db").val() == 'Oracle'){
+            var params = {"type-db": $("#type-db").val(),
+                "parameters": [
+                    {"username": $('#username').val(),
+                    "password": $('#password-oracle').val(),
+                    "dsn": $('#dsn').val()}
+                ]}
+        }
+
+        var formData = new FormData();
+        
+        formData.append('jsonParams', JSON.stringify(params))
+
+        $.ajax({
+            type: 'POST',
+            url: '/gvsigonline/etl/test_conexion/',
+            data: formData,
+            beforeSend:function(xhr){
+                xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+            },
+            cache: false, 
+            contentType: false, 
+            processData: false,
+            success: function (response) {
+
+                if(response.result == true){
+                    textConnection = gettext('Connection parameters are valids.')
+                    $("#text-test-connection").css('color', 'green');
+                }else{
+                    textConnection = gettext('Connection parameters are not valids.')
+                    $("#text-test-connection").css('color', 'red');
+                }
+
+                $("#text-test-connection").text(textConnection)
+            }
+        })
+    });
+
+    $('#close-db').click(function() {
+        $("#text-test-connection").text('')
+    })
+
+    $('#save-db').click(function() {
+    
+    if ($("#type-db").val() == 'PostgreSQL'){
+        var params = {
+            "type-db": $("#type-db").val(),
+            "name-db": $("#name-db").val(),
+            "parameters": [
+                {"host": $('#host').val(),
+                "port": $('#port').val(),
+                "database": $('#database').val(),
+                "user": $('#user').val(),
+                "passwd": $('#password-postgres').val(),
+                "schema": $('#schema').val()}
+            ]}
+    }else if ($("#type-db").val() == 'Oracle'){
+            var params = {"type-db": $("#type-db").val(),
+                    "name-db": $("#name-db").val(),
+                "parameters": [
+                    {"username": $('#username').val(),
+                    "password": $('#password-oracle').val(),
+                    "dsn": $('#dsn').val()}
+                ]}
+        }
+
+    var formData = new FormData();
+    
+    formData.append('jsonParams', JSON.stringify(params))
+
+    $.ajax({
+        type: 'POST',
+        url: '/gvsigonline/etl/save_conexion/',
+        data: formData,
+        beforeSend:function(xhr){
+            xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+        },
+        cache: false, 
+        contentType: false, 
+        processData: false,
+        success: function (response) {
+            $('#modal-add-db').modal('hide')
+            
+            if(response['saved']=="false"){
+                $('#modal-db-exists').modal('show')
+            }else{
+                dbc.push({"name": response['name'], "type": response['type']})
+            }
+            }
+        })
+    });
 
 </script>
 

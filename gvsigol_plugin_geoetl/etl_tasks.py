@@ -14,7 +14,7 @@ import os, shutil
 
 import cx_Oracle
 #from geomet import wkt
-from . import etl_schema
+from .models import database_connections
 import requests
 import base64
 from datetime import date, datetime
@@ -530,26 +530,27 @@ def output_Postgresql(dicc, geom_column_name = ''):
         print('There is no features in output')
     
     else:
-        schemaTable = dicc['tablename'].lower()
 
-        if '.' in schemaTable:
-            esq = schemaTable.split(".")[0]
-            table_name = schemaTable.split(".")[1]
-        else:
-            esq = 'public'
-            table_name = schemaTable
+        db  = database_connections.objects.get(name = dicc['db'])
 
-        conn_string_target= 'postgresql://'+dicc['user']+':'+dicc['password']+'@'+dicc['host']+':'+dicc['port']+'/'+dicc['database']
+        params_str = (db.connection_params).replace('passwd', 'password')
+
+        params = json.loads(params_str)
+
+        esq = params['schema']
+        table_name = dicc['tablename'].lower()
+
+        conn_string_target= 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+params['port']+'/'+params['database']
         db_target = create_engine(conn_string_target)
         conn_target = db_target.connect()
 
         if dicc['operation'] == 'CREATE':
             df.to_sql(table_name, con=conn_target, schema= esq, if_exists='fail', index=False)
             sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
-            executePostgres(dicc, sqlAlter)
+            executePostgres(params, sqlAlter)
             sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
             try:
-                executePostgres(dicc, sqlAlter_)
+                executePostgres(params, sqlAlter_)
             except:
                 pass
 
@@ -560,21 +561,21 @@ def output_Postgresql(dicc, geom_column_name = ''):
             if geom_column_name != '':
 
                 sqlA = 'ALTER TABLE '+esq+'."'+table_name+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
-                executePostgres(dicc, sqlA)
+                executePostgres(params, sqlA)
 
                 sqlU = 'UPDATE '+esq+'."'+table_name+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
-                executePostgres(dicc, sqlU)
+                executePostgres(params, sqlU)
 
                 sqlD = 'ALTER TABLE '+esq+'."'+table_name+'"  DROP COLUMN wkb_geometry'
-                executePostgres(dicc, sqlD)
+                executePostgres(params, sqlD)
             
             
             df.to_sql(table_name, con=conn_target, schema= esq, if_exists='replace', index=False)
             sqlAlter = 'ALTER TABLE '+ esq+'."'+table_name+'" ADD COLUMN IF NOT EXISTS ogc_fid SERIAL'
-            executePostgres(dicc, sqlAlter)
+            executePostgres(params, sqlAlter)
             sqlAlter_ =  'ALTER TABLE '+ esq+'."'+table_name+'" ADD PRIMARY KEY (ogc_fid)'
             try:
-                executePostgres(dicc, sqlAlter_)
+                executePostgres(params, sqlAlter_)
             except:
                 pass
         elif dicc['operation'] == 'UPDATE':
@@ -592,7 +593,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
             
                 sqlUpdate = sqlUpdate[:-1] + ' WHERE "'+dicc['match']+'" = '+"'"+value+"'"
 
-                executePostgres(dicc, sqlUpdate)
+                executePostgres(params, sqlUpdate)
         
         elif dicc['operation'] == 'DELETE':
             
@@ -600,7 +601,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
                 sqlDelete = 'DELETE FROM '+ esq+'."'+table_name+'" '
                 value = str(row[1][dicc['match']]).replace("'","''")
                 sqlDelete = sqlDelete + ' WHERE "'+dicc['match']+'" = '+"'"+value+"'"
-                executePostgres(dicc, sqlDelete)
+                executePostgres(params, sqlDelete)
 
         conn_source.close()
         db_source.dispose()
@@ -613,14 +614,15 @@ def output_Postgresql(dicc, geom_column_name = ''):
 def output_Postgis(dicc):
 
     table_name_source = dicc['data'][0]
-    schemaTable = dicc['tablename'].lower()
 
-    if '.' in schemaTable:
-        esq = schemaTable.split(".")[0]
-        tab = schemaTable.split(".")[1]
-    else:
-        esq = 'public'
-        tab = schemaTable
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params_str = (db.connection_params).replace('passwd', 'password')
+
+    params = json.loads(params_str)
+
+    esq = params['schema']
+    tab = dicc['tablename'].lower()
 
     con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = con_source.cursor()
@@ -694,7 +696,7 @@ def output_Postgis(dicc):
         con_source.close()
         cur.close()
 
-        con_target = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+        con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
         cur2 = con_target.cursor()
 
         if srid != 0 and type_geom != '':
@@ -1015,7 +1017,11 @@ def input_Oracle(dicc):
 
     table_name = dicc['id']
 
-    conn_string_source = 'oracle+cx_oracle://'+dicc['username']+':'+dicc['password']+'@'+dicc['dsn'].split('/')[0]+'/?service_name='+dicc['dsn'].split('/')[1]
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params = json.loads(db.connection_params)
+
+    conn_string_source = 'oracle+cx_oracle://'+params['username']+':'+params['password']+'@'+params['dsn'].split('/')[0]+'/?service_name='+params['dsn'].split('/')[1]
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
     
@@ -1038,20 +1044,13 @@ def input_Oracle(dicc):
     db_source.dispose()
     
     conn_ORA = cx_Oracle.connect(
-        dicc['username'],
-        dicc['password'],
-        dicc['dsn']
+        params['username'],
+        params['password'],
+        params['dsn']
     )
 
     c_ORA = conn_ORA.cursor()
     c_ORA.execute(sql)
-
-    #conn_PG = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
-    #cur_PG = conn_PG.cursor()
-
-    #sqlTruncate = 'TRUNCATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name+'"'
-    #cur_PG.execute(sqlTruncate)
-    #conn_PG.commit()
 
     count = 1
 
@@ -1069,9 +1068,6 @@ def input_Oracle(dicc):
         else:
             df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
 
-
-    #conn_ORA.close()
-    #c_ORA.close()
 
     conn_target.close()
     db_target.dispose()
@@ -1320,14 +1316,17 @@ def input_Indenova(dicc):
 
 def input_Postgres(dicc, geom_column_name = ''):
 
-    #order_attr = 'ogc_id'
     table_name = dicc['id']
 
-    #offset = 0
+    db  = database_connections.objects.get(name = dicc['db'])
 
-    conn_string_source = 'postgresql://'+dicc['user']+':'+dicc['password']+'@'+dicc['host']+':'+dicc['port']+'/'+dicc['database']
+    params_str = (db.connection_params).replace('passwd', 'password')
 
-    schemaTable = dicc['tablename'].lower()
+    params = json.loads(params_str)
+
+    conn_string_source = 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+params['port']+'/'+params['database']
+
+    schemaTable = params['schema']+'.'+dicc['tablename'].lower()
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
 
@@ -1354,7 +1353,7 @@ def input_Postgres(dicc, geom_column_name = ''):
     conn_source.close()
     db_source.dispose()
 
-    con_Pos = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+    con_Pos = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur_Pos = con_Pos.cursor()
     
     cur_Pos.execute(sql)
@@ -1385,16 +1384,16 @@ def input_Postgis(dicc):
 
     table_name = dicc['id']
 
-    schemaTable = dicc['tablename'].lower()
+    db  = database_connections.objects.get(name = dicc['db'])
 
-    if '.' in schemaTable:
-        esq = schemaTable.split(".")[0]
-        tab = schemaTable.split(".")[1]
-    else:
-        esq = 'public'
-        tab = schemaTable
+    params_str = (db.connection_params).replace('passwd', 'password')
 
-    con_source = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+    params = json.loads(params_str)
+
+    esq = params['schema']
+    tab = dicc['tablename'].lower()
+
+    con_source = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur = con_source.cursor()
 
     sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
@@ -1406,14 +1405,6 @@ def input_Postgis(dicc):
         if  row[1] == 'USER-DEFINED' or row[1] == 'geometry':
             geom_column_name = row[0]
             break
-
-    """sqlAlter = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
-    cur.execute(sqlAlter)
-    con_source.commit()
-
-    sqlUpdate = 'UPDATE '+esq+'."'+tab+'"  SET _st_astext_temp = ST_ASTEXT ('+geom_column_name+')'
-    cur.execute(sqlUpdate)
-    con_source.commit()"""
 
     sqlSrid = 'SELECT ST_SRID ('+geom_column_name+') FROM '+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL LIMIT 1'
     cur.execute(sqlSrid)
@@ -1445,15 +1436,8 @@ def input_Postgis(dicc):
 
     input_Postgres(dicc, geom_column_name)
 
-    """sqlDrop = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN _st_astext_temp '
-    cur.execute(sqlDrop)
-    con_source.commit()"""
-
-
     con_target = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur2 = con_target.cursor()
-
-    
     
     sqlDrop2 = 'ALTER TABLE '+settings.GEOETL_DB['schema']+'."'+table_name+'"  DROP COLUMN "'+ geom_column_name+'"'
     cur2.execute(sqlDrop2)

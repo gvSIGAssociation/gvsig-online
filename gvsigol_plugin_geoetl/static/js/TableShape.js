@@ -1468,17 +1468,9 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column30">'+
-                                '<label form="username" class="col-form-label">'+gettext('User name:')+'</label>'+
-                                '<input id="username-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column30">'+
-                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id="password-'+ID+'" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column40">'+
-                                '<label form="dsn" class="col-form-label">'+gettext('Data source name:')+'</label>'+
-                                '<input type="text" id="dsn-'+ID+'" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div>'+
+                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
+                                '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
                             '<div class="column20">'+
                                 '<label for ="get-owners" class="col-form-label">'+gettext('Get owners')+':</label><br>'+
@@ -1496,7 +1488,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="table-name" class="col-form-label">'+gettext('Tables:')+'</label>'+
                                 '<select class="form-control" id="table-name-'+ID+'"> </select>'+
                             '</div>'+
-                            '<br><br><br><br><br><br><br><br><br>'+ 
+                            '<br><br><br>'+ 
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-oracle" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL statement')+'</label>'+											
@@ -1509,7 +1501,6 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
-                        '<button type="button" class="btn btn-default btn-sm" id="verify-oracle-'+ID+'">'+gettext('Verify connection')+'</button>'+
                         '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
                         '<button type="button" class="btn btn-default btn-sm" id="input-oracle-accept-'+ID+'">'+gettext('Accept')+'</button>'+
                     '</div>'+
@@ -1518,6 +1509,15 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
         '</div>')
 
         var context = this
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'Oracle'){
+                $('#db-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
 
         $(".more-options-"+ID).slideUp("slow")
         
@@ -1532,69 +1532,6 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
             }
         });
         
-        
-        $('#verify-oracle-'+ID).click(function() {
-                
-            var paramsOrcl = {"id": ID,
-            "parameters": [
-                {"username": $('#username-'+ID).val(),
-                "dsn": $('#dsn-'+ID).val(),
-                "password": $('#password-'+ID).val()
-            }
-            ]}
-
-            var formDataOrcl = new FormData();
-            
-            formDataOrcl.append('jsonParamsOracle', JSON.stringify(paramsOrcl))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/test_oracle_conexion/',
-                data: formDataOrcl,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (response) {
-
-                    if(response.result == true){
-                        textConnection = gettext('Connection parameters are valids.')
-                    }else{
-                        textConnection = gettext('Connection parameters are not valids.')
-                    }
-
-                    $("#dialog-test-oracle-connection").remove();
-                        
-                    $('#canvas-parent').append('<div id="dialog-test-oracle-connection" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-                        '<div class="modal-dialog" role="document">'+
-                            '<div class="modal-content">'+
-                                '<div class="modal-header">'+
-                                    '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                                        '<span aria-hidden="true">&times;</span>'+
-                                    '</button>'+
-                                    '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-                                '</div>'+
-                                '<div class="modal-body" align="center">'+textConnection+
-                                '</div>'+
-                                '<div class="modal-footer">'+
-                                    '<button id= "close-test-oracle-connection" type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                    '</div>')
-
-                    $('#dialog-test-oracle-connection').modal('show')
-
-                    $('#close-test-oracle-connection').click(function() {
-                        
-                        $('#dialog-test-oracle-connection').modal('hide')
-                        
-                    })
-                }
-            })
-        });
 
         icon.on("click", function(){
 
@@ -1614,9 +1551,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                                 
             var paramsOracleOwners = {"id": ID,
             "parameters": [
-                {"username": $('#username-'+ID).val(),
-                "dsn": $('#dsn-'+ID).val(),
-                "password": $('#password-'+ID).val()}
+                {"db": $('#db-'+ID).val()}
             ]}
 
             var formDataOracleOwners = new FormData();
@@ -1649,9 +1584,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                             
             var paramsOracleTables = {"id": ID,
             "parameters": [
-                {"username": $('#username-'+ID).val(),
-                "dsn": $('#dsn-'+ID).val(),
-                "password": $('#password-'+ID).val(),
+                {"db": $('#db-'+ID).val(),
                 "owner-name": $('#owner-name-'+ID).val()}
             ]}
 
@@ -1686,9 +1619,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
             
             var paramsOracle = {"id": ID,
             "parameters": [
-                {"username": $('#username-'+ID).val(),
-                "dsn": $('#dsn-'+ID).val(),
-                "password": $('#password-'+ID).val(),
+                {"db": $('#db-'+ID).val(),
                 "owner-name": $('#owner-name-'+ID).val(),
                 "table-name": $('#table-name-'+ID).val(),
                 "checkbox": $("#checkbox-"+ID).val(),
@@ -1881,31 +1812,14 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
-                                '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div>'+
+                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
+                                '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column50">'+    
-                                '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
-                                '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
-                                '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
-                            '</div>'+
-                            '<div class="column50">'+                                
-                                '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
-                                '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
-                            '</div>'+
-                            '<div class="column50">'+
+                            '<div>'+
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
                             '</div>'+
-                            '<br><br><br><br><br><br><br><br><br>'+
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
@@ -1918,13 +1832,21 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-footer">'+
                         '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                        '<button type="button" class="btn btn-default btn-sm" id="verify-postgresql-'+ID+'">'+gettext('Verify connection')+'</button>'+
                         '<button type="button" class="btn btn-default btn-sm" id="input-postgis-accept-'+ID+'">'+gettext('Accept')+'</button>'+
                     '</div>'+
                 '</div>'+
             '</div>'+
         '</div>')
 
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'PostgreSQL'){
+                $('#db-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
 
         $("#checkbox-"+ID).change(function() {
             if($("#checkbox-"+ID).is(':checked')){
@@ -1937,70 +1859,6 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
         });
 
         var context = this
-
-        $('#verify-postgresql-'+ID).click(function() {
-                
-            var paramsPostgres = {"id": ID,
-                "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val()}
-                ]}
-    
-                var formDataPostgres = new FormData();
-                
-                formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
-    
-                $.ajax({
-                    type: 'POST',
-                    url: '/gvsigonline/etl/test_postgres_conexion/',
-                    data: formDataPostgres,
-                    beforeSend:function(xhr){
-                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                    },
-                    cache: false, 
-                    contentType: false, 
-                    processData: false,
-                    success: function (response) {
-    
-                        if(response.result == true){
-                            textConnection = gettext('Connection parameters are valids.')
-                        }else{
-                            textConnection = gettext('Connection parameters are not valids.')
-                        }
-    
-                        $("#dialog-test-postgres-connection").remove();
-                            
-                        $('#canvas-parent').append('<div id="dialog-test-postgres-connection" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-                            '<div class="modal-dialog" role="document">'+
-                                '<div class="modal-content">'+
-                                    '<div class="modal-header">'+
-                                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                                            '<span aria-hidden="true">&times;</span>'+
-                                        '</button>'+
-                                        '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-                                    '</div>'+
-                                    '<div class="modal-body" align="center">'+textConnection+
-                                    '</div>'+
-                                    '<div class="modal-footer">'+
-                                        '<button id= "close-test-postgres-connection" type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>')
-    
-                        $('#dialog-test-postgres-connection').modal('show')
-    
-                        $('#close-test-postgres-connection').click(function() {
-                            
-                            $('#dialog-test-postgres-connection').modal('hide')
-                            
-                        })
-                    }
-                })
-            });
 
         icon.on("click", function(){
 
@@ -2020,11 +1878,7 @@ input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
                 
             var paramsPostgis = {"id": ID,
             "parameters": [
-                {"host": $('#host-'+ID).val(),
-                "port": $('#port-'+ID).val(),
-                "database": $('#database-'+ID).val(),
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val(),
+                {"db": $('#db-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
                 "checkbox": $("#checkbox-"+ID).val(),
                 "clause": $('#clause-'+ID).val()}
@@ -2217,31 +2071,14 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
-                                '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div>'+
+                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
+                                '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column50">'+    
-                                '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
-                                '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
-                                '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
-                            '</div>'+
-                            '<div class="column50">'+                                
-                                '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
-                                '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
-                            '</div>'+
-                            '<div class="column50">'+
+                            '<div>'+
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
                             '</div>'+
-                            '<br><br><br><br><br><br><br><br><br>'+
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
@@ -2254,12 +2091,21 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-footer">'+
                         '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                        '<button type="button" class="btn btn-default btn-sm" id="verify-postgresql-'+ID+'">'+gettext('Verify connection')+'</button>'+
                         '<button type="button" class="btn btn-default btn-sm" id="input-postgis-accept-'+ID+'">'+gettext('Accept')+'</button>'+
                     '</div>'+
                 '</div>'+
             '</div>'+
         '</div>')
+
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'PostgreSQL'){
+                $('#db-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
 
 
         $("#checkbox-"+ID).change(function() {
@@ -2273,70 +2119,6 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         });
 
         var context = this
-
-        $('#verify-postgresql-'+ID).click(function() {
-                
-            var paramsPostgres = {"id": ID,
-                "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val()}
-                ]}
-    
-                var formDataPostgres = new FormData();
-                
-                formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
-    
-                $.ajax({
-                    type: 'POST',
-                    url: '/gvsigonline/etl/test_postgres_conexion/',
-                    data: formDataPostgres,
-                    beforeSend:function(xhr){
-                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                    },
-                    cache: false, 
-                    contentType: false, 
-                    processData: false,
-                    success: function (response) {
-    
-                        if(response.result == true){
-                            textConnection = gettext('Connection parameters are valids.')
-                        }else{
-                            textConnection = gettext('Connection parameters are not valids.')
-                        }
-    
-                        $("#dialog-test-postgres-connection").remove();
-                            
-                        $('#canvas-parent').append('<div id="dialog-test-postgres-connection" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-                            '<div class="modal-dialog" role="document">'+
-                                '<div class="modal-content">'+
-                                    '<div class="modal-header">'+
-                                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                                            '<span aria-hidden="true">&times;</span>'+
-                                        '</button>'+
-                                        '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-                                    '</div>'+
-                                    '<div class="modal-body" align="center">'+textConnection+
-                                    '</div>'+
-                                    '<div class="modal-footer">'+
-                                        '<button id= "close-test-postgres-connection" type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>')
-    
-                        $('#dialog-test-postgres-connection').modal('show')
-    
-                        $('#close-test-postgres-connection').click(function() {
-                            
-                            $('#dialog-test-postgres-connection').modal('hide')
-                            
-                        })
-                    }
-                })
-            });
 
         icon.on("click", function(){
 
@@ -2355,11 +2137,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 
             var paramsPostgis = {"id": ID,
             "parameters": [
-                {"host": $('#host-'+ID).val(),
-                "port": $('#port-'+ID).val(),
-                "database": $('#database-'+ID).val(),
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val(),
+                {"db": $('#db-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
                 "checkbox": $("#checkbox-"+ID).val(),
                 "clause": $('#clause-'+ID).val()}
@@ -10690,29 +10468,13 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
-                                '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div>'+
+                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
+                                '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column50">'+    
-                                '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
-                                '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
-                                '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
-                            '</div>'+
-                            '<div class="column50">'+                                
-                                '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
-                                '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
-                            '</div>'+
-                            '<div class="column50">'+
+                            '<div>'+
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
                             '</div>'+
                             '<div class="column25">'+
                                 '<label class="col-form-label">'+gettext('Operation:')+'</label>'+
@@ -10748,12 +10510,20 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-footer">'+
                         '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                        '<button type="button" class="btn btn-default btn-sm" id="verify-postgresql-'+ID+'">'+gettext('Verify connection')+'</button>'+
                         '<button type="button" class="btn btn-default btn-sm" id="output-postgresql-accept-'+ID+'">'+gettext('Accept')+'</button>'+
                     '</div>'+
                 '</div>'+
             '</div>'+
         '</div>')
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'PostgreSQL'){
+                $('#db-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
 
         $('input:radio[name="operation-'+ID+'"]').change(function(){
             
@@ -10763,72 +10533,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
             else{
                 $('#match-'+ID).attr('disabled', true)
             }
-        });
-        
-        $('#verify-postgresql-'+ID).click(function() {
-                
-        var paramsPostgres = {"id": ID,
-            "parameters": [
-                {"host": $('#host-'+ID).val(),
-                "port": $('#port-'+ID).val(),
-                "database": $('#database-'+ID).val(),
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val()}
-            ]}
-
-            var formDataPostgres = new FormData();
-            
-            formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/test_postgres_conexion/',
-                data: formDataPostgres,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (response) {
-
-                    if(response.result == true){
-                        textConnection = gettext('Connection parameters are valids.')
-                    }else{
-                        textConnection = gettext('Connection parameters are not valids.')
-                    }
-
-                    $("#dialog-test-postgres-connection").remove();
-                        
-                    $('#canvas-parent').append('<div id="dialog-test-postgres-connection" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-                        '<div class="modal-dialog" role="document">'+
-                            '<div class="modal-content">'+
-                                '<div class="modal-header">'+
-                                    '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                                        '<span aria-hidden="true">&times;</span>'+
-                                    '</button>'+
-                                    '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-                                '</div>'+
-                                '<div class="modal-body" align="center">'+textConnection+
-                                '</div>'+
-                                '<div class="modal-footer">'+
-                                    '<button id= "close-test-postgres-connection" type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                    '</div>')
-
-                    $('#dialog-test-postgres-connection').modal('show')
-
-                    $('#close-test-postgres-connection').click(function() {
-                        
-                        $('#dialog-test-postgres-connection').modal('hide')
-                        
-                    })
-                }
-            })
-        });
-        
+        });       
 
         icon.on("click", function(){
 
@@ -10864,11 +10569,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
 
             var paramsPostgreSQL = {"id": ID,
                 "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
+                    {"db": $('#db-'+ID).val(),
                     "tablename": $('#tablename-'+ID).val(),
                     "match": $('#match-'+ID).val(),
                     "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
@@ -11045,29 +10746,13 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
-                                '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div>'+
+                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
+                                '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column50">'+    
-                                '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
-                                '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
-                                '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
-                            '</div>'+
-                            '<div class="column50">'+                                
-                                '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
-                                '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
-                            '</div>'+
-                            '<div class="column50">'+
+                            '<div>'+
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
                             '</div>'+
                             '<div class="column25">'+
                                 '<label class="col-form-label">'+gettext('Operation:')+'</label>'+
@@ -11103,12 +10788,20 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-footer">'+
                         '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                        '<button type="button" class="btn btn-default btn-sm" id="verify-postgis-'+ID+'">'+gettext('Verify connection')+'</button>'+
                         '<button type="button" class="btn btn-default btn-sm" id="output-postgis-accept-'+ID+'">'+gettext('Accept')+'</button>'+
                     '</div>'+
                 '</div>'+
             '</div>'+
         '</div>')
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'PostgreSQL'){
+                $('#db-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
 
         $('input:radio[name="operation-'+ID+'"]').change(function(){
             
@@ -11120,69 +10813,6 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             }
         });
         
-        $('#verify-postgis-'+ID).click(function() {
-                
-        var paramsPostgres = {"id": ID,
-            "parameters": [
-                {"host": $('#host-'+ID).val(),
-                "port": $('#port-'+ID).val(),
-                "database": $('#database-'+ID).val(),
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val()}
-            ]}
-
-            var formDataPostgres = new FormData();
-            
-            formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/test_postgres_conexion/',
-                data: formDataPostgres,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (response) {
-
-                    if(response.result == true){
-                        textConnection = gettext('Connection parameters are valids.')
-                    }else{
-                        textConnection = gettext('Connection parameters are not valids.')
-                    }
-
-                    $("#dialog-test-postgres-connection").remove();
-                        
-                    $('#canvas-parent').append('<div id="dialog-test-postgres-connection" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-                        '<div class="modal-dialog" role="document">'+
-                            '<div class="modal-content">'+
-                                '<div class="modal-header">'+
-                                    '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                                        '<span aria-hidden="true">&times;</span>'+
-                                    '</button>'+
-                                    '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-                                '</div>'+
-                                '<div class="modal-body" align="center">'+textConnection+
-                                '</div>'+
-                                '<div class="modal-footer">'+
-                                    '<button id= "close-test-postgres-connection" type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                    '</div>')
-
-                    $('#dialog-test-postgres-connection').modal('show')
-
-                    $('#close-test-postgres-connection').click(function() {
-                        
-                        $('#dialog-test-postgres-connection').modal('hide')
-                        
-                    })
-                }
-            })
-        });
         
       var context = this
         icon.on("click", function(){
@@ -11219,11 +10849,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             var paramsPostgis = {"id": ID,
             "parameters": [
-                {"host": $('#host-'+ID).val(),
-                "port": $('#port-'+ID).val(),
-                "database": $('#database-'+ID).val(),
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val(),
+                {"db": $('#db-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
                 "match": $('#match-'+ID).val(),
                 "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}

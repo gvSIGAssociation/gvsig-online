@@ -34,7 +34,8 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus
+from .models import ETLworkspaces, ETLstatus, database_connections
+from gvsigol_services.models import Datastore
 from django.contrib.auth.models import User
 from . import settings as settings_geoetl
 from . import etl_tasks
@@ -89,7 +90,12 @@ def etl_canvas(request):
     srs = core_utils.get_supported_crs_array()
     srs_string = json.dumps(srs)
 
-    create_schema(settings.GEOETL_DB)
+    dbc =[]
+
+    databases  = database_connections.objects.all()
+
+    for db in databases:
+        dbc.append({"name": db.name, "type": db.type})
 
     try:
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
@@ -118,7 +124,8 @@ def etl_canvas(request):
             'description': instance.description,
             'workspace': json.dumps(instance.workspace),
             'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
-            'srs': srs_string
+            'srs': srs_string,
+            'dbc': dbc
         }
 
         try:
@@ -149,7 +156,8 @@ def etl_canvas(request):
     except:
         response = {
             'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
-            'srs': srs
+            'srs': srs,
+            'dbc': dbc
         }
         return render(request, 'etl.html', response)
 
@@ -200,6 +208,22 @@ def get_list(user):
 @login_required()
 @staff_required
 def etl_workspace_list(request):
+
+    create_schema(settings.GEOETL_DB)
+
+    datastores  = Datastore.objects.filter(type = 'v_PostGIS')
+
+    for ds in datastores:
+        try:
+            bbdd_con = database_connections(
+                type = 'PostgreSQL',
+                name = ds.name,
+                connection_params = ds.connection_params
+            )
+            bbdd_con.save()
+            
+        except Exception as e:
+            print(e)
     
     username = request.GET['user']
 
@@ -594,14 +618,51 @@ def etl_schema_shape(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')   
 @staff_required 
-def test_postgres_conexion(request):
+def test_conexion(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
 
-            jsParams = json.loads(request.POST['jsonParamsPostgres'])
+            jsParams = json.loads(request.POST['jsonParams'])
 
-            response = etl_schema.test_postgres(jsParams['parameters'][0])
+            if jsParams['type-db'] == 'PostgreSQL':
+
+                response = etl_schema.test_postgres(jsParams['parameters'][0])
+                
+            elif jsParams['type-db'] == 'Oracle':
+
+                response = etl_schema.test_oracle(jsParams['parameters'][0])
+
+            return HttpResponse(json.dumps(response), content_type="application/json")
+
+@login_required(login_url='/gvsigonline/auth/login_user/')   
+@staff_required 
+def save_conexion(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+
+            jsParams = json.loads(request.POST['jsonParams'])
+
+            try:
+                bbdd_con = database_connections(
+                    type = jsParams['type-db'],
+                    name = jsParams['name-db'],
+                    connection_params = json.dumps(jsParams['parameters'][0])
+                )
+                bbdd_con.save()
+
+                response = {
+                    'saved': 'true',
+                    'name': jsParams['name-db'],
+                    'type': jsParams['type-db']
+                }  
+                
+            except Exception as e:
+                response = {
+                    'saved': 'false',
+                }  
+                print(e)
 
             return HttpResponse(json.dumps(response), content_type="application/json")
 
@@ -617,19 +678,6 @@ def etl_schema_csv(request):
 
             response = etl_schema.get_schema_csv(jsParams['parameters'][0])
             
-            return HttpResponse(json.dumps(response), content_type="application/json")
-
-@login_required(login_url='/gvsigonline/auth/login_user/')   
-@staff_required 
-def test_oracle_conexion(request):
-    if request.method == 'POST':
-        form = UploadFileForm(request.POST)
-        if form.is_valid():
-
-            jsParams = json.loads(request.POST['jsonParamsOracle'])
-
-            response = etl_schema.test_oracle(jsParams['parameters'][0])
-
             return HttpResponse(json.dumps(response), content_type="application/json")
 
 @login_required()

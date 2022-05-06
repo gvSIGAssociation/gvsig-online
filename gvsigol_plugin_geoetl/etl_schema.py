@@ -9,6 +9,7 @@ import json
 import re
 #from datetime import date
 from django.contrib.gis.gdal import DataSource
+from .models import database_connections
 import os
 import shutil
 from zipfile import ZipFile
@@ -109,8 +110,25 @@ def test_oracle(dicc):
 def test_postgres(dicc):
     try:
         conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+        cur = conn.cursor()
+        
+        sql = "SELECT schema_name FROM information_schema.schemata"
+        cur.execute(sql)
+        conn.commit()
+
+        res = False
+
+        for i in cur:
+            if i[0] == dicc['schema']:
+                res = True
+                break
+        
         conn.close()
-        return {"result": True}
+
+        if res == False:
+            print ('Connection postgres: Schema does not exist')
+
+        return {"result": res}
     except Exception as e:
         print ('Connection postgres: ' + str(e))
         return {"result": False}
@@ -121,14 +139,18 @@ def get_schema_csv(dicc):
 
 def get_owners_oracle(dicc):
 
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params = json.loads(db.connection_params)
+
     conn = cx_Oracle.connect(
-        dicc['username'],
-        dicc['password'],
-        dicc['dsn']
+        params['username'],
+        params['password'],
+        params['dsn']
     )
 
     c = conn.cursor()
-    c.execute("select username as schema_name from sys.dba_users order by username")
+    c.execute("select username as schema_name from sys.all_users order by username")
 
     owners = []
     for own in c:
@@ -140,10 +162,14 @@ def get_owners_oracle(dicc):
 
 def get_tables_oracle(dicc):
 
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params = json.loads(db.connection_params)
+
     conn = cx_Oracle.connect(
-        dicc['username'],
-        dicc['password'],
-        dicc['dsn']
+        params['username'],
+        params['password'],
+        params['dsn']
     )
 
     c = conn.cursor()
@@ -159,12 +185,15 @@ def get_tables_oracle(dicc):
 
 def get_schema_oracle(dicc):
 
-    conn = cx_Oracle.connect(
-        dicc['username'],
-        dicc['password'],
-        dicc['dsn']
-    )
+    db  = database_connections.objects.get(name = dicc['db'])
 
+    params = json.loads(db.connection_params)
+
+    conn = cx_Oracle.connect(
+        params['username'],
+        params['password'],
+        params['dsn']
+    )
     
     c = conn.cursor()
 
@@ -306,19 +335,20 @@ def get_proced_indenova(dicc):
     return [x.lower() for x in listSchema]"""
 
 def get_schema_postgres(dicc):
-    schemaTable = dicc['tablename'].lower()
-    if "." in schemaTable:
-        schema = schemaTable.split(".")[0]
-        table_name = schemaTable.split(".")[1]
-    else:
-        schema = "public"
-        table_name = schemaTable
+    
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params_str = (db.connection_params).replace('passwd', 'password')
+
+    params = json.loads(params_str)
+   
+    table_name = dicc['tablename'].lower()
     
     #postgres connection
-    conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+    conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur = conn.cursor()
 
-    sql ="SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '"+schema+"' AND table_name   = '"+table_name+"';"
+    sql ="SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '"+params['schema']+"' AND table_name   = '"+table_name+"';"
 
     cur.execute(sql)
     listSchema = []
