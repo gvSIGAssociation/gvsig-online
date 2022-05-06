@@ -185,6 +185,13 @@ gvsigolETL.Toolbar = Class.extend({
 			});
 		});
 
+		// Inject the Add Database Connection Button
+		this.bbddButton  = $('<button id="button-add-bbdd" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5" ></i>' + gettext('Add DB') + '</button>');
+		this.html.append(this.bbddButton);
+		this.bbddButton.click( function() {
+			$('#modal-add-db').modal('show')
+		})
+
 		// Inject the DELETE Button
 		this.deleteButton  = $('<button id="button-remove" class="btn btn-default btn-sm"><i class="fa fa-times margin-r-5"></i>' + gettext('Remove') + '</button>');
 		this.html.append(this.deleteButton);
