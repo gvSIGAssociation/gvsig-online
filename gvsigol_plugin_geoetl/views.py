@@ -187,8 +187,15 @@ def get_list(user):
                 interid = periodicTask.interval_id
                 if cronid:
                     crontab = CrontabSchedule.objects.get(id= cronid)
-                    workspace['minute'] = crontab.minute
-                    workspace['hour'] = crontab.hour
+                    if crontab.minute != '0':
+                        workspace['minute'] = crontab.minute
+                    else: 
+                        workspace['minute'] = '00'
+
+                    if crontab.hour != '0':
+                        workspace['hour'] = crontab.hour
+                    else:
+                        workspace['hour'] = '00'
 
                     days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
                     try:
