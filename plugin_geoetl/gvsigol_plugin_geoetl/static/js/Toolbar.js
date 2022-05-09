@@ -349,6 +349,8 @@ gvsigolETL.Toolbar = Class.extend({
 								multiIn = multiIn + 1
 
 								if($('input:radio[name="'+key+'-'+figure.id+'"]').is(':radio')){
+
+									console.log(parameters[0][key])
 									
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).attr('checked', true)
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).val(parameters[0][key])

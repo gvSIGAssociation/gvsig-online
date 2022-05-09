@@ -115,20 +115,10 @@ def test_postgres(dicc):
         sql = "SELECT schema_name FROM information_schema.schemata"
         cur.execute(sql)
         conn.commit()
-
-        res = False
-
-        for i in cur:
-            if i[0] == dicc['schema']:
-                res = True
-                break
         
         conn.close()
 
-        if res == False:
-            print ('Connection postgres: Schema does not exist')
-
-        return {"result": res}
+        return {"result": True}
     except Exception as e:
         print ('Connection postgres: ' + str(e))
         return {"result": False}
@@ -338,17 +328,17 @@ def get_schema_postgres(dicc):
     
     db  = database_connections.objects.get(name = dicc['db'])
 
-    params_str = (db.connection_params).replace('passwd', 'password')
+    params_str = db.connection_params
 
     params = json.loads(params_str)
    
-    table_name = dicc['tablename'].lower()
+    table_name = dicc['tablename']
     
     #postgres connection
     conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur = conn.cursor()
 
-    sql ="SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '"+params['schema']+"' AND table_name   = '"+table_name+"';"
+    sql ="SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '"+dicc['schema-name']+"' AND table_name   = '"+table_name+"';"
 
     cur.execute(sql)
     listSchema = []
@@ -400,5 +390,50 @@ def get_schema_postgres(dicc):
     conn.commit()
     conn.close()
     cur.close()
+
+    return listSchema
+
+
+def get_schema_name_postgres(dicc):
+
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params_str = db.connection_params
+
+    params = json.loads(params_str)
+
+    conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+    cur = conn.cursor()
+    
+    sql = "SELECT schema_name FROM information_schema.schemata"
+    cur.execute(sql)
+    conn.commit()
+    listSchema = []
+    for row in cur:
+        listSchema.append(row[0])
+    
+    conn.close()
+
+    return listSchema
+
+def get_table_name_postgres(dicc):
+
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params_str = db.connection_params
+
+    params = json.loads(params_str)
+
+    conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+    cur = conn.cursor()
+    
+    sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '"+ dicc['schema-name']+"'"
+    cur.execute(sql)
+    conn.commit()
+    listSchema = []
+    for row in cur:
+        listSchema.append(row[0])
+    
+    conn.close()
 
     return listSchema
