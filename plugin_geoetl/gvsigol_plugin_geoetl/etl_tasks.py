@@ -825,7 +825,6 @@ def trans_Calculator(dicc):
     cur.execute(sqlCount)
     run = False
     for row in cur:
-        print(row[0])
         if row[0] != 0:
             run = True
 
