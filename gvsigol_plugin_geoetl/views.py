@@ -211,19 +211,19 @@ def etl_workspace_list(request):
 
     create_schema(settings.GEOETL_DB)
 
-    datastores  = Datastore.objects.filter(type = 'v_PostGIS')
+    #datastores  = Datastore.objects.filter(type = 'v_PostGIS')
 
-    for ds in datastores:
-        try:
-            bbdd_con = database_connections(
-                type = 'PostgreSQL',
-                name = ds.name,
-                connection_params = ds.connection_params
-            )
-            bbdd_con.save()
-            
-        except Exception as e:
-            print(e)
+    #for ds in datastores:
+    try:
+        bbdd_con = database_connections(
+            type = 'PostgreSQL',
+            name = settings.GEOETL_DB['database'],
+            connection_params = '{ "user": "'+settings.GEOETL_DB['user']+'", "password": "'+settings.GEOETL_DB['password']+'", "host": "'+settings.GEOETL_DB['host']+'", "port":'+settings.GEOETL_DB['port']+', "database": "'+settings.GEOETL_DB['database']+'"}'
+        )
+        bbdd_con.save()
+        
+    except Exception as e:
+        print(e)
     
     username = request.GET['user']
 
@@ -827,6 +827,30 @@ def etl_schema_kml(request):
             f = request.POST['file']
 
             listSchema = etl_schema.get_schema_kml(f)
+            response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_schemas_name_postgres(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParams'])
+            listSchema = etl_schema.get_schema_name_postgres(jsParams['parameters'][0])
+            response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_table_name_postgres(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParams'])
+            listSchema = etl_schema.get_table_name_postgres(jsParams['parameters'][0])
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")

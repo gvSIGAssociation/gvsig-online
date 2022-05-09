@@ -533,14 +533,14 @@ def output_Postgresql(dicc, geom_column_name = ''):
 
         db  = database_connections.objects.get(name = dicc['db'])
 
-        params_str = (db.connection_params).replace('passwd', 'password')
+        params_str = db.connection_params
 
         params = json.loads(params_str)
 
-        esq = params['schema']
-        table_name = dicc['tablename'].lower()
+        esq = dicc['schema-name']
+        table_name = dicc['tablename']
 
-        conn_string_target= 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+params['port']+'/'+params['database']
+        conn_string_target= 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+str(params['port'])+'/'+params['database']
         db_target = create_engine(conn_string_target)
         conn_target = db_target.connect()
 
@@ -617,12 +617,11 @@ def output_Postgis(dicc):
 
     db  = database_connections.objects.get(name = dicc['db'])
 
-    params_str = (db.connection_params).replace('passwd', 'password')
-
+    params_str = db.connection_params
     params = json.loads(params_str)
 
-    esq = params['schema']
-    tab = dicc['tablename'].lower()
+    esq = dicc['schema-name']
+    tab = dicc['tablename']
 
     con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = con_source.cursor()
@@ -822,9 +821,18 @@ def trans_Calculator(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
-    sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET "'+ attr + '" = ' + expression
-    cur.execute(sqlInsert)
-    conn.commit()
+    sqlCount = 'SELECT count(*) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlCount)
+    run = False
+    for row in cur:
+        print(row[0])
+        if row[0] != 0:
+            run = True
+
+    if run:
+        sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET "'+ attr + '" = ' + expression
+        cur.execute(sqlInsert)
+        conn.commit()
 
     conn.close()
     cur.close()
@@ -1243,7 +1251,7 @@ def input_Indenova(dicc):
 
     proced_list = dicc['proced-list']
 
-    schema = dicc['schema']
+    schema = dicc['schema-name']
 
     url_auth = domain + "//api/rest/security/v1/authentication/authenticate"
     headers_auth = {'esigna-auth-api-key': api_key, 'Authorization': "Basic ".encode()+ base64.b64encode(auth) }
@@ -1320,13 +1328,13 @@ def input_Postgres(dicc, geom_column_name = ''):
 
     db  = database_connections.objects.get(name = dicc['db'])
 
-    params_str = (db.connection_params).replace('passwd', 'password')
+    params_str = db.connection_params
 
     params = json.loads(params_str)
 
-    conn_string_source = 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+params['port']+'/'+params['database']
+    conn_string_source = 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+str(params['port'])+'/'+params['database']
 
-    schemaTable = params['schema']+'.'+dicc['tablename'].lower()
+    schemaTable = dicc['schema-name']+'.'+dicc['tablename']
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
 
@@ -1386,12 +1394,12 @@ def input_Postgis(dicc):
 
     db  = database_connections.objects.get(name = dicc['db'])
 
-    params_str = (db.connection_params).replace('passwd', 'password')
+    params_str = db.connection_params
 
     params = json.loads(params_str)
 
-    esq = params['schema']
-    tab = dicc['tablename'].lower()
+    esq = dicc['schema-name']
+    tab = dicc['tablename']
 
     con_source = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur = con_source.cursor()
