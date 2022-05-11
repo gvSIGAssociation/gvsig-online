@@ -553,7 +553,7 @@ def set_state(conf, state):
 
 def get_iso_language(request, default_lang='en'):
     try:
-        return languages.get(part1=request.LANGUAGE_CODE)
+        return languages.get(part1=request.LANGUAGE_CODE.split("-")[0])
     except:
         return languages.get(part1=default_lang)
 
