@@ -524,8 +524,11 @@ def output_Postgresql(dicc, geom_column_name = ''):
     
         df = pd.read_sql("SELECT * FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"', con = conn_source)
     else:
-        df = pd.read_sql("SELECT *, ST_ASTEXT ("+geom_column_name+") AS _st_astext_temp FROM " + settings.GEOETL_DB["schema"]+'."'+table_name_source+'"', con = conn_source)
-
+        df = pd.read_sql("SELECT *, ST_ASTEXT (wkb_geometry) AS _st_astext_temp FROM " + settings.GEOETL_DB["schema"]+'."'+table_name_source+'"', con = conn_source)
+        
+        if geom_column_name != 'wkb_geometry':
+            df.rename(columns = {'wkb_geometry':geom_column_name}, inplace = True)
+    
     if df.empty:
         print('There is no features in output')
     
@@ -556,6 +559,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
 
         elif dicc['operation'] == 'APPEND':
             df.to_sql(table_name, con=conn_target, schema= esq, if_exists='append', index=False)
+        
         elif dicc['operation'] == 'OVERWRITE':
 
             if geom_column_name != '':
@@ -563,10 +567,10 @@ def output_Postgresql(dicc, geom_column_name = ''):
                 sqlA = 'ALTER TABLE '+esq+'."'+table_name+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
                 executePostgres(params, sqlA)
 
-                sqlU = 'UPDATE '+esq+'."'+table_name+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
+                sqlU = 'UPDATE '+esq+'."'+table_name+'"  SET _st_astext_temp = ST_ASTEXT ('+geom_column_name+')'
                 executePostgres(params, sqlU)
 
-                sqlD = 'ALTER TABLE '+esq+'."'+table_name+'"  DROP COLUMN wkb_geometry'
+                sqlD = 'ALTER TABLE '+esq+'."'+table_name+'"  DROP COLUMN '+geom_column_name
                 executePostgres(params, sqlD)
             
             
@@ -665,15 +669,25 @@ def output_Postgis(dicc):
 
         else:
 
+            sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
+            sqlDatetype += "where table_schema = '"+ esq+"' and table_name ='"+tab+"' "
+            cur.execute(sqlDatetype)
+            con_source.commit()
+
+            for row in cur:
+                if  row[1] == 'USER-DEFINED' or row[1] == 'geometry':
+                    geom_column_name = row[0]
+                    break
+
             srid = 0
-            sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+esq+'."'+tab+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+            sqlSrid = 'SELECT ST_SRID ('+geom_column_name+') FROM '+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL LIMIT 1'
             cur.execute(sqlSrid)
             con_source.commit()
             for row in cur:
                 srid = row[0]
                 break
 
-            sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+esq+'."'+tab+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
+            sqlTypeGeom = "SELECT split_part (ST_ASTEXT ("+geom_column_name+"), '(', 1)  FROM "+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL GROUP BY split_part'
             cur.execute(sqlTypeGeom)
             con_source.commit()
             type_geom = ''
@@ -686,11 +700,11 @@ def output_Postgis(dicc):
             cur.execute(sqlAlter)
             con_source.commit()
 
-            sqlUpdate = 'UPDATE '+esq+'."'+tab+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
+            sqlUpdate = 'UPDATE '+esq+'."'+tab+'"  SET _st_astext_temp = ST_ASTEXT ('+geom_column_name+')'
             cur.execute(sqlUpdate)
             con_source.commit()
 
-            output_Postgresql(dicc,'wkb_geometry')
+            output_Postgresql(dicc, geom_column_name)
         
         con_source.close()
         cur.close()
@@ -700,15 +714,15 @@ def output_Postgis(dicc):
 
         if srid != 0 and type_geom != '':
 
-            sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN "wkb_geometry"'
+            sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN '+geom_column_name
             cur2.execute(sqlDrop2)
             con_target.commit()
 
-            sqlAlter2 = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN wkb_geometry geometry('+type_geom+', '+str(srid)+')'
+            sqlAlter2 = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN '+geom_column_name+' geometry('+type_geom+', '+str(srid)+')'
             cur2.execute(sqlAlter2)
             con_target.commit()
 
-            sqlUpdate2 = 'UPDATE '+esq+'."'+tab+'"  SET wkb_geometry = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
+            sqlUpdate2 = 'UPDATE '+esq+'."'+tab+'"  SET '+geom_column_name+' = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
             cur2.execute(sqlUpdate2)
             con_target.commit()
 
@@ -2287,6 +2301,31 @@ def trans_ChangeAttrType(dicc):
 
     sqlRename = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" RENAME COLUMN "'+attr+'_temp" TO "'+attr+'"'
     cur.execute(sqlRename)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+def trans_RemoveGeom(dicc):
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlDrop = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN wkb_geometry'
+    cur.execute(sqlDrop)
     conn.commit()
 
     conn.close()

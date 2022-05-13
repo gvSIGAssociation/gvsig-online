@@ -341,6 +341,7 @@ gvsigolETL.Toolbar = Class.extend({
 											$('#'+key_+'-'+figure.id).append('<option value ="'+parameters[0][key][k][0]+'">'+parameters[0][key][k][1]+'</option>')
 
 										}else{
+											
 											$('#'+key_+'-'+figure.id).append('<option>'+parameters[0][key][k]+'</option>')
 										}
 									};
@@ -349,8 +350,6 @@ gvsigolETL.Toolbar = Class.extend({
 								multiIn = multiIn + 1
 
 								if($('input:radio[name="'+key+'-'+figure.id+'"]').is(':radio')){
-
-									console.log(parameters[0][key])
 									
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).attr('checked', true)
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).val(parameters[0][key])
@@ -359,10 +358,8 @@ gvsigolETL.Toolbar = Class.extend({
 									
 									$('#'+key+'-'+figure.id).attr('checked', true)
 									$('#'+key+'-'+figure.id).val(parameters[0][key])
-									
 
-								}else{
-									
+								}else{									
 									$('#'+key+'-'+figure.id).val(parameters[0][key]);
 								}
 							}
