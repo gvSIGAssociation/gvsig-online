@@ -147,9 +147,15 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 			if (wfsURL.indexOf('http') == -1) {
 				wfsURL = window.location.origin + wfsURL;
 			}
-
+			var headers = {};
+			if (viewer.core.conf.user && viewer.core.conf.user.token) {
+				// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				headers["Authorization"] = 'Bearer ' + viewer.core.conf.user.token;
+			};
 			fetch(wfsURL, {
 				method: 'POST',
+				headers: headers,
+				mode: 'cors',
 				body: new XMLSerializer().serializeToString(featureRequest)
 			}).then(function(response) {
 				return response.json();

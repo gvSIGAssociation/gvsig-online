@@ -126,11 +126,16 @@ ChartsView.prototype.createUI = function(layer, charts) {
 		style: this.styleFunction.bind(this)
 	});
 	this.map.addLayer(this.vectorLayer);
-	
+	var headers = {};
+	if (viewer.core.conf.user && viewer.core.conf.user.token) {
+		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+		headers["Authorization"] = 'Bearer ' + viewer.core.conf.user.token;
+	};
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: self.layer.layer_wfs_url,
+		url: self.layer.layer_wfs_url,
+		headers: headers,
 	  	data: {
 	  		service: 'WFS',
 	  		version: '1.0.0',

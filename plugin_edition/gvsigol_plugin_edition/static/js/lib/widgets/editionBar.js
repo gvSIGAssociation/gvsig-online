@@ -2329,6 +2329,7 @@ EditionBar.prototype.transactWFS = function(p,f) {
 	str = s.serializeToString(node);
 	var headers = {};
 	if (self.layerTree.conf.user && self.layerTree.conf.user.token) {
+		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 		headers["Authorization"] = 'Bearer ' + self.layerTree.conf.user.token;
 	};
 	$.ajax({

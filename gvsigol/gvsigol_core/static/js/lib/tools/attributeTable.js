@@ -437,9 +437,9 @@ attributeTable.prototype.selectTableEvent = function(e, dt, items, indexes) {
 
 attributeTable.prototype.getSelectedFeatures = function(fids){
 	var self = this;
-	var headers = {}
-	// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+	var headers = {};
 	if (this.conf.user && this.conf.user.token && !this.layer.external) {
+		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 		headers["Authorization"] = 'Bearer ' + this.conf.user.token;
 	};
 	$.ajax({
@@ -780,11 +780,16 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 	for (var i=0; i<rows.length; i++) {
 		fids.push(rows[i].featureid);
 	}
-
+    var headers = {};
+	if (this.conf.user && this.conf.user.token && !this.layer.external) {
+		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+		headers["Authorization"] = 'Bearer ' + this.conf.user.token;
+	};
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: this.layer.wfs_url,
+		url: this.layer.wfs_url,
+		headers: headers,
 	  	data: {
 	  		'service': 'WFS',
 			'version': '1.1.0',
@@ -1495,10 +1500,16 @@ attributeTable.prototype.getFeature = function(row) {
 	var feature = null;
 	
 	var typename = row.featureid.split('.')[0];
+	var headers = {};
+	if (this.conf.user && this.conf.user.token && !this.layer.external) {
+		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+		headers["Authorization"] = 'Bearer ' + this.conf.user.token;
+	};
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: this.layer.wfs_url,
+		url: this.layer.wfs_url,
+		headers: headers,
 	  	data: {
 	  		'service': 'WFS',
 			'version': '1.1.0',

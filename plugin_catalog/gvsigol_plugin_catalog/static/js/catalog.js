@@ -916,8 +916,14 @@ CatalogView.prototype.getAvailableLayers = function(baseUrl, layerName) {
 	
 	var url = baseUrl + "?service=WMS&request=GetCapabilities&version=1.1.1";
 	var parser = new ol.format.WMSCapabilities();
+    var headers = {};
+	if (viewer.core.conf.user && viewer.core.conf.user.token) {
+        // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+		headers["Authorization"] = 'Bearer ' + viewer.core.conf.user.token;
+	};
 	$.ajax({
 		url: url,
+		headers: headers,
 		success: function(response) {
 			var result = parser.read(response);
 			var url = baseUrl;

@@ -384,18 +384,21 @@ selectFeatureByBuffer.prototype.clickHandler = function(coords, isArea) {
 
 			href.searchParams.set('filter', shape);
 			url = href.toString()
-
+			var headers = {};
+			if (viewer.core.conf.user && viewer.core.conf.user.token) {
+				// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				headers["Authorization"] = 'Bearer ' + viewer.core.conf.user.token;
+			};
 			$.ajax({
 				url: url,
-				success: function(response) {
-					var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
-					var features = formatGeoJSON.readFeatures(response);
-					self.viewer.addSelectedFeaturesSource(qLayer.workspace+":"+qLayer.layer_name, features);
-					if(self.popup) self.popup.hide();
-				},
-				error: function(jqXHR, textStatus) {
-					console.log(textStatus);
-				}
+				headers: headers
+			}).done(function(response) {
+				var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
+				var features = formatGeoJSON.readFeatures(response);
+				self.viewer.addSelectedFeaturesSource(qLayer.workspace+":"+qLayer.layer_name, features);
+				if(self.popup) self.popup.hide();
+			}).fail(function(jqXHR, textStatus) {
+				console.log(textStatus);
 			});
 		}
 

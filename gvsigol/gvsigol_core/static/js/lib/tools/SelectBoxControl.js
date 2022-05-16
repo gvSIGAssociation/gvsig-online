@@ -199,9 +199,14 @@ SelectBoxControl.prototype.clickHandler = function(evt) {
 			var href = new URL(url);
 			href.searchParams.set('BBOX', evt.coordinate.join()+",urn:ogc:def:crs:EPSG:3857");
 			url = href.toString();
-
+			var headers = {};
+			if (viewer.core.conf.user && viewer.core.conf.user.token) {
+				// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				headers["Authorization"] = 'Bearer ' + viewer.core.conf.user.token;
+			};
 			$.ajax({
 				url: url,
+				headers: headers,
 				success: function(response) {
 					var geometryName = self.getFeatureGeometryName(qLayer);
 					var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});

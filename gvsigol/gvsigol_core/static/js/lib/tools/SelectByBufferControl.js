@@ -92,6 +92,7 @@ SelectByBufferControl.prototype.activate = function(e) {
 	}
 	this.active = true;
 	this.addLayer();
+	this.map.un('click', this.showPopup, this);
 	this.map.on('click', this.showPopup, this);
 	this.addPopup();
 };
@@ -181,7 +182,6 @@ SelectByBufferControl.prototype.clickHandler = function(geom, isArea) {
 				}
 			}
 		}
-
 		var viewResolution = (this.map.getView().getResolution());
 		var url = null;
 		var ajaxRequests = new Array();
@@ -204,9 +204,15 @@ SelectByBufferControl.prototype.clickHandler = function(geom, isArea) {
 			if (wfsURL.indexOf('http') == -1) {
 				wfsURL = window.location.origin + wfsURL;
 			}
-			
+			var headers = {};
+			if (viewer.core.conf.user && viewer.core.conf.user.token) {
+				// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				headers["Authorization"] = 'Bearer ' + viewer.core.conf.user.token;
+			};
 			fetch(wfsURL, {
 				method: 'POST',
+				headers: headers,
+				mode: 'cors',
 				body: new XMLSerializer().serializeToString(featureRequest)
 			}).then(function(response) {
 				return response.json();
