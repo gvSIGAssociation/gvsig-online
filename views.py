@@ -1744,14 +1744,18 @@ def layer_config(request, layer_id):
         for lang_id, _ in LANGUAGES:
             available_languages.append(lang_id)
         try:
+            i, params = layer.datastore.get_db_connection()
+            with i as c:
+                is_view = c.is_view(layer.datastore.name, layer.source_name)
+        except:
+            logger.exception('Error checking layer is_view')
+            is_view = False
+        try:
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             expose_pks = gs.datastore_check_exposed_pks(layer.datastore)
             lyr_conf = layer.get_config_manager()
             fields = lyr_conf.get_field_viewconf(include_pks=expose_pks)
             form_groups = _parse_form_groups(lyr_conf._conf.get('form_groups', []), fields)
-            i, params = layer.datastore.get_db_connection()
-            with i as c:
-                is_view = c.is_view(layer.datastore.name, layer.source_name)
         except:
             logger.exception("Retrieving fields")
             fields = []
