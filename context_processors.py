@@ -36,6 +36,6 @@ def global_settings(request):
         'GVSIGOL_SURNAME_SHORTv': gvsigol.settings.GVSIGOL_SURNAME_SHORT,
         'TEMPORAL_ADVANCED_PARAMETERS': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
         'PUBLIC_PLUGINS': gvsigol.settings.PUBLIC_PLUGINS,
-        'DOCS': gvsigol.settings.DOCS,
+        'DOCS': getattr(gvsigol.settings, 'DOCS', {}),
         'AUTH_GROUPS': auth_backend.check_group_support()
     }
