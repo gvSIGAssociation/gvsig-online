@@ -80,9 +80,11 @@ viewer.core = {
     _authenticate: function() {
     	var self = this;
 		if (self.conf.user && self.conf.user.credentials) {
-			var _params = "username=" + self.conf.user.credentials.username + "&password=" + self.conf.user.credentials.password;
-			for (var i=0; i<self.conf.auth_urls.length; i++) {			
-
+			var headers;
+			headers = {
+				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+			};
+			for (var i=0; i<self.conf.auth_urls.length; i++) {
 				$.ajax({
 					url: self.conf.auth_urls[i] + "/wms",
 					params: {
@@ -95,15 +97,12 @@ viewer.core = {
 						withCredentials: true
 					},
 					method: 'GET',
-					headers: {
-						"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
-					},
+					headers: headers,
 					error: function(jqXHR, textStatus, errorThrown){},
 					success: function(resp){
 						console.log('Authenticated');
 					}
 				});
-
 			}
 		}
     },
@@ -583,18 +582,38 @@ viewer.core = {
 				var bearer_token = "Bearer " + self.conf.user.token;
 				xhr.setRequestHeader('Authorization', bearer_token);
 			}
-			xhr.responseType = "arraybuffer";
+			xhr.responseType = "blob";
 			xhr.onload = function () {
-				var blob;
-				var arrayBufferView = new Uint8Array(this.response);
-				if (format.toLowerCase().indexOf("png") != -1) {
-					blob = new Blob([arrayBufferView], { type: 'image/png' });
+				if (xhr.status == 401) {
+					console.log(xhr.getAllResponseHeaders());
+					messageBox.show("error", "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
 				}
-				else {
-					blob = new Blob([arrayBufferView], { type: 'image/jpeg' });
+				else if (xhr.status == 403) {
+					console.log(xhr.getAllResponseHeaders());
+					messageBox.show("error", "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+				}
+				else if (xhr.getResponseHeader("content-type").indexOf("application/vnd.ogc.se_xml") !== -1) {
+					// returned in cross-domain requests instead of the 401 error
+					console.log(xhr.status)
+					console.log(xhr.getAllResponseHeaders());
+					const reader = new FileReader();
+
+					// This fires after the blob has been read/loaded.
+					reader.addEventListener('loadend', (e) => {
+						const text = reader.result;
+						var parser = new DOMParser();
+						xmlDoc = parser.parseFromString(text, "text/xml");
+						var exception = xmlDoc.getElementsByTagName("ServiceException");
+						if (exception && exception.length>0) {
+							if (exception[0].getAttribute('code') == 'LayerNotDefined') {
+								messageBox.show("error", "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+							}
+						}
+					});
+					reader.readAsText(this.response);
 				}
 				var urlCreator = window.URL || window.webkitURL;
-				var imageUrl = urlCreator.createObjectURL(blob);
+				var imageUrl = urlCreator.createObjectURL(this.response);
 				image.getImage().src = imageUrl;
 			};
 			xhr.send();

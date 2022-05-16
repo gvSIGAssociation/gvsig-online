@@ -85,22 +85,43 @@ legend.prototype._loadLegendImg = function(image, src) {
 		var bearer_token = "Bearer " + this.conf.user.token;
 		xhr.setRequestHeader('Authorization', bearer_token);
 	}
-	xhr.responseType = "arraybuffer";
+	xhr.responseType = "blob";
 	xhr.onload = function () {
-		var blob;
-		var arrayBufferView = new Uint8Array(this.response);
-		if (src.toLowerCase().indexOf("png") != -1) { // FIXME: weak format detection
-			blob = new Blob([arrayBufferView], { type: 'image/png' });
+		if (xhr.status == 401) {
+			console.log(xhr.getAllResponseHeaders());
+			messageBox.show("error", "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
 		}
-		else {
-			blob = new Blob([arrayBufferView], { type: 'image/jpeg' });
+		else if (xhr.status == 403) {
+			console.log(xhr.getAllResponseHeaders());
+			messageBox.show("error", "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+		}
+		else if (xhr.getResponseHeader("content-type").indexOf("application/vnd.ogc.se_xml") !== -1) {
+			// returned in cross-domain requests instead of the 401 error
+			console.log(xhr.status)
+			console.log(xhr.getAllResponseHeaders());
+			const reader = new FileReader();
+
+			// This fires after the blob has been read/loaded.
+			reader.addEventListener('loadend', (e) => {
+				const text = reader.result;
+				var parser = new DOMParser();
+				xmlDoc = parser.parseFromString(text, "text/xml");
+				var exception = xmlDoc.getElementsByTagName("ServiceException");
+				if (exception && exception.length>0) {
+					if (exception[0].getAttribute('code') == 'LayerNotDefined') {
+						messageBox.show("error", "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+					}
+				}
+			});
+			reader.readAsText(this.response);
 		}
 		var urlCreator = window.URL || window.webkitURL;
-		var imageUrl = urlCreator.createObjectURL(blob);
+		var imageUrl = urlCreator.createObjectURL(this.response);
 		image.src = imageUrl;
 	};
 	xhr.send();
-}
+};
+
 
 /**
  * TODO.
