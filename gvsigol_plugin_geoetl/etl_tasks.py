@@ -540,7 +540,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
 
         params = json.loads(params_str)
 
-        esq = dicc['schema-name']
+        esq = dicc['schema-name-option']
         table_name = dicc['tablename']
 
         conn_string_target= 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+str(params['port'])+'/'+params['database']
@@ -624,7 +624,7 @@ def output_Postgis(dicc):
     params_str = db.connection_params
     params = json.loads(params_str)
 
-    esq = dicc['schema-name']
+    esq = dicc['schema-name-option']
     tab = dicc['tablename']
 
     con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
@@ -1264,7 +1264,7 @@ def input_Indenova(dicc):
 
     proced_list = dicc['proced-list']
 
-    schema = dicc['schema-name']
+    schema = dicc['schema']
 
     url_auth = domain + "//api/rest/security/v1/authentication/authenticate"
     headers_auth = {'esigna-auth-api-key': api_key, 'Authorization': "Basic ".encode()+ base64.b64encode(auth) }
@@ -1347,7 +1347,7 @@ def input_Postgres(dicc, geom_column_name = ''):
 
     conn_string_source = 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+str(params['port'])+'/'+params['database']
 
-    schemaTable = dicc['schema-name']+'.'+dicc['tablename']
+    schemaTable = dicc['schema-name-option']+'.'+dicc['tablename']
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
 
@@ -1411,7 +1411,7 @@ def input_Postgis(dicc):
 
     params = json.loads(params_str)
 
-    esq = dicc['schema-name']
+    esq = dicc['schema-name-option']
     tab = dicc['tablename']
 
     con_source = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
