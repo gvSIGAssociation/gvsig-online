@@ -534,7 +534,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
     
     else:
 
-        db  = database_connections.objects.get(name = dicc['db'])
+        db  = database_connections.objects.get(name = dicc['db-option'])
 
         params_str = db.connection_params
 
@@ -562,7 +562,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
         
         elif dicc['operation'] == 'OVERWRITE':
 
-            if geom_column_name != '':
+            """if geom_column_name != '':
 
                 sqlA = 'ALTER TABLE '+esq+'."'+table_name+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
                 executePostgres(params, sqlA)
@@ -571,7 +571,7 @@ def output_Postgresql(dicc, geom_column_name = ''):
                 executePostgres(params, sqlU)
 
                 sqlD = 'ALTER TABLE '+esq+'."'+table_name+'"  DROP COLUMN '+geom_column_name
-                executePostgres(params, sqlD)
+                executePostgres(params, sqlD)"""
             
             
             df.to_sql(table_name, con=conn_target, schema= esq, if_exists='replace', index=False)
@@ -619,7 +619,7 @@ def output_Postgis(dicc):
 
     table_name_source = dicc['data'][0]
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = database_connections.objects.get(name = dicc['db-option'])
 
     params_str = db.connection_params
     params = json.loads(params_str)
@@ -667,50 +667,54 @@ def output_Postgis(dicc):
 
             output_Postgresql(dicc,'wkb_geometry')
 
+            con_source.close()
+            cur.close()
+
+            con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+            cur2 = con_target.cursor()
+
         else:
+
+            con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+            cur2 = con_target.cursor()
 
             sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
             sqlDatetype += "where table_schema = '"+ esq+"' and table_name ='"+tab+"' "
-            cur.execute(sqlDatetype)
-            con_source.commit()
+            cur2.execute(sqlDatetype)
+            con_target.commit()
 
-            for row in cur:
+            for row in cur2:
                 if  row[1] == 'USER-DEFINED' or row[1] == 'geometry':
                     geom_column_name = row[0]
                     break
 
             srid = 0
             sqlSrid = 'SELECT ST_SRID ('+geom_column_name+') FROM '+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL LIMIT 1'
-            cur.execute(sqlSrid)
-            con_source.commit()
-            for row in cur:
+            cur2.execute(sqlSrid)
+            con_target.commit()
+            for row in cur2:
                 srid = row[0]
                 break
 
             sqlTypeGeom = "SELECT split_part (ST_ASTEXT ("+geom_column_name+"), '(', 1)  FROM "+esq+'."'+tab+'" WHERE '+geom_column_name+' IS NOT NULL GROUP BY split_part'
-            cur.execute(sqlTypeGeom)
-            con_source.commit()
+            cur2.execute(sqlTypeGeom)
+            con_target.commit()
             type_geom = ''
-            for row in cur:
+            for row in cur2:
                 if type_geom == '':
                     type_geom = row[0]
                     break
 
             sqlAlter = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN IF NOT EXISTS _st_astext_temp TEXT'
-            cur.execute(sqlAlter)
-            con_source.commit()
+            cur2.execute(sqlAlter)
+            con_target.commit()
 
             sqlUpdate = 'UPDATE '+esq+'."'+tab+'"  SET _st_astext_temp = ST_ASTEXT ('+geom_column_name+')'
-            cur.execute(sqlUpdate)
-            con_source.commit()
+            cur2.execute(sqlUpdate)
+            con_target.commit()
 
             output_Postgresql(dicc, geom_column_name)
         
-        con_source.close()
-        cur.close()
-
-        con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
-        cur2 = con_target.cursor()
 
         if srid != 0 and type_geom != '':
 
@@ -1347,7 +1351,7 @@ def input_Postgres(dicc, geom_column_name = ''):
 
     conn_string_source = 'postgresql://'+params['user']+':'+params['password']+'@'+params['host']+':'+str(params['port'])+'/'+params['database']
 
-    schemaTable = dicc['schema-name-option']+'.'+dicc['tablename']
+    schemaTable = dicc['schema-name']+'.'+dicc['tablename']
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
 
@@ -1411,7 +1415,7 @@ def input_Postgis(dicc):
 
     params = json.loads(params_str)
 
-    esq = dicc['schema-name-option']
+    esq = dicc['schema-name']
     tab = dicc['tablename']
 
     con_source = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])

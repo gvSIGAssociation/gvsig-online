@@ -5650,6 +5650,7 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
             schemaMod =[...schemaEdge]
            
             paramsCreateAttr['schema'] = schemaMod
+            paramsCreateAttr['schema-old'] = schemaEdge
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
@@ -10870,7 +10871,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<div>'+
                                 '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
-                                '<select id="db-'+ID+'" class="form-control"></select>'+
+                                '<select id="db-option-'+ID+'" class="form-control"></select>'+
                             '</div>'+
 
                             '<div class="column20">'+
@@ -10930,7 +10931,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
         for(i=0;i<dbc.length;i++){
 
             if(dbc[i].type == 'PostgreSQL'){
-                $('#db-'+ID).append(
+                $('#db-option-'+ID).append(
                     '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
                 );
             }
@@ -10950,7 +10951,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
                                 
             var paramsGetSchemas = {"id": ID,
             "parameters": [
-                {"db": $('#db-'+ID).val()}
+                {"db": $('#db-option-'+ID).val()}
             ]}
 
             var formDataGetSchemas = new FormData();
@@ -11028,7 +11029,7 @@ output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
             var paramsPostgreSQL = {"id": ID,
                 "parameters": [
                     {"get_schema-name-option": get_sch,
-                    "db": $('#db-'+ID).val(),
+                    "db-option": $('#db-option-'+ID).val(),
                     "schema-name-option": $('#schema-name-option-'+ID).val(),
                     "tablename": $('#tablename-'+ID).val(),
                     "match": $('#match-'+ID).val(),
@@ -11208,7 +11209,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<div>'+
                                 '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
-                                '<select id="db-'+ID+'" class="form-control"></select>'+
+                                '<select id="db-option-'+ID+'" class="form-control"></select>'+
                             '</div>'+
 
                             '<div class="column20">'+
@@ -11268,7 +11269,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         for(i=0;i<dbc.length;i++){
 
             if(dbc[i].type == 'PostgreSQL'){
-                $('#db-'+ID).append(
+                $('#db-option-'+ID).append(
                     '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
                 );
             }
@@ -11288,7 +11289,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 
             var paramsGetSchemas = {"id": ID,
             "parameters": [
-                {"db": $('#db-'+ID).val()}
+                {"db": $('#db-option-'+ID).val()}
             ]}
 
             var formDataGetSchemas = new FormData();
@@ -11367,7 +11368,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             var paramsPostgis = {"id": ID,
             "parameters": [
                 {"get_schema-name-option": get_sch,
-                "db": $('#db-'+ID).val(),
+                "db-option": $('#db-option-'+ID).val(),
                 "schema-name-option": $('#schema-name-option-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
                 "match": $('#match-'+ID).val(),
