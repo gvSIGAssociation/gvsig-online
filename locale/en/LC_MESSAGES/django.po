@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-02 13:06+0100\n"
+"POT-Creation-Date: 2022-05-20 08:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,43 +18,43 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: gvsigol_auth/forms.py:30 gvsigol_auth/templates/user_list.html:23
-#: gvsigol_auth/templates/user_update.html:29
-#: gvsigol_auth/templates/user_update.html:30 gvsigol_auth/utils.py:111
+#: gvsigol_auth/templates/user_update.html:39
+#: gvsigol_auth/templates/user_update.html:40 gvsigol_auth/utils.py:106
 msgid "First name"
 msgstr ""
 
-#: gvsigol_auth/forms.py:31 gvsigol_auth/templates/user_add.html:46
+#: gvsigol_auth/forms.py:31 gvsigol_auth/templates/user_add.html:58
 #: gvsigol_auth/templates/user_list.html:24
-#: gvsigol_auth/templates/user_update.html:33
-#: gvsigol_auth/templates/user_update.html:34 gvsigol_auth/utils.py:112
+#: gvsigol_auth/templates/user_update.html:43
+#: gvsigol_auth/templates/user_update.html:44 gvsigol_auth/utils.py:107
 msgid "Last name"
 msgstr ""
 
 #: gvsigol_auth/forms.py:32 gvsigol_auth/templates/login.html:47
-#: gvsigol_auth/templates/user_add.html:53
+#: gvsigol_auth/templates/user_add.html:65
 #: gvsigol_auth/templates/user_list.html:22
-#: gvsigol_auth/templates/user_update.html:40
-#: gvsigol_auth/templates/user_update.html:41 gvsigol_auth/utils.py:110
+#: gvsigol_auth/templates/user_update.html:50
+#: gvsigol_auth/templates/user_update.html:51 gvsigol_auth/utils.py:105
 msgid "Username"
 msgstr ""
 
-#: gvsigol_auth/forms.py:33 gvsigol_auth/templates/user_add.html:57
+#: gvsigol_auth/forms.py:33 gvsigol_auth/templates/user_add.html:69
 #: gvsigol_auth/templates/user_list.html:25
-#: gvsigol_auth/templates/user_update.html:44
-#: gvsigol_auth/templates/user_update.html:45 gvsigol_auth/utils.py:113
+#: gvsigol_auth/templates/user_update.html:54
+#: gvsigol_auth/templates/user_update.html:55 gvsigol_auth/utils.py:108
 msgid "Email"
 msgstr ""
 
 #: gvsigol_auth/forms.py:34 gvsigol_auth/templates/login.html:51
-#: gvsigol_auth/templates/user_add.html:65 gvsigol_auth/utils.py:114
+#: gvsigol_auth/templates/user_add.html:77 gvsigol_auth/utils.py:109
 msgid "Password"
 msgstr ""
 
-#: gvsigol_auth/forms.py:35 gvsigol_auth/templates/user_add.html:69
+#: gvsigol_auth/forms.py:35 gvsigol_auth/templates/user_add.html:81
 msgid "Repeat password"
 msgstr ""
 
-#: gvsigol_auth/services.py:75
+#: gvsigol_auth/services.py:77
 msgid "Group for admin users"
 msgstr ""
 
@@ -74,12 +74,21 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
-#: gvsigol_auth/templates/dashboard_auth_menu.html:7
-#: gvsigol_auth/templates/user_list.html:28
+#: gvsigol_auth/templates/dashboard_auth_menu.html:8
+#: gvsigol_auth/templates/user_add.html:41
+#: gvsigol_auth/templates/user_update.html:27
 msgid "Groups"
 msgstr ""
 
+#: gvsigol_auth/templates/dashboard_auth_menu.html:10
+#: gvsigol_auth/templates/user_add.html:43
+#: gvsigol_auth/templates/user_list.html:28
+#: gvsigol_auth/templates/user_update.html:29
+msgid "Roles"
+msgstr ""
+
 #: gvsigol_auth/templates/group_add.html:12
+#: gvsigol_auth/templates/role_add.html:12
 #: gvsigol_auth/templates/user_add.html:12
 #: gvsigol_auth/templates/user_update.html:12
 msgid "Save"
@@ -87,11 +96,15 @@ msgstr ""
 
 #: gvsigol_auth/templates/group_add.html:39
 #: gvsigol_auth/templates/group_list.html:22
+#: gvsigol_auth/templates/role_add.html:39
+#: gvsigol_auth/templates/role_list.html:22
 msgid "Name"
 msgstr ""
 
 #: gvsigol_auth/templates/group_add.html:46
 #: gvsigol_auth/templates/group_list.html:23
+#: gvsigol_auth/templates/role_add.html:46
+#: gvsigol_auth/templates/role_list.html:23
 msgid "Description"
 msgstr ""
 
@@ -109,88 +122,105 @@ msgid "The group will be removed, Do you want continue?"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:58
+#: gvsigol_auth/templates/role_list.html:58
 #: gvsigol_auth/templates/user_list.html:70
 msgid "Cancel"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:59
+#: gvsigol_auth/templates/role_list.html:59
 #: gvsigol_auth/templates/user_list.html:71
 msgid "Accept"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:76
+#: gvsigol_auth/templates/role_list.html:76
 #: gvsigol_auth/templates/user_list.html:88
 msgid "Processing request..."
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:77
+#: gvsigol_auth/templates/role_list.html:77
 #: gvsigol_auth/templates/user_list.html:89
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:78
+#: gvsigol_auth/templates/role_list.html:78
 #: gvsigol_auth/templates/user_list.html:90
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:79
+#: gvsigol_auth/templates/role_list.html:79
 #: gvsigol_auth/templates/user_list.html:91
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:80
+#: gvsigol_auth/templates/role_list.html:80
 #: gvsigol_auth/templates/user_list.html:92
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:81
+#: gvsigol_auth/templates/role_list.html:81
 #: gvsigol_auth/templates/user_list.html:93
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:83
+#: gvsigol_auth/templates/role_list.html:83
 #: gvsigol_auth/templates/user_list.html:95
 msgid "Loading..."
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:84
 #: gvsigol_auth/templates/group_list.html:85
+#: gvsigol_auth/templates/role_list.html:84
+#: gvsigol_auth/templates/role_list.html:85
 #: gvsigol_auth/templates/user_list.html:96
 #: gvsigol_auth/templates/user_list.html:97
 msgid "No records available"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:87
+#: gvsigol_auth/templates/role_list.html:87
 #: gvsigol_auth/templates/user_list.html:99
 msgid "First"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:88
+#: gvsigol_auth/templates/role_list.html:88
 #: gvsigol_auth/templates/user_list.html:100
 msgid "Previous"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:89
+#: gvsigol_auth/templates/role_list.html:89
 #: gvsigol_auth/templates/user_list.html:101
 msgid "Next"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:90
+#: gvsigol_auth/templates/role_list.html:90
 #: gvsigol_auth/templates/user_list.html:102
 msgid "Last"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:93
+#: gvsigol_auth/templates/role_list.html:93
 #: gvsigol_auth/templates/user_list.html:105
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
 #: gvsigol_auth/templates/group_list.html:94
+#: gvsigol_auth/templates/role_list.html:94
 #: gvsigol_auth/templates/user_list.html:106
 #, python-format
 msgid "%(sep)sSort descending"
@@ -273,31 +303,60 @@ msgstr ""
 msgid "Password has contain at least 8 characters"
 msgstr ""
 
-#: gvsigol_auth/templates/user_add.html:42
+#: gvsigol_auth/templates/role_list.html:11
+msgid "Add role"
+msgstr ""
+
+#: gvsigol_auth/templates/role_list.html:52
+#: gvsigol_auth/templates/role_list.html:100
+msgid "Delete role"
+msgstr ""
+
+#: gvsigol_auth/templates/role_list.html:55
+msgid "The role will be removed, Do you want continue?"
+msgstr ""
+
+#: gvsigol_auth/templates/user_add.html:39
+#: gvsigol_auth/templates/user_update.html:25
+msgid "General"
+msgstr ""
+
+#: gvsigol_auth/templates/user_add.html:54
 msgid "First Name"
 msgstr ""
 
-#: gvsigol_auth/templates/user_add.html:83
-#: gvsigol_auth/templates/user_update.html:55
-#: gvsigol_auth/templates/user_update.html:57
+#: gvsigol_auth/templates/user_add.html:95
+#: gvsigol_auth/templates/user_update.html:65
+#: gvsigol_auth/templates/user_update.html:67
 msgid "Is superuser"
 msgstr ""
 
-#: gvsigol_auth/templates/user_add.html:88
-#: gvsigol_auth/templates/user_update.html:64
-#: gvsigol_auth/templates/user_update.html:66
+#: gvsigol_auth/templates/user_add.html:100
+#: gvsigol_auth/templates/user_update.html:74
+#: gvsigol_auth/templates/user_update.html:76
 msgid "Can manage projects"
 msgstr ""
 
-#: gvsigol_auth/templates/user_add.html:95
-#: gvsigol_auth/templates/user_update.html:74
+#: gvsigol_auth/templates/user_add.html:115
+#: gvsigol_auth/templates/user_update.html:92
 msgid "Assign groups"
 msgstr ""
 
-#: gvsigol_auth/templates/user_add.html:108
-#: gvsigol_auth/templates/user_update.html:88
-#: gvsigol_auth/templates/user_update.html:90
+#: gvsigol_auth/templates/user_add.html:128
+#: gvsigol_auth/templates/user_update.html:106
+#: gvsigol_auth/templates/user_update.html:108
 msgid "Assign group"
+msgstr ""
+
+#: gvsigol_auth/templates/user_add.html:148
+#: gvsigol_auth/templates/user_update.html:129
+msgid "Assign roles"
+msgstr ""
+
+#: gvsigol_auth/templates/user_add.html:161
+#: gvsigol_auth/templates/user_update.html:143
+#: gvsigol_auth/templates/user_update.html:145
+msgid "Assign role"
 msgstr ""
 
 #: gvsigol_auth/templates/user_list.html:11
@@ -325,67 +384,85 @@ msgstr ""
 msgid "Update user"
 msgstr ""
 
-#: gvsigol_auth/utils.py:93
+#: gvsigol_auth/utils.py:88
 msgid "New user account"
 msgstr ""
 
-#: gvsigol_auth/utils.py:109
+#: gvsigol_auth/utils.py:104
 msgid "Account data"
 msgstr ""
 
-#: gvsigol_auth/utils.py:124
+#: gvsigol_auth/utils.py:119
 msgid "Password reset"
 msgstr ""
 
-#: gvsigol_auth/utils.py:126
+#: gvsigol_auth/utils.py:121
 msgid ""
 "You are receiving this email because we received a password reset request "
 "for your account."
 msgstr ""
 
-#: gvsigol_auth/utils.py:127
+#: gvsigol_auth/utils.py:122
 msgid "You can reset your password by clicking the link bellow"
 msgstr ""
 
-#: gvsigol_auth/utils.py:129
+#: gvsigol_auth/utils.py:124
 msgid ""
 "If you did not request a password reset, please ignore this email. Your "
 "password will not change."
 msgstr ""
 
-#: gvsigol_auth/views.py:84 gvsigol_auth/views.py:169 gvsigol_auth/views.py:297
+#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:171 gvsigol_auth/views.py:299
 msgid "Your account has been disabled"
 msgstr ""
 
-#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:88 gvsigol_auth/views.py:171
-#: gvsigol_auth/views.py:173 gvsigol_auth/views.py:299
+#: gvsigol_auth/views.py:88 gvsigol_auth/views.py:90 gvsigol_auth/views.py:173
+#: gvsigol_auth/views.py:175 gvsigol_auth/views.py:301
 msgid "The username and password you have entered do not match our records"
 msgstr ""
 
-#: gvsigol_auth/views.py:245
+#: gvsigol_auth/views.py:247
 msgid "User account does not exist"
 msgstr ""
 
-#: gvsigol_auth/views.py:249
+#: gvsigol_auth/views.py:251
 msgid "That did not work"
 msgstr ""
 
-#: gvsigol_auth/views.py:303
+#: gvsigol_auth/views.py:305
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr ""
 
-#: gvsigol_auth/views.py:429
-msgid "User group for"
+#: gvsigol_auth/views.py:427
+msgid "User creation failed"
 msgstr ""
 
-#: gvsigol_auth/views.py:653
-msgid "Admin is a reserved group"
+#: gvsigol_auth/views.py:535
+msgid ""
+"The authentication server is not available. Try again later or contact "
+"system administrators."
 msgstr ""
 
-#: gvsigol_auth/views.py:657
+#: gvsigol_auth/views.py:568
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
+msgstr ""
+
+#: gvsigol_auth/views.py:612
+msgid "Admin is a reserved role"
+msgstr ""
+
+#: gvsigol_auth/views.py:616
+#, python-brace-format
+msgid ""
+"Invalid user role name: '{value}'. Identifiers must begin with a letter or "
+"an underscore (_). Subsequent characters can be letters, underscores or "
+"numbers"
+msgstr ""
+
+#: gvsigol_auth/views.py:641
+msgid "System roles can't be deleted"
 msgstr ""
