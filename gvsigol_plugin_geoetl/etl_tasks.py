@@ -1006,7 +1006,6 @@ def trans_Counter(dicc):
         cur.execute(sqlAdd)
         conn.commit()
     else:
-        #sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, row_number() OVER (PARTITION BY "'+gbAttr+'") from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" ORDER BY "'+gbAttr+'");'
         sqlDup = 'create table {schema}.{tbl_target} as (select *, row_number() OVER (PARTITION BY {attr}) from {schema}.{tbl_source}  ORDER BY {attr});'
 
         cur.execute(sql.SQL(sqlDup).format(
@@ -1017,7 +1016,6 @@ def trans_Counter(dicc):
         ))
         conn.commit()
         
-        #sqlRename = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" RENAME COLUMN "row_number" TO "'+attr+'";'
         sqlRename = 'ALTER TABLE {schema}.{tbl_target} RENAME COLUMN "row_number" TO {attr};'
 
         cur.execute(sql.SQL(sqlRename).format(
@@ -1042,23 +1040,37 @@ def trans_Calculator(dicc):
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source))
     cur.execute(sqlDup)
     conn.commit()
 
-    sqlCount = 'SELECT count(*) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlCount = sql.SQL('SELECT count(*) FROM {}.{}').format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target)) 
     cur.execute(sqlCount)
+
     run = False
     for row in cur:
         if row[0] != 0:
             run = True
 
     if run:
-        sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET "'+ attr + '" = ' + expression
+        sqlInsert = sql.Composed([
+            sql.SQL('UPDATE {schema}.{tbl_target} SET {attr} = ').format(
+                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                tbl_target = sql.Identifier(table_name_target),
+                attr = sql.Identifier(attr)),
+            sql.SQL(expression) 
+            ])
         cur.execute(sqlInsert)
         conn.commit()
 
