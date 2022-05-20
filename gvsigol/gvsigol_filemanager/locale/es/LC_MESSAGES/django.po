@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-02 13:06+0100\n"
+"POT-Creation-Date: 2022-05-20 08:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -124,30 +124,30 @@ msgstr "Subir"
 msgid "File manager"
 msgstr "Administrador de archivos"
 
-#: gvsigol_filemanager/views.py:141
+#: gvsigol_filemanager/views.py:142
 msgid "Export process done successfully"
 msgstr "Proceso de exportación realizado satisfactoriamente"
 
-#: gvsigol_filemanager/views.py:144
+#: gvsigol_filemanager/views.py:145
 msgid "Export process completed with warnings:"
 msgstr "El proceso de exportación se completó con avisos:"
 
-#: gvsigol_filemanager/views.py:171
+#: gvsigol_filemanager/views.py:172
 msgid "Server error"
 msgstr "Error del servidor"
 
-#: gvsigol_filemanager/views.py:175
+#: gvsigol_filemanager/views.py:176
 msgid "You must fill in all fields"
 msgstr "Debe rellenar todos los campos"
 
-#: gvsigol_filemanager/views.py:232 gvsigol_filemanager/views.py:243
+#: gvsigol_filemanager/views.py:233 gvsigol_filemanager/views.py:244
 msgid "Error deleting resource"
 msgstr "Error borrando el recurso"
 
-#: gvsigol_filemanager/views.py:232
+#: gvsigol_filemanager/views.py:233
 msgid "exists in datastore"
 msgstr "ya que se utiliza en el almacén de datos"
 
-#: gvsigol_filemanager/views.py:266
+#: gvsigol_filemanager/views.py:267
 msgid "Error unzipping resource"
 msgstr "Error descomprimiendo el recurso"

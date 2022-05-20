@@ -138,10 +138,10 @@ msgid "Add polygon"
 msgstr "Añadir polígono"
 
 msgid "Edit feature"
-msgstr "Editar feature"
+msgstr "Editar entitad"
 
 msgid "Remove feature"
-msgstr "Eliminar feature"
+msgstr "Eliminar entitad"
 
 msgid "Stop edition"
 msgstr "Terminar edición"
@@ -150,10 +150,10 @@ msgid "Error starting edition"
 msgstr "Error comenzando edición"
 
 msgid "Feature properties"
-msgstr "Propiedades de la feature"
+msgstr "Propiedades de la entitad"
 
 msgid "Feature resources"
-msgstr "Recursos de la feature"
+msgstr "Recursos de la entitad"
 
 msgid "remove"
 msgstr "eliminar"
@@ -162,7 +162,7 @@ msgid "Failed to remove layer lock"
 msgstr "Fallo al eliminar el bloqueo de la capa"
 
 msgid "New feature"
-msgstr "Nueva feature"
+msgstr "Nueva entitad"
 
 msgid "Save"
 msgstr "Guardar"
@@ -632,3 +632,13 @@ msgstr "Lupa"
 
 msgid "Search in catalog"
 msgstr "Busca al catálogo"
+
+msgid "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr "La sesión de Geoserver ha caducado. Cierre sesión en gvSIG Online y vuelva a iniciarla"
+
+msgid "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr "No tiene permisos para leer la capa o la sesión de Geoserver ha caducado. Cierre sesión en gvSIG Online y vuelva a iniciarla"
+
+msgid "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr "La capa no existe o la sesión de Geoserver ha caducado. Cierre sesión en gvSIG Online y vuelva a iniciarla"
+

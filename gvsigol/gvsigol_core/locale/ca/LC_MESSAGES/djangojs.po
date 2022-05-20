@@ -1,11 +1,18 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
+"X-Generator: Poedit 3.0.1\n"
 
 # gvSIG Online.
 # Copyright (C) 2010-2017 SCOLAB.
@@ -138,10 +145,10 @@ msgid "Add polygon"
 msgstr "Afegir polígon"
 
 msgid "Edit feature"
-msgstr "Editar feature"
+msgstr "Editar entitat"
 
 msgid "Remove feature"
-msgstr "Eliminar feature"
+msgstr "Eliminar entitat"
 
 msgid "Stop edition"
 msgstr "Terminar edició"
@@ -150,7 +157,7 @@ msgid "Error starting edition"
 msgstr "Error en començar l’edició"
 
 msgid "Feature properties"
-msgstr "Propietats de la feature"
+msgstr "Propietats de l'entitat"
 
 msgid "Feature resources"
 msgstr "Propietats del recurs"
@@ -162,7 +169,7 @@ msgid "Failed to remove layer lock"
 msgstr "No s'ha pogut eliminar el bloqueig de capes"
 
 msgid "New feature"
-msgstr "Nova feature"
+msgstr "Nova entitat"
 
 msgid "Save"
 msgstr "Guardar"
@@ -208,7 +215,7 @@ msgstr "Recursos multimèdia"
 
 # measureArea.js
 msgid "Show measure tools"
-msgstr "Mostrar ferramentes de mesura"
+msgstr "Mostrar eines de mesura"
 
 msgid "Measure area and perimeter"
 msgstr "Mesura de l’àrea i el perímetre"
@@ -227,22 +234,22 @@ msgid "Measure angle"
 msgstr "Mesurar angle"
 
 msgid "Close measure tools"
-msgstr "Tancar ferramentes de mesura"
+msgstr "Tancar eines de mesura"
 
 msgid "Show selection tools"
-msgstr "Mostrar ferramentes de selecció"
+msgstr "Mostrar eines de selecció"
 
-msgid "Select features"
-msgstr "Seleccionar registres"
+msgid "Select entitats"
+msgstr "Seleccionar entitats"
 
-msgid "Select feature"
-msgstr "Seleccionar registre"
+msgid "Select entitat"
+msgstr "Seleccionar entitat"
 
 msgid "Select by buffer"
-msgstr ""
+msgstr "Seleccionar per buffer"
 
 msgid "Close selection tools"
-msgstr ""
+msgstr "Tancar eines de selecció"
 
 # measureLength.js
 msgid "Search by coordinate"
@@ -308,16 +315,16 @@ msgid "Metadata"
 msgstr "Metadades"
 
 msgid "Download links"
-msgstr ""
+msgstr "Enllaços de descarga"
 
 msgid "Download shapefile"
-msgstr ""
+msgstr "Descargar shapefile"
 
 msgid "Download CSV"
-msgstr ""
+msgstr "Descargar CSV"
 
 msgid "Download GML"
-msgstr ""
+msgstr "Descargar GML"
 
 msgid "Attribute table"
 msgstr "Taula d'atributs"
@@ -569,3 +576,13 @@ msgstr "Lupa"
 
 msgid "Search in catalog"
 msgstr "Cerca al catàlog"
+
+msgid "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr "La sessió de Geoserver ha caducat. Tanca la sessió en gvSIG Online i torna a obrir-la"
+
+msgid "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr "No tens permissos per veure la capa o la sessió de Geoserver ha caducat. Tanca la sessió en gvSIG Online i torna a obrir-la"
+
+msgid "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr "La capa no existeix o la sessió de Geoserver ha caducat. Tanca la sessió en gvSIG Online i torna a obrir-la"
+
