@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-02 13:06+0100\n"
+"POT-Creation-Date: 2022-05-20 08:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -957,8 +957,8 @@ msgstr ""
 
 #: gvsigol_symbology/templates/external_graphic_add.html:146
 #: gvsigol_symbology/templates/external_graphic_add.html:152
-#: gvsigol_symbology/views.py:989 gvsigol_symbology/views.py:1193
-#: gvsigol_symbology/views.py:1379
+#: gvsigol_symbology/views.py:983 gvsigol_symbology/views.py:1187
+#: gvsigol_symbology/views.py:1373
 msgid "You must select a file"
 msgstr ""
 
@@ -1120,36 +1120,36 @@ msgstr ""
 msgid "Select field to generate unique values"
 msgstr ""
 
-#: gvsigol_symbology/views.py:140
+#: gvsigol_symbology/views.py:141
 msgid "The layer must contain at least one style"
 msgstr ""
 
-#: gvsigol_symbology/views.py:143
+#: gvsigol_symbology/views.py:144
 msgid "Can not delete a default style"
 msgstr ""
 
-#: gvsigol_symbology/views.py:981
+#: gvsigol_symbology/views.py:975
 msgid "Error importing SLD"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1041 gvsigol_symbology/views.py:1066
+#: gvsigol_symbology/views.py:1035 gvsigol_symbology/views.py:1060
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1136 gvsigol_symbology/views.py:1183
-#: gvsigol_symbology/views.py:1231 gvsigol_symbology/views.py:1308
-#: gvsigol_symbology/views.py:1369 gvsigol_symbology/views.py:1507
+#: gvsigol_symbology/views.py:1130 gvsigol_symbology/views.py:1177
+#: gvsigol_symbology/views.py:1225 gvsigol_symbology/views.py:1302
+#: gvsigol_symbology/views.py:1363 gvsigol_symbology/views.py:1501
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1190 gvsigol_symbology/views.py:1376
+#: gvsigol_symbology/views.py:1184 gvsigol_symbology/views.py:1370
 msgid "You must enter a name for the library"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1196 gvsigol_symbology/views.py:1382
+#: gvsigol_symbology/views.py:1190 gvsigol_symbology/views.py:1376
 msgid "You must enter a name for the library and select a file"
 msgstr ""
