@@ -15,16 +15,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-12-23 15:13+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2022-05-20 10:45+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
 msgstr "No podeu actualitzar un magatzem de dades tipus GeoTIFF. Suprimiu-la i torneu-la a crear"
@@ -66,7 +67,7 @@ msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). 
 msgstr "Nom no vàlid: els identificadors han de començar amb una lletra o un subratllat (_). Els caràcters posteriors poden ser lletres, guions baixos o números"
 
 msgid "Enumeration cannot contain point-colon"
-msgstr "els valors no poden contenir valors (;)"
+msgstr "Els valors no poden contenir valors (;)"
 
 msgid "Create new layer"
 msgstr "Crear capa buida"
@@ -108,7 +109,7 @@ msgid "Edit node"
 msgstr "Editar node"
 
 msgid "Convert"
-msgstr ""
+msgstr "Convertir"
 
 msgid "Autogen"
 msgstr ""
@@ -120,16 +121,16 @@ msgid "Convert ok"
 msgstr ""
 
 msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
-msgstr ""
+msgstr "El camp no es pot marcar com obligatori a nivell de base de dades perquè alguns registres contenen valores nuls en aquesta columna. Esborra els valors nuls i torna a provar."
 
 msgid "Node has been reloaded"
-msgstr ""
+msgstr "El node s'ha recarregat"
 
 msgid "Error reloading node"
-msgstr ""
+msgstr "Error recarregant el node"
 
 msgid "Connection has been success"
-msgstr ""
+msgstr "S'ha connectat correctament"
 
 msgid "Filter by project"
 msgstr "Filtrar per projecte"
@@ -138,32 +139,31 @@ msgid "Show all layers"
 msgstr "Mostrar totes les capes"
 
 msgid "The action was successfully completed"
-msgstr ""
+msgstr "L'acció s'ha completat correctament"
 
 msgid "The action failed"
-msgstr ""
+msgstr "L'acció ha fallat"
 
 msgid "The layer definition was refreshed"
-msgstr ""
+msgstr "La definició de la capa s'ha refrescat"
 
 msgid "The layer refresh failed"
-msgstr ""
+msgstr "El refrescat de capa ha fallat"
 
 msgid "Calculated"
-msgstr ""
+msgstr "Calculat"
 
 msgid "Old name"
-msgstr ""
+msgstr "Nom anterior"
 
 msgid "New name"
-msgstr ""
+msgstr "Nou nom"
 
 msgid "Rename"
-msgstr ""
+msgstr "Canviar nom"
 
 msgid "Field to delete"
-msgstr ""
+msgstr "Camp a esborrar"
 
 msgid "You must select an extent on the map using the control"
-msgstr ""
-
+msgstr "S'ha de seleccionar una extensió en el mapa fent servir el control"
