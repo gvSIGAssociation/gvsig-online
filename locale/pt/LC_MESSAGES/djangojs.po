@@ -624,3 +624,13 @@ msgstr "Lupa"
 
 msgid "Search in catalog"
 msgstr "Pesquisa no catálogo"
+
+msgid "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr ""
+
+msgid "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr ""
+
+msgid "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+msgstr ""
+
