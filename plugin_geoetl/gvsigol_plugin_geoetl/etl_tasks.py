@@ -1545,8 +1545,14 @@ def input_Indenova(dicc):
                             exp_copy[attr] =''
                         elif attr not in list_keys_low and attr == 'adirefcatt':
                             exp_copy[attr] ='00000000000000000000'
-                                      
-                    exp_copy['url'] = domain + "/accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
+
+                    if domain.startswith('https://empleadopublico.alzira.es'):
+
+                        exp_copy['url'] = domain + "/?externAccess=73ac4c3b-3ede-4436-a66a-75037ef96b4a&urlredirect=accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
+
+                    elif domain.startswith('https://preempleadopublico.alzira.es'):
+                        
+                        exp_copy['url'] = domain + "/?externAccess=ce54d05d-e01b-c4c7-707a-ecd7289736ab&urlredirect=accesoexp.do?formAction=openexp&idexp="+str(exp_copy["idExp"])
                         
                     exp_copy_low = {x.lower(): v for x, v in exp_copy.items()}
 
