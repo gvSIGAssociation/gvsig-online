@@ -750,6 +750,8 @@ def output_Postgis(dicc):
 
     inSame = isInSamedb(params)
 
+    print("Is in same server and databse: "+str(inSame))
+
     esq = dicc['schema-name-option']
     tab = dicc['tablename']
 
