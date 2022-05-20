@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-20 08:09+0000\n"
+"POT-Creation-Date: 2022-05-20 15:22+0000\n"
 "PO-Revision-Date: 2022-05-20 12:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -2148,8 +2148,8 @@ msgstr "Requerit als formularis d'edició"
 #: gvsigol_services/templates/layer_config.html:115
 #: gvsigol_services/templates/layer_config.html:152
 #: gvsigol_services/templates/select_layer_permissions.html:35
-msgid "SQL views can't be edited."
-msgstr "Les vistes SQL no es poden editar"
+msgid "SQL views can\\"
+msgstr "Vistes SQL"
 
 #: gvsigol_services/templates/layer_config.html:123
 msgid "Rename"
@@ -2568,6 +2568,10 @@ msgstr "Esborrar Vista SQL"
 #: gvsigol_services/templates/sqlview_list.html:109
 msgid "Update SQL View"
 msgstr "Actualitzar Vista SQL"
+
+#: gvsigol_services/templates/translations.html:3
+msgid "SQL views can't be edited."
+msgstr "Les vistes SQL no es poden editar"
 
 #: gvsigol_services/templates/workspace_list.html:11
 msgid "Add workspace"
