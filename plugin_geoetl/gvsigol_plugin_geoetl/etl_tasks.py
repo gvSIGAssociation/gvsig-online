@@ -877,7 +877,7 @@ def output_Postgis(dicc):
 
             output_Postgresql(dicc, geom_column_name)
         
-        if inSame:
+        if inSame and dicc['operation'] == 'CREATE':
             pass
 
         else:
