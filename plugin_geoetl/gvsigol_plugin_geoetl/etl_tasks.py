@@ -19,7 +19,7 @@ from .models import database_connections
 import requests
 import base64
 from datetime import date, datetime
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, true
 from django.contrib.gis.gdal import DataSource
 import re
 from zipfile import ZipFile
@@ -726,6 +726,19 @@ def output_Postgresql(dicc, geom_column_name = ''):
         return [table_name]
 
 
+def isInSamedb(params):
+
+    if (settings.GEOETL_DB['host'] == params['host'] and 
+        str(settings.GEOETL_DB["port"]) == str(params['port']) and 
+        settings.GEOETL_DB["database"] == params['database'] and
+        settings.GEOETL_DB["user"] == params['user'] and
+        settings.GEOETL_DB["password"] == params['password']):
+        
+        return True
+    else:
+        return False
+
+
 def output_Postgis(dicc):
 
     table_name_source = dicc['data'][0]
@@ -734,6 +747,8 @@ def output_Postgis(dicc):
 
     params_str = db.connection_params
     params = json.loads(params_str)
+
+    inSame = isInSamedb(params)
 
     esq = dicc['schema-name-option']
     tab = dicc['tablename']
@@ -757,34 +772,50 @@ def output_Postgis(dicc):
 
             geom_column_name = 'wkb_geometry'
 
-            srid = 0
-            sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
-            cur.execute(sqlSrid)
-            con_source.commit()
-            for row in cur:
-                srid = row[0]
-                break
+            if inSame:
+                
+                sqlCreate = sql.SQL('create table {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab),
+                    sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    tbl_source = sql.Identifier(table_name_source))
+                
+                cur.execute(sqlCreate)
+                con_source.commit()
 
-            sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
-            cur.execute(sqlTypeGeom)
-            con_source.commit()
-            type_geom = ''
-            for row in cur:
-                if type_geom == '':
-                    type_geom = row[0]
-                elif type_geom != row[0]:
-                    type_geom = 'GEOMETRY'
+                con_source.close()
+                cur.close()
+
+            else:
+
+                srid = 0
+                sqlSrid = 'SELECT ST_SRID (wkb_geometry) FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+                cur.execute(sqlSrid)
+                con_source.commit()
+                for row in cur:
+                    srid = row[0]
                     break
-                else:
-                    pass
 
-            output_Postgresql(dicc,'wkb_geometry')
+                sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
+                cur.execute(sqlTypeGeom)
+                con_source.commit()
+                type_geom = ''
+                for row in cur:
+                    if type_geom == '':
+                        type_geom = row[0]
+                    elif type_geom != row[0]:
+                        type_geom = 'GEOMETRY'
+                        break
+                    else:
+                        pass
 
-            con_source.close()
-            cur.close()
+                output_Postgresql(dicc,'wkb_geometry')
 
-            con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
-            cur2 = con_target.cursor()
+                con_source.close()
+                cur.close()
+
+                con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+                cur2 = con_target.cursor()
 
         else:
 
@@ -828,27 +859,31 @@ def output_Postgis(dicc):
 
             output_Postgresql(dicc, geom_column_name)
         
+        if inSame:
+            pass
 
-        if srid != 0 and type_geom != '':
+        else:
 
-            sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN '+geom_column_name
+            if srid != 0 and type_geom != '':
+
+                sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN '+geom_column_name
+                cur2.execute(sqlDrop2)
+                con_target.commit()
+
+                sqlAlter2 = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN '+geom_column_name+' geometry('+type_geom+', '+str(srid)+')'
+                cur2.execute(sqlAlter2)
+                con_target.commit()
+
+                sqlUpdate2 = 'UPDATE '+esq+'."'+tab+'"  SET '+geom_column_name+' = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
+                cur2.execute(sqlUpdate2)
+                con_target.commit()
+
+            sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN _st_astext_temp'
             cur2.execute(sqlDrop2)
             con_target.commit()
 
-            sqlAlter2 = 'ALTER TABLE '+esq+'."'+tab+'"  ADD COLUMN '+geom_column_name+' geometry('+type_geom+', '+str(srid)+')'
-            cur2.execute(sqlAlter2)
-            con_target.commit()
-
-            sqlUpdate2 = 'UPDATE '+esq+'."'+tab+'"  SET '+geom_column_name+' = ST_GeomFromText(_st_astext_temp,'+str(srid)+')'
-            cur2.execute(sqlUpdate2)
-            con_target.commit()
-
-        sqlDrop2 = 'ALTER TABLE '+esq+'."'+tab+'"  DROP COLUMN _st_astext_temp'
-        cur2.execute(sqlDrop2)
-        con_target.commit()
-
-        con_target.close()
-        cur2.close()
+            con_target.close()
+            cur2.close()
 
 
 def input_Csv(dicc):
