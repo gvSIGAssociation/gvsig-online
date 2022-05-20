@@ -785,6 +785,22 @@ def output_Postgis(dicc):
                 cur.execute(sqlCreate)
                 con_source.commit()
 
+                sqlAlter = sql.SQL('ALTER TABLE {sch_target}.{tbl_target}  ADD COLUMN IF NOT EXISTS ogc_fid SERIAL').format(
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab))
+
+                cur.execute(sqlAlter)
+                con_source.commit()
+
+                sqlAlter_ =  sql.SQL('ALTER TABLE {sch_target}.{tbl_target} ADD PRIMARY KEY (ogc_fid)').format(
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab))
+                try:
+                    cur.execute(sqlAlter_)
+                    con_source.commit()
+                except:
+                    pass
+
                 con_source.close()
                 cur.close()
 
