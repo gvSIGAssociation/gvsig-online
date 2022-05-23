@@ -1764,374 +1764,6 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
 });
 
 
-//// INPUT POSTGRES////
-
-input_Postgres = draw2d.shape.layout.VerticalLayout.extend({
-
-	NAME: "input_Postgres",
-	
-    init : function(attr)
-    {
-    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3, width:1},attr));
-        
-        this.classLabel = new draw2d.shape.basic.Label({
-            text:"PostgreSQL", 
-            stroke:1,
-            fontColor:"#ffffff",  
-            bgColor:"#83d0c9", 
-            radius: this.getRadius(), 
-            padding:10,
-            resizeable:true,
-            editor:new draw2d.ui.LabelInplaceEditor()
-        });
-
-        var icon = new draw2d.shape.icon.Gear({ 
-            minWidth:13, 
-            minHeight:13, 
-            width:13, 
-            height:13, 
-            color:"#e2504c"
-        });
-
-        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
-
-        this.add(this.classLabel);
-
-        var ID = this.id
-
-        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
-
-        $('#canvas-parent').append('<div id="dialog-input-postgis-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-            '<div class="modal-dialog" role="document">'+
-                '<div class="modal-content">'+
-                    '<div class="modal-header">'+
-                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                            '<span aria-hidden="true">&times;</span>'+
-                        '</button>'+
-                        '<h4 class="modal-title">'+gettext('PostGIS Parameters')+'</h4>'+
-                    '</div>'+
-                    '<div class="modal-body">'+
-                        '<form>'+
-                            '<div>'+
-                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
-                                '<select id="db-'+ID+'" class="form-control"></select>'+
-                            '</div>'+
-
-                            '<div class="column20">'+
-                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
-                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
-                            '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="schema" class="col-form-label">'+gettext('Schema:')+'</label>'+
-                                '<select id="schema-name-'+ID+'" class="form-control"></select>'+
-                            '</div>'+
-
-                            '<div class="column20">'+
-                                '<label for ="get-tables" class="col-form-label">'+gettext('Get Tables')+':</label><br>'+
-                                '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
-                            '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<select id="tablename-'+ID+'" class="form-control"></select>'+
-                            '</div>'+
-                            '<div class="col-md-12">'+
-                                '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
-                                '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
-                            '</div>'+
-                            '<div class="more-options-'+ID+'">'+
-                                '<label class="col-form-label">'+gettext('SQL WHERE Clause:')+'</label>'+
-                                '<textarea id="clause-'+ID+'" rows="1" class="form-control" placeholder=""></textarea>'+
-                            '</div>'+
-                        '</form>'+
-                    '</div>'+
-                    '<div class="modal-footer">'+
-                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                        '<button type="button" class="btn btn-default btn-sm" id="input-postgis-accept-'+ID+'">'+gettext('Accept')+'</button>'+
-                    '</div>'+
-                '</div>'+
-            '</div>'+
-        '</div>')
-
-
-        for(i=0;i<dbc.length;i++){
-
-            if(dbc[i].type == 'PostgreSQL'){
-                $('#db-'+ID).append(
-                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
-                );
-            }
-        };
-
-        $("#checkbox-"+ID).change(function() {
-            if($("#checkbox-"+ID).is(':checked')){
-                $(".more-options-"+ID).slideDown("slow")
-                $("#checkbox-"+ID).val("true")
-            }else{
-                $(".more-options-"+ID).slideUp("slow")
-                $("#checkbox-"+ID).val("")
-            }
-        });
-
-
-        $('#get-schemas-'+ID).on("click", function(){
-                                
-            var paramsGetSchemas = {"id": ID,
-            "parameters": [
-                {"db": $('#db-'+ID).val()}
-            ]}
-
-            var formDataGetSchemas = new FormData();
-            
-            formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/etl_schemas_name_postgres/',
-                data: formDataGetSchemas,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (data) {
-
-                    $('#schema-name-'+ID).empty()
-                    get_sch = []
-
-                    for (i = 0; i < data.length; i++){
-                        $('#schema-name-'+ID).append('<option>'+data[i]+'</option>')
-                        get_sch.push(data[i])
-
-
-                    }
-                }
-            })
-        });
-
-
-        $('#get-tables-'+ID).on("click", function(){
-                                
-            var paramsGetSchemas = {"id": ID,
-            "parameters": [
-                {"db": $('#db-'+ID).val(),
-                "schema-name": $('#schema-name-'+ID).val()}
-            ]}
-
-            var formDataGetSchemas = new FormData();
-            
-            formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/etl_table_name_postgres/',
-                data: formDataGetSchemas,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (data) {
-                    get_tbl = []
-                    $('#tablename-'+ID).empty()
-
-                    for (i = 0; i < data.length; i++){
-                        $('#tablename-'+ID).append('<option>'+data[i]+'</option>')
-                        get_tbl.push(data[i])
-
-                    }
-                }
-            })
-        });
-
-        if (typeof get_sch === 'undefined'){
-            get_sch = []
-            $("#schema-name-"+ID+" option").each(function()
-                {  
-                    get_sch.push($(this).val())
-                }
-            );
-        }
-
-        if (typeof get_tbl === 'undefined'){
-            get_tbl = []
-            $("#tablename-"+ID+" option").each(function()
-                {  
-                    get_tbl.push($(this).val())
-                }
-            );
-        }
-
-        var context = this
-
-        icon.on("click", function(){
-
-            $('#dialog-input-postgis-'+ID).modal('show')
-
-            if($("#checkbox-"+ID).is(':checked')){
-                $(".more-options-"+ID).slideDown("slow")
-                $("#checkbox-"+ID).val("true")
-            }else{
-                $(".more-options-"+ID).slideUp("slow")
-                $("#checkbox-"+ID).val("")
-            }
-
-        });
-
-        $('#input-postgis-accept-'+ID).click(function() {
-                
-            var paramsPostgis = {"id": ID,
-            "parameters": [
-                {"get_schema-name": get_sch,
-                "get_tablename": get_tbl,
-                "db": $('#db-'+ID).val(),
-                "schema-name": $('#schema-name-'+ID).val(),
-                "tablename": $('#tablename-'+ID).val(),
-                "checkbox": $("#checkbox-"+ID).val(),
-                "clause": $('#clause-'+ID).val()}
-            ]}
-
-            var formDataSchemaPostgis = new FormData();
-            
-            formDataSchemaPostgis.append('jsonParamsPostgres', JSON.stringify(paramsPostgis))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/etl_schema_postgresql/',
-                data: formDataSchemaPostgis,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (data) {
-                    paramsPostgis['schema'] = data
-                    paramsPostgis['parameters'][0]['schema'] = data
-
-                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
-                    
-                    isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
-                    
-                    icon.setColor('#01b0a0')
-                    
-                    $('#dialog-input-postgis-'+ID).modal('hide')
-                    
-                    }
-                })
-        });
-
-    },
-    
-    /**
-     * @method
-     * Add an entity to the db shape
-     * 
-     * @param {String} txt the label to show
-     * @param {Number} [optionalIndex] index where to insert the entity
-     */
-    addEntity: function(optionalIndex)
-    {
-	   	 var label =new draw2d.shape.basic.Label({
-	   	     text: gettext('Input'),
-	   	     stroke:0.2,
-	   	     radius:0,
-	   	     bgColor:"#ffffff",
-	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
-	   	     resizeable:true
-	   	 });
-
-	     var output= label.createPort("output");
-         
-         output.setName("output_"+label.id);
-         
-	     if($.isNumeric(optionalIndex)){
-             this.add(label, null, optionalIndex+1);
-	     }
-	     else{
-	         this.add(label);
-         }
-         
-         listLabel.push([this.id, [], [output.name]])
-
-         return label;
-    },
-        /**
-     * @method
-     * Remove the entity with the given index from the DB table shape.<br>
-     * This method removes the entity without care of existing connections. Use
-     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
-     * 
-     * @param {Number} index the index of the entity to remove
-     */
-    removeEntity: function(index)
-    {
-        this.remove(this.children.get(index+1).figure);
-    },
-
-    /**
-     * @method
-     * Returns the entity figure with the given index
-     * 
-     * @param {Number} index the index of the entity to return
-     */
-    getEntity: function(index)
-    {
-        return this.children.get(index+1).figure;
-    },
-     
-     /**
-      * @method
-      * Set the name of the DB table. Visually it is the header of the shape
-      * 
-      * @param name
-      */
-     setName: function(name)
-     {
-         this.classLabel.setText(name);
-         
-         return this;
-     },
-     
-     /**
-      * @method 
-      * Return an objects with all important attributes for XML or JSON serialization
-      * 
-      * @returns {Object}
-      */
-     getPersistentAttributes : getPerAttr,
-     
-     /**
-      * @method 
-      * Read all attributes from the serialized properties and transfer them into the shape.
-      *
-      * @param {Object} memento
-      * @return
-      */
-     setPersistentAttributes : function(memento)
-     {
-         this._super(memento);
-         
-         this.setName(memento.name);
-
-         if(typeof memento.entities !== "undefined"){
-             $.each(memento.entities, $.proxy(function(i,e){
-                 var entity =this.addEntity(e.text);
-                 entity.id = e.id;
-                 entity.getInputPort(0).setName("input_"+e.id);
-                 entity.getOutputPort(0).setName("output_"+e.id);
-             },this));
-         }
-
-         return this;
-     }
-
-});
-
 
 //// INPUT POSTGIS////
 
@@ -2144,7 +1776,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
     	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3, width:1},attr));
         
         this.classLabel = new draw2d.shape.basic.Label({
-            text:"PostGIS", 
+            text:"PgSQL/PostGIS", 
             stroke:1,
             fontColor:"#ffffff",  
             bgColor:"#83d0c9", 
@@ -2204,14 +1836,14 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
                                 '<select id="tablename-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="col-md-12">'+
+                            /*'<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
                             '</div>'+
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label">'+gettext('SQL WHERE Clause:')+'</label>'+
                                 '<textarea id="clause-'+ID+'" rows="1" class="form-control" placeholder=""></textarea>'+
-                            '</div>'+
+                            '</div>'+*/
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -2233,7 +1865,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         };
 
 
-        $("#checkbox-"+ID).change(function() {
+        /*$("#checkbox-"+ID).change(function() {
             if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
@@ -2241,7 +1873,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
             }
-        });
+        });*/
 
         $('#get-schemas-'+ID).on("click", function(){
                                 
@@ -2339,13 +1971,13 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-postgis-'+ID).modal('show')
 
-            if($("#checkbox-"+ID).is(':checked')){
+            /*if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
             }else{
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
-            }
+            }*/
         });
 
         $('#input-postgis-accept-'+ID).click(function() {
@@ -2356,9 +1988,9 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 "get_tablename": get_tbl,
                 "db": $('#db-'+ID).val(),
                 "schema-name": $('#schema-name-'+ID).val(),
-                "tablename": $('#tablename-'+ID).val(),
+                "tablename": $('#tablename-'+ID).val()}/*,
                 "checkbox": $("#checkbox-"+ID).val(),
-                "clause": $('#clause-'+ID).val()}
+            "clause": $('#clause-'+ID).val()}*/
             ]}
 
             var formDataSchemaPostgis = new FormData();
@@ -10819,346 +10451,6 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
 
 ////////////////////////////////////////////////  SALIDAS /////////////////////////////////////////////////////////
 
-//// OUTPUT POSTGRESQL ////
-
-output_Postgresql = draw2d.shape.layout.VerticalLayout.extend({
-
-	NAME: "output_Postgresql",
-	
-    init : function(attr)
-    {
-    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
-        
-        this.classLabel = new draw2d.shape.basic.Label({
-            text:"PostgreSQL", 
-            stroke:1,
-            fontColor:"#ffffff",  
-            bgColor:"#e8ca93", 
-            radius: this.getRadius(), 
-            padding:10,
-            resizeable:true,
-            editor:new draw2d.ui.LabelInplaceEditor()
-        });
-        
-        var icon = new draw2d.shape.icon.Gear({
-            minWidth:13, 
-            minHeight:13, 
-            width:13, 
-            height:13, 
-            color:"#e2504c"
-        });
-
-        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
-
-        this.add(this.classLabel);
-
-        var ID = this.id
-
-        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
-
-      var context = this
-
-        $('#canvas-parent').append('<div id="dialog-output-postgresql-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-            '<div class="modal-dialog" role="document">'+
-                '<div class="modal-content">'+
-                    '<div class="modal-header">'+
-                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                            '<span aria-hidden="true">&times;</span>'+
-                        '</button>'+
-                        '<h4 class="modal-title">'+gettext('PostgreSQL Parameters')+'</h4>'+
-                    '</div>'+
-                    '<div class="modal-body">'+
-                        '<form>'+
-                            '<div>'+
-                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
-                                '<select id="db-option-'+ID+'" class="form-control"></select>'+
-                            '</div>'+
-
-                            '<div class="column20">'+
-                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
-                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
-                            '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="schema" class="col-form-label">'+gettext('Schema:')+'</label>'+
-                                '<select id="schema-name-option-'+ID+'" class="form-control"></select>'+
-                            '</div>'+
-
-                            '<div>'+
-                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
-                            '</div>'+
-                            '<div class="column25">'+
-                                '<label class="col-form-label">'+gettext('Operation:')+'</label>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="create" name="operation-'+ID+'" class="form-check-input" value="CREATE" checked="checked">'+
-                                    '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
-                                '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="append-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="APPEND">'+
-                                    '<label for="append" class="form-check-label">'+gettext('APPEND')+'</label>'+
-                                '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="overwrite-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="OVERWRITE">'+
-                                    '<label for="overwrite" class="form-check-label">'+gettext('OVERWRITE')+'</label>'+
-                                '</div>'+
-                            '</div>'+
-                            '<div class="column25">'+
-                            '<br><br>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="update-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
-                                    '<label for="update" class="form-check-label">'+gettext('UPDATE')+'</label>'+
-                                '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="delete-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="DELETE">'+
-                                    '<label for="delete" class="form-check-label">'+gettext('DELETE')+'</label>'+
-                                '</div>'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('Match column:')+'</label>'+
-                                '<select class="form-control" id="match-'+ID+'" disabled> </select>'+
-                            '</div>'+
-                        '</form>'+
-                    '</div>'+
-                    '<div class="modal-footer">'+
-                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                        '<button type="button" class="btn btn-default btn-sm" id="output-postgresql-accept-'+ID+'">'+gettext('Accept')+'</button>'+
-                    '</div>'+
-                '</div>'+
-            '</div>'+
-        '</div>')
-
-        for(i=0;i<dbc.length;i++){
-
-            if(dbc[i].type == 'PostgreSQL'){
-                $('#db-option-'+ID).append(
-                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
-                );
-            }
-        };
-
-        $('input:radio[name="operation-'+ID+'"]').change(function(){
-            
-            if ($(this).val()!='CREATE'){
-                $('#match-'+ID).attr('disabled', false)
-            }
-            else{
-                $('#match-'+ID).attr('disabled', true)
-            }
-        }); 
-
-        $('#get-schemas-'+ID).on("click", function(){
-                                
-            var paramsGetSchemas = {"id": ID,
-            "parameters": [
-                {"db": $('#db-option-'+ID).val()}
-            ]}
-
-            var formDataGetSchemas = new FormData();
-            
-            formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/etl_schemas_name_postgres/',
-                data: formDataGetSchemas,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (data) {
-
-                    $('#schema-name-option-'+ID).empty()
-                    get_sch = []
-
-                    for (i = 0; i < data.length; i++){
-                        $('#schema-name-option-'+ID).append('<option>'+data[i]+'</option>')
-                        get_sch.push(data[i])
-
-
-                    }
-                }
-            })
-        });
-
-        if (typeof get_sch === 'undefined'){
-            get_sch = []
-            $("#schema-name-option-"+ID+" option").each(function()
-                {  
-                    get_sch.push($(this).val())
-                }
-            );
-        }
-
-        var context = this
-
-        icon.on("click", function(){
-
-            setTimeout(function(){
-                try{
-                    schemas = getOwnSchemas(context.canvas, ID)
-                    schema = schemas[0]
-                    schemaOld = schemas[1]
-                
-                }catch{ 
-                    schema=[]
-                    schemaOld =[]
-                }
-                
-                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
-
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
-                    schema = schemaEdge
-                    $('#match-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        $('#match-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
-                }
-
-            },100);
-
-            $('#dialog-output-postgresql-'+ID).modal('show')
-
-        });
-
-        $('#output-postgresql-accept-'+ID).click(function() {
-
-            var paramsPostgreSQL = {"id": ID,
-                "parameters": [
-                    {"get_schema-name-option": get_sch,
-                    "db-option": $('#db-option-'+ID).val(),
-                    "schema-name-option": $('#schema-name-option-'+ID).val(),
-                    "tablename": $('#tablename-'+ID).val(),
-                    "match": $('#match-'+ID).val(),
-                    "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
-                ]
-            }
-            
-            paramsPostgreSQL['schema-old'] = schemaEdge
-            paramsPostgreSQL['schema'] = schema
-            
-            isAlreadyInCanvas(jsonParams, paramsPostgreSQL, ID)
-
-            icon.setColor('#e79600')
-            
-            $('#dialog-output-postgresql-'+ID).modal('hide')
-
-        });
-
-    },
-     
-    /**
-     * @method
-     * Add an entity to the db shape
-     * 
-     * @param {String} txt the label to show
-     * @param {Number} [optionalIndex] index where to insert the entity
-     */
-    addEntity: function(optionalIndex)
-    {
-	   	var label =new draw2d.shape.basic.Label({
-	   	    text: gettext("Output"),
-	   	    stroke:0.2,
-	   	    radius:0,
-	   	    bgColor:"#ffffff",
-	   	    padding:{left:10, top:3, right:40, bottom:5},
-	   	    fontColor:"#9a8262",
-            resizeable:true
-            
-	   	 });
-
-	     var input= label.createPort("input");
-
-         input.setName("input_"+label.id);
-         
-	     if($.isNumeric(optionalIndex)){
-             this.add(label, null, optionalIndex+1);
-	     }
-	     else{
-	         this.add(label);
-	     }
-         
-         listLabel.push([this.id, [input.name], []])
-
-	     return label;
-    },
-
-    /**
-     * @method
-     * Remove the entity with the given index from the DB table shape.<br>
-     * This method removes the entity without care of existing connections. Use
-     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
-     * 
-     * @param {Number} index the index of the entity to remove
-     */
-    removeEntity: function(index)
-    {
-        this.remove(this.children.get(index+1).figure);
-    },
-
-    /**
-     * @method
-     * Returns the entity figure with the given index
-     * 
-     * @param {Number} index the index of the entity to return
-     */
-    getEntity: function(index)
-    {
-        return this.children.get(index+1).figure;
-    },
-     
-     /**
-      * @method
-      * Set the name of the DB table. Visually it is the header of the shape
-      * 
-      * @param name
-      */
-     setName: function(name)
-     {
-         this.classLabel.setText(name);
-         
-         return this;
-     },
-     
-     /**
-      * @method 
-      * Return an objects with all important attributes for XML or JSON serialization
-      * 
-      * @returns {Object}
-      */
-     getPersistentAttributes : getPerAttr,
-     
-     /**
-      * @method 
-      * Read all attributes from the serialized properties and transfer them into the shape.
-      *
-      * @param {Object} memento
-      * @return
-      */
-     setPersistentAttributes : function(memento)
-     {
-         
-         this._super(memento);
-         
-         this.setName(memento.name);
-
-         if(typeof memento.entities !== "undefined"){
-             $.each(memento.entities, $.proxy(function(i,e){
-                 var entity =this.addEntity(e.text);
-                 entity.id = e.id;
-                 entity.getInputPort(0).setName("input_"+e.id);
-                 entity.getOutputPort(0).setName("output_"+e.id);
-             },this));
-         }
-
-         return this;
-     }  
-
-});
-
 //// OUTPUT POSTGIS ////
 
 output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
@@ -11170,7 +10462,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
     	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
         
         this.classLabel = new draw2d.shape.basic.Label({
-            text:"PostGIS", 
+            text:"PgSQL/PostGIS", 
             stroke:1,
             fontColor:"#ffffff",  
             bgColor:"#e8ca93", 
