@@ -1,4 +1,5 @@
 from gvsigol.celery import app as celery_app
+from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 from gvsigol import settings
 import time
 import json
@@ -9,7 +10,9 @@ import gvsigol_services.tiling_service as tiling_service #Tiling, create_status,
 from pyproj import Proj, transform
 from gvsigol_services.models import Layer
 from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
-from gvsigol_services.decorators import start_new_thread
+#from gvsigol_services.decorators import start_new_thread
+from gvsigol_services import geographic_servers
+from gvsigol_services.models import Layer, Datastore, Workspace
 
 import logging
 logger = logging.getLogger('gvsigol')
@@ -409,3 +412,40 @@ def check_gdal_env():
         logger.info("GDAL correctly configured. Version {0}".format(gdal_version))
     except:
         logger.exception("GDAL not correclty configured")
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    my_task_name = 'gvsigol_services.tasks.update_layer_info'
+    schedule, _ = CrontabSchedule.objects.get_or_create(
+        minute='01',
+        hour='4',
+        day_of_week='*',
+        day_of_month='*',
+        month_of_year='*'
+    )
+    PeriodicTask.objects.get_or_create(
+        name=my_task_name,
+        task=my_task_name,
+        defaults={'crontab': schedule}
+    )
+
+@celery_app.task(bind=True)
+def update_layer_info(self):
+    layer_list = Layer.objects.filter(external=False)
+    for l in layer_list:
+        datastore = Datastore.objects.get(id=l.datastore_id)
+        workspace = Workspace.objects.get(id=datastore.workspace_id)
+        server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        try:
+            (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
+            if ds_type == 'imagemosaic':
+                ds_type = 'coverage'
+            l.native_srs = layer_info[ds_type]['srs']
+            l.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
+            l.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+            
+        except Exception as e:
+            l.default_srs = 'EPSG:4326'
+            l.native_extent = '-180,-90,180,90'
+            l.latlong_extent = '-180,-90,180,90'
+        l.save()
