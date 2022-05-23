@@ -239,11 +239,11 @@ def trans_KeepAttr(dicc):
     sqlDup = 'create table {schema}.{tbl_target} as (select '
 
     for attr in attrList:
-        sqlDup += ' %s ,'
+        sqlDup += ' {} ,'
 
     sqlDup = sqlDup[:-1]+' from {schema}.{tbl_source})'
 
-    cur.execute(sqlDup.format(
+    cur.execute(sql.SQL(sqlDup).format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source),
