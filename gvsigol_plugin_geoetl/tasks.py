@@ -1,3 +1,4 @@
+
 from gvsigol.celery import app as celery_app
 from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
@@ -185,6 +186,7 @@ def run_canvas_background(**kwargs):
         delete_tables(tables_list_name)
 
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
+        
     
 def delete_tables(nodes):
     conn_ = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
