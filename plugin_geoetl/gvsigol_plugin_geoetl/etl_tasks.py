@@ -662,7 +662,7 @@ def output_Postgis(dicc):
     con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = con_source.cursor()
 
-    sqlCount = sql.SQL("SELECT COUNT(*) FROM {sch_source}.{tbl_source})").format(
+    sqlCount = sql.SQL("SELECT COUNT(*) FROM {sch_source}.{tbl_source}").format(
             sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
             tbl_source = sql.Identifier(table_name_source))
     
