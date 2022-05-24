@@ -943,11 +943,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 
         })
 
-        
-
         icon.on("click", function(){
-
-            
 
             $('#select-file-button-'+ID).click(function (e) {
                 if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
@@ -2201,7 +2197,25 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value="">'+gettext('Insert if needed')+'</option>'+
                                 '</select>'+
                             '</div>'+
-                            '<br><br><br><br><br><br>'+
+
+                            '<br><br><br>'+
+                            '<div>'+
+                                '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
+                            '</div>'+
+                            '<div id ="more-options-'+ID+'">'+
+                                '<div>'+
+                                    '<input type="checkbox" name="checkbox-excel" id="move-'+ID+'"/>'+
+                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                '</div>'+
+                                '<div class="column20">'+
+                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
+                                '</div>'+
+                                '<div class="column50">'+
+                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder='+gettext('"For removing files leave this input empty"')+'></input>'+
+                                '</div>'+
+                                '<br><br><br>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -2225,7 +2239,52 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
 
         var context = this
 
+        $("#advanced-param-"+ID).click(function(){
+            $("#more-options-"+ID).slideToggle("slow");
+        });
+
+        $("#move-"+ID).change(function() {
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
+            }
+        });
+
+
         icon.on("click", function(){
+
+            $('#select-file-button-'+ID).click(function (e) {
+                window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                getPathFile('kml-kmz', ID)
+
+            });
+
+
+            $('#select-folder-button-'+ID).click(function (e) {
+                window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                getPathFile('folder', ID)
+            });
+
+
+            $("#more-options-"+ID).slideUp("slow");
+
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
+                $("#more-options-"+ID).slideDown("slow");
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
+            }
 
             $('#dialog-input-kml-'+ID).modal('show')
         })
@@ -2236,7 +2295,10 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
             "parameters": [
             { "kml-kmz-file": $('#kml-kmz-file-'+ID).val(),
               "encode": $('#encode-'+ID).val(),
-              "epsg": $('#epsg-'+ID).val()}
+              "epsg": $('#epsg-'+ID).val(),
+              //"reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
+              "move": $('#move-'+ID).val(),
+              "folder": $('#folder-'+ID).val()}
             ]}
 
             var formDataSchemaKML = new FormData();

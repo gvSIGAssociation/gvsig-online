@@ -662,7 +662,10 @@ def output_Postgis(dicc):
     con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = con_source.cursor()
 
-    sqlCount = "SELECT COUNT(*) FROM "+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'
+    sqlCount = "SELECT COUNT(*) FROM {sch_source}.{tbl_source})".format(
+            sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_source = sql.Identifier(table_name_source))
+    
     cur.execute(sqlCount)
     con_source.commit()
     for row in cur:
@@ -2548,15 +2551,36 @@ def trans_SpatialRel(dicc):
 def move(name, dicc):
 
     if name == 'input_Excel':
+        f = dicc["excel-file"]
         source = dicc["excel-file"]
         target = dicc["folder"]
         suffixes = (".xls", ".xlsx")
 
-    for file in os.listdir(source):
-        if file.endswith(suffixes):
-            if target != '':
+    elif name == 'input_Kml':
+        f= dicc['kml-kmz-file'][7:]
+
+        source = '/'.join(f.split('/')[:-1])
+        target = dicc["folder"]
+        suffixes = (".kml", ".kmz")
+
+        files = [f.split('/')[-1], f.split('/')[-1].split('.')[0], f.split('/')[-1].split('.')[0]+'.zip']
+
+    if os.path.isdir(f):
+
+        for file in os.listdir(source):
+            if file.endswith(suffixes):
+                if target != '':
+                    shutil.move (source+'//'+file, target+'//'+file)
+                else:
+                    os.remove(source+'//'+file)
+
+    elif os.path.isfile(f):
+
+        if target != '':
+            for file in files:
                 shutil.move (source+'//'+file, target+'//'+file)
-            else:
+        else:
+            for file in files:
                 os.remove(source+'//'+file)
 
 def input_Kml(dicc):
