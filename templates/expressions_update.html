@@ -217,6 +217,38 @@ function imagePostFunction(image, src) {
 	}
 }
 
+function authenticate(url) {
+	var self = this;
+	var username = '{{username}}';
+	console.log(username);
+	if (!username) {
+		return;
+	}
+	var password = '{{password}}';
+	var headers;
+	headers = {
+		"Authorization": "Basic " + btoa(username + ":" + password)
+	};
+	$.ajax({
+		url: url,
+		params: {
+			'SERVICE': 'WMS',
+			'VERSION': '1.1.1',
+			'REQUEST': 'GetCapabilities'
+		},
+		async: true,
+		xhrFields: {
+			withCredentials: true
+		},
+		method: 'GET',
+		headers: headers,
+		error: function(jqXHR, textStatus, errorThrown){},
+		success: function(resp){
+			console.log('Authenticated');
+		}
+	});
+}
+
 $(document).ready(function() {
 	
 	var layerId = "{{layer_id}}";
@@ -230,6 +262,7 @@ $(document).ready(function() {
 	var rules = {{ rules|safe }};
 	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
+	authenticate(layerUrl);
 	
 	for (var crs in supported_crs) {
 		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
