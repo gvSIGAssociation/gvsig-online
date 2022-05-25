@@ -250,7 +250,8 @@ def get_conf(request, layer_id):
     layer_wfs_url = core_utils.get_wfs_url(workspace)
     
     preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
-                      
+    if preview_url.startswith(settings.BASE_URL + '/'):
+        preview_url = preview_url.replace(settings.BASE_URL, '')         
     conf = {
         'layer_id': layer_id,
         'layer_url': layer_url,
