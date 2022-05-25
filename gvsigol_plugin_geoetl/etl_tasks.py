@@ -113,6 +113,9 @@ def input_Excel(dicc):
     conn = db.connect()
 
     df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+
+    conn.close()
+    db.dispose()
     
     return [table_name]
 
@@ -737,7 +740,6 @@ def output_Postgis(dicc):
 
                 _ogr.execute()
 
-        
         elif dicc['operation'] == 'APPEND':
 
             if inSame:
@@ -773,7 +775,6 @@ def output_Postgis(dicc):
                                 attr_target = attr_source.replace('"wkb_geometry"', '"'+row[0]+'"')
                             break
                 
-                
                 sqlInsert = sql.Composed([
                     sql.SQL('INSERT INTO {sch_target}.{tbl_target} ').format(
                         sch_target = sql.Identifier(esq),
@@ -791,7 +792,6 @@ def output_Postgis(dicc):
                 cur.execute(sqlInsert)
                 con_source.commit()
 
-            
             #insert en diferente servidor o bddd
             else:
                 try:
@@ -877,7 +877,7 @@ def output_Postgis(dicc):
             geometry = False
 
             for row in cur:
-                attr_source.append('"'+row[0]+'"')
+                attr_source.append(row[0])
                 if 'wkb_geometry' == row[0]:
                     geometry = True
 
@@ -905,7 +905,7 @@ def output_Postgis(dicc):
                             if 'wkb_geometry' == row[0]:
                                 attr_target = 'wkb_geometry'
                             else:
-                                attr_target = '"'+row[0]+'"'
+                                attr_target = row[0]
                             break
                 else:
 
@@ -917,7 +917,7 @@ def output_Postgis(dicc):
                             if 'wkb_geometry' == row[0]:
                                 attr_target = 'wkb_geometry'
                             else:
-                                attr_target = '"'+row[0]+'"'
+                                attr_target = row[0]
                             break
 
 
@@ -929,32 +929,36 @@ def output_Postgis(dicc):
             con_source.commit()
 
             for row in cur:
-                attrs_update =''
+                attrs_update ='UPDATE {sch_target}.{tbl_target} SET '
+                attrList =[]
+                valueList =[]
 
                 for i in range (0, len(attr_source)):
-                    if '"'+dicc['match']+'"' == attr_source[i]:
-                        value = "'"+str(row[i])+"'"
+                    if dicc['match'] == attr_source[i]:
+                        value = row[i]
                         
-                    elif attr_source[i] == '"wkb_geometry"':
-                        pass
-                        attrs_update = attrs_update +attr_target+' = '+"'"+ str(row[i])+"', "
+                    elif attr_source[i] == 'wkb_geometry':
+                        attrList.append(attr_target)
+                        valueList.append(row[i])
+                        attrs_update = attrs_update + '{} = %s, '
                         
                     else:
-                        attrs_update = attrs_update +attr_source[i]+' = '+"'"+ str(row[i])+"', "
+                        attrList.append(attr_source[i])
+                        valueList.append(row[i])
+                        attrs_update = attrs_update + '{} = %s, '
 
-                sqlUpdate = sql.Composed([
-                    sql.SQL('UPDATE {sch_target}.{tbl_target} SET ').format(
+                valueList.append(value)
+                attrs_update = attrs_update[:-2] + ' WHERE {match} = %s'
+
+                sqlUpdate = sql.SQL(attrs_update).format(
                         sch_target = sql.Identifier(esq),
                         tbl_target = sql.Identifier(tab),
-                    ),
-                    sql.SQL(attrs_update[:-2]),
-                    sql.SQL(' WHERE {match} = ').format(
+                        *[sql.Identifier(field) for field in attrList],
                         match = sql.Identifier(dicc['match'])
-                    ),
-                    sql.SQL(value)
-                ])
+                        
+                    )
 
-                cur_2.execute(sqlUpdate)
+                cur_2.execute(sqlUpdate,valueList)
 
                 if inSame:
 
@@ -986,7 +990,7 @@ def output_Postgis(dicc):
             geometry = False
 
             for row in cur:
-                attr_source.append('"'+row[0]+'"')
+                attr_source.append(row[0])
                 if 'wkb_geometry' == row[0]:
                     geometry = True
 
@@ -1003,7 +1007,7 @@ def output_Postgis(dicc):
                         if 'wkb_geometry' == row[0]:
                             attr_target = 'wkb_geometry'
                         else:
-                            attr_target = '"'+row[0]+'"'
+                            attr_target = row[0]
                         break
 
             cur.execute(sql.SQL('SELECT * FROM {sch_source}.{tbl_source}').format(
@@ -1025,19 +1029,16 @@ def output_Postgis(dicc):
             for row in cur:
 
                 for i in range (0, len(attr_source)):
-                    if '"'+dicc['match']+'"' == attr_source[i]:
-                        value = "'"+str(row[i])+"'"
+                    if dicc['match'] == attr_source[i]:
+                        value = row[i]
 
-                sqlDelete = sql.Composed([
-                    sql.SQL('DELETE FROM {sch_target}.{tbl_target} WHERE {match} = ').format(
+                sqlDelete = sql.SQL('DELETE FROM {sch_target}.{tbl_target} WHERE {match} = %s').format(
                         sch_target = sql.Identifier(esq),
                         tbl_target = sql.Identifier(tab),
                         match = sql.Identifier(dicc['match'])
-                    ),
-                    sql.SQL(value)
-                ])
+                    )
 
-                cur_2.execute(sqlDelete)
+                cur_2.execute(sqlDelete,[value])
 
                 if inSame:
 
@@ -1067,6 +1068,9 @@ def input_Csv(dicc):
     conn = db.connect()
 
     df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+
+    conn.close()
+    db.dispose()
     
     return [table_name]
 
@@ -1246,19 +1250,33 @@ def trans_CadastralGeom(dicc):
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source});').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source))
+    
     cur.execute(sqlDup)
     conn.commit()
 
-    sqlAdd = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'+' ADD COLUMN "_id_temp" SERIAL, ADD COLUMN "wkb_geometry" geometry(MultiPolygon, 4326); '
+    sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN "_id_temp" SERIAL, ADD COLUMN "wkb_geometry" geometry(MultiPolygon, 4326); ').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
+
     cur.execute(sqlAdd)
     conn.commit()
 
-    sqlSel = 'SELECT "'+attr+'", "_id_temp" FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'";'
+    sqlSel = sql.SQL('SELECT {attr}, "_id_temp" FROM {schema}.{tbl_target};').format(
+        attr = sql.Identifier(attr),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
     cur.execute(sqlSel)
     
     for row in cur:
@@ -1296,8 +1314,12 @@ def trans_CadastralGeom(dicc):
                                     'coordinates': [coordinates]
                                     }
             
-                    sqlInsert = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON(' +"'"+ str(json.dumps(i["geometry"])) +"'), "+ srs +') WHERE "_id_temp" = ' + str(row[1])
-                    cur2.execute(sqlInsert)
+                    sqlInsert = sql.SQL('UPDATE {schema}.{tbl_target} SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON( %s), %s) WHERE "_id_temp" = %s').format(
+                            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                            tbl_target = sql.Identifier(table_name_target)
+                        )
+                    
+                    cur2.execute(sqlInsert,[str(json.dumps(i["geometry"])), srs, str(row[1])])
                     conn.commit()
             except Exception as e:
                 print(str(e))
@@ -1309,7 +1331,11 @@ def trans_CadastralGeom(dicc):
 
             
     
-    sqlDropCol = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN _id_temp;'
+    sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
+
     cur.execute(sqlDropCol)
     conn.commit()
 
