@@ -349,7 +349,8 @@ def get_conf(request, layer_id):
         preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'     
     elif feature_type == 'PolygonSymbolizer':
         preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
-
+    if preview_url.startswith(settings.BASE_URL + '/'):
+        preview_url = preview_url.replace(settings.BASE_URL, '')
     conf = {
         'featureType': feature_type,
         'json_alphanumeric_fields': json.dumps(alphanumeric_fields),
