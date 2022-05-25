@@ -2,6 +2,7 @@
 from gvsigol.celery import app as celery_app
 from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
+from celery.utils.log import get_task_logger
 
 from .models import ETLstatus
 from gvsigol import settings
@@ -9,6 +10,8 @@ from gvsigol import settings
 from . import etl_tasks
 
 import psycopg2
+
+logger = get_task_logger(__name__)
 
 
 @celery_app.task
@@ -184,7 +187,8 @@ def run_canvas_background(**kwargs):
         
         
         delete_tables(tables_list_name)
-
+        
+        logger.error('ERROR: In '+n[1]['type']+' Node, '+ str(e))
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
         
     
