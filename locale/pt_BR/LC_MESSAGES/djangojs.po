@@ -1,18 +1,18 @@
 msgid ""
 msgstr ""
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Language: pt_BR\n"
-"X-Source-Language: C\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
-"X-Generator: Poedit 2.4.3\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+"X-Generator: Poedit 3.0.1\n"
 
 # gvSIG Online.
 # Copyright (C) 2010-2017 SCOLAB.
@@ -54,7 +54,7 @@ msgid "Showing"
 msgstr "Exibição"
 
 msgid "Showing from"
-msgstr "a partir de"
+msgstr "Exibição de"
 
 msgid "registers"
 msgstr "Cadastros"
@@ -169,7 +169,7 @@ msgid "Failed to remove layer lock"
 msgstr "Falha ao remover ou bloqueio da camada"
 
 msgid "New feature"
-msgstr "novo recurso"
+msgstr "Novo recurso"
 
 msgid "Save"
 msgstr "Salvar"
@@ -178,8 +178,7 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 msgid "Failed to save the new record. Please check values"
-msgstr ""
-"Não foi possível guardar o novo registo. Por favor, verifique os valores"
+msgstr "Não foi possível guardar o novo registo. Por favor, verifique os valores"
 
 # exportToPDF.js
 msgid "Map title"
@@ -286,7 +285,7 @@ msgid "Base layers"
 msgstr "Camadas de base"
 
 msgid "None"
-msgstr "nenhum"
+msgstr "Nenhum"
 
 msgid "No layer"
 msgstr "Nenhuma camada"
@@ -474,19 +473,11 @@ msgstr "aplicar data de referência"
 msgid "Temporary range"
 msgstr "Intervalo temporário"
 
-msgid ""
-"Only relative intervals can be defined if the other field is PRESENT or a "
-"concrete date."
-msgstr ""
-"Apenas intervalos relativos podem ser definidos se o outro campo for "
-"PRESENTE ou uma data concreta"
+msgid "Only relative intervals can be defined if the other field is PRESENT or a concrete date."
+msgstr "Apenas intervalos relativos podem ser definidos se o outro campo for PRESENTE ou uma data concreta"
 
-msgid ""
-"Only PRESENT is available in Instant mode. You need to define a RANGE to use "
-"relative intervals"
-msgstr ""
-"Somente a opção PRESENT está disponível no modo Instantâneo. Você precisa "
-"definir uma escala para usar intervalos relativos"
+msgid "Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"
+msgstr "Somente a opção PRESENT está disponível no modo Instantâneo. Você precisa definir uma escala para usar intervalos relativos"
 
 msgid "Image Mosaic"
 msgstr "Mosaico de imagens"
@@ -633,11 +624,12 @@ msgid "Search in catalog"
 msgstr "Pesquisa no catálogo"
 
 msgid "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
-msgstr ""
+msgstr "A sessão do Geoserver expirou. Deve sair do gvSIG Online e entrar novamente para reiniciar a sessão"
 
 msgid "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
 msgstr ""
+"Você não está autorizado a ler a camada ou a sessão do Geoserver expirou. Deve sair do gvSIG Online e fazer login novamente para reiniciar "
+"a sessão"
 
 msgid "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
-msgstr ""
-
+msgstr "A camada não existe ou a sessão do Geoserver expirou. Deve sair do gvSIG Online e entrar novamente para reiniciar a sessão"
