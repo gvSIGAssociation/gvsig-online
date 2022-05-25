@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-20 15:06+0000\n"
-"PO-Revision-Date: 2021-06-16 14:38+0200\n"
+"PO-Revision-Date: 2022-05-23 16:33+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: gvsigol_auth/forms.py:30 gvsigol_auth/templates/user_list.html:23
 #: gvsigol_auth/templates/user_update.html:39
@@ -70,10 +70,8 @@ msgid "User"
 msgstr "Usuário"
 
 #: gvsigol_auth/templates/dashboard_auth_menu.html:4
-#, fuzzy
-#| msgid "Username"
 msgid "User management"
-msgstr "Nome de usuário"
+msgstr "Gestão de usuários"
 
 #: gvsigol_auth/templates/dashboard_auth_menu.html:6
 msgid "Users"
@@ -90,7 +88,7 @@ msgstr "Grupos"
 #: gvsigol_auth/templates/user_list.html:28
 #: gvsigol_auth/templates/user_update.html:29
 msgid "Roles"
-msgstr ""
+msgstr "Roles"
 
 #: gvsigol_auth/templates/group_add.html:12
 #: gvsigol_auth/templates/role_add.html:12
@@ -310,28 +308,22 @@ msgid "Password has contain at least 8 characters"
 msgstr "A senha tem pelo menos 8 caracteres"
 
 #: gvsigol_auth/templates/role_list.html:11
-#, fuzzy
-#| msgid "Add group"
 msgid "Add role"
-msgstr "Adicionar grupo"
+msgstr "Adicionar roles"
 
 #: gvsigol_auth/templates/role_list.html:52
 #: gvsigol_auth/templates/role_list.html:100
-#, fuzzy
-#| msgid "Delete group"
 msgid "Delete role"
-msgstr "Excluir grupo"
+msgstr "Excluir roles"
 
 #: gvsigol_auth/templates/role_list.html:55
-#, fuzzy
-#| msgid "The group will be removed, Do you want continue?"
 msgid "The role will be removed, Do you want continue?"
-msgstr "O grupo será removido. Você quer continuar?"
+msgstr "O role será removido. Você quer continuar?"
 
 #: gvsigol_auth/templates/user_add.html:39
 #: gvsigol_auth/templates/user_update.html:25
 msgid "General"
-msgstr ""
+msgstr "Geral"
 
 #: gvsigol_auth/templates/user_add.html:54
 msgid "First Name"
@@ -362,18 +354,14 @@ msgstr "Atribuir grupos"
 
 #: gvsigol_auth/templates/user_add.html:148
 #: gvsigol_auth/templates/user_update.html:129
-#, fuzzy
-#| msgid "Assign groups"
 msgid "Assign roles"
-msgstr "Atribuir grupos"
+msgstr "Atribuir roles"
 
 #: gvsigol_auth/templates/user_add.html:161
 #: gvsigol_auth/templates/user_update.html:143
 #: gvsigol_auth/templates/user_update.html:145
-#, fuzzy
-#| msgid "Assign group"
 msgid "Assign role"
-msgstr "Atribuir grupos"
+msgstr "Atribuir roles"
 
 #: gvsigol_auth/templates/user_list.html:11
 msgid "Add user"
@@ -449,7 +437,7 @@ msgstr "A conta de usuário não existe"
 
 #: gvsigol_auth/views.py:251
 msgid "That did not work"
-msgstr "Isso não funcionou"
+msgstr "Não funcionou"
 
 #: gvsigol_auth/views.py:305
 msgid "Invalid token. Your link has expired, you need to ask for another one."
@@ -457,13 +445,15 @@ msgstr "Código inválido. Seu link expirou, você precisa solicitar outro"
 
 #: gvsigol_auth/views.py:427
 msgid "User creation failed"
-msgstr ""
+msgstr "A criação do usuário falhou"
 
 #: gvsigol_auth/views.py:535
 msgid ""
 "The authentication server is not available. Try again later or contact "
 "system administrators."
 msgstr ""
+"O servidor de autenticação não está disponível. Tente novamente mais tarde "
+"ou entre em contato com os administradores do sistema."
 
 #: gvsigol_auth/views.py:568
 #, python-brace-format
@@ -473,33 +463,27 @@ msgid ""
 "numbers"
 msgstr ""
 "Nome de grupo de usuários inválido: '{value}'. Os identificadores devem "
-"começar com uma letra ouum sublinhado (_). Os caracteres subsequentes podem "
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
 #: gvsigol_auth/views.py:612
-#, fuzzy
-#| msgid "Admin is a reserved group"
 msgid "Admin is a reserved role"
-msgstr "Admin é um grupo reservado"
+msgstr "Admin é um role reservado"
 
 #: gvsigol_auth/views.py:616
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "Invalid user group name: '{value}'. Identifiers must begin with a letter "
-#| "or an underscore (_). Subsequent characters can be letters, underscores "
-#| "or numbers"
+#, python-brace-format
 msgid ""
 "Invalid user role name: '{value}'. Identifiers must begin with a letter or "
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
 "Nome de grupo de usuários inválido: '{value}'. Os identificadores devem "
-"começar com uma letra ouum sublinhado (_). Os caracteres subsequentes podem "
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
 #: gvsigol_auth/views.py:641
 msgid "System roles can't be deleted"
-msgstr ""
+msgstr "Os roles do sistema podem ser excluídas"
 
 #~ msgid "Users and groups"
 #~ msgstr "Usuários e grupos"
