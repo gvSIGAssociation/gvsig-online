@@ -58,10 +58,8 @@ def get_schema_excel(dicc):
 
 def get_schema_kml(file):
 
-    temp_dir = settings.TEMP_ROOT + 'plugin_geoetl'
-
-    if not os.path.exists(temp_dir):
-        os.mkdir(temp_dir)
+    from .etl_tasks import get_temp_dir
+    temp_dir = get_temp_dir()
 
     if file.endswith('.kmz'):
         kmz_file = file[7:]
