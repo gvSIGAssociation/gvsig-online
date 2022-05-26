@@ -108,6 +108,12 @@ function configure() {
 		[[ $last_char != "/" ]] && MEDIA_ROOT="$MEDIA_ROOT/"
 	fi	
 	grep -rl "##MEDIA_ROOT##"  | xargs sed -i "s ##MEDIA_ROOT## $MEDIA_ROOT g"
+
+	if [ -z $TEMP_ROOT ]; then
+		echo "WARNING: TEMP_ROOT is not defined, using /var/tmp"					
+		TEMP_ROOT="/var/tmp/"
+	fi	
+	grep -rl "##TEMP_ROOT##"  | xargs sed -i "s ##TEMP_ROOT## $TEMP_ROOT g"
 																																																																																																																																																																																								
 	if [ -z $FILEMANAGER_DIR ]; then
 		echo "WARNING: FILEMANAGER_DIR is not defined, using /var/www/media/data"					
