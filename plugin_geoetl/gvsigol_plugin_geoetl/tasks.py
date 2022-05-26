@@ -173,7 +173,7 @@ def run_canvas_background(**kwargs):
         delete_tables(tables_list_name)
     
     except Exception as e:
-
+        logger.exception('Error running workspace')
         if id_ws:
             statusModel  = ETLstatus.objects.get(id_ws = id_ws)
             statusModel.message = str(e)[:250]
