@@ -298,6 +298,7 @@ MEDIA_ROOT = '##MEDIA_ROOT##'
 MEDIA_URL = '##BASE_URL##/##MEDIA_PATH##/'
 STATIC_URL = '/##STATIC_PATH##/'
 STATIC_ROOT = '##GVSIGOL_HOME##/gvsigol/assets'
+TEMP_ROOT = '##TEMP_ROOT##'
 LAYERS_ROOT = 'layer_downloads'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
