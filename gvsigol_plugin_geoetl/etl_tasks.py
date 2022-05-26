@@ -12,7 +12,7 @@ from collections import defaultdict
 #from dateutil.parser import parse
 import mgrs
 import gdaltools
-import os, shutil
+import os, shutil, tempfile
 
 import cx_Oracle
 #from geomet import wkt
@@ -68,6 +68,17 @@ class Graph:
 		# Print contents of the stack 
         # return list in reverse order
 		return stack[::-1] 
+
+def get_temp_dir():
+    """
+    Creates a unique, temporary directory under os.path.join(settings.TEMP_ROOT, 'plugin_geoetl')
+    and returns the absolute path to the temporary directory.
+    The created directory is NOT automatically removed.
+    """
+    base_temp = os.path.join(settings.TEMP_ROOT, 'plugin_geoetl')
+    if not os.path.exists(base_temp):
+        os.makedirs(base_temp)
+    return tempfile.mkdtemp(dir=base_temp)
 
 #functions associated to tasks. 
 #All of them receive a dictionary with the parameters for the task
@@ -2605,12 +2616,6 @@ def move(name, dicc):
             os.remove(source)
 
 def input_Kml(dicc):
-
-    temp_dir = settings.TEMP_ROOT + 'plugin_geoetl'
-
-    if not os.path.exists(temp_dir):
-        os.mkdir(temp_dir)
-
     table_name = dicc['id'].replace('-','_')
 
     file = dicc['kml-kmz-file'][7:]
@@ -2620,6 +2625,7 @@ def input_Kml(dicc):
 
         filename = kmz_file.split('/')[-1].split('.')[0]
 
+        temp_dir = get_temp_dir()
         kmz_zip = '/'+os.path.join(temp_dir, filename+'.zip')
 
         shutil.copy(kmz_file, kmz_zip)
