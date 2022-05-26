@@ -185,7 +185,6 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Error'
             statusModel.save()
         
-        
         delete_tables(tables_list_name)
         
         logger.error('ERROR: In '+n[1]['type']+' Node, '+ str(e))

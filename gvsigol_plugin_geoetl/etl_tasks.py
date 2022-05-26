@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #from sre_constants import SRE_INFO_CHARSET
+from lib2to3.pgen2.tokenize import StopTokenizing
 from gvsigol import settings
 
 import pandas as pd
@@ -307,9 +308,13 @@ def trans_Join(dicc):
     attr1 = dicc['attr-1'].split(" ")
     attr2 = dicc['attr-2'].split(" ")
 
+    onAttr =[]
+
     on =''
     for pos in range (0, len(attr1)):
-        on += 'A0."'+attr1[pos]+'"::TEXT = A1."'+attr2[pos]+'"::TEXT AND '
+        onAttr.append(attr1[pos])
+        onAttr.append(attr2[pos])
+        on += 'A0.{}::TEXT = A1.{}::TEXT AND '
 
     on = on[:-5]
 
@@ -339,13 +344,20 @@ def trans_Join(dicc):
             sc.append(row[0])
         schemas.append(sc)
 
-    for name in schemas[0]:
-        if name in schemas[1]:
-            schemas[1].remove(name)
+    schemaList =[]
+    schema = ''
 
-    schema_0 = 'A0."' + '", A0."'.join(schemas[0]) + '"'
-    schema_1 = 'A1."' + '", A1."'.join(schemas[1]) + '"'
-    schema = schema_0 +' , ' + schema_1
+    for name in schemas[0]:
+        schemaList.append(name)
+        if schema == '':
+            schema = 'A0.{}'
+        else:
+            schema = schema + ', A0.{}'
+
+    for name in schemas[1]:
+        if name not in schemaList:
+            schemaList.append(name)
+            schema = schema + ', A1.{}'
 
     for out in output:
 
@@ -356,52 +368,45 @@ def trans_Join(dicc):
         cur.execute(sqlDrop)
         conn.commit()
 
-    sqlJoin = sql.Composed([
-        sql.SQL('create table {sch}.{tbl_join} as (select ').format(
+    sqlJoin_ = 'create table {sch}.{tbl_join} as (select '+schema +' from {sch}.{tbl_source_0} AS A0 INNER JOIN {sch}.{tbl_source_1} AS A1 ON '+ on + ');'
+
+    sqlJoin = sql.SQL(sqlJoin_).format(
             sch = sql.Identifier(settings.GEOETL_DB["schema"]),
-            tbl_join = sql.Identifier(table_name_target_join)
-        ),
-        sql.SQL(schema),
-        sql.SQL(' from {sch}.{tbl_source_0} AS A0 INNER JOIN {sch}.{tbl_source_1} AS A1 ON ').format(
-            sch = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_join = sql.Identifier(table_name_target_join),
+            *[sql.Identifier(field) for field in schemaList],
             tbl_source_0 = sql.Identifier(table_name_source_0),
-            tbl_source_1 = sql.Identifier(table_name_source_1)
-        ),sql.SQL(on),
-        sql.SQL(');')]
-    )
+            tbl_source_1 = sql.Identifier(table_name_source_1),
+            *[sql.Identifier(field) for field in onAttr],
+        )
 
     cur.execute(sqlJoin)
     conn.commit()
 
-    sqlNotJoin1 = sql.Composed([
-            sql.SQL('create table {sch}.{tbl_not_0} as (select A0.* from {sch}.{tbl_source_0} AS A0 LEFT OUTER JOIN {sch}.{tbl_source_1} AS A1 ON ').format(
+    sqlNotJoin1_ = 'create table {sch}.{tbl_not_0} as (select A0.* from {sch}.{tbl_source_0} AS A0 LEFT OUTER JOIN {sch}.{tbl_source_1} AS A1 ON '+on + ' WHERE A1.{attr} IS NULL)'
+
+    sqlNotJoin1 = sql.SQL(sqlNotJoin1_).format(
             sch = sql.Identifier(settings.GEOETL_DB["schema"]),
             tbl_not_0 = sql.Identifier(table_name_target_0_not_used),
             tbl_source_0 = sql.Identifier(table_name_source_0),
-            tbl_source_1 = sql.Identifier(table_name_source_1)
-        ),
-        sql.SQL(on),
-        sql.SQL(' WHERE '),
-        sql.SQL(schema_1.split(",")[0]),
-        sql.SQL(' IS NULL )')]
-    )
+            tbl_source_1 = sql.Identifier(table_name_source_1),
+            *[sql.Identifier(field) for field in onAttr],
+            attr = sql.Identifier(schemas[1][0])
+        )
     
     cur.execute(sqlNotJoin1)
     conn.commit()
 
-    sqlNotJoin2 = sql.Composed([
-            sql.SQL('create table {sch}.{tbl_not_1} as (select A1.* from {sch}.{tbl_source_0} AS A0 RIGHT OUTER JOIN {sch}.{tbl_source_1} AS A1 ON ').format(
+    sqlNotJoin2_ = 'create table {sch}.{tbl_not_1} as (select A1.* from {sch}.{tbl_source_0} AS A0 RIGHT OUTER JOIN {sch}.{tbl_source_1} AS A1 ON '+on + ' WHERE A0.{attr} IS NULL)'
+
+    sqlNotJoin2 = sql.SQL(sqlNotJoin2_).format(
             sch = sql.Identifier(settings.GEOETL_DB["schema"]),
             tbl_not_1 = sql.Identifier(table_name_target_1_not_used),
             tbl_source_0 = sql.Identifier(table_name_source_0),
-            tbl_source_1 = sql.Identifier(table_name_source_1)
-        ),
-        sql.SQL(on),
-        sql.SQL(' WHERE '),
-        sql.SQL(schema_0.split(",")[0]),
-        sql.SQL(' IS NULL )')]
-    )
-    
+            tbl_source_1 = sql.Identifier(table_name_source_1),
+            *[sql.Identifier(field) for field in onAttr],
+            attr = sql.Identifier(schemas[0][0])
+        )
+
     cur.execute(sqlNotJoin2)
     conn.commit()
 
@@ -475,23 +480,21 @@ def trans_CreateAttr(dicc):
     conn.commit()
 
     if value != '':
-        
-        sqlSET = sql.SQL(' DEFAULT %s')
+        sqlSET = ' DEFAULT %s'
     else:
-        sqlSET = sql.SQL('')
+        sqlSET = ''
 
-    sqlAdd = sql.Composed([
-        sql.SQL('ALTER TABLE {}.{} ADD COLUMN {} ').format(
+    sqlAdd = sql.SQL('ALTER TABLE {}.{} ADD COLUMN {} {}').format(
             sql.Identifier(settings.GEOETL_DB["schema"]),
             sql.Identifier(table_name_target),
-            sql.Identifier(attr)
-        ),
-        sql.SQL(data_type),
-        sqlSET,
-        ])
+            sql.Identifier(attr),
+            sql.SQL(data_type+sqlSET)
+        )
 
-    
-    cur.execute(sqlAdd,[value])
+    if value != '':
+        cur.execute(sqlAdd,[value])
+    else:
+        cur.execute(sqlAdd)
     conn.commit()
 
     conn.close()
@@ -537,6 +540,7 @@ def trans_Filter(dicc):
         conn.commit()
 
         data_type = ''
+        toVar = ''
 
         for row in cur:
             data_type = row[0]
@@ -552,45 +556,34 @@ def trans_Filter(dicc):
             value = '%' + value + '%'
 
         if 'char' in data_type or data_type == 'text':
-            value = "'"+value+"'"
+            pass
         elif operator == 'LIKE':
-            attr = attr + "::varchar"
-            value = "'"+value+"'"
-        else:
-            value = str(value)
+            toVar = "::varchar"
 
-        sqlFilPassed = 'create table {schema}.{tbl_passed} as (select * from {schema}.{tbl_source} WHERE {attr} '
+        sqlFilPassed = 'create table {schema}.{tbl_passed} as (select * from {schema}.{tbl_source} WHERE {attr}{tovar} {oper} %s)'
         
-        sqlFilPassed_ = sql.Composed([
-                sql.SQL(sqlFilPassed).format(
+        sqlFilPassed_ = sql.SQL(sqlFilPassed).format(
                     schema = sql.Identifier(settings.GEOETL_DB["schema"]),
                     tbl_passed = sql.Identifier(table_name_target_passed),
                     tbl_source = sql.Identifier(table_name_source),
-                    attr = sql.Identifier(attr)),
-                sql.SQL(operator),
-                sql.SQL(' '),
-                sql.SQL(value),
-                sql.SQL(')'),
-        ])
+                    attr = sql.Identifier(attr),
+                    tovar = sql.SQL(toVar),
+                    oper = sql.SQL(operator))
         
-        cur.execute(sqlFilPassed_)
+        cur.execute(sqlFilPassed_,[value])
         conn.commit()
 
-        sqlFilFailed = 'create table {schema}.{tbl_failed} as (select * from {schema}.{tbl_source} WHERE NOT {attr} '
+        sqlFilFailed = 'create table {schema}.{tbl_failed} as (select * from {schema}.{tbl_source} WHERE NOT {attr}{tovar} {oper} %s)'
 
-        sqlFilFailed_ = sql.Composed([
-                sql.SQL(sqlFilFailed).format(
+        sqlFilFailed_ = sql.SQL(sqlFilFailed).format(
                     schema = sql.Identifier(settings.GEOETL_DB["schema"]),
                     tbl_failed = sql.Identifier(table_name_target_failed),
                     tbl_source = sql.Identifier(table_name_source),
-                    attr = sql.Identifier(attr)),
-                sql.SQL(operator),
-                sql.SQL(' '),
-                sql.SQL(value),
-                sql.SQL(')'),
-        ])
+                    attr = sql.Identifier(attr),
+                    tovar = sql.SQL(toVar),
+                    oper = sql.SQL(operator))
 
-        cur.execute(sqlFilFailed_)
+        cur.execute(sqlFilFailed_,[value])
         conn.commit()
 
         conn.close()
@@ -598,30 +591,25 @@ def trans_Filter(dicc):
 
     else:
 
-        sqlFilPassed = 'create table {schema}.{tbl_passed} as (select * from {schema}.{tbl_source} WHERE ( '
+        sqlFilPassed = 'create table {schema}.{tbl_passed} as (select * from {schema}.{tbl_source} WHERE ( {expres} ))'
         
-        sqlFilPassed_ = sql.Composed([
-                sql.SQL(sqlFilPassed).format(
+        sqlFilPassed_ = sql.SQL(sqlFilPassed).format(
                     schema = sql.Identifier(settings.GEOETL_DB["schema"]),
                     tbl_passed = sql.Identifier(table_name_target_passed),
-                    tbl_source = sql.Identifier(table_name_source)),
-                sql.SQL(expression),
-                sql.SQL(' ))'),
-        ])
+                    tbl_source = sql.Identifier(table_name_source),
+                    expres = sql.SQL(expression))
+
         
         cur.execute(sqlFilPassed_)
         conn.commit()
 
-        sqlFilFailed = 'create table {schema}.{tbl_failed} as (select * from {schema}.{tbl_source} WHERE NOT ( '
+        sqlFilFailed = 'create table {schema}.{tbl_failed} as (select * from {schema}.{tbl_source} WHERE NOT ( {expres} ))'
 
-        sqlFilFailed_ = sql.Composed([
-                sql.SQL(sqlFilFailed).format(
+        sqlFilFailed_ = sql.SQL(sqlFilFailed).format(
                     schema = sql.Identifier(settings.GEOETL_DB["schema"]),
                     tbl_failed = sql.Identifier(table_name_target_failed),
-                    tbl_source = sql.Identifier(table_name_source)),
-                sql.SQL(expression),
-                sql.SQL(' ))')
-        ])
+                    tbl_source = sql.Identifier(table_name_source),
+                    expres = sql.SQL(expression))
 
         cur.execute(sqlFilFailed_)
         conn.commit()
@@ -709,6 +697,14 @@ def output_Postgis(dicc):
                 except:
                     pass
 
+                sqlIndex = sql.SQL('CREATE INDEX "{tbl}_wkb_geometry_geom_idx" on {sch_target}.{tbl_target} USING gist (wkb_geometry);').format(
+                    tbl = sql.SQL(tab),
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab))
+                
+                cur.execute(sqlIndex)
+                con_source.commit()
+
                 con_source.close()
                 cur.close()
 
@@ -751,43 +747,49 @@ def output_Postgis(dicc):
 
                 attr_source = '('
 
-                geometry = False
+                attrSourceList = []
+                attrTargetList = []
+
 
                 for row in cur:
-                    attr_source = attr_source + '"'+row[0]+'", '
+                    attr_source = attr_source + ' {}, '
+                    attrSourceList.append(row[0])
+                    
                     if 'wkb_geometry' == row[0]:
-                        geometry = True
+
+                        sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
+                        sqlDatetype += "where table_schema = %s and table_name = %s "
+
+                        cur.execute(sql.SQL(sqlDatetype).format(),[esq, tab])
+                        con_source.commit()
+
+                        for r in cur:
+                            if  r[1] == 'USER-DEFINED' or r[1] == 'geometry':
+                                if 'wkb_geometry' == r[0]:
+                                    attrTargetList.append(row[0])
+                                else:
+                                    attrTargetList.append(r[0])
+                                break
+
+                    else:
+                        attrTargetList.append(row[0])
                 
                 attr_source = attr_source[:-2] + ')'
 
-                if geometry:
-                    sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
-                    sqlDatetype += "where table_schema = %s and table_name = %s "
-
-                    cur.execute(sql.SQL(sqlDatetype).format(),[esq, tab])
-                    con_source.commit()
-
-                    for row in cur:
-                        if  row[1] == 'USER-DEFINED' or row[1] == 'geometry':
-                            if 'wkb_geometry' == row[0]:
-                                attr_target = attr_source
-                            else:
-                                attr_target = attr_source.replace('"wkb_geometry"', '"'+row[0]+'"')
-                            break
+                sqlInsert_ = 'INSERT INTO {sch_target}.{tbl_target} {attrs_target} SELECT {attrs_source} FROM {sch_source}.{tbl_source} '
                 
-                sqlInsert = sql.Composed([
-                    sql.SQL('INSERT INTO {sch_target}.{tbl_target} ').format(
+                sqlInsert = sql.SQL(sqlInsert_).format(
                         sch_target = sql.Identifier(esq),
-                        tbl_target = sql.Identifier(tab)
+                        tbl_target = sql.Identifier(tab),
+                        attrs_source = sql.SQL(attr_source[1:-1]).format(
+                            *[sql.Identifier(field) for field in attrSourceList],
                         ),
-                    sql.SQL(attr_target),
-                    sql.SQL(' SELECT '),
-                    sql.SQL(attr_source[1:-1]),
-                    sql.SQL(' FROM {sch_source}.{tbl_source} ').format(
+                        attrs_target = sql.SQL(attr_source).format(
+                            *[sql.Identifier(field) for field in attrTargetList],
+                        ),
                         sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
                         tbl_source = sql.Identifier(table_name_source)
-                        ),
-                    ])
+                        )
 
                 cur.execute(sqlInsert)
                 con_source.commit()
@@ -2577,39 +2579,37 @@ def trans_SpatialRel(dicc):
 def move(name, dicc):
 
     if name == 'input_Excel':
-        f = dicc["excel-file"]
         source = dicc["excel-file"]
         target = dicc["folder"]
         suffixes = (".xls", ".xlsx")
 
     elif name == 'input_Kml':
-        f= dicc['kml-kmz-file'][7:]
-
-        source = '/'.join(f.split('/')[:-1])
+        source= dicc['kml-kmz-file'][7:]
         target = dicc["folder"]
         suffixes = (".kml", ".kmz")
 
-        files = [f.split('/')[-1], f.split('/')[-1].split('.')[0], f.split('/')[-1].split('.')[0]+'.zip']
-
-    if os.path.isdir(f):
+    if os.path.isdir(source):
 
         for file in os.listdir(source):
             if file.endswith(suffixes):
                 if target != '':
-                    shutil.move (source+'//'+file, target+'//'+file)
+                    shutil.move (source+'/'+file, target+'/'+file)
                 else:
-                    os.remove(source+'//'+file)
+                    os.remove(source+'/'+file)
 
-    elif os.path.isfile(f):
+    elif os.path.isfile(source):
 
         if target != '':
-            for file in files:
-                shutil.move (source+'//'+file, target+'//'+file)
+            shutil.move (source, target+'/'+source.split('/')[-1])
         else:
-            for file in files:
-                os.remove(source+'//'+file)
+            os.remove(source)
 
 def input_Kml(dicc):
+
+    temp_dir = settings.TEMP_ROOT + 'plugin_geoetl'
+
+    if not os.path.exists(temp_dir):
+        os.mkdir(temp_dir)
 
     table_name = dicc['id'].replace('-','_')
 
@@ -2617,17 +2617,17 @@ def input_Kml(dicc):
 
     if file.endswith('.kmz'):
         kmz_file = file
-        path_list = kmz_file.split('/')[:-1]
+
         filename = kmz_file.split('/')[-1].split('.')[0]
 
-        kmz_zip = '//'+os.path.join(*path_list, filename+'.zip')
+        kmz_zip = '/'+os.path.join(temp_dir, filename+'.zip')
 
         shutil.copy(kmz_file, kmz_zip)
 
         with ZipFile(kmz_zip) as zf:
-            zf.extractall('//'+os.path.join(*path_list, filename))
+            zf.extractall('/'+os.path.join(temp_dir, filename))
 
-        kml_file = '//'+os.path.join(*path_list, filename, 'doc.kml')
+        kml_file = '/'+os.path.join(temp_dir, filename, 'doc.kml')
 
     elif file.endswith('.kml'):
         kml_file = file
@@ -2673,6 +2673,28 @@ def input_Kml(dicc):
     _ogr.set_dim("2")
     _ogr.geom_type = "PROMOTE_TO_MULTI"
     _ogr.execute()
+
+    srid, type_geom = get_type_n_srid(table_name)
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN wkb_geometry TYPE Geometry({type_geom}, {srid})').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        table_name = sql.Identifier(table_name),
+        type_geom = sql.SQL(type_geom),
+        srid = sql.SQL(str(srid))
+    )
+
+    cur.execute(sqlAlter)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    if file.endswith('.kmz'):
+        
+        shutil.rmtree(temp_dir)
     
     return [table_name]
 
