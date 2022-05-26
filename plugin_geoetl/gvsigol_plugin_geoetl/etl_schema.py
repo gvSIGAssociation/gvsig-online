@@ -13,6 +13,7 @@ from .models import database_connections
 import os
 import shutil
 from zipfile import ZipFile
+from gvsigol import settings
 
 def get_sheets_excel(excel, r):
     import warnings
@@ -57,19 +58,24 @@ def get_schema_excel(dicc):
 
 def get_schema_kml(file):
 
+    temp_dir = settings.TEMP_ROOT + 'plugin_geoetl'
+
+    if not os.path.exists(temp_dir):
+        os.mkdir(temp_dir)
+
     if file.endswith('.kmz'):
         kmz_file = file[7:]
-        path_list = kmz_file.split('/')[:-1]
+
         filename = kmz_file.split('/')[-1].split('.')[0]
 
-        kmz_zip = '//'+os.path.join(*path_list, filename+'.zip')
+        kmz_zip = '/'+os.path.join(temp_dir, filename+'.zip')
 
         shutil.copy(kmz_file, kmz_zip)
 
         with ZipFile(kmz_zip) as zf:
-            zf.extractall('//'+os.path.join(*path_list, filename))
+            zf.extractall('/'+os.path.join(temp_dir, filename))
 
-        kml_file = '//'+os.path.join(*path_list, filename, 'doc.kml')
+        kml_file = '/'+os.path.join(temp_dir, filename, 'doc.kml')
 
     elif file.endswith('.kml'):
         kml_file = file[7:]
@@ -79,6 +85,10 @@ def get_schema_kml(file):
     layer = dataSource[0]
 
     schema = [x.lower() for x in layer.fields]
+
+    if file.endswith('.kmz'):
+        
+        shutil.rmtree(temp_dir)
 
     return schema
 
