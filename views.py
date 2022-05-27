@@ -1491,7 +1491,10 @@ def layer_update(request, layer_id):
             if ds.type != 'e_WMS':
                 gs.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
                 if ds.type == 'v_PostGIS':
-                    utils.set_time_enabled(gs, layer)
+                    try:
+                        utils.set_time_enabled(gs, layer)
+                    except:
+                        logger.exception('error setting time enabled')
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 

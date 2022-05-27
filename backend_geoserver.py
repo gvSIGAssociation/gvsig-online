@@ -1161,7 +1161,9 @@ class Geoserver():
     def shp2postgis(self, shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=forms_geoserver.MODE_CREATE, encoding="autodetect", sql=None):
         ogr = gdaltools.ogr2ogr()
         ogr.set_encoding(encoding)
-        ogr.set_input(shp_path, srs=srs)
+        inputConn = gdaltools.PgConnectionString(
+            host=host, port=port, dbname=dbname, schema=schema, user=user, password=password)
+        ogr.set_input(inputConn, srs=srs)
         conn = gdaltools.PgConnectionString(host=host, port=port, dbname=dbname, schema=schema, user=user, password=password)
         ogr.set_output(conn, table_name=table_name)
         if creation_mode == forms_geoserver.MODE_CREATE:
