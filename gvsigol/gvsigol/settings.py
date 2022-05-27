@@ -126,8 +126,8 @@ finally:
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#USE_X_FORWARDED_HOST = True
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
 #GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
@@ -139,7 +139,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'mozilla_django_oidc',
+    #'mozilla_django_oidc',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -158,10 +158,10 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    #'gvsigol_app_test',
+    'gvsigol_app_test',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
-    'gvsigol_app_tocantins',
+    #'gvsigol_app_tocantins',
 
     ############# PLUGINS ################
     #'gvsigol_plugin_alfresco',
@@ -181,10 +181,10 @@ INSTALLED_APPS = [
     'gvsigol_plugin_importvector',
     #'gvsigol_plugin_manageaddresses',
     'gvsigol_plugin_gestiona',
-    'gvsigol_plugin_oidc_mozilla',
+    #'gvsigol_plugin_oidc_mozilla',
     #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
-    #'gvsigol_plugin_restapi',
+    'gvsigol_plugin_restapi',
     #'gvsigol_plugin_streetview',
     #'gvsigol_plugin_sync',
     'gvsigol_plugin_trip_planner',
@@ -195,7 +195,6 @@ INSTALLED_APPS = [
     #### DEPENDENCIES ######,
     'django_celery_beat'
 ]
-
 
 try:
     __import__('corsheaders')
@@ -318,9 +317,9 @@ GVSIGOL_LDAP = {
 
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
-    'django_auth_ldap.backend.LDAPBackend',
-    #'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    #'django_auth_ldap.backend.LDAPBackend',
+    'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
+    #'django.contrib.auth.backends.ModelBackend',
 )
 
 LOGIN_URL = 'gvsigol_authenticate_user'
@@ -647,7 +646,6 @@ LEGACY_GVSIGOL_SERVICES = {
 
 CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
 CELERY_TASK_ACKS_LATE = True
-CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
@@ -685,7 +683,7 @@ RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
 LAYERS_ROOT = 'layer_downloads'
 #ALLOWED_HOST_NAMES = ['http://localhost']
-ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost', 'http://localhost:8000']
+ALLOWED_HOST_NAMES = ['http://localhost', 'http://localhost:8000']
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
     'JWT_ALLOW_REFRESH': True,
