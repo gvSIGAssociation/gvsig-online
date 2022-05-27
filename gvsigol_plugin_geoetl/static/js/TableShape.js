@@ -10674,16 +10674,6 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 }
             })
         });
-
-
-        if (typeof get_sch === 'undefined'){
-            get_sch = []
-            $("#schema-name-option-"+ID+" option").each(function()
-                {  
-                    get_sch.push($(this).val())
-                }
-            );
-        }
         
       var context = this
 
@@ -10712,6 +10702,15 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 }
 
             },100);
+
+            if (typeof get_sch === 'undefined'){
+                get_sch = []
+                $("#schema-name-option-"+ID+" option").each(function()
+                    {  
+                        get_sch.push($(this).val())
+                    }
+                );
+            }
 
             $('#dialog-output-postgis-'+ID).modal('show')
 
