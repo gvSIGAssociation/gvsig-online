@@ -338,10 +338,10 @@ gvsigolETL.Toolbar = Class.extend({
 									for (k = 0; k < parameters[0][key].length; k++){
 
 										if (Array.isArray(parameters[0][key][k])){
+											
 											$('#'+key_+'-'+figure.id).append('<option value ="'+parameters[0][key][k][0]+'">'+parameters[0][key][k][1]+'</option>')
 
 										}else{
-											
 											$('#'+key_+'-'+figure.id).append('<option>'+parameters[0][key][k]+'</option>')
 										}
 									};
