@@ -1418,14 +1418,14 @@ def layer_update(request, layer_id):
             time_field = request.POST.get('time_enabled_field')
             time_endfield = request.POST.get('time_enabled_endfield')
             time_presentation = request.POST.get('time_presentation')
-            time_resolution_year = request.POST.get('time_resolution_year')
-            time_resolution_month = request.POST.get('time_resolution_month')
-            time_resolution_week = request.POST.get('time_resolution_week')
-            time_resolution_day = request.POST.get('time_resolution_day')
-            time_resolution_hour = request.POST.get('time_resolution_hour')
-            time_resolution_minute = request.POST.get('time_resolution_minute')
-            time_resolution_second = request.POST.get('time_resolution_second')
-            time_default_value_mode = request.POST.get('time_default_value_mode')
+            time_resolution_year = int(request.POST.get('time_resolution_year'))
+            time_resolution_month = int(request.POST.get('time_resolution_month'))
+            time_resolution_week = int(request.POST.get('time_resolution_week'))
+            time_resolution_day = int(request.POST.get('time_resolution_day'))
+            time_resolution_hour = int(request.POST.get('time_resolution_hour'))
+            time_resolution_minute = int(request.POST.get('time_resolution_minute'))
+            time_resolution_second = int(request.POST.get('time_resolution_second'))
+            time_default_value_mode = int(request.POST.get('time_default_value_mode'))
             time_default_value = request.POST.get('time_default_value')
 
             time_resolution = request.POST.get('time_resolution')
@@ -1491,10 +1491,7 @@ def layer_update(request, layer_id):
             if ds.type != 'e_WMS':
                 gs.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
                 if ds.type == 'v_PostGIS':
-                    try:
-                        utils.set_time_enabled(gs, layer)
-                    except:
-                        logger.exception('error setting time enabled')
+                    utils.set_time_enabled(gs, layer)
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 
