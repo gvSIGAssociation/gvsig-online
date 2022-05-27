@@ -46,7 +46,7 @@ def get_conf(request):
 def get_provincias(request):
     if request.method == 'POST':
         provincias_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaProvincia';
-        r = requests.get(url = provincias_url, params = {}, verify=False)
+        r = requests.get(url = provincias_url, params = {})
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
 
@@ -57,7 +57,7 @@ def get_municipios(request):
 
         municipio_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaMunicipio?Provincia='+provincia+'&Municipio=';
 
-        r = requests.get(url = municipio_url, params = {}, verify=False)
+        r = requests.get(url = municipio_url, params = {})
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
 
@@ -70,7 +70,7 @@ def get_vias(request):
 
         address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaVia?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia=";
 
-        r = requests.get(url = address_url, params = {}, verify=False)
+        r = requests.get(url = address_url, params = {})
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
 
@@ -94,7 +94,7 @@ def get_rc_by_coords(request):
         #     'Coordenada_Y': ycen
         # }
         # r = requests.get(url = address_url, params = payload, timeout=6) # timeout a 6 segundos, el servidor de catastro a veces tarda
-        r = requests.get(url = address_url, timeout=6, verify=False)
+        r = requests.get(url = address_url, timeout=6)
 
         tree = ElementTree.fromstring(r.content)
 
@@ -140,7 +140,7 @@ def get_rc_info(request):
             address_url = 'https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCListaBienes.aspx?origen=Carto&huso='+srs+'&x='+xcen+'&y='+ycen
             print(address_url)
 
-            r = requests.get(url = address_url, params = {}, verify=False)
+            r = requests.get(url = address_url, params = {})
             
             response = r.text
             response = re.sub(r"""<a onclick="javascript:CargarBien\('(?P<del>[^']*)',\s*'(?P<mun>[^']*)',\s*'(?P<UrbRus>[^']*)',\s*'(?P<RefC>[^']*)'(,\s*('[^']*'|true|false)){11},\s*'(?P<from>[^']*)',\s*'(?P<ZV>[^']*)'[^>]*>[^<]*</a>""", '<a href="https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCConCiud.aspx?del=\\g<del>&mun=\\g<mun>&UrbRus=\\g<UrbRus>&RefC=\\g<RefC>&Apenom=&esBice=&RCBice1=&RCBice2=&DenoBice=&from=\\g<from>&ZV=\\g<ZV>" target="_blank">\\g<RefC> </a>', response)
@@ -167,7 +167,7 @@ def get_rc_info(request):
 def get_rc_polygon(ref_catastral, srs='EPSG::4326'):
 
     catastral_url = 'http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&version=2&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat='+ref_catastral+'&srsname='+srs
-    r = requests.get(url = catastral_url, params = {}, verify=False)
+    r = requests.get(url = catastral_url, params = {})
     tree = ElementTree.fromstring(r.content)
     features = []
 
@@ -291,7 +291,7 @@ def get_referencia_catastral(request):
         if rc.__len__() > 0:
             final_url = settings.URL_API_CATASTRO + "/OVCCoordenadas.asmx/Consulta_CPMRC?Provincia=&Municipio=&SRS="+ srs +"&RC="+ rc[0:14]
 
-            r = requests.get(url = final_url, params = {}, verify=False)
+            r = requests.get(url = final_url, params = {})
             tree = ElementTree.fromstring(r.content)
 
             for aux1 in tree.iter('{http://www.catastro.meh.es/}coordenadas'):
