@@ -1531,6 +1531,24 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
 
         icon.on("click", function(){
 
+            optionList = []
+            $('#db-'+ID+' option').each(function() {
+                optionList.push($(this).val())
+              });
+
+            for(i=0;i<dbc.length;i++){
+
+                if(dbc[i].type == 'Oracle'){
+
+                    if (! optionList.includes(dbc[i].name)){
+                        $('#db-'+ID).append(
+                            '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                        );
+                    }
+
+                }
+            };
+
             $('#dialog-input-oracle-'+ID).modal('show')
 
             if($("#checkbox-"+ID).is(':checked')){
@@ -1964,6 +1982,24 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         var context = this
 
         icon.on("click", function(){
+
+            optionList = []
+            $('#db-'+ID+' option').each(function() {
+                optionList.push($(this).val())
+              });
+    
+            for(i=0;i<dbc.length;i++){
+    
+                if(dbc[i].type == 'PostgreSQL'){
+    
+                    if (! optionList.includes(dbc[i].name)){
+                        $('#db-'+ID).append(
+                            '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                        );
+                    }
+    
+                }
+            };
 
             $('#dialog-input-postgis-'+ID).modal('show')
 
@@ -10711,6 +10747,25 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     }
                 );
             }
+
+
+            optionList = []
+            $('#db-option-'+ID+' option').each(function() {
+                optionList.push($(this).val())
+              });
+
+            for(i=0;i<dbc.length;i++){
+
+                if(dbc[i].type == 'PostgreSQL'){
+
+                    if (! optionList.includes(dbc[i].name)){
+                        $('#db-option-'+ID).append(
+                            '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                        );
+                    }
+
+                }
+            };
 
             $('#dialog-output-postgis-'+ID).modal('show')
 
