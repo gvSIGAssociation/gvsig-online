@@ -1615,15 +1615,27 @@ def trans_SplitAttr(dicc):
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, string_to_array("'+attr+'",'+"'"+_split+"'" + ') as "'+_list+'" from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
-    cur.execute(sqlDup)
+    sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select *, string_to_array({attr}, %s) as {list} from {schema}.{tbl_source});').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        attr = sql.Identifier(attr),
+        list = sql.SQL(_list),
+        tbl_source = sql.Identifier(table_name_source))
+    
+    cur.execute(sqlDup, [_split])
     conn.commit()
 
-    sqlDropCol = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN "'+attr+'"; '
+    sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN {attr}; ').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        attr = sql.Identifier(attr),
+    )
     cur.execute(sqlDropCol)
     conn.commit()
 
@@ -1648,32 +1660,55 @@ def trans_ExplodeList(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlCreate = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (SELECT * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"); TRUNCATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlCreate = sql.SQL('CREATE TABLE {schema}.{tbl_target} as (SELECT * FROM {schema}.{tbl_source}); TRUNCATE TABLE {schema}.{tbl_target}').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source))
+
     cur.execute(sqlCreate)
     conn.commit()
 
-    sqlAdd = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'+' ADD COLUMN "_id_temp" SERIAL, ADD COLUMN "'+attr+'" TEXT'
+    sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN "_id_temp" SERIAL, ADD COLUMN {attr} TEXT').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        attr = sql.Identifier(attr)
+    )
     cur.execute(sqlAdd)
     conn.commit()
 
-    sqlAdd = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'+' ADD COLUMN "_id_temp" SERIAL;'
+    sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_source} ADD COLUMN "_id_temp" SERIAL;').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_source = sql.Identifier(table_name_source))
     cur.execute(sqlAdd)
     conn.commit()
 
-    sqlSel = 'SELECT "'+list_name+'", _id_temp FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'";'
+    sqlSel = sql.SQL('SELECT {list}, _id_temp FROM {schema}.{tbl_source};').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        list = sql.Identifier(list_name),
+        tbl_source = sql.Identifier(table_name_source))       
+    
     cur.execute(sqlSel)
     
     for row in cur:
         cur2 = conn.cursor()
         for i in range (0, len(row[0])):
-            sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"  SELECT *, ' +"'"+ row[0][i] +"'"+ ' FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" WHERE "_id_temp" = ' + str(row[1])
-            cur2.execute(sqlInsert)
+            sqlInsert = sql.SQL('INSERT INTO {schema}.{tbl_target}  SELECT *, %s FROM {schema}.{tbl_source} WHERE "_id_temp" = %s').format(
+                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                tbl_target = sql.Identifier(table_name_target),
+                tbl_source = sql.Identifier(table_name_source))
+                
+            cur2.execute(sqlInsert,[row[0][i],row[1]])
             conn.commit()
         cur2.close()
 
-    sqlDropCol = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN _id_temp, DROP COLUMN "'+list_name+'"; '
-    sqlDropCol += 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" DROP COLUMN _id_temp; '
-    cur.execute(sqlDropCol)
+    sqlDropCol = 'ALTER TABLE {schema}.{tbl_target}  DROP COLUMN _id_temp, DROP COLUMN {list}; '
+    sqlDropCol += 'ALTER TABLE {schema}.{tbl_source} DROP COLUMN _id_temp; '
+    cur.execute(sql.SQL(sqlDropCol).format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source),
+        list = sql.Identifier(list_name)
+    ))
     conn.commit()
 
     conn.close()
@@ -1691,25 +1726,38 @@ def trans_Union(dicc):
     multi =dicc['multi']
 
     st_multi_start = ''
-    st_multi_ends = ''
+    st_multi_end = ''
 
     if multi == 'true':
         st_multi_start = 'ST_Multi('
-        st_multi_ends = ')'
+        st_multi_end = ')'
 
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     if groupby == '':
-        sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select ST_Union(wkb_geometry) as wkb_geometry from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+        sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select ST_Union(wkb_geometry) as wkb_geometry from {schema}.{tbl_source});').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            tbl_source = sql.Identifier(table_name_source))
+
         cur.execute(sqlDup)
         conn.commit()
     else:
-        sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select "'+groupby+'", '+st_multi_start+' ST_Union(wkb_geometry)'+st_multi_ends+' as wkb_geometry from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'" GROUP BY "'+groupby+'");'
+        sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select {groupby}, {start} ST_Union(wkb_geometry) {end} as wkb_geometry from {schema}.{tbl_source} GROUP BY {groupby});').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            tbl_source = sql.Identifier(table_name_source),
+            groupby = sql.Identifier(groupby),
+            start = sql.SQL(st_multi_start),
+            end = sql.SQL(st_multi_end))
+
         cur.execute(sqlDup)
         conn.commit()
 
@@ -1951,50 +1999,87 @@ def trans_CompareRows(dicc):
     cur = conn.cursor()
 
     for out in output:
-        sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+out+'"'
+        sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(out))
         cur.execute(sqlDrop)
         conn.commit()
 
-    sqlEquals = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target_equals+'" as (SELECT * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'"); TRUNCATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target_equals+'"'
+    sqlEquals = sql.SQL('CREATE TABLE {schema}.{tbl_target_equals} as (SELECT * FROM {schema}.{tbl_source}); TRUNCATE TABLE {schema}.{tbl_target_equals}').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target_equals = sql.Identifier(table_name_target_equals),
+            tbl_source = sql.Identifier(table_name_source_0))
+    
     cur.execute(sqlEquals)
     conn.commit()
 
-    sqlNew = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_news+'" as (select A0.* from '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" AS A0'
-    sqlNew += ' LEFT OUTER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON A0."'+attr+'" = A1."'+attr+'" WHERE A1."'+attr+'" IS NULL );'
+    sqlNew = sql.SQL('create table {schema}.{tbl_target_news} as (select A0.* from {schema}.{tbl_source_0} AS A0 LEFT OUTER JOIN {schema}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr} WHERE A1.{attr} IS NULL );').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target_news = sql.Identifier(table_name_target_news),
+            tbl_source_0 = sql.Identifier(table_name_source_0),
+            tbl_source_1 = sql.Identifier(table_name_source_1),
+            attr = sql.Identifier(attr))
+
     cur.execute(sqlNew)
     conn.commit()
 
-    sqlNotJoin2 = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target_1_not_used+'" as (select A1.* from '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" AS A0'
-    sqlNotJoin2 += ' RIGHT OUTER JOIN '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" AS A1 ON A0."'+attr+'" = A1."'+attr+'" WHERE A0."'+attr+'" IS NULL );'
+    sqlNotJoin2 = sql.SQL('create table {schema}.{tbl_target_1_not_used} as (select A1.* from {schema}.{tbl_source_0} AS A0 RIGHT OUTER JOIN {schema}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr} WHERE A0.{attr} IS NULL );').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target_1_not_used = sql.Identifier(table_name_target_1_not_used),
+            tbl_source_0 = sql.Identifier(table_name_source_0),
+            tbl_source_1 = sql.Identifier(table_name_source_1),
+            attr = sql.Identifier(attr))
+
     cur.execute(sqlNotJoin2)
     conn.commit()
 
-    sqlChanges = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target_changes+'" as (SELECT * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'"); TRUNCATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target_changes+'"'
+    sqlChanges = sql.SQL('CREATE TABLE {schema}.{tbl_target_changes} as (SELECT * FROM {schema}.{tbl_source_0}); TRUNCATE TABLE {schema}.{tbl_target_changes}').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target_changes = sql.Identifier(table_name_target_changes),
+            tbl_source_0 = sql.Identifier(table_name_source_0))
+
     cur.execute(sqlChanges)
     conn.commit()
 
-    sqlSelect0 = 'SELECT "'+attr+'", * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'"'
+    sqlSelect0 = sql.SQL('SELECT {attr}, * FROM {schema}.{tbl_source_0}').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_source_0 = sql.Identifier(table_name_source_0),
+            attr = sql.Identifier(attr))
+
     cur.execute(sqlSelect0)
     
     for row in cur:
         cur2 = conn.cursor()
-        sqlSelect1 = 'SELECT "'+attr+'", * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_1+'" WHERE "'+attr+'" = '+"'"+str(row[0])+"'"
-        cur2.execute(sqlSelect1)
+        sqlSelect1 = sql.SQL('SELECT {attr}, * FROM {schema}.{tbl_source_1} WHERE {attr} = %s ').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_source_1 = sql.Identifier(table_name_source_1),
+            attr = sql.Identifier(attr))
+
+        cur2.execute(sqlSelect1,[row[0]])
         
         for row2 in cur2:
             if row == row2:
-                sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name_target_equals+'" SELECT  * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" WHERE "'+attr+'" = '+"'"+str(row[0])+"'"
-                cur2.execute(sqlInsert)
+                sqlInsert = sql.SQL('INSERT INTO {schema}.{tbl_target_equals} SELECT * FROM {schema}.{tbl_source_0} WHERE {attr} = %s ').format(
+                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    tbl_target_equals = sql.Identifier(table_name_target_equals),
+                    tbl_source_0 = sql.Identifier(table_name_source_0),
+                    attr = sql.Identifier(attr))
+                    
+                cur2.execute(sqlInsert,[row[0]])
                 conn.commit()
             else:
-                sqlInsert = 'INSERT INTO '+settings.GEOETL_DB["schema"]+'."'+table_name_target_changes+'" SELECT  * FROM '+settings.GEOETL_DB["schema"]+'."'+table_name_source_0+'" WHERE "'+attr+'" = '+"'"+str(row[0])+"'"
-                cur2.execute(sqlInsert)
+                sqlInsert = sql.SQL('INSERT INTO {schema}.{tbl_target_changes} SELECT * FROM {schema}.{tbl_source_0} WHERE {attr} = %s ').format(
+                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    tbl_target_changes = sql.Identifier(table_name_target_changes),
+                    tbl_source_0 = sql.Identifier(table_name_source_0),
+                    attr = sql.Identifier(attr))
+
+                cur2.execute(sqlInsert,[row[0]])
                 conn.commit()
             break
             
     conn.close()
     cur.close()
-
 
     return output
 
@@ -2014,15 +2099,24 @@ def trans_FilterGeom(dicc):
     cur = conn.cursor()
 
     for out in output:
-        sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+out+'"'
+
+        sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(out))
+
         cur.execute(sqlDrop)
         conn.commit()
 
-    typeGeom = ['POINT', 'MULTIPOINT', 'LINESTRING', 'MULTILINESTRING', 'POLYGON', 'MULTIPOLYGON']
+    typeGeom = ['POINT%', 'MULTIPOINT%', 'LINESTRING%', 'MULTILINESTRING%', 'POLYGON%', 'MULTIPOLYGON%']
 
     for i in range (0, len(typeGeom)):
-        sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+output[i]+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'"'+ "WHERE ST_ASTEXT(wkb_geometry) LIKE '"+typeGeom[i]+"%' );"
-        cur.execute(sqlDup)
+        
+        sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source} WHERE ST_ASTEXT(wkb_geometry) LIKE %s );').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(output[i]),
+            tbl_source = sql.Identifier(table_name_source)
+        )
+        cur.execute(sqlDup,[typeGeom[i]])
         conn.commit()
 
     conn.close()
@@ -2040,11 +2134,18 @@ def trans_CalcArea(dicc):
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, ST_Area(wkb_geometry) as "'+attr+'"  from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select *, ST_Area(wkb_geometry) as {attr}  from {schema}.{tbl_source} );').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            tbl_source = sql.Identifier(table_name_source),
+            attr = sql.Identifier(attr))
+            
     cur.execute(sqlDup)
     conn.commit()
 
