@@ -2164,16 +2164,25 @@ def trans_CurrentDate(dicc):
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select * from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source)
+    )
     cur.execute(sqlDup)
     conn.commit()
 
-    sqlAdd = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'+' ADD COLUMN "'+attr+'" DATE;'
-    sqlAdd += 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'+' SET "'+attr+'" = CURRENT_DATE;'
+    sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} DATE; UPDATE {schema}.{tbl_target} SET {attr} = CURRENT_DATE;').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        attr = sql.Identifier(attr)
+    )
     cur.execute(sqlAdd)
     conn.commit()
 
@@ -2190,19 +2199,31 @@ def trans_ExplodeGeom(dicc):
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = 'create table '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, (st_dump(wkb_geometry)).geom from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
+    sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select *, (st_dump(wkb_geometry)).geom from {schema}.{tbl_source});').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source)
+    )
     cur.execute(sqlDup)
     conn.commit()
 
-    sqlDropCol = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" DROP COLUMN wkb_geometry;'
+    sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN wkb_geometry;').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
     cur.execute(sqlDropCol)
     conn.commit()
 
-    sqlRename = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" RENAME COLUMN geom TO wkb_geometry;'
+    sqlRename = sql.SQL('ALTER TABLE {schema}.{tbl_target} RENAME COLUMN geom TO wkb_geometry;').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
     cur.execute(sqlRename)
     conn.commit()
 
@@ -2387,18 +2408,36 @@ def trans_ConcatAttr(dicc):
     table_name_target = dicc['id']
 
     separator = dicc['separator']
-    attrs = ', '.join(dicc['attr'])
+    
+    #attrs = ', '.join(dicc['attr'])
+
     new_attr = dicc['new-attr']
 
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"'
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = 'CREATE TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'" as (select *, concat_ws('+"'"+separator+"', "+attrs+') as "'+new_attr+'" from '+settings.GEOETL_DB["schema"]+'."'+table_name_source+'");'
-    cur.execute(sqlDup)
+    sqlDup = 'CREATE TABLE {schema}.{tbl_target} as (select *, concat_ws(%s, '
+
+    for at in dicc['attr']:
+        sqlDup += '{}, '
+
+    sqlDup = sqlDup[:-2]+') as {new_attr} from {schema}.{tbl_source});'
+    
+    sqlDup_ = sql.SQL(sqlDup).format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source),
+        *[sql.Identifier(attr) for attr in dicc['attr']],
+        new_attr = sql.Identifier(new_attr)
+    )
+    
+    cur.execute(sqlDup_,[separator])
     conn.commit()
 
     conn.close()
