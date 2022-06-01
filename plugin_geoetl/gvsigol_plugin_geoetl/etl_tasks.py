@@ -712,13 +712,19 @@ def output_Postgis(dicc):
                 except:
                     pass
 
-                sqlIndex = sql.SQL('CREATE INDEX "{tbl}_wkb_geometry_geom_idx" on {sch_target}.{tbl_target} USING gist (wkb_geometry);').format(
-                    tbl = sql.SQL(tab),
-                    sch_target = sql.Identifier(esq),
-                    tbl_target = sql.Identifier(tab))
-                
-                cur.execute(sqlIndex)
-                con_source.commit()
+                try:
+
+                    sqlIndex = sql.SQL('CREATE INDEX "{tbl}_wkb_geometry_geom_idx" on {sch_target}.{tbl_target} USING gist (wkb_geometry);').format(
+                        tbl = sql.SQL(tab),
+                        sch_target = sql.Identifier(esq),
+                        tbl_target = sql.Identifier(tab))
+                    
+                    cur.execute(sqlIndex)
+                    con_source.commit()
+
+                except:
+                    
+                    print("No se ha podido crear el índice espacial")
 
                 con_source.close()
                 cur.close()
@@ -2408,8 +2414,6 @@ def trans_ConcatAttr(dicc):
     table_name_target = dicc['id']
 
     separator = dicc['separator']
-    
-    #attrs = ', '.join(dicc['attr'])
 
     new_attr = dicc['new-attr']
 
