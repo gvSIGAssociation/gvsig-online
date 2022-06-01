@@ -208,7 +208,7 @@ msgstr "Recursos multimèdia"
 
 # measureArea.js
 msgid "Show measure tools"
-msgstr "Mostrar ferramentes de mesura"
+msgstr "Eines de mesura"
 
 msgid "Measure area and perimeter"
 msgstr "Mesura de l’àrea i el perímetre"
@@ -227,10 +227,10 @@ msgid "Measure angle"
 msgstr "Mesurar angle"
 
 msgid "Close measure tools"
-msgstr "Tancar ferramentes de mesura"
+msgstr "Tancar eines de mesura"
 
 msgid "Show selection tools"
-msgstr "Mostrar ferramentes de selecció"
+msgstr "Eines de selecció"
 
 msgid "Select features"
 msgstr ""

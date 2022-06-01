@@ -344,7 +344,7 @@ msgstr "Grup de capes"
 #: gvsigol_core/templates/viewer.html:117
 #: gvsigol_core/templates/viewer_compress.html:117
 msgid "Tools"
-msgstr "Ferramentes"
+msgstr "Eines"
 
 #: gvsigol_core/templates/project_add.html:31
 #: gvsigol_core/templates/project_clone.html:37

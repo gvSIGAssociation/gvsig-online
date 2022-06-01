@@ -46,6 +46,9 @@ from actstream import action
 import logging
 from gvsigol_core.utils import get_absolute_url
 logger = logging.getLogger('gvsigol')
+from django.conf import settings as conf_settings
+from django.http import HttpResponse
+from django.utils import translation
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
@@ -143,6 +146,7 @@ def login_user(request):
                             expediente = request.GET.get('expediente')
                             app = request.GET.get('app')
                             token = request.GET.get('token')
+                            lang = request.GET.get('lang')
                             next = request.GET.get('next')
                             if id_solicitud is not None and app is not None:
                                 response = redirect(next)
@@ -150,6 +154,8 @@ def login_user(request):
                                     response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app
                                 else:
                                     response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app + '&token=' + token
+                                if lang is not None:
+                                    response['Location'] += response['Location'] + '&lang=' + lang
                                 return response
 
                             if expediente is not None:
@@ -158,6 +164,10 @@ def login_user(request):
                                     response['Location'] += '?expediente=' + expediente
                                 else:
                                     response['Location'] += '?expediente=' + expediente + '&token=' + token
+                                if lang is not None:
+                                    response['Location'] += response['Location'] + '&lang=' + lang
+                                    translation.activate(lang)
+                                    request.session[translation.LANGUAGE_SESSION_KEY] = lang
                                 return response
 
                         else:

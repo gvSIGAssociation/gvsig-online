@@ -46,9 +46,9 @@ packages = [
     'gvsigol_plugin_emergencies',
     'gvsigol_plugin_opensea2',
     'gvsigol_plugin_charts',
+    'gvsigol_plugin_regepa',
     'gvsigol_app_tocantins'
 ]
-
 urlpatterns = [
     url(r'^gvsigonline/i18n/', include(i18n)),
     url(r'^gvsigonline/jsi18n/$', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
