@@ -80,6 +80,9 @@ class GeographicServers:
             
     def get_all_nodes(self, id):
         return Node.objects.filter(server_id=int(id))
+    
+    def get_server_model(self, id):
+        return Server.objects.get(id=int(id))
 
 __geographic_servers = None
 
