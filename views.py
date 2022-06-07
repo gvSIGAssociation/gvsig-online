@@ -25,7 +25,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import HttpResponseForbidden
 from gvsigol_services import geographic_servers
-from gvsigol_services.models import Workspace, Datastore, Layer
+from gvsigol_services.models import Workspace, Datastore, Layer, Server
 from gvsigol_services import utils as service_utils
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -1340,13 +1340,14 @@ def library_update(request, library_id):
             rules.append(rule)
         
         gs = geographic_servers.get_instance().get_default_server()
-        master = geographic_servers.get_instance().get_master_node(gs.id)
+        server = geographic_servers.get_instance().get_server_model(gs.id)
+        wms_url = server.getWmsEndpoint(relative=True)
         response = {
             'library': library,
             'rules': rules,
-            'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
-            'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
-            'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+            'preview_point_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
         return render(request, 'library_update.html', response)
     
