@@ -1514,13 +1514,14 @@ def symbol_add(request, library_id, symbol_type):
  
     else: 
         gs = geographic_servers.get_instance().get_default_server()
-        master = geographic_servers.get_instance().get_master_node(gs.id)         
+        server = geographic_servers.get_instance().get_server_model(gs.id)
+        wms_url = server.getWmsEndpoint(relative=True)
         response = {
             'library_id': library_id,
             'symbol_type': symbol_type,
-            'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
-            'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
-            'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+            'preview_point_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
         if symbol_type == 'ExternalGraphicSymbolizer':
             return render(request, 'external_graphic_add.html', response)
@@ -1562,12 +1563,13 @@ def symbol_update(request, symbol_id):
         
         else:
             gs = geographic_servers.get_instance().get_default_server()
-            master = geographic_servers.get_instance().get_master_node(gs.id)
+            server = geographic_servers.get_instance().get_server_model(gs.id)
+            wms_url = server.getWmsEndpoint(relative=True)
             response = {
                 'rule': services_library.get_symbol(r, ftype),
-                'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
-                'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
-                'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+                'preview_point_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+                'preview_line_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+                'preview_polygon_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
             }
             return render(request, 'symbol_update.html', response)
     
