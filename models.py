@@ -52,32 +52,46 @@ class Server(models.Model):
     password = models.CharField(max_length=100)
     default = models.BooleanField(default=False)
     
-    def getWmsEndpoint(self, workspace=None):
+    def _get_relative_url(self, url):
+        if url.startswith(settings.BASE_URL + '/'):
+            return url[len(settings.BASE_URL):]
+        return url
+
+    def getWmsEndpoint(self, workspace=None, relative=False):
+        if relative:
+            base_url =  self._get_relative_url(self.frontend_url)
         if workspace:
-            return self.frontend_url + "/" + workspace + "/wms"
-        else:
-            return self.frontend_url + "/wms"
+            return base_url + "/" + workspace + "/wms"
+        return base_url + "/wms"
     
-    def getWfsEndpoint(self, workspace=None):
+    def getWfsEndpoint(self, workspace=None, relative=False):
+        if relative:
+            base_url =  self._get_relative_url(self.frontend_url)
         if workspace:
-            return self.frontend_url + "/" + workspace + "/wfs"
-        else:
-            return self.frontend_url + "/wfs"
+            return base_url + "/" + workspace + "/wfs"
+        return base_url + "/wfs"
     
-    def getWcsEndpoint(self, workspace=None):
+    def getWcsEndpoint(self, workspace=None, relative=False):
+        if relative:
+            base_url =  self._get_relative_url(self.frontend_url)
         if workspace:
-            return self.frontend_url + "/" + workspace + "/wcs"
-        else:
-            return self.frontend_url + "/wcs"
+            return base_url + "/" + workspace + "/wcs"
+        return base_url + "/wcs"
     
-    def getWmtsEndpoint(self, workspace=None):
-        return self.frontend_url + "/gwc/service/wmts"
+    def getWmtsEndpoint(self, workspace=None, relative=False):
+        if relative:
+            base_url =  self._get_relative_url(self.frontend_url)
+        return base_url + "/gwc/service/wmts"
     
-    def getCacheEndpoint(self, workspace=None):
-        return self.frontend_url + "/gwc/service/wms"
+    def getCacheEndpoint(self, workspace=None, relative=False):
+        if relative:
+            base_url =  self._get_relative_url(self.frontend_url)
+        return base_url + "/gwc/service/wms"
     
-    def getGWCRestEndpoint(self, workspace=None):
-        return self.frontend_url + "/gwc/rest"
+    def getGWCRestEndpoint(self, workspace=None, relative=False):
+        if relative:
+            base_url =  self._get_relative_url(self.frontend_url)
+        return base_url + "/gwc/rest"
     
     def __str__(self):
         return self.name
