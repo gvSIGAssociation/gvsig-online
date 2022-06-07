@@ -819,9 +819,9 @@ def project_get_conf(request):
             if project_group.baselayer_group:
                 conf_group['visible'] = False 
             conf_group['basegroup'] = project_group.baselayer_group
-            conf_group['wms_endpoint'] = server.getWmsEndpoint()
-            conf_group['wfs_endpoint'] = server.getWfsEndpoint()
-            conf_group['cache_endpoint'] = server.getCacheEndpoint()
+            conf_group['wms_endpoint'] = server.getWmsEndpoint(relative=True)
+            conf_group['wfs_endpoint'] = server.getWfsEndpoint(relative=True)
+            conf_group['cache_endpoint'] = server.getCacheEndpoint(relative=True)
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
             user_roles = auth_backend.get_roles(request)
