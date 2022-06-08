@@ -82,6 +82,7 @@ ALLOWED_HOST_NAMES = [##ALLOWED_HOST_NAMES##
 USE_X_FORWARDED_HOST = ##USE_X_FORWARDED_HOST##
 SECURE_PROXY_SSL_HEADER = ##SECURE_PROXY_SSL_HEADER##
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2048
+DATA_UPLOAD_MAX_MEMORY_SIZE = 26214400 #Tamaño máximo para la memoria del getcapabilities default 2621440 (2.5M) es muy poco y no se pueden añadir capas externas cuando el servidor tiene muchas capas
 
 # Application definition
 
