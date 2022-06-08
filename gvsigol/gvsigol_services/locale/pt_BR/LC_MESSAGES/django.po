@@ -2,23 +2,24 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# César Martínez Izquierdo <cmartinez@scolab.es>, 2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-20 15:22+0000\n"
-"PO-Revision-Date: 2022-02-22 18:06+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"PO-Revision-Date: 2022-06-08 17:31+0200\n"
+"Last-Translator: César Martínez Izquierdo <cmartinez@scolab.es>\n"
+"Language-Team: Español; Castellano <>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #: gvsigol_services/backend_geoserver.py:107
 #: gvsigol_services/backend_geoserver.py:133
@@ -47,7 +48,7 @@ msgstr "Camada vetorial"
 
 #: gvsigol_services/backend_geoserver.py:122
 msgid "SQL View"
-msgstr "SQL Vista"
+msgstr "Vista SQL"
 
 #: gvsigol_services/backend_geoserver.py:762
 #: gvsigol_services/backend_geoserver.py:777
@@ -200,7 +201,7 @@ msgstr "Já existe uma camada com este nome: '{value}'."
 #: gvsigol_services/backend_geoserver.py:1664
 #: gvsigol_services/backend_geoserver.py:1673
 msgid "Error occurred building the view. Review the SQL sentence"
-msgstr "Ocorreu um erro ao construir a vista. Revisar a sentença SQL"
+msgstr "Ocorreu um erro na construção da vista. Reveja a frase SQL"
 
 #: gvsigol_services/backend_geoserver.py:1700
 #, python-brace-format
@@ -1337,7 +1338,7 @@ msgstr "Serviços"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:17
 msgid "SQL Views"
-msgstr "SQL Vista"
+msgstr "Vistas SQL"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:22
 msgid "Datatypes"
@@ -2572,7 +2573,7 @@ msgstr "Atualizar Vista SQL"
 
 #: gvsigol_services/templates/translations.html:3
 msgid "SQL views can't be edited."
-msgstr ""
+msgstr "As visualizações SQL não podem ser editadas."
 
 #: gvsigol_services/templates/workspace_list.html:11
 msgid "Add workspace"
