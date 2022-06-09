@@ -60,6 +60,8 @@ class Server(models.Model):
     def getWmsEndpoint(self, workspace=None, relative=False):
         if relative:
             base_url =  self._get_relative_url(self.frontend_url)
+        else:
+            base_url = self.frontend_url
         if workspace:
             return base_url + "/" + workspace + "/wms"
         return base_url + "/wms"
@@ -67,6 +69,8 @@ class Server(models.Model):
     def getWfsEndpoint(self, workspace=None, relative=False):
         if relative:
             base_url =  self._get_relative_url(self.frontend_url)
+        else:
+            base_url = self.frontend_url
         if workspace:
             return base_url + "/" + workspace + "/wfs"
         return base_url + "/wfs"
@@ -74,6 +78,8 @@ class Server(models.Model):
     def getWcsEndpoint(self, workspace=None, relative=False):
         if relative:
             base_url =  self._get_relative_url(self.frontend_url)
+        else:
+            base_url = self.frontend_url
         if workspace:
             return base_url + "/" + workspace + "/wcs"
         return base_url + "/wcs"
@@ -81,16 +87,22 @@ class Server(models.Model):
     def getWmtsEndpoint(self, workspace=None, relative=False):
         if relative:
             base_url =  self._get_relative_url(self.frontend_url)
+        else:
+            base_url = self.frontend_url
         return base_url + "/gwc/service/wmts"
     
     def getCacheEndpoint(self, workspace=None, relative=False):
         if relative:
             base_url =  self._get_relative_url(self.frontend_url)
+        else:
+            base_url = self.frontend_url
         return base_url + "/gwc/service/wms"
     
     def getGWCRestEndpoint(self, workspace=None, relative=False):
         if relative:
             base_url =  self._get_relative_url(self.frontend_url)
+        else:
+            base_url = self.frontend_url
         return base_url + "/gwc/rest"
     
     def __str__(self):
