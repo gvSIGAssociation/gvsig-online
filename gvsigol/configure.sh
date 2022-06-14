@@ -331,7 +331,7 @@ function configure() {
 
 function move_template() {
 	DIR="$(dirname "$0")" 
-	mv $DIR/vsigol/settings_tpl.py $DIR/gvsigol/settings.py
+	mv $DIR/gvsigol/settings_tpl.py $DIR/gvsigol/settings.py
 }
 
 configure
