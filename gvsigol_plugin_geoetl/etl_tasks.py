@@ -667,6 +667,7 @@ def output_Postgis(dicc):
 
     con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = con_source.cursor()
+    cur_2 = con_source.cursor()
 
     sqlCount = sql.SQL("SELECT COUNT(*) FROM {sch_source}.{tbl_source}").format(
             sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
@@ -757,9 +758,19 @@ def output_Postgis(dicc):
 
                 _ogr.execute()
 
-        elif dicc['operation'] == 'APPEND':
+        elif dicc['operation'] == 'APPEND' or dicc['operation'] == 'OVERWRITE':
 
             if inSame:
+
+                if dicc['operation'] == 'OVERWRITE':
+
+                    sqlTruncate = sql.SQL('TRUNCATE TABLE {sch_target}.{tbl_target} ').format(
+                            sch_target = sql.Identifier(esq),
+                            tbl_target = sql.Identifier(tab)
+                            )
+                    cur.execute(sqlTruncate)
+                    con_source.commit()
+
                 sqlDatetype = 'SELECT column_name from information_schema.columns '
                 sqlDatetype += "where table_schema = %s and table_name = %s "
 
@@ -781,10 +792,10 @@ def output_Postgis(dicc):
                         sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
                         sqlDatetype += "where table_schema = %s and table_name = %s "
 
-                        cur.execute(sql.SQL(sqlDatetype).format(),[esq, tab])
-                        con_source.commit()
+                        cur_2.execute(sql.SQL(sqlDatetype).format(),[esq, tab])
+                        #con_source.commit()
 
-                        for r in cur:
+                        for r in cur_2:
                             if  r[1] == 'USER-DEFINED' or r[1] == 'geometry':
                                 if 'wkb_geometry' == r[0]:
                                     attrTargetList.append(row[0])
@@ -828,53 +839,11 @@ def output_Postgis(dicc):
                 _ogr = gdaltools.ogr2ogr()
                 _ogr.set_input(_conn_source, table_name=table_name_source)
                 _ogr.set_output(_conn_target, table_name=tab)
-                _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_APPEND, data_source_mode=_ogr.MODE_DS_UPDATE)
 
-                _ogr.layer_creation_options = {
-                    "LAUNDER": "YES",
-                    "precision": "NO"
-                }
-                _ogr.config_options = {
-                    "OGR_TRUNCATE": "NO"
-                }
-                _ogr.set_dim("2")
-                _ogr.geom_type = type_geom
-                _ogr.execute()
-
-        elif dicc['operation'] == 'OVERWRITE':
-            if inSame:
-                sqlTruncate = sql.SQL('TRUNCATE TABLE {sch_target}.{tbl_target} ').format(
-                        sch_target = sql.Identifier(esq),
-                        tbl_target = sql.Identifier(tab)
-                        )
-                cur.execute(sqlTruncate)
-                con_source.commit()
-
-
-                sqlInsert = sql.SQL('INSERT INTO {sch_target}.{tbl_target} SELECT * FROM {sch_source}.{tbl_source}').format(
-                        sch_target = sql.Identifier(esq),
-                        tbl_target = sql.Identifier(tab),
-                        sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
-                        tbl_source = sql.Identifier(table_name_source)
-                        )
-
-                cur.execute(sqlInsert)
-                con_source.commit()
-            
-            #OVERWRITE en diferente servidor o bddd
-            else:
-                try:
-                    srid, type_geom = get_type_n_srid(table_name_source)
-                except:
-                    type_geom = ''
-
-                _conn_source = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=settings.GEOETL_DB["schema"], user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
-                _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
-
-                _ogr = gdaltools.ogr2ogr()
-                _ogr.set_input(_conn_source, table_name=table_name_source)
-                _ogr.set_output(_conn_target, table_name=tab)
-                _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_OVERWRITE, data_source_mode=_ogr.MODE_DS_UPDATE)
+                if dicc['operation'] == 'OVERWRITE':
+                    _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_OVERWRITE, data_source_mode=_ogr.MODE_DS_UPDATE)
+                else:
+                    _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_APPEND, data_source_mode=_ogr.MODE_DS_UPDATE)
 
                 _ogr.layer_creation_options = {
                     "LAUNDER": "YES",
