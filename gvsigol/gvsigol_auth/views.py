@@ -155,7 +155,7 @@ def login_user(request):
                                 else:
                                     response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app + '&token=' + token
                                 if lang is not None:
-                                    response['Location'] += response['Location'] + '&lang=' + lang
+                                    response['Location'] += '&lang=' + lang
                                 return response
 
                             if expediente is not None:
@@ -165,7 +165,7 @@ def login_user(request):
                                 else:
                                     response['Location'] += '?expediente=' + expediente + '&token=' + token
                                 if lang is not None:
-                                    response['Location'] += response['Location'] + '&lang=' + lang
+                                    response['Location'] += '&lang=' + lang
                                     translation.activate(lang)
                                     request.session[translation.LANGUAGE_SESSION_KEY] = lang
                                 return response
