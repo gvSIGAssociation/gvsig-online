@@ -891,7 +891,7 @@ class Geoserver():
         try:
             if ds_type.startswith('v_'): # vector
                 self.rest_catalog.update_featuretype(workspace, ds_name, name, updated_params=updatedParams, user=self.user, password=self.password)
-            else: # raster, external layer, etc
+            elif ds_type != 'e_WMS': # raster, etc
                 title = updatedParams.get('title')
                 if title:
                     catalog = self.getGsconfig()
