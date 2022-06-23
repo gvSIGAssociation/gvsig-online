@@ -24,7 +24,7 @@ from doctest import master
 '''
 
 from .models import ColorMap, ColorMapEntry, Library, Style, StyleLayer, Rule, Symbolizer, RasterSymbolizer
-
+from gvsigol import settings
 from gvsigol_services import geographic_servers
 
 from gvsigol_services.models import Layer, Datastore, Workspace
