@@ -828,6 +828,7 @@ def output_Postgis(dicc):
 
             #insert en diferente servidor o bddd
             else:
+
                 try:
                     srid, type_geom = get_type_n_srid(table_name_source)
                 except:
@@ -835,7 +836,6 @@ def output_Postgis(dicc):
 
                 _conn_source = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=settings.GEOETL_DB["schema"], user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
                 _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
-
                 _ogr = gdaltools.ogr2ogr()
                 _ogr.set_input(_conn_source, table_name=table_name_source)
                 _ogr.set_output(_conn_target, table_name=tab)
@@ -1868,12 +1868,18 @@ def input_Postgis(dicc):
     inSame = isInSamedb(params)
     
     if inSame:
+
+        if dicc['checkbox'] == 'true':
+            where_clause = 'WHERE ' + dicc['clause']
+        else:
+            where_clause = ''
     
-        sqlCreate = sql.SQL('create table {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
+        sqlCreate = sql.SQL('create table {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source} {where_clause})').format(
             sch_target = sql.Identifier(settings.GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             sch_source = sql.Identifier(esq),
-            tbl_source = sql.Identifier(tab))
+            tbl_source = sql.Identifier(tab),
+            where_clause = sql.SQL(where_clause))
         
         cur.execute(sqlCreate)
         conn.commit()
@@ -1904,16 +1910,59 @@ def input_Postgis(dicc):
 
     #Create en diferente servidor o bbdd
     else:
-        try:
-            srid, type_geom = get_type_n_srid(tab)
-        except:
-            type_geom = ''
 
-        _conn_target = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=settings.GEOETL_DB["schema"], user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+        conn_2 = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+        cur_2 = conn_2.cursor()
+    
+        sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
+        sqlDatetype += "where table_schema = %s and table_name = %s "
+
+        cur_2.execute(sql.SQL(sqlDatetype).format(),[esq, tab])
+        conn_2.commit()
+
+        geometry = ''
+        for r in cur_2:
+            if  r[1] == 'USER-DEFINED' or r[1] == 'geometry':
+                geometry = r[0]
+                break
+        type_geom = ''
+        
+        if geometry != '':
+
+            sqlTypeGeom = sql.SQL("SELECT split_part (ST_ASTEXT ({geometry}), '(', 1)  FROM {schema}.{table} WHERE {geometry} IS NOT NULL GROUP BY split_part").format(
+                geometry = sql.Identifier(geometry),
+                schema = sql.Identifier(esq),
+                table = sql.Identifier(tab)                      
+            )
+
+            cur_2.execute(sqlTypeGeom)
+            conn_2.commit()
+            
+            for row in cur_2:
+                if type_geom == '':
+                    type_geom = row[0]
+                elif type_geom != row[0]:
+                    type_geom = 'GEOMETRY'
+                    break
+                else:
+                    pass
+
+        if dicc['checkbox'] == 'true':
+            where_clause = 'WHERE ' + dicc['clause']
+            _sql = sql.SQL('select * from {sch_source}.{tbl_source} {where_clause}').format(
+                sch_source = sql.Identifier(esq),
+                tbl_source = sql.Identifier(tab),
+                where_clause = sql.SQL(where_clause))
+        else:
+            where_clause = ''
+
         _conn_source = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
+        _conn_target = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=settings.GEOETL_DB["schema"], user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
 
         _ogr = gdaltools.ogr2ogr()
+
         _ogr.set_input(_conn_source, table_name=tab)
+        
         _ogr.set_output(_conn_target, table_name=table_name_target)
         _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
 
@@ -1926,9 +1975,17 @@ def input_Postgis(dicc):
         }
         _ogr.set_dim("2")
 
+
+        if dicc['checkbox'] == 'true':
+
+            _ogr.set_sql(_sql.as_string(conn))
+
         _ogr.geom_type = type_geom
 
         _ogr.execute()
+
+        conn_2.close()
+        cur_2.close()
 
         sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
         sqlDatetype += "where table_schema = %s and table_name = %s "
@@ -1953,6 +2010,8 @@ def input_Postgis(dicc):
         
         conn.close()
         cur.close()
+
+
 
     return [table_name_target]
 
@@ -2212,15 +2271,6 @@ def get_type_n_srid(table_name):
 
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
-
-    """sqlAlter = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name+'"  ADD COLUMN _st_astext_temp TEXT'
-    cur.execute(sqlAlter)
-    conn.commit()
-
-
-    sqlUpdate = 'UPDATE '+settings.GEOETL_DB["schema"]+'."'+table_name+'"  SET _st_astext_temp = ST_ASTEXT (wkb_geometry)'
-    cur.execute(sqlUpdate)
-    conn.commit()"""
 
     #sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+settings.GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
     sqlTypeGeom = "SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM "+settings.GEOETL_DB["schema"]+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL GROUP BY split_part'
@@ -2564,15 +2614,15 @@ def trans_ExecuteSQL(dicc):
 
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
+    
+    db  = database_connections.objects.get(name = dicc['db'])
 
-    schemaTable = dicc['tablename'].lower()
+    params_str = db.connection_params
 
-    if '.' in schemaTable:
-        esq = schemaTable.split(".")[0]
-        table_name = schemaTable.split(".")[1]
-    else:
-        esq = 'public'
-        table_name = schemaTable
+    params = json.loads(params_str)
+
+    esq = dicc['schema-name']
+    table_name = dicc['tablename']
 
     query = dicc['query']
 
@@ -2588,7 +2638,7 @@ def trans_ExecuteSQL(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
-    conn_2 = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+    conn_2 = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur_2 = conn_2.cursor()
 
     sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '

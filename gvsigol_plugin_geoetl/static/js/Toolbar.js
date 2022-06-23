@@ -273,6 +273,10 @@ gvsigolETL.Toolbar = Class.extend({
 				if (cnv[o]['type'] != 'draw2d.Connection'){
 					
 					type = cnv[o]['type']
+					if (type == 'input_Postgres'){
+						type = 'input_Postgis'
+
+					}
 					x = cnv[o]['x']
 					y = cnv[o]['y']
 	

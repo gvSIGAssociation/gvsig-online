@@ -1850,14 +1850,14 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
                                 '<select id="tablename-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            /*'<div class="col-md-12">'+
+                            '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
                             '</div>'+
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label">'+gettext('SQL WHERE Clause:')+'</label>'+
                                 '<textarea id="clause-'+ID+'" rows="1" class="form-control" placeholder=""></textarea>'+
-                            '</div>'+*/
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -1879,7 +1879,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         };
 
 
-        /*$("#checkbox-"+ID).change(function() {
+        $("#checkbox-"+ID).change(function() {
             if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
@@ -1887,7 +1887,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
             }
-        });*/
+        });
 
         $('#get-schemas-'+ID).on("click", function(){
                                 
@@ -2003,13 +2003,13 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             $('#dialog-input-postgis-'+ID).modal('show')
 
-            /*if($("#checkbox-"+ID).is(':checked')){
+            if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
             }else{
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
-            }*/
+            }
         });
 
         $('#input-postgis-accept-'+ID).click(function() {
@@ -2020,9 +2020,9 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 "get_tablename": get_tbl,
                 "db": $('#db-'+ID).val(),
                 "schema-name": $('#schema-name-'+ID).val(),
-                "tablename": $('#tablename-'+ID).val()}/*,
+                "tablename": $('#tablename-'+ID).val(),
                 "checkbox": $("#checkbox-"+ID).val(),
-            "clause": $('#clause-'+ID).val()}*/
+                "clause": $('#clause-'+ID).val()}
             ]}
 
             var formDataSchemaPostgis = new FormData();
@@ -5561,32 +5561,32 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                         '</button>'+
                         '<h4 class="modal-title" >'+gettext('Execute SQL Parameters')+'</h4>'+
                     '</div>'+
-                    '<div  class="modal-body">'+
-                        '<form>'+
-                        
-                            '<div class="column50">'+
-                                '<label form="host" class="col-form-label">'+gettext('Host:')+'</label>'+
-                                '<input id="host-'+ID+'" type="text" value="localhost" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                        '<div  class="modal-body">'+
+                            '<form>'+
+
+                            '<div>'+
+                                
+                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
+                                '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column50">'+    
-                                '<label form="port" class="col-form-label">'+gettext('Port:')+'</label>'+
-                                '<input id="port-'+ID+'" type="text" value="5432" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div class="column20">'+
+                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
+                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
                             '</div>'+
-                            '<div class="column50">'+
-                                '<label form="database" class="col-form-label">'+gettext('Database:')+'</label>'+
-                                '<input id="database-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Name of your database')+'">'+
+
+                            '<div class="column80">'+
+                                '<label form="schema" class="col-form-label">'+gettext('Schema:')+'</label>'+
+                                '<select id="schema-name-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column50">'+                                
-                                '<label form="user" class="col-form-label">'+gettext('User:')+'</label>'+
-                                '<input id="user-'+ID+'" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">'+
+
+                            '<div class="column20">'+
+                                '<label for ="get-tables" class="col-form-label">'+gettext('Get Tables')+':</label><br>'+
+                                '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
                             '</div>'+
-                            '<div class="column50">'+
-                                '<label form="password" class="col-form-label">'+gettext('Password:')+'</label>'+
-                                '<input type="password" id = "password-'+ID+'" class="form-control" value="">'+
-                            '</div>'+
-                            '<div class="column50">'+
+
+                            '<div class="column80">'+
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('schema.tablename')+'">'+
+                                '<select id="tablename-'+ID+'" class="form-control"></select>'+
                             '</div>'+
 
                             '<div class="right">'+
@@ -5619,87 +5619,119 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-footer">'+
                         '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                        '<button type="button" class="btn btn-default btn-sm" id="verify-postgis-'+ID+'">'+gettext('Verify connection')+'</button>'+
                         '<button type="button" class="btn btn-default btn-sm" id="execute-sql-accept-'+ID+'">'+gettext('Accept')+'</button>'+
                     '</div>'+
                 '</div>'+
             '</div>'+
         '</div>')
 
-        $('#verify-postgis-'+ID).click(function() {
-                
-            var paramsPostgres = {"id": ID,
-                "parameters": [
-                    {"host": $('#host-'+ID).val(),
-                    "port": $('#port-'+ID).val(),
-                    "database": $('#database-'+ID).val(),
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val()}
-                ]}
-    
-                var formDataPostgres = new FormData();
-                
-                formDataPostgres.append('jsonParamsPostgres', JSON.stringify(paramsPostgres))
-    
-                $.ajax({
-                    type: 'POST',
-                    url: '/gvsigonline/etl/test_postgres_conexion/',
-                    data: formDataPostgres,
-                    beforeSend:function(xhr){
-                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                    },
-                    cache: false, 
-                    contentType: false, 
-                    processData: false,
-                    success: function (response) {
-    
-                        if(response.result == true){
-                            textConnection = gettext('Connection parameters are valids.')
-                        }else{
-                            textConnection = gettext('Connection parameters are not valids.')
-                        }
-    
-                        $("#dialog-test-postgres-connection").remove();
-                            
-                        $('#canvas-parent').append('<div id="dialog-test-postgres-connection" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-                            '<div class="modal-dialog" role="document">'+
-                                '<div class="modal-content">'+
-                                    '<div class="modal-header">'+
-                                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                                            '<span aria-hidden="true">&times;</span>'+
-                                        '</button>'+
-                                        '<h4 class="modal-title">'+gettext('Response')+'</h4>'+
-                                    '</div>'+
-                                    '<div class="modal-body" align="center">'+textConnection+
-                                    '</div>'+
-                                    '<div class="modal-footer">'+
-                                        '<button id= "close-test-postgres-connection" type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>')
-    
-                        $('#dialog-test-postgres-connection').modal('show')
-    
-                        $('#close-test-postgres-connection').click(function() {
-                            
-                            $('#dialog-test-postgres-connection').modal('hide')
-                            
-                        })
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'PostgreSQL'){
+                $('#db-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
+
+
+        $('#get-schemas-'+ID).on("click", function(){
+                                
+            var paramsGetSchemas = {"id": ID,
+            "parameters": [
+                {"db": $('#db-'+ID).val()}
+            ]}
+
+            var formDataGetSchemas = new FormData();
+            
+            formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schemas_name_postgres/',
+                data: formDataGetSchemas,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    $('#schema-name-'+ID).empty()
+                    get_sch = []
+
+                    for (i = 0; i < data.length; i++){
+                        $('#schema-name-'+ID).append('<option>'+data[i]+'</option>')
+                        get_sch.push(data[i])
+
+
                     }
-                })
+                }
+            })
         });
+
+        $('#get-tables-'+ID).on("click", function(){
+                                
+            var paramsGetSchemas = {"id": ID,
+            "parameters": [
+                {"db": $('#db-'+ID).val(),
+                "schema-name": $('#schema-name-'+ID).val()}
+            ]}
+
+            var formDataGetSchemas = new FormData();
+            
+            formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_table_name_postgres/',
+                data: formDataGetSchemas,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    get_tbl = []
+                    $('#tablename-'+ID).empty()
+
+                    for (i = 0; i < data.length; i++){
+                        $('#tablename-'+ID).append('<option>'+data[i]+'</option>')
+                        get_tbl.push(data[i])
+
+                    }
+                }
+            })
+        });
+
+        if (typeof get_sch === 'undefined'){
+            get_sch = []
+            $("#schema-name-"+ID+" option").each(function()
+                {  
+                    get_sch.push($(this).val())
+                }
+            );
+        }
+
+        if (typeof get_tbl === 'undefined'){
+            get_tbl = []
+            $("#tablename-"+ID+" option").each(function()
+                {  
+                    get_tbl.push($(this).val())
+                }
+            );
+        }
 
         $('#get-schema-'+ID).click(function() {
             
             var paramsPostgis = {"id": ID,
             "parameters": [
-                {"host": $('#host-'+ID).val(),
-                "port": $('#port-'+ID).val(),
-                "database": $('#database-'+ID).val(),
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val(),
-                "tablename": $('#tablename-'+ID).val()}
+                {"db": $('#db-'+ID).val(),
+                "schema-name": $('#schema-name-'+ID).val(),
+                "tablename": $('#tablename-'+ID).val(),
+                "query": $('#query-'+ID).val()}
             ]}
 
             var formDataSchemaPostgis = new FormData();
@@ -5789,11 +5821,10 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
             var paramsExecute= {"id": ID,
             "parameters": [
-                {"host": $('#host-'+ID).val(),
-                "port": $('#port-'+ID).val(),
-                "database": $('#database-'+ID).val(),
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val(),
+                {"get_schema-name": get_sch,
+                "get_tablename": get_tbl,
+                "db": $('#db-'+ID).val(),
+                "schema-name": $('#schema-name-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
                 "query": $('#query-'+ID).val()}
             ]}
@@ -5814,7 +5845,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
 
-                    schemaMod =[...schemaEdge]
+                    var schemaMod =[...schemaEdge]
                     
                     for (i = 0; i < data.length; i++){
                         schemaMod.push(data[i])
@@ -5823,12 +5854,11 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                     paramsExecute['schema'] = schemaMod
                     paramsExecute['schema-old'] = schemaEdge
 
+                    passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+
                 }
             })
-           
-
-
-            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+            
             isAlreadyInCanvas(jsonParams, paramsExecute, ID)
 
             icon.setColor('#4682B4')
