@@ -226,13 +226,13 @@ $(document).ready(function() {
 					for (var field in err.responseJSON.error) {
 						var label;
 						if (field == 'project_name') {
-							label = '{% trans "Name" %}';
+							label = gettext("Name");
 						}
 						else if (field == 'target_workspace') {
-							label = '{% trans "Workspace" %}';
+							label = gettext("Workspace");
 						}
 						else if (field == 'target_datastore') {
-							label = '{% trans "Datastore" %}';
+							label = gettext("Datastore");
 						}
 						else {
 							label = field;
