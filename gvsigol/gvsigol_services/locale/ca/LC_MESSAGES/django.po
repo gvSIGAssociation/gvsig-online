@@ -1277,11 +1277,11 @@ msgstr ""
 
 #: gvsigol_services/templates/cache_list.html:21
 msgid "Cached layers"
-msgstr "Capes cacheades"
+msgstr "Capes a la memòria cau"
 
 #: gvsigol_services/templates/cache_list.html:22
 msgid "Cached groups"
-msgstr "Grups cacheats"
+msgstr "Grups a la memòria cau"
 
 #: gvsigol_services/templates/cache_list.html:148
 #: gvsigol_services/templates/cache_list.html:185
@@ -1289,12 +1289,12 @@ msgstr "Grups cacheats"
 #: gvsigol_services/templates/layergroup_update.html:134
 #: gvsigol_services/templates/layergroup_update.html:136
 msgid "Clear cache"
-msgstr "Netejar cache"
+msgstr "Netejar memòria cau"
 
 #: gvsigol_services/templates/cache_list.html:152
 #: gvsigol_services/templates/cache_list.html:189
 msgid "Configure cache options"
-msgstr "Configurar opcions de la caché"
+msgstr "Configurar opcions de la memòria cau"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:4
 msgid "Services"
@@ -1322,7 +1322,7 @@ msgstr "Capes externes"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:14
 msgid "Cache management"
-msgstr "Gestió de la caché"
+msgstr "Gestió de la memòria cau"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:15
 msgid "Locks"
@@ -2313,7 +2313,7 @@ msgstr "Títol del grup"
 #: gvsigol_services/templates/layergroup_update.html:70
 #: gvsigol_services/templates/layergroup_update.html:72
 msgid "Create cache for the layer group"
-msgstr "Crear cache per al grup de capes"
+msgstr "Crear memòria cau per al grup de capes"
 
 #: gvsigol_services/templates/layergroup_add.html:75
 #: gvsigol_services/templates/layergroup_update.html:79

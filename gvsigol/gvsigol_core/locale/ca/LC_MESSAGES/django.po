@@ -335,7 +335,7 @@ msgstr "Capes base"
 #: gvsigol_core/templates/project_add.html:29
 #: gvsigol_core/templates/project_update.html:42
 msgid "Layer groups"
-msgstr "Grup de capes"
+msgstr "Grups de capes"
 
 #: gvsigol_core/templates/project_add.html:30
 #: gvsigol_core/templates/project_update.html:43

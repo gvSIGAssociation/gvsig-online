@@ -1318,7 +1318,7 @@ msgstr "Armazéns de dados"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:11
 msgid "Layer groups"
-msgstr "Grupo de camadas"
+msgstr "Grupos de camadas"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:13
 msgid "External layers"
