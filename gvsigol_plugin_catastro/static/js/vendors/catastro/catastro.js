@@ -101,7 +101,7 @@ var	ui = '<ul class="nav nav-tabs">';
 
 	var buttons = '';
 	buttons += '<button id="float-modal-cancel-coordcalc" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-	buttons += '<button id="float-modal-accept-coordcalc" type="button" class="btn btn-default">' + gettext('Calculate') + '</button>';
+	buttons += '<button id="float-modal-accept-coordcalc" type="button" class="btn btn-default">' + gettext('Search') + '</button>';
 
 	$('#float-modal .modal-footer').empty();
 	$('#float-modal .modal-footer').append(buttons);
