@@ -152,7 +152,7 @@ var	ui = '<ul class="nav nav-tabs">';
 			if($("#urban_radio").is(":checked")){
 				params['urban_radio'] = true;
 				params['tipovia'] = $("#road-type-input").val();
-				params['nombrevia'] = $("#road-name-input").val();
+				params['nombrevia'] = $("#road-name-input option:selected").text();
 				params['numerovia'] = $("#road-number-input").val();
 				params['kmvia'] = $("#road-km-input").val();
 				params['bloquevia'] = $("#road-block-input").val();
@@ -506,27 +506,15 @@ CatastroForm.prototype.onAddressKeyPress = function(){
                 var key = $(this).find("cv").text();
                 var type = $(this).find("tv").text();
                 var value = $(this).find("nv").text();
-                options += "<option data-name=\""+value+"\" data-type=\""+type+"\" value=\""+value+"\">"+value+"</option>";
+                options += "<option data-name=\""+value+"\" data-type=\""+type+"\" value=\""+key+"\">"+value+"</option>";
             });
 	  		$("#road-name-input").empty().html(options)
 
 	  		$("#road-name-input.js-example-basic-single").select2();
 
 	  		$("#road-name-input").unbind("change").change(function(){
-	  			var component = $("#road-name-input").select2('data');
-	  			var value = "";
-	  			if(Array.isArray(component)){
-	  				value = component[0].text;
-	  			}else{
-	  				value = component.text;
-	  			};
-	  			var type = "";
-
-	  			var option = $("#road-name-input option[data-name=\""+value+"\"]")
-	  			if(option.length > 0){
-	  				type = option.first().attr("data-type")
-	  			}
-
+				var type = "";
+				type = $( "#road-name-input option:selected" ).attr('data-type');
 	  			$("#road-type-input").val(type);
 	  		})
 		},
