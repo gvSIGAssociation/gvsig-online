@@ -339,7 +339,7 @@ msgstr "Capas base"
 #: gvsigol_core/templates/project_add.html:29
 #: gvsigol_core/templates/project_update.html:42
 msgid "Layer groups"
-msgstr "Grupo de capas"
+msgstr "Grupos de capas"
 
 #: gvsigol_core/templates/project_add.html:30
 #: gvsigol_core/templates/project_update.html:43
