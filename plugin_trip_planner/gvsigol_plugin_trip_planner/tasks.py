@@ -48,7 +48,7 @@ def cron_trip_planner_refresh(id):
         providers = GTFSProvider.objects.order_by('name')
         bChange = False
         for p in providers:
-            path = 'data/GTFS/{0}{1}'.format(p.id, '.zip')
+            path = 'data/plugin_trip_planner/GTFS/{0}{1}'.format(p.id, '.zip')
             url = p.url
             dstFile = os.path.join(settings.MEDIA_ROOT, path)
             try:
