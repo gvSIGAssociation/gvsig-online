@@ -1306,7 +1306,7 @@ msgid "Locks"
 msgstr ""
 
 #: gvsigol_services/templates/dashboard_services_menu.html:16
-msgid "Services URL"
+msgid "Services URLs"
 msgstr ""
 
 #: gvsigol_services/templates/dashboard_services_menu.html:17

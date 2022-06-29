@@ -1330,8 +1330,8 @@ msgid "Locks"
 msgstr "Bloquejos"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:16
-msgid "Services URL"
-msgstr "Serveis"
+msgid "Services URLs"
+msgstr "URLs del serveis"
 
 #: gvsigol_services/templates/dashboard_services_menu.html:17
 msgid "SQL Views"
