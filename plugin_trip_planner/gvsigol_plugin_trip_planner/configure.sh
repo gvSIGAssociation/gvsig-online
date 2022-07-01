@@ -6,7 +6,7 @@ function move_to_working_dir()
 {
     DIR="$(dirname "$0")"
     pushd $DIR
-    echo "[INFO]: Working dir $DIR"
+    echo "[INFO]: Working dir $PWD"
 }
 function back_from_working_dir()
 {
