@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "[INFO]: Start script configure.sh gvsigol core"
+
+
 function configure() {
 	echo "INFO: Replace settings from variables ...."
 	
@@ -364,3 +367,5 @@ move_to_working_dir
 configure
 move_template
 back_from_working_dir
+
+echo "[INFO]: End script configure.sh gvsigol core"
