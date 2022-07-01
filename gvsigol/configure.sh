@@ -318,7 +318,7 @@ function configure() {
 	else
 		if [ -z $DRF_DEFAULT_AUTHENTICATION_CLASSES ]; then
 			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is $GVSIGOL_AUTH_BACKEND , using 'rest_framework_jwt.authentication.JSONWebTokenAuthentication'"
-			DRF_DEFAULT_AUTHENTICATION_CLASSES="'rest_framework_jwt.authentication.JSONWebTokenAuthentication',\n    'rest_framework.authentication.SessionAuthentication',\n    'rest_framework.authentication.BasicAuthentication'"
+			DRF_DEFAULT_AUTHENTICATION_CLASSES="'rest_framework_jwt.authentication.JSONWebTokenAuthentication',\n        'rest_framework.authentication.SessionAuthentication',\n        'rest_framework.authentication.BasicAuthentication'"
 		fi
 		if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
 			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
