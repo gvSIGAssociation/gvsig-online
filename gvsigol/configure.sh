@@ -309,7 +309,7 @@ function configure() {
 	if [ $GVSIGOL_AUTH_BACKEND = "gvsigol_plugin_oidc_mozilla"]; then
 		if [ -z $DRF_DEFAULT_AUTHENTICATION_CLASSES ]; then
 			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is 'gvsigol_plugin_oidc_mozilla' , using 'mozilla_django_oidc.contrib.drf.OIDCAuthentication'"
-			DRF_DEFAULT_AUTHENTICATION_CLASSES="mozilla_django_oidc.contrib.drf.OIDCAuthentication"
+			DRF_DEFAULT_AUTHENTICATION_CLASSES="'mozilla_django_oidc.contrib.drf.OIDCAuthentication'"
 		fi
 		if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
 			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
