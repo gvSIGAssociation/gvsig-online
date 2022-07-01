@@ -1,10 +1,22 @@
 #!/bin/bash
 
-echo "[INFO]: Running configure.sh plugin_trip_planner"
+echo "[INFO]: Start script configure.sh plugin_trip_planner"
+
+function move_to_working_dir()
+{
+    DIR="$(dirname "$0")"
+    pushd $DIR
+    echo "[INFO]: Working dir $DIR"
+}
+function back_from_working_dir()
+{
+    popd
+    echo "[INFO]: Back to $PWD"
+}
 
 function configure() {
     if [ -z "$GTFS_SCRIPT" ]; then
-        echo "ERROR: GTFS_SCRIPT is not defined."
+        echo "[ERROR]: GTFS_SCRIPT is not defined."
         exit -1  
     else 
 	    echo "GTFS_SCRIPT: $GTFS_SCRIPT"		      
@@ -13,10 +25,13 @@ function configure() {
 }
 
 function move_template() {
-	DIR="$(dirname "$0")"
-	mv $DIR/settings_tpl.py $DIR/settings.py
+	mv settings_tpl.py settings.py
 }
 
+move_to_working_dir
 configure
 move_template
+back_from_working_dir
+ 
 
+echo "[INFO]: End script configure.sh plugin_trip_planner"
