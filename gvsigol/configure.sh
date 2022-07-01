@@ -344,10 +344,23 @@ function configure() {
 	grep -rl "##SHP_DOWNLOAD_DEFAULT_ENCODING##"  | xargs sed -i "s/##SHP_DOWNLOAD_DEFAULT_ENCODING##/$SHP_DOWNLOAD_DEFAULT_ENCODING/g"
 }
 
-function move_template() {
-	DIR="$(dirname "$0")" 
-	mv $DIR/gvsigol/settings_tpl.py $DIR/gvsigol/settings.py
+function move_template() {	
+	mv gvsigol/settings_tpl.py gvsigol/settings.py
 }
 
+function move_to_working_dir()
+{
+    DIR="$(dirname "$0")"
+    pushd $DIR
+    echo "[INFO]: Working dir $PWD"
+}
+function back_from_working_dir()
+{
+    popd
+    echo "[INFO]: Back to $PWD"
+}
+
+move_to_working_dir
 configure
 move_template
+back_from_working_dir
