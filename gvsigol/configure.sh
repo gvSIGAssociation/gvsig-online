@@ -306,11 +306,27 @@ function configure() {
 		GVSIGOL_AUTH_BACKEND="gvsigol_auth"
 	fi
 	grep -rl "##GVSIGOL_AUTH_BACKEND##"  | xargs sed -i "s/##GVSIGOL_AUTH_BACKEND##/$GVSIGOL_AUTH_BACKEND/g"
-	if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
-		echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
-		DJANGO_AUTHENTICATION_BACKENDS="'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
+	if [ $GVSIGOL_AUTH_BACKEND = "gvsigol_plugin_oidc_mozilla"]; then
+		if [ -z $DRF_DEFAULT_AUTHENTICATION_CLASSES ]; then
+			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is 'gvsigol_plugin_oidc_mozilla' , using 'mozilla_django_oidc.contrib.drf.OIDCAuthentication'"
+			DRF_DEFAULT_AUTHENTICATION_CLASSES="mozilla_django_oidc.contrib.drf.OIDCAuthentication"
+		fi
+		if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
+			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
+			DJANGO_AUTHENTICATION_BACKENDS="'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',\n    'django.contrib.auth.backends.ModelBackend'"
+		fi
+	else
+		if [ -z $DRF_DEFAULT_AUTHENTICATION_CLASSES ]; then
+			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is $GVSIGOL_AUTH_BACKEND , using 'rest_framework_jwt.authentication.JSONWebTokenAuthentication'"
+			DRF_DEFAULT_AUTHENTICATION_CLASSES="'rest_framework_jwt.authentication.JSONWebTokenAuthentication',\n    'rest_framework.authentication.SessionAuthentication',\n    'rest_framework.authentication.BasicAuthentication'"
+		fi
+		if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
+			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
+			DJANGO_AUTHENTICATION_BACKENDS="'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
+		fi
 	fi
 	grep -rl "##DJANGO_AUTHENTICATION_BACKENDS##"  | xargs sed -i "s/##DJANGO_AUTHENTICATION_BACKENDS##/$DJANGO_AUTHENTICATION_BACKENDS/g"
+	grep -rl "##DRF_DEFAULT_AUTHENTICATION_CLASSES##"  | xargs sed -i "s/##DRF_DEFAULT_AUTHENTICATION_CLASSES##/$DRF_DEFAULT_AUTHENTICATION_CLASSES/g"
 	if [ -z $USE_X_FORWARDED_HOST ]; then
 		echo "WARNING: USE_X_FORWARDED_HOST is not defined, using 'False'"
 		USE_X_FORWARDED_HOST="False"
@@ -326,7 +342,6 @@ function configure() {
 		SHP_DOWNLOAD_DEFAULT_ENCODING="ISO-8859-1"
 	fi
 	grep -rl "##SHP_DOWNLOAD_DEFAULT_ENCODING##"  | xargs sed -i "s/##SHP_DOWNLOAD_DEFAULT_ENCODING##/$SHP_DOWNLOAD_DEFAULT_ENCODING/g"
-
 }
 
 function move_template() {

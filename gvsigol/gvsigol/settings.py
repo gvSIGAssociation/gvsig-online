@@ -318,8 +318,8 @@ GVSIGOL_LDAP = {
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
     #'django_auth_ldap.backend.LDAPBackend',
-    'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
-    #'django.contrib.auth.backends.ModelBackend',
+    #'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 LOGIN_URL = 'gvsigol_authenticate_user'
@@ -584,6 +584,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        #'mozilla_django_oidc.contrib.drf.OIDCAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -646,6 +647,7 @@ LEGACY_GVSIGOL_SERVICES = {
 
 CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
 CELERY_TASK_ACKS_LATE = True
+CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
