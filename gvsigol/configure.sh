@@ -309,7 +309,7 @@ function configure() {
 		GVSIGOL_AUTH_BACKEND="gvsigol_auth"
 	fi
 	grep -rl "##GVSIGOL_AUTH_BACKEND##"  | xargs sed -i "s/##GVSIGOL_AUTH_BACKEND##/$GVSIGOL_AUTH_BACKEND/g"
-	if [ $GVSIGOL_AUTH_BACKEND = "gvsigol_plugin_oidc_mozilla"]; then
+	if [ $GVSIGOL_AUTH_BACKEND = "gvsigol_plugin_oidc_mozilla" ]; then
 		if [ -z $DRF_DEFAULT_AUTHENTICATION_CLASSES ]; then
 			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is 'gvsigol_plugin_oidc_mozilla' , using 'mozilla_django_oidc.contrib.drf.OIDCAuthentication'"
 			DRF_DEFAULT_AUTHENTICATION_CLASSES="'mozilla_django_oidc.contrib.drf.OIDCAuthentication'"
