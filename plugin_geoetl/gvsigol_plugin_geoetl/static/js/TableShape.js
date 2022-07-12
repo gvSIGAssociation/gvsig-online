@@ -5378,6 +5378,16 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
             ]}
             
             schemaMod =[...schemaEdge]
+
+            console.log(schemaMod)
+
+            schemaMod.splice(schemaMod.indexOf($('#attr-'+ID).val()), 1)
+
+            console.log(schemaMod)
+
+            schemaMod.push($('#attr-'+ID).val())
+
+            console.log(schemaMod)
            
             paramsCreateAttr['schema'] = schemaMod
             paramsCreateAttr['schema-old'] = schemaEdge
@@ -5634,7 +5644,6 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
             }
         };
 
-
         $('#get-schemas-'+ID).on("click", function(){
                                 
             var paramsGetSchemas = {"id": ID,
@@ -5731,7 +5740,8 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                 {"db": $('#db-'+ID).val(),
                 "schema-name": $('#schema-name-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
-                "query": $('#query-'+ID).val()}
+                //"query": $('#query-'+ID).val()
+            }
             ]}
 
             var formDataSchemaPostgis = new FormData();

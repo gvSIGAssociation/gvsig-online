@@ -82,7 +82,9 @@ def get_schema_kml(file):
             
     layer = dataSource[0]
 
-    schema = [x.lower() for x in layer.fields]
+    schema = ['ogc_fid']
+    for x in layer.fields:
+        schema.append(x.lower())
 
     if file.endswith('.kmz'):
         
