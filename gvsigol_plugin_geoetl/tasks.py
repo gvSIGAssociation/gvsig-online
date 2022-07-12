@@ -170,7 +170,7 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Success'
             statusModel.save()
         
-        delete_tables(tables_list_name)
+        #delete_tables(tables_list_name)
     
     except Exception as e:
         logger.exception('Error running workspace')
@@ -185,7 +185,7 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Error'
             statusModel.save()
         
-        delete_tables(tables_list_name)
+        #delete_tables(tables_list_name)
         
         logger.error('ERROR: In '+n[1]['type']+' Node, '+ str(e))
         print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
