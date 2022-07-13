@@ -43,6 +43,7 @@ from . import etl_schema
 from .tasks import run_canvas_background
 
 import psycopg2
+from psycopg2 import sql
 from datetime import datetime
 import numpy as np
 import json
@@ -65,7 +66,10 @@ def create_schema(connection_params):
     cursor = connection.cursor()
 
     try:
-        create_schema = "CREATE SCHEMA IF NOT EXISTS " + schema + " AUTHORIZATION " + user + ";"
+        create_schema = sql.SQL("CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {user};").format(
+            schema = sql.SQL(schema),
+            user = sql.SQL(user)
+        )
         cursor.execute(create_schema)
 
     except Exception as e:
