@@ -14,6 +14,7 @@ import os
 import shutil
 from zipfile import ZipFile
 from gvsigol import settings
+from psycopg2 import sql
 
 def get_sheets_excel(excel, r):
     import warnings
@@ -348,9 +349,9 @@ def get_schema_postgres(dicc):
     conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur = conn.cursor()
 
-    sql ="SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '"+dicc['schema-name']+"' AND table_name   = '"+table_name+"';"
+    sql_ = sql.SQL("SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = %s AND table_name   = %s;")
 
-    cur.execute(sql)
+    cur.execute(sql_,[dicc['schema-name'], table_name])
     listSchema = []
 
     if "query" in dicc:
@@ -437,8 +438,8 @@ def get_table_name_postgres(dicc):
     conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
     cur = conn.cursor()
     
-    sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '"+ dicc['schema-name']+"'"
-    cur.execute(sql)
+    sql_ = "SELECT table_name FROM information_schema.tables WHERE table_schema = %s"
+    cur.execute(sql_, [dicc['schema-name']])
     conn.commit()
     listSchema = []
     for row in cur:

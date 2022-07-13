@@ -19,7 +19,7 @@ from .models import database_connections
 import requests
 import base64
 from datetime import date, datetime
-from sqlalchemy import create_engine, table, select
+from sqlalchemy import create_engine
 from django.contrib.gis.gdal import DataSource
 import re
 from zipfile import ZipFile
