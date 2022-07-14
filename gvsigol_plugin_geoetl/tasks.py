@@ -7,9 +7,10 @@ from celery.utils.log import get_task_logger
 from .models import ETLstatus
 from gvsigol import settings
 
-from . import etl_tasks
+from . import etl_tasks, views
 
 import psycopg2
+from psycopg2 import sql
 
 logger = get_task_logger(__name__)
 
@@ -221,10 +222,67 @@ def delete_tables(nodes):
             if n not in tables and n != None:
                 tables.append(n)
 
-    string_tables = ('", '+settings.GEOETL_DB["schema"]+ '."').join(tables)
+    for tbl in tables:
 
-    sqlDrop = 'DROP TABLE IF EXISTS '+settings.GEOETL_DB["schema"]+ '."'+string_tables+'"'
-    cur_.execute(sqlDrop)
-    conn_.commit()
+        sqlDrop = sql.SQL('DROP TABLE IF EXISTS {}.{}').format(
+            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(tbl),
+        )
+        cur_.execute(sqlDrop)
+        conn_.commit()
     conn_.close()
     cur_.close()
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_clean(**kwargs):
+    my_task_name = 'gvsigol_plugin_geoetl.periodic_clean'
+    if not PeriodicTask.objects.filter(name=my_task_name).exists():
+
+        schedule, _ = CrontabSchedule.objects.get_or_create(
+            minute='00',
+            hour='22',
+            day_of_week='*',
+            day_of_month='*',
+            month_of_year='*'
+        )
+        PeriodicTask.objects.create(
+            crontab=schedule,
+            name=my_task_name,
+            task='gvsigol_plugin_geoetl.tasks.periodic_clean',
+        )
+
+@celery_app.task   
+def periodic_clean():
+    statusModel  = ETLstatus.objects.all()
+
+    response = {"run": 'false'}
+
+    for sm in statusModel:
+        if sm.status == 'Running':
+            response['run'] = 'true'
+            break
+    
+    if response['run'] == 'false':
+        connection_params = settings.GEOETL_DB
+
+        user = connection_params.get('user')
+        schema = connection_params.get('schema')
+
+        connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
+        cursor = connection.cursor()
+
+        drop_schema = sql.SQL("DROP SCHEMA {schema} CASCADE;").format(
+            schema = sql.SQL(schema)
+        )
+        cursor.execute(drop_schema)
+        connection.commit()
+
+        create_schema = sql.SQL("CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {user};").format(
+            schema = sql.SQL(schema),
+            user = sql.SQL(user)
+        )
+        cursor.execute(create_schema)
+        connection.commit()
+        
+        connection.close()
+        cursor.close()

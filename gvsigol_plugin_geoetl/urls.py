@@ -29,4 +29,6 @@ urlpatterns = [
     path('etl/etl_schema_kml/', views.etl_schema_kml, name='etl_schema_kml'),
     path('etl/etl_schemas_name_postgres/', views.etl_schemas_name_postgres, name='etl_schemas_name_postgres'),
     path('etl/etl_table_name_postgres/', views.etl_table_name_postgres, name='etl_table_name_postgres'),
+    path('etl/etl_workspace_is_running/', views.etl_workspace_is_running, name='etl_workspace_is_running'),
+    path('etl/etl_clean_tmp_tables/', views.etl_clean_tmp_tables, name='etl_clean_tmp_tables'),
 ]

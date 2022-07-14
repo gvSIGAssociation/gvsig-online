@@ -15,7 +15,7 @@
 						<button id="button-upload-workspace-etl" class="btn btn-block btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</button>
 					</div>
 					<div class="box-tools pull-right">
-						<button id="button-back-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i> {% trans "Back" %}</button>
+						<button id="button-clean-tmp" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title="{% trans "Clean temporal tables" %}"><i class="fa fa-trash margin-r-5"></i> {% trans "Clean" %}</button>
 					</div>
 				</div>
 			</div>
@@ -278,6 +278,32 @@
 		</div>
 	</div>
 
+	<!-- Modal clean temporal tables-->
+	<div id="modal-clean-tmp-tables" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+			
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">{% trans "Clean temporal tables" %}</h4>
+				</div>
+
+				<div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600; font-size: 15px;">{% trans 'Some ETL workspace is running. Are you sure you want to drop the temporary tables? ' %}</p>
+                        </div>
+                    </div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
+					<button type="button" class="btn btn-default btn-sm" id="accept-clean-tmp">{% trans "Clean" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endif %}
 
 {% endblock %}
@@ -344,9 +370,48 @@
 
 		$('[data-toggle-second="tooltip"]').tooltip();
 
-		$('#button-back-canvas').on('click', function (){
-			window.history.back();
+		$('#button-clean-tmp').on('click', function (){
+
+			$.ajax({
+					type: 'POST',
+					async: false,
+					url: '/gvsigonline/etl/etl_workspace_is_running/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success	:function(response){
+
+						if (response.run == 'true'){
+
+							$('#modal-clean-tmp-tables').modal('show')
+
+						}
+					},
+					error: function(){}
+				});
+		
 		});
+
+		$('#accept-clean-tmp').on('click', function (){
+			CleanTemporalTables()
+		})
+
+
+		function CleanTemporalTables(){
+			$('#modal-clean-tmp-tables').modal('hide')
+
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/etl/etl_clean_tmp_tables/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(){},
+				error: function(){}
+			});
+
+		}
 
 		$('#button-new-empty-canvas').on('click', function (){
 			location.href = '/gvsigonline/etl/etl_canvas/';
