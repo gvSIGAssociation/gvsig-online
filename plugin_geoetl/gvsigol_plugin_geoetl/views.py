@@ -865,3 +865,53 @@ def etl_table_name_postgres(request):
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")
+
+
+@login_required()
+@staff_required
+def etl_workspace_is_running(request):
+    if request.method == 'POST':
+        statusModel  = ETLstatus.objects.all()
+
+        response = {"run": 'false'}
+
+        for sm in statusModel:
+            if sm.status == 'Running':
+                response['run'] = 'true'
+                break
+        
+        if response['run'] == 'false':
+            etl_clean_tmp_tables(request)
+
+    return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
+@login_required()
+@staff_required
+def etl_clean_tmp_tables(request):
+
+    connection_params = settings.GEOETL_DB
+
+    user = connection_params.get('user')
+    schema = connection_params.get('schema')
+
+    connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
+    cursor = connection.cursor()
+
+    drop_schema = sql.SQL("DROP SCHEMA {schema} CASCADE;").format(
+        schema = sql.SQL(schema)
+    )
+    cursor.execute(drop_schema)
+    connection.commit()
+
+    create_schema = sql.SQL("CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {user};").format(
+        schema = sql.SQL(schema),
+        user = sql.SQL(user)
+    )
+    cursor.execute(create_schema)
+    connection.commit()
+    
+    connection.close()
+    cursor.close()
+    
+    response = {}
+    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
