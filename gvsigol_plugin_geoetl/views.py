@@ -46,7 +46,6 @@ from .tasks import run_canvas_background
 import psycopg2
 from psycopg2 import sql
 from datetime import datetime
-import numpy as np
 import json
 import os
 
