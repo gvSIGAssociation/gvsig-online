@@ -101,7 +101,7 @@ zipp==3.4.1
 
 # uwsgi server
 uwsgi==2.0.18
-gevent==1.4.0
+#gevent==1.4.0
 #gevent==21.1.2
 #greenlet==0.4.12
 
