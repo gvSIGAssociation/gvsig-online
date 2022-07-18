@@ -22,6 +22,7 @@
 @author: carlesmarti <carlesmarti@scolab.es>
 '''
 
+from urllib import response
 from django.shortcuts import HttpResponse, render, redirect
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
@@ -255,7 +256,12 @@ def save_periodic_workspace(request, workspace):
         jsonCanvas = json.loads(request.POST['workspace'])
     except:
         jsonCanvas = json.loads(workspace.workspace)
-    
+
+    if workspace.parameters:
+        params = json.loads(workspace.parameters)
+    else:
+        params = None
+
     my_task_name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id)
 
     if day == 'every':
@@ -275,7 +281,7 @@ def save_periodic_workspace(request, workspace):
         PeriodicTask.objects.create(
             interval=schedule,
             name=my_task_name,
-            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id}),
+            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id, 'parameters': params}),
             task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
         )
     else:
@@ -299,7 +305,7 @@ def save_periodic_workspace(request, workspace):
         PeriodicTask.objects.create(
             crontab=schedule,
             name=my_task_name,
-            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id}),
+            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id, 'parameters': params}),
             task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
         )
 
@@ -370,6 +376,7 @@ def etl_workspace_add(request):
             id = int(request.POST.get('id'))
             user = ws.username
             name = request.POST.get('name')
+            params = ws.parameters
             exists = name_user_exists(id, name, user)
             if exists:
                 response = {
@@ -384,7 +391,8 @@ def etl_workspace_add(request):
                     name = name,
                     description = request.POST.get('description'),
                     workspace = request.POST.get('workspace'),
-                    username = user
+                    username = user,
+                    parameters = params
                     
                 )
                 workspace.save()
@@ -405,7 +413,8 @@ def etl_workspace_add(request):
                     name = name,
                     description = request.POST.get('description'),
                     workspace = request.POST.get('workspace'),
-                    username = user
+                    username = user,
+                    parameters = params
                     
                 )
                 workspace.save()
@@ -425,7 +434,8 @@ def etl_workspace_add(request):
                 name = request.POST.get('name'),
                 description = request.POST.get('description'),
                 workspace = request.POST.get('workspace'),
-                username = user
+                username = user,
+                parameters = None
             )
             workspace.save()
         
@@ -463,6 +473,8 @@ def etl_workspace_update(request):
     if request.method == 'POST':
         lgid = request.POST['id']
         instance  = ETLworkspaces.objects.get(id=int(lgid))
+        params = instance.parameters
+
         if request.POST.get('superuser') == 'false':
             
             user = instance.username
@@ -480,7 +492,8 @@ def etl_workspace_update(request):
                 name = name,
                 description = request.POST.get('description'),
                 workspace = instance.workspace,
-                username = user
+                username = user,
+                parameters = params
             )
             workspace.save()
         else:
@@ -489,6 +502,7 @@ def etl_workspace_update(request):
             id = int(request.POST.get('id'))
             name = request.POST.get('name')
             exists = name_user_exists(id, name, user)
+            
             if exists:
                 response = {
                     'exists': 'true',
@@ -500,7 +514,8 @@ def etl_workspace_update(request):
                 name = name,
                 description = request.POST.get('description'),
                 workspace = instance.workspace,
-                username = user
+                username = user,
+                parameters = params
             )
             workspace.save()            
 
@@ -569,13 +584,18 @@ def etl_read_canvas(request):
                 id_ws = request.POST['id_ws']
                 ws  = ETLworkspaces.objects.get(id=int(id_ws))
                 jsonCanvas = json.loads(ws.workspace)
+                if ws.parameters:
+                    params = json.loads(ws.parameters)
+                else:
+                    params = None
 
             else:
 
                 jsonCanvas = json.loads(request.POST['jsonCanvas'])
                 id_ws = None
+                params = None
 
-            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws})
+            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws, 'parameters': params})
             #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': id_ws})
  
         else:
@@ -915,3 +935,44 @@ def etl_clean_tmp_tables(request):
     
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+
+
+@login_required()
+@staff_required
+def get_workspace_parameters(request):
+    if request.method == 'POST':
+        
+        ws = ETLworkspaces.objects.get(id = request.POST['id'])
+
+        if ws.parameters:
+
+            response = json.loads(ws.parameters)
+        else:
+            response = {"db": "", 
+                        "sql-before": "", 
+                        "sql-after": ""}
+
+        response['dbcs'] = []
+
+        databases  = database_connections.objects.all()
+
+        for db in databases:
+            response['dbcs'].append({"name": db.name, "type": db.type})
+
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
+@login_required()
+@staff_required
+def set_workspace_parameters(request):
+    if request.method == 'POST':
+
+        ws = ETLworkspaces.objects.get(id = request.POST['id'])
+
+        params = '{"db": "'+request.POST['db']+'", "sql-before": "'+request.POST['sql-before']+'", "sql-after": "'+request.POST['sql-after']+'"}'
+
+        ws.parameters = params
+        ws.save()
+
+        response = {}
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')

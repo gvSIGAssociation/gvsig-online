@@ -35,6 +35,7 @@
 								<th></th>
 								<th></th>
 								<th></th>
+								<th></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -64,6 +65,7 @@
 									<td></td>
 									<td></td>
 									<td></td>
+									<th></th>
 								</tr>
 							{% endfor %}
 						</tbody>
@@ -304,6 +306,62 @@
 			</div>
 		</div>
 	</div>
+
+<!-- Modal to update a workspace-->
+<div id="modal-set-parameters-workspace" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+		
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Set parameters for workspace" %}</h4>
+			</div>
+
+			<div class="modal-body">
+				<form id="layer-group-form" role="form">
+
+					<div class="row">
+						<div class="col-md-12">
+							<label for="etl_id">ID</label>
+							<input placeholder = "{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<label form="db" class="col-form-label">{% trans "DB Connection" %}</label>
+							<select id="db" class="form-control"></select>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<label class="col-form-label">{% trans "SQL before running workspace" %}</a></label>
+							<textarea id="sql-before" rows="3" class="form-control"></textarea>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<label class="col-form-label">{% trans "SQL after running workspace" %}</a></label>
+							<textarea id="sql-after" rows="3" class="form-control"></textarea>
+						</div>
+					</div>					
+
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
+				<button type="button" class="btn btn-default btn-sm" id="set-parameters">{% trans "Set parameters" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
 {% endif %}
 
 {% endblock %}
@@ -342,6 +400,10 @@
 				}
 			},
 			"columnDefs": [{
+				"targets": -1,
+				"data": null,
+				"defaultContent": '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>'
+			},{
 				"targets": -2,
 				"data": null,
 				"defaultContent": '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
@@ -355,9 +417,9 @@
 				"data": null,
 				"defaultContent": '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>'
 			},{
-				"targets": -1,
+				"targets": -5,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>'
+				"defaultContent": '<button type="button" name="button-set-parameters-workspace" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Set parameters" %}' + '" class="btn btn-secondary"><i class="fa fa-bars"></i></button>'
 			},{
 				"targets": 1,
 				"data": null,
@@ -516,6 +578,74 @@
 			else if (this.name == "button-run-workspace-etl"){
 				runWorkspace(data);  
 			}
+
+			else if (this.name == "button-set-parameters-workspace"){
+
+				$(".modal-body #etl_id").val( data[0] );
+
+				$.ajax({
+					type: 'POST',
+					async: false,
+					data: {
+						"id": data[0],
+					},
+					url: '/gvsigonline/etl/get_workspace_parameters/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success	:function(response){
+
+						console.log(response)
+
+						dbc = response['dbcs']
+
+						for(i=0;i<dbc.length;i++){
+
+							$('#db').append(
+								'<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+							);
+						};
+
+						if (response['db'] != ''){
+							$(".modal-body #db").val( response['db'] );
+						}
+
+						$(".modal-body #sql-before").val( response['sql-before'].replace( /_##_/g, '"'));
+
+						$(".modal-body #sql-after").val( response['sql-after'].replace( /_##_/g, '"'));
+
+						$('#modal-set-parameters-workspace').modal('show')
+					},
+					error: function(){}
+				});
+				 
+			}
+
+		});
+
+
+		$('#set-parameters').on('click', function (){
+
+		$.ajax({
+				type: 'POST',
+				async: false,
+				data:{
+					"id": $(".modal-body #etl_id").val(),
+					"db": $(".modal-body #db").val(),
+					"sql-before": $(".modal-body #sql-before").val().replace(/"/g, '_##_'),
+					"sql-after": $(".modal-body #sql-after").val().replace(/"/g, '_##_')
+				},
+				url: '/gvsigonline/etl/set_workspace_parameters/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+
+					$('#modal-set-parameters-workspace').modal('hide')
+
+				},
+				error: function(){}
+			});
 
 		});
 

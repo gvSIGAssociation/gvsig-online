@@ -31,4 +31,6 @@ urlpatterns = [
     path('etl/etl_table_name_postgres/', views.etl_table_name_postgres, name='etl_table_name_postgres'),
     path('etl/etl_workspace_is_running/', views.etl_workspace_is_running, name='etl_workspace_is_running'),
     path('etl/etl_clean_tmp_tables/', views.etl_clean_tmp_tables, name='etl_clean_tmp_tables'),
+    path('etl/get_workspace_parameters/', views.get_workspace_parameters, name='get_workspace_parameters'),
+    path('etl/set_workspace_parameters/', views.set_workspace_parameters, name='set_workspace_parameters'),
 ]
