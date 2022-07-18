@@ -4,13 +4,14 @@ from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 from celery.utils.log import get_task_logger
 
-from .models import ETLstatus
+from .models import ETLstatus, database_connections
 from gvsigol import settings
 
 from . import etl_tasks, views
 
 import psycopg2
 from psycopg2 import sql
+import json
 
 logger = get_task_logger(__name__)
 
@@ -20,6 +21,7 @@ def run_canvas_background(**kwargs):
 
     jsonCanvas = kwargs["jsonCanvas"]
     id_ws = kwargs["id_ws"]
+    params = kwargs["parameters"]
     
     if id_ws:
         try:
@@ -44,7 +46,14 @@ def run_canvas_background(**kwargs):
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
         statusModel.message = 'Running'
         statusModel.status = 'Running'
-        statusModel.save()         
+        statusModel.save()
+
+
+    if params:
+        if params['sql-before'] != '':
+            executeSQL(params['db'], params['sql-before'])
+
+
     
     nodes=[]
     edges =[]
@@ -159,6 +168,10 @@ def run_canvas_background(**kwargs):
             for m in move:
                 parameters = m['entities'][0]['parameters'][0]
                 method_to_call = etl_tasks.move (m['type'], parameters)
+
+        if params:
+            if params['sql-after'] != '':
+                executeSQL(params['db'], params['sql-after'])
 
         if id_ws:
             statusModel  = ETLstatus.objects.get(id_ws = id_ws)
@@ -286,3 +299,21 @@ def periodic_clean():
         
         connection.close()
         cursor.close()
+
+
+def executeSQL(db, query):
+
+    db_model  = database_connections.objects.get(name = db)
+
+    params_str = db_model.connection_params
+    connection_params = json.loads(params_str)
+
+    connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
+    cursor = connection.cursor()
+
+    sql_ = sql.SQL(query.replace('_##_', '"'))
+    cursor.execute(sql_)
+    connection.commit()
+    
+    connection.close()
+    cursor.close()
