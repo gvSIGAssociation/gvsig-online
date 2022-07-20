@@ -34,7 +34,8 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('new_cartociudad', _('(New) Cartography of CartoCiudad')),
                 ('user', _('Other data sources')),
                 ('ide_uy', _('IDE Uruguay Geocoder')),
-                ('postgres', _('Simple Geocoder'))
+                ('postgres', _('Simple Geocoder')),
+                ('generic', _('Generic API Service Geocoder')),
             )
 
 GEOCODING_PROVIDER = {

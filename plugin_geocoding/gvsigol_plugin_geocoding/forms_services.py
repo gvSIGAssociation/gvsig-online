@@ -47,6 +47,11 @@ class ProviderForm(forms.ModelForm):
     
     params = forms.CharField(label=_('Parameters'), required=False, disabled=False, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
+    candidates_url = forms.CharField(label=_('Candidates URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    find_url = forms.CharField(label=_('Find URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    reverse_url = forms.CharField(label=_('Reverse URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    max_results = forms.CharField(label=_('Limit'), required=False, max_length=3, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+
 
 class ProviderUpdateForm(forms.ModelForm):
     class Meta:
@@ -66,5 +71,10 @@ class ProviderUpdateForm(forms.ModelForm):
     category = forms.CharField(label=_('Category'),  required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
     params = forms.CharField(label=_('Parameters'), required=True, disabled=False, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
+
+    candidates_url = forms.CharField(label=_('Candidates URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    find_url = forms.CharField(label=_('Find URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    reverse_url = forms.CharField(label=_('Reverse URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    max_results = forms.CharField(label=_('Limit'), required=False, max_length=3, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
     

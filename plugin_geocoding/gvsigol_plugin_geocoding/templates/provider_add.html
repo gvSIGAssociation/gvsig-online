@@ -44,6 +44,35 @@
 								{{ form.type }}									
 							</div>
 						</div>
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_candidates">{% trans "Candidates URL" %}</label>
+								{{ form.candidates_url }}						
+							</div>
+						</div>	
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_find">{% trans "Find URL" %}</label>
+								{{ form.find_url }}						
+							</div>
+						</div>	
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_reverse">{% trans "Reverse URL" %}</label>
+								{{ form.reverse_url }}						
+							</div>
+						</div>	
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_limit">{% trans "Limit" %}</label>
+								{{ form.max_results }}						
+							</div>
+						</div>	
+
 						
 						<div class="row user-param cartociudad-param postgres-param hidden">
 							<div class="col-md-12 form-group">	

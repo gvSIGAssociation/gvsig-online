@@ -95,7 +95,24 @@ def provider_add(request):
             
             params = {}
             
-            if type=='cartociudad' or type=='user' or type=='postgres':
+            if type == 'generic':
+                if 'params' in request.POST:
+                    candidates = request.POST.get('candidates_url')
+                    find = request.POST.get('find_url')
+                    reverse = request.POST.get('reverse_url')
+                    try:
+                        limit = int(request.POST.get('max_results'))
+                    except:
+                        limit = 10
+                    params = {
+                        'candidates_url': candidates,
+                        'find_url': find,
+                        'reverse_url': reverse,
+                        'max_results': limit,
+                        'filter' : ''
+                    }
+
+            elif type=='cartociudad' or type=='user' or type=='postgres':
                 if 'params' in request.POST:
                     params = json.loads(request.POST.get('params'))
                 workspace = request.POST.get('workspace')
@@ -248,6 +265,22 @@ def provider_update(request, provider_id):
             params = ast.literal_eval(request.POST.get('params'))
         has_errors = False
         
+        if type=='generic':
+            candidates = request.POST.get('candidates_url')
+            find = request.POST.get('find_url')
+            reverse = request.POST.get('reverse_url')
+            try:
+                limit = int(request.POST.get('max_results'))
+            except:
+                limit = 10
+            params = {
+                'candidates_url': candidates,
+                'find_url': find,
+                'reverse_url': reverse,
+                'max_results': limit,
+                'filter' : ''
+            }
+
         if type=='cartociudad' or type=='user' or type=='postgres':
             workspace = request.POST.get('provider-workspace')
             datastore = request.POST.get('provider-datastore')
@@ -299,6 +332,12 @@ def provider_update(request, provider_id):
         form = ProviderUpdateForm(instance=provider)
         params = json.loads(provider.params)
         form.fields['category'].initial = provider.category
+
+        if provider.type == 'generic':
+            form.fields['candidates_url'].initial = params["candidates_url"]
+            form.fields['find_url'].initial = params["find_url"]
+            form.fields['reverse_url'].initial = params["reverse_url"]
+            form.fields['max_results'].initial = params["max_results"]
         
         if provider.type == 'user' or provider.type == 'cartociudad' or provider.type == 'postgres':
             datastore_id = params["datastore_id"]

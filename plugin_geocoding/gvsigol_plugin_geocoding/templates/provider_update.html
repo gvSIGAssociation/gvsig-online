@@ -49,6 +49,40 @@
 							</div>
 							<input type="hidden" name="provider-type" value="{{ type }}"/>
 						</div>
+
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_candidates">{% trans "Candidates URL" %}</label>
+								{{ form.candidates_url }}						
+							</div>
+							<input type="hidden" id="provider-candidates_url" name="provider-candidates_url" value="{{ candidates_url }}"/>
+						</div>	
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_find">{% trans "Find URL" %}</label>
+								{{ form.find_url }}						
+							</div>
+							<input type="hidden" id="provider-find_url" name="provider-find_url" value="{{ find_url }}"/>
+						</div>	
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_reverse">{% trans "Reverse URL" %}</label>
+								{{ form.reverse_url }}						
+							</div>
+							<input type="hidden" id="provider-reverse_url" name="provider-reverse_url" value="{{ reverse_url }}"/>
+						</div>	
+
+						<div class="row generic-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_limit">{% trans "Limit" %}</label>
+								{{ form.max_results }}						
+							</div>
+							<input type="hidden" id="provider-max_results" name="provider-max_results" value="{{ max_results }}"/>
+						</div>	
+
 						
 						<div class="row user-param cartociudad-param postgres-param hidden">
 							<div class="col-md-12 form-group">	
