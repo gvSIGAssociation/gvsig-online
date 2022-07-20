@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from .views import BrowserView, ExportToDatabaseView, UploadView, UploadFileView, DeleteFileView, DirectoryCreateView, UnzipFileView, download_file
+from . import views
 
 app_name="gvsigol_filemanager"
 urlpatterns = [
@@ -13,6 +14,7 @@ urlpatterns = [
     path('unzip/file/', UnzipFileView.as_view(), name='unzip-file'),
     path('create/directory/', DirectoryCreateView.as_view(), name='create-directory'),
     path('export_to_database/', ExportToDatabaseView.as_view(), name='export-to-database'),
+    path('list_exports/', views.list_exports, name='list_exports'),
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
     path('download/<path:filepath>', download_file, name='fmdownload'),

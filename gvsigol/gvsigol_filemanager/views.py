@@ -1,3 +1,4 @@
+from datetime import datetime
 from gvsigol_auth import auth_backend
 from gvsigol_services.models import Datastore
 from gvsigol_services import geographic_servers
@@ -26,6 +27,8 @@ from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import staff_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import render
+from .tasks import postBackground
+from .models import exports_historical
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
@@ -109,8 +112,7 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
         context['is_etl_plugin_installed'] = 'gvsigol_plugin_etl' in INSTALLED_APPS
         
         return context
-
-
+ 
 class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, TemplateView):
     template_name = 'browser/export_to_database.html'
     raise_exception = True
@@ -133,48 +135,68 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         return context
     
     def post(self, request, *args, **kwargs):
-        form = PostgisLayerUploadForm(request.POST, request.FILES, user=request.user)
-        if form.is_valid():
-            try:
-                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
-                if gs.exportShpToPostgis(form.cleaned_data):
-                    #request.session.message = _('Export process done successfully')
-                    messages.add_message(request, messages.INFO, _('Export process done successfully'))
-                    return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
-            except rest_geoserver.RequestWarning as e:
-                    msg = _('Export process completed with warnings:') + ' ' + str(e)
-                    messages.add_message(request, messages.INFO, msg)
-                    return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
-            except rest_geoserver.RequestError as e:
-                message = e.server_message
-                #request.session['message'] = str(message)
-                messages.add_message(request, messages.ERROR, str(message))
-                """
-                if e.status_code == -1:
-                    name = form.data['name']
-                    datastore_id = form.data['datastore']
-                    datastore = Datastore.objects.get(id=datastore_id)
-                    params = json.loads(datastore.connection_params)
-                    host = params['host']
-                    port = params['port']
-                    dbname = params['database']
-                    user = params['user']
-                    passwd = params['passwd']
-                    schema = params.get('schema', 'public')
-                    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-                    i.delete_table(schema, name)
-                    i.close()
-                """
-                return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
-                
-            except Exception as exc:
-                #request.session['message'] = _('Server error') +  ":" + str(exc)
-                messages.add_message(request, messages.ERROR, _('Server error') +  ":" + str(exc))
-                return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
+
+        exports_model = exports_historical.objects.order_by('id')
+
+        if exports_model.count() >= 20:
+
+            to_remove = exports_model.count() - 19
+            i = 0
+            for exp in exports_model:
+                if i == to_remove:
+                    break
+                else:
+                    exp.delete()
+                i+=1
+
+        e = datetime.now()
+        export_md = exports_historical(
+            time = "%s-%s-%s %s:%s:%s" % (e.day, e.month, e.year, e.hour, e.minute, e.second),
+            file = request.POST.get('file_path'),
+            status = 'Running',
+            message = 'Running',
+            username = request.user.username
+        )
+
+        export_md.save()
+
+        postBackground.apply_async(kwargs = {'id': export_md.id, 'post': request.POST, 'files': request.FILES, 'username': request.user.username})
+
+        return redirect('/gvsigonline/filemanager/list_exports/')
+
+
+def list_exports(request):
+
+    exports_model = exports_historical.objects.order_by('-id')
+
+    exportations = []
+
+    for ex in exports_model:
+        export = {}
+        export['id'] = ex.id
+        export['file'] = ex.file
+        export['time'] = ex.time
+        export['status'] = ex.status
+        export['message'] = ex.message
+        export['redirect'] = ex.redirect
+        export['username'] = ex.username
+        
+        if '/' in ex.file:
+            export['back'] = '/'.join(ex.file.split('/')[:-1])
         else:
-            #request.session['message'] = _('You must fill in all fields')
-            messages.add_message(request, messages.ERROR, _('You must fill in all fields'))
-            return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
+            export['back'] = ''
+
+        exportations.append(export)
+
+    response = {'exportations': exportations}
+
+    if request.POST:
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    else:
+
+        return render(request, 'filemanager_exports_historical.html', response)
+
+
 
 class UploadView(FilemanagerMixin, TemplateView):
     template_name = 'filemanager_upload.html'
