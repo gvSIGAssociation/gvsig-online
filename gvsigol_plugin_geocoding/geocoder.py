@@ -28,6 +28,7 @@ from .cartociudad import Cartociudad
 from .nominatim import Nominatim 
 from .geocoder_postgres import GeocoderPostgres
 from .ide_uy import IdeUY
+from .generic import GenericAPI
 import json, ast
 
 
@@ -61,6 +62,10 @@ class Geocoder():
 
         if provider.type == 'ide_uy':
             geocoder[provider.type] = IdeUY(provider)
+            self.geocoders.append(geocoder)
+
+        if provider.type == 'generic':
+            geocoder[provider.type] = GenericAPI(provider)
             self.geocoders.append(geocoder)
 
         if provider.type == 'postgres':

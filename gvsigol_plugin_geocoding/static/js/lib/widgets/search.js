@@ -320,6 +320,35 @@ search.prototype.initUI = function() {
 						}
 					});
 				}
+
+				if(response.types[i] == "generic"){
+					self.menus.push({
+						text: 'Dirección de IDE de Albacete',
+						classname: 'geocoding-contextmenu', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'generic'
+								},
+								success	:function(response){
+									self.locate(response, response.srs, false);
+								},
+								error: function(xhr, status, error) {
+									  console.error(xhr.responseText);
+								}
+							});
+						}
+					});
+				}
+
 				if(response.types[i] == "postgres"){
 					self.menus.push({
 						text: 'Dirección Simple',
@@ -416,6 +445,11 @@ search.prototype.initUI = function() {
 								epsg = response.address.srs;
 							}								
 							self.locate(response.address, epsg, true);
+							let layer = self.getSearchLayer(self.map); 
+
+							if(response.address[0] && response.address[0].geom) {
+								self.drawSearchLayer(self, response.address[0].geom, layer);
+							}
 						}
 						else if (response.address["address"]) {
 							var epsg = 'EPSG:4326'; // Por defecto
@@ -434,6 +468,58 @@ search.prototype.initUI = function() {
 
 	});
 };
+
+search.prototype.drawSearchLayer = function(self, geom, layer) {
+	let format = new ol.format.WKT();
+	tramos = [geom]
+	if(tramos.length > 0) {
+		for(var i = 0; i < tramos.length; i++) {
+			var feats = format.readFeatures(tramos[i], {
+				dataProjection: 'EPSG:4326',
+				featureProjection: 'EPSG:3857'
+			});
+			layer.getSource().addFeatures(feats);
+		}
+	}	
+	self.map.addLayer(layer);
+}
+
+search.prototype.getSearchLayer = function(map) {
+	for(var i = 0; i < map.getLayers().getLength(); i++) {
+		let arr = map.getLayers().getArray()
+		if (arr[i].get('name') === 'search') {
+			arr[i].getSource().clear();
+			return arr[i];
+		}
+	}
+
+	var layer = new ol.layer.Vector({
+	  source: new ol.source.Vector({
+		  projection: 'EPSG:3857'
+	  }),
+	  style: new ol.style.Style({
+			image: new ol.style.Circle({
+	            fill: new ol.style.Fill({
+	                color: 'rgba(255, 0, 00, 0.8)'
+	            }),
+	            stroke: new ol.style.Stroke({
+		            color: 'white',
+		            width: 2
+		        }),
+	            radius: 10,
+	    	}),
+	        stroke: new ol.style.Stroke({
+	            color: 'rgba(255, 0, 0, 0.8)',
+	            width: 3
+	        })
+	  })
+	});
+			
+	layer.set('name', 'search');
+	layer.setZIndex(10000);
+	return layer;
+};
+
 
 /**
  * TODO.
@@ -517,10 +603,24 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 						callejero += '<br>OLC Asignado: ' + address.olc_Asignado;				
 					}					
 					
-					this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');					
-				}
-				else
-				{
+					this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');	
+				} else if (address.source == "generic") {
+					var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');
+					var txtPopup = "";
+					if(address.address && (address.address.trim() != 0)) {
+						txtPopup = address.address;
+					}
+					if (address.olc) {
+						txtPopup += '<br><span style="color:grey">OLC: ' + address.olc + '</span> <button onclick="navigator.clipboard.writeText(\'' + address.olc + '\');">Copiar</button>' ;	
+						txtPopup += '&nbsp;<button onclick="window.open(\'https://www.google.com/maps/place/' + address.olc.replace('+', '%2B') + '\',\'_blank\');">Google</button>' ;				
+					}
+					this.popup.show(coordinate, '<div><p>' + txtPopup + '</p></div>');	
+					let layer = this.getSearchLayer(this.map); 
+
+					if(address.geom) {
+						this.drawSearchLayer(this, address.geom, layer);
+					}
+				} else {
 					if (address instanceof Array) {
 						for (var i=0; i < address.length; i++)
 						{
@@ -579,10 +679,35 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 						txtPopup += '<br>OLC Asignado: ' + a.olc_Asignado;				
 					}					
 				}
+				if (a.source == "generic") {
+					if(a.state && (a.state == 2)){
+						txtPopup += '<br> (Aproximado)';
+					}
+					if (a.olc)
+					{
+						txtPopup += '<br><span style="color:grey">OLC: ' + a.olc + '</span> <button onclick="navigator.clipboard.writeText(\'' + a.olc + '\');">Copiar</button>' ;	
+						txtPopup += '&nbsp;<button onclick="window.open(\'https://www.google.com/maps/place/' + a.olc.replace('+', '%2B') + '\',\'_blank\');">Google</button>' ;				
+					}
+					if (a.olc_Asignado)
+					{
+						txtPopup += '<br>OLC Asignado: ' + a.olc_Asignado;				
+					}			
+					
+				}
 
 				nPopup.show(coordinate, txtPopup);
 				mCoord[0] = mCoord[0] + coordinate[0];
 				mCoord[1] = mCoord[1] + coordinate[1];
+				if (a.source == "generic") {
+					$(".ol-popup-left").find(".closeBox").click(function() {
+						for(var i = 0; i < map.getLayers().getLength(); i++) {
+							let arr = map.getLayers().getArray()
+							if (arr[i].get('name') === 'search') {
+								arr[i].getSource().clear();
+							}
+						}
+					});	
+				}
 			}
 			mCoord[0] = mCoord[0] / address.length;
 			mCoord[1] = mCoord[1] / address.length;
