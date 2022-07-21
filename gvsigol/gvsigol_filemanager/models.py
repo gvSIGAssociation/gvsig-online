@@ -7,7 +7,7 @@ class exports_historical(models.Model):
     status = models.CharField(max_length=25, null=True, blank=True)
     message = models.CharField(max_length=500, null=True, blank=True)
     redirect = models.CharField(max_length=500, null=True, blank=True)
-    username = models.CharField(max_length=30)
+    username = models.CharField(default='', max_length=30)
     
     def __str__(self):
         return self.name
