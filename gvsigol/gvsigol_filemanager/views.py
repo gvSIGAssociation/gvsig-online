@@ -160,9 +160,19 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
 
         export_md.save()
 
-        postBackground.apply_async(kwargs = {'id': export_md.id, 'post': request.POST, 'files': request.FILES, 'username': request.user.username})
+        try:
 
-        return redirect('/gvsigonline/filemanager/list_exports/')
+            postBackground.apply_async(kwargs = {'id': export_md.id, 'post': request.POST, 'files': request.FILES, 'username': request.user.username})
+
+            return redirect('/gvsigonline/filemanager/list_exports/')
+        
+        except Exception as e:
+
+            export_md.status = 'Error'
+            export_md.message = str(e)
+            export_md.save()
+
+            return redirect('/gvsigonline/filemanager/list_exports/')
 
 
 def list_exports(request):
