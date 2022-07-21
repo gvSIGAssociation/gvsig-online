@@ -231,7 +231,8 @@ function configure() {
 
 	if [ -z $CELERY_BROKER_URL ]; then
 		echo "WARNING: CELERY_BROKER_URL is not defined, deriving one assuming localhost and GVSIGOL_PASSWD"
-		CELERY_BROKER_URL="pyamqp://gvsigol:$GVSIGOL_PASSWD@localhost:5672/gvsigol"
+		RABBITMQ_PASS=`echo "$GVSIGOL_PASSWD" | jq -Rr @uri`
+		CELERY_BROKER_URL="pyamqp://gvsigol:$RABBITMQ_PASS@localhost:5672/gvsigol"
 	fi
 	grep -rl "##CELERY_BROKER_URL##"  | xargs sed -i "s ##CELERY_BROKER_URL## $CELERY_BROKER_URL g"
 	
