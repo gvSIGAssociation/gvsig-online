@@ -231,7 +231,12 @@ function configure() {
 
 	if [ -z $CELERY_BROKER_URL ]; then
 		echo "WARNING: CELERY_BROKER_URL is not defined, deriving one assuming localhost and GVSIGOL_PASSWD"
-		RABBITMQ_PASS=`echo "$GVSIGOL_PASSWD" | jq -Rr @uri`
+		if jq --version 2> /dev/null ; then
+			RABBITMQ_PASS=`echo "$GVSIGOL_PASSWD" | jq -Rr @uri`
+		else
+			echo "WARNING: jq command is not available. RABBITMQ pass may not be correctly escaped"
+			RABBITMQ_PASS="$GVSIGOL_PASSWD"
+		fi
 		CELERY_BROKER_URL="pyamqp://gvsigol:$RABBITMQ_PASS@localhost:5672/gvsigol"
 	fi
 	grep -rl "##CELERY_BROKER_URL##"  | xargs sed -i "s ##CELERY_BROKER_URL## $CELERY_BROKER_URL g"
