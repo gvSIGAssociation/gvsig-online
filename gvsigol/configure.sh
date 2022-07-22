@@ -231,7 +231,7 @@ function configure() {
 
 	if [ -z $CELERY_BROKER_URL ]; then
 		echo "WARNING: CELERY_BROKER_URL is not defined, deriving one assuming localhost and GVSIGOL_PASSWD"
-		if jq --version 2> /dev/null ; then
+		if jq --version > /dev/null ; then
 			RABBITMQ_PASS=`echo "$GVSIGOL_PASSWD" | jq -Rr @uri`
 		else
 			echo "WARNING: jq command is not available. RABBITMQ pass may not be correctly escaped"
