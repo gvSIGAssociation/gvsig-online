@@ -1796,10 +1796,11 @@ class Geoserver():
                 # It also safe if the geoserver/gvsigol rules get incoherent
                 result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
 
-            who_can_write = []
             write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True).distinct()
             if len(write_roles) > 0:
                 who_can_write = [ auth_backend.to_provider_rolename(write_role, provider="geoserver") for write_role in write_roles ]
+            elif layer.type.startswith('c_'):
+                who_can_write = []
             else:
                 who_can_write = [ auth_backend.to_provider_rolename(auth_backend.get_admin_role(), provider="geoserver") ] 
             write_rule_path = workspace.name + "." + layer.name + ".w"
