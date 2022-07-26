@@ -1768,12 +1768,11 @@ class Geoserver():
             if layer.public:
                 who_can_read = [ "*" ]
             else:
-                read_roles_query = LayerReadRole.objects.filter(layer=layer)
-                # FIXME OIDC CMI role prefix?
-                if read_roles_query.count()>0: # layer is not public
-                    who_can_read = [ auth_backend.to_provider_rolename(read_role, provider="geoserver") for read_role in read_roles_query ]
+                read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True).distinct()
+                if len(read_roles)>0:
+                    who_can_read = [ auth_backend.to_provider_rolename(read_role, provider="geoserver") for read_role in read_roles ]
                 else:
-                    who_can_read = [ "ROLE_ADMIN"]
+                    who_can_read = [ auth_backend.to_provider_rolename(auth_backend.get_admin_role(), provider="geoserver") ]
             
             datastore = Datastore.objects.get(id=layer.datastore_id)
             workspace = Workspace.objects.get(id=datastore.workspace_id)
@@ -1798,9 +1797,11 @@ class Geoserver():
                 result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
 
             who_can_write = []
-            write_roles_query = LayerWriteRole.objects.filter(layer=layer)
-            if write_roles_query.count()>0:
-                who_can_write = [ auth_backend.to_provider_rolename(write_role, provider="geoserver") for write_role in write_roles_query ]
+            write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True).distinct()
+            if len(write_roles) > 0:
+                who_can_write = [ auth_backend.to_provider_rolename(write_role, provider="geoserver") for write_role in write_roles ]
+            else:
+                who_can_write = [ auth_backend.to_provider_rolename(auth_backend.get_admin_role(), provider="geoserver") ] 
             write_rule_path = workspace.name + "." + layer.name + ".w"
             if  len(who_can_write) > 0:
                 write_rule_roles =  ",".join(who_can_write)
