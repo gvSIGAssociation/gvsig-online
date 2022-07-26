@@ -462,13 +462,83 @@ get_admin_role = auth_backend.get_admin_role
 """
 Gets the name of the admin role, that is, a role that is always
 assigned to superusers.
+
+Returns
+-------
+str
+    The name of the admin role
+
+See also
+--------
+auth_backend.to_provider_rolename()
+auth_backend.from_provider_rolename()
 """
 get_system_users = auth_backend.get_system_users
 get_system_roles = auth_backend.get_system_roles
 get_primary_role = auth_backend.get_primary_role
 to_provider_rolename = auth_backend.to_provider_rolename
-from_provider_rolename = auth_backend.from_provider_rolename
+"""
+Converts a role name to the equivalent role name
+in the target provider namespace.
 
+The name of the roles may differ between gvSIG Online and some
+providers (for instance Geoserver) when some authentication backend
+are enabled. For instance, when the authentication backend is
+based in Django + LDAP, the gvSIG Online role "ug_test"
+is mapped as "ROLE_UG_TEST" in Geoserver. This method performs this
+mapping according to the enabled authentication backend.
+
+Parameters
+----------
+role: str
+    A role name in the gvSIG Online namespace
+provider: str
+    A provider name (e.g. "geoserver")
+
+Returns
+-------
+str
+    The name of role in the provider namespace
+
+Examples
+--------
+auth_backend.to_provider_rolename("test", "geoserver")
+(example responses: "test" or "ROLE_TEST")
+auth_backend.to_provider_rolename("ug_test", "geoserver")
+(example responses: "test" or "ROLE_TEST") "ug_test" or "ROLE_UG_TEST" dep)
+"""
+
+from_provider_rolename = auth_backend.from_provider_rolename
+"""
+Converts a role name from the provider namespace to the equivalent
+role in the gvSIG Online namespace.
+
+The name of the roles may differ between gvSIG Online and some
+providers (for instance Geoserver) when some authentication backend
+are enabled. For instance, when the authentication backend is
+based in Django + LDAP, the gvSIG Online role "ug_test"
+is mapped as "ROLE_UG_TEST" in Geoserver. This method performs this
+mapping according to the enabled authentication backend.
+
+Parameters
+----------
+role: str
+    A role name in the provider namespace
+provider: str
+    A provider name (e.g. "geoserver")
+
+Returns
+-------
+str
+    The name of role in the gvSIG Online namespace
+
+Examples
+--------
+auth_backend.from_provider_rolename("ROLE_TEST", "geoserver")
+(example responses: "test" or "ROLE_TEST")
+auth_backend.from_provider_rolename("ROLE_UG_TEST", "geoserver")
+(example responses: "ug_test" or "ROLE_UG_TEST") "ug_test" or "ROLE_UG_TEST" dep)
+"""
 
 check_group_support = auth_backend.check_group_support
 """

@@ -16,6 +16,7 @@ from requests_oauthlib import OAuth2Session
 from requests.exceptions import RequestException, ConnectionError, Timeout, TooManyRedirects
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
 from gvsigol_auth import signals
+from rest_framework.request import Request
 try:
     import threading
 except ImportError: # remove in python 3.7
@@ -26,7 +27,7 @@ KEYCLOAK_TIMEOUT = 30
 
 MAIN_SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
 STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
-SUPERUSER_ROLES = {MAIN_SUPERUSER_ROLE, 'ADMIN', 'ROLE_ADMIN'}
+SUPERUSER_ROLES = {MAIN_SUPERUSER_ROLE, 'ADMIN'}
 SYSTEM_ROLES = SUPERUSER_ROLES | {STAFF_ROLE} | {'AUTHENTICATED', 'offline_access', 'uma_authorization'}
 
 def get_admin_role():
@@ -825,6 +826,9 @@ def get_roles(request_or_user):
     """
     if isinstance(request_or_user, HttpRequest):
         claims = request_or_user.session.get('oidc_access_token_payload', {})
+        return claims.get('gvsigol_roles', [])
+    elif isinstance(request_or_user, Request):
+        claims = request_or_user._request.session.get('oidc_access_token_payload', {})
         return claims.get('gvsigol_roles', [])
     User = get_user_model()
     if isinstance(request_or_user, str):
