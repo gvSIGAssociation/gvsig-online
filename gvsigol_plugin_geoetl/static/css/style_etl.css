@@ -99,6 +99,12 @@
 
 }
 
+.column10
+{
+    float: left;
+    width: 10%;
+}
+
 .column20
 {
     float: left;
@@ -151,5 +157,11 @@
 {
     float: left;
     width: 80%;
+}
+
+.column90
+{
+    float: left;
+    width: 90%;
 }
 

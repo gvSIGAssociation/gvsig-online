@@ -10587,6 +10587,355 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// GEOCODER////
+
+trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_Geocoder",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Geocoder"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-geocoder-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('Geocoder Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Engine')+'</label>'+
+                                '<select class="form-control" id="engine-option-'+ID+'">'+
+                                    '<option value="ICV"> Geocodificador ICV - EPSG:25830</option>'+
+                                '</select>'+    
+                            '</div>'+
+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Mode')+'</label>'+
+                                '<select class="form-control" id="mode-option-'+ID+'">'+
+                                    '<option value="direct" selected = "selected"> '+gettext('Direct')+'</option>'+
+                                    '<option value="reverse"> '+gettext('Reverse')+'</option>'+
+                                '</select>'+    
+                            '</div>'+
+
+                            '<div id = "direct-'+ID+'">'+
+
+                                '<div class ="column80">'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Attribute:')+'</label>'+
+                                    '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                                '</div>'+
+
+                                '<div class ="column20">'+
+                                '<br>'+
+                                    '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
+                                    '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                                '</div>'+
+
+                                '<div>'+
+                                    '<label form="" class="col-form-label">'+gettext('Attribute selected:')+'</label>'+
+                                    '<input id="attr-selected-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" disabled>'+
+                                '</div>'+
+                            '</div>'+
+
+                            '<div id = "reverse-'+ID+'">'+
+
+                                '<div>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('X attribute:')+'</label>'+
+                                    '<select class="form-control" id="x-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Y attribute:')+'</label>'+
+                                    '<select class="form-control" id="y-'+ID+'"> </select>'+
+                                '</div>'+
+                            '</div>'+
+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="geocoder-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        $("#reverse-"+ID).slideUp("slow");
+
+        var context = this
+
+        $("#mode-option-"+ID).change(function() {
+            if($("#mode-option-"+ID).val() == 'direct'){
+
+                $("#direct-"+ID).slideDown("slow");
+                $("#reverse-"+ID).slideUp("slow");
+
+            }else if($("#mode-option-"+ID).val() == 'reverse'){
+
+                $("#direct-"+ID).slideUp("slow");
+                $("#reverse-"+ID).slideDown("slow");
+
+            }
+        });
+
+        var input = $("#attr-selected-"+ID)
+
+        $( "#add-"+ID ).click(function() {
+
+            if (input.val() == ''){
+                input.val($("#attr-"+ID).val())
+            }else{
+                input.val(input.val() +' '+ $("#attr-"+ID).val())
+            }
+
+        });
+
+        $( "#quit-"+ID ).click(function() {
+            
+            attr = $("#attr-selected-"+ID).val().split(" ")
+            attr.pop()
+            attr = attr.join(" ")
+
+            $("#attr-selected-"+ID).val(attr)
+
+          });
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+
+                    $('#attr-'+ID).empty()
+
+                    for (i = 0; i < schema.length; i++){
+                        
+                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                        $('#x-'+ID).append('<option>'+schema[i]+'</option>')
+                        $('#y-'+ID).append('<option>'+schema[i]+'</option>')
+                    }
+                }
+
+            },100);
+
+            if($("#mode-option-"+ID).val() == 'direct'){
+
+                $("#direct-"+ID).slideDown("slow");
+                $("#reverse-"+ID).slideUp("slow");
+
+            }else if($("#mode-option-"+ID).val() == 'reverse'){
+
+                $("#direct-"+ID).slideUp("slow");
+                $("#reverse-"+ID).slideDown("slow");
+            }
+            
+            $('#dialog-geocoder-'+ID).modal('show')
+
+        });
+
+        $('#geocoder-accept-'+ID).click(function() {
+
+            var paramsGeocoder = {"id": ID,
+            "parameters": [
+                {
+                "engine-option": $('#engine-option-'+ID).val(),
+                "mode-option": $('#mode-option-'+ID).val(),
+                "attr": $('#attr-'+ID).val(),
+                "attr-selected": $('#attr-selected-'+ID).val(),
+                "x": $('#x-'+ID).val(),
+                "y": $('#y-'+ID).val()
+                }
+            ]};
+
+            schemaMod =[...schemaEdge]
+
+            if($("#mode-option-"+ID).val() == 'direct'){
+                schemaMod.push('_X')
+                schemaMod.push('_Y')
+            }else{
+                schemaMod.push('_ADDRESS')
+            }
+            
+            paramsGeocoder['schema'] = schemaMod
+            paramsGeocoder['schema-old'] = schemaEdge
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsGeocoder, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-geocoder-'+ID).modal('hide')
+
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+         }
+         
+         listLabel.push([this.id,[input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        
+        this.remove(this.children.get(index+1).figure);
+        
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
 ////////////////////////////////////////////////  SALIDAS /////////////////////////////////////////////////////////
 
 //// OUTPUT POSTGIS ////

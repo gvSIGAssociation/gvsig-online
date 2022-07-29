@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
+from operator import add
 from gvsigol import settings
+from .settings import URL_GEOCODER
 
 import pandas as pd
 import psycopg2
@@ -103,6 +105,8 @@ def input_Excel(dicc):
 
         df = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
         df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+        df_obj = df.select_dtypes(['object'])
+        df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
     
     else:
         x = 0
@@ -115,10 +119,14 @@ def input_Excel(dicc):
                     df = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
                     df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
                     df['_filename'] = file
+                    df_obj = df.select_dtypes(['object'])
+                    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
                 else:
                     dfx = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
                     dfx = dfx.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
                     dfx['_filename'] = file
+                    df_obj = dfx.select_dtypes(['object'])
+                    dfx[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
                     df = df.append(dfx, sort = False)
                 x += 1
 
@@ -1053,6 +1061,10 @@ def output_Postgis(dicc):
 def input_Csv(dicc):
 
     df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8')
+
+    df_obj = df.select_dtypes(['object'])
+    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
     table_name = dicc['id']
 
     conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
@@ -1516,6 +1528,8 @@ def input_Oracle(dicc):
                 row[i] = row[i].read().replace("\x00", "\uFFFD")
 
         df_tar = pd.DataFrame([row], columns = col)
+        df_obj = df_tar.select_dtypes(['object'])
+        df_tar[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
         if count == 1:
             df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
@@ -1834,6 +1848,8 @@ def input_Indenova(dicc):
                     df = pd.json_normalize(exp_copy_low)
 
                     df = df[schema]
+                    df_obj = df.select_dtypes(['object'])
+                    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
                     if first:
                         df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
@@ -3082,6 +3098,142 @@ def trans_RemoveGeom(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+def trans_Geocoder(dicc):
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    conn_2 = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur_2 = conn_2.cursor()
+
+    sqlDrop = sql.SQL('DROP TABLE IF EXISTS {schema}.{table_target}').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target)
+        )
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} as (select * from {schema}.{table_source});').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target),
+        table_source = sql.Identifier(table_name_source)
+        )
+    cur.execute(sqlDup)
+    conn.commit()
+
+    engine = dicc["engine-option"]
+
+    mode = dicc["mode-option"]
+
+    if mode == 'direct':
+        attrs = dicc["attr-selected"].split(' ')
+
+        sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN IF NOT EXISTS "_X" FLOAT, ADD COLUMN IF NOT EXISTS "_Y" FLOAT, ADD COLUMN IF NOT EXISTS _id_temp SERIAL').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target)
+        )
+        cur.execute(sqlAlter)
+        conn.commit()
+
+        _sql = 'SELECT _id_temp,'
+        for i in attrs:
+            _sql+= '{},'
+        _sql = _sql[:-1] + ' FROM {schema}.{table_target}'
+
+        sqlSel = sql.SQL(_sql).format(
+            *[sql.Identifier(field) for field in attrs],
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target)
+        )
+        cur.execute(sqlSel)
+        conn.commit()
+
+        for row in cur:
+            
+            if engine == 'ICV':
+                address_list = []
+                for x in range (1, len(row)):
+                    if row[x]:
+                        address_list.append(str(row[x]))
+                address = ', '.join(address_list)
+                
+                r = requests.get(URL_GEOCODER['icv-direct'] % address)
+                result = json.loads(r.content.decode('utf-8')[1:-1])['results'][0]['relacionespacial']
+
+                if result.startswith('POINT'):
+                    coord = result[result.find("(")+1:result.find(")")].split(' ')
+
+                    sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_X" = %s, "_Y" = %s WHERE _id_temp = %s').format(
+                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        table_target = sql.Identifier(table_name_target)
+                    )
+                    cur_2.execute(sqlUpdate,[coord[0], coord[1],row[0]])
+                    conn_2.commit()
+
+            #Aquí podremos añadir otros motores de búsqueda
+            else:
+                pass
+
+
+    else:
+
+        _x = dicc["x"]
+        _y = dicc["y"]
+
+        sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN IF NOT EXISTS "_ADDRESS" TEXT, ADD COLUMN IF NOT EXISTS _id_temp SERIAL').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target)
+        )
+        cur.execute(sqlAlter)
+        conn.commit()
+
+        sqlSel = sql.SQL('SELECT _id_temp, {x}, {y} FROM {schema}.{table_target}').format(
+            x = sql.Identifier(_x),
+            y = sql.Identifier(_y),
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target)
+        )
+        cur.execute(sqlSel)
+        conn.commit()
+
+        for row in cur:
+
+            if engine == 'ICV':
+                r = requests.get(URL_GEOCODER['icv-reverse'] % (row[1], row[2]))
+                
+                result = json.loads(r.content.decode('utf-8'))
+                address = str(result['dtipo_vial'])+' '+str(result['nombre'])+', '+str(result['dtipo_porpk'])+' '+str(result['numero'])+', '+str(result['municipio'])
+
+                sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_ADDRESS" = %s WHERE _id_temp = %s').format(
+                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    table_target = sql.Identifier(table_name_target)
+                )
+                cur_2.execute(sqlUpdate,[address, row[0]])
+                conn_2.commit()
+
+            #Aquí podremos añadir otros motores de búsqueda
+            else:
+                pass
+
+    sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
+
+    cur.execute(sqlDropCol)
+    conn.commit()
+
+    conn_2.close()
+    cur_2.close()    
+    
     conn.close()
     cur.close()
 
