@@ -47,13 +47,6 @@ def run_canvas_background(**kwargs):
         statusModel.message = 'Running'
         statusModel.status = 'Running'
         statusModel.save()
-
-
-    if params:
-        if params['sql-before'] != '':
-            executeSQL(params['db'], params['sql-before'])
-
-
     
     nodes=[]
     edges =[]
@@ -89,6 +82,11 @@ def run_canvas_background(**kwargs):
     move = []
     
     try:
+
+        if params:
+            if params['sql-before'] != '':
+                executeSQL(params['db'], params['sql-before'])
+
         #going down the sorted list of tasks and executing them
         for s in sortedList:
             for n in nodes:
@@ -188,6 +186,7 @@ def run_canvas_background(**kwargs):
     
     except Exception as e:
         logger.exception('Error running workspace')
+        
         if id_ws:
             statusModel  = ETLstatus.objects.get(id_ws = id_ws)
             statusModel.message = str(e)[:250]
