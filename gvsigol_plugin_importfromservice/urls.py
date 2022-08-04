@@ -1,6 +1,6 @@
-from django.conf.urls import url
+from django.urls import path
 from gvsigol_plugin_importfromservice import views
 
 urlpatterns = [
-    #url(r'^samplemenubutton/get_conf/$', views.get_conf, name='get_conf'),
+    path('importfromservice/get_conf/', views.get_conf, name='get_conf'),
 ]

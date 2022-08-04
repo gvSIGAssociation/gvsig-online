@@ -13,28 +13,24 @@
 		var button = '<li role="presentation"><a id="importfromservice" role="menuitem" tabindex="-1" href="#"><i class="fa fa-globe m-r-5"></i>'+gettext("Import from service")+'</a></li>';
 		$('#gvsigol-navbar-file-menu').append(button);
 		
-		var tool = new ImportFromService(conf, map);
-		viewer.core.loadTool(tool);
-		
-		/*$.ajax({
+		$.ajax({
 			type : 'POST',
 			async : false,
-			url : '/gvsigonline/print/get_conf/',
+			url : '/gvsigonline/importfromservice/get_conf/',
 			beforeSend : function(xhr) {
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success : function(response) {
-				var url = response.sample_url;
-				
-				var tool = new SampleMenuButton(url, conf, map);
+				var tool = new ImportFromService(response, conf, map);
 				viewer.core.loadTool(tool);
 				
 				
 			},
-			error : function() {
-				messageBox.show('error', gettext('Error loading samplemenubutton plugin'));
+			error : function(e) {
+				console.log(e)
+				messageBox.show('error', gettext('Error loading importfromservice plugin'));
 			}
-		});*/
+		});
 	}
 	
 	
