@@ -373,8 +373,8 @@ coordinateCalculator.prototype.calculate = function() {
 				$('#calc-errors').append('<span>* ' + gettext('Some value is out of range') + '</span><br />');
 				
 			} else {
-				var lon = this.getDecimalDeg(parseFloat(lonDegrees), parseFloat(lonMinutes), parseFloat(lonSeconds));
-				var lat = this.getDecimalDeg(parseFloat(latDegrees), parseFloat(latMinutes), parseFloat(latSeconds));
+				var lon = this.getDecimalDeg(lonDegrees, lonMinutes, lonSeconds);
+				var lat = this.getDecimalDeg(latDegrees, latMinutes, latSeconds);
 				originCoords = [lon, lat];
 			}
 			
@@ -417,8 +417,13 @@ coordinateCalculator.prototype.calculate = function() {
 };
 
 coordinateCalculator.prototype.getDecimalDeg = function(deg, min, sec) {
-	var aux = Math.abs(deg) + (min / 60) + (sec / 3600);
-	if (deg < 0) {
+	
+	d = parseFloat(deg)
+	m = parseFloat(min)
+	s = parseFloat(sec)
+	
+	var aux = Math.abs(d) + (min / 60) + (sec / 3600);
+	if (d < 0 || deg =='-0') {
 		return -aux;
 	} else {
 		return aux;
