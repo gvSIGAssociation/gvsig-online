@@ -155,7 +155,7 @@
 								
 										<div class="row">
 											<div class="col-md-12 form-group">
-												<label class="active" for="id_time_enabled_endfield">{% trans "End time_enabled field" %}</label>
+												<label class="active" for="id_time_enabled_endfield">{% trans "End time enabled field" %}</label>
 												{{ form.time_enabled_endfield }}
 											</div>
 										</div>
@@ -599,9 +599,17 @@
 			if (id_datastore in datastore_types) {
 				if(datastore_types[id_datastore].startsWith('v_')){
 					$(".vector_fields").css("display", "block");
+
+					$("#time_enabled").attr('disabled', false)
+				
 				}
 				else {
 					$(".vector_fields").css("display", "none");
+
+					$("#time_enabled").prop('checked', false)
+					temporary_field($('#time_enabled'))
+					$("#time_enabled").attr('disabled', true)
+
 				}
 				if(datastore_types[id_datastore].startsWith('c_')){
 					$(".image_mosaic_tmp_fields").css("display", "none");

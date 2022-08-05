@@ -1763,6 +1763,7 @@ def layer_config(request, layer_id):
             logger.exception("Retrieving fields")
             fields = []
             form_groups = []
+            is_view = []
         enums = Enumeration.objects.all()
         procedures = []
         disabled_procedures = core_utils.get_setting('GVSIGOL_DISABLED_PROCEDURES', [])
