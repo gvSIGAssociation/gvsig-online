@@ -4283,10 +4283,10 @@ def cache_list(request):
     layer_list = None
     group_list = None
     if request.user.is_superuser:
-        layer_list = Layer.objects.filter(cached=True).exclude(type='WMTS')
+        layer_list = Layer.objects.filter(cached=True).exclude(type__in=['WMTS', 'XYZ'])
         group_list = LayerGroup.objects.filter(cached=True)
     else:
-        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True).exclude(type='WMTS')
+        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True).exclude(type__in=['WMTS', 'XYZ'])
         group_list = LayerGroup.objects.filter(created_by__exact=request.user.username).filter(cached=True)
     response = {
         'layers': layer_list,
