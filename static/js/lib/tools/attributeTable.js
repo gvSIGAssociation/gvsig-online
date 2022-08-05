@@ -841,6 +841,7 @@ attributeTable.prototype.zoomToSelection = function(rows) {
  * TODO
  */
 attributeTable.prototype.show = function() {
+	bottomPanel.maximizePanel();
 	bottomPanel.showPanel();
 };
 
