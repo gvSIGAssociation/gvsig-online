@@ -1425,10 +1425,11 @@ def layer_update(request, layer_id):
                 time_resolution_day = int(request.POST.get('time_resolution_day'))
                 time_resolution_hour = int(request.POST.get('time_resolution_hour'))
                 time_resolution_minute = int(request.POST.get('time_resolution_minute'))
-                time_resolution_second = int(request.POST.get('time_resolution_second'))
-                time_default_value_mode = int(request.POST.get('time_default_value_mode'))
+                time_resolution_second = int(request.POST.get('time_resolution_second'))                
             except:
                 logger.exception('Error getting time values')
+
+            time_default_value_mode = request.POST.get('time_default_value_mode')
             time_default_value = request.POST.get('time_default_value')
 
             time_resolution = request.POST.get('time_resolution')
