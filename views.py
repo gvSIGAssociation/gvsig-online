@@ -76,6 +76,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
 from gvsigol_core.models import Project, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup, TilingProcessStatus
+from gvsigol_symbology.models import Style
 from gvsigol_core.views import not_found_view
 from gvsigol_services.backend_resources import resource_manager 
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger, LayerReadRole, LayerWriteRole
@@ -2953,8 +2954,17 @@ def get_feature_info(request):
                     
                 else:
                     styles = []
+                    cluster = False
                     if 'styles' in layer:
                         styles = layer['styles']
+
+                    for s in styles:
+                        if s['is_default'] == True:
+                            name_style = s['name']
+                            ms = Style.objects.get(name = name_style)
+                            if ms.type == 'CP':
+                                cluster = True
+
                     urls.append(url)
                     query_layer = layer['query_layer']
                     ws= None
@@ -3050,30 +3060,40 @@ def get_feature_info(request):
                                 fid = geojson['features'][i].get('id')
                                 resources = []
                                 if fid.__len__() > 0:
-                                    fid = geojson['features'][i].get('id').split('.')[1]
-                                    try:
-                                        layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                                        for lr in layer_resources:
-                                            res_type = utils.get_resource_type_label(lr.type)
-                                            resource = {
-                                                'type': res_type,
-                                                'url': lr.get_url(),
-                                                'title': lr.title,
-                                                'name': lr.path.split('/')[-1],
-                                                'id': lr.id
-                                            }
-                                            resources.append(resource)
-                                    except Exception as e:
-                                        print(str(e))
+                                    if not cluster:
+                                        fid = geojson['features'][i].get('id').split('.')[1]
+                                        try:
+                                            layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                                            for lr in layer_resources:
+                                                res_type = utils.get_resource_type_label(lr.type)
+                                                resource = {
+                                                    'type': res_type,
+                                                    'url': lr.get_url(),
+                                                    'title': lr.title,
+                                                    'name': lr.path.split('/')[-1],
+                                                    'id': lr.id
+                                                }
+                                                resources.append(resource)
+                                        except Exception as e:
+                                            print(str(e))
+                                    else:
+                                        geojson['features'][i]['resources'] = resources
+                                        geojson['features'][i]['all_correct'] = resultset['response']
+                                        geojson['features'][i]['feature'] = fid
+                                        geojson['features'][i]['layer_name'] = resultset['query_layer']
+                                        
+                                        features = get_clustered_values(geojson['features'], layer.datastore.name)
 
                                 else:
                                     geojson['features'][i]['type']= 'raster'
-                                geojson['features'][i]['resources'] = resources
-                                geojson['features'][i]['all_correct'] = resultset['response']
-                                geojson['features'][i]['feature'] = fid
-                                geojson['features'][i]['layer_name'] = resultset['query_layer']
-
-                            features = geojson['features']
+                                
+                                if not cluster:
+                                    geojson['features'][i]['resources'] = resources
+                                    geojson['features'][i]['all_correct'] = resultset['response']
+                                    geojson['features'][i]['feature'] = fid
+                                    geojson['features'][i]['layer_name'] = resultset['query_layer']
+                            if not cluster:
+                                features = geojson['features']
                         else:
                             for i in range(0, len(geojson['features'])):
                                 fid = geojson['features'][i].get('id')
@@ -3083,7 +3103,7 @@ def get_feature_info(request):
                                 geojson['features'][i]['layer_name'] = resultset['query_layer']
 
                             features = geojson['features']
-                            
+
                     except Exception as e:
                         print(str(e))
                         feat = {}
@@ -3092,7 +3112,7 @@ def get_feature_info(request):
                         feat['query_layer'] = query_layer
                         features = []
                         features.append(feat)
-                        
+            
             if features:
                 full_features = full_features + features
 
@@ -3101,6 +3121,49 @@ def get_feature_info(request):
             }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+def get_clustered_values(geojson, ds_name):
+
+    datastore = Datastore.objects.get(name__exact=ds_name)
+    params = json.loads(datastore.connection_params)
+    host = params['host']
+    port = params['port']
+    dbname = params['database']
+    user = params['user']
+    passwd = params['passwd']
+
+    conn = psycopg2.connect(database=dbname, host=host, port=port, user=user, password=passwd)
+    cur = conn.cursor()
+
+    lyr_name = geojson[0]['layer_name']
+    limit = geojson[0]['properties']['count']
+
+    coordinates = geojson[0]['geometry']['coordinates']
+
+    features = []
+
+    query = sql.SQL("SELECT row_to_json(fila) FROM (SELECT * FROM {schema}.{lyr} ORDER BY ST_DISTANCE('SRID=3857;POINT({x_} {y_})'::geometry, ST_TRANSFORM(wkb_geometry, 3857)) ASC LIMIT %s) AS fila").format(
+        schema = sql.Identifier(ds_name),
+        lyr = sql.Identifier(lyr_name),
+        x_ = sql.SQL(str(coordinates[0])),
+        y_ = sql.SQL(str(coordinates[1]))
+    )
+    cur.execute(query,[limit])
+
+    for row in cur:
+        f = {}
+        f['type'] = 'Feature'
+        f['id'] =lyr_name+'.'+str(row[0]['ogc_fid'])
+        f['geometry'] = row[0]['wkb_geometry']
+        f['properties'] = row[0]
+        del f['properties']['wkb_geometry']
+        f['resources'] = []
+        f['feature'] = str(row[0]['ogc_fid'])
+        f['layer_name'] = lyr_name
+        
+        features.append(f)
+
+    return features
 
 @csrf_exempt
 def get_unique_values(request):
