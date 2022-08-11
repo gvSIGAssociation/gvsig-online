@@ -856,7 +856,7 @@ class Geoserver():
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             logger.exception('ERROR createOrUpdateSortedGeoserverLayerGroup failed')
-            raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
+            raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published. Error: "+str(e)))
         
     def deleteGeoserverLayerGroup(self, layer_group):
         try:

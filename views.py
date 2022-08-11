@@ -3150,6 +3150,16 @@ def get_clustered_values(geojson, ds_name):
     )
     cur.execute(query,[limit])
 
+    """
+    geombbox = json.dumps(geojson[0]['properties']['geomBBOX'])
+    query = sql.SQL("SELECT row_to_json(fila) FROM (SELECT * FROM {schema}.{lyr} WHERE ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON(%s), 3857), ST_TRANSFORM(wkb_geometry, 3857)) = true ) AS fila").format(
+            schema = sql.Identifier(ds_name),
+            lyr = sql.Identifier(lyr_name)
+        )
+
+    cur.execute(query,[str(geombbox)])
+    """
+
     for row in cur:
         f = {}
         f['type'] = 'Feature'
