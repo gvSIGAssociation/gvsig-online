@@ -659,10 +659,13 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
+
+        print('toc', toc)
         
         # delete the layergroup if exists
         for toc_group in toc:
             response_get = self.session.get(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", auth=auth)
+            print(response_get.status_code)
             if response_get.status_code==200:
                 r = self.session.delete(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", params={}, auth=auth)
             
@@ -695,6 +698,7 @@ class Geoserver():
                     }
                 }
                 r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth)
+                print(r.status_code)
                 if r.status_code==201:
                     return True
             
