@@ -78,7 +78,7 @@ gvsigol.tools.ShareView.prototype.getViewState = function() {
 
 gvsigol.tools.ShareView.prototype.getSharedViewState = function(description) {
 	return {
-		'pid': self.conf.pid,
+		'pid': this.conf.pid,
 		'description': description,
 		'view_state': JSON.stringify(this.getViewState())
 	};
