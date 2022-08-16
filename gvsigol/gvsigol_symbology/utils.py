@@ -250,7 +250,12 @@ def delete_library_dir(library):
     except Exception as e:
         print(('Error: %s' % e))
         return False
-    
+
+def get_relative_url(url):
+    if url.startswith(settings.BASE_URL + '/'):
+        return url[len(settings.BASE_URL):]
+    return url
+ 
 def get_online_resource(library, file_name):
     return settings.MEDIA_URL + "symbol_libraries/" + library.name + "/" + file_name
 
@@ -509,3 +514,22 @@ def get_declared_xml_encoding(xml_string):
     if m and m.lastindex == 1:
         return m.group(1)
     return 'utf-8'
+
+def set_auth_settings(request, conf):
+    conf['username'] = request.session.get('username', '')
+    if request.session.get('oidc_access_token'):
+        conf['auth_token'] = 'Bearer ' + request.session.get('oidc_access_token')
+    else:
+        conf['password'] =  request.session.get('password', '')
+
+def get_preview_url(workspace, feature_type):
+    preview_url = ''
+    if feature_type == 'PointSymbolizer':
+        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point'
+    elif feature_type == 'LineSymbolizer':
+        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'
+    elif feature_type == 'PolygonSymbolizer':
+        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+    if preview_url.startswith(settings.BASE_URL + '/'):
+        preview_url = preview_url.replace(settings.BASE_URL, '')
+    return preview_url

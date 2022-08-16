@@ -100,5 +100,5 @@ def get_conf(request, layer_id):
         'layer_name': workspace.name + ':' + layer.name,
         'style_name': workspace.name + '_' + layer.name + '_' + str(index)
     }
-
+    utils.set_auth_settings(request, conf)
     return conf
