@@ -107,8 +107,12 @@ SymbologyUtils.prototype.getAlphanumericFields = function(element){
 	return this.alphanumericFields;
 };
 
-SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
+SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl, auth_token) {
 	var self = this;
+	headers = {};
+	if (auth_token) {
+		headers['Authorization'] = auth_token;
+	}
 	$.ajax({
 		type: 'GET',
 		async: true,
@@ -121,7 +125,8 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
 			'outputFormat': 'application/json',
 			'maxFeatures': 1
 	  	},
-	  	success	:function(response){
+		headers: headers,
+	  	done: function(response, textStatus, jqXHR){
 	  		if(response.features && response.features.length > 0){
 		  		var newFeature = new ol.Feature();
 		  		var sourceCRS = 'EPSG:' + response.crs.properties.name.split('::')[1];
@@ -153,13 +158,41 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
 						view.setZoom(7);
 					}
 		  		}
-				
+			} else if (jqXHR.getResponseHeader("content-type").indexOf("application/vnd.ogc.se_xml") !== -1) {
+				// returned in cross-domain requests instead of the 401 error
+				console.log(jqXHR.status)
+				console.log(jqXHR.getAllResponseHeaders());
+				const reader = new FileReader();
+
+				// This fires after the blob has been read/loaded.
+				reader.addEventListener('loadend', (e) => {
+					const text = reader.result;
+					var parser = new DOMParser();
+					xmlDoc = parser.parseFromString(text, "text/xml");
+					var exception = xmlDoc.getElementsByTagName("ServiceException");
+					if (exception && exception.length>0) {
+						if (exception[0].getAttribute('code') == 'LayerNotDefined') {
+							messageBox.show("error", "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+						}
+					}
+				});
+				reader.readAsText(response);
 			} else {
 				console.log("ERROR no features to center map preview");
 			}
 	  	},
-	  	error: function(e){
-	  		console.log("ERROR centering map preview");
+	  	fail: function(jqXHR, textStatus, errorThrown){
+			if (jqXHR.status == 401) {
+				console.log(jqXHR.getAllResponseHeaders());
+				messageBox.show("error", "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+			}
+			else if (xjqXHRhr.status == 403) {
+				console.log(jqXHR.getAllResponseHeaders());
+				messageBox.show("error", "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+			}
+			else {
+	  			console.log("ERROR centering map preview");
+			}
 	  	}
 	});
 };

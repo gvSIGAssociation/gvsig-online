@@ -264,5 +264,5 @@ def get_conf(request, layer_id):
         'extent_epsg': resource.get('coverage').get('grid').get('crs'),
         'preview_url': preview_url
     }    
-     
+    utils.set_auth_settings(request, conf)
     return conf

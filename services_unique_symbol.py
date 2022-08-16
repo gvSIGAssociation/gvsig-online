@@ -342,15 +342,6 @@ def get_conf(request, layer_id):
     layer_url = core_utils.get_wms_url(workspace)
     layer_wfs_url = core_utils.get_wfs_url(workspace)
 
-    preview_url = ''
-    if feature_type == 'PointSymbolizer':
-        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point'    
-    elif feature_type == 'LineSymbolizer':
-        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'     
-    elif feature_type == 'PolygonSymbolizer':
-        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
-    if preview_url.startswith(settings.BASE_URL + '/'):
-        preview_url = preview_url.replace(settings.BASE_URL, '')
     conf = {
         'featureType': feature_type,
         'json_alphanumeric_fields': json.dumps(alphanumeric_fields),
@@ -362,7 +353,7 @@ def get_conf(request, layer_id):
         'style_name': workspace.name + '_' + layer.name + '_' + str(index),
         'libraries': Library.objects.all(),
         'supported_crs': json.dumps(core_utils.get_supported_crs()),
-        'preview_url': preview_url
+        'preview_url': utils.get_preview_url(workspace, feature_type)
     }
-
+    utils.set_auth_settings(request, conf)
     return conf

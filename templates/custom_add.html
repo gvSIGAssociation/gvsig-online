@@ -65,6 +65,8 @@ $(document).ready(function() {
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var layerName = "{{layer_name}}";
+	var authToken = "{{auth_token}}";
+	authenticate(layerUrl);
 	
 	var map = new ol.Map({
 		layers: [
@@ -83,9 +85,7 @@ $(document).ready(function() {
 		visible: true,
 		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
 		serverType: 'geoserver',
-		tileLoadFunction: function(image, src) {
-			imagePostFunction(image, src);
-		}
+		tileLoadFunction: imagePostFunction
 	});
 	wmsLayer = new ol.layer.Tile({
 		id: 'preview-layer',
@@ -228,47 +228,6 @@ function reloadLayerPreview (map){
 			}
 		};
 	}, this);
-}
-
-function imagePostFunction(image, src) {
-	var img = image.getImage();
-	if (typeof window.btoa === 'function') {
-		var xhr = new XMLHttpRequest();
-	  	var dataEntries = src.split("&");
-	  	var url;
-	  	var params = "";
-	  	for (var i = 0 ; i< dataEntries.length ; i++){
-	    	if (i===0){
-	      		url = dataEntries[i];  
-	      		
-	      	} else {
-	      		params = params + "&"+dataEntries[i];
-	      	}
-	  	}
-	  	xhr.open('POST', url, true);
-
-	  	xhr.responseType = 'arraybuffer';
-	  	xhr.onload = function(e) {
-	    	if (this.status === 200) {
-	      		var uInt8Array = new Uint8Array(this.response);
-	      		var i = uInt8Array.length;
-	      		var binaryString = new Array(i);
-	      		while (i--) {
-	        		binaryString[i] = String.fromCharCode(uInt8Array[i]);
-	      		}
-	      		var data = binaryString.join('');
-	      		var type = xhr.getResponseHeader('content-type');
-	      		if (type.indexOf('image') === 0) {
-	        		img.src = 'data:' + type + ';base64,' + window.btoa(data);
-	      		}
-	    	}
-	  	};
-	  	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	  	xhr.send(params);
-	  	
-	} else {
-		img.src = src;
-	}
 }
 </script>
 {% endblock %}
