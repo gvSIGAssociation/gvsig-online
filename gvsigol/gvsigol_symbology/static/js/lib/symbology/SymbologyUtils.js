@@ -109,14 +109,10 @@ SymbologyUtils.prototype.getAlphanumericFields = function(element){
 
 SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl, auth_token) {
 	var self = this;
-	headers = {};
-	if (auth_token) {
-		headers['Authorization'] = auth_token;
-	}
-	$.ajax({
+	var conf = {
 		type: 'GET',
 		async: true,
-	  	url: wfsUrl,							
+	  	url: wfsUrl,
 	  	data: {
 	  		'service': 'WFS',
 			'version': '1.1.0',
@@ -125,7 +121,7 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl, auth_token) {
 			'outputFormat': 'application/json',
 			'maxFeatures': 1
 	  	},
-		headers: headers,
+		headers: {},
 	  	done: function(response, textStatus, jqXHR){
 	  		if(response.features && response.features.length > 0){
 		  		var newFeature = new ol.Feature();
@@ -194,7 +190,15 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl, auth_token) {
 	  			console.log("ERROR centering map preview");
 			}
 	  	}
-	});
+	};
+	headers = {};
+	if (auth_token) {
+		conf['headers']['Authorization'] = auth_token;
+	}
+	else {
+		conf['xhrFields'] = {"withCredentials": true};
+	}
+	$.ajax(conf);
 };
 
 SymbologyUtils.prototype.centerMapToExtent = function(ext, epsg) {
