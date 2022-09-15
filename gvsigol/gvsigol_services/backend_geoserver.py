@@ -1835,15 +1835,16 @@ class Geoserver():
     
     def setLayerReadRules(self, layer, read_roles):
         url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
+        geoserver_admin_role = auth_backend.to_provider_rolename(auth_backend.get_admin_role(), provider='geoserver')
         if layer.public:
             who_can_read = [ "*" ]
         else:
             if len(read_roles) > 0:
                 who_can_read = [ auth_backend.to_provider_rolename(g, provider="geoserver") for g in read_roles]
-                if not 'ROLE_ADMIN' in who_can_read:
-                    who_can_read.append('ROLE_ADMIN')
+                if not geoserver_admin_role in who_can_read:
+                    who_can_read.append(geoserver_admin_role)
             else:
-                who_can_read = [ "ROLE_ADMIN"]
+                who_can_read = [ geoserver_admin_role ]
         read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
         read_rule_roles = ",".join(who_can_read)
         rules = DataRule.objects.filter(path=read_rule_path)
