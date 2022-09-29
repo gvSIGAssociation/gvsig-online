@@ -167,7 +167,7 @@ function configure() {
 	
 	#TODO: hay que llevarlo a la app 	
 	if [ -z $EMAIL_BACKEND_ACTIVE ]; then
-		EMAIL_BACKEND_ACTIVE="False"
+		EMAIL_BACKEND_ACTIVE="True"
 	else
 		if [ "$EMAIL_BACKEND_ACTIVE" = "true" ]; then
 			EMAIL_BACKEND_ACTIVE=True
@@ -197,8 +197,7 @@ function configure() {
 	fi
 	grep -rl "##EMAIL_HOST_USER##"  | xargs sed -i "s ##EMAIL_HOST_USER## $EMAIL_HOST_USER g"
 	if [ -z $EMAIL_HOST_PASSWORD ]; then
-		echo "WARNING: EMAIL_HOST_PASSWORD is not defined, using GVSIGOL_PASSWD"
-		EMAIL_HOST_PASSWORD="$GVSIGOL_PASSWD"
+		echo "WARNING: EMAIL_HOST_PASSWORD is not defined"
 	fi
 	grep -rl "##EMAIL_HOST_PASSWORD##"  | xargs sed -i "s ##EMAIL_HOST_PASSWORD## $EMAIL_HOST_PASSWORD g"
 	if [ -z $EMAIL_TIMEOUT ]; then
