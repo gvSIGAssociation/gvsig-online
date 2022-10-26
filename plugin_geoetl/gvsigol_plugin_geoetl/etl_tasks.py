@@ -1681,7 +1681,11 @@ def trans_ExplodeList(dicc):
     
     for row in cur:
         cur2 = conn.cursor()
-        for i in range (0, len(row[0])):
+        try:
+            _len = len(row[0])
+        except:
+            _len = 0
+        for i in range (0, _len):
             sqlInsert = sql.SQL('INSERT INTO {schema}.{tbl_target}  SELECT *, %s FROM {schema}.{tbl_source} WHERE "_id_temp" = %s').format(
                 schema = sql.Identifier(settings.GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
@@ -2465,11 +2469,11 @@ def trans_Intersection(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlInter = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ' st_intersection( st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) as wkb_geometry from '
+    sqlInter = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ', st_intersection( st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) as wkb_geometry from '
     sqlInter += '{schema}.{table_source_0} AS A0, {schema}.{table_source_1}  AS A1 '
-    sqlInter += 'WHERE st_intersects(A0.wkb_geometry, A1.wkb_geometry) = true)'
+    sqlInter += 'WHERE st_intersects(st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) = true)'
 
-
+   
     sql_ = sql.SQL(sqlInter).format(
         schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
@@ -2833,6 +2837,8 @@ def trans_ExecuteSQL(dicc):
                 )
                 
                 joined_list = set_value + where_value
+                print(joined_list)
+                print(_sql_.as_string(conn))
                 cur_3.execute(_sql_, joined_list)
                 conn.commit()
 

@@ -5812,7 +5812,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
         $(document).off("dblclick", "#attrs-values-"+ID+" > li > a")
 
         $(document).on("dblclick", "#attrs-values-"+ID+" > li > a", function(){
-            var text = '##"'+this.text+'"##'
+            var text = '##'+this.text+'##'
             var textarea = document.getElementById('query-'+ID)
             textarea.value = textarea.value + text
 
@@ -6062,6 +6062,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value="INTEGER"> Integer </option>'+
                                     '<option value="FLOAT"> Float </option>'+
                                     '<option value="DATE"> Date </option>'+
+                                    '<option value="BOOLEAN"> Boolean </option>'+
                                 '</select>'+
                             '</div>'+     
                             '<div class="column40">'+
