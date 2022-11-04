@@ -659,7 +659,7 @@ def get_user_projects(request):
     roles = auth_backend.get_roles(request)
     projects = Project.objects.filter(projectrole__role__in=roles) \
             | Project.objects.filter(is_public=True)
-    if request.user:
+    if request.user and request.user.is_authenticated:
         projects = projects \
             | Project.objects.filter(created_by=request.user.username)
     return projects.distinct()
