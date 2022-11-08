@@ -1,9 +1,0 @@
-Cambios para la V2
-- Cuando se suben recursos /api/v1/layers/{lyr_id}/{feat_id}/resources/ si ya existe uno con este nombre no te deja subir. 
-Habría que subirlo pero con otro nombre (sufijo incremental o timestamp). Chevi apunta a tener un parámetro override pero no se si es buena idea 
-porque los recursos son comunes para todos y te puedes cargar algo de otra persona. 
-- Versionado de las features. Ahora mismo es el cliente quien incrementa el número de versión. Está hecho y comentado para que se haga en el servidor
-pero no se puede subir porque a los de sav dejaría de irle la aplicación, así que para la v2
--Necesitamos alguna forma de descarga de un capa completa que contenga el ogc_fid porque parece que el export.py no está metiendo este campo 
-porque se lo baja de geoserver y no se porqué no lo añade
- 
