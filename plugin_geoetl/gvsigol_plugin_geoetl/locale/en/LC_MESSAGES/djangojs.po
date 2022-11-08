@@ -409,7 +409,7 @@ msgstr ""
 msgid "Cadastral Geometry Parameters"
 msgstr ""
 
-msgid "Cadastral Reference Attribute:"
+msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
 msgstr ""
 
 msgid "MGRS Parameters"
@@ -440,4 +440,418 @@ msgid "Text to Point Parameters"
 msgstr ""
 
 msgid "Insert EPSG:"
+msgstr ""
+
+msgid "Add DB"
+msgstr ""
+
+msgid "Choose path:"
+msgstr ""
+
+msgid "Select Path"
+msgstr ""
+
+msgid "Advanced Parameters"
+msgstr ""
+
+msgid "Reading options:"
+msgstr ""
+
+msgid "Single excel file"
+msgstr ""
+
+msgid "All files in a folder"
+msgstr ""
+
+msgid "Do you want to (re)-move the files after the process is over?"
+msgstr ""
+
+msgid "Select folder"
+msgstr ""
+
+msgid "For removing files leave this input empty"
+msgstr ""
+
+msgid "Encoding:"
+msgstr ""
+
+msgid "Domain:"
+msgstr ""
+
+msgid "List urban procedures:"
+msgstr ""
+
+msgid "Get procedures"
+msgstr ""
+
+msgid "ALL"
+msgstr ""
+
+msgid "Description:"
+msgstr ""
+
+msgid "Add Procedure:"
+msgstr ""
+
+msgid "From an initial date"
+msgstr ""
+
+msgid "Between dates"
+msgstr ""
+
+msgid "Current date for initial"
+msgstr ""
+
+msgid "Current date for end"
+msgstr ""
+
+msgid "Choose file:"
+msgstr ""
+
+msgid "Insert if needed"
+msgstr ""
+
+msgid "InDenova Parameters"
+msgstr ""
+
+msgid "KML/KMZ Parameters"
+msgstr ""
+
+msgid "Oracle Parameters"
+msgstr ""
+
+msgid "DB Connection:"
+msgstr ""
+
+msgid "Get owners:"
+msgstr ""
+
+msgid "Get owners"
+msgstr ""
+
+msgid "Owners:"
+msgstr ""
+
+msgid "Get tables:"
+msgstr ""
+
+msgid "Get tables"
+msgstr ""
+
+msgid "Tables:"
+msgstr ""
+
+msgid "Do you want to write a SQL statement?"
+msgstr ""
+
+msgid "SQL statement:"
+msgstr ""
+
+msgid "Get schemas:"
+msgstr ""
+
+msgid "Get schemas"
+msgstr ""
+
+msgid "Schema:"
+msgstr ""
+
+msgid "Do you want to write a SQL WHERE Clause?"
+msgstr ""
+
+msgid "SQL WHERE Clause:"
+msgstr ""
+
+msgid "String functions:"
+msgstr ""
+
+msgid "Change Attr. Type"
+msgstr ""
+
+msgid "Change Attribute Type Parameters"
+msgstr ""
+
+msgid "Attribute to change type:"
+msgstr ""
+
+msgid "To data type:"
+msgstr ""
+
+msgid "Varchar"
+msgstr ""
+
+msgid "Integer"
+msgstr ""
+
+msgid "Float"
+msgstr ""
+
+msgid "Boolean"
+msgstr ""
+
+msgid "Compare Rows"
+msgstr ""
+
+msgid "Input to comp."
+msgstr ""
+
+msgid "Equals"
+msgstr ""
+
+msgid "News"
+msgstr ""
+
+msgid "Changes"
+msgstr ""
+
+msgid "Comp. Not Used"
+msgstr ""
+
+msgid "Compare Rows Parameters"
+msgstr ""
+
+msgid "Concatenate Attr."
+msgstr ""
+
+msgid "Attributes to concatenate:"
+msgstr ""
+
+msgid "New attribute name:"
+msgstr ""
+
+msgid "Separator (opt.):"
+msgstr ""
+
+msgid "Separator"
+msgstr ""
+
+msgid "Concatenate Attributes Parameters"
+msgstr ""
+
+msgid "Current Date"
+msgstr ""
+
+msgid "Current Date Parameters"
+msgstr ""
+
+msgid "New date attribute"
+msgstr ""
+
+msgid "Data type:"
+msgstr ""
+
+msgid "Composite Filter:"
+msgstr ""
+
+msgid "Filter Duplicate"
+msgstr ""
+
+msgid "Unique"
+msgstr ""
+
+msgid "Duplicated"
+msgstr ""
+
+msgid "Filter Duplicate Parameters"
+msgstr ""
+
+msgid "Attributes that must be uniques:"
+msgstr ""
+
+msgid "Pad Attribute"
+msgstr ""
+
+msgid "Pad Attribute Parameters"
+msgstr ""
+
+msgid "Attribute to pad:"
+msgstr ""
+
+msgid "Length desired:"
+msgstr ""
+
+msgid "Side to pad:"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "Pad String:"
+msgstr ""
+
+msgid "Calculate Area"
+msgstr ""
+
+msgid "Calculate Area Parameters"
+msgstr ""
+
+msgid "New area attribute:"
+msgstr ""
+
+msgid "Explode Geometry"
+msgstr ""
+
+msgid "Filter Geom."
+msgstr ""
+
+msgid "Points"
+msgstr ""
+
+msgid "Multipoints"
+msgstr ""
+
+msgid "Lines"
+msgstr ""
+
+msgid "Multilines"
+msgstr ""
+
+msgid "Polygons"
+msgstr ""
+
+msgid "Multipolygons"
+msgstr ""
+
+msgid "Geocoder"
+msgstr ""
+
+msgid "Geocoder Parameters"
+msgstr ""
+
+msgid "Engine"
+msgstr ""
+
+msgid "Mode"
+msgstr ""
+
+msgid "Attributes selected:"
+msgstr ""
+
+msgid "Main"
+msgstr ""
+
+msgid "Secondary"
+msgstr ""
+
+msgid "Intersection"
+msgstr ""
+
+msgid "Intersection Parameters"
+msgstr ""
+
+msgid "Merge attributes of the secondary input to the final output"
+msgstr ""
+
+msgid "Remove Geom."
+msgstr ""
+
+msgid "Empty to read from input layer"
+msgstr ""
+
+msgid "Spatial Relation"
+msgstr ""
+
+msgid "Spatial Relation Parameters"
+msgstr ""
+
+msgid "Intersects"
+msgstr ""
+
+msgid "Touches"
+msgstr ""
+
+msgid "Within"
+msgstr ""
+
+msgid "Multigeometry for all features of the output"
+msgstr ""
+
+msgid "Union Parameters"
+msgstr ""
+
+msgid "WKT to Geometry Parameters"
+msgstr ""
+
+msgid "WKT string Attribute:"
+msgstr ""
+
+msgid "Explode List"
+msgstr ""
+
+msgid "Explode List Parameters"
+msgstr ""
+
+msgid "List Name:"
+msgstr ""
+
+msgid "Attribute Name:"
+msgstr ""
+
+msgid "Split Attribute"
+msgstr ""
+
+msgid "Split Attribute Parameters"
+msgstr ""
+
+msgid "String Attribute:"
+msgstr ""
+
+msgid "Split by:"
+msgstr ""
+
+msgid "Execute SQL"
+msgstr ""
+
+msgid "Execute SQL Parameters"
+msgstr ""
+
+msgid "Attributes from input:"
+msgstr ""
+
+msgid "Attributes from new connection:"
+msgstr ""
+
+msgid "Get attributes"
+msgstr ""
+
+msgid "Query:"
+msgstr ""
+
+msgid "APPEND"
+msgstr ""
+
+msgid "OVERWRITE"
+msgstr ""
+
+msgid "Entities with website in SEDIPUALB@"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Types of georeferences in the entity"
+msgstr ""
+
+msgid "No date, download all"
+msgstr ""
+
+msgid "Init date"
+msgstr ""
+
+msgid "End date"
+msgstr ""
+
+msgid "Minutes before the current date for the init date"
+msgstr ""
+
+msgid "Time Stamp"
+msgstr ""
+
+msgid "Get entities"
+msgstr ""
+
+msgid "Get types"
 msgstr ""

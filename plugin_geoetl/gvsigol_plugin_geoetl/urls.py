@@ -33,4 +33,6 @@ urlpatterns = [
     path('etl/etl_clean_tmp_tables/', views.etl_clean_tmp_tables, name='etl_clean_tmp_tables'),
     path('etl/get_workspace_parameters/', views.get_workspace_parameters, name='get_workspace_parameters'),
     path('etl/set_workspace_parameters/', views.set_workspace_parameters, name='set_workspace_parameters'),
+    path('etl/etl_entities_segex/', views.etl_entities_segex, name='etl_entities_segex'),
+    path('etl/etl_types_segex/', views.etl_types_segex, name='etl_types_segex'),
 ]

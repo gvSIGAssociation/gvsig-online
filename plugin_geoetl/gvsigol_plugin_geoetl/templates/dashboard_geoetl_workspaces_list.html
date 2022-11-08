@@ -15,7 +15,7 @@
 						<button id="button-upload-workspace-etl" class="btn btn-block btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</button>
 					</div>
 					<div class="box-tools pull-right">
-						<button id="button-clean-tmp" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title="{% trans "Clean temporal tables" %}"><i class="fa fa-trash margin-r-5"></i> {% trans "Clean" %}</button>
+						<button id="button-clean-tmp" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title='{% trans "Clean temporal tables" %}'><i class="fa fa-trash margin-r-5"></i> {% trans "Clean" %}</button>
 					</div>
 				</div>
 			</div>
@@ -595,8 +595,6 @@
 					},
 					success	:function(response){
 
-						console.log(response)
-
 						dbc = response['dbcs']
 
 						for(i=0;i<dbc.length;i++){
@@ -610,9 +608,17 @@
 							$(".modal-body #db").val( response['db'] );
 						}
 
-						$(".modal-body #sql-before").val( response['sql-before'].replace( /_##_/g, '"'));
+						try{
+							sqlbefore = response['sql-before'].join(' \n ')
+							sqlafter = response['sql-after'].join(' \n ')
+						}catch{
+							sqlbefore = ''
+							sqlafter = ''
+						}
 
-						$(".modal-body #sql-after").val( response['sql-after'].replace( /_##_/g, '"'));
+						$(".modal-body #sql-before").val( sqlbefore.replace( /_##_/g, '"'));
+
+						$(".modal-body #sql-after").val( sqlafter.replace( /_##_/g, '"'));
 
 						$('#modal-set-parameters-workspace').modal('show')
 					},

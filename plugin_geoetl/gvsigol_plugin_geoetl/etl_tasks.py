@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
+from html import entities
 from operator import add
 from gvsigol import settings
 from .settings import URL_GEOCODER
@@ -20,14 +21,13 @@ import cx_Oracle
 from .models import database_connections
 import requests
 import base64
-from datetime import date, datetime
-from sqlalchemy import create_engine
+from datetime import date, datetime, timedelta
+from sqlalchemy import create_engine, true
 from django.contrib.gis.gdal import DataSource
 import re
 from zipfile import ZipFile
 import time
-import string
-import random
+from . import etl_schema
 
 from celery.utils.log import get_task_logger
 
@@ -3026,7 +3026,7 @@ def input_Kml(dicc):
 def trans_ChangeAttrType(dicc):
 
     attr = dicc['attr']
-    data_type = dicc['data-type']
+    data_type = dicc['data-type-option']
 
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
@@ -3244,3 +3244,122 @@ def trans_Geocoder(dicc):
     cur.close()
 
     return [table_name_target]
+
+
+def input_Segex(dicc):
+
+    entity = dicc['entities-list']
+
+    types_list = dicc['types-list']
+
+    schema = dicc['schema']
+
+    if dicc['domain'] == 'PRE':
+        url = 'https://pre-%s.sedipualba.es/apisegex/' % (entity)
+    else:
+        url = 'https://%s.sedipualba.es/apisegex/' % (entity)
+
+    wsSegUser = dicc['user']
+
+    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    db = create_engine(conn_string)
+    conn = db.connect()
+
+    first = True
+
+    table_name = dicc['id']
+
+    for tp in types_list:
+
+        offset = 0
+
+        if tp != 'all':
+
+            while offset%100 == 0:
+
+                wsSegPass = etl_schema.getwsSegPass(dicc['password'])
+                
+                listGeoref = 'Georef/ListGeorefs?wsSegUser=%s&wsSegPass=%s&idEntidad=%s&idTipo=%s&offset=%s' % (wsSegUser, wsSegPass, entity, tp, offset)
+                
+                if dicc['date-segex'] == 'check-init-date':
+                    
+                    if dicc['checkbox-init'] == 'true':
+                    
+                        ts_now = datetime.now()
+
+                        subs_ts = ts_now - timedelta(minutes = int(dicc['minute-before']))
+
+                        ts_init = subs_ts.strftime('%Y-%m-%d %H:%M:%S')
+
+                    else:
+                        ts = datetime.strptime(dicc['init-date'], '%Y-%m-%dT%H:%M')
+
+                        ts_init = ts.strftime('%Y-%m-%d %H:%M:%S')
+
+                    listGeoref += '&fechaInicio=%s' % (ts_init)
+
+                elif dicc['date-segex'] == 'check-init-end-date':
+
+                    if dicc['checkbox-init'] == 'true':
+                    
+                        ts_now = datetime.now()
+
+                        subs_ts = ts_now - timedelta(minutes = int(dicc['minute-before']))
+
+                        ts_init = subs_ts.strftime('%Y-%m-%d %H:%M:%S')
+
+                    else:
+                        ts = datetime.strptime(dicc['init-date'], '%Y-%m-%dT%H:%M')
+
+                        ts_init = ts.strftime('%Y-%m-%d %H:%M:%S')
+
+                    if dicc['checkbox-end'] == 'true':
+                    
+                        ts_now = datetime.now()
+
+                        ts_end = ts_now.strftime('%Y-%m-%d %H:%M:%S')
+
+                    else:
+                        ts = datetime.strptime(dicc['end-date'], '%Y-%m-%dT%H:%M')
+
+                        ts_end = ts.strftime('%Y-%m-%d %H:%M:%S')
+
+                    listGeoref += '&fechaInicio=%s&fechaFin=%s' % (ts_init, ts_end)
+                
+                r = requests.get(url+listGeoref)
+
+                for georef in r.json()['Georefs']:
+
+                    wsSegPass = etl_schema.getwsSegPass(dicc['password'])
+
+                    getGeoref = 'Georef/GetGeoref?wsSegUser=%s&wsSegPass=%s&idEntidad=%s&idGeoref=%s' % (wsSegUser, wsSegPass, entity, georef['IdGeoref'])
+
+                    r_geof = requests.get(url+getGeoref)
+                    
+                    exp = r_geof.json()
+                    
+                    exp['Operacion']= georef['Operacion']
+                    
+                    df = pd.json_normalize(exp)
+
+                    df = df[schema]
+                    
+                    df_obj = df.select_dtypes(['object'])
+                    
+                    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
+                    if first:
+                        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+                        first = False
+                    else:
+                        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+
+                if len(r.json()['Georefs']) == 100:
+                
+                    offset += 100
+
+                else:
+
+                    offset += 10
+
+    return [table_name]
