@@ -977,7 +977,7 @@ def set_workspace_parameters(request):
         ws.save()
 
         response = {}
-<<<<<<< .mine
+
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
 
@@ -1005,7 +1005,4 @@ def etl_types_segex(request):
 
             response = json.dumps(listTypes)
             
-            return HttpResponse(response, content_type="application/json")||||||| .r7314
-        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')=======
-        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
->>>>>>> .r7372
+            return HttpResponse(response, content_type="application/json")
