@@ -943,7 +943,7 @@ def get_workspace_parameters(request):
         
         ws = ETLworkspaces.objects.get(id = request.POST['id'])
 
-        if ws.parameters:
+        if ws.parameters:          
 
             response = json.loads(ws.parameters)
         else:
@@ -968,10 +968,44 @@ def set_workspace_parameters(request):
 
         ws = ETLworkspaces.objects.get(id = request.POST['id'])
 
-        params = '{"db": "'+request.POST['db']+'", "sql-before": "'+request.POST['sql-before']+'", "sql-after": "'+request.POST['sql-after']+'"}'
+        sql_before = request.POST['sql-before'].splitlines()
+        sql_after = request.POST['sql-after'].splitlines()
+
+        params = '{"db": "'+request.POST['db']+'", "sql-before": '+str(sql_before).replace("'", '"')+', "sql-after": '+str(sql_after).replace("'", '"')+'}'
 
         ws.parameters = params
         ws.save()
 
         response = {}
+<<<<<<< .mine
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
+
+@login_required()
+@staff_required
+def etl_entities_segex(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParamsEntities'])
+
+            listEntities = etl_schema.get_entities_segex(jsParams['parameters'][0])
+
+            response = json.dumps(listEntities)
+            
+            return HttpResponse(response, content_type="application/json")
+
+def etl_types_segex(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParamsTypes'])
+
+            listTypes = etl_schema.get_types_segex(jsParams['parameters'][0])
+
+            response = json.dumps(listTypes)
+            
+            return HttpResponse(response, content_type="application/json")||||||| .r7314
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')=======
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+>>>>>>> .r7372

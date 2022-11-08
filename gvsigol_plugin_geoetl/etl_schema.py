@@ -15,6 +15,9 @@ import shutil
 from zipfile import ZipFile
 from gvsigol import settings
 from psycopg2 import sql
+from datetime import datetime
+from hashlib import sha256
+import base64
 
 def get_sheets_excel(excel, r):
     import warnings
@@ -266,75 +269,6 @@ def get_proced_indenova(dicc):
     
     return listProd
 
-"""def get_schema_indenova(dicc):
-    
-    domain = dicc['domain']
-    api_key = dicc['api-key']
-    client_id = dicc['client-id']
-    secret = dicc['secret']
-    auth = (client_id+':'+secret).encode()
-
-    if dicc['checkbox-init'] is True:
-        today = date.today()
-        init_date = today.strftime("%d/%m/%Y")
-    else:
-        in_d_list = dicc['init-date'].split('-')
-        init_date = in_d_list[2]+'/'+in_d_list[1]+'/'+in_d_list[0]
-    
-    if dicc['checkbox-end'] is True:
-        today = date.today()
-        end_date = today.strftime("%d/%m/%Y")
-    else:
-        end_d_list = dicc['end-date'].split('-')
-        end_date = end_d_list[2]+'/'+end_d_list[1]+'/'+end_d_list[0]
-
-    proced_list = dicc['proced-list']
-
-    url_auth = domain + "//api/rest/security/v1/authentication/authenticate"
-    headers_auth = {'esigna-auth-api-key': api_key, 'Authorization': "Basic ".encode()+ base64.b64encode(auth) }
-    r_auth = requests.get(url_auth, headers = headers_auth)
-    token = r_auth.content
-
-    listSchema = []
-
-    for i in proced_list:
-        if i != 'all':
-            if dicc['check'] is True:
-
-                url_date = domain + '/api/rest/bpm/v1/search/'+i+'/getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
-            else:
-                url_date = domain + "/api/rest/bpm/v1/search/"+i+"/getOpenExpsByTramAndDateIni?dateIni="+init_date
-
-            headers_token = {'esigna-auth-api-key': api_key, "Authorization": "Bearer "+token.decode()}
-            r_date = requests.get(url_date, headers = headers_token)
-            
-            if r_date.status_code == 200:
-                for j in json.loads(r_date.content.decode('utf8')):
-                    
-                    numExp = j['numExp']
-            
-                    url_cad = domain + '//api/rest/bpm/v1/search/getDataFileByNumber?numExp='+numExp+'&listMetadata=adirefcatt'
-                    r_cad = requests.get(url_cad, headers = headers_token)
-                    
-                    expedient = json.loads(r_cad.content.decode('utf-8'))
-
-                    for key in expedient.keys():
-                        if isinstance(expedient[key], list):
-                            if key != 'metadata':
-                                for k in expedient[key]:
-                                    for ke in k.keys():
-                                        if ke not in listSchema:
-                                            listSchema.append(ke)
-                            else:
-                                for k in expedient[key]:
-                                    if k['varName'] not in listSchema:
-                                        listSchema.append(k['varName'])
-                        else:
-                            if key not in listSchema:
-                                listSchema.append(key)
-    
-    return [x.lower() for x in listSchema]"""
-
 def get_schema_postgres(dicc):
     
     db  = database_connections.objects.get(name = dicc['db'])
@@ -448,3 +382,63 @@ def get_table_name_postgres(dicc):
     conn.close()
 
     return listSchema
+
+def getwsSegPass(psw):
+
+    utc = datetime.utcnow()
+    
+    utcText = utc.strftime('%Y%m%d%H%M%S')
+
+    hashInputString = utcText+psw
+
+    hashInputBytes = hashInputString.encode('utf-8')
+
+    hashBytes = sha256(hashInputBytes).digest()
+
+    hashBase64 = base64.b64encode(hashBytes)
+
+    wsSegPass = utcText+hashBase64.decode()
+
+    return wsSegPass
+
+def get_entities_segex(dicc):
+
+    if dicc['domain'] == 'PRE':
+        url = 'https://pre-02000.sedipualba.es/apisegex/'
+    else:
+        url = 'https://02000.sedipualba.es/apisegex/'
+
+    listEntidades = 'Georef/ListEntidades'
+
+    r = requests.get(url+listEntidades)
+
+    listEntities = []
+
+    for i in r.json():
+        listEntities.append([i['Id'], i['Descripcion']])
+    
+    return listEntities
+
+def get_types_segex (dicc):
+
+    entity = dicc['entities-list']
+
+    if dicc['domain'] == 'PRE':
+        url = 'https://pre-%s.sedipualba.es/apisegex/' % (entity)
+    else:
+        url = 'https://%s.sedipualba.es/apisegex/' % (entity)
+
+    wsSegUser = dicc['user']
+
+    wsSegPass = getwsSegPass(dicc['password'])
+
+    listTipos = 'Georef/ListTiposGeoref?wsSegUser=%s&wsSegPass=%s&idEntidad=%s' % (wsSegUser, wsSegPass, entity)
+
+    r = requests.get(url+listTipos)
+
+    listTypes = []
+
+    for i in r.json():
+        listTypes.append([i['Id'], i['Descripcion']])
+    
+    return listTypes

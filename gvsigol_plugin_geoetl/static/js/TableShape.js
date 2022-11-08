@@ -569,7 +569,563 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// INPUT SEGEX ////
+input_Segex = draw2d.shape.layout.VerticalLayout.extend({
 
+	NAME: "input_Segex",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"SEGEX",
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+       
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-input-segex-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+gettext('SEGEX Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label class="col-form-label" >'+gettext('Domain:')+'</label>'+
+                                    '<select class="form-control" id="domain-'+ID+'">'+
+                                        '<option value="PRO"> https://sedipualba.es/apisegex/ </option>'+
+                                        '<option value="PRE"> https://pre.sedipualba.es/apisegex/ </option>'+
+                                    '</select>'+
+                            '</div>'+
+
+                            '<label class="col-form-label" >'+gettext('Entities with website in SEDIPUALB@')+':</label><br>'+
+
+                            '<div class="column33">'+
+                                '<a href="#" id="get-entities-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>'+gettext('Get entities')+'</a>'+
+                            '</div>'+
+
+                            '<div class="box-tools column66">'+
+                                '<select class="form-control" id="entities-list-'+ID+'" name="entities-list" >'+
+                                '</select>'+
+                            '</div>'+
+
+                            '<div>'+
+                                '<label class="col-form-label" >'+gettext('User')+' (wsSegUser): </label>'+
+                                '<input type="text" id="user-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+ 
+                            '<div>'+
+                                '<label class="col-form-label" >'+gettext('Password:')+'</label>'+
+                                '<input type="text" id="password-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+
+
+                            '<div>'+
+                                '<label class="col-form-label" >'+gettext('Types of georeferences in the entity')+':</label><br>'+
+                                '<a href="#" id="get-types-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>'+gettext('Get types')+'</a>'+
+                            '</div>'+
+                            '<div class="box-tools">'+
+                                '<br><select id="types-list-'+ID+'" name="types-list" multiple style="width: 100%; height:200px">'+
+                                    '<option value="all">'+gettext('ALL')+'</option>'+
+                                '</select>'+
+                            '</div>'+
+
+                            '<div>'+
+                                '<label>'+gettext('Choose date')+'</label><br>'+
+                                    '<div class="radio-inline">'+
+                                    
+                                        '<input  type="radio" name="date-segex-'+ID+'"  id="check-no-date-'+ID+'" value="check-no-date">'+	
+                                        '<label  for="no-date">'+gettext('No date, download all')+'</label>'+
+
+                                        '<input  type="radio" name="date-segex-'+ID+'"  id="check-init-date-'+ID+'" value="check-init-date">'+	
+                                        '<label  for="init-date">'+gettext('From an initial date')+'</label>'+
+
+                                        '<input  type="radio" name="date-segex-'+ID+'"  id="check-init-end-date-'+ID+'" value="check-init-end-date">'+	
+                                        '<label  for="init-end-date">'+gettext('Between dates')+'</label>'+
+
+                                    '</div>'+
+                            '</div>'+
+                            
+                            '<div class="input-group date">'+
+                                '<div class="column50">'+
+                                    '<label>'+gettext('Init date')+'</label>'+
+                                    '<input type="datetime-local" class="form-control" id="init-date-'+ID+'" name="init-date"/>'+
+                                '</div>'+
+                                '<div class="column50">'+
+                                    '<label>'+gettext('End date')+'</label>'+
+                                    '<input type="datetime-local" class="form-control" id="end-date-'+ID+'" name="end-date"/>'+
+                                '</div>'+
+                            '</div>'+
+                            
+                            '<div>'+
+                                '<input type="checkbox" name="checkbox-init-segex" id="checkbox-init-'+ID+'" value=""/>'+
+                                '<input type="number" name="checkbox-init-segex" id="minute-before-'+ID+'" value="0" size ="3"/>'+
+                                '<label for="checkbox"> '+gettext('Minutes before the current date for the init date')+'</label>'+
+                            '</div>'+
+                            '<div>'+
+                                '<input type="checkbox" name="checkbox-end-segex" id="checkbox-end-'+ID+'" value=""/>'+
+                                '<label for="checkbox">'+gettext('Current date for end')+'</label>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-segex-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        var context = this
+
+        $('#init-date-'+ID).prop('disabled', true)
+        $('#end-date-'+ID).prop('disabled', true)
+        $("#checkbox-init-"+ID).prop('disabled', true)
+        $("#checkbox-end-"+ID).prop('disabled', true)
+        $("#minute-before-"+ID).prop('disabled', true)
+
+        $('input:radio[name="date-segex-'+ID+'"]').change(function(){
+            if ($('#check-no-date-'+ID).is(':checked')){
+                
+                $('#init-date-'+ID).prop('disabled', true)
+                $('#init-date-'+ID).val("")
+                
+                $('#end-date-'+ID).prop('disabled', true)
+                $('#end-date-'+ID).val("")
+                
+                $("#checkbox-init-"+ID).prop('disabled', true)
+                $("#checkbox-init-"+ID).prop('checked', false)
+                
+                $("#checkbox-end-"+ID).prop('disabled', true)
+                $("#checkbox-end-"+ID).prop('checked', false)
+                
+                $("#minute-before-"+ID).prop('disabled', true)
+                $("#minute-before-"+ID).val(0)
+                
+            }
+            
+            else if ($('#check-init-date-'+ID).is(':checked')){
+                
+                $('#init-date-'+ID).prop('disabled', false)
+                
+                $('#end-date-'+ID).prop('disabled', true)
+                $('#end-date-'+ID).val("")
+                
+                $("#checkbox-init-"+ID).prop('disabled', false)
+
+                $("#checkbox-end-"+ID).prop('disabled', true)
+                $("#checkbox-end-"+ID).prop('checked', false)
+                
+                $("#minute-before-"+ID).prop('disabled', false)
+                
+            }
+            else{
+            
+                $('#init-date-'+ID).prop('disabled', false)
+                
+                $('#end-date-'+ID).prop('disabled', false)
+                
+                $("#checkbox-init-"+ID).prop('disabled', false)
+                
+                $("#checkbox-end-"+ID).prop('disabled', false)
+                
+                $("#minute-before-"+ID).prop('disabled', false)
+
+            }
+        });
+
+
+        $("#checkbox-end-"+ID).click(function() {
+            if($("#checkbox-end-"+ID).is(':checked')){
+                $('#end-date-'+ID).val("")
+            }
+        });
+
+        $("#checkbox-init-"+ID).click(function() {
+            if($("#checkbox-init-"+ID).is(':checked')){
+                $('#init-date-'+ID).val("")
+            }else{
+
+                $('#minute-before-'+ID).val(0)
+            }
+        });
+
+
+        $('#get-entities-'+ID).click(function(){
+                
+            $(this).hover(function(){
+                $(this).css('cursor','wait');
+                
+            });
+            
+            var paramsEntities = {"id": ID,
+            "parameters": [
+                {"domain": $('#domain-'+ID).val()
+                }
+            ]};
+
+            var formDataEntities = new FormData();
+
+            formDataEntities.append('jsonParamsEntities', JSON.stringify(paramsEntities))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_entities_segex/',
+                data: formDataEntities,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    $('#entities-list-'+ID).empty()
+                    
+                    $('#get-entities-'+ID).hover(function(){
+                        $(this).css('cursor','pointer');
+                    });
+
+                    get_ = []
+                    
+                    for(i=0;i<data.length;i++){
+                        $('#entities-list-'+ID).append('<option value="'+data[i][0]+'">'+data[i][1]+'</option>')
+                        get_.push([data[i][0], data[i][1]])
+                    };
+                },
+                error: function(){
+                    $('#get-entities-'+ID).hover(function(){
+                        $(this).css('cursor','pointer');
+                    });
+                }
+            })
+        });
+
+
+        $('#types-list-'+ID).click(function(){
+            if($(this).val()=='all'){
+                $('#types-list-'+ID+' option').prop('selected', true)
+            }
+        });
+
+        $('#get-types-'+ID).click(function(){
+                
+            $(this).hover(function(){
+                $(this).css('cursor','wait');
+                
+            });
+            
+            var paramsTypes = {"id": ID,
+            "parameters": [
+                {"domain": $('#domain-'+ID).val(),
+                "entities-list": $('#entities-list-'+ID).val(),
+                "user": $('#user-'+ID).val(),
+                "password": $('#password-'+ID).val()
+                }
+            ]};
+
+            var formDataTypes = new FormData();
+
+            formDataTypes.append('jsonParamsTypes', JSON.stringify(paramsTypes))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_types_segex/',
+                data: formDataTypes,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    $('#types-list-'+ID).empty()
+                    $('#types-list-'+ID).append('<option value="all">'+gettext('ALL')+'</option>')
+                    
+                    $('#get-types-'+ID).hover(function(){
+                        $(this).css('cursor','pointer');
+                    });
+
+                    get_types = []
+                    
+                    for(i=0;i<data.length;i++){
+                        $('#types-list-'+ID).append('<option value="'+data[i][0]+'">'+data[i][1]+'</option>')
+                        get_types.push([data[i][0], data[i][1]])
+                    };
+                },
+                error: function(){
+                    $('#get-types-'+ID).hover(function(){
+                        $(this).css('cursor','pointer');
+                    });
+                }
+            })
+        });
+        
+        icon.on("click", function(){
+
+            $('#dialog-input-segex-'+ID).modal('show')
+
+            if ($('#check-no-date-'+ID).is(':checked')){
+                
+                $('#init-date-'+ID).prop('disabled', true)
+                $('#init-date-'+ID).val("")
+                
+                $('#end-date-'+ID).prop('disabled', true)
+                $('#end-date-'+ID).val("")
+                
+                $("#checkbox-init-"+ID).prop('disabled', true)
+                $("#checkbox-init-"+ID).prop('checked', false)
+                
+                $("#checkbox-end-"+ID).prop('disabled', true)
+                $("#checkbox-end-"+ID).prop('checked', false)
+                
+                $("#minute-before-"+ID).prop('disabled', true)
+                $("#minute-before-"+ID).val(0)
+                
+            }
+            
+            else if ($('#check-init-date-'+ID).is(':checked')){
+                
+                $('#init-date-'+ID).prop('disabled', false)
+                
+                $('#end-date-'+ID).prop('disabled', true)
+                $('#end-date-'+ID).val("")
+                
+                $("#checkbox-init-"+ID).prop('disabled', false)
+
+                $("#checkbox-end-"+ID).prop('disabled', true)
+                $("#checkbox-end-"+ID).prop('checked', false)
+                
+                $("#minute-before-"+ID).prop('disabled', false)
+
+                
+            }
+            else if ($('#check-init-end-date-'+ID).is(':checked')){
+            
+                $('#init-date-'+ID).prop('disabled', false)
+                
+                $('#end-date-'+ID).prop('disabled', false)
+                
+                $("#checkbox-init-"+ID).prop('disabled', false)
+                
+                $("#checkbox-end-"+ID).prop('disabled', false)
+                
+                $("#minute-before-"+ID).prop('disabled', false)
+
+            }
+        });
+
+        $('#input-segex-accept-'+ID).click(function() {
+
+            if($("#checkbox-init-"+ID).is(':checked')){
+                $("#checkbox-init-"+ID).val("true")
+                
+            }else{
+                $("#checkbox-init-"+ID).val("")
+            };
+
+            if($("#checkbox-end-"+ID).is(':checked')){
+                $("#checkbox-end-"+ID).val("true")
+                
+            }else{
+                $("#checkbox-end-"+ID).val("")
+            };
+
+            if (typeof get_ === 'undefined'){
+                get_ = []
+                $("#entities-list-"+ID+" option").each(function()
+                    {  
+                        get_.push([$(this).val(), $(this).text()])
+                    }
+                );
+                console.log(get_)
+            }
+
+
+            if (typeof get_types === 'undefined'){
+                get_types = []
+                $("#types-list-"+ID+" option").each(function()
+
+                    {  
+    
+                        if ($(this).val() != 'all'){
+                            get_types.push([$(this).val(), $(this).text()])
+                        }
+                        
+                    }
+                );
+
+            }
+
+            var paramsSegex= {"id": ID,
+            "parameters": [
+                {   
+                    "get_entities-list": get_,
+                    "get_types-list": get_types,
+                    "domain": $('#domain-'+ID).val(),
+                    "entities-list": $('#entities-list-'+ID).val(),
+                    "user": $('#user-'+ID).val(),
+                    "password": $('#password-'+ID).val(),
+                    "types-list": $('#types-list-'+ID).val(),
+                    "minute-before": $('#minute-before-'+ID).val(),
+                    "init-date": $('#init-date-'+ID).val(),
+                    "end-date": $('#end-date-'+ID).val(),
+                    "checkbox-end": $("#checkbox-end-"+ID).val(),
+                    "checkbox-init": $("#checkbox-init-"+ID).val(),
+                    "date-segex":$('input:radio[name="date-segex-'+ID+'"]:checked').val()
+                }
+            ]};
+
+            data = ['IdGeorreferencia', 'Operacion', 'Descripcion', 'Observaciones', 'Latitud', 'Longitud', 'TipoReferenciaCatastral', 
+                    'ReferenciaCatastral', 'IneMunicipioDireccion', 'ViaDireccion', 'NumeroViaDireccion', 'RestoDireccion',
+                    'CodigoExpediente', 'TituloExpediente', 'UrlExpediente', 'EstadoExpediente', 'DescripcionEstadoExpediente',
+                    'EstadoFinalizadoExpediente', 'DescripcionEstadoFinalizadoExpediente', 'ProcedimientoExpediente',
+                    'TramitadorExpediente', 'FechaCreacionExpediente', 'FechaInicioExpediente', 'FechaFinalizacionExpediente']
+
+            paramsSegex['schema'] = data
+            paramsSegex['parameters'][0]['schema'] = data
+            
+            passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+            
+            isAlreadyInCanvas(jsonParams, paramsSegex, ID)
+
+            icon.setColor('#01b0a0')
+            
+            $('#dialog-input-segex-'+ID).modal('hide')
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+	   	 var label =new draw2d.shape.basic.Label({
+	   	     text:gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#009688",
+             resizeable:true
+	   	 });
+
+	     var output= label.createPort("output");
+	     
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     }
+	     else{
+	         this.add(label);
+	     }
+         
+         listLabel.push([this.id, [], [output.name]])
+         
+         return label;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
 
 //// INPUT CSV ////
 input_Csv = draw2d.shape.layout.VerticalLayout.extend({
@@ -897,7 +1453,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
                                 '<div class="column50">'+
                                     '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder='+gettext('"For removing files leave this input empty"')+'></input>'+
+                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
                                 '</div>'+
                                 '<br><br><br>'+
                             '</div>'+
@@ -1230,7 +1786,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                                 '<input type="text" id="shp-file-'+ID+'" name="file" class="form-control"></input>'+
                             '</div>'+
                             '<div class="column20">'+
-                                '<label class="col-form-label">Encoding:</label>'+
+                                '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
                                 '<select id="encode-'+ID+'" class="form-control">'+ 
                                     '<option value="LATIN1">LATIN1</option>'+
                                     '<option value="UTF-8">UTF-8</option>'+
@@ -1487,7 +2043,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                             '<br><br><br>'+ 
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-oracle" id="checkbox-'+ID+'"/>'+
-                                '<label for="checkbox">'+gettext('Do you want to write a SQL statement')+'</label>'+											
+                                '<label for="checkbox">'+gettext('Do you want to write a SQL statement?')+'</label>'+											
                             '</div>'+
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label">'+gettext('SQL statement:')+'</label>'+
@@ -1842,7 +2398,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
 
                             '<div class="column20">'+
-                                '<label for ="get-tables" class="col-form-label">'+gettext('Get Tables')+':</label><br>'+
+                                '<label for ="get-tables" class="col-form-label">'+gettext('Get tables')+':</label><br>'+
                                 '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
                             '</div>'+
 
@@ -1852,7 +2408,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
-                                '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause')+'</label>'+											
+                                '<label for="checkbox">'+gettext('Do you want to write a SQL WHERE Clause?')+'</label>'+											
                             '</div>'+
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label">'+gettext('SQL WHERE Clause:')+'</label>'+
@@ -1960,24 +2516,6 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 }
             })
         });
-
-        if (typeof get_sch === 'undefined'){
-            get_sch = []
-            $("#schema-name-"+ID+" option").each(function()
-                {  
-                    get_sch.push($(this).val())
-                }
-            );
-        }
-
-        if (typeof get_tbl === 'undefined'){
-            get_tbl = []
-            $("#tablename-"+ID+" option").each(function()
-                {  
-                    get_tbl.push($(this).val())
-                }
-            );
-        }
 
         var context = this
 
@@ -2219,7 +2757,7 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
                                 '<input type="text" id="kml-kmz-file-'+ID+'" name="file" class="form-control"></input>'+
                             '</div>'+
                             '<div class="column20">'+
-                                '<label class="col-form-label">Encoding:</label>'+
+                                '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
                                 '<select id="encode-'+ID+'" class="form-control">'+ 
                                     '<option value="LATIN1">LATIN1</option>'+
                                     '<option value="UTF-8">UTF-8</option>'+
@@ -2249,7 +2787,7 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
                                 '<div class="column50">'+
                                     '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder='+gettext('"For removing files leave this input empty"')+'></input>'+
+                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
                                 '</div>'+
                                 '<br><br><br>'+
                         '</form>'+
@@ -5320,11 +5858,13 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('To data type:')+'</label>'+
-                                '<select class="form-control" id="data-type-'+ID+'">'+
-                                    '<option value="VARCHAR"> Varchar </option>'+
-                                    '<option value="INTEGER"> Integer </option>'+
-                                    '<option value="FLOAT"> Float </option>'+
-                                    '<option value="DATE"> Date </option>'+
+                                '<select class="form-control" id="data-type-option-'+ID+'">'+
+                                    '<option value="VARCHAR"> '+gettext('Varchar')+'</option>'+
+                                    '<option value="INTEGER"> '+gettext('Integer')+' </option>'+
+                                    '<option value="FLOAT"> '+gettext('Float')+' </option>'+
+                                    '<option value="DATE"> '+gettext('Date')+' </option>'+
+                                    '<option value="TIMESTAMP"> '+gettext('Time Stamp')+' </option>'+
+                                    '<option value="BOOLEAN"> '+gettext('Boolean')+' </option>'+
                                 '</select>'+
                             '</div>'+
                         '</form>'+
@@ -5374,7 +5914,7 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
             var paramsCreateAttr = {"id": ID,
             "parameters": [
                 {"attr": $('#attr-'+ID).val(),
-                "data-type": $('#data-type-'+ID).val()}
+                "data-type-option": $('#data-type-option-'+ID).val()}
             ]}
             
             schemaMod =[...schemaEdge]
@@ -5590,7 +6130,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
 
                             '<div class="column20">'+
-                                '<label for ="get-tables" class="col-form-label">'+gettext('Get Tables')+':</label><br>'+
+                                '<label for ="get-tables" class="col-form-label">'+gettext('Get tables')+':</label><br>'+
                                 '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
                             '</div>'+
 
@@ -6058,11 +6598,12 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="column20">'+
                                 '<label class="col-form-label">'+gettext('Data type:')+'</label>'+
                                 '<select class="form-control" id="data-type-'+ID+'">'+
-                                    '<option value="VARCHAR"> Varchar </option>'+
-                                    '<option value="INTEGER"> Integer </option>'+
-                                    '<option value="FLOAT"> Float </option>'+
-                                    '<option value="DATE"> Date </option>'+
-                                    '<option value="BOOLEAN"> Boolean </option>'+
+                                '<option value="VARCHAR"> '+gettext('Varchar')+'</option>'+
+                                '<option value="INTEGER"> '+gettext('Integer')+' </option>'+
+                                '<option value="FLOAT"> '+gettext('Float')+' </option>'+
+                                '<option value="DATE"> '+gettext('Date')+' </option>'+
+                                '<option value="TIMESTAMP"> '+gettext('Time Stamp')+' </option>'+
+                                '<option value="BOOLEAN"> '+gettext('Boolean')+' </option>'+
                                 '</select>'+
                             '</div>'+     
                             '<div class="column40">'+
@@ -6727,7 +7268,7 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
 	   	 });
 
 	   	 var label2 =new draw2d.shape.basic.Label({
-            text: gettext("Second."),
+            text: gettext("Secondary"),
             stroke:0.2,
             radius:0,
             bgColor:"#ffffff",
@@ -6894,13 +7435,13 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div>'+
-                                '<label class="col-form-label">'+gettext('Spatial relation')+'</label>'+
+                                '<label class="col-form-label">'+gettext('Spatial Relation')+':</label>'+
                                 '<select class="form-control" id="option-'+ID+'">'+
-                                    '<option value="ST_CONTAINS"> Main Contains Secondary</option>'+
-                                    '<option value="ST_EQUALS"> Main Equals Secondary</option>'+
-                                    '<option value="ST_INTERSECTS"> Main Intersects Secondary</option>'+
-                                    '<option value="ST_TOUCHES"> Main Touches Secondary</option>'+                                    
-                                    '<option value="ST_WITHIN"> Main Within Secondary</option>'+
+                                    '<option value="ST_CONTAINS">'+gettext('Main')+' '+gettext('Contains')+' '+gettext('Secondary')+'</option>'+
+                                    '<option value="ST_EQUALS">'+gettext('Main')+' '+gettext('Equals')+' '+gettext('Secondary')+'</option>'+
+                                    '<option value="ST_INTERSECTS">'+gettext('Main')+' '+gettext('Intersects')+' '+gettext('Secondary')+'</option>'+
+                                    '<option value="ST_TOUCHES">'+gettext('Main')+' '+gettext('Touches')+' '+gettext('Secondary')+'</option>'+                                    
+                                    '<option value="ST_WITHIN">'+gettext('Main')+' '+gettext('Within')+' '+gettext('Secondary')+'</option>'+
                                 '</select>'+                  
                             '</div>'+
                         '</form>'+
@@ -6979,7 +7520,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
 	   	 });
 
 	   	 var label2 =new draw2d.shape.basic.Label({
-            text: gettext("Second."),
+            text: gettext("Secondary"),
             stroke:0.2,
             radius:0,
             bgColor:"#ffffff",
@@ -10666,7 +11207,7 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
 
                                 '<div>'+
-                                    '<label form="" class="col-form-label">'+gettext('Attribute selected:')+'</label>'+
+                                    '<label form="" class="col-form-label">'+gettext('Attributes selected:')+'</label>'+
                                     '<input id="attr-selected-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" disabled>'+
                                 '</div>'+
                             '</div>'+

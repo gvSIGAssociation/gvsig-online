@@ -84,7 +84,7 @@ def run_canvas_background(**kwargs):
     try:
 
         if params:
-            if params['sql-before'] != '':
+            if len(params['sql-before']) > 0:
                 executeSQL(params['db'], params['sql-before'])
 
         #going down the sorted list of tasks and executing them
@@ -168,7 +168,7 @@ def run_canvas_background(**kwargs):
                 method_to_call = etl_tasks.move (m['type'], parameters)
 
         if params:
-            if params['sql-after'] != '':
+            if len(params['sql-after']) > 0:
                 executeSQL(params['db'], params['sql-after'])
 
         if id_ws:
@@ -300,7 +300,9 @@ def periodic_clean():
         cursor.close()
 
 
-def executeSQL(db, query):
+def executeSQL(db, query_list):
+
+    query = ' '.join(query_list)
 
     db_model  = database_connections.objects.get(name = db)
 

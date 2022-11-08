@@ -339,6 +339,7 @@ gvsigolETL.Toolbar = Class.extend({
 								if(key.startsWith('get_')){
 
 									key_ = key.replace('get_', '')
+
 									for (k = 0; k < parameters[0][key].length; k++){
 
 										if (Array.isArray(parameters[0][key][k])){
