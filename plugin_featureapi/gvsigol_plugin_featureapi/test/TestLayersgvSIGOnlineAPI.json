@@ -1,0 +1,1414 @@
+{
+	"info": {
+		"_postman_id": "77f889a6-d497-4543-8b7a-7c70f29d30d8",
+		"name": "Test Layers gvSIGOnline API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get_public_project_list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_public_project_list\", function () {",
+							"    //Comprueba que exista un proyecto público llamado con el de las variables de ENV",
+							"    const responseJson = pm.response.json();",
+							"    const prj = postman.getEnvironmentVariable(\"publicprj\");",
+							"    const json = responseJson.content;",
+							"    let existsPrj = false;",
+							"    for(var i = 0; i<json.length;i++) {",
+							"        if(json[i].name == prj) {",
+							"            existsPrj = true;",
+							"        }",
+							"    }",
+							"    pm.expect(existsPrj).to.eql(true);",
+							"    if(postman.getEnvironmentVariable(\"keycloak\") == 'false') {",
+							"        console.log('LOCAL AUTHENTICATION')",
+							"        postman.setNextRequest(\"get_api_key\")",
+							"    } else {",
+							"        console.log('KEYCLOAK AUTHENTICATION')",
+							"        postman.setNextRequest(\"get_api_key_keycloak\")",
+							"    }",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/public/projects",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"public",
+						"projects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_api_key",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_api_key\", function () {",
+							"    //Asigna la variable de entorno con el token",
+							"    const json = pm.response.json();",
+							"    postman.setEnvironmentVariable(\"token\", \"JWT \" + json.token);",
+							"    console.log(\"GET_API_KEY: \" + json.token)",
+							"    postman.setNextRequest(\"get_project_list\")",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "username",
+							"value": "{{user}}",
+							"type": "default"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/auth/api-token-auth/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"auth",
+						"api-token-auth",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_api_key_keycloak",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_api_key\", function () {",
+							"    //Asigna la variable de entorno con el token",
+							"    const json = pm.response.json();",
+							"    postman.setEnvironmentVariable(\"token\", \"Bearer \" + json.access_token);",
+							"    console.log(\"GET_API_KEY_KEYCLOAK: \" + json.access_token)",
+							"    postman.setNextRequest(\"get_project_list\")",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "{{user}}",
+							"type": "default"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "default"
+						},
+						{
+							"key": "client_id",
+							"value": "{{client_id}}",
+							"type": "default"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{client_secret}}",
+							"type": "default"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://keycloak.scolab.eu/auth/realms/ideuytest/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"keycloak",
+						"scolab",
+						"eu"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"ideuytest",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_project_list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_project_list\", function () {",
+							"    //Comprueba que exista un proyecto público llamado con el de las variables de ENV",
+							"    const responseJson = pm.response.json();",
+							"    const prj = postman.getEnvironmentVariable(\"prj\");",
+							"    const json = responseJson.content;",
+							"    //console.log(\"get_project_list JSON:\" + JSON.stringify(responseJson))",
+							"    let existsPrj = false;",
+							"    console.log(\"GET_PROJECT_LIST Num:\" + json.length)",
+							"    for(var i = 0; i<json.length;i++) {",
+							"        //console.log(json[i].name)",
+							"        if(json[i].name == prj) {",
+							"            existsPrj = true;",
+							"            postman.setEnvironmentVariable(\"prjid\", json[i].id);",
+							"        }",
+							"    }",
+							"    pm.expect(existsPrj).to.eql(true);",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/projects",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"projects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_layers_from_project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_layers_from_project\", function () {",
+							"    //Comprueba que exista un proyecto público llamado con el de las variables de ENV",
+							"    const responseJson = pm.response.json();",
+							"    const prj = postman.getEnvironmentVariable(\"prj\");",
+							"    const json = responseJson.content;",
+							"    //console.log(\"get_project_list JSON:\" + JSON.stringify(responseJson))",
+							"    let existsLyr = false;",
+							"    //console.log(\"PRJ:\" + prj)",
+							"    for(var i = 0; i<json.length;i++) {",
+							"        //console.log(json[i].name)",
+							"        if(json[i].name == postman.getEnvironmentVariable('testlayer')) {",
+							"            existsLyr = true;",
+							"            console.log(\"LAYER FOUND, ID: \" + json[i].id);",
+							"            postman.setEnvironmentVariable(\"lyr_id\", json[i].id);",
+							"        }",
+							"    }",
+							"    if(existsLyr) {",
+							"        postman.setNextRequest(\"create_feature\")",
+							"    } else {",
+							"        postman.setNextRequest(\"create_layer\")",
+							"    }",
+							"",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/projects/{{prjid}}/layers/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"projects",
+						"{{prjid}}",
+						"layers",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_layer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"create_layer\", function () {",
+							"    const responseJson = pm.response.json();",
+							"    const json = responseJson.content;",
+							"    postman.setEnvironmentVariable(\"lyr_id\", json.id);",
+							"    console.log(\"CREATE LAYER lyr_id: \" + json.id)",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "geom_type",
+							"value": "Point",
+							"type": "default"
+						},
+						{
+							"key": "datastore",
+							"value": "{{datastore_id}}",
+							"type": "default"
+						},
+						{
+							"key": "name",
+							"value": "{{testlayer}}",
+							"type": "default"
+						},
+						{
+							"key": "title",
+							"value": "Test layer",
+							"type": "default"
+						},
+						{
+							"key": "srs",
+							"value": "EPSG:4326",
+							"type": "default"
+						},
+						{
+							"key": "layer_group",
+							"value": "{{group_id}}",
+							"type": "default"
+						},
+						{
+							"key": "fields",
+							"value": "[{\"id\":\"klt01kb332\",\"name\":\"fieldName\",\"type\":\"character_varying\",\"calculation\":\"\",\"calculationLabel\":\"\"}]",
+							"type": "default"
+						},
+						{
+							"key": "md_abstract",
+							"value": "",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_layer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_layer\", function () {",
+							"   const json = pm.response.json();",
+							"   ",
+							"   let checkID = json.content.id == postman.getEnvironmentVariable(\"lyr_id\");",
+							"   let checkLyr = json.content.name == postman.getEnvironmentVariable(\"testlayer\");",
+							"",
+							"   pm.expect(checkID).to.eql(true);",
+							"   pm.expect(checkLyr).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/?lyr_id={{lyr_id}}",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						""
+					],
+					"query": [
+						{
+							"key": "lyr_id",
+							"value": "{{lyr_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_feature",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"create_feature\", function () {",
+							"   const json = pm.response.json();",
+							"   let checkName = json.properties.fieldname == 'OFICINAS SCOLAB';",
+							"   let checkVersion = json.properties.feat_version_gvol == 1;",
+							"   postman.setEnvironmentVariable(\"feat_id\", json.properties.ogc_fid);",
+							"   pm.expect(checkName).to.eql(true);",
+							"   pm.expect(checkVersion).to.eql(true);",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"type\": \"Feature\",\n  \"geometry\": {\n    \"coordinates\": [\n      [\n        -0.389824, 39.469296\n      ]\n    ],\n    \"crs\": {\n      \"type\": \"name\",\n      \"properties\": {\n        \"name\": \"urn:ogc:def:crs:EPSG::4326\"\n      }\n    },\n    \"type\": \"MultiPoint\"\n  },\n  \"properties\": {\n    \"fieldname\": \"OFICINAS SCOLAB\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/features/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"features",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_created_features",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_created_feature\", function () {",
+							"   const json = pm.response.json();",
+							"   ",
+							"   let checkLength = json.content.length >= 1;",
+							"   let checkLyrID = json.content[0].layer_id == postman.getEnvironmentVariable(\"lyr_id\");",
+							"   console.log(\"GET_UPDATED_FEATURE lyrID:\" + json.content[0].layer_id + \" length:\" + json.content.length)",
+							"   pm.expect(checkLength).to.eql(true);",
+							"   pm.expect(checkLyrID).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "lyr_id",
+							"value": "{{lyr_id}}",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/createdfeatures/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"createdfeatures",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update_feature",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"update_feature\", function () {",
+							"   const json = pm.response.json();",
+							"   let checkName = json.properties.fieldname == 'OFICINAS SCOLAB A.GUIMERA';",
+							"   let checkVersion = json.properties.feat_version_gvol == 2;",
+							"   pm.expect(checkName).to.eql(true);",
+							"   pm.expect(checkVersion).to.eql(true);",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"type\": \"Feature\",\n  \"geometry\": {\n    \"coordinates\": [\n      [\n        -0.389824, 39.469296\n      ]\n    ],\n    \"crs\": {\n      \"type\": \"name\",\n      \"properties\": {\n        \"name\": \"urn:ogc:def:crs:EPSG::4326\"\n      }\n    },\n    \"type\": \"MultiPoint\"\n  },\n  \"properties\": {\n    \"ogc_fid\" : {{feat_id}},\n    \"fieldname\": \"OFICINAS SCOLAB A.GUIMERA\",\n    \"feat_version_gvol\": 1\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/features/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"features",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_feature",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_feature\", function () {",
+							"   const json = pm.response.json();",
+							"   ",
+							"   let checkName = json.content.properties.fieldname == 'OFICINAS SCOLAB A.GUIMERA';",
+							"   let checkVersion = json.content.properties.feat_version_gvol == 2;",
+							"   console.log(\"GET FEATURE - field:\" + checkName + \" version:\" + checkVersion)",
+							"   ",
+							"   pm.expect(checkName).to.eql(true);",
+							"   pm.expect(checkVersion).to.eql(true);",
+							"   ",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/{{feat_id}}/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"{{feat_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_feature_list_by_extent",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_feature_list_by_extent\", function () {",
+							"   const json = pm.response.json();",
+							"",
+							"   let checkNfeat = json.totalfeatures >= 1;",
+							"   let checkName = json.features[0].properties.fieldname == 'OFICINAS SCOLAB A.GUIMERA';",
+							"   console.log(\"GET FEATURE LIST BY EXTENT - field:\" + checkName + \" Num feats:\" + checkNfeat)",
+							"",
+							"   pm.expect(checkNfeat).to.eql(true);",
+							"   pm.expect(checkName).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/featurelist/?minlat=-40&minlon=-1&maxlat=42&maxlon=0&zip=false&resources=false&lyr_id=196",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"featurelist",
+						""
+					],
+					"query": [
+						{
+							"key": "minlat",
+							"value": "-40"
+						},
+						{
+							"key": "minlon",
+							"value": "-1"
+						},
+						{
+							"key": "maxlat",
+							"value": "42"
+						},
+						{
+							"key": "maxlon",
+							"value": "0"
+						},
+						{
+							"key": "zip",
+							"value": "false"
+						},
+						{
+							"key": "resources",
+							"value": "false"
+						},
+						{
+							"key": "lyr_id",
+							"value": "196"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_layer_description",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_layer_description\", function () {",
+							"   const json = pm.response.json();",
+							"   ",
+							"   let checkLength = json.content.length > 1;",
+							"",
+							"   existsLyr = false;",
+							"   for(var i = 0; i<json.content.length;i++) {",
+							"        //console.log(json[i].name)",
+							"        if(json.content[i].name == 'fieldname') {",
+							"            existsLyr = true;",
+							"        }",
+							"    }",
+							"",
+							"   pm.expect(existsLyr).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "lyr_id",
+							"value": "{{lyr_id}}",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/description/?lyr_id=196",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"description",
+						""
+					],
+					"query": [
+						{
+							"key": "lyr_id",
+							"value": "196"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_updated_feature",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_updated_feature\", function () {",
+							"   const json = pm.response.json();",
+							"   ",
+							"   let checkLength = json.content.length >= 1;",
+							"   let checkLyrID = json.content[0].layer_id == postman.getEnvironmentVariable(\"lyr_id\");",
+							"   console.log(\"GET_UPDATED_FEATURE lyrID:\" + json.content[0].layer_id + \" length:\" + json.content.length)",
+							"   pm.expect(checkLength).to.eql(true);",
+							"   pm.expect(checkLyrID).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "lyr_id",
+							"value": "{{lyr_id}}",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/updatedfeatures/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"updatedfeatures",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_geoserver_legend",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_geoserver_legend\", function () {",
+							"   const json = pm.response.json();",
+							"   ",
+							"   let url = json.url;",
+							"   console.log(\"GET GEOSERVER LEGEND:\" + url)",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "lyr_id",
+							"value": "{{lyr_id}}",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/legend/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"legend",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add_resource",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"add_resource\", function () {",
+							"   const json = pm.response.json();",
+							"   console.log(pm.response)",
+							"   let checkID = json && json.id >= 1;",
+							"   postman.setEnvironmentVariable(\"resource_id\", json.id);",
+							"   pm.expect(checkID).to.eql(true);",
+							"   pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "Logo",
+							"type": "default"
+						},
+						{
+							"key": "image",
+							"type": "file",
+							"src": "logo_test.png"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/{{feat_id}}/resources/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"{{feat_id}}",
+						"resources",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_resources_list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_resources_list\", function () {",
+							"   const json = pm.response.json();",
+							"   let checkLen = json.content.length >= 1",
+							"   let checkTitle = json.content[0].title == 'Logo'",
+							"",
+							"   pm.expect(checkLen).to.eql(true);",
+							"   pm.expect(checkTitle).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/{{feat_id}}/resources/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"{{feat_id}}",
+						"resources",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_resources_added",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_resources_added\", function () {",
+							"   const json = pm.response.json();",
+							"   let checkLen = json.content.length >= 1",
+							"   let checkUser = json.content[0].usr == postman.getEnvironmentVariable('user')",
+							"   let checkID = json.content[0].layer_id == postman.getEnvironmentVariable('lyr_id')",
+							"",
+							"   pm.expect(checkLen).to.eql(true);",
+							"   pm.expect(checkUser).to.eql(true);",
+							"   pm.expect(checkID).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/addedresources/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"addedresources",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete_resource",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"delete_resource\", function () {",
+							"   pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/{{feat_id}}/resources/{{resource_id}}/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"{{feat_id}}",
+						"resources",
+						"{{resource_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete_feature",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"delete_feature\", function () {",
+							"   pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/{{feat_id}}/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"{{feat_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_deleted_features",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_deleted_features\", function () {",
+							"   const json = pm.response.json();",
+							"   ",
+							"   let checkLength = json.content.length >= 1;",
+							"   let checkLyrID = json.content[0].layer_id == postman.getEnvironmentVariable(\"lyr_id\");",
+							"   console.log(\"GET_DELETED_FEATURE lyrID:\" + json.content[0].layer_id + \" length:\" + json.content.length)",
+							"   pm.expect(checkLength).to.eql(true);",
+							"   pm.expect(checkLyrID).to.eql(true);",
+							"",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "lyr_id",
+							"value": "{{lyr_id}}",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/deletedfeatures/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"deletedfeatures",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"",
+					"",
+					"",
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "auth",
+			"value": "JWT \neyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxNCwidXNlcm5hbWUiOiJuYnJvZGluIiwiZXhwIjoxNjY3MDU2NDYwLCJlbWFpbCI6Im5icm9kaW5Ac2NvbGFiLmVzIiwib3JpZ19pYXQiOjE2NjY4ODM2NjB9.jgh0eT3pBDFtl6uvB3wV1vuwFarg_5A6c9so_xLb_do",
+			"type": "default"
+		}
+	]
+}
