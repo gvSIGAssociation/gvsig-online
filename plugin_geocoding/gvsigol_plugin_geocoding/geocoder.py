@@ -30,7 +30,7 @@ from .geocoder_postgres import GeocoderPostgres
 from .ide_uy import IdeUY
 from .generic import GenericAPI
 import json, ast
-
+from .models import Provider
 
 class Geocoder():
     
@@ -94,7 +94,41 @@ class Geocoder():
             "suggestions": suggestions
         }
         return response
-    
+
+    def geocoding_direct_from_etl(self, query, geocoder_type):
+
+        provider = Provider.objects.get(type = geocoder_type)
+
+        self.add_provider(provider)
+
+        for geocoder_t in self.geocoders:
+            if  geocoder_type in geocoder_t:
+                geocoder = geocoder_t[geocoder_type]
+                break
+        
+        suggestions = geocoder.geocode(query, exactly_one=False)[0]
+
+        response = self.find_candidate(json.dumps(suggestions))
+
+        return response
+
+    def geocoding_reverse_from_etl(self, x, y, geocoder_type):
+        coordinate = [x, y]
+        loc = {}
+
+        provider = Provider.objects.get(type = geocoder_type)
+
+        self.add_provider(provider)
+
+        for geocoder_t in self.geocoders:
+            if  geocoder_type in geocoder_t:
+                geocoder = geocoder_t[geocoder_type]
+                break
+        
+        loc = geocoder.reverse(coordinate,exactly_one=True,language='es')
+
+        return loc
+
     
     def find_candidate(self, address):
         location = {}
