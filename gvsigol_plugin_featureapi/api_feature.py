@@ -739,7 +739,7 @@ class FeatureByPointView(ListAPIView):
         """
         validation = Validation(request)
         try:
-            validation.check_read_permission(self, lyr_id)
+            validation.check_read_permission(lyr_id)
 
             lon = 0
             if 'lon' in self.request.GET:
