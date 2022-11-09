@@ -35,7 +35,6 @@ from gvsigol_services import utils as services_utils
 from django.utils import timezone
 from psycopg2 import sql as sqlbuilder
 from pyproj import Proj, transform
-from gvsigol_services.tasks import tiling_layer
 import logging
 import ast
 from gvsigol_services import views as serviceviews
