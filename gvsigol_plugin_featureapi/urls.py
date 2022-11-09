@@ -47,6 +47,7 @@ urlpatterns = [
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/versions/', api_feature.FeatureVersionsView.as_view(), name='get_feature_versions'),
     path('api/v1/layers/<int:lyr_id>/feature/', api_feature.FeatureByPointView.as_view(), name='get_feature_by_point'),
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/resources/<int:resource_id>/', api_feature.FileDeleteView.as_view(), name='delete_attached_file'),
+    path('api/v1/layers/<int:lyr_id>/fieldoptions/', api_layer.LayerFieldOptions.as_view(), name='get_layer_field_options'),
 
     path('api/v1/layers/<int:lyr_id>/deletedfeatures/', api_feature.FeatureVersionsDeleted.as_view(), name='get_deleted_features'),
     path('api/v1/layers/<int:lyr_id>/updatedfeatures/', api_feature.FeatureVersionsUpdated.as_view(), name='get_updated_features'),
@@ -62,7 +63,7 @@ urlpatterns = [
     path('api/v1/public/layers/<int:lyr_id>/features/', api_feature.PublicFeaturesView.as_view(), name='get_feature_list'),
     path('api/v1/public/layers/<int:lyr_id>/feature/', api_feature.PublicFeatureByPointView.as_view(), name='get_feature_by_point'),
     path('api/v1/public/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.PublicResourcesView.as_view(), name='get_list_attached_files'),
-    path('api/v1/public/layers/<int:lyr_id>/fieldoptions/', api_layer.PublicLayerFieldOptions.as_view(), name='get_layer_field_options'),
+    path('api/v1/public/layers/<int:lyr_id>/fieldoptions/', api_layer.PublicLayerFieldOptions.as_view(), name='get_public_layer_field_options'),
     path('api/v1/public/layers/<int:lyr_id>/legend/', api_layer.PublicLegend.as_view(), name='get_geoserver_public_legend'),
 
     path('edition/feature_version_management/', views.feature_version_management, name='layers_group'),
