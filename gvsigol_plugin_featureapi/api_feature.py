@@ -722,12 +722,13 @@ class FeatureVersionsDeletedResources(ListAPIView):
 class FeatureByPointView(ListAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (CoordsFeatureFilter,)
+    permission_classes = [AllowAny]
         
     @swagger_auto_schema(operation_id='get_feature_by_point', operation_summary='Gets a feature from a pair of coordinates',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
                                     403: "The layer is not allowed to this user",
                                     400: "Bad parameter lon. The value must be a float<br>Bad parameter lat. The value must be a float"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
     def get(self, request, lyr_id):
         """
         Gets the features in the coordinates (lan, lon)
@@ -738,7 +739,7 @@ class FeatureByPointView(ListAPIView):
         """
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_read_permission(self, lyr_id)
 
             lon = 0
             if 'lon' in self.request.GET:
@@ -883,6 +884,8 @@ class PublicFeatureByPointView(ListAPIView):
             lyr = Layer.objects.get(id=lyr_id)
             if lyr is None:
                 raise HttpException(404, "Layer not found")
+            if not lyr.public:
+                raise HttpException(403, "The user does not have permission to read this layer")
 
             serializer = FeatureSerializer()
             result = serializer.info_by_point(None, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
@@ -984,6 +987,8 @@ class PublicResourcesView(ListCreateAPIView):
                                     403: "The layer is not allowed to this user"})
     @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id, feat_id):
+        v = Validation(request)
+        v.check_read_permission(lyr_id)
         resourceset = LayerResource.objects.filter(layer_id=lyr_id, feature=feat_id)
         serializer = serializers.LayerResourceSerializer(resourceset, many=True)
         result = {
