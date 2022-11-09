@@ -97,6 +97,37 @@ class TimestampFilter(BaseFilterBackend):
         return fields
 
 
+#--------------------------------------------------
+#              LayerFieldOptions
+#--------------------------------------------------
+class LayerFieldOptions(ListAPIView):
+    serializer_class = FeatureSerializer
+    filter_backends = (FieldOptionsFilter, )
+    permission_classes=[AllowAny]
+    
+    @swagger_auto_schema(operation_id='get_layer_field_options', operation_summary='Gets the options list of a layer field',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
+                                    403: "The layer is not allowed to this user", 
+                                    400: "Field options list cannot be obtained. Unexpected error:..."})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        """
+        This call returns a array with a options list of a selected layer field.
+        """
+        validation = Validation(request)
+        validation.check_read_permission(lyr_id)
+          
+        try:
+            if 'fieldselected' in self.request.GET:
+                try:
+                    fieldSelected = self.request.GET['fieldselected']
+                except Exception:
+                    raise HttpException(400, "Bad parameter fieldSelected. The value must be a layer field")
+
+            result = serializers.FeatureSerializer().list_field_options(lyr_id, fieldSelected)
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
 
     
 #--------------------------------------------------
