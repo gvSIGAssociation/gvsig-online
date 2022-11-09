@@ -2521,6 +2521,28 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
         icon.on("click", function(){
 
+            if (typeof get_sch === 'undefined'){
+
+                get_sch = []
+    
+                $("#schema-name-"+ID+" option").each(function()
+                    {  
+                        get_sch.push($(this).val())
+                    }
+                );
+            }
+    
+            if (typeof get_tbl === 'undefined'){
+    
+                get_tbl = []
+    
+                $("#tablename-"+ID+" option").each(function()
+                    {  
+                        get_tbl.push($(this).val())
+                    }
+                );
+            }
+
             optionList = []
             $('#db-'+ID+' option').each(function() {
                 optionList.push($(this).val())
@@ -6255,23 +6277,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
             })
         });
 
-        if (typeof get_sch === 'undefined'){
-            get_sch = []
-            $("#schema-name-"+ID+" option").each(function()
-                {  
-                    get_sch.push($(this).val())
-                }
-            );
-        }
 
-        if (typeof get_tbl === 'undefined'){
-            get_tbl = []
-            $("#tablename-"+ID+" option").each(function()
-                {  
-                    get_tbl.push($(this).val())
-                }
-            );
-        }
 
         $('#get-schema-'+ID).click(function() {
             
@@ -6312,6 +6318,24 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
       var context = this
 
         icon.on("click", function(){
+
+            if (typeof get_sch === 'undefined'){
+                get_sch = []
+                $("#schema-name-"+ID+" option").each(function()
+                    {  
+                        get_sch.push($(this).val())
+                    }
+                );
+            }
+    
+            if (typeof get_tbl === 'undefined'){
+                get_tbl = []
+                $("#tablename-"+ID+" option").each(function()
+                    {  
+                        get_tbl.push($(this).val())
+                    }
+                );
+            }
             
             setTimeout(function(){
                 try{
@@ -8733,11 +8757,11 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Longitude attribute:')+'</label>'+
+                                '<label form="attr" class="col-form-label">'+gettext('Longitude attribute:')+' (X) </label>'+
                                 '<select class="form-control" id="lon-'+ID+'"> </select>'+
                             '</div>'+
                             '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Latitude attribute:')+'</label>'+
+                                '<label form="attr" class="col-form-label">'+gettext('Latitude attribute:')+' (Y) </label>'+
                                 '<select class="form-control" id="lat-'+ID+'"> </select>'+
                             '</div>'+
                             '<div class="column33">'+
@@ -11215,11 +11239,11 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
                             '<div id = "reverse-'+ID+'">'+
 
                                 '<div>'+
-                                    '<label form="attr" class="col-form-label">'+gettext('X attribute:')+'</label>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Longitude attribute:')+' (X) </label>'+
                                     '<select class="form-control" id="x-'+ID+'"> </select>'+
                                 '</div>'+
                                 '<div>'+
-                                    '<label form="attr" class="col-form-label">'+gettext('Y attribute:')+'</label>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Latitude attribute:')+' (Y) </label>'+
                                     '<select class="form-control" id="y-'+ID+'"> </select>'+
                                 '</div>'+
                             '</div>'+
@@ -11233,6 +11257,16 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+        for (i = 0; i < providers.length; i++){
+                        
+            if(providers[i].type.includes('cartociudad')){
+                $('#engine-option-'+ID).append('<option value="'+providers[i].type+'"> '+providers[i].name+' - EPSG:4258</option>')
+            }else{
+                $('#engine-option-'+ID).append('<option value="'+providers[i].type+'"> '+providers[i].name+' - EPSG:4326</option>')
+
+            }
+        }
 
         $("#reverse-"+ID).slideUp("slow");
 
@@ -11670,15 +11704,6 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             },100);
 
-            if (typeof get_sch === 'undefined'){
-                get_sch = []
-                $("#schema-name-option-"+ID+" option").each(function()
-                    {  
-                        get_sch.push($(this).val())
-                    }
-                );
-            }
-
 
             optionList = []
             $('#db-option-'+ID+' option').each(function() {
@@ -11694,7 +11719,6 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                             '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
                         );
                     }
-
                 }
             };
 
@@ -11703,6 +11727,16 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         });
 
         $('#output-postgis-accept-'+ID).click(function() {
+
+
+            if (typeof get_sch === 'undefined'){
+                get_sch = []
+                $("#schema-name-option-"+ID+" option").each(function()
+                    {  
+                        get_sch.push($(this).val())
+                    }
+                );
+            }
 
             var paramsPostgis = {"id": ID,
             "parameters": [

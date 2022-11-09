@@ -3162,14 +3162,20 @@ def trans_Geocoder(dicc):
         cur.execute(sqlSel)
         conn.commit()
 
+        sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_X" = %s, "_Y" = %s WHERE _id_temp = %s').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target)
+        )
+
         for row in cur:
+
+            address_list = []
+            for x in range (1, len(row)):
+                if row[x]:
+                    address_list.append(str(row[x]))
+            address = ', '.join(address_list)
             
             if engine == 'ICV':
-                address_list = []
-                for x in range (1, len(row)):
-                    if row[x]:
-                        address_list.append(str(row[x]))
-                address = ', '.join(address_list)
                 
                 r = requests.get(URL_GEOCODER['icv-direct'] % address)
                 result = json.loads(r.content.decode('utf-8')[1:-1])['results'][0]['relacionespacial']
@@ -3177,17 +3183,20 @@ def trans_Geocoder(dicc):
                 if result.startswith('POINT'):
                     coord = result[result.find("(")+1:result.find(")")].split(' ')
 
-                    sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_X" = %s, "_Y" = %s WHERE _id_temp = %s').format(
-                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
-                        table_target = sql.Identifier(table_name_target)
-                    )
                     cur_2.execute(sqlUpdate,[coord[0], coord[1],row[0]])
                     conn_2.commit()
 
-            #Aquí podremos añadir otros motores de búsqueda
+            #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
-                pass
 
+                from gvsigol_plugin_geocoding.geocoder import Geocoder
+
+                geocoder = Geocoder()
+
+                result = geocoder.geocoding_direct_from_etl(address, engine)
+
+                cur_2.execute(sqlUpdate,[result['address']['lng'], result['address']['lat'], row[0]])
+                conn_2.commit()
 
     else:
 
@@ -3210,6 +3219,11 @@ def trans_Geocoder(dicc):
         cur.execute(sqlSel)
         conn.commit()
 
+        sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_ADDRESS" = %s WHERE _id_temp = %s').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target)
+        )
+
         for row in cur:
 
             if engine == 'ICV':
@@ -3218,16 +3232,26 @@ def trans_Geocoder(dicc):
                 result = json.loads(r.content.decode('utf-8'))
                 address = str(result['dtipo_vial'])+' '+str(result['nombre'])+', '+str(result['dtipo_porpk'])+' '+str(result['numero'])+', '+str(result['municipio'])
 
-                sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_ADDRESS" = %s WHERE _id_temp = %s').format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
-                    table_target = sql.Identifier(table_name_target)
-                )
                 cur_2.execute(sqlUpdate,[address, row[0]])
                 conn_2.commit()
 
-            #Aquí podremos añadir otros motores de búsqueda
+            #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
-                pass
+
+                from gvsigol_plugin_geocoding.geocoder import Geocoder
+
+                geocoder = Geocoder()
+
+                result = geocoder.geocoding_reverse_from_etl(row[1], row[2], engine)
+
+                if 'cartociudad' in engine:
+                    address = str(result['tip_via'])+' '+str(result['address'])+', '+str(result['portalNumber'])+', '+str(result['muni'])
+
+                else:
+                    address = result['address']
+                
+                cur_2.execute(sqlUpdate,[address, row[0]])
+                conn_2.commit()
 
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),

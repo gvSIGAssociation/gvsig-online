@@ -33,6 +33,8 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSch
 from gvsigol import settings
 from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
+from gvsigol_plugin_geocoding.models import Provider
+from gvsigol_plugin_geocoding.settings import GEOCODING_SUPPORTED_TYPES
 
 from .forms import UploadFileForm
 from .models import ETLworkspaces, ETLstatus, database_connections
@@ -101,6 +103,17 @@ def etl_canvas(request):
     for db in databases:
         dbc.append({"name": db.name, "type": db.type})
 
+    providers = []
+    providers_obj  = Provider.objects.all()
+
+    for pr in providers_obj:
+        for engine in GEOCODING_SUPPORTED_TYPES:
+            if engine[0] == pr.type:
+                name = engine[1]
+                break
+        providers.append({"type": pr.type, 'name': name})
+
+
     try:
         statusModel  = ETLstatus.objects.get(name = 'current_canvas')
         statusModel.message = ''
@@ -129,7 +142,8 @@ def etl_canvas(request):
             'workspace': json.dumps(instance.workspace),
             'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
             'srs': srs_string,
-            'dbc': dbc
+            'dbc': dbc,
+            'providers': providers
         }
 
         try:
@@ -161,7 +175,8 @@ def etl_canvas(request):
         response = {
             'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
             'srs': srs,
-            'dbc': dbc
+            'dbc': dbc,
+            'providers': providers
         }
         return render(request, 'etl.html', response)
 
