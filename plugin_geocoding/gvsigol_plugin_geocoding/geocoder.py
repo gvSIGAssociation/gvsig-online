@@ -105,9 +105,18 @@ class Geocoder():
             if  geocoder_type in geocoder_t:
                 geocoder = geocoder_t[geocoder_type]
                 break
-        
-        suggestions = geocoder.geocode(query, exactly_one=False)[0]
+        try:
+            sugges= geocoder.geocode(query, exactly_one=False)[0]
+        except:
+            response = {}
+            
+            return response
 
+        if geocoder_type == 'generic':
+            suggestions = {"address['" + str(key)+"']": val for key, val in sugges.items()}
+        else:
+            suggestions = sugges
+        
         response = self.find_candidate(json.dumps(suggestions))
 
         return response
