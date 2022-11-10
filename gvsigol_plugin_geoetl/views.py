@@ -106,12 +106,18 @@ def etl_canvas(request):
     providers = []
     providers_obj  = Provider.objects.all()
 
+    print('objetos providers', providers_obj)
+
     for pr in providers_obj:
+        print('pr tipo', pr.type)
         for engine in GEOCODING_SUPPORTED_TYPES:
+            print('GEOCODING_SUPPORTED_TYPES', engine)
             if engine[0] == pr.type:
                 name = engine[1]
                 break
         providers.append({"type": pr.type, 'name': name})
+
+    print(providers)
 
 
     try:
