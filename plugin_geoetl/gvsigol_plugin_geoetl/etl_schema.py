@@ -412,12 +412,18 @@ def get_entities_segex(dicc):
 
     r = requests.get(url+listEntidades)
 
-    listEntities = []
+    print('listEntidades: ' + str(r.status_code))
 
-    for i in r.json():
-        listEntities.append([i['Id'], i['Descripcion']])
-    
-    return listEntities
+    if r.status_code == 200:
+
+        listEntities = []
+
+        for i in r.json():
+            listEntities.append([i['Id'], i['Descripcion']])
+        
+        return listEntities
+    else:
+        return []
 
 def get_types_segex (dicc):
 
@@ -436,9 +442,15 @@ def get_types_segex (dicc):
 
     r = requests.get(url+listTipos)
 
-    listTypes = []
+    print('listTipos: '+str(r.status_code))
 
-    for i in r.json():
-        listTypes.append([i['Id'], i['Descripcion']])
-    
-    return listTypes
+    if r.status_code == 200:
+
+        listTypes = []
+
+        for i in r.json():
+            listTypes.append([i['Id'], i['Descripcion']])
+        
+        return listTypes
+    else:
+        return []

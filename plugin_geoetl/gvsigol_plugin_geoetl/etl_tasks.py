@@ -3367,38 +3367,52 @@ def input_Segex(dicc):
                 
                 r = requests.get(url+listGeoref)
 
-                for georef in r.json()['Georefs']:
+                print('listGeorefStatus: '+str(r.status_code))
 
-                    wsSegPass = etl_schema.getwsSegPass(dicc['password'])
+                if r.status_code == 200:
 
-                    getGeoref = 'Georef/GetGeoref?wsSegUser=%s&wsSegPass=%s&idEntidad=%s&idGeoref=%s' % (wsSegUser, wsSegPass, entity, georef['IdGeoref'])
+                    for georef in r.json()['Georefs']:
 
-                    r_geof = requests.get(url+getGeoref)
-                    
-                    exp = r_geof.json()
-                    
-                    exp['Operacion']= georef['Operacion']
-                    
-                    df = pd.json_normalize(exp)
+                        wsSegPass = etl_schema.getwsSegPass(dicc['password'])
 
-                    df = df[schema]
-                    
-                    df_obj = df.select_dtypes(['object'])
-                    
-                    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+                        getGeoref = 'Georef/GetGeoref?wsSegUser=%s&wsSegPass=%s&idEntidad=%s&idGeoref=%s' % (wsSegUser, wsSegPass, entity, georef['IdGeoref'])
 
-                    if first:
-                        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
-                        first = False
+                        r_geof = requests.get(url+getGeoref)
+
+                        print('getGeorefStatus: '+str(r.status_code))
+
+                        if r.status_code == 200:
+                        
+                            exp = r_geof.json()
+                            
+                            exp['Operacion']= georef['Operacion']
+                            
+                            df = pd.json_normalize(exp)
+
+                            df = df[schema]
+                            
+                            df_obj = df.select_dtypes(['object'])
+                            
+                            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
+                            if first:
+                                df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+                                first = False
+                            else:
+                                df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+
+                    if len(r.json()['Georefs']) == 100:
+                    
+                        offset += 100
+
                     else:
-                        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
 
-                if len(r.json()['Georefs']) == 100:
-                
-                    offset += 100
+                        offset += 10
 
-                else:
+    if first:
 
-                    offset += 10
+        df = pd.DataFrame(columns = schema)
+        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+
 
     return [table_name]
