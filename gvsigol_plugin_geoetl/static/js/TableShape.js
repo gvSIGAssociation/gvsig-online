@@ -963,7 +963,6 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                         get_.push([$(this).val(), $(this).text()])
                     }
                 );
-                console.log(get_)
             }
 
 
@@ -5941,15 +5940,9 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
             
             schemaMod =[...schemaEdge]
 
-            console.log(schemaMod)
-
             schemaMod.splice(schemaMod.indexOf($('#attr-'+ID).val()), 1)
 
-            console.log(schemaMod)
-
             schemaMod.push($('#attr-'+ID).val())
-
-            console.log(schemaMod)
            
             paramsCreateAttr['schema'] = schemaMod
             paramsCreateAttr['schema-old'] = schemaEdge
