@@ -3178,13 +3178,17 @@ def trans_Geocoder(dicc):
             if engine == 'ICV':
                 
                 r = requests.get(URL_GEOCODER['icv-direct'] % address)
-                result = json.loads(r.content.decode('utf-8')[1:-1])['results'][0]['relacionespacial']
 
-                if result.startswith('POINT'):
-                    coord = result[result.find("(")+1:result.find(")")].split(' ')
+                try:
+                    result = json.loads(r.content.decode('utf-8')[1:-1])['results'][0]['relacionespacial']
 
-                    cur_2.execute(sqlUpdate,[coord[0], coord[1],row[0]])
-                    conn_2.commit()
+                    if result.startswith('POINT'):
+                        coord = result[result.find("(")+1:result.find(")")].split(' ')
+
+                        cur_2.execute(sqlUpdate,[coord[0], coord[1],row[0]])
+                        conn_2.commit()
+                except:
+                    pass
 
             #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
@@ -3195,8 +3199,12 @@ def trans_Geocoder(dicc):
 
                 result = geocoder.geocoding_direct_from_etl(address, engine)
 
-                cur_2.execute(sqlUpdate,[result['address']['lng'], result['address']['lat'], row[0]])
-                conn_2.commit()
+                try:
+
+                    cur_2.execute(sqlUpdate,[result['address']['lng'], result['address']['lat'], row[0]])
+                    conn_2.commit()
+                except:
+                    pass
 
     else:
 
@@ -3229,11 +3237,14 @@ def trans_Geocoder(dicc):
             if engine == 'ICV':
                 r = requests.get(URL_GEOCODER['icv-reverse'] % (row[1], row[2]))
                 
-                result = json.loads(r.content.decode('utf-8'))
-                address = str(result['dtipo_vial'])+' '+str(result['nombre'])+', '+str(result['dtipo_porpk'])+' '+str(result['numero'])+', '+str(result['municipio'])
+                try:
+                    result = json.loads(r.content.decode('utf-8'))
+                    address = str(result['dtipo_vial'])+' '+str(result['nombre'])+', '+str(result['dtipo_porpk'])+' '+str(result['numero'])+', '+str(result['municipio'])
 
-                cur_2.execute(sqlUpdate,[address, row[0]])
-                conn_2.commit()
+                    cur_2.execute(sqlUpdate,[address, row[0]])
+                    conn_2.commit()
+                except:
+                    pass
 
             #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
@@ -3244,14 +3255,18 @@ def trans_Geocoder(dicc):
 
                 result = geocoder.geocoding_reverse_from_etl(row[1], row[2], engine)
 
-                if 'cartociudad' in engine:
-                    address = str(result['tip_via'])+' '+str(result['address'])+', '+str(result['portalNumber'])+', '+str(result['muni'])
+                try:
 
-                else:
-                    address = result['address']
-                
-                cur_2.execute(sqlUpdate,[address, row[0]])
-                conn_2.commit()
+                    if 'cartociudad' in engine:
+                        address = str(result['tip_via'])+' '+str(result['address'])+', '+str(result['portalNumber'])+', '+str(result['muni'])
+
+                    else:
+                        address = result['address']
+                    
+                    cur_2.execute(sqlUpdate,[address, row[0]])
+                    conn_2.commit()
+                except:
+                    pass
 
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),
