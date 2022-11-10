@@ -856,3 +856,9 @@ msgstr "Obtén entidades"
 
 msgid "Get types"
 msgstr "Obtén tipos"
+
+msgid "Reverse"
+msgstr "Indirecto"
+
+msgid "Direct"
+msgstr "Directo"

@@ -855,3 +855,9 @@ msgstr ""
 
 msgid "Get types"
 msgstr ""
+
+msgid "Reverse"
+msgstr ""
+
+msgid "Direct"
+msgstr ""
