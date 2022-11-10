@@ -3193,13 +3193,13 @@ def trans_Geocoder(dicc):
             #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
 
-                from gvsigol_plugin_geocoding.geocoder import Geocoder
-
-                geocoder = Geocoder()
-
-                result = geocoder.geocoding_direct_from_etl(address, engine)
-
                 try:
+
+                    from gvsigol_plugin_geocoding.geocoder import Geocoder
+
+                    geocoder = Geocoder()
+
+                    result = geocoder.geocoding_direct_from_etl(address, engine)
 
                     cur_2.execute(sqlUpdate,[result['address']['lng'], result['address']['lat'], row[0]])
                     conn_2.commit()
@@ -3249,13 +3249,12 @@ def trans_Geocoder(dicc):
             #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
 
-                from gvsigol_plugin_geocoding.geocoder import Geocoder
-
-                geocoder = Geocoder()
-
-                result = geocoder.geocoding_reverse_from_etl(row[1], row[2], engine)
-
                 try:
+                    from gvsigol_plugin_geocoding.geocoder import Geocoder
+
+                    geocoder = Geocoder()
+
+                    result = geocoder.geocoding_reverse_from_etl(row[1], row[2], engine)
 
                     if 'cartociudad' in engine:
                         address = str(result['tip_via'])+' '+str(result['address'])+', '+str(result['portalNumber'])+', '+str(result['muni'])
