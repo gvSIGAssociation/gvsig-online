@@ -3187,8 +3187,8 @@ def trans_Geocoder(dicc):
 
                         cur_2.execute(sqlUpdate,[coord[0], coord[1],row[0]])
                         conn_2.commit()
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
 
             #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
@@ -3201,10 +3201,16 @@ def trans_Geocoder(dicc):
 
                     result = geocoder.geocoding_direct_from_etl(address, engine)
 
-                    cur_2.execute(sqlUpdate,[result['address']['lng'], result['address']['lat'], row[0]])
-                    conn_2.commit()
-                except:
-                    pass
+                    if engine != 'generic':
+
+                        cur_2.execute(sqlUpdate,[result['address']['lng'], result['address']['lat'], row[0]])
+                        conn_2.commit()
+                    else:
+                        cur_2.execute(sqlUpdate,[result['address'][0]['lng'], result['address'][0]['lat'], row[0]])
+                        conn_2.commit()
+
+                except Exception as e:
+                    print(e)
 
     else:
 
@@ -3243,8 +3249,8 @@ def trans_Geocoder(dicc):
 
                     cur_2.execute(sqlUpdate,[address, row[0]])
                     conn_2.commit()
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
 
             #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
             else:
@@ -3264,8 +3270,8 @@ def trans_Geocoder(dicc):
                     
                     cur_2.execute(sqlUpdate,[address, row[0]])
                     conn_2.commit()
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
 
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),
