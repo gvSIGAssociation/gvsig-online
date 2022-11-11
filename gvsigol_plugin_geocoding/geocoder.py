@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from sqlalchemy import null
 from gvsigol_plugin_geocoding.googlemaps import GoogleMaps
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
@@ -113,7 +114,12 @@ class Geocoder():
             return response
 
         if geocoder_type == 'generic':
-            suggestions = {"address['" + str(key)+"']": val for key, val in sugges.items()}
+            suggestions = {"address[" + str(key)+"]": val for key, val in sugges.items()}
+            for key, val in suggestions.items():
+                if val is None:
+                    suggestions[key] = ''
+                if val == 0:
+                    suggestions[key] = '0'
         else:
             suggestions = sugges
         
