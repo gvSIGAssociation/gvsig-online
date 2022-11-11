@@ -281,6 +281,13 @@ function configure() {
 		ALLOWED_HOST_NAMES="'${BASE_URL}'"
 	fi
 	grep -rl "##ALLOWED_HOST_NAMES##"  | xargs sed -i "s ##ALLOWED_HOST_NAMES## $ALLOWED_HOST_NAMES g"
+
+	echo "INFO: Replace CSRF_TRUSTED_ORIGINS"
+	if [ -z $CSRF_TRUSTED_ORIGINS ]; then
+		echo "WARNING: CSRF_TRUSTED_ORIGINS is not defined. Using GVSIGOL_HOST"
+		CSRF_TRUSTED_ORIGINS="'${GVSIGOL_HOST}'"
+	fi
+	grep -rl "##CSRF_TRUSTED_ORIGINS##"  | xargs sed -i "s ##CSRF_TRUSTED_ORIGINS## $CSRF_TRUSTED_ORIGINS g"
 	
 	#docs 
 	echo "INFO: Replace DOCS_URL"
