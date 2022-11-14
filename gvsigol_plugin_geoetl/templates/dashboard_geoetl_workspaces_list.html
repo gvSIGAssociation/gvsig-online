@@ -595,6 +595,10 @@
 					},
 					success	:function(response){
 
+						$("#db option").each(function() {
+							$(this).remove();
+						});
+
 						dbc = response['dbcs']
 
 						for(i=0;i<dbc.length;i++){
