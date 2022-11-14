@@ -312,7 +312,7 @@ def executeSQL(db, query_list):
     connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
     cursor = connection.cursor()
 
-    sql_ = sql.SQL(query.replace('_##_', '"'))
+    sql_ = sql.SQL(query.replace('_##_', '"').replace('#__#', "'"))
     cursor.execute(sql_)
     connection.commit()
     
