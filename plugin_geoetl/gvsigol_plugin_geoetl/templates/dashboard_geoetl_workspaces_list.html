@@ -616,9 +616,9 @@
 							sqlafter = ''
 						}
 
-						$(".modal-body #sql-before").val( sqlbefore.replace( /_##_/g, '"'));
+						$(".modal-body #sql-before").val( sqlbefore.replace( /_##_/g, '"').replace( /#__#/g, "'"));
 
-						$(".modal-body #sql-after").val( sqlafter.replace( /_##_/g, '"'));
+						$(".modal-body #sql-after").val( sqlafter.replace( /_##_/g, '"').replace( /#__#/g, "'"));
 
 						$('#modal-set-parameters-workspace').modal('show')
 					},
@@ -638,8 +638,8 @@
 				data:{
 					"id": $(".modal-body #etl_id").val(),
 					"db": $(".modal-body #db").val(),
-					"sql-before": $(".modal-body #sql-before").val().replace(/"/g, '_##_'),
-					"sql-after": $(".modal-body #sql-after").val().replace(/"/g, '_##_')
+					"sql-before": $(".modal-body #sql-before").val().replace(/"/g, '_##_').replace(/'/g, '#__#'),
+					"sql-after": $(".modal-body #sql-after").val().replace(/"/g, '_##_').replace(/'/g, '#__#')
 				},
 				url: '/gvsigonline/etl/set_workspace_parameters/',
 				beforeSend:function(xhr){

@@ -963,7 +963,7 @@ def get_workspace_parameters(request):
         
         ws = ETLworkspaces.objects.get(id = request.POST['id'])
 
-        if ws.parameters:          
+        if ws.parameters:
 
             response = json.loads(ws.parameters)
         else:
