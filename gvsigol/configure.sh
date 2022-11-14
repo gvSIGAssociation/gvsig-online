@@ -280,20 +280,20 @@ function configure() {
 		echo "WARNING: ALLOWED_HOST_NAMES is not defined. Using BASE_URL"
 		ALLOWED_HOST_NAMES="'${BASE_URL}'"
 	fi
-	grep -rl "##ALLOWED_HOST_NAMES##"  | xargs sed -i "s ##ALLOWED_HOST_NAMES## \"$ALLOWED_HOST_NAMES\" g"
+	grep -rl "##ALLOWED_HOST_NAMES##"  | xargs sed -i "s!##ALLOWED_HOST_NAMES##!$ALLOWED_HOST_NAMES!g"
 
 	echo "INFO: Replace CSRF_TRUSTED_ORIGINS"
 	if [ -z $CSRF_TRUSTED_ORIGINS ]; then
 		echo "WARNING: CSRF_TRUSTED_ORIGINS is not defined. Using GVSIGOL_HOST"
 		CSRF_TRUSTED_ORIGINS="'${GVSIGOL_HOST}'"
 	fi
-	grep -rl "##CSRF_TRUSTED_ORIGINS##"  | xargs sed -i "s ##CSRF_TRUSTED_ORIGINS## \"$CSRF_TRUSTED_ORIGINS\" g"
+	grep -rl "##CSRF_TRUSTED_ORIGINS##"  | xargs sed -i "s!##CSRF_TRUSTED_ORIGINS##!$CSRF_TRUSTED_ORIGINS!g"
 	echo "INFO: Replace CORS_ALLOWED_ORIGINS"
 	if [ -z $CORS_ALLOWED_ORIGINS ]; then
 		echo "WARNING: CORS_ALLOWED_ORIGINS is not defined. Using BASE_URL"
 		CORS_ALLOWED_ORIGINS="'${BASE_URL}'"
 	fi
-	grep -rl "##CORS_ALLOWED_ORIGINS##"  | xargs sed -i "s ##CORS_ALLOWED_ORIGINS## \"$CORS_ALLOWED_ORIGINS\" g"
+	grep -rl "##CORS_ALLOWED_ORIGINS##"  | xargs sed -i "s!##CORS_ALLOWED_ORIGINS##!$CORS_ALLOWED_ORIGINS!g"
 	
 	#docs 
 	echo "INFO: Replace DOCS_URL"
