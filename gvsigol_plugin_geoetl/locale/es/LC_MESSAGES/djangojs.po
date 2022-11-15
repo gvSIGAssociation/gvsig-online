@@ -862,3 +862,15 @@ msgstr "Inverso"
 
 msgid "Direct"
 msgstr "Directo"
+
+msgid "JSON Parameters"
+msgstr "Parámetros JSON"
+
+msgid "Choose JSON file"
+msgstr "Elige .JSON"
+
+msgid "Do you want to load JSON data from an API REST?"
+msgstr "¿Quieres cargar datos JSON desde un API REST"
+
+msgid "Choose date"
+msgstr "Elige fecha"

@@ -1405,7 +1405,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div class="column20">'+
-                                '<label class="col-form-label" >'+gettext('Choose JSON file:')+'</label><br>'+
+                                '<label class="col-form-label" >'+gettext('Choose JSON file')+': </label><br>'+
                                 '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
                             '</div>'+ 
                             '<div class="column80">'+
@@ -1414,7 +1414,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+ 
                             '<div>'+
                                 '<input type="checkbox" name="checkbox-json" id="api-rest-'+ID+'"/>'+
-                                '<label for="checkbox">'+gettext('Do you want load JSON from an API REST?')+'</label>'+											
+                                '<label for="checkbox">'+gettext('Do you want to load JSON data from an API REST?')+'</label>'+											
                             '</div>'+
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label" >'+gettext('URL:')+'</label>'+

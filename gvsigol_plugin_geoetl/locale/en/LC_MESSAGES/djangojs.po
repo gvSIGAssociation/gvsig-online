@@ -861,3 +861,15 @@ msgstr ""
 
 msgid "Direct"
 msgstr ""
+
+msgid "JSON Parameters"
+msgstr ""
+
+msgid "Choose JSON file"
+msgstr ""
+
+msgid "Do you want to load JSON data from an API REST?"
+msgstr ""
+
+msgid "Choose date"
+msgstr ""
