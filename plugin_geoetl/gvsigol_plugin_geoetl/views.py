@@ -1026,3 +1026,20 @@ def etl_types_segex(request):
             response = json.dumps(listTypes)
             
             return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_schema_json(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+
+            jsParams = json.loads(request.POST['jsonParamsJSON'])
+
+            listSchema = etl_schema.get_schema_json(jsParams['parameters'][0])
+
+            response = json.dumps(listSchema)
+
+            print(listSchema)
+
+            return HttpResponse(response, content_type="application/json")

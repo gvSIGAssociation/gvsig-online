@@ -3419,5 +3419,26 @@ def input_Segex(dicc):
         df = pd.DataFrame(columns = schema)
         df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
 
+    return [table_name]
 
+
+def input_Json(dicc):
+    
+    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    db = create_engine(conn_string)
+    conn = db.connect()
+
+    table_name = dicc['id']
+
+    if dicc['api-rest'] == 'true':
+        df = pd.read_json(dicc['url'])
+    else:
+        df = pd.read_json(dicc['json-file'])
+
+    df_obj = df.select_dtypes(['object'])
+    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+    conn.close()
+    db.dispose()
+    
     return [table_name]

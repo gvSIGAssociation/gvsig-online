@@ -35,4 +35,5 @@ urlpatterns = [
     path('etl/set_workspace_parameters/', views.set_workspace_parameters, name='set_workspace_parameters'),
     path('etl/etl_entities_segex/', views.etl_entities_segex, name='etl_entities_segex'),
     path('etl/etl_types_segex/', views.etl_types_segex, name='etl_types_segex'),
+    path('etl/etl_schema_json/', views.etl_schema_json, name='etl_schema_json'),
 ]
