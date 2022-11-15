@@ -102,7 +102,9 @@ function getPathFile(fileType, ID){
 
         if(fileType == 'csv' && url.endsWith('.csv')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        } else if(fileType == 'excel' && (url.endsWith('.xls') || url.endsWith('.xlsx'))){
+        }else if(fileType == 'json' && url.endsWith('.json')){
+            $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        }else if(fileType == 'excel' && (url.endsWith('.xls') || url.endsWith('.xlsx'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'shp' && url.endsWith('.shp')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
@@ -1353,6 +1355,266 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
      }  
 
 });
+
+//// INPUT JSON ////
+input_Json = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "input_Json",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"JSON", 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+       
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+
+        $('#canvas-parent').append('<div id="dialog-input-json-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+gettext('JSON Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div class="column20">'+
+                                '<label class="col-form-label" >'+gettext('Choose JSON file:')+'</label><br>'+
+                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
+                            '</div>'+ 
+                            '<div class="column80">'+
+                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                '<input type="text" id="json-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+ 
+                            '<div>'+
+                                '<input type="checkbox" name="checkbox-json" id="api-rest-'+ID+'"/>'+
+                                '<label for="checkbox">'+gettext('Do you want load JSON from an API REST?')+'</label>'+											
+                            '</div>'+
+                            '<div class="more-options-'+ID+'">'+
+                                '<label class="col-form-label" >'+gettext('URL:')+'</label>'+
+                                '<input type="text" id="url-'+ID+'" name="url" class="form-control"></input>'+
+                            '</div>'+ 
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-json-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+
+        
+        $("#api-rest-"+ID).change(function() {
+            if($("#api-rest-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#api-rest-"+ID).val("true")
+                $("#json-file-"+ID).prop( "disabled", true );
+                $("#select-file-button-"+ID).prop( "disabled", true );
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#api-rest-"+ID).val("")
+                $( "#json-file-"+ID ).prop( "disabled", false );
+                $("#select-file-button-"+ID).prop( "disabled", false );
+            }
+        });
+
+        getPathFile('json', ID)
+
+        var context = this
+
+        icon.on("click", function(){
+
+            if($("#api-rest-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#api-rest-"+ID).val("true")
+                $( "#json-file-"+ID ).prop( "disabled", true );
+                $( "#select-file-button-"+ID ).prop( "disabled", true );
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#api-rest-"+ID).val("")
+                $( "#json-file-"+ID ).prop( "disabled", false );
+                $( "#select-file-button-"+ID ).prop( "disabled", false );
+            }
+
+            $('#dialog-input-json-'+ID).modal('show')
+
+        });
+
+        $('#input-json-accept-'+ID).click(function() {
+
+            var paramsJSON = {"id": ID,
+            "parameters": [
+                {"json-file": $('#json-file-'+ID).val(),
+                "api-rest": $("#api-rest-"+ID).val(),
+                "url": $('#url-'+ID).val()
+                }
+            ]}
+
+            var formDataSchemaJSON = new FormData();
+
+            formDataSchemaJSON.append('jsonParamsJSON', JSON.stringify(paramsJSON))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_json/',
+                data: formDataSchemaJSON,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsJSON['schema'] = data
+                    
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    }
+                })
+    
+            isAlreadyInCanvas(jsonParams, paramsJSON, ID)
+
+            icon.setColor('#01b0a0')
+            
+            $('#dialog-input-json-'+ID).modal('hide')
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+	   	 var label =new draw2d.shape.basic.Label({
+	   	     text:gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#009688",
+             resizeable:true
+	   	 });
+
+	     var output= label.createPort("output");
+	     
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     }
+	     else{
+	         this.add(label);
+	     }
+         
+         listLabel.push([this.id, [], [output.name]])
+         
+         return label;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+
 
 //// INPUT EXCEL ////
 

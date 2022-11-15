@@ -454,3 +454,13 @@ def get_types_segex (dicc):
         return listTypes
     else:
         return []
+
+
+def get_schema_json(dicc):
+    
+    if dicc['api-rest'] == 'true':
+        jsondata = pd.read_json(dicc['url'])
+    else:
+        jsondata = pd.read_json(dicc['json-file'])
+    
+    return list(jsondata.columns)
