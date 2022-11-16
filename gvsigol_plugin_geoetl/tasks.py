@@ -21,6 +21,7 @@ def run_canvas_background(**kwargs):
 
     jsonCanvas = kwargs["jsonCanvas"]
     id_ws = kwargs["id_ws"]
+    username = kwargs["username"]
     params = kwargs["parameters"]
     
     if id_ws:
@@ -43,7 +44,7 @@ def run_canvas_background(**kwargs):
             statusModel.save()
     else:
 
-        statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+        statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
         statusModel.message = 'Running'
         statusModel.status = 'Running'
         statusModel.save()
@@ -177,7 +178,7 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Success'
             statusModel.save()  
         else:
-            statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+            statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
             statusModel.message ='Process has been executed successfully'
             statusModel.status = 'Success'
             statusModel.save()
@@ -193,7 +194,7 @@ def run_canvas_background(**kwargs):
             statusModel.status = 'Error'
             statusModel.save()
         else:
-            statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+            statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
             statusModel.message = str(e)[:250]
             statusModel.status = 'Error'
             statusModel.save()
