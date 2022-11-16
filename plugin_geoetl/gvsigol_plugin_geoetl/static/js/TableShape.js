@@ -102,7 +102,7 @@ function getPathFile(fileType, ID){
 
         if(fileType == 'csv' && url.endsWith('.csv')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        }else if(fileType == 'json' && url.endsWith('.json')){
+        }else if(fileType == 'json' && url.endsWith('.json') && ID != '0'){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         }else if(fileType == 'excel' && (url.endsWith('.xls') || url.endsWith('.xlsx'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)

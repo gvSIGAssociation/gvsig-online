@@ -1103,23 +1103,30 @@ def trans_Reproject(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
+    try:
+        srid, type_geom = get_type_n_srid(table_name_source)
+    except:
+        type_geom = ''
+
     if sourceepsg == '':
         pass
     else:
-        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry USING ST_SetSRID(wkb_geometry, {epsg})'
+        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
         sqlAlter = sql.SQL(sqlAlter_).format(
                     schema = sql.Identifier(settings.GEOETL_DB["schema"]),
                     tbl_target = sql.Identifier(table_name_target),
+                    type_geom = sql.SQL(type_geom),
                     epsg = sql.SQL(sourceepsg))
       
         cur.execute(sqlAlter)
         conn.commit()
 
-    sqlTransf_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry USING ST_Transform(wkb_geometry, {epsg})'
+    sqlTransf_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_Transform(wkb_geometry, {epsg})'
     
     sqlTransf = sql.SQL(sqlTransf_).format(
                 schema = sql.Identifier(settings.GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
+                type_geom = sql.SQL(type_geom),
                 epsg = sql.SQL(targetepsg))
 
     cur.execute(sqlTransf)
@@ -1476,6 +1483,15 @@ def trans_TextToPoint(dicc):
         epsg = sql.SQL(epsg)
     )
     cur.execute(sqlDup)
+    conn.commit()
+
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN wkb_geometry TYPE Geometry(Point, {srid})').format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        table_name = sql.Identifier(table_name_target),
+        srid = sql.SQL(str(epsg))
+    )
+
+    cur.execute(sqlAlter)
     conn.commit()
     
     return[table_name_target]
@@ -2365,6 +2381,12 @@ def merge_tables(_list):
             attr_select_source.append(sql.SQL('NULL AS {}').format(sql.Identifier(attr)))
 
     table_name = table_name_source[15:]+';'+table_name_target[15:]
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name))
+    cur.execute(sqlDrop)
+    conn.commit()
 
     sql_ = 'create table {schema}.{tbl_name} as (select '+ attr_select_par[:-2] +' FROM {schema}.{tbl_target} UNION'
     sql_ += ' select '+ attr_select_par[:-2] +' FROM {schema}.{tbl_source})'
