@@ -476,7 +476,7 @@
 		}
 
 		$('#button-new-empty-canvas').on('click', function (){
-			location.href = '/gvsigonline/etl/etl_canvas/';
+			location.href = '/gvsigonline/etl/etl_canvas/?user=' + '{{ user.username }}';
 		});
 
 		upload = false
@@ -666,6 +666,7 @@
 				async: false,
 				data: {
 					"id_ws": data[0],
+					"username": '{{ user.username }}',
 					'jsonCanvas': false
 				},
 				url: '/gvsigonline/etl/etl_read_canvas/',
@@ -680,7 +681,7 @@
 			
 		function openWorkspace(data){	
 				
-			location.href = '/gvsigonline/etl/etl_canvas/?lgid=' + data[0];
+			location.href = '/gvsigonline/etl/etl_canvas/?user=' + '{{ user.username }}&lgid=' + data[0];
 			
 		}
 

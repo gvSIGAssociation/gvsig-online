@@ -24,7 +24,7 @@ gvsigolETL.Toolbar = Class.extend({
 			$('#modal-new-empy-canvas').modal('show')
 
 			$('#button-empty-canvas-accept').click(function() {
-				location.href = '/gvsigonline/etl/etl_canvas/';
+				location.href = '/gvsigonline/etl/etl_canvas/?user=' + username;
 
 			})
 
@@ -167,6 +167,7 @@ gvsigolETL.Toolbar = Class.extend({
 				jsonCanvas = JSON.stringify(json)
 				
 				formData.append('jsonCanvas',jsonCanvas)
+				formData.append('username',username)
 
 				$.ajax({
 					type: 'POST',

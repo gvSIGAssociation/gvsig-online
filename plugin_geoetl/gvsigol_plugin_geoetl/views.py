@@ -91,6 +91,8 @@ def etl_canvas(request):
     #from gvsigol.celery import app as celery_app
     #celery_app.control.purge()
 
+    username = request.GET['user']
+
     srs = core_utils.get_supported_crs_array()
     srs_string = json.dumps(srs)
 
@@ -120,7 +122,7 @@ def etl_canvas(request):
         providers = []
 
     try:
-        statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+        statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
         statusModel.message = ''
         statusModel.status = ''
         statusModel.id_ws = None
@@ -129,7 +131,7 @@ def etl_canvas(request):
     except:
         
         statusModel = ETLstatus(
-            name = 'current_canvas',
+            name = 'current_canvas.'+username,
             message = '',
             status = '',
             id_ws = None
@@ -300,7 +302,7 @@ def save_periodic_workspace(request, workspace):
         PeriodicTask.objects.create(
             interval=schedule,
             name=my_task_name,
-            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id, 'parameters': params}),
+            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id, 'username': request.POST['username'], 'parameters': params}),
             task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
         )
     else:
@@ -324,7 +326,7 @@ def save_periodic_workspace(request, workspace):
         PeriodicTask.objects.create(
             crontab=schedule,
             name=my_task_name,
-            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id, 'parameters': params}),
+            kwargs=json.dumps({'jsonCanvas': jsonCanvas, 'id_ws': workspace.id, 'username': request.POST['username'], 'parameters': params}),
             task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
         )
 
@@ -551,7 +553,7 @@ def etl_workspace_update(request):
 @staff_required
 def etl_current_canvas_status(request):
     try:
-        statusModel  = ETLstatus.objects.get(name = 'current_canvas')
+        statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+request.POST['username'])
         status = statusModel.status
         msg = statusModel.message
 
@@ -576,7 +578,7 @@ def etl_list_canvas_status(request):
     workspaces = []
 
     for sm in statusModel:
-        if sm.name != 'current_canvas':
+        if not sm.name.startswith('current_canvas'):
             
             workspace = {}
             workspace['id_ws'] = sm.id_ws
@@ -587,6 +589,7 @@ def etl_list_canvas_status(request):
     response = {
         'workspaces': workspaces
     }   
+
     
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
@@ -614,7 +617,8 @@ def etl_read_canvas(request):
                 id_ws = None
                 params = None
 
-            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws, 'parameters': params})
+
+            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws, 'username': request.POST['username'], 'parameters': params})
             #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': id_ws})
  
         else:

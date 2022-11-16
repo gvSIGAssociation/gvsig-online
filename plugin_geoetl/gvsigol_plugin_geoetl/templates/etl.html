@@ -487,6 +487,9 @@
 			//type: 'GET',
         	type: 'POST',
 			async: true,
+            data: {
+                "username": '{{ user.username }}',
+            },
 		  	url: '/gvsigonline/etl/etl_current_canvas_status/',
 		  	beforeSend:function(xhr){
 		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
