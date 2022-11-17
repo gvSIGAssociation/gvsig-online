@@ -358,6 +358,13 @@ class Validation():
         if not layer.public:
             raise HttpException(403, "Layer is not public")
 
+    def check_create_layer(self, username, datastoreid):
+        try:
+            if not services_utils.can_manage_datastore(username, datastoreid):
+                raise HttpException(403, "The user does not have permission to create a layer in this datastore")
+        except Exception:
+            raise HttpException(403, "The user does not have permission to create a layer in this datastore")
+
 class HttpException(Exception):
     def __init__(self, code, msg):
         self.msg = msg
