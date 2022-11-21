@@ -980,9 +980,9 @@ class FileUploadView(ListCreateAPIView):
 
 
 #--------------------------------------------------
-#            PublicResourcesView
+#            ResourcesView
 #--------------------------------------------------
-class PublicResourcesView(ListCreateAPIView):
+class ResourcesView(ListCreateAPIView):
     permission_classes = [AllowAny]
     
     @swagger_auto_schema(operation_id='get_list_attached_files', operation_summary='Get the list of resources attached to the feature',
@@ -1047,13 +1047,14 @@ class FileAttachedView(ListAPIView):
 class FileDeleteView(RetrieveDestroyAPIView):
     parser_classes = (MultiPartParser,)
     serializer_class = FileUploadSerializer
+    permission_classes = [AllowAny]
     
     @swagger_auto_schema(operation_id='get_attached_file_legacy', operation_summary='Get the resource attached to the feature',
                           responses={
                                     400: "The layer does not have this resource.<br>Resource NOT found",
                                     404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'], permission_classes=[])
     def get(self, request, lyr_id, feat_id, resource_id):
         validation = Validation(request)
         try:
