@@ -796,6 +796,9 @@ class FeatureByPointView(ListAPIView):
 
             serializer = FeatureSerializer()
             result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
+            result['infoFormat'] = 'application/geojson'
+            result['layerId'] = lyr.id
+            result['layerTitle'] = lyr.title
 
             result = {
                 "content" : result,
