@@ -68,7 +68,8 @@ class LayerResourceSerializer(serializers.ModelSerializer):
         try:
             res = LayerResource.objects.get(id=obj.id)
             return reverse('gvsigol_plugin_featureapi:layer_resource', args=[res.id])
-        except Exception:
+        except Exception as e:
+            print(e)
             pass
 
     class Meta:
@@ -378,7 +379,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None):
+    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
@@ -407,11 +408,12 @@ class FeatureSerializer(serializers.Serializer):
                 geom_cols = con.get_geometry_columns(table, schema=schema)
                 properties = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
                 geom_col = geom_cols[0]
+                whereCount = None
 
                 if text is not None:
                     excluded = [geom_cols[0], 'modified_by', 'feat_date_gvol', 'feat_version_gvol', 'last_modification']
                     where = None
-                    whereCount = None
+                    #whereCount = None
                     if strict_search == True:
                         where = self._get_strict_search_where(con, schema, table, text, exclude_cols=excluded)
                         whereCount = where
@@ -423,7 +425,16 @@ class FeatureSerializer(serializers.Serializer):
                         else:
                             where = self._get_search_where_tsvector(con, schema, table, text, exclude_cols=excluded)
                             whereCount = where
+                if filter is not None:
+                    if text is not None:
+                        where = where + self._get_filter_where_and(filter)
+                        whereCount = where
                     
+                    else:
+                        where = self._get_filter_where(filter)
+                        whereCount = where
+                    
+                if whereCount is not None:                    
                     sqlCount = sqlbuilder.SQL("SELECT count(*) FROM {schema}.{table} {where}")
                     queryCount = sqlCount.format(
                         schema=sqlbuilder.Identifier(schema),
@@ -775,12 +786,60 @@ class FeatureSerializer(serializers.Serializer):
             if where is not None :
                 where = where + " OR "
             else:
-                where = " WHERE "
+                where = " WHERE ("
             where = where + "lower(unaccent(" + i + ")) like lower(unaccent({text}))"
+
+        where = where + ")"
 
         return sqlbuilder.SQL(where).format(
             text=sqlbuilder.Literal("%" + text + "%"))
 
+    def _get_filter_where(self, filter):
+        where = self._get_filter_query(filter)
+        where = " WHERE (" + where + ")"
+        return sqlbuilder.SQL(where)
+
+    def _get_filter_where_and(self, filter):
+        where = self._get_filter_query(filter)
+        where_and = " AND (" + where + ")"
+        return sqlbuilder.SQL(where_and)
+
+    def _get_filter_query(self, filter):
+        filter_queries = filter['filterQueries']
+        filter_operator = None
+        where = None
+        if 'filterOperator' in filter:
+            filter_operator = filter['filterOperator']
+        for i, q in enumerate(filter_queries):
+            query = None
+            if q['type'] == 'query':
+                query = q['field'] + q['operator'] + "'" + str(q['value']) + "'"
+                if q['notop'] == True:
+                    query = "NOT " + query
+            elif q['type'] == 'qGroup':
+                query = "("
+                queries = q['querys']
+                qGroup_operator = None
+                if 'op' in q:
+                    qGroup_operator = q['op']
+                for j, gq in enumerate(queries):
+                    opNOT = False
+                    if 'notop' in gq:
+                        opNOT = gq['notop']
+                    gQuery = gq['field'] + gq['operator'] + "'" + str(gq['value']) + "'"
+                    if opNOT == True:
+                        gQuery = "NOT " + gQuery
+                    if j != len(queries) -1:
+                        gQuery = gQuery + qGroup_operator
+                    query = query + gQuery
+                query = query + ")"
+            if i != len(filter_queries) - 1:
+                query = query + filter_operator
+            if where is not None:
+                where = where + query
+            else:
+                where = query
+        return where
   
     def _get_search_where_tsvector(self, introspect, schema, tablename, text, exclude_cols=[]):
         fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
