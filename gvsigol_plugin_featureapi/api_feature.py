@@ -47,6 +47,7 @@ from django.utils import timezone
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services import utils as services_utils
 from django_sendfile import sendfile
+import json
 
 
 
@@ -185,9 +186,15 @@ class FeaturesView(CreateAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter strictsearch. The value must be a value true or false")
 
-
+            filter = None
+            if 'filter' in self.request.GET:
+                try:
+                    filter = json.loads(self.request.GET['filter'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter filter. The value must be a string")
+                    
             validation.check_feature_list(lyr_id)
-            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text)
+            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter)
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -362,8 +369,15 @@ class PublicFeaturesView(CreateAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter strictsearch. The value must be a value true or false")
 
+            filter = None
+            if 'filter' in self.request.GET:
+                try:
+                    filter = json.loads(self.request.GET['filter'])
+                except Exception as e:
+                    print(e)
+                    raise HttpException(400, "Bad parameter filter. The value must be a string")
 
-            result = serializers.FeatureSerializer().list(None, lyr_id, pagination, 4326, date, strict_search, onlyprops, text)
+            result = serializers.FeatureSerializer().list(None, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter)
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
