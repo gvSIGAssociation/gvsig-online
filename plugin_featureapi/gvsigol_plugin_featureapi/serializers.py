@@ -66,8 +66,7 @@ class LayerResourceSerializer(serializers.ModelSerializer):
 
     def get_url_(self, obj):
         try:
-            res = LayerResource.objects.get(id=obj.id)
-            return reverse('gvsigol_plugin_featureapi:layer_resource', args=[res.id])
+            return reverse('gvsigol_plugin_featureapi:get_attached_file', args=[obj.id])
         except Exception as e:
             print(e)
             pass
