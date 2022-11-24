@@ -22,7 +22,7 @@ from .models import database_connections
 import requests
 import base64
 from datetime import date, datetime, timedelta
-from sqlalchemy import create_engine, true
+from sqlalchemy import create_engine, false, true
 from django.contrib.gis.gdal import DataSource
 import re
 from zipfile import ZipFile
@@ -1060,23 +1060,50 @@ def output_Postgis(dicc):
 
 def input_Csv(dicc):
 
-    df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8')
+    skiprows = 0
 
-    df_obj = df.select_dtypes(['object'])
-    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+    first = True
 
-    table_name = dicc['id']
+    counter = 10000
 
-    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
-  
-    db = create_engine(conn_string)
-    conn = db.connect()
+    while counter == 10000:
 
-    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', skiprows=skiprows, nrows=10000)
 
-    conn.close()
-    db.dispose()
+        counter = df.shape[0]
+
+        table_name = dicc['id']
+
+        conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
     
+        db = create_engine(conn_string)
+        conn = db.connect()
+
+        if first:
+
+            column_names = df.columns
+
+            df_obj = df.select_dtypes(['object'])
+            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
+            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+            first = False
+            
+        else:
+
+            df.columns = column_names
+
+            df_obj = df.select_dtypes(['object'])
+            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
+            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+
+        skiprows += 10000
+
+
+        conn.close()
+        db.dispose()
+        
     return [table_name]
 
 def trans_Reproject(dicc):
@@ -2393,7 +2420,7 @@ def merge_tables(_list):
     
     sqlDup = sql.SQL(sql_).format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),
-        tbl_name = sql.Identifier(table_name),
+        tbl_name = sql.Identifier(table_name[:60]),
         *[ex for ex in attr_select_target],
         tbl_target = sql.Identifier(table_name_target),
         *[ex for ex in attr_select_source],
@@ -2406,7 +2433,7 @@ def merge_tables(_list):
     conn.close()
     cur.close()
 
-    return [table_name]
+    return [table_name[:60]]
 
 def trans_ConcatAttr(dicc):
 
@@ -2607,7 +2634,7 @@ def trans_PadAttr(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    if dicc['side'] == 'Right':
+    if dicc['side-option'] == 'Right':
         side = 'rpad'
     else:
         side = 'lpad'
@@ -2859,8 +2886,6 @@ def trans_ExecuteSQL(dicc):
                 )
                 
                 joined_list = set_value + where_value
-                print(joined_list)
-                print(_sql_.as_string(conn))
                 cur_3.execute(_sql_, joined_list)
                 conn.commit()
 

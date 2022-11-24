@@ -88,8 +88,8 @@ def create_schema(connection_params):
 @staff_required
 def etl_canvas(request):
     
-    #from gvsigol.celery import app as celery_app
-    #celery_app.control.purge()
+    from gvsigol.celery import app as celery_app
+    celery_app.control.purge()
 
     username = request.GET['user']
 

@@ -4778,7 +4778,7 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div>'+
                                 '<label class="col-form-label">'+gettext('Side to pad:')+'</label>'+
-                                '<select class="form-control" id="side-'+ID+'">' +
+                                '<select class="form-control" id="side-option-'+ID+'">' +
                                     '<option>'+gettext('Right')+'</option>'+
                                     '<option>'+gettext('Left')+'</option>'+
                                 '</select>'+
@@ -4835,7 +4835,7 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
             "parameters": [
                 {"attr": $('#attr-'+ID).val(),
                 "length": $('#length-'+ID).val(),
-                "side": $('#side-'+ID).val(),
+                "side-option": $('#side-option-'+ID).val(),
                 "string": $('#string-'+ID).val()}
             ]}
 
