@@ -46,7 +46,7 @@ urlpatterns = [
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/', api_feature.FeaturesDeleteView.as_view(), name='get_feature,delete_feature'),
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/versions/', api_feature.FeatureVersionsView.as_view(), name='get_feature_versions'),
     path('api/v1/layers/<int:lyr_id>/feature/', api_feature.FeatureByPointView.as_view(), name='get_feature_by_point'),
-    path('api/v1/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.FileUploadView.as_view(), name='get_list_attached_files'),
+    path('api/v1/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.FileUploadView.as_view(), name='get_list_attached_files,add_resource'),
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/resources/<int:resource_id>/', api_feature.FileDeleteView.as_view(), name='delete_attached_file'),
     path('api/v1/layers/<int:lyr_id>/fieldoptions/', api_layer.LayerFieldOptions.as_view(), name='get_layer_field_options'),
 
@@ -56,14 +56,13 @@ urlpatterns = [
     path('api/v1/layers/<int:lyr_id>/addedresources/', api_feature.FeatureVersionsAddedResources.as_view(), name='get_added_resources'),
     path('api/v1/layers/<int:lyr_id>/deletedresources/', api_feature.FeatureVersionsDeletedResources.as_view(), name='get_deleted_resources'),
 
-    path('api/v1/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.FileUploadView.as_view(), name='get_list_attached_files,add_resource'),
     path('api/v1/layers/<int:lyr_id>/legend/', api_layer.Legend.as_view(), name='get_geoserver_legend'),
     path('api/v1/layers/<int:lyr_id>/checkchanges/', api_layer.LayerChanges.as_view(), name='check_changes'),
 
     path('api/v1/public/layers/<int:lyr_id>/feature/<int:feat_id>/', api_feature.FeatureGetView.as_view(), name='get_feature'),
     path('api/v1/public/layers/<int:lyr_id>/features/', api_feature.PublicFeaturesView.as_view(), name='get_feature_list'),
     path('api/v1/public/layers/<int:lyr_id>/feature/', api_feature.PublicFeatureByPointView.as_view(), name='get_feature_by_point'),
-    path('api/v1/public/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.ResourcesView.as_view(), name='get_list_attached_files'),
+    path('api/v1/public/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.ResourcesView.as_view(), name='get_list_public_attached_files'),
     path('api/v1/public/layers/<int:lyr_id>/fieldoptions/', api_layer.PublicLayerFieldOptions.as_view(), name='get_public_layer_field_options'),
     path('api/v1/public/layers/<int:lyr_id>/legend/', api_layer.PublicLegend.as_view(), name='get_geoserver_public_legend'),
 

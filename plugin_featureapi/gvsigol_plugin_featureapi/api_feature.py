@@ -926,13 +926,16 @@ class PublicFeatureByPointView(ListAPIView):
 class FileUploadView(ListCreateAPIView):
     parser_classes = (MultiPartParser,)
     serializer_class = FileUploadSerializer
-    #parser_classes = (YAMLParser,)
-    #renderer_classes = (YAMLRenderer,)
+
+    def get_permissions(self):
+        if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
     
     @swagger_auto_schema(operation_id='get_list_attached_files', operation_summary='Get the list of resources attached to the feature',
                           responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id, feat_id):
         v = Validation(request)    
         try:
@@ -956,7 +959,7 @@ class FileUploadView(ListCreateAPIView):
                           responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>File already exists", 
                                      403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
                                      400: "Error in the input parameters. Image and title cannot be null<br>Error checking version column<br>Error saving the resource"})
-    @action(detail=True, methods=['POST'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['POST'])
     def post(self, request, lyr_id, feat_id):
         try:
             v = Validation(request)
@@ -965,9 +968,9 @@ class FileUploadView(ListCreateAPIView):
             except Exception as e:
                 raise HttpException(400, "Layer NOT found")
 
+            v.check_uploaded_image(request, lyr_id)
             i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
             with i as con: # connection will auoclose
-                v.check_uploaded_image(request, lyr_id)
                 v.check_version_and_date_columns(lyr, con, schema, table)
                 
                 up_file = request.FILES['image']
