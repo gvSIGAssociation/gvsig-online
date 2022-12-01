@@ -998,7 +998,8 @@ class FileUploadView(ListCreateAPIView):
 #--------------------------------------------------
 class ResourcesView(ListCreateAPIView):
     permission_classes = [AllowAny]
-    
+    serializer_class = serializers.LayerResourceSerializer
+
     @swagger_auto_schema(operation_id='get_list_attached_files', operation_summary='Get the list of resources attached to the feature',
                           responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The layer is not allowed to this user"})
