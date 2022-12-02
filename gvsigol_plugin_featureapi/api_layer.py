@@ -305,19 +305,23 @@ class LayerChanges(ListAPIView):
 #--------------------------------------------------
 #                LayerListView
 #--------------------------------------------------
-class LayerListView(ListAPIView):
-    serializer_class = LayerSerializer
+class LayerListView(ListCreateAPIView):
+    parser_classes = (FormParser,)
+    def get_serializer_class(self):
+        if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return LayerSerializer
+        return LayerCreateSerializer
+
+    def get_permissions(self):
+        if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
     
     @swagger_auto_schema(operation_id='get_layer_list', operation_summary='Gets the list of layers in the application',
                          responses={404: "Database connection NOT found<br>User NOT found"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'])
     def get(self, request):
-        v = Validation(request)    
-        try:
-            v.check_get_layer_list()
-        except HttpException as e:
-            return e.get_exception()
-        
+        # no need for validation since will get the layer visible for the user
         queryset = services_utils.get_layerread_by_user(request)
 
         queryset.connections = util.get_pool_connection(queryset)
@@ -334,15 +338,11 @@ class LayerListView(ListAPIView):
         util.destroy_pool_connection(queryset.connections)
         return JsonResponse(result, safe=False)
 
-
-class LayerListView(CreateAPIView):
-    parser_classes = (FormParser,)
-    serializer_class = LayerCreateSerializer
     @swagger_auto_schema(operation_id='create_layer', operation_summary='Creates a new layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The user does not have permission to create this layer",
                                     400: "Error creating the layer"}) 
-    @action(detail=True, methods=['POST'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['POST'])
     def post(self, request):
         try:
             #content = util.get_content(request)
@@ -542,11 +542,15 @@ def layer_create(request, layer_group_id):
 #--------------------------------------------------
 class LayersView(DestroyAPIView):
     serializer_class = FeatureSerializer
+    def get_permissions(self):
+        if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
     
     @swagger_auto_schema(operation_id='get_layer', operation_summary='Gets a specific layer from its ID',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id):
         v = Validation(request)    
         try:
@@ -556,7 +560,7 @@ class LayersView(DestroyAPIView):
         
         queryset = Layer.objects.select_related('datastore').get(id = lyr_id)
         queryset.connections = util.get_pool_connection(queryset)
-        serializer = LayerSerializer(queryset, context={'request': request, 'user': request.user.username})
+        serializer = LayerSerializer(queryset, context={'request': request})
         result = {
             "content" : serializer.data,
             "links" : [
@@ -581,7 +585,7 @@ class LayersView(DestroyAPIView):
     @swagger_auto_schema(operation_id='delete_layer', operation_summary='Delete a specific layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['DELETE'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['DELETE'])
     def delete(self, request, lyr_id):
         v = Validation(request)    
         try:
