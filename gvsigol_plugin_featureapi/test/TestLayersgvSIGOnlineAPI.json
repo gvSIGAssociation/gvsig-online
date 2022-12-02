@@ -1034,9 +1034,8 @@
 						"exec": [
 							"pm.test(\"get_public_feature\", function () {",
 							"   const json = pm.response.json();",
-							"   ",
 							"   let checkName = json.content.properties.fieldname == 'Pico Espadán';",
-							"   let checkVersion = json.content.properties.feat_version_gvol == 2;",
+							"   let checkVersion = json.content.properties.feat_version_gvol == 1;",
 							"   console.log(\"GET FEATURE - field:\" + checkName + \" version:\" + checkVersion)",
 							"   ",
 							"   pm.expect(checkName).to.eql(true);",
