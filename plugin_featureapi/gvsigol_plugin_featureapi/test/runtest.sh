@@ -1,2 +1,2 @@
 #!/bin/bash
-newman run TestLayersgvSIGOnlineAPI.json --global-var "user=$GVSIGOL_USER" --global-var "password=$GVSIGOL_PASS" -e Devel_environment.json 
+newman run TestLayersgvSIGOnlineAPI.json -e Devel_environment.json --env-var "user=$GVSIGOL_USER" --env-var "password=$GVSIGOL_PASS"
