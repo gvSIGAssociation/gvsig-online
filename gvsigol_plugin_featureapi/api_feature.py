@@ -439,11 +439,15 @@ class PublicFeaturesView(CreateAPIView):
 #--------------------------------------------------
 class FeaturesDeleteView(RetrieveDestroyAPIView):
     serializer_class = FeatureSerializer
+    def get_permissions(self):
+        if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
         
     @swagger_auto_schema(operation_id='get_feature', operation_summary='Gets a feature from a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
                                     403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id, feat_id):
         validation = Validation(request)
         try:
@@ -470,7 +474,7 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
                                     404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
                                     403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
                                     409: "Version conflict"})
-    @action(detail=True, methods=['DELETE'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['DELETE'])
     def delete(self, request, lyr_id, feat_id):
         validation = Validation(request)
         try:
