@@ -278,7 +278,6 @@ class Validation():
         self.check_version_feature(content, idfield)
         
     def check_get_feature(self, lyr_id):
-        self.user_exists()
         self.layer_exists(lyr_id)
         self.check_layer_allowed(lyr_id)
         
@@ -323,13 +322,12 @@ class Validation():
         
     def check_get_project_list(self):
         pass
-        #self.user_exists()
         
     def check_feature_list(self, lyr_id):
         self.check_get_layer(lyr_id) 
         
     def check_get_layer_list(self):
-        self.user_exists() 
+        pass
         
     def check_get_group_list(self):
         self.check_get_layer_list()
