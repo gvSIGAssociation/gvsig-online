@@ -148,12 +148,13 @@ class Pagination():
 class FeaturesView(CreateAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (PaginationFeatureFilter,)
+    permission_classes = [AllowAny]
     
     @swagger_auto_schema(operation_id='get_feature_list', operation_summary='Gets the feature list of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
                                     403: "The layer is not allowed to this user", 
                                     400: "Features cannot be obtained. Unexpected error:..."})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id):
         """
         This call returns a Geojson with a FeatureCollection. The maximum number of features is 100 but you can define this
