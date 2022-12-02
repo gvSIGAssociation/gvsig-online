@@ -34,7 +34,7 @@ from gvsigol_plugin_featureapi import views
 
 router = routers.DefaultRouter()
 
-urlpatterns = [ 
+urlpatterns = [
     path('api/v1/layers/', api_layer.LayerListView.as_view(), name='get_layer_list,create_layer'),
     path('api/v1/layers/<int:lyr_id>/', api_layer.LayersView.as_view(), name='get_layer,delete_layer'), 
     path('api/v1/layers/<int:lyr_id>/data/', api_layer.LayersData.as_view(), name='get_layer_data'),

@@ -69,7 +69,19 @@
 			"enabled": true
 		},
 		{
+			"key": "public_lyr_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
 			"key": "feat_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "public_feat_id",
 			"value": "",
 			"type": "any",
 			"enabled": true
@@ -83,6 +95,12 @@
 		{
 			"key": "testlayer",
 			"value": "testlayerAPIRest",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testpubliclayer",
+			"value": "testpubliclayerAPIRest",
 			"type": "default",
 			"enabled": true
 		},
