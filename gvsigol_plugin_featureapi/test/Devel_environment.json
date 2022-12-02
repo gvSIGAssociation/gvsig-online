@@ -9,12 +9,6 @@
 			"enabled": true
 		},
 		{
-			"key": "user",
-			"value": "apitest",
-			"type": "default",
-			"enabled": true
-		},
-		{
 			"key": "publicprj",
 			"value": "FondeaPosidonia",
 			"type": "default",
@@ -23,12 +17,6 @@
 		{
 			"key": "prj",
 			"value": "SpanishCarto",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "password",
-			"value": "AnakletoKtto.",
 			"type": "default",
 			"enabled": true
 		},
