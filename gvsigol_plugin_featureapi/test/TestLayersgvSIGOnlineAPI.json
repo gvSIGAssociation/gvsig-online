@@ -453,7 +453,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/?lyr_id={{lyr_id}}",
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/",
 					"protocol": "{{protocol}}",
 					"host": [
 						"{{url}}"
@@ -465,12 +465,110 @@
 						"layers",
 						"{{lyr_id}}",
 						""
-					],
-					"query": [
-						{
-							"key": "lyr_id",
-							"value": "{{lyr_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_layers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_layers\", function () {",
+							"   const json = pm.response.json();",
+							"   console.log(json);",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
 						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_layers unauthenticated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_layers unauthenticated\", function () {",
+							"   const json = pm.response.json();",
+							"   console.log(json);",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						""
 					]
 				}
 			},
