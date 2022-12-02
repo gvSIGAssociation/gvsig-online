@@ -251,6 +251,111 @@
 			"response": []
 		},
 		{
+			"name": "get_layers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_layers\", function () {",
+							"   const json = pm.response.json();",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_layers unauthenticated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get_layers unauthenticated\", function () {",
+							"   const json = pm.response.json();",
+							"   for (let lyr of json.content) {",
+							"        pm.expect(lyr.id.toString()).to.not.eql(postman.getEnvironmentVariable(\"lyr_id\"));",
+							"   }",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "get_layers_from_project",
 			"event": [
 				{
@@ -409,6 +514,64 @@
 			"response": []
 		},
 		{
+			"name": "create_feature",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"create_feature\", function () {",
+							"   const json = pm.response.json();",
+							"   let checkName = json.properties.fieldname == 'OFICINAS SCOLAB';",
+							"   let checkVersion = json.properties.feat_version_gvol == 1;",
+							"   postman.setEnvironmentVariable(\"feat_id\", json.properties.ogc_fid);",
+							"   pm.expect(checkName).to.eql(true);",
+							"   pm.expect(checkVersion).to.eql(true);",
+							"   pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"type\": \"Feature\",\n  \"geometry\": {\n    \"coordinates\": [\n      [\n        -0.389824, 39.469296\n      ]\n    ],\n    \"crs\": {\n      \"type\": \"name\",\n      \"properties\": {\n        \"name\": \"urn:ogc:def:crs:EPSG::4326\"\n      }\n    },\n    \"type\": \"MultiPoint\"\n  },\n  \"properties\": {\n    \"fieldname\": \"OFICINAS SCOLAB\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/features/",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gvsigonline",
+						"api",
+						"v1",
+						"layers",
+						"{{lyr_id}}",
+						"features",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "get_layer",
 			"event": [
 				{
@@ -464,168 +627,6 @@
 						"v1",
 						"layers",
 						"{{lyr_id}}",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get_layers",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"get_layers\", function () {",
-							"   const json = pm.response.json();",
-							"   console.log(json);",
-							"   pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{token}}",
-						"type": "default"
-					}
-				],
-				"body": {
-					"mode": "formdata",
-					"formdata": [],
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/",
-					"protocol": "{{protocol}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"gvsigonline",
-						"api",
-						"v1",
-						"layers",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get_layers unauthenticated",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"get_layers unauthenticated\", function () {",
-							"   const json = pm.response.json();",
-							"   console.log(json);",
-							"   pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [],
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/",
-					"protocol": "{{protocol}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"gvsigonline",
-						"api",
-						"v1",
-						"layers",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "create_feature",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"create_feature\", function () {",
-							"   const json = pm.response.json();",
-							"   let checkName = json.properties.fieldname == 'OFICINAS SCOLAB';",
-							"   let checkVersion = json.properties.feat_version_gvol == 1;",
-							"   postman.setEnvironmentVariable(\"feat_id\", json.properties.ogc_fid);",
-							"   pm.expect(checkName).to.eql(true);",
-							"   pm.expect(checkVersion).to.eql(true);",
-							"   pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{token}}",
-						"type": "default"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"type\": \"Feature\",\n  \"geometry\": {\n    \"coordinates\": [\n      [\n        -0.389824, 39.469296\n      ]\n    ],\n    \"crs\": {\n      \"type\": \"name\",\n      \"properties\": {\n        \"name\": \"urn:ogc:def:crs:EPSG::4326\"\n      }\n    },\n    \"type\": \"MultiPoint\"\n  },\n  \"properties\": {\n    \"fieldname\": \"OFICINAS SCOLAB\"\n  }\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{protocol}}://{{url}}/gvsigonline/api/v1/layers/{{lyr_id}}/features/",
-					"protocol": "{{protocol}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"gvsigonline",
-						"api",
-						"v1",
-						"layers",
-						"{{lyr_id}}",
-						"features",
 						""
 					]
 				}
@@ -810,6 +811,7 @@
 						"exec": [
 							"pm.test(\"create_public_feature\", function () {",
 							"   const json = pm.response.json();",
+							"   console.log(json);",
 							"   let checkName = json.properties.fieldname == 'Pico Espadán';",
 							"   let checkVersion = json.properties.feat_version_gvol == 1;",
 							"   postman.setEnvironmentVariable(\"public_feat_id\", json.properties.ogc_fid);",
@@ -868,9 +870,8 @@
 						"exec": [
 							"pm.test(\"get_public_layer\", function () {",
 							"   const json = pm.response.json();",
-							"   ",
 							"   let checkID = json.content.id == postman.getEnvironmentVariable(\"public_lyr_id\");",
-							"   let checkLyr = json.content.name == postman.getEnvironmentVariable(\"publictestlayer\");",
+							"   let checkLyr = json.content.name == postman.getEnvironmentVariable(\"testpubliclayer\");",
 							"",
 							"   pm.expect(checkID).to.eql(true);",
 							"   pm.expect(checkLyr).to.eql(true);",
@@ -1031,7 +1032,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"get_feature\", function () {",
+							"pm.test(\"get_public_feature\", function () {",
 							"   const json = pm.response.json();",
 							"   ",
 							"   let checkName = json.content.properties.fieldname == 'Pico Espadán';",
