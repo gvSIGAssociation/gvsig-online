@@ -1105,7 +1105,7 @@ def layer_add(request):
 @staff_required
 def layer_add_with_group(request, layergroup_id):
     redirect_to_layergroup = request.GET.get('redirect')
-
+    groups = []
     if request.method == 'POST':
         form = LayerForm(request.POST)
         abstract = request.POST.get('md-abstract')
@@ -1185,6 +1185,12 @@ def layer_add_with_group(request, layergroup_id):
                 datastore = form.cleaned_data['datastore']
                 workspace = datastore.workspace
                 extraParams = {}
+
+                assigned_read_roles = []
+                assigned_write_roles = []
+                for key in request.POST:
+                    if 'read-usergroup-' in key:
+                        assigned_read_roles.append(key[len('read-usergroup-'):])
                 
                 if datastore.type == 'v_PostGIS':
                     extraParams['maxFeatures'] = maxFeatures
@@ -1197,9 +1203,18 @@ def layer_add_with_group(request, layergroup_id):
                     passwd = params['passwd']
                     schema = params.get('schema', 'public')
                     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-                    fields = i.get_fields(form.cleaned_data['name'], schema)
-                    i.close()
-                    
+                    with i as c:
+                        fields = c.get_fields(form.cleaned_data['name'], schema)
+                        is_view = c.is_view(schema, form.cleaned_data['name'])
+                
+                    if not is_view:
+                        for key in request.POST:
+                            if 'write-usergroup-' in key:
+                                assigned_write_roles.append(key[len('write-usergroup-'):])
+                else:
+                    is_view = False
+                groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
+                if datastore.type == 'v_PostGIS':
                     for field in fields:
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
@@ -1254,22 +1269,6 @@ def layer_add_with_group(request, layergroup_id):
                     'max_features': maxFeatures
                 }
 
-                assigned_read_roles = []
-                for key in request.POST:
-                    if 'read-usergroup-' in key:
-                        assigned_read_roles.append(key[len('read-usergroup-'):])
-
-                if newRecord.type == 'v_PostGIS':
-                    i, params = newRecord.datastore.get_db_connection()
-                    with i as c:
-                        is_view = c.is_view(newRecord.datastore.name, newRecord.source_name)
-                else:
-                    is_view = False
-                assigned_write_roles = []
-                if not is_view:
-                    for key in request.POST:
-                        if 'write-usergroup-' in key:
-                            assigned_write_roles.append(key[len('write-usergroup-'):])
                 utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles)
                 do_config_layer(server, newRecord, featuretype)
 
@@ -1287,7 +1286,7 @@ def layer_add_with_group(request, layergroup_id):
                 logger.exception(msg)
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
-        groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
+
     else:
         form = LayerForm()
         if not request.user.is_superuser:
