@@ -25,7 +25,7 @@ TRIGGER_FUNCTION_DEF = """CREATE OR REPLACE FUNCTION public.gol_area_m2() RETURN
             plpy.log(str(e))
         finally:
             return "MODIFY"
-    $$ LANGUAGE plpython2u;
+    $$ LANGUAGE plpython3u;
     """
 
 def insert_def(apps, schema_editor):
