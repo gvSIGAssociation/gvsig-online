@@ -10,6 +10,9 @@ from datetime import datetime
 import os
 import logging
 import json
+import subprocess
+import shlex
+
 
 @celery_app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
@@ -65,7 +68,9 @@ def cron_trip_planner_refresh(id):
                 logging.exception(msg)
 
         if bChange:
-            os.system(GTFS_SCRIPT)
+            _execute_script(GTFS_SCRIPT)
+        else:
+            print ("INFO: GTFS have not changed")
 
         response = {
             'refresh': True
@@ -84,3 +89,28 @@ def cron_trip_planner_refresh(id):
         statusModel.message = str(e)[:250]
         statusModel.status = 'Error'
         statusModel.save() 
+
+
+
+@celery_app.task(bind=True)
+def execute_gtfs_scripts(sender):
+    return HttpResponse(json.dumps(_execute_script(GTFS_SCRIPT), indent=4), content_type='project/json')
+
+    
+def _execute_script (cmd):
+    try:        
+        s = cmd.split(';')
+        for i in s:
+            print ("INFO: Executing ...", shlex.split(i))        
+            proc = subprocess.Popen(shlex.split(i), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=False)
+            out, err = proc.communicate()  # Read data from stdout and stderr
+            if out != b'':
+                print ("INFO:", out)
+            if err != b'':
+                print ("ERROR:", err)
+            r = proc.poll()
+            if r is 1:
+                return {'success': False, 'error': err}                
+        return {'success': True}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
