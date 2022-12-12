@@ -5091,14 +5091,15 @@ def _sqlview_update(request, is_update, sql_view=None):
                     if not utils.can_manage_datastore(request.user, ds):
                         return HttpResponseForbidden("The user can't manage this datastore: {}".format(table.get('datastore_id')))
                     i, params = ds.get_db_connection()
+                    schema = params.get('schema', 'public')
                     with i as c:
                         if idx == 0:
-                            pks = c.get_pk_columns(table_name, schema=ds.name)
+                            pks = c.get_pk_columns(table_name, schema=schema)
                             if len(pks) == 0:
                                 form.add_error(None, ugettext_lazy('The main table must have a primary key'))
                                 raise Exception
                             main_table = table_alias
-                        table_fields[table_alias] = c.get_fields(table_name, schema=ds.name)
+                        table_fields[table_alias] = c.get_fields(table_name, schema=schema)
                 
                     if idx > 0:
                         join_field1 = table.get('join_field1')
@@ -5112,7 +5113,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                     else:
                         join_fields = None
 
-                    ft_obj = SqlFrom(ds.name, table_name, table_alias, join_fields=join_fields)
+                    ft_obj = SqlFrom(schema, table_name, table_alias, join_fields=join_fields)
                     ft_json = ft_obj.to_json()
                     ft_json['datastore_id'] = ds.id
                     ft_json['datastore_name'] = str(ds)
