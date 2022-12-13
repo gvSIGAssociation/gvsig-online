@@ -363,6 +363,13 @@ function configure() {
 		SHP_DOWNLOAD_DEFAULT_ENCODING="ISO-8859-1"
 	fi
 	grep -rl "##SHP_DOWNLOAD_DEFAULT_ENCODING##"  | xargs sed -i "s/##SHP_DOWNLOAD_DEFAULT_ENCODING##/$SHP_DOWNLOAD_DEFAULT_ENCODING/g"
+
+	# redirect to new frontend
+	if [ -z $FRONTEND_REDIRECT_URL ]; then
+		echo "WARNING: FRONTEND_REDIRECT_URL is not defined, ignoring'"
+	else
+		grep -rl "##FRONTEND_REDIRECT_URL##"  | xargs sed -i "s ##FRONTEND_REDIRECT_URL## $FRONTEND_REDIRECT_URL g"
+	fi
 }
 
 function move_template() {	
