@@ -21,8 +21,11 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
+from contextlib import redirect_stderr
 from django.shortcuts import render
+from django.shortcuts import redirect
 from gvsigol import settings
+
 
 def index(request):
     resp = {}
@@ -34,5 +37,8 @@ def index(request):
     if 'gvsigol_plugin_sync' in settings.INSTALLED_APPS:
         from gvsigol_plugin_sync import settings as sync_settings
         resp['GVSIGOL_APP_DOWNLOAD_LINK'] = sync_settings.GVSIGOL_APP_DOWNLOAD_LINK
-        
-    return render(request, 'index.html', resp)
+    
+    if hasattr(settings, 'FRONTEND_REDIRECT_URL'):
+        return redirect(settings.FRONTEND_REDIRECT_URL)
+    else:
+        return render(request, 'index.html', resp)
