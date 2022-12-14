@@ -5076,7 +5076,8 @@ def _sqlview_update(request, is_update, sql_view=None):
             try:
                 sql_view.name = form.cleaned_data.get('name')
                 sql_view.datastore = form.cleaned_data.get('datastore')
-                
+                target_datastore_params = json.loads(sql_view.datastore.connection_params)
+                target_schema = target_datastore_params.get('schema', 'public')
                 from_objs = []
                 table_fields = {}
                 field_aliases = {}
@@ -5152,13 +5153,13 @@ def _sqlview_update(request, is_update, sql_view=None):
                 try:
                     i, params = sql_view.datastore.get_db_connection()
                     with i as c:
-                        if c.object_exists(sql_view.datastore.name, sql_view.name):
+                        if c.object_exists(target_schema, sql_view.name):
                             if is_update:
-                                c.delete_view(sql_view.datastore.name, sql_view.name)
+                                c.delete_view(target_schema, sql_view.name)
                             else:
                                 form.add_error(None, ugettext_lazy('An object already exists with name: {}').format(sql_view.name))
                                 raise Exception
-                        if not c.create_view(sql_view.datastore.name, sql_view.name, from_objs, field_objs):
+                        if not c.create_view(target_schema, sql_view.name, from_objs, field_objs):
                             msg = _check_join_field_types(from_def)
                             if msg:
                                 form.add_error(None, msg)
@@ -5166,8 +5167,8 @@ def _sqlview_update(request, is_update, sql_view=None):
                                 form.add_error(None, ugettext_lazy('The view could not be created'))
                             raise Exception
                         if is_update: # delete and insert again in case the pk field has a new alias
-                            c.delete_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name)
-                        if not c.insert_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name, pk_aliases):
+                            c.delete_geoserver_view_pk_columns(target_schema, sql_view.name)
+                        if not c.insert_geoserver_view_pk_columns(target_schema, sql_view.name, pk_aliases):
                             form.add_error(None, ugettext_lazy('Pk columns could not be inserted'))
                             raise Exception
                         # TODO: we should add indexes to the join fields to ensure optimal performance
@@ -5181,8 +5182,8 @@ def _sqlview_update(request, is_update, sql_view=None):
                     if not is_update:
                         i, params = sql_view.datastore.get_db_connection()
                         with i as c:
-                            c.delete_view(sql_view.datastore.name, sql_view.name)
-                            c.delete_geoserver_view_pk_columns(sql_view.datastore.name, sql_view.name)
+                            c.delete_view(target_schema, sql_view.name)
+                            c.delete_geoserver_view_pk_columns(target_schema, sql_view.name)
                         sql_view.delete()
                         view_id = ''
                         
@@ -5215,9 +5216,10 @@ def sqlview_delete(request, view_id):
             if not request.user.is_superuser and view.created_by != request.user.username:
                 return HttpResponseForbidden(_('Not allowed'))
             i, params = view.datastore.get_db_connection()
+            schema = params.get('schema', 'public')
             with i as c:
-                c.delete_view(view.datastore.name, view.name)
-                c.delete_geoserver_view_pk_columns(view.datastore.name, view.name)
+                c.delete_view(schema, view.name)
+                c.delete_geoserver_view_pk_columns(schema, view.name)
             view.delete()
             return HttpResponseRedirect(reverse('sqlview_list'))
         except Exception as e:
