@@ -39,13 +39,21 @@ import logging
 import ast
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
 import sys
+from gvsigol_auth import utils as auth_utils
+from gvsigol_auth import auth_backend
+
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 class UserSerializer(serializers.ModelSerializer):
+    roles = serializers.SerializerMethodField('get_roles_')
+
+    def get_roles_(self, obj):
+        return auth_backend.get_roles(obj.username)
+
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser', 'last_login']
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser', 'last_login', 'roles']
 
 
 class ZoneLayersSerializer(serializers.ModelSerializer):
