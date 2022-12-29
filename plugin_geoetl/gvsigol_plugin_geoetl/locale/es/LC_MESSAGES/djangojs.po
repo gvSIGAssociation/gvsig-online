@@ -770,6 +770,9 @@ msgstr "Dentro de"
 msgid "Multigeometry for all features of the output"
 msgstr "Multigeometría para todos los registros de la salida"
 
+msgid "Union"
+msgstr "Fusión"
+
 msgid "Union Parameters"
 msgstr "Parámetros Fusión"
 

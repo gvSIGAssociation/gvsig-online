@@ -3,6 +3,7 @@
 from copy import deepcopy
 from html import entities
 from operator import add
+from ossaudiodev import SNDCTL_DSP_GETCHANNELMASK
 from gvsigol import settings
 from .settings import URL_GEOCODER
 
@@ -2930,7 +2931,7 @@ def trans_SpatialRel(dicc):
 
     sqlUpdate = 'UPDATE  {schema}.{table_target}  SET _related ='+"'True' WHERE _id_temp IN ("
     sqlUpdate += 'SELECT main._id_temp FROM  {schema}.{table_target}  main, {schema}.{table_source_1} sec'
-    sqlUpdate += ' WHERE {option}(main.wkb_geometry, sec.wkb_geometry))'
+    sqlUpdate += ' WHERE {option}(st_makevalid(main.wkb_geometry), st_makevalid(sec.wkb_geometry)))'
     
     cur.execute(sql.SQL(sqlUpdate).format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),
@@ -3489,3 +3490,52 @@ def input_Json(dicc):
     db.dispose()
     
     return [table_name]
+
+def trans_Difference(dicc):
+
+    table_name_source_0 = dicc['data'][0]
+    table_name_source_1 = dicc['data'][1]
+
+    table_name_target = dicc['id']
+
+    schemas = dicc['schema']
+
+
+    schema = ''
+    attrs =[]
+
+    for attr in schemas:
+        schema += 'A0.{},'
+        attrs.append(attr)
+
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDiff = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ', ST_Difference( st_makevalid(A0.wkb_geometry), st_union(st_makevalid(A1.wkb_geometry))) as wkb_geometry from '
+    sqlDiff += '{schema}.{table_source_0} AS A0, {schema}.{table_source_1}  AS A1 '
+    sqlDiff += 'GROUP BY '+ schema+' A0.wkb_geometry)'
+
+   
+    sql_ = sql.SQL(sqlDiff).format(
+        schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target),
+        *[sql.Identifier(field) for field in attrs],
+        table_source_0 = sql.Identifier(table_name_source_0),
+        table_source_1 = sql.Identifier(table_name_source_1),
+        *[sql.Identifier(field) for field in attrs],
+    )
+
+    cur.execute(sql_)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
