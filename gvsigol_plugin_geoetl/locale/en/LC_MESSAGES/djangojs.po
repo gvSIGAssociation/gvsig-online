@@ -769,6 +769,9 @@ msgstr ""
 msgid "Multigeometry for all features of the output"
 msgstr ""
 
+msgid "Union"
+msgstr ""
+
 msgid "Union Parameters"
 msgstr ""
 
