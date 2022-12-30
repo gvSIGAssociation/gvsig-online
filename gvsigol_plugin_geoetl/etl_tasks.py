@@ -2277,11 +2277,19 @@ def trans_CurrentDate(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
-    sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} DATE; UPDATE {schema}.{tbl_target} SET {attr} = CURRENT_DATE;').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
-        tbl_target = sql.Identifier(table_name_target),
-        attr = sql.Identifier(attr)
-    )
+    if dicc['checkbox'] == 'true':
+        sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} TIMESTAMP; UPDATE {schema}.{tbl_target} SET {attr} = CURRENT_TIMESTAMP;').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            attr = sql.Identifier(attr)
+        )
+    else:
+
+        sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} DATE; UPDATE {schema}.{tbl_target} SET {attr} = CURRENT_DATE;').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            attr = sql.Identifier(attr)
+        )
     cur.execute(sqlAdd)
     conn.commit()
 

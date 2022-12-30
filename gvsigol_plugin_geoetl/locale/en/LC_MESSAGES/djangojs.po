@@ -876,3 +876,9 @@ msgstr ""
 
 msgid "Choose date"
 msgstr ""
+
+msgid "Difference"
+msgstr ""
+
+msgid "Date"
+msgstr ""

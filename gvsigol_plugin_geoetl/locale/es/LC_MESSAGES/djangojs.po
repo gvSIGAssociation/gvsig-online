@@ -877,3 +877,9 @@ msgstr "¿Quieres cargar datos JSON desde un API REST"
 
 msgid "Choose date"
 msgstr "Elige fecha"
+
+msgid "Difference"
+msgstr "Diferencia"
+
+msgid "Date"
+msgstr "Fecha"
