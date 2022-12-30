@@ -7979,18 +7979,18 @@ trans_Difference = draw2d.shape.layout.VerticalLayout.extend({
             },100);
             
 
-            var paramsInter = {"id": ID,
+            var paramsDiff = {"id": ID,
             "parameters": [
             {"schema": schemaMod}
             ]}
 
-            paramsInter['schema-old'] = schemaEdge
-            paramsInter['schema'] = schemaMod
+            paramsDiff['schema-old'] = schemaEdge
+            paramsDiff['schema'] = schemaMod
 
 
             passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
 
-            isAlreadyInCanvas(jsonParams, paramsInter, ID)
+            isAlreadyInCanvas(jsonParams, paramsDiff, ID)
 
             icon.setColor('#4682B4')
 
@@ -11439,11 +11439,10 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
                             '<div>'+
                                 '<label class="col-form-label">'+gettext('New date attribute')+':</label>'+
                                 '<input id="attr-'+ID+'" type="text" size="40" value="_date" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '<input type="checkbox" name="checkbox" id="checkbox-'+ID+'" value=""/>'+
+                                '<label for="checkbox">'+gettext('Time Stamp')+'</label>'+
+                            
                             '</div>'+
-                            /*'<div class="column50">'+
-                                '<label class="col-form-label"><a href = "https://www.w3schools.com/python/python_datetime.asp" target="_blank">'+gettext('Format')+':</a></label>'+
-                                '<input id="format-'+ID+'" type="text" size="40" value="%d/%m/%Y" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+*/
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -11455,6 +11454,15 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
         '</div>')
         
       var context = this
+
+    $("#checkbox-"+ID).click(function() {
+        if($("#checkbox-"+ID).is(':checked')){
+            $('#checkbox-'+ID).val("true")
+        }else{
+            $('#checkbox-'+ID).val("")
+        }
+
+    });
 
         icon.on("click", function(){
             
@@ -11486,6 +11494,7 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
             var paramsDate = {"id": ID,
             "parameters": [
                 {"attr": $('#attr-'+ID).val(),
+                "checkbox": $('#checkbox-'+ID).val(),
                 "format": $('#format-'+ID).val()}
             ]}
 
