@@ -1,8 +1,8 @@
 ## django
 django==2.2.28
 djangoajax==3.2
-httplib2==0.19.1
-geopy==2.1.0
+httplib2==0.20.4
+geopy==2.2.0
 gisdata==0.5.4
 
 ## auth
@@ -23,23 +23,21 @@ django-cors-headers==3.7.0
 
 ##Instalamos el driver de PostgreSQL para python:
 psycopg2==2.8.6
-# *NOTE:* Es necesario instalar previamente la libreria _libpq-dev_
-#psycopg2-binary>=2.8,<2.9
 
 ##Instalamos Pillow para que django soporte la gestion de images;
-pillow==8.3.2
+pillow==9.2.0
 # *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
 
 ## gsconfig
-geoserver-restconfig==2.0.4.8
-requests==2.25.1
+geoserver-restconfig==2.0.7
+requests==2.28.1
 
 # async requests
 requests-futures==1.0.0
 
 ## Scolab tools
 spatialiteintrospect==1.2
-pygdaltools==1.3.2
+pygdaltools==1.4.0
 # *NOTE:* It requires having gdal tools installed in the system (gdal-bin package)
 
 ## Other
@@ -48,7 +46,7 @@ six==1.15.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.8.1
 
-numpy==1.19.1 # latest version supporting Python 3.6
+numpy==1.23.4
 
 cmislib3==1.0.8
 lxml==4.9.1
@@ -66,7 +64,7 @@ pyexcel-xlsx==0.6.0
 pyexcel-ods3==0.6.0
 
 # Parseo del getCapabilities (baseLayers)
-pyproj==2.2.2 # to be updated
+pyproj==3.2.1
 OWSLib==0.23.0
 
 limesurveyrc2api==1.0.0
@@ -80,7 +78,7 @@ django-jsonfield-compat==0.4.4
 django-jsonfield-backport==1.0.3 # not needed in Django >= 3.1
 
 # xsendfile wrapper
-django-sendfile2==0.6.0
+django-sendfile2==0.7.0
 
 # Comprobar el timestamp de un fichero antes de bajarlo
 tzlocal==2.1
@@ -88,22 +86,16 @@ tzlocal==2.1
 # language code database
 iso-639
 
-# aquí me quedo --- python3
 # job and queque manager, for download manager and email queues
-celery==5.0.5
-django-celery-beat==2.2.0
+celery==5.2.7
+django-celery-beat==2.3.0
 # harcode indirect celery requirements
-kombu==5.0.2
-billiard==3.6.4.0
+kombu>=5.2.4,<6.0
+billiard>=3.6.4.0,<4.0
 vine==5.0.0
-# necessary until Python 3.8
-zipp==3.4.1
 
 # uwsgi server
 uwsgi==2.0.18
-gevent==1.4.0
-#gevent==21.1.2
-#greenlet==0.4.12
 
 # Used by opensea2. To be removed when migrated to Celery
 APScheduler==3.7.0
@@ -123,5 +115,5 @@ SQLAlchemy==1.3.18
 
 # necesario si se configura OIDC/Keycloak con gvsigol_plugin_oidc_mozilla
 mozilla-django-oidc==2.0.0
-oauthlib==3.2.0
+oauthlib==3.2.1
 requests-oauthlib==1.3.1
