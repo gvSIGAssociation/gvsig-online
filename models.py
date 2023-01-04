@@ -106,7 +106,7 @@ class Server(models.Model):
         return base_url + "/gwc/rest"
     
     def __str__(self):
-        return self.name
+        return self.title_name
     
     @property
     def title_name(self):
