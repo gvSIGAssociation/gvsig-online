@@ -370,6 +370,10 @@ function configure() {
 	else
 		grep -rl "##FRONTEND_REDIRECT_URL##"  | xargs sed -i "s ##FRONTEND_REDIRECT_URL## $FRONTEND_REDIRECT_URL g"
 	fi
+	if [ -z $USE_SPA_PROJECT_LINKS ]; then
+		USE_SPA_PROJECT_LINKS=""
+	fi
+	grep -rl "##USE_SPA_PROJECT_LINKS##"  | xargs sed -i "s ##USE_SPA_PROJECT_LINKS## $USE_SPA_PROJECT_LINKS g"
 }
 
 function move_template() {	

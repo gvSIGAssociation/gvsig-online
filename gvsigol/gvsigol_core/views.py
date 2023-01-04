@@ -124,8 +124,12 @@ def home(request):
     external_ldap_mode = True
     if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
         external_ldap_mode = False
+    if settings.USE_SPA_PROJECT_LINKS:
+        useClassicViewer = False
+    else:
+        useClassicViewer = True
 
-    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode})
+    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode, 'use_classic_viewer': useClassicViewer})
 
 @login_required()
 @staff_required
