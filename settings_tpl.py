@@ -546,5 +546,6 @@ GEOETL_DB = {
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
 SHP_DOWNLOAD_DEFAULT_ENCODING = '##SHP_DOWNLOAD_DEFAULT_ENCODING##'
 
+FRONTEND_BASE_URL = '##FRONTEND_BASE_URL##'
 FRONTEND_REDIRECT_URL = '##FRONTEND_REDIRECT_URL##'
 USE_SPA_PROJECT_LINKS = '##USE_SPA_PROJECT_LINKS##'
