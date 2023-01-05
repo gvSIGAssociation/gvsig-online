@@ -717,4 +717,5 @@ GEOETL_DB = {
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 USE_SPA_PROJECT_LINKS = 'True'
+FRONTEND_BASE_URL='/spa'
 

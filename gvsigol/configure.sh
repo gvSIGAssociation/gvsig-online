@@ -364,12 +364,19 @@ function configure() {
 	fi
 	grep -rl "##SHP_DOWNLOAD_DEFAULT_ENCODING##"  | xargs sed -i "s/##SHP_DOWNLOAD_DEFAULT_ENCODING##/$SHP_DOWNLOAD_DEFAULT_ENCODING/g"
 
+    ##################################
+	# SPA frontend related variables #
+	if [ -z $FRONTEND_BASE_URL ]; then
+		echo "WARNING: FRONTEND_BASE_URL is not defined, using '/spa/'"
+		FRONTEND_BASE_URL="/spa"
+	fi
+	grep -rl "##FRONTEND_BASE_URL##"  | xargs sed -i "s ##FRONTEND_BASE_URL## $FRONTEND_BASE_URL g"
 	# redirect to new frontend
 	if [ -z $FRONTEND_REDIRECT_URL ]; then
-		echo "WARNING: FRONTEND_REDIRECT_URL is not defined, ignoring'"
-	else
-		grep -rl "##FRONTEND_REDIRECT_URL##"  | xargs sed -i "s ##FRONTEND_REDIRECT_URL## $FRONTEND_REDIRECT_URL g"
+		echo "WARNING: FRONTEND_REDIRECT_URL is not defined, setting empty"
+		FRONTEND_REDIRECT_URL=""
 	fi
+	grep -rl "##FRONTEND_REDIRECT_URL##"  | xargs sed -i "s ##FRONTEND_REDIRECT_URL## $FRONTEND_REDIRECT_URL g"
 	if [ -z $USE_SPA_PROJECT_LINKS ]; then
 		USE_SPA_PROJECT_LINKS=""
 	fi

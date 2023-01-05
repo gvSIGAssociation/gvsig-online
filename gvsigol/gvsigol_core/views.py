@@ -129,7 +129,7 @@ def home(request):
     else:
         useClassicViewer = True
 
-    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode, 'use_classic_viewer': useClassicViewer})
+    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode, 'use_classic_viewer': useClassicViewer, 'frontend_base_url': settings.FRONTEND_BASE_URL})
 
 @login_required()
 @staff_required
@@ -153,7 +153,8 @@ def project_list(request):
 
     response = {
         'projects': projects,
-        'servers': Server.objects.all().order_by('-default')
+        'servers': Server.objects.all().order_by('-default'),
+        'frontend_base_url': settings.FRONTEND_BASE_URL
     }
     return render(request, 'project_list.html', response)
 
