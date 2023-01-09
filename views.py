@@ -154,7 +154,8 @@ def project_list(request):
     response = {
         'projects': projects,
         'servers': Server.objects.all().order_by('-default'),
-        'frontend_base_url': settings.FRONTEND_BASE_URL
+        'frontend_base_url': settings.FRONTEND_BASE_URL,
+        'USE_SPA_PROJECT_LINKS': settings.USE_SPA_PROJECT_LINKS
     }
     return render(request, 'project_list.html', response)
 
