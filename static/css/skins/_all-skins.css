@@ -2904,7 +2904,7 @@
  * ---------
  */
  .skin-eliana .main-header .navbar {
-  background-color: rgba(199, 83, 95, 0.6);
+  background-color: #d3002d;
 }
 .skin-eliana .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -2930,7 +2930,7 @@
   color: #fff;
 }
 .skin-eliana .main-header .navbar .sidebar-toggle:hover {
-  background-color: #d72d47;
+  background-color: #d3002d;
 }
 @media (max-width: 767px) {
   .skin-eliana .main-header .navbar .dropdown-menu li.divider {
@@ -2940,19 +2940,19 @@
     color: #fff;
   }
   .skin-eliana .main-header .navbar .dropdown-menu li a:hover {
-    background: #d72d47;
+    background: #d3002d;
   }
 }
 .skin-eliana .main-header .logo {
-  background-color: #d72d47;
+  background-color: #d3002d;
   color: #ffffff;
   border-bottom: 0 solid transparent;
 }
 .skin-eliana .main-header .logo:hover {
-  background-color: #d72d47;
+  background-color: #d3002d;
 }
 .skin-eliana .main-header li.user-header {
-  background-color: #d72d47;
+  background-color: #d3002d;
 }
 .skin-eliana .content-header {
   background: transparent;
@@ -2977,7 +2977,7 @@
 .skin-eliana .sidebar-menu > li.active > a {
   color: #ffffff;
   background: #1e282c;
-  border-left-color: #d72d47;
+  border-left-color: #d3002d;
 }
 .skin-eliana .sidebar-menu > li > .treeview-menu {
   margin: 0 1px;
