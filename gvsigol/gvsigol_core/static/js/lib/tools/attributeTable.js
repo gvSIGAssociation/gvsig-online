@@ -982,6 +982,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 							var scale = 0;
 							var matrices = new Array();
 							var tileGrid = baseLayers[i].getSource().getTileGrid();
+							var tileSize = (tileGrid.getTileSize() === undefined) ? 256 : tileGrid.getTileSize();
 							for (var z = 0; z < 18; ++z) {
 								var matrixSize = new Array();
 								if (z == 0) {
@@ -998,7 +999,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 						            "identifier": z,
 						            "matrixSize": matrixSize,
 						            "scaleDenominator": scale,
-						            "tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
+						            "tileSize": [tileSize, tileSize],
 						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 								});
 							}
