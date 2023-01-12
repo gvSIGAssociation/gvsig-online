@@ -950,7 +950,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 					}
 					var legend = {
 						"name": mapLayers[i].title,
-						"icons": [mapLayers[i].legend_no_auth]
+						"icons": [legendUrl]
 					};
 					/*var legend = {
 						"name": mapLayers[i].title,
