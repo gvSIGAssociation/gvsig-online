@@ -991,7 +991,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 							var matrices = new Array();
 							var tileGrid = baseLayers[i].getSource().getTileGrid();
 							var lastSize = 1;
-							var format = bLayer.getSource().getFormat();
+							var format = baseLayers[i].getSource().getFormat();
 							var tileSize = 256;
 							if (tileGrid.getTileSize(0)) {
 								tileSize = tileGrid.getTileSize();
