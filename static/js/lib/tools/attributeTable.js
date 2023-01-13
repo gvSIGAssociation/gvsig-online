@@ -990,26 +990,37 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 							var scale = 0;
 							var matrices = new Array();
 							var tileGrid = baseLayers[i].getSource().getTileGrid();
-							var tileSize = (tileGrid.getTileSize() === undefined) ? 256 : tileGrid.getTileSize();
-
-							for (var z = 0; z < 18; ++z) {
+							var lastSize = 1;
+							var format = bLayer.getSource().getFormat();
+							var tileSize = 256;
+							if (tileGrid.getTileSize(0)) {
+								tileSize = tileGrid.getTileSize();
+							}
+			
+							for (var z = 0; z < tileGrid.getMatrixIds().length; ++z) {
 								var matrixSize = new Array();
 								if (z == 0) {
 									matrixSize.push(1);
 									matrixSize.push(1);
 									scale = initialScale;
-
+			
 								} else if (z >= 1) {
-									matrixSize.push(z*2);
-									matrixSize.push(z*2);
+									lastSize = lastSize*2;
+									matrixSize.push(lastSize*2);
+									matrixSize.push(lastSize*2);
 									scale = scale / 2;
 								}
+								var tileSizeZ = 256;
+								if (tileGrid.getTileSize(z)) {
+									tileSizeZ = tileGrid.getTileSize(z);
+								}
+			
 								matrices.push({
-						            "identifier": z,
-						            "matrixSize": matrixSize,
-						            "scaleDenominator": scale,
-						            "tileSize": [tileSize, tileSize],
-						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
+									"identifier": tileGrid.getMatrixIds()[z],
+									"matrixSize": matrixSize,
+									"tileSize": [tileSizeZ, tileSizeZ],
+									"scaleDenominator": scale,
+									"topLeftCorner": [-2.003750834E7, 2.0037508E7]
 								});
 							}
 							var url = mapLayers[i].getSource().getUrls()[0];
