@@ -143,11 +143,12 @@ ImportVector.prototype.createUploadForm = function() {
 						var geomType = null;
 						if (extension == 'zip') {
 							sourceFormat = new ol.format.GeoJSON();
-							
+							vectorLayer.shape = true;
 							fr.onload = function (evt) {  
 								var vectorData = evt.target.result;
 								var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
 								shp(vectorData).then(function (geojson) {   
+									vectorLayer.geojsonData = geojson;
 									geomType = geojson.features[0].geometry.type;
 									vectorLayer.randomStyle = self.getVectorStyle(geomType);
 									source.addFeatures(sourceFormat.readFeatures(geojson,  {                
