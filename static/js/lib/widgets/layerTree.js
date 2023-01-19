@@ -506,6 +506,34 @@ layerTree.prototype.setLayerEvents = function() {
 			self.assignStyleToLayer(selectedLayer, style);
 		}
 	});
+
+	$(".build-gml").unbind("click").on('click', function(e) {
+		var layers = self.map.getLayers();
+		var selectedLayer = null;
+		var id = this.id.split("build-gml-")[1];
+		layers.forEach(function(layer){
+			if (layer.baselayer == false) {
+				if (id===layer.get("id")) {
+					selectedLayer = layer;
+				}
+			}						
+		}, this);
+		self.buildGML(selectedLayer);
+	});
+
+	$(".download-gml").unbind("click").on('click', function(e) {
+		var layers = self.map.getLayers();
+		var selectedLayer = null;
+		var id = this.id.split("download-gml-")[1];
+		layers.forEach(function(layer){
+			if (layer.baselayer == false) {
+				if (id===layer.get("id")) {
+					selectedLayer = layer;
+				}
+			}						
+		}, this);
+		self.downloadGML(selectedLayer);
+	});
 	
 	$(".layer-tree-groups").sortable({
 		placeholder: "sort-highlight",
@@ -1943,6 +1971,15 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 			ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 			ui += '	</a>';
 		}
+		if (layer.imported && layer.shape) {
+			ui += '	<a id="build-gml-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool build-gml">';
+			ui += '		<i class="fa fa-gear" aria-hidden="true"></i> ' + gettext('Crear GML Catastro');
+			ui += '	</a>';
+
+			ui += '	<view id="download-gml-' + id + '" style="margin:5px;display: none" >';
+			ui += '		<a id="href-gml-' + id + '" href="" style="color:blue">' + gettext('Descarga de GML de Catastro') + '</a>';
+			ui += '	</view>';
+		}
 		
 		if(layer.styles){
 			if (layer.styles.length > 1) {
@@ -2016,6 +2053,36 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		   self.map.getView().fit(ext, self.map.getSize());
 		});
 }
+
+
+layerTree.prototype.buildGML = function(layer) {
+	$.ajax({
+		type: 'POST',
+		async: true,
+		url: "/gvsigonline/api/v1/catastro/gml/",
+		data: JSON.stringify(layer.geojsonData),
+		headers: {
+			//"content-type": "text/plain;charset=UTF-8" 
+			"content-type": "application/json;charset=UTF-8" 
+		},
+		success	:function(response){
+			console.log(JSON.stringify(response))
+			//$("#id-gml-" + layer.id).text(response.id);
+			$("#href-gml-" + layer.id).attr("href", "/gvsigonline/fileserver/api/v1/catastro/gml/" + response.id + "/")
+			$("#download-gml-" + layer.id).css("display", "block");
+			
+	  	},
+		error: function(e){
+			alert(gettext("Parcelas catastrales no validas"));
+		},
+	  	beforeSend:function(xhr){
+	    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+	  	}
+	});
+
+
+}
+
 
 
 /**

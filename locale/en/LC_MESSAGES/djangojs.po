@@ -631,3 +631,11 @@ msgstr ""
 msgid "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
 msgstr ""
 
+msgid "Parcelas catastrales no validas"
+msgstr "Invalid cadastral parcels"
+
+msgid "Crear GML Catastro"
+msgstr "Create GML Cadastre"
+
+msgid "Descarga de GML de Catastro"
+msgstr "Cadastre GML download"
