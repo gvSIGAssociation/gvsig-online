@@ -39,6 +39,7 @@ import logging
 import ast
 from gvsigol_services import views as serviceviews
 from gvsigol_core import utils as coreutils
+from operator import itemgetter
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -356,7 +357,7 @@ class LayerGroupSerializer(serializers.ModelSerializer):
         username = self.context.get('user')
         lang = self.context['lang']
         projectid = self.context['projectid']
-        queryset = util.get_layerread_by_user_and_group(request, obj.id)
+        queryset = util.get_layerread_by_user_and_group(request, obj.id).order_by("-order")
         serializer = LayerSerializer(queryset, many=True, context={'request': request, 'user': username, 'lang': lang, 'projectid': projectid})
         return serializer.data
 
@@ -407,7 +408,8 @@ class InfoSerializer(serializers.ModelSerializer):
         lang = self.context['lang']
         resultset = util.get_layergroups_by_user_and_project(request, obj.id)
         serializer = LayerGroupSerializer(resultset, many=True, context={'request': request, 'user': username, 'lang': lang, 'projectid': obj.id})
-        return serializer.data
+        ordered_layer_groups = sorted(serializer.data, key=itemgetter('order'), reverse=True)
+        return ordered_layer_groups
 
     def get_project_image(self, obj):
         # FIXME: we should to consider HTTP_ORIGIN and ALLOWED_HOST_NAMES to build the URL
