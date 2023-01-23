@@ -113,9 +113,16 @@ def get_all_layer_groups_checked_by_project(request, project):
         
     return layer_groups
 
-def get_json_toc(project_layergroups):
+def get_json_toc(project_layergroups, base_group=None):
     toc = {}
     count1 = 1
+    if base_group is not None:
+        # base groups must have lower z-index (lower order number)
+        try:
+            project_layergroups.remove(base_group)
+        except ValueError:
+            pass
+        project_layergroups.insert(0, base_group)
     for lg in project_layergroups:
         lg_count = count1 * 1000
         toc_layergroup = {}

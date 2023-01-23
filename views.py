@@ -431,7 +431,10 @@ def project_update(request, pid):
             
         selected_base_group = None
         if 'selected_base_group' in request.POST:
-            selected_base_group = request.POST.get('selected_base_group')
+            try:
+                selected_base_group = int(request.POST.get('selected_base_group'))
+            except:
+                pass
 
         label_added = None
         if 'labels_added' in request.POST:
@@ -455,13 +458,14 @@ def project_update(request, pid):
 
         project = Project.objects.get(id=int(pid))
 
+        old_order = project.toc_order
         old_layer_groups = []
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             old_layer_groups.append(lg.layer_group.id)
 
-        if set(assigned_layergroups) != set(old_layer_groups):
+        if (old_order != toc) or list(assigned_layergroups) != list(old_layer_groups):
             core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
-            toc_structure = core_utils.get_json_toc(assigned_layergroups)
+            toc_structure = core_utils.get_json_toc(assigned_layergroups, selected_base_group)
             project.toc_order = toc_structure
 
         name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
@@ -512,7 +516,7 @@ def project_update(request, pid):
             layergroup = LayerGroup.objects.get(id=alg)
             baselayer_group = False
             try:
-                if alg == int(selected_base_group):
+                if alg == selected_base_group:
                     baselayer_group = True
             except:
                 print('ERROR: selected_base_group is not defined')
