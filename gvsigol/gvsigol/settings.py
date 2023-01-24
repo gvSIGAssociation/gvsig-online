@@ -165,6 +165,8 @@ INSTALLED_APPS = [
 
     ############# PLUGINS ################
     #'gvsigol_plugin_alfresco',
+    'gvsigol_plugin_baseapi',
+    'gvsigol_plugin_business',
     'gvsigol_plugin_catalog',
     'gvsigol_plugin_catastro',
     #'gvsigol_plugin_catastrouy',
@@ -174,6 +176,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_edition',
     #'gvsigol_plugin_elevation',
     #'gvsigol_plugin_emergencies',
+    'gvsigol_plugin_featureapi',
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_geoetl',
     #-#'gvsigol_plugin_shps_folder',
@@ -184,7 +187,8 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_oidc_mozilla',
     #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
-    'gvsigol_plugin_restapi',
+    'gvsigol_plugin_projectapi',
+    #'gvsigol_plugin_restapi',
     #'gvsigol_plugin_streetview',
     #'gvsigol_plugin_sync',
     'gvsigol_plugin_trip_planner',
@@ -687,6 +691,7 @@ LAYERS_ROOT = 'layer_downloads'
 #ALLOWED_HOST_NAMES = ['http://localhost']
 ALLOWED_HOST_NAMES = ['http://localhost', 'http://localhost:8000']
 JWT_AUTH = {
+    #'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=5),
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
     'JWT_ALLOW_REFRESH': True,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
@@ -717,5 +722,6 @@ GEOETL_DB = {
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 USE_SPA_PROJECT_LINKS = 'True'
-FRONTEND_BASE_URL='/spa'
 
+FRONTEND_BASE_URL = '/spa'
+FRONTEND_REDIRECT_URL = '/spa'
