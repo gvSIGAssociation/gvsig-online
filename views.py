@@ -465,8 +465,7 @@ def project_update(request, pid):
 
         if (old_order != toc) or list(assigned_layergroups) != list(old_layer_groups):
             core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
-            toc_structure = core_utils.get_json_toc(assigned_layergroups, selected_base_group)
-            project.toc_order = toc_structure
+            project.toc_order = core_utils.get_json_toc(assigned_layergroups, selected_base_group)
 
         name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
         name = re.sub(' ','',name)
