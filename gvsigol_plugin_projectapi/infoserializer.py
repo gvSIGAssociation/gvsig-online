@@ -401,6 +401,7 @@ class InfoSerializer(serializers.ModelSerializer):
     gs_instances = serializers.SerializerMethodField('get_geoserver_instances')
     plugins = serializers.SerializerMethodField('get_plugins_')
     supported_crs = serializers.SerializerMethodField('get_supported_crs_')
+    extent_array = serializers.SerializerMethodField('_get_extent')
 
     def get_project_layer_groups(self, obj):
         request = self.context['request']
@@ -448,10 +449,20 @@ class InfoSerializer(serializers.ModelSerializer):
     def get_supported_crs_ (self, obj):
         supp_crs = coreutils.get_supported_crs()
         return supp_crs
+    
+    def _get_extent(self, obj):
+        if obj.extent:
+            extent = obj.extent.split(",")
+            min_x = float(extent[0])
+            min_y = float(extent[1])
+            max_x = float(extent[2])
+            max_y = float(extent[3])
+            return [min_x, min_y , max_x , max_y]
+        return None
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date']
+        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', "extent_array", 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date']
         #fields = '__all__'
 
 
