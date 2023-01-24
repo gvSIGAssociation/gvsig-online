@@ -140,6 +140,11 @@ legend.prototype.getLegendsFromVisibleLayers = function() {
 		if (!layers[i].baselayer) {
 			if (layers[i].wms_url && layers[i].getVisible()) {
 				if (layers[i].legend) {
+
+					if (layers[i].legend.includes("??")) {
+						layers[i].legend =  layers[i].legend.replace('??', '?');
+					}
+
 					if (layers[i].legend != "") {
 						layerLegend = 		'<div class="box box-widget">';
 						layerLegend += 			'<div class="box-header with-border">';
