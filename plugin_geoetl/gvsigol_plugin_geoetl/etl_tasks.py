@@ -852,16 +852,20 @@ def output_Postgis(dicc):
 
                 if dicc['operation'] == 'OVERWRITE':
                     _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_OVERWRITE, data_source_mode=_ogr.MODE_DS_UPDATE)
+                    _ogr.config_options = {
+                        "OGR_TRUNCATE": "YES"
+                    }
                 else:
                     _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_APPEND, data_source_mode=_ogr.MODE_DS_UPDATE)
+                    _ogr.config_options = {
+                        "OGR_TRUNCATE": "NO"
+                    }
 
                 _ogr.layer_creation_options = {
                     "LAUNDER": "YES",
                     "precision": "NO"
                 }
-                _ogr.config_options = {
-                    "OGR_TRUNCATE": "NO"
-                }
+
                 _ogr.set_dim("2")
                 _ogr.geom_type = type_geom
                 _ogr.execute()
