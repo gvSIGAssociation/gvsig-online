@@ -93,7 +93,8 @@ print.prototype.handler = function(e) {
 		this.detailsTab.empty();
 
 		this.capabilities = this.getCapabilities('a4_landscape');
-		this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
+		var mapAttribute = this.getAttributeByName('map');
+		this.renderPrintExtent(mapAttribute.clientInfo);
 	    var translate = new ol.interaction.Translate({
 	        layers: [this.extentLayer]
 	      });
@@ -113,7 +114,7 @@ print.prototype.handler = function(e) {
 		    currZoom = newZoom;
 	        self.extentLayer.getSource().clear();
 //	        self.extentLayer.changed();
-	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
+	        self.renderPrintExtent(mapAttribute.clientInfo);
 	        translate.setActive(true);	        
 		  }
 		});
@@ -294,7 +295,9 @@ print.prototype.handler = function(e) {
 
 			self.extentLayer.getSource().clear();
 	        self.lastAngle = 0;
-	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
+			var mapAttribute = self.getAttributeByName('map');
+			self.renderPrintExtent(mapAttribute.clientInfo);
+	
 			self.updateUI();
 			$('#print-template').trigger('printtemplateselected');
 		});
@@ -332,7 +335,8 @@ print.prototype.handler = function(e) {
 			// self.map.getView().setResolution(self.getResolutionForScale(scaleVal));
 			self.extentLayer.getSource().clear();
 			self.extentLayer.getSource().dispatchEvent('change');
-			self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
+			var mapAttribute = self.getAttributeByName('map');
+			self.renderPrintExtent(mapAttribute.clientInfo);
 		});
 
 
@@ -420,7 +424,8 @@ print.prototype.setDefaultTemplate = function(templateName) {
 
 	this.extentLayer.getSource().clear();
 	this.lastAngle = 0;
-	this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
+	var mapAttribute = this.getAttributeByName('map');
+	this.renderPrintExtent(mapAttribute.clientInfo);
 
 	// $('#print-template').trigger('change');
 };
@@ -604,7 +609,7 @@ print.prototype.createPrintJob = function(template) {
 	var projection = $('#print-projection').val();
 
 	if (this.supports('crsPermanent')) {
-		projection = this.getAttributeDefaultValue('crs');
+		projection = this.getAttributeDefaultValue('crsPermanent');
 	}
 
 	var overviewLayerId = $('#print-overview').val();
@@ -973,6 +978,16 @@ print.prototype.getAttributeDefaultValue = function (paramName) {
 	for (var att of this.capabilities.layouts[0].attributes) {
 		if (att.name == paramName) {
 			return att.default;
+		}
+	}
+    return undefined;
+};
+
+print.prototype.getAttributeByName = function (paramName) {
+	// search for attribute param
+	for (var att of this.capabilities.layouts[0].attributes) {
+		if (att.name == paramName) {
+			return att;
 		}
 	}
     return undefined;
