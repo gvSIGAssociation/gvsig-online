@@ -571,15 +571,21 @@ def project_update(request, pid):
             for g in layer_groups:
                 ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': 1000, 'layers': {}}
             ordered_toc = sorted(iter(ordered_toc.items()), key=lambda x_y2: x_y2[1]['order'], reverse=True)
-        all_tools = get_available_tools(False, False)
-        projectTools = json.loads(project.tools) if project.tools else all_tools
-
-        for defaultTool in all_tools:
-            for projectTool in projectTools:
-                if projectTool['name'] == defaultTool['name']:
-                    defaultTool['checked'] = True
-                    break
-              
+        if project.tools:
+            try:
+                projectTools = json.loads(project.tools)
+                # get all tools to ensure the config includes all existing tools
+                all_tools = get_available_tools(False, False)
+                for tool in all_tools:
+                    for projectTool in projectTools:
+                        if projectTool['name'] == tool['name']:
+                            tool['checked'] = projectTool['checked']
+                            break
+                projectTools = all_tools
+            except:
+                projectTools = get_available_tools(True, True)
+        else:
+            projectTools = get_available_tools(True, True)
         for lg in layer_groups:
             lg['layers'] = []
             layers = Layer.objects.filter(layer_group_id=lg['id'])
