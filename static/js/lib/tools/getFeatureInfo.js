@@ -331,14 +331,19 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				infoFormat = qLayer.infoFormat;
 			}
 			if(qLayer.getSource() instanceof ol.source.WMTS){
-				var zoom = map.getView().getZoom();
-				url = self.getWMTSFeatureInfoUrl(
-						qLayer.getSource(),
-						evt.coordinate,
-						zoom,
-						this.map.getView().getProjection(),
-						{'INFOFORMAT': infoFormat, 'FEATURE_COUNT': '100'}
-					);
+				
+				try{
+					var zoom = map.getView().getZoom();
+					url = self.getWMTSFeatureInfoUrl(
+							qLayer.getSource(),
+							evt.coordinate,
+							zoom,
+							this.map.getView().getProjection(),
+							{'INFOFORMAT': infoFormat, 'FEATURE_COUNT': '100'}
+						);
+				}catch{
+					url = null
+				}
 			}else{
 				url = qLayer.getSource().getGetFeatureInfoUrl(
 					evt.coordinate,
@@ -572,6 +577,9 @@ getFeatureInfo.prototype.appendInfo = function(features, count){
 	$("#info-spinner").overlay();
 	var self = this;
 	var html = '';
+
+	$('.item.feature-item.show_info').remove()
+
 	for (var i in features) {
 		if (features[i].type == 'feature' && features[i].feature.type == 'raster') {
 			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title+ "</span>";
