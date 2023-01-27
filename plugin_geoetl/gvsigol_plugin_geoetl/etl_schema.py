@@ -427,7 +427,7 @@ def get_entities_segex(dicc):
 
 def get_types_segex (dicc):
 
-    entity = dicc['entities-list']
+    entity = dicc['entities-list'][0]
 
     if dicc['domain'] == 'PRE':
         url = 'https://pre-%s.sedipualba.es/apisegex/' % (entity)

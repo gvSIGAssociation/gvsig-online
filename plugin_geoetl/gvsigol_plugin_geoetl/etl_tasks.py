@@ -19,7 +19,7 @@ import os, shutil, tempfile
 
 import cx_Oracle
 #from geomet import wkt
-from .models import database_connections
+from .models import database_connections, segex_FechaFinGarantizada
 import requests
 import base64
 from datetime import date, datetime, timedelta
@@ -3352,7 +3352,7 @@ def trans_Geocoder(dicc):
 
 def input_Segex(dicc):
 
-    entity = dicc['entities-list']
+    entity = dicc['entities-list'][0]
 
     types_list = dicc['types-list']
 
@@ -3387,13 +3387,18 @@ def input_Segex(dicc):
                 
                 if dicc['date-segex'] == 'check-init-date':
                     
-                    if dicc['checkbox-init'] == 'true':
+                    if dicc['init-segex'] == 'init':
                     
                         ts_now = datetime.now()
 
                         subs_ts = ts_now - timedelta(minutes = int(dicc['minute-before']))
 
                         ts_init = subs_ts.strftime('%Y-%m-%d %H:%M:%S')
+
+                    elif dicc['init-segex'] == 'init-guaranteed':
+
+                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = dicc['entities-list'][1], type = tp)
+                        ts_init = segexModel.fechafingarantizada.strftime('%Y-%m-%d %H:%M:%S')
 
                     else:
                         ts = datetime.strptime(dicc['init-date'], '%Y-%m-%dT%H:%M')
@@ -3404,13 +3409,17 @@ def input_Segex(dicc):
 
                 elif dicc['date-segex'] == 'check-init-end-date':
 
-                    if dicc['checkbox-init'] == 'true':
+                    if dicc['init-segex'] == 'init':
                     
                         ts_now = datetime.now()
 
                         subs_ts = ts_now - timedelta(minutes = int(dicc['minute-before']))
 
                         ts_init = subs_ts.strftime('%Y-%m-%d %H:%M:%S')
+
+                    elif dicc['init-segex'] == 'init-guaranteed':
+                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = dicc['entities-list'][1], type = tp)
+                        ts_init = segexModel.fechafingarantizada.strftime('%Y-%m-%d %H:%M:%S')
 
                     else:
                         ts = datetime.strptime(dicc['init-date'], '%Y-%m-%dT%H:%M')
@@ -3433,6 +3442,20 @@ def input_Segex(dicc):
                 r = requests.get(url+listGeoref)
 
                 print('listGeorefStatus: '+str(r.status_code))
+
+                try:
+                    segexModel  = segex_FechaFinGarantizada.objects.get(entity = dicc['entities-list'][1], type = tp)
+                    segexModel.fechafingarantizada = r.json()['FechaFinGarantizada']
+                    segexModel.save()
+
+                except:
+                    
+                    segexModel = segex_FechaFinGarantizada(
+                        entity = dicc['entities-list'][1],
+                        type = tp,
+                        fechafingarantizada = r.json()['FechaFinGarantizada']
+                    )
+                    segexModel.save()
 
                 if r.status_code == 200:
 
