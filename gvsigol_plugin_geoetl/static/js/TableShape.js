@@ -684,9 +684,13 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             
                             '<div>'+
-                                '<input type="checkbox" name="checkbox-init-segex" id="checkbox-init-'+ID+'" value=""/>'+
-                                '<input type="number" name="checkbox-init-segex" id="minute-before-'+ID+'" value="0" size ="3"/>'+
-                                '<label for="checkbox"> '+gettext('Minutes before the current date for the init date')+'</label>'+
+                                '<input type="radio" name="init-segex-'+ID+'" id="init-'+ID+'" value="init"/>'+
+                                '<input type="number" id="minute-before-'+ID+'" value="0" size ="3"/>'+
+                                '<label for="radio"> '+gettext('Minutes before the current date for the init date')+'</label>'+
+                            '</div>'+
+                            '<div>'+
+                                '<input type="radio" name="init-segex-'+ID+'" id="init-guaranteed-'+ID+'" value="init-guaranteed"/>'+
+                                '<label for="radio" data-toggle-second="tooltip" data-placement="top" title="If files of the selected type of georeference have not been previously requested, this option will fail."> '+gettext('Last date guaranteed for the init date.')+'</label>'+
                             '</div>'+
                             '<div>'+
                                 '<input type="checkbox" name="checkbox-end-segex" id="checkbox-end-'+ID+'" value=""/>'+
@@ -706,7 +710,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
 
         $('#init-date-'+ID).prop('disabled', true)
         $('#end-date-'+ID).prop('disabled', true)
-        $("#checkbox-init-"+ID).prop('disabled', true)
+        $("#init-"+ID).prop('disabled', true)
         $("#checkbox-end-"+ID).prop('disabled', true)
         $("#minute-before-"+ID).prop('disabled', true)
 
@@ -719,8 +723,11 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 $('#end-date-'+ID).prop('disabled', true)
                 $('#end-date-'+ID).val("")
                 
-                $("#checkbox-init-"+ID).prop('disabled', true)
-                $("#checkbox-init-"+ID).prop('checked', false)
+                $("#init-"+ID).prop('disabled', true)
+                $("#init-"+ID).prop('checked', false)
+
+                $("#init-guaranteed-"+ID).prop('disabled', true)
+                $("#init-guaranteed-"+ID).prop('checked', false)
                 
                 $("#checkbox-end-"+ID).prop('disabled', true)
                 $("#checkbox-end-"+ID).prop('checked', false)
@@ -737,7 +744,9 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 $('#end-date-'+ID).prop('disabled', true)
                 $('#end-date-'+ID).val("")
                 
-                $("#checkbox-init-"+ID).prop('disabled', false)
+                $("#init-"+ID).prop('disabled', false)
+
+                $("#init-guaranteed-"+ID).prop('disabled', false)
 
                 $("#checkbox-end-"+ID).prop('disabled', true)
                 $("#checkbox-end-"+ID).prop('checked', false)
@@ -751,7 +760,9 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 
                 $('#end-date-'+ID).prop('disabled', false)
                 
-                $("#checkbox-init-"+ID).prop('disabled', false)
+                $("#init-"+ID).prop('disabled', false)
+                $("#init-guaranteed-"+ID).prop('disabled', false)
+
                 
                 $("#checkbox-end-"+ID).prop('disabled', false)
                 
@@ -767,8 +778,8 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
             }
         });
 
-        $("#checkbox-init-"+ID).click(function() {
-            if($("#checkbox-init-"+ID).is(':checked')){
+        $("#init-"+ID).click(function() {
+            if($("#init-"+ID).is(':checked')){
                 $('#init-date-'+ID).val("")
             }else{
 
@@ -844,7 +855,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
             var paramsTypes = {"id": ID,
             "parameters": [
                 {"domain": $('#domain-'+ID).val(),
-                "entities-list": $('#entities-list-'+ID).val(),
+                "entities-list": [$('#entities-list-'+ID).val(), $( "#entities-list-"+ID+" option:selected" ).text()],
                 "user": $('#user-'+ID).val(),
                 "password": $('#password-'+ID).val()
                 }
@@ -900,8 +911,11 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 $('#end-date-'+ID).prop('disabled', true)
                 $('#end-date-'+ID).val("")
                 
-                $("#checkbox-init-"+ID).prop('disabled', true)
-                $("#checkbox-init-"+ID).prop('checked', false)
+                $("#init-"+ID).prop('disabled', true)
+                $("#init-"+ID).prop('checked', false)
+
+                $("#init-guaranteed-"+ID).prop('disabled', true)
+                $("#init-guaranteed-"+ID).prop('checked', false)
                 
                 $("#checkbox-end-"+ID).prop('disabled', true)
                 $("#checkbox-end-"+ID).prop('checked', false)
@@ -918,7 +932,9 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 $('#end-date-'+ID).prop('disabled', true)
                 $('#end-date-'+ID).val("")
                 
-                $("#checkbox-init-"+ID).prop('disabled', false)
+                $("#init-"+ID).prop('disabled', false)
+
+                $("#init-guaranteed-"+ID).prop('disabled', false)
 
                 $("#checkbox-end-"+ID).prop('disabled', true)
                 $("#checkbox-end-"+ID).prop('checked', false)
@@ -933,7 +949,8 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 
                 $('#end-date-'+ID).prop('disabled', false)
                 
-                $("#checkbox-init-"+ID).prop('disabled', false)
+                $("#init-"+ID).prop('disabled', false)
+                $("#init-guaranteed-"+ID).prop('disabled', false)
                 
                 $("#checkbox-end-"+ID).prop('disabled', false)
                 
@@ -943,13 +960,6 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
         });
 
         $('#input-segex-accept-'+ID).click(function() {
-
-            if($("#checkbox-init-"+ID).is(':checked')){
-                $("#checkbox-init-"+ID).val("true")
-                
-            }else{
-                $("#checkbox-init-"+ID).val("")
-            };
 
             if($("#checkbox-end-"+ID).is(':checked')){
                 $("#checkbox-end-"+ID).val("true")
@@ -983,13 +993,19 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
 
             }
 
+           if ($('input:radio[name="init-segex-'+ID+'"]:checked').val()=== undefined){
+                init_date = 'False'
+           }else{
+                init_date = $('input:radio[name="init-segex-'+ID+'"]:checked').val()
+           }
+
             var paramsSegex= {"id": ID,
             "parameters": [
                 {   
                     "get_entities-list": get_,
                     "get_types-list": get_types,
                     "domain": $('#domain-'+ID).val(),
-                    "entities-list": $('#entities-list-'+ID).val(),
+                    "entities-list": [$('#entities-list-'+ID).val(), $( "#entities-list-"+ID+" option:selected" ).text()],
                     "user": $('#user-'+ID).val(),
                     "password": $('#password-'+ID).val(),
                     "types-list": $('#types-list-'+ID).val(),
@@ -997,10 +1013,12 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                     "init-date": $('#init-date-'+ID).val(),
                     "end-date": $('#end-date-'+ID).val(),
                     "checkbox-end": $("#checkbox-end-"+ID).val(),
-                    "checkbox-init": $("#checkbox-init-"+ID).val(),
+                    "init-segex":init_date,
                     "date-segex":$('input:radio[name="date-segex-'+ID+'"]:checked').val()
                 }
             ]};
+
+            console.log()
 
             data = ['IdGeorreferencia', 'Operacion', 'Descripcion', 'Observaciones', 'Latitud', 'Longitud', 'TipoReferenciaCatastral', 
                     'ReferenciaCatastral', 'IneMunicipioDireccion', 'ViaDireccion', 'NumeroViaDireccion', 'RestoDireccion',

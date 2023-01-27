@@ -30,3 +30,12 @@ class database_connections(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class segex_FechaFinGarantizada(models.Model):
+    entity = models.CharField(max_length=250)
+    type = models.IntegerField(null=False)
+    fechafingarantizada = models.DateTimeField(auto_now_add=False, null=False)
+
+    def __str__(self):
+        return self.name
