@@ -39,3 +39,11 @@ class segex_FechaFinGarantizada(models.Model):
 
     def __str__(self):
         return self.name
+
+class cadastral_requests(models.Model):
+    name = models.CharField(max_length=20, default='cadastral_requests')
+    requests = models.IntegerField(null=False, default=0)
+    lastRequest = models.DateTimeField(auto_now_add=True, null=False)
+
+    def __str__(self):
+        return self.name
