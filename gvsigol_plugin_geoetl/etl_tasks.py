@@ -19,7 +19,7 @@ import os, shutil, tempfile
 
 import cx_Oracle
 #from geomet import wkt
-from .models import database_connections, segex_FechaFinGarantizada
+from .models import database_connections, segex_FechaFinGarantizada, cadastral_requests
 import requests
 import base64
 from datetime import date, datetime, timedelta
@@ -1275,9 +1275,8 @@ def trans_Calculator(dicc):
 
     return [table_name_target]
 
-counter_cadastral_petitions = 0
-
 def trans_CadastralGeom(dicc):
+
     from gvsigol_plugin_catastro.views import get_rc_polygon
     
     attr = dicc['attr']
@@ -1285,10 +1284,9 @@ def trans_CadastralGeom(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    global counter_cadastral_petitions
-
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
     cur = conn.cursor()
+    cur2 = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
         sql.Identifier(settings.GEOETL_DB["schema"]),
@@ -1321,12 +1319,31 @@ def trans_CadastralGeom(dicc):
     
     for row in cur:
 
-        if counter_cadastral_petitions < 3000:
+        try:
+            cr_model  = cadastral_requests.objects.get(name = 'cadastral_requests')
+            cadastral_requests_count = cr_model.requests
+
+        except:
+            
+            cr_model = cadastral_requests(
+                name = 'cadastral_requests',
+                requests = 0,
+            )
+            cr_model.save()
+
+            cadastral_requests_count = 0
+
+        if cadastral_requests_count < 3600:
+            
             try:
-                cur2 = conn.cursor()
+
+                cadastral_requests_count += 1
+
+                cr_model.requests = cadastral_requests_count
+                cr_model.lastRequest = datetime.now()
+                cr_model.save()
                 
                 features = get_rc_polygon(row[0].replace(' ', ''))
-                counter_cadastral_petitions += 1
                 
                 i ={}
                 coordinates =[]
@@ -1365,11 +1382,14 @@ def trans_CadastralGeom(dicc):
                 print(str(e))
 
         else:
-            print("Take a coffee. The maximum number of requests to cadastre has been reached. The process will continue in an hour.")
-            time.sleep(3600)
-            counter_cadastral_petitions = 0
 
-            
+            dif = 3600.0 - (datetime.now() - (cr_model.lastRequest).replace(tzinfo=None)).total_seconds()
+            print("Take a coffee. The maximum number of requests to cadastre has been reached. The process will continue in "+str(dif/60)+" minutes.")
+
+            time.sleep(dif)
+            cr_model.requests = 0
+            cr_model.lastRequest = datetime.now()
+            cr_model.save()
     
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),

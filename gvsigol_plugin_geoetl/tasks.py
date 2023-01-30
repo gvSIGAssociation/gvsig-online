@@ -4,7 +4,7 @@ from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 from celery.utils.log import get_task_logger
 
-from .models import ETLstatus, database_connections
+from .models import ETLstatus, database_connections, cadastral_requests
 from gvsigol import settings
 
 from . import etl_tasks, views
@@ -12,6 +12,7 @@ from . import etl_tasks, views
 import psycopg2
 from psycopg2 import sql
 import json
+from datetime import date, datetime, timedelta
 
 logger = get_task_logger(__name__)
 
@@ -319,3 +320,36 @@ def executeSQL(db, query_list):
     
     connection.close()
     cursor.close()
+
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_cadastral_requests(**kwargs):
+
+    print('ebtramos por aquiujfekjvfbkjlvefnljnvlksejfvnlkjdfnlkjbnlkjdfblkjdnsf')
+    my_task_name = 'gvsigol_plugin_geoetl.periodic_cadastral_requests'
+    if not PeriodicTask.objects.filter(name=my_task_name).exists():
+
+        schedule, created = IntervalSchedule.objects.get_or_create(
+            every = 15,
+            period = IntervalSchedule.MINUTES,
+        )
+        PeriodicTask.objects.create(
+            interval=schedule,
+            name=my_task_name,
+            task='gvsigol_plugin_geoetl.tasks.periodic_cadastral_requests',
+        )
+
+@celery_app.task   
+def periodic_cadastral_requests():
+        try:
+            cr_model  = cadastral_requests.objects.get(name = 'cadastral_requests')
+            cadastral_requests_count = cr_model.requests
+            date_saved = (cr_model.lastRequest).replace(tzinfo=None)
+
+            if cadastral_requests_count > 0 and (datetime.now() - date_saved).total_seconds() >= 3600:
+                cr_model.requests = 0
+                cr_model.lastRequest = datetime.now()
+                cr_model.save()
+
+        except:
+            pass

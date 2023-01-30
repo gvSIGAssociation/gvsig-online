@@ -690,7 +690,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div>'+
                                 '<input type="radio" name="init-segex-'+ID+'" id="init-guaranteed-'+ID+'" value="init-guaranteed"/>'+
-                                '<label for="radio" data-toggle-second="tooltip" data-placement="top" title="If files of the selected type of georeference have not been previously requested, this option will fail."> '+gettext('Last date guaranteed for the init date.')+'</label>'+
+                                '<label for="radio" data-toggle-second="tooltip" data-placement="top" title="'+gettext('If files of the selected type of georeference have not been previously requested, this option will fail.')+'"> '+gettext('Last date guaranteed for the init date.')+'</label>'+
                             '</div>'+
                             '<div>'+
                                 '<input type="checkbox" name="checkbox-end-segex" id="checkbox-end-'+ID+'" value=""/>'+

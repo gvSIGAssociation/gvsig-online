@@ -882,3 +882,9 @@ msgstr ""
 
 msgid "Date"
 msgstr ""
+
+msgid "Last date guaranteed for the init date."
+msgstr ""
+
+msgid "If files of the selected type of georeference have not been previously requested, this option will fail."
+msgstr ""
