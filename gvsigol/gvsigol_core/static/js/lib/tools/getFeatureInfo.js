@@ -578,8 +578,6 @@ getFeatureInfo.prototype.appendInfo = function(features, count){
 	var self = this;
 	var html = '';
 
-	$('.item.feature-item.show_info').remove()
-
 	for (var i in features) {
 		if (features[i].type == 'feature' && features[i].feature.type == 'raster') {
 			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title+ "</span>";
