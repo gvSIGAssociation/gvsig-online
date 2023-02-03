@@ -312,7 +312,7 @@ msgstr ""
 
 #: templates/dashboard_geoetl_workspaces_list.html:405
 msgid "Download workspace"
-msgstr "Descarga espacio de trabajo"
+msgstr "Descargar espacio de trabajo"
 
 #: templates/dashboard_geoetl_workspaces_list.html:413
 msgid "Update workspace"
