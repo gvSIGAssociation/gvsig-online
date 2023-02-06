@@ -381,6 +381,11 @@ function configure() {
 		USE_SPA_PROJECT_LINKS=""
 	fi
 	grep -rl "##USE_SPA_PROJECT_LINKS##"  | xargs sed -i "s ##USE_SPA_PROJECT_LINKS## $USE_SPA_PROJECT_LINKS g"
+	if [ -z $LANGUAGE_CODE ]; then
+		echo "WARNING: LANGUAGE_CODE is not defined, using 'es'"
+		LANGUAGE_CODE="es"
+	fi
+	grep -l "##LANGUAGE_CODE##" gvsigol/settings_tpl.py | xargs sed -i "s ##LANGUAGE_CODE## $LANGUAGE_CODE g"
 }
 
 function move_template() {	
