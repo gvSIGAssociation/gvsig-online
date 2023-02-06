@@ -94,3 +94,15 @@ def insertAfter(parent, child, previousSiblingNames, namespaces={}):
 def namespacedTag(ns_prefix, tag, nsmap):
     namespace = nsmap.get(ns_prefix)
     return "{" + namespace + "}" + tag
+
+def setLocalisedCharacterString(node, text, locale_id, namespaces):
+    cs = node.find('./gco:CharacterString', namespaces)
+    if cs is not None:
+        cs.text = text
+    locale_ref = '#' + locale_id.upper()
+    if locale_id:
+        xpath_expr = "./gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString[@locale='"+locale_ref+"']"
+    else:
+        "./gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString"
+    for cs in node.findall(xpath_expr, namespaces):
+        cs.text = text

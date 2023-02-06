@@ -101,7 +101,7 @@ class Geonetwork():
     def gn_insert_metadata(self, md_record):
         #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'  
         # 'http://localhost:8080/geonetwork/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=generateUUID&transformWith=_none_'
-        url = self.service_url + "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&transformWith=_none_"
+        url = self.service_url + "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=GENERATEUUID&transformWith=_none_"
         headers = {
             'Content-Type': 'application/xml',
             'Accept': 'application/json',
@@ -127,9 +127,7 @@ class Geonetwork():
                             uuid = uuids[0]
 
             if uuid and id:
-                return [uuid, id]
-        else:
-            return False    
+                return [uuid, id]    
         raise FailedRequestError(r.status_code, r.content)
 
     def csw_update_metadata(self, uuid, updated_xml_md):

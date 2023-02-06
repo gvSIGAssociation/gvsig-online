@@ -4,8 +4,8 @@ from builtins import str as text
 from .registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter, namespacedTag
-from gvsigol.settings import BASE_DIR
+from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter, namespacedTag, setLocalisedCharacterString
+from gvsigol.settings import BASE_DIR, LANGUAGE_CODE
 import collections
 from owslib import wcs
 import os
@@ -26,7 +26,12 @@ def define_translations():
     _('originator')
     _('publisher')
 
-namespaces = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
+namespaces = {
+    'gmd': 'http://www.isotc211.org/2005/gmd',
+    'gco': 'http://www.isotc211.org/2005/gco',
+    'gmx': 'http://www.isotc211.org/2005/gmx',
+    'xlink': 'http://www.w3.org/1999/xlink'
+}
 
 def get_template(md_type):
     """
@@ -41,6 +46,19 @@ def get_template(md_type):
                 return tpl_path
     return os.path.join(BASE_DIR, 'gvsigol_plugin_catalog/mdtemplates/dataset19139.xml')
 
+def getCrsCodeAnchor(crs):
+    code = ET.Element(namespacedTag('gmd', 'code', namespaces))
+    anchor = ET.Element(namespacedTag('gmx', 'Anchor', namespaces))
+    if crs.startswith('EPSG:'):
+        crs_uri = "http://www.opengis.net/def/crs/EPSG/0/" + crs[5:]
+    else:
+        crs_uri = crs
+    anchor.attrib[namespacedTag('xlink', 'title', namespaces)] = crs_uri
+    anchor.attrib[namespacedTag('xlink', 'href', namespaces)] = crs_uri
+    anchor.text = crs
+    code.append(anchor)
+    return code
+                 
 def create_datset_metadata(mdfields):
     try:
         qualified_name = mdfields.get('qualified_name')
@@ -53,7 +71,7 @@ def create_datset_metadata(mdfields):
         wfs_endpoint = mdfields.get('wfs_endpoint')
         wcs_endpoint = mdfields.get('wcs_endpoint')
         spatial_representation_type = mdfields.get('spatial_representation_type', 'vector')
-        current_date = text(datetime.now().isoformat())
+        current_datetime = datetime.now()
         
         tpl_path = get_template('dataset')
         tree = ET.parse(tpl_path)
@@ -61,17 +79,27 @@ def create_datset_metadata(mdfields):
         spatialRepresentationTypeCode = tree.find('//gmd:MD_SpatialRepresentationTypeCode', namespaces)
         spatialRepresentationTypeCode.set('codeListValue', spatial_representation_type)
         
-        titleElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString', namespaces)
-        titleElem.text = title
+        titleElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title', namespaces)
+        setLocalisedCharacterString(titleElem, title, LANGUAGE_CODE, namespaces)
         
-        abstractElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString', namespaces)
-        abstractElem.text = abstract
+        abstractElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract', namespaces)
+        setLocalisedCharacterString(abstractElem, abstract, LANGUAGE_CODE, namespaces)
         
         crsElem = tree.find('/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/gco:CharacterString', namespaces)
-        crsElem.text = crs
+        if crsElem is not None:
+            crsElem.text = crs
+        else:
+            crsCodeElem = tree.find('/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code', namespaces)
+            rs_identifier = crsCodeElem.getparent()
+            rs_identifier.remove(crsCodeElem)
+            rs_identifier.append(getCrsCodeAnchor(crs))
         
         dateTime = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:DateTime', namespaces)
-        dateTime.text = current_date
+        if dateTime is not None:
+            dateTime.text = text(current_datetime.isoformat())
+        else:
+            dateTime = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date', namespaces)
+            dateTime.text = text(current_datetime.date().isoformat())
         
         create_thumbnail(tree, thumbnail_url, title)
         minx, miny, maxx, maxy = extent_tuple
@@ -85,178 +113,6 @@ def create_datset_metadata(mdfields):
     except:
         logger.exception("Error creating metadata")
 
-"""
-def create_datset_metadata(mdfields):
-    qualified_name = mdfields.get('qualified_name')
-    title = mdfields.get('title')
-    abstract = mdfields.get('abstract')
-    extent_tuple = mdfields.get('extent_tuple', (0.0, 0.0, 0.0, 0.0))
-    crs = mdfields.get('crs')
-    thumbnail_url = mdfields.get('thumbnail_url')
-    wms_endpoint = mdfields.get('wms_endpoint')
-    wfs_endpoint = mdfields.get('wfs_endpoint')
-    wcs_endpoint = mdfields.get('wcs_endpoint')
-    
-    minx, miny, maxx, maxy = extent_tuple
-    metadata =  u'<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" '
-    metadata +=     u'xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" '
-    metadata +=   u'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gco="http://www.isotc211.org/2005/gco" '
-    metadata +=   u'xmlns:gml="http://www.opengis.net/gml" xmlns:gts="http://www.isotc211.org/2005/gts" '
-    metadata +=   u'xmlns:geonet="http://www.fao.org/geonetwork" xsi:schemaLocation="http://www.isotc211.org/2005/gmd ../schema.xsd">'
-    
-    metadata +=   u'<gmd:metadataStandardName>'
-    metadata +=       u'<gco:CharacterString>ISO 19115:2003/19139</gco:CharacterString>'
-    metadata +=   u'</gmd:metadataStandardName>'
-    
-    metadata +=   u'<gmd:metadataStandardVersion>'
-    metadata +=       u'<gco:CharacterString>1.0</gco:CharacterString>'
-    metadata +=   u'</gmd:metadataStandardVersion>'
-    
-    metadata +=   u'<gmd:spatialRepresentationInfo/>'
-    
-    metadata +=   u'<gmd:referenceSystemInfo>'
-    metadata +=       u'<gmd:MD_ReferenceSystem>'
-    metadata +=           u'<gmd:referenceSystemIdentifier>'
-    metadata +=               u'<gmd:RS_Identifier>'
-    metadata +=                   u'<gmd:code>'
-    metadata +=                       u'<gco:CharacterString>' + sanitizeXmlText(crs) + u'</gco:CharacterString>'
-    metadata +=                   u'</gmd:code>'
-    metadata +=               u'</gmd:RS_Identifier>'
-    metadata +=           u'</gmd:referenceSystemIdentifier>'
-    metadata +=       u'</gmd:MD_ReferenceSystem>'
-    metadata +=   u'</gmd:referenceSystemInfo>'
-    
-    metadata +=   u'<gmd:identificationInfo>'
-    metadata +=       u'<gmd:MD_DataIdentification>'
-    metadata +=           u'<gmd:citation>'
-    metadata +=               u'<gmd:CI_Citation>'
-    metadata +=                   u'<gmd:title xsi:type="gmd:PT_FreeText_PropertyType">'
-    metadata +=                       u'<gco:CharacterString>' + sanitizeXmlText(title) + u'</gco:CharacterString>'
-    metadata +=                       u'<gmd:PT_FreeText>'
-    metadata +=                           u'<gmd:textGroup>'
-    metadata +=                               u'<gmd:LocalisedCharacterString locale="#ES">' + sanitizeXmlText(title) + u'</gmd:LocalisedCharacterString>'
-    metadata +=                           u'</gmd:textGroup>'
-    metadata +=                       u'</gmd:PT_FreeText>'
-    metadata +=                   u'</gmd:title>'
-    metadata +=                   u'<gmd:date>'
-    metadata +=                       u'<gmd:CI_Date>'
-    metadata +=                           u'<gmd:date>'
-    metadata +=                               u'<gco:DateTime>' + sanitizeXmlText(text(datetime.now())) + u'</gco:DateTime>'
-    metadata +=                           u'</gmd:date> '
-    metadata +=                           u'<gmd:dateType>'
-    metadata +=                               u'<gmd:CI_DateTypeCode codeList="./resources/codeList.xml#CI_DateTypeCode" codeListValue="creation"/>'
-    metadata +=                           u'</gmd:dateType>'
-    metadata +=                       u'</gmd:CI_Date>'
-    metadata +=                   u'</gmd:date>'
-    metadata +=               u'</gmd:CI_Citation>'
-    metadata +=           u'</gmd:citation>'
-    metadata +=           u'<gmd:abstract>'
-    metadata +=               u'<gco:CharacterString>' + sanitizeXmlText(abstract) + u'</gco:CharacterString>'
-    metadata +=           u'</gmd:abstract>'
-    metadata +=           u'<gmd:graphicOverview><gmd:MD_BrowseGraphic>'
-    metadata +=               u'<gmd:fileName>'
-    metadata +=                   u'<gco:CharacterString>' + sanitizeXmlText(thumbnail_url) + u'</gco:CharacterString>'
-    metadata +=               u'</gmd:fileName>'
-    metadata +=               u'<gmd:fileDescription>'
-    metadata +=                   u'<gco:CharacterString>gvsigol thumbnail</gco:CharacterString>'
-    metadata +=               u'</gmd:fileDescription>'
-    metadata +=           u'</gmd:MD_BrowseGraphic></gmd:graphicOverview>'
-    metadata +=           u'<gmd:extent>'
-    metadata +=               u'<gmd:EX_Extent>'
-    metadata +=                   u'<gmd:geographicElement>'
-    metadata +=                       u'<gmd:EX_GeographicBoundingBox>'
-    metadata +=                           u'<gmd:westBoundLongitude>'
-    metadata +=                               u'<gco:Decimal>' + sanitizeXmlText(minx) + u'</gco:Decimal>'
-    metadata +=                           u'</gmd:westBoundLongitude>'
-    metadata +=                           u'<gmd:eastBoundLongitude>'
-    metadata +=                               u'<gco:Decimal>' + sanitizeXmlText(maxx) + u'</gco:Decimal>'
-    metadata +=                           u'</gmd:eastBoundLongitude>'
-    metadata +=                           u'<gmd:southBoundLatitude>'
-    metadata +=                               u'<gco:Decimal>' + sanitizeXmlText(miny) + u'</gco:Decimal>'
-    metadata +=                           u'</gmd:southBoundLatitude>'
-    metadata +=                           u'<gmd:northBoundLatitude>'
-    metadata +=                               u'<gco:Decimal>' + sanitizeXmlText(maxy) + u'</gco:Decimal>'
-    metadata +=                           u'</gmd:northBoundLatitude>'
-    metadata +=                       u'</gmd:EX_GeographicBoundingBox>'
-    metadata +=                   u'</gmd:geographicElement>'
-    metadata +=               u'</gmd:EX_Extent>'
-    metadata +=           u'</gmd:extent>'
-    metadata +=       u'</gmd:MD_DataIdentification>'
-    metadata +=   u'</gmd:identificationInfo>'
-    
-    metadata +=   u'<gmd:distributionInfo>'
-    metadata +=       u'<gmd:MD_Distribution>'
-    metadata +=           u'<gmd:distributionFormat>'
-    metadata +=               u'<gmd:MD_Format>'
-    metadata +=                   u'<gmd:name>'
-    metadata +=                       u'<gco:CharacterString>ShapeFile</gco:CharacterString>'
-    metadata +=                   u'</gmd:name>'
-    metadata +=                   u'<gmd:version>'
-    metadata +=                       u'<gco:CharacterString>Grass Version 6.1</gco:CharacterString>'
-    metadata +=                   u'</gmd:version>'
-    metadata +=               u'</gmd:MD_Format>'
-    metadata +=           u'</gmd:distributionFormat>'
-    metadata +=           u'<gmd:transferOptions>'
-    metadata +=               u'<gmd:MD_DigitalTransferOptions>'
-    metadata +=                   u'<gmd:onLine>'
-    metadata +=                       u'<gmd:CI_OnlineResource>'
-    metadata +=                           u'<gmd:linkage>'
-    metadata +=                               u'<gmd:URL>' + sanitizeXmlText(wms_endpoint) + u'</gmd:URL>'
-    metadata +=                           u'</gmd:linkage>'
-    metadata +=                           u'<gmd:protocol>'
-    metadata +=                               u'<gco:CharacterString>OGC:WMS</gco:CharacterString>'
-    metadata +=                           u'</gmd:protocol>'
-    metadata +=                           u'<gmd:name>'
-    metadata +=                               u'<gco:CharacterString>' + sanitizeXmlText(qualified_name) + u'</gco:CharacterString>'
-    metadata +=                           u'</gmd:name>'
-    metadata +=                           u'<gmd:description>'
-    metadata +=                               u'<gco:CharacterString>' + sanitizeXmlText(title) + u'</gco:CharacterString>'
-    metadata +=                           u'</gmd:description>'
-    metadata +=                       u'</gmd:CI_OnlineResource>'
-    metadata +=                   u'</gmd:onLine>'
-    if wfs_endpoint:
-        metadata +=           u'<gmd:onLine>'
-        metadata +=               u'<gmd:CI_OnlineResource>'
-        metadata +=                   u'<gmd:linkage>'
-        metadata +=                       u'<gmd:URL>' + sanitizeXmlText(wfs_endpoint) + u'</gmd:URL>'
-        metadata +=                   u'</gmd:linkage>'
-        metadata +=                   u'<gmd:protocol>'
-        metadata +=                       u'<gco:CharacterString>OGC:WFS</gco:CharacterString>'
-        metadata +=                   u'</gmd:protocol>'
-        metadata +=                   u'<gmd:name>'
-        metadata +=                       u'<gco:CharacterString>' + sanitizeXmlText(qualified_name) + u'</gco:CharacterString>'
-        metadata +=                   u'</gmd:name>'
-        metadata +=                   u'<gmd:description>'
-        metadata +=                       u'<gco:CharacterString>' + sanitizeXmlText(title) + u'</gco:CharacterString>'
-        metadata +=                   u'</gmd:description>'
-        metadata +=                   u'<gmd:function><gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download"/></gmd:function>'
-        metadata +=               u'</gmd:CI_OnlineResource>'
-        metadata +=           u'</gmd:onLine>'
-    if wcs_endpoint:
-        metadata +=           u'<gmd:onLine>'
-        metadata +=               u'<gmd:CI_OnlineResource>'
-        metadata +=                   u'<gmd:linkage>'
-        metadata +=                       u'<gmd:URL>' + sanitizeXmlText(wcs_endpoint) + u'</gmd:URL>'
-        metadata +=                   u'</gmd:linkage>'
-        metadata +=                   u'<gmd:protocol>'
-        metadata +=                       u'<gco:CharacterString>OGC:WCS</gco:CharacterString>'
-        metadata +=                   u'</gmd:protocol>'
-        metadata +=                   u'<gmd:name>'
-        metadata +=                       u'<gco:CharacterString>' + sanitizeXmlText(qualified_name) + u'</gco:CharacterString>'
-        metadata +=                   u'</gmd:name>'
-        metadata +=                   u'<gmd:description>'
-        metadata +=                       u'<gco:CharacterString>' + sanitizeXmlText(title) + u'</gco:CharacterString>'
-        metadata +=                   u'</gmd:description>'
-        metadata +=                   u'<gmd:function><gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download"/></gmd:function>'
-        metadata +=               u'</gmd:CI_OnlineResource>'
-        metadata +=           u'</gmd:onLine>'
-    metadata +=               u'</gmd:MD_DigitalTransferOptions>'
-    metadata +=           u'</gmd:transferOptions>'
-    metadata +=       u'</gmd:MD_Distribution>'
-    metadata +=   u'</gmd:distributionInfo>'
-    metadata += u'</gmd:MD_Metadata>'
-    return metadata
-"""
 
 class Iso19139_2007Manager(BaseStandardManager):
     def get_code(self):
