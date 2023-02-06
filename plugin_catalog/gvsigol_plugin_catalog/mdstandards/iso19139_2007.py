@@ -5,7 +5,8 @@ from .registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
 from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter, namespacedTag, setLocalisedCharacterString
-from gvsigol.settings import BASE_DIR, LANGUAGE_CODE
+from gvsigol.settings import BASE_DIR
+from django.conf import settings
 import collections
 from owslib import wcs
 import os
@@ -80,10 +81,10 @@ def create_datset_metadata(mdfields):
         spatialRepresentationTypeCode.set('codeListValue', spatial_representation_type)
         
         titleElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title', namespaces)
-        setLocalisedCharacterString(titleElem, title, LANGUAGE_CODE, namespaces)
+        setLocalisedCharacterString(titleElem, title, settings.LANGUAGE_CODE, namespaces)
         
         abstractElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract', namespaces)
-        setLocalisedCharacterString(abstractElem, abstract, LANGUAGE_CODE, namespaces)
+        setLocalisedCharacterString(abstractElem, abstract, settings.LANGUAGE_CODE, namespaces)
         
         crsElem = tree.find('/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/gco:CharacterString', namespaces)
         if crsElem is not None:
