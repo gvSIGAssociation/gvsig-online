@@ -41,6 +41,7 @@ urlpatterns = [
     path('api/v1/layers/<int:lyr_id>/style/', api_layer.LayersStyle.as_view(), name='get_layer_style'),
     path('api/v1/layers/<int:lyr_id>/description/', api_layer.LayerDescription.as_view(), name='get_layer_description'),
     path('api/v1/layers/<int:lyr_id>/capabilities/', api_layer.LayerCapabilities.as_view(), name='get_layer_capabilitiess'),
+    path('api/v1/layers/<int:lyr_id>/refresh/', api_layer.layer_refresh, name='refresh_layer'),
     path('api/v1/layers/<int:lyr_id>/features/', api_feature.FeaturesView.as_view(), name='get_feature_list,create_feature,update_feature'),
     path('api/v1/layers/<int:lyr_id>/featurelist/', api_feature.FeaturesExtentView.as_view(), name='get_feature_list_by_extent'),
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/', api_feature.FeaturesDeleteView.as_view(), name='get_feature,delete_feature'),
