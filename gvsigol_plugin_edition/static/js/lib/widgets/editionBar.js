@@ -454,7 +454,9 @@ EditionBar.prototype.stopEdition = function() {
 		this.removeVectorLayer();
 	}
 	$('#editionbar').remove();
+	console.log(this.selectedLayer);
 	this.updateServiceBoundingBox(this.selectedLayer.workspace, this.selectedLayer.layer_name);
+	this.selectedLayer.latlong_extent = null;
 	this.removeLayerLock();
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
