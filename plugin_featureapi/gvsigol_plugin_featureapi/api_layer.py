@@ -25,19 +25,20 @@ import ast
 import coreapi
 from django.http.response import HttpResponse, JsonResponse
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.decorators import action
+from rest_framework import status
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import BaseFilterBackend
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveDestroyAPIView, ListCreateAPIView, DestroyAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.generics import ListAPIView, ListCreateAPIView, DestroyAPIView
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.parsers import FormParser
 from gvsigol_plugin_featureapi.export import VectorLayerExporter
 from gvsigol_plugin_featureapi.serializers import FeatureSerializer, LayerChangesSerializer, LayerCreateSerializer
 from gvsigol_plugin_featureapi.serializers import LayerSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services import geographic_servers
 from gvsigol_services import views as serviceviews
-from gvsigol_services.models import Layer, LayerGroup, Datastore, Workspace, LayerResource, Server
+from gvsigol_services.models import Layer
 from gvsigol_symbology.models import StyleLayer
 from . import serializers
 from . import util
@@ -46,6 +47,7 @@ from gvsigol_services import views as services_views
 from psycopg2 import sql as sqlbuilder
 from gvsigol_services.forms_geoserver import CreateFeatureTypeForm
 from gvsigol_services.models import LayerFieldEnumeration, TriggerProcedure, Trigger
+from gvsigol_services.tasks import refresh_layer_info
 import re
 
 class LangFilter(BaseFilterBackend):
@@ -814,3 +816,26 @@ class LayerCapabilities(ListAPIView):
             return JsonResponse(result, safe=False)
         
         return HttpException(404, "Data NOT exists for this layer").get_exception()
+
+
+@swagger_auto_schema(operation_id='refresh_layer',
+                    operation_summary='Refresh layer extent and thumbnail',
+                    method='PUT',
+                    responses={
+                        200: 'Layer refresh has been scheduled',
+                        404: "Layer NOT found", 
+                        403: "The layer is not allowed to this user",
+                        401: "The user is not authenticated"
+                    })
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def layer_refresh(request, lyr_id):
+    try:
+        layer = Layer.objects.get(pk=lyr_id)
+    except Layer.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'PUT':
+        if not services_utils.can_write_layer(request, layer) and not services_utils.can_manage_layer(request, layer):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        refresh_layer_info.apply_async(args=[layer.id])
+        return Response({'status': 'Layer refresh has been scheduled for execution'})
