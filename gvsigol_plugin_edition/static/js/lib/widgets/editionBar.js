@@ -454,6 +454,7 @@ EditionBar.prototype.stopEdition = function() {
 		this.removeVectorLayer();
 	}
 	$('#editionbar').remove();
+	this.updateServiceBoundingBox(this.selectedLayer.workspace, this.selectedLayer.layer_name);
 	this.removeLayerLock();
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
@@ -2358,23 +2359,6 @@ EditionBar.prototype.transactWFS = function(p,f) {
 					fid = resp.insertIds[0].split('.')[1];
 				}
 				success = true;
-				if (p=="insert"||p=="update") {
-					/* Trigger a bounding box recalculating after insertions or
-					 * updates to ensure the bounding box of the service covers
-					 * all the layer geometries.
-					 *
-					 * Avoid using it on deletions as triggering
-					 * an update on an empty layer will produce incorrect
-					 * bounding boxes.
-					 */
-					try {
-						self.updateServiceBoundingBox(self.selectedLayer.workspace, self.selectedLayer.layer_name);
-					} catch (e) {
-						// ignore errors
-						console.error(e);
-					}
-				}
-
 			} catch (err) {
 				$('#edition-error').empty();
 				var ui = '';
