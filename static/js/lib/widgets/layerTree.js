@@ -2049,6 +2049,7 @@ layerTree.prototype.zoomToLayer = function(layer) {
 			   (extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
 			   return;
 		   }
+		   layer.latlong_extent = extent; // cache result
 		   var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
 		   self.map.getView().fit(ext, self.map.getSize());
 		});
