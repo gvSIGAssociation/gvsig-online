@@ -519,7 +519,7 @@ def set_layer_extent(layer, ds_type, layer_info, server):
         layer.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
         
     except Exception as e:
-        layer.default_srs = 'EPSG:4326'
+        layer.native_srs = 'EPSG:4326'
         layer.native_extent = '-180,-90,180,90'
         layer.latlong_extent = '-180,-90,180,90' 
         

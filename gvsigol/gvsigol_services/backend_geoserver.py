@@ -1996,15 +1996,11 @@ class Geoserver():
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             count = i.get_estimated_count(schema, layer.source_name)
-            if count < 10000:
-                (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
-                maxx = layer_info[ds_type]['latLonBoundingBox']['maxx']
-                maxy = layer_info[ds_type]['latLonBoundingBox']['maxy']
-                minx = layer_info[ds_type]['latLonBoundingBox']['minx']
-                miny = layer_info[ds_type]['latLonBoundingBox']['miny']
-            else:
-                # we get the extent of a single feature to avoid hitting Geoserver performance for big layers 
-                minx, miny, maxx, maxy = i.get_bbox_firstgeom(schema, layer.name, 0.01)
+            (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
+            maxx = layer_info[ds_type]['latLonBoundingBox']['maxx']
+            maxy = layer_info[ds_type]['latLonBoundingBox']['maxy']
+            minx = layer_info[ds_type]['latLonBoundingBox']['minx']
+            miny = layer_info[ds_type]['latLonBoundingBox']['miny']
             i.close()
             if minx is None: # empty layers
                 minx = -180.0

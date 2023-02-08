@@ -12,7 +12,8 @@ from gvsigol_services.models import Layer
 from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
 #from gvsigol_services.decorators import start_new_thread
 from gvsigol_services import geographic_servers
-from gvsigol_services.models import Layer, Datastore, Workspace
+from gvsigol_services.models import Layer, LayerGroup
+from gvsigol_services.utils import set_layer_extent
 
 import logging
 logger = logging.getLogger('gvsigol')
@@ -429,23 +430,59 @@ def setup_periodic_tasks(sender, **kwargs):
         defaults={'crontab': schedule}
     )
 
+def do_layer_cache_clear(layer, server):
+    server.clearCache(layer.datastore.workspace.name, layer)
+    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+    server.createOrUpdateGeoserverLayerGroup(layer_group)
+    server.clearLayerGroupCache(layer_group.name)
+
+def do_refresh_layer_extent(layer, server):
+    try:
+        server.updateBoundingBoxFromData(layer)
+        (ds_type, layer_info) = server.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
+        set_layer_extent(layer, ds_type, layer_info, server)
+        layer.save()
+        # restore dynamic grid subsets for gwc layers
+        server.set_gwclayer_dynamic_subsets(layer.datastore.workspace, layer.name)
+    except Exception as e:
+        logger.exception('error refreshing layer info - {0}'.format(str(layer)))
+
+def do_layer_cache_clear(layer, server):
+    server.clearCache(layer.datastore.workspace.name, layer)
+    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+    server.createOrUpdateGeoserverLayerGroup(layer_group)
+    server.clearLayerGroupCache(layer_group.name)
+
+def do_update_thumbnail(layer, server):
+    server.updateThumbnail(layer, 'update')
+
+@celery_app.task(bind=True)
+def refresh_layer_info(self, layer_id):
+    try:
+        layer = Layer.objects.select_related("datastore__workspace").get(id=layer_id)
+        server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        do_refresh_layer_extent(layer, server)
+        do_layer_cache_clear(layer, server)
+        do_update_thumbnail(layer, server)
+        server.reload_nodes()
+    except Exception as e:
+            logger.exception('error refreshing layer info - {0}'.format(str(layer)))
+
 @celery_app.task(bind=True)
 def update_layer_info(self):
-    layer_list = Layer.objects.filter(external=False)
-    for l in layer_list:
-        datastore = Datastore.objects.get(id=l.datastore_id)
-        workspace = Workspace.objects.get(id=datastore.workspace_id)
-        server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    layer_list = Layer.objects.filter(external=False).select_related("datastore__workspace")
+
+    servers = []
+    for layer in layer_list:
         try:
-            (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
-            if ds_type == 'imagemosaic':
-                ds_type = 'coverage'
-            l.native_srs = layer_info[ds_type]['srs']
-            l.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
-            l.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-            
+            server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            do_refresh_layer_extent(layer, server)
+            servers.append(server)
         except Exception as e:
-            l.default_srs = 'EPSG:4326'
-            l.native_extent = '-180,-90,180,90'
-            l.latlong_extent = '-180,-90,180,90'
-        l.save()
+            logger.exception('error refreshing layer info - {0}'.format(str(layer)))
+    
+    for server in set(servers):
+        server.reload_nodes()
+
+
+
