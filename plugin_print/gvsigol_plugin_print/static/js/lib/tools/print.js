@@ -587,7 +587,7 @@ print.prototype.convertBaseLayerToPrintLayer = function(bLayer, legends) {
 				legendUrl = legendUrl.replace('getlegendgraphic', 'getlegendgraphic&transparent=true');
 				var legend = {
 					"name": bLayer.getProperties().label,
-					"icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:800;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
+					"icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:800;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3')]
 				};
 				legends.push(legend);	
 			}
@@ -796,7 +796,7 @@ print.prototype.createPrintJob = function(template) {
 					// TODO: Para los A4 horizontales, 800 va bien, para A3 se puede usar 1000, etc.
 					var legend = {
 							"name": mapLayers[i].title,
-				            "icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:800;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3;wrap:true')]
+				            "icons": [legendUrl.replace('forceLabels:on', 'forceLabels:on;columnheight:800;fontAntiAliasing:true;dpi:100;fontSize:12;columns:3')]
 				        };
 					legends.push(legend);
 				}
