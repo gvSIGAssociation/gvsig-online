@@ -1959,26 +1959,14 @@ def layer_boundingbox_from_data(request):
         layer_name = request.POST['layer']
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
-        workspace = Workspace.objects.get(name=ws_name)
-        layer_query_set = Layer.objects.filter(external=False).filter(name=layer_name, datastore__workspace=workspace)
-        layer = layer_query_set[0]
-        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-        gs.updateBoundingBoxFromData(layer)
-        # restore dynamic grid subsets for gwc layers
-        gs.set_gwclayer_dynamic_subsets(workspace, layer.name) 
-        gs.clearCache(workspace.name, layer)
-        gs.updateThumbnail(layer, 'update')
-        
-        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
-        gs.createOrUpdateGeoserverLayerGroup(layer_group)
-        gs.clearLayerGroupCache(layer_group.name)
-        gs.reload_nodes()
-
+        layer = Layer.objects.get(external=False, name=layer_name, datastore__workspace__name=ws_name)
+        tasks.refresh_layer_info.apply_async(args=[layer.id])
         return HttpResponse('{"response": "ok"}', content_type='application/json')
-
-    except Exception as e:
+    except Layer.DoesNotExist:
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer.id))
-
+    except Exception as e:
+        logger.exception('Error')
+        return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer.id))
 
 def _layer_cache_clear(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
