@@ -1437,7 +1437,19 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label" >'+gettext('URL:')+'</label>'+
                                 '<input type="text" id="url-'+ID+'" name="url" class="form-control"></input>'+
-                            '</div>'+ 
+                                '<div>'+
+                                    '<input type="checkbox" name="checkbox-json" id="is-pag-'+ID+'"/>'+
+                                    '<label for="checkbox">'+gettext('Is paginated?')+'</label>'+										
+                                '</div>'+
+                                '<div class="column30">'+
+                                    '<label class="col-form-label" >'+gettext('Pagination parameter:')+'</label>'+
+                                    '<input type="text" id="pag-par-'+ID+'" name="pag-par" class="form-control"></input>'+
+                                '</div>'+
+                                '<div class="column30">'+
+                                    '<label form="init" class="col-form-label">'+gettext('Starts in:')+'</label>'+
+                                    '<input type="number" id="init-pag-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                                '</div>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -1464,6 +1476,18 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
             }
         });
 
+        $("#is-pag-"+ID).change(function() {
+            if($("#is-pag-"+ID).is(':checked')){
+                $("#is-pag-"+ID).val("true")
+                $("#pag-par-"+ID).prop( "disabled", false );
+                $("#init-pag-"+ID).prop( "disabled", false );
+            }else{
+                $("#is-pag-"+ID).val("")
+                $("#pag-par-"+ID ).prop( "disabled", true );
+                $("#init-pag-"+ID ).prop( "disabled", true );
+            }
+        });
+
         getPathFile('json', ID)
 
         var context = this
@@ -1480,6 +1504,16 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 $("#api-rest-"+ID).val("")
                 $( "#json-file-"+ID ).prop( "disabled", false );
                 $( "#select-file-button-"+ID ).prop( "disabled", false );
+            };
+
+            if($("#is-pag-"+ID).is(':checked')){
+                $("#is-pag-"+ID).val("true")
+                $("#pag-par-"+ID).prop( "disabled", false );
+                $("#init-pag-"+ID).prop( "disabled", false );
+            }else{
+                $("#is-pag-"+ID).val("")
+                $("#pag-par-"+ID ).prop( "disabled", true );
+                $("#init-pag-"+ID ).prop( "disabled", true );
             }
 
             $('#dialog-input-json-'+ID).modal('show')
@@ -1492,7 +1526,10 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
             "parameters": [
                 {"json-file": $('#json-file-'+ID).val(),
                 "api-rest": $("#api-rest-"+ID).val(),
-                "url": $('#url-'+ID).val()
+                "url": $('#url-'+ID).val(),
+                "is-pag": $("#is-pag-"+ID).val(),
+                "pag-par": $("#pag-par-"+ID ).val(),
+                "init-pag": $("#init-pag-"+ID ).val()
                 }
             ]}
 
