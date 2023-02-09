@@ -406,7 +406,7 @@ CONTROL_FIELDS = [{
                 }]
 VERSION_FIELD = 'feat_version_gvol'
 DATE_FIELD = 'feat_date_gvol'
-if 'gvsigol_plugin_restapi' in INSTALLED_APPS:
+if 'gvsigol_plugin_restapi' in INSTALLED_APPS or 'gvsigol_plugin_featureapi' in INSTALLED_APPS:
     CONTROL_FIELDS.extend([{
         'name': DATE_FIELD,
         'type': 'timestamp_with_time_zone',
