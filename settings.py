@@ -343,7 +343,6 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.9/topics/i18n/
 LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -562,7 +561,7 @@ CONTROL_FIELDS = [{
                 }]
 VERSION_FIELD = 'feat_version_gvol'
 DATE_FIELD = 'feat_date_gvol'
-if 'gvsigol_plugin_restapi' in INSTALLED_APPS:
+if 'gvsigol_plugin_restapi' in INSTALLED_APPS or 'gvsigol_plugin_featureapi' in INSTALLED_APPS:
     CONTROL_FIELDS.extend([{
         'name': DATE_FIELD,
         'type': 'timestamp_with_time_zone',
