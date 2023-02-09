@@ -459,7 +459,11 @@ def get_types_segex (dicc):
 def get_schema_json(dicc):
     
     if dicc['api-rest'] == 'true':
-        jsondata = pd.read_json(dicc['url'])
+        if dicc['is-pag'] == 'true':
+            start = dicc['init-pag']
+            jsondata = pd.read_json(dicc['url']+'&'+dicc['pag-par']+'='+str(start))
+        else:
+            jsondata = pd.read_json(dicc['url'])
     else:
         jsondata = pd.read_json(dicc['json-file'])
     

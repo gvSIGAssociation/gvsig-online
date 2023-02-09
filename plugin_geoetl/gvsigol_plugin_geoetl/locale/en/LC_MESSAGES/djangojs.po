@@ -888,3 +888,12 @@ msgstr ""
 
 msgid "If files of the selected type of georeference have not been previously requested, this option will fail."
 msgstr ""
+
+msgid "Is paginated?"
+msgstr ""
+
+msgid "Pagination parameter:"
+msgstr ""
+
+msgid "Starts in:"
+msgstr ""

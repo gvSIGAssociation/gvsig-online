@@ -889,3 +889,12 @@ msgstr "Última fecha garantizada para la fecha de inicio"
 
 msgid "If files of the selected type of georeference have not been previously requested, this option will fail."
 msgstr "Si no se han hecho peticiones de expedientes del tipo seleccionado previamente, está opción fallará"
+
+msgid "Is paginated?"
+msgstr "¿Está paginado?"
+
+msgid "Pagination parameter:"
+msgstr "Parámetro de paginación:"
+
+msgid "Starts in:"
+msgstr "Empieza en:"

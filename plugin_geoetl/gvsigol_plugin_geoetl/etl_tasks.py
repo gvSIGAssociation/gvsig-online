@@ -3534,13 +3534,46 @@ def input_Json(dicc):
     table_name = dicc['id']
 
     if dicc['api-rest'] == 'true':
-        df = pd.read_json(dicc['url'])
+
+        if dicc['is-pag'] == 'true':
+
+            start = int(dicc['init-pag'])
+
+            first = True
+
+            while requests.get(dicc['url']+'&'+dicc['pag-par']+'='+str(start)).status_code == 200:
+                
+                df = pd.read_json(dicc['url']+'&'+dicc['pag-par']+'='+str(start))
+
+                if first:
+                    df_obj = df.select_dtypes(['object'])
+                    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+                    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+                    first = False
+                else:
+                    df_obj = df.select_dtypes(['object'])
+                    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+                    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+
+                print('pagina: '+ str(start))
+
+                start +=1
+
+        else:
+        
+            df = pd.read_json(dicc['url'])
+
+            df_obj = df.select_dtypes(['object'])
+            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+    
     else:
         df = pd.read_json(dicc['json-file'])
 
-    df_obj = df.select_dtypes(['object'])
-    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        df_obj = df.select_dtypes(['object'])
+        df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+    
     conn.close()
     db.dispose()
     
