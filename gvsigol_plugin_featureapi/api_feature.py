@@ -240,6 +240,8 @@ class FeaturesView(CreateAPIView):
                     except Exception as e:
                         print(e)
                 data = content['data']
+                while isinstance(data, str):
+                    data = json.loads(data)
             else:
                 data = content
             
