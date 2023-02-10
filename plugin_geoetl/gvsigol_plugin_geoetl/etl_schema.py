@@ -459,12 +459,24 @@ def get_types_segex (dicc):
 def get_schema_json(dicc):
     
     if dicc['api-rest'] == 'true':
-        if dicc['is-pag'] == 'true':
+        """if dicc['is-pag'] == 'true':
             start = dicc['init-pag']
             jsondata = pd.read_json(dicc['url']+'&'+dicc['pag-par']+'='+str(start))
-        else:
-            jsondata = pd.read_json(dicc['url'])
+        else:"""
+        jsondata = pd.read_json(dicc['url'])
     else:
         jsondata = pd.read_json(dicc['json-file'])
+    
+    return list(jsondata.columns)
+
+
+def get_schema_padron_alba(dicc):
+    
+    if dicc['service'] == 'PRE':
+        url = "http://172.16.136.19/servicios/wp-json/mg-dbq2json/v1/services?s=pre_estadisticas_padron&u=fPqq2xHVQkix&pag=1"
+    elif dicc['service'] == 'PRO':
+        url = "http://172.16.136.19/servicios/wp-json/mg-dbq2json/v1/services?s=pro_estadisticas_padron&u=fPqq2xHVQkix&pag=1"
+
+    jsondata = pd.read_json(url)
     
     return list(jsondata.columns)

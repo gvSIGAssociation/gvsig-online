@@ -1437,7 +1437,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label" >'+gettext('URL:')+'</label>'+
                                 '<input type="text" id="url-'+ID+'" name="url" class="form-control"></input>'+
-                                '<div>'+
+                                /*'<div>'+
                                     '<input type="checkbox" name="checkbox-json" id="is-pag-'+ID+'"/>'+
                                     '<label for="checkbox">'+gettext('Is paginated?')+'</label>'+										
                                 '</div>'+
@@ -1448,7 +1448,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                                 '<div class="column30">'+
                                     '<label form="init" class="col-form-label">'+gettext('Starts in:')+'</label>'+
                                     '<input type="number" id="init-pag-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
-                                '</div>'+
+                                '</div>'+*/
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -1476,7 +1476,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
             }
         });
 
-        $("#is-pag-"+ID).change(function() {
+        /*$("#is-pag-"+ID).change(function() {
             if($("#is-pag-"+ID).is(':checked')){
                 $("#is-pag-"+ID).val("true")
                 $("#pag-par-"+ID).prop( "disabled", false );
@@ -1486,7 +1486,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 $("#pag-par-"+ID ).prop( "disabled", true );
                 $("#init-pag-"+ID ).prop( "disabled", true );
             }
-        });
+        });*/
 
         getPathFile('json', ID)
 
@@ -1506,7 +1506,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 $( "#select-file-button-"+ID ).prop( "disabled", false );
             };
 
-            if($("#is-pag-"+ID).is(':checked')){
+            /*if($("#is-pag-"+ID).is(':checked')){
                 $("#is-pag-"+ID).val("true")
                 $("#pag-par-"+ID).prop( "disabled", false );
                 $("#init-pag-"+ID).prop( "disabled", false );
@@ -1514,7 +1514,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 $("#is-pag-"+ID).val("")
                 $("#pag-par-"+ID ).prop( "disabled", true );
                 $("#init-pag-"+ID ).prop( "disabled", true );
-            }
+            }*/
 
             $('#dialog-input-json-'+ID).modal('show')
 
@@ -1527,9 +1527,9 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 {"json-file": $('#json-file-'+ID).val(),
                 "api-rest": $("#api-rest-"+ID).val(),
                 "url": $('#url-'+ID).val(),
-                "is-pag": $("#is-pag-"+ID).val(),
+                /*"is-pag": $("#is-pag-"+ID).val(),
                 "pag-par": $("#pag-par-"+ID ).val(),
-                "init-pag": $("#init-pag-"+ID ).val()
+                "init-pag": $("#init-pag-"+ID ).val()*/
                 }
             ]}
 
@@ -1669,6 +1669,223 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+
+//// INPUT PADRON ALBACETE ////
+input_PadronAlbacete = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "input_PadronAlbacete ",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"Padrón Albacete", 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+       
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+
+        $('#canvas-parent').append('<div id="dialog-input-padron-alba-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">Parámetros del Padrón de Albacete</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label class="col-form-label" > Servicio </label>'+
+                                    '<select class="form-control" id="service-'+ID+'">'+
+                                        '<option value="PRO"> Producción </option>'+
+                                        '<option value="PRE"> Preproducción </option>'+
+                                    '</select>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-padron-alba-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        var context = this
+
+        icon.on("click", function(){
+
+            $('#dialog-input-padron-alba-'+ID).modal('show')
+
+        });
+
+        $('#input-padron-alba-accept-'+ID).click(function() {
+
+            var paramsJSON = {"id": ID,
+            "parameters": [
+                {"service": $('#service-'+ID).val()
+                }
+            ]}
+
+            var formDataSchemaJSON = new FormData();
+
+            formDataSchemaJSON.append('jsonParamsJSON', JSON.stringify(paramsJSON))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_padron_alba/',
+                data: formDataSchemaJSON,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsJSON['schema'] = data
+                    
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    }
+                })
+    
+            isAlreadyInCanvas(jsonParams, paramsJSON, ID)
+
+            icon.setColor('#01b0a0')
+            
+            $('#dialog-input-padron-alba-'+ID).modal('hide')
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+	   	 var label =new draw2d.shape.basic.Label({
+	   	     text:gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#009688",
+             resizeable:true
+	   	 });
+
+	     var output= label.createPort("output");
+	     
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     }
+	     else{
+	         this.add(label);
+	     }
+         
+         listLabel.push([this.id, [], [output.name]])
+         
+         return label;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
 
 
 //// INPUT EXCEL ////
