@@ -658,7 +658,6 @@ class FeatureSerializer(serializers.Serializer):
                 logger.exception("Error getting CRS")
                 crs_dst = None
             feat_id = data['properties'][idfield]
-            print ('TEST CRS: ' + str(crs_dst))
             layer = Layer.objects.get(id = lyr_id)
             validation.check_version_and_date_columns(layer, con, schema, table)
             data['properties'][settings.DATE_FIELD] = "now()"#datetime.now()
@@ -673,12 +672,11 @@ class FeatureSerializer(serializers.Serializer):
             geom = None
             if "geometry" in data:
                 geom = data['geometry'] 
-            
+            print('GEOMETRY: ' + str(geom))
             self._check_geom(geom, con)
             
             try:
                 sql, values = self._get_sql_update(table, schema, data['properties'], feat_id, geom, geom_column, crs_dst, idfield)
-                print ('QUERY_AS_STRING: ' + sql.as_string(con.cursor))
                 con.cursor.execute(sql, values)
                 util.save_version_history(con, schema, table, lyr_id, feat_id, validation.usr, 2)
                 return util.get_feat_by_id(con, feat_id, schema, table, idfield, geom_column)
@@ -755,6 +753,7 @@ class FeatureSerializer(serializers.Serializer):
         query = sqlbuilder.SQL(sql).format(
             geojson=sqlbuilder.Literal(json.dumps(geomjson))
             )
+        print ('CHECK_GEOM: ' + query.as_string(con.cursor))
         con.cursor.execute(query)
         rows = con.cursor.fetchone()
         if rows[0] == False:
