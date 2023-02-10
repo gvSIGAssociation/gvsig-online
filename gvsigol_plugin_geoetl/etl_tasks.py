@@ -3535,7 +3535,7 @@ def input_Json(dicc):
 
     if dicc['api-rest'] == 'true':
 
-        if dicc['is-pag'] == 'true':
+        """if dicc['is-pag'] == 'true':
 
             start = int(dicc['init-pag'])
 
@@ -3559,20 +3559,20 @@ def input_Json(dicc):
 
                 start +=1
 
-        else:
+        else:"""
         
-            df = pd.read_json(dicc['url'])
+        df = pd.read_json(dicc['url'])
 
-            df_obj = df.select_dtypes(['object'])
-            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        """df_obj = df.select_dtypes(['object'])
+        df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)"""
     
     else:
         df = pd.read_json(dicc['json-file'])
 
-        df_obj = df.select_dtypes(['object'])
-        df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+    df_obj = df.select_dtypes(['object'])
+    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
     
     conn.close()
     db.dispose()
@@ -3627,3 +3627,42 @@ def trans_Difference(dicc):
     cur.close()
 
     return [table_name_target]
+
+def input_PadronAlbacete(dicc):
+
+    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    db = create_engine(conn_string)
+    conn = db.connect()
+
+    table_name = dicc['id']
+    
+    if dicc['service'] == 'PRE':
+        url_est = "http://172.16.136.19/servicios/wp-json/mg-dbq2json/v1/services?s=pre_estadisticas_padron&u=fPqq2xHVQkix&pag=%s"
+        url_count = "http://172.16.136.19/servicios/wp-json/mg-dbq2json/v1/services?s=pre_estadisticas_padron_cuenta&u=fPqq2xHVQkix"
+    
+    elif dicc['service'] == 'PRO':
+        url_est = "http://172.16.136.19/servicios/wp-json/mg-dbq2json/v1/services?s=pro_estadisticas_padron&u=fPqq2xHVQkix&pag=%s"
+        url_count = "http://172.16.136.19/servicios/wp-json/mg-dbq2json/v1/services?s=pro_estadisticas_padron_cuenta&u=fPqq2xHVQkix"
+
+    df_count = pd.read_json(url_count)
+
+    last_pag = df_count['NUMPAGINAS'][0]
+
+    for i in range(1, last_pag):
+        url = url_est % (str(i))
+        df = pd.read_json(url)
+
+        df_obj = df.select_dtypes(['object'])
+        df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
+        if i == 1:
+
+            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        else:
+            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+
+    conn.close()
+    db.dispose()
+
+    return [table_name]
+    

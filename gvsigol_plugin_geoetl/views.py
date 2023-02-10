@@ -1044,6 +1044,19 @@ def etl_schema_json(request):
 
             response = json.dumps(listSchema)
 
-            print(listSchema)
+            return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_schema_padron_alba(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+
+            jsParams = json.loads(request.POST['jsonParamsJSON'])
+
+            listSchema = etl_schema.get_schema_padron_alba(jsParams['parameters'][0])
+
+            response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")

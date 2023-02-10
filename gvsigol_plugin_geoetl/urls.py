@@ -36,4 +36,5 @@ urlpatterns = [
     path('etl/etl_entities_segex/', views.etl_entities_segex, name='etl_entities_segex'),
     path('etl/etl_types_segex/', views.etl_types_segex, name='etl_types_segex'),
     path('etl/etl_schema_json/', views.etl_schema_json, name='etl_schema_json'),
+    path('etl/etl_schema_padron_alba/', views.etl_schema_padron_alba, name='etl_schema_padron_alba'),
 ]
