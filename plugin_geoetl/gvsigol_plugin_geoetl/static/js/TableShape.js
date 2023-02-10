@@ -1673,7 +1673,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
 //// INPUT PADRON ALBACETE ////
 input_PadronAlbacete = draw2d.shape.layout.VerticalLayout.extend({
 
-	NAME: "input_PadronAlbacete ",
+	NAME: "input_PadronAlbacete",
 	
     init : function(attr)
     {
