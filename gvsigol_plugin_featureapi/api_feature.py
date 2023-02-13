@@ -1037,6 +1037,7 @@ class ResourcesView(ListCreateAPIView):
 class FileAttachedView(ListAPIView):
     parser_classes = (MultiPartParser,)
     serializer_class = FileUploadSerializer
+    permission_classes = [AllowAny]
     
     @swagger_auto_schema(operation_id='get_attached_file', operation_summary='Get the resource attached to the feature',
                           responses={
