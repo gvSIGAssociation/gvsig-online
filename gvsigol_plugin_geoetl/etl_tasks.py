@@ -3648,9 +3648,18 @@ def input_PadronAlbacete(dicc):
 
     last_pag = df_count['NUMPAGINAS'][0]
 
-    for i in range(1, last_pag):
+    for i in range(1, last_pag+1):
         url = url_est % (str(i))
-        df = pd.read_json(url)
+        df = pd.read_json(url, dtype={"DISTRITO": str, 
+                                    "SECCION": str, 
+                                    "MANZANA": str, 
+                                    "HOJA": str, 
+                                    "ORDEN": str,
+                                    "KM": str,
+                                    "CODIGOPOSTAL": str,
+                                    })
+
+        df['FECHANACIMIENTO'] = pd.to_datetime(df['FECHANACIMIENTO'])
 
         df_obj = df.select_dtypes(['object'])
         df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
