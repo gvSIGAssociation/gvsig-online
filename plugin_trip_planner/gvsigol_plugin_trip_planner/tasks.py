@@ -45,7 +45,7 @@ def cron_trip_planner_refresh(id):
     statusModel.status = 'Running'
     statusModel.save()
 
-    print(('############################    '+datetime.now().strftime("%Y-%m-%d %H:%M") + ' -> Actualizando Trip-Planner: '))
+    print('INFO:  Actualizando Trip-Planner '+datetime.now().strftime("%Y-%m-%d %H:%M"))
 
     try:
         providers = GTFSProvider.objects.order_by('name')
@@ -103,7 +103,7 @@ def _execute_script (cmd):
         for i in s:
             print ("INFO: Executing ...", shlex.split(i))        
             proc = subprocess.Popen(shlex.split(i), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=False)
-            out, err = proc.communicate()  # Read data from stdout and stderr
+            out, err = proc.communicate() 
             if out != b'':
                 print ("INFO:", out)
             if err != b'':
