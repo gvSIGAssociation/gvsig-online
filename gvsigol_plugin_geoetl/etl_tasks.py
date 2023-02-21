@@ -3253,7 +3253,7 @@ def trans_Geocoder(dicc):
             for x in range (1, len(row)):
                 if row[x]:
                     address_list.append(str(row[x]))
-            address = ', '.join(address_list)
+            address = ' '.join(address_list)
             
             if engine == 'ICV':
                 
