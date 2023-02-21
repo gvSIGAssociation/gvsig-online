@@ -96,6 +96,39 @@ class Geocoder():
         }
         return response
 
+    def damerau_levenshtein_distance(self, string1, string2):
+
+        s1 = string1.lower()
+
+        s2 = string2.lower()
+
+        #Cálculo de la distancia
+        d = {}
+        lenstr1 = len(s1)
+        lenstr2 = len(s2)
+        for i in range(-1,lenstr1+1):
+            d[(i,-1)] = i+1
+        for j in range(-1,lenstr2+1):
+            d[(-1,j)] = j+1
+
+        for i in range(lenstr1):
+            for j in range(lenstr2):
+                if s1[i] == s2[j]:
+                    cost = 0
+                else:
+                    cost = 1
+                d[(i,j)] = min(
+                    d[(i-1,j)] + 1,
+                    d[(i,j-1)] + 1,
+                    d[(i-1,j-1)] + cost,
+                    )
+                if i and j and s1[i]==s2[j-1] and s1[i-1] == s2[j]:
+                    d[(i,j)] = min (d[(i,j)], d[i-2,j-2] + cost)
+
+        dDL= d[lenstr1-1,lenstr2-1]
+
+        return dDL
+
     def geocoding_direct_from_etl(self, query, geocoder_type):
 
         provider = Provider.objects.get(type = geocoder_type)
@@ -107,23 +140,37 @@ class Geocoder():
                 geocoder = geocoder_t[geocoder_type]
                 break
         try:
-            sugges= geocoder.geocode(query, exactly_one=False)[0]
+            sugges= geocoder.geocode(query, exactly_one=False)
         except:
             response = {}
             
             return response
 
         if geocoder_type == 'generic':
-            suggestions = {"address[" + str(key)+"]": val for key, val in sugges.items()}
-            for key, val in suggestions.items():
-                if val is None:
-                    suggestions[key] = ''
-                if val == 0:
-                    suggestions[key] = '0'
+            suggestions = []
+            for s in sugges:
+                sg = {"address[" + str(key)+"]": val for key, val in s.items()}
+                for key, val in sg.items():
+                    if val is None:
+                        sg[key] = ''
+                    if val == 0:
+                        sg[key] = '0'
+                suggestions.append(sg)
         else:
             suggestions = sugges
         
-        response = self.find_candidate(json.dumps(suggestions))
+        distance = 99999999
+        suggestion = suggestions[0]
+        
+        for sug in suggestions:
+
+            dld = self.damerau_levenshtein_distance(query, sug['address[address]'])
+
+            if dld < distance:
+                distance = dld
+                suggestion = sug
+        
+        response = self.find_candidate(json.dumps(suggestion))
 
         return response
 
