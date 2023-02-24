@@ -561,8 +561,11 @@ msgstr ""
 "La conexión no se ha guardado. Probablemente, el nombre de la base de datos "
 "ya existe"
 
-#~ msgid "Back"
-#~ msgstr "Atrás"
+msgid "Creators"
+msgstr "Creadores"
 
-#~ msgid "all"
-#~ msgstr "todos"
+msgid "Grid"
+msgstr "Cuadrícula"
+
+msgid "Set parameters of all tasks before save"
+msgstr "Configura los parámetros de todas las tareas antes de guardar"

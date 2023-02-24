@@ -550,3 +550,12 @@ msgstr ""
 #: templates/etl.html:405
 msgid "DataBase Connection not saved. Probably, database name already exists."
 msgstr ""
+
+msgid "Creators"
+msgstr ""
+
+msgid "Grid"
+msgstr ""
+
+msgid "Set parameters of all tasks before save"
+msgstr ""

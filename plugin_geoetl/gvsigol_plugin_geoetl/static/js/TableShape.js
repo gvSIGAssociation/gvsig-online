@@ -81,6 +81,8 @@ function setColorIfIsOpened(jsonParams, type, ID, icon){
                     icon.setColor("#e79600")
                 }else if (type.startsWith('trans')){ 
                     icon.setColor("#4682B4")
+                }else if (type.startsWith('crea')){ 
+                    icon.setColor("#8e57eb")
                 }
                 break;
             }
@@ -1017,8 +1019,6 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                     "date-segex":$('input:radio[name="date-segex-'+ID+'"]:checked').val()
                 }
             ]};
-
-            console.log()
 
             data = ['IdGeorreferencia', 'Operacion', 'Descripcion', 'Observaciones', 'Latitud', 'Longitud', 'TipoReferenciaCatastral', 
                     'ReferenciaCatastral', 'IneMunicipioDireccion', 'ViaDireccion', 'NumeroViaDireccion', 'RestoDireccion',
@@ -3562,6 +3562,321 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
 
          return this;
      }  
+
+});
+
+/////////////////////////////////////////////////// CREATORS ///////////////////////////////////////////////////////////
+//// GRID ////
+
+crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "crea_Grid",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3, width:1},attr));
+        
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Grid"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#c1a7ed",
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-create-grid-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+gettext('Grid Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('How to create the grid?')+'</label>'+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="extent-'+ID+'" name="create-'+ID+'" class="form-check-input" value="Extent" checked="checked">'+
+                                    '<label for="create" class="form-check-label">'+gettext('Grid from extent of input geometry')+'</label>'+
+                                '</div>'+
+                                
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="coordinates-'+ID+'" name="create-'+ID+'" class="form-check-input" value="Coordinates">'+
+                                    '<label for="create" class="form-check-label">'+gettext('Grid from initial coordinates (Lower left corner)')+'</label>'+
+                                '</div>'+
+                            '</div>'+
+
+                            '<div class="column50">'+
+                                '<label form="rows" class="col-form-label">'+gettext('Rows')+'</label>'+
+                                '<input type="number" id="rows-'+ID+'" value=0 min="1" class="form-control" disabled pattern="^[0-9]+">'+
+                            '</div>'+
+
+                            '<div class="column50">'+
+                                '<label form="columns" class="col-form-label">'+gettext('Columns')+'</label>'+
+                                '<input type="number" id="columns-'+ID+'" value=0 min="1" class="form-control" disabled pattern="^[0-9]+">'+
+                            '</div>'+
+
+                            '<div class="column50">'+
+                                '<label form="width" class="col-form-label">'+gettext('Width')+'</label>'+
+                                '<input type="number" id="width-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                            '</div>'+
+
+                            '<div class="column50">'+
+                                '<label form="height" class="col-form-label">'+gettext('Height')+'</label>'+
+                                '<input type="number" id="height-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                            '</div>'+
+
+                            '<div class="column50">'+
+                                '<label form="initial-x" class="col-form-label">'+gettext('Initial X')+'</label>'+
+                                '<input type="number" id="init-x-'+ID+'" value=0 min="0" class="form-control" disabled pattern="^[0-9]+">'+
+                            '</div>'+
+
+                            '<div class="column50">'+
+                                '<label form="initial-y" class="col-form-label">'+gettext('Initial Y')+'</label>'+
+                                '<input type="number" id="init-y-'+ID+'" value=0 min="0" class="form-control" disabled pattern="^[0-9]+">'+
+                            '</div>'+
+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext("EPSG")+'</label>'+
+                                '<select id="epsg-'+ID+'" class="form-control">'+
+                                    '<option value="">----</option>'+
+                                '</select>'+
+                            '</div>'+
+                        
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="create-grid-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        var context = this
+
+        for(i=0;i<srs.length;i++){
+
+            epsg = srs[i].code.split(":")[1]
+
+            $('#epsg-'+ID).append(
+                '<option value="'+epsg+'">'+srs[i].code+' - '+srs[i].title+'</option>'
+            );
+        }
+
+        $('input:radio[name="create-'+ID+'"]').change(function(){
+            if ($(this).val() == 'Extent'){
+                
+                $('#rows-'+ID).prop('disabled', true)
+                $('#columns-'+ID).prop('disabled', true)
+                $('#init-x-'+ID).prop('disabled', true)
+                $('#init-y-'+ID).prop('disabled', true)
+                $('#epsg-'+ID).prop('disabled', true)
+                
+            }
+            else if ($(this).val() == 'Coordinates'){
+            
+                $('#rows-'+ID).prop('disabled', false)
+                $('#columns-'+ID).prop('disabled', false)
+                $('#init-x-'+ID).prop('disabled', false)
+                $('#init-y-'+ID).prop('disabled', false)
+                $('#epsg-'+ID).prop('disabled', false)
+            }
+        });
+
+        icon.on("click", function(){
+
+            if ($('input:radio[name="create-'+ID+'"]:checked').val() == 'Extent'){
+
+                $('#rows-'+ID).prop('disabled', true)
+                $('#columns-'+ID).prop('disabled', true)
+                $('#init-x-'+ID).prop('disabled', true)
+                $('#init-y-'+ID).prop('disabled', true)
+                $('#epsg-'+ID).prop('disabled', true)
+
+            }
+            else if ($('input:radio[name="create-'+ID+'"]:checked').val() == 'Coordinates'){
+                
+                $('#rows-'+ID).prop('disabled', false)
+                $('#columns-'+ID).prop('disabled', false)
+                $('#init-x-'+ID).prop('disabled', false)
+                $('#init-y-'+ID).prop('disabled', false)
+                $('#epsg-'+ID).prop('disabled', false)
+            }
+
+            $('#dialog-create-grid-'+ID).modal('show')
+
+        });
+
+        $('#create-grid-accept-'+ID).click(function() {
+                
+            var paramsGrid = {"id": ID,
+            "parameters": [
+                {"create": $('input:radio[name="create-'+ID+'"]:checked').val(),
+                "rows": $('#rows-'+ID).val(),
+                "columns": $('#columns-'+ID).val(),
+                "width": $("#width-"+ID).val(),
+                "height": $('#height-'+ID).val(),
+                "init-x": $('#init-x-'+ID).val(),
+                "init-y": $("#init-y-"+ID).val(),
+                "epsg": $('#epsg-'+ID).val()}
+            ]}
+
+            data = ['_row', '_column']
+
+            paramsGrid['schema'] = data
+            paramsGrid['parameters'][0]['schema'] = data
+            
+            passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+            
+            isAlreadyInCanvas(jsonParams, paramsGrid, ID)
+            
+            icon.setColor('#8e57eb')
+                    
+            $('#dialog-create-grid-'+ID).modal('hide')
+        });
+    },
+    
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+        var label1 =new draw2d.shape.basic.Label({
+            text: gettext('Input')+' (Op.)',
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:10, top:3, right:10, bottom:5},
+            fontColor:"#8e57eb",
+         resizeable:true
+        });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+	   	     text: gettext('Output'),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#8e57eb",
+	   	     resizeable:true
+	   	 });
+
+        var input1 = label1.createPort("input");
+        input1.setName("input_"+label1.id);
+
+        var output = label2.createPort("output");
+        output.setName("output_"+label2.id);
+
+	    if($.isNumeric(optionalIndex)){
+            this.add(label1, null, optionalIndex+1);
+            this.add(label2, null, optionalIndex+1);
+	    }
+	    else{
+            this.add(label1);
+            this.add(label2);
+
+        }
+         
+        listLabel.push([this.id, [input1.name], [output.name]])
+
+	    return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }
 
 });
 

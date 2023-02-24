@@ -30,6 +30,14 @@
                                 <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
                             </div>
                         </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-creator" role="button" id="button-outputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Creators" %}'> <i class="fa fa-pencil-square-o"></i> </button>
+                            <div class="dropdown-menu">
+                                <li><a  data-shape="crea_Grid" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Grid" %}</a></li>
+                            </div>
+                        </div>
+
                         <div class="btn-group">
                             <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Alphanumeric Transformers" %}'> <i class="fa fa-sort-alpha-asc"></i>  </button>
                             <div class="dropdown-menu">
@@ -195,7 +203,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans 'Close' %}</button>
-                    <button type="button" class="btn btn-default btn-sm" id="save-etl" title="Set parameters of all tasks before save">{% trans 'Save' %}</button>
+                    <button type="button" class="btn btn-default btn-sm" id="save-etl" title='{% trans "Set parameters of all tasks before save" %}'>{% trans 'Save' %}</button>
                 </div>
             </div>
         </div>

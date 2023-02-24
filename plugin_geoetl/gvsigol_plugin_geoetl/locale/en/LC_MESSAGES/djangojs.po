@@ -325,9 +325,6 @@ msgstr ""
 msgid "Load sheets"
 msgstr ""
 
-msgid "Set parameters of all tasks before save"
-msgstr ""
-
 msgid "New"
 msgstr ""
 
@@ -896,4 +893,37 @@ msgid "Pagination parameter:"
 msgstr ""
 
 msgid "Starts in:"
+msgstr ""
+
+msgid "Grid"
+msgstr ""
+
+msgid "Grid Parameters"
+msgstr ""
+
+msgid "How to create the grid?"
+msgstr ""
+
+msgid "Grid from extent of input geometry"
+msgstr ""
+
+msgid "Grid from initial coordinates (Lower left corner)"
+msgstr ""
+
+msgid "Rows"
+msgstr ""
+
+msgid "Columns"
+msgstr ""
+
+msgid "Width"
+msgstr ""
+
+msgid "Height"
+msgstr ""
+
+msgid "Initial X"
+msgstr ""
+
+msgid "Initial Y"
 msgstr ""
