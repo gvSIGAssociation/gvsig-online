@@ -325,9 +325,6 @@ msgstr "Elige fichero"
 msgid "Load sheets"
 msgstr "Carga hojas"
 
-msgid "Set parameters of all tasks before save"
-msgstr "Configura los parámetros de todas las tareas antes de guardar"
-
 msgid "New"
 msgstr "Nuevo"
 
@@ -898,3 +895,36 @@ msgstr "Parámetro de paginación:"
 
 msgid "Starts in:"
 msgstr "Empieza en:"
+
+msgid "Grid"
+msgstr "Cuadrícula"
+
+msgid "Grid Parameters"
+msgstr "Parámetros Cuadrícula"
+
+msgid "How to create the grid?"
+msgstr "¿Cómo crear la cuadrícula?"
+
+msgid "Grid from extent of input geometry"
+msgstr "Cuadrícula a partir de la extensión de la geometría de entrada"
+
+msgid "Grid from initial coordinates (Lower left corner)"
+msgstr "Cuadrícula a partir de coordenadas (Esquina inferior izquierda)"
+
+msgid "Rows"
+msgstr "Filas"
+
+msgid "Columns"
+msgstr "Columnas"
+
+msgid "Width"
+msgstr "Anchura"
+
+msgid "Height"
+msgstr "Altura"
+
+msgid "Initial X"
+msgstr "X inicial"
+
+msgid "Initial Y"
+msgstr "Y inicial"

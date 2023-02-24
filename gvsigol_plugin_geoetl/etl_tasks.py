@@ -28,6 +28,7 @@ from django.contrib.gis.gdal import DataSource
 import re
 from zipfile import ZipFile
 import time
+import math
 from . import etl_schema
 
 from celery.utils.log import get_task_logger
@@ -1803,6 +1804,13 @@ def trans_Union(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
+    sqlIndex = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source}_wkb_geometry_geom_idx" on {schema}."{table_source}" USING gist (wkb_geometry);').format(
+        table_source = sql.SQL(table_name_source),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    
+    cur.execute(sqlIndex)
+    conn.commit()
+
     if groupby == '':
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select ST_Union(wkb_geometry) as wkb_geometry from {schema}.{tbl_source});').format(
             schema = sql.Identifier(settings.GEOETL_DB["schema"]),
@@ -2551,6 +2559,21 @@ def trans_Intersection(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
+
+    sqlIndex1 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_0}_wkb_geometry_geom_idx" on {schema}."{table_source_0}" USING gist (wkb_geometry);').format(
+        table_source_0 = sql.SQL(table_name_source_0),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    
+    cur.execute(sqlIndex1)
+    conn.commit()
+
+    sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
+        table_source_1 = sql.SQL(table_name_source_1),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    
+    cur.execute(sqlIndex2)
+    conn.commit()
+
     sqlInter = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ', st_intersection( st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) as wkb_geometry from '
     sqlInter += '{schema}.{table_source_0} AS A0, {schema}.{table_source_1}  AS A1 '
     sqlInter += 'WHERE st_intersects(st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) = true)'
@@ -2959,6 +2982,20 @@ def trans_SpatialRel(dicc):
         table_target = sql.Identifier(table_name_target)
     )
     cur.execute(sqlAlter)
+    conn.commit()
+
+    sqlIndex1 = sql.SQL('CREATE INDEX IF NOT EXISTS "{tbl_target}_wkb_geometry_geom_idx" on {schema}."{tbl_target}" USING gist (wkb_geometry);').format(
+        tbl_target = sql.SQL(table_name_target),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    
+    cur.execute(sqlIndex1)
+    conn.commit()
+
+    sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
+        table_source_1 = sql.SQL(table_name_source_1),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    
+    cur.execute(sqlIndex2)
     conn.commit()
 
     sqlUpdate = 'UPDATE  {schema}.{table_target}  SET _related ='+"'True' WHERE _id_temp IN ("
@@ -3606,6 +3643,21 @@ def trans_Difference(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
+
+    sqlIndex1 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_0}_wkb_geometry_geom_idx" on {schema}."{table_source_0}" USING gist (wkb_geometry);').format(
+        table_source_0 = sql.SQL(table_name_source_0),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    
+    cur.execute(sqlIndex1)
+    conn.commit()
+
+    sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
+        table_source_1 = sql.SQL(table_name_source_1),
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    
+    cur.execute(sqlIndex2)
+    conn.commit()
+
     sqlDiff = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ', ST_Difference( st_makevalid(A0.wkb_geometry), st_union(st_makevalid(A1.wkb_geometry))) as wkb_geometry from '
     sqlDiff += '{schema}.{table_source_0} AS A0, {schema}.{table_source_1}  AS A1 '
     sqlDiff += 'GROUP BY '+ schema+' A0.wkb_geometry)'
@@ -3674,4 +3726,82 @@ def input_PadronAlbacete(dicc):
     db.dispose()
 
     return [table_name]
+
+
+def crea_Grid(dicc):
+
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+
+    gridFunction = sql.SQL("""
+                        CREATE OR REPLACE FUNCTION ST_CreateGrid(
+                            nrow integer, ncol integer,
+                            xsize float8, ysize float8,
+                            x0 float8 DEFAULT 0, y0 float8 DEFAULT 0,
+                            OUT "row" integer, OUT col integer,
+                            OUT geom geometry)
+                        RETURNS SETOF record AS
+                    $$
+                    SELECT i + 1 AS row, j + 1 AS col, ST_Translate(cell, j * $3 + $5, i * $4 + $6) AS geom
+                    FROM generate_series(0, $1 - 1) AS i,
+                        generate_series(0, $2 - 1) AS j,
+                    (
+                    SELECT ('POLYGON((0 0, 0 '||$4||', '||$3||' '||$4||', '||$3||' 0,0 0))')::geometry AS cell
+                    ) AS foo;
+                    $$ LANGUAGE sql IMMUTABLE STRICT;
+            """)
+
+    cur.execute(gridFunction)
+    conn.commit()
+
+    sqlGrid = "CREATE TABLE {schema}.{table_target} AS (SELECT row as _row, col as _column, st_setsrid(geom, %s) as wkb_geometry "
+    sqlGrid += "FROM ST_CreateGrid(%s, %s, %s, %s, %s, %s))"
+    
+    sql_ = sql.SQL(sqlGrid).format(
+        schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target)
+    )
+    
+    if dicc['create'] == 'Coordinates':
+
+        cur.execute(sql_, [dicc['epsg'], dicc['rows'], dicc['columns'], dicc['width'], dicc['height'], dicc['init-x'], dicc['init-y']])
+        conn.commit()
+
+    elif dicc['create'] == 'Extent':
+        table_name_source = dicc['data'][0]
+
+        sqlExtent = sql.SQL("SELECT ST_Extent(wkb_geometry) FROM {schema}.{tbl_source}").format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_source = sql.Identifier(table_name_source)
+        )
+
+        cur.execute(sqlExtent)
+        conn.commit()
+
+        for row in cur:
+            coords = row[0][4:-1].split(',')
+            xmin, ymin, xmax, ymax = float(coords[0].split(' ')[0]), float(coords[0].split(' ')[1]), float(coords[1].split(' ')[0]), float(coords[1].split(' ')[1])
+
+        columns = math.ceil((xmax - xmin) / float(dicc['width']))
+
+        rows = math.ceil((ymax - ymin) / float(dicc['height']))
+
+        srid, type_geom = get_type_n_srid(table_name_source)
+
+        cur.execute(sql_, [srid, rows, columns, dicc['width'], dicc['height'], xmin, ymin])
+        conn.commit()
+    
+    conn.close()
+    cur.close()
+
+    return[table_name_target]
     
