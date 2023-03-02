@@ -1007,7 +1007,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                     "get_entities-list": get_,
                     "get_types-list": get_types,
                     "domain": $('#domain-'+ID).val(),
-                    "entities-list": [$('#entities-list-'+ID).val(), $( "#entities-list-"+ID+" option:selected" ).text()],
+                    "entities-list": [$('#entities-list-'+ID).val(), $("#entities-list-"+ID+" option:selected" ).text()],
                     "user": $('#user-'+ID).val(),
                     "password": $('#password-'+ID).val(),
                     "types-list": $('#types-list-'+ID).val(),
@@ -1020,7 +1020,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 }
             ]};
 
-            data = ['IdGeorreferencia', 'Operacion', 'Descripcion', 'Observaciones', 'Latitud', 'Longitud', 'TipoReferenciaCatastral', 
+            data = ['TipoGeorreferencia', 'IdGeorreferencia', 'Operacion', 'Descripcion', 'Observaciones', 'Latitud', 'Longitud', 'TipoReferenciaCatastral', 
                     'ReferenciaCatastral', 'IneMunicipioDireccion', 'ViaDireccion', 'NumeroViaDireccion', 'RestoDireccion',
                     'CodigoExpediente', 'TituloExpediente', 'UrlExpediente', 'EstadoExpediente', 'DescripcionEstadoExpediente',
                     'EstadoFinalizadoExpediente', 'DescripcionEstadoFinalizadoExpediente', 'ProcedimientoExpediente',

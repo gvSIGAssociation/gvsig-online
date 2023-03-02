@@ -88,7 +88,7 @@ def run_canvas_background(**kwargs):
         if params:
             if len(params['sql-before']) > 0:
                 executeSQL(params['db'], params['sql-before'])
-
+        
         #going down the sorted list of tasks and executing them
         for s in sortedList:
             for n in nodes:
