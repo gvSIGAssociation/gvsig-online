@@ -970,10 +970,28 @@ def get_workspace_parameters(request):
         if ws.parameters:
 
             response = json.loads(ws.parameters)
+            try:
+                response['json-user-params'] = json.dumps(response['json-user-params'])
+            except:
+                response['json-user-params'] = json.dumps({})
         else:
             response = {"db": "", 
                         "sql-before": "", 
-                        "sql-after": ""}
+                        "sql-after": "",
+                        "json-user-params": json.dumps({}),
+                        "checkbox-user-params": "",
+                        "get_loop-user-params": [],
+                        "loop-user-params": "",
+                        "radio-params-user": "",
+                        "init-loop-integer-user-params": 0,
+                        "end-loop-integer-user-params": 0,
+                        "get_schema-name-user-params": [],
+                        "schema-name-user-params": "",
+                        "get_table-name-user-params": [],
+                        "table-name-user-params": "",
+                        "get_attr-name-user-params": [],
+                        "attr-name-user-params": ""
+                        }
 
         response['dbcs'] = []
 
@@ -995,7 +1013,25 @@ def set_workspace_parameters(request):
         sql_before = request.POST['sql-before'].splitlines()
         sql_after = request.POST['sql-after'].splitlines()
 
-        params = '{"db": "'+request.POST['db']+'", "sql-before": '+str(sql_before).replace("'", '"')+', "sql-after": '+str(sql_after).replace("'", '"')+'}'
+        
+
+        params = '{"db": "'+request.POST['db']
+        params +='", "sql-before": '+str(sql_before).replace("'", '"')
+        params += ', "sql-after": '+str(sql_after).replace("'", '"')
+        params += ', "json-user-params": '+request.POST['json-user-params']
+        params += ', "checkbox-user-params": "'+request.POST['checkbox-user-params']
+        params += '", "get_loop-user-params": ["'+request.POST['get_loop-user-params']
+        params += '"], "loop-user-params": "'+request.POST['loop-user-params']
+        params += '", "radio-params-user": "'+request.POST['radio-params-user']
+        params += '", "init-loop-integer-user-params": '+request.POST['init-loop-integer-user-params']
+        params += ', "end-loop-integer-user-params": '+request.POST['end-loop-integer-user-params']
+        params += ', "get_schema-name-user-params": ["'+request.POST['get_schema-name-user-params']
+        params += '"], "schema-name-user-params": "'+request.POST['schema-name-user-params']
+        params += '", "get_table-name-user-params": ["'+request.POST['get_table-name-user-params']
+        params += '"], "table-name-user-params": "'+request.POST['table-name-user-params']
+        params += '", "get_attr-name-user-params": ["'+request.POST['get_attr-name-user-params']
+        params += '"], "attr-name-user-params": "'+request.POST['attr-name-user-params']
+        params += '"}'
 
         ws.parameters = params
         ws.save()

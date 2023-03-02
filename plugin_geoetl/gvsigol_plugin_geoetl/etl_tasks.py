@@ -3286,6 +3286,8 @@ def trans_Geocoder(dicc):
 
         for row in cur:
 
+            print('----------->row', row)
+
             address_list = []
             for x in range (1, len(row)):
                 if row[x]:
@@ -3413,6 +3415,8 @@ def input_Segex(dicc):
 
     types_list = dicc['types-list']
 
+    types_text_list = dicc['get_types-list']
+
     schema = dicc['schema']
 
     if dicc['domain'] == 'PRE':
@@ -3429,6 +3433,8 @@ def input_Segex(dicc):
     first = True
 
     table_name = dicc['id']
+
+    tpt = 0
 
     for tp in types_list:
 
@@ -3529,7 +3535,10 @@ def input_Segex(dicc):
                         if r.status_code == 200:
                         
                             exp = r_geof.json()
-                            
+                        
+                            exp['TipoGeorreferencia']= types_text_list[tpt][1]
+
+
                             exp['Operacion']= georef['Operacion']
                             
                             df = pd.json_normalize(exp)
@@ -3554,6 +3563,7 @@ def input_Segex(dicc):
 
                         offset += 10
 
+        tpt += 1
     if first:
 
         df = pd.DataFrame(columns = schema)

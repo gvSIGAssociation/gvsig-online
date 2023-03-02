@@ -307,7 +307,7 @@
 		</div>
 	</div>
 
-<!-- Modal to update a workspace-->
+<!-- Modal to set parameters for workspace-->
 <div id="modal-set-parameters-workspace" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -319,7 +319,7 @@
 				<h4 class="modal-title">{% trans "Set parameters for workspace" %}</h4>
 			</div>
 
-			<div class="modal-body">
+			<div class="modal-body" style="max-height: calc(100vh - 225px); overflow: scroll;">
 				<form id="layer-group-form" role="form">
 
 					<div class="row">
@@ -335,20 +335,134 @@
 							<select id="db" class="form-control"></select>
 						</div>
 					</div>
-
-					<div class="row">
-						<div class="col-md-12">
-							<label class="col-form-label">{% trans "SQL before running workspace" %}</a></label>
-							<textarea id="sql-before" rows="3" class="form-control"></textarea>
-						</div>
+					
+					<div>
+						<label class="col-form-label" id ="sql-params">{% trans "SQL Parameters" %} <i id ="img-sql-params" class="fa fa-caret-right"></i> </label>
 					</div>
 
-					<div class="row">
-						<div class="col-md-12">
-							<label class="col-form-label">{% trans "SQL after running workspace" %}</a></label>
-							<textarea id="sql-after" rows="3" class="form-control"></textarea>
+					<div id="more-options-sql" class="more-options">
+
+						<div class="row">
+							<div class="col-md-12">
+								<label class="col-form-label">{% trans "SQL before running workspace" %}</a></label>
+								<textarea id="sql-before" rows="3" class="form-control"></textarea>
+							</div>
 						</div>
-					</div>					
+
+						<div class="row">
+							<div class="col-md-12">
+								<label class="col-form-label">{% trans "SQL after running workspace" %}</a></label>
+								<textarea id="sql-after" rows="3" class="form-control"></textarea>
+							</div>
+						</div>
+					</div>
+					<!----
+					<div>
+						<label class="col-form-label" id ="user-params">{% trans "User Parameters" %} <i id ="img-user-params" class="fa fa-caret-right"></i> </label>
+					</div>
+
+					<div id="more-options-user" class="more-options">
+						<div class="row">
+							<div class="col-md-12">
+								<label class="col-form-label">{% trans "Add user parameter" %}</a></label> 
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-4">
+								<label >{% trans "Name" %}</a></label>
+								<input type="text" id="name-user-params" class="form-control"></input>
+							</div>
+							<div class="col-sm-4">
+								<label >{% trans "Type" %}</a></label>
+									<select class="form-control" id="type-user-params">
+										<option value="VARCHAR"> {% trans "Varchar" %}</option>
+										<option value="INTEGER"> {% trans "Integer" %}</option>
+										<option value="FLOAT"> {% trans "Float" %} </option>
+									</select>
+							</div>
+
+							<div class="col-sm-4">
+								<label >{% trans "Value" %}</a></label>
+								<input type="text" id="value-user-params" class="form-control"></input>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-12">
+								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-user-params"><i class="fa fa-minus" aria-hidden="true"></i></button>
+								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-user-params"><i class="fa fa-plus" aria-hidden="true"></i></button>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<input type="text" id="json-user-params" class="form-control" readonly="readonly" value ="{}"></input>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-12">
+                                <input type="checkbox" id="checkbox-user-params" value = 'False'/>
+                                <label for="checkbox"> {% trans "There are variable parameters (The workspace will be executed in a loop)" %} </label>   							
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-sm-4">
+								<label >{% trans "Variable parameter" %}</a></label>
+								<select class="form-control" id="loop-user-params">
+
+								</select>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-12">
+                                <div class="form-check">
+                                    <input type="radio" name="radio-params-user" class="form-check-input" id="loop-integer-user-params" value="integer">
+                                    <label>{% trans "Integer iterative value from" %}</label> <input type="number" id="init-loop-integer-user-params" value="0" size ="3"/><label>{% trans " to " %} </label> <input type="number" id="end-loop-integer-user-params" value="0" size ="3"/>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="radio-params-user" class="form-check-input" id="loop-postgres-user-params" value="postgres">
+                                    <label>{% trans "Iterative value from a column of a PostgreSQL table" %}</label>
+                                </div>						
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-4">
+								<label class="col-form-label">{% trans "Get schemas" %}</label><br>
+								<a href="#" id="get-schemas" class="btn btn-default btn-sm">{% trans "Get schemas" %}</a>
+							</div>
+							<div class="col-sm-8">
+								<label class="col-form-label">{% trans "Schemas" %}</label>
+								<select id="schema-name-user-params" class="form-control"></select>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-4">
+								<label class="col-form-label">{% trans "Get tables" %}</label><br>
+								<a href="#" id="get-tables" class="btn btn-default btn-sm">{% trans "Get tables" %}</a>
+							</div>
+							<div class="col-sm-8">
+								<label class="col-form-label">{% trans "Tables" %}</label>
+								<select id="table-name-user-params" class="form-control"></select>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-4">
+								<label class="col-form-label">{% trans "Get attributes" %}</label><br>
+								<a href="#" id="get-attrs" class="btn btn-default btn-sm">{% trans "Get attributes" %}</a>
+							</div>
+							<div class="col-sm-8">
+								<label class="col-form-label">{% trans "Attributes" %}</label>
+								<select id="attr-name-user-params" class="form-control"></select>
+							</div>
+						</div>  
+
+					</div>-->
 
 				</form>
 			</div>
@@ -373,6 +487,241 @@
 	$('#submenu-etl').addClass("active");
 
 	username = '{{ user.username }}'
+
+
+	//Parámetros de usuario
+
+	$("#sql-params").click(function(){
+		$("#img-sql-params").toggleClass('fa-caret-right fa-caret-down')
+        $("#more-options-sql").slideToggle("slow");
+        });
+
+	$("#user-params").click(function(){
+		$("#img-user-params").toggleClass('fa-caret-right fa-caret-down')
+		$("#more-options-user").slideToggle("slow");
+	});
+
+
+	$('#add-user-params').click(function(){
+		name = $('#name-user-params').val()
+
+		$('#loop-user-params').append(
+                '<option value="'+name+'">'+name+'</option>'
+            );
+
+		type = $('#type-user-params').val()
+		
+		if (type == 'VARCHAR'){
+
+			value = $('#value-user-params').val()
+
+		}else if (type == 'INTEGER'){
+
+			value = parseInt($('#value-user-params').val())
+
+		} else if (type == 'FLOAT'){
+
+			value = parseFloat($('#value-user-params').val())
+
+		}
+
+		json = JSON.parse($('#json-user-params').val())
+
+		json[name] = value;
+
+		jsonString = JSON.stringify(json);
+
+		$('#json-user-params').val(jsonString);
+
+	})
+
+	$('#quit-user-params').click(function(){
+		name = $('#name-user-params').val()
+		json = JSON.parse($('#json-user-params').val())
+
+		if (name != ''){
+
+			delete json[name]
+
+			$("#loop-user-params option[value='"+name+"']").remove();
+
+		} else {
+			keys = Object.keys(json)
+			delete json[keys[keys.length-1]]
+
+			$("#loop-user-params").find("option:last").remove();
+
+		}
+
+		jsonString = JSON.stringify(json);
+		$('#json-user-params').val(jsonString);
+
+	});
+
+	$('#checkbox-user-params').change(function(){
+
+		if ($('#checkbox-user-params').is(':checked')){
+
+			$('#checkbox-user-params').val('True')
+					
+			$("#loop-user-params").prop('disabled', false)
+			$('[name = "radio-params-user"]').prop('disabled', false)
+			$("#init-loop-integer-user-params").prop('disabled', false)
+			$("#end-loop-integer-user-params").prop('disabled', false)
+			$("#get-schemas").removeClass('disabled')
+			$("#schema-name-user-params").prop('disabled', false)
+			$("#get-tables").removeClass('disabled')
+			$("#table-name-user-params").prop('disabled', false)
+			$("#get-attrs").removeClass('disabled')
+			$("#attr-name-user-params").prop('disabled', false)
+					
+		}
+
+		else {
+			$('#checkbox-user-params').val('False')
+
+			$("#loop-user-params").prop('disabled', true)
+			$('[name = "radio-params-user"]').prop('disabled', true)
+			$("#init-loop-integer-user-params").prop('disabled', true)
+			$("#end-loop-integer-user-params").prop('disabled', true)
+			$("#get-schemas").addClass('disabled')
+			$("#schema-name-user-params").prop('disabled', true)
+			$("#get-tables").addClass('disabled')
+			$("#table-name-user-params").prop('disabled', true)
+			$("#get-attrs").addClass('disabled')
+			$("#attr-name-user-params").prop('disabled', true)
+		}
+	});
+
+
+	$('input:radio[name = "radio-params-user"]').change(function(){
+
+		if ($('#loop-integer-user-params').is(':checked')){
+
+			$("#init-loop-integer-user-params").prop('disabled', false)
+			$("#end-loop-integer-user-params").prop('disabled', false)
+			$("#get-schemas").addClass('disabled')
+			$("#schema-name-user-params").prop('disabled', true)
+			$("#get-tables").addClass('disabled')
+			$("#table-name-user-params").prop('disabled', true)
+			$("#get-attrs").addClass('disabled')
+			$("#attr-name-user-params").prop('disabled', true)
+
+		}
+		else{
+			$("#init-loop-integer-user-params").prop('disabled', true)
+			$("#end-loop-integer-user-params").prop('disabled', true)
+			$("#get-schemas").removeClass('disabled')
+			$("#schema-name-user-params").prop('disabled', false)
+			$("#get-tables").removeClass('disabled')
+			$("#table-name-user-params").prop('disabled', false)
+			$("#get-attrs").removeClass('disabled')
+			$("#attr-name-user-params").prop('disabled', false)
+
+		}
+
+	})
+
+	$('#get-schemas').on("click", function(){
+                                
+		var paramsGetSchemas = {
+		"parameters": [
+			{"db": $('#db').val()}
+		]}
+
+		var formDataGetSchemas = new FormData();
+		
+		formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
+
+		$.ajax({
+			type: 'POST',
+			url: '/gvsigonline/etl/etl_schemas_name_postgres/',
+			data: formDataGetSchemas,
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			cache: false, 
+			contentType: false, 
+			processData: false,
+			success: function (data) {
+
+				$('#schema-name-user-params').empty()
+
+				for (i = 0; i < data.length; i++){
+					$('#schema-name-user-params').append('<option>'+data[i]+'</option>')
+				}
+			}
+		})
+	});
+
+	$('#get-tables').on("click", function(){
+                                
+		var paramsGetSchemas = {
+		"parameters": [
+			{"db": $('#db').val(),
+			"schema-name": $('#schema-name-user-params').val()}
+		]}
+
+		var formDataGetSchemas = new FormData();
+		
+		formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
+
+		$.ajax({
+			type: 'POST',
+			url: '/gvsigonline/etl/etl_table_name_postgres/',
+			data: formDataGetSchemas,
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			cache: false, 
+			contentType: false, 
+			processData: false,
+			success: function (data) {
+				
+				$('#table-name-user-params').empty()
+
+				for (i = 0; i < data.length; i++){
+					$('#table-name-user-params').append('<option>'+data[i]+'</option>')
+
+				}
+			}
+		})
+	});
+
+	$('#get-attrs').on("click", function(){
+                                
+		var paramsGetAttrs = {
+		"parameters": [
+			{"db": $('#db').val(),
+			"schema-name": $('#schema-name-user-params').val(),
+			"tablename": $('#table-name-user-params').val()}
+		]}
+
+		var formDataGetAttrs = new FormData();
+		
+		formDataGetAttrs.append('jsonParamsPostgres', JSON.stringify(paramsGetAttrs))
+
+		$.ajax({
+			type: 'POST',
+			url: '/gvsigonline/etl/etl_schema_postgresql/',
+			data: formDataGetAttrs,
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			cache: false, 
+			contentType: false, 
+			processData: false,
+			success: function (data) {
+				
+				$('#attr-name-user-params').empty()
+
+				for (i = 0; i < data.length; i++){
+					$('#attr-name-user-params').append('<option>'+data[i]+'</option>')
+
+				}
+			}
+		})
+	});
 
 	$(document).ready(function() {
 		var table = $('#etl-table').DataTable({
@@ -581,6 +930,17 @@
 
 			else if (this.name == "button-set-parameters-workspace"){
 
+				$(".more-options").slideUp("slow");
+				$("#img-sql-params").removeClass('fa-caret-down')
+				$("#img-sql-params").addClass('fa-caret-right')
+
+				$("#img-user-params").removeClass('fa-caret-down')
+				$("#img-user-params").addClass('fa-caret-right')
+
+				$('#name-user-params').val('')
+				$('#type-user-params').val('VARCHAR')
+				$('#value-user-params').val('')
+
 				$(".modal-body #etl_id").val( data[0] );
 
 				$.ajax({
@@ -624,6 +984,136 @@
 
 						$(".modal-body #sql-after").val( sqlafter.replace( /_##_/g, '"').replace( /#--#/g, "'"));
 
+						try{
+
+							json_user_params = response['json-user-params']
+							checkbox_user_params = response['checkbox-user-params']
+							get_loop_user_params = response['get_loop-user-params']
+							loop_user_params = response['loop-user-params']
+							radio_params_user = response['radio-params-user']
+							init_loop_integer_user_params = response['init-loop-integer-user-params']
+							end_loop_integer_user_params = response['end-loop-integer-user-params']
+							get_schema_name_user_params = response['get_schema-name-user-params']
+							schema_name_user_params = response['schema-name-user-params']
+							get_table_name_user_params = response['get_table-name-user-params']
+							table_name_user_params = response['table-name-user-params']
+							get_attr_name_user_params = response['get_attr-name-user-params']
+							attr_name_user_params = response['attr-name-user-params']
+			
+						}catch{
+
+							json_user_params = "{}"
+							checkbox_user_params = ""
+							get_loop_user_params = []
+							loop_user_params = ""
+							radio_params_user = ""
+							init_loop_integer_user_params = 0
+							end_loop_integer_user_params = 0
+							get_schema_name_user_params = []
+							schema_name_user_params = ""
+							get_table_name_user_params = []
+							table_name_user_params = ""
+							get_attr_name_user_params = []
+							attr_name_user_params = ""
+
+						}
+
+						$(".modal-body #json-user-params").val(json_user_params)
+
+						if (checkbox_user_params == 'True'){
+							$('#checkbox-user-params').val('True')
+							$('#checkbox-user-params').prop('checked', true);
+
+							$("#loop-user-params").prop('disabled', false)
+							$('[name = "radio-params-user"]').prop('disabled', false)
+							$("#init-loop-integer-user-params").prop('disabled', false)
+							$("#end-loop-integer-user-params").prop('disabled', false)
+							$("#get-schemas").removeClass('disabled')
+							$("#schema-name-user-params").prop('disabled', false)
+							$("#get-tables").removeClass('disabled')
+							$("#table-name-user-params").prop('disabled', false)
+							$("#get-attrs").removeClass('disabled')
+							$("#attr-name-user-params").prop('disabled', false)
+									
+						}
+
+						else {
+							$('#checkbox-user-params').val('False')
+							$('#checkbox-user-params').prop('checked', false);
+
+							$("#loop-user-params").prop('disabled', true)
+							$('[name = "radio-params-user"]').prop('disabled', true)
+							$("#init-loop-integer-user-params").prop('disabled', true)
+							$("#end-loop-integer-user-params").prop('disabled', true)
+							$("#get-schemas").addClass('disabled')
+							$("#schema-name-user-params").prop('disabled', true)
+							$("#get-tables").addClass('disabled')
+							$("#table-name-user-params").prop('disabled', true)
+							$("#get-attrs").addClass('disabled')
+							$("#attr-name-user-params").prop('disabled', true)
+						};
+/*
+						$('#loop-user-params').empty()
+						for (i = 0; i < get_loop_user_params.length; i++){
+							$('#loop-user-params').append('<option>'+get_loop_user_params[i]+'</option>')
+						};
+						
+						$("#loop-user-params").val(loop_user_params)
+
+						if (radio_params_user == 'integer'){
+
+							$('#loop-integer-user-params').prop('checked', true);
+
+							$("#init-loop-integer-user-params").prop('disabled', false)
+							$("#end-loop-integer-user-params").prop('disabled', false)
+							$("#get-schemas").addClass('disabled')
+							$("#schema-name-user-params").prop('disabled', true)
+							$("#get-tables").addClass('disabled')
+							$("#table-name-user-params").prop('disabled', true)
+							$("#get-attrs").addClass('disabled')
+							$("#attr-name-user-params").prop('disabled', true)
+
+						}else{
+
+							$('#loop-postgres-user-params').prop('checked', true);
+
+							$("#init-loop-integer-user-params").prop('disabled', true)
+							$("#end-loop-integer-user-params").prop('disabled', true)
+							$("#get-schemas").removeClass('disabled')
+							$("#schema-name-user-params").prop('disabled', false)
+							$("#get-tables").removeClass('disabled')
+							$("#table-name-user-params").prop('disabled', false)
+							$("#get-attrs").removeClass('disabled')
+							$("#attr-name-user-params").prop('disabled', false)
+
+						};
+
+						$("#init-loop-integer-user-params").val(init_loop_integer_user_params)
+						$("#end-loop-integer-user-params").val(end_loop_integer_user_params)
+
+						
+						
+						$('#schema-name-user-params').empty()
+						for (i = 0; i < get_schema_name_user_params.length; i++){
+							$('#schema-name-user-params').append('<option>'+get_schema_name_user_params[i]+'</option>')
+						};
+						
+						$("#schema-name-user-params").val(schema_name_user_params)
+
+						$('#table-name-user-params').empty()
+						for (i = 0; i < get_table_name_user_params.length; i++){
+							$('#table-name-user-params').append('<option>'+get_table_name_user_params[i]+'</option>')
+						};
+						
+						$("#table-name-user-params").val(table_name_user_params)
+
+						$('#attr-name-user-params').empty()
+						for (i = 0; i < get_attr_name_user_params.length; i++){
+							$('#attr-name-user-params').append('<option>'+get_attr_name_user_params[i]+'</option>')
+						};
+						
+						$("#attr-name-user-params").val(attr_name_user_params)*/
+
 						$('#modal-set-parameters-workspace').modal('show')
 					},
 					error: function(){}
@@ -636,26 +1126,76 @@
 
 		$('#set-parameters').on('click', function (){
 
-		$.ajax({
-				type: 'POST',
-				async: false,
-				data:{
-					"id": $(".modal-body #etl_id").val(),
-					"db": $(".modal-body #db").val(),
-					"sql-before": $(".modal-body #sql-before").val().replace(/"/g, '_##_').replace(/'/g, '#--#'),
-					"sql-after": $(".modal-body #sql-after").val().replace(/"/g, '_##_').replace(/'/g, '#--#')
-				},
-				url: '/gvsigonline/etl/set_workspace_parameters/',
-				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-				success	:function(response){
+			var get_loop = []
+			var get_sch = []
+			var get_tbl = []
+			var get_attr = []
 
-					$('#modal-set-parameters-workspace').modal('hide')
+			$("#loop-user-params option").each(function()
+				{
+					get_loop.push($(this).val())
+				});
 
-				},
-				error: function(){}
+			$("#schema-name-user-params option").each(function()
+			{
+				get_sch.push($(this).val())
 			});
+
+			$("#table-name-user-params option").each(function()
+			{
+				get_tbl.push($(this).val())
+			});
+
+			$("#attr-name-user-params option").each(function()
+			{
+				get_attr.push($(this).val())
+			});
+
+			if ($('#loop-integer-user-params').is(':checked')){
+				radio = 'integer'
+			}else{
+				radio = 'postgres'
+			}
+
+
+			params = {
+						"id": $(".modal-body #etl_id").val(),
+						"db": $(".modal-body #db").val(),
+						"sql-before": $(".modal-body #sql-before").val().replace(/"/g, '_##_').replace(/'/g, '#--#'),
+						"sql-after": $(".modal-body #sql-after").val().replace(/"/g, '_##_').replace(/'/g, '#--#'),
+						"json-user-params": $(".modal-body #json-user-params").val(),
+						"checkbox-user-params": $(".modal-body #checkbox-user-params").val(),
+						"get_loop-user-params": get_loop.join('","'),
+						"loop-user-params": $(".modal-body #loop-user-params").val(),
+						"radio-params-user": radio,
+						"init-loop-integer-user-params": $(".modal-body #init-loop-integer-user-params").val(),
+						"end-loop-integer-user-params": $(".modal-body #end-loop-integer-user-params").val(),
+						"get_schema-name-user-params": get_sch.join('","'),
+						"schema-name-user-params": $(".modal-body #schema-name-user-params").val(),
+						"get_table-name-user-params": get_tbl.join('","'),
+						"table-name-user-params": $(".modal-body #table-name-user-params").val(),
+						"get_attr-name-user-params": get_attr.join('","'),
+						"attr-name-user-params": $(".modal-body #attr-name-user-params").val(),
+						
+					}
+
+					console.log(params)
+
+			$.ajax({
+					type: 'POST',
+					async: false,
+					data: params,
+					url: '/gvsigonline/etl/set_workspace_parameters/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success	:function(response){
+
+						$('#modal-set-parameters-workspace').modal('hide')
+
+					},
+					error: function(){}
+				});
 
 		});
 
