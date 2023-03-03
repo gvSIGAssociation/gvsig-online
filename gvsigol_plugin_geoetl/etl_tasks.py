@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
-from html import entities
-from operator import add
-from ossaudiodev import SNDCTL_DSP_GETCHANNELMASK
 from gvsigol import settings
 from .settings import URL_GEOCODER
 
@@ -819,6 +816,8 @@ def output_Postgis(dicc):
                 
                 attr_source = attr_source[:-2] + ')'
 
+                cur_2.close()
+
                 sqlInsert_ = 'INSERT INTO {sch_target}.{tbl_target} {attrs_target} SELECT {attrs_source} FROM {sch_source}.{tbl_source} '
                 
                 sqlInsert = sql.SQL(sqlInsert_).format(
@@ -836,6 +835,10 @@ def output_Postgis(dicc):
 
                 cur.execute(sqlInsert)
                 con_source.commit()
+
+                con_source.close()
+                cur.close()
+                
 
             #insert en diferente servidor o bddd
             else:
@@ -3538,7 +3541,6 @@ def input_Segex(dicc):
                         
                             exp['TipoGeorreferencia']= types_text_list[tpt][1]
 
-
                             exp['Operacion']= georef['Operacion']
                             
                             df = pd.json_normalize(exp)
@@ -3565,9 +3567,11 @@ def input_Segex(dicc):
 
         tpt += 1
     if first:
-
         df = pd.DataFrame(columns = schema)
         df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+
+    conn.close()
+    db.dispose()
 
     return [table_name]
 
