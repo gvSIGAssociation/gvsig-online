@@ -13,6 +13,7 @@ import psycopg2
 from psycopg2 import sql
 import json
 from datetime import date, datetime, timedelta
+import copy
 
 logger = get_task_logger(__name__)
 
@@ -82,87 +83,119 @@ def run_canvas_background(**kwargs):
     tables_list_name =[]
 
     move = []
+
+    loop_list = [0]
     
     try:
 
-        if params:
+        if params and not statusModel.name.startswith('current_canvas'):
             if len(params['sql-before']) > 0:
                 executeSQL(params['db'], params['sql-before'])
         
-        #going down the sorted list of tasks and executing them
-        for s in sortedList:
-            for n in nodes:
-                if s == n[0]:
-                    
-                    #get parameters for the task
-                    try:
-                        parameters = n[1]['entities'][0]['parameters'][0]
-                        parameters['id'] = n[1]['id']
-                        tables_list_name.append(n[1]['id'])
+            if params['checkbox-user-params'] == 'True':
+
+                if params['radio-params-user'] == 'integer':
+                    loop_list = [*range(params['init-loop-integer-user-params'], params['end-loop-integer-user-params']+1, 1)]
+                elif params['radio-params-user'] == 'postgres':
+                    loop_list = getLoopListFromPostgres(params)
+
+            json_user_params = params['json-user-params']
+
+        for iter_value in loop_list:
+
+            if params and not statusModel.name.startswith('current_canvas'):
+                print('Valor del parámetro de usuario variable: '+str(iter_value))
+                if params['checkbox-user-params'] == 'True':
+                    json_user_params[params['loop-user-params']] = iter_value
+
+            #going down the sorted list of tasks and executing them
+            for s in sortedList:
+                for n in nodes:
+                    if s == n[0]:
                         
-                    except:
-                        parameters = {}
-                    
-                    print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
-                    #execute input task
-                    if n[1]['type'].startswith('input'):
+                        #get parameters for the task
+                        try:
+                            parameters_copy = n[1]['entities'][0]['parameters'][0]
+                            parameters_copy['id'] = n[1]['id']
+                            tables_list_name.append(n[1]['id'])
+                            
+                        except:
+                            parameters_copy = {}
 
-                        if 'move' in parameters:
-                            if parameters['move'] != '':
-                                move.append(n[1])
+                        parameters = copy.deepcopy(parameters_copy)
 
-                        method_to_call = getattr(etl_tasks, n[1]['type'])
-                        result = method_to_call(parameters)
-                        n.append(result)
-                        tables_list_name.append(result)
-                    
-                    #execute trasnformers or outputs tasks    
-                    else:
+                        if params and not statusModel.name.startswith('current_canvas'):
+                            if json_user_params !={}:
+                                for key in json_user_params:
+                                    for key2 in parameters:
+                                        if isinstance(parameters[key2], list):
+                                            for x in range (0, len(parameters[key2])):
+                                                if '@@'+key+'@@' in parameters[key2][x]:
+                                                    parameters[key2][x] = parameters[key2][x].replace('@@'+key+'@@', json_user_params[key])
+                                        else:
+                                            if '@@'+key+'@@' in parameters[key2]:
+                                                parameters[key2] = parameters[key2].replace('@@'+key+'@@', json_user_params[key])
                         
-                        for ip in n[1]['ports']:
-                            if ip['name'].startswith('input'):
-                                
-                                targetPort = ip['name']
-                                targetPortRepeated = False
-                                for e in edges:
-                                    if e['target']['port'] == targetPort:
+                        print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
+                        #execute input task
+                        if n[1]['type'].startswith('input'):
 
-                                        sourceNode = e['source']['node']
-                                        sourcePort = e['source']['port']
-                                        
-                                        for nd in nodes:
-                                            if nd[1]['id'] == sourceNode:
-                                                
-                                                outputPortCounter=-1
-                                                for op in nd[1]['ports']:
-                                                    
-                                                    if op['name'].startswith('output'):
-                                                        outputPortCounter+=1
-                                                    if op['name']== sourcePort:
-                                                        break
-                                                if 'data' in parameters:
-                                                    parameters['data'].append(nd[2][outputPortCounter])
-                                                else:
-                                                    parameters['data'] = [nd[2][outputPortCounter]]
-                                                    
-                                                break
-                                        
-                                        #if more than one edge have the end in the same port
-                                        if targetPortRepeated == True:
-                                            
-                                            result = etl_tasks.merge_tables(parameters['data'])
-                                            parameters['data'] = result
-                                            tables_list_name.append(result)
-                                        
-                                        targetPortRepeated = True      
+                            if 'move' in parameters:
+                                if parameters['move'] != '':
+                                    move.append(n[1])
 
-                        method_to_call = getattr(etl_tasks, n[1]['type'])
-                        parameters['id'] = n[1]['id']
-                        result = method_to_call(parameters)
-                        tables_list_name.append(result)
-                        
-                        if not n[1]['type'].startswith('output'):
+                            method_to_call = getattr(etl_tasks, n[1]['type'])
+                            result = method_to_call(parameters)
                             n.append(result)
+                            tables_list_name.append(result)
+                        
+                        #execute trasnformers or outputs tasks    
+                        else:
+                            
+                            for ip in n[1]['ports']:
+                                if ip['name'].startswith('input'):
+                                    
+                                    targetPort = ip['name']
+                                    targetPortRepeated = False
+                                    for e in edges:
+                                        if e['target']['port'] == targetPort:
+
+                                            sourceNode = e['source']['node']
+                                            sourcePort = e['source']['port']
+                                            
+                                            for nd in nodes:
+                                                if nd[1]['id'] == sourceNode:
+                                                    
+                                                    outputPortCounter=-1
+                                                    for op in nd[1]['ports']:
+                                                        
+                                                        if op['name'].startswith('output'):
+                                                            outputPortCounter+=1
+                                                        if op['name']== sourcePort:
+                                                            break
+                                                    if 'data' in parameters:
+                                                        parameters['data'].append(nd[2][outputPortCounter])
+                                                    else:
+                                                        parameters['data'] = [nd[2][outputPortCounter]]
+                                                        
+                                                    break
+                                            
+                                            #if more than one edge have the end in the same port
+                                            if targetPortRepeated == True:
+                                                
+                                                result = etl_tasks.merge_tables(parameters['data'])
+                                                parameters['data'] = result
+                                                tables_list_name.append(result)
+                                            
+                                            targetPortRepeated = True      
+
+                            method_to_call = getattr(etl_tasks, n[1]['type'])
+                            parameters['id'] = n[1]['id']
+                            result = method_to_call(parameters)
+                            tables_list_name.append(result)
+                            
+                            if not n[1]['type'].startswith('output'):
+                                n.append(result)
         
         if move:
             for m in move:
@@ -353,3 +386,32 @@ def periodic_cadastral_requests():
 
         except:
             pass
+
+
+def getLoopListFromPostgres(params):
+    
+    db_model  = database_connections.objects.get(name = params['db'])
+
+    params_str = db_model.connection_params
+    connection_params = json.loads(params_str)
+
+    connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
+    cursor = connection.cursor()
+
+    sql_ = sql.SQL("SELECT {column} FROM {schema}.{table};").format(
+        column = sql.Identifier(params['attr-name-user-params']),
+        schema = sql.Identifier(params['schema-name-user-params']),
+        table = sql.Identifier(params['table-name-user-params']),
+    )
+
+    loopList = []
+    cursor.execute(sql_)
+    connection.commit()
+
+    for value in cursor:
+        loopList.append(value[0])
+    
+    connection.close()
+    cursor.close()
+
+    return loopList
