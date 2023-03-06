@@ -263,10 +263,8 @@ msgid "DB Connection"
 msgstr "Conexión BBDD"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:340
-#, fuzzy
-#| msgid "Set parameters"
 msgid "SQL Parameters"
-msgstr "Establece parámetros"
+msgstr "Parámetros SQL"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:347
 msgid "SQL before running workspace"
