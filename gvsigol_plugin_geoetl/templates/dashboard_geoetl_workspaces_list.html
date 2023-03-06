@@ -984,39 +984,59 @@
 
 						$(".modal-body #sql-after").val( sqlafter.replace( /_##_/g, '"').replace( /#--#/g, "'"));
 
-						try{
-
-							json_user_params = response['json-user-params']
-							checkbox_user_params = response['checkbox-user-params']
-							get_loop_user_params = response['get_loop-user-params']
-							loop_user_params = response['loop-user-params']
-							radio_params_user = response['radio-params-user']
-							init_loop_integer_user_params = response['init-loop-integer-user-params']
-							end_loop_integer_user_params = response['end-loop-integer-user-params']
-							get_schema_name_user_params = response['get_schema-name-user-params']
-							schema_name_user_params = response['schema-name-user-params']
-							get_table_name_user_params = response['get_table-name-user-params']
-							table_name_user_params = response['table-name-user-params']
-							get_attr_name_user_params = response['get_attr-name-user-params']
-							attr_name_user_params = response['attr-name-user-params']
-			
-						}catch{
-
+						json_user_params = response['json-user-params']
+						if (json_user_params == undefined){
 							json_user_params = "{}"
+						};
+						checkbox_user_params = response['checkbox-user-params']
+						if (checkbox_user_params == undefined){
 							checkbox_user_params = ""
+						};
+						get_loop_user_params = response['get_loop-user-params']
+						if (get_loop_user_params == undefined){
 							get_loop_user_params = []
+						};
+						loop_user_params = response['loop-user-params']
+						if (loop_user_params == undefined){
 							loop_user_params = ""
+						};
+						radio_params_user = response['radio-params-user']
+						if (radio_params_user == undefined){
 							radio_params_user = ""
+						};
+						init_loop_integer_user_params = response['init-loop-integer-user-params']
+						if (init_loop_integer_user_params == undefined){
 							init_loop_integer_user_params = 0
+						};
+						end_loop_integer_user_params = response['end-loop-integer-user-params']
+						if (end_loop_integer_user_params == undefined){
 							end_loop_integer_user_params = 0
+						};
+						get_schema_name_user_params = response['get_schema-name-user-params']
+						if (get_schema_name_user_params == undefined){
 							get_schema_name_user_params = []
+						};
+						schema_name_user_params = response['schema-name-user-params']
+						if (schema_name_user_params == undefined){
 							schema_name_user_params = ""
+						};
+						get_table_name_user_params = response['get_table-name-user-params']
+						if (get_table_name_user_params == undefined){
 							get_table_name_user_params = []
+						};
+						table_name_user_params = response['table-name-user-params']
+						if (table_name_user_params == undefined){
 							table_name_user_params = ""
+						};
+						get_attr_name_user_params = response['get_attr-name-user-params']
+						if (get_attr_name_user_params == undefined){
 							get_attr_name_user_params = []
+						};
+						attr_name_user_params = response['attr-name-user-params']
+						if (attr_name_user_params == undefined){
 							attr_name_user_params = ""
-
-						}
+						};
+			
 
 						$(".modal-body #json-user-params").val(json_user_params)
 

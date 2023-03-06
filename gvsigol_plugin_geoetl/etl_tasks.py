@@ -2523,11 +2523,12 @@ def trans_ConcatAttr(dicc):
 def trans_Intersection(dicc):
 
     table_name_source_0 = dicc['data'][0]
-    table_name_source_1 = dicc['data'][1]
 
     table_name_target = dicc['id']
 
     merge = dicc['merge']
+
+    self_int = dicc['self-intersect']
 
     schemas = dicc['schema']
 
@@ -2570,28 +2571,61 @@ def trans_Intersection(dicc):
     cur.execute(sqlIndex1)
     conn.commit()
 
-    sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
-        table_source_1 = sql.SQL(table_name_source_1),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+    if self_int == '':
+
+        table_name_source_1 = dicc['data'][1]
+
+        sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
+            table_source_1 = sql.SQL(table_name_source_1),
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+        
+        cur.execute(sqlIndex2)
+        conn.commit()
+
+        sqlInter = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ', st_intersection( st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) as wkb_geometry from '
+        sqlInter += '{schema}.{table_source_0} AS A0, {schema}.{table_source_1}  AS A1 '
+        sqlInter += 'WHERE st_intersects(st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) = true)'
+
     
-    cur.execute(sqlIndex2)
-    conn.commit()
+        sql_ = sql.SQL(sqlInter).format(
+            schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target),
+            *[sql.Identifier(field) for field in attrs],
+            table_source_0 = sql.Identifier(table_name_source_0),
+            table_source_1 = sql.Identifier(table_name_source_1)
+        )
 
-    sqlInter = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ', st_intersection( st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) as wkb_geometry from '
-    sqlInter += '{schema}.{table_source_0} AS A0, {schema}.{table_source_1}  AS A1 '
-    sqlInter += 'WHERE st_intersects(st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) = true)'
+        cur.execute(sql_)
+        conn.commit()
+    else:
+        sqlAdd = sql.SQL('ALTER TABLE {schema}.{table_source} ADD COLUMN "_id_temp" SERIAL').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_source = sql.Identifier(table_name_source_0))
+        
+        cur.execute(sqlAdd)
+        conn.commit()
 
-   
-    sql_ = sql.SQL(sqlInter).format(
-        schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
-        table_target = sql.Identifier(table_name_target),
-        *[sql.Identifier(field) for field in attrs],
-        table_source_0 = sql.Identifier(table_name_source_0),
-        table_source_1 = sql.Identifier(table_name_source_1)
-    )
 
-    cur.execute(sql_)
-    conn.commit()
+        sqlInter = 'create table {schema}.{table_target} as (select '+ schema[:-1] + ', A0._id_temp, A1._id_temp AS _id_temp_2, st_intersection( st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) as wkb_geometry from '
+        sqlInter += '{schema}.{table_source_0} AS A0, {schema}.{table_source_0}  AS A1 '
+        sqlInter += 'WHERE st_intersects(st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) = true AND A0._id_temp < A1._id_temp)'
+
+        sql_ = sql.SQL(sqlInter).format(
+            schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_target = sql.Identifier(table_name_target),
+            *[sql.Identifier(field) for field in attrs],
+            table_source_0 = sql.Identifier(table_name_source_0),
+        )
+
+        cur.execute(sql_)
+        conn.commit()
+
+        sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp, DROP COLUMN _id_temp_2;').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target))
+
+        cur.execute(sqlDropCol)
+        conn.commit()
 
     conn.close()
     cur.close()

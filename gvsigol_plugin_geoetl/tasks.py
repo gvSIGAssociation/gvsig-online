@@ -84,7 +84,7 @@ def run_canvas_background(**kwargs):
 
     move = []
 
-    loop_list = [0]
+    loop_list = ['sin parámetro de usuario']
     
     try:
 
@@ -105,7 +105,7 @@ def run_canvas_background(**kwargs):
 
             if params and not statusModel.name.startswith('current_canvas'):
                 print('Valor del parámetro de usuario variable: '+str(iter_value))
-                if params['checkbox-user-params'] == 'True':
+                if params['checkbox-user-params'] == 'True':                    
                     json_user_params[params['loop-user-params']] = iter_value
 
             #going down the sorted list of tasks and executing them
@@ -131,11 +131,13 @@ def run_canvas_background(**kwargs):
                                         if isinstance(parameters[key2], list):
                                             for x in range (0, len(parameters[key2])):
                                                 if '@@'+key+'@@' in parameters[key2][x]:
-                                                    parameters[key2][x] = parameters[key2][x].replace('@@'+key+'@@', json_user_params[key])
+                                                    parameters[key2][x] = parameters[key2][x].replace('@@'+key+'@@', str(json_user_params[key]))
                                         else:
                                             if '@@'+key+'@@' in parameters[key2]:
-                                                parameters[key2] = parameters[key2].replace('@@'+key+'@@', json_user_params[key])
-                        
+                                                parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))
+                        if n[1]['type'].startswith('trans_Filter'):
+                            print(parameters)
+
                         print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
                         #execute input task
                         if n[1]['type'].startswith('input'):
