@@ -928,3 +928,6 @@ msgstr "X inicial"
 
 msgid "Initial Y"
 msgstr "Y inicial"
+
+msgid "Self intersect layer (Use only data from main input)"
+msgstr "Autointersecta capa (Utiliza solo los datos de la entrada principal)"

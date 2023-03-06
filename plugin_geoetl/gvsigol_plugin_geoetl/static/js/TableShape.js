@@ -8028,6 +8028,10 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div>'+
+                                '<input type="checkbox" name="merge" id="self-intersect-'+ID+'" value=""/>'+
+                                '<label for="checkbox">'+gettext('Self intersect layer (Use only data from main input)')+'</label>'+                         
+                            '</div>'+
+                            '<div>'+
                                 '<input type="checkbox" name="merge" id="merge-'+ID+'" value=""/>'+
                                 '<label for="checkbox">'+gettext('Merge attributes of the secondary input to the final output')+'</label>'+                         
                             '</div>'+
@@ -8041,7 +8045,31 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-      var context = this
+        var context = this
+
+        $("#self-intersect-"+ID).change(function() {
+            if ($('#self-intersect-'+ID).is(':checked')) {
+                $('#self-intersect-'+ID).val('true')
+                $('#merge-'+ID).val('')
+                $('#merge-'+ID).prop('checked', false)
+                $('#merge-'+ID).prop('disabled', true)
+            }else{
+                $('#self-intersect-'+ID).val('')
+                $('#merge-'+ID).prop('disabled', false)
+            }
+        });
+
+        $("#merge-"+ID).change(function() {
+            if ($('#merge-'+ID).is(':checked')) {
+                $('#merge-'+ID).val('true')
+                $('#self-intersect-'+ID).val('')
+                $('#self-intersect-'+ID).prop('checked', false)
+                $('#self-intersect-'+ID).prop('disabled', true)
+            }else{
+                $('#merge-'+ID).val('')
+                $('#self-intersect-'+ID).prop('disabled', false)
+            }
+        });
 
         icon.on("click", function(){
             setTimeout(function(){
@@ -8063,6 +8091,13 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
         });
 
         $('#intersection-accept-'+ID).click(function() {
+
+
+            if ($('#self-intersect-'+ID).is(':checked')) {
+                $('#self-intersect-'+ID).val('true')
+            }else{
+                $('#self-intersect-'+ID).val('')
+            }
 
             if ($('#merge-'+ID).is(':checked')) {
                 $('#merge-'+ID).val('true')
@@ -8096,8 +8131,9 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
 
             var paramsInter = {"id": ID,
             "parameters": [
-            {"merge": $('#merge-'+ID).val(),
-            "schema": schemaEdge}
+                {"self-intersect": $('#self-intersect-'+ID).val(),
+                "merge": $('#merge-'+ID).val(),
+                "schema": schemaEdge}
             ]}
 
             paramsInter['schema-old'] = schemaEdge

@@ -927,3 +927,6 @@ msgstr ""
 
 msgid "Initial Y"
 msgstr ""
+
+msgid "Self intersect layer (Use only data from main input)"
+msgstr ""
