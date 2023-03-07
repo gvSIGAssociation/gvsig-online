@@ -910,9 +910,9 @@ class RequestError(Exception):
 
     def __str__(self):
         if self.message:
-            return self.message
+            return str(self.message)
         else:
-            return self.server_message
+            return str(self.server_message)
 
     def set_message(self, message):
         self.message = message

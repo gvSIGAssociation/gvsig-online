@@ -58,6 +58,7 @@ from django.utils.html import escape, strip_tags
 import threading
 from . import geographic_servers
 from requests.exceptions import RetryError, ConnectionError, Timeout, TooManyRedirects
+import psycopg2.errors
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -1084,6 +1085,21 @@ class Geoserver():
             print("__update_raster_stats failed!!")
             print(e)
             pass
+    
+    def __columntypes_ogr(self, dbf_field_defs):
+        col_types = ""
+        for field in dbf_field_defs:
+            if _valid_sql_name_regex.search(field.name) == None:
+                raise InvalidValue(-1, _("Invalid field name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=field.name))
+            if field.type == 'N' and field.decimal_count == 0 and field.length > 18:
+                col_types += self.__quote_identifier_ogr_column_types(field.name) + "=numeric(" + str(field.length) + "," + str(field.decimal_count) + ")"
+        return col_types
+    
+    def __quote_identifier_ogr(self, field_name):
+        return '"' + field_name.replace('\\', '\\\\').replace('"', '\\"') + '"'
+
+    def __quote_identifier_ogr_column_types(self, field_name):
+        return field_name.replace('\\', '\\\\').replace('"', '\\"')
 
     def __fieldmapping_sql(self, creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password):
         if creation_mode == forms_geoserver.MODE_CREATE:
@@ -1091,9 +1107,13 @@ class Geoserver():
             return
         
         i = Introspect(db, host=host, port=port, user=user, password=password)
-        db_fields = i.get_fields(table_name, schema=schema)
-        db_pks = i.get_pk_columns(table_name, schema=schema)
-        i.close()
+        with i as c:
+            try:
+                db_fields = c.get_fields(table_name, schema=schema)
+                db_pks = c.get_pk_columns(table_name, schema=schema)
+            except psycopg2.errors.UndefinedTable as e:
+                raise rest_geoserver.RequestError(-1, _('Overwrite or append was specified but the table does not exist: {0}'.format(table_name)))
+
         if len(db_pks) == 1:
             db_pk = db_pks[0]
         else:
@@ -1111,7 +1131,7 @@ class Geoserver():
         pending = []
         for f in shp_fields:
             if f == pk:
-                fields.append('"' + f + '" as ogc_fid')
+                fields.append(self.__quote_identifier_ogr(f) + ' as ogc_fid')
             elif f in db_fields:
                 ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == f), None)
                 if ctrl_field:
@@ -1121,7 +1141,7 @@ class Geoserver():
                     elif ctrl_field.get('type', '').startswith('timestamp'):
                         fields.append('CAST("' + f + '" AS timestamp)')
                         continue
-                fields.append('"' + f + '"')
+                fields.append(self.__quote_identifier_ogr(f))
             else:
                 pending.append(f)
         
@@ -1146,19 +1166,19 @@ class Geoserver():
                         # skip control field in append mode
                         continue
                     elif ctrl_field.get('type', '').startswith('timestamp'):
-                        fields.append('CAST("' + f + '" AS timestamp) as "' + db_mapped_field + '"')
+                        fields.append('CAST(' + self.__quote_identifier_ogr(f) + ' AS timestamp) as "' + db_mapped_field + '"')
                         db_fields.remove(db_mapped_field)
                         continue
-                fields.append('"' + f + '" as "' + db_mapped_field + '"')
+                fields.append(self.__quote_identifier_ogr(f)  + ' as "' + db_mapped_field + '"')
                 db_fields.remove(db_mapped_field)
             else:
-                fields.append('"' + f + '"')
+                fields.append(self.__quote_identifier_ogr(f))
         
         shp_name = os.path.splitext(os.path.basename(shp_path))[0]
         sql = "SELECT " + ",".join(fields) + " FROM " + shp_name
         return sql
     
-    def shp2postgis(self, shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=forms_geoserver.MODE_CREATE, encoding="autodetect", sql=None):
+    def shp2postgis(self, shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=forms_geoserver.MODE_CREATE, encoding="autodetect", sql=None, column_types=None):
         ogr = gdaltools.ogr2ogr()
         ogr.set_encoding(encoding)
         ogr.set_input(shp_path, srs=srs)
@@ -1170,10 +1190,13 @@ class Geoserver():
                 ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_APPEND, data_source_mode=ogr.MODE_DS_UPDATE)
         elif creation_mode == forms_geoserver.MODE_OVERWRITE:
                 ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_OVERWRITE, data_source_mode=ogr.MODE_DS_UPDATE)
-        ogr.layer_creation_options = {
+        creation_options = {
             "LAUNDER": "YES",
-            "precision": "NO"
+            "PRECISION": "NO"
         }
+        if column_types:
+            creation_options['COLUMN_TYPES'] = column_types
+        ogr.layer_creation_options = creation_options
         ogr.config_options = {
             "OGR_TRUNCATE": "NO"
         }
@@ -1216,7 +1239,8 @@ class Geoserver():
 
             shp_field_names = [f.name for f in shp_fields]
             sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
-            stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql)
+            column_types = self.__columntypes_ogr(shp_fields)
+            stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql=sql, column_types=column_types)
             if stderr.startswith("ERROR"): # some errors don't return non-0 status so will not directly raise an exception
                 raise rest_geoserver.RequestError(-1, stderr)
             with Introspect(db, host=host, port=port, user=user, password=password) as i:
@@ -1256,7 +1280,7 @@ class Geoserver():
             if not stderr:
                 return True
         except rest_geoserver.RequestError as e:
-            logger.exception(str(e))
+            logger.exception(e)
             raise
         except gdaltools.GdalToolsError as e:
             logger.exception(str(e))

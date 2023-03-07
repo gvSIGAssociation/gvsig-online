@@ -9,8 +9,8 @@ from gvsigol_services import rest_geoserver
 from django.contrib.auth.models import User
 from .models import exports_historical
 
-import json
-
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__)
 
 @celery_app.task
 def postBackground(**kwargs):
@@ -36,7 +36,7 @@ def postBackground(**kwargs):
                 export.save()
                
         except rest_geoserver.RequestWarning as e:
-            
+            logger.exception(e)
             msg = 'Export process completed with warnings: ' + str(e)
 
             export.status = 'Warning'
@@ -45,7 +45,7 @@ def postBackground(**kwargs):
             export.save()
                 
         except rest_geoserver.RequestError as e:
-
+            logger.exception(e)
             try:
                 from ast import literal_eval as make_tuple
                 
@@ -60,7 +60,7 @@ def postBackground(**kwargs):
             export.save()
             
         except Exception as exc:
-
+            logger.exception(exc)
             export.status = 'Error'
             export.message = 'Server error'+  ": " + str(exc)
             export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + post.get('file_path')
