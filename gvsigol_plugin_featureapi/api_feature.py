@@ -962,7 +962,7 @@ class FileUploadView(ListCreateAPIView):
         }
         return JsonResponse(result, safe=False)
     
-    @swagger_auto_schema(operation_id='add_resource', operation_summary='Upload a resource attached to the feature',
+    @swagger_auto_schema(operation_id='uploaded_attached_file', operation_summary='Upload a resource attached to the feature',
                           responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>File already exists", 
                                      403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
                                      400: "Error in the input parameters. Image and title cannot be null<br>Error checking version column<br>Error saving the resource"})
