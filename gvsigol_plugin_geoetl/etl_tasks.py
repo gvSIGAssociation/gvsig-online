@@ -686,8 +686,8 @@ def output_Postgis(dicc):
     for row in cur:
         count = row[0]
         break
-    
-    if count == 0:
+
+    if count == 0 and dicc['operation'] != 'CREATE' and dicc['operation'] != 'OVERWRITE':
         print('There is no features in output')
 
     else:
@@ -695,15 +695,26 @@ def output_Postgis(dicc):
         if dicc['operation'] == 'CREATE':
 
             if inSame:
+
+                if count != 0:
                 
-                sqlCreate = sql.SQL('create table {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
-                    sch_target = sql.Identifier(esq),
-                    tbl_target = sql.Identifier(tab),
-                    sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
-                    tbl_source = sql.Identifier(table_name_source))
-                
-                cur.execute(sqlCreate)
-                con_source.commit()
+                    sqlCreate = sql.SQL('create table {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
+                        sch_target = sql.Identifier(esq),
+                        tbl_target = sql.Identifier(tab),
+                        sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        tbl_source = sql.Identifier(table_name_source))
+                    
+                    cur.execute(sqlCreate)
+                    con_source.commit()
+                else:
+                    sqlCreate = sql.SQL('create table IF NOT EXISTS {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
+                        sch_target = sql.Identifier(esq),
+                        tbl_target = sql.Identifier(tab),
+                        sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        tbl_source = sql.Identifier(table_name_source))
+                    
+                    cur.execute(sqlCreate)
+                    con_source.commit()                    
 
                 sqlAlter = sql.SQL('ALTER TABLE {sch_target}.{tbl_target}  ADD COLUMN IF NOT EXISTS ogc_fid SERIAL').format(
                     sch_target = sql.Identifier(esq),
@@ -751,7 +762,11 @@ def output_Postgis(dicc):
                 _ogr = gdaltools.ogr2ogr()
                 _ogr.set_input(_conn_source, table_name=table_name_source)
                 _ogr.set_output(_conn_target, table_name=tab)
-                _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
+
+                if count == 0:
+                    _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_APPEND, data_source_mode=_ogr.MODE_DS_UPDATE)
+                else:
+                    _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
 
                 _ogr.layer_creation_options = {
                     "LAUNDER": "YES",

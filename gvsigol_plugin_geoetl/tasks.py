@@ -135,8 +135,6 @@ def run_canvas_background(**kwargs):
                                         else:
                                             if '@@'+key+'@@' in parameters[key2]:
                                                 parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))
-                        if n[1]['type'].startswith('trans_Filter'):
-                            print(parameters)
 
                         print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
                         #execute input task
