@@ -688,6 +688,12 @@ class FeatureSerializer(serializers.Serializer):
         """
         Create and return a new Feature instance, given the validated data.
         """
+
+        #En la creación no puede venir el campo ogc_fid porque ya lo pone el servidor y da un error de 
+        #campo duplicado. Si la app lo manda hay que eliminarlo
+        if 'ogc_fid' in data['properties']:
+            del data['properties']['ogc_fid']
+
         #Hay que hacer inserciones en tabla con Introspect porque de las capas no hay modelo
         i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
         with i as con: # connection will auoclose
