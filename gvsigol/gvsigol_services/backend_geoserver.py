@@ -1087,13 +1087,13 @@ class Geoserver():
             pass
     
     def __columntypes_ogr(self, dbf_field_defs):
-        col_types = ""
+        col_types = []
         for field in dbf_field_defs:
             if _valid_sql_name_regex.search(field.name) == None:
                 raise InvalidValue(-1, _("Invalid field name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=field.name))
             if field.type == 'N' and field.decimal_count == 0 and field.length > 18:
-                col_types += self.__quote_identifier_ogr_column_types(field.name) + "=numeric(" + str(field.length) + "," + str(field.decimal_count) + ")"
-        return col_types
+                col_types.append(self.__quote_identifier_ogr_column_types(field.name) + "=numeric(" + str(field.length) + "," + str(field.decimal_count) + ")")
+        return ",".join(col_types)
     
     def __quote_identifier_ogr(self, field_name):
         return '"' + field_name.replace('\\', '\\\\').replace('"', '\\"') + '"'
