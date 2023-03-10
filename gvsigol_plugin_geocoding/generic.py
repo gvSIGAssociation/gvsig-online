@@ -139,7 +139,7 @@ class GenericAPI():
     
     @staticmethod   
     def get_json_from_url(url, params):
-        response = requests.get(url=url, params=params, verify = False)
+        response = requests.get(url=url, params=params, verify = True)
         if response.status_code == 200:
             respuesta = response.content
             data = json.loads(respuesta)
