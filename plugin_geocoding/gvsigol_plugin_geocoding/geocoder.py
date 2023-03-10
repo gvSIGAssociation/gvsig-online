@@ -141,6 +141,7 @@ class Geocoder():
                 break
         try:
             sugges= geocoder.geocode(query, exactly_one=False)
+            print(sugges)
         except:
             response = {}
             
@@ -164,7 +165,12 @@ class Geocoder():
         
         for sug in suggestions:
 
-            dld = self.damerau_levenshtein_distance(query, sug['address[address]'])
+            if geocoder_type == 'generic':
+
+                dld = self.damerau_levenshtein_distance(query, sug['address[address]'])
+
+            else:
+                dld = self.damerau_levenshtein_distance(query, sug['address'])
 
             if dld < distance:
                 distance = dld
