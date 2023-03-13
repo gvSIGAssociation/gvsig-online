@@ -3338,8 +3338,6 @@ def trans_Geocoder(dicc):
 
         for row in cur:
 
-            print('----------->row', row)
-
             address_list = []
             for x in range (1, len(row)):
                 if row[x]:
@@ -3585,9 +3583,15 @@ def input_Segex(dicc):
                         print('getGeorefStatus: '+str(r.status_code))
 
                         if r.status_code == 200:
+                            
+                            if r_geof.json():
+
+                                exp = r_geof.json()
                         
-                            exp = r_geof.json()
-                        
+                            else:
+                                exp = dict.fromkeys(schema, '')
+                                exp['IdGeorreferencia'] = georef['IdGeoref']
+
                             exp['TipoGeorreferencia']= types_text_list[tpt][1]
 
                             exp['Operacion']= georef['Operacion']
