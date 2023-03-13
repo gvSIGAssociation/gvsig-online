@@ -39,6 +39,13 @@
 					<div class="navbar-header index select-project-logo">
         				<img src="{% static "img/logo_small.png"%}">
 					</div>
+					<div class="navbar-custom-menu">
+						<ul class="nav navbar-nav">
+							<li>
+								<img style="max-height: 60px; margin-right: 10px;" src="{% static "img/logo_ue.png"%}">
+							</li>
+						</ul>
+					</div>
 				</div>
 			</nav>
 		</header>
@@ -76,8 +83,12 @@
 		</div>
 
 		<footer class="main-footer">
-			<div class="pull-right hidden-xs">
-				<b>{% trans "Version" %}</b> {{GVSIGOL_VERSION}}
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12 center">
+						<img class="custom-footer-img" style="width: 100%;">
+					</div>
+				</div>
 			</div>
 		</footer>
 
