@@ -84,7 +84,7 @@ def run_canvas_background(**kwargs):
 
     move = []
 
-    loop_list = ['sin parámetro de usuario']
+    loop_list = ['sin parámetro de usuario variable']
     
     try:
 
