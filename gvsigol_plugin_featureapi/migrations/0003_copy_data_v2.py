@@ -23,6 +23,7 @@ def data_exists(apps, schema_editor):
     return False
 
 def copy_data(apps, schema_editor):
+    print("copy data")
     sql = """
         INSERT INTO public.gvsigol_plugin_featureapi_featureversions
            (id, version, wkb_geometry, fields, date, usr, feat_id, operation, resource, layer_id)
@@ -31,14 +32,17 @@ def copy_data(apps, schema_editor):
         FROM public.gvsigol_plugin_restapi_featurechange
         """
     schema_editor.execute(sql)
+    print("copy data fin")
 
 def apply(apps, schema_editor):
     try:
         if not data_exists(apps, schema_editor):
             copy_data(apps, schema_editor)
-    except:
+    except Exception as e:
         # ignore errors, it may fail if plugin_restapi was not installed
-        pass
+        # rollback transaction to get a clean DB connection status
+        schema_editor.execute("ROLLBACK")
+    
     # We reset sequence even if no data was copied, because an earlier
     # version of the 0002_copy_data migration copied data and did not
     # properly reset the sequence. Resetting should be harmless anyway.
