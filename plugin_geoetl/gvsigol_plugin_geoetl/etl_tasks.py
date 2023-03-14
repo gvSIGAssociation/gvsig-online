@@ -3592,11 +3592,24 @@ def input_Segex(dicc):
                                 exp = dict.fromkeys(schema, '')
                                 exp['IdGeorreferencia'] = georef['IdGeoref']
 
-                            exp['TipoGeorreferencia']= types_text_list[tpt][1]
+                                exp["Latitud"] = 0.0
+                                exp["Longitud"] = 0.0
+                                exp["EstadoExpediente"] = 0
 
+                            exp['TipoGeorreferencia']= types_text_list[tpt][1]
                             exp['Operacion']= georef['Operacion']
-                            
+
+                            exp["IdGeorreferencia"] = int(exp["IdGeorreferencia"])
+                            exp["Operacion"] = int(exp["Operacion"])
+                            exp["Latitud"] = float(exp["Latitud"])
+                            exp["Longitud"] = float(exp["Longitud"])
+                            exp["EstadoExpediente"] = int(exp["EstadoExpediente"])
+
                             df = pd.json_normalize(exp)
+
+                            df['FechaCreacionExpediente'] = pd.to_datetime(df['FechaCreacionExpediente'], errors='coerce')
+                            df['FechaInicioExpediente'] = pd.to_datetime(df['FechaInicioExpediente'], errors='coerce')
+                            df['FechaFinalizacionExpediente'] = pd.to_datetime(df['FechaFinalizacionExpediente'], errors='coerce')
 
                             df = df[schema]
                             
