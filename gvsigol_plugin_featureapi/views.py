@@ -135,15 +135,16 @@ def check_version(request):
         validation = Validation(request)
         lyr = util.get_layer(None, lyrname, workspace)
         i, table, schema = servicesutils.get_db_connect_from_layer(lyr)
-        with i as con: # connection will auoclose
+        with i as con: # connection will autoclose
+            table_info = con.get_table_info(table, schema=schema)
             if operation == 1:
-                validation.check_version_and_date_columns(lyr, i, schema, table, 0)
+                use_versions = validation.check_version_and_date_columns(lyr, con, schema, table, table_info, default_version=0)
             else:
-                validation.check_version_and_date_columns(lyr, i, schema, table)
+                use_versions = validation.check_version_and_date_columns(lyr, con, schema, table, table_info)
             code = 200
             msg = 'OK'
             
-            if(featid and version and operation != 1):
+            if (use_versions and featid and version and operation != 1):
                 validation.check_feature_version(con, schema, table, featid, version)
     except HttpException:
         raise

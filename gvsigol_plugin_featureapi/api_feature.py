@@ -514,7 +514,7 @@ class FeatureGetView(RetrieveDestroyAPIView):
     @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id, feat_id):
         validation = Validation(request)
-        validation.is_public_layer(lyr_id)
+        validation.check_get_feature(lyr_id)
         try:
             feat = serializers.FeatureSerializer().get(None, lyr_id, feat_id, 4326)
             result = {
@@ -978,7 +978,8 @@ class FileUploadView(ListCreateAPIView):
             v.check_uploaded_image(request, lyr_id)
             i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
             with i as con: # connection will auoclose
-                v.check_version_and_date_columns(lyr, con, schema, table)
+                table_info = con.get_table_info(table, schema=schema)
+                use_versions = v.check_version_and_date_columns(lyr_id, con, schema, table, table_info)
                 
                 up_file = request.FILES['image']
                 
@@ -995,8 +996,9 @@ class FileUploadView(ListCreateAPIView):
                 resource.layer = lyr
                 resource.save()
                 url = os.path.join(core_settings.MEDIA_URL, rel_path)
-                util.update_feat_version(con, schema, table, feat_id)
-                util.save_version_history(con, schema, table, lyr_id, feat_id, v.usr, 4, url)
+                if use_versions:
+                    util.update_feat_version(con, schema, table, feat_id)
+                    util.save_version_history(con, schema, table, lyr_id, feat_id, v.usr, 4, url)
                 external_url =  core_settings.BASE_URL + resource.get_url()
             return Response({'id': resource.id, 'title':request.POST['title'], 'image' : external_url}, status.HTTP_201_CREATED)
         except HttpException as e:

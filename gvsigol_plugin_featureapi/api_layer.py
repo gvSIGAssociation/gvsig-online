@@ -49,6 +49,7 @@ from gvsigol_services.forms_geoserver import CreateFeatureTypeForm
 from gvsigol_services.models import LayerFieldEnumeration, TriggerProcedure, Trigger
 from gvsigol_services.tasks import refresh_layer_info
 import re
+from django.utils.translation import gettext_lazy as _
 
 class LangFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
@@ -420,7 +421,11 @@ class LayerListView(ListCreateAPIView):
 
             return JsonResponse(result, safe=False)
         except HttpException as e:
+            print(e)
             return e.get_exception()
+        except Exception as e:
+            print(e)
+            return(e)
     
     
 def layer_create(request, layer_group_id):
@@ -536,7 +541,8 @@ def layer_create(request, layer_group_id):
                 return newRecord.id
         except Exception as e:
             raise HttpException(400, "Error creating the layer: " + str(e))
-
+    else:
+        raise HttpException(400, "Error creating the layer. Form validation error: " + form.errors.as_text())
 
 
 #--------------------------------------------------
