@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "09a4dfe0-6a9a-4d7d-bc1c-1993c1683544",
+		"_postman_id": "ec190e80-b238-4ea3-a34d-8dec142d4381",
 		"name": "Test Layers gvSIGOnline API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -203,7 +203,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"get_project_list\", function () {",
-							"    //Comprueba que exista un proyecto público llamado con el de las variables de ENV",
+							"    //Comprueba que exista un proyecto llamado con el de las variables de ENV",
 							"    const responseJson = pm.response.json();",
 							"    const prj = postman.getEnvironmentVariable(\"prj\");",
 							"    const json = responseJson.content;",
@@ -368,12 +368,12 @@
 							"    const prj = postman.getEnvironmentVariable(\"prj\");",
 							"    const json = responseJson.content;",
 							"    //console.log(\"get_project_list JSON:\" + JSON.stringify(responseJson))",
-							"    let existsLyr = false;",
 							"    //console.log(\"PRJ:\" + prj)",
+							"    postman.setEnvironmentVariable(\"lyr_id\", \"\");",
+							"    postman.setEnvironmentVariable(\"public_lyr_id\", \"\");",
 							"    for(var i = 0; i<json.length;i++) {",
 							"        //console.log(json[i].name)",
 							"        if(json[i].name == postman.getEnvironmentVariable('testlayer')) {",
-							"            existsLyr = true;",
 							"            console.log(\"LAYER FOUND, ID: \" + json[i].id);",
 							"            postman.setEnvironmentVariable(\"lyr_id\", json[i].id);",
 							"        }",
@@ -381,11 +381,6 @@
 							"            console.log(\"PUBLIC LAYER FOUND, ID: \" + json[i].id + \" - \" + json[i].name);",
 							"            postman.setEnvironmentVariable(\"public_lyr_id\", json[i].id);",
 							"        }",
-							"    }",
-							"    if(existsLyr) {",
-							"        postman.setNextRequest(\"create_feature\")",
-							"    } else {",
-							"        postman.setNextRequest(\"create_layer\")",
 							"    }",
 							"",
 							"    pm.response.to.have.status(200);",
@@ -431,6 +426,10 @@
 					"script": {
 						"exec": [
 							"pm.test(\"create_layer\", function () {",
+							"    if (postman.getEnvironmentVariable(\"lyr_id\") != '') {",
+							"        console.log(\"LAYER ALREADY EXISTS: \" + postman.getEnvironmentVariable(\"lyr_id\"));",
+							"        return true;",
+							"    }",
 							"    const responseJson = pm.response.json();",
 							"    const json = responseJson.content;",
 							"    postman.setEnvironmentVariable(\"lyr_id\", json.id);",
@@ -492,6 +491,16 @@
 						{
 							"key": "md_abstract",
 							"value": "",
+							"type": "default"
+						},
+						{
+							"key": "read-usergroup-{{user_role}}",
+							"value": "yes",
+							"type": "default"
+						},
+						{
+							"key": "write-usergroup-{{user_role}}",
+							"value": "yes",
 							"type": "default"
 						}
 					]
@@ -781,6 +790,16 @@
 						{
 							"key": "resource-is-public",
 							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "read-usergroup-{{user_role}}",
+							"value": "yes",
+							"type": "default"
+						},
+						{
+							"key": "write-usergroup-{{user_role}}",
+							"value": "yes",
 							"type": "default"
 						}
 					]
