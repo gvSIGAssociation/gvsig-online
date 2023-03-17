@@ -2059,9 +2059,8 @@ class Geoserver():
             'WIDTH': '768',
             'BBOX': bbox
         }
-                
-        iname = ''.join(random.choice(string.ascii_uppercase) for i in range(8))
-        iname += '.png'
+        
+        out_file, out_file_name = tempfile.mkstemp(suffix='.png', prefix='', dir=settings.MEDIA_ROOT + "thumbnails/")
         req = requests.Session()
         req.auth = (self.user, self.password)
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
@@ -2069,13 +2068,14 @@ class Geoserver():
         wms = core_utils.get_absolute_url(ws.wms_endpoint, {})
         response = req.get(wms, params=values, verify=False, stream=True, proxies=settings.PROXIES)
         print(response.url)
-        with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
+        
+        with open(out_file, 'wb') as f:
             for block in response.iter_content(1024):
                 if not block:
                     break
                 f.write(block)
                 
-        return os.path.join("thumbnails/", iname)
+        return out_file_name
     
     # ImageMosaic methods
     def createimagemosaic(self, store, layer):
