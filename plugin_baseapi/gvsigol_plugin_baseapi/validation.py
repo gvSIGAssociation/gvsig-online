@@ -42,59 +42,62 @@ class Validation():
     def __init__(self, request):
         self.request = request
         self.usr = str(self.request.user)
-        
-    def check_version_and_date_columns(self, lyr, con, schema, table, default_version = 1):
-        addversioncol = self.check_version_column(con, schema, table, default_version)
-        adddatecol = self.check_date_column(con, schema, table)
-        if(addversioncol or adddatecol):
+
+    def check_version_and_date_columns(self, lyr, con, schema, table, table_info, default_version = 1):
+        has_version_col = settings.VERSION_FIELD in table_info.get_columns()
+        if has_version_col:
+            add_version_col = False
+        else:
+            add_version_col = self.add_version_column(con, schema, table, default_version=default_version)
+        has_date_col = settings.DATE_FIELD in table_info.get_columns()
+        if has_date_col:
+            add_date_col = False
+        else:
+            add_date_col = self.add_date_column(con, schema, table)
+        if(add_version_col or add_date_col):
+            if not isinstance(lyr, Layer):
+                lyr = Layer.objects.get(id=lyr)
             gs = geographic_servers.get_instance().get_server_by_id(lyr.datastore.workspace.server.id)
             gs.reload_featuretype(lyr, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
             expose_pks = gs.datastore_check_exposed_pks(lyr.datastore)
             lyr.get_config_manager().refresh_field_conf(include_pks=expose_pks)
             lyr.save()
-        
-    def check_version_column(self, con, schema, table, default_version = 1):
+        return (has_version_col or add_version_col) and (has_date_col or add_date_col)
+
+    def add_version_column(self, con, schema, table, default_version = 1):
         """
-        Checks if exists the version column in the table but add it 
+        Adds version column to the table
         """
-        sql = "SELECT column_name FROM information_schema.columns WHERE table_name=%s AND table_schema=%s AND column_name=%s"
         try:
-            con.cursor.execute(sql, [table, schema, settings.VERSION_FIELD])
-            if con.cursor.rowcount == 0:
-                sql = "ALTER TABLE {schema}.{table} ADD COLUMN {version_field} INTEGER NOT NULL DEFAULT %s"
-                query = sqlbuilder.SQL(sql).format(
-                    schema=sqlbuilder.Identifier(schema),
-                    table=sqlbuilder.Identifier(table),
-                    version_field=sqlbuilder.Identifier(settings.VERSION_FIELD)
-                    )
-                    
-                # print query.as_string(introspect_conn.conn)
-                con.cursor.execute(query, [default_version])
-                self.add_field_properties(schema, table, settings.VERSION_FIELD)
-                return True
+            sql = "ALTER TABLE {schema}.{table} ADD COLUMN {version_field} INTEGER NOT NULL DEFAULT %s"
+            query = sqlbuilder.SQL(sql).format(
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                version_field=sqlbuilder.Identifier(settings.VERSION_FIELD)
+                )
+                
+            # print query.as_string(introspect_conn.conn)
+            con.cursor.execute(query, [default_version])
+            self.add_field_properties(schema, table, settings.VERSION_FIELD)
+            return True
         except Exception as e:
-            logger.exception("Error checking version column")
-            raise HttpException(400, "Error checking version column: " + format(e))
+            logger.exception("Error adding version column")
         return False
         
-    def check_date_column(self, con, schema, table):
-        sql = "SELECT 1 FROM information_schema.columns WHERE table_name=%s AND table_schema=%s AND column_name=%s"
+    def add_date_column(self, con, schema, table):
         try:
-            con.cursor.execute(sql, [table, schema, settings.DATE_FIELD])
-            if con.cursor.rowcount == 0:
-                sql = "ALTER TABLE {schema}.{table} ADD COLUMN {date_field} timestamp with time zone NOT NULL DEFAULT now()"
-                query = sqlbuilder.SQL(sql).format(
-                    schema=sqlbuilder.Identifier(schema),
-                    table=sqlbuilder.Identifier(table),
-                    date_field=sqlbuilder.Identifier(settings.DATE_FIELD)
-                    )
-                con.cursor.execute(query, [])
-                self.add_field_properties(schema, table, settings.DATE_FIELD)
-                return True
+            sql = "ALTER TABLE {schema}.{table} ADD COLUMN {date_field} timestamp with time zone NOT NULL DEFAULT now()"
+            query = sqlbuilder.SQL(sql).format(
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                date_field=sqlbuilder.Identifier(settings.DATE_FIELD)
+                )
+            con.cursor.execute(query, [])
+            self.add_field_properties(schema, table, settings.DATE_FIELD)
+            return True
         except Exception as e:
-            logger.exception("Error checking date column")
-            raise HttpException(400, "Error checking date column: " + format(e))
+            logger.exception("Error adding date column")
         return False
     
     def add_field_properties(self, schema, table, fieldname):
@@ -118,7 +121,7 @@ class Validation():
             lyr.save()
         except Exception:
             pass
-    
+
     def check_version_to_overwrite(self, con, schema, table, id_feat, version_to_override):
         idfield = util.get_layer_pk_name(con, schema, table)
         
@@ -137,22 +140,31 @@ class Validation():
         else:
             raise HttpException(409, "The feature version does not match with the version number supplied.")
         
-                
-#     def check_feature_version(self, con, schema, table, feat):
-#         """
-#         Checks if exists the feature in database and checks if the feature version 
-#         stored is greater than the passed
-#         """
-#         idfield = util.get_layer_pk_name(con, schema, table)
-#         if not util.exists(con, schema + "." + table, idfield + "=" + str(feat['properties'][idfield])):
-#             raise HttpException(404, "Feature NOT found in the table " + schema + "." + table)
-#          
-#         feat_server_version = self._get_feat_version(con, feat, schema, table)
-#         feat_cli_version = feat['properties'][settings.VERSION_FIELD]
-#         if int(feat_cli_version) <= int(feat_server_version):
-#             raise HttpException(409, "Conflict between versions. The feature version sent is minor or equal than the version stored. Maybe other client modified the feature while you were editing.")
-#  
-#El número de versión se incrementa en servidor
+
+    def check_feature_version_for_update(self, con, schema, table, pk_field, feat_id, feat_version):
+        """
+        Checks if the feature and version exists in the database, locking the
+        row for updates/deletes if autocommit is off.
+        """
+        sql = """
+        SELECT {version_field} FROM {schema}.{table}
+        WHERE {idfield} = %s FOR UPDATE"""
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            idfield=sqlbuilder.Identifier(pk_field),
+            version_field=sqlbuilder.Identifier(settings.VERSION_FIELD),
+            provided_version=sqlbuilder.Literal(feat_version)
+            )
+        con.cursor.execute(query, [feat_id])
+        rows = con.cursor.fetchall()
+        if len(rows) > 0:
+            feat_server_version = rows[0][0]
+            if int(feat_version) != int(feat_server_version):
+                raise HttpException(409, "Conflict between versions. The feature version sent (" + str(feat_version) + ") is different than the last version stored (" + str(feat_server_version) + "). Maybe other client modified the feature while you were editing.")
+        else:
+            raise HttpException(404, "Feature NOT found in the table " + schema + "." + table)
+
     def check_feature_version(self, con, schema, table, feat_id, feat_version):
         """
         Checks if exists the feature in database 
@@ -164,13 +176,6 @@ class Validation():
         feat_server_version = self._get_feat_version(con, schema, table, idfield, feat_id)
         if int(feat_version) != int(feat_server_version):
             raise HttpException(409, "Conflict between versions. The feature version sent (" + str(feat_version) + ") is different than the last version stored (" + str(feat_server_version) + "). Maybe other client modified the feature while you were editing.")
-    
-    def check_feat_exists(self, con, schema, table, feat_id, idfield=None):
-        if not idfield:
-            idfield = util.get_layer_pk_name(con, schema, table)
-        if util.count(con, schema, table, idfield, feat_id) > 0:
-            return None
-        raise HttpException(404, "Feature NOT found")
     
     def _get_feat_version(self, con,  schema, table, idfield, fid):
         sql = "SELECT {version_field} FROM {schema}.{table} WHERE {idfield} = %s"
@@ -184,7 +189,7 @@ class Validation():
         row = con.cursor.fetchall()
         if row is not None and len(row) > 0:
             return row[0][0]    
-        
+
     def check_edit_permission(self, lyr):
         try:
             if not services_utils.can_write_layer(self.request, lyr):
@@ -212,7 +217,11 @@ class Validation():
     def layer_exists(self, lyr_id):
         if Layer.objects.filter(id=lyr_id).count() == 0:
             raise HttpException(404, "Layer NOT found")
-    
+
+    def layer_type_postgis(self, lyr_id):
+        if not Layer.objects.filter(id=lyr_id, type='v_PostGIS').exists():
+            raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
+
     def project_exists(self, prj_id):
         now = datetime.now()
         if Project.objects.filter(id=prj_id, expiration_date__gte=now).count() == 0 and Project.objects.filter(id=prj_id, expiration_date=None).count() == 0:
@@ -279,7 +288,8 @@ class Validation():
         
     def check_get_feature(self, lyr_id):
         self.layer_exists(lyr_id)
-        self.check_layer_allowed(lyr_id)
+        self.layer_type_postgis(lyr_id)
+        self.check_read_permission(lyr_id)
         
     def check_delete_feature(self, lyr_id):
         self.check_edit_permission(lyr_id)

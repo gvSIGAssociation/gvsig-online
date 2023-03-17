@@ -310,68 +310,97 @@ class FeatureSerializer(serializers.Serializer):
             return translate
         except Exception:
             return feat
-        
+    
+    def _get_sql_columns_for_get_operation(self, pk_col, col_names_query, geom_col, target_epsg_code):
+        sql = """
+            {pk_col} pk,
+            ST_AsGeoJSON(ST_Transform({geom}, {epsg})) geom, 
+            row_to_json((SELECT d FROM (SELECT {col_names_query}) d)) props,
+            ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}),
+                ST_Perimeter(ST_Transform({geom}, 4326)) / 10000)) simplegeom,
+            ST_NPoints({geom}) numpoints
+            """
+        return sqlbuilder.SQL(sql).format(
+            pk_col = sqlbuilder.Identifier(pk_col),
+            col_names_query=col_names_query,
+            geom=sqlbuilder.Identifier(geom_col),
+            epsg=sqlbuilder.Literal(target_epsg_code)
+        )
+
+    def _get_sql_columns_for_sqlreturning(self, pk_col, col_names_query_with_id, geom_col, target_epsg_code, use_versions=False, col_names_query=None):
+        if use_versions:
+            sql = """
+                {sql_get_columns},
+                {geom} wkbgeom,
+                row_to_json((SELECT d FROM (SELECT {col_names}) d)) props,
+                {feat_version_gvol} feat_version,
+                {feat_date_gvol} feat_date
+                """
+            return sqlbuilder.SQL(sql).format(
+                sql_get_columns=self._get_sql_columns_for_get_operation(pk_col, col_names_query_with_id, geom_col, target_epsg_code),
+                col_names=col_names_query,
+                geom=sqlbuilder.Identifier(geom_col),
+                feat_version_gvol=sqlbuilder.Identifier(settings.VERSION_FIELD),
+                feat_date_gvol=sqlbuilder.Identifier(settings.DATE_FIELD),
+            )
+        else:
+            return self._get_sql_columns_for_get_operation(pk_col, col_names_query_with_id, geom_col, target_epsg_code)
+
+    def _process_query_result_for_get_operation(self, rows, epsg):
+        if(rows is not None and len(rows) > 0):
+            feat = rows[0]
+
+            geometry = 'null'
+            simplegeom = 'null'
+            if feat[1] is not None:
+                geometry = json.loads(feat[1])
+                if 'crs' not in geometry:
+                    geometry['crs'] = json.loads('{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:' + str(epsg) + '\"}}')
+
+                if feat[3] is not None:
+                    simplegeom = json.loads(feat[3])
+                    if 'crs' not in simplegeom:
+                        simplegeom['crs'] = json.loads('{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:' + str(epsg) + '\"}}')
+
+            return {
+                "type":"Feature",
+                "geometry" : geometry,
+                "properties" : feat[2],
+                "simplegeom" : simplegeom,
+                "numpoints" : feat[4]
+            }
 
     def get(self, validation, lyr_id, feat_id, epsg):
         layer = Layer.objects.get(id = int(lyr_id))
-        if layer.type != 'v_PostGIS':
-            raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
             i, table, schema = services_utils.get_db_connect_from_layer(layer)
             with i as con: # connection will autoclose
-                pk_list = con.get_pk_columns(table, schema=schema)
-                if(len(pk_list) > 0):
-                    #Se considera que las capas tienen una sola clave primaria
-                    where = sqlbuilder.SQL("WHERE {pk_col} = {feat_id}").format(
-                              pk_col = sqlbuilder.Identifier(pk_list[0]),
-                              feat_id=sqlbuilder.Literal(feat_id)
-                    )
-                else:
-                    where = sqlbuilder.SQL("WHERE ogc_fid={feat_id}").format(feat_id=feat_id)
+                table_info = con.get_table_info(table, schema=schema)
+                try:
+                    pk_field = util.get_default_pk_name(table_info)
+                except:
+                    raise HttpException(404, "Feature NOT found. Layer has no primary key")
+                
+                #Se considera que las capas tienen una sola clave primaria
+                where = sqlbuilder.SQL("WHERE {pk_col} = {feat_id}").format(
+                            pk_col = sqlbuilder.Identifier(pk_field),
+                            feat_id=sqlbuilder.Literal(feat_id)
+                )
                 geom_cols = con.get_geometry_columns(table, schema=schema)
-                properties_query = self._get_properties_names_with_id(con, schema, table, exclude_cols=geom_cols)
+                properties_query = self._get_properties_names(con, schema, table, exclude_cols=geom_cols, fields=table_info.get_columns())
                 geom_col = geom_cols[0]
                 #De este serializador no ha modelo. Hay que hacerlo por consulta
-                epsilon = "ST_Perimeter(ST_Transform({geom}, 4326)) / 10000"
-                select0 = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), "
-                select1 = "row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), "
-                select2 = "ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), " + epsilon + ")), "
-                select3 = "ST_NPoints({geom})"
-                sql = sqlbuilder.SQL("SELECT " + select0 + select1 + select2 + select3 + " FROM {schema}.{table} {where}")
+                sql = sqlbuilder.SQL("SELECT {select_cols} FROM {schema}.{table} {where}")
                 query = sql.format(
-                    geom=sqlbuilder.Identifier(geom_col),
-                    epsg=sqlbuilder.Literal(epsg),
-                    col_names_values=properties_query,
+                    select_cols = self._get_sql_columns_for_get_operation(pk_field, properties_query, geom_col, epsg),
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
                     where=where
                 )
                 con.cursor.execute(query)
                 rows = con.cursor.fetchall()
-                
-                if(rows is not None and len(rows) > 0):
-                    feat = rows[0]
-
-                    geometry = 'null'
-                    simplegeom = 'null'
-                    if feat[0] is not None:
-                        geometry = json.loads(feat[0])
-                        if 'crs' not in geometry:
-                            geometry['crs'] = json.loads('{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:' + str(epsg) + '\"}}')
-
-                        if feat[2] is not None:
-                            simplegeom = json.loads(feat[2])
-                            if 'crs' not in simplegeom:
-                                simplegeom['crs'] = json.loads('{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:' + str(epsg) + '\"}}')
-
-                    return {
-                        "type":"Feature",
-                        "geometry" : geometry,
-                        "properties" : feat[1],
-                        "simplegeom" : simplegeom,
-                        #"resources" : serializer.data,
-                        "numpoints" : feat[3]
-                    }
+                if len(rows) > 0:
+                    return self._process_query_result_for_get_operation(rows, epsg)
                 raise HttpException(404, "Feature NOT found")
         except Exception as e:
             if isinstance(e, HttpException):
@@ -623,26 +652,81 @@ class FeatureSerializer(serializers.Serializer):
     def delete(self, validation, lyr_id, feat_id, version):
         i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
         with i as con: # connection will autoclose
-            layer = Layer.objects.get(id = lyr_id)
-            validation.check_version_and_date_columns(layer, con, schema, table)
-            if(version):
-                validation.check_feature_version(con, schema, table, feat_id, version)
-                
-            idfield = util.get_layer_pk_name(con, schema, table)
-            validation.check_feat_exists(con, schema, table, feat_id, idfield=idfield)
+            table_info = con.get_table_info(table, schema=schema)
+            use_versions = validation.check_version_and_date_columns(lyr_id, con, schema, table, table_info)
             try:
-                util.update_feat_version(con, schema, table, feat_id)
-                sql = "DELETE FROM {schema}.{table} WHERE {idfield} = %s"
+                pk_field = util.get_default_pk_name(table_info)
+            except:
+                raise HttpException(400, "Feature cannot be deleted. Tables without primary key are not supported")
+            try:
+                (_, _, geom_column, _, target_crs, _, _, _) = con.get_geometry_columns_info(table=table, schema=schema)[0]
+            except:
+                logger.exception("Error getting CRS")
+                target_crs = None
+            if use_versions and version:
+                # set a transaction to lock the row and avoid to be
+                # concurrently modified
+                con.conn.set_session(autocommit=False)
+                validation.check_feature_version_for_update(con, schema, table, pk_field, feat_id, version)            
+            try:
+                if use_versions:
+                    exclude_cols = [ pk_field, geom_column, settings.VERSION_FIELD]
+                    properties_query = self._get_properties_names(con, schema, table, exclude_cols=exclude_cols, fields=table_info.get_columns())
+                        
+                    returning_sql = """
+                        RETURNING {pk_col} pk,
+                        {geom} wkbgeom,
+                        row_to_json((SELECT d FROM (SELECT {col_names}) d)) props,
+                        ({feat_version_gvol} + 1) feat_version,
+                        now() feat_date
+                        """
+                    returning_query = sqlbuilder.SQL(returning_sql).format(
+                        pk_col = sqlbuilder.Identifier(pk_field),
+                        col_names=properties_query,
+                        geom=sqlbuilder.Identifier(geom_column),
+                        feat_version_gvol=sqlbuilder.Identifier(settings.VERSION_FIELD),
+                        feat_date_gvol=sqlbuilder.Identifier(settings.DATE_FIELD),
+                    )
+                else:
+                    returning_sql = """
+                        RETURNING {pk_col} pk
+                        """
+                    returning_query = sqlbuilder.SQL(returning_sql).format(
+                        pk_col = sqlbuilder.Identifier(pk_field)
+                    )
+                sql = "DELETE FROM {schema}.{table} WHERE {idfield} = %s {returning_query}"
                 query = sqlbuilder.SQL(sql).format(
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
-                    idfield=sqlbuilder.Identifier(idfield)
+                    idfield=sqlbuilder.Identifier(pk_field),
+                    returning_query=returning_query
                     )
-                util.save_version_history(con, schema, table, lyr_id, feat_id, validation.usr, 3)
                 con.cursor.execute(query, [feat_id])
+                rows = con.cursor.fetchall()
+                con.conn.commit()
+                con.conn.set_session(autocommit=False)
+                if len(rows) == 0:
+                    raise HttpException(404, "Feature NOT found")
+                if use_versions:
+                    for r in rows:
+                        util.save_feature_version(
+                            lyr_id=lyr_id,
+                            feat_id=r[0],
+                            wkb_geom=r[1],
+                            properties=r[2],
+                            version=r[3],
+                            date=r[4],
+                            usr=validation.usr,
+                            operation=3)
+            except HttpException:
+                raise
             except Exception as e:
+                try:
+                    con.conn.rollback()
+                    con.conn.set_session(autocommit=False)
+                except:
+                    pass
                 raise HttpException(400, "Feature cannot be deleted. Unexpected error: " + format(e))
-
 
     def update(self, validation, lyr_id, data, override, version_to_override):
         """
@@ -650,104 +734,125 @@ class FeatureSerializer(serializers.Serializer):
         """
         #Hay que hacer inserciones en tabla con Introspect porque de las capas no hay modelo
         i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
-        with i as con: # connection will auoclose
-            idfield = util.get_layer_pk_name(con, schema, table)
+        with i as con: # connection will autoclose
+            table_info = con.get_table_info(table, schema=schema)
             try:
-                (_, _, geom_column, _, crs_dst, _, _, _) = con.get_geometry_columns_info(table=table, schema=schema)[0]
+                idfield = util.get_default_pk_name(table_info)
             except:
-                logger.exception("Error getting CRS")
-                crs_dst = None
+                raise HttpException(400, "Feature cannot be updaed in database. Tables without primary key are not supported")
             feat_id = data['properties'][idfield]
-            layer = Layer.objects.get(id = lyr_id)
-            validation.check_version_and_date_columns(layer, con, schema, table)
-            data['properties'][settings.DATE_FIELD] = "now()"#datetime.now()
-            version = data['properties']['feat_version_gvol']
-            if not override:
-                validation.check_feature_version(con, schema, table, feat_id, version)
-            else:
-                if(version_to_override != -1):
-                    validation.check_version_to_overwrite(con, schema, table, feat_id, version_to_override)
-        
-        
-            geom = None
-            if "geometry" in data:
-                geom = data['geometry'] 
-            print('GEOMETRY: ' + str(geom))
-            self._check_geom(geom, con)
-            
+            pk_is_serial = table_info.get_column_info(idfield).get('is_serial')
+            if pk_is_serial:
+                try:
+                    del data[idfield]
+                except KeyError:
+                    pass
+
+            use_versions = validation.check_version_and_date_columns(lyr_id, con, schema, table, table_info)
+            if use_versions:
+                # set a transaction to lock the row and avoid to be
+                # concurrently modified
+                con.conn.set_session(autocommit=False)
+                version = data['properties'][settings.VERSION_FIELD]
+                data['properties'][settings.DATE_FIELD] =  "now()"
+                if override:
+                    if version_to_override != -1:
+                        validation.check_feature_version_for_update(con, schema, table, idfield, feat_id, version_to_override)
+                else:
+                    validation.check_feature_version_for_update(con, schema, table, idfield, feat_id, version)
+
+            return_crs = 4326
+            geom = data.get('geometry')
             try:
-                sql, values = self._get_sql_update(table, schema, data['properties'], feat_id, geom, geom_column, crs_dst, idfield)
+                sql, values = self._get_sql_update(con, table, schema, data['properties'], feat_id, geom, table_info, idfield, return_crs, use_versions=use_versions)
                 con.cursor.execute(sql, values)
-                util.save_version_history(con, schema, table, lyr_id, feat_id, validation.usr, 2)
-                return util.get_feat_by_id(con, feat_id, schema, table, idfield, geom_column)
+                rows = con.cursor.fetchall()
+                con.conn.commit()
+                con.conn.set_session(autocommit=False)
+                if use_versions:
+                    try:
+                        for r in rows:
+                            util.save_feature_version(
+                                lyr_id=lyr_id,
+                                feat_id=r[0],
+                                wkb_geom=r[5],
+                                properties=r[6],
+                                version=r[7],
+                                date=r[8],
+                                usr=validation.usr,
+                                operation=2)
+                    except:
+                        raise HttpException(400, "Feature change cannot be inserted in database history. Unexpected error: " + format(e))
+                try:
+                    return self._process_query_result_for_get_operation(rows, return_crs)
+                except Exception as e:
+                    raise HttpException(400, "Error retrieving the updated feature. Error: " + format(e))
+            except HttpException as e:
+                raise
             except Exception as e:
+                try:
+                    con.conn.rollback()
+                    con.conn.set_session(autocommit=False)
+                except:
+                    pass
                 raise HttpException(400, "Feature cannot be updated in database. Unexpected error: " + format(e))
-        
         
     def create(self, validation, lyr_id, data):
         """
         Create and return a new Feature instance, given the validated data.
         """
-
-        #En la creación no puede venir el campo ogc_fid porque ya lo pone el servidor y da un error de 
-        #campo duplicado. Si la app lo manda hay que eliminarlo
-        if 'ogc_fid' in data['properties']:
-            del data['properties']['ogc_fid']
-
-        #Hay que hacer inserciones en tabla con Introspect porque de las capas no hay modelo
         i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
-        with i as con: # connection will auoclose
+        with i as con: # connection will autoclose
+            table_info = con.get_table_info(table, schema=schema)
             try:
-                id_feat = util.get_layer_id(con, schema, table)
-            except Exception:
-                id_feat = None
-            idfield = util.get_layer_pk_name(con, schema, table)
-            try:
-                (_, _, geom_column, _, crs_dst, _, _, _) = con.get_geometry_columns_info(table=table, schema=schema)[0]
+                idfield = util.get_default_pk_name(table_info)
             except:
-                logger.exception("Error getting CRS")
-                crs_dst = None
+                raise HttpException(400, "Feature cannot be inserted in database. Tables without primary key are not supported")
+            pk_is_serial = table_info.get_column_info(idfield).get('is_serial')
+            if pk_is_serial:
+                try:
+                    del data[idfield]
+                except KeyError:
+                    pass
 
-            layer = Layer.objects.get(id = lyr_id)
-            validation.check_version_and_date_columns(layer, con, schema, table)
-            data['properties'][settings.VERSION_FIELD] = 1
-            data['properties'][settings.DATE_FIELD] =  "now()"#time.strftime("%Y-%m-%d %H:%M:%S") #datetime.utcnow()
+            use_versions = validation.check_version_and_date_columns(lyr_id, con, schema, table, table_info)
+            if use_versions:
+                data['properties'][settings.VERSION_FIELD] = 1
+                data['properties'][settings.DATE_FIELD] =  "now()"#time.strftime("%Y-%m-%d %H:%M:%S") #datetime.utcnow()
             
+            return_crs = 4326
             try:
-                sql = self._get_sql_insert(table, schema, data['properties'], id_feat, data['geometry'], geom_column, crs_dst, idfield, con)
+                sql = self._get_sql_insert(table, schema, data['properties'], data['geometry'], table_info, idfield, pk_is_serial, return_crs, con, use_versions=use_versions)
             except Exception as e:
                 if(hasattr(e, 'msg') and e.msg != ''):
                     raise e
                 raise HttpException(400, "Feature cannot be inserted in database. Unexpected error: " + format(e))
+            rows = None
             try:
                 con.cursor.execute(sql)
-                util.save_version_history(con, schema, table, lyr_id, id_feat, validation.usr, 1)
+                rows = con.cursor.fetchall()
+                if use_versions:
+                    try:
+                        for r in rows:
+                            util.save_feature_version(
+                                lyr_id=lyr_id,
+                                feat_id=r[0],
+                                wkb_geom=r[5],
+                                properties=r[6],
+                                version=r[7],
+                                date=r[8],
+                                usr=validation.usr,
+                                operation=1)
+                    except Exception as e:
+                        raise HttpException(400, "Feature cannot be inserted in database history. Unexpected error: " + format(e))
+                try:
+                    return self._process_query_result_for_get_operation(rows, return_crs)
+                except Exception as e:
+                    raise HttpException(400, "Error retrieving the inserted feature. Error: " + format(e))
+            except HttpException as e:
+                raise
             except Exception as e:
-                raise HttpException(400, "Feature cannot be inserted in database. Unexpected error: " + format(e))
-                
-            data['properties'][idfield] = id_feat
-            
-            data['properties'][settings.DATE_FIELD] = timezone.now()
-
-            #Devolvemos el registro que se ha almacenado en la BBDD. Hay que consultarlo
-            #pq puede haber triggers que modifiquen campos 
-            
-            return self.get(validation, lyr_id, id_feat, 4326)
-
-            # geom_cols = con.get_geometry_columns(table, schema=schema)
-            # properties = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
-            # sql = "SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} WHERE {idfield} = %s"
-            # query = sqlbuilder.SQL(sql).format(
-            #     schema=sqlbuilder.Identifier(schema),
-            #     table=sqlbuilder.Identifier(table),
-            #     idfield=sqlbuilder.Identifier(idfield),
-            #     properties=properties
-            # )
-            # con.cursor.execute(query, [id_feat])
-            # row = con.cursor.fetchone()
-
-            # return row[0]
-               
+                raise HttpException(400, "Feature change cannot be inserted in database. Unexpected error: " + format(e))
 
     def _check_geom(self, geomjson, con):
         """
@@ -759,29 +864,18 @@ class FeatureSerializer(serializers.Serializer):
         query = sqlbuilder.SQL(sql).format(
             geojson=sqlbuilder.Literal(json.dumps(geomjson))
             )
-        print ('CHECK_GEOM: ' + query.as_string(con.cursor))
+        logger.debug('CHECK_GEOM: ' + query.as_string(con.cursor))
         con.cursor.execute(query)
         rows = con.cursor.fetchone()
         if rows[0] == False:
             raise HttpException(400, "Geometry malformed")
 
-
-    def _get_properties_names_with_id(self, introspect, schema, tablename, exclude_cols=[]):
-        fields = introspect.get_fields(tablename, schema=schema)
-        properties = [ f for f in fields if f not in exclude_cols]
-        col_names_values = []
-        for p in properties:
-             #col_names_values.append(sqlbuilder.Literal(p))
-             col_names_values.append(sqlbuilder.Identifier(p))
-        return sqlbuilder.SQL(", ").join(col_names_values)
-
-
-    def _get_properties_names(self, introspect, schema, tablename, exclude_cols=[]):
-        fields = introspect.get_fields(tablename, schema=schema)
+    def _get_properties_names(self, introspect, schema, tablename, exclude_cols=[], fields=None):
+        if fields is None:
+            fields = introspect.get_fields(tablename, schema=schema)
         properties = [ f for f in fields if f not in exclude_cols]
         colnames = [ sqlbuilder.Identifier(c) for c in properties ]
         return sqlbuilder.SQL(", ").join(colnames)
-
 
     def _get_strict_search_where(self, introspect, schema, tablename, text, exclude_cols=[]):
         fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
@@ -905,38 +999,73 @@ class FeatureSerializer(serializers.Serializer):
         else:
             return True
 
-
-    def _get_sql_insert(self, table, schema, props, id_feat, geom, geom_column, crs, idfield, con):
+    def _get_sql_insert(self, table, schema, props, geom, table_info, pk_field, pk_is_serial, return_crs, con, use_versions):
         #TODO:quitar para V2
         #El CRS de origen si no viene se presupone en 4326. El de destino se lee de la capa
         #Ojo! esto es un problema pq se acostumbran a no meter CRS y luego meten coordenadas en otro sistema y ya está liada
+
+        try:
+            (_, _, geom_column, _, target_crs, _, _, _) = con.get_geometry_columns_info(table=table, schema=schema)[0]
+        except:
+            logger.exception("Error getting CRS")
+            target_crs = None
         if "crs" not in geom: 
             geom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
-            
         self._check_geom(geom, con)
         
-        colnames = [sqlbuilder.Identifier(idfield), sqlbuilder.Identifier(geom_column)]
-        colvalues = [
-            sqlbuilder.Literal(id_feat),
-            sqlbuilder.SQL("ST_TRANSFORM(ST_GeomFromGeoJSON({geojson}),{crs})").format(
-                geojson=sqlbuilder.Literal(json.dumps(geom)),
-                crs=sqlbuilder.Literal(crs)
+        properties_query_with_id = self._get_properties_names(con, schema, table, exclude_cols=[geom_column], fields=table_info.get_columns())
+        exclude_cols = [ pk_field, geom_column, settings.VERSION_FIELD]
+        properties_query = self._get_properties_names(con, schema, table, exclude_cols=exclude_cols, fields=table_info.get_columns())
+        
+        returning_sql = sqlbuilder.SQL(
+                "RETURNING {get_op_cols}"
+            ).format(
+                get_op_cols=self._get_sql_columns_for_sqlreturning(pk_field, properties_query_with_id, geom_column, return_crs, use_versions=use_versions, col_names_query=properties_query)
+            )
+        if pk_is_serial:
+            colnames = []
+            colvalues = []
+        else:
+            colnames = [sqlbuilder.Identifier(pk_field)]
+            colvalues = [sqlbuilder.SQL(
+                    "SELECT COALESCE(MAX({pk_field}), 0) + 1 FROM {schema}.{table}"
+                ).format(
+                    idfield=sqlbuilder.Identifier(pk_field),
+                    schema=sqlbuilder.Identifier(schema),
+                    table=sqlbuilder.Identifier(table)
                 )
             ]
+        colnames.append(sqlbuilder.Identifier(geom_column))
+        colvalues.append(sqlbuilder.SQL("ST_TRANSFORM(ST_GeomFromGeoJSON({geojson}),{crs})").format(
+                    geojson=sqlbuilder.Literal(json.dumps(geom)),
+                    crs=sqlbuilder.Literal(target_crs)
+                    ))
         for i in list(props.keys()):
             colnames.append(sqlbuilder.Identifier(i))
             colvalues.append(sqlbuilder.Literal(props[i]))
 
-        sql = "INSERT INTO {schema}.{table} ({colnames}) VALUES ({colvalues})"
+        sql = "INSERT INTO {schema}.{table} ({colnames}) VALUES ({colvalues}) {returning_sql}"
         query = sqlbuilder.SQL(sql).format(
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table),
             colnames=sqlbuilder.SQL(", ").join(colnames),
             colvalues=sqlbuilder.SQL(", ").join(colvalues),
+            pk_field=sqlbuilder.Identifier(pk_field),
+            returning_sql = returning_sql
             )
         return query
-    
-    def _get_sql_update(self, table, schema, props, id_feat, geom, geom_column, crs, idfield):
+
+    def _get_sql_update(self, con, table, schema, props, id_feat, geom, table_info, pk_field, return_crs, use_versions):
+        try:
+            (_, _, geom_column, _, target_crs, _, _, _) = con.get_geometry_columns_info(table=table, schema=schema)[0]
+        except:
+            logger.exception("Error getting CRS")
+            target_crs = None
+        if "crs" not in geom:
+            #El CRS de origen si no viene se presupone en 4326. El de destino se lee de la capa
+            geom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+
+        self._check_geom(geom, con)
         values = []
         col_values = []
         for i in list(props.keys()):
@@ -949,28 +1078,33 @@ class FeatureSerializer(serializers.Serializer):
             else:
                 values.append(props[i])
             
-        if geom is not None:
-            #El CRS de origen si no viene se presupone en 4326. El de destino se lee de la capa
-            if "crs" not in geom: 
-                geom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
-            value = sqlbuilder.SQL("ST_TRANSFORM(ST_GeomFromGeoJSON({geojson}),{crs})").format(
-                geojson=sqlbuilder.Literal(json.dumps(geom)),
-                crs=sqlbuilder.Literal(crs)
-                )
-            col_values.append(sqlbuilder.SQL("{field} = {value}").format(
-                field=sqlbuilder.Identifier(geom_column),
-                value=value))
+        value = sqlbuilder.SQL("ST_TRANSFORM(ST_GeomFromGeoJSON({geojson}),{crs})").format(
+            geojson=sqlbuilder.Literal(json.dumps(geom)),
+            crs=sqlbuilder.Literal(target_crs)
+            )
+        col_values.append(sqlbuilder.SQL("{field} = {value}").format(
+            field=sqlbuilder.Identifier(geom_column),
+            value=value))
         values.append(id_feat)
 
-        sql = "UPDATE {schema}.{table} SET {col_values} WHERE {idfield} = %s"
+        properties_query_with_id = self._get_properties_names(con, schema, table, exclude_cols=[geom_column], fields=table_info.get_columns())
+        exclude_cols = [ pk_field, geom_column, settings.VERSION_FIELD]
+        properties_query = self._get_properties_names(con, schema, table, exclude_cols=exclude_cols, fields=table_info.get_columns())
+        returning_sql = sqlbuilder.SQL(
+            "RETURNING {get_op_cols}"
+        ).format(
+            get_op_cols=self._get_sql_columns_for_sqlreturning(pk_field, properties_query_with_id, geom_column, return_crs, use_versions=use_versions, col_names_query=properties_query)
+        )
+
+        sql = "UPDATE {schema}.{table} SET {col_values} WHERE {idfield} = %s  {returning_sql}"
         query = sqlbuilder.SQL(sql).format(
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table),
             col_values=sqlbuilder.SQL(", ").join(col_values),
-            idfield=sqlbuilder.Identifier(idfield)
+            idfield=sqlbuilder.Identifier(pk_field),
+            returning_sql=returning_sql
             )
         return (query, values)
-
 
 class LayerChangesSerializer(serializers.Serializer):
     

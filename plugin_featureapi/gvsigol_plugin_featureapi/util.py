@@ -42,6 +42,7 @@ from gvsigol_services import utils
 from gvsigol_services.utils import get_public_layers_query, get_layerread_by_user_query
 from psycopg2 import sql as sqlbuilder
 from psycopg2.extensions import quote_ident
+from rest_framework.exceptions import ParseError, UnsupportedMediaType
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -89,6 +90,23 @@ def get_layer_id(con, schema, layer):
         id_ = r[0][0] + 1
     return id_
 
+def get_default_pk_name(table_info, default='ogc_fid'):
+    """
+    Obtiene la columna que es clave primaria de una capa. Si una tabla
+    no tiene clave primaria pero existe una columna con el nombre
+    'ogc_fid' (o el valor pasado en el parámetro default),
+    se devuelve el valor de default.
+    Si no, se lanza una excepción.
+    Limitación: Se considera que las capas tienen una clave primaria no compuesta,
+    formada por un único campo.
+    """
+    pk = table_info.get_pk()
+    if pk is None:
+        if default in table_info.get_columns():
+            return default
+    else:
+        return pk
+    raise Exception('Layer has no primary key')
 
 def get_layer_pk_name(con, schema, table_name):
     """
@@ -101,7 +119,7 @@ def get_layer_pk_name(con, schema, table_name):
             return pks[0]
     except Exception:
         logger.exception("Error getting pk")
-    return "ogc_fid"
+    return 'ogc_fid'
 
 
 def update_feat_version(con, schema, table, featid):
@@ -197,25 +215,29 @@ def save_version_history(con, schema, table, lyr_id, feat_id, usr, operation, re
         table=sqlbuilder.Identifier(table))
     con.cursor.execute(query, [feat_id])
     for r in con.cursor.fetchall():
-        change = FeatureVersions()
-        change.version = r[2]
-        change.wkb_geometry = r[0]
-        change.fields = r[3]
-        change.date = timezone.now()
-        change.feat_id = r[1]
-        change.layer_id = lyr_id
-        change.usr = usr
-        change.operation = operation
-        change.resource = resource
-        change.save()
+        save_feature_version(lyr_id, r[1], r[0], r[3], r[2], timezone.now(), usr, operation, resource)
 
-
-# def _get_properties_names(introspect, schema, tablename, exclude_cols=[]):
-#     """
-#     Obtiene la lista de propiedades de una tabla
-#     """
-#     fields = introspect.get_fields(tablename, schema=schema)
-#     return [ f for f in fields if f not in exclude_cols]
+def save_feature_version(lyr_id, feat_id, wkb_geom, properties, version, date, usr, operation, resource = None):
+    """
+    Cuando se edita una geometria se guarda en el historial. El tipo de operacion es:
+    
+    1-Crear, 
+    2-Actualizar, 
+    3-Borrar, 
+    4-Anyadir recurso, 
+    5-Borrar recurso
+    """
+    change = FeatureVersions()
+    change.version = version
+    change.wkb_geometry = wkb_geom
+    change.fields = properties
+    change.date = date
+    change.feat_id = feat_id
+    change.layer_id = lyr_id
+    change.usr = usr
+    change.operation = operation
+    change.resource = resource
+    change.save()
 
 def get_layerread_by_user_and_project(request, project_id):
     '''
