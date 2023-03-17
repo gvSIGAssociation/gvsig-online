@@ -10,13 +10,13 @@
 		},
 		{
 			"key": "publicprj",
-			"value": "FondeaPosidonia",
+			"value": "apitestpublicprj",
 			"type": "default",
 			"enabled": true
 		},
 		{
 			"key": "prj",
-			"value": "SpanishCarto",
+			"value": "apitestprj",
 			"type": "default",
 			"enabled": true
 		},
@@ -28,7 +28,7 @@
 		},
 		{
 			"key": "prjid",
-			"value": "20",
+			"value": "58",
 			"type": "any",
 			"enabled": true
 		},
@@ -100,7 +100,7 @@
 		},
 		{
 			"key": "group_id",
-			"value": "91",
+			"value": "126",
 			"type": "default",
 			"enabled": true
 		},
