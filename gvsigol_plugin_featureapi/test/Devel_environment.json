@@ -109,6 +109,12 @@
 			"value": "",
 			"type": "default",
 			"enabled": true
+		},
+		{
+			"key": "user_role",
+			"value": "ug_apitest",
+			"type": "default",
+			"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",
