@@ -84,21 +84,57 @@ class SqlField():
         if self.alias:
             r["alias"] = self.alias
         return r
-            
+
+class TableInfo():
+    def __init__(self, column_names, column_info, pks) -> None:
+        self._info_dict = column_info
+        self._columns = column_names
+        self._pks = pks
+
+    def get_columns(self):
+        """Gets the list of column names"""
+        return self._columns
+
+    def get_column_info(self, column_name):
+        """
+        Gets a dictionary describing the column using the
+        following entries: 'order', 'name', 'type', 'length',
+        'precision', 'scale'. 'nullable', 'is_pk', 'is_serial'
+        """
+        return self._info_dict.get(column_name)
+
+    def get_pks(self):
+        """Gets the list of the primary key column names"""
+        return self._pks
+
+    def get_pk(self):
+        """
+        Gets the primary key, assuming it is not a composite key.
+        If the table primary key is composite, then returns the
+        first found primary key. Returns None if there is not
+        primary key
+        """
+        try:
+            return self._pks[0]
+        except:
+            return None
+        
+
+    
 
 class Introspect:
-    def __init__(self, database, host='localhost', port='5432', user='postgres', password='postgres'):
+    def __init__(self, database, host='localhost', port='5432', user='postgres', password='postgres', timeout=5):
         self.conn = None
         self.database = database
         self.host = host
         self.port = port
         self.user = user
         self.password = password
-        self.__enter__()
+        self.__enter__(timeout=timeout)
 
-    def __enter__(self):
+    def __enter__(self, timeout=5):
         if not self.conn:
-            self.conn = psycopg2.connect(database=self.database, user=self.user, password=self.password, host=self.host, port=self.port)
+            self.conn = psycopg2.connect(database=self.database, user=self.user, password=self.password, host=self.host, port=self.port, connect_timeout=timeout)
             delattr(self, 'user')
             delattr(self, 'password')
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
@@ -603,7 +639,87 @@ class Introspect:
                 table=sqlbuilder.Identifier(table))
             self.cursor.execute(query)
 
-    def get_fields_info(self, table, schema='public'):
+    def get_table_info(self, table, schema='public'):
+        """
+        Gets a TableInfo object describing the columns of the table:
+        column names, primary keys, column properties (order, column name,
+        type, length, precission, scale, whether it is nullable, whether it
+        is a primary key and whether it is serial).
+
+        This method queries pg_attribute to be able to query normal tables and
+        materialized views. Primary keys declared in gt_pk_metadata table are
+        considered when the queried relationis a view and has no real primary
+        keys.
+
+        See also: TableInfo
+        """
+        qualified_table = quote_ident(schema, self.conn) + "." + quote_ident(table, self.conn) 
+        sql = sqlbuilder.SQL("""
+        SELECT q1.*, q2.attname IS NOT NULL AS is_pk, (q2.owned_seq IS NOT NULL AND q2.attname IS NOT NULL) AS is_serial
+        FROM (
+        SELECT a.attnum, a.attname,
+        CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
+                ELSE format_type(a.atttypid, null)
+        END,
+        information_schema._pg_char_max_length(a.atttypid, a.atttypmod),
+        information_schema._pg_numeric_precision(a.atttypid, a.atttypmod),
+        information_schema._pg_numeric_scale(a.atttypid, a.atttypmod),
+        a.attnotnull
+        FROM pg_attribute a
+        JOIN (pg_class c JOIN pg_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
+        JOIN (pg_type t JOIN pg_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
+        WHERE a.attnum > 0
+        AND NOT a.attisdropped
+        AND nc.nspname = %s
+        AND c.relname = %s
+        ) q1
+        LEFT OUTER JOIN 
+        (SELECT a.attname, pg_get_serial_sequence('{schema}.{table}', a.attname) AS owned_seq
+                    FROM pg_index i
+                    JOIN pg_attribute a ON a.attrelid = i.indrelid
+                    AND a.attnum = ANY(i.indkey)
+                    WHERE
+                    i.indrelid = ({schema_table})::regclass
+                    AND i.indisprimary
+            ) q2
+                    ON q1.attname = q2.attname
+                    ORDER BY q1.attnum
+
+        """).format(
+            schema_table=sqlbuilder.Literal(qualified_table),
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table)
+            )
+        self.cursor.execute(sql, [schema, table])
+        columns = []
+        pks = []
+        col_info = {}
+        for r in self.cursor.fetchall():
+            field_def = {
+                'order':r[0],
+                'name': r[1],
+                'type': r[2],
+                'length': r[3],
+                'precision': r[4],
+                'scale': r[5],
+                'nullable': False if r[6] else True,
+                'is_pk': r[7],
+                'is_serial': r[8]
+            }
+            col_info[r[1]] = field_def
+            columns.append(r[1])
+            if field_def['is_pk']:
+                pks.append(r[1])
+        if len(pks) == 0 and self.is_view(schema, table):
+            pk_info = self.get_geoserver_view_pk_columns(schema, table)
+            if len(pk_info) > 0:
+                for field_def in col_info:
+                    if field_def['name'] in pks:
+                        field_def['is_pk'] = True
+                        pks.append(field_def['is_pk'])
+        return TableInfo(columns, col_info, pks)
+
+    def get_fields_info(self, table, schema='public', pk_info=False):
         """
         Gets the list of columns of the table and some column information:
         order, column name, type, length, precission, scale and whether it is
@@ -611,8 +727,45 @@ class Introspect:
 
         This method queries pg_attribute to be able to query normal tables and
         materialized views.
+
+        See also: similar method get_table_info.
         """
-        self.cursor.execute("""
+        if not pk_info:
+            self.cursor.execute("""
+            SELECT a.attnum, a.attname,
+            CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
+                ELSE format_type(a.atttypid, null)
+            END,
+            information_schema._pg_char_max_length(a.atttypid, a.atttypmod),
+            information_schema._pg_numeric_precision(a.atttypid, a.atttypmod),
+            information_schema._pg_numeric_scale(a.atttypid, a.atttypmod),
+            a.attnotnull
+            FROM pg_attribute a
+            JOIN (pg_class c JOIN pg_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
+            JOIN (pg_type t JOIN pg_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
+            WHERE a.attnum > 0
+            AND NOT a.attisdropped
+            AND nc.nspname = %s
+            AND c.relname = %s
+            ORDER BY a.attnum;
+            """, [schema, table])
+            rows = []
+            for r in self.cursor.fetchall():
+                field_def = {
+                    'order':r[0],
+                    'name': r[1],
+                    'type': r[2],
+                    'length': r[3],
+                    'precision': r[4],
+                    'scale': r[5],
+                    'nullable': 'NO' if r[6] else 'YES'
+                }
+                rows.append(field_def)
+        else:
+            qualified_table = quote_ident(schema, self.conn) + "." + quote_ident(table, self.conn) 
+            sql = sqlbuilder.SQL("""
+            SELECT q1.*, q2.attname IS NOT NULL AS is_pk, (q2.owned_seq IS NOT NULL AND q2.attname IS NOT NULL) AS is_serial
+            FROM (
             SELECT a.attnum, a.attname,
             CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
                  ELSE format_type(a.atttypid, null)
@@ -628,22 +781,51 @@ class Introspect:
             AND NOT a.attisdropped
             AND nc.nspname = %s
             AND c.relname = %s
-            ORDER BY a.attnum;
-        """, [schema, table])
-        rows = []
-        for r in self.cursor.fetchall():
-            field_def = {'order':r[0],
-                'name': r[1],
-                'type': r[2],
-                'length': r[3],
-                'precision': r[4],
-                'scale': r[5],
-                'nullable': 'NO' if r[6] else 'YES'
-            }
-            rows.append(field_def)
+            ) q1
+            LEFT OUTER JOIN 
+            (SELECT a.attname, pg_get_serial_sequence('{schema}.{table}', a.attname) AS owned_seq
+                        FROM pg_index i
+                        JOIN pg_attribute a ON a.attrelid = i.indrelid
+                        AND a.attnum = ANY(i.indkey)
+                        WHERE
+                        i.indrelid = ({schema_table})::regclass
+                        AND i.indisprimary
+              ) q2
+                        ON q1.attname = q2.attname
+                        ORDER BY q1.attnum
+
+            """).format(
+                schema_table=sqlbuilder.Literal(qualified_table),
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table)
+            )
+            self.cursor.execute(sql, [schema, table])
+            rows = []
+            num_pks = 0
+            for r in self.cursor.fetchall():
+                field_def = {
+                    'order':r[0],
+                    'name': r[1],
+                    'type': r[2],
+                    'length': r[3],
+                    'precision': r[4],
+                    'scale': r[5],
+                    'nullable': 'NO' if r[6] else 'YES',
+                    'is_pk': r[7],
+                    'is_serial': r[8]
+                }
+                rows.append(field_def)
+                if field_def['is_serial']:
+                    num_pks = num_pks + 1
+            if num_pks == 0 and self.is_view(schema, table):
+                pks = self.get_geoserver_view_pk_columns(schema, table)
+                if len(pks) > 0:
+                    for field_def in rows:
+                        if field_def['name'] in pks:
+                            field_def['is_pk'] = True
         return rows
 
-    def get_table_fields_info(self, table, schema='public'):
+    def get_fields_info_stsql(self, table, schema='public'):
         """
         Gets the list of columns of the table and some column information:
         order, column name, type, length, precission, scale and whether it is
@@ -651,6 +833,8 @@ class Introspect:
 
         This method queries information_schema.columns which is standard SQL but
         it is not valid to query materialized views.
+
+        This method is deprecated, use get_fields_info instead.
         """
         self.cursor.execute("""
         SELECT ordinal_position, column_name, data_type, character_maximum_length, numeric_precision, numeric_scale, is_nullable FROM information_schema.columns
@@ -1466,6 +1650,24 @@ class Introspect:
             print("Query error!", e)
             return []
         return values
+
+    def has_owned_sequence(self, schema, table, field):
+        """
+        Checks whether a column has an owned sequence, which is mainly used
+        as an approximation to check if the primary key column of a table
+        is a serial or bigserial column.
+        """
+        sql = "SELECT pg_get_serial_sequence('{schema}.{table}', {field})"
+        query = sqlbuilder.SQL(sql).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table),
+            field=sqlbuilder.Literal(field)
+            )
+        self.cursor.execute(query)
+        r = self.cursor.fetchall()
+        if r[0][0] is None:
+            return False
+        return True
 
     def close(self):
         """
