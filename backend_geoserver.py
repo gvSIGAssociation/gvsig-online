@@ -2009,40 +2009,22 @@ class Geoserver():
         
         return numberOfFeatures
     
+    def _parse_coord(self, num_or_str, default):
+        if isinstance(num_or_str, int):
+            return num_or_str
+        try:
+            return float(num_or_str)
+        except Exception:
+            return default
+
     def getThumbnail(self, ws, ds, layer):
-        if layer.type == 'v_PostGIS':
-            params = json.loads(layer.datastore.connection_params)
-            host = params['host']
-            port = params['port']
-            dbname = params['database']
-            user = params['user']
-            passwd = params['passwd']
-            schema = params.get('schema', 'public')
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            count = i.get_estimated_count(schema, layer.source_name)
-            (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
-            maxx = layer_info[ds_type]['latLonBoundingBox']['maxx']
-            maxy = layer_info[ds_type]['latLonBoundingBox']['maxy']
-            minx = layer_info[ds_type]['latLonBoundingBox']['minx']
-            miny = layer_info[ds_type]['latLonBoundingBox']['miny']
-            i.close()
-            if minx is None: # empty layers
-                minx = -180.0
-            if miny is None:
-                miny = -90.0
-            if maxx is None:
-                maxx = 180.0
-            if maxy is None:
-                maxy = 90.0
-            
-        else:
-            (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
-            if ds_type == 'imagemosaic':
+        (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
+        if ds_type == 'imagemosaic':
                 ds_type = 'coverage'
-            maxx = layer_info[ds_type]['latLonBoundingBox']['maxx']
-            maxy = layer_info[ds_type]['latLonBoundingBox']['maxy']
-            minx = layer_info[ds_type]['latLonBoundingBox']['minx']
-            miny = layer_info[ds_type]['latLonBoundingBox']['miny']
+        maxx = self._parse_coord(layer_info[ds_type]['latLonBoundingBox']['maxx'], 180.0)
+        maxy = self._parse_coord(layer_info[ds_type]['latLonBoundingBox']['maxy'], 90.0)
+        minx = self._parse_coord(layer_info[ds_type]['latLonBoundingBox']['minx'], -180.0)
+        miny = self._parse_coord(layer_info[ds_type]['latLonBoundingBox']['miny'], -90.0)
         if minx > maxx:
             maxx = minx +1
         if miny > maxy:
