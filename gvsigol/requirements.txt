@@ -48,6 +48,7 @@ xmltodict
 six==1.15.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.8.1
+pyhton-docx==0.8.11
 
 numpy==1.19.1 # latest version supporting Python 3.6
 
@@ -126,3 +127,4 @@ SQLAlchemy==1.3.18
 mozilla-django-oidc==2.0.0
 oauthlib==3.2.2
 requests-oauthlib==1.3.1
+
