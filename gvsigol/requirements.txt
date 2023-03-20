@@ -48,7 +48,7 @@ xmltodict
 six==1.15.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.8.1
-pyhton-docx==0.8.11
+python-docx==0.8.11
 
 numpy==1.19.1 # latest version supporting Python 3.6
 
