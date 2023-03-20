@@ -2,11 +2,49 @@
 
 from django.db import migrations
 
+def get_json_toc(apps, project_layergroups, base_group=None):
+    """
+    Methdo copied from gvsigol_core.utils because we need
+    to import Layer and LayerGroup using apps.get_model
+    """
+    LayerGroup = apps.get_model("gvsigol_services", "LayerGroup")
+    Layer = apps.get_model("gvsigol_services", "Layer")
+    toc = {}
+    count1 = 1
+    if base_group is not None:
+        # base groups must have lower z-index (lower order number)
+        try:
+            project_layergroups.remove(base_group)
+        except ValueError:
+            pass
+        project_layergroups.insert(0, base_group)
+    for lg in project_layergroups:
+        lg_count = count1 * 1000
+        toc_layergroup = {}
+        layer_group = LayerGroup.objects.get(id=lg)
+        toc_layergroup['name'] = layer_group.name
+        toc_layergroup['title'] = layer_group.title
+        toc_layergroup['order'] = lg_count
+        
+        toc_layers = {}
+        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id)
+        count2 = 1
+        for l in layers_in_group: 
+            toc_layers[l.name] = {
+                'name': l.name,
+                'title': l.title,
+                'order': lg_count + count2
+            }
+            count2 += 1
+        toc_layergroup['layers'] = toc_layers
+        toc[layer_group.name] = toc_layergroup
+        count1 += 1
+
+
 def toc_order_fix(apps, schema_editor):
     """
     Ensures base layers have the lowest z-index in toc-order
     """
-    from gvsigol_core.utils import get_json_toc
     Project = apps.get_model("gvsigol_core", "Project")
     ProjectLayerGroup = apps.get_model("gvsigol_core", "ProjectLayerGroup")
     for project in Project.objects.all():
@@ -16,7 +54,7 @@ def toc_order_fix(apps, schema_editor):
             selected_base_group = plg.layer_group.id
         except:
             selected_base_group = None
-        project.toc_order = get_json_toc(assigned_layergroups, selected_base_group)
+        project.toc_order = get_json_toc(apps, assigned_layergroups, selected_base_group)
         project.save()
 
 
