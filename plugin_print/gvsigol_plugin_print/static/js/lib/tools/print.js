@@ -73,6 +73,18 @@ print.prototype.active = false;
  */
 print.prototype.deactivable = true;
 
+print.prototype.applyRotation = function(rotationValue) {
+	var feature = this.extentLayer.getSource().getFeatures()[0];
+	var center = this.map.getView().getCenter();
+	var radiansAngle = (rotationValue * 2 * Math.PI) / 360;
+	var radiansLastAngle = ((360-this.lastAngle) * 2 * Math.PI) / 360;
+	feature.getGeometry().rotate(radiansLastAngle, center);
+	feature.getGeometry().rotate(radiansAngle, center);
+	this.extentLayer.getSource().dispatchEvent('change');
+	this.lastAngle = rotationValue;
+
+}
+
 /**
  * @param {Event} e Browser event.
  */
@@ -297,20 +309,15 @@ print.prototype.handler = function(e) {
 	        self.lastAngle = 0;
 			var mapAttribute = self.getAttributeByName('map');
 			self.renderPrintExtent(mapAttribute.clientInfo);
+			var rotation = $('#print-rotation').val();
+			self.applyRotation(rotation);
 	
 			self.updateUI();
 			$('#print-template').trigger('printtemplateselected');
 		});
 
 		$('#print-rotation').on('change', function(e) {
-			var feature = self.extentLayer.getSource().getFeatures()[0];
-		    var center = self.map.getView().getCenter();
-		    var radiansAngle = (this.value * 2 * Math.PI) / 360;
-		    var radiansLastAngle = ((360-self.lastAngle) * 2 * Math.PI) / 360;
-		    feature.getGeometry().rotate(radiansLastAngle, center);
-			feature.getGeometry().rotate(radiansAngle, center);
-			self.extentLayer.getSource().dispatchEvent('change');
-			self.lastAngle = this.value;
+			self.applyRotation(this.value);
 		});
 		
 		$('#print-scale').on('change', function(e) {
@@ -344,6 +351,7 @@ print.prototype.handler = function(e) {
 			var userScaleStr = $("#print-userscale").val();
 			var userScale = parseInt(userScaleStr);
 			self.zoomChangedFromScale = true;
+			self.dpi = 96;
 			self.map.getView().setResolution(self.getResolutionForScale(userScale));
 		});
 
@@ -377,6 +385,7 @@ print.prototype.handler = function(e) {
 			self.showLayersTab();
 			self.capabilities = null;
 			self.active = false;
+			self.lastAngle = 0;
 		});
 
 		this.active = true;
@@ -423,7 +432,7 @@ print.prototype.setDefaultTemplate = function(templateName) {
 	this.capabilities = this.getCapabilities(templateName);
 
 	this.extentLayer.getSource().clear();
-	this.lastAngle = 0;
+	// this.lastAngle = 0;
 	var mapAttribute = this.getAttributeByName('map');
 	this.renderPrintExtent(mapAttribute.clientInfo);
 
@@ -634,6 +643,7 @@ print.prototype.createPrintJob = function(template) {
 	var useNearestScale = true;
 	if (!scaleToSet) {
 		scaleToSet = self.getScaleForResolution(); // Actual scale of the view if the user has not selected a scale
+		scaleToSet = scaleToSet * 0.6;
 		useNearestScale = false;
 	}
 
@@ -998,13 +1008,18 @@ var inchesPerMeter = 39.3700787;
 var dpi = 96;
 
 print.prototype.getResolutionForScale = function (scaleDenominator) {
-  return scaleDenominator / inchesPerMeter / dpi;
+  let dpiMonitor = 120; // asumimos los dpi del monitor de un portátil, no hay otra forma de hacerlo mejor.
+  // Tenemos que mostrar el cuadro que muestra la zona que se va a imprimir, y eso hace que no podamos poner la 
+  // resolución de la vista exactamente a la escala de impresión. Tenemos que aplicar el factor de 0.6 que 
+  // usamos en el renderExtent
+  let factor = 0.6;
+  return scaleDenominator / inchesPerMeter / dpiMonitor / 0.6;
 }
 
 print.prototype.getScaleForResolution = function() {
 	const resolution = this.map.getView().getResolution();
 	const mpu = this.map.getView().getProjection().getMetersPerUnit();
-	return parseFloat(resolution.toString()) * mpu * inchesPerMeter * dpi;
+	return parseFloat(resolution.toString()) * mpu * inchesPerMeter * 120;
 }
 
 print.prototype.getCurrentScale = function (dpi) {
@@ -1092,17 +1107,17 @@ print.prototype.getCapabilities = function(template) {
 };
 
 /**
- * TODO
+ * ancho en metros = unidades jasper * 0.35273 * denominadorEscala / 1000
  */
 print.prototype.renderPrintExtent = function(clientInfo) {
-    var mapComponentWidth = this.map.getSize()[0];
+    var mapComponentWidth = this.map.getSize()[0]; // en metros
     var mapComponentHeight = this.map.getSize()[1];
     var currentMapRatio = mapComponentWidth / mapComponentHeight;
     var scaleFactor = 0.6;
-    var desiredPrintRatio = clientInfo.width / clientInfo.height;
+    var desiredPrintRatio = clientInfo.width / clientInfo.height; // en unidades jasper
     var targetWidth;
     var targetHeight;
-    var geomExtent;
+    var geomExtent = [];
     var feat;
 
     if (desiredPrintRatio >= currentMapRatio) {
@@ -1112,11 +1127,41 @@ print.prototype.renderPrintExtent = function(clientInfo) {
         targetHeight = mapComponentHeight * scaleFactor;
         targetWidth = targetHeight * desiredPrintRatio;
     }
+
+	var scaleToSet = $('#print-scale').val();
+	if (scaleToSet == 'user-scale') {
+		var userScaleStr = $("#print-userscale").val();
+		var userScale = parseInt(userScaleStr);
+		scaleToSet = userScale;
+	}
+	var useNearestScale = true;
+	if (!scaleToSet) {
+		scaleToSet = this.getScaleForResolution(); // Actual scale of the view if the user has not selected a scale
+		scaleToSet = scaleToSet * 0.6;
+		useNearestScale = false;
+	}
+
+	// Vamos a poner una resolución un poco más alejada para poder visualizar el rectángulo del mapa y poder moverlo.
+	// Si pusieramos la misma escala que queremos imprimir, el usuario no podría ajustar el rectángulo arrastrando,
+	// ocuparía toda la vista.
+
+	var center = this.map.getView().getCenter();
+
+	let anchoMetros = clientInfo.width * 0.35273 * scaleToSet / 1000.0;
+	let altoMetros = clientInfo.height * 0.35273 * scaleToSet / 1000.0;
     
-    geomExtent = this.map.getView().calculateExtent([
-        targetWidth,
-        targetHeight
-    ]);
+	let minX = center[0] - (anchoMetros/2.0);
+  	let minY = center[1]- (altoMetros/2.0);
+  	let maxX = center[0] + (anchoMetros/2.0);
+  	let maxY = center[1] + (altoMetros/2.0);
+
+    // geomExtent = this.map.getView().calculateExtent([
+    //     targetWidth,
+    //     targetHeight
+    // ]);
+
+    geomExtent = [minX, minY, maxX, maxY];
+
     
     feat = new ol.Feature(ol.geom.Polygon.fromExtent(geomExtent));
     this.extentLayer.getSource().addFeature(feat);
