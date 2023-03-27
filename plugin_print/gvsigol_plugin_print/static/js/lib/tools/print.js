@@ -76,9 +76,11 @@ print.prototype.deactivable = true;
 print.prototype.applyRotation = function(rotationValue) {
 	var feature = this.extentLayer.getSource().getFeatures()[0];
 	var center = this.map.getView().getCenter();
+	if (rotationValue === undefined)
+		rotationValue = 0;
 	var radiansAngle = (rotationValue * 2 * Math.PI) / 360;
-	var radiansLastAngle = ((360-this.lastAngle) * 2 * Math.PI) / 360;
-	feature.getGeometry().rotate(radiansLastAngle, center);
+	// var radiansLastAngle = ((360-this.lastAngle) * 2 * Math.PI) / 360;
+	// feature.getGeometry().rotate(radiansLastAngle, center);
 	feature.getGeometry().rotate(radiansAngle, center);
 	this.extentLayer.getSource().dispatchEvent('change');
 	this.lastAngle = rotationValue;
@@ -309,15 +311,16 @@ print.prototype.handler = function(e) {
 	        self.lastAngle = 0;
 			var mapAttribute = self.getAttributeByName('map');
 			self.renderPrintExtent(mapAttribute.clientInfo);
-			var rotation = $('#print-rotation').val();
-			self.applyRotation(rotation);
 	
 			self.updateUI();
 			$('#print-template').trigger('printtemplateselected');
 		});
 
 		$('#print-rotation').on('change', function(e) {
-			self.applyRotation(this.value);
+			// self.applyRotation(this.value);
+			self.extentLayer.getSource().clear();
+			var mapAttribute = self.getAttributeByName('map');
+			self.renderPrintExtent(mapAttribute.clientInfo);
 		});
 		
 		$('#print-scale').on('change', function(e) {
@@ -327,6 +330,10 @@ print.prototype.handler = function(e) {
 				var userScaleStr = $("#print-userscale").text();
 				var userScale = parseInt(userScaleStr);
 				scaleVal = userScale;
+				self.extentLayer.getSource().clear();
+				var mapAttribute = self.getAttributeByName('map');
+				self.renderPrintExtent(mapAttribute.clientInfo);
+	
 			}
 			else {
 				$('#print-user-scale-holder').hide();
@@ -1167,6 +1174,9 @@ print.prototype.renderPrintExtent = function(clientInfo) {
     this.extentLayer.getSource().addFeature(feat);
     this.extentLayer.setZIndex(this.map.getLayers().length);
     this.extentLayer.changed();
+	var rotation = $('#print-rotation').val();
+	this.applyRotation(rotation);
+
     return feat;
 };
 
