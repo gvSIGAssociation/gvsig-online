@@ -4658,7 +4658,7 @@ def kill_all_group_tasks(request):
 def update_thumbnail(request, layer_id):
     try:
         layer = Layer.objects.get(id=int(layer_id))
-        if not utils.can_manage_layer(layer):
+        if not utils.can_manage_layer(request.user, layer):
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
