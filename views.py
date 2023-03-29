@@ -1957,7 +1957,7 @@ def layer_boundingbox_from_data(request):
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(external=False, name=layer_name, datastore__workspace__name=ws_name)
-        if not utils.can_write_layer(layer):
+        if not utils.can_write_layer(request, layer):
             return HttpResponseNotFound("<h1>Permission denied to modify layer: {0}</h1>".format(layer.id))
         tasks.refresh_layer_info.apply_async(args=[layer.id])
         return HttpResponse('{"response": "ok"}', content_type='application/json')
