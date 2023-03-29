@@ -609,15 +609,17 @@ class Geoserver():
             elif mode == 'update':
                 signals.layer_updated.send(sender=None, layer=layer)
                 
+            try:
+                if old_thumbnail and 'no_thumbnail.jpg' != os.path.basename(old_thumbnail.path):
+                    if os.path.isfile(old_thumbnail.path):
+                        os.remove(old_thumbnail.path)
+            except:
+                pass
             return layer
         
         except Exception as e:
             logger.exception('Actualizando thumbnail: ' + layer.name)
             pass
-
-        if old_thumbnail and not 'no_thumbnail.jpg' in old_thumbnail.name:
-            if os.path.isfile(old_thumbnail.path):
-                os.remove(old_thumbnail.path)
         
     def deleteStyle(self, name):
         try:
