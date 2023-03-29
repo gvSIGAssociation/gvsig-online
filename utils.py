@@ -793,3 +793,12 @@ def get_layerread_by_user(request):
     roles = get_roles(request)
     return Layer.objects.filter(get_layerread_by_user_query(roles) \
              | get_public_layers_query()).distinct()
+
+def set_default_permissions(file_path):
+    """
+    Sets the default permissions to the provided file, based
+    on the system umask value
+    """
+    umask = os.umask(0o666)
+    os.umask(umask)
+    os.chmod(file_path, 0o666 & ~umask)

@@ -2060,7 +2060,7 @@ class Geoserver():
             'BBOX': bbox
         }
         
-        out_file, out_file_name = tempfile.mkstemp(suffix='.png', prefix='', dir=settings.MEDIA_ROOT + "thumbnails/")
+        out_file, out_file_name = tempfile.mkstemp(suffix='.png', prefix='', dir=os.path.join(settings.MEDIA_ROOT, "thumbnails"))
         req = requests.Session()
         req.auth = (self.user, self.password)
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
@@ -2074,8 +2074,8 @@ class Geoserver():
                 if not block:
                     break
                 f.write(block)
-                
-        return out_file_name
+        utils.set_default_permissions(out_file_name)
+        return os.path.relpath(out_file_name, settings.MEDIA_ROOT)
     
     # ImageMosaic methods
     def createimagemosaic(self, store, layer):
