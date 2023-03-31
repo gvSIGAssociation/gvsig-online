@@ -216,6 +216,9 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer, buildDrawC
 			$.ajax({
 				url: url,
 				headers: headers,
+				xhrFields: {
+					withCredentials: true
+				},
 				EditionBar: this_,
 				success: function(response) {
 					try{
@@ -454,7 +457,6 @@ EditionBar.prototype.stopEdition = function() {
 		this.removeVectorLayer();
 	}
 	$('#editionbar').remove();
-	console.log(this.selectedLayer);
 	this.updateServiceBoundingBox(this.selectedLayer.workspace, this.selectedLayer.layer_name);
 	this.selectedLayer.latlong_extent = null;
 	this.removeLayerLock();
@@ -989,6 +991,7 @@ EditionBar.prototype.getEnumeration = function(enumName) {
 		type: 'POST',
 		async: false,
 	  	url: "/gvsigonline/services/get_enumeration/",
+		timeout: 7000,
 	  	data: {
 	  		'enum_name': enumName
 		},
@@ -2340,6 +2343,9 @@ EditionBar.prototype.transactWFS = function(p,f) {
 		type: 'POST',
 		headers: headers,
 		async: false,
+		xhrFields: {
+			withCredentials: true
+		},
 	    dataType: 'xml',
 	    processData: false,
 	    contentType: 'text/xml',
