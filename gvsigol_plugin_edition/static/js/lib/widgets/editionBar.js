@@ -1287,7 +1287,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		for (var i=0; i<this.featureType.length; i++) {
 			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
 				var name = '<span class="edit-feature-field">' + this.featureType[i].name + '</span>';
-				var visible = true;
+				var visible = false;
 				if(fields){
 					for(var ix =0; ix<fields.length; ix++){
 						if(fields[ix].name.toLowerCase() == this.featureType[i].name){
@@ -1760,7 +1760,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		for (var i=0; i<this.featureType.length; i++) {
 			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
 				var name = '<span class="edit-feature-field">' + this.featureType[i].name+'</span>';
-				var visible = true;
+				var visible = false;
 				if(fields){
 					for(var ix =0; ix<fields.length; ix++){
 						if(fields[ix].name.toLowerCase() == this.featureType[i].name){
