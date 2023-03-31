@@ -51,18 +51,9 @@ logger = logging.getLogger(__name__)
 def feature_version_management(request):
     if request.method == 'POST':
         try:
-            layerid = None
-            try:
-                layerid = request.POST['lyrid']
-            except Exception:
-                pass
-            workspace = None
-            lyrname = None
-            try:
-                workspace = request.POST['workspace']
-                lyrname = request.POST['lyrname']
-            except Exception:
-                pass
+            layerid = request.POST.get('lyrid')
+            workspace = request.POST.get('workspace')
+            lyrname = request.POST.get('lyrname')
             featid = request.POST['featid']
             segments = featid.split(".")
             featid = segments[-1]
@@ -126,7 +117,7 @@ def check_version(request):
         workspace = request.POST['workspace']
         lyrname = request.POST['lyrname']
         operation = int(request.POST['operation'])
-        version = request.POST['version'] 
+        version = request.POST.get('version')
         featid = request.POST.get('featid')
         if featid:
             segments = featid.split(".")
