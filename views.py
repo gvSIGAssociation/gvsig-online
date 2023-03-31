@@ -4843,7 +4843,7 @@ def db_field_delete(request):
             logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
             if e.pgcode == '42703':
                 return utils.get_exception(400, _('Field does not exist. Probably, it was deleted or renamed concurrently by another user'))
-        except Exception:
+        except Exception as e:
             logger.exception(_('Error deleting field. Cause: {0}').format(str(e)))
     return utils.get_exception(400, 'Error in the input params')
 
