@@ -425,23 +425,23 @@ class GvSigOnlineServicesAD(GvSigOnlineServices):
         ad_suffix = GVSIGOL_LDAP['AD']
         if self.is_enabled:
             # The dn of our new entry/object
-            dn=str("cn=" + username + ",ou=users," + self.domain)
+            dn = "cn=" + username + ",ou=users," + self.domain
             
             # A dict to help build the "body" of the object
             attrs = {}
-            attrs['cn'] = str(username)
-            attrs['gidNumber'] = str('500')
-            attrs['givenName'] = str(first_name)
-            attrs['homeDirectory'] = str('/home/users/' + username)
+            attrs['cn'] = username.encode(LDAP_ENCODING)
+            attrs['gidNumber'] = '500'.encode(LDAP_ENCODING)
+            attrs['givenName'] = first_name.encode(LDAP_ENCODING)
+            attrs['homeDirectory'] = ('/home/users/' + username).encode(LDAP_ENCODING)
             if is_superuser:
-                attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
-                attrs['olcExtraAttrs'] = 'CAT_ALL_Administrator'
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixAccount'.encode(LDAP_ENCODING),'inetOrgPerson'.encode(LDAP_ENCODING),'extensibleObject'.encode(LDAP_ENCODING)]
+                attrs['olcExtraAttrs'] = 'CAT_ALL_Administrator'.encode(LDAP_ENCODING)
             else:
-                attrs['objectclass'] = ['top','posixAccount','inetOrgPerson']
-            attrs['userPassword'] = '{SASL}' + str(username) + ad_suffix
-            attrs['uidNumber'] = str(GvSigOnlineServices.ldap_get_last_uid(self) + 1)
-            attrs['sn'] = str(username)
-            attrs['uid'] = str(username)
+                attrs['objectclass'] = ['top'.encode(LDAP_ENCODING),'posixAccount'.encode(LDAP_ENCODING),'inetOrgPerson'.encode(LDAP_ENCODING)]
+            attrs['userPassword'] = '{SASL}'.encode(LDAP_ENCODING) + username.encode(LDAP_ENCODING) + ad_suffix.encode(LDAP_ENCODING)
+            attrs['uidNumber'] = str(self.ldap_get_last_uid() + 1).encode('utf-8')
+            attrs['sn'] = username.encode(LDAP_ENCODING)
+            attrs['uid'] = username.encode(LDAP_ENCODING)
             
             # Convert our dict to nice syntax for the add-function using modlist-module
             ldif = modlist.addModlist(attrs)
