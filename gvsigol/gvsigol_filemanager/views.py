@@ -29,6 +29,7 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import render
 from .tasks import postBackground
 from .models import exports_historical
+from gvsigol.celery import app as celery_app
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
@@ -155,7 +156,8 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
             file = request.POST.get('file_path'),
             status = 'Running',
             message = 'Running',
-            username = request.user.username
+            username = request.user.username,
+            redirect = "/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path')
         )
 
         export_md.save()
@@ -181,13 +183,68 @@ def list_exports(request):
 
     exportations = []
 
+    i = celery_app.control.inspect()
+
+    actives = i.active()
+
+    actives_list = []
+
+    if actives:
+        key = list(actives.keys())[0]
+        if len(actives[key]) > 0:
+
+            for act in actives[key]:
+                if act['name'] == 'gvsigol_filemanager.tasks.postBackground':
+                    actives_list.append(act['id'])
+
     for ex in exports_model:
         export = {}
         export['id'] = ex.id
         export['file'] = ex.file
         export['time'] = ex.time
-        export['status'] = ex.status
-        export['message'] = ex.message
+        
+        if ex.status == 'Running' or ex.message == 'Exportation task has been lost':
+
+            if ex.task_id:
+
+                if ex.task_id not in actives_list:
+                    export['status'] = 'Error'
+                    export['message'] = 'Exportation task has been lost'
+
+                    ex.status = 'Error'
+                    ex.message = 'Exportation task has been lost'
+                    ex.save()
+
+                elif ex.message == 'Exportation task has been lost' or ex.message == 'Running again':
+
+                    export['status'] = 'Running'
+                    export['message'] = 'Running again'
+
+                    ex.status = 'Running'
+                    ex.message = 'Running again'
+                    ex.save()
+
+                else:
+
+                    export['status'] = 'Running'
+                    export['message'] = 'Running'
+
+                    ex.status = 'Running'
+                    ex.message = 'Running'
+                    ex.save()
+
+            else:
+                export['status'] = 'Error'
+                export['message'] = 'Exportation task has been lost'
+                ex.status = 'Error'
+                ex.message = 'Exportation task has been lost'
+                ex.save()
+
+        else:
+        
+            export['status'] = ex.status
+            export['message'] = ex.message
+        
         export['redirect'] = ex.redirect
         export['username'] = ex.username
         

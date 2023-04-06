@@ -100,10 +100,22 @@ function actualizarInfoPanel(data){
 		if(status == 'Success'){
 
 			$("#icon-"+id).removeClass("fa fa-spinner fa-spin")
+			$("#icon-"+id).removeClass("fa fa-times")
 			$("#icon-"+id).addClass("fa fa-check")
 			$("#icon-"+id).css("display", "inline");
 			$("#icon-"+id).css("color", "green");
 
+			$("#msg-"+id).text(msg)
+
+			$("#btn-"+id).remove()
+
+		}
+
+		if(status == 'Running'){
+
+			$("#icon-"+id).addClass("fa fa-spinner fa-spin")
+			$("#icon-"+id).css("display", "inline-block");
+			$("#icon-"+id).css("color", "");
 			$("#msg-"+id).text(msg)
 
 		}
