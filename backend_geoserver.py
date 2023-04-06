@@ -1262,8 +1262,7 @@ class Geoserver():
                             i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
                         except:
                             logger.exception("Error adding control field: " + control_field['name'])
-                if creation_mode == forms_geoserver.MODE_OVERWRITE:
-                    i.update_pk_sequences(name, schema=schema)
+                i.update_pk_sequences(name, schema=schema)
             
             if creation_mode == forms_geoserver.MODE_OVERWRITE:
                 # re-install triggers
