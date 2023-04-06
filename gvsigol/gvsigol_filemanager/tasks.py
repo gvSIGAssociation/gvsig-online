@@ -1,4 +1,5 @@
 from gvsigol.celery import app as celery_app
+from celery.signals import after_task_publish
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from gvsigol_services import geographic_servers
 from django.contrib import messages
@@ -20,7 +21,12 @@ def postBackground(**kwargs):
     files = kwargs['files']
     username = kwargs['username']
 
+    task_id = postBackground.request.id
+
     export = exports_historical.objects.get(id = _id)
+
+    export.task_id = str(task_id)
+    export.save()
 
     user = User.objects.get(username = username)
 
