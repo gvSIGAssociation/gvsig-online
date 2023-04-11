@@ -1,0 +1,11 @@
+DEBUG=true
+MINIMIZE=true
+OS=Debian11
+
+GVSIGOL_HOST="localhost"
+GVSIGOL_SKIN="skin-blue"
+GVSIGOL_PLUGINS="'gvsigol_app_dev','gvsigol_plugin_print','gvsigol_plugin_edition','gvsigol_plugin_baseapi','gvsigol_plugin_featureapi','gvsigol_plugin_projectapi'"
+LANGUAGES="('es', _('Spanish')), ('en',_('English'))"
+
+
+GDAL_LIBRARY_PATH="/usr/lib/libgdal.so.28"
