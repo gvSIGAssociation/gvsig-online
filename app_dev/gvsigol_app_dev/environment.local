@@ -11,4 +11,4 @@ LANGUAGES="('es', _('Spanish')), ('en',_('English'))"
 
 
 
-GDAL_LIBRARY_PATH="/usr/lib/libgdal.so.28"
+GDAL_LIBRARY_PATH="/usr/lib/libgdal.so.30"
