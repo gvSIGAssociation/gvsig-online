@@ -25,42 +25,54 @@ from django.http.response import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from gvsigol_plugin_baseapi.validation import HttpException
-
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from django.core.serializers import serialize
+from gvsigol_plugin_prueba.models import Poi
+from . import service
 import json
 
-class TestView(ListAPIView):
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+    
+class PoiView(ListAPIView):
     serializer_class = None
     permission_classes = [AllowAny]
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
-    @swagger_auto_schema(operation_id='get_test', operation_summary='', 
+
+    @swagger_auto_schema(operation_id='get_pois', operation_summary='', 
                          responses={404: "Database connection NOT found<br>User NOT found",
                                     403: "The project is not allowed to this user"})
     @action(detail=True, methods=['GET'])
     def get(self, request):
         try: 
-            param = request.query_params.get('param')
+            pois = serialize('geojson', Poi.objects.all(), geometry_field='geometry', fields=('name', 'description'))
             
             response = {
-                'success': False
+                'pois': pois
             }
             return JsonResponse(response, safe=False)
             
         except HttpException as e:
             return e.get_exception()
     
-    @swagger_auto_schema(operation_id='post_test', operation_summary='', 
+    @swagger_auto_schema(operation_id='save_pois', operation_summary='', 
                          responses={404: "Database connection NOT found<br>User NOT found",
                                     403: "The project is not allowed to this user"})
-    @action(detail=True, methods=['POST'])
+    @action(detail=True, methods=['POST'], permission_classes=[AllowAny])
     def post(self, request):
         try:
             content = get_content(request)
+            json_pois = content.get('pois')
+
+            saved = service.save_pois(json_pois)
 
             response = {
-                'success': False
+                'success': saved
             }
 
             return JsonResponse(response, safe=False)
