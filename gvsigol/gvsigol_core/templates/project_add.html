@@ -81,6 +81,11 @@
 										<label for="selectable_groups">{% trans "Selectable layer groups" %}</label>&nbsp;&nbsp;
 										<input type="checkbox" name="selectable_groups" id="selectable_groups"/>														
 									</div>
+									<div class="col-md-3 form-group">
+										<label for="id_expiration_date">{% trans "expiration_date" %}</label>
+										<input type="datetime-local" name="expiration_date"  id="expiration_date" class="form-control" />
+										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />							
+									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-3 form-group">
@@ -141,28 +146,23 @@
 									</div>
 								</div>
 
+								<!-- TAGS DE PROYECTO -->
+
 								<div class="row">
 									<div class="col-md-3 form-group">
-										<span class='header_project_label'>{% trans "Project tags" %}</span>
-										<select size="8" multiple='multiple' class="form-control" id="id_project_label" name="project_label" tabindex="-1" aria-hidden="true">
-											<option value="mobile">mobile</option>
-											<!--Otras etiquetas-->
-										</select>
-									</div>
-									<div class="col-md-1 form-group" style="width: 4%;top:40px">
-										<div style="width:25px">
-											<button id="button_add_label" type="button" >&gt;&gt;</button>
-											<button id="button_remove_label" type="button" >&lt;&lt;</button>
-										</div>
-									</div>
-									<div class="col-md-3 form-group">
-										<span class='header_project_label'>{% trans "Added tags" %}</span>
-										<select size="8" multiple='multiple'  class="form-control" id="id_label_added" name="label_added" tabindex="-1" aria-hidden="true">
-											
-										</select>
+										<label for="header_project_label">{% trans "Project tags" %}</label>
 									</div>
 									<input class="hide form-control" id="labels_added" name="labels_added" type="text" />
 								</div>
+								{% for s in label_list %}
+								<div class="row">
+									<div class="col-md-6 form-group">
+										<div>
+											<input {{ s.checked }} type="checkbox" name="label_{{s.label}}" id="id_{{s.label}}" />&nbsp;&nbsp;&nbsp;{{ s.label }}
+										</div>
+									</div>
+								</div>
+								{% endfor %}
 
 							</div>
               			</div>
@@ -421,20 +421,6 @@
   	        
   	    }
   	}
-
-	$('#button_add_label').on("click", function (e) {
-		let val = $('#id_project_label').val();
-		if(val) {
-			var hasOption = $('#id_label_added option[value="' + val + '"]');
-			if (hasOption.length == 0) {
-				$('#id_label_added').append("<option value='" + val + "'>"+ val + "</option>")
-			}
-		}
-	})
-
-	$('#button_remove_label').on("click", function (e) {
-		$('#id_label_added option:selected').remove();
-	})
 	
 	var epsg3857Bounds = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 	var epsg4326Bounds = [-180.0, -90.0, 180.0, 90.0];
@@ -642,6 +628,22 @@
 			updateMapSelectedExtent(map, vector_source);
 		});
 
+		$("#expiration_date").on('change', function(evt) {
+			let localDateStr = $("#expiration_date").val()
+			$("#expiration_date_utc").val(getUTCMillisFromLocal(localDateStr))
+		});
+
+		function getUTCMillisFromLocal(localDateStr) {
+			if(localDateStr == null || localDateStr == '') {
+				return null
+			}
+			try {
+				let localDate = new Date(localDateStr)
+				return Date.parse(localDate.toUTCString())
+			}catch(error) {
+				return null
+			}
+		};
 		
 		var searcheableList = new List('user-list-box', {
 	  		  valueNames: ['searchable-user'],
@@ -730,11 +732,19 @@
 			}
 			$("#project_tools").val(JSON.stringify(projectTools));
 
-			//Se seleccionan todas las opciones del listado de etiquetas para que se manden en el submit
+			let labels = [
+			{% for s in label_list %}
+				'{{ s.label }}',
+			{% endfor %}
+			]
+
 			let labels_to_send = ""
-			$("#id_label_added option").each(function() {
-				labels_to_send += this.value + ","
-			});
+			for(var i = 0; i < labels.length; i++) {
+				var item = labels[i];
+				if($("#id_" + item).is(':checked')) {
+					labels_to_send += item + ","
+				}
+			}
 			labels_to_send = labels_to_send.substring(0, labels_to_send.length - 1)
 			$("#labels_added").val(labels_to_send)
 			
