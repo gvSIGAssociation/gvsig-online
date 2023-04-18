@@ -191,6 +191,7 @@ def project_add(request):
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
         tools = request.POST.get('project_tools')
+        expiration_date_utc = request.POST.get('expiration_date_utc')
 
         is_public = False
         if 'is_public' in request.POST:
@@ -228,6 +229,9 @@ def project_add(request):
         labels_added = None
         if 'labels_added' in request.POST:
             labels_added = request.POST.get('labels_added')
+
+        if 'expiration_date_utc' in request.POST:
+            expiration_date_utc = request.POST.get('expiration_date_utc')
 
         assigned_layergroups = []
         assigned_roles = []
@@ -299,6 +303,15 @@ def project_add(request):
             tools = tools,
             labels = labels_added
         )
+        if expiration_date_utc is not None and expiration_date_utc != '':
+            try:
+                ts = int(expiration_date_utc) / 1000
+                project.expiration_date = datetime.datetime.fromtimestamp(ts)
+            except Exception as e:
+                pass
+        else:
+            project.expiration_date = None
+
         project.save()
         
         if has_image:
@@ -375,9 +388,13 @@ def project_add(request):
                     'id': l.id,
                     'title': l.title
                 })
-            prepared_layer_groups.append(layer_group)
+            prepared_layer_groups.append(layer_group)  
 
-        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin})
+        labels = []
+        for l in settings.PRJ_LABELS:
+            labels.append({'label': l, 'checked': ''})
+
+        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin, 'label_list': labels})
 
 
 @login_required()
