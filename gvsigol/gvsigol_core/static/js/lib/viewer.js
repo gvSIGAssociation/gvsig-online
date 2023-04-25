@@ -87,7 +87,7 @@ viewer.core = {
 			for (var i=0; i<self.conf.auth_urls.length; i++) {
 				$.ajax({
 					url: self.conf.auth_urls[i] + "/wms",
-					params: {
+					data: {
 						'SERVICE': 'WMS',
 						'VERSION': '1.1.1',
 						'REQUEST': 'GetCapabilities'
