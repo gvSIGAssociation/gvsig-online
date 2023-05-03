@@ -235,7 +235,8 @@ print.prototype.handler = function(e) {
 		
 			for ( var bId = 0; bId < self.baseLayers.length; bId++) {
 				var lyr = self.baseLayers[bId];
-				if (lyr.type == "OSM") 
+				// if (lyr.type == "OSM") 
+				if (bId == 0) // Cambiamos. En lugar de poner la de OSM por defecto, ponemos la primera que se configura.
 					ui += '<option value="' + bId + '" selected>' + lyr.name + '</option>'
 				else 
 					ui += '<option value="' + bId + '">' + lyr.name + '</option>'
