@@ -37,4 +37,5 @@ urlpatterns = [
     path('etl/etl_types_segex/', views.etl_types_segex, name='etl_types_segex'),
     path('etl/etl_schema_json/', views.etl_schema_json, name='etl_schema_json'),
     path('etl/etl_schema_padron_alba/', views.etl_schema_padron_alba, name='etl_schema_padron_alba'),
+    path('etl/etl_xml_tags/', views.etl_xml_tags, name='etl_xml_tags'),
 ]
