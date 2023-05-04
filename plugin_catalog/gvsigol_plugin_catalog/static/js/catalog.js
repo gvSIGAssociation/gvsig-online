@@ -956,14 +956,29 @@ CatalogView.prototype.getAvailableLayers = function(baseUrl, layerName) {
 			if (layerName) {
 				var layer = null;
 				for (var i=0, len = layers.length; i<len; i++) {
-					var layerobj = layers[i];
-					if (layerobj.Name == layerName) {
-						layer = layerobj;
+					if (layers[i].Name == layerName) {
+						layer = layers[i];
 					}
 				}
 			}
 			if (layer != null) {
 				layers = [layer];
+			}
+			else {
+				// try removing the workspace name
+				var layerNameParts = layerName.split(":");
+				if (layerNameParts.length>1) {
+					var nqLayerName = layerNameParts[1];
+					for (var i=0, len = layers.length; i<len; i++) {
+						if (layers[i].Name == nqLayerName) {
+							layer = layers[i];
+						}
+					}
+					if (layer != null) {
+						layers = [layer];
+					}
+				}
+
 			}
 			onSuccess(url, layers, formats);
 			onFinally(url, layers, formats);
