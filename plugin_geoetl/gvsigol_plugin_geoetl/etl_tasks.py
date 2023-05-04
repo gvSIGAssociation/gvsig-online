@@ -27,6 +27,7 @@ from zipfile import ZipFile
 import time
 import math
 from . import etl_schema
+import xml.etree.ElementTree as ET
 
 from celery.utils.log import get_task_logger
 
@@ -93,6 +94,127 @@ def get_temp_dir():
 #Name must be the identifier of the task 
 #Array will be as longer as outputs has the task. e.g filter has two outputs True and False
 #so output array will be [idTrue, idFalse]
+
+
+def getXpath(child, list_):
+
+    parentTag = ['.']
+
+    for x in range (0, len(list_)):
+        r = list_[x]
+
+        if r[1].strip() == child:
+
+            if r[0].split('-')[0] == 0:
+                break
+            else:
+                parentTag.insert(1, r[0].split('-')[1])
+                child = r[0].split('-')[1]
+                x = 0
+
+    return '/'.join(parentTag)
+
+def input_Xml(dicc):
+
+    table_name = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name))
+    cur.execute(sqlDrop)
+    conn.commit()
+    
+    if dicc['reading'] == 'single':
+
+        listXmlFile = [dicc['xml-file'].split('//')[1]]
+
+    else:
+        listXmlFile = []
+        for file in os.listdir(dicc['xml-file']):
+            if file.endswith(".xml"):
+                listXmlFile.append(dicc['xml-file'] +'//'+ file)
+        
+    for xmlFile in listXmlFile:
+
+        root = ET.parse(xmlFile)
+
+        schemaList = dicc['selected-schema'].split(',')
+
+        sqlCreate = "CREATE TABLE IF NOT EXISTS {schema}.{table_name} ("
+
+        for s in schemaList:
+            sqlCreate = sqlCreate + '{} TEXT, '
+
+        sqlCreate = sqlCreate[:-2]+')'
+
+        _sqlCreate = sql.SQL(sqlCreate).format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            table_name = sql.Identifier(table_name),
+            *[sql.Identifier(field) for field in schemaList])
+        cur.execute(_sqlCreate)
+        conn.commit()
+
+        child = schemaList[0]
+
+        xpath = getXpath(child, dicc["get_tag-list"])
+
+        for i in root.findall(xpath):
+            p = [i.find(n).text for n in schemaList]
+
+            sqlInsert = "INSERT INTO {schema}.{table_name} ("
+            for s in schemaList:
+                sqlInsert = sqlInsert + '{}, '
+
+            sqlInsert = sqlInsert[:-2]+') VALUES ('
+
+            for s in schemaList:
+                sqlInsert = sqlInsert + '%s, '
+
+            sqlInsert = sqlInsert[:-2]+')'
+
+            _sqlInsert = sql.SQL(sqlInsert).format(
+                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                table_name = sql.Identifier(table_name),
+                *[sql.Identifier(field) for field in schemaList])
+            cur.execute(_sqlInsert, p)
+            conn.commit()
+
+        if dicc['other-tags'] != '':
+
+            colAd = dicc['other-tags'].split(',')
+
+            sqlAlter = 'ALTER TABLE {schema}.{table_name} '
+            for s in colAd:
+                sqlAlter = sqlAlter + 'ADD COLUMN IF NOT EXISTS {} TEXT, '
+
+            _sqlAlter = sql.SQL(sqlAlter[:-2]).format(
+                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                table_name = sql.Identifier(table_name),
+                *[sql.Identifier(field) for field in colAd])
+
+            cur.execute(_sqlAlter, colAd)
+            conn.commit()
+
+            for col in colAd:
+                xpath = getXpath(col, dicc["get_tag-list"])
+
+                for val in root.findall(xpath+'/'+col):
+
+                    sqlUpdate = sql.SQL('UPDATE {schema}.{table_name} SET {attr} = %s').format(
+                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        table_name = sql.Identifier(table_name),
+                        attr = sql.Identifier(col))
+
+                    cur.execute(sqlUpdate, [val.text])
+                    conn.commit()
+
+    
+    return[table_name]
+
+
 
 def input_Excel(dicc):
 
@@ -1666,6 +1788,17 @@ def trans_WktGeom(dicc):
         cur.execute(sqlDup)
         conn.commit()
 
+        srid, type_geom = get_type_n_srid(table_name_target)
+
+        sqlSet = sql.SQL('ALTER TABLE {schema}.{tbl_target}  ALTER COLUMN wkb_geometry TYPE geometry({type}, {epsg}) USING ST_SetSRID(wkb_geometry,{epsg});').format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            type = sql.Identifier(type_geom),
+            epsg = sql.SQL(epsg))
+        
+        cur.execute(sqlSet)
+        conn.commit()
+
     sqlRemov = sql.SQL('ALTER TABLE {schema}.{tbl_target}  DROP COLUMN {attr}').format(
         schema = sql.Identifier(settings.GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
@@ -3084,6 +3217,11 @@ def move(name, dicc):
         source= dicc['kml-kmz-file'][7:]
         target = dicc["folder"]
         suffixes = (".kml", ".kmz")
+
+    elif name == 'input_Xml':
+        source= dicc['xml-file']
+        target = dicc["folder"]
+        suffixes = (".xml")
 
     if os.path.isdir(source):
 

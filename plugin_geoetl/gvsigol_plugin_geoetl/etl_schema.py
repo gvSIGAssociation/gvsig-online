@@ -19,6 +19,8 @@ from datetime import datetime
 from hashlib import sha256
 import base64
 
+import xmltodict
+
 def get_sheets_excel(excel, r):
     import warnings
 
@@ -480,3 +482,85 @@ def get_schema_padron_alba(dicc):
     jsondata = pd.read_json(url)
     
     return list(jsondata.columns)
+
+
+def perf_func(dicc, level=0):
+    if dicc:
+        if isinstance(dicc, dict):
+            for key in dicc.keys():
+                tagList.append([level, key])
+                perf_func(dicc[key], level+1)
+        elif isinstance(dicc, list):
+            for i in dicc:
+                for key in i.keys():
+                    tagList.append([level, key])
+                    perf_func(i[key], level+1)
+
+def get_xml_tags(f, r):
+
+    tagList_cleaned = []
+    
+    if r == 'single':
+        listXmlFile = [f.split('//')[1]]
+
+    else:
+        listXmlFile = []
+        for file in os.listdir(f):
+            if file.endswith(".xml"):
+                listXmlFile.append(f +'//'+ file)
+
+    
+    for xmlFile in listXmlFile:
+
+        xmlStr = open(xmlFile).read()
+
+        xmlDict = xmltodict.parse(xmlStr)
+
+        global tagList
+
+        tagList = []
+
+        perf_func(xmlDict, 0)
+
+        count = 0
+        for i in tagList:
+            level = i[0]
+            for j in tagList[count:]:
+                if i == j:
+                    pass
+                elif j[0] == level+1:
+                    j.append(i[1])
+                elif j[0] == level:
+                    break
+            count+=1
+
+        for k in tagList:
+            if len(k) == 3:
+                item = [str(k[0])+'-'+k[2], k[1]]
+            else:
+                item = [str(k[0]), k[1]]
+
+            if item not in tagList_cleaned:
+
+                pos = 0
+                addItem = True
+
+                for l in reversed(tagList_cleaned):
+                    pos += -1
+                    if item[0] == '0':
+                        break
+                    elif l[0] == item[0]:
+                        tagList_cleaned.insert(pos, item)
+                        addItem = False
+                        break
+                    elif item[0].split('-')[1] == l[1]:
+                        tagList_cleaned.insert(pos, item)
+                        addItem = False
+                        break
+                    
+                if addItem:
+
+                    tagList_cleaned.append(item)
+
+    return tagList_cleaned[::-1]
+

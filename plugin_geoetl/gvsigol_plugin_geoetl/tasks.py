@@ -85,7 +85,23 @@ def run_canvas_background(**kwargs):
     move = []
 
     loop_list = ['sin parámetro de usuario variable']
+
+    #### ordena ejecucion de salidas postgres ####
+    tupleOutputOrder = []
+    for s in sortedList:
+        for n in nodes:
+            if s == n[0]:
+                if n[1]['type'].startswith('output_Postgis'):
+                    if 'order' in n[1]['entities'][0]['parameters'][0]:
+                        tupleOutputOrder.append((n[1]['entities'][0]['parameters'][0]['order'], n[0]))
     
+    tupleOutputOrder.sort()
+
+    for ord in tupleOutputOrder:
+        sortedList.remove(ord[1])
+        sortedList.append(ord[1])
+    #### ####
+
     try:
 
         if params and not statusModel.name.startswith('current_canvas'):
@@ -358,7 +374,6 @@ def executeSQL(db, query_list):
 @celery_app.on_after_finalize.connect
 def setup_periodic_cadastral_requests(**kwargs):
 
-    print('ebtramos por aquiujfekjvfbkjlvefnljnvlksejfvnlkjdfnlkjbnlkjdfblkjdnsf')
     my_task_name = 'gvsigol_plugin_geoetl.periodic_cadastral_requests'
     if not PeriodicTask.objects.filter(name=my_task_name).exists():
 

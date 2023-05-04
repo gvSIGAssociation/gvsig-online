@@ -106,6 +106,8 @@ function getPathFile(fileType, ID){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         }else if(fileType == 'json' && url.endsWith('.json') && ID != '0'){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        }else if(fileType == 'xml' && url.endsWith('.xml') && ID != '0'){
+            $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         }else if(fileType == 'excel' && (url.endsWith('.xls') || url.endsWith('.xlsx'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'shp' && url.endsWith('.shp')){
@@ -2153,6 +2155,462 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             icon.setColor('#01b0a0')
 
             $('#dialog-input-excel-'+ID).modal('hide')
+        })
+    },
+    
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+	   	 var label =new draw2d.shape.basic.Label({
+	   	     text: gettext('Input'),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#009688",
+	   	     resizeable:true
+	   	 });
+
+	     var output= label.createPort("output");
+         
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     }
+	     else{
+	         this.add(label);
+         }
+         
+         listLabel.push([this.id, [], [output.name]])
+
+         return label;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }
+
+});
+
+
+
+//// INPUT XML ////
+
+input_Xml = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "input_Xml",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3, width:1},attr));
+        
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"XML", 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-input-xml-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+gettext('XML Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div class="column20">'+
+                                '<label for ="xml-file" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select path')+'</a><br>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                '<input type="text" id="xml-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '</div>'+
+                            '<div class="column20">'+
+                                '<label for ="xml-file" class="col-form-label">'+gettext('Get tags')+':</label><br>'+
+                                '<a href="#" id="get-tags-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tags')+'</a><br>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<select id="tag-list-'+ID+'" multiple style="width: 100%; height:200px">'+
+                                '</select>'+
+                            '</div>'+
+                            '<div>'+
+                                '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
+                                '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                            '</div>'+
+                            '<div>'+
+                                '<input id="selected-schema-'+ID+'" class="form-control" readonly="readonly"></input>'+
+                            '</div>'+
+                            '<div>'+
+                                '<input type="checkbox" id="add-tags-'+ID+'" value="false" />'+
+                                '<label for="checkbox">'+gettext('Add other different tags than the selected schema to all records')+'</label>'+											
+                            '</div>'+
+                            '<div>'+
+                                '<input id="other-tags-'+ID+'" class="form-control" readonly="readonly"></input>'+
+                            '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
+                            '</div>'+
+                            '<div id ="more-options-'+ID+'">'+
+                                '<div class="column30">'+
+                                    '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
+                                        '<label for="single" class="form-check-label">'+gettext('Single XML file')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
+                                        '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="column70">'+
+                                    '<input type="checkbox" name="checkbox-xml" id="move-'+ID+'"/>'+
+                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                '</div>'+
+                                '<div class="column20">'+
+                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
+                                '</div>'+
+                                '<div class="column50">'+
+                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
+                                '</div>'+
+                                '<br><br><br>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-xml-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>') 
+
+        $("#advanced-param-"+ID).click(function(){
+            $("#more-options-"+ID).slideToggle("slow");
+        });
+
+        var context = this
+
+        $("#move-"+ID).change(function() {
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
+            }
+        });
+
+        $('input:radio[name="reading-'+ID+'"]').change(function() {
+
+            if($(this).val()=='single'){
+                $("#move-"+ID).prop('checked', false)
+                $("#move-"+ID).attr('disabled', true)
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+            }else{
+                $("#move-"+ID).attr('disabled', false)
+            }
+        });
+
+        icon.on("click", function(){
+
+
+            $('#tag-list-'+ID+' option').each(function(){
+
+                level = $(this).val().split('-')[0]
+                tab = '\xa0\xa0\xa0\xa0'.repeat(level)
+
+                $(this).text(tab+$(this).text())
+
+            });
+
+            $('#select-file-button-'+ID).click(function (e) {
+                if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
+                    window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                    getPathFile('xml', ID)
+                }else{
+                    window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                    getPathFile('xml/', ID)
+                }
+            });
+
+            $('#select-folder-button-'+ID).click(function (e) {
+                window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                getPathFile('folder', ID)
+            });
+
+            if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
+                $("#move-"+ID).prop('checked', false)
+                $("#move-"+ID).attr('disabled', true)
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#more-options-"+ID).slideUp("slow");
+            }
+
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
+            }
+
+            if($("#add-tags-"+ID).is(':checked')){
+                $("#add-tags-"+ID).val('true')
+            }else{
+                $("#add-tags-"+ID).val('false')
+
+            };
+
+            $("#add-tags-"+ID).change(function() {
+                if($("#add-tags-"+ID).is(':checked')){
+                    $("#add-tags-"+ID).val('true')
+                }else{
+                    $("#add-tags-"+ID).val('false')
+    
+                };
+            });
+
+            $('#dialog-input-xml-'+ID).modal('show')
+
+        });
+
+
+        $('#get-tags-'+ID).on("click", function(){
+                                
+            var formDataXmlTags = new FormData();
+
+            formDataXmlTags.append('file', $('#xml-file-'+ID).val())
+            formDataXmlTags.append('reading', $('input:radio[name="reading-'+ID+'"]:checked').val())
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_xml_tags/',
+                data: formDataXmlTags,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    $('#tag-list-'+ID).empty()
+                    get_ = []
+
+                    for (i = 0; i < data.length; i++){
+
+                        level = parseInt(data[i][0].split('-')[0])
+
+                        tab = '&emsp;'.repeat(level)
+
+                        $('#tag-list-'+ID).append('<option value="'+data[i][0]+'">'+tab+data[i][1]+'</option>')
+                        
+                        get_.push(data[i])
+                    }
+                }
+            })
+        });
+
+
+        $('#tag-list-'+ID).dblclick(function(){
+
+            valueUnsel = $(this).val()
+            
+            level = String(parseInt($(this).val()[0].split('-')[0])+1)
+            tag = $('#tag-list-'+ID+' option:selected').text().trim()
+
+            $('#tag-list-'+ID+' option[value='+level+'-'+tag+']').prop("selected", true);
+            $('#tag-list-'+ID+' option[value='+valueUnsel+']').prop("selected", false);
+        
+        });
+
+        $( "#add-"+ID ).click(function() {
+
+            textArray =[]
+
+            $('#tag-list-'+ID+' option:selected').each(function()
+                {
+                    textArray.push($(this).text().trim())
+                });
+
+            if ($("#add-tags-"+ID).val()=='false'){
+                //console.log($('#tag-list-'+ID+' option:selected').text())
+                $('#selected-schema-'+ID).val(textArray)
+            }else{
+
+                if($('#other-tags-'+ID).val()==''){
+                    $('#other-tags-'+ID).val(textArray)
+                }else{
+                    $('#other-tags-'+ID).val($('#other-tags-'+ID).val()+','+textArray)
+                }
+                
+            }
+
+        });
+
+        $( "#quit-"+ID ).click(function() {
+
+            if ($("#add-tags-"+ID).val()=='false'){
+                $('#selected-schema-'+ID).val('')
+            }else{
+
+                tagsArray = $('#other-tags-'+ID).val().split(',')
+                tagsArray.pop()
+                $('#other-tags-'+ID).val(tagsArray)
+                
+            }
+
+        });
+
+
+        $('#input-xml-accept-'+ID).click(function() {
+
+            if (typeof get_ === 'undefined'){
+                get_ = []
+                $("#tag-list-"+ID+" option").each(function()
+                    {
+                        get_.push([$(this).val(), $(this).text().trim()])
+                    });
+            }
+            
+            var paramsXml = {"id": ID,
+            "parameters": [
+                {"get_tag-list":  get_ ,
+                "xml-file": $('#xml-file-'+ID).val(),
+                "tag-list": [$('#tag-list-'+ID).val(), $('#tag-list-'+ID+' option:selected').text().trim()],
+                "selected-schema": $('#selected-schema-'+ID).val(),
+                "add-tags": $("#add-tags-"+ID).val(),
+                "other-tags": $('#other-tags-'+ID).val(),
+                "reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
+                "move": $('#move-'+ID).val(),
+                "folder": $('#folder-'+ID).val()
+                }
+            ]}
+
+            
+            var schema = $('#selected-schema-'+ID).val().split(',').concat($('#other-tags-'+ID).val().split(','))
+            
+            paramsXml['schema'] = schema
+            paramsXml['parameters'][0]['schema'] = schema
+
+            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+
+            var formDataSchemaXml = new FormData();
+            
+            formDataSchemaXml.append('jsonParamsXml', JSON.stringify(paramsXml))
+
+            isAlreadyInCanvas(jsonParams, paramsXml, ID)
+
+            icon.setColor('#01b0a0')
+
+            $('#dialog-input-xml-'+ID).modal('hide')
         })
     },
     
@@ -12718,7 +13176,9 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Match column:')+'</label>'+
-                                '<select class="form-control" id="match-'+ID+'" disabled> </select>'+
+                                '<select class="form-control" id="match-'+ID+'" disabled> </select><br>'+
+                                '<label class="col-form-label">'+gettext('Order')+':&nbsp</label>'+
+                                '<input type="number" id="order-'+ID+'" value="0" size ="3"/>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -12854,7 +13314,8 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 "schema-name-option": $('#schema-name-option-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
                 "match": $('#match-'+ID).val(),
-                "operation": $('input:radio[name="operation-'+ID+'"]:checked').val()}
+                "operation": $('input:radio[name="operation-'+ID+'"]:checked').val(),
+                "order": $('#order-'+ID).val()}
             ]}
             
             paramsPostgis['schema-old'] = schemaEdge

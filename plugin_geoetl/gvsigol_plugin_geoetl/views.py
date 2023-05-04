@@ -1096,3 +1096,17 @@ def etl_schema_padron_alba(request):
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_xml_tags(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            f = request.POST['file']
+            r = request.POST['reading']
+            listTagsLevels = etl_schema.get_xml_tags(f, r)
+            
+            response = json.dumps(listTagsLevels)
+
+            return HttpResponse(response, content_type="application/json")
