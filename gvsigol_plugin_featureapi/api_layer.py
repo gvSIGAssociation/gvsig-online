@@ -33,13 +33,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser
 from gvsigol_plugin_featureapi.export import VectorLayerExporter
-from gvsigol_plugin_featureapi.serializers import FeatureSerializer, LayerChangesSerializer, LayerCreateSerializer
+from gvsigol_plugin_featureapi.serializers import FeatureSerializer, LayerChangesSerializer, LayerCreateSerializer, StyleSerializer
 from gvsigol_plugin_featureapi.serializers import LayerSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services import geographic_servers
 from gvsigol_services import views as serviceviews
 from gvsigol_services.models import Layer
-from gvsigol_symbology.models import StyleLayer
+from gvsigol_symbology.models import StyleLayer, Style
 from . import serializers
 from . import util
 from gvsigol_services import utils as services_utils
@@ -702,6 +702,28 @@ class LayersStyle(ListAPIView):
         return response        
 
 
+class LayersSymbStyle(ListAPIView):
+    serializer_class = StyleSerializer
+    permission_classes = [AllowAny]
+    @swagger_auto_schema(operation_id='get_layer_symb_style', operation_summary='Gets the list of styles of the layer',
+                         responses={400: "The layer is not in the user datastore",
+                                    403: "The layer is not allowed to this user", 
+                                    404: "Layer NOT found"})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        v = Validation(request)    
+        try:
+            v.check_get_layer(lyr_id)
+        except HttpException as e:
+            return e.get_exception()
+
+        
+        sty = Style.objects.filter(stylelayer__layer_id=lyr_id)
+        
+        result = StyleSerializer(sty, many=True)
+        
+        return JsonResponse(result.data, safe=False)  
+    
 #--------------------------------------------------
 #               LayerDescription
 #--------------------------------------------------

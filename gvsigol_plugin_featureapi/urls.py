@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/v1/layers/<int:lyr_id>/', api_layer.LayersView.as_view(), name='get_layer,delete_layer'), 
     path('api/v1/layers/<int:lyr_id>/data/', api_layer.LayersData.as_view(), name='get_layer_data'),
     path('api/v1/layers/<int:lyr_id>/style/', api_layer.LayersStyle.as_view(), name='get_layer_style'),
+    path('api/v1/layers/<int:lyr_id>/styledef/', api_layer.LayersSymbStyle.as_view(), name='get_layer_symbology_style'),
     path('api/v1/layers/<int:lyr_id>/description/', api_layer.LayerDescription.as_view(), name='get_layer_description'),
     path('api/v1/layers/<int:lyr_id>/capabilities/', api_layer.LayerCapabilities.as_view(), name='get_layer_capabilitiess'),
     path('api/v1/layers/<int:lyr_id>/refresh/', api_layer.layer_refresh, name='refresh_layer'),

@@ -25,6 +25,7 @@ import math
 from rest_framework import serializers
 
 from django.contrib.auth.models import User
+from gvsigol_symbology.models import Style
 from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers
 from gvsigol_plugin_featureapi import util
 from gvsigol_plugin_featureapi.models import FeatureVersions
@@ -48,6 +49,13 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 
   
+
+class StyleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Style
+        fields = '__all__'
+
+
 class FeatureChangeSerializer(serializers.ModelSerializer):
     resource = serializers.SerializerMethodField('get_resource_')
 
