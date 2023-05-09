@@ -2117,10 +2117,18 @@ layerTree.prototype.showMetadata = function(layer) {
 	var body = '';
 	body += '<div class="row">';
 	body += 	'<div class="col-md-12">';
-	body += 		'<p>' + layer.abstract + '</p>';				
+	var p = $('<p></p>');
+	if (layer.abstract) {
+		body += p.append(layer.abstract).prop('outerHTML');
+    }
+	else if (layer.title) {
+		body += p.append(layer.title).prop('outerHTML');
+	}
+	else {
+		body += p.append(layer.name).prop('outerHTML');
+	}
 	body += 	'</div>';
 	body += '</div>';
-	
 	$('#float-modal .modal-body').empty();
 	$('#float-modal .modal-body').append(body);
 	
