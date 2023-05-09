@@ -2120,7 +2120,7 @@ layerTree.prototype.showMetadata = function(layer) {
 	var p = $('<p></p>');
 	if (layer.abstract) {
 		body += p.append(layer.abstract).prop('outerHTML');
-    }
+	}
 	else if (layer.title) {
 		body += p.append(layer.title).prop('outerHTML');
 	}
