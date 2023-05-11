@@ -100,7 +100,10 @@ uwsgi==2.0.18
 # Used by opensea2. To be removed when migrated to Celery
 APScheduler==3.7.0
 
+# soap client, suds deprecated, zeep is used in new developments 
 suds-community==0.8.4
+zeep==3.4.0
+zeep[xmlsec]==3.4.0
 
 # plugin_widget
 django_tinymce==3.4.0
