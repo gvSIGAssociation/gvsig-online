@@ -58,10 +58,6 @@ class Validation():
             if not isinstance(lyr, Layer):
                 lyr = Layer.objects.get(id=lyr)
             gs = geographic_servers.get_instance().get_server_by_id(lyr.datastore.workspace.server.id)
-            # Geoserver complains if we try to update the feature type right after adding
-            # the date and version columns, because it keeps the datasource open and does
-            # not recognizes the new columns. Reloading master workarounds the problem.
-            gs.reload_master()
             gs.reload_featuretype(lyr, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
             expose_pks = gs.datastore_check_exposed_pks(lyr.datastore)

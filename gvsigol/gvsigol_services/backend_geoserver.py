@@ -687,7 +687,16 @@ class Geoserver():
             finally:
                 conn.close()
         source_name = layer.source_name if layer.source_name else layer.name
-        self.rest_catalog.update_featuretype(layer.datastore.workspace.name, layer.datastore.name, source_name, updated_params=updated_params, nativeBoundingBox=nativeBoundingBox, latLonBoundingBox=latLonBoundingBox, user=self.user, password=self.password)
+        try:
+            self.rest_catalog.update_featuretype(layer.datastore.workspace.name, layer.datastore.name, source_name, updated_params=updated_params, nativeBoundingBox=nativeBoundingBox, latLonBoundingBox=latLonBoundingBox, user=self.user, password=self.password)
+        except rest_geoserver.FailedRequestError as e:
+            # Geoserver randomly complains if we try to update the feature type
+            # right after adding the date and version columns, because it keeps
+            # the datasource open and does not recognizes the new columns.
+            # Reloading master workarounds the problem.
+            logger.debug("Failed to update feature type. Reloading master catalog and retrying", exc_info=e)
+            self.reload_master()
+            self.rest_catalog.update_featuretype(layer.datastore.workspace.name, layer.datastore.name, source_name, updated_params=updated_params, nativeBoundingBox=nativeBoundingBox, latLonBoundingBox=latLonBoundingBox, user=self.user, password=self.password)
 
     def getGeoserverBindings(self, sql_type):
         if sql_type in ["character varying", "character", "text", "cd_json"]:
