@@ -7499,12 +7499,33 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
         for(i=0;i<dbc.length;i++){
 
-            if(dbc[i].type == 'PostgreSQL'){
+            //if(dbc[i].type == 'PostgreSQL'){
                 $('#db-'+ID).append(
-                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                    '<option value="'+dbc[i].name+'" data-type = "'+dbc[i].type+'">'+dbc[i].name+'</option>'
                 );
-            }
+            //}
         };
+
+        $('#db-'+ID).on('change', function() {
+
+            if ($(this).find(":selected").data("type") == 'PostgreSQL'){
+
+                $('#get-schemas-'+ID).removeAttr('disabled');
+                $('#schema-name-'+ID).prop("disabled",false);
+                $('#get-tables-'+ID).removeAttr('disabled');
+                $('#tablename-'+ID).prop("disabled",false);
+                $('#get-schema-'+ID).removeAttr('disabled');
+
+            } else if ($(this).find(":selected").data("type") == 'Oracle'){
+
+                $('#get-schemas-'+ID).attr('disabled','disabled')
+                $('#schema-name-'+ID).prop("disabled",true);
+                $('#get-tables-'+ID).attr('disabled','disabled')
+                $('#tablename-'+ID).prop("disabled",true);
+                $('#get-schema-'+ID).attr('disabled','disabled')
+
+            }
+        });
 
         $('#get-schemas-'+ID).on("click", function(){
                                 
@@ -7704,12 +7725,24 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
             ]}
 
             var formDataSchemaExecute = new FormData();
-            
-            formDataSchemaExecute.append('jsonParamsPostgres', JSON.stringify(paramsExecute))
+
+            type_db = $('#db-'+ID).find(":selected").data("type")
+
+            if (type_db == 'PostgreSQL'){
+                formDataSchemaExecute.append('jsonParamsPostgres', JSON.stringify(paramsExecute))
+                url_ = '/gvsigonline/etl/etl_schema_postgresql/'
+
+            } else if (type_db == 'Oracle'){
+
+                paramsExecute['parameters'][0]['checkbox'] = 'true'
+                paramsExecute['parameters'][0]['sql'] = $('#query-'+ID).val().split('WHERE')[0]
+                formDataSchemaExecute.append('jsonParamsOracle', JSON.stringify(paramsExecute))
+                url_ = '/gvsigonline/etl/etl_schema_oracle/'
+            }
 
             $.ajax({
                 type: 'POST',
-                url: '/gvsigonline/etl/etl_schema_postgresql/',
+                url: url_,
                 data: formDataSchemaExecute,
                 beforeSend:function(xhr){
                     xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));

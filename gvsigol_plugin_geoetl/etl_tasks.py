@@ -2924,9 +2924,6 @@ def trans_ExecuteSQL(dicc):
 
     params = json.loads(params_str)
 
-    esq = dicc['schema-name']
-    table_name = dicc['tablename']
-
     query = dicc['query']
 
     conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
@@ -2947,18 +2944,99 @@ def trans_ExecuteSQL(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
-    conn_2 = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
-    cur_2 = conn_2.cursor()
+    if db.type == 'PostgreSQL':
 
-    sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
-    sqlDatetype += "where table_schema = %s and table_name = %s"
+        esq = dicc['schema-name']
+        table_name = dicc['tablename']
 
-    cur_2.execute(sql.SQL(sqlDatetype),[esq, table_name])
-    conn_2.commit()
+        conn_2 = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+        cur_2 = conn_2.cursor()
 
-    attr_query = re.search('SELECT(.*)FROM', dicc['query'])
-    attr_query = attr_query.group(1).replace(' ', '')
-    list_attr_query = attr_query.split(',')
+        sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
+        sqlDatetype += "where table_schema = %s and table_name = %s"
+
+        cur_2.execute(sql.SQL(sqlDatetype),[esq, table_name])
+        conn_2.commit()
+
+        attr_query = re.search('SELECT(.*)FROM', dicc['query'])
+        attr_query = attr_query.group(1).replace(' ', '')
+        list_attr_query = attr_query.split(',')
+
+    elif db.type == 'Oracle':
+        conn_2 = cx_Oracle.connect(
+            params['username'],
+            params['password'],
+            params['dsn']
+        )
+
+        c = conn_2.cursor()
+
+        sql_ = 'SELECT '
+
+        attr_query = re.search('SELECT(.*)FROM', dicc['query'])
+        attr_query = attr_query.group(1).replace(' ', '')
+        list_attr_query = attr_query.split(',')
+
+        for a in list_attr_query:
+            sql_ = sql_ + 'DUMP('+a+'),'
+
+        from_query = re.search('FROM(.*)WHERE', dicc['query'])
+        from_query = from_query.group(1)
+
+        sql_ = sql_[:-1]+' FROM '+from_query
+        
+        c.execute(sql_)
+
+        cur_2 = []
+
+        null = True
+        first = True
+
+        for row in c:
+            
+            if null:
+                null = False
+                for i in range (0, len(list_attr_query)):
+                    
+                    if first:
+                    
+                        typ = row[i].split(' ')[0]
+
+                        if typ == 'Typ=1':
+
+                            cur_2.insert(i, [list_attr_query[i], 'VARCHAR'])
+                        elif typ == 'Typ=2':
+
+                            cur_2.insert(i, [list_attr_query[i], 'INTEGER'])
+
+                        elif typ == 'Typ=12':
+                            cur_2.insert(i, [list_attr_query[i], 'DATE'])
+
+                        else:
+                            cur_2.insert(i, [list_attr_query[i], 'NULL'])
+                            null = True
+
+                    elif cur_2[i][1] == 'NULL':
+                        
+                        typ = row[i].split(' ')[0]
+
+                        if typ == 'Typ=1':
+
+                            cur_2[i] = [list_attr_query[i], 'VARCHAR']
+                        elif typ == 'Typ=2':
+
+                            cur_2[i] = [list_attr_query[i], 'INTEGER']
+
+                        elif typ == 'Typ=12':
+                            cur_2[i] = [list_attr_query[i], 'DATE']
+                        else:
+                            cur_2[i] = [list_attr_query[i], 'NULL']
+                            null = True
+
+                first = False
+
+            else:
+                break
 
     f_list = []
     
@@ -3094,8 +3172,13 @@ def trans_ExecuteSQL(dicc):
             for i in range (0, len(listAttr)):
                 q = q.replace('##'+listAttr[i]+'##', "'"+str(row[i])+"'")
 
-            cur_2.execute(q)
-            conn_2.commit()
+            if db.type == 'Oracle':
+
+                cur_2 = c.execute(q)
+
+            elif db.type == 'PostgreSQL':
+
+                cur_2.execute(q)
 
             set_attr = []
             set_value = []
@@ -3134,8 +3217,14 @@ def trans_ExecuteSQL(dicc):
     cur.close()
     cur_3.close()
 
-    conn_2.close()
-    cur_2.close()
+    if db.type == 'Oracle':
+
+        pass
+
+    elif db.type == 'PostgreSQL':
+
+        conn_2.close()
+        cur_2.close()
 
     return [table_name_target]
 
