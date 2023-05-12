@@ -87,7 +87,7 @@ _valid_sql_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 """
 Types that can be created from gvSIG Online
 """
-SUPPORTED_SQL_CREATION_TYPES = [ "character varying", "integer", "double precision", "boolean", "date", "time", "timestamp" ]
+SUPPORTED_SQL_CREATION_TYPES = [ "character varying", "integer", "bigint", "smallint", "double precision", "boolean", "date", "time", "timestamp" ]
 OTHER_SUPPORTED_SQL_TYPES = ["character", "text", "numeric"]
 
 class Geoserver():

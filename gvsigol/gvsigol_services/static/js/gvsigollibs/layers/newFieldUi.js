@@ -26,6 +26,12 @@ function getFieldTypes(enableEnums, enableForms) {
 		key: 'timestamp',
 		value: 'Timestamp'
 	},{
+		key: 'bigint',
+		value: 'BigInt'
+	},{
+		key: 'smallint',
+		value: 'SmallInt'
+	},{
 		key: 'cd_json',
 		value: 'Complex type: JSON'
 	}];

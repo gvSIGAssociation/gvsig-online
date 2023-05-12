@@ -976,6 +976,10 @@ class Introspect:
             return 'timestamp'
         elif data_type_def == 'timestamp_with_time_zone' or data_type_def == 'timestamp with time zone':
             return 'timestamp with time zone'
+        elif data_type_def == 'bigint':
+            return 'bigint'
+        elif data_type_def == 'smallint':
+            return 'smallint'
         elif data_type_def == 'cd_json':
             return 'character varying'
         elif data_type_def == 'enumeration' or \
@@ -1015,6 +1019,8 @@ class Introspect:
                 data_type == 'time' or \
                 data_type == 'timestamp' or \
                 data_type == 'timestamp with time zone' or \
+                data_type == 'bigint' or \
+                data_type == 'smallinit' or \
                 data_type == 'enumeration' or \
                 data_type == 'multiple_enumeration' or \
                 data_type == 'form':
