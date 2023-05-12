@@ -3,7 +3,7 @@
  * ---------
  */
  .skin-mallorca .main-header .navbar {
-    background-color: #61ACCB;
+    background-color: #00665F;
   }
   .skin-mallorca .main-header .navbar .nav > li > a {
     color: #ffffff;
@@ -29,7 +29,7 @@
     color: #fff;
   }
   .skin-mallorca .main-header .navbar .sidebar-toggle:hover {
-    background-color: #61ACCB;
+    background-color: #00665F;
   }
   @media (max-width: 767px) {
     .skin-mallorca .main-header .navbar .dropdown-menu li.divider {
@@ -39,19 +39,19 @@
       color: #fff;
     }
     .skin-mallorca .main-header .navbar .dropdown-menu li a:hover {
-      background: #61ACCB;
+      background: #00665F;
     }
   }
   .skin-mallorca .main-header .logo {
-    background-color: #61ACCB;
+    background-color: #00665F;
     color: #ffffff;
     border-bottom: 0 solid transparent;
   }
   .skin-mallorca .main-header .logo:hover {
-    background-color: #61ACCB;
+    background-color: #00665F;
   }
   .skin-mallorca .main-header li.user-header {
-    background-color: #61ACCB;
+    background-color: #00665F;
   }
   .skin-mallorca .content-header {
     background: transparent;
@@ -76,7 +76,7 @@
   .skin-mallorca .sidebar-menu > li.active > a {
     color: #ffffff;
     background: #1e282c;
-    border-left-color: #61ACCB;
+    border-left-color: #00665F;
   }
   .skin-mallorca .sidebar-menu > li > .treeview-menu {
     margin: 0 1px;
