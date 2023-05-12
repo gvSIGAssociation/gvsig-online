@@ -897,6 +897,22 @@ class Geoserver():
             else:
                 d[k] = u[k]
         return d
+
+    def datastore_enable(self, store, workspace, enabled=False, user=None, password=None, extraParams={}):
+        url = self.service_url + "/workspaces/" + workspace + "/datastores/" + store
+        if enabled:
+            enabled_str = 'true'
+        else:
+            enabled_str = 'false'
+        data = {"dataStore": {"name": store, "enabled": enabled_str}}
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        r = self.session.put(url, json=data, auth=auth)
+        if r.status_code==200:
+            return True
+        raise FailedRequestError(r.status_code, r.content)
     
 class RequestWarning(Exception):
     def __init__(self, message=None):
