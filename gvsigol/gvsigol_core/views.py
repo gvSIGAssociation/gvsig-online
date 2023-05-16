@@ -481,7 +481,7 @@ def project_update(request, pid):
             old_layer_groups.append(lg.layer_group.id)
 
         if (old_order != toc) or list(assigned_layergroups) != list(old_layer_groups):
-            core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
+            # core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
             project.toc_order = core_utils.get_json_toc(assigned_layergroups, selected_base_group)
 
         name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
@@ -578,15 +578,21 @@ def project_update(request, pid):
 
         if project.toc_order:
             toc = json.loads(project.toc_order)
-            for g in toc:
-                group = toc.get(g)
-                ordered_layers = sorted(iter(group.get('layers').items()), key=lambda x_y: x_y[1]['order'], reverse=True)
-                group['layers'] = ordered_layers
-            ordered_toc = sorted(iter(toc.items()), key=lambda x_y1: x_y1[1]['order'], reverse=True)
         else:
+            toc = {}
             ordered_toc = {}
             for g in layer_groups:
-                ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': 1000, 'layers': {}}
+                if g.get('checked'):
+                    order = 1000
+                    layers = {}
+                    for gnames in toc:
+                        if g['name'] == gnames:
+                            group = toc.get(gnames)
+                            order = group.get('order', 1000)
+                            ordered_layers = sorted(iter(group.get('layers').items()), key=lambda x_y: x_y[1]['order'], reverse=True)
+                            layers = ordered_layers
+                            break
+                    ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': order, 'layers': layers}
             ordered_toc = sorted(iter(ordered_toc.items()), key=lambda x_y2: x_y2[1]['order'], reverse=True)
         if project.tools:
             try:
