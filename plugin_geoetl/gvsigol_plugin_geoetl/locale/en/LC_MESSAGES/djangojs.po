@@ -930,3 +930,12 @@ msgstr ""
 
 msgid "Self intersect layer (Use only data from main input)"
 msgstr ""
+
+msgid "Get tags"
+msgstr ""
+
+msgid "Add other different tags than the selected schema to all records"
+msgstr ""
+
+msgid "Single XML file"
+msgstr ""

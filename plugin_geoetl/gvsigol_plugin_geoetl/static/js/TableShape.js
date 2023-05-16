@@ -2333,8 +2333,9 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
                             '<div>'+
                                 '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
                                 '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
-                            '</div>'+
+                            '</div><br>'+
                             '<div>'+
+                                '<label class="col-form-label" >'+gettext('Schema:')+'</label>'+
                                 '<input id="selected-schema-'+ID+'" class="form-control" readonly="readonly"></input>'+
                             '</div>'+
                             '<div>'+

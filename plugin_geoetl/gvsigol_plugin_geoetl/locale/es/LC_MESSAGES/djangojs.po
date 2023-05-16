@@ -931,3 +931,12 @@ msgstr "Y inicial"
 
 msgid "Self intersect layer (Use only data from main input)"
 msgstr "Autointersecta capa (Utiliza solo los datos de la entrada principal)"
+
+msgid "Get tags"
+msgstr "Obtén etiquetas"
+
+msgid "Add other different tags than the selected schema to all records"
+msgstr "Añade otras etiquetas diferentes al esquema seleccionado a todos los registros"
+
+msgid "Single XML file"
+msgstr "Archivo XML único"
