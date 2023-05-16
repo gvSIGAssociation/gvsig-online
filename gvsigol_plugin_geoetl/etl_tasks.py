@@ -3219,7 +3219,7 @@ def trans_ExecuteSQL(dicc):
 
     if db.type == 'Oracle':
 
-        pass
+        cur_2.close()
 
     elif db.type == 'PostgreSQL':
 
