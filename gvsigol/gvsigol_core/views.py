@@ -580,20 +580,20 @@ def project_update(request, pid):
             toc = json.loads(project.toc_order)
         else:
             toc = {}
-            ordered_toc = {}
-            for g in layer_groups:
-                if g.get('checked'):
-                    order = 1000
-                    layers = {}
-                    for gnames in toc:
-                        if g['name'] == gnames:
-                            group = toc.get(gnames)
-                            order = group.get('order', 1000)
-                            ordered_layers = sorted(iter(group.get('layers').items()), key=lambda x_y: x_y[1]['order'], reverse=True)
-                            layers = ordered_layers
-                            break
-                    ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': order, 'layers': layers}
-            ordered_toc = sorted(iter(ordered_toc.items()), key=lambda x_y2: x_y2[1]['order'], reverse=True)
+        ordered_toc = {}
+        for g in layer_groups:
+            if g.get('checked'):
+                order = 1000
+                layers = {}
+                for gnames in toc:
+                    if g['name'] == gnames:
+                        group = toc.get(gnames)
+                        order = group.get('order', 1000)
+                        ordered_layers = sorted(iter(group.get('layers').items()), key=lambda x_y: x_y[1]['order'], reverse=True)
+                        layers = ordered_layers
+                        break
+                ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': order, 'layers': layers}
+        ordered_toc = sorted(iter(ordered_toc.items()), key=lambda x_y2: x_y2[1]['order'], reverse=True)
         if project.tools:
             try:
                 projectTools = json.loads(project.tools)
