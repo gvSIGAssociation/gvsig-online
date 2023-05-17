@@ -203,6 +203,104 @@ class FeatureSerializer(serializers.Serializer):
             if isinstance(e, HttpException):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
+        
+    def info_by_point_without_simplify(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer):
+        if layer.type != 'v_PostGIS':
+            raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
+        try:
+            i, table, schema = services_utils.get_db_connect_from_layer(layer)
+            with i as con: # connection will autoclose
+                geom_cols = con.get_geometry_columns(table, schema=schema)
+
+                #Devuelve un registro en blanco con los identificadores de campos y sus traducciones
+                if(blank):
+                    return self.get_blank_registry(con, table, schema, geom_cols, layer, lang)
+
+                properties_query = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
+                idfield = util.get_layer_pk_name(con, schema, table)
+
+                geom_col = geom_cols[0]
+
+                native_epsg = layer.native_srs.split(':')[1]
+
+                params = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))"
+                where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom})"
+                sql = sqlbuilder.SQL("SELECT " + params + " FROM {schema}.{table} WHERE " + where + " ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})")
+                query = sql.format(
+                    geom=sqlbuilder.Identifier(geom_col),
+                    epsg=sqlbuilder.Literal(epsg),
+                    native_epsg=sqlbuilder.Literal(int(native_epsg)),
+                    col_names_values=properties_query,
+                    schema=sqlbuilder.Identifier(schema),
+                    table=sqlbuilder.Identifier(table),
+                    buffer=sqlbuilder.Literal(buffer),
+                    lat=sqlbuilder.Literal(lat),
+                    lon=sqlbuilder.Literal(lon)
+                )
+                
+                con.cursor.execute(query)
+                from gvsigol_plugin_featureapi.serializers import LayerResourceSerializer
+
+                feat_list = []
+                for feat in con.cursor.fetchall():
+                    #self.showSimplification(epsilon, feat)
+                    resourceset = LayerResource.objects.filter(layer_id=layer.id, feature=feat[1][idfield])
+                    serializer = LayerResourceSerializer(resourceset, many=True)
+                    properties = feat[1]
+                    if 'feat_version_gvol' not in properties:
+                        properties['feat_version_gvol'] = 1
+
+                    if return_geom == True:
+                        geometry = 'null'
+                        simplegeom = 'null'
+                        if feat[0] is not None:
+                            geometry = json.loads(feat[0])
+
+                            if 'crs' not in geometry:
+                                geometry['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+
+                            if feat[2] is not None:
+                                simplegeom = json.loads(feat[2])
+                                if 'crs' not in simplegeom:
+                                    simplegeom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+
+                        element = {
+                            "type":"Feature",
+                            "properties" : properties,
+                            #"translates" : self.translate(layer.conf, feat[1], lang),
+                            "geometry" : geometry,
+                            "simplegeom" : simplegeom,
+                            "resources" : serializer.data,
+                            "numpoints" : feat[3]
+                        }
+                    else:
+                        element = {
+                            "type":"Feature",
+                            "properties" : properties,
+                            #"translates" : self.translate(layer.conf, feat[1], lang),
+                            "resources" : serializer.data
+                        }
+                        
+                    feat_list.append(element)
+
+                bufferGeom = 'null'
+                if(getbuffer == True):
+                    bufferGeom = self.getBufferGeometry(con, lon, lat, buffer)
+                    bufferGeom = json.loads(bufferGeom)
+                    if 'crs' not in bufferGeom:
+                        bufferGeom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+
+                return {
+                        "type":"FeatureCollection",
+                        "lang" : lang,
+                        "totalfeatures" : len(feat_list),
+                        "features" : feat_list,
+                        "buffer": bufferGeom
+                }
+        except Exception as e:
+            if isinstance(e, HttpException):
+                raise e
+            raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
 
     def getBufferGeometry(self, con, lon, lat, buffer):
         sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))")

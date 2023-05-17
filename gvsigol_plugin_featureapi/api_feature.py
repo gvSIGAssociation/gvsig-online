@@ -803,6 +803,13 @@ class FeatureByPointView(ListAPIView):
                     blank = True if self.request.GET['blank'] == 'true' else False
                 except Exception:
                     raise HttpException(400, "Bad parameter blank")
+                
+            simplify = True
+            if 'simplify' in self.request.GET:
+                try:
+                    simplify = True if self.request.GET['simplify'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter simplify")
 
             getbuffer = False
             if 'getbuffer' in self.request.GET:
@@ -816,7 +823,11 @@ class FeatureByPointView(ListAPIView):
                 raise HttpException(404, "Layer not found")
 
             serializer = FeatureSerializer()
-            result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
+            result = None
+            if simplify:
+                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
+            else:
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
             result['infoFormat'] = 'application/geojson'
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
