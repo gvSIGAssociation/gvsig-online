@@ -405,12 +405,10 @@ class Geoserver():
     
     
     def get_resources(self, workspace, datastore, type, user=None, password=None):
-        json = []
         if type == 'all':
             configurables = self.get_resources(workspace, datastore, "configurable", user, password)
             availables = self.get_resources(workspace, datastore, "available", user, password)
-            json =  configurables + availables
-            
+            return configurables + availables
         else:    
             url = self.service_url + "/workspaces/" + workspace + "/datastores/" + datastore + "/featuretypes.json?list="+type
             if user and password:
@@ -418,20 +416,17 @@ class Geoserver():
             else:
                 auth = self.session.auth
             r = self.session.get(url, auth=auth)
-            json = r.json()
-            
-            
-            if type == 'available' or type == 'available_with_geom':
-                if json['list'] and json['list']['string']:
-                    resources = json['list']['string']
-                    return [resource for resource in resources]
-            else:
-                if json['featureTypes'] and json['featureTypes']['featureType']:
-                    resources = json['featureTypes']['featureType']
-                    return [resource['name'] for resource in resources]
+            if r.status_code == 200:
+                json = r.json()    
+                if type == 'available' or type == 'available_with_geom':
+                    if json['list'] and json['list']['string']:
+                        resources = json['list']['string']
+                        return [resource for resource in resources]
+                else:
+                    if json['featureTypes'] and json['featureTypes']['featureType']:
+                        resources = json['featureTypes']['featureType']
+                        return [resource['name'] for resource in resources]
             return []
-            
-        return json
     
     def get_wmsresources(self, workspace, wmsstore, user=None, password=None):
         json = []
