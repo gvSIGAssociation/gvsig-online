@@ -21,7 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from gvsigol_symbology.models import  StyleLayer, Symbolizer, Style
+from gvsigol_symbology.models import  StyleLayer, Symbolizer, Style, ExternalGraphicSymbolizer
 from gvsigol_symbology import sld_builder
 from gvsigol_services.backend_postgis import Introspect
 from django.core import serializers
@@ -325,6 +325,8 @@ def symbolizer_to_json(symbolizer):
         json_symbolizer['type'] = 'ExternalGraphicSymbolizer'
         json_symbolizer['order'] = symbolizer.order
         json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.externalgraphicsymbolizer])
+        print(json_symbolizer['json'])
+        print(symbolizer.externalgraphicsymbolizer.online_resource)
         
     elif hasattr(symbolizer, 'textsymbolizer'):
         json_symbolizer['type'] = 'TextSymbolizer'

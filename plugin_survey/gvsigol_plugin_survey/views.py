@@ -694,7 +694,7 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
                                     if field_def['name'] == control_field['name']:
                                         field_def['editableactive'] = False
                                         field_def['editable'] = False
-                                field_def['infovisible'] = False
+                                field_def['infovisible'] = True
                                 field_defs.append(field_def)
                                 
     section.name = prepare_string(section.name)
