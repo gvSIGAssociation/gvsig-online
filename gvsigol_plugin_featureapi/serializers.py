@@ -119,18 +119,22 @@ class FeatureSerializer(serializers.Serializer):
 
                 geom_col = geom_cols[0]
 
-                epsilon = self.get_epsilon(con, geom_col, epsg, table, schema, buffer, lon, lat)
-
+                native_epsg = 4326
+                if layer.native_srs:
+                    native_epsg = layer.native_srs.split(':')[1]
+                    native_epsg = int(native_epsg)
+                epsilon = self.get_epsilon(con, geom_col, epsg, native_epsg, table, schema, buffer, lon, lat)
                 #get_buffer_params = " "
                 #if(getbuffer == True):
                 #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))"
 
                 params = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), {epsilon})), ST_NPoints({geom}) as props"
-                where = "ST_INTERSECTS(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}), st_transform({geom}, 4326))"
-                sql = sqlbuilder.SQL("SELECT " + params + " FROM {schema}.{table} WHERE " + where + " ORDER BY st_distance('SRID=4326;POINT({lon} {lat})'::geometry, st_transform({geom}, 4326))")
+                where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom})"
+                sql = sqlbuilder.SQL("SELECT " + params + " FROM {schema}.{table} WHERE " + where + " ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})")
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
                     epsg=sqlbuilder.Literal(epsg),
+                    native_epsg=sqlbuilder.Literal(native_epsg),
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
@@ -221,7 +225,10 @@ class FeatureSerializer(serializers.Serializer):
 
                 geom_col = geom_cols[0]
 
-                native_epsg = layer.native_srs.split(':')[1]
+                native_epsg = 4326
+                if layer.native_srs:
+                    native_epsg = layer.native_srs.split(':')[1]
+                    native_epsg = int(native_epsg)
 
                 params = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))"
                 where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom})"
@@ -229,7 +236,7 @@ class FeatureSerializer(serializers.Serializer):
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
                     epsg=sqlbuilder.Literal(epsg),
-                    native_epsg=sqlbuilder.Literal(int(native_epsg)),
+                    native_epsg=sqlbuilder.Literal(native_epsg),
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
@@ -334,7 +341,7 @@ class FeatureSerializer(serializers.Serializer):
                 print(".........Dst Num:" + str(len(coor)) + " " )
 
 
-    def get_epsilon(self, con, geom_col, epsg, table, schema, buffer, lon, lat):
+    def get_epsilon(self, con, geom_col, epsg, native_epsg, table, schema, buffer, lon, lat):
         '''
         Epsilon es un número que sirve para la simplificación de polígonos y tiene relación con el número de puntos a simplificar en una curva
         por la distancia de los puntos a sus extremos.  Como las geometrías están en 4326 epsilon está en grados. Cuanto más grande es epsilon menos
@@ -344,10 +351,11 @@ class FeatureSerializer(serializers.Serializer):
         Esto se usa desde la app móvil para dibujar poligonos seleccionados porque si metemos muchos vértices petamos la app. 
         '''
         div = 10000
-        sql = sqlbuilder.SQL("SELECT ST_Perimeter(ST_Transform({geom}, {epsg})) FROM {schema}.{table} WHERE ST_INTERSECTS(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}), st_transform({geom}, 4326)) ORDER BY st_distance('SRID=4326;POINT({lon} {lat})'::geometry, st_transform({geom}, 4326))")
+        sql = sqlbuilder.SQL("SELECT ST_Perimeter(ST_Transform({geom}, {epsg})) FROM {schema}.{table} WHERE ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom}) ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})")
         query = sql.format(
             geom=sqlbuilder.Identifier(geom_col),
             epsg=sqlbuilder.Literal(epsg),
+            native_epsg=sqlbuilder.Literal(native_epsg),
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table),
             buffer=sqlbuilder.Literal(buffer),
