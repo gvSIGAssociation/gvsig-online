@@ -325,8 +325,6 @@ def symbolizer_to_json(symbolizer):
         json_symbolizer['type'] = 'ExternalGraphicSymbolizer'
         json_symbolizer['order'] = symbolizer.order
         json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.externalgraphicsymbolizer])
-        print(json_symbolizer['json'])
-        print(symbolizer.externalgraphicsymbolizer.online_resource)
         
     elif hasattr(symbolizer, 'textsymbolizer'):
         json_symbolizer['type'] = 'TextSymbolizer'
