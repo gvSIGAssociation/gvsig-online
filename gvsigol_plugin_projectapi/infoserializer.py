@@ -147,8 +147,9 @@ class LayerSerializer(serializers.ModelSerializer):
                     if i['name'] in field_group:
                         i['groupname'] = field_group[i['name']]['groupname']
                         i['grouporder'] = field_group[i['name']]['grouporder']
-                        i['fieldorder'] = field_group[i['name']]['fieldorder']
-                    
+                        i['fieldorder'] = field_group[i['name']]['fieldorder']  
+
+            return result
 
         except Exception:
             return
@@ -171,7 +172,7 @@ class LayerSerializer(serializers.ModelSerializer):
     def get_description_(self, obj):
         if obj.datastore:
             result = serviceviews.describe_feature_type(obj.name, obj.datastore.workspace.name)
-            self.add_fields_to_description(result, obj, self.context['lang'])
+            result = self.add_fields_to_description(result, obj, self.context['lang'])
             return result
 
     def is_writable(self, obj):
