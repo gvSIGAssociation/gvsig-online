@@ -295,6 +295,7 @@ class LayerConfig:
             field_conf['editableactive'] = control_field.get('editableactive', False)
             field_conf['editable'] = control_field.get('editable', False)
             field_conf['visible'] = control_field.get('visible', field_conf['visible'])
+            field_conf['infovisible'] = control_field.get('visible', field_conf['infovisible'])
             field_conf['nullable'] = control_field.get('nullable', field_conf['nullable'])
             field_conf['mandatory'] = control_field.get('mandatory', field_conf['mandatory'])
             
