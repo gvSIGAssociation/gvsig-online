@@ -148,7 +148,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_extensions',
     'rest_framework',
-    'django_celery_results',
 
     ############# CORE ################
     'gvsigol_statistics',
@@ -401,9 +400,9 @@ SITE_ID=1
 #BASE_URL = 'https://localhost'
 #MEDIA_ROOT = '/usr/local/var/www/media/'
 #MEDIA_URL = 'https://localhost/media/'
-BASE_URL = 'http://localhost'
+BASE_URL = 'https://localhost'
 MEDIA_ROOT = '/var/www/sites/localhost/media/'
-MEDIA_URL = 'http://localhost/media/'
+MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -652,8 +651,6 @@ LEGACY_GVSIGOL_SERVICES = {
 CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
 CELERY_TASK_ACKS_LATE = True
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-CELERY_RESULT_EXTENDED = True
-CELERY_RESULT_BACKEND = 'django-db'
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
