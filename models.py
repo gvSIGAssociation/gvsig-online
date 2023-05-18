@@ -283,7 +283,7 @@ class LayerConfig:
         else:
             field_conf['editable'] = field_conf.get('editable', True)
             field_conf['editableactive'] = True
-        field_conf['infovisible'] = field_conf.get('infovisible', False)
+        field_conf['infovisible'] = field_conf.get('infovisible', True)
         field_conf['nullable'] = (field_info.get('nullable') != 'NO')
         if not field_conf['nullable']:
             field_conf['mandatory'] = True
