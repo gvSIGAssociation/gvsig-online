@@ -810,6 +810,13 @@ class FeatureByPointView(ListAPIView):
                     simplify = True if self.request.GET['simplify'] == 'true' else False
                 except Exception:
                     raise HttpException(400, "Bad parameter simplify")
+                
+            source_epsg = 'EPSG:4326'
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
 
             getbuffer = False
             if 'getbuffer' in self.request.GET:
@@ -827,7 +834,7 @@ class FeatureByPointView(ListAPIView):
             if simplify:
                 result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
             else:
-                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer)
             result['infoFormat'] = 'application/geojson'
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
