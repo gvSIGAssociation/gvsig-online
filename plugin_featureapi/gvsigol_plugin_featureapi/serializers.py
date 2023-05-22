@@ -208,7 +208,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def info_by_point_without_simplify(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer):
+    def info_by_point_without_simplify(self, validation, layer, lat, lon, source_epsg, buffer, return_geom, lang, blank, getbuffer):
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
@@ -230,17 +230,19 @@ class FeatureSerializer(serializers.Serializer):
                     native_epsg = layer.native_srs.split(':')[1]
                     native_epsg = int(native_epsg)
 
-                params = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))"
+                transformed_buffer = self.get_buffer(con, source_epsg, native_epsg, buffer, lon, lat)
+
+                params = "ST_AsGeoJSON(ST_Transform({geom}, 4326)), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))"
                 where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom})"
+                #where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), 20), {geom})"
                 sql = sqlbuilder.SQL("SELECT " + params + " FROM {schema}.{table} WHERE " + where + " ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})")
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
-                    epsg=sqlbuilder.Literal(epsg),
                     native_epsg=sqlbuilder.Literal(native_epsg),
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
-                    buffer=sqlbuilder.Literal(buffer),
+                    buffer=sqlbuilder.Literal(transformed_buffer),
                     lat=sqlbuilder.Literal(lat),
                     lon=sqlbuilder.Literal(lon)
                 )
@@ -366,6 +368,26 @@ class FeatureSerializer(serializers.Serializer):
         for feat in con.cursor.fetchall():
             perimeter = feat[0]
             return perimeter / div
+        
+    def get_buffer(self, con, source_epsg, target_epsg, buffer, lon, lat):
+        query_point = [lon, lat] # 0.39059, 39.48329 x, y
+        (x1, y1) = query_point
+        x2 = x1 + buffer
+        y2 = y1
+
+        sql = sqlbuilder.SQL("SELECT ST_Length(ST_Transform(ST_GeomFromText('LINESTRING({x1} {y1},{x2} {y2})',{source_epsg}), {target_epsg}))")
+
+        query = sql.format(
+            x1=sqlbuilder.Literal(x1),
+            y1=sqlbuilder.Literal(y1),
+            x2=sqlbuilder.Literal(x2),
+            y2=sqlbuilder.Literal(y2),
+            source_epsg=sqlbuilder.Literal(source_epsg),
+            target_epsg=sqlbuilder.Literal(target_epsg),
+        )
+        con.cursor.execute(query)
+        for feat in con.cursor.fetchall():
+            return feat[0]
 
 
     def get_blank_registry(self, con, tablename, schema, exclude_cols, layer, lang):
