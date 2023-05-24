@@ -9,13 +9,13 @@
 	
 	if (viewer.core.ifToolInConf('gvsigol_plugin_samplemenubutton')) {
 		
-		var button = '<li role="presentation"><a id="samplemenubutton" role="menuitem" tabindex="-1" href="#"><i class="fa fa-bug m-r-5"></i>'+gettext("Sample menu button")+'</a></li>';
+		var button = '<li role="presentation"><a id="samplemenubutton" role="menuitem" tabindex="-1" href="#"><i class="fa fa-bug m-r-5"></i>'+gettext("Ficha espectáculo piroténico")+'</a></li>';
 		$('#gvsigol-navbar-file-menu').append(button);
 		
 		$.ajax({
 			type : 'POST',
 			async : false,
-			url : '/gvsigonline/print/get_conf/',
+			url : '/gvsigonline/samplemenubutton/get_conf/',
 			beforeSend : function(xhr) {
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
