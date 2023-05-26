@@ -40,7 +40,7 @@ def sampledashboard_list(request):
     response = {
         'samples': get_list()
     }
-    return render(request, 'dashboard_list.html', response)
+    return render(request, 'dashboard_sampledashboard_list.html', response)
 
 def get_list():
     sample_list = SampleDashboard.objects.all()
@@ -69,7 +69,7 @@ def sampledashboard_add(request):
     else:
         response = {
         }
-        return render(request, 'dashboard_add.html', response)
+        return render(request, 'dashboard_sampledashboard_add.html', response)
     
 @login_required()
 def sampledashboard_update(request):
@@ -82,7 +82,7 @@ def sampledashboard_update(request):
             'title':instance.title,
             'description':instance.description
         }
-        return render(request, 'dashboard_update.html', response)
+        return render(request, 'dashboard_sampledashboard_update.html', response)
     else:
         sample = SampleDashboard(
             id = int(request.POST.get('sample_id')),
@@ -101,7 +101,7 @@ def sampledashboard_delete(request):
         #instance = SampleDashboard().objects.filter(id=int(lgid))
         instance.delete()
     response = {}
-    return render(request, 'dashboard_add.html', response)
+    return render(request, 'dashboard_sampledashboard_add.html', response)
             
     
     
