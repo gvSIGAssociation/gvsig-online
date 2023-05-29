@@ -130,4 +130,4 @@ django-environ==0.10.0
 # gtfs editor
 tinydb==3.12.1
 #pycryptodomex==3.6.6
-tables==3.4.4
+tables==3.7.0
