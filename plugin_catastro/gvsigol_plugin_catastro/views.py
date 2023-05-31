@@ -103,11 +103,14 @@ def get_rc_by_coords(request):
                 for aux3 in aux2.iter('{http://www.catastro.meh.es/}pc'):
                     for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc1'):
                         response['rc'] = aux5.text
+                        response['pc1'] = aux5.text
                     for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc2'):
                         response['rc'] += aux5.text
+                        response['pc2'] = aux5.text
 
                 for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
                     response['address'] = aux3.text
+
         return JsonResponse(response)
 
 @csrf_exempt
