@@ -67,24 +67,27 @@ class Geonetwork():
     
     def get_auth(self):
         return self.session.auth
-    
+
     def gn_auth(self, user, password):
         self.session.auth = (user, password)
         try:
             #URL = 'http://localhost:8080/geonetwork/srv/eng/info?type=me'
             URL = self.service_url + "/srv/eng/info?type=me"
             r = self.session.post(URL, timeout=get_default_timeout(), proxies=settings.PROXIES)
+            logger.debug("1- Status code: {}, Message: {}, URL: {}".format(r.status_code, r.text, URL))
             if r.status_code==403:
-                
                 headers = {
                     'X-XSRF-TOKEN': self.get_csrf_token()
                 }
                 
                 r = self.session.post(URL, auth=(user, password), headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
                 if r.status_code==200:
+                    logger.debug("2- Status code: {}, Message: {}, URL: {}".format(r.status_code, r.text, URL))
                     return True
+                logger.error("3- Status code: {}, Message: {}, URL: {}".format(r.status_code, r.text, URL))
                 return False
             else:
+                logger.error("4- Status code: {}, Message: {}, URL: {}".format(r.status_code, r.text, URL))
                 return False
         except Exception as e:
             logger.exception('Error authenticating')
