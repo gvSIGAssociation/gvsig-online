@@ -113,7 +113,7 @@ APScheduler==3.7.0
 # soap client, suds deprecated, zeep is used in new developments 
 suds-community==0.8.4
 zeep==3.4.0
-zeep[xmlsec]==3.4.0
+#zeep[xmlsec]==3.4.0
 
 
 # plugin_widget
