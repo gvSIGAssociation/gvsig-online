@@ -89,7 +89,7 @@
 					                	<i class="fa fa-cubes"></i>
 					                </div>
 									<div class="product-info">
-										<a href="{{plugin_manual.url}}" class="product-title ">{% trans plugin_manual.title %}</a> 
+										<a href="{{plugin_manual.url}}" class="product-title ">{% trans plugin_manual.title %} {% if plugin_manual.lang %}[{{plugin_manual.lang}}]{% endif %}</a> 
 										<span class="product-description">{% trans plugin_manual.desc %}</span>
 									</div>
 								</li>
