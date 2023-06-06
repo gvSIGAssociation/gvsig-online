@@ -63,3 +63,8 @@ class Provider(models.Model):
             cadena = cadena + ')'
         
         return  cadena
+
+
+def translations_placeholder():
+    test = _("gvsigol_plugin_geocoding manual title")
+    test = _("gvsigol_plugin_geocoding manual desc")
