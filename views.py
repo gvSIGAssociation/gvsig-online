@@ -53,6 +53,7 @@ import string
 import json
 import ast
 import re
+import os
 
 from django.views.decorators.clickjacking import xframe_options_exempt
 from actstream import action
@@ -100,7 +101,7 @@ def home(request):
     if settings.AUTH_WITH_REMOTE_USER == True:
             from_login = True
     """
-    
+    print(request.LANGUAGE_CODE)
     projects = []
     public_projects = []
     if request.user.is_superuser:
@@ -1260,12 +1261,67 @@ def select_public_project(request):
 
 def documentation(request):
     lang = request.LANGUAGE_CODE
+    base_docs_url = getattr(settings, 'DOC_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
+
+    intro_path = os.path.join(base_docs_url, lang, 'gvsigol_intro.pdf')
+    if os.path.exists(intro_path):
+        intro = {
+            'url': '/docs/' + os.path.relpath(intro_path, base_docs_url),
+            'lang': None
+        }
+    else:
+        intro = {
+            'url': '/docs/es/gvsigol_intro.pdf',
+            'lang': 'es'
+        }
+    admin_path = os.path.join(base_docs_url, lang, 'gvsigol_admin_guide.pdf')
+    if os.path.exists(admin_path):
+        admin = {
+            'url': '/docs/' + os.path.relpath(admin_path, base_docs_url),
+            'lang': None
+        }
+    else:
+        admin = {
+            'url': '/docs/es/gvsigol_admin_guide.pdf',
+            'lang': 'es'
+        }
+    viewer_path = os.path.join(base_docs_url, lang, 'gvsigol_user_manual.pdf')
+    if os.path.exists(viewer_path):
+        viewer = {
+            'url': '/docs/' + os.path.relpath(viewer_path, base_docs_url),
+            'lang': None
+        }
+    else:
+        viewer = {
+            'url': '/docs/es/gvsigol_user_manual.pdf',
+            'lang': 'es'
+        }
+
+    plugins_base_path = base_docs_url + '/plugins'
+    plugin_manuals = []
+    for app_name in settings.INSTALLED_APPS:
+        if  app_name.startswith('gvsigol_') and os.path.exists(os.path.join(plugins_base_path, app_name, app_name + '_' + lang + '.pdf')):
+            plugin_manuals.append({
+                'url': settings.STATIC_URL + '/gvsigol_manuals/' + app_name + '/' + app_name + '_' + lang + '.pdf',
+                'title': _(app_name + ' manual title'),
+                'desc': _(app_name + ' manual desc')
+            })
+        """
+        if  os.path.exists(os.path.join(settings.STATIC_ROOT, 'gvsigol_manuals', app_name, app_name + '_' + lang + '.pdf')):
+            plugin_manuals.append({
+                'url': settings.STATIC_URL + '/gvsigol_manuals/' + app_name + '/' + app_name + '_' + lang + '.pdf',
+                'title': _(app_name + ' manual title'),
+                'desc': _(app_name + ' manual desc')
+            })
+        """
+        
+        
     response = {
-        'intro_url': '/docs/web/intro/' + lang + '/',
-        'admin_guide_url': '/docs/web/dashboard/' + lang + '/',
-        'viewer_url': '/docs/web/viewer/' + lang + '/',
-        'plugins_url': '/docs/web/plugins/' + lang + '/',
-        'mobile_url': '/docs/mobile/' + lang + '/'
+        'intro': intro,
+        'admin': admin,
+        'viewer': viewer,
+        'plugin_manuals': plugin_manuals,
+        #'mobile_url': '/docs/mobile/' + lang + '/'
     }
     return render(request, 'documentation.html', response)
 
