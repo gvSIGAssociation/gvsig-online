@@ -1296,6 +1296,17 @@ def documentation(request):
             'url': '/docs/es/gvsigol_user_manual.pdf',
             'lang': 'es'
         }
+    mobile_path = os.path.join(base_docs_url, lang, 'gvsigmapps_manual.pdf')
+    if os.path.exists(mobile_path):
+        mobile = {
+            'url': '/docs/' + os.path.relpath(mobile_path, base_docs_url),
+            'lang': None
+        }
+    else:
+        mobile = {
+            'url': '/docs/es/gvsigmapps_manual.pdf',
+            'lang': 'es'
+        }
 
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
@@ -1327,7 +1338,7 @@ def documentation(request):
         'admin': admin,
         'viewer': viewer,
         'plugin_manuals': plugin_manuals,
-        #'mobile_url': '/docs/mobile/' + lang + '/'
+        'mobile': mobile
     }
     return render(request, 'documentation.html', response)
 
