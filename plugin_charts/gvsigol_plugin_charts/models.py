@@ -8,3 +8,9 @@ class Chart(models.Model):
     title = models.CharField(max_length=150)
     description = models.CharField(null=True, blank=True, max_length=500)
     conf = models.TextField()
+
+
+def translations_placeholder():
+    # do not remove
+    test = _("gvsigol_plugin_charts manual title")
+    test = _("gvsigol_plugin_charts manual desc")
