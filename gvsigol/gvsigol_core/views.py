@@ -1300,20 +1300,26 @@ def documentation(request):
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
     for app_name in settings.INSTALLED_APPS:
-        if  app_name.startswith('gvsigol_') and os.path.exists(os.path.join(plugins_base_path, app_name, app_name + '_' + lang + '.pdf')):
-            plugin_manuals.append({
-                'url': settings.STATIC_URL + '/gvsigol_manuals/' + app_name + '/' + app_name + '_' + lang + '.pdf',
-                'title': _(app_name + ' manual title'),
-                'desc': _(app_name + ' manual desc')
-            })
-        """
-        if  os.path.exists(os.path.join(settings.STATIC_ROOT, 'gvsigol_manuals', app_name, app_name + '_' + lang + '.pdf')):
-            plugin_manuals.append({
-                'url': settings.STATIC_URL + '/gvsigol_manuals/' + app_name + '/' + app_name + '_' + lang + '.pdf',
-                'title': _(app_name + ' manual title'),
-                'desc': _(app_name + ' manual desc')
-            })
-        """
+        if  app_name.startswith('gvsigol_'):
+            the_path = os.path.join(plugins_base_path, app_name, app_name + '_' + lang + '.pdf')
+            if os.path.exists(the_path):
+                the_url = '/docs/' + os.path.relpath(the_path, base_docs_url)
+                plugin_manuals.append({
+                    'url': the_url,
+                    'title': _(app_name + ' manual title'),
+                    'desc': _(app_name + ' manual desc'),
+                    'lang': None
+                })
+            else:
+                plugin_path = os.path.join(plugins_base_path, app_name, app_name + '_es.pdf')
+                if os.path.exists(plugin_path):
+                    the_url = '/docs/' + os.path.relpath(plugin_path, base_docs_url)
+                    plugin_manuals.append({
+                        'url': the_url,
+                        'title': _(app_name + ' manual title'),
+                        'desc': _(app_name + ' manual desc'),
+                        'lang': 'es'
+                    })
         
         
     response = {
