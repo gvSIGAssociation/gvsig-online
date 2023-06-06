@@ -695,11 +695,6 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
-DOCS = {
-    'URL': BASE_URL + '/media/docs',
-    'NAME': 'manual.pdf',
-    'VERSION': 'v1'
-}
 
 CHECK_TILELOAD_ERROR = False
 
