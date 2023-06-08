@@ -106,12 +106,12 @@ def sendMail(user, password):
         body = body + '  - ' + _('First name') + ': ' + first_name + '\n'
         body = body + '  - ' + _('Last name') + ': ' + last_name + '\n'
         body = body + '  - ' + _('Email') + ': ' + user.email + '\n'
+        body_debug = body + '  - ' + _('Password') + ': *****' + '\n'
         body = body + '  - ' + _('Password') + ': ' + password + '\n'
         
         toAddress = [user.email]           
         fromAddress = gvsigol.settings.EMAIL_HOST_USER
-        
-        print('Restore message: ' + body)
+        logging.getLogger(LOGGER_NAME).debug('Restore message:\n' + body_debug)
         send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
     
 def send_reset_password_email(email, pass_reset_url):
