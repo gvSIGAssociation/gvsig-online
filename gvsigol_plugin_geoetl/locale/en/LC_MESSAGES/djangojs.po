@@ -939,3 +939,42 @@ msgstr ""
 
 msgid "Single XML file"
 msgstr ""
+
+msgid "Order"
+msgstr ""
+
+msgid "Expose Attributes"
+msgstr ""
+
+msgid "Expose Attribute Parameters"
+msgstr ""
+
+msgid "Attribute to expose:"
+msgstr ""
+
+msgid "Write attributes to expose separated by space"
+msgstr ""
+
+msgid "Validate Geometry"
+msgstr ""
+
+msgid "Valid"
+msgstr ""
+
+msgid "Invalid"
+msgstr ""
+
+msgid "Validate Geometry Parameters"
+msgstr ""
+
+msgid "Stop workspace if there are invalid geometries"
+msgstr ""
+
+msgid "Simple Geometry Parameters"
+msgstr ""
+
+msgid "Simple Geometry"
+msgstr ""
+
+msgid "Stop workspace if some geometry is not simple"
+msgstr ""

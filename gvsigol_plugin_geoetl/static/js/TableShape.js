@@ -6287,6 +6287,545 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// VALIDATE GEOMETRIES ////
+
+trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_ValGeom",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Validate Geometry"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+      var context = this
+        
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        //adding dialog for choosing parameters of the transformer
+        $('#canvas-parent').append('<div id="dialog-val-geom-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('Validate Geometry Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                        '<div>'+
+                            '<input type="checkbox" id="stop-'+ID+'" value="false" />'+
+                            '<label for="checkbox">'+gettext('Stop workspace if there are invalid geometries')+'</label>'+											
+                        '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="val-geom-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        $("#stop-"+ID).change(function() {
+            if ($('#stop-'+ID).is(':checked')) {
+                $('#stop-'+ID).val('true')
+            }else{
+                $('#stop-'+ID).val('false')
+            }
+        });
+
+        icon.on("click", function(){
+
+            setTimeout(function(){
+                
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+                }
+
+            },100);
+            
+            $('#dialog-val-geom-'+ID).modal('show')
+
+        });
+
+        if ($('#stop-'+ID).is(':checked')) {
+            $('#stop-'+ID).val('true')
+        }else{
+            $('#stop-'+ID).val('false')
+        }
+
+        console.log($('#stop-'+ID).val())
+
+        $('#val-geom-accept-'+ID).click(function() {
+
+            //parameters selected to json
+            var paramsValGeom = {"id": ID,
+            "parameters": [
+            {"stop": $('#stop-'+ID).val()}
+            ]}
+            
+            paramsValGeom['schema-old'] = schemaEdge
+
+            schemaModA = [...schemaEdge]
+            schemaModB = [...schemaEdge]
+            
+            schemaMod = [schemaModA.concat(['_valid']), schemaModB.concat(['_valid', '_reason', '_location'])]
+            
+            paramsValGeom['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            isAlreadyInCanvas(jsonParams, paramsValGeom, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-val-geom-'+ID).modal('hide')
+
+        });
+
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Valid"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label3 =new draw2d.shape.basic.Label({
+            text: gettext("Invalid"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     var output2= label3.createPort("output");
+         output2.setName("output_"+label3.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+             this.add(label3, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+             this.add(label3);
+         }
+         
+         listLabel.push([this.id, [input.name], [output.name, output2.name]])
+
+	     return label1, label2, label3;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+//// SIMPLE GEOMETRIES ////
+
+trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_SimpGeom",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Simple Geometry"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+      var context = this
+        
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        //adding dialog for choosing parameters of the transformer
+        $('#canvas-parent').append('<div id="dialog-simp-geom-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext('Simple Geometry Parameters')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                        '<div>'+
+                            '<input type="checkbox" id="stop-'+ID+'" value="false" />'+
+                            '<label for="checkbox">'+gettext('Stop workspace if some geometry is not simple')+'</label>'+											
+                        '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="simp-geom-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        $("#stop-"+ID).change(function() {
+            if ($('#stop-'+ID).is(':checked')) {
+                $('#stop-'+ID).val('true')
+            }else{
+                $('#stop-'+ID).val('false')
+            }
+        });
+
+        icon.on("click", function(){
+
+            setTimeout(function(){
+                
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+                }
+
+            },100);
+            
+            $('#dialog-simp-geom-'+ID).modal('show')
+
+        });
+
+        if ($('#stop-'+ID).is(':checked')) {
+            $('#stop-'+ID).val('true')
+        }else{
+            $('#stop-'+ID).val('false')
+        }
+
+        console.log($('#stop-'+ID).val())
+
+        $('#simp-geom-accept-'+ID).click(function() {
+
+            //parameters selected to json
+            var paramsValGeom = {"id": ID,
+            "parameters": [
+            {"stop": $('#stop-'+ID).val()}
+            ]}
+            
+            paramsValGeom['schema-old'] = schemaEdge
+
+            schemaMod = [schemaEdge, schemaEdge]
+            
+            paramsValGeom['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            
+            isAlreadyInCanvas(jsonParams, paramsValGeom, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-simp-geom-'+ID).modal('hide')
+
+        });
+
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Simple"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label3 =new draw2d.shape.basic.Label({
+            text: gettext("No simple"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     var output2= label3.createPort("output");
+         output2.setName("output_"+label3.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+             this.add(label3, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+             this.add(label3);
+         }
+         
+         listLabel.push([this.id, [input.name], [output.name, output2.name]])
+
+	     return label1, label2, label3;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
 //// MODIFY VALUE ATTRIBUTE ////
 
 trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
@@ -8022,6 +8561,276 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
             icon.setColor('#4682B4')
             
             $('#dialog-create-attr-'+ID).modal('hide')
+
+        })
+
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+         }
+         
+         listLabel.push([this.id,[input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
+//// EXPOSE ATTRIBUTE ////
+
+trans_ExposeAttr = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_ExposeAttr",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Expose Attributes"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-expose-attr-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+gettext("Expose Attribute Parameters")+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div >'+
+                                '<label class="col-form-label">'+gettext("Attribute to expose:")+'</label>'+
+                                '<input id="attr-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Write attributes to expose separated by space')+'">'+
+                            '</div>'+
+                            ''+
+                            '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
+                            '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                            ''+
+                            '<div>'+
+                                '<input id="attrs-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="expose-attr-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+        
+      var context = this
+
+      $('#attrs-'+ID).attr('disabled', true)
+
+      var input = $("#attrs-"+ID)
+
+      $( "#add-"+ID ).click(function() {
+
+          if (input.val() == ''){
+              input.val($("#attr-"+ID).val())
+          }else{
+              input.val(input.val() +' '+ $("#attr-"+ID).val())
+          }
+
+      });
+
+      $( "#quit-"+ID ).click(function() {
+          
+          attr = $("#attrs-"+ID).val().split(" ")
+          attr.pop()
+          attr = attr.join(" ")
+
+          $("#attrs-"+ID).val(attr)
+
+        });
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+                schema = schemaEdge
+
+            },100);
+            
+
+            $('#dialog-expose-attr-'+ID).modal('show')
+        })
+
+        $('#expose-attr-accept-'+ID).click(function() {
+            
+            schemaMod =[...schemaEdge]
+            
+            newSchemaAttr = $('#attrs-'+ID).val().split(" ")
+            
+            for(i=0;i<newSchemaAttr.length;i++){
+                if(schemaMod.includes(newSchemaAttr[i]) == false){
+                    schemaMod.push(newSchemaAttr[i])
+                }
+            };
+
+            var paramsExposeAttr = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "attrs": $('#attrs-'+ID).val(),
+                "schema": newSchemaAttr}
+            ]}
+
+            
+           
+            paramsExposeAttr['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsExposeAttr, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-expose-attr-'+ID).modal('hide')
 
         })
 

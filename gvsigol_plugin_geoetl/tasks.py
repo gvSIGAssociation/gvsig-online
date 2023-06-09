@@ -240,12 +240,12 @@ def run_canvas_background(**kwargs):
         
         if id_ws:
             statusModel  = ETLstatus.objects.get(id_ws = id_ws)
-            statusModel.message = str(e)[:250]
+            statusModel.message = str(e)[:600]
             statusModel.status = 'Error'
             statusModel.save()
         else:
             statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-            statusModel.message = str(e)[:250]
+            statusModel.message = str(e)[:600]
             statusModel.status = 'Error'
             statusModel.save()
         

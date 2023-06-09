@@ -940,3 +940,43 @@ msgstr "Añade otras etiquetas diferentes al esquema seleccionado a todos los re
 
 msgid "Single XML file"
 msgstr "Archivo XML único"
+
+msgid "Order"
+msgstr "Orden"
+
+msgid "Expose Attributes"
+msgstr "Expón Atributos"
+
+msgid "Expose Attribute Parameters"
+msgstr "Parámetros Expón Atributos"
+
+msgid "Attribute to expose:"
+msgstr "Atributos a exponer:"
+
+msgid "Write attributes to expose separated by space"
+msgstr "Escribe los atributos a exponer separados por un espcacio"
+
+msgid "Validate Geometry"
+msgstr "Valida Geometría"
+
+msgid "Valid"
+msgstr "Válida"
+
+msgid "Invalid"
+msgstr "No válida"
+
+msgid "Validate Geometry Parameters"
+msgstr "Parámetros Valida Geometría"
+
+msgid "Stop workspace if there are invalid geometries"
+msgstr "Detén el espacio de trabajo si hay geometrías no válidas"
+
+msgid "Simple Geometry Parameters"
+msgstr "Parámetros Geometría Simple"
+
+msgid "Simple Geometry"
+msgstr "Geometría Simple"
+
+msgid "Stop workspace if some geometry is not simple"
+msgstr "Detén el espacio de trabajo si alguna geometría no es simple"
+
