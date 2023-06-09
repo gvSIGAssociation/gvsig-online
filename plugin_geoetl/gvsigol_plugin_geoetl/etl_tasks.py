@@ -4111,4 +4111,167 @@ def crea_Grid(dicc):
     cur.close()
 
     return[table_name_target]
+
+
+def trans_ExposeAttr(dicc):
+
+    attr = dicc['attr']
+    schemaList = dicc['schema']
+
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sql_ = 'create table {schema}.{tbl_target} as (select '
+
+    for attr in schemaList:
+        sql_ = sql_ + '{},'
     
+    
+    sql_ = sql_[:-1] +' from {schema}.{tbl_source})'
+
+    sqlDup = sql.SQL(sql_).format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        *[sql.Identifier(field) for field in schemaList],
+        tbl_source = sql.Identifier(table_name_source)
+    )
+
+    cur.execute(sqlDup)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+
+def trans_ValGeom(dicc):
+
+    table_name_source = dicc['data'][0]
+    table_name_target_valid = dicc['id']+'_0'
+    table_name_target_invalid = dicc['id']+'_1'
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target_valid))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDrop2 = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target_invalid))
+    cur.execute(sqlDrop2)
+    conn.commit()
+
+    sqlDup = sql.SQL("create table {schema}.{tbl_target} as (select *, valid(ST_IsValidDetail(wkb_geometry)) as _valid from {schema}.{tbl_source} WHERE valid(ST_IsValidDetail(wkb_geometry)) = 't')").format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target_valid),
+        tbl_source = sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlDup2 = sql.SQL("create table {schema}.{tbl_target} as (select *, valid(ST_IsValidDetail(wkb_geometry)) as _valid, reason(ST_IsValidDetail(wkb_geometry)) as _reason, st_AsText(location(ST_IsValidDetail(wkb_geometry))) as _location from {schema}.{tbl_source} WHERE valid(ST_IsValidDetail(wkb_geometry)) = 'f')").format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target_invalid),
+        tbl_source = sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlDup2)
+    conn.commit()
+
+    if dicc['stop'] == 'true':
+        sqlCount = sql.SQL("SELECT * from {schema}.{tbl_target} LIMIT 1").format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target_invalid)
+        )
+        cur.execute(sqlCount)
+        conn.commit()
+
+        _count = 0
+
+        for row in cur:
+            reason = row[-2]
+            location = row[-1]
+            _count +=1
+            break
+
+        if _count == 1:
+            raise Exception ("There is an invalid feature. Reason: "+reason+'. Location: '+location +'. Feature: '+ str(row[:-3]))
+
+    conn.close()
+    cur.close()          
+
+    return [table_name_target_valid, table_name_target_invalid]
+
+
+def trans_SimpGeom(dicc):
+
+    table_name_source = dicc['data'][0]
+    table_name_target_simple = dicc['id']+'_0'
+    table_name_target_no_simple = dicc['id']+'_1'
+
+    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target_simple))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDrop2 = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target_no_simple))
+    cur.execute(sqlDrop2)
+    conn.commit()
+
+    sqlDup = sql.SQL("create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source} WHERE ST_IsSimple(wkb_geometry) = 't')").format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target_simple),
+        tbl_source = sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlDup2 = sql.SQL("create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source} WHERE ST_IsSimple(wkb_geometry) = 'f')").format(
+        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target_no_simple),
+        tbl_source = sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlDup2)
+    conn.commit()
+
+    if dicc['stop'] == 'true':
+        sqlCount = sql.SQL("SELECT * from {schema}.{tbl_target} LIMIT 1").format(
+            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target_no_simple)
+        )
+        cur.execute(sqlCount)
+        conn.commit()
+
+        _count = 0
+
+        for row in cur:
+            _count +=1
+            break
+
+        if _count == 1:
+            raise Exception ("There are features with geometries no simple. "+ str(row))
+
+    conn.close()
+    cur.close()          
+
+    return [table_name_target_simple, table_name_target_no_simple]
