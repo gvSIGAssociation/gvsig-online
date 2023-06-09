@@ -8818,7 +8818,7 @@ trans_ExposeAttr = draw2d.shape.layout.VerticalLayout.extend({
             "parameters": [
                 {"attr": $('#attr-'+ID).val(),
                 "attrs": $('#attrs-'+ID).val(),
-                "schema": newSchemaAttr}
+                "schema": schemaMod}
             ]}
 
             

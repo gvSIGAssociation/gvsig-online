@@ -4131,6 +4131,18 @@ def trans_ExposeAttr(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
+
+    sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
+    sqlDatetype += "where table_schema = %s and table_name = %s "
+
+    cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"], table_name_source])
+    conn.commit()
+
+    for row in cur:
+        if 'wkb_geometry' == row[0]:
+            schemaList.append('wkb_geometry')
+            break
+
     sql_ = 'create table {schema}.{tbl_target} as (select '
 
     for attr in schemaList:
