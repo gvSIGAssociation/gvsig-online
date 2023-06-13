@@ -103,7 +103,9 @@ APScheduler==3.7.0
 # soap client, suds deprecated, zeep is used in new developments 
 suds-community==0.8.4
 zeep==3.4.0
+# Plugin PID 
 zeep[xmlsec]==3.4.0
+shortuuid==1.0.11
 
 # plugin_widget
 django_tinymce==3.4.0
