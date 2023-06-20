@@ -3823,7 +3823,13 @@ def input_Segex(dicc):
                                 exp["Longitud"] = 0.0
                                 exp["EstadoExpediente"] = 0
 
-                            exp['TipoGeorreferencia']= types_text_list[tpt][1]
+                            for tt in types_text_list:
+
+                                if str(tt[0]) == str(tp):
+                                    exp['TipoGeorreferencia']= tt[1]
+                                    break
+
+
                             exp['Operacion']= georef['Operacion']
 
                             exp["IdGeorreferencia"] = int(exp["IdGeorreferencia"])
