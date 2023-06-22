@@ -26,6 +26,8 @@ from urllib import response
 from django.shortcuts import HttpResponse, render, redirect
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
+from gvsigol_auth.django_auth import get_user_details
+#from gvsigol_auth.auth_backend import get_roles, get_user_details
 from django.core import serializers
 from django.utils.translation import ugettext as _
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
@@ -91,7 +93,7 @@ def etl_canvas(request):
     #from gvsigol.celery import app as celery_app
     #celery_app.control.purge()
 
-    username = request.GET['user']
+    username = request.user.username
 
     srs = core_utils.get_supported_crs_array()
     srs_string = json.dumps(srs)
@@ -140,52 +142,62 @@ def etl_canvas(request):
 
     try:
         lgid = request.GET['lgid']
+
         instance  = ETLworkspaces.objects.get(id=int(lgid))
 
-        response = {
-            'id':lgid,
-            'name': instance.name,
-            'description': instance.description,
-            'workspace': json.dumps(instance.workspace),
-            'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
-            'srs': srs_string,
-            'dbc': dbc,
-            'providers': providers
-        }
+        if instance.username == request.user.username or request.user.is_superuser:
 
-        try:
-            periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+instance.name+'.'+str(lgid))
-        except:
-            periodicTask = None
+            response = {
+                'id':lgid,
+                'name': instance.name,
+                'description': instance.description,
+                'workspace': json.dumps(instance.workspace),
+                'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
+                'srs': srs_string,
+                'dbc': dbc,
+                'providers': providers
+            }
+
+            try:
+                periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+instance.name+'.'+str(lgid))
+            except:
+                periodicTask = None
+            
+            if periodicTask:
+                cronid = periodicTask.crontab_id
+                interid = periodicTask.interval_id
+                if cronid:
+                    crontab = CrontabSchedule.objects.get(id= cronid)
+                    response['minute'] = crontab.minute
+                    response['hour'] = crontab.hour
+
+                    days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                    try:
+                        response['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+                    except:
+                        response['day_of_week'] = 'all'
+                else:
+                    interval = IntervalSchedule.objects.get(id= interid)
+                    response['every'] = interval.every
+                    response['period'] = interval.period
+
+            return render(request, 'etl.html', response)
         
-        if periodicTask:
-            cronid = periodicTask.crontab_id
-            interid = periodicTask.interval_id
-            if cronid:
-                crontab = CrontabSchedule.objects.get(id= cronid)
-                response['minute'] = crontab.minute
-                response['hour'] = crontab.hour
+        else:
 
-                days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-                try:
-                    response['day_of_week'] = days_of_week[int(crontab.day_of_week)]
-                except:
-                    response['day_of_week'] = 'all'
-            else:
-                interval = IntervalSchedule.objects.get(id= interid)
-                response['every'] = interval.every
-                response['period'] = interval.period
+            return redirect('etl_workspace_list')
 
-        return render(request, 'etl.html', response)
-    
-    except:
-        response = {
-            'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
-            'srs': srs,
-            'dbc': dbc,
-            'providers': providers
-        }
-        return render(request, 'etl.html', response)
+    except Exception as e:
+        if str(e) == 'ETLworkspaces matching query does not exist.':
+            return redirect('etl_workspace_list')
+        else:
+            response = {
+                'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
+                'srs': srs,
+                'dbc': dbc,
+                'providers': providers
+            }
+            return render(request, 'etl.html', response)
 
 def get_list(user):
     
@@ -258,7 +270,7 @@ def etl_workspace_list(request):
     except Exception as e:
         print(e)
     
-    username = request.GET['user']
+    username = request.user.username
 
     response = {
         'workspaces': get_list(username),
@@ -618,8 +630,13 @@ def etl_read_canvas(request):
                 params = None
 
 
-            run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws, 'username': request.POST['username'], 'parameters': params})
-            #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': id_ws})
+            if id_ws:
+                if ws.username == request.user.username or request.user.is_superuser:
+                    run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws, 'username': request.POST['username'], 'parameters': params})
+                    #run_canvas_background({'jsonCanvas': jsonCanvas, 'id_ws': id_ws})
+            else:
+                run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 'id_ws': id_ws, 'username': request.POST['username'], 'parameters': params})
+
  
         else:
             print ('invalid form')

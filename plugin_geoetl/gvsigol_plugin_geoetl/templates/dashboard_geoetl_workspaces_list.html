@@ -40,33 +40,35 @@
 						</thead>
 						<tbody>
 							{% for workspace in workspaces %}
-								<tr>
-									<td> {{ workspace.id }} </td>
-									<td></td>
-									
-										<td>
-											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
-											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
-											<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
-										</td>
-
-
-									<td>{{ workspace.name }}</td>
-									<td>{{ workspace.description }}</td>
-									{% if workspace.every %}
-										<td>{{ workspace.every }} {{ workspace.period }}</td>
-									{% elif workspace.day_of_week%}
-										<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
-									{% else %}
+								{% if user.username == workspace.username or user.is_superuser%}
+									<tr>
+										<td> {{ workspace.id }} </td>
 										<td></td>
-									{% endif %}
-									<td> {{ workspace.username }} </td>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
-									<th></th>
-								</tr>
+										
+											<td>
+												<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
+												<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
+												<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
+											</td>
+
+
+										<td>{{ workspace.name }}</td>
+										<td>{{ workspace.description }}</td>
+										{% if workspace.every %}
+											<td>{{ workspace.every }} {{ workspace.period }}</td>
+										{% elif workspace.day_of_week%}
+											<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
+										{% else %}
+											<td></td>
+										{% endif %}
+										<td> {{ workspace.username }} </td>
+										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
+										<th></th>
+									</tr>
+								{% endif %}
 							{% endfor %}
 						</tbody>
 					</table>
@@ -483,11 +485,10 @@
 {% block extra-scripts %}
 
 <script>
-	$('#menu-manage-plugins').addClass("active");
+	$('#menu-plugin-etl').addClass("active");
 	$('#submenu-etl').addClass("active");
 
 	username = '{{ user.username }}'
-
 
 	//Parámetros de usuario
 
@@ -825,7 +826,8 @@
 		}
 
 		$('#button-new-empty-canvas').on('click', function (){
-			location.href = '/gvsigonline/etl/etl_canvas/?user=' + '{{ user.username }}';
+
+			location.href = '/gvsigonline/etl/etl_canvas/';
 		});
 
 		upload = false
@@ -1241,7 +1243,7 @@
 			
 		function openWorkspace(data){	
 				
-			location.href = '/gvsigonline/etl/etl_canvas/?user=' + '{{ user.username }}&lgid=' + data[0];
+			location.href = '/gvsigonline/etl/etl_canvas/?lgid=' + data[0];
 			
 		}
 

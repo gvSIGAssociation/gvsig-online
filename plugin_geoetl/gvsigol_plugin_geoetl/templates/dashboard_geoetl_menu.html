@@ -1,11 +1,11 @@
 {% load staticfiles %}
 {% load i18n %}
-<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+<!--<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
 <script>
 	if ($("#menu-manage-plugins" ).length){
 		$("#menu-manage-plugins ul.treeview-menu").append(
 		'<li id="submenu-etl">'+
-		'	<a href="/gvsigonline/etl/etl_workspace_list/?user=' + '{{ user.username }}' +'">'+
+		'	<a href="/gvsigonline/etl/etl_workspace_list/">'+
 		'		<i class="fa fa-cogs"></i>{% trans "Extract, Transform & Load" %}'+
 		'	</a>'+
 		'</li>');
@@ -14,9 +14,21 @@
 		'<li id="menu-manage-plugins" class="treeview"><a href="#">'+
 		'	<i class="fa fa-puzzle-piece" aria-hidden="true"></i><span>{% trans "Plugins" %}</span> <i class="fa fa-angle-left pull-right"></i></a>'+
 		'	<ul class="treeview-menu">'+
-		'		<li id="submenu-etl"><a href="/gvsigonline/etl/etl_workspace_list/?user=' + '{{ user.username }}' + '"><i class="fa fa-cogs"></i>{% trans "Extract, Transform & Load" %}</a></li>'+
+		'		<li id="submenu-etl"><a href="/gvsigonline/etl/etl_workspace_list/"><i class="fa fa-cogs"></i>{% trans "Extract, Transform & Load" %}</a></li>'+
 		'	</ul>'+
 		'</li>');
 
 	}
-</script>
+</script>-->
+<li id="menu-plugin-etl" class="treeview">
+	<a href="#">
+		<i class="fa fa-cogs"></i>
+		<span>{% trans "Extract, Transform & Load" %}</span> 
+		<i class="fa fa-angle-left pull-right"></i>
+		<ul class="treeview-menu">
+			<li id="submenu-etl"><a href="/gvsigonline/etl/etl_workspace_list/"><i class="fa fa-list"></i> {% trans "Workspaces" %}</a></li>
+			<li id="submenu-canvas"><a href="/gvsigonline/etl/etl_canvas/"><i class="fa fa-calendar"></i> {% trans "Canvas" %}</a></li>
+
+		</ul>
+	</a>
+</li>
