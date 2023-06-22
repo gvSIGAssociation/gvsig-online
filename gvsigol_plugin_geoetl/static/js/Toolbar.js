@@ -24,7 +24,7 @@ gvsigolETL.Toolbar = Class.extend({
 			$('#modal-new-empy-canvas').modal('show')
 
 			$('#button-empty-canvas-accept').click(function() {
-				location.href = '/gvsigonline/etl/etl_canvas/?user=' + username;
+				location.href = '/gvsigonline/etl/etl_canvas/';
 
 			})
 
@@ -35,7 +35,7 @@ gvsigolETL.Toolbar = Class.extend({
 		this.html.append(this.openButton);
 		this.openButton.click( function() {
 
-			location.href = '/gvsigonline/etl/etl_workspace_list/?user=' + username;
+			location.href = '/gvsigonline/etl/etl_workspace_list/';
 		});
 
 		
@@ -112,7 +112,7 @@ gvsigolETL.Toolbar = Class.extend({
 							if(response['exists']=="true"){
 								$('#modal-ws-exists').modal('show')
 							}else{
-								location.href = '/gvsigonline/etl/etl_workspace_list/?user=' + username;
+								location.href = '/gvsigonline/etl/etl_workspace_list/';
 							}
 						}
 					});
@@ -140,7 +140,7 @@ gvsigolETL.Toolbar = Class.extend({
 								if(response['exists']=="true"){
 									$('#modal-ws-exists').modal('show')
 								}else{
-									location.href = '/gvsigonline/etl/etl_workspace_list/?user=' + username;
+									location.href = '/gvsigonline/etl/etl_workspace_list/';
 								}
 							}
 						});
