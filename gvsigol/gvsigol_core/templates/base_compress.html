@@ -150,7 +150,6 @@
 						{% include "dashboard_symbology_menu.html" %}
 						{% include "dashboard_core_menu.html" %}
 						{% include "dashboard_statistics_menu.html" %}
-						{% include "dashboard_geoetl_menu.html" %}
 
 						{% if user.is_superuser %}
 						
@@ -163,6 +162,7 @@
 		    				{% endfor %}
 		    			
 		    			{% else %}
+							{% include "dashboard_geoetl_menu.html" %}
 		    				{% for plugin in PUBLIC_PLUGINS %}					  
 		    					{% if 'gvsigol_plugin_' in plugin %}	
 		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
