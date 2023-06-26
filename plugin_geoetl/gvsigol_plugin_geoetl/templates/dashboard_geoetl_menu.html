@@ -20,6 +20,7 @@
 
 	}
 </script>-->
+{% if user.is_staff or user.is_superuser %}
 <li id="menu-plugin-etl" class="treeview">
 	<a href="#">
 		<i class="fa fa-cogs"></i>
@@ -32,3 +33,5 @@
 		</ul>
 	</a>
 </li>
+
+{% endif %}

@@ -48,8 +48,3 @@ class cadastral_requests(models.Model):
 
     def __str__(self):
         return self.name
-
-
-def translations_placeholder():
-    test = _("gvsigol_plugin_geoetl manual title")
-    test = _("gvsigol_plugin_geoetl manual desc")
