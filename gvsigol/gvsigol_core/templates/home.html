@@ -28,12 +28,14 @@
 				<p class="text-muted">{% trans "You are logged in as basic user" %}</p><hr>
 				{% endif %}
 				<strong><i class="fa fa-clock-o margin-r-5"></i> {% trans "Last login" %}</strong>
-				<p class="text-muted">{{user.last_login}}</p><hr>
+				<p class="text-muted">{{user.last_login}}</p>
 				
-				{% if external_ldap_mode %}
-				<strong><i class="fa fa-lock margin-r-5"></i> {% trans "Password" %}</strong>
+				{% if allow_password_update %}
+				<hr><strong><i class="fa fa-lock margin-r-5"></i> {% trans "Password" %}</strong>
+				{% if manage_passwords_url %}
+				<p class="text-muted"><a href="{{manage_passwords_url}}" target="_blank" id="">{% trans "Click here" %}</a> {% trans "to update your password" %}</p>
+				{% else %}
 				<p class="text-muted"><a href="" id="show-hide-pass-update-link">{% trans "Click here" %}</a> {% trans "to update your password" %}</p>
-
 				<div id="show-hide-pass-update-div" class="hide">
 					<div id="form-error" class="hide" style="color: #ff0000;">
 						<p>* {% trans "Passwords doesn't match" %}</p>
@@ -57,6 +59,7 @@
 						<button id="update-password-submit" class="btn btn-default">{%trans "Update password" %}</button>
 					</div>
 				</div>
+				{% endif %}
 				{% endif %}
 
 			</div>
@@ -96,10 +99,6 @@
 			</div>
 			
 		</div>
-		<!-- /.box -->
-	</div>
-	
-	<div class="col-md-8">
 		<div id="project-list-box2" class="box searchable-list-box">
 			<div class="box-header with-border">
 				<h3 class="box-title col-md-6">{% trans "Public projects list" %}</h3>
