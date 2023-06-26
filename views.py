@@ -122,15 +122,20 @@ def home(request):
         else:
             projects.append(project)
 
-    external_ldap_mode = True
-    if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
-        external_ldap_mode = False
+    manage_passwords_url = getattr(settings, 'MANAGE_PASSWORD_URL', None)
+    if settings.AUTH_DASHBOARD_UI:        
+        if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD']:
+            allow_password_update = False
+        else:
+            allow_password_update = True
+    else:
+        allow_password_update = (manage_passwords_url is not None)
     if settings.USE_SPA_PROJECT_LINKS:
         useClassicViewer = False
     else:
         useClassicViewer = True
 
-    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode, 'use_classic_viewer': useClassicViewer, 'frontend_base_url': settings.FRONTEND_BASE_URL})
+    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'allow_password_update': allow_password_update, 'manage_passwords_url': manage_passwords_url, 'use_classic_viewer': useClassicViewer, 'frontend_base_url': settings.FRONTEND_BASE_URL})
 
 @login_required()
 @staff_required
