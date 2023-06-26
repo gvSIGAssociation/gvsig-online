@@ -124,10 +124,6 @@ try:
 except ImportError:
     print('ERROR: No ha instalado la libreria drf_yasg')
 
-PUBLIC_PLUGINS = [
-    ##GVSIGOL_PUBLIC_PLUGINS##
-]
-
 ACTSTREAM_SETTINGS = {
     'FETCH_RELATIONS': True,
     'USE_JSONFIELD': True,
