@@ -338,7 +338,7 @@ AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
 #AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 AUTH_LDAP_ROOT_DN = "dc=local,dc=gvsigonline,dc=com"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
-
+AUTH_DASHBOARD_UI = True
 
 # Internationalization
 LANGUAGE_CODE = 'es'
