@@ -331,6 +331,11 @@ function configure() {
 	fi
 	grep -rl "##DJANGO_AUTHENTICATION_BACKENDS##"  | xargs sed -i "s/##DJANGO_AUTHENTICATION_BACKENDS##/$DJANGO_AUTHENTICATION_BACKENDS/g"
 	grep -rl "##DRF_DEFAULT_AUTHENTICATION_CLASSES##"  | xargs sed -i "s/##DRF_DEFAULT_AUTHENTICATION_CLASSES##/$DRF_DEFAULT_AUTHENTICATION_CLASSES/g"
+	if [ -z $AUTH_DASHBOARD_UI ]; then
+		echo "WARNING: AUTH_DASHBOARD_UI is not defined, using 'True'"
+		AUTH_DASHBOARD_UI="True"
+	fi
+	grep -rl "##AUTH_DASHBOARD_UI##"  | xargs sed -i "s/##AUTH_DASHBOARD_UI##/$AUTH_DASHBOARD_UI/g"
 	if [ -z $USE_X_FORWARDED_HOST ]; then
 		echo "WARNING: USE_X_FORWARDED_HOST is not defined, using 'False'"
 		USE_X_FORWARDED_HOST="False"
