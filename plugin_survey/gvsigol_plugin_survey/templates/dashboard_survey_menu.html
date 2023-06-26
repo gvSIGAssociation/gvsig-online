@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load i18n %}
+{% if user.is_superuser %}
 <script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
 <script>
 if ($("#menu-manage-plugins" ).length){
@@ -19,3 +20,4 @@ if ($("#menu-manage-plugins" ).length){
 	'</li>');	
 }
 </script>
+{% endif %}

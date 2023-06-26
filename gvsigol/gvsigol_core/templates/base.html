@@ -141,47 +141,23 @@
 						<a href="/gvsigonline/core/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
 					</li>	
 					{% if user.is_staff %}
-						{% if user.is_superuser %}				
-							{% include "dashboard_auth_menu.html" %}	
-						{% endif %}	
+						{% if user.is_superuser %}
+							{% include "dashboard_auth_menu.html" %}
+						{% endif %}
 													
 						{% include "dashboard_services_menu.html" %}
 						{% include "dashboard_filemanager_menu.html" %}
 						{% include "dashboard_symbology_menu.html" %}
 						{% include "dashboard_core_menu.html" %}
 						{% include_if_exists "dashboard_statistics_menu.html" %}
-
-						{% if user.is_superuser %}
-							{% for plugin in INSTALLED_APPS %}												  
-		    					{% if 'gvsigol_plugin_' in plugin %}	
-		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
-										{% include_if_exists aux %}	
-									{% endwith %}
-		    					{% endif %}		    					
-		    				{% endfor %}
-		    			
-		    			{% else %}
-
-		    				{% for plugin in PUBLIC_PLUGINS %}					  
-		    					{% if 'gvsigol_plugin_' in plugin %}	
-		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
-										{% include_if_exists aux %}	
-									{% endwith %}
-		    					{% endif %}		    					
-		    				{% endfor %}
-		    				
-						{% endif %}		
-					
-					{% else %}
-		    				{% for plugin in PUBLIC_PLUGINS %}	
-		    					{% if 'gvsigol_plugin_' in plugin %}	
-		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}
-										{% include_if_exists aux %}	
-									{% endwith %}
-		    					{% endif %}		    					
-		    				{% endfor %}
-		    						
-					{% endif %}						
+					{% endif %}
+					{% for plugin in INSTALLED_APPS %}												  
+    					{% if 'gvsigol_plugin_' in plugin %}	
+    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
+								{% include_if_exists aux %}	
+							{% endwith %}
+    					{% endif %}		    					
+    				{% endfor %}
 				</ul>				
 			</section>			
 		</aside>

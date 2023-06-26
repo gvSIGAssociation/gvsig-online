@@ -1,6 +1,6 @@
 {% load staticfiles %}
 {% load i18n %}
-
+{% if user.is_superuser or user.is_staff %}
 <li id="menu-manage-statistics" class="treeview"><a href="#">
 	<i class="fa fa-line-chart"></i><span>{% trans "Statistics" %}</span> <i class="fa fa-angle-left pull-right"></i></a>
 	<ul class="treeview-menu">
@@ -8,3 +8,4 @@
 		<!-- <li id="submenu-statistics-groups"><a href="/gvsigonline/auth/group_list/"><i class="fa fa-bar-chart "></i>{% trans "More Statistics" %}</a></li> -->
 	</ul>
 </li>
+{% endif %}

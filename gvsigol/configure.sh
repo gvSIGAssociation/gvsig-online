@@ -273,8 +273,6 @@ function configure() {
 	fi
 	grep -rl "##TEMPORAL_ADVANCED_PARAMETERS##"  | xargs sed -i "s/##TEMPORAL_ADVANCED_PARAMETERS##/$TEMPORAL_ADVANCED_PARAMETERS/g"
 
-	grep -rl "##GVSIGOL_PUBLIC_PLUGINS##"  | xargs sed -i "s ##GVSIGOL_PUBLIC_PLUGINS## $GVSIGOL_PUBLIC_PLUGINS g"  | true
-
 	echo "INFO: Replace ALLOWED_HOST_NAMES"
 	if [ -z $ALLOWED_HOST_NAMES ]; then
 		echo "WARNING: ALLOWED_HOST_NAMES is not defined. Using BASE_URL"
