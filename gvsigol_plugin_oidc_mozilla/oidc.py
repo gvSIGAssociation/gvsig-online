@@ -29,7 +29,13 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         scopes_str = self.get_settings('OIDC_RP_SCOPES', 'openid email username')
         scopes = scopes_str.split()
         if 'email' in scopes and 'username' in scopes:
-            return 'email' in claims and 'username' in claims
+            if 'email' not in claims:
+                LOGGER.warning('email is required in claims')
+                return False
+            if 'username' not in claims:
+                LOGGER.warning('username is required in claims')
+                return False
+            return True
 
         LOGGER.warning('Custom OIDC_RP_SCOPES defined. '
                        'You need to override `verify_claims` for custom claims verification.')
