@@ -159,3 +159,11 @@ def ensure_admin_group():
                 auth_backend.add_to_role(user, admin_role)
     except BackendNotAvailable:
         logging.getLogger(LOGGER_NAME).warning("Authentication backend is not available. Check configuration and connectivity")
+
+def config_staff_user(username):
+    from gvsigol_services import utils
+    role = auth_backend.get_primary_role(username)
+    user_role_created = auth_backend.add_role(role)
+    auth_backend.add_to_role(username, role)
+    utils.create_user_workspace(username, role)
+    return (user_role_created, role)
