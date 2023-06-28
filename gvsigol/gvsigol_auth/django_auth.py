@@ -423,11 +423,7 @@ def add_role(role_name, desc=''):
     """
     if auth_services.get_services().ldap_add_group(role_name, desc) == False:
         return False
-    try:
-        auth_services.get_services().add_data_directory(role_name)
-    except Exception as e:
-        print(str(e))
-        return False
+
     try:
         role = Role(
             name = role_name,
