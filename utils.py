@@ -37,7 +37,7 @@ from gvsigol_auth.models import UserGroup, User
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
-    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace
+    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server
 from .models import LayerReadRole, LayerWriteRole
 from gvsigol_core import utils as core_utils
 import ast
@@ -46,6 +46,7 @@ from psycopg2 import sql as sqlbuilder
 import logging
 logger = logging.getLogger("gvsigol")
 from gvsigol_auth import auth_backend
+from gvsigol_auth import services as auth_services
 
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
     role_list = auth_backend.get_all_roles_details()
@@ -802,3 +803,34 @@ def set_default_permissions(file_path):
     umask = os.umask(0o666)
     os.umask(umask)
     os.chmod(file_path, 0o666 & ~umask)
+
+def create_user_workspace(username, role):
+    """
+    Creates the user workspace and datastore if they don't exist
+    """
+    gs = geographic_servers.get_instance().get_default_server()
+    server_object = Server.objects.get(id=int(gs.id))
+
+    auth_services.get_services().add_data_directory(role)
+    url = server_object.frontend_url + '/'
+    ws_name = 'ws_' + username.lower()
+    if gs.createWorkspace(ws_name, url + ws_name):          
+        # save it on DB if successfully created
+        newWs = Workspace(
+            server = server_object,
+            name = ws_name,
+            description = '',
+            uri = url + ws_name,
+            wms_endpoint = url + ws_name + '/wms',
+            wfs_endpoint = url + ws_name + '/wfs',
+            wcs_endpoint = url + ws_name + '/wcs',
+            wmts_endpoint = url + 'gwc/service/wmts',
+            cache_endpoint = url + 'gwc/service/wms',
+            created_by = username,
+            is_public = False
+        )
+        newWs.save()
+        
+        ds_name = 'ds_' + username.lower()
+        create_datastore(username, ds_name, newWs)
+        gs.reload_nodes()
