@@ -325,41 +325,6 @@ def user_list(request):
     }     
     return render(request, 'user_list.html', response)
 
-def _config_staff_user(username):
-    gs = geographic_servers.get_instance().get_default_server()
-    server_object = Server.objects.get(id=int(gs.id))
-
-    role = auth_backend.get_primary_role(username)
-    user_role_created = auth_backend.add_role(role)
-
-    auth_backend.add_to_role(username, role)
-    # FIXME OIDC CMI deberia hacerse solo si no existe el rol???
-    auth_services.get_services().add_data_directory(role)
-    url = server_object.frontend_url + '/'
-    ws_name = 'ws_' + username.lower()
-    if gs.createWorkspace(ws_name, url + ws_name):          
-        # save it on DB if successfully created
-        newWs = Workspace(
-            server = server_object,
-            name = ws_name,
-            description = '',
-            uri = url + ws_name,
-            wms_endpoint = url + ws_name + '/wms',
-            wfs_endpoint = url + ws_name + '/wfs',
-            wcs_endpoint = url + ws_name + '/wcs',
-            wmts_endpoint = url + 'gwc/service/wmts',
-            cache_endpoint = url + 'gwc/service/wms',
-            created_by = username,
-            is_public = False
-        )
-        newWs.save()
-        
-        ds_name = 'ds_' + username.lower()
-        services_utils.create_datastore(username, ds_name, newWs)
-        gs.reload_nodes()
-    return (user_role_created, role)
-    
-
 @login_required()
 @superuser_required
 def user_add(request):        
@@ -415,7 +380,7 @@ def user_add(request):
 
                         #User backend
                         if is_superuser or is_staff:
-                            user_role_created, role =_config_staff_user(user.username)
+                            user_role_created, role = auth_utils.config_staff_user(user.username)
                             role_membership_added.append(role)
                             
                         try:    
@@ -528,7 +493,7 @@ def user_update(request, username):
                         roles=assigned_roles
                 )
             if success and (is_superuser or is_staff):
-                _config_staff_user(username)
+                auth_utils.config_staff_user(username)
 
             return redirect('user_list')
         else:
