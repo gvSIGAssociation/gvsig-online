@@ -30,7 +30,6 @@ MAIN_SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
 STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
 SUPERUSER_ROLES = {MAIN_SUPERUSER_ROLE, 'ADMIN'}
 SYSTEM_ROLES = SUPERUSER_ROLES | {STAFF_ROLE} | {'AUTHENTICATED', 'offline_access', 'uma_authorization'}
-OIDC_VERIFY_SSL = getattr(settings, 'OIDC_VERIFY_SSL', True)
 
 def get_admin_role():
     """
@@ -78,6 +77,7 @@ class OIDCSession():
             self.refresh_url = token_url
         self.token = None
         self._session = None
+        self.oidc_verify_ssl = getattr(settings, 'OIDC_VERIFY_SSL', True)
 
     def _create_session(self):
         extra = {
@@ -96,7 +96,7 @@ class OIDCSession():
                 token_url=self.token_url,
                 client_id=self.client_id,
                 client_secret=self.client_secret,
-                verify=OIDC_VERIFY_SSL
+                verify=self.oidc_verify_ssl
                 )
         return self._session
     
@@ -109,84 +109,84 @@ class OIDCSession():
         try:
             if not params:
                 params = {}
-            r = self._get_session().get(url, params=params, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
+            r = self._get_session().get(url, params=params, timeout=KEYCLOAK_TIMEOUT, verify=self.oidc_verify_ssl)
             if r.status_code == 401:
                 self._create_session()
-                return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
+                return self.get(url, params=params, retry=False, verify=self.oidc_verify_ssl)
             return r
             
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.get(url, params=params, retry=False, verify=self.oidc_verify_ssl)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.get(url, params=params, retry=False, verify=self.oidc_verify_ssl)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.get(url, params=params, retry=False, verify=self.oidc_verify_ssl)
     
     def post(self, url, data=None, json=None, retry=True):
         try:
-            r = self._get_session().post(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
+            r = self._get_session().post(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=self.oidc_verify_ssl)
             if r.status_code == 401:
                 self._create_session()
-                return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+                return self.post(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.post(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.post(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.post(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
 
     def put(self, url, data=None, json=None, retry=True):
         try:
-            r = self._get_session().put(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
+            r = self._get_session().put(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=self.oidc_verify_ssl)
             if r.status_code == 401:
                 self._create_session()
-                return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+                return self.put(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.put(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.put(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.put(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
     
     def delete(self, url,  data=None, json=None, retry=True):
         try:
-            r = self._get_session().delete(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
+            r = self._get_session().delete(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=self.oidc_verify_ssl)
             if r.status_code == 401:
                 self._create_session()
-                return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+                return self.delete(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.delete(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.delete(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
+            return self.delete(url, data=data, json=json, retry=False, verify=self.oidc_verify_ssl)
 
 class KeycloakAdminSession(OIDCSession):
     def __init__(self, client_id, client_secret, base_url, realm) -> None:
