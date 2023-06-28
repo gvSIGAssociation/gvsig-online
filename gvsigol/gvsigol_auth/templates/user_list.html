@@ -5,6 +5,7 @@
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
+		{% if not read_only_users %}
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
@@ -12,7 +13,7 @@
 				</div>
 			</div>
 		</div>
-			
+		{% endif %}
 		<div class="box">
 			<div class="box-body">
 				<table class="table" id="users-table">
@@ -109,7 +110,7 @@ $(document).ready(function() {
 		"columnDefs": [{
 	        "targets": -1,
 	        "data": null,
-	        "defaultContent": '<button type="button" name="button-delete-user" data-toggle="modal" data-target="#modal-delete-user" data-placement="bottom" title="' + '{% trans "Delete user" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	        "defaultContent": {% if read_only_users %}''{% else %}'<button type="button" name="button-delete-user" data-toggle="modal" data-target="#modal-delete-user" data-placement="bottom" title="' + '{% trans "Delete user" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'{% endif %}
 	    },{
 	        "targets": -2,
 	        "data": null,

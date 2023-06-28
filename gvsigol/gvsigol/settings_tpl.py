@@ -244,6 +244,7 @@ LOGOUT_REDIRECT_URL = "##LOGOUT_REDIRECT_URL##"
 if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
     import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 AUTH_DASHBOARD_UI = ("##AUTH_DASHBOARD_UI##" != 'False')
+AUTH_READONLY_USERS = ("##AUTH_READONLY_USERS##" != 'False')
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/

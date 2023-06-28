@@ -336,6 +336,11 @@ function configure() {
 		AUTH_DASHBOARD_UI="True"
 	fi
 	grep -rl "##AUTH_DASHBOARD_UI##"  | xargs sed -i "s/##AUTH_DASHBOARD_UI##/$AUTH_DASHBOARD_UI/g"
+	if [ -z $AUTH_READONLY_USERS ]; then
+		echo "WARNING: AUTH_READONLY_USERS is not defined, using 'False'"
+		AUTH_READONLY_USERS="False"
+	fi
+	grep -rl "##AUTH_READONLY_USERS##"  | xargs sed -i "s/##AUTH_READONLY_USERS##/$AUTH_READONLY_USERS/g"
 	if [ -z $USE_X_FORWARDED_HOST ]; then
 		echo "WARNING: USE_X_FORWARDED_HOST is not defined, using 'False'"
 		USE_X_FORWARDED_HOST="False"
