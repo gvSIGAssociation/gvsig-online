@@ -172,6 +172,36 @@ Returns
 """
 
 update_user = auth_backend.update_user
+"""
+Updates a user, identified by username. Only the provided attributes
+will be updated.
+
+Parameters
+----------
+username: str
+    User name
+
+[first_name]: str
+    First name
+[last_name]: str
+    Last name
+[superuser]: boolean
+    Whether the user is superuser
+[staff]: boolean
+    Whether the user is staff
+[groups]: [str]
+    Groups to assign to the user. The provided groups will replace
+    the existing user groups
+[roles]: [str]
+    Roles to assign to the user. The provided roles will replace
+    the existing user roles
+[password]: str
+    The new password
+Returns
+-------
+    User
+    A Django User instance or None if an error happened
+"""
 
 delete_user  = auth_backend.delete_user
 """

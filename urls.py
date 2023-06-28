@@ -47,7 +47,7 @@ if settings.AUTH_DASHBOARD_UI:
 MANAGE_PASSWORD_URL = getattr(settings, 'MANAGE_PASSWORD_URL', None)
 if not MANAGE_PASSWORD_URL:
     urlpatterns = urlpatterns + [
-        path('reset/<int:user_id>/<uid>/<token>/', auth_views.password_reset_confirmation, name='password_reset_confirmation'),
+        path('reset/<username>/<uid>/<token>/', auth_views.password_reset_confirmation, name='password_reset_confirmation'),
         path('reset/done/', auth_views.password_reset_complete, name='password_reset_confirmation_complete'),
         path('password_update/', auth_views.password_update, name='password_update'),
         path('password_reset/', auth_views.password_reset, name='password_reset'),
