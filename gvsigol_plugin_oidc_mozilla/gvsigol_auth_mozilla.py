@@ -17,6 +17,7 @@ from requests.exceptions import RequestException, ConnectionError, Timeout, TooM
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
 from gvsigol_auth import signals
 from rest_framework.request import Request
+from django.conf import settings
 try:
     import threading
 except ImportError: # remove in python 3.7
@@ -29,6 +30,7 @@ MAIN_SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
 STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
 SUPERUSER_ROLES = {MAIN_SUPERUSER_ROLE, 'ADMIN'}
 SYSTEM_ROLES = SUPERUSER_ROLES | {STAFF_ROLE} | {'AUTHENTICATED', 'offline_access', 'uma_authorization'}
+OIDC_VERIFY_SSL = getattr(settings, 'OIDC_VERIFY_SSL', True)
 
 def get_admin_role():
     """
@@ -93,7 +95,8 @@ class OIDCSession():
         self._session.fetch_token(
                 token_url=self.token_url,
                 client_id=self.client_id,
-                client_secret=self.client_secret
+                client_secret=self.client_secret,
+                verify=OIDC_VERIFY_SSL
                 )
         return self._session
     
@@ -106,84 +109,84 @@ class OIDCSession():
         try:
             if not params:
                 params = {}
-            r = self._get_session().get(url, params=params, timeout=KEYCLOAK_TIMEOUT)
+            r = self._get_session().get(url, params=params, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
             if r.status_code == 401:
                 self._create_session()
-                return self.get(url, params=params, retry=False)
+                return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
             return r
             
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.get(url, params=params, retry=False)
+            return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.get(url, params=params, retry=False)
+            return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.get(url, params=params, retry=False)
+            return self.get(url, params=params, retry=False, verify=OIDC_VERIFY_SSL)
     
     def post(self, url, data=None, json=None, retry=True):
         try:
-            r = self._get_session().post(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT)
+            r = self._get_session().post(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
             if r.status_code == 401:
                 self._create_session()
-                return self.post(url, data=data, json=json, retry=False)
+                return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.post(url, data=data, json=json, retry=False)
+            return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.post(url, data=data, json=json, retry=False)
+            return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.post(url, data=data, json=json, retry=False)
+            return self.post(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
 
     def put(self, url, data=None, json=None, retry=True):
         try:
-            r = self._get_session().put(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT)
+            r = self._get_session().put(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
             if r.status_code == 401:
                 self._create_session()
-                return self.put(url, data=data, json=json, retry=False)
+                return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.put(url, data=data, json=json, retry=False)
+            return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.put(url, data=data, json=json, retry=False)
+            return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.put(url, data=data, json=json, retry=False)
+            return self.put(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
     
     def delete(self, url,  data=None, json=None, retry=True):
         try:
-            r = self._get_session().delete(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT)
+            r = self._get_session().delete(url, data=data, json=json, timeout=KEYCLOAK_TIMEOUT, verify=OIDC_VERIFY_SSL)
             if r.status_code == 401:
                 self._create_session()
-                return self.delete(url, data=data, json=json, retry=False)
+                return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
             return r
         except InvalidClientIdError as e:
             # No refresh token
             self._create_session()
-            return self.delete(url, data=data, json=json, retry=False)
+            return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
         except TokenExpiredError as e:
             # (token_expired) cuando caduca access token y no se renueva
             self._create_session()
-            return self.delete(url, data=data, json=json, retry=False)
+            return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
         except InvalidGrantError:
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
-            return self.delete(url, data=data, json=json, retry=False)
+            return self.delete(url, data=data, json=json, retry=False, verify=OIDC_VERIFY_SSL)
 
 class KeycloakAdminSession(OIDCSession):
     def __init__(self, client_id, client_secret, base_url, realm) -> None:
@@ -344,23 +347,27 @@ class KeycloakAdminSession(OIDCSession):
             LOGGER.exception('requests error adding user')
 
     def update_user(self,
-            user_id,
             username,
-            email,
-            first_name,
-            last_name,
-            superuser,
-            staff,
+            email=None,
+            first_name=None,
+            last_name=None,
+            superuser=None,
+            staff=None,
             groups=None,
             roles=None,
             password=None):
+        user_id = self.get_user_id(username)
         try:
             user_rep = {
-                "email": email,
-                "firstName": first_name,
-                "lastName": last_name,
                 "id": user_id
             }
+            if email:
+                user_rep['email'] = email
+            if first_name:
+                user_rep['firstName'] = first_name
+            if last_name:
+                user_rep['lastName'] = last_name
+            
             if password:
                 user_rep["credentials"] =  [{"value": password}]
             url = "{base_url}/users/{user_id}".format(base_url=self.admin_url, user_id=user_id)
@@ -370,11 +377,16 @@ class KeycloakAdminSession(OIDCSession):
                 
                 try:
                     user = User.objects.get(username=username)
-                    user.first_name = first_name
-                    user.last_name = last_name
-                    user.email = email
-                    user.is_staff = staff
-                    user.is_superuser = superuser
+                    if first_name:
+                        user.first_name = first_name
+                    if last_name:
+                        user.last_name = last_name
+                    if email:
+                        user.email = email
+                    if staff is not None:
+                        user.is_staff = staff
+                    if superuser is not None:
+                        user.is_superuser = superuser
                     if password:
                         user.set_password(password)
                     user.save()
@@ -385,15 +397,14 @@ class KeycloakAdminSession(OIDCSession):
                     roles = set()
                 else:
                     roles = set(roles) # remove duplicates
-                if superuser:
-                    realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
-                elif staff:
-                    realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
-                else:
-                    realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
-
-                
-                set_roles(username, list(realm_roles))
+                if superuser is not None and staff is not None:
+                    if superuser:
+                        realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
+                    elif staff:
+                        realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
+                    else:
+                        realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
+                    set_roles(username, list(realm_roles))
                 if groups is not None:
                     set_groups(username, groups)
                 """
@@ -969,53 +980,51 @@ def _get_user_name(user):
     elif isinstance(user, int):
         return User.objects.get(id=user).username
 
-def update_user(user_id,
+def update_user(
             username,
-            email,
-            first_name,
-            last_name,
-            superuser,
-            staff,
+            email=None,
+            first_name=None,
+            last_name=None,
+            superuser=None,
+            staff=None,
             groups=None,
             roles=None,
             password=None):
     """
-    Updates a user
+    Updates a user, identified by username. Only the provided attributes
+    will be updated.
 
     Parameters
     ----------
-    user_id: str
-        The user id
     username: str
         User name
 
-    first_name: str
+    [first_name]: str
         First name
-    last_name: str
+    [last_name]: str
         Last name
-    superuser: boolean
+    [superuser]: boolean
         Whether the user is superuser
-    staff: boolean
+    [staff]: boolean
         Whether the user is staff
     [groups]: [str]
         Groups to assign to the user. The provided groups will replace
-        the existing user groups. It is ignored if not provided.
+        the existing user groups
     [roles]: [str]
         Roles to assign to the user. The provided roles will replace
-        the existing user roles. It is ignored if not provided.
+        the existing user roles
     [password]: str
-        The new password. The password is not modified if this paramter is
-        not provied.
+        The new password
     Returns
     -------
         User
         A Django User instance or None if an error happened
     """
-    return _get_admin_session().update_user(user_id,
+    return _get_admin_session().update_user(
             username,
-            email,
-            first_name,
-            last_name,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
             superuser=superuser,
             staff=staff,
             groups=groups,

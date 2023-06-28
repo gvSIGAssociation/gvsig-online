@@ -1,4 +1,5 @@
-from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
+from mozilla_django_oidc.views import OIDCAuthenticationCallbackView, OIDCLogoutView
+from mozilla_django_oidc.views import OIDCLogoutView
 from django.shortcuts import resolve_url
 
 class GvsigolOIDCAuthenticationCallbackView(OIDCAuthenticationCallbackView):
@@ -8,3 +9,8 @@ class GvsigolOIDCAuthenticationCallbackView(OIDCAuthenticationCallbackView):
     @property
     def failure_url(self):
         return resolve_url(super().failure_url)
+
+class GvsigolOIDCLogoutView(OIDCLogoutView):
+    @property
+    def redirect_url(self):
+        return resolve_url(super().redirect_url)
