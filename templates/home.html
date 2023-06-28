@@ -167,7 +167,19 @@
 		  	},
 			success	:function(response){
 				if (response.success == true) {
-					location.href = '{% url 'gvsigol_logout_user' %}';
+					var logout_url = '{% url "gvsigol_logout_user" %}';
+					$.ajax({
+						type: 'POST',
+						async: false,
+						url: logout_url,
+						beforeSend:function(xhr){
+							xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+						},
+						success: function(response, a, b, c) {
+							location.href = '{% url "index" %}';
+						},
+						error: function(response){}
+					});
 				} else {
 					var error = $('#form-error')[0];
 					if (error.className == 'hide') {
