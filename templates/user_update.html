@@ -37,11 +37,11 @@
 										<div class="row">
 											<div class="col-md-6">
 												<label for="first_name">{% trans "First name" %}</label>
-												<input placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{selected_user.first_name}}">							
+												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{selected_user.first_name}}">							
 											</div>
 											<div class="col-md-6">
 												<label for="last_name">{% trans "Last name" %}</label>
-												<input placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{selected_user.last_name}}">								
+												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{selected_user.last_name}}">								
 											</div>
 										</div>
 														
@@ -52,7 +52,7 @@
 											</div>
 											<div class="col-md-6 form-group">
 												<label for="email">{% trans "Email" %}</label>
-												<input placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{selected_user.email}}">								
+												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{selected_user.email}}">								
 											</div>
 										</div>
 										

@@ -320,7 +320,8 @@ def user_list(request):
         user["roles"] = "; ".join(user["roles"])
                       
     response = {
-        'users': users
+        'users': users,
+        'read_only_users': settings.AUTH_READONLY_USERS
     }     
     return render(request, 'user_list.html', response)
 
@@ -507,16 +508,25 @@ def user_update(request, username):
                 is_superuser = True
                 is_staff = True
 
-            success = auth_backend.update_user(
+            if settings.AUTH_READONLY_USERS:
+                success = auth_backend.update_user(
                     username,
-                    request.POST.get('email'),
-                    request.POST.get('first_name'),
-                    request.POST.get('last_name'),
                     superuser=is_superuser,
                     staff=is_staff,
                     groups=assigned_groups,
                     roles=assigned_roles
-            )
+                )
+            else:
+                success = auth_backend.update_user(
+                        username,
+                        email=request.POST.get('email'),
+                        first_name=request.POST.get('first_name'),
+                        last_name=request.POST.get('last_name'),
+                        superuser=is_superuser,
+                        staff=is_staff,
+                        groups=assigned_groups,
+                        roles=assigned_roles
+                )
             if success and (is_superuser or is_staff):
                 _config_staff_user(username)
 
@@ -524,7 +534,13 @@ def user_update(request, username):
         else:
             selected_user = auth_backend.get_user_details(user=username)
             roles = auth_utils.get_all_roles_checked_by_user(username)
-            response = {'uid': username, 'selected_user': selected_user, 'user': request.user, 'roles': roles}
+            response = {
+                'uid': username,
+                'selected_user': selected_user,
+                'user': request.user,
+                'roles': roles,
+                'read_only_users': settings.AUTH_READONLY_USERS
+                }
             if auth_backend.check_group_support():
                 response['groups'] = auth_utils.get_all_groups_checked_by_user(username)
             return render(request, 'user_update.html', response)

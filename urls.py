@@ -32,9 +32,7 @@ urlpatterns = LOGIN_PATHS + [
 if settings.AUTH_DASHBOARD_UI:
     urlpatterns = urlpatterns + [
         path('user_list/', auth_views.user_list, name='user_list'),
-        path('user_add/', auth_views.user_add, name='user_add'),
-        path('user_update/<uid>/', auth_views.user_update, name='user_update'),
-        path('user_delete/<uid>/', auth_views.user_delete, name='user_delete'),
+        path('user_update/<username>/', auth_views.user_update, name='user_update'),
 
         path('group_list/', auth_views.group_list, name='group_list'),
         path('group_add/', auth_views.group_add, name='group_add'),
@@ -44,6 +42,11 @@ if settings.AUTH_DASHBOARD_UI:
         path('role_add/', auth_views.role_add, name='role_add'),
         path('role_delete/<role_name>/', auth_views.role_delete, name='role_delete'),
     ]
+    if not settings.AUTH_READONLY_USERS:
+        urlpatterns = urlpatterns + [
+            path('user_add/', auth_views.user_add, name='user_add'),
+            path('user_delete/<uid>/', auth_views.user_delete, name='user_delete')
+        ]
 MANAGE_PASSWORD_URL = getattr(settings, 'MANAGE_PASSWORD_URL', None)
 if not MANAGE_PASSWORD_URL:
     urlpatterns = urlpatterns + [
