@@ -214,12 +214,15 @@ def password_update(request):
         password2 = request.POST.get('password2')
         
         if password1 == password2:
-            user = User.objects.get(id=request.user.id)
+            auth_backend.update_user(
+                username=request.user.username,
+                password=password1)
+            """
             user.set_password(password1)
             user.save()
             
             auth_services.get_services().ldap_change_user_password(user, password1)
-            
+            """
             response = {'success': True}
             
         else:
@@ -238,7 +241,7 @@ def password_reset(request):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token =  default_token_generator.make_token(user)
 
-            pass_reset_url = reverse('password_reset_confirmation', kwargs={'user_id': user.id, 'uid': uid, 'token': token})
+            pass_reset_url = reverse('password_reset_confirmation', kwargs={'username': user.username, 'uid': uid, 'token': token})
             pass_reset_url = get_absolute_url(pass_reset_url, request.META)
             auth_utils.send_reset_password_email(user.email, pass_reset_url)
             return redirect('password_reset_success')
@@ -273,20 +276,17 @@ def password_reset_complete(request):
     View that checks the hash in a password reset link and presents a
     form for entering a new password.
     """
-    user_id = request.POST.get('user_id')
+    username = request.POST.get('username')
     token = request.POST.get('token')
 
-    user = User.objects.get(id=user_id)
+    user = User.objects.get(username=username)
 
     errors = ''
     
     if user is not None and default_token_generator.check_token(user, token):
         if request.method == 'POST':
             temp_pass = request.POST.get('password')
-            user.set_password(temp_pass)
-            user.save()
-            auth_services.get_services().ldap_change_user_password(user, temp_pass)
-            
+            auth_backend.update_user(username, password=temp_pass)            
             request.session['username'] = user.username
             request.session['password'] = temp_pass
             user = authenticate(username=user.username, password=temp_pass)
@@ -485,7 +485,7 @@ def user_add(request):
     
 @login_required()
 @superuser_required
-def user_update(request, uid):
+def user_update(request, username):
     try:
         if request.method == 'POST':
             assigned_groups = []
@@ -507,9 +507,7 @@ def user_update(request, uid):
                 is_superuser = True
                 is_staff = True
 
-            username = request.POST.get('username')
             success = auth_backend.update_user(
-                    uid,
                     username,
                     request.POST.get('email'),
                     request.POST.get('first_name'),
@@ -524,16 +522,15 @@ def user_update(request, uid):
 
             return redirect('user_list')
         else:
-            selected_user = auth_backend.get_user_details(user_id=uid)
-            username = selected_user.get('username')
+            selected_user = auth_backend.get_user_details(user=username)
             roles = auth_utils.get_all_roles_checked_by_user(username)
-            response = {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'roles': roles}
+            response = {'uid': username, 'selected_user': selected_user, 'user': request.user, 'roles': roles}
             if auth_backend.check_group_support():
                 response['groups'] = auth_utils.get_all_groups_checked_by_user(username)
             return render(request, 'user_update.html', response)
     except BackendNotAvailable:
         message = _("The authentication server is not available. Try again later or contact system administrators.")
-        return render(request, 'user_update.html', {'uid': uid, 'selected_user': None, 'user': None, 'groups': [], 'roles': []})
+        return render(request, 'user_update.html', {'uid': username, 'selected_user': None, 'user': None, 'groups': [], 'roles': []})
         
 @login_required()
 @superuser_required

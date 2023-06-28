@@ -261,42 +261,40 @@ def add_user(username,
     return user
 
 def update_user(
-        user_id,
         username,
-        email,
-        first_name,
-        last_name,
-        superuser,
-        staff,
+        email=None,
+        first_name=None,
+        last_name=None,
+        superuser=None,
+        staff=None,
         groups=None,
         roles=None,
         password=None):
     """
-    Updates a user
+    Updates a user, identified by username. Only the provided attributes
+    will be updated.
 
     Parameters
     ----------
-    user_id: str
-        The user id
     username: str
         User name
 
-    first_name: str
+    [first_name]: str
         First name
-    last_name: str
+    [last_name]: str
         Last name
-    superuser: boolean
+    [superuser]: boolean
         Whether the user is superuser
-    staff: boolean
+    [staff]: boolean
         Whether the user is staff
     [groups]: [str]
-        Groups to assign to the user. Ignored by this backend.
+        Groups to assign to the user. The provided groups will replace
+        the existing user groups
     [roles]: [str]
         Roles to assign to the user. The provided roles will replace
-        the existing user roles. It is ignored if not provided.
+        the existing user roles
     [password]: str
-        The new password. The password is not modified if this paramter is
-        not provied.
+        The new password
     Returns
     -------
         User
@@ -311,6 +309,7 @@ def update_user(
     user.is_staff = staff
     if password:
         user.set_password(password)
+        auth_services.get_services().ldap_change_user_password(user, password)
     user.save()
     if roles is not None:
         set_roles(username, roles)
