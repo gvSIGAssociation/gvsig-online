@@ -219,12 +219,12 @@ ACTSTREAM_SETTINGS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware', 
-    #'mozilla_django_oidc.middleware.SessionRefresh',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #'mozilla_django_oidc.middleware.SessionRefresh',
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -339,6 +339,7 @@ AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
 AUTH_LDAP_ROOT_DN = "dc=local,dc=gvsigonline,dc=com"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 AUTH_DASHBOARD_UI = True
+AUTH_READONLY_USERS = False
 
 # Internationalization
 LANGUAGE_CODE = 'es'
