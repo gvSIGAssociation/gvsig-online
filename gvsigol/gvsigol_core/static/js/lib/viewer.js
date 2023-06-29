@@ -934,6 +934,7 @@ viewer.core = {
 			//this.tools.push(new measureAngle(this.map));
 			
 			new MeasureToolBar(this.map);
+			new ShowMeasureToolbar(this.map, this);
 		}
 		/*if (this.ifToolInConf('gvsigol_tool_export')) {
 			this.tools.push(new exportToPDF(this.conf, this.map));
