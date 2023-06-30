@@ -98,7 +98,7 @@
 	<header class="main-header map-header">
 
 		<!-- Header Navbar: style can be found in header.less -->
-		<nav id="viewer-navbar" class="navbar navbar-static-top" style="margin-left:0px;" role="navigation">
+		<nav id="viewer-navbar" class="navbar navbar-static-top"  role="navigation" {% if IFRAME_MODE_UI %} style="display: none" {% else %} style="margin-left:0px;" {% endif %}>
 
 			<!-- Sidebar toggle button-->
           	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
@@ -182,12 +182,12 @@
 		</nav>
 	</header>
 
-	<div id="container">
+	<div id="container" {% if IFRAME_MODE_UI %} style="top: 0px" {% endif %}>
 
-		<aside class="control-sidebar control-sidebar-light control-sidebar-closed" style="position: fixed; height: 100%;">
-			
+		<aside class="control-sidebar control-sidebar-light control-sidebar-closed" {% if IFRAME_MODE_UI %} style="padding-top: 0px" {% else %} style="position: fixed; height: 100%;" {% endif %}>
+					
 			{% if project.show_project_icon %}
-			<div id="project-info-div" class="project-info-div">
+			<div id="project-info-div" class="project-info-div" {% if IFRAME_MODE_UI %} style="display: none" {% endif %}>
 				{% if has_image %}
 				<div class="pull-left image">
 					<img src="{{project_image}}" class="" alt="User Image">
