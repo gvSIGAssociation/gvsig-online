@@ -68,7 +68,7 @@
 
 	<div class="wrapper">
 	
-		<header class="main-header" id="base-main-header">
+		<header class="main-header" id="base-main-header" {% if IFRAME_MODE_UI %} style="display: none" {% endif %}>
 			<a href="/gvsigonline/" class="logo">
 				<span class="logo-mini"><b>{{GVSIGOL_NAME_SHORT}}</b>{{GVSIGOL_SURNAME_SHORT}}</span>
 				<span class="logo-lg"><b>{{GVSIGOL_NAME}}</b>{{GVSIGOL_SURNAME}}</span>
@@ -124,7 +124,7 @@
 			</nav>
 		</header>
 
-		<aside class="main-sidebar">
+		<aside class="main-sidebar" {% if IFRAME_MODE_UI %} style="display: none" {% endif %}>
 			<section class="sidebar">
 				<!-- Sidebar user panel -->
 				<div class="user-panel">
@@ -162,13 +162,13 @@
 			</section>			
 		</aside>
 
-		<div class="content-wrapper" id="base-content-wrapper">
+		<div class="content-wrapper" id="base-content-wrapper" {% if IFRAME_MODE_UI %} style="margin-left: 0px !important;" {% endif %}>
 			<section class="content">
 				{% block content %}{% endblock %}
 			</section>
 		</div>
 
-		<footer class="main-footer">
+		<footer class="main-footer" {% if IFRAME_MODE_UI %} style="display: none" {% endif %} >
 			<div class="pull-right hidden-xs">
 				<b>{% trans "Version" %}</b> {{GVSIGOL_VERSION}}
 			</div>

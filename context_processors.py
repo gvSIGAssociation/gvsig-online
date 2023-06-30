@@ -36,5 +36,6 @@ def global_settings(request):
         'GVSIGOL_SURNAME_SHORTv': gvsigol.settings.GVSIGOL_SURNAME_SHORT,
         'TEMPORAL_ADVANCED_PARAMETERS': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
         'AUTH_GROUPS': auth_backend.check_group_support(),
-        'AUTH_DASHBOARD_UI': gvsigol.settings.AUTH_DASHBOARD_UI
+        'AUTH_DASHBOARD_UI': gvsigol.settings.AUTH_DASHBOARD_UI,
+        'IFRAME_MODE_UI':  gvsigol.settings.AUTH_DASHBOARD_UI
     }
