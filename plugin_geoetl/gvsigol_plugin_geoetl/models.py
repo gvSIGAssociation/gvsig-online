@@ -8,6 +8,7 @@ class ETLworkspaces(models.Model):
     workspace = models.TextField()
     username = models.CharField(max_length=250)
     parameters = models.TextField(null=True, blank=True)
+    concat = models.BooleanField(default=False)
     
     def __str__(self):
         return self.name

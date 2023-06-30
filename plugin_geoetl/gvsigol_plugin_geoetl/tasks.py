@@ -4,7 +4,7 @@ from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 from celery.utils.log import get_task_logger
 
-from .models import ETLstatus, database_connections, cadastral_requests
+from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests
 from gvsigol import settings
 
 from . import etl_tasks, views
@@ -21,238 +21,259 @@ logger = get_task_logger(__name__)
 @celery_app.task
 def run_canvas_background(**kwargs):
 
-    jsonCanvas = kwargs["jsonCanvas"]
-    id_ws = kwargs["id_ws"]
-    username = kwargs["username"]
-    params = kwargs["parameters"]
-    
-    if id_ws:
-        try:
+    if kwargs["concat"]:
+        listConcatIds = kwargs["jsonCanvas"]
 
-            statusModel  = ETLstatus.objects.get(id_ws = id_ws)
+    else:
+        listConcatIds = [kwargs["id_ws"]]
+    
+    for wspc in listConcatIds:
+        
+        if kwargs["concat"]:
+            id_ws = kwargs["id_ws"]
+            etl_ws  = ETLworkspaces.objects.get(id=int(wspc))
+            jsonCanvas = json.loads(etl_ws.workspace)
+            username = kwargs["username"]
+            if etl_ws.parameters:
+                params = json.loads(etl_ws.parameters)
+            else:
+                params = etl_ws.parameters
+        else:
+            jsonCanvas = kwargs["jsonCanvas"]
+            id_ws = kwargs["id_ws"]
+            username = kwargs["username"]
+            params = kwargs["parameters"]
+
+
+    
+        if id_ws:
+            try:
+
+                statusModel  = ETLstatus.objects.get(id_ws = id_ws)
+                statusModel.message = 'Running'
+                statusModel.status = 'Running'
+                statusModel.save()
+
+            except:
+
+                statusModel = ETLstatus(
+                    name = 'name',
+                    message = 'Running',
+                    status = 'Running',
+                    id_ws = id_ws
+                )
+                
+                statusModel.save()
+        else:
+
+            statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
             statusModel.message = 'Running'
             statusModel.status = 'Running'
             statusModel.save()
-
-        except:
-
-            statusModel = ETLstatus(
-                name = 'name',
-                message = 'Running',
-                status = 'Running',
-                id_ws = id_ws
-            )
-            
-            statusModel.save()
-    else:
-
-        statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-        statusModel.message = 'Running'
-        statusModel.status = 'Running'
-        statusModel.save()
-    
-    nodes=[]
-    edges =[]
-
-    count = 0
-    for i in jsonCanvas:
-        if i['type'] != 'draw2d.Connection':
-            nodes.append([count,i])
-            count+=1
-        else:
-            del i['id']
-            if i not in edges:
-                edges.append(i)
-
-    g = etl_tasks.Graph(len(nodes))
-
-    for e in edges:
-        source = -1
-        target = -1
-        for n in nodes:
-            if e['source']['node'] == n[1]['id']:
-                source = n[0]
-            elif e['target']['node'] == n[1]['id']:
-                target = n[0]
-            elif source !=-1 and target !=-1:
-                break
-        g.addEdge(source, target)
-
-    sortedList = g.topologicalSort()
-
-    tables_list_name =[]
-
-    move = []
-
-    loop_list = ['sin parámetro de usuario variable']
-
-    #### ordena ejecucion de salidas postgres ####
-    tupleOutputOrder = []
-    for s in sortedList:
-        for n in nodes:
-            if s == n[0]:
-                if n[1]['type'].startswith('output_Postgis'):
-                    if 'order' in n[1]['entities'][0]['parameters'][0]:
-                        tupleOutputOrder.append((n[1]['entities'][0]['parameters'][0]['order'], n[0]))
-    
-    tupleOutputOrder.sort()
-
-    for ord in tupleOutputOrder:
-        sortedList.remove(ord[1])
-        sortedList.append(ord[1])
-    #### ####
-
-    try:
-
-        if params and not statusModel.name.startswith('current_canvas'):
-            if len(params['sql-before']) > 0:
-                executeSQL(params['db'], params['sql-before'])
         
-            if params['checkbox-user-params'] == 'True':
+        nodes=[]
+        edges =[]
 
-                if params['radio-params-user'] == 'integer':
-                    loop_list = [*range(params['init-loop-integer-user-params'], params['end-loop-integer-user-params']+1, 1)]
-                elif params['radio-params-user'] == 'postgres':
-                    loop_list = getLoopListFromPostgres(params)
+        count = 0
+        for i in jsonCanvas:
+            if i['type'] != 'draw2d.Connection':
+                nodes.append([count,i])
+                count+=1
+            else:
+                del i['id']
+                if i not in edges:
+                    edges.append(i)
 
-            json_user_params = params['json-user-params']
+        g = etl_tasks.Graph(len(nodes))
 
-        for iter_value in loop_list:
+        for e in edges:
+            source = -1
+            target = -1
+            for n in nodes:
+                if e['source']['node'] == n[1]['id']:
+                    source = n[0]
+                elif e['target']['node'] == n[1]['id']:
+                    target = n[0]
+                elif source !=-1 and target !=-1:
+                    break
+            g.addEdge(source, target)
+
+        sortedList = g.topologicalSort()
+
+        tables_list_name =[]
+
+        move = []
+
+        loop_list = ['sin parámetro de usuario variable']
+
+        #### ordena ejecucion de salidas postgres ####
+        tupleOutputOrder = []
+        for s in sortedList:
+            for n in nodes:
+                if s == n[0]:
+                    if n[1]['type'].startswith('output_Postgis'):
+                        if 'order' in n[1]['entities'][0]['parameters'][0]:
+                            tupleOutputOrder.append((n[1]['entities'][0]['parameters'][0]['order'], n[0]))
+        
+        tupleOutputOrder.sort()
+
+        for ord in tupleOutputOrder:
+            sortedList.remove(ord[1])
+            sortedList.append(ord[1])
+        #### ####
+
+        try:
 
             if params and not statusModel.name.startswith('current_canvas'):
-                print('Valor del parámetro de usuario variable: '+str(iter_value))
-                if params['checkbox-user-params'] == 'True':                    
-                    json_user_params[params['loop-user-params']] = iter_value
+                if len(params['sql-before']) > 0:
+                    executeSQL(params['db'], params['sql-before'])
+            
+                if params['checkbox-user-params'] == 'True':
 
-            #going down the sorted list of tasks and executing them
-            for s in sortedList:
-                for n in nodes:
-                    if s == n[0]:
-                        
-                        #get parameters for the task
-                        try:
-                            parameters_copy = n[1]['entities'][0]['parameters'][0]
-                            parameters_copy['id'] = n[1]['id']
-                            tables_list_name.append(n[1]['id'])
+                    if params['radio-params-user'] == 'integer':
+                        loop_list = [*range(params['init-loop-integer-user-params'], params['end-loop-integer-user-params']+1, 1)]
+                    elif params['radio-params-user'] == 'postgres':
+                        loop_list = getLoopListFromPostgres(params)
+
+                json_user_params = params['json-user-params']
+
+            for iter_value in loop_list:
+
+                if params and not statusModel.name.startswith('current_canvas'):
+                    print('Valor del parámetro de usuario variable: '+str(iter_value))
+                    if params['checkbox-user-params'] == 'True':                    
+                        json_user_params[params['loop-user-params']] = iter_value
+
+                #going down the sorted list of tasks and executing them
+                for s in sortedList:
+                    for n in nodes:
+                        if s == n[0]:
                             
-                        except:
-                            parameters_copy = {}
+                            #get parameters for the task
+                            try:
+                                parameters_copy = n[1]['entities'][0]['parameters'][0]
+                                parameters_copy['id'] = n[1]['id']
+                                tables_list_name.append(n[1]['id'])
+                                
+                            except:
+                                parameters_copy = {}
 
-                        parameters = copy.deepcopy(parameters_copy)
+                            parameters = copy.deepcopy(parameters_copy)
 
-                        if params and not statusModel.name.startswith('current_canvas'):
-                            if json_user_params !={}:
-                                for key in json_user_params:
-                                    for key2 in parameters:
-                                        if isinstance(parameters[key2], list):
-                                            for x in range (0, len(parameters[key2])):
-                                                if '@@'+key+'@@' in parameters[key2][x]:
-                                                    parameters[key2][x] = parameters[key2][x].replace('@@'+key+'@@', str(json_user_params[key]))
-                                        else:
-                                            if '@@'+key+'@@' in parameters[key2]:
-                                                parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))
+                            if params and not statusModel.name.startswith('current_canvas'):
+                                if json_user_params !={}:
+                                    for key in json_user_params:
+                                        for key2 in parameters:
+                                            if isinstance(parameters[key2], list):
+                                                for x in range (0, len(parameters[key2])):
+                                                    if '@@'+key+'@@' in parameters[key2][x]:
+                                                        parameters[key2][x] = parameters[key2][x].replace('@@'+key+'@@', str(json_user_params[key]))
+                                            else:
+                                                if '@@'+key+'@@' in parameters[key2]:
+                                                    parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))
 
-                        print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
-                        #execute input task
-                        if n[1]['type'].startswith('input'):
+                            print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
+                            #execute input task
+                            if n[1]['type'].startswith('input'):
 
-                            if 'move' in parameters:
-                                if parameters['move'] != '':
-                                    move.append(n[1])
+                                if 'move' in parameters:
+                                    if parameters['move'] != '':
+                                        move.append(n[1])
 
-                            method_to_call = getattr(etl_tasks, n[1]['type'])
-                            result = method_to_call(parameters)
-                            n.append(result)
-                            tables_list_name.append(result)
-                        
-                        #execute trasnformers or outputs tasks    
-                        else:
-                            
-                            for ip in n[1]['ports']:
-                                if ip['name'].startswith('input'):
-                                    
-                                    targetPort = ip['name']
-                                    targetPortRepeated = False
-                                    for e in edges:
-                                        if e['target']['port'] == targetPort:
-
-                                            sourceNode = e['source']['node']
-                                            sourcePort = e['source']['port']
-                                            
-                                            for nd in nodes:
-                                                if nd[1]['id'] == sourceNode:
-                                                    
-                                                    outputPortCounter=-1
-                                                    for op in nd[1]['ports']:
-                                                        
-                                                        if op['name'].startswith('output'):
-                                                            outputPortCounter+=1
-                                                        if op['name']== sourcePort:
-                                                            break
-                                                    if 'data' in parameters:
-                                                        parameters['data'].append(nd[2][outputPortCounter])
-                                                    else:
-                                                        parameters['data'] = [nd[2][outputPortCounter]]
-                                                        
-                                                    break
-                                            
-                                            #if more than one edge have the end in the same port
-                                            if targetPortRepeated == True:
-                                                
-                                                result = etl_tasks.merge_tables(parameters['data'])
-                                                parameters['data'] = result
-                                                tables_list_name.append(result)
-                                            
-                                            targetPortRepeated = True      
-
-                            method_to_call = getattr(etl_tasks, n[1]['type'])
-                            parameters['id'] = n[1]['id']
-                            result = method_to_call(parameters)
-                            tables_list_name.append(result)
-                            
-                            if not n[1]['type'].startswith('output'):
+                                method_to_call = getattr(etl_tasks, n[1]['type'])
+                                result = method_to_call(parameters)
                                 n.append(result)
-        
-        if move:
-            for m in move:
-                parameters = m['entities'][0]['parameters'][0]
-                method_to_call = etl_tasks.move (m['type'], parameters)
+                                tables_list_name.append(result)
+                            
+                            #execute trasnformers or outputs tasks    
+                            else:
+                                
+                                for ip in n[1]['ports']:
+                                    if ip['name'].startswith('input'):
+                                        
+                                        targetPort = ip['name']
+                                        targetPortRepeated = False
+                                        for e in edges:
+                                            if e['target']['port'] == targetPort:
 
-        if params:
-            if len(params['sql-after']) > 0:
-                executeSQL(params['db'], params['sql-after'])
+                                                sourceNode = e['source']['node']
+                                                sourcePort = e['source']['port']
+                                                
+                                                for nd in nodes:
+                                                    if nd[1]['id'] == sourceNode:
+                                                        
+                                                        outputPortCounter=-1
+                                                        for op in nd[1]['ports']:
+                                                            
+                                                            if op['name'].startswith('output'):
+                                                                outputPortCounter+=1
+                                                            if op['name']== sourcePort:
+                                                                break
+                                                        if 'data' in parameters:
+                                                            parameters['data'].append(nd[2][outputPortCounter])
+                                                        else:
+                                                            parameters['data'] = [nd[2][outputPortCounter]]
+                                                            
+                                                        break
+                                                
+                                                #if more than one edge have the end in the same port
+                                                if targetPortRepeated == True:
+                                                    
+                                                    result = etl_tasks.merge_tables(parameters['data'])
+                                                    parameters['data'] = result
+                                                    tables_list_name.append(result)
+                                                
+                                                targetPortRepeated = True      
 
-        if id_ws:
-            statusModel  = ETLstatus.objects.get(id_ws = id_ws)
-            statusModel.message = 'Process has been executed successfully'
-            statusModel.status = 'Success'
-            statusModel.save()  
-        else:
-            statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-            statusModel.message ='Process has been executed successfully'
-            statusModel.status = 'Success'
-            statusModel.save()
+                                method_to_call = getattr(etl_tasks, n[1]['type'])
+                                parameters['id'] = n[1]['id']
+                                result = method_to_call(parameters)
+                                tables_list_name.append(result)
+                                
+                                if not n[1]['type'].startswith('output'):
+                                    n.append(result)
+            
+            if move:
+                for m in move:
+                    parameters = m['entities'][0]['parameters'][0]
+                    method_to_call = etl_tasks.move (m['type'], parameters)
+
+            if params:
+                if len(params['sql-after']) > 0:
+                    executeSQL(params['db'], params['sql-after'])
+
+            if id_ws:
+                statusModel  = ETLstatus.objects.get(id_ws = id_ws)
+                statusModel.message = 'Process has been executed successfully'
+                statusModel.status = 'Success'
+                statusModel.save()  
+            else:
+                statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
+                statusModel.message ='Process has been executed successfully'
+                statusModel.status = 'Success'
+                statusModel.save()
+            
+            delete_tables(tables_list_name)
         
-        delete_tables(tables_list_name)
-    
-    except Exception as e:
-        logger.exception('Error running workspace')
-        
-        if id_ws:
-            statusModel  = ETLstatus.objects.get(id_ws = id_ws)
-            statusModel.message = str(e)[:600]
-            statusModel.status = 'Error'
-            statusModel.save()
-        else:
-            statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-            statusModel.message = str(e)[:600]
-            statusModel.status = 'Error'
-            statusModel.save()
-        
-        delete_tables(tables_list_name)
-        
-        logger.error('ERROR: In '+n[1]['type']+' Node, '+ str(e))
-        print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
+        except Exception as e:
+            logger.exception('Error running workspace')
+            
+            if id_ws:
+                statusModel  = ETLstatus.objects.get(id_ws = id_ws)
+                statusModel.message = str(e)[:600]
+                statusModel.status = 'Error'
+                statusModel.save()
+            else:
+                statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
+                statusModel.message = str(e)[:600]
+                statusModel.status = 'Error'
+                statusModel.save()
+            
+            delete_tables(tables_list_name)
+            
+            logger.error('ERROR: In '+n[1]['type']+' Node, '+ str(e))
+            print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
+            break
         
     
 def delete_tables(nodes):

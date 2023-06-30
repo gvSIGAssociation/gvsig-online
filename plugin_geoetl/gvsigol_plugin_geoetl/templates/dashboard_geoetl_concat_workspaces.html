@@ -12,19 +12,17 @@
 						<button id="button-new-empty-canvas" class="btn btn-block btn-default btn-sm"><i class="fa fa-file-o margin-r-5"></i> {% trans "New" %}</button>
 					</div>
 					<div class="box-tools pull-right">
-						<button id="button-upload-workspace-etl" class="btn btn-block btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</button>
+						<button id="button-add-concat" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add Concat." %}</button>
 					</div>
 					<div class="box-tools pull-right">
-						<button id="button-clean-tmp" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title='{% trans "Clean temporal tables" %}'><i class="fa fa-trash margin-r-5"></i> {% trans "Clean" %}</button>
-					</div>
-					<div class="box-tools pull-right">
-						<button id="button-concat-workspaces" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title='{% trans "Concat. workspaces" %}'><i class="fa fa-th-list margin-r-5"></i> {% trans "Concat. workspaces" %}</button>
+						<button id="button-workpaces" class="btn btn-block btn-default btn-sm"><i class="fa fa-list margin-r-5"></i> {% trans "Workpaces" %}</button>
 					</div>
 				</div>
+
 			</div>
 			<div class="box">
 				<div class="box-header with-border">
-					<h3 class="box-title col-md-6">{% trans "Workspaces list" %}</h3>
+					<h3 class="box-title col-md-6">{% trans "Concatenated workspaces list" %}</h3>
 				</div>
 				<div class="box-body">
 					<table class="table" id="etl-table">
@@ -37,9 +35,7 @@
 								<th>{% trans "Description" %}</th>
 								<th>{% trans "Periodicity" %}</th>
 								<th>{% trans "User" %}</th>
-								<th></th>
-								<th></th>
-								<th></th>
+								<th>{% trans "Concatenation" %}</th>
 								<th></th>
 								<th></th>
 							</tr>
@@ -50,13 +46,11 @@
 									<tr>
 										<td> {{ workspace.id }} </td>
 										<td></td>
-										
 											<td>
 												<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
 												<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
 												<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
 											</td>
-
 
 										<td>{{ workspace.name }}</td>
 										<td>{{ workspace.description }}</td>
@@ -68,11 +62,9 @@
 											<td></td>
 										{% endif %}
 										<td> {{ workspace.username }} </td>
+										<td> {{ workspace.workspace }} </td>
 										<td></td>
 										<td></td>
-										<td></td>
-										<td></td>
-										<th></th>
 									</tr>
 								{% endif %}
 							{% endfor %}
@@ -111,7 +103,7 @@
 
 <!-- MODALS-->
 <!-- Modal to update a workspace-->
-	<div id="modal-update-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div id="modal-update-concat-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 			
@@ -119,7 +111,7 @@
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title">{% trans "Update ETL Workspace" %}</h4>
+					<h4 class="modal-title">{% trans "Update or Save ETL Workspace" %}</h4>
 				</div>
 
 				<div class="modal-body">
@@ -196,6 +188,32 @@
 								</div>
 							</div>
 						</div>
+
+						<div class="row">
+							<div class="col-sm-9">
+								<label >{% trans "Workspaces" %}</a></label>
+									<select class="form-control" id="workspaces-to-concat">
+									</select>
+							</div>
+							<div class="col-sm-3">
+								<label >{% trans "Get Workspaces" %}</a></label>
+								<button type="button" class="btn btn-default btn-sm" id="get-workspaces">{% trans "Get workspaces" %}</button>
+							</div>
+
+						</div>
+
+						<div class="row">
+							<div class="col-sm-12">
+								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-concat-wks"><i class="fa fa-minus" aria-hidden="true"></i></button>
+								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-concat-wks"><i class="fa fa-plus" aria-hidden="true"></i></button>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<input type="text" id="wks-concatenated" class="form-control" readonly="readonly" value ="[]"></input>
+							</div>
+						</div>
+						
 						{% if user.is_superuser %}
 							<div class="row">
 								<div class="col-md-12">
@@ -208,7 +226,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
-					<button type="button" class="btn btn-default btn-sm" id="update-etl-workspace">{% trans "Update" %}</button>
+					<button type="button" class="btn btn-default btn-sm" id="update-etl-concat-workspace">{% trans "Save" %}</button>
 				</div>
 			</div>
 		</div>
@@ -239,249 +257,6 @@
         </div>
     </div>
 
-	<div id="modal-upload-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-			
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-					<h4 class="modal-title">{% trans "Upload ETL Workspace" %}</h4>
-				</div>
-
-				<div class="modal-body">
-					<form id="layer-group-form" role="form">
-
-						<div class="row">
-							<div class="col-md-12">
-								<label for="etl_name">{% trans "Name" %}</label>
-								<input placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name_upload" type="text" class="form-control">							
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12">
-								<label for="etl_desc">{% trans "Description" %}</label>
-								<input placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc_upload" id="etl_desc_upload" type="text" class="form-control">								
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12">
-								<label for="etl_json">{% trans "ETL Workspace JSON" %}</label>
-								<div>
-									<a href="#" id="select-file-button-0" style="float: left" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>Select file</a>
-									<div style="overflow: hidden; padding-right: .5em;">
-										<input  placeholder = "{% trans 'ETL Workspace JSON' %}" name="etl_json" id="etl_json_upload" type="text" class="form-control">
-									</div>
-								</div>
-							</div>
-						</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
-					<button type="button" class="btn btn-default btn-sm" id="upload-etl-workspace">{% trans "Upload" %}</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Modal clean temporal tables-->
-	<div id="modal-clean-tmp-tables" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-			
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-					<h4 class="modal-title">{% trans "Clean temporal tables" %}</h4>
-				</div>
-
-				<div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-12 form-group">
-                            <p style="font-weight: 600; font-size: 15px;">{% trans 'Some ETL workspace is running. Are you sure you want to drop the temporary tables? ' %}</p>
-                        </div>
-                    </div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
-					<button type="button" class="btn btn-default btn-sm" id="accept-clean-tmp">{% trans "Clean" %}</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-<!-- Modal to set parameters for workspace-->
-<div id="modal-set-parameters-workspace" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-		
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-				<h4 class="modal-title">{% trans "Set parameters for workspace" %}</h4>
-			</div>
-
-			<div class="modal-body" style="max-height: calc(100vh - 225px); overflow: scroll;">
-				<form id="layer-group-form" role="form">
-
-					<div class="row">
-						<div class="col-md-12">
-							<label for="etl_id">ID</label>
-							<input placeholder = "{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-12">
-							<label form="db" class="col-form-label">{% trans "DB Connection" %}</label>
-							<select id="db" class="form-control"></select>
-						</div>
-					</div>
-					
-					<div>
-						<label class="col-form-label" id ="sql-params">{% trans "SQL Parameters" %} <i id ="img-sql-params" class="fa fa-caret-right"></i> </label>
-					</div>
-
-					<div id="more-options-sql" class="more-options">
-
-						<div class="row">
-							<div class="col-md-12">
-								<label class="col-form-label">{% trans "SQL before running workspace" %}</a></label>
-								<textarea id="sql-before" rows="3" class="form-control"></textarea>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12">
-								<label class="col-form-label">{% trans "SQL after running workspace" %}</a></label>
-								<textarea id="sql-after" rows="3" class="form-control"></textarea>
-							</div>
-						</div>
-					</div>
-
-					<div>
-						<label class="col-form-label" id ="user-params">{% trans "User Parameters" %} <i id ="img-user-params" class="fa fa-caret-right"></i> </label>
-					</div>
-
-					<div id="more-options-user" class="more-options">
-						<div class="row">
-							<div class="col-md-12">
-								<label class="col-form-label">{% trans "Add user parameter" %}</a></label> 
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label >{% trans "Name" %}</a></label>
-								<input type="text" id="name-user-params" class="form-control"></input>
-							</div>
-							<div class="col-sm-4">
-								<label >{% trans "Type" %}</a></label>
-									<select class="form-control" id="type-user-params">
-										<option value="VARCHAR"> {% trans "Varchar" %}</option>
-										<option value="INTEGER"> {% trans "Integer" %}</option>
-										<option value="FLOAT"> {% trans "Float" %} </option>
-									</select>
-							</div>
-
-							<div class="col-sm-4">
-								<label >{% trans "Value" %}</a></label>
-								<input type="text" id="value-user-params" class="form-control"></input>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-12">
-								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-user-params"><i class="fa fa-minus" aria-hidden="true"></i></button>
-								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-user-params"><i class="fa fa-plus" aria-hidden="true"></i></button>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-sm-12">
-								<input type="text" id="json-user-params" class="form-control" readonly="readonly" value ="{}"></input>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-12">
-                                <input type="checkbox" id="checkbox-user-params" value = 'False'/>
-                                <label for="checkbox"> {% trans "There are variable parameters (The workspace will be executed in a loop)" %} </label>   							
-							</div>
-						</div>
-						
-						<div class="row">
-							<div class="col-sm-4">
-								<label >{% trans "Variable parameter" %}</a></label>
-								<select class="form-control" id="loop-user-params">
-
-								</select>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-12">
-                                <div class="form-check">
-                                    <input type="radio" name="radio-params-user" class="form-check-input" id="loop-integer-user-params" value="integer">
-                                    <label>{% trans "Integer iterative value from" %}</label> <input type="number" id="init-loop-integer-user-params" value="0" size ="3"/><label>{% trans " to " %} </label> <input type="number" id="end-loop-integer-user-params" value="0" size ="3"/>
-                                </div>
-                                <div class="form-check">
-                                    <input type="radio" name="radio-params-user" class="form-check-input" id="loop-postgres-user-params" value="postgres">
-                                    <label>{% trans "Iterative value from a column of a PostgreSQL table" %}</label>
-                                </div>						
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label class="col-form-label">{% trans "Get schemas" %}</label><br>
-								<a href="#" id="get-schemas" class="btn btn-default btn-sm">{% trans "Get schemas" %}</a>
-							</div>
-							<div class="col-sm-8">
-								<label class="col-form-label">{% trans "Schemas" %}</label>
-								<select id="schema-name-user-params" class="form-control"></select>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label class="col-form-label">{% trans "Get tables" %}</label><br>
-								<a href="#" id="get-tables" class="btn btn-default btn-sm">{% trans "Get tables" %}</a>
-							</div>
-							<div class="col-sm-8">
-								<label class="col-form-label">{% trans "Tables" %}</label>
-								<select id="table-name-user-params" class="form-control"></select>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label class="col-form-label">{% trans "Get attributes" %}</label><br>
-								<a href="#" id="get-attrs" class="btn btn-default btn-sm">{% trans "Get attributes" %}</a>
-							</div>
-							<div class="col-sm-8">
-								<label class="col-form-label">{% trans "Attributes" %}</label>
-								<select id="attr-name-user-params" class="form-control"></select>
-							</div>
-						</div>  
-
-					</div>
-
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans "Close" %}</button>
-				<button type="button" class="btn btn-default btn-sm" id="set-parameters">{% trans "Set parameters" %}</button>
-			</div>
-		</div>
-	</div>
-</div>
-
 
 
 {% endif %}
@@ -496,239 +271,55 @@
 
 	username = '{{ user.username }}'
 
-	//Parámetros de usuario
 
-	$("#sql-params").click(function(){
-		$("#img-sql-params").toggleClass('fa-caret-right fa-caret-down')
-        $("#more-options-sql").slideToggle("slow");
-        });
+	$('#add-concat-wks').click(function(){
 
-	$("#user-params").click(function(){
-		$("#img-user-params").toggleClass('fa-caret-right fa-caret-down')
-		$("#more-options-user").slideToggle("slow");
-	});
+		value = $('#workspaces-to-concat').val()
 
+		json = JSON.parse($('#wks-concatenated').val())
 
-	$('#add-user-params').click(function(){
-		name = $('#name-user-params').val()
-
-		$('#loop-user-params').append(
-                '<option value="'+name+'">'+name+'</option>'
-            );
-
-		type = $('#type-user-params').val()
-		
-		if (type == 'VARCHAR'){
-
-			value = $('#value-user-params').val()
-
-		}else if (type == 'INTEGER'){
-
-			value = parseInt($('#value-user-params').val())
-
-		} else if (type == 'FLOAT'){
-
-			value = parseFloat($('#value-user-params').val())
-
-		}
-
-		json = JSON.parse($('#json-user-params').val())
-
-		json[name] = value;
+		json.push(value)
 
 		jsonString = JSON.stringify(json);
 
-		$('#json-user-params').val(jsonString);
+		$('#wks-concatenated').val(jsonString);
 
 	})
 
-	$('#quit-user-params').click(function(){
-		name = $('#name-user-params').val()
-		json = JSON.parse($('#json-user-params').val())
+	$('#quit-concat-wks').click(function(){
 
-		if (name != ''){
+		json = JSON.parse($('#wks-concatenated').val())
 
-			delete json[name]
-
-			$("#loop-user-params option[value='"+name+"']").remove();
-
-		} else {
-			keys = Object.keys(json)
-			delete json[keys[keys.length-1]]
-
-			$("#loop-user-params").find("option:last").remove();
-
-		}
+		json.pop();
 
 		jsonString = JSON.stringify(json);
-		$('#json-user-params').val(jsonString);
+		$('#wks-concatenated').val(jsonString);
 
 	});
 
-	$('#checkbox-user-params').change(function(){
-
-		if ($('#checkbox-user-params').is(':checked')){
-
-			$('#checkbox-user-params').val('True')
-					
-			$("#loop-user-params").prop('disabled', false)
-			$('[name = "radio-params-user"]').prop('disabled', false)
-			$("#init-loop-integer-user-params").prop('disabled', false)
-			$("#end-loop-integer-user-params").prop('disabled', false)
-			$("#get-schemas").removeClass('disabled')
-			$("#schema-name-user-params").prop('disabled', false)
-			$("#get-tables").removeClass('disabled')
-			$("#table-name-user-params").prop('disabled', false)
-			$("#get-attrs").removeClass('disabled')
-			$("#attr-name-user-params").prop('disabled', false)
-					
-		}
-
-		else {
-			$('#checkbox-user-params').val('False')
-
-			$("#loop-user-params").prop('disabled', true)
-			$('[name = "radio-params-user"]').prop('disabled', true)
-			$("#init-loop-integer-user-params").prop('disabled', true)
-			$("#end-loop-integer-user-params").prop('disabled', true)
-			$("#get-schemas").addClass('disabled')
-			$("#schema-name-user-params").prop('disabled', true)
-			$("#get-tables").addClass('disabled')
-			$("#table-name-user-params").prop('disabled', true)
-			$("#get-attrs").addClass('disabled')
-			$("#attr-name-user-params").prop('disabled', true)
-		}
-	});
-
-
-	$('input:radio[name = "radio-params-user"]').change(function(){
-
-		if ($('#loop-integer-user-params').is(':checked')){
-
-			$("#init-loop-integer-user-params").prop('disabled', false)
-			$("#end-loop-integer-user-params").prop('disabled', false)
-			$("#get-schemas").addClass('disabled')
-			$("#schema-name-user-params").prop('disabled', true)
-			$("#get-tables").addClass('disabled')
-			$("#table-name-user-params").prop('disabled', true)
-			$("#get-attrs").addClass('disabled')
-			$("#attr-name-user-params").prop('disabled', true)
-
-		}
-		else{
-			$("#init-loop-integer-user-params").prop('disabled', true)
-			$("#end-loop-integer-user-params").prop('disabled', true)
-			$("#get-schemas").removeClass('disabled')
-			$("#schema-name-user-params").prop('disabled', false)
-			$("#get-tables").removeClass('disabled')
-			$("#table-name-user-params").prop('disabled', false)
-			$("#get-attrs").removeClass('disabled')
-			$("#attr-name-user-params").prop('disabled', false)
-
-		}
-
-	})
-
-	$('#get-schemas').on("click", function(){
-                                
-		var paramsGetSchemas = {
-		"parameters": [
-			{"db": $('#db').val()}
-		]}
-
-		var formDataGetSchemas = new FormData();
-		
-		formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
+	$('#get-workspaces').on("click", function(){
 
 		$.ajax({
 			type: 'POST',
-			url: '/gvsigonline/etl/etl_schemas_name_postgres/',
-			data: formDataGetSchemas,
+			url: '/gvsigonline/etl/get_workspaces/',
 			beforeSend:function(xhr){
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			cache: false, 
 			contentType: false, 
 			processData: false,
-			success: function (data) {
-
-				$('#schema-name-user-params').empty()
-
-				for (i = 0; i < data.length; i++){
-					$('#schema-name-user-params').append('<option>'+data[i]+'</option>')
-				}
-			}
-		})
-	});
-
-	$('#get-tables').on("click", function(){
-                                
-		var paramsGetSchemas = {
-		"parameters": [
-			{"db": $('#db').val(),
-			"schema-name": $('#schema-name-user-params').val()}
-		]}
-
-		var formDataGetSchemas = new FormData();
-		
-		formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
-
-		$.ajax({
-			type: 'POST',
-			url: '/gvsigonline/etl/etl_table_name_postgres/',
-			data: formDataGetSchemas,
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-			},
-			cache: false, 
-			contentType: false, 
-			processData: false,
-			success: function (data) {
-				
-				$('#table-name-user-params').empty()
+			success: function (response) {
+				data = response.workspaces
+				$('#workspaces-to-concat').empty()
 
 				for (i = 0; i < data.length; i++){
-					$('#table-name-user-params').append('<option>'+data[i]+'</option>')
+					$('#workspaces-to-concat').append('<option value = "'+data[i]['id']+'">'+data[i]['id']+' - '+data[i]['name']+'</option>')
 
 				}
 			}
 		})
 	});
 
-	$('#get-attrs').on("click", function(){
-                                
-		var paramsGetAttrs = {
-		"parameters": [
-			{"db": $('#db').val(),
-			"schema-name": $('#schema-name-user-params').val(),
-			"tablename": $('#table-name-user-params').val()}
-		]}
-
-		var formDataGetAttrs = new FormData();
-		
-		formDataGetAttrs.append('jsonParamsPostgres', JSON.stringify(paramsGetAttrs))
-
-		$.ajax({
-			type: 'POST',
-			url: '/gvsigonline/etl/etl_schema_postgresql/',
-			data: formDataGetAttrs,
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-			},
-			cache: false, 
-			contentType: false, 
-			processData: false,
-			success: function (data) {
-				
-				$('#attr-name-user-params').empty()
-
-				for (i = 0; i < data.length; i++){
-					$('#attr-name-user-params').append('<option>'+data[i]+'</option>')
-
-				}
-			}
-		})
-	});
 
 	$(document).ready(function() {
 		var table = $('#etl-table').DataTable({
@@ -758,24 +349,12 @@
 			"columnDefs": [{
 				"targets": -1,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>'
+				"defaultContent": '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
 			},{
 				"targets": -2,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
-			},{
-				"targets": -3,
-				"data": null,
 				"defaultContent": '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>'
 				
-			},{
-				"targets": -4,
-				"data": null,
-				"defaultContent": '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>'
-			},{
-				"targets": -5,
-				"data": null,
-				"defaultContent": '<button type="button" name="button-set-parameters-workspace" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Set parameters" %}' + '" class="btn btn-secondary"><i class="fa fa-bars"></i></button>'
 			},{
 				"targets": 1,
 				"data": null,
@@ -788,58 +367,15 @@
 
 		$('[data-toggle-second="tooltip"]').tooltip();
 
-		$('#button-clean-tmp').on('click', function (){
-
-			$.ajax({
-					type: 'POST',
-					async: false,
-					url: '/gvsigonline/etl/etl_workspace_is_running/',
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					success	:function(response){
-
-						if (response.run == 'true'){
-
-							$('#modal-clean-tmp-tables').modal('show')
-
-						}
-					},
-					error: function(){}
-				});
-		
-		});
-
-		$('#accept-clean-tmp').on('click', function (){
-			CleanTemporalTables()
-		})
-
-
-		$('#button-concat-workspaces').on('click', function (){
-
-			location.href = '/gvsigonline/etl/etl_concat_workspaces/';
-		});
-
-
-		function CleanTemporalTables(){
-			$('#modal-clean-tmp-tables').modal('hide')
-
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: '/gvsigonline/etl/etl_clean_tmp_tables/',
-				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-				success	:function(){},
-				error: function(){}
-			});
-
-		}
 
 		$('#button-new-empty-canvas').on('click', function (){
 
 			location.href = '/gvsigonline/etl/etl_canvas/';
+		});
+
+		$('#button-workpaces').on('click', function (){
+
+		location.href = '/gvsigonline/etl/etl_workspace_list/';
 		});
 
 		upload = false
@@ -850,37 +386,20 @@
 				getPathFile('json', '0')
 		})
 
-		$("#upload-etl-workspace").on('click', function(){
 
-			$.ajax({
-					type: 'POST',
-					async: false,
-					data: {
-						"name": $("#etl_name_upload").val(),
-						"description": $("#etl_desc_upload").val(),
-						"file": $("#etl_json_upload").val(),
-						"username": username
-					},
-					url: '/gvsigonline/etl/etl_workspace_upload/',
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					success	:function(response){
-						$('#modal-upload-workspace-etl').modal('hide');
-						$("#etl_name_upload").val("")
-						$("#etl_desc_upload").val("")
-						$("#etl_json_upload").val("")
+		$('#button-add-concat').on('click', function (){
 
-						if(response['exists']=="true"){
-							upload = true
-							$('#modal-ws-exists').modal('show')
-							
-						}else{
-							location.reload();
-						}
-					},
-					error: function(){}
-				});
+			$(".modal-body #etl_id").val('');
+			$(".modal-body #etl_name").val('');
+			$(".modal-body #etl_desc").val('');
+			$(".modal-body #wks-concatenated").val('[]');
+			
+
+			$('#modal-update-concat-workspace-etl').modal('show')
+			$("#repeat_periodically").prop('checked', false)
+			$(".repeat_periodically_time").slideUp("slow");
+			data =[]
+			updateConcatWorkspace(data)
 
 		})
 		
@@ -893,6 +412,7 @@
 				$(".modal-body #etl_id").val( data[0] );
 				$(".modal-body #etl_name").val( data[3] );
 				$(".modal-body #etl_desc").val( data[4] );
+				$(".modal-body #wks-concatenated").val( data[7] );
 
 				if(data[5]!=''){
 					$("#repeat_periodically").prop('checked', true)
@@ -922,16 +442,12 @@
 					$(".repeat_periodically_time").slideUp("slow");
 				}
 				
-				$('#modal-update-workspace-etl').modal('show')
+				$('#modal-update-concat-workspace-etl').modal('show')
 				
-				updateWorkspace(data)
+				updateConcatWorkspace(data)
 				
 			} else if (this.name == "button-delete-workspace-etl"){
 				deleteWorkspace(data);   
-			}
-
-			else if (this.name == "button-open-workspace-etl"){
-				openWorkspace(data);  
 			}
 
 			else if (this.name == "button-download-workspace-etl"){
@@ -1157,82 +673,6 @@
 
 		});
 
-
-		$('#set-parameters').on('click', function (){
-
-			var get_loop = []
-			var get_sch = []
-			var get_tbl = []
-			var get_attr = []
-
-			$("#loop-user-params option").each(function()
-				{
-					get_loop.push($(this).val())
-				});
-
-			$("#schema-name-user-params option").each(function()
-			{
-				get_sch.push($(this).val())
-			});
-
-			$("#table-name-user-params option").each(function()
-			{
-				get_tbl.push($(this).val())
-			});
-
-			$("#attr-name-user-params option").each(function()
-			{
-				get_attr.push($(this).val())
-			});
-
-			if ($('#loop-integer-user-params').is(':checked')){
-				radio = 'integer'
-			}else{
-				radio = 'postgres'
-			}
-
-
-			params = {
-						"id": $(".modal-body #etl_id").val(),
-						"db": $(".modal-body #db").val(),
-						"sql-before": $(".modal-body #sql-before").val().replace(/"/g, '_##_').replace(/'/g, '#--#'),
-						"sql-after": $(".modal-body #sql-after").val().replace(/"/g, '_##_').replace(/'/g, '#--#'),
-						"json-user-params": $(".modal-body #json-user-params").val(),
-						"checkbox-user-params": $(".modal-body #checkbox-user-params").val(),
-						"get_loop-user-params": get_loop.join('","'),
-						"loop-user-params": $(".modal-body #loop-user-params").val(),
-						"radio-params-user": radio,
-						"init-loop-integer-user-params": $(".modal-body #init-loop-integer-user-params").val(),
-						"end-loop-integer-user-params": $(".modal-body #end-loop-integer-user-params").val(),
-						"get_schema-name-user-params": get_sch.join('","'),
-						"schema-name-user-params": $(".modal-body #schema-name-user-params").val(),
-						"get_table-name-user-params": get_tbl.join('","'),
-						"table-name-user-params": $(".modal-body #table-name-user-params").val(),
-						"get_attr-name-user-params": get_attr.join('","'),
-						"attr-name-user-params": $(".modal-body #attr-name-user-params").val(),
-						
-					}
-
-					console.log(params)
-
-			$.ajax({
-					type: 'POST',
-					async: false,
-					data: params,
-					url: '/gvsigonline/etl/set_workspace_parameters/',
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					success	:function(response){
-
-						$('#modal-set-parameters-workspace').modal('hide')
-
-					},
-					error: function(){}
-				});
-
-		});
-
 		function runWorkspace(data){
 
 			$.ajax({
@@ -1251,12 +691,6 @@
 				error: function(){}
 			});
 
-		}
-			
-		function openWorkspace(data){	
-				
-			location.href = '/gvsigonline/etl/etl_canvas/?lgid=' + data[0];
-			
 		}
 
 		function deleteWorkspace(data){
@@ -1280,20 +714,22 @@
 			});
 		};
 
-		function updateWorkspace(data){
+		function updateConcatWorkspace(data){
 			
-			$('#update-etl-workspace').click( function() {
+			$('#update-etl-concat-workspace').click( function() {
 
-				updateData = {"id": data[0], 
+				updateData = {"id": $(".modal-body #etl_id").val(), 
 							"name": $(".modal-body #etl_name").val(), 
 							"description": $(".modal-body #etl_desc").val(), 
-							"workspace": data[3],
+							"workspace": $(".modal-body #wks-concatenated").val(), 
 							"day": $(".modal-body #ws-program-day").val(),
 							"time": $(".modal-body #ws-program-time").val(),
 							"interval": $(".modal-body #ws-program-interval").val(),
 							"unit": $(".modal-body #ws-program-unit").val(),
 							"username": username
 						}
+
+				console.log(updateData)
 				
 				if($("#repeat_periodically").is(':checked')){
 					updateData["checked"] = true
@@ -1311,13 +747,13 @@
 					type: 'POST',
 					async: false,
 					data: updateData,
-					url: '/gvsigonline/etl/etl_workspace_update/',
+					url: '/gvsigonline/etl/etl_concatenate_workspace_update/',
 					beforeSend:function(xhr){
 						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
 					success	:function(response){
 						
-						$('#modal-update-workspace-etl').modal('hide');
+						$('#modal-update-concat-workspace-etl').modal('hide');
 						if(response['exists']=="true"){
 							$('#modal-ws-exists').modal('show')
 						}else{
@@ -1336,7 +772,7 @@
 			$('#modal-upload-workspace-etl').modal('show')
 			upload = false
 		}else{
-			$('#modal-update-workspace-etl').modal('show')
+			$('#modal-update-concat-workspace-etl').modal('show')
 		}
         
 
