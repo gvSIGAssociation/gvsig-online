@@ -76,13 +76,16 @@ viewer.core = {
     	this._createWidgets();
     	this._loadTools();
     },
-
+    stringToBase64: function(s) {
+		var byteArray = new TextEncoder().encode(s);
+        const binString = Array.from(byteArray, (x) => String.fromCodePoint(x)).join("");
+        return btoa(binString);
+    },
     _authenticate: function() {
     	var self = this;
 		if (self.conf.user && self.conf.user.credentials) {
-			var headers;
-			headers = {
-				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+			var headers = {
+				"Authorization": "Basic " + self.stringToBase64(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
 			};
 			for (var i=0; i<self.conf.auth_urls.length; i++) {
 				$.ajax({
