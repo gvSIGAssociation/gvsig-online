@@ -301,7 +301,7 @@ def update_user(
         A Django User instance or None if an error happened
     """
     User = get_user_model()
-    user = User.objects.get(id=int(user_id))
+    user = User.objects.get(username=username)
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
