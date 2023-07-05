@@ -10,7 +10,7 @@
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "GTFS Providers list" %}</h3>
 				<div class="box-tools pull-right">
-					<button id="button-add-provider" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add GTFS provider" %}</button>
+					<button id="button-add-provider" class="btn btn-block btn-default btn-sm fa fa-plus"> <em class="fa fa-plus margin-r-5"></em>{% trans "Add GTFS provider" %}</button>
 				</div>
 			</div>
 			
@@ -30,7 +30,6 @@
 					<tbody>
 						{% for prov in providers %}
 						<tr class="ui-state-default">
-<!-- 							<td><i class="fa fa-sort" aria-hidden="true"></i></td> -->
 							<td class="row-id">{{ prov.id }}</td>
 							<td class="col-md-2">{{ prov.name }}</td>
 							<td class="col-md-2">{{ prov.description }}</td>
@@ -54,18 +53,6 @@
 						{% csrf_token %}
 			  			
 						<div class="form-row">
-							<!--<div class="form-group col-md-3">
-								{% trans "Download and Rebuild Graph at:" %}
-							</div>
-							<div class="form-group col-md-2">
-						    	<input type="text" class="form-control" id="cron_hour" name="cron_hour" aria-describedby="cronHourHelp" 
-						    		placeholder="{% trans "Enter hour (from 0-23)" %}"  value="{{ cron_hour }}" />						    	
-							</div>
-							<div class="form-group col-md-1"><span> : </span></div>
-							<div class="form-group col-md-2">   
-							    <input type="text" class="form-control" id="cron_minutes" name="cron_minutes" aria-describedby="cronTimeHelp" 
-							    	placeholder="{% trans "Enter minutes (from 0-59)" %}" value="{{ cron_minutes }}" />
-							</div>-->
 							<div class="row">
 								<div class="col-md-12">
 									<label for="repeat_periodically">{% trans "Run periodically?" %}</label>&nbsp;&nbsp;
@@ -121,7 +108,7 @@
 			    		<input type="submit" class="btn btn-default" value="{% trans "Set up cronjob" %}">
 					</form>
 					<div class="box-tools pull-right">
-						<button id="button-update-now" class="btn btn-block btn-default btn-sm"><i id ="icon-success" class="fa fa-check" aria-hidden="true"></i> <i id = "icon-running" class="fa fa-spinner fa-spin"></i> <i id ="icon-error" class="fa fa-times" aria-hidden="true" ></i> {% trans "Update Now" %}</button>
+						<button id="button-update-now" class="btn btn-block btn-default btn-sm"><em id ="icon-success" class="fa fa-check" aria-hidden="true"></em> <em id = "icon-running" class="fa fa-spinner fa-spin"></em> <em id ="icon-error" class="fa fa-times" aria-hidden="true" ></em> {% trans "Update Now" %}</button>
 					</div>
 				</div>
 			</div>
