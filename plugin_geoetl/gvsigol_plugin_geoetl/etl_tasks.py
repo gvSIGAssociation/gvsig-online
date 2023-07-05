@@ -2,7 +2,7 @@
 
 from copy import deepcopy
 from gvsigol import settings
-from .settings import URL_GEOCODER
+from .settings import URL_GEOCODER, GEOETL_DB
 
 import pandas as pd
 import psycopg2
@@ -118,11 +118,11 @@ def input_Xml(dicc):
 
     table_name = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name))
     cur.execute(sqlDrop)
     conn.commit()
@@ -151,7 +151,7 @@ def input_Xml(dicc):
         sqlCreate = sqlCreate[:-2]+')'
 
         _sqlCreate = sql.SQL(sqlCreate).format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_name = sql.Identifier(table_name),
             *[sql.Identifier(field) for field in schemaList])
         cur.execute(_sqlCreate)
@@ -176,7 +176,7 @@ def input_Xml(dicc):
             sqlInsert = sqlInsert[:-2]+')'
 
             _sqlInsert = sql.SQL(sqlInsert).format(
-                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                schema = sql.Identifier(GEOETL_DB["schema"]),
                 table_name = sql.Identifier(table_name),
                 *[sql.Identifier(field) for field in schemaList])
             cur.execute(_sqlInsert, p)
@@ -191,7 +191,7 @@ def input_Xml(dicc):
                 sqlAlter = sqlAlter + 'ADD COLUMN IF NOT EXISTS {} TEXT, '
 
             _sqlAlter = sql.SQL(sqlAlter[:-2]).format(
-                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                schema = sql.Identifier(GEOETL_DB["schema"]),
                 table_name = sql.Identifier(table_name),
                 *[sql.Identifier(field) for field in colAd])
 
@@ -204,7 +204,7 @@ def input_Xml(dicc):
                 for val in root.findall(xpath+'/'+col):
 
                     sqlUpdate = sql.SQL('UPDATE {schema}.{table_name} SET {attr} = %s').format(
-                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
                         table_name = sql.Identifier(table_name),
                         attr = sql.Identifier(col))
 
@@ -253,12 +253,12 @@ def input_Excel(dicc):
 
     table_name = dicc['id']
 
-    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
   
     db = create_engine(conn_string)
     conn = db.connect()
 
-    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+    df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
 
     conn.close()
     db.dispose()
@@ -284,13 +284,13 @@ def input_Shp(dicc):
             pass
     
     srs = "EPSG:"+str(epsg)
-    schema = settings.GEOETL_DB['schema']
+    schema = GEOETL_DB['schema']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name))
     cur.execute(sqlDrop)
     conn.commit()
@@ -300,7 +300,7 @@ def input_Shp(dicc):
     _ogr = gdaltools.ogr2ogr()
     _ogr.set_encoding(encoding)
     _ogr.set_input(shp, srs=srs)
-    _conn = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=schema, user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+    _conn = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=schema, user=GEOETL_DB["user"], password=GEOETL_DB["password"])
     _ogr.set_output(_conn, table_name=table_name)
     _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
 
@@ -324,17 +324,17 @@ def trans_RemoveAttr(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -347,7 +347,7 @@ def trans_RemoveAttr(dicc):
         sqlRemov += ' DROP COLUMN {},'
 
     cur.execute(sql.SQL(sqlRemov[:-1]).format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target),
         *[sql.Identifier(field) for field in attrList]
         ))
@@ -365,11 +365,11 @@ def trans_KeepAttr(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -377,7 +377,7 @@ def trans_KeepAttr(dicc):
     sqlDatetype = 'SELECT column_name from information_schema.columns '
     sqlDatetype += 'where table_schema = %s and table_name = %s '
     cur.execute(sql.SQL(sqlDatetype).format(
-    ),[settings.GEOETL_DB["schema"], table_name_source])
+    ),[GEOETL_DB["schema"], table_name_source])
     conn.commit()
     
     for row in cur:
@@ -393,7 +393,7 @@ def trans_KeepAttr(dicc):
     sqlDup = sqlDup[:-1]+' from {schema}.{tbl_source})'
 
     cur.execute(sql.SQL(sqlDup).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source),
         *[sql.Identifier(field) for field in attrList]
@@ -413,17 +413,17 @@ def trans_RenameAttr(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -435,7 +435,7 @@ def trans_RenameAttr(dicc):
     for x in range (0, len(oldAttr)):
         sqlRename = sqlRename_ + ' RENAME COLUMN {} TO {};'
         cur.execute(sql.SQL(sqlRename).format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target),
         sql.Identifier(oldAttr[x]),
         sql.Identifier(newAttr[x])
@@ -472,7 +472,7 @@ def trans_Join(dicc):
 
     output = [table_name_target_join, table_name_target_0_not_used, table_name_target_1_not_used]
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     schemas =[]
@@ -481,7 +481,7 @@ def trans_Join(dicc):
         sqlDatetype = 'SELECT column_name from information_schema.columns '
         sqlDatetype += 'where table_schema = %s and table_name = %s '
         cur.execute(sql.SQL(sqlDatetype).format(
-        ),[settings.GEOETL_DB["schema"], table_name])
+        ),[GEOETL_DB["schema"], table_name])
         conn.commit()
 
         sc =[]
@@ -507,7 +507,7 @@ def trans_Join(dicc):
     for out in output:
 
         sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(GEOETL_DB["schema"]),
             sql.Identifier(out))
         
         cur.execute(sqlDrop)
@@ -516,7 +516,7 @@ def trans_Join(dicc):
     sqlJoin_ = 'create table {sch}.{tbl_join} as (select '+schema +' from {sch}.{tbl_source_0} AS A0 INNER JOIN {sch}.{tbl_source_1} AS A1 ON '+ on + ');'
 
     sqlJoin = sql.SQL(sqlJoin_).format(
-            sch = sql.Identifier(settings.GEOETL_DB["schema"]),
+            sch = sql.Identifier(GEOETL_DB["schema"]),
             tbl_join = sql.Identifier(table_name_target_join),
             *[sql.Identifier(field) for field in schemaList],
             tbl_source_0 = sql.Identifier(table_name_source_0),
@@ -530,7 +530,7 @@ def trans_Join(dicc):
     sqlNotJoin1_ = 'create table {sch}.{tbl_not_0} as (select A0.* from {sch}.{tbl_source_0} AS A0 LEFT OUTER JOIN {sch}.{tbl_source_1} AS A1 ON '+on + ' WHERE A1.{attr} IS NULL)'
 
     sqlNotJoin1 = sql.SQL(sqlNotJoin1_).format(
-            sch = sql.Identifier(settings.GEOETL_DB["schema"]),
+            sch = sql.Identifier(GEOETL_DB["schema"]),
             tbl_not_0 = sql.Identifier(table_name_target_0_not_used),
             tbl_source_0 = sql.Identifier(table_name_source_0),
             tbl_source_1 = sql.Identifier(table_name_source_1),
@@ -544,7 +544,7 @@ def trans_Join(dicc):
     sqlNotJoin2_ = 'create table {sch}.{tbl_not_1} as (select A1.* from {sch}.{tbl_source_0} AS A0 RIGHT OUTER JOIN {sch}.{tbl_source_1} AS A1 ON '+on + ' WHERE A0.{attr} IS NULL)'
 
     sqlNotJoin2 = sql.SQL(sqlNotJoin2_).format(
-            sch = sql.Identifier(settings.GEOETL_DB["schema"]),
+            sch = sql.Identifier(GEOETL_DB["schema"]),
             tbl_not_1 = sql.Identifier(table_name_target_1_not_used),
             tbl_source_0 = sql.Identifier(table_name_source_0),
             tbl_source_1 = sql.Identifier(table_name_source_1),
@@ -566,17 +566,17 @@ def trans_ModifyValue(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -584,7 +584,7 @@ def trans_ModifyValue(dicc):
     conn.commit()
 
     sqlUpdate = sql.SQL('UPDATE {}.{} SET {} = %s').format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target),
         sql.Identifier(attr)
     )
@@ -606,17 +606,17 @@ def trans_CreateAttr(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -630,7 +630,7 @@ def trans_CreateAttr(dicc):
         sqlSET = ''
 
     sqlAdd = sql.SQL('ALTER TABLE {}.{} ADD COLUMN {} {}').format(
-            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(GEOETL_DB["schema"]),
             sql.Identifier(table_name_target),
             sql.Identifier(attr),
             sql.SQL(data_type+sqlSET)
@@ -661,17 +661,17 @@ def trans_Filter(dicc):
     table_name_target_passed = dicc['id']+'_0'
     table_name_target_failed = dicc['id']+'_1'
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_passed))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_failed))
     cur.execute(sqlDrop)
     conn.commit()
@@ -681,7 +681,7 @@ def trans_Filter(dicc):
         sqlDatetype = 'SELECT  data_type from information_schema.columns '
         sqlDatetype += "where table_schema = %s and table_name = %s and column_name = %s "
         
-        cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"],table_name_source, attr])
+        cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"],table_name_source, attr])
         conn.commit()
 
         data_type = ''
@@ -708,7 +708,7 @@ def trans_Filter(dicc):
         sqlFilPassed = 'create table {schema}.{tbl_passed} as (select * from {schema}.{tbl_source} WHERE {attr}{tovar} {oper} %s)'
         
         sqlFilPassed_ = sql.SQL(sqlFilPassed).format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_passed = sql.Identifier(table_name_target_passed),
                     tbl_source = sql.Identifier(table_name_source),
                     attr = sql.Identifier(attr),
@@ -721,7 +721,7 @@ def trans_Filter(dicc):
         sqlFilFailed = 'create table {schema}.{tbl_failed} as (select * from {schema}.{tbl_source} WHERE NOT {attr}{tovar} {oper} %s)'
 
         sqlFilFailed_ = sql.SQL(sqlFilFailed).format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_failed = sql.Identifier(table_name_target_failed),
                     tbl_source = sql.Identifier(table_name_source),
                     attr = sql.Identifier(attr),
@@ -739,7 +739,7 @@ def trans_Filter(dicc):
         sqlFilPassed = 'create table {schema}.{tbl_passed} as (select * from {schema}.{tbl_source} WHERE ( {expres} ))'
         
         sqlFilPassed_ = sql.SQL(sqlFilPassed).format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_passed = sql.Identifier(table_name_target_passed),
                     tbl_source = sql.Identifier(table_name_source),
                     expres = sql.SQL(expression))
@@ -751,7 +751,7 @@ def trans_Filter(dicc):
         sqlFilFailed = 'create table {schema}.{tbl_failed} as (select * from {schema}.{tbl_source} WHERE NOT ( {expres} ))'
 
         sqlFilFailed_ = sql.SQL(sqlFilFailed).format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_failed = sql.Identifier(table_name_target_failed),
                     tbl_source = sql.Identifier(table_name_source),
                     expres = sql.SQL(expression))
@@ -768,11 +768,11 @@ def trans_Filter(dicc):
 
 def isInSamedb(params):
 
-    if (settings.GEOETL_DB['host'] == params['host'] and 
-        str(settings.GEOETL_DB["port"]) == str(params['port']) and 
-        settings.GEOETL_DB["database"] == params['database'] and
-        settings.GEOETL_DB["user"] == params['user'] and
-        settings.GEOETL_DB["password"] == params['password']):
+    if (GEOETL_DB['host'] == params['host'] and 
+        str(GEOETL_DB["port"]) == str(params['port']) and 
+        GEOETL_DB["database"] == params['database'] and
+        GEOETL_DB["user"] == params['user'] and
+        GEOETL_DB["password"] == params['password']):
         
         return True
     else:
@@ -795,12 +795,12 @@ def output_Postgis(dicc):
     esq = dicc['schema-name-option']
     tab = dicc['tablename']
 
-    con_source = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    con_source = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = con_source.cursor()
     cur_2 = con_source.cursor()
 
     sqlCount = sql.SQL("SELECT COUNT(*) FROM {sch_source}.{tbl_source}").format(
-            sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+            sch_source = sql.Identifier(GEOETL_DB["schema"]),
             tbl_source = sql.Identifier(table_name_source))
     
     cur.execute(sqlCount)
@@ -823,7 +823,7 @@ def output_Postgis(dicc):
                     sqlCreate = sql.SQL('create table {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
                         sch_target = sql.Identifier(esq),
                         tbl_target = sql.Identifier(tab),
-                        sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        sch_source = sql.Identifier(GEOETL_DB["schema"]),
                         tbl_source = sql.Identifier(table_name_source))
                     
                     cur.execute(sqlCreate)
@@ -832,7 +832,7 @@ def output_Postgis(dicc):
                     sqlCreate = sql.SQL('create table IF NOT EXISTS {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
                         sch_target = sql.Identifier(esq),
                         tbl_target = sql.Identifier(tab),
-                        sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        sch_source = sql.Identifier(GEOETL_DB["schema"]),
                         tbl_source = sql.Identifier(table_name_source))
                     
                     cur.execute(sqlCreate)
@@ -878,7 +878,7 @@ def output_Postgis(dicc):
                 except:
                     type_geom = ''
 
-                _conn_source = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=settings.GEOETL_DB["schema"], user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+                _conn_source = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"])
                 _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
 
                 _ogr = gdaltools.ogr2ogr()
@@ -919,7 +919,7 @@ def output_Postgis(dicc):
                 sqlDatetype = 'SELECT column_name from information_schema.columns '
                 sqlDatetype += "where table_schema = %s and table_name = %s "
 
-                cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"], table_name_source])
+                cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"], table_name_source])
                 con_source.commit()
 
                 attr_source = '('
@@ -966,7 +966,7 @@ def output_Postgis(dicc):
                         attrs_target = sql.SQL(attr_source).format(
                             *[sql.Identifier(field) for field in attrTargetList],
                         ),
-                        sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        sch_source = sql.Identifier(GEOETL_DB["schema"]),
                         tbl_source = sql.Identifier(table_name_source)
                         )
 
@@ -985,7 +985,7 @@ def output_Postgis(dicc):
                 except:
                     type_geom = ''
 
-                _conn_source = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=settings.GEOETL_DB["schema"], user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+                _conn_source = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"])
                 _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
                 _ogr = gdaltools.ogr2ogr()
                 _ogr.set_input(_conn_source, table_name=table_name_source)
@@ -1016,7 +1016,7 @@ def output_Postgis(dicc):
             sqlDatetype = 'SELECT column_name from information_schema.columns '
             sqlDatetype += "where table_schema = %s and table_name = %s "
 
-            cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"], table_name_source])
+            cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"], table_name_source])
             con_source.commit()
 
             attr_source = []
@@ -1069,7 +1069,7 @@ def output_Postgis(dicc):
 
 
             cur.execute(sql.SQL('SELECT * FROM {sch_source}.{tbl_source}').format(
-                sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                sch_source = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_source = sql.Identifier(table_name_source)
             ))
 
@@ -1129,7 +1129,7 @@ def output_Postgis(dicc):
             sqlDatetype = 'SELECT column_name from information_schema.columns '
             sqlDatetype += "where table_schema = %s and table_name = %s "
 
-            cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"], table_name_source])
+            cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"], table_name_source])
             con_source.commit()
 
             attr_source = []
@@ -1158,7 +1158,7 @@ def output_Postgis(dicc):
                         break
 
             cur.execute(sql.SQL('SELECT * FROM {sch_source}.{tbl_source}').format(
-                sch_source = sql.Identifier(settings.GEOETL_DB["schema"]),
+                sch_source = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_source = sql.Identifier(table_name_source)
             ))
 
@@ -1220,7 +1220,7 @@ def input_Csv(dicc):
 
         table_name = dicc['id']
 
-        conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+        conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     
         db = create_engine(conn_string)
         conn = db.connect()
@@ -1232,7 +1232,7 @@ def input_Csv(dicc):
             df_obj = df.select_dtypes(['object'])
             df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
-            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
             first = False
             
         else:
@@ -1242,7 +1242,7 @@ def input_Csv(dicc):
             df_obj = df.select_dtypes(['object'])
             df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
-            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
         skiprows += 10000
 
@@ -1260,17 +1260,17 @@ def trans_Reproject(dicc):
     sourceepsg = str(dicc['source-epsg'])
     targetepsg = str(dicc['target-epsg'])
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source))
     cur.execute(sqlDup)
@@ -1286,7 +1286,7 @@ def trans_Reproject(dicc):
     else:
         sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
         sqlAlter = sql.SQL(sqlAlter_).format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_target = sql.Identifier(table_name_target),
                     type_geom = sql.SQL(type_geom),
                     epsg = sql.SQL(sourceepsg))
@@ -1297,7 +1297,7 @@ def trans_Reproject(dicc):
     sqlTransf_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_Transform(wkb_geometry, {epsg})'
     
     sqlTransf = sql.SQL(sqlTransf_).format(
-                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                schema = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
                 type_geom = sql.SQL(type_geom),
                 epsg = sql.SQL(targetepsg))
@@ -1316,11 +1316,11 @@ def trans_Counter(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -1328,7 +1328,7 @@ def trans_Counter(dicc):
     if gbAttr == '':
 
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             tbl_source = sql.Identifier(table_name_source))
         cur.execute(sqlDup)
@@ -1336,7 +1336,7 @@ def trans_Counter(dicc):
 
         sqlAdd_ = 'ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} SERIAL; '  
         sqlAdd = sql.SQL(sqlAdd_).format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_target = sql.Identifier(table_name_target),
                     attr = sql.Identifier(attr))
 
@@ -1346,7 +1346,7 @@ def trans_Counter(dicc):
         sqlDup = 'create table {schema}.{tbl_target} as (select *, row_number() OVER (PARTITION BY {attr}) from {schema}.{tbl_source}  ORDER BY {attr});'
 
         cur.execute(sql.SQL(sqlDup).format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             tbl_source = sql.Identifier(table_name_source),
             attr = sql.Identifier(gbAttr)
@@ -1356,7 +1356,7 @@ def trans_Counter(dicc):
         sqlRename = 'ALTER TABLE {schema}.{tbl_target} RENAME COLUMN "row_number" TO {attr};'
 
         cur.execute(sql.SQL(sqlRename).format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             attr = sql.Identifier(attr)
         ))
@@ -1374,24 +1374,24 @@ def trans_Calculator(dicc):
     attr = dicc['attr']
     expression= dicc['expression']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source))
     cur.execute(sqlDup)
     conn.commit()
 
     sqlCount = sql.SQL('SELECT count(*) FROM {}.{}').format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target)) 
     cur.execute(sqlCount)
 
@@ -1402,7 +1402,7 @@ def trans_Calculator(dicc):
 
     if run:
         sqlInsert = sql.SQL('UPDATE {schema}.{tbl_target} SET {attr} = {expres} ').format(
-                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                schema = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
                 attr = sql.Identifier(attr),
                 expres = sql.SQL(expression))
@@ -1425,18 +1425,18 @@ def trans_CadastralGeom(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
     cur2 = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source))
     
@@ -1444,7 +1444,7 @@ def trans_CadastralGeom(dicc):
     conn.commit()
 
     sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN "_id_temp" SERIAL, ADD COLUMN "wkb_geometry" geometry(MultiPolygon, 4326); ').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
     )
 
@@ -1453,7 +1453,7 @@ def trans_CadastralGeom(dicc):
 
     sqlSel = sql.SQL('SELECT {attr}, "_id_temp" FROM {schema}.{tbl_target};').format(
         attr = sql.Identifier(attr),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
     )
     cur.execute(sqlSel)
@@ -1513,7 +1513,7 @@ def trans_CadastralGeom(dicc):
                                     }
             
                     sqlInsert = sql.SQL('UPDATE {schema}.{tbl_target} SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON( %s), %s) WHERE "_id_temp" = %s').format(
-                            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                            schema = sql.Identifier(GEOETL_DB["schema"]),
                             tbl_target = sql.Identifier(table_name_target)
                         )
                     
@@ -1533,7 +1533,7 @@ def trans_CadastralGeom(dicc):
             cr_model.save()
     
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
     )
 
@@ -1551,18 +1551,18 @@ def trans_MGRS(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
     cur_2 = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source))
     cur.execute(sqlDup)
@@ -1576,7 +1576,7 @@ def trans_MGRS(dicc):
         grid = dicc['mgrs']
 
         sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN _lat FLOAT DEFAULT NULL, ADD COLUMN _lon FLOAT DEFAULT NULL').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target))
         
         cur.execute(sqlAdd)
@@ -1584,7 +1584,7 @@ def trans_MGRS(dicc):
 
         sqlSelect = sql.SQL('SELECT {grid} FROM {schema}.{tbl_target}').format(
             grid = sql.Identifier(grid),
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target)
         )
         cur.execute(sqlSelect)
@@ -1596,7 +1596,7 @@ def trans_MGRS(dicc):
 
                 sqlUpdate = sql.SQL('UPDATE {schema}.{tbl_target}  SET _lat = %s, _lon = %s WHERE {grid} = %s ').format(
                     grid = sql.Identifier(grid),
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_target = sql.Identifier(table_name_target)
                 )
                 cur_2.execute(sqlUpdate,[lat, lon, row[0]])
@@ -1611,7 +1611,7 @@ def trans_MGRS(dicc):
         lon = dicc['lon']
 
         sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN _grid TEXT DEFAULT NULL').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target))
 
         cur.execute(sqlAdd)
@@ -1620,7 +1620,7 @@ def trans_MGRS(dicc):
         sqlSelect = sql.SQL('SELECT {lat}, {lon} FROM {schema}.{tbl_target}').format(
             lat = sql.Identifier(lat),
             lon = sql.Identifier(lon),
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target))
 
         cur.execute(sqlSelect)
@@ -1633,7 +1633,7 @@ def trans_MGRS(dicc):
                 sqlUpdate = sql.SQL('UPDATE {schema}.{tbl_target} SET _grid = %s WHERE {lat} = %s AND {lon} = %s ').format(
                     lat = sql.Identifier(lat),
                     lon = sql.Identifier(lon),
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_target = sql.Identifier(table_name_target))
                 
                 cur_2.execute(sqlUpdate,[grid, row[0], row[1]])
@@ -1658,17 +1658,17 @@ def trans_TextToPoint(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('CREATE TABLE {schema}.{tbl_target} AS (SELECT *, ST_SetSRID(ST_MakePoint({lon}::float, {lat}::float), {epsg}) AS wkb_geometry FROM {schema}.{tbl_source} );').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source),
         lon = sql.Identifier(lon),
@@ -1679,7 +1679,7 @@ def trans_TextToPoint(dicc):
     conn.commit()
 
     sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN wkb_geometry TYPE Geometry(Point, {srid})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_name = sql.Identifier(table_name_target),
         srid = sql.SQL(str(epsg))
     )
@@ -1708,11 +1708,11 @@ def input_Oracle(dicc):
     
     df = pd.read_sql(sql + " WHERE rownum = 1" , con = conn_source)
 
-    conn_string_target= 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    conn_string_target= 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     db_target = create_engine(conn_string_target)
     conn_target = db_target.connect()
 
-    df.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+    df.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
     
     col = list(df.columns.values)
 
@@ -1741,10 +1741,10 @@ def input_Oracle(dicc):
         df_tar[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
         if count == 1:
-            df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+            df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
             count +=1
         else:
-            df_tar.to_sql(table_name, con=conn_target, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+            df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
 
     conn_target.close()
@@ -1759,18 +1759,18 @@ def trans_WktGeom(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     if epsg =='':
         sqlDup = sql.SQL('create table {schema}.{tbl_target}  as (SELECT *, ST_GeomFromText({attr}) as wkb_geometry  FROM {schema}.{tbl_source});').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             attr = sql.Identifier(attr),
             tbl_source = sql.Identifier(table_name_source))
@@ -1779,7 +1779,7 @@ def trans_WktGeom(dicc):
         conn.commit()
     else:
         sqlDup = sql.SQL('create table {schema}.{tbl_target}  as (SELECT *, ST_SetSRID ( ST_GeomFromText({attr}), {epsg} ) as wkb_geometry  FROM {schema}.{tbl_source});').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             attr = sql.Identifier(attr),
             epsg = sql.SQL(epsg),
@@ -1791,7 +1791,7 @@ def trans_WktGeom(dicc):
         srid, type_geom = get_type_n_srid(table_name_target)
 
         sqlSet = sql.SQL('ALTER TABLE {schema}.{tbl_target}  ALTER COLUMN wkb_geometry TYPE geometry({type}, {epsg}) USING ST_SetSRID(wkb_geometry,{epsg});').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             type = sql.Identifier(type_geom),
             epsg = sql.SQL(epsg))
@@ -1800,7 +1800,7 @@ def trans_WktGeom(dicc):
         conn.commit()
 
     sqlRemov = sql.SQL('ALTER TABLE {schema}.{tbl_target}  DROP COLUMN {attr}').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(attr))
 
@@ -1822,17 +1822,17 @@ def trans_SplitAttr(dicc):
     _list = dicc['list']
     _split = dicc['split']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select *, string_to_array({attr}, %s) as {list} from {schema}.{tbl_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(attr),
         list = sql.SQL(_list),
@@ -1842,7 +1842,7 @@ def trans_SplitAttr(dicc):
     conn.commit()
 
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN {attr}; ').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(attr),
     )
@@ -1861,17 +1861,17 @@ def trans_ExplodeList(dicc):
     attr = dicc['attr']
     list_name = dicc['list']
     
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlCreate = sql.SQL('CREATE TABLE {schema}.{tbl_target} as (SELECT * FROM {schema}.{tbl_source}); TRUNCATE TABLE {schema}.{tbl_target}').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source))
 
@@ -1879,7 +1879,7 @@ def trans_ExplodeList(dicc):
     conn.commit()
 
     sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN "_id_temp" SERIAL, ADD COLUMN {attr} TEXT').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(attr)
     )
@@ -1887,13 +1887,13 @@ def trans_ExplodeList(dicc):
     conn.commit()
 
     sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_source} ADD COLUMN "_id_temp" SERIAL;').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_source = sql.Identifier(table_name_source))
     cur.execute(sqlAdd)
     conn.commit()
 
     sqlSel = sql.SQL('SELECT {list}, _id_temp FROM {schema}.{tbl_source};').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         list = sql.Identifier(list_name),
         tbl_source = sql.Identifier(table_name_source))       
     
@@ -1907,7 +1907,7 @@ def trans_ExplodeList(dicc):
             _len = 0
         for i in range (0, _len):
             sqlInsert = sql.SQL('INSERT INTO {schema}.{tbl_target}  SELECT *, %s FROM {schema}.{tbl_source} WHERE "_id_temp" = %s').format(
-                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                schema = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
                 tbl_source = sql.Identifier(table_name_source))
                 
@@ -1918,7 +1918,7 @@ def trans_ExplodeList(dicc):
     sqlDropCol = 'ALTER TABLE {schema}.{tbl_target}  DROP COLUMN _id_temp, DROP COLUMN {list}; '
     sqlDropCol += 'ALTER TABLE {schema}.{tbl_source} DROP COLUMN _id_temp; '
     cur.execute(sql.SQL(sqlDropCol).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source),
         list = sql.Identifier(list_name)
@@ -1946,25 +1946,25 @@ def trans_Union(dicc):
         st_multi_start = 'ST_Multi('
         st_multi_end = ')'
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlIndex = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source}_wkb_geometry_geom_idx" on {schema}."{table_source}" USING gist (wkb_geometry);').format(
         table_source = sql.SQL(table_name_source),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+        schema = sql.Identifier(GEOETL_DB["schema"]))
     
     cur.execute(sqlIndex)
     conn.commit()
 
     if groupby == '':
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select ST_Union(wkb_geometry) as wkb_geometry from {schema}.{tbl_source});').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             tbl_source = sql.Identifier(table_name_source))
 
@@ -1972,7 +1972,7 @@ def trans_Union(dicc):
         conn.commit()
     else:
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select {groupby}, {start} ST_Union(wkb_geometry) {end} as wkb_geometry from {schema}.{tbl_source} GROUP BY {groupby});').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             tbl_source = sql.Identifier(table_name_source),
             groupby = sql.Identifier(groupby),
@@ -2018,7 +2018,7 @@ def input_Indenova(dicc):
     r_auth = requests.get(url_auth, headers = headers_auth)
     token = r_auth.content
 
-    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     db = create_engine(conn_string)
     conn = db.connect()
 
@@ -2083,10 +2083,10 @@ def input_Indenova(dicc):
                     df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
                     if first:
-                        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+                        df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
                         first = False
                     else:
-                        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+                        df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
     return[table_name]
 
@@ -2104,11 +2104,11 @@ def input_Postgis(dicc):
     esq = dicc['schema-name']
     tab = dicc['tablename']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -2123,7 +2123,7 @@ def input_Postgis(dicc):
             where_clause = ''
     
         sqlCreate = sql.SQL('create table {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source} {where_clause})').format(
-            sch_target = sql.Identifier(settings.GEOETL_DB["schema"]),
+            sch_target = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             sch_source = sql.Identifier(esq),
             tbl_source = sql.Identifier(tab),
@@ -2135,7 +2135,7 @@ def input_Postgis(dicc):
         sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
         sqlDatetype += "where table_schema = %s and table_name = %s "
 
-        cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"], table_name_target])
+        cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"], table_name_target])
         conn.commit()
 
         for row in cur:
@@ -2144,7 +2144,7 @@ def input_Postgis(dicc):
                     pass
                 else:
                     sqlAlter = sql.SQL('ALTER TABLE {sch_target}.{tbl_target} RENAME COLUMN {attr} TO "wkb_geometry"').format(
-                        sch_target = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        sch_target = sql.Identifier(GEOETL_DB["schema"]),
                         tbl_target = sql.Identifier(table_name_target),
                         attr = sql.Identifier(row[0])                      
                     )
@@ -2205,7 +2205,7 @@ def input_Postgis(dicc):
             where_clause = ''
 
         _conn_source = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
-        _conn_target = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=settings.GEOETL_DB["schema"], user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+        _conn_target = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"])
 
         _ogr = gdaltools.ogr2ogr()
 
@@ -2238,7 +2238,7 @@ def input_Postgis(dicc):
         sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
         sqlDatetype += "where table_schema = %s and table_name = %s "
 
-        cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"], table_name_target])
+        cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"], table_name_target])
         conn.commit()
 
         for row in cur:
@@ -2247,7 +2247,7 @@ def input_Postgis(dicc):
                     pass
                 else:
                     sqlAlter = sql.SQL('ALTER TABLE {sch_target}.{tbl_target} RENAME COLUMN {attr} TO "wkb_geometry"').format(
-                        sch_target = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        sch_target = sql.Identifier(GEOETL_DB["schema"]),
                         tbl_target = sql.Identifier(table_name_target),
                         attr = sql.Identifier(row[0])                      
                     )
@@ -2277,18 +2277,18 @@ def trans_CompareRows(dicc):
 
     output = [table_name_target_equals, table_name_target_news,table_name_target_changes, table_name_target_1_not_used]
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     for out in output:
         sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(GEOETL_DB["schema"]),
             sql.Identifier(out))
         cur.execute(sqlDrop)
         conn.commit()
 
     sqlEquals = sql.SQL('CREATE TABLE {schema}.{tbl_target_equals} as (SELECT * FROM {schema}.{tbl_source}); TRUNCATE TABLE {schema}.{tbl_target_equals}').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target_equals = sql.Identifier(table_name_target_equals),
             tbl_source = sql.Identifier(table_name_source_0))
     
@@ -2296,7 +2296,7 @@ def trans_CompareRows(dicc):
     conn.commit()
 
     sqlNew = sql.SQL('create table {schema}.{tbl_target_news} as (select A0.* from {schema}.{tbl_source_0} AS A0 LEFT OUTER JOIN {schema}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr} WHERE A1.{attr} IS NULL );').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target_news = sql.Identifier(table_name_target_news),
             tbl_source_0 = sql.Identifier(table_name_source_0),
             tbl_source_1 = sql.Identifier(table_name_source_1),
@@ -2306,7 +2306,7 @@ def trans_CompareRows(dicc):
     conn.commit()
 
     sqlNotJoin2 = sql.SQL('create table {schema}.{tbl_target_1_not_used} as (select A1.* from {schema}.{tbl_source_0} AS A0 RIGHT OUTER JOIN {schema}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr} WHERE A0.{attr} IS NULL );').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target_1_not_used = sql.Identifier(table_name_target_1_not_used),
             tbl_source_0 = sql.Identifier(table_name_source_0),
             tbl_source_1 = sql.Identifier(table_name_source_1),
@@ -2316,7 +2316,7 @@ def trans_CompareRows(dicc):
     conn.commit()
 
     sqlChanges = sql.SQL('CREATE TABLE {schema}.{tbl_target_changes} as (SELECT * FROM {schema}.{tbl_source_0}); TRUNCATE TABLE {schema}.{tbl_target_changes}').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target_changes = sql.Identifier(table_name_target_changes),
             tbl_source_0 = sql.Identifier(table_name_source_0))
 
@@ -2324,7 +2324,7 @@ def trans_CompareRows(dicc):
     conn.commit()
 
     sqlSelect0 = sql.SQL('SELECT {attr}, * FROM {schema}.{tbl_source_0}').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_source_0 = sql.Identifier(table_name_source_0),
             attr = sql.Identifier(attr))
 
@@ -2333,7 +2333,7 @@ def trans_CompareRows(dicc):
     for row in cur:
         cur2 = conn.cursor()
         sqlSelect1 = sql.SQL('SELECT {attr}, * FROM {schema}.{tbl_source_1} WHERE {attr} = %s ').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_source_1 = sql.Identifier(table_name_source_1),
             attr = sql.Identifier(attr))
 
@@ -2342,7 +2342,7 @@ def trans_CompareRows(dicc):
         for row2 in cur2:
             if row == row2:
                 sqlInsert = sql.SQL('INSERT INTO {schema}.{tbl_target_equals} SELECT * FROM {schema}.{tbl_source_0} WHERE {attr} = %s ').format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_target_equals = sql.Identifier(table_name_target_equals),
                     tbl_source_0 = sql.Identifier(table_name_source_0),
                     attr = sql.Identifier(attr))
@@ -2351,7 +2351,7 @@ def trans_CompareRows(dicc):
                 conn.commit()
             else:
                 sqlInsert = sql.SQL('INSERT INTO {schema}.{tbl_target_changes} SELECT * FROM {schema}.{tbl_source_0} WHERE {attr} = %s ').format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     tbl_target_changes = sql.Identifier(table_name_target_changes),
                     tbl_source_0 = sql.Identifier(table_name_source_0),
                     attr = sql.Identifier(attr))
@@ -2377,13 +2377,13 @@ def trans_FilterGeom(dicc):
 
     output = [table_name_target_points, table_name_target_multipoints, table_name_target_lines, table_name_target_multilines, table_name_target_polygons, table_name_target_multipolygons]
     
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     for out in output:
 
         sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(GEOETL_DB["schema"]),
             sql.Identifier(out))
 
         cur.execute(sqlDrop)
@@ -2394,7 +2394,7 @@ def trans_FilterGeom(dicc):
     for i in range (0, len(typeGeom)):
         
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source} WHERE ST_ASTEXT(wkb_geometry) LIKE %s );').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(output[i]),
             tbl_source = sql.Identifier(table_name_source)
         )
@@ -2413,17 +2413,17 @@ def trans_CalcArea(dicc):
 
     attr = dicc['attr']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select *, ST_Area(wkb_geometry) as {attr}  from {schema}.{tbl_source} );').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             tbl_source = sql.Identifier(table_name_source),
             attr = sql.Identifier(attr))
@@ -2443,17 +2443,17 @@ def trans_CurrentDate(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -2462,14 +2462,14 @@ def trans_CurrentDate(dicc):
 
     if dicc['checkbox'] == 'true':
         sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} TIMESTAMP; UPDATE {schema}.{tbl_target} SET {attr} = CURRENT_TIMESTAMP;').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             attr = sql.Identifier(attr)
         )
     else:
 
         sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} DATE; UPDATE {schema}.{tbl_target} SET {attr} = CURRENT_DATE;').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             attr = sql.Identifier(attr)
         )
@@ -2486,17 +2486,17 @@ def trans_ExplodeGeom(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select *, (st_dump(wkb_geometry)).geom from {schema}.{tbl_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -2504,14 +2504,14 @@ def trans_ExplodeGeom(dicc):
     conn.commit()
 
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN wkb_geometry;').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
     )
     cur.execute(sqlDropCol)
     conn.commit()
 
     sqlRename = sql.SQL('ALTER TABLE {schema}.{tbl_target} RENAME COLUMN geom TO wkb_geometry;').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
     )
     cur.execute(sqlRename)
@@ -2525,12 +2525,12 @@ def trans_ExplodeGeom(dicc):
 
 def get_type_n_srid(table_name):
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
-    #sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+settings.GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
+    #sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
     sqlTypeGeom = sql.SQL("SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM {schema}.{table} WHERE wkb_geometry IS NOT NULL GROUP BY split_part").format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table = sql.Identifier(table_name),
     )
     cur.execute(sqlTypeGeom)
@@ -2548,7 +2548,7 @@ def get_type_n_srid(table_name):
 
     srid = 0
     sqlSrid = sql.SQL('SELECT ST_SRID (wkb_geometry) FROM {schema}.{table} WHERE wkb_geometry IS NOT NULL LIMIT 1').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table = sql.Identifier(table_name),
     )
 
@@ -2568,11 +2568,11 @@ def merge_tables(_list):
     table_name_source = _list[-1]
     table_name_target = _list[-2]
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
-    attr_target_list = list(pd.read_sql(sql.SQL('SELECT * FROM {schema}.{table}').format(schema = sql.Identifier(settings.GEOETL_DB['schema']), table = sql.Identifier(table_name_target)), con = conn).columns)
-    attr_source_list = list(pd.read_sql(sql.SQL('SELECT * FROM {schema}.{table}').format(schema = sql.Identifier(settings.GEOETL_DB['schema']), table = sql.Identifier(table_name_source)), con = conn).columns)
+    attr_target_list = list(pd.read_sql(sql.SQL('SELECT * FROM {schema}.{table}').format(schema = sql.Identifier(GEOETL_DB['schema']), table = sql.Identifier(table_name_target)), con = conn).columns)
+    attr_source_list = list(pd.read_sql(sql.SQL('SELECT * FROM {schema}.{table}').format(schema = sql.Identifier(GEOETL_DB['schema']), table = sql.Identifier(table_name_source)), con = conn).columns)
     
     attr_select = deepcopy(attr_target_list)
 
@@ -2602,7 +2602,7 @@ def merge_tables(_list):
     table_name = table_name_source[15:]+';'+table_name_target[15:]
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name))
     cur.execute(sqlDrop)
     conn.commit()
@@ -2611,7 +2611,7 @@ def merge_tables(_list):
     sql_ += ' select '+ attr_select_par[:-2] +' FROM {schema}.{tbl_source})'
     
     sqlDup = sql.SQL(sql_).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_name = sql.Identifier(table_name[:60]),
         *[ex for ex in attr_select_target],
         tbl_target = sql.Identifier(table_name_target),
@@ -2636,11 +2636,11 @@ def trans_ConcatAttr(dicc):
 
     new_attr = dicc['new-attr']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -2653,7 +2653,7 @@ def trans_ConcatAttr(dicc):
     sqlDup = sqlDup[:-2]+') as {new_attr} from {schema}.{tbl_source});'
     
     sqlDup_ = sql.SQL(sqlDup).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         tbl_source = sql.Identifier(table_name_source),
         *[sql.Identifier(attr) for attr in dicc['attr']],
@@ -2702,11 +2702,11 @@ def trans_Intersection(dicc):
             schema += 'A0.{},'
             attrs.append(attr)
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -2714,7 +2714,7 @@ def trans_Intersection(dicc):
 
     sqlIndex1 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_0}_wkb_geometry_geom_idx" on {schema}."{table_source_0}" USING gist (wkb_geometry);').format(
         table_source_0 = sql.SQL(table_name_source_0),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+        schema = sql.Identifier(GEOETL_DB["schema"]))
     
     cur.execute(sqlIndex1)
     conn.commit()
@@ -2725,7 +2725,7 @@ def trans_Intersection(dicc):
 
         sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
             table_source_1 = sql.SQL(table_name_source_1),
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+            schema = sql.Identifier(GEOETL_DB["schema"]))
         
         cur.execute(sqlIndex2)
         conn.commit()
@@ -2736,7 +2736,7 @@ def trans_Intersection(dicc):
 
     
         sql_ = sql.SQL(sqlInter).format(
-            schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema =  sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target),
             *[sql.Identifier(field) for field in attrs],
             table_source_0 = sql.Identifier(table_name_source_0),
@@ -2747,7 +2747,7 @@ def trans_Intersection(dicc):
         conn.commit()
     else:
         sqlAdd = sql.SQL('ALTER TABLE {schema}.{table_source} ADD COLUMN "_id_temp" SERIAL').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_source = sql.Identifier(table_name_source_0))
         
         cur.execute(sqlAdd)
@@ -2759,7 +2759,7 @@ def trans_Intersection(dicc):
         sqlInter += 'WHERE st_intersects(st_makevalid(A0.wkb_geometry), st_makevalid(A1.wkb_geometry)) = true AND A0._id_temp < A1._id_temp)'
 
         sql_ = sql.SQL(sqlInter).format(
-            schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema =  sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target),
             *[sql.Identifier(field) for field in attrs],
             table_source_0 = sql.Identifier(table_name_source_0),
@@ -2769,7 +2769,7 @@ def trans_Intersection(dicc):
         conn.commit()
 
         sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp, DROP COLUMN _id_temp_2;').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target))
 
         cur.execute(sqlDropCol)
@@ -2788,23 +2788,23 @@ def trans_FilterDupli(dicc):
     table_name_target_unique = dicc['id']+'_0'
     table_name_target_dupli = dicc['id']+'_1'
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_unique))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDrop2 = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_dupli))
     cur.execute(sqlDrop2)
     conn.commit()
 
     sqlAdd = sql.SQL('ALTER TABLE {schema}.{table_source} ADD COLUMN "_id_temp" SERIAL').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_source = sql.Identifier(table_name_source))
     
     cur.execute(sqlAdd)
@@ -2818,7 +2818,7 @@ def trans_FilterDupli(dicc):
         attrs = attrs[:-2]+')'
         
         sqlUn = sql.SQL('create table {schema}.{table_unique} as (SELECT DISTINCT ON '+attrs+'* from {schema}.{table_source});').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_unique = sql.Identifier(table_name_target_unique),
             *[sql.Identifier(field) for field in attr],
             table_source = sql.Identifier(table_name_source))
@@ -2827,7 +2827,7 @@ def trans_FilterDupli(dicc):
         conn.commit()
     else:
         sqlUn = sql.SQL('create table {schema}.{table_unique} as (SELECT DISTINCT * from {schema}.{table_source});').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_unique = sql.Identifier(table_name_target_unique),
             table_source = sql.Identifier(table_name_source))
         cur.execute(sqlUn)
@@ -2837,7 +2837,7 @@ def trans_FilterDupli(dicc):
     sqlDup += '( SELECT * FROM {schema}.{table_source} as A0 WHERE A0._id_temp NOT IN '
     sqlDup += '( SELECT _id_temp FROM {schema}.{table_unique} ))'
     cur.execute(sql.SQL(sqlDup).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_dup = sql.Identifier(table_name_target_dupli),
         table_source = sql.Identifier(table_name_source),
         table_unique = sql.Identifier(table_name_target_unique)
@@ -2849,7 +2849,7 @@ def trans_FilterDupli(dicc):
     sqlDrop3 += 'ALTER TABLE {schema}.{table_dup} DROP COLUMN _id_temp; '
 
     cur.execute(sql.SQL(sqlDrop3).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_dup = sql.Identifier(table_name_target_dupli),
         table_source = sql.Identifier(table_name_source),
         table_unique = sql.Identifier(table_name_target_unique)
@@ -2866,11 +2866,11 @@ def trans_PadAttr(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -2881,7 +2881,7 @@ def trans_PadAttr(dicc):
         side = 'lpad'
 
     sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} as (select *, {side}('+'CAST({attr} AS TEXT), %s, %s) from {schema}.{table_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         side = sql.SQL(side),
         attr = sql.Identifier(dicc['attr']),
@@ -2892,7 +2892,7 @@ def trans_PadAttr(dicc):
     conn.commit()
 
     sqlRemov = sql.SQL('ALTER TABLE {schema}.{table_target} DROP COLUMN {attr}').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(dicc['attr'])
     )
@@ -2900,7 +2900,7 @@ def trans_PadAttr(dicc):
     conn.commit()
 
     sqlRename = sql.SQL('ALTER TABLE {schema}.{table_target} RENAME COLUMN {side} TO {attr};').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         side = sql.Identifier(side),
         attr = sql.Identifier(dicc['attr'])
@@ -2926,18 +2926,18 @@ def trans_ExecuteSQL(dicc):
 
     query = dicc['query']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
     cur_3 = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} AS (SELECT * FROM {schema}.{table_source} );').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         table_source = sql.Identifier(table_name_source)
     )
@@ -3051,7 +3051,7 @@ def trans_ExecuteSQL(dicc):
                 else:
                     f_list.append(col[0])
                     sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN {atrib} {type}').format(
-                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
                         table_target = sql.Identifier(table_name_target),
                         atrib = sql.Identifier(col[0]),
                         type = sql.SQL(col[1])
@@ -3064,7 +3064,7 @@ def trans_ExecuteSQL(dicc):
                 if col[0] == attr[1:-1]:
                     f_list.append(col[0])
                     sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN {atrib} {type}').format(
-                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
                         table_target = sql.Identifier(table_name_target),
                         atrib = sql.Identifier(col[0]),
                         type = sql.SQL(col[1])
@@ -3086,7 +3086,7 @@ def trans_ExecuteSQL(dicc):
                 if col[0] == att:
                     f_list.append(col[0])
                     sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN {atrib} {type}').format(
-                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
                         table_target = sql.Identifier(table_name_target),
                         atrib = sql.Identifier(col[0]),
                         type = sql.SQL(col[1])
@@ -3104,9 +3104,9 @@ def trans_ExecuteSQL(dicc):
             else:
                 att = at
             f_list.append(att)
-            #sqlAlter = 'ALTER TABLE '+settings.GEOETL_DB["schema"]+'."'+table_name_target+'"  ADD COLUMN "'+att+'" TEXT'
+            #sqlAlter = 'ALTER TABLE '+GEOETL_DB["schema"]+'."'+table_name_target+'"  ADD COLUMN "'+att+'" TEXT'
             sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN {atrib} TEXT').format(
-                schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                schema = sql.Identifier(GEOETL_DB["schema"]),
                 table_target = sql.Identifier(table_name_target),
                 atrib = sql.Identifier(att)
             )
@@ -3119,7 +3119,7 @@ def trans_ExecuteSQL(dicc):
                 if col[0] == attr:
                     f_list.append(col[0])
                     sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN {atrib} {type}').format(
-                        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
                         table_target = sql.Identifier(table_name_target),
                         atrib = sql.Identifier(col[0]),
                         type = sql.SQL(col[1])
@@ -3160,7 +3160,7 @@ def trans_ExecuteSQL(dicc):
         sqlDis = sqlDis[:-2]+' FROM {schema}.{table_target}'
         sql_ = sql.SQL(sqlDis).format(
             *[sql.Identifier(field) for field in endlistAttr],
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target),
         )
 
@@ -3203,7 +3203,7 @@ def trans_ExecuteSQL(dicc):
 
                 sqlUpdate = sqlUpdate[:-2] + where[:-5]
                 _sql_ = sql.SQL(sqlUpdate).format(
-                    schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
                     table_target = sql.Identifier(table_name_target),
                     *[sql.Identifier(field) for field in set_attr],
                     *[sql.Identifier(field) for field in where_attr],
@@ -3234,17 +3234,17 @@ def trans_SpatialRel(dicc):
     table_name_source_1 = dicc['data'][1]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} AS (SELECT * FROM {schema}.{table_source_0} );').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         table_source_0 = sql.Identifier(table_name_source_0)
     )
@@ -3252,7 +3252,7 @@ def trans_SpatialRel(dicc):
     conn.commit()
 
     sqlAlter = sql.SQL("ALTER TABLE {schema}.{table_target} ADD COLUMN _id_temp SERIAL, ADD COLUMN _related TEXT DEFAULT 'False' ").format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target)
     )
     cur.execute(sqlAlter)
@@ -3260,14 +3260,14 @@ def trans_SpatialRel(dicc):
 
     sqlIndex1 = sql.SQL('CREATE INDEX IF NOT EXISTS "{tbl_target}_wkb_geometry_geom_idx" on {schema}."{tbl_target}" USING gist (wkb_geometry);').format(
         tbl_target = sql.SQL(table_name_target),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+        schema = sql.Identifier(GEOETL_DB["schema"]))
     
     cur.execute(sqlIndex1)
     conn.commit()
 
     sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
         table_source_1 = sql.SQL(table_name_source_1),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+        schema = sql.Identifier(GEOETL_DB["schema"]))
     
     cur.execute(sqlIndex2)
     conn.commit()
@@ -3277,7 +3277,7 @@ def trans_SpatialRel(dicc):
     sqlUpdate += ' WHERE {option}(st_makevalid(main.wkb_geometry), st_makevalid(sec.wkb_geometry)))'
     
     cur.execute(sql.SQL(sqlUpdate).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         table_source_1 = sql.Identifier(table_name_source_1),
         option = sql.SQL(dicc['option'])
@@ -3285,7 +3285,7 @@ def trans_SpatialRel(dicc):
     conn.commit()
 
     sqlAlter2 = sql.SQL('ALTER TABLE {schema}.{table_target} DROP COLUMN _id_temp ').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target))
     cur.execute(sqlAlter2)
     conn.commit()
@@ -3364,13 +3364,13 @@ def input_Kml(dicc):
             pass
     
     srs = "EPSG:"+str(epsg)
-    schema = settings.GEOETL_DB['schema']
+    schema = GEOETL_DB['schema']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name))
     cur.execute(sqlDrop)
     conn.commit()
@@ -3380,7 +3380,7 @@ def input_Kml(dicc):
     _ogr = gdaltools.ogr2ogr()
     _ogr.set_encoding(encoding)
     _ogr.set_input(kml_file, srs=srs)
-    _conn = gdaltools.PgConnectionString(host=settings.GEOETL_DB["host"], port=settings.GEOETL_DB["port"], dbname=settings.GEOETL_DB["database"], schema=schema, user=settings.GEOETL_DB["user"], password=settings.GEOETL_DB["password"])
+    _conn = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=schema, user=GEOETL_DB["user"], password=GEOETL_DB["password"])
     _ogr.set_output(_conn, table_name=table_name)
     _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
 
@@ -3397,11 +3397,11 @@ def input_Kml(dicc):
 
     srid, type_geom = get_type_n_srid(table_name)
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN wkb_geometry TYPE Geometry({type_geom}, {srid})').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_name = sql.Identifier(table_name),
         type_geom = sql.SQL(type_geom),
         srid = sql.SQL(str(srid))
@@ -3427,18 +3427,18 @@ def trans_ChangeAttrType(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target)
         )
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} as (select *, {attr}::{data_type} as {attr_temp} from {schema}.{table_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(attr),
         data_type = sql.SQL(data_type),
@@ -3449,7 +3449,7 @@ def trans_ChangeAttrType(dicc):
     conn.commit()
 
     sqlRemov = sql.SQL('ALTER TABLE {schema}.{table_target} DROP COLUMN {attr}').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(attr)
     )
@@ -3457,7 +3457,7 @@ def trans_ChangeAttrType(dicc):
     conn.commit()
 
     sqlRename = sql.SQL('ALTER TABLE {schema}.{table_target} RENAME COLUMN {attr_temp} TO {attr}').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         attr = sql.Identifier(attr),
         attr_temp = sql.Identifier('attr_temp')
@@ -3475,18 +3475,18 @@ def trans_RemoveGeom(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL('DROP TABLE IF EXISTS {schema}.{table_target}').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target)
         )
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} as (select * from {schema}.{table_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         table_source = sql.Identifier(table_name_source)
         )
@@ -3494,7 +3494,7 @@ def trans_RemoveGeom(dicc):
     conn.commit()
 
     sqlDrop = sql.SQL('ALTER TABLE {schema}.{table_target} DROP COLUMN wkb_geometry').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target)
         )
     cur.execute(sqlDrop)
@@ -3510,21 +3510,21 @@ def trans_Geocoder(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
-    conn_2 = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn_2 = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur_2 = conn_2.cursor()
 
     sqlDrop = sql.SQL('DROP TABLE IF EXISTS {schema}.{table_target}').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target)
         )
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} as (select * from {schema}.{table_source});').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         table_source = sql.Identifier(table_name_source)
         )
@@ -3539,7 +3539,7 @@ def trans_Geocoder(dicc):
         attrs = dicc["attr-selected"].split(' ')
 
         sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN IF NOT EXISTS "_X" FLOAT, ADD COLUMN IF NOT EXISTS "_Y" FLOAT, ADD COLUMN IF NOT EXISTS _id_temp SERIAL').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target)
         )
         cur.execute(sqlAlter)
@@ -3552,14 +3552,14 @@ def trans_Geocoder(dicc):
 
         sqlSel = sql.SQL(_sql).format(
             *[sql.Identifier(field) for field in attrs],
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target)
         )
         cur.execute(sqlSel)
         conn.commit()
 
         sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_X" = %s, "_Y" = %s WHERE _id_temp = %s').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target)
         )
 
@@ -3614,7 +3614,7 @@ def trans_Geocoder(dicc):
         _y = dicc["y"]
 
         sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN IF NOT EXISTS "_ADDRESS" TEXT, ADD COLUMN IF NOT EXISTS _id_temp SERIAL').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target)
         )
         cur.execute(sqlAlter)
@@ -3623,14 +3623,14 @@ def trans_Geocoder(dicc):
         sqlSel = sql.SQL('SELECT _id_temp, {x}, {y} FROM {schema}.{table_target}').format(
             x = sql.Identifier(_x),
             y = sql.Identifier(_y),
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target)
         )
         cur.execute(sqlSel)
         conn.commit()
 
         sqlUpdate = sql.SQL('UPDATE {schema}.{table_target}  SET "_ADDRESS" = %s WHERE _id_temp = %s').format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             table_target = sql.Identifier(table_name_target)
         )
 
@@ -3670,7 +3670,7 @@ def trans_Geocoder(dicc):
                     print(e)
 
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
     )
 
@@ -3703,7 +3703,7 @@ def input_Segex(dicc):
 
     wsSegUser = dicc['user']
 
-    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     db = create_engine(conn_string)
     conn = db.connect()
 
@@ -3851,10 +3851,10 @@ def input_Segex(dicc):
                             df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
                             if first:
-                                df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+                                df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
                                 first = False
                             else:
-                                df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+                                df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
                     if len(r.json()['Georefs']) == 100:
                     
@@ -3867,7 +3867,7 @@ def input_Segex(dicc):
         tpt += 1
     if first:
         df = pd.DataFrame(columns = schema)
-        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+        df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
 
     conn.close()
     db.dispose()
@@ -3877,7 +3877,7 @@ def input_Segex(dicc):
 
 def input_Json(dicc):
     
-    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     db = create_engine(conn_string)
     conn = db.connect()
 
@@ -3898,12 +3898,12 @@ def input_Json(dicc):
                 if first:
                     df_obj = df.select_dtypes(['object'])
                     df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-                    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+                    df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
                     first = False
                 else:
                     df_obj = df.select_dtypes(['object'])
                     df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-                    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+                    df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
                 print('pagina: '+ str(start))
 
@@ -3915,14 +3915,14 @@ def input_Json(dicc):
 
         """df_obj = df.select_dtypes(['object'])
         df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-        df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)"""
+        df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)"""
     
     else:
         df = pd.read_json(dicc['json-file'])
 
     df_obj = df.select_dtypes(['object'])
     df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-    df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+    df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
     
     conn.close()
     db.dispose()
@@ -3947,11 +3947,11 @@ def trans_Difference(dicc):
         attrs.append(attr)
 
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -3959,14 +3959,14 @@ def trans_Difference(dicc):
 
     sqlIndex1 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_0}_wkb_geometry_geom_idx" on {schema}."{table_source_0}" USING gist (wkb_geometry);').format(
         table_source_0 = sql.SQL(table_name_source_0),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+        schema = sql.Identifier(GEOETL_DB["schema"]))
     
     cur.execute(sqlIndex1)
     conn.commit()
 
     sqlIndex2 = sql.SQL('CREATE INDEX IF NOT EXISTS "{table_source_1}_wkb_geometry_geom_idx" on {schema}."{table_source_1}" USING gist (wkb_geometry);').format(
         table_source_1 = sql.SQL(table_name_source_1),
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]))
+        schema = sql.Identifier(GEOETL_DB["schema"]))
     
     cur.execute(sqlIndex2)
     conn.commit()
@@ -3977,7 +3977,7 @@ def trans_Difference(dicc):
 
    
     sql_ = sql.SQL(sqlDiff).format(
-        schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema =  sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         *[sql.Identifier(field) for field in attrs],
         table_source_0 = sql.Identifier(table_name_source_0),
@@ -3995,7 +3995,7 @@ def trans_Difference(dicc):
 
 def input_PadronAlbacete(dicc):
 
-    conn_string = 'postgresql://'+settings.GEOETL_DB['user']+':'+settings.GEOETL_DB['password']+'@'+settings.GEOETL_DB['host']+':'+settings.GEOETL_DB['port']+'/'+settings.GEOETL_DB['database']
+    conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     db = create_engine(conn_string)
     conn = db.connect()
 
@@ -4031,9 +4031,9 @@ def input_PadronAlbacete(dicc):
 
         if i == 1:
 
-            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='replace', index=False)
+            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
         else:
-            df.to_sql(table_name, con=conn, schema= settings.GEOETL_DB['schema'], if_exists='append', index=False)
+            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
     conn.close()
     db.dispose()
@@ -4045,11 +4045,11 @@ def crea_Grid(dicc):
 
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -4080,7 +4080,7 @@ def crea_Grid(dicc):
     sqlGrid += "FROM ST_CreateGrid(%s, %s, %s, %s, %s, %s))"
     
     sql_ = sql.SQL(sqlGrid).format(
-        schema =  sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema =  sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target)
     )
     
@@ -4093,7 +4093,7 @@ def crea_Grid(dicc):
         table_name_source = dicc['data'][0]
 
         sqlExtent = sql.SQL("SELECT ST_Extent(wkb_geometry) FROM {schema}.{tbl_source}").format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_source = sql.Identifier(table_name_source)
         )
 
@@ -4128,11 +4128,11 @@ def trans_ExposeAttr(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
@@ -4141,7 +4141,7 @@ def trans_ExposeAttr(dicc):
     sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
     sqlDatetype += "where table_schema = %s and table_name = %s "
 
-    cur.execute(sql.SQL(sqlDatetype).format(),[settings.GEOETL_DB["schema"], table_name_source])
+    cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"], table_name_source])
     conn.commit()
 
     for row in cur:
@@ -4158,7 +4158,7 @@ def trans_ExposeAttr(dicc):
     sql_ = sql_[:-1] +' from {schema}.{tbl_source})'
 
     sqlDup = sql.SQL(sql_).format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target),
         *[sql.Identifier(field) for field in schemaList],
         tbl_source = sql.Identifier(table_name_source)
@@ -4179,23 +4179,23 @@ def trans_ValGeom(dicc):
     table_name_target_valid = dicc['id']+'_0'
     table_name_target_invalid = dicc['id']+'_1'
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_valid))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDrop2 = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_invalid))
     cur.execute(sqlDrop2)
     conn.commit()
 
     sqlDup = sql.SQL("create table {schema}.{tbl_target} as (select *, valid(ST_IsValidDetail(wkb_geometry)) as _valid from {schema}.{tbl_source} WHERE valid(ST_IsValidDetail(wkb_geometry)) = 't')").format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target_valid),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -4203,7 +4203,7 @@ def trans_ValGeom(dicc):
     conn.commit()
 
     sqlDup2 = sql.SQL("create table {schema}.{tbl_target} as (select *, valid(ST_IsValidDetail(wkb_geometry)) as _valid, reason(ST_IsValidDetail(wkb_geometry)) as _reason, st_AsText(location(ST_IsValidDetail(wkb_geometry))) as _location from {schema}.{tbl_source} WHERE valid(ST_IsValidDetail(wkb_geometry)) = 'f')").format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target_invalid),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -4212,7 +4212,7 @@ def trans_ValGeom(dicc):
 
     if dicc['stop'] == 'true':
         sqlCount = sql.SQL("SELECT * from {schema}.{tbl_target} LIMIT 1").format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target_invalid)
         )
         cur.execute(sqlCount)
@@ -4241,23 +4241,23 @@ def trans_SimpGeom(dicc):
     table_name_target_simple = dicc['id']+'_0'
     table_name_target_no_simple = dicc['id']+'_1'
 
-    conn = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_simple))
     cur.execute(sqlDrop)
     conn.commit()
 
     sqlDrop2 = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-        sql.Identifier(settings.GEOETL_DB["schema"]),
+        sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target_no_simple))
     cur.execute(sqlDrop2)
     conn.commit()
 
     sqlDup = sql.SQL("create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source} WHERE ST_IsSimple(wkb_geometry) = 't')").format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target_simple),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -4265,7 +4265,7 @@ def trans_SimpGeom(dicc):
     conn.commit()
 
     sqlDup2 = sql.SQL("create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source} WHERE ST_IsSimple(wkb_geometry) = 'f')").format(
-        schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+        schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target_no_simple),
         tbl_source = sql.Identifier(table_name_source)
     )
@@ -4274,7 +4274,7 @@ def trans_SimpGeom(dicc):
 
     if dicc['stop'] == 'true':
         sqlCount = sql.SQL("SELECT * from {schema}.{tbl_target} LIMIT 1").format(
-            schema = sql.Identifier(settings.GEOETL_DB["schema"]),
+            schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target_no_simple)
         )
         cur.execute(sqlCount)

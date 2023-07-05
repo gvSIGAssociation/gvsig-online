@@ -45,6 +45,7 @@ from . import settings as settings_geoetl
 from . import etl_tasks
 from . import etl_schema
 from .tasks import run_canvas_background
+from .settings import GEOETL_DB
 
 import psycopg2
 from psycopg2 import sql
@@ -256,7 +257,7 @@ def get_list(user, concat = False):
 @staff_required
 def etl_workspace_list(request):
 
-    create_schema(settings.GEOETL_DB)
+    create_schema(GEOETL_DB)
 
     #datastores  = Datastore.objects.filter(type = 'v_PostGIS')
 
@@ -264,8 +265,8 @@ def etl_workspace_list(request):
     try:
         bbdd_con = database_connections(
             type = 'PostgreSQL',
-            name = settings.GEOETL_DB['database'],
-            connection_params = '{ "user": "'+settings.GEOETL_DB['user']+'", "password": "'+settings.GEOETL_DB['password']+'", "host": "'+settings.GEOETL_DB['host']+'", "port":'+settings.GEOETL_DB['port']+', "database": "'+settings.GEOETL_DB['database']+'"}'
+            name = GEOETL_DB['database'],
+            connection_params = '{ "user": "'+GEOETL_DB['user']+'", "password": "'+GEOETL_DB['password']+'", "host": "'+GEOETL_DB['host']+'", "port":'+GEOETL_DB['port']+', "database": "'+GEOETL_DB['database']+'"}'
         )
         bbdd_con.save()
         
@@ -285,7 +286,7 @@ def etl_workspace_list(request):
 @staff_required
 def etl_concat_workspaces(request):
 
-    create_schema(settings.GEOETL_DB)
+    create_schema(GEOETL_DB)
 
     #datastores  = Datastore.objects.filter(type = 'v_PostGIS')
 
@@ -293,8 +294,8 @@ def etl_concat_workspaces(request):
     try:
         bbdd_con = database_connections(
             type = 'PostgreSQL',
-            name = settings.GEOETL_DB['database'],
-            connection_params = '{ "user": "'+settings.GEOETL_DB['user']+'", "password": "'+settings.GEOETL_DB['password']+'", "host": "'+settings.GEOETL_DB['host']+'", "port":'+settings.GEOETL_DB['port']+', "database": "'+settings.GEOETL_DB['database']+'"}'
+            name = GEOETL_DB['database'],
+            connection_params = '{ "user": "'+GEOETL_DB['user']+'", "password": "'+GEOETL_DB['password']+'", "host": "'+GEOETL_DB['host']+'", "port":'+GEOETL_DB['port']+', "database": "'+GEOETL_DB['database']+'"}'
         )
         bbdd_con.save()
         
@@ -996,7 +997,7 @@ def etl_workspace_is_running(request):
 @staff_required
 def etl_clean_tmp_tables(request):
 
-    connection_params = settings.GEOETL_DB
+    connection_params = GEOETL_DB
 
     user = connection_params.get('user')
     schema = connection_params.get('schema')

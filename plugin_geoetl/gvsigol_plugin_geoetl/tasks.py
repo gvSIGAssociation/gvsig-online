@@ -8,6 +8,7 @@ from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_re
 from gvsigol import settings
 
 from . import etl_tasks, views
+from .settings import GEOETL_DB
 
 import psycopg2
 from psycopg2 import sql
@@ -277,7 +278,7 @@ def run_canvas_background(**kwargs):
         
     
 def delete_tables(nodes):
-    conn_ = psycopg2.connect(user = settings.GEOETL_DB["user"], password = settings.GEOETL_DB["password"], host = settings.GEOETL_DB["host"], port = settings.GEOETL_DB["port"], database = settings.GEOETL_DB["database"])
+    conn_ = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur_ = conn_.cursor()
 
     sqlBlocks = "SELECT pid, query FROM pg_stat_activity WHERE query != '<IDLE>' AND query NOT ILIKE '%pg_stat_activity%' ORDER BY query_start desc"
@@ -309,7 +310,7 @@ def delete_tables(nodes):
     for tbl in tables:
 
         sqlDrop = sql.SQL('DROP TABLE IF EXISTS {}.{}').format(
-            sql.Identifier(settings.GEOETL_DB["schema"]),
+            sql.Identifier(GEOETL_DB["schema"]),
             sql.Identifier(tbl),
         )
         cur_.execute(sqlDrop)
@@ -347,7 +348,7 @@ def periodic_clean():
             break
     
     if response['run'] == 'false':
-        connection_params = settings.GEOETL_DB
+        connection_params = GEOETL_DB
 
         user = connection_params.get('user')
         schema = connection_params.get('schema')
