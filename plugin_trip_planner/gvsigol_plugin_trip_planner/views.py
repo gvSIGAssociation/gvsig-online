@@ -230,10 +230,6 @@ def gtfs_crontab_update(request):
             my_task_name = 'gvsigol_plugin_trip_planner.trip_planner_refresh'
             try:
                 periodicTask  = PeriodicTask.objects.get(name = my_task_name)
-            except:
-                periodicTask = None
-            
-            if periodicTask:
                 cronid = periodicTask.crontab_id
                 interid = periodicTask.interval_id
 
@@ -245,6 +241,10 @@ def gtfs_crontab_update(request):
                     crontabSchedule.delete()
 
                 periodicTask.delete()                  
+
+            except:
+                periodicTask = None
+            
             
             """hh = int(request.POST.get('cron_hour'))
             mm = int(request.POST.get('cron_minutes'))
@@ -289,12 +289,7 @@ def gtfs_crontab_update(request):
                 )
             else:
                 unit_program = request.POST.get('program-unit')
-                if  unit_program == 'minutes':
-                    unit_period = IntervalSchedule.MINUTES
-                elif unit_program == 'days':
-                    unit_period = IntervalSchedule.DAYS
-                elif unit_program == 'hours':
-                    unit_period = IntervalSchedule.HOURS
+                unit_period = get_unit_period(unit_program)
         
                 schedule, created = IntervalSchedule.objects.get_or_create(
                     every = request.POST.get('program-interval'),
@@ -316,6 +311,15 @@ def gtfs_crontab_update(request):
         return HttpResponse('Error with Celery:' + str(e), status=500)
 
     return redirect('gtfs_provider_list')
+
+def get_unit_period(unit_program):
+    if  unit_program == 'minutes':
+        unit_period = IntervalSchedule.MINUTES
+    elif unit_program == 'days':
+        unit_period = IntervalSchedule.DAYS
+    elif unit_program == 'hours':
+        unit_period = IntervalSchedule.HOURS
+    return unit_period
 
 
 
