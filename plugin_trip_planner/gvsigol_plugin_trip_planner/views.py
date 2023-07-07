@@ -262,17 +262,19 @@ def gtfs_crontab_update(request):
             my_app_config = apps.get_app_config('gvsigol_plugin_trip_planner')
             my_app_config.initialize_trip_planner_gtfs_cron(CRONTAB_ACTIVE, t, 1, 'days')"""
             
-            if request.POST.get('program-day') != 'every':
+            program_day = request.POST.get('program-day')
+            
+            if  program_day != 'every':
                 time = request.POST.get('program-time')
                 mm = time.split(":")[1]
                 hh = time.split(":")[0]
 
-                days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                # Usamos un Set para ver qué día es
+                days_of_week = {'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'} 
 
                 day_of_week = '*'
-                for i in range(0, len(days_of_week)):
-                    if request.POST.get('program-day') == days_of_week[i]:
-                        day_of_week = str(i)
+                if (program_day in days_of_week):
+                    day_of_week = program_day
                 
                 schedule, _ = CrontabSchedule.objects.get_or_create(
                     minute=mm,
