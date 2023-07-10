@@ -16,3 +16,5 @@ OIDC_RP_SCOPES = 'openid email username geoserver-client'
 KEYCLOAK_ADMIN_CLIENT_ID = '##KEYCLOAK_ADMIN_CLIENT_ID##'
 KEYCLOAK_ADMIN_CLIENT_SECRET = '##KEYCLOAK_ADMIN_CLIENT_SECRET##'
 MANAGE_PASSWORD_URL = '##MANAGE_PASSWORD_URL##'
+OIDC_EXEMPT_URLS = ['gvsigol_authenticate_user', 'gvsigol_logout_user']
+LOGIN_REDIRECT_URL_FAILURE = 'index'
