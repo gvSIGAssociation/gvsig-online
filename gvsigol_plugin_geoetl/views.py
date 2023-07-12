@@ -330,7 +330,7 @@ def save_periodic_workspace(request, workspace):
     if workspace.concat:
         concat = workspace.concat
     else:
-        params = False
+        concat = False
 
     my_task_name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id)
 
@@ -1192,8 +1192,6 @@ def get_workspaces(request):
 @staff_required
 def etl_concatenate_workspace_update(request):
     if request.method == 'POST':
-
-        print(request.POST)
 
         lgid = request.POST['id']
 
