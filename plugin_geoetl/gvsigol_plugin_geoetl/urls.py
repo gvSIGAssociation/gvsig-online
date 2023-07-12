@@ -18,6 +18,7 @@ urlpatterns = [
     path('etl/etl_workspace_delete/', views.etl_workspace_delete, name='etl_workspace_delete'),
     path('etl/etl_workspace_download/', views.etl_workspace_download, name='etl_workspace_download'),
     path('etl/etl_workspace_upload/', views.etl_workspace_upload, name='etl_workspace_upload'),
+    path('etl/etl_workspace_update/', views.etl_workspace_update, name='etl_workspace_update'),
     path('etl/etl_concatenate_workspace_update/', views.etl_concatenate_workspace_update, name='etl_concatenate_workspace_update'),
     path('etl/etl_concat_workspaces/', views.etl_concat_workspaces, name='etl_concat_workspaces'),
     path('etl/etl_concat_workspaces/', views.etl_concat_workspaces, name='etl_concat_workspaces'),
