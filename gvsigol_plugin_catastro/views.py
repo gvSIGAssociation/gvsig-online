@@ -46,7 +46,7 @@ def get_conf(request):
 def get_provincias(request):
     if request.method == 'POST':
         provincias_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaProvincia';
-        r = requests.get(url = provincias_url, params = {}, verify=False)
+        r = requests.get(url = provincias_url, params = {}, verify=False, timeout=2)
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
 
