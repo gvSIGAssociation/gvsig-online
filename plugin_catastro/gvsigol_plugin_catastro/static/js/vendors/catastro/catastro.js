@@ -172,37 +172,38 @@ var	ui = '<ul class="nav nav-tabs">';
 
 
 		var final_url = '/gvsigonline/catastro/get_referencia_catastral/'
-		$.ajax({
-			type: 'POST',
-			async: false,
-		  	url: final_url,
-		  	data: {
-		  		'tipo': type,
-		  		'params': JSON.stringify(params)
-			},
-		  	success	:function(data){
-		  		$("#float-modal").modal('hide');
+		if (show) {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: final_url,
+				data: {
+					'tipo': type,
+					'params': JSON.stringify(params)
+				},
+				success	:function(data){
+					$("#float-modal").modal('hide');
 
-                var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
-				var popup = new ol.Overlay.Popup();
-				viewer.core.map.addOverlay(popup);
-				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("RC") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
-				popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
+					var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
+					var popup = new ol.Overlay.Popup();
+					viewer.core.map.addOverlay(popup);
+					var popupContent = '<p>'+data['address']+'</p><p>' + gettext("RC") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
+					popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
 
-				viewer.core.map.getView().setCenter(coordinate);
-				viewer.core.map.getView().setZoom(18);
-                self.getRefCatastralPolygon(data['rc']);
+					viewer.core.map.getView().setCenter(coordinate);
+					viewer.core.map.getView().setZoom(18);
+					self.getRefCatastralPolygon(data['rc']);
 
-                $("#popup-show-more-info").click(function(){
-                	self.getRefCatastralInfo(parseFloat(data['xcen']), parseFloat(data['ycen']), data['srs'])
-                })
-			},
-		  	error: function(){
-		  		console.log("Can't get RC");
-		  		$("#float-modal").modal('hide');
-		  	}
-		});
-
+					$("#popup-show-more-info").click(function(){
+						self.getRefCatastralInfo(parseFloat(data['xcen']), parseFloat(data['ycen']), data['srs'])
+					})
+				},
+				error: function(){
+					console.log("Can't get RC");
+					$("#float-modal").modal('hide');
+				}
+			});
+		}
 
 
 
