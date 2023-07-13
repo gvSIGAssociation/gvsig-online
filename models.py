@@ -6,7 +6,7 @@ from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup, Layer
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
-from django.contrib.auth.models import Group
+
 
 def get_default_logo_image():
     return settings.STATIC_URL + 'img/logo_principal.png'
@@ -60,8 +60,8 @@ class Project(models.Model):
                 prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, copy_layer_data=copy_layer_data, permissions=permissions)
             
             if permissions != CLONE_PERMISSION_SKIP:
-                for prj_ug in old_project.projectusergroup_set.all():
-                    prj_ug.clone(project=new_project_instance)
+                for prj_ur in old_project.projectrole_set.all():
+                    prj_ur.clone(project=new_project_instance)
         return new_project_instance
     
     @property
