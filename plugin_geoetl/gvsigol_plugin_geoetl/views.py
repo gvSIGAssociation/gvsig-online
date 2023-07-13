@@ -257,6 +257,8 @@ def get_list(user, concat = False):
 @staff_required
 def etl_workspace_list(request):
 
+    print(GEOETL_DB)
+
     create_schema(GEOETL_DB)
 
     #datastores  = Datastore.objects.filter(type = 'v_PostGIS')
