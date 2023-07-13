@@ -1,5 +1,6 @@
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
+import importlib
 import json
 import logging
 from django.core.exceptions import SuspiciousOperation, ImproperlyConfigured
@@ -35,10 +36,16 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             if 'username' not in claims:
                 LOGGER.warning('username is required in claims')
                 return False
-            return True
+        if self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE', ''):
+            try:
+                gvsigol_oidc_config = importlib.import_module(self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE'))
+                if not gvsigol_oidc_config.verify_claims(claims):
+                    LOGGER.warning('gvsigol_verify_claims check failed')
+                    return False
+            except Exception as e:
+                LOGGER.exception('error configuring user using OIDC_GVSIGOL_CONFIG_MODULE.config_user')
+                print(e)
 
-        LOGGER.warning('Custom OIDC_RP_SCOPES defined. '
-                       'You need to override `verify_claims` for custom claims verification.')
 
         return True
             
@@ -46,13 +53,29 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         email = claims.get('email')
         username = claims.get('username', '')
         django_roles = claims.get('gvsigol_roles', [])
-        return self.UserModel.objects.create_user(username,
+        user = self.UserModel.objects.create_user(username,
             email=email,
             first_name = claims.get('first_name', ''),
             last_name = claims.get('last_name', ''),
             is_superuser = (MAIN_SUPERUSER_ROLE in django_roles),
             is_staff = (STAFF_ROLE in django_roles)
         )
+        
+        if user.is_staff:
+            from gvsigol_auth.utils import config_staff_user
+            config_staff_user(user.username)
+        if self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE', ''):
+            try:
+                gvsigol_oidc_config = importlib.import_module(self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE'))
+                if not gvsigol_oidc_config.config_user(claims):
+                    LOGGER.exception('error while configuring user using OIDC_GVSIGOL_CONFIG_MODULE.config_user')
+                    return None
+            except Exception as e:
+                LOGGER.exception('unexpected error configuring user using OIDC_GVSIGOL_CONFIG_MODULE.config_user')
+                print(e)
+
+        return user
+        
 
     def update_user(self, user, claims):
         user.email = claims.get('email')

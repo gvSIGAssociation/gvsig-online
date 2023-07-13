@@ -1508,6 +1508,31 @@ def not_found_sharedview(request):
     response.status_code = 404
     return response
 
+def _project_clone(project, new_project_name, title, target_server, target_workspace_name, target_datastore_name, username, permission_choice, copy_data=True):
+    if target_server.frontend_url.endswith("/"):
+        uri = target_server.frontend_url + target_workspace_name
+    else:
+        uri = target_server.frontend_url + "/" + target_workspace_name
+
+    values = {
+        "name": target_workspace_name,
+        "description": target_workspace_name + " ws",
+        "uri": uri,
+        "wms_endpoint": target_server.getWmsEndpoint(target_workspace_name),
+        "wfs_endpoint": target_server.getWfsEndpoint(target_workspace_name),
+        "wcs_endpoint": target_server.getWcsEndpoint(target_workspace_name),
+        "wmts_endpoint": target_server.getWmtsEndpoint(target_workspace_name),
+        "cache_endpoint": target_server.getCacheEndpoint(target_workspace_name)
+    }
+
+    target_workspace = services_utils.create_workspace(target_server.id, target_workspace_name, uri, values, username)
+    if target_workspace:
+        datastore = services_utils.create_datastore(username, target_datastore_name, target_workspace)
+        new_project = project.clone(target_datastore=datastore, name=new_project_name, title=title, copy_layer_data=copy_data, permissions=permission_choice)
+        server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+        server.reload_nodes()
+        return new_project
+
 @login_required()
 @superuser_required
 def project_clone(request, pid):
@@ -1531,27 +1556,15 @@ def project_clone(request, pid):
             copy_data = form.cleaned_data.get('copy_data')
             permission_choice = form.cleaned_data.get('permission_choice')
 
-            if target_server.frontend_url.endswith("/"):
-                uri = target_server.frontend_url + target_workspace_name
-            else:
-                uri = target_server.frontend_url + "/" + target_workspace_name
-
-            values = {
-                "name": target_workspace_name,
-                "description": target_workspace_name + " ws",
-                "uri": uri,
-                "wms_endpoint": target_server.getWmsEndpoint(target_workspace_name),
-                "wfs_endpoint": target_server.getWfsEndpoint(target_workspace_name),
-                "wcs_endpoint": target_server.getWcsEndpoint(target_workspace_name),
-                "wmts_endpoint": target_server.getWmtsEndpoint(target_workspace_name),
-                "cache_endpoint": target_server.getCacheEndpoint(target_workspace_name)
-            }
-            target_workspace = services_utils.create_workspace(target_server.id, target_workspace_name, uri, values, request.user.username)
-            if target_workspace:
-                datastore = services_utils.create_datastore(request.user.username, target_datastore_name, target_workspace)
-                project.clone(target_datastore=datastore, name=name, title=title, copy_layer_data=copy_data, permissions=permission_choice)
-                server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
-                server.reload_nodes()
+            if _project_clone(project,
+                           name,
+                           title,
+                           target_server,
+                           target_workspace_name,
+                           target_datastore_name,
+                           request.user.username,
+                           permission_choice,
+                           copy_data=copy_data):
                 messages.add_message(request, messages.INFO, _('The project was successfully cloned.'))
                 return redirect('project_update', pid=project.id)
     else:
