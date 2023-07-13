@@ -30,17 +30,17 @@ function configure() {
 	grep -rl "##ETL_DB_HOST##"  | xargs sed -i "s/##ETL_DB_HOST##/$ETL_DB_HOST/g"
 	if [ -z $ETL_DB_NAME ]; then
 		echo "WARNING: ETL_DB_NAME is not defined, using database name gvsigonline."					
-		ETL_DB_NAME="gvsigonline"
+		ETL_DB_NAME=$DB_NAME
 	fi
 	grep -rl "##ETL_DB_NAME##"  | xargs sed -i "s/##ETL_DB_NAME##/$ETL_DB_NAME/g"		
 	if [ -z $ETL_DB_PORT ]; then
 		echo "WARNING: ETL_DB_PORT is not defined, using 5432."					
-		ETL_DB_PORT="5432"
+		ETL_DB_PORT=$DB_PORT
 	fi
 	grep -rl "##ETL_DB_PORT##"  | xargs sed -i "s/##ETL_DB_PORT##/$ETL_DB_PORT/g"		
 	if [ -z $ETL_DB_USER ]; then
 		echo "WARNING: ETL_DB_USER is not defined, using gvsigonline"					
-		ETL_DB_USER="gvsigonline"
+		ETL_DB_USER=$DB_USER
 	fi
 	grep -rl "##ETL_DB_USER##"  | xargs sed -i "s/##ETL_DB_USER##/$ETL_DB_USER/g"		
 	if [ -z $ETL_DB_PASSWD ]; then
