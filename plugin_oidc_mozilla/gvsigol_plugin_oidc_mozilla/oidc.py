@@ -18,6 +18,9 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
 
     def filter_users_by_claims(self, claims):
         """Return all users matching the specified email."""
+        if self.get_settings('OIDC_GVSIGOL_EMAIL_LOGIN', False):
+            return super().filter_users_by_claims(claims)
+
         username = claims.get('username')
         if not username:
             return self.UserModel.objects.none()
@@ -67,7 +70,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         if self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE', ''):
             try:
                 gvsigol_oidc_config = importlib.import_module(self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE'))
-                if not gvsigol_oidc_config.config_user(claims):
+                if not gvsigol_oidc_config.config_user(user, claims):
                     LOGGER.exception('error while configuring user using OIDC_GVSIGOL_CONFIG_MODULE.config_user')
                     return None
             except Exception as e:
