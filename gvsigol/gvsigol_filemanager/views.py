@@ -90,7 +90,7 @@ class FilemanagerMixin(object):
 
 class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, TemplateView):
     template_name = 'browser/filemanager_list.html'
-    raise_exception = True
+    raise_exception = False
     def test_func(self):
         return can_browse_path(self.request, self.request.GET.get('path', ''))
 
@@ -116,7 +116,7 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
  
 class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, TemplateView):
     template_name = 'browser/export_to_database.html'
-    raise_exception = True
+    raise_exception = False
     def test_func(self):
         # Note: user permissions in the target datastore are specifically checked in form validation
         if self.request.user.is_superuser or self.request.user.is_staff:
@@ -280,7 +280,7 @@ class UploadView(FilemanagerMixin, TemplateView):
         return super(UploadView, self).dispatch(request, *args, **kwargs)
 
 class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
-    raise_exception = True
+    raise_exception = False
     def test_func(self):
         return can_manage_path(self.request, self.request.POST.get('path'))
     
@@ -307,7 +307,7 @@ class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
         }))
         
 class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
-    raise_exception = True
+    raise_exception = False
     def test_func(self):
         return can_manage_path(self.request, self.request.POST.get('path'))
     
@@ -334,7 +334,7 @@ class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
             }))
 
 class UnzipFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
-    raise_exception = True
+    raise_exception = False
     def test_func(self):
         return can_manage_path(self.request, self.request.POST.get('path'))
     
@@ -363,7 +363,7 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
         'path': '#',
         'label': 'Create directory'
     }]
-    raise_exception = True
+    raise_exception = False
     def test_func(self):
         if self.request.method in SAFE_METHODS:
             return (self.request.user.is_superuser or self.request.user.is_staff)
