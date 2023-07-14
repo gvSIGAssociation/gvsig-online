@@ -47,6 +47,7 @@ import logging
 logger = logging.getLogger("gvsigol")
 from gvsigol_auth import auth_backend
 from gvsigol_auth import services as auth_services
+import re
 
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
     role_list = auth_backend.get_all_roles_details()
@@ -813,7 +814,8 @@ def create_user_workspace(username, role):
 
     auth_services.get_services().add_data_directory(role)
     url = server_object.frontend_url + '/'
-    ws_name = 'ws_' + username.lower()
+    ascii_norm_username = re.sub('[^0-9a-zA-Z]+', '_', username.lower().replace('@', '_at_'))
+    ws_name = 'ws_' + ascii_norm_username
     if gs.createWorkspace(ws_name, url + ws_name):          
         # save it on DB if successfully created
         newWs = Workspace(
@@ -831,6 +833,6 @@ def create_user_workspace(username, role):
         )
         newWs.save()
         
-        ds_name = 'ds_' + username.lower()
+        ds_name = 'ds_' + ascii_norm_username
         create_datastore(username, ds_name, newWs)
         gs.reload_nodes()
