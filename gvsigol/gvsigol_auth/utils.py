@@ -30,6 +30,7 @@ from django.contrib.auth.models import User
 from gvsigol.utils import default_sorter
 from gvsigol_auth import auth_backend
 import logging
+import re
 
 LOGGER_NAME = 'gvsigol'
 
@@ -167,3 +168,15 @@ def config_staff_user(username):
     auth_backend.add_to_role(username, role)
     utils.create_user_workspace(username, role)
     return (user_role_created, role)
+
+def ascii_norm_username(username):
+    """
+    Creates a ascii-based string similar to the provided username.
+    It replaces any character not beloging to [^0-9a-zA-Z]+ pattern by
+    underscores (_), and @ character by '_at_' literal. Capital letters are
+    converted to lower case.
+    This ascii-based version of username is used to create unique resource
+    names (workspaces, datastores, layer groups, etc) which don't accept
+    special characters.
+    """
+    return re.sub('[^0-9a-zA-Z]+', '_', username.lower().replace('@', '_at_'))

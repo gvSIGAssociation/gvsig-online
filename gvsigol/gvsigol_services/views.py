@@ -71,7 +71,7 @@ from . import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from gvsigol.settings import MOSAIC_DB
-from gvsigol_auth.utils import superuser_required, staff_required, get_primary_user_role
+from gvsigol_auth.utils import superuser_required, staff_required, get_primary_user_role, ascii_norm_username
 from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
 from gvsigol_core.models import Project, ProjectBaseLayerTiling
@@ -2123,7 +2123,7 @@ def layergroup_add_with_project(request, project_id):
             visible = True
 
         if name != '':
-            name = request.POST.get('layergroup_name') + '_' + request.user.username
+            name = request.POST.get('layergroup_name') + '_' + ascii_norm_username(request.user.username)
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
                 return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values())})
