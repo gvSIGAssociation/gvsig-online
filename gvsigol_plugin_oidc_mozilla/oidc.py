@@ -61,9 +61,6 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             is_staff = (STAFF_ROLE in django_roles)
         )
         
-        if user.is_staff:
-            from gvsigol_auth.utils import config_staff_user
-            config_staff_user(user.username)
         if self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE', ''):
             try:
                 gvsigol_oidc_config = importlib.import_module(self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE'))
@@ -73,6 +70,10 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             except Exception as e:
                 LOGGER.exception('unexpected error configuring user using OIDC_GVSIGOL_CONFIG_MODULE.config_user')
                 print(e)
+        else:
+            if user.is_staff:
+                from gvsigol_auth.utils import config_staff_user
+                config_staff_user(user.username)
 
         return user
         
