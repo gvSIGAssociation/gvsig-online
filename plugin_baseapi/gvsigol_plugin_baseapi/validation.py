@@ -332,6 +332,9 @@ class Validation():
         
     def check_get_project_list(self):
         pass
+
+    def check_get_application_list(self):
+        pass
         
     def check_feature_list(self, lyr_id):
         self.check_get_layer(lyr_id) 
