@@ -41,7 +41,7 @@ from django.db.models import Q
 
 from gvsigol import settings as core_settings
 from django.contrib.auth.models import User
-from gvsigol_core.models import Project, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectLayerGroup, Application
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services import geographic_servers
@@ -50,7 +50,7 @@ from gvsigol_services import views as serviceviews
 from gvsigol_services.models import Layer, LayerGroup, Datastore, Workspace, \
     LayerResource
 from gvsigol_symbology.models import StyleLayer
-from .infoserializer import InfoSerializer, PublicInfoSerializer
+from .infoserializer import InfoSerializer, PublicInfoSerializer, AppInfoSerializer
 import gvsigol_plugin_projectapi.serializers
 import gvsigol_plugin_projectapi.util as util
 from os import path
@@ -172,6 +172,48 @@ class PublicProjectConfView(ListAPIView):
 
             result = {
                 "projects" : serializer.data,
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+        
+class ApplicationConfView(ListAPIView):
+    serializer_class = AppInfoSerializer
+    permission_classes = [AllowAny]
+   
+    #@swaggerdoc('test.yml')
+    @swagger_auto_schema(operation_id='get_project_configuration', operation_summary='', 
+                         responses={404: "Database connection NOT found<br>User NOT found",
+                                    403: "The project is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def get(self, request):
+        v = Validation(request)   
+        try:   
+            applicationid = 0
+            if 'applicationid' in self.request.GET:
+                try:
+                    applicationid = int(self.request.GET['applicationid'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter project. The value must be a integer") 
+
+            try:
+                v.check_get_application_list()
+            except HttpException as e:
+                return e.get_exception()
+
+            queryset = None
+            applications_by_user = util.get_applications_ids_by_user(request, False)
+            if applicationid != 0:
+                if applicationid in applications_by_user:
+                    queryset = Application.objects.filter(id=applicationid)
+                else:
+                    raise HttpException(403, "The application is not allowed to this user")  
+            else:
+                queryset = Application.objects.filter(id__in=applications_by_user)
+            serializer = AppInfoSerializer(queryset, many=True, context={'request': request, 'user': request.user.username})
+
+            result = {
+                "applications" : serializer.data,
             }
             return JsonResponse(result, safe=False)
         except HttpException as e:

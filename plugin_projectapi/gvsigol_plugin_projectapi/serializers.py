@@ -25,7 +25,7 @@ import math
 from rest_framework import serializers
 
 from django.contrib.auth.models import User
-from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers
+from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers, Application
 from gvsigol_plugin_projectapi import util
 from gvsigol_plugin_baseapi.validation import HttpException
 from gvsigol_services.models import LayerGroup, Layer, Server
@@ -178,5 +178,19 @@ class LayerChangesSerializer(serializers.Serializer):
             if lyr.version > timestamp:
                 return lyr.version
         return 0
+    
+class ApplicationsSerializer(serializers.ModelSerializer):
+    #line1 = serializers.CharField(help_text='Field documentation!')
+    image = serializers.SerializerMethodField('get_application_image')
+
+    def get_application_image(self, obj):
+        # FIXME: we should to consider HTTP_ORIGIN and ALLOWED_HOST_NAMES to build the URL
+        # See gvsigol_core.utils.get_absolute_url method
+        return settings.BASE_URL + obj.image_url
+
+    class Meta:
+        model = Application
+        fields = ['id', 'name', 'title', 'description', 'image', 'url', 'conf', 'created_by', 'is_public']
+        #fields = '__all__'
 
 
