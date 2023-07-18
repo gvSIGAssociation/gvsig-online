@@ -21,7 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools
+from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools, can_manage_project
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
@@ -145,7 +145,7 @@ def project_list(request):
     if request.user.is_superuser:
         project_list = Project.objects.all()
     else:
-        project_list = Project.objects.filter(created_by__exact=request.user.username)
+        project_list = get_user_projects(request)
 
     projects = []
     for p in project_list:
@@ -155,6 +155,8 @@ def project_list(request):
         project['title'] = p.title
         project['description'] = p.description
         project['is_public'] = p.is_public
+        can_manage = 'true' if can_manage_project(request, project) else 'false'
+        project['can_manage'] = can_manage
         projects.append(project)
 
     response = {
