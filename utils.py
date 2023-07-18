@@ -51,7 +51,7 @@ def can_read_project(request, project):
     """
     try:
         if isinstance(project, string_types):
-            project = Project.objects.get(name__exact=project)
+            project = Project.objects.get(name=project)
         elif isinstance(project, int):
             project = Project.objects.get(pk=project)
         if project.is_public:
@@ -62,6 +62,20 @@ def can_read_project(request, project):
             return True
         roles = auth_backend.get_roles(request)
         return project.projectrole_set.filter(role__in=roles).exists()
+    except Exception as e:
+        print(e)
+    return False
+
+def can_manage_project(request, project):
+    try:
+        if request.user.is_superuser:
+            return True
+        if isinstance(project, string_types):
+            project = Project.objects.get(name=project)
+        elif isinstance(project, int):
+            project = Project.objects.get(pk=project)
+        if project.created_by == request.user.username:
+            return True
     except Exception as e:
         print(e)
     return False

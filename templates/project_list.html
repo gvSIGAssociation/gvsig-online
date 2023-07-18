@@ -33,7 +33,7 @@
 					</thead>
 					<tbody>
 						{% for project in projects %}
-						<tr>
+						<tr data-canmanage="{{project.can_manage}}" data-projectid="{{ project.id }}">
 							<td>{{ project.id }}</td>
 							<td>{{ project.name }}</td>
 							<td>{{ project.title }}</td>
@@ -170,18 +170,41 @@ $(document).ready(function() {
 		"columnDefs": [{
 	        "targets": -1,
 	        "data": null,
-	        "defaultContent": '<button type="button" name="button-delete-project" data-toggle="modal" data-target="#modal-delete-project" data-placement="bottom" title="' + '{% trans "Delete project" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+			"render": function ( data, type, row ) {
+				var filter = 'tr[data-projectid="' + data[0] + '"]';
+				var dataset = $('#projects-table').find(filter).data();
+				if (dataset['canmanage']) {
+                	return '<button type="button" name="button-delete-project" data-toggle="modal" data-target="#modal-delete-project" data-placement="bottom" title="' + '{% trans "Delete project" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
+				}
+				else {
+					return '<span title="{% trans "You are not allowed to manage this project" %}"><a href="#" data-toggle="tooltip" data-placement="bottom" class="btn btn-primary disabled"><i class="fa fa-eye"></i></a>';
+				}
+            }
 		},{
 	        "targets": -2,
 	        "data": null,
             "render": function ( data, type, row ) {
-                return '<a title="' + '{% trans "Clone project" %}" ' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-primary"><i class="fa fa-clone"></i></a>';
+				var filter = 'tr[data-projectid="' + data[0] + '"]';
+				var dataset = $('#projects-table').find(filter).data();
+				if (dataset['canmanage']) {
+                	return '<a title="' + '{% trans "Clone project" %}" ' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-primary"><i class="fa fa-clone"></i></a>';
+				}
+				else {
+					return '';
+				}
             }
 	    },{
 	        "targets": -3,
 	        "data": null,
             "render": function ( data, type, row ) {
-            	return '<a title="' + '{% trans "Update project" %}" ' + '" href="/gvsigonline/core/project_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
+				var filter = 'tr[data-projectid="' + data[0] + '"]';
+				var dataset = $('#projects-table').find(filter).data();
+				if (dataset['canmanage']) {
+            		return '<a title="' + '{% trans "Update project" %}" ' + '" href="/gvsigonline/core/project_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
+				}
+				else {
+					return '';
+				}
             }
 	    }],
 	    "dom": 'T<"clear">lfrtip',
