@@ -3997,6 +3997,8 @@ def external_layer_add(request):
 
             external_layer.save()
 
+            
+
             external_layer.name = 'externallayer_' + str(external_layer.id)
             external_layer.save()
             
@@ -4100,7 +4102,7 @@ def external_layer_update(request, external_layer_id):
                 params['url'] = request.POST.get('url')
                 params['key'] = request.POST.get('key')
 
-
+            #geographic_servers.get_instance().get_server_by_id(server.id).updateThumbnail(external_layer)
             external_layer.external_params = json.dumps(params)
             external_layer.save()
             
