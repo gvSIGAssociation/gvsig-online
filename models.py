@@ -14,6 +14,9 @@ def get_default_logo_image():
 def get_default_project_image():
     return settings.STATIC_URL + 'img/no_project.png'
 
+def get_default_application_image():
+    return settings.STATIC_URL + 'img/no_project.png'
+
 class Project(models.Model):
     name = models.CharField(max_length=100, unique=True)
     title = models.CharField(max_length=100, null=True, blank=True)
@@ -267,3 +270,46 @@ class ZoneLayers(models.Model):
     running = models.BooleanField(default=False)
     bboxes = models.TextField(null=True, blank=True)
     pkgassigned = models.CharField(max_length=50, null=True)
+
+class Application(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=250, null=True, blank=True)
+    url = models.CharField(max_length=250, null=True, blank=True)
+    # see also image_url property
+    image = models.ImageField(upload_to='images', default='', null=True, blank=True)
+    conf = models.TextField(null=True, blank=True)
+    is_public = models.BooleanField(default=False)
+    created_by = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name + ' - ' + self.description
+    
+    @property
+    def image_url(self):
+        """
+        Returns URL to the application image if defined, otherwise it returns get_default_application_image()
+        otherwise. This method always returns a relative URL, such as
+        '/media/images/logo_AMQtcXf.png'
+        or
+        '/static/img/no_project.png'.
+        
+        This property is recommended instead of directly using image.url because
+        the default application image is outside media dir, so the url property does
+        not build a valid URL.
+        """
+        if not self.image:
+            return get_default_application_image()
+        return self.image.url.replace(settings.BASE_URL, '')
+    
+class ApplicationRole(models.Model):
+    application = models.ForeignKey(Application, default=None, on_delete=models.CASCADE)
+    role = models.TextField()
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['application', 'role']),
+        ]
+    
+    def __str__(self):
+        return self.application.name + ' - ' + self.role

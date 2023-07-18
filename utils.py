@@ -26,7 +26,7 @@ from gvsigol_auth import auth_backend
 from django import apps
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Application, ApplicationRole
 from gvsigol_services.models import LayerGroup, Layer
 from gvsigol import settings
 import json
@@ -73,6 +73,18 @@ def get_all_roles_checked_by_project(project):
     for role in role_list:
         if role['name'] != 'admin':
             for gbu in roles_by_project:
+                if gbu.role == role['name']:
+                    role['checked'] = True
+            roles.append(role)
+    return roles
+
+def get_all_roles_checked_by_application(application):
+    role_list = auth_backend.get_all_roles_details()
+    roles_by_application = ApplicationRole.objects.filter(application_id=application.id)
+    roles = []
+    for role in role_list:
+        if role['name'] != 'admin':
+            for gbu in roles_by_application:
                 if gbu.role == role['name']:
                     role['checked'] = True
             roles.append(role)
@@ -670,6 +682,15 @@ def get_user_projects(request):
         projects = projects \
             | Project.objects.filter(created_by=request.user.username)
     return projects.distinct()
+
+def get_user_applications(request):
+    roles = auth_backend.get_roles(request)
+    applications = Application.objects.filter(applicationrole__role__in=roles) \
+            | Application.objects.filter(is_public=True)
+    if request.user and request.user.is_authenticated:
+        applications = applications \
+            | Application.objects.filter(created_by=request.user.username)
+    return applications.distinct()
 
 def get_core_tools(enabled=True):
     return [{

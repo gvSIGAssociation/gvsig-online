@@ -30,7 +30,7 @@ from gvsigol_core import forms
 from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
-from .models import Project, ProjectLayerGroup, ProjectRole
+from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -1646,3 +1646,204 @@ def extend_permissions_to_layer(request):
             logger.exception("")
             return JsonResponse({"status": "error"}, status=500)
     return JsonResponse({"status": "error"}, status=400)
+
+@login_required()
+@staff_required
+def application_list(request):
+
+    application_list = None
+    if request.user.is_superuser:
+        application_list = Application.objects.all()
+    else:
+        application_list = Application.objects.filter(created_by__exact=request.user.username)
+
+    applications = []
+    for app in application_list:
+        application = {}
+        application['id'] = app.id
+        application['name'] = app.name
+        application['title'] = app.title
+        application['description'] = app.description
+        application['url'] = app.url
+        application['is_public'] = app.is_public
+        applications.append(application)
+
+    response = {
+        'applications': applications
+    }
+    return render(request, 'application_list.html', response)
+
+@login_required()
+@staff_required
+def application_add(request):
+    if request.method == 'POST':
+        name = request.POST.get('application-name')
+
+        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(' ','',name)
+
+        title = request.POST.get('application-title')
+        description = request.POST.get('application-description')
+        url = request.POST.get('application-url')
+        conf = request.POST.get('application-conf')
+
+        is_public = False
+        if 'is_public' in request.POST:
+            is_public = True
+
+        has_image = False
+        if 'application-image' in request.FILES:
+            has_image = True
+
+        assigned_roles = []
+        for key in request.POST:
+            if 'usergroup-' in key:
+                assigned_roles.append(key[len('usergroup-'):])
+
+        groups = None
+        if request.user.is_superuser:
+            groups = auth_backend.get_all_roles_details(exclude_system=True)
+        else:
+            groups = get_primary_user_role_details(request)
+
+        if name == '':
+            message = _('You must enter an application name')
+            return render(request, 'application_add.html', {'message': message, 'groups': groups})
+
+        if _valid_name_regex.search(name) == None:
+            message = _("Invalid application name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+            return render(request, 'application_add.html', {'message': message, 'groups': groups})
+
+        if Application.objects.filter(name=name).exists():
+            message = _('Application name already exists')
+            return render(request, 'application_add.html', {'message': message, 'groups': groups})
+
+        app = Application(
+            name = name,
+            title = title,
+            description = description,
+            url = url,
+            conf = conf,
+            created_by = request.user.username,
+            is_public = is_public
+        )
+        app.save()
+        
+        if has_image:
+            app.image = request.FILES['application-image']
+            app.save()
+
+        roles = auth_backend.get_all_roles()
+        for assigned_role in assigned_roles:
+            if assigned_role in roles:
+                app_role = ApplicationRole(
+                    application = app,
+                    role = assigned_role
+                )
+                app_role.save()
+
+        app_role = ApplicationRole(
+            application = app,
+            role = 'admin'
+        )
+        app_role.save()
+
+        return redirect('application_list')
+
+    else:
+        roles = None
+        if request.user.is_superuser:
+            roles = auth_backend.get_all_roles_details(exclude_system=True)
+        else:
+            roles = get_primary_user_role_details(request)
+
+        return render(request, 'application_add.html', {'groups': roles})
+
+
+@login_required()
+@staff_required
+def application_update(request, appid):
+    if request.method == 'POST':
+        name = request.POST.get('application-name')
+        title = request.POST.get('application-title')
+        description = request.POST.get('application-description')
+        url = request.POST.get('application-url')
+        conf = request.POST.get('application-conf')
+
+        is_public = False
+        if 'is_public' in request.POST:
+            is_public = True
+
+        assigned_roles = []
+        for key in request.POST:
+            if 'usergroup-' in key:
+                assigned_roles.append(key[len('usergroup-'):])
+
+        has_image = False
+        if 'project-image' in request.FILES:
+            has_image = True
+
+        app = Application.objects.get(id=int(appid))
+
+        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(' ','',name)
+
+        app.name = name
+        app.title = title
+        app.description = description
+        app.url = url
+        app.conf = conf
+        app.is_public = is_public
+        
+        if has_image:
+            app.image = request.FILES['application-image']
+
+        app.save()
+
+        ApplicationRole.objects.filter(application_id=app.id).delete()
+        roles = auth_backend.get_all_roles()
+        for role in assigned_roles:
+            if role in roles:
+                app_role = ApplicationRole(
+                    application = app,
+                    role = role
+                )
+                app_role.save()
+
+        app_role = ApplicationRole(
+            application = app,
+            role = 'admin'
+        )
+        app_role.save()
+
+        return redirect('application_list')
+
+    else:
+        app = Application.objects.get(id=int(appid))
+        roles = core_utils.get_all_roles_checked_by_application(app)
+        
+        return render(request, 'application_update.html', {
+            'appid': appid, 
+            'application': app,
+            'groups': roles,
+            'superuser' : is_superuser(request.user)
+        })
+
+
+@login_required()
+@staff_required
+def application_delete(request, appid):
+    if request.method == 'POST':
+        try:
+            if request.user.is_superuser:
+                app = Application.objects.get(id=int(appid))
+            else:
+                app = Application.objects.get(id=int(appid), created_by__exact=request.user.username)
+            app.delete()
+            response = {
+                'deleted': True
+            }
+            return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+        except:
+            logger.exception("Error deleting application")
+            return HttpResponseForbidden({"deleted": False, "error": "Not allowed"})
