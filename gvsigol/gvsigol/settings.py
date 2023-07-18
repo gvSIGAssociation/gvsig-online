@@ -130,7 +130,7 @@ ALLOWED_HOSTS = ['*']
 #SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-#GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
+GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 
 
@@ -158,43 +158,36 @@ INSTALLED_APPS = [
     'gvsigol_core',
 
     ############# APPS ################
-    'gvsigol_app_test',
-    #'gvsigol_app_ideuy',
-    #'gvsigol_app_librapicassa',
-    #'gvsigol_app_tocantins',
+    'gvsigol_app_librapicassa',
+    #'gvsigol_app_eliana',
+    #'gvsigol_app_cartagena',
 
     ############# PLUGINS ################
-    #'gvsigol_plugin_alfresco',
-    'gvsigol_plugin_baseapi',
-    'gvsigol_plugin_business',
     'gvsigol_plugin_catalog',
     'gvsigol_plugin_catastro',
-    #'gvsigol_plugin_catastrouy',
-    'gvsigol_plugin_charts',
+    #'gvsigol_plugin_albacete_cementerio',
+    #'gvsigol_plugin_business',
+    #'gvsigol_plugin_charts',
     #'gvsigol_plugin_downloadman',
     'gvsigol_plugin_draw',
     'gvsigol_plugin_edition',
     #'gvsigol_plugin_elevation',
-    #'gvsigol_plugin_emergencies',
-    'gvsigol_plugin_featureapi',
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_geoetl',
-    #-#'gvsigol_plugin_shps_folder',
-    'gvsigol_plugin_importfromservice',
-    'gvsigol_plugin_importvector',
-    #'gvsigol_plugin_manageaddresses',
-    'gvsigol_plugin_gestiona',
+    #'gvsigol_plugin_importfromservice',
+    #'gvsigol_plugin_importvector',
     #'gvsigol_plugin_oidc_mozilla',
-    #'gvsigol_plugin_opensea2',
     'gvsigol_plugin_print',
-    'gvsigol_plugin_projectapi',
     #'gvsigol_plugin_restapi',
-    #'gvsigol_plugin_streetview',
-    #'gvsigol_plugin_sync',
-    'gvsigol_plugin_trip_planner',
-    #'gvsigol_plugin_turiscan',
-    #'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_mobileproject',
+    'gvsigol_plugin_baseapi',
+    'gvsigol_plugin_featureapi',
+    'gvsigol_plugin_projectapi',
+    'gvsigol_plugin_picassa',
+    'gvsigol_plugin_sigpac',
+    'gvsigol_plugin_vinya',
+    #'gvsigol_plugin_sampledashboard',
+    #'gvsigol_plugin_gtfs_editor',
+    'gvsigol_plugin_prueba',
     'actstream',
     #### DEPENDENCIES ######,
     'django_celery_beat'
@@ -307,7 +300,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': True,
+    'ENABLED': False,
     'HOST':'localhost',
     'PORT': '389',
     'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
@@ -400,7 +393,7 @@ SITE_ID=1
 #MEDIA_ROOT = '/usr/local/var/www/media/'
 #MEDIA_URL = 'https://localhost/media/'
 BASE_URL = 'https://localhost'
-MEDIA_ROOT = '/var/www/sites/localhost/media/'
+MEDIA_ROOT = '/var/www/media/'
 MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
@@ -426,7 +419,7 @@ GVSIGOL_VERSION = '3.x.x-dev'
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
     'dbport': '5432',
-    'dbname': 'gvsigonline_v3',
+    'dbname': 'gvsigonline_v2',
     'dbuser': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -434,7 +427,7 @@ GVSIGOL_USERS_CARTODB = {
 MOSAIC_DB = {
     'host': 'localhost',
     'port': '5432',
-    'database': 'gvsigonline_v3',
+    'database': 'gvsigonline_v2',
     'schema': 'imagemosaic',
     'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
@@ -445,7 +438,7 @@ MOSAIC_DB = {
 #OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
 
 TILE_SIZE = 256
-MAX_ZOOM_LEVEL = 18 
+MAX_ZOOM_LEVEL = 20 
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
@@ -538,7 +531,7 @@ GVSIGOL_BASE_LAYERS = {
 #skin-purple-light
 #skin-yellow
 #skin-yellow-light
-GVSIGOL_SKIN = "skin-blue"
+GVSIGOL_SKIN = "skin-cartagena"
 
 GVSIGOL_PATH = 'gvsigonline'
 GVSIGOL_NAME = 'gvsig'
@@ -664,8 +657,8 @@ PROXIES = {
 }
 
 # use development backend if not using Apache/xsendfile
-#SENDFILE_BACKEND = 'django_sendfile.backends.development'
-SENDFILE_BACKEND = 'django_sendfile.backends.xsendfile'
+SENDFILE_BACKEND = 'django_sendfile.backends.development'
+#SENDFILE_BACKEND = 'django_sendfile.backends.xsendfile'
 SENDFILE_ROOT = '/'
 SHARED_VIEW_EXPIRATION_TIME = 1
 
@@ -687,7 +680,7 @@ RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
 LAYERS_ROOT = 'layer_downloads'
 #ALLOWED_HOST_NAMES = ['http://localhost']
-ALLOWED_HOST_NAMES = ['http://localhost', 'http://localhost:8000']
+ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
 JWT_AUTH = {
     #'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=5),
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
@@ -714,7 +707,12 @@ GEOETL_DB = {
 
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
+
+CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
+CELERY_TASK_ACKS_LATE = True
 USE_SPA_PROJECT_LINKS = 'True'
 
 FRONTEND_BASE_URL = '/spa'
-FRONTEND_REDIRECT_URL = '/spa'
+#FRONTEND_REDIRECT_URL = '/spa'
+
+IFRAME_MODE_UI = False

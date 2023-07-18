@@ -30,4 +30,9 @@ urlpatterns = [
     path('project_clone/<int:pid>/', core_views.project_clone, name='project_clone'),
     path('project_permissions_to_layers/<int:pid>/', core_views.project_permissions_to_layer, name='project_permissions_to_layers'),
     path('extend_permissions_to_layer/', core_views.extend_permissions_to_layer, name='extend_permissions_to_layer'),
+
+    path('application_list/', core_views.application_list, name='application_list'),
+    path('application_add/', core_views.application_add, name='application_add'),
+    path('application_delete/<int:appid>/', core_views.application_delete, name='application_delete'),
+    path('application_update/<int:appid>/', core_views.application_update, name='application_update'),
 ]
