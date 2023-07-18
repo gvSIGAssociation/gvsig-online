@@ -34,10 +34,10 @@ from django.db.models import Q
 
 from gvsigol import settings as core_settings
 from django.contrib.auth.models import User
-from gvsigol_core.models import Project, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectLayerGroup, Application
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
-from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer
+from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer, ApplicationsSerializer
 from gvsigol_plugin_featureapi.serializers import LayerSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services.models import Layer, LayerGroup, Server
@@ -709,6 +709,40 @@ class GeoserverAPIKey(ListAPIView):
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
+        
+#--------------------------------------------------
+#                APPLICATIONS
+#--------------------------------------------------   
+
+class ApplicationListView(ListAPIView):
+    serializer_class = ProjectsSerializer
+    permission_classes = [AllowAny]
+   
+    #@swaggerdoc('test.yml')
+    @swagger_auto_schema(operation_id='get_application_list', operation_summary='Gets the list of applications', 
+                         responses={404: "Database connection NOT found<br>User NOT found"})
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def get(self, request):
+        v = Validation(request)    
+        try:
+            v.check_get_application_list()
+        except HttpException as e:
+            return e.get_exception()
+        
+        applications_by_user = util.get_applications_ids_by_user(request)
+        queryset = Application.objects.filter(id__in=applications_by_user)
+
+        serializer = ApplicationsSerializer(queryset, many=True)
+        result = {
+            "content" : serializer.data,
+            "links" : [
+                {
+                    "rel" : "self",
+                    "href": request.get_full_path()
+                }
+            ]
+        }
+        return JsonResponse(result, safe=False)
 
 
 

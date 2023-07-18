@@ -31,7 +31,7 @@ from django.utils.translation import ugettext as _
 import gvsigol
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_core.models import Project, ProjectLayerGroup
-from gvsigol_core.utils import get_absolute_url, get_user_projects
+from gvsigol_core.utils import get_absolute_url, get_user_projects, get_user_applications
 from gvsigol import settings
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, Layer, LayerGroup, Server
@@ -220,6 +220,20 @@ def get_projects_ids_by_user(request, mobile=False):
         Objeto HttpRequest de Django con la petición en curso
     '''
     return [p.id for p in get_user_projects(request)]
+
+def get_applications_ids_by_user(request, mobile=False):
+    '''
+    Obtiene las aplicaciones en las que un usuario tiene permisos, es decir que aparece
+    con el check activo en la pestaña "Grupo de usuarios" de la aplicación.
+    Además incluye las aplicaciones públicas.
+    FIXME: No se usa el parámetro mobile
+
+    Parámetros
+    ==========
+    request: HttpRequest
+        Objeto HttpRequest de Django con la petición en curso
+    '''
+    return [app.id for app in get_user_applications(request)]
 
 def get_layergroups_by_user(request):
     '''

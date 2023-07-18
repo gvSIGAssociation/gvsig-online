@@ -25,7 +25,7 @@ import math
 from rest_framework import serializers
 
 from django.contrib.auth.models import User
-from gvsigol_core.models import Project, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectLayerGroup, Application
 from gvsigol_plugin_projectapi import util
 from gvsigol_services.models import LayerGroup, Layer
 from gvsigol import settings
@@ -524,6 +524,20 @@ class PublicInfoSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date']
         #fields = '__all__'
+
+class AppInfoSerializer(serializers.ModelSerializer):
+    conf = serializers.SerializerMethodField('get_application_conf')
+
+    def get_application_conf (self, obj):
+        conf = json.loads(obj.conf)
+        while isinstance(conf, str):
+            conf = json.loads(obj.conf)
+
+        return conf
+
+    class Meta:
+        model = Application
+        fields = ['conf']
         
 
 
