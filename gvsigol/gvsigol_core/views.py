@@ -155,7 +155,7 @@ def project_list(request):
         project['title'] = p.title
         project['description'] = p.description
         project['is_public'] = p.is_public
-        can_manage = 'true' if can_manage_project(request, project) else 'false'
+        can_manage = 'true' if can_manage_project(request, p) else 'false'
         project['can_manage'] = can_manage
         projects.append(project)
 
