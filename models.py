@@ -163,6 +163,10 @@ class Datastore(models.Model):
         i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
         return i, params
 
+class DefaultUserDatastore(models.Model):
+    username = models.TextField(unique=True)
+    datastore = models.ForeignKey(Datastore, on_delete=models.CASCADE)
+
 class LayerGroup(models.Model):
     server_id = models.IntegerField(null=True, default=get_default_server)
     name = models.CharField(max_length=150) 
