@@ -27,6 +27,7 @@ from urllib import response
 from django.shortcuts import HttpResponse, render, redirect
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
+from gvsigol_auth import auth_backend
 from gvsigol_auth.django_auth import get_user_details
 #from gvsigol_auth.auth_backend import get_roles, get_user_details
 from django.core import serializers
@@ -147,7 +148,7 @@ def etl_canvas(request):
 
         instance  = ETLworkspaces.objects.get(id=int(lgid))
 
-        if instance.username == request.user.username or request.user.is_superuser:
+        if instance.can_edit(request):
 
             response = {
                 'id':lgid,
@@ -201,54 +202,61 @@ def etl_canvas(request):
             }
             return render(request, 'etl.html', response)
 
-def get_list(user, concat = False):
-    
-    etl_list = ETLworkspaces.objects.all()
-    
-    user_ob = User.objects.get(username = user)
-
+def get_list(request, concat = False):
+    user = request.user
+    if user.is_superuser:
+        etl_list = ETLworkspaces.objects.filter(concat=concat)
+    elif user.is_staff:
+        user_roles = auth_backend.get_roles(request)
+        etl_list = (ETLworkspaces.objects.filter(etlworkspaceexecuterole__role__in=user_roles) |
+                     ETLworkspaces.objects.filter(username=user.username, concat=concat)).distinct()
+    else:
+        etl_list = []
     workspaces = []
     for w in etl_list:
-        if (w.username == user or user_ob.is_superuser) and w.concat == concat:
-            workspace = {}
-            workspace['id'] = w.id
-            workspace['name'] = w.name
-            workspace['description'] = w.description
-            if concat == True:
-                workspace['workspace'] = w.workspace
-            workspace['username'] = w.username
+        workspace = {}
+        workspace['id'] = w.id
+        workspace['name'] = w.name
+        workspace['description'] = w.description
+        if concat == True:
+            workspace['workspace'] = w.workspace
+        workspace['username'] = w.username
+        if user.is_superuser or w.username == request.user.username:
+            workspace['editable'] = 'true'
+        else:
+            workspace['editable'] = 'true' if w.can_edit(request) else 'false'
 
-            try:
-                periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
-            except:
-                periodicTask = None
-            
-            if periodicTask:
-                cronid = periodicTask.crontab_id
-                interid = periodicTask.interval_id
-                if cronid:
-                    crontab = CrontabSchedule.objects.get(id= cronid)
-                    if crontab.minute != '0':
-                        workspace['minute'] = crontab.minute
-                    else: 
-                        workspace['minute'] = '00'
+        try:
+            periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
+        except:
+            periodicTask = None
+        
+        if periodicTask:
+            cronid = periodicTask.crontab_id
+            interid = periodicTask.interval_id
+            if cronid:
+                crontab = CrontabSchedule.objects.get(id= cronid)
+                if crontab.minute != '0':
+                    workspace['minute'] = crontab.minute
+                else: 
+                    workspace['minute'] = '00'
 
-                    if crontab.hour != '0':
-                        workspace['hour'] = crontab.hour
-                    else:
-                        workspace['hour'] = '00'
-
-                    days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-                    try:
-                        workspace['day_of_week'] = days_of_week[int(crontab.day_of_week)]
-                    except:
-                        workspace['day_of_week'] = "all"
+                if crontab.hour != '0':
+                    workspace['hour'] = crontab.hour
                 else:
-                    interval = IntervalSchedule.objects.get(id= interid)
-                    workspace['every'] = interval.every
-                    workspace['period'] = interval.period
+                    workspace['hour'] = '00'
 
-            workspaces.append(workspace)
+                days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                try:
+                    workspace['day_of_week'] = days_of_week[int(crontab.day_of_week)]
+                except:
+                    workspace['day_of_week'] = "all"
+            else:
+                interval = IntervalSchedule.objects.get(id= interid)
+                workspace['every'] = interval.every
+                workspace['period'] = interval.period
+
+        workspaces.append(workspace)
     
     return workspaces
 
@@ -274,11 +282,9 @@ def etl_workspace_list(request):
         
     except Exception as e:
         print(e)
-    
-    username = request.user.username
 
     response = {
-        'workspaces': get_list(username),
+        'workspaces': get_list(request),
         'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
     }
 
@@ -304,10 +310,8 @@ def etl_concat_workspaces(request):
     except Exception as e:
         print(e)
     
-    username = request.user.username
-
     response = {
-        'workspaces': get_list(username, True),
+        'workspaces': get_list(request, True),
         'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
     }
 
@@ -432,9 +436,9 @@ def delete_periodic_workspace(workspace):
         pass
 
 def name_user_exists(id, name, user):
-    workspaces = ETLworkspaces.objects.all()
+    workspaces = ETLworkspaces.objects.filter(name=name, username=user)
     for w in workspaces:
-        if w.name == name and w.username == user and id != w.id:
+        if id != w.id:
             return True
     return False
 
@@ -442,83 +446,53 @@ def name_user_exists(id, name, user):
 @staff_required
 def etl_workspace_add(request):
     if request.method == 'POST':
-    
-        try: 
-            ws = ETLworkspaces.objects.get(id = int(request.POST.get('id')))
+        name = request.POST.get('name') 
+        description = request.POST.get('description')
+        workspace = request.POST.get('workspace')
+        periodic_task = request.POST.get('checked') == 'true'
+        try:
             id = int(request.POST.get('id'))
-            user = ws.username
-            name = request.POST.get('name')
-            params = ws.parameters
-            exists = name_user_exists(id, name, user)
-            if exists:
-                response = {
-                    'exists': 'true',
-                }   
-                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-            
-            if request.POST.get('superuser') == 'false':
-                
-                workspace = ETLworkspaces(
-                    id = id,
-                    name = name,
-                    description = request.POST.get('description'),
-                    workspace = request.POST.get('workspace'),
-                    username = user,
-                    parameters = params
-                    
-                )
-                workspace.save()
-            
+            # if the ws exists, we update it
+            ws = ETLworkspaces.objects.get(id = id)
+            if ws.can_edit(request):
+                if name_user_exists(id, name, workspace.username):
+                    response = {
+                        'exists': 'true',
+                    }   
+                    return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+                ws.name = name
+                ws.description = description
+                ws.save()
+                delete_periodic_workspace(workspace)
+                if periodic_task:
+                    save_periodic_workspace(request, workspace)
             else:
-                user = request.POST.get('username')
-                id = int(request.POST.get('id'))
-                name = request.POST.get('name')
-                exists = name_user_exists(id, name, user)
-                if exists:
+                return HttpResponse(json.dumps({'status': 'not allowed'}, indent=4), content_type='folder/json')
+        except:
+            # creating a new ws
+            if request.user.is_superuser or request.user.is_staff:
+                if name_user_exists(None, name, request.user.username):
                     response = {
                         'exists': 'true',
                     }   
                     return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
+                id = None
+                params = None
                 workspace = ETLworkspaces(
-                    id = id,
                     name = name,
-                    description = request.POST.get('description'),
-                    workspace = request.POST.get('workspace'),
-                    username = user,
-                    parameters = params
-                    
+                    description = description,
+                    workspace = workspace,
+                    username = request.user.username,
+                    parameters = None
                 )
                 workspace.save()
-            
-        except:
-            user = request.POST.get('username')
-            id = None
-            name = request.POST.get('name')
-            exists = name_user_exists(id, name, user)
-            if exists:
-                response = {
-                    'exists': 'true',
-                }   
-                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-
-            workspace = ETLworkspaces(
-                name = request.POST.get('name'),
-                description = request.POST.get('description'),
-                workspace = request.POST.get('workspace'),
-                username = user,
-                parameters = None
-            )
-            workspace.save()
-        
-        delete_periodic_workspace(workspace)
-
-        if request.POST.get('checked') == 'true':
-
-            save_periodic_workspace(request, workspace)
-
+                if periodic_task:
+                    save_periodic_workspace(request, workspace)
+            else:
+                return HttpResponse(json.dumps({'status': 'not allowed'}, indent=4), content_type='folder/json')
         response = {
-            'workspaces': get_list(user)
+            'workspaces': get_list(request)
         }
 
         return render(request, 'dashboard_geoetl_workspaces_list.html', response)
@@ -527,14 +501,13 @@ def etl_workspace_add(request):
 @login_required()
 @staff_required
 def etl_workspace_delete(request):
-    lgid = request.POST['lgid']
+    
     if request.method == 'POST':
-        
+        lgid = request.POST['lgid']
         instance  = ETLworkspaces.objects.get(id=int(lgid))
-        
-        delete_periodic_workspace(instance)
-        
-        instance.delete()
+        if instance.can_edit(request):
+            delete_periodic_workspace(instance)
+            instance.delete()
 
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
@@ -543,60 +516,33 @@ def etl_workspace_delete(request):
 @staff_required
 def etl_workspace_update(request):
     if request.method == 'POST':
-        lgid = request.POST['id']
-        instance  = ETLworkspaces.objects.get(id=int(lgid))
-        params = instance.parameters
+        id = request.POST['id']
+        instance  = ETLworkspaces.objects.get(id=int(id))
+        if instance.can_edit(request):
 
-        if request.POST.get('superuser') == 'false':
-            
-            user = instance.username
-            id = int(request.POST.get('id'))
+            params = instance.parameters
             name = request.POST.get('name')
-            exists = name_user_exists(id, name, user)
+            description = request.POST.get('description')
+            set_superuser = request.POST.get('superuser') == 'true'
+            exists = name_user_exists(id, name, instance.username)
             if exists:
                 response = {
                     'exists': 'true',
                 }   
                 return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-            
-            workspace = ETLworkspaces(
-                id = id,
-                name = name,
-                description = request.POST.get('description'),
-                workspace = instance.workspace,
-                username = user,
-                parameters = params
-            )
-            workspace.save()
-        else:
+            if set_superuser:
+                instance.username = 'root'
+            instance.name = name
+            instance.description = description
+            instance.parameters = params
+            instance.save()
 
-            user = request.POST.get('username')
-            id = int(request.POST.get('id'))
-            name = request.POST.get('name')
-            exists = name_user_exists(id, name, user)
-            
-            if exists:
-                response = {
-                    'exists': 'true',
-                }   
-                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+            delete_periodic_workspace(instance)
 
-            workspace = ETLworkspaces(
-                id = id,
-                name = name,
-                description = request.POST.get('description'),
-                workspace = instance.workspace,
-                username = user,
-                parameters = params
-            )
-            workspace.save()            
+            if request.POST.get('checked') == 'true':
 
-        delete_periodic_workspace(instance)
-
-        if request.POST.get('checked') == 'true':
-
-            save_periodic_workspace(request, instance)
-            
+                save_periodic_workspace(request, instance)
+                
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
@@ -673,14 +619,14 @@ def etl_read_canvas(request):
 
 
             if id_ws:
-                if ws.username == request.user.username or request.user.is_superuser:
+                if ws.can_execute(request):
                     run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
                                                                 'id_ws': id_ws, 
                                                                 'username': request.POST['username'], 
                                                                 'parameters': params,
                                                                 'concat': concat})
                     
-            else:
+            else: # TODO revisar con Carles
                 run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
                                                             'id_ws': id_ws, 
                                                             'username': request.POST['username'], 
@@ -884,31 +830,35 @@ def etl_schema_postgresql(request):
             response = json.dumps(listSchema)
             return HttpResponse(response, content_type="application/json")
 
+@login_required
+@staff_required
 def etl_workspace_download(request):
     lgid = request.GET['lgid']
 
     workspace = ETLworkspaces.objects.get(id=int(lgid))
+    if workspace.can_edit(request):
+        folder = "etl_workspaces"
 
-    folder = "etl_workspaces"
+        folder_path = os.path.join(settings.FILEMANAGER_DIRECTORY, folder)
 
-    folder_path = os.path.join(settings.FILEMANAGER_DIRECTORY, folder)
+        try:
+            os.mkdir(folder_path)
+        except:
+            pass
 
-    try:
-        os.mkdir(folder_path)
-    except:
-        pass
+        file_path = os.path.join(folder_path, workspace.name.replace(' ', '_')+'.json')
 
-    file_path = os.path.join(folder_path, workspace.name.replace(' ', '_')+'.json')
+        with open(file_path, 'w') as f:
+            f.write(workspace.workspace)
 
-    with open(file_path, 'w') as f:
-        f.write(workspace.workspace)
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(fh.read(), content_type="application/txt")
+                response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+                return response
 
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type="application/txt")
-            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
-            return response
-
+@login_required
+@staff_required
 def etl_workspace_upload(request):
     name = request.POST['name']
     desc = request.POST['description']
@@ -1033,42 +983,43 @@ def get_workspace_parameters(request):
     if request.method == 'POST':
         
         ws = ETLworkspaces.objects.get(id = request.POST['id'])
+        if ws.can_edit(request):
+            if ws.parameters:
 
-        if ws.parameters:
+                response = json.loads(ws.parameters)
+                try:
+                    response['json-user-params'] = json.dumps(response['json-user-params'])
+                except:
+                    response['json-user-params'] = json.dumps({})
+            else:
+                response = {"db": "", 
+                            "sql-before": "", 
+                            "sql-after": "",
+                            "json-user-params": json.dumps({}),
+                            "checkbox-user-params": "",
+                            "get_loop-user-params": [],
+                            "loop-user-params": "",
+                            "radio-params-user": "",
+                            "init-loop-integer-user-params": 0,
+                            "end-loop-integer-user-params": 0,
+                            "get_schema-name-user-params": [],
+                            "schema-name-user-params": "",
+                            "get_table-name-user-params": [],
+                            "table-name-user-params": "",
+                            "get_attr-name-user-params": [],
+                            "attr-name-user-params": ""
+                            }
 
-            response = json.loads(ws.parameters)
-            try:
-                response['json-user-params'] = json.dumps(response['json-user-params'])
-            except:
-                response['json-user-params'] = json.dumps({})
-        else:
-            response = {"db": "", 
-                        "sql-before": "", 
-                        "sql-after": "",
-                        "json-user-params": json.dumps({}),
-                        "checkbox-user-params": "",
-                        "get_loop-user-params": [],
-                        "loop-user-params": "",
-                        "radio-params-user": "",
-                        "init-loop-integer-user-params": 0,
-                        "end-loop-integer-user-params": 0,
-                        "get_schema-name-user-params": [],
-                        "schema-name-user-params": "",
-                        "get_table-name-user-params": [],
-                        "table-name-user-params": "",
-                        "get_attr-name-user-params": [],
-                        "attr-name-user-params": ""
-                        }
+            response['dbcs'] = []
 
-        response['dbcs'] = []
+            databases  = database_connections.objects.all()
 
-        databases  = database_connections.objects.all()
-
-        for db in databases:
-            response['dbcs'].append({"name": db.name, "type": db.type})
+            for db in databases:
+                response['dbcs'].append({"name": db.name, "type": db.type})
 
 
-        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+            return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+        return HttpResponse(json.dumps({"status": "error"}, indent=4), content_type='folder/json')
 
 @login_required()
 @staff_required
@@ -1076,36 +1027,39 @@ def set_workspace_parameters(request):
     if request.method == 'POST':
 
         ws = ETLworkspaces.objects.get(id = request.POST['id'])
+        if ws.can_edit(request):
 
-        sql_before = request.POST['sql-before'].splitlines()
-        sql_after = request.POST['sql-after'].splitlines()
+            sql_before = request.POST['sql-before'].splitlines()
+            sql_after = request.POST['sql-after'].splitlines()
 
-        
+            
 
-        params = '{"db": "'+request.POST['db']
-        params +='", "sql-before": '+str(sql_before).replace("'", '"')
-        params += ', "sql-after": '+str(sql_after).replace("'", '"')
-        params += ', "json-user-params": '+request.POST['json-user-params']
-        params += ', "checkbox-user-params": "'+request.POST['checkbox-user-params']
-        params += '", "get_loop-user-params": ["'+request.POST['get_loop-user-params']
-        params += '"], "loop-user-params": "'+request.POST['loop-user-params']
-        params += '", "radio-params-user": "'+request.POST['radio-params-user']
-        params += '", "init-loop-integer-user-params": '+request.POST['init-loop-integer-user-params']
-        params += ', "end-loop-integer-user-params": '+request.POST['end-loop-integer-user-params']
-        params += ', "get_schema-name-user-params": ["'+request.POST['get_schema-name-user-params']
-        params += '"], "schema-name-user-params": "'+request.POST['schema-name-user-params']
-        params += '", "get_table-name-user-params": ["'+request.POST['get_table-name-user-params']
-        params += '"], "table-name-user-params": "'+request.POST['table-name-user-params']
-        params += '", "get_attr-name-user-params": ["'+request.POST['get_attr-name-user-params']
-        params += '"], "attr-name-user-params": "'+request.POST['attr-name-user-params']
-        params += '"}'
+            params = '{"db": "'+request.POST['db']
+            params +='", "sql-before": '+str(sql_before).replace("'", '"')
+            params += ', "sql-after": '+str(sql_after).replace("'", '"')
+            params += ', "json-user-params": '+request.POST['json-user-params']
+            params += ', "checkbox-user-params": "'+request.POST['checkbox-user-params']
+            params += '", "get_loop-user-params": ["'+request.POST['get_loop-user-params']
+            params += '"], "loop-user-params": "'+request.POST['loop-user-params']
+            params += '", "radio-params-user": "'+request.POST['radio-params-user']
+            params += '", "init-loop-integer-user-params": '+request.POST['init-loop-integer-user-params']
+            params += ', "end-loop-integer-user-params": '+request.POST['end-loop-integer-user-params']
+            params += ', "get_schema-name-user-params": ["'+request.POST['get_schema-name-user-params']
+            params += '"], "schema-name-user-params": "'+request.POST['schema-name-user-params']
+            params += '", "get_table-name-user-params": ["'+request.POST['get_table-name-user-params']
+            params += '"], "table-name-user-params": "'+request.POST['table-name-user-params']
+            params += '", "get_attr-name-user-params": ["'+request.POST['get_attr-name-user-params']
+            params += '"], "attr-name-user-params": "'+request.POST['attr-name-user-params']
+            params += '"}'
 
-        ws.parameters = params
-        ws.save()
+            ws.parameters = params
+            ws.save()
 
-        response = {}
+            response = {}
 
-        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+            return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+        else:
+            return HttpResponse(json.dumps({"result": "error"}, indent=4), content_type='folder/json')
 
 
 @login_required()
@@ -1178,14 +1132,12 @@ def etl_xml_tags(request):
 
             return HttpResponse(response, content_type="application/json")
 
+@login_required()
+@staff_required
 def get_workspaces(request):
 
-    user = request.user.username
-
-    get_list(user, concat = False)
-    
     response = {
-        'workspaces': sorted(get_list(user), key=lambda d: d['id'])
+        'workspaces': sorted(get_list(request), key=lambda d: d['id'])
     }
 
     return HttpResponse(json.dumps(response), content_type="application/json")
