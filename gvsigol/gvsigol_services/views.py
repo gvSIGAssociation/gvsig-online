@@ -473,7 +473,9 @@ def datastore_list(request):
     if request.user.is_superuser:
         datastore_list = Datastore.objects.all()
     else:
-        datastore_list = Datastore.objects.filter(created_by__exact=request.user.username)
+        # no consideramos DefaultUserDatastore porque por el momento sólo permitimos actualizar el datastore
+        # a superusuarios o al creador
+        datastore_list = Datastore.objects.filter(created_by=request.user.username).order_by('name')
 
     for datastore in datastore_list:
         params = json.loads(datastore.connection_params)
@@ -1290,7 +1292,8 @@ def layer_add_with_group(request, layergroup_id):
     else:
         form = LayerForm()
         if not request.user.is_superuser:
-            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+            form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
             form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
         groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
         is_public = False
@@ -1523,7 +1526,8 @@ def layer_update(request, layer_id):
                 form.initial[key] = params[key]
 
         if not request.user.is_superuser:
-            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+            form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
             form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
 
         try:
@@ -5188,7 +5192,8 @@ def _sqlview_update(request, is_update, sql_view=None):
             form = SqlViewForm(request.user, initial=initial, instance=sql_view)
             view_id = sql_view.id
         if not request.user.is_superuser:
-            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username, type__startswith='v_').order_by('name')
+            form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username, type__startswith='v_') |
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username, type__startswith='v_')).distinct().order_by('name')
     return render(request, 'sqlview_add.html', {
             'form': form,
             'view_id': view_id,
@@ -5255,7 +5260,8 @@ def list_datastores_in_db(request):
         if request.user.is_superuser:
             datastore_list = Datastore.objects.filter(type__startswith='v_').order_by('name')
         else:
-            datastore_list = Datastore.objects.filter(created_by=request.user.username, type__startswith='v_').order_by('name')
+            datastore_list =  (Datastore.objects.filter(created_by=request.user.username, type__startswith='v_') |
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username, type__startswith='v_')).distinct().order_by('name')
         filtered_datastores = []
         for datastore in datastore_list:
             params = json.loads(datastore.connection_params)

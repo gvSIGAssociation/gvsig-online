@@ -238,8 +238,8 @@ def survey_update(request, survey_id):
         form = SurveyForm(instance=survey)
     
     if not request.user.is_superuser:
-        form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
-    
+        form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username).distinct().order_by('name')
     
     sections = SurveySection.objects.filter(survey_id=survey.id).order_by('order')
     
