@@ -46,35 +46,33 @@
 						</thead>
 						<tbody>
 							{% for workspace in workspaces %}
-								{% if user.username == workspace.username or user.is_superuser%}
-									<tr>
-										<td> {{ workspace.id }} </td>
-										<td></td>
-										
-											<td>
-												<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
-												<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
-												<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
-											</td>
+								<tr data-workspaceid="{{ workspace.id }}" data-editable="{{workspace.editable}}">
+									<td> {{ workspace.id }} </td>
+									<td></td>
+									
+										<td>
+											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
+											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
+											<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
+										</td>
 
 
-										<td>{{ workspace.name }}</td>
-										<td>{{ workspace.description }}</td>
-										{% if workspace.every %}
-											<td>{{ workspace.every }} {{ workspace.period }}</td>
-										{% elif workspace.day_of_week%}
-											<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
-										{% else %}
-											<td></td>
-										{% endif %}
-										<td> {{ workspace.username }} </td>
+									<td>{{ workspace.name }}</td>
+									<td>{{ workspace.description }}</td>
+									{% if workspace.every %}
+										<td>{{ workspace.every }} {{ workspace.period }}</td>
+									{% elif workspace.day_of_week%}
+										<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
+									{% else %}
 										<td></td>
-										<td></td>
-										<td></td>
-										<td></td>
-										<th></th>
-									</tr>
-								{% endif %}
+									{% endif %}
+									<td> {{ workspace.username }} </td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<th></th>
+								</tr>
 							{% endfor %}
 						</tbody>
 					</table>
@@ -758,24 +756,68 @@
 			"columnDefs": [{
 				"targets": -1,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>'
+				"render": function ( data, type, row ) {
+					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+					var dataset = $('#etl-table').find(filter).data();
+					if (dataset['editable']) {
+						return '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>';
+					}
+					else {
+						return '';
+					}
+				}
 			},{
 				"targets": -2,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+				"render": function ( data, type, row ) {
+					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+					var dataset = $('#etl-table').find(filter).data();
+					if (dataset['editable']) {
+						return '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
+					}
+					else {
+						return '';
+					}
+				}
 			},{
 				"targets": -3,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>'
-				
+				"render": function ( data, type, row ) {
+					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+					var dataset = $('#etl-table').find(filter).data();
+					if (dataset['editable']) {
+						return '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>';
+					}
+					else {
+						return '';
+					}
+				}
 			},{
 				"targets": -4,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>'
+				"render": function ( data, type, row ) {
+					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+					var dataset = $('#etl-table').find(filter).data();
+					if (dataset['editable']) {
+						return '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>';
+					}
+					else {
+						return '';
+					}
+				}
 			},{
 				"targets": -5,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-set-parameters-workspace" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Set parameters" %}' + '" class="btn btn-secondary"><i class="fa fa-bars"></i></button>'
+				"render": function ( data, type, row ) {
+					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+					var dataset = $('#etl-table').find(filter).data();
+					if (dataset['editable']) {
+						return '<button type="button" name="button-set-parameters-workspace" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Set parameters" %}' + '" class="btn btn-secondary"><i class="fa fa-bars"></i></button>';
+					}
+					else {
+						return '';
+					}
+				}
 			},{
 				"targets": 1,
 				"data": null,
