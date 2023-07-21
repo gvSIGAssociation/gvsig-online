@@ -104,6 +104,9 @@ class EtlWorkspaceExecuteRole(models.Model):
         indexes = [
             models.Index(fields=['etl_ws', 'role']),
         ]
+        constraints = [
+           models.UniqueConstraint(fields=['etl_ws', 'role'], name='unique_exec_permission_per_role_and_etlws')
+        ]
 
 class EtlWorkspaceEditRole(models.Model):
     etl_ws = models.ForeignKey(ETLworkspaces, on_delete=models.CASCADE)
@@ -112,4 +115,7 @@ class EtlWorkspaceEditRole(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['etl_ws', 'role']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['etl_ws', 'role'], name='unique_edit_permission_per_role_and_etlws')
         ]
