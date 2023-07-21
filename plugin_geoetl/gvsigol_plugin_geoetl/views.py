@@ -54,6 +54,8 @@ from datetime import datetime
 import json
 import os
 
+class EtlWorkspaceExists(Exception):
+    pass
 
 def get_conf(request):
     if request.method == 'POST': 
@@ -442,55 +444,53 @@ def name_user_exists(id, name, user):
             return True
     return False
 
+def _etl_workspace_update(instance, request, name, description, workspace, params, concat, periodic_task, set_superuser=False):
+    if request.user.is_superuser and set_superuser:
+        username = request.user.username
+    else:
+        username = instance.username
+    if name_user_exists(instance.id, name, username):
+        raise EtlWorkspaceExists
+
+    instance.username = username
+    instance.name = name
+    instance.description = description
+    instance.parameters = params
+    instance.workspace = workspace
+    instance.concat = concat
+    instance.save()
+
+    if instance.id is not None:
+        delete_periodic_workspace(instance)
+    if periodic_task:
+        save_periodic_workspace(request, instance)
+
 @login_required()
 @staff_required
-def etl_workspace_add(request):
+def etl_workspace_update(request):
     if request.method == 'POST':
         name = request.POST.get('name') 
         description = request.POST.get('description')
         workspace = request.POST.get('workspace')
         periodic_task = request.POST.get('checked') == 'true'
+        set_superuser = request.POST.get('superuser') == 'true'
         try:
             id = int(request.POST.get('id'))
-            # if the ws exists, we update it
             ws = ETLworkspaces.objects.get(id = id)
-            if ws.can_edit(request):
-                if name_user_exists(id, name, workspace.username):
-                    response = {
-                        'exists': 'true',
-                    }   
-                    return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-                ws.name = name
-                ws.description = description
-                ws.save()
-                delete_periodic_workspace(workspace)
-                if periodic_task:
-                    save_periodic_workspace(request, workspace)
-            else:
+            if not ws.can_edit(request):
                 return HttpResponse(json.dumps({'status': 'not allowed'}, indent=4), content_type='folder/json')
+            params = ws.parameters
         except:
-            # creating a new ws
-            if request.user.is_superuser or request.user.is_staff:
-                if name_user_exists(None, name, request.user.username):
-                    response = {
-                        'exists': 'true',
-                    }   
-                    return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+            ws = ETLworkspaces()
+            params = None
+        try:
+            _etl_workspace_update(ws, request, name, description, workspace, params, False, periodic_task, set_superuser)
+        except EtlWorkspaceExists:
+            response = {
+                'exists': 'true',
+            }   
+            return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
-                id = None
-                params = None
-                workspace = ETLworkspaces(
-                    name = name,
-                    description = description,
-                    workspace = workspace,
-                    username = request.user.username,
-                    parameters = None
-                )
-                workspace.save()
-                if periodic_task:
-                    save_periodic_workspace(request, workspace)
-            else:
-                return HttpResponse(json.dumps({'status': 'not allowed'}, indent=4), content_type='folder/json')
         response = {
             'workspaces': get_list(request)
         }
@@ -512,39 +512,11 @@ def etl_workspace_delete(request):
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
+
 @login_required()
 @staff_required
-def etl_workspace_update(request):
-    if request.method == 'POST':
-        id = request.POST['id']
-        instance  = ETLworkspaces.objects.get(id=int(id))
-        if instance.can_edit(request):
-
-            params = instance.parameters
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-            set_superuser = request.POST.get('superuser') == 'true'
-            exists = name_user_exists(id, name, instance.username)
-            if exists:
-                response = {
-                    'exists': 'true',
-                }   
-                return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-            if set_superuser:
-                instance.username = 'root'
-            instance.name = name
-            instance.description = description
-            instance.parameters = params
-            instance.save()
-
-            delete_periodic_workspace(instance)
-
-            if request.POST.get('checked') == 'true':
-
-                save_periodic_workspace(request, instance)
-                
-    response = {}
-    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+def etl_workspace_add(request):
+    return etl_workspace_update(request)
 
 @login_required()
 @staff_required
@@ -622,14 +594,14 @@ def etl_read_canvas(request):
                 if ws.can_execute(request):
                     run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
                                                                 'id_ws': id_ws, 
-                                                                'username': request.POST['username'], 
+                                                                'username': request.user.user.name, 
                                                                 'parameters': params,
                                                                 'concat': concat})
                     
-            else: # TODO revisar con Carles
+            else: # executing a workspace that has not been saved yet
                 run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
                                                             'id_ws': id_ws, 
-                                                            'username': request.POST['username'], 
+                                                            'username': request.user.user.name,
                                                             'parameters': params,
                                                             'concat': concat})
 
@@ -1146,92 +1118,27 @@ def get_workspaces(request):
 @staff_required
 def etl_concatenate_workspace_update(request):
     if request.method == 'POST':
+        name = request.POST.get('name') 
+        description = request.POST.get('description')
+        workspace = request.POST.get('workspace')
+        periodic_task = request.POST.get('checked') == 'true'
+        set_superuser = request.POST.get('superuser') == 'true'
+        try:
+            id = int(request.POST.get('id'))
+            ws = ETLworkspaces.objects.get(id = id)
+            if not ws.can_edit(request):
+                return HttpResponse(json.dumps({'status': 'not allowed'}, indent=4), content_type='folder/json')
+            params = ws.parameters
+        except:
+            ws = ETLworkspaces()
+            params = None
+        try:
+            _etl_workspace_update(ws, request, name, description, workspace, params, True, periodic_task, set_superuser)
+        except EtlWorkspaceExists:
+            response = {
+                'exists': 'true',
+            }   
+            return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
-        lgid = request.POST['id']
-
-        if lgid == '':
-            instance = ETLworkspaces(
-                name = request.POST.get('name'),
-                description = request.POST.get('description'),
-                workspace = request.POST.get('workspace'),
-                username = request.user.username,
-                concat = True
-            )
-            
-        else:
-
-            instance  = ETLworkspaces.objects.get(id=int(lgid))
-
-        if request.POST.get('superuser') == 'false':
-            if lgid == '':
-                user = request.user.username
-                id = 0
-                name = request.POST.get('name')
-                exists = name_user_exists(id, name, user)
-
-                if exists:
-                    response = {
-                        'exists': 'true',
-                    }   
-                    return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-            else:
-                user = instance.username
-                id = int(request.POST.get('id'))
-                name = request.POST.get('name')
-            
-
-            
-            if lgid == '':
-                instance.save()
-            else:
-                workspace = ETLworkspaces(
-                    id = id,
-                    name = name,
-                    description = request.POST.get('description'),
-                    workspace = instance.workspace,
-                    username = user,
-                    concat = True
-                )
-                workspace.save()
-        else:
-
-            user = request.user.username
-            if lgid == '':
-                id = 0
-                name = request.POST.get('name')
-                exists = name_user_exists(id, name, user)
-
-                if exists:
-                    response = {
-                        'exists': 'true',
-                    }   
-                    return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-            else:
-                id = int(request.POST.get('id'))
-                name = request.POST.get('name')
-            
-
-            if lgid == '':
-                print(instance)
-                instance.save()
-            else:
-                workspace = ETLworkspaces(
-                    id = id,
-                    name = name,
-                    description = request.POST.get('description'),
-                    workspace = request.POST.get('workspace'),
-                    username = user,
-                    concat = True
-                )
-                workspace.save()
-
-        if lgid != '':   
-
-            delete_periodic_workspace(instance)
-
-        if request.POST.get('checked') == 'true':
-
-            save_periodic_workspace(request, instance)
-            
     response = {}
     return render(request, 'dashboard_geoetl_concat_workspaces.html', response)
