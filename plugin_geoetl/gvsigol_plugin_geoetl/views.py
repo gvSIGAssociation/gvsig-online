@@ -448,7 +448,10 @@ def _etl_workspace_update(instance, request, name, description, workspace, param
     if request.user.is_superuser and set_superuser:
         username = request.user.username
     else:
-        username = instance.username
+        if instance.username is None:
+            username = instance.username
+        else:
+            username = request.user.username
     if name_user_exists(instance.id, name, username):
         raise EtlWorkspaceExists
 
