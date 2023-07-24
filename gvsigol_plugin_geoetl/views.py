@@ -597,14 +597,14 @@ def etl_read_canvas(request):
                 if ws.can_execute(request):
                     run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
                                                                 'id_ws': id_ws, 
-                                                                'username': request.user.name, 
+                                                                'username': request.user.username, 
                                                                 'parameters': params,
                                                                 'concat': concat})
                     
             else: # executing a workspace that has not been saved yet
                 run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
                                                             'id_ws': id_ws, 
-                                                            'username': request.user.name,
+                                                            'username': request.user.username,
                                                             'parameters': params,
                                                             'concat': concat})
 
