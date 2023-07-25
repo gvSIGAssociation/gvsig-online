@@ -24,6 +24,7 @@
 from gvsigol_symbology.models import  StyleLayer, Symbolizer, Style, ExternalGraphicSymbolizer
 from gvsigol_symbology import sld_builder
 from gvsigol_services.backend_postgis import Introspect
+from gvsigol_services.utils import set_default_permissions
 from django.core import serializers
 from gvsigol import settings
 import tempfile, zipfile
@@ -98,19 +99,23 @@ def copyrecursively(source_folder, destination_folder):
             if os.path.exists(dst_path):
                 if os.stat(src_path).st_mtime > os.stat(dst_path).st_mtime:
                     shutil.copyfile(src_path, dst_path)
+                    set_default_permissions(dst_path)
             else:
                 if not os.path.exists(os.path.dirname(dst_path)):
                     try:
                         os.makedirs(os.path.dirname(dst_path))
+                        os.chmod(os.path.dirname(dst_path), 0o750)
                     except OSError as exc: # Guard against race condition
                         if exc.errno != errno.EEXIST:
                             raise
                 shutil.copyfile(src_path, dst_path)
+                set_default_permissions(dst_path)
         for item in dirs:
             src_path = os.path.join(root, item)
             dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
             if not os.path.exists(dst_path):
                 os.mkdir(dst_path)
+                os.chmod(dst_path, 0o750)
                 
 def copy_resources(symbol, resource_path):
     symbolizers = Symbolizer.objects.filter(rule = symbol)
@@ -130,11 +135,14 @@ def copy(src, dest):
                 local_dir_url = dest[:dest.rfind('/')]
                 if not os.path.exists(local_dir_url):
                     os.mkdir(local_dir_url)
+                    os.chmod(local_dir_url, 0o750)
             shutil.copy2(src, dest)
+            set_default_permissions(dest)
     except OSError as e:
         # If the error was caused because the source wasn't a directory
         if e.errno == errno.ENOTDIR:
             shutil.copy(src, dest)
+            set_default_permissions(dest)
         else:
             print(('Directory not copied. Error: %s' % e))
 
@@ -180,6 +188,7 @@ def check_library_path(library):
     library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
     try:        
         os.mkdir(library_path)
+        os.chmod(library_path, 0o750)
         return library_path
      
     except OSError as e:
@@ -190,6 +199,7 @@ def check_custom_legend_path():
     legend_path = settings.MEDIA_ROOT + "custom_legends/"
     try:        
         os.mkdir(legend_path)
+        os.chmod(legend_path, 0o750)
         return legend_path
      
     except OSError as e:
@@ -204,7 +214,7 @@ def save_custom_legend(legend_path, file, file_name):
         with open(file_path, 'wb+') as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
-        
+        set_default_permissions(file_path)
         legend_url = settings.MEDIA_URL + "custom_legends/" + file_name   
         return legend_url
      
@@ -220,7 +230,7 @@ def save_external_graphic(library_path, file, file_name):
         with open(file_path, 'wb+') as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
-                
+        set_default_permissions(file_path)
         return True
      
     except Exception:

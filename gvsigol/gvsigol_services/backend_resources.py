@@ -48,7 +48,7 @@ class GvsigolRM():
                 for chunk in resource.chunks():
                     destination.write(chunk)
             relative_path = os.path.relpath(f, settings.MEDIA_ROOT)
-            os.chmod(f, 0o0700)
+            utils.set_default_permissions(f)
             return [True, relative_path]
          
         except Exception as e:
@@ -89,6 +89,7 @@ class GvsigolRM():
             target_dir = utils.get_historic_resources_dir(path_, lyrid)
             new_path = os.path.join(target_dir, new_name)
             copyfile(path_, new_path)
+            utils.set_default_permissions(new_path)
             rel_path = os.path.relpath(new_path, settings.MEDIA_ROOT)
             return rel_path
 
