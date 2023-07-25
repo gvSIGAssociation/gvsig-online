@@ -799,12 +799,13 @@ def get_layerread_by_user(request):
 
 def set_default_permissions(file_path):
     """
-    Sets the default permissions to the provided file, based
-    on the system umask value
+    Sets the default permissions to the provided file. We set 0o640
+    by default and substract the system umask to get the most
+    restrictive default.
     """
-    umask = os.umask(0o666)
-    os.umask(umask)
-    os.chmod(file_path, 0o666 & ~umask)
+    umask = os.umask(0o666) # set a random mask to retrive the system mask
+    os.umask(umask) # restore system mask
+    os.chmod(file_path, 0o640 & ~umask)
 
 def create_user_workspace(username, role):
     """
