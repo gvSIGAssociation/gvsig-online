@@ -6,7 +6,7 @@
 {% block content %}	
 	<div class="row">
 		<div class="col-md-12">
-			<form id="project-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/project_add/">
+			<form id="project-form" enctype="multipart/form-data" role="form" method="post" onkeydown="return event.key != 'Enter';" action="/gvsigonline/core/project_add/">
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<div class="box-tools pull-right">
@@ -189,12 +189,12 @@
 													<a href="javascript:void(0)" class="product-title"><span class="searchable-layer">{{layergroup.title}}</span>
 														<div style="margin-right: 10px;" class="radio pull-right">													
 															<label>
-																<input type="radio" class="selected-base-group" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group" value="{{layergroup.id}}" id="selected-base-group-{{layergroup.id}}"/>{% trans "Base group" %}
+																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" value="{{layergroup.id}}" id="selected-base-group-{{layergroup.id}}"/>{% trans "Base group" %}
 															</label>
 														</div>
 														<div style="margin-right: 10px;" class="checkbox pull-right">													
 															<label>
-																<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
+																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
 															</label>
 														</div>
 													</a>
@@ -234,7 +234,7 @@
 									<div class="box-body toc-layer-update">
 										<div id="toc" class="toc">
 										{% for g in toc %}
-											<div id="lg_{{g.1.name}}" data-name="{{g.1.name}}" data-title="{{g.1.title}}" data-order="{{g.1.order}}" class="box box-default collapsed-box toc-layergroup">
+											<div id="lg_{{g.1.id}}" data-name="{{g.1.name}}" data-title="{{g.1.title}}" data-order="{{g.1.order}}" class="box box-default collapsed-box toc-layergroup">
 												<div class="box-header with-border">
 													<span class="handle" style="margin-right: 20px;"> 
 														<i class="fa fa-ellipsis-v"></i>
@@ -541,6 +541,93 @@
 			console.log(e)
 		}
 	}
+
+	function setOnSelectedBasegroupChanged() {
+		$('input[name=selected-base-group-btn]').parent().mouseup(function(e) {
+			var previousSelection = $('input:radio[name=selected-base-group-btn]:checked');
+			var data_id = $(previousSelection).attr("data-groupid");
+			if ($(previousSelection).is(':checked')){
+	  			$("#layergroup-" + data_id).prop("checked", false);
+				$("#lg_"+data_id).remove();
+	  		}
+		});
+		$('input[name=selected-base-group-btn]').change(function(e) {
+	  		var data_id = $(this).attr("data-groupid");
+	  		var data_name = $(this).attr("data-name");
+	  		var data_title = $(this).attr("data-title");
+	  		
+	  		$('.baselayers-default').each(function( index ) {
+	  			$(this).prop("checked", false);
+	  		});
+			$('.basegroup-layers').css("display", "none");
+			$('#basegroup-layers-' + data_id).css("display", "block");
+			
+			$('#basegroup-layers-' + data_id + " li").first().find( "input" ).prop("checked", true);
+			if(!$("#layergroup-" + data_id).is(':checked')){
+	  			$("#layergroup-" + data_id).prop("checked", true);
+	  		}
+			
+			$("#lg_"+data_id).remove();
+
+			$('.layergroup-input').each(function( index ) {
+				var id = $(this).attr("data-groupid");
+		  		var name = $(this).attr("data-name");
+		  		var title = $(this).attr("data-title");
+		  		
+				if ($("#layergroup-" + id).is(':checked')) {
+					var exists = ($("#lg_" + id).length>0);
+					if (!exists) {
+						var newdata = '<div id="lg_'+id+'" data-groupid="' + id +'" data-name="'+name+'" data-title="'+title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
+						'<div class="box-header with-border">'+
+						'	<span class="handle" style="margin-right: 20px;"> '+
+						'		<i class="fa fa-ellipsis-v"></i>'+
+						'		<i class="fa fa-ellipsis-v"></i>'+
+						'	</span>'+
+						'	<span class="text">'+title+'</span>'+
+						'</div>'+	
+						'</div>';	
+						$("#toc").append(newdata);	
+					}
+					
+				}
+			});
+		});
+	}
+
+	function setOnSelectedLayergroupChanged() {
+		$(".layergroup-input").unbind("click").click(function(){
+			console.log("checked");
+	  		if($(this).is(':checked')){	
+		  		var data_id = $(this).attr("data-groupid");
+		  		var data_name = $(this).attr("data-name");
+		  		var data_title = $(this).attr("data-title");
+		  		
+				var newdata = '<div id="lg_'+data_id+'" data-groupid="' + data_id +'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
+					'<div class="box-header with-border">'+
+					'	<span class="handle" style="margin-right: 20px;"> '+
+					'		<i class="fa fa-ellipsis-v"></i>'+
+					'		<i class="fa fa-ellipsis-v"></i>'+
+					'	</span>'+
+					'	<span class="text">'+data_title+'</span>'+
+					'</div>'+	
+					'</div>';	
+		  		if($("#selected-base-group-" + data_id).is(':checked')){
+					$("#toc").append(newdata);
+		  		}
+				else {
+					$("#toc").prepend(newdata);
+				}	
+	  		}else{
+	  			var data_id = $(this).attr("data-groupid");
+		  		if ($("#selected-base-group-" + data_id).is(':checked')) {
+		  			$("#selected-base-group-" + data_id).prop("checked", false);
+		  			$('.basegroup-layers').css("display", "none");
+		  		}
+		  		
+				$("#lg_"+data_id).remove();
+	  		}
+	  	});
+	}
 	
 	$().ready(function() {
 		/**
@@ -662,28 +749,8 @@
 		});
 		
 		searcheableList2.on("updated", function(){
-			$(".layergroup-input").unbind("click").click(function(){
-		  		if($(this).is(':checked')){	
-			  		var data_id = $(this).attr("data-id");
-			  		var data_name = $(this).attr("data-name");
-			  		var data_title = $(this).attr("data-title");
-			  		var newdata = '<div id="lg_'+data_name+'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
-					'<div class="box-header with-border">'+
-					'	<span class="handle" style="margin-right: 20px;"> '+
-					'		<i class="fa fa-ellipsis-v"></i>'+
-					'		<i class="fa fa-ellipsis-v"></i>'+
-					'	</span>'+
-					'	<span class="text">'+data_title+'</span>'+
-					'</div>'+	
-					'</div>';	
-					$("#toc").append(newdata);
-		  		}else{
-		  			var data_id = $(this).attr("data-id");
-			  		var data_name = $(this).attr("data-name");
-			  		
-					$("#lg_"+data_name).remove()
-		  		}
-		  	});
+			setOnSelectedLayergroupChanged();
+			setOnSelectedBasegroupChanged();
 		});
 		
 		$(".save_button").click(function(e){
@@ -696,19 +763,38 @@
 				var item = searcheableList2.items[i];
 				item.show();
 			}
-			$(".project-usergroup-checkbox").prop( "disabled", false)
+			$(".project-usergroup-checkbox").prop( "disabled", false);
+			var selectedBaseLayer = $('input:radio[name=baselayers-default]:checked').val();
+			var selectedBaseGroup = $('input:radio[name=selected-base-group-btn]:checked').val();
+			console.log(selectedBaseGroup);
+			$("#selected_base_layer").val(selectedBaseLayer);
+			$("#selected_base_group").val(selectedBaseGroup);
 			
-			var toc = {}
+			var toc = {};
 			var root = $('#toc');
 			var groupList = root.children();
-			for (var i=0; i<groupList.length; i++) {
-				var g = groupList[i];
-				var groupOrder = (groupList.length - i) * 1000;
-				var groupName = g.dataset.name;
-				var groupTitle = g.dataset.title;
+			var g, groupId, groupOrder, groupName, groupTitle;
+			//for (var i=0; i<groupList.length; i++) {
+			for (var i=groupList.length-1; i>=0; i--) {
+				g = groupList[i];
+				groupId = g.dataset.groupid;
+				if (groupId == selectedBaseGroup) {
+					groupOrder = 500;
+				}
+				else {
+					groupOrder = (groupList.length - i) * 1000;
+				}
+				groupName = g.dataset.name;
+				groupTitle = g.dataset.title;
+				
+				console.log("-- id:" + groupId);
+				console.log("-- name:" + groupName);
+				console.log("--- title:" + groupTitle);
+				console.log("--- order:" + groupOrder);
 				
 				var layers = {};
 				var group = {
+					'id': groupId,
 					'name': groupName,
 					'title': groupTitle,
 					'order': groupOrder,
@@ -790,7 +876,7 @@
 			}
 			
 			var selectedBaseLayer = $('input:radio[name=baselayers-default]:checked').val();
-			var selectedBaseGroup = $('input:radio[name=selected-base-group]:checked').val();
+			var selectedBaseGroup = $('input:radio[name=selected-base-group-btn]:checked').val();
 			$("#selected_base_layer").val(selectedBaseLayer);
 			$("#selected_base_group").val(selectedBaseGroup);
 		});
@@ -859,91 +945,11 @@
 			forcePlaceholderSize: true,
 			zIndex: 999999
 		});
-	  	
-	  	$(".layergroup-input").unbind("click").click(function(){
-	  		if($(this).is(':checked')){	
-		  		var data_id = $(this).attr("data-id");
-		  		var data_name = $(this).attr("data-name");
-		  		var data_title = $(this).attr("data-title");
-		  		
-		  		if(!$("#selected-base-group-" + data_id).is(':checked')){
-		  			var newdata = '<div id="lg_'+data_name+'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
-					'<div class="box-header with-border">'+
-					'	<span class="handle" style="margin-right: 20px;"> '+
-					'		<i class="fa fa-ellipsis-v"></i>'+
-					'		<i class="fa fa-ellipsis-v"></i>'+
-					'	</span>'+
-					'	<span class="text">'+data_title+'</span>'+
-					'</div>'+	
-					'</div>';	
-					$("#toc").append(newdata);	
-		  		}
-		  		
-	  		}else{
-	  			var data_id = $(this).attr("data-id");
-		  		var data_name = $(this).attr("data-name");
-		  		
-		  		if ($("#selected-base-group-" + data_id).is(':checked')) {
-		  			$("#selected-base-group-" + data_id).prop("checked", false);
-		  			$('.basegroup-layers').css("display", "none");
-		  		}
-		  		
-				$("#lg_"+data_name).remove();
-	  		}
-	  	});
-	  	
-	  	
-	  	$('input[name=selected-base-group]').change(function(e) {
-	  		var data_id = $(this).attr("data-id");
-	  		var data_name = $(this).attr("data-name");
-	  		var data_title = $(this).attr("data-title");
-	  		
-	  		$('.baselayers-default').each(function( index ) {
-	  			$(this).prop("checked", false);
-	  		});
-	  		
-			$('.basegroup-layers').css("display", "none");
-			$('#basegroup-layers-' + this.dataset.id).css("display", "block");
-			
-			$('#basegroup-layers-' + this.dataset.id + " li").first().find( "input" ).prop("checked", true);
-			
-			if(!$("#layergroup-" + data_id).is(':checked')){
-	  			$("#layergroup-" + data_id).prop("checked", true);
-	  		}
-			
-			$("#lg_"+data_name).remove();
-			
-			$('.layergroup-input').each(function( index ) {
-				var id = $(this).attr("data-id");
-		  		var name = $(this).attr("data-name");
-		  		var title = $(this).attr("data-title");
-		  		
-		  		if (id != data_id) {
-		  			if ($("#layergroup-" + id).is(':checked')) {
-		  				var exists = false;
-		  				if($("#lg_" + name).length) {
-		  					exists = true;
-		  				}
-		  				if (!exists) {
-		  					var newdata = '<div id="lg_'+name+'" data-name="'+name+'" data-title="'+title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
-							'<div class="box-header with-border">'+
-							'	<span class="handle" style="margin-right: 20px;"> '+
-							'		<i class="fa fa-ellipsis-v"></i>'+
-							'		<i class="fa fa-ellipsis-v"></i>'+
-							'	</span>'+
-							'	<span class="text">'+title+'</span>'+
-							'</div>'+	
-							'</div>';	
-							$("#toc").append(newdata);	
-		  				}
-		  				
-		  			}
-		  		}
-			});
-			
-		});
+
+	  	setOnSelectedLayergroupChanged();
+	  	setOnSelectedBasegroupChanged();
+
 		function handleIsPublicResourceCheckbox(searcheableList) {
-			console.log(searcheableList);
 			// inital status
 			$(".project-usergroup-checkbox").prop( "disabled", $("#is_public").is(":checked"));
 			// monitor changes
@@ -957,7 +963,6 @@
 			});
 			// apply disabled status on searcheableReadList page changes
 			searcheableList.on('updated', function() {
-				console.log("updated");
 				$(".project-usergroup-checkbox").prop( "disabled", $("#is_public").is(":checked"));
 			});
 		}
@@ -978,7 +983,7 @@
 				var item = searcheableList2.items[i];
 				var checkbox = $(item.elm).find("input:checkbox")[0];
 				if (checkbox.checked) {
-					checkedLayergroups.push(checkbox.dataset.id);
+					checkedLayergroups.push(checkbox.dataset.groupid);
 				}
 			}
 			data = {
