@@ -167,6 +167,28 @@ def project_list(request):
     }
     return render(request, 'project_list.html', response)
 
+def _get_prepared_layer_groups(request):
+    if request.user.is_superuser:
+        layergroups = LayerGroup.objects.exclude(name='__default__')
+    else:
+        layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by=request.user.username)
+        
+    prepared_layer_groups = []
+    for lg in layergroups:
+        layer_group = {}
+        layer_group['id'] = lg.id
+        layer_group['name'] = lg.name
+        layer_group['title'] = lg.title
+        layer_group['layers'] = []
+        layers = Layer.objects.filter(layer_group_id=lg.id)
+        for l in layers:
+            layer_group['layers'].append({
+                'id': l.id,
+                'title': l.title
+            })
+        prepared_layer_groups.append(layer_group)
+    return prepared_layer_groups
+
 @login_required()
 @staff_required
 def project_add(request):
@@ -196,7 +218,7 @@ def project_add(request):
         extent4326_maxx = request.POST.get('extent4326_maxx')
         extent4326_maxy = request.POST.get('extent4326_maxy')
         zoom = request.POST.get('zoom')
-        toc = request.POST.get('toc_value')
+        layer_group_order = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
         tools = request.POST.get('project_tools')
         expiration_date_utc = request.POST.get('expiration_date_utc')
@@ -249,27 +271,6 @@ def project_add(request):
             if 'usergroup-' in key:
                 assigned_roles.append(key[len('usergroup-'):])
 
-        layergroups = None
-        if request.user.is_superuser:
-            layergroups = LayerGroup.objects.exclude(name='__default__')
-        else:
-            layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by__exact=request.user.username)
-            
-        prepared_layer_groups = []
-        for lg in layergroups:
-            layer_group = {}
-            layer_group['id'] = lg.id
-            layer_group['name'] = lg.name
-            layer_group['title'] = lg.title
-            layer_group['layers'] = []
-            layers = Layer.objects.filter(layer_group_id=lg.id)
-            for l in layers:
-                layer_group['layers'].append({
-                    'id': l.id,
-                    'title': l.title
-                })
-            prepared_layer_groups.append(layer_group)
-
         groups = None
         if request.user.is_superuser:
             groups = auth_backend.get_all_roles_details(exclude_system=True)
@@ -278,15 +279,38 @@ def project_add(request):
 
         if name == '':
             message = _('You must enter an project name')
-            return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+            return render(request, 'project_add.html',
+                          {
+                            'message': message,
+                            'layergroups': _get_prepared_layer_groups(request),
+                            'tools': project_tools,
+                            'groups': groups,
+                            'has_geocoding_plugin': has_geocoding_plugin
+                          }
+                        )
 
         if _valid_name_regex.search(name) == None:
             message = _("Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-            return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+            return render(request, 'project_add.html',
+                          {
+                            'message': message,
+                            'layergroups': _get_prepared_layer_groups(request),
+                            'tools': project_tools,
+                            'groups': groups,
+                            'has_geocoding_plugin': has_geocoding_plugin
+                          }
+                        )
+    
+        toc_order = core_utils.get_json_toc(assigned_layergroups, selected_base_group, json.loads(layer_group_order))
 
         if Project.objects.filter(name=name).exists():
             message = _('Project name already exists')
-            return render(request, 'project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+            return render(request, 'project_add.html', {'message': message,
+                                                        'tools': project_tools ,
+                                                        'layergroups': _get_prepared_layer_groups(request),
+                                                        'groups': groups,
+                                                        'has_geocoding_plugin': has_geocoding_plugin
+                                                    })
 
         project = Project(
             name = name,
@@ -297,7 +321,7 @@ def project_add(request):
             center_lon = longitude,
             zoom = int(float(zoom)),
             extent = extent,
-            toc_order = toc,
+            toc_order = toc_order,
             toc_mode = toc_mode,
             created_by = request.user.username,
             is_public = is_public,
@@ -371,33 +395,13 @@ def project_add(request):
         return redirect('project_list')
 
     else:
-        layergroups = None
-        if request.user.is_superuser:
-            layergroups = LayerGroup.objects.exclude(name='__default__')
-        else:
-            layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by__exact=request.user.username)
-
         roles = None
         if request.user.is_superuser:
             roles = auth_backend.get_all_roles_details(exclude_system=True)
         else:
             roles = get_primary_user_role_details(request)
         
-        prepared_layer_groups = []
-        for lg in layergroups:
-            layer_group = {}
-            layer_group['id'] = lg.id
-            layer_group['name'] = lg.name
-            layer_group['title'] = lg.title
-            layer_group['layers'] = []
-            layers = Layer.objects.filter(layer_group_id=lg.id)
-            for l in layers:
-                layer_group['layers'].append({
-                    'id': l.id,
-                    'title': l.title
-                })
-            prepared_layer_groups.append(layer_group)  
-
+        prepared_layer_groups = _get_prepared_layer_groups(request)
         labels = []
         for l in settings.PRJ_LABELS:
             labels.append({'label': l, 'checked': ''})
@@ -428,7 +432,7 @@ def project_update(request, pid):
         extent4326_maxx = request.POST.get('extent4326_maxx')
         extent4326_maxy = request.POST.get('extent4326_maxy')
         zoom = request.POST.get('zoom')
-        toc = request.POST.get('toc_value')
+        layer_group_order = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
         tools = request.POST.get('project_tools')
         expiration_date_utc = request.POST.get('expiration_date_utc')
@@ -488,9 +492,8 @@ def project_update(request, pid):
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             old_layer_groups.append(lg.layer_group.id)
 
-        if (old_order != toc) or list(assigned_layergroups) != list(old_layer_groups):
-            # core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
-            project.toc_order = core_utils.get_json_toc(assigned_layergroups, selected_base_group)
+        if not old_order or (old_order != layer_group_order) or list(assigned_layergroups) != list(old_layer_groups):
+            project.toc_order = core_utils.get_json_toc(assigned_layergroups, selected_base_group, json.loads(layer_group_order))
 
         name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
         name = re.sub(' ','',name)
@@ -504,7 +507,6 @@ def project_update(request, pid):
         project.zoom = int(float(zoom))
         project.extent = extent
         project.is_public = is_public
-        project.toc_order = toc
         project.toc_mode = toc_mode
         project.tools = tools
         project.show_project_icon = show_project_icon
@@ -591,16 +593,19 @@ def project_update(request, pid):
         ordered_toc = {}
         for g in layer_groups:
             if g.get('checked'):
-                order = 1000
+                if g.get('baselayer_group', False):
+                    order = 500
+                else:
+                    order = 1000
                 layers = {}
                 for gnames in toc:
                     if g['name'] == gnames:
                         group = toc.get(gnames)
-                        order = group.get('order', 1000)
+                        order = group.get('order', order)
                         ordered_layers = sorted(iter(group.get('layers').items()), key=lambda x_y: x_y[1]['order'], reverse=True)
                         layers = ordered_layers
                         break
-                ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': order, 'layers': layers}
+                ordered_toc[g['name']] = {'name': g['name'], 'id': g['id'], 'title': g['title'], 'order': order, 'layers': layers}
         ordered_toc = sorted(iter(ordered_toc.items()), key=lambda x_y2: x_y2[1]['order'], reverse=True)
         if project.tools:
             try:
