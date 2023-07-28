@@ -171,8 +171,6 @@
 				'date_pattern': time_pattern
 			},
 		  	success	:function(response){
-		  		console.log("route: " + route)
-		  		console.log(response);
 
 		  		var route_path = route.replace("/", "-") + "-" + count;
 		  		$("#"+route_path+"-target-by-user-chart").empty();
@@ -277,35 +275,33 @@
 		  	error: function(){}
 		});
 	}
+	function statistics_load(plugin_id, operation, title, count, target_title, target_field, reverse_petition){
+		var stat_id = plugin_id + '-' + operation + '-' + count;
+		$("#statistics-tab-controller").append('<li id="li-statistics-' + stat_id + '"><a href="#tab-statistics-' + stat_id + '" data-toggle="tab">' + title + '</a></li>');
 
+		$("#li-statistics-" + stat_id).click(function(){
+			reload_data(plugin_id + '/' + operation, count, reverse_petition, target_title, target_field);
 
-	$().ready(function() {
-		$("#statistics-tab-controller").append('<li id="li-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}"><a href="#tab-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}" data-toggle="tab">{{ plugin.title }}</a></li>');
-
-		$("#li-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}").click(function(){
-			reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}");
-
-			$("#li-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}").unbind("click");
+			$("#li-statistics-" + stat_id).unbind("click");
 		});
 
-		$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-icon").click(function(){
-			if($("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div").hasClass("hidden")){
-				$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div").removeClass("hidden");
+		$("#" + stat_id + "-filter-icon").click(function(){
+			if($("#" + stat_id + "-filter-div").hasClass("hidden")){
+				$("#" + stat_id + "-filter-div").removeClass("hidden");
 			}else{
-				$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div").addClass("hidden");
+				$("#" + stat_id + "-filter-div").addClass("hidden");
 			}
 		});
 
 		$.extend( true, $.fn.dataTable.defaults, {
-		    "searching": false,
-		    "ordering": false,
-		    "paging":   false,
-	        "info":     false
+			"searching": false,
+			"ordering": false,
+			"paging":   false,
+			"info":     false
 		} );
 
-		$("#{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-table").DataTable({
-	        "order": [[ 1, "desc" ]]
-	    } );
-
-	});
+		$("#" + stat_id + "-target-by-user-table").DataTable({
+			"order": [[ 1, "desc" ]]
+		} );
+	}
 </script>
