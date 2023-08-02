@@ -1,0 +1,702 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-11-10 09:56+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: csv_to_db.py:48 csv_to_db.py:66 excel_to_db.py:51 excel_to_db.py:69
+msgid "In process"
+msgstr "En proceso"
+
+#: csv_to_db.py:53
+msgid "CSV file"
+msgstr "CSV"
+
+#: csv_to_db.py:62 csv_to_db.py:144 excel_to_db.py:65 excel_to_db.py:205
+msgid "line"
+msgstr "línea"
+
+#: csv_to_db.py:144 excel_to_db.py:205
+msgid "of"
+msgstr "de"
+
+#: excel_to_db.py:56
+msgid "Excel file"
+msgstr "Excel"
+
+#: forms.py:9
+msgid "Excel"
+msgstr "Excel"
+
+#: forms.py:9
+msgid "CSV"
+msgstr "CSV"
+
+#: forms.py:10
+msgid "Append data"
+msgstr "Añadir datos a la tabla"
+
+#: forms.py:10
+msgid "Replace data"
+msgstr "Reemplazar los datos existentes en la tabla"
+
+#: forms.py:17 forms.py:34 templates/browser/transform_to_database.html.py:73
+#: templates/transformation_add.html:43 templates/transformation_update.html:58
+msgid "Workspace"
+msgstr "Espacio de trabajo"
+
+#: forms.py:18 forms.py:35 templates/transformation_list.html.py:24
+msgid "Datastore"
+msgstr "Almacén de datos"
+
+#: forms.py:19 forms.py:36 templates/browser/transform_to_database.html.py:87
+#: templates/transformation_list.html:25
+msgid "Resource"
+msgstr "Tabla"
+
+#: forms.py:21 forms.py:41
+msgid "File"
+msgstr "Fichero"
+
+#: forms.py:23
+msgid "Transformation"
+msgstr "Transformación"
+
+#: forms.py:24
+msgid "Method"
+msgstr "Método"
+
+#: forms.py:33 templates/transformation_add.html.py:36
+#: templates/transformation_list.html:22
+#: templates/transformation_update.html:36
+msgid "Name"
+msgstr "Nombre"
+
+#: forms.py:38
+msgid "Encoding"
+msgstr "Codificación de caracteres"
+
+#: forms.py:40 templates/transformation_list.html.py:23
+#: templates/transformation_update.html:100
+msgid "Type"
+msgstr "Tipo"
+
+#: forms.py:43
+msgid "Parameters"
+msgstr "Parámetros"
+
+#: settings.py:11 settings_template.py:11
+msgid "Fixed year value"
+msgstr "Año por defecto"
+
+#: settings.py:13 settings.py:74 settings.py:136 settings.py:196
+#: settings.py:198 settings_template.py:13 settings_template.py:74
+#: settings_template.py:136 settings_template.py:196 settings_template.py:198
+msgid "Fixed value"
+msgstr "Valor por defecto"
+
+#: settings.py:19 settings.py:42 settings.py:59 settings.py:81 settings.py:104
+#: settings.py:121 settings.py:143 settings.py:166 settings.py:183
+#: settings_template.py:19 settings_template.py:42 settings_template.py:59
+#: settings_template.py:81 settings_template.py:104 settings_template.py:121
+#: settings_template.py:143 settings_template.py:166 settings_template.py:183
+msgid "format"
+msgstr "Formato"
+
+#: settings.py:28 settings_template.py:28
+msgid "Fixed year cell"
+msgstr "Año desde celda"
+
+#: settings.py:30 settings.py:53 settings.py:92 settings.py:115 settings.py:154
+#: settings.py:177 settings_template.py:30 settings_template.py:53
+#: settings_template.py:92 settings_template.py:115 settings_template.py:154
+#: settings_template.py:177
+msgid "Column"
+msgstr "Nº de columna"
+
+#: settings.py:36 settings.py:98 settings.py:160 settings_template.py:36
+#: settings_template.py:98 settings_template.py:160
+msgid "Row"
+msgstr "Nº de fila"
+
+#: settings.py:51 settings_template.py:51
+msgid "Fixed year column"
+msgstr "Año desde columna"
+
+#: settings.py:72 settings_template.py:72
+msgid "Fixed month value"
+msgstr "Mes por defecto"
+
+#: settings.py:90 settings_template.py:90
+msgid "Fixed month cell"
+msgstr "Mes desde celda"
+
+#: settings.py:113 settings_template.py:113
+msgid "Fixed month column"
+msgstr "Mes desde columna"
+
+#: settings.py:134 settings_template.py:134
+msgid "Fixed day value"
+msgstr "Día por defecto"
+
+#: settings.py:152 settings_template.py:152
+msgid "Fixed day cell"
+msgstr "Día desde celda"
+
+#: settings.py:175 settings_template.py:175
+msgid "Fixed day column"
+msgstr "Día desde columna"
+
+#: settings.py:207 settings_template.py:207
+msgid "Cell value"
+msgstr "Valor de celda"
+
+#: settings.py:209 settings.py:227 settings.py:364 settings.py:392
+#: settings_template.py:209 settings_template.py:227 settings_template.py:364
+#: settings_template.py:392
+msgid "Column index"
+msgstr "Índice de la columna"
+
+#: settings.py:215 settings.py:370 settings_template.py:215
+#: settings_template.py:370
+msgid "Row index"
+msgstr "Índice de la fila"
+
+#: settings.py:225 settings_template.py:225
+msgid "Column value"
+msgstr "Valor de columna"
+
+#: settings.py:237 settings_template.py:237
+msgid "Geometry field from lon/lat values"
+msgstr "Campo geometría desde columnas lon/lat"
+
+#: settings.py:239 settings.py:271 settings.py:297 settings_template.py:239
+#: settings_template.py:271 settings_template.py:297
+msgid "Geometry type"
+msgstr "Tipo de geometría"
+
+#: settings.py:245 settings.py:277 settings.py:303 settings_template.py:245
+#: settings_template.py:277 settings_template.py:303
+msgid "EPSG value"
+msgstr "Valor EPSG"
+
+#: settings.py:253 settings_template.py:253
+msgid "Long column index"
+msgstr "Índice columna longitud"
+
+#: settings.py:259 settings_template.py:259
+msgid "Lat column index"
+msgstr "Índice columna latitud"
+
+#: settings.py:269 settings_template.py:269
+msgid "Geometry field from one field (lon, lat)"
+msgstr "Campo geometría desde una única columna (lon, lat)"
+
+#: settings.py:285 settings.py:311 settings_template.py:285
+#: settings_template.py:311
+msgid "coordinates column index"
+msgstr "Nº columna de las coordenadas"
+
+#: settings.py:295 settings_template.py:295
+msgid "Geometry field from one field (lat, lon)"
+msgstr "Campo geometría desde una única columna (lat/lon)"
+
+#: settings.py:321 settings_template.py:321
+msgid "Geometry from address in field"
+msgstr "Campo geometría desde columna dirección"
+
+#: settings.py:323 settings_template.py:323
+msgid "Address value"
+msgstr "Nº de la columna dirección"
+
+#: settings.py:333 settings_template.py:333
+msgid "Date definition"
+msgstr "Definición de fecha"
+
+#: settings.py:335 settings_template.py:335
+msgid "Years"
+msgstr "Año"
+
+#: settings.py:341 settings_template.py:341
+msgid "Months"
+msgstr "Mes"
+
+#: settings.py:347 settings_template.py:347
+msgid "Days"
+msgstr "Día"
+
+#: settings.py:353 settings.py:381 settings.py:403 settings_template.py:353
+#: settings_template.py:381 settings_template.py:403
+msgid "Locale"
+msgstr "Idioma"
+
+#: settings.py:362 settings_template.py:362
+msgid "Date from cell"
+msgstr "Fecha desde celda"
+
+#: settings.py:376 settings.py:398 settings_template.py:376
+#: settings_template.py:398
+msgid "Date format"
+msgstr "Formato de fecha"
+
+#: settings.py:390 settings_template.py:390
+msgid "Date from column"
+msgstr "Fecha desde columna"
+
+#: settings.py:412 settings_template.py:412
+msgid "Filename value"
+msgstr "Nombre de fichero"
+
+#: settings.py:418 settings_template.py:418
+msgid "Sheet value"
+msgstr "Nombre de hoja"
+
+#: settings.py:424 settings_template.py:424
+msgid "Custom value (experimental)"
+msgstr "Valor calculado (experimental)"
+
+#: settings.py:426 settings_template.py:426
+msgid "code_text"
+msgstr "Código"
+
+#: templates/browser/transform_to_database.html:13
+msgid "Transform"
+msgstr "Transformar"
+
+#: templates/browser/transform_to_database.html:46
+msgid "Origen de los datos:"
+msgstr ""
+
+#: templates/browser/transform_to_database.html:47
+msgid "Select directory"
+msgstr "Seleccionar directorio"
+
+#: templates/browser/transform_to_database.html:57
+msgid "Ficheros '.xlsx', '.csv' "
+msgstr ""
+
+#: templates/browser/transform_to_database.html:63
+msgid "Transformación a realizar:"
+msgstr ""
+
+#: templates/browser/transform_to_database.html:70
+msgid "Destino de los datos:"
+msgstr ""
+
+#: templates/browser/transform_to_database.html:80
+msgid "Data store"
+msgstr "Almacén de datos"
+
+#: templates/browser/transform_to_database.html:94
+msgid "Method to apply"
+msgstr "Método a aplicar"
+
+#: templates/browser/transform_to_database.html:124
+msgid "Default"
+msgstr "Por defecto"
+
+#: templates/browser/transform_to_database.html:142
+#: templates/browser/transform_to_database.html:189
+#: templates/transformation_add.html:99 templates/transformation_add.html:146
+#: templates/transformation_update.html:785
+#: templates/transformation_update.html:833
+msgid "Data store contains no resources to publish"
+msgstr "El almacén no contiene recursos"
+
+#: templates/browser/transform_to_database.html:159
+#: templates/transformation_add.html:116
+#: templates/transformation_update.html:802
+msgid "Choose dataStore"
+msgstr "Elige almacén de datos"
+
+#: templates/browser/transform_to_database.html:165
+#: templates/browser/transform_to_database.html:211
+#: templates/browser/transform_to_database.html:219
+#: templates/browser/transform_to_database.html:240
+#: templates/transformation_add.html:122 templates/transformation_add.html:168
+#: templates/transformation_add.html:176 templates/transformation_add.html:197
+#: templates/transformation_update.html:808
+#: templates/transformation_update.html:855
+#: templates/transformation_update.html:863
+#: templates/transformation_update.html:885
+msgid "Service is unavailable"
+msgstr "Servicio no disponible"
+
+#: templates/browser/transform_to_database.html:172
+#: templates/transformation_add.html:129
+#: templates/transformation_update.html:815
+msgid "No valid workspace selected"
+msgstr "El espacio de trabajo seleccionado no es válido"
+
+#: templates/browser/transform_to_database.html:206
+#: templates/transformation_add.html:163
+#: templates/transformation_update.html:850
+msgid "Choose resource"
+msgstr "Elige recurso"
+
+#: templates/browser/transform_to_database.html:226
+#: templates/browser/transform_to_database.html:247
+#: templates/transformation_add.html:183 templates/transformation_add.html:204
+#: templates/transformation_update.html:870
+#: templates/transformation_update.html:892
+msgid "No valid data store selected"
+msgstr "Almacén de datos no válido"
+
+#: templates/dashboard_etl_menu.html:9 templates/dashboard_etl_menu.html:17
+msgid "Transformations"
+msgstr "Transformaciones"
+
+#: templates/dashboard_etl_menu.html:15
+msgid "Plugins"
+msgstr ""
+
+#: templates/transformation_add.html:12 templates/transformation_list.html:13
+#: templates/transformation_update.html:10
+msgid "Add transformation"
+msgstr "Añadir"
+
+#: templates/transformation_add.html:14
+msgid "Continue"
+msgstr "Continuar"
+
+#: templates/transformation_add.html:50 templates/transformation_update.html:65
+msgid "Data Store"
+msgstr "Almacén de datos"
+
+#: templates/transformation_add.html:57 templates/transformation_update.html:72
+msgid "Resource name"
+msgstr "Nombre del recurso"
+
+#: templates/transformation_list.html:11
+msgid "Transformations list"
+msgstr "Lista de transformaciones"
+
+#: templates/transformation_list.html:58
+msgid "Delete transformation"
+msgstr "Borrar transformación"
+
+#: templates/transformation_list.html:61
+msgid "The transformation and its registered rules will be deleted"
+msgstr "La transformación y sus reglas serán borradas"
+
+#: templates/transformation_list.html:64
+#: templates/transformation_update.html:266
+#: templates/transformation_update.html:341
+#: templates/transformation_update.html:366
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/transformation_list.html:65
+#: templates/transformation_update.html:268
+#: templates/transformation_update.html:343
+#: templates/transformation_update.html:368
+msgid "Accept"
+msgstr "Aceptar"
+
+#: templates/transformation_list.html:82
+#: templates/transformation_update.html:449
+msgid "Processing request..."
+msgstr "Procesando petición"
+
+#: templates/transformation_list.html:83
+#: templates/transformation_update.html:450
+#, python-format
+msgid "Search%(sep)s"
+msgstr "Buscar%(sep)s"
+
+#: templates/transformation_list.html:84
+#: templates/transformation_update.html:451
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr "Mostrando %(numrecords)s registros"
+
+#: templates/transformation_list.html:85
+#: templates/transformation_update.html:452
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
+
+#: templates/transformation_list.html:86
+#: templates/transformation_update.html:453
+msgid "Showing from 0 to 0 of 0 records"
+msgstr "Mostrando desde 0 a 0 de 0 registros"
+
+#: templates/transformation_list.html:87
+#: templates/transformation_update.html:454
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr "Filtrando %(max)s registros"
+
+#: templates/transformation_list.html:89
+#: templates/transformation_update.html:456
+msgid "Loading..."
+msgstr "Cargando..."
+
+#: templates/transformation_list.html:90 templates/transformation_list.html:91
+#: templates/transformation_update.html:457
+#: templates/transformation_update.html:458
+msgid "No records available"
+msgstr "No hay registros disponibles"
+
+#: templates/transformation_list.html:93
+#: templates/transformation_update.html:460
+msgid "First"
+msgstr "Primero"
+
+#: templates/transformation_list.html:94
+#: templates/transformation_update.html:461
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/transformation_list.html:95
+#: templates/transformation_update.html:462
+msgid "Next"
+msgstr "Siguiente"
+
+#: templates/transformation_list.html:96
+#: templates/transformation_update.html:463
+msgid "Last"
+msgstr "Último"
+
+#: templates/transformation_list.html:99
+#: templates/transformation_update.html:466
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr "%(sep)sOrdenar ascendentemente"
+
+#: templates/transformation_list.html:100
+#: templates/transformation_update.html:467
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr "%(sep)sOrdenar descendentemente"
+
+#: templates/transformation_list.html:106
+msgid "Remove transformation"
+msgstr "Borrar transformación"
+
+#: templates/transformation_list.html:110
+msgid "Update transformation"
+msgstr "Actualizar transformación"
+
+#: templates/transformation_update.html:13
+msgid "Save"
+msgstr "Guardar"
+
+#: templates/transformation_update.html:43
+msgid "Example origin file"
+msgstr "Fichero ejemplo de origen de datos"
+
+#: templates/transformation_update.html:49
+msgid "Select file"
+msgstr "Seleccionar fichero"
+
+#: templates/transformation_update.html:57
+msgid "Example destiny BD"
+msgstr "Ejemplo de Base de datos de destino"
+
+#: templates/transformation_update.html:87
+msgid "Excel File"
+msgstr "Excel"
+
+#: templates/transformation_update.html:90
+msgid "CSV File"
+msgstr "CSV"
+
+#: templates/transformation_update.html:109
+msgid "Select sheet"
+msgstr "Seleccionar hoja"
+
+#: templates/transformation_update.html:114
+msgid "All sheets"
+msgstr "Todas las hojas"
+
+#: templates/transformation_update.html:119
+msgid "..."
+msgstr "..."
+
+#: templates/transformation_update.html:128
+msgid "Limit separator"
+msgstr "Separador"
+
+#: templates/transformation_update.html:140
+msgid "Character encoding"
+msgstr "Codificación de caracteres"
+
+#: templates/transformation_update.html:146
+msgid "From row"
+msgstr "Desde la fila"
+
+#: templates/transformation_update.html:152
+msgid "From column"
+msgstr "Desde la columna"
+
+#: templates/transformation_update.html:162
+msgid "Rules"
+msgstr "Reglas"
+
+#: templates/transformation_update.html:165
+msgid "New rule"
+msgstr "Nueva regla"
+
+#: templates/transformation_update.html:174
+msgid "ID"
+msgstr "Id."
+
+#: templates/transformation_update.html:175
+msgid "Field"
+msgstr "Campo de la BD"
+
+#: templates/transformation_update.html:176
+msgid "Field rule"
+msgstr "Campo de la regla"
+
+#: templates/transformation_update.html:216
+msgid "Hojas en las que se aplica"
+msgstr ""
+
+#: templates/transformation_update.html:224
+msgid "Todas las hojas"
+msgstr ""
+
+#: templates/transformation_update.html:228
+msgid "Sólo la hoja..."
+msgstr ""
+
+#: templates/transformation_update.html:238
+msgid "Desde "
+msgstr ""
+
+#: templates/transformation_update.html:243
+msgid "hasta "
+msgstr ""
+
+#: templates/transformation_update.html:251
+msgid "Que cumplan..."
+msgstr ""
+
+#: templates/transformation_update.html:284
+#: templates/transformation_update.html:477
+#: templates/transformation_update.html:614
+msgid "Update rule"
+msgstr "Actualizar regla"
+
+#: templates/transformation_update.html:290
+msgid "Preview"
+msgstr "Anterior"
+
+#: templates/transformation_update.html:300
+msgid "Not data loaded yet"
+msgstr "No hay datos cargados aún"
+
+#: templates/transformation_update.html:307
+msgid "Campo de la BD a rellenar"
+msgstr ""
+
+#: templates/transformation_update.html:317
+msgid "Tipo del dato"
+msgstr ""
+
+#: templates/transformation_update.html:324
+msgid "Rellenar con..."
+msgstr ""
+
+#: templates/transformation_update.html:359
+#: templates/transformation_update.html:473
+#: templates/transformation_update.html:613
+msgid "Delete rule"
+msgstr "Eliminar regla"
+
+#: templates/transformation_update.html:362
+msgid "The rule will be removed, Do you want continue?"
+msgstr "La regla será eliminada, ¿Desea continuar?"
+
+#: templates/transformation_update.html:651
+msgid "Resource contains no fields"
+msgstr "El recurso no contiene campos"
+
+#: templates/transformation_update.html:669
+msgid "Choose field"
+msgstr "Elige un campo"
+
+#: views.py:80 views.py:227
+msgid "Not defined"
+msgstr "Sin definir"
+
+#: views.py:98
+msgid "Error: fill all the transformation fields"
+msgstr "Error: rellena todos los campos"
+
+#: views.py:105 views.py:143 views.py:172 views.py:240
+msgid "Error: transformation could not be published"
+msgstr "Error: la transformación no pudo ser completada"
+
+#: views.py:206
+msgid "Error: transformation could not be removed"
+msgstr "Error: la transformación no pudo ser borrada"
+
+#: views.py:299 views.py:430
+msgid "Loading sheet"
+msgstr "Cargando hoja..."
+
+#: views.py:304
+msgid "Loading Excel file... (this could take a while)"
+msgstr "Cargando fichero Excel... (esto puede llevar algo de tiempo)"
+
+#: views.py:379
+msgid "Error in"
+msgstr "Error en "
+
+#: views.py:403
+msgid "Transformation done succesfully"
+msgstr "Transformación realizada satisfactoriamente"
+
+#: views.py:412
+msgid "Server error"
+msgstr "Error en el servidor"
+
+#~ msgid "custom_value"
+#~ msgstr "Valor calculado"
+
+#~ msgid "Project"
+#~ msgstr "Proyecto"
+
+#~ msgid "Directory name"
+#~ msgstr "Nombre del directorio"
+
+#~ msgid "WorldWind configuration"
+#~ msgstr "WorldWind"
+
+#~ msgid "Add WorldWind Provider"
+#~ msgstr "Añadir proveedor WorldWind"
+
+#~ msgid "Directory"
+#~ msgstr "Directorio"
+
+#~ msgid "Providers list"
+#~ msgstr "Lista de proveedores"
+
+#~ msgid "Add provider"
+#~ msgstr "Añadir proveedor"
+
+#~ msgid "TOC order"
+#~ msgstr "Orden del TOC"
+
+#~ msgid "Error: Problem creating mapfile."
+#~ msgstr "Error: Problema creando mapfile"
+
+#~ msgid "Error: Provider already defined for this project."
+#~ msgstr "Error: El proveedor ya ha sido definido para este proyecto"

@@ -1,0 +1,159 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"X-Generator: Poedit 2.4.3\n"
+
+# gvSIG Online.
+# Copyright (C) 2010-2017 SCOLAB.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr "Você não pode atualizar um tipo de armazenamento de dados GeoTIFF. Exclua-o e crie-o novamente"
+
+msgid "Select type"
+msgstr "Selecione o tipo"
+
+msgid "Select enumeration"
+msgstr "Selecionar enumeração"
+
+msgid "Select multiple enumeration"
+msgstr "Selecionar enumeração múltipla"
+
+msgid "Field name"
+msgstr "Nome do campo"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Save field"
+msgstr "Gravar campo"
+
+msgid "Edit field"
+msgstr "Editar campo"
+
+msgid "true"
+msgstr "Verdadeiro"
+
+msgid "false"
+msgstr "Falso"
+
+msgid "True"
+msgstr "Verdadeiro"
+
+msgid "False"
+msgstr "Falso"
+
+msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
+msgstr ""
+"Nome inválido: Os identificadores devem começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, sublinhados ou números"
+
+msgid "Enumeration cannot contain point-colon"
+msgstr "Enumeração não pode conter ponto-colon"
+
+msgid "Create new layer"
+msgstr "Criar nova camada"
+
+msgid "Publish layer"
+msgstr "Publicar camada"
+
+msgid "Error in GetCapabilities"
+msgstr "Erro na obtenção de capacidades"
+
+msgid "Error trying to connect"
+msgstr "Erro ao tentar conectar"
+
+msgid "Insert item name"
+msgstr "Inserir nome do item"
+
+msgid "Select form"
+msgstr "Selecione o formulário"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "active"
+msgstr "Ativo"
+
+msgid "inactive"
+msgstr "Inativo"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Is master?"
+msgstr "É superusuário?"
+
+msgid "Save node"
+msgstr "Gravar nódulo"
+
+msgid "Edit node"
+msgstr "Editar nodulo"
+
+msgid "Convert"
+msgstr "Converter"
+
+msgid "Autogen"
+msgstr "Autogen"
+
+msgid "Autogen ok"
+msgstr "Autogen ok"
+
+msgid "Convert ok"
+msgstr "Converter ok"
+
+msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
+msgstr ""
+"O campo não pode ser definido como obrigatório em nível de banco de dados porque alguns registros contêm valores NULL nesta coluna. Excluir os valores NULL "
+"e tentar novamente."
+
+msgid "Node has been reloaded"
+msgstr "O nó foi recarregado"
+
+msgid "Error reloading node"
+msgstr "Erro ao recarregar o nó"
+
+msgid "Connection has been success"
+msgstr "A conexão foi um sucesso"
+
+msgid "Filter by project"
+msgstr "Filtrar por projeto"
+
+msgid "Show all layers"
+msgstr "Mostrar todas as camadas"
+
+msgid "The action was successfully completed"
+msgstr "A ação foi concluída com sucesso"
+
+msgid "The action failed"
+msgstr "A ação fracassou"
+
+msgid "The layer definition was refreshed"
+msgstr "A definição da camada foi refrescada"
+
+msgid "The layer refresh failed"
+msgstr "A atualização da camada falhou"
+
+msgid "Calculated"
+msgstr "Calculado"

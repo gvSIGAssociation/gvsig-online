@@ -1,0 +1,591 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+{% if redirect_to_layergroup %}
+<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect">
+{% else %}
+<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/">
+{% endif %}	
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button type="submit" class="btn btn-default btn-sm">
+						<i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}
+					</button>
+				</div>
+			</div>	
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{{ form.non_field_errors }}
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+				{% if message %}
+				<div id="form-error" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+			</div>			
+		</div>
+		
+		<ul class="nav nav-tabs">
+          	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
+          	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
+          	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
+          	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
+        </ul>
+        
+        
+        <div class="tab-content">
+        
+        	<div class="tab-pane active" id="tab-layer-general">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+     							<div class="row">		
+									<div class="col-md-12 form-group">
+										<label for="id_type">{% trans "Type" %}</label>
+										{{ form.type }}
+									</div>	
+								</div>	
+								<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
+									<div class="col-md-12 form-group">
+										<label for="id_url">{% trans "Url" %}</label>
+										{{ form.url }}
+										<input type="hidden" name="get_map_url" id="get_map_url">
+									</div>	
+								</div>
+								<div class="row layers-control wms-control wmts-control">
+									<div class="col-md-9 form-group">
+										<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>					
+									</div>
+									<div class="col-md-3 form-group">
+										<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>					
+									</div>
+								</div>
+								<div class="row">		
+									<div class="col-md-12 form-group">
+										<label for="id_title">{% trans "Title" %}</label>
+										{{ form.title }}
+									</div>	
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label class="active" for="id_layer_group">{% trans "Layer group" %}</label>
+										{{ form.layer_group }}
+									</div>
+								</div>
+								<div class="row layers-control wms-control wmts-control">		
+									<div class="col-md-12 form-group">
+										<label for="id_version">{% trans "Version" %}</label>
+										{{ form.version }}
+									</div>	
+								</div>
+								<div class="row layers-control bing-control wms-control wmts-control">		
+									<div class="col-md-12 form-group">
+										<label for="id_layers">{% trans "Layers" %}</label>
+										{{ form.layers }}
+										<datalist id="id_layer_list">
+										</datalist>
+									</div>	
+								</div>
+								<div class="row layers-control wms-control wmts-control">		
+									<div class="col-md-12 form-group">
+										<label for="id_format">{% trans "Format" %}</label>
+										{{ form.format }}
+										<datalist id="id_format_list">
+										</datalist>
+									</div>	
+								</div>
+								<div class="row layers-control wms-control wmts-control">		
+									<div class="col-md-12 form-group">
+										<label for="id_infoformat">{% trans "Featureinfo format" %}</label>
+										{{ form.infoformat }}
+										<datalist id="id_infoformat_list">
+										</datalist>
+									</div>	
+								</div>
+								<div class="row layers-control wmts-control">		
+									<div class="col-md-12 form-group">
+										<label for="id_format">{% trans "MatrixSet" %}</label>
+										{{ form.matrixset }}
+									</div>
+									<div class="col-md-9 form-group">
+										<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>					
+									</div>	
+								</div>
+								<div class="row layers-control bing-control xyz-control osm-control">		
+									<div class="col-md-12 form-group">
+										<label for="id_apikey">{% trans "Api-key" %}</label>
+										{{ form.key }}
+									</div>	
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+          	
+          	<div class="tab-pane" id="tab-layer-properties">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+          						<div class="col-md-4 form-group">
+          							<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
+									<input name="timeout" id="timeout" value="{{external_layer.timeout}}" type="number" class="form-control">														
+								</div>
+          						<div class="col-md-4 form-group">
+									{% if external_layer.visible %}
+									<input type="checkbox" name="visible"  id="visible" checked/>
+									{% else %}
+									<input type="checkbox" name="visible"  id="visible"/>
+									{% endif %}
+									<label for="visible">{% trans "Visible" %}</label>
+								</div>
+								<div class="col-md-4 form-group">
+									{% if external_layer.cached %}
+									<input type="checkbox" name="cached"  id="cached" checked/>
+									{% else %}
+									<input type="checkbox" name="cached"  id="cached"/>
+									{% endif %}
+									<label for="cached">{% trans "Cached" %}</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+        
+	        <div class="tab-pane" id="tab-layer-metadata">
+	         	<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+	         				<div class="box-body">
+	         					{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<span>{% trans "Layer metadata" %}.</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<label for="uuid">{% trans "Metadata UUID" %}</label>
+										<input name="uuid" id="uuid" type="text" class="form-control" value="{{layer_md_uuid}}">
+									</div>
+								</div>
+								<div id="mdtoolseditdiv" class="row {% if layer_md_uuid %}{% else %}hidden d-none{% endif %}">
+									<div class="col-md-2 form-group">
+										<label for="edit_metadata_btn">{% trans "Metadata tools" %}</label>
+										<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}/srv/eng/catalog.search#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
+									</div>
+								</div>
+								<div id="mdtoolscreatediv" class="row {% if layer_md_uuid %}hidden d-none{% else %}{% endif %}">
+									<div class="col-md-2 form-group">
+										<label for="create_metadata_btn">{% trans "Metadata tools" %}</label>
+										<button id="create_metadata_btn" type="button" class="btn btn-default form-control">{% trans "Create metadata" %}</button>
+									</div>
+								</div>
+								{% else %}
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
+										<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{{external_layer.abstract}}</textarea>	     	
+							        </div>
+								</div>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				</div>
+	         </div>
+          	
+          	<div class="tab-pane" id="tab-layer-detailedinfo">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+          						<div class="row">
+	          						<div class="col-md-6 form-group">
+	          							{% if layer.detailed_info_enabled %}
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled" checked/>
+	          							{% else %}
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
+	          							{% endif %}
+										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+									</div>
+								</div>
+								{% if layer.detailed_info_enabled %}
+	          					<div class="row" id="detailed_info_button_title-row">
+	          					{% else %}
+	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
+	          					{% endif %}
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
+										<input value="{{layer.detailed_info_button_title}}" placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+									</div>
+								</div>	
+								{% if layer.detailed_info_enabled %}	
+								<div class="row" id="detailed_info_html-row">
+								{% else %}
+								<div style="display: none;" class="row" id="detailed_info_html-row">
+								{% endif %}
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_html">{% trans "HTML" %}</label>
+										{% if layer.detailed_info_html != None %}
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{layer.detailed_info_html}}</textarea>
+										{% else %}
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>	
+										{% endif %}					
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+          	
+        </div>
+	</div>
+</div>
+</form>
+{% endblock %} {% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-externallayers').addClass("active");
+</script>
+<script type="text/javascript">
+function fileExists(url) {
+    if(url){
+        var req = new XMLHttpRequest();
+        req.open('GET', url, false);
+        req.send();
+        return req.status==200;
+        
+    } else {
+        return false;
+    }
+};
+$(document).ready(function(){ 
+	
+	var bing_layers = {{bing_layers|safe}};
+	var url = "{{ form.url.value }}";
+	var format_or = "{{ form.format.value }}";
+	var infoformat_or = "{{ form.infoformat.value }}";
+	var matrixset = "{{ form.matrixset.value }}";
+	var params = {{external_layer.external_params|safe}};
+	var version = params['version'];
+	var layer = params['layers'];
+	var wmts_success = true;
+	
+	var detailedInfoHTML = document.getElementById('detailed_info_html');
+	if ('False' == '{{html|safe}}') {
+		if (fileExists(HTML_PATH + 'detailed_info.html')) {
+			detailedInfoHTML.innerHTML = '<iframe width="800" height="600" src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
+			
+		} else {
+			var aux = '';
+			aux += '<div class="col-md-12"> \n';
+			aux += '\t <h2>{% trans "Layer title" %}</h2> \n';
+			aux += '\t <p>{% trans "Layer description" %}</p> \n';
+			aux += '</div> \n';
+			detailedInfoHTML.innerHTML = aux;
+		}
+	}
+	
+	var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
+		mode: "text/html",
+        extraKeys: {"Ctrl-Space": "autocomplete"},
+        autoRefresh:true,
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	$('#detailed_info_enabled').click(function(){
+		if ($('#detailed_info_enabled').is(":checked")) {
+			$('#detailed_info_button_title-row').css('display', 'block');
+			$('#detailed_info_html-row').css('display', 'block');
+			codemirror.refresh();
+			
+		} else {
+			$('#detailed_info_button_title-row').css('display', 'none');
+			$('#detailed_info_html-row').css('display', 'none');
+		}
+	});
+	
+	function updateFormfields(){
+		var type = $("#id_type option:selected").val();
+		$(".layers-control").css("display","none");
+		$("."+type.toLowerCase()+"-control").css("display","block");
+		
+		if(type == "Bing"){
+			$("#id_layers").empty();
+			for(index in bing_layers){
+				$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
+			}
+		}
+	};
+	
+	$("#id_type").change(function(){
+		updateFormfields();
+	})
+	
+	function check_url(){
+		url = $("#id_url").val();
+		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
+		if(!url.includes(hostname+"/")){
+			$(".alert-box-message").css("display", "block");
+		}else{
+			$(".alert-box-message").css("display", "none");
+		}
+	}
+	
+	check_url();
+	updateFormfields();
+
+	function showAlertMatrix(){
+		var matrixset = $("#id_matrixset").val();
+
+		if(matrixset && (matrixset.includes("3857") || matrixset.includes("4326"))) {
+			$("#matrixset-alert").css("display", "none");
+			
+		}else{
+			$("#matrixset-alert").css("display", "block");
+		}
+	}
+
+	$("#id_matrixset").on('change', function(){
+		showAlertMatrix();
+	})
+
+	showAlertMatrix();
+	
+	$("#connect-button").click(function() {
+		//getLayersFromCapabilities(this.value);
+		url = $("#id_url").val();
+		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
+		if(!url.includes(hostname+"/")){
+			$("#connect-alert").css("display", "block");
+		}else{
+			$("#connect-alert").css("display", "none");
+		}
+		type = $("#id_type option:selected").val();
+		version = "";
+		
+		getNewLayersFromCapabilities(url, type, version, "", true);
+	});
+	
+	// translate default layer group
+	var lgs = $("#id_layer_group");
+	var lg_options = $("#id_layer_group option");
+	for (var i=0; i<lg_options.length; i++) {
+		text = $(lg_options[i]).text();
+		if (text=="__default__") {
+			$(lg_options[i]).html('{% trans "Default" %}');
+		}
+		if (lgs.val()=="") {
+			lgs.val(1);
+		}
+	}
+	
+	function getNewLayersFromCapabilities(url, type, version, layer, edit_version){
+		$("#form-error ul").empty();
+		$.ajax({
+	        type: "POST",
+			url: "/gvsigonline/services/get_capabilities_from_url/",
+			async: false,
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			data:{
+				'url': url,
+				'type': type,
+				'version': version,
+				'layer': layer
+			},
+			success: function(data) {
+				if('response' in data && data['response'] == '500'){
+					$("#form-error ul").empty().append("<li>"+gettext('Error in GetCapabilities')+': '+data['message']+'</li>')
+				}else{
+				if('title' in data){
+					if($("#id_title").val() == ""){
+						$("#id_title").val(data['title']);
+					}
+				}
+
+				if('get_map_url' in data){
+					$("#get_map_url").val(data['get_map_url']);
+				}
+				
+				if (data.crs_list) {
+					for (var i=0; i<data.crs_list.length; i++) {
+						var minx = data.crs_list[i][0].toString();
+						var miny = data.crs_list[i][1].toString();
+						var maxx = data.crs_list[i][2].toString();
+						var maxy = data.crs_list[i][3].toString();
+						var bounds = minx + ';' + miny + ';' + maxx + ';' + maxy;
+						$('<input>').attr({
+						    type: 'hidden',
+						    id: 'crs_' + data.crs_list[i][4],
+						    name: 'crs_' + data.crs_list[i][4],
+						    value: bounds
+						}).appendTo('form');
+					}
+				}
+				
+				if (data.capabilities) {
+					$('<input>').attr({
+					    type: 'hidden',
+					    id: 'capabilities',
+					    name: 'capabilities',
+					    value: JSON.stringify(data.capabilities)
+					}).appendTo('form');
+				}
+				
+				 if('layers' in data){
+					$("#id_layers").empty();
+					var layers = data['layers'];
+					for(var i=0;i<layers.length; i++){
+	 					if(layers[i] == layer){
+							$("#id_layers").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
+						}else{
+	 						$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+						}
+					}
+				}
+				 
+				 if('formats' in data){
+					 $("#id_format").empty();
+						var layers = data['formats'];
+						for(var i=0;i<layers.length; i++){
+							if(layers[i] == format_or){
+								$("#id_format").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
+						}
+					}
+				 
+				 if('infoformats' in data){
+					 $("#id_infoformat").empty();
+						var layers = data['infoformats'];
+						for(var i=0;i<layers.length; i++){
+							if(layers[i] == infoformat_or){
+								$("#id_infoformat").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_infoformat").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
+						}
+					}
+				 
+				 if(type == "WMTS" && 'matrixsets' in data){
+					 $("#id_matrixset").empty();
+						var layers = data['matrixsets'];
+						for(var i=0;i<layers.length; i++){
+							if(layers[i] == matrixset){
+								
+								$("#id_matrixset").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
+						}
+						showAlertMatrix();
+					}
+				 
+				 if(edit_version && 'version' in data){
+					 var version = data['version'];
+					 $("#id_version").empty();
+					 if(version == '1.0.0'){
+						 $("#id_version").append("<option value=\"1.0.0\" selected>1.0.0</option>")
+					 }
+					 
+					 if(version == '1.1.1'){
+						 $("#id_version").append("<option value=\"1.1.1\" selected>1.1.1</option>")
+					 }else{
+						 if(version != '1.0.0'){
+						 	$("#id_version").append("<option value=\"1.1.1\">1.1.1</option>")
+						 }
+					 }
+					 
+					 if(version == '1.3.0'){
+						 $("#id_version").append("<option value=\"1.3.0\" selected>1.3.0</option>")
+					 }
+					 
+					 $("#id_version").unbind("change").change(function() {
+							url = $("#id_url").val();
+							type = $("#id_type option:selected").val();
+							version = $("#id_version option:selected").val();
+							layer = $("#id_layers option:selected").val();
+							matrixset = $("#id_matrixset option:selected").val();
+							format_or = $("#id_format option:selected").val();
+							infoformat_or = $("#id_infoformat option:selected").val();
+							
+							getNewLayersFromCapabilities(url, type, version, layer, false);
+							$('#id_version option[value="'+version+'"]').prop('selected', true);
+						});
+					 
+					 $("#id_layers").unbind("change").change(function() {
+							url = $("#id_url").val();
+							type = $("#id_type option:selected").val();
+							version = $("#id_version option:selected").val();
+							layer = $( this ).val();
+							matrixset = $("#id_matrixset option:selected").val();
+							format_or = $("#id_format option:selected").val();
+							infoformat_or = $("#id_infoformat option:selected").val();
+							
+							getNewLayersFromCapabilities(url, type, version, layer, false);
+							$('#id_layers option[value="'+layer+'"]').prop('selected', true);
+						});
+				 }
+				}
+			},
+			error: function(err){
+				alert(gettext("Error trying to connect"));
+				if('response' in err){
+					$("#form-error ul").empty().append("<li>"+err['message']+'</li>')
+				}
+				wmts_success = false;
+			}
+		});
+		
+	}
+	
+	var url = $("#id_url").val();
+	var type = $("#id_type option:selected").val()
+	
+	if(type == 'WMS' || type == 'WMTS'){
+		getNewLayersFromCapabilities(url, type, version, layer, true);
+	}
+	
+	if(type == "Bing"){
+		$("#id_layers").empty();
+		for(index in bing_layers){
+			$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
+		}
+	}
+	
+	if(wmts_success){
+		$('#id_layers option[value="'+layer+'"]').prop('selected', true);
+		$('#id_version option[value="'+version+'"]').prop('selected', true);
+		$('#id_matrixset option[value="'+matrixset+'"]').prop('selected', true);
+		$('#id_format option[value="'+format_or+'"]').prop('selected', true);
+		$('#id_infoformat option[value="'+infoformat_or+'"]').prop('selected', true);
+	}
+	
+});
+</script>
+{% endblock %}

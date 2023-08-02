@@ -1,0 +1,980 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-24 12:55+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Undo"
+msgstr ""
+
+msgid "Redo"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Run"
+msgstr ""
+
+msgid "Zoom In"
+msgstr ""
+
+msgid "Zoom Out"
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Process has been executed succesfully"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Accept"
+msgstr ""
+
+msgid "Response"
+msgstr ""
+
+msgid "Excel Parameters"
+msgstr ""
+
+msgid "Choose excel file:"
+msgstr ""
+
+msgid "Sheet:"
+msgstr ""
+
+msgid "Attribute columns:"
+msgstr ""
+
+msgid "Skip header:"
+msgstr ""
+
+msgid "Input"
+msgstr ""
+
+msgid "Output"
+msgstr ""
+
+msgid "Shapefile Parameters"
+msgstr ""
+
+msgid "Choose shapefile:"
+msgstr ""
+
+msgid "Path:"
+msgstr ""
+
+msgid "Join"
+msgstr ""
+
+msgid "Join Parameters"
+msgstr ""
+
+msgid "Main table attribute:"
+msgstr ""
+
+msgid "Secondary table attribute:"
+msgstr ""
+
+msgid "Input Main"
+msgstr ""
+
+msgid "Input Sec."
+msgstr ""
+
+msgid "Main Not Used"
+msgstr ""
+
+msgid "Sec. Not Used"
+msgstr ""
+
+msgid "Remove Attribute"
+msgstr ""
+
+msgid "Remove Attribute Parameters"
+msgstr ""
+
+msgid "Attribute to remove:"
+msgstr ""
+
+msgid "Rename Attribute"
+msgstr ""
+
+msgid "Rename Attribute Parameters"
+msgstr ""
+
+msgid "Attribute to rename:"
+msgstr ""
+
+msgid "New name:"
+msgstr ""
+
+msgid "Modify Value"
+msgstr ""
+
+msgid "Modify Value Parameters"
+msgstr ""
+
+msgid "Attribute to modify:"
+msgstr ""
+
+msgid "New value:"
+msgstr ""
+
+msgid "Create Attribute"
+msgstr ""
+
+msgid "Create Attribute Parameters"
+msgstr ""
+
+msgid "New attribute:"
+msgstr ""
+
+msgid "Value:"
+msgstr ""
+
+msgid "Filter"
+msgstr ""
+
+msgid "Filter Parameters"
+msgstr ""
+
+msgid "Attribute:"
+msgstr ""
+
+msgid "Operator:"
+msgstr ""
+
+msgid "Starts with"
+msgstr ""
+
+msgid "Ends with"
+msgstr ""
+
+msgid "Contains"
+msgstr ""
+
+msgid "True"
+msgstr ""
+
+msgid "False"
+msgstr ""
+
+msgid "Keep Attribute"
+msgstr ""
+
+msgid "Keep Attribute Parameters"
+msgstr ""
+
+msgid "Attribute to keep:"
+msgstr ""
+
+msgid "PostgreSQL Parameters"
+msgstr ""
+
+msgid "PostGIS Parameters"
+msgstr ""
+
+msgid "Host:"
+msgstr ""
+
+msgid "Port:"
+msgstr ""
+
+msgid "Database:"
+msgstr ""
+
+msgid "User:"
+msgstr ""
+
+msgid "Password:"
+msgstr ""
+
+msgid "Table name:"
+msgstr ""
+
+msgid "Operation:"
+msgstr ""
+
+msgid "CREATE"
+msgstr ""
+
+msgid "UPDATE"
+msgstr ""
+
+msgid "DELETE"
+msgstr ""
+
+msgid "Match Column:"
+msgstr ""
+
+msgid "Verify connection"
+msgstr ""
+
+msgid "New name"
+msgstr ""
+
+msgid "New attribute value"
+msgstr ""
+
+msgid "New attribute name"
+msgstr ""
+
+msgid "Name of your database"
+msgstr ""
+
+msgid "schema.tablename"
+msgstr ""
+
+msgid "Connection parameters are valids."
+msgstr ""
+
+msgid "Connection parameters are not valids."
+msgstr ""
+
+msgid "CSV Parameters"
+msgstr ""
+
+msgid "Choose csv file:"
+msgstr ""
+
+msgid "Separator:"
+msgstr ""
+
+msgid "Insert if PRJ is not loaded"
+msgstr ""
+
+msgid "Reproject"
+msgstr ""
+
+msgid "Reproject Parameters"
+msgstr ""
+
+msgid "Source EPSG:"
+msgstr ""
+
+msgid "Target EPSG:"
+msgstr ""
+
+msgid "Counter Parameters"
+msgstr ""
+
+msgid "New counter attribute:"
+msgstr ""
+
+msgid "Group by:"
+msgstr ""
+
+msgid "Counter"
+msgstr ""
+
+msgid "Calculator"
+msgstr ""
+
+msgid "Calculator Parameters"
+msgstr ""
+
+msgid "Math functions:"
+msgstr ""
+
+msgid "Attributes:"
+msgstr ""
+
+msgid "Expression:"
+msgstr ""
+
+msgid "For more math functions check above link"
+msgstr ""
+
+msgid "Set all transformers parameters in canvas"
+msgstr ""
+
+msgid "Select file"
+msgstr ""
+
+msgid "Load sheets"
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+msgid "Are you sure?"
+msgstr ""
+
+msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
+msgstr ""
+
+msgid "File selected is not a "
+msgstr ""
+
+msgid "Save ETL workspace"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Run periodically?"
+msgstr ""
+
+msgid "All days"
+msgstr ""
+
+msgid "Monday"
+msgstr ""
+
+msgid "Tuesday"
+msgstr ""
+
+msgid "Wednesday"
+msgstr ""
+
+msgid "Thursday"
+msgstr ""
+
+msgid "Friday"
+msgstr ""
+
+msgid "Saturday"
+msgstr ""
+
+msgid "Sunday"
+msgstr ""
+
+msgid "Every"
+msgstr ""
+
+msgid "Run workspace every..."
+msgstr ""
+
+msgid "Select number of..."
+msgstr ""
+
+msgid "... time measure"
+msgstr ""
+
+msgid "minutes"
+msgstr ""
+
+msgid "hours"
+msgstr ""
+
+msgid "days"
+msgstr ""
+
+msgid "Overwrite workspace?"
+msgstr ""
+
+msgid "Workspace"
+msgstr ""
+
+msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
+msgstr ""
+
+msgid "Cadastral Geom."
+msgstr ""
+
+msgid "Cadastral Geometry Parameters"
+msgstr ""
+
+msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
+msgstr ""
+
+msgid "MGRS Parameters"
+msgstr ""
+
+msgid "Select mode:"
+msgstr ""
+
+msgid "MGRS to geographic coordinates:"
+msgstr ""
+
+msgid "Geographic coordinates to MGRS:"
+msgstr ""
+
+msgid "MGRS grid attribute:"
+msgstr ""
+
+msgid "Longitude attribute:"
+msgstr ""
+
+msgid "Latitude attribute:"
+msgstr ""
+
+msgid "Text to Point"
+msgstr ""
+
+msgid "Text to Point Parameters"
+msgstr ""
+
+msgid "Insert EPSG:"
+msgstr ""
+
+msgid "Add DB"
+msgstr ""
+
+msgid "Choose path:"
+msgstr ""
+
+msgid "Select Path"
+msgstr ""
+
+msgid "Advanced Parameters"
+msgstr ""
+
+msgid "Reading options:"
+msgstr ""
+
+msgid "Single excel file"
+msgstr ""
+
+msgid "All files in a folder"
+msgstr ""
+
+msgid "Do you want to (re)-move the files after the process is over?"
+msgstr ""
+
+msgid "Select folder"
+msgstr ""
+
+msgid "For removing files leave this input empty"
+msgstr ""
+
+msgid "Encoding:"
+msgstr ""
+
+msgid "Domain:"
+msgstr ""
+
+msgid "List urban procedures:"
+msgstr ""
+
+msgid "Get procedures"
+msgstr ""
+
+msgid "ALL"
+msgstr ""
+
+msgid "Description:"
+msgstr ""
+
+msgid "Add Procedure:"
+msgstr ""
+
+msgid "From an initial date"
+msgstr ""
+
+msgid "Between dates"
+msgstr ""
+
+msgid "Current date for initial"
+msgstr ""
+
+msgid "Current date for end"
+msgstr ""
+
+msgid "Choose file:"
+msgstr ""
+
+msgid "Insert if needed"
+msgstr ""
+
+msgid "InDenova Parameters"
+msgstr ""
+
+msgid "KML/KMZ Parameters"
+msgstr ""
+
+msgid "Oracle Parameters"
+msgstr ""
+
+msgid "DB Connection:"
+msgstr ""
+
+msgid "Get owners:"
+msgstr ""
+
+msgid "Get owners"
+msgstr ""
+
+msgid "Owners:"
+msgstr ""
+
+msgid "Get tables:"
+msgstr ""
+
+msgid "Get tables"
+msgstr ""
+
+msgid "Tables:"
+msgstr ""
+
+msgid "Do you want to write a SQL statement?"
+msgstr ""
+
+msgid "SQL statement:"
+msgstr ""
+
+msgid "Get schemas:"
+msgstr ""
+
+msgid "Get schemas"
+msgstr ""
+
+msgid "Schema:"
+msgstr ""
+
+msgid "Do you want to write a SQL WHERE Clause?"
+msgstr ""
+
+msgid "SQL WHERE Clause:"
+msgstr ""
+
+msgid "String functions:"
+msgstr ""
+
+msgid "Change Attr. Type"
+msgstr ""
+
+msgid "Change Attribute Type Parameters"
+msgstr ""
+
+msgid "Attribute to change type:"
+msgstr ""
+
+msgid "To data type:"
+msgstr ""
+
+msgid "Varchar"
+msgstr ""
+
+msgid "Integer"
+msgstr ""
+
+msgid "Float"
+msgstr ""
+
+msgid "Boolean"
+msgstr ""
+
+msgid "Compare Rows"
+msgstr ""
+
+msgid "Input to comp."
+msgstr ""
+
+msgid "Equals"
+msgstr ""
+
+msgid "News"
+msgstr ""
+
+msgid "Changes"
+msgstr ""
+
+msgid "Comp. Not Used"
+msgstr ""
+
+msgid "Compare Rows Parameters"
+msgstr ""
+
+msgid "Concatenate Attr."
+msgstr ""
+
+msgid "Attributes to concatenate:"
+msgstr ""
+
+msgid "New attribute name:"
+msgstr ""
+
+msgid "Separator (opt.):"
+msgstr ""
+
+msgid "Separator"
+msgstr ""
+
+msgid "Concatenate Attributes Parameters"
+msgstr ""
+
+msgid "Current Date"
+msgstr ""
+
+msgid "Current Date Parameters"
+msgstr ""
+
+msgid "New date attribute"
+msgstr ""
+
+msgid "Data type:"
+msgstr ""
+
+msgid "Composite Filter:"
+msgstr ""
+
+msgid "Filter Duplicate"
+msgstr ""
+
+msgid "Unique"
+msgstr ""
+
+msgid "Duplicated"
+msgstr ""
+
+msgid "Filter Duplicate Parameters"
+msgstr ""
+
+msgid "Attributes that must be uniques:"
+msgstr ""
+
+msgid "Pad Attribute"
+msgstr ""
+
+msgid "Pad Attribute Parameters"
+msgstr ""
+
+msgid "Attribute to pad:"
+msgstr ""
+
+msgid "Length desired:"
+msgstr ""
+
+msgid "Side to pad:"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "Pad String:"
+msgstr ""
+
+msgid "Calculate Area"
+msgstr ""
+
+msgid "Calculate Area Parameters"
+msgstr ""
+
+msgid "New area attribute:"
+msgstr ""
+
+msgid "Explode Geometry"
+msgstr ""
+
+msgid "Filter Geom."
+msgstr ""
+
+msgid "Points"
+msgstr ""
+
+msgid "Multipoints"
+msgstr ""
+
+msgid "Lines"
+msgstr ""
+
+msgid "Multilines"
+msgstr ""
+
+msgid "Polygons"
+msgstr ""
+
+msgid "Multipolygons"
+msgstr ""
+
+msgid "Geocoder"
+msgstr ""
+
+msgid "Geocoder Parameters"
+msgstr ""
+
+msgid "Engine"
+msgstr ""
+
+msgid "Mode"
+msgstr ""
+
+msgid "Attributes selected:"
+msgstr ""
+
+msgid "Main"
+msgstr ""
+
+msgid "Secondary"
+msgstr ""
+
+msgid "Intersection"
+msgstr ""
+
+msgid "Intersection Parameters"
+msgstr ""
+
+msgid "Merge attributes of the secondary input to the final output"
+msgstr ""
+
+msgid "Remove Geom."
+msgstr ""
+
+msgid "Empty to read from input layer"
+msgstr ""
+
+msgid "Spatial Relation"
+msgstr ""
+
+msgid "Spatial Relation Parameters"
+msgstr ""
+
+msgid "Intersects"
+msgstr ""
+
+msgid "Touches"
+msgstr ""
+
+msgid "Within"
+msgstr ""
+
+msgid "Multigeometry for all features of the output"
+msgstr ""
+
+msgid "Union"
+msgstr ""
+
+msgid "Union Parameters"
+msgstr ""
+
+msgid "WKT to Geometry Parameters"
+msgstr ""
+
+msgid "WKT string Attribute:"
+msgstr ""
+
+msgid "Explode List"
+msgstr ""
+
+msgid "Explode List Parameters"
+msgstr ""
+
+msgid "List Name:"
+msgstr ""
+
+msgid "Attribute Name:"
+msgstr ""
+
+msgid "Split Attribute"
+msgstr ""
+
+msgid "Split Attribute Parameters"
+msgstr ""
+
+msgid "String Attribute:"
+msgstr ""
+
+msgid "Split by:"
+msgstr ""
+
+msgid "Execute SQL"
+msgstr ""
+
+msgid "Execute SQL Parameters"
+msgstr ""
+
+msgid "Attributes from input:"
+msgstr ""
+
+msgid "Attributes from new connection:"
+msgstr ""
+
+msgid "Get attributes"
+msgstr ""
+
+msgid "Query:"
+msgstr ""
+
+msgid "APPEND"
+msgstr ""
+
+msgid "OVERWRITE"
+msgstr ""
+
+msgid "Entities with website in SEDIPUALB@"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Types of georeferences in the entity"
+msgstr ""
+
+msgid "No date, download all"
+msgstr ""
+
+msgid "Init date"
+msgstr ""
+
+msgid "End date"
+msgstr ""
+
+msgid "Minutes before the current date for the init date"
+msgstr ""
+
+msgid "Time Stamp"
+msgstr ""
+
+msgid "Get entities"
+msgstr ""
+
+msgid "Get types"
+msgstr ""
+
+msgid "Reverse"
+msgstr ""
+
+msgid "Direct"
+msgstr ""
+
+msgid "JSON Parameters"
+msgstr ""
+
+msgid "Choose JSON file"
+msgstr ""
+
+msgid "Do you want to load JSON data from an API REST?"
+msgstr ""
+
+msgid "Choose date"
+msgstr ""
+
+msgid "Difference"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Last date guaranteed for the init date."
+msgstr ""
+
+msgid "If files of the selected type of georeference have not been previously requested, this option will fail."
+msgstr ""
+
+msgid "Is paginated?"
+msgstr ""
+
+msgid "Pagination parameter:"
+msgstr ""
+
+msgid "Starts in:"
+msgstr ""
+
+msgid "Grid"
+msgstr ""
+
+msgid "Grid Parameters"
+msgstr ""
+
+msgid "How to create the grid?"
+msgstr ""
+
+msgid "Grid from extent of input geometry"
+msgstr ""
+
+msgid "Grid from initial coordinates (Lower left corner)"
+msgstr ""
+
+msgid "Rows"
+msgstr ""
+
+msgid "Columns"
+msgstr ""
+
+msgid "Width"
+msgstr ""
+
+msgid "Height"
+msgstr ""
+
+msgid "Initial X"
+msgstr ""
+
+msgid "Initial Y"
+msgstr ""
+
+msgid "Self intersect layer (Use only data from main input)"
+msgstr ""
+
+msgid "Get tags"
+msgstr ""
+
+msgid "Add other different tags than the selected schema to all records"
+msgstr ""
+
+msgid "Single XML file"
+msgstr ""
+
+msgid "Order"
+msgstr ""
+
+msgid "Expose Attributes"
+msgstr ""
+
+msgid "Expose Attribute Parameters"
+msgstr ""
+
+msgid "Attribute to expose:"
+msgstr ""
+
+msgid "Write attributes to expose separated by space"
+msgstr ""
+
+msgid "Validate Geometry"
+msgstr ""
+
+msgid "Valid"
+msgstr ""
+
+msgid "Invalid"
+msgstr ""
+
+msgid "Validate Geometry Parameters"
+msgstr ""
+
+msgid "Stop workspace if there are invalid geometries"
+msgstr ""
+
+msgid "Simple Geometry Parameters"
+msgstr ""
+
+msgid "Simple Geometry"
+msgstr ""
+
+msgid "Stop workspace if some geometry is not simple"
+msgstr ""

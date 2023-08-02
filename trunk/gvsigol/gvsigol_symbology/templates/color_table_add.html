@@ -1,0 +1,588 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border step-2">
+				<h3 class="box-title">{% trans "Add new color table" %}</h3>
+				<div class="box-tools pull-right">
+					<button id="raster-statistics" class="btn btn-sm btn-default raster-statistics"><i class="fa fa-refresh margin-r-5"></i> {% trans "Raster statistics" %}</button>
+					<button id="refresh-preview" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
+					<button id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+				</div>
+			</div>
+
+			<div class="box-body">
+			
+				<div class="row">
+					<div class="col-md-6">
+						<div id="form-error" style="color:#ff0000;"></div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Name" %}</label>
+								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Title" %}</label>
+								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6 form-group">
+								<label>{% trans "Min. scale" %}</label>
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+							</div>
+							<div class="col-md-6 form-group">
+								<label>{% trans "Max. scale" %}</label>
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+							</div>
+							<div class="col-md-12 form-group">
+								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="checkbox col-md-12">								
+								<label>
+									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+								</label>
+							</div>
+						</div>
+						<div class="row">
+							<div class="checkbox col-md-4">								
+								<label>
+									<input type="checkbox" name="has-custom-legend" id="has-custom-legend"/>{% trans "Has custom legend?" %}
+								</label>
+							</div>
+							<div id="legend-file-div" class="col-md-8" style="display: none;">
+								<div class="form-group">
+									<label>{% trans "Select image" %}</label>
+									<input id="legend-file" name="legend-file" type="file" accept=".png" onchange="loadPreviewLegend(event)" class="file" data-show-preview="true">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<div id="output-legend-div" style="display: none;">
+									<img style="max-width: 300px;" id="output-legend" class="output-legend"/>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div id="map" class="preview-map"></div>
+					</div>						
+				</div>
+				
+				<div class="row">
+					<div class="col-md-6 form-group">
+						
+					</div>
+					<div class="col-md-2 form-group">
+						<label>{% trans "Select number of intervals" %}</label>
+			    		<input name="number-of-intervals" id="number-of-intervals" type="number" step="any" value="0" class="form-control">
+					</div>
+					
+					<div class="col-md-4 form-group">
+						<label>{% trans " " %}</label>
+						<button id="select-ramp-color" class="btn btn-sm btn-default" style="width:100%;"><i class="fa fa-barcode margin-r-5"></i>{% trans "Apply ramp color" %}</button>
+					</div>
+				</div>
+				
+				<div id="rules" class="row">
+				</div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-color-map-entry" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Edit color map entry" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="nav-tabs-custom">
+	            	<ul id="tab-menu" class="nav nav-tabs">				                        
+	            	</ul>
+	            	<div id="tab-content" class="tab-content">
+	            	</div>
+       			</div>
+			</div>
+		</div>
+	</div>
+</div> 
+
+<!-- Modal -->
+<div class="modal fade" id="modal-raster-properties" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Raster properties" %}</h4>
+			</div>
+			<div class="modal-raster-info-body">
+				
+			</div>
+		</div>
+	</div>
+</div> 
+
+<!-- Modal -->
+<div class="modal fade" id="modal-ramp-error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<span style="font-size: 20px; font-weight: bold;">{% trans "Warning" %}</span>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="modal-edit-rule-content" class="modal-body">
+				{% trans "Rules needed to apply a color ramp" %}
+				<div class="modal-footer">
+					<!-- <button id="button-select-ramp-open" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Apply" %}</button> -->
+					<button id="button-error-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-select-ramp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Select color ramp" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Select library" %}</label>
+						<select id="select-ramp-library" class="form-control">
+							<option disabled selected value> -- {% trans "Select ramp library" %} -- </option>
+							{% for ramp_library in ramp_libraries %}
+							<option value="{{ramp_library.id}}">{{ramp_library.name}}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Select category" %}</label>
+						<select id="select-category" class="form-control" disabled>
+							<option disabled selected value> -- {% trans "Select ramp category" %} -- </option>
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Invert ramp color" %}</label>
+						<input id="invert-ramp" type="checkbox"/>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
+								<ul class="ramp-list clearfix" style="padding-left: 0px;">
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<!-- <button id="button-select-ramp-open" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Apply" %}</button> -->
+				<button id="button-select-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+	
+	$('#has-custom-legend').change(function() {
+        if(this.checked) {
+        	$('#legend-file-div').css('display', 'block');
+        	$('#output-legend-div').css('display', 'block');
+        } else {
+        	$('#legend-file-div').css('display', 'none');
+        	$('#output-legend-div').css('display', 'none');
+        }
+                
+    });
+	
+	var loadPreviewLegend = function(event) {
+		$("#form-error").empty();
+		if (event.target.files[0].type == 'image/png') {
+			var output = document.getElementById('output-legend');
+		   	output.src = URL.createObjectURL(event.target.files[0]);
+		   	
+		} else {
+			$("#legend-file").val("");
+			$("#form-error").append('<p>*{% trans "The file format is not supported" %}</p>');
+		}
+	   	
+	 };
+</script>
+<script>
+
+this.color_ramp_data = {};
+this.colorTable = null;
+
+$(document).ready(function() {
+	var self = this;
+	var layerId = "{{layer_id}}";
+	var layerUrl = "{{layer_url}}";
+	var layerName = "{{layer_name}}";
+	var styleId = "{{style.id}}";
+	var rule_opts = "";
+	var previewUrl = "{{preview_url}}";
+	var supported_crs = {{supported_crs|safe}};
+	var extentEpsg = "{{extent_epsg}}";
+	var extent = {{extent|safe}}
+	var min = null;
+	var max = null;
+	
+	for (var crs in supported_crs) {
+		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
+	}
+	
+	var map = new ol.Map({
+		layers: [
+		    new ol.layer.Tile({
+            	source: new ol.source.OSM()
+          	})
+		],
+		target: "map",
+		view: new ol.View({
+		    center:[0,0],
+		    zoom: '2'
+		})
+	});
+	var wmsSource = new ol.source.TileWMS({
+		url: layerUrl,
+		visible: true,
+		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+		serverType: 'geoserver'
+	});
+	wmsLayer = new ol.layer.Tile({
+		id: 'preview-layer',
+		source: wmsSource,
+		visible: true
+	});
+	map.addLayer(wmsLayer);
+	
+	var utils = new SymbologyUtils(map, layerId, wmsLayer, 'RasterSymbolizer', previewUrl, [], []);
+	window.colorTable = new ColorTable(layerName, utils, null);
+	var colorTable = window.colorTable;
+	
+	colorTable.addDefaultEntries();
+	
+	$("#style-title").on('change', function(e){
+		var rule = colorTable.getRule();
+		rule.title = this.value;
+	});
+	
+	$("#symbol-minscale").on('change', function(e){
+		var rule = colorTable.getRule();
+		rule.minscale = this.value;
+	});
+	
+	$("#symbol-maxscale").on('change', function(e){
+		var rule = colorTable.getRule();
+		rule.maxscale = this.value;
+	});
+	
+	$("#raster-statistics").on('click', function(e){
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/symbology/get_raster_statistics/{{layer_id}}/',
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				if(response.result){
+					$(".modal-raster-info-body").empty();
+					html = ''
+					if (response.result.length == 0){
+						html = gettext("No data to show");
+					}
+					
+					for(var i = 0; i < response.result.length; i++){
+						var min = response.result[i][0];
+						if(self.min == null || min < self.min){
+							self.min = min;
+						}
+						var max = response.result[i][1];
+						if(self.max == null || max > self.max){
+							self.max = max;
+						}
+						var avg = response.result[i][2];
+						var stv = response.result[i][3];
+						
+						html += '<div class="raster-info"><span class="band-title">'+gettext('Band')+":"+ i +'</span>';
+						html += '<ul class="band-info-ul">';
+						html += '<li class="band-info"><span class="band-info-item">'+ gettext("Min")+":</span>"+min+'</li>';
+						html += '<li class="band-info"><span class="band-info-item">'+ gettext("Max")+":</span>"+max+'</li>';
+						html += '<li class="band-info"><span class="band-info-item">'+ gettext("Mean")+":</span>"+avg+'</li>';
+						html += '<li class="band-info"><span class="band-info-item">'+ gettext("Stdev")+":</span>"+stv+'</li>';
+						html += '</ul></div>';
+					}
+					
+					$(".modal-raster-info-body").html(html);
+					
+					$("#modal-raster-properties").modal("show");
+				}
+			},
+			error: function(){}
+		});
+	});
+	
+	$("#save-legend").on('click', function(e){
+		if ($("#style-name").val() != '') {
+			var color_tabs = $("#rules tbody").find("tr");
+			if(color_tabs.length==1){
+				$("#form-error").append('<p>*{% trans "Two or more color definitions are required" %}</p>');
+			}
+			else{
+				colorTable.save(layerId);
+			}
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
+	});
+	
+	$("#refresh-preview").on('click', function(e){
+		colorTable.updatePreview("{{layer_id}}");
+	});
+	
+	try{
+		utils.centerMapToExtent(extent, extentEpsg);
+	}catch(error){
+		console.log("Error: centerMapToExtent ->" + error);
+	}
+	
+	$('#number-of-intervals').on('change', function(e) {
+		
+		$(".users-list").empty();
+		var numberOfIntervals = this.value;
+		if (parseInt(numberOfIntervals) <= 0 ) {
+			messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+			
+		} else {
+			if(self.min == null || self.max == null){
+				$.ajax({
+					type: 'POST',
+					async: false,
+					url: '/gvsigonline/symbology/get_raster_statistics/{{layer_id}}/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success	:function(response){
+						if(response.result){
+							for(var i = 0; i < response.result.length; i++){
+								var min = response.result[i][0];
+								if(self.min == null || min < self.min){
+									self.min = min;
+								}
+								var max = response.result[i][1];
+								if(self.max == null || max > self.max){
+									self.max = max;
+								}
+							}
+							if(self.min != null && self.max != null){
+								window.colorTable.load(self.min, self.max, numberOfIntervals);	
+								$(".delete-rule").on('click', function(e){
+									intervals.deleteRule(this.dataset.ruleid);
+								});
+							}
+						}
+					},
+					error: function(){}
+				});
+			}else{
+				if(self.min != null && self.max != null){
+					colorTable.load(self.min, self.max, numberOfIntervals);	
+					$(".delete-rule").on('click', function(e){
+						intervals.deleteRule(this.dataset.ruleid);
+					});
+				}
+			}
+			
+		}	
+	});
+	
+	
+		
+	$("#select-ramp-color").on('click', function(e){
+		e.preventDefault();
+		if(colorTable.rule){
+			$('#modal-select-ramp').modal('show');
+			
+			$(".ramp-list").empty();
+			var libraryId = $("#select-ramp-library").val();
+			if (libraryId) {
+				getFoldersFromLibrary(libraryId);
+			}
+			
+			$("#select-ramp-library").on('change', function(e) {
+				$(".ramp-list").empty();
+				getFoldersFromLibrary(this.value);
+			});
+		}else{
+			$('#modal-ramp-error').modal('show');
+		}
+	});
+	
+	function getRampFromFolder(folderId) {
+		var self = this;
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/get_ramps_from_folder/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			data: {
+				folder_id: folderId
+			},
+			success: function(response){
+				var colorramp = new ColorRamp();
+				$(".ramp-list").empty();
+				var ramps = response.color_ramps;
+				var options = "";
+				for(var i=0; i<ramps.length; i++){
+					var ramp = ramps[i];
+					var aux_json = ramp.definition;
+					
+					if($("#invert-ramp").is(':checked')){
+						for(ramp_entry in aux_json["definition"]){
+							var entry  = aux_json["definition"][ramp_entry];
+							entry["quantity"] = ""+(100-parseFloat(entry["quantity"]));
+						}
+					}
+					
+					options += '<div id="color-ramp-' + ramp.id + '" class="color-ramp-item col-md-4">'+
+					'<div id="color-ramp-preview-' + ramp.id + '" class="preview-ramp-color" style="'+ colorramp.getStyleForPreview(aux_json) +'">'+
+					'</div>'+
+					'<span class="color-ramp-name">' + ramp.name + '</span>'+ 
+					'</div>';
+					
+					var aux_color_ramp = {
+							"name": ramp.name,
+							"data": aux_json
+					}
+					self.color_ramp_data[""+ramp.id] = aux_color_ramp;
+				}
+				$(".ramp-list").append(options);
+				$(".color-ramp-item").click(function(){
+				 	var id = $(this).attr("id").replace("color-ramp-","");
+					if(self.color_ramp_data[id]){
+				 		var json_data = self.color_ramp_data[id]["data"];
+				 		if(document.min == null || document.max == null){
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/symbology/get_raster_statistics/{{layer_id}}/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+								},
+								success	:function(response){
+									if(response.result){
+										for(var i = 0; i < response.result.length; i++){
+											var min = response.result[i][0];
+											if(document.min == null || min < document.min){
+												document.min = min;
+											}
+											var max = response.result[i][1];
+											if(document.max == null || max < document.max){
+												document.max = max;
+											}
+											
+											if(document.min != null && document.max != null){
+												self.colorTable.applyRampColor(json_data, document.min, document.max);
+											}
+										}
+									}
+								},
+								error: function(){}
+							});
+						}else{
+			 				self.colorTable.applyRampColor(json_data, document.min, document.max);
+						}
+					}
+					$('#modal-select-ramp').modal('hide');
+				});
+			},
+		    error: function(){}
+		});
+	};
+
+	function getFoldersFromLibrary(libraryId) {
+		var self = this;
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/get_folders_from_library/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			data: {
+				library_id: libraryId
+			},
+			success: function(response){
+				$("#select-category").empty();
+				var folders = response.library_folders;
+				var options = "";
+				for(var i=0; i<folders.length; i++){
+					var folder = folders[i];
+					options += "<option value=\""+ folder.id +"\">"+folder.name+"</option>";
+				}
+				$("#select-category").prop("disabled", false);
+				$("#select-category").append(options);
+				$("#select-category").on('change', function(e) {
+					$(".ramp-list").empty();
+					getRampFromFolder(this.value);
+				});
+				$("#select-category").trigger("change");
+			},
+		    error: function(){}
+		});
+	};
+	
+	$("#invert-ramp").click(function(){
+		var folder_id = $("#select-category").val()
+		getRampFromFolder(folder_id);
+	});
+	
+});
+</script>
+{% endblock %}

@@ -1,0 +1,306 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border step-2">
+				<h3 class="box-title">{% trans "Update style" %}</h3>
+				<div class="box-tools pull-right">
+					<button id="refresh-preview" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
+					<!--  <button id="show-label" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-tags margin-r-5"></i> {% trans "Labeling" %}</button> -->
+					<button id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+				</div>
+			</div>
+
+			<div class="box-body">
+			
+				<div class="row">
+					<div class="col-md-6">
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Name" %}</label>
+								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" type="text" value="{{style.name}}" class="form-control">	
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Title" %}</label>
+								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" value="{{style.title}}" class="form-control">	
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6 form-group">
+								<label>{% trans "Min. scale" %}</label>
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="{{minscale}}" class="form-control">
+							</div>
+							<div class="col-md-6 form-group">
+								<label>{% trans "Max. scale" %}</label>
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="{{maxscale}}" class="form-control">
+							</div>
+							<div class="col-md-12 form-group">
+								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="checkbox col-md-12">								
+								<label>
+									{% if style.is_default %}
+									<input type="checkbox" name="style-is-default" id="style-is-default" checked disabled/>{% trans "Set as default style" %}
+									{% else %}
+									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+									{% endif %}
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div id="map" class="preview-map"></div>
+					</div>						
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<button id="add-expression" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-plus margin-r-5"></i> {% trans "Add new rule" %}</button>
+						<span class="text-muted">{% trans "Creates a new rule based on an expression" %}</span>
+					</div>
+				</div>
+				
+				<div id="rules" class="row">
+				</div>
+	
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-import-symbol" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Import symbol" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Select library" %}</label>
+						<select id="select-library" class="form-control">
+							<option disabled selected value> -- {% trans "Select symbol library" %} -- </option>
+							{% for library in libraries %}
+							<option value="{{library.id}}">{{library.name}}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
+								<ul class="users-list clearfix">
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="button-import-symbol-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+			</div>
+		</div>
+	</div>
+</div>    	
+
+<!-- Modal -->
+<div class="modal fade" id="modal-symbolizer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-body">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<div class="nav-tabs-custom">
+	            	<ul id="tab-menu" class="nav nav-tabs">				                        
+	            	</ul>
+	            	<div id="tab-content" class="tab-content">
+	            	</div>
+       			</div>
+			</div>
+		</div>
+	</div>
+</div> 
+
+<!-- Modal -->
+<div class="modal fade" id="modal-expression" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="modal-expression-content" class="modal-body">
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-edit-rule" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="modal-edit-rule-content" class="modal-body">
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+
+$(document).ready(function() {
+	
+	var layerId = "{{layer_id}}";
+	var layerUrl = "{{layer_url}}";
+	var wfsUrl = "{{layer_wfs_url}}";
+	var layerName = "{{layer_name}}";
+	var styleId = "{{style.id}}";
+	var featureType = "{{featureType}}";
+	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
+	var fonts = {{ fonts|safe }};
+	var rules = {{ rules|safe }};
+	var previewUrl = "{{preview_url}}";
+	var supported_crs = {{supported_crs|safe}};
+	var authToken = "{{auth_token}}";
+	authenticate(layerUrl);
+	
+	for (var crs in supported_crs) {
+		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
+	}
+	
+	var map = new ol.Map({
+		layers: [
+		    new ol.layer.Tile({
+            	source: new ol.source.OSM()
+          	})
+		],
+		target: "map",
+		view: new ol.View({
+		    center:[0,0],
+		    zoom: '2'
+		})
+	});
+	var wmsSource = new ol.source.TileWMS({
+		url: layerUrl,
+		visible: true,
+		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1', 'STYLES': '{{style.name}}'},
+		serverType: 'geoserver',
+		tileLoadFunction: imagePostFunction
+	});
+	wmsLayer = new ol.layer.Tile({
+		id: 'preview-layer',
+		source: wmsSource,
+		visible: true
+	});
+	map.addLayer(wmsLayer);
+	
+	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
+	utils.setType("CP");
+	var clustered_points = new ClusteredPoints(featureType, layerName, utils, previewUrl);
+	clustered_points.loadRules(rules);
+	$(".delete-rule").on('click', function(e){
+		clustered_points.deleteRule(this.dataset.ruleid);
+	});
+	utils.centerMap(layerName, wfsUrl, authToken);
+	
+	var previous_minscale = $("#symbol-minscale").val();
+	var previous_maxscale = $("#symbol-maxscale").val();
+	
+    $("#symbol-minscale").focus(function () {
+        previous_minscale = this.value;
+    }).change(function() {
+        var rules = clustered_points.getRules();
+		for (var i=0; i<rules.length; i++) {
+			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
+				rules[i].minscale = this.value;
+			}
+		}
+		previous_minscale = this.value;
+    });
+
+    $("#symbol-maxscale").focus(function () {
+        previous_maxscale = this.value;
+    }).change(function() {
+        var rules = clustered_points.getRules();
+		for (var i=0; i<rules.length; i++) {
+			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
+				rules[i].maxscale = this.value;
+			}
+		}
+		previous_maxscale = this.value;
+    });
+    
+	$("#show-label").on('click', function(e){
+		clustered_points.showLabel();
+	});
+	
+	$("#save-legend").on('click', function(e){
+		if ($("#style-name").val() != '') {
+			clustered_points.update(layerId, styleId);
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
+	});
+	
+	$("#refresh-preview").on('click', function(e){
+		clustered_points.updatePreview(layerId);
+	});
+	
+	$("#add-expression").on('click', function(e) {
+		clustered_points.addNewRule();
+		$(".delete-rule").on('click', function(e){
+			clustered_points.deleteRule(this.dataset.ruleid);
+		});
+	});
+	
+	$(window).on("beforeunload", function(){
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/remove_temporal_preview/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			data: {
+				name: "{{style.name}}",
+				layer_id: "{{layer_id}}"
+			},
+			success: function(response){
+				
+			},
+		    error: function(){}
+		});
+	});
+
+});
+</script>
+{% endblock %}

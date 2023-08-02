@@ -1,0 +1,443 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-24 12:55+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Undo"
+msgstr "Desfer"
+
+msgid "Redo"
+msgstr "Refer"
+
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "Run"
+msgstr "Executar"
+
+msgid "Zoom In"
+msgstr "Acostar"
+
+msgid "Zoom Out"
+msgstr "Allunyar"
+
+msgid "Open"
+msgstr "Obrir"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Process has been executed succesfully"
+msgstr "El procés ha sigut executat satisfactòriament"
+
+msgid "Close"
+msgstr "Tancar"
+
+msgid "Accept"
+msgstr "Acceptar"
+
+msgid "Response"
+msgstr "Resposta"
+
+msgid "Excel Parameters"
+msgstr "Paràmetres Excel"
+
+msgid "Choose excel file:"
+msgstr "Tria arxiu excel:"
+
+msgid "Sheet:"
+msgstr "Fulla:"
+
+msgid "Attribute columns:"
+msgstr "Columnes d'atributs"
+
+msgid "Skip header:"
+msgstr "Evitar capçalera:"
+
+msgid "Input"
+msgstr "Entrada"
+
+msgid "Output"
+msgstr "Eixida"
+
+msgid "Shapefile Parameters"
+msgstr "Paràmetres Shapefile"
+
+msgid "Choose shapefile:"
+msgstr "Tria l'arxiu SHP:"
+
+msgid "Path:"
+msgstr "Ruta:"
+
+msgid "Join"
+msgstr "Unió"
+
+msgid "Join Parameters"
+msgstr "Paràmetres Unió"
+
+msgid "Main table attribute:"
+msgstr "Atribut de la taula principal:"
+
+msgid "Secondary table attribute:"
+msgstr "Atribut de la tabla secundària:"
+
+msgid "Input Main"
+msgstr "Pr. Entrada"
+
+msgid "Input Sec."
+msgstr "Sec. Entrada"
+
+msgid "Main Not Used"
+msgstr "Pr. Sense Usar"
+
+msgid "Sec. Not Used"
+msgstr "Sec. Sense Usar"
+
+msgid "Remove Attribute"
+msgstr "Elimina Atribut"
+
+msgid "Remove Attribute Parameters"
+msgstr "Paràmetres Elimina Atribut"
+
+msgid "Attribute to remove:"
+msgstr "Atribut a eliminar:"
+
+msgid "Rename Attribute"
+msgstr "Reanomena Atribut"
+
+msgid "Rename Attribute Parameters"
+msgstr "Paràmetres Reanomena Atribut"
+
+msgid "Attribute to rename:"
+msgstr "Atribut a reanomenar:"
+
+msgid "New name:"
+msgstr "Nou nom:"
+
+msgid "Modify Value"
+msgstr "Modifica Valor"
+
+msgid "Modify Value Parameters"
+msgstr "Paràmetres Modifica Valor"
+
+msgid "Attribute to modify:"
+msgstr "Atribut a modificar:"
+
+msgid "New value:"
+msgstr "Nou valor:"
+
+msgid "Create Attribute"
+msgstr "Crea Atribut"
+
+msgid "Create Attribute Parameters"
+msgstr "Paràmetres Crea Atribut"
+
+msgid "New attribute:"
+msgstr "Nou atribut:"
+
+msgid "Value:"
+msgstr "Valor:"
+
+msgid "Filter"
+msgstr "Filtre"
+
+msgid "Filter Parameters"
+msgstr "Paràmetres Filtre"
+
+msgid "Attribute:"
+msgstr "Atribut:"
+
+msgid "Operator:"
+msgstr "Operador:"
+
+msgid "Starts with"
+msgstr "Compença per"
+
+msgid "Ends with"
+msgstr "Acaba per"
+
+msgid "Contains"
+msgstr "Conté"
+
+msgid "True"
+msgstr "Vertader"
+
+msgid "False"
+msgstr "Fals"
+
+msgid "Keep Attribute"
+msgstr "Mantén Atribut"
+
+msgid "Keep Attribute Parameters"
+msgstr "Paràmetres Mantén Atribut"
+
+msgid "Attribute to keep:"
+msgstr "Atribut a mantindre:"
+
+msgid "PostgreSQL Parameters"
+msgstr "Paràmetres PostgreSQL"
+
+msgid "PostGIS Parameters"
+msgstr "Paràmetres PostGIS"
+
+msgid "Host:"
+msgstr "Amfitrió:"
+
+msgid "Port:"
+msgstr "Port:"
+
+msgid "Database:"
+msgstr "Base de dades:"
+
+msgid "User:"
+msgstr "Usuari:"
+
+msgid "Password:"
+msgstr "Contrasenya:"
+
+msgid "Table name:"
+msgstr "Nom de la taula:"
+
+msgid "Operation:"
+msgstr "Operació:"
+
+msgid "CREATE"
+msgstr "CREAR"
+
+msgid "UPDATE"
+msgstr "ACTUALITZAR"
+
+msgid "DELETE"
+msgstr "ELIMINA"
+
+msgid "Match column:"
+msgstr "Columna coincident:"
+
+msgid "Verify connection"
+msgstr "Verifica connexió"
+
+msgid "New name"
+msgstr "Nou nom"
+
+msgid "New attribute value"
+msgstr "Nou valor d'atribut"
+
+msgid "New attribute name"
+msgstr "Nou nom d'atribut"
+
+msgid "Name of your database"
+msgstr "Nom de la teua base de dades"
+
+msgid "schema.tablename"
+msgstr "esquema.nomdelataula"
+
+msgid "Connection parameters are valids."
+msgstr "Els paràmetres de connexió son vàlids."
+
+msgid "Connection parameters are not valids."
+msgstr "Els paràmetres de connexió no son vàlids."
+
+msgid "CSV Parameters"
+msgstr "Paràmetres CSV"
+
+msgid "Choose csv file:"
+msgstr "Tria arxiu csv:"
+
+msgid "Separator:"
+msgstr "Separador:"
+
+msgid "Insert if PRJ is not loaded"
+msgstr "Insertar si no es carrega el PRJ"
+
+msgid "Reproject"
+msgstr "Reprojectar"
+
+msgid "Reproject Parameters"
+msgstr "Paràmetres Reprojectar"
+
+msgid "Source EPSG:"
+msgstr "EPSG origen:"
+
+msgid "Target EPSG:"
+msgstr "EPSG destí:"
+
+msgid "Counter Parameters"
+msgstr "Paràmetres Contador"
+
+msgid "New counter attribute:"
+msgstr "Nou atribut contador:"
+
+msgid "Group by:"
+msgstr "Agrupa per:"
+
+msgid "Counter"
+msgstr "Contador"
+
+msgid "Calculator"
+msgstr "Calculador"
+
+msgid "Calculator Parameters"
+msgstr "Paràmetres Calculador"
+
+msgid "Math functions:"
+msgstr "Funcions matemàtiques:"
+
+msgid "Attributes:"
+msgstr "Atributs:"
+
+msgid "Expression:"
+msgstr "Expressió:"
+
+msgid "For more math functions check above link."
+msgstr "Per a més funcions matemàtiques consulta l'enllaç de dalt."
+
+msgid "Set all transformers parameters in canvas"
+msgstr "Configura tots els paràmetres dels transformadors al canvas"
+
+msgid "Select file"
+msgstr "Tria arxiu"
+
+msgid "Load sheets"
+msgstr "Carrega fulles"
+
+msgid "Set parameters of all tasks before save"
+msgstr "Configura els paràmetres de totes les tasques abans de guardar"
+
+msgid "New"
+msgstr "Nou"
+
+msgid "Are you sure?"
+msgstr "Estàs segur?"
+
+msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
+msgstr "Si obris un nou canvas buit perdràs el canvas actual si no l'has guardat abans"
+
+msgid "File selected is not a "
+msgstr "L'arxiu seleccionat no és un "
+
+msgid "Save ETL workspace"
+msgstr "Guarda l'espai de treball ETL"
+
+msgid "Description"
+msgstr "Descripció"
+
+msgid "Run periodically?"
+msgstr "Executar periòdicament?"
+
+msgid "All days"
+msgstr "Tots els dies"
+
+msgid "Monday"
+msgstr "Dilluns"
+
+msgid "Tuesday"
+msgstr "Dimarts"
+
+msgid "Wednesday"
+msgstr "Dimecres"
+
+msgid "Thursday"
+msgstr "Dijous"
+
+msgid "Friday"
+msgstr "Divendres"
+
+msgid "Saturday"
+msgstr "Dissabte"
+
+msgid "Sunday"
+msgstr "Diumenge"
+
+msgid "Every"
+msgstr "Cada"
+
+msgid "Run workspace every..."
+msgstr "Executa l'espai de treball cada..."
+
+msgid "Select number of..."
+msgstr "Selecciona el nombre de..."
+
+msgid "... time measure"
+msgstr "... mesura de temps"
+
+msgid "minutes"
+msgstr "minuts"
+
+msgid "hours"
+msgstr "hores"
+
+msgid "days"
+msgstr "dies"
+
+msgid "Overwrite workspace?"
+msgstr "Sobreescriure espai de treball?"
+
+msgid "Workspace"
+msgstr "L'espai de treball"
+
+msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
+msgstr "es sobreescriurà. Si no vols que es sobreescriga deixa l'ID buit."
+
+msgid "Cadastral Geom."
+msgstr "Geom. Cadastral"
+
+msgid "Cadastral Geometry Parameters"
+msgstr "Paràmetres Geometria Cadastral"
+
+msgid "Cadastral Reference Attribute:"
+msgstr "Atribut de la Referència Cadastral:"
+
+msgid "MGRS Parameters"
+msgstr "Paràmetres MGRS"
+
+msgid "Select mode:"
+msgstr "Seleccione el mode:"
+
+msgid "MGRS to geographic coordinates:"
+msgstr "MGRS a coordenades geogràfiques:"
+
+msgid "Geographic coordinates to MGRS:"
+msgstr "Coordenades geogràfiques a MGRS:"
+
+msgid "MGRS grid attribute:"
+msgstr "Atribut del grid MGRS:"
+
+msgid "Longitude attribute:"
+msgstr "Atribut de longitud"
+
+msgid "Latitude attribute:"
+msgstr "Atribut de latitud"
+
+msgid "Text to Point"
+msgstr "Text a Punt"
+
+msgid "Text to Point Parameters"
+msgstr "Paràmetres Text a Punt"
+
+msgid "Insert EPSG:"
+msgstr "Inserta EPSG:"

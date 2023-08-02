@@ -1,0 +1,733 @@
+﻿{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+{% if user.is_staff %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-12 form-group">
+                        <div id=toolbar-etl class="box-tools pull-right"> </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{% trans "ETL - Extract, Transform & Load" %}</h3>
+                    <div class="box-tools pull-right">        
+                        <div class="btn-group" >
+                            <button class="btn btn-success" type="button" id="button-inputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top"  title='{% trans "Inputs" %}'> <i class="fa fa-sign-in"></i> </button>
+                            <div class="dropdown-menu">
+                                <li><a data-shape="input_Csv" class="palette_node_element draw2d_droppable dropdown-item">CSV</a></li>
+                                <li><a data-shape="input_Excel" class="palette_node_element draw2d_droppable dropdown-item">Excel</a></li>
+                                <li><a data-shape="input_Indenova" class="palette_node_element draw2d_droppable dropdown-item">InDenova</a></li>
+                                <li><a data-shape="input_Json" class="palette_node_element draw2d_droppable dropdown-item">JSON</a></li>
+                                <li><a data-shape="input_Kml" class="palette_node_element draw2d_droppable dropdown-item">KML/KMZ</a></li>
+                                <li><a data-shape="input_Oracle" class="palette_node_element draw2d_droppable dropdown-item">Oracle</a></li>
+                                <li><a data-shape="input_PadronAlbacete" class="palette_node_element draw2d_droppable dropdown-item">Padrón Albacete</a></li>
+                                <li><a data-shape="input_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
+                                <li><a data-shape="input_Segex" class="palette_node_element draw2d_droppable dropdown-item">SEGEX</a></li>
+                                <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
+                                <li><a data-shape="input_Xml" class="palette_node_element draw2d_droppable dropdown-item">XML</a></li>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-creator" role="button" id="button-outputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Creators" %}'> <i class="fa fa-pencil-square-o"></i> </button>
+                            <div class="dropdown-menu">
+                                <li><a  data-shape="crea_Grid" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Grid" %}</a></li>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Alphanumeric Transformers" %}'> <i class="fa fa-sort-alpha-asc"></i>  </button>
+                            <div class="dropdown-menu">
+                                <li><a data-shape="trans_Calculator" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculator" %}</a></li>
+                                <li><a data-shape="trans_ChangeAttrType" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Change Attribute Type" %}</a></li>
+                                <li><a data-shape="trans_CompareRows" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Compare Rows" %}</a></li>
+                                <li><a data-shape="trans_ConcatAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Concatenate Attributes" %}</a></li>
+                                <li><a data-shape="trans_Counter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Counter" %}</a></li>
+                                <li><a data-shape="trans_CurrentDate" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Current Date" %}</a></li>
+                                <li><a data-shape="trans_CreateAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Create Attribute" %}</a></li>
+                                <li><a data-shape="trans_ExposeAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Expose Attribute" %}</a></li>
+                                <li><a data-shape="trans_Filter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Filter" %}</a></li>
+                                <li><a data-shape="trans_FilterDupli" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Filter Duplicates" %}</a></li>
+                                <li><a data-shape="trans_Join" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Join" %}</a></li>
+                                <li><a data-shape="trans_KeepAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Keep Attribute"%}</a></li>
+                                <li><a data-shape="trans_ModifyValue" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Modify Value" %}</a></li>
+                                <li><a data-shape="trans_PadAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Pad Attribute" %}</a></li>
+                                <li><a data-shape="trans_RemoveAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Remove Attribute" %}</a></li>
+                                <li><a data-shape="trans_RenameAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Rename Attribute" %}</a></li>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Geometric Transformers" %}'> <i class="fa fa-globe"></i>  </button>
+                            <div class="dropdown-menu">
+                                <li><a data-shape="trans_CadastralGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Cadastral Geometry" %}</a></li>
+                                <li><a data-shape="trans_CalcArea" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculate Area" %}</a></li>
+                                <li><a data-shape="trans_Difference" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Difference" %}</a></li>                                
+                                <li><a data-shape="trans_ExplodeGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Explode Geometry" %}</a></li>
+                                <li><a data-shape="trans_FilterGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Filter Geometry" %}</a></li>
+                                <li><a data-shape="trans_Geocoder" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Geocoder" %}</a></li>
+                                <li><a data-shape="trans_Intersection" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Intersection" %}</a></li>
+                                <li><a data-shape="trans_MGRS" class="palette_node_element draw2d_droppable dropdown-item"> MGRS</a></li>
+                                <li><a data-shape="trans_RemoveGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Remove Geometry" %}</a></li>
+                                <li><a data-shape="trans_Reproject" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Reproject" %}</a></li>
+                                <li><a data-shape="trans_SimpGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Simple Geometry" %}</a></li>
+                                <li><a data-shape="trans_SpatialRel" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Spatial Relation" %}</a></li>
+                                <li><a data-shape="trans_TextToPoint" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Text to Point" %}</a></li>
+                                <li><a data-shape="trans_Union" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Union" %}</a></li>
+                                <li><a data-shape="trans_ValGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Validate Geometry" %}</a></li>
+                                <li><a data-shape="trans_WktGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "WKT to Geometry" %}</a></li>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "List Transformers" %}'> <i class="fa fa-list-ol"></i>  </button>
+                            <div class="dropdown-menu">
+                                <li><a data-shape="trans_ExplodeList" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Explode List" %}</a></li>
+                                <li><a data-shape="trans_SplitAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Split Attribute" %}</a></li>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Workflows Transformers" %}'> <i class="fa fa-cog"></i>  </button>
+                            <div class="dropdown-menu">
+                                <li><a data-shape="trans_ExecuteSQL" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Execute SQL" %}</a></li>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-warning" role="button" id="button-outputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Outputs" %}'> <i class="fa fa-sign-out"></i> </button>
+                            <div class="dropdown-menu">
+                                <li><a  data-shape="output_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="canvas-parent">
+                <div id="canvas-etl"></div>
+            </div>
+            <div id="jsonCanvas"></div>
+        </div>    
+    </div>
+    
+    <!-- Modals -->
+    <!-- Modal to save a workspace-->
+    <div id="dialog-save" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">{% trans "Save ETL workspace" %}</h4>
+                </div>
+
+                <div class="modal-body">
+                    <form id="layer-group-form" role="form">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="etl_id" >ID</label>
+                                <input value ="{{ id }}" placeholder="{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="etl_name">{% trans "Name" %}</label>
+                                <input value ="{{ name }}" placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name" type="text" class="form-control">								
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="etl_desc">{% trans "Description" %}</label>
+                                <input value ="{{ description }}" placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">								
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>	
+                                <label for="repeat_periodically">{% trans "Run workspace every..." %}</label>
+                            </div>
+                            
+                            <div class="col-md-6 repeat_periodically_time" >
+                                <select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">
+									<option value="all">{% trans 'All days' %}</option>
+									<option value="monday">{% trans 'Monday' %}</option>
+									<option value="tuesday">{% trans 'Tuesday' %}</option>
+									<option value="wednesday">{% trans 'Wednesday' %}</option>
+									<option value="thursday">{% trans 'Thursday' %}</option>
+									<option value="friday">{% trans 'Friday' %}</option>
+									<option value="saturday">{% trans 'Saturday' %}</option>
+									<option value="sunday">{% trans 'Sunday' %}</option>
+									<option value="every">{% trans 'Every' %} ...</option>
+                                </select>
+                            </div>
+                            <div class="more-hour-options">
+                                <div class="col-md-6 repeat_periodically_time">
+                                    <div class="form-group">
+                                        <div class="input-group date">
+                                            <input type="text" class="form-control" id="ws-program-time" name="ws-program-time" placeHolder="HH:mm:ss"/>
+                                            <span class="input-group-addon">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="more-options">
+                                <div class="col-md-12 repeat_periodically_time">
+                                    <label>{% trans 'Run workspace every...' %}</label>
+                                </div>
+                            
+                                <div class="col-md-6 repeat_periodically_time">
+                                    <input placeholder="Select number of..." name="ws-program-interval" id="ws-program-interval" type="number" value=1 class="form-control">
+                                </div>
+                                <div class="col-md-6 repeat_periodically_time">
+                                    <select class="form-control" style="width: 100%;" id="ws-program-unit" name="ws-program-unit">
+										<option value="empty">{% trans '... time measure' %}</option>
+										<option value="minutes">{% trans 'minutes' %}</option>
+										<option value="hours">{% trans 'hours' %}</option>
+										<option value="days">{% trans 'days' %}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        {% if user.is_superuser %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="checkbox" name="change_superuser" id="change_superuser"/>
+                                    <label for="change_superuser">{% trans 'Change to superuser?' %}</label>											
+                                </div>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans 'Close' %}</button>
+                    <button type="button" class="btn btn-default btn-sm" id="save-etl" title='{% trans "Set parameters of all tasks before save" %}'>{% trans 'Save' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal to make sure to overwrite workspace-->
+    <div class="modal fade" id="modal-overwrite-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Overwrite workspace?' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'Workspace' %} {{ id }} {% trans 'will be overwritten. If you do not want to overwrite it the ID must be empty' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-overwrite-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans 'Cancel' %}</button>
+                    <button id="button-overwrite-workspace-accept" type="button" class="btn btn-default">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal to make sure to clean canvas-->
+    <div class="modal fade" id="modal-new-empy-canvas" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Are you sure?' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'If you open a new empty canvas you will lost your current canvas if you have not saved it before' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-empty-canvas-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans 'Cancel' %}</button>
+                    <button id="button-empty-canvas-accept" type="button" class="btn btn-default">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>   
+
+    <!-- Modal name and user is already in database-->
+    <div class="modal fade" id="modal-ws-exists" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Not allowed' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'In database already exists a workspace with the same name and the same user' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-ws-exists-accept" type="button" class="btn btn-default">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal add connection in database-->
+    <div class="modal fade" id="modal-add-db" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">{% trans 'Add DataBase Connection' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="layer-group-form" role="form">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="type-db" >{% trans 'Type' %}</label>
+                                <select  class="form-control" style="width: 100%;" id="type-db" name="type-db">
+                                    <option value="">---</option>
+                                    <option value="PostgreSQL">PostgreSQL/PostGIS</option>
+                                    <option value="Oracle">Oracle</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label form="name" class="col-form-label">{% trans 'Name' %}</label>
+                                <input id="name-db" type="text" value="" class="form-control" pattern="[A-Za-z]{3}">
+                            </div>
+                        </div>
+
+                        <div id="postgresql-db" name = "db-form" style = "display:none;">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="host" class="col-form-label">{% trans 'Host' %}</label>
+                                    <input id="host" type="text" value="localhost" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="port" class="col-form-label">{% trans 'Port:' %}</label>
+                                    <input id="port" type="text" value="5432" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="database" class="col-form-label">{% trans 'Database:' %}</label>
+                                    <input id="database" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="{% trans 'Name of your database' %}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">                          
+                                    <label form="user" class="col-form-label">{% trans 'User:' %}</label>
+                                    <input id="user" type="text" value="postgres" size="40"  class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="password" class="col-form-label">{% trans 'Password:' %}</label>
+                                    <input type="password" id = "password-postgres" class="form-control" value="">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="oracle-db" name = "db-form" style = "display:none;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="username" class="col-form-label">{% trans 'User name:' %}</label>
+                                    <input id="username" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="password" class="col-form-label">{% trans 'Password:' %}</label>
+                                    <input type="password" id="password-oracle" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="dsn" class="col-form-label">{% trans 'Data source name:' %}</label>
+                                    <input type="text" id="dsn" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="text-test-connection"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" id="close-db">{% trans 'Close' %}</button>
+                    <button type="button" class="btn btn-default btn-sm" id="verify-db">{% trans 'Verify connection' %}</button>
+                    <button type="button" class="btn btn-default btn-sm" id="save-db">{% trans 'Save' %}</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal database not saved-->
+    <div class="modal fade" id="modal-db-exists" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Not allowed' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'DataBase Connection not saved. Probably, database name already exists.' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-db-exists-accept" type="button" class="btn btn-default">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endif %} 
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+    
+	$('#menu-plugin-etl').addClass("active");
+	$('#submenu-canvas').addClass("active");
+
+    lgid = '{{ id }}'
+    name_ws = '{{ name }}'
+    description_ws = '{{ description }}'
+    workspace = '{{ workspace }}'
+    fm_directory = '{{ fm_directory }}'
+    username = '{{ user.username }}'
+
+    if('{{day_of_week}}'){
+        dataPeriodic = '{{day_of_week}}'+' '+'{{hour}}'+':'+'{{minute}}'
+    }else if('{{every}}'){
+        dataPeriodic = '{{every}}'+' '+'{{period}}'
+    }else{
+        dataPeriodic = ''
+    }
+    
+    if(workspace){
+        var cnv = JSON.parse({{ workspace|safe }})
+    };
+
+    var srs = {{ srs|safe }}
+
+    var dbc = {{dbc|safe}}
+
+    var providers = {{providers|safe}}
+
+    function actualizarInfoPanel(data){
+        if(data.status == ''){
+
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+
+        if(data.status == 'Running'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "inline-block");
+            $("#icon-error").css("display", "none");
+			
+        }
+        if(data.status == 'Success'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "inline");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+        if(data.status == 'Error'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "inline");
+
+        }
+
+    }
+
+    function getCurrentCanvasStatus(){
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+            data: {
+                "username": '{{ user.username }}',
+            },
+		  	url: '/gvsigonline/etl/etl_current_canvas_status/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		actualizarInfoPanel(response);  		
+			},
+		  	error: function(response){
+				actualizarInfoPanel(response);	
+		  	}
+		});
+		return false;
+    }
+
+	function startCurrentCanvasStatus(){
+		interval = setInterval(function(){ 
+			getCurrentCanvasStatus();
+		}, 5000);
+	}
+
+    startCurrentCanvasStatus();
+    getCurrentCanvasStatus()
+
+    $(".more-options").slideUp("slow")
+
+    if(dataPeriodic!=''){
+        $("#repeat_periodically").prop('checked', true)
+        $(".repeat_periodically_time").slideDown("slow");
+
+        if(dataPeriodic.includes(':')){
+
+            $(".more-options").slideUp("slow"); 
+            $(".more-hour-options").slideDown("slow");
+            
+            $(".modal-body #ws-program-day").val(dataPeriodic.split(' ')[0])
+            $(".modal-body #ws-program-time").val(dataPeriodic.split(' ')[1]+':00')
+
+        }else{
+
+            $(".more-options").slideDown("slow");  // checked
+            $(".more-hour-options").slideUp("slow");
+
+            $(".modal-body #ws-program-day").val('all')
+            $(".modal-body #ws-program-interval").val(dataPeriodic.split(' ')[0])
+            $(".modal-body #ws-program-unit").val(dataPeriodic.split(' ')[1])
+
+        }
+
+    }else{
+        $("#repeat_periodically").prop('checked', false)
+        $(".repeat_periodically_time").slideUp("slow");
+    }
+
+    $("#save-etl").prop("disabled",false);
+    $('#save-etl').attr('data-toggle','');
+
+    $('#repeat_periodically').click(function() {
+
+            if($("#repeat_periodically").is(':checked'))
+                $(".repeat_periodically_time").slideDown("slow");  // checked
+            else
+                $(".repeat_periodically_time").slideUp("slow"); 
+        });
+
+    function edit_progamming_form(value){
+        if(value == "every"){
+            $(".more-options").slideDown("slow");  // checked
+            $(".more-hour-options").slideUp("slow"); 
+        }else{
+            $(".more-options").slideUp("slow"); 
+            $(".more-hour-options").slideDown("slow"); 
+        }
+    }
+
+    $('#ws-program-time').datetimepicker({
+        format: 'HH:mm:ss' 
+    });
+
+    $('#ws-program-day').on('change', function() {
+        edit_progamming_form($(this).val());
+    });
+
+
+    $('#button-ws-exists-accept').on('click', function(){
+        $('#modal-ws-exists').modal('hide')
+        $('#dialog-save').modal('show')
+
+    })
+
+    $('#button-db-exists-accept').on('click', function(){
+        $('#modal-db-exists').modal('hide')
+        $('#modal-add-db').modal('show')
+
+    })
+
+    $('#type-db').on('change', function() {
+
+        $("[name = 'db-form']").slideUp();
+        $("#text-test-connection").text('')
+        
+        if ($("#type-db").val() == 'PostgreSQL'){
+            $("#postgresql-db").slideDown();
+        }else if ($("#type-db").val() == 'Oracle'){
+            $("#oracle-db").slideDown();
+        }
+        
+    });
+
+    $('#verify-db').click(function() {
+    
+        if ($("#type-db").val() == 'PostgreSQL'){
+            var params = {"type-db": $("#type-db").val(),
+                "parameters": [
+                    {"host": $('#host').val(),
+                    "port": $('#port').val(),
+                    "database": $('#database').val(),
+                    "user": $('#user').val(),
+                    "password": $('#password-postgres').val()}
+                ]}
+        }else if ($("#type-db").val() == 'Oracle'){
+            var params = {"type-db": $("#type-db").val(),
+                "parameters": [
+                    {"username": $('#username').val(),
+                    "password": $('#password-oracle').val(),
+                    "dsn": $('#dsn').val()}
+                ]}
+        }
+
+        var formData = new FormData();
+        
+        formData.append('jsonParams', JSON.stringify(params))
+
+        $.ajax({
+            type: 'POST',
+            url: '/gvsigonline/etl/test_conexion/',
+            data: formData,
+            beforeSend:function(xhr){
+                xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+            },
+            cache: false, 
+            contentType: false, 
+            processData: false,
+            success: function (response) {
+
+                if(response.result == true){
+                    textConnection = gettext('Connection parameters are valids.')
+                    $("#text-test-connection").css('color', 'green');
+                }else{
+                    textConnection = gettext('Connection parameters are not valids.')
+                    $("#text-test-connection").css('color', 'red');
+                }
+
+                $("#text-test-connection").text(textConnection)
+            }
+        })
+    });
+
+    $('#close-db').click(function() {
+        $("#text-test-connection").text('')
+    })
+
+    $('#save-db').click(function() {
+    
+    if ($("#type-db").val() == 'PostgreSQL'){
+        var params = {
+            "type-db": $("#type-db").val(),
+            "name-db": $("#name-db").val(),
+            "parameters": [
+                {"host": $('#host').val(),
+                "port": $('#port').val(),
+                "database": $('#database').val(),
+                "user": $('#user').val(),
+                "password": $('#password-postgres').val()}
+            ]}
+    }else if ($("#type-db").val() == 'Oracle'){
+            var params = {"type-db": $("#type-db").val(),
+                    "name-db": $("#name-db").val(),
+                "parameters": [
+                    {"username": $('#username').val(),
+                    "password": $('#password-oracle').val(),
+                    "dsn": $('#dsn').val()}
+                ]}
+        }
+
+    var formData = new FormData();
+    
+    formData.append('jsonParams', JSON.stringify(params))
+
+    $.ajax({
+        type: 'POST',
+        url: '/gvsigonline/etl/save_conexion/',
+        data: formData,
+        beforeSend:function(xhr){
+            xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+        },
+        cache: false, 
+        contentType: false, 
+        processData: false,
+        success: function (response) {
+            $('#modal-add-db').modal('hide')
+            
+            if(response['saved']=="false"){
+                $('#modal-db-exists').modal('show')
+            }else{
+                dbc.push({"name": response['name'], "type": response['type']})
+            }
+            }
+        })
+    });
+
+</script>
+
+<link type="text/css" rel="stylesheet" href="{% static "css/style_etl.css" %}">
+
+<script type="text/javascript" src="{% static "js/lib/draw2d.js" %}"></script>
+
+<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+<script type="text/javascript" src="{% static "js/Application.js" %}"></script>
+<script type="text/javascript" src="{% static "js/View.js" %}"></script>
+<script type="text/javascript" src="{% static "js/Toolbar.js" %}"></script>
+<script type="text/javascript" src="{% static "js/TableShape.js" %}"></script>
+<script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}"></script>
+
+
+
+{% endblock %}

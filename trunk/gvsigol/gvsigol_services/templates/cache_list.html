@@ -1,0 +1,273 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+{% for message in messages %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="alert alert-danger" role="alert">
+			<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+			<span class="sr-only">{% trans "Error:" %}</span>
+			{{message}}
+		  </div>
+	</div>
+</div>
+{% endfor %}
+<div class="row">
+	<div class="col-md-12">
+	
+		<ul class="nav nav-tabs">
+	    	<li class="active"><a href="#tab-cached-layers" data-toggle="tab">{% trans "Cached layers" %}</a></li>
+	        <li><a href="#tab-cached-groups" data-toggle="tab">{% trans "Cached groups" %}</a></li>
+	    </ul>
+	       	
+	  	<div class="tab-content">
+	    	<div class="tab-pane active" id="tab-cached-layers">
+	        	<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body">
+								<table class="table" style="width: 100%;" id="layers-table">
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>{% trans "Name" %}</th>
+											<th>{% trans "Title" %}</th>
+											<th>{% trans "Datastore" %}</th>
+											<th>{% trans "Layer group" %}</th>
+											<th>{% trans "Cached" %}</th>
+											<th></th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for layer in layers %}
+										<tr>
+											<td>{{ layer.id }}</td>
+											<td>{{ layer.name }}</td>
+											<td>{{ layer.title }}</td>
+											<td>{{ layer.datastore.name }}</td>
+											<td>{{ layer.layer_group.name }} ({{layer.layer_group.title }})</td>
+											{% if layer.cached %}
+											<td><input disabled type="checkbox" checked/></td>
+											{% else %}
+											<td><input disabled type="checkbox"/></td>
+											{% endif %}
+											<td></td>
+											<td></td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+	         </div>
+	         
+	         <div class="tab-pane" id="tab-cached-groups">
+	        	<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body">
+								<table class="table" style="width: 100%;" id="groups-table">
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>{% trans "Name" %}</th>
+											<th>{% trans "Title" %}</th>
+											<th>{% trans "Cached" %}</th>
+											<th></th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for group in groups %}
+										<tr>
+											<td>{{ group.id }}</td>
+											<td>{{ group.name }}</td>
+											<td>{{ group.title }}</td>
+											{% if group.cached %}
+											<td><input disabled type="checkbox" checked/></td>
+											{% else %}
+											<td><input disabled type="checkbox"/></td>
+											{% endif %}
+											<td></td>
+											<td></td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+	         </div>
+	   	</div>
+		
+		
+	</div>
+</div>      
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-cache').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var layersTable = $('#layers-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		    	first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		        last		: '{% trans "Last" %}'
+		    },
+		    aria: {
+		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	      	"targets": -1,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-layer-cache-clear" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-layer-cache-config" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure cache options" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	  	}],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+	
+	var groupsTable = $('#groups-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		    	first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		        last		: '{% trans "Last" %}'
+		    },
+		    aria: {
+		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	      	"targets": -1,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-group-cache-clear" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-group-cache-config" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure cache options" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	  	}],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+		 
+	$('#layers-table tbody').on('click', 'button', function (){
+		var row = layersTable.row($(this).parents('tr'));
+	    var data = row.data();  
+	    if (this.name == "button-layer-cache-config"){
+	    	layerCacheConfig(data, row);
+			
+		} else if (this.name == "button-layer-cache-clear"){
+			layerCacheClear(data, row, $(this));
+			
+		}
+	});
+	
+	$('#groups-table tbody').on('click', 'button', function (){
+		var row = groupsTable.row($(this).parents('tr'));
+	    var data = row.data();  
+	    if (this.name == "button-group-cache-config"){
+	    	groupCacheConfig(data, row);
+			
+		} else if (this.name == "button-group-cache-clear"){
+			groupCacheClear(data, row, $(this));
+			
+		}
+	});
+	
+	
+	function layerCacheConfig(data){			
+		location.href = '/gvsigonline/services/layer_cache_config/' + data[0] + '/';
+	}
+	
+	function layerCacheClear(data, row, button){			
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layer_cache_clear/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layer cache was cleared"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layer cache clearing failed"));
+			}
+		});
+	}
+	function groupCacheConfig(data){
+		location.href = '/gvsigonline/services/group_cache_config/' + data[0] + '/';
+	}
+	function groupCacheClear(data, row, button){
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layergroup_cache_clear/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layergroup cache was cleared"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layergroup cache clearing failed"));
+			}
+		});
+	}
+	    
+});
+</script>
+{% endblock %}

@@ -1,0 +1,169 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"PO-Revision-Date: 2022-05-20 10:45+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0.1\n"
+
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr "No podeu actualitzar un magatzem de dades tipus GeoTIFF. Suprimiu-la i torneu-la a crear"
+
+msgid "Select type"
+msgstr "Seleccionar tipus"
+
+msgid "Select enumeration"
+msgstr "Seleccionar enumeració"
+
+msgid "Select multiple enumeration"
+msgstr "Seleccionar enumeració multiple"
+
+msgid "Field name"
+msgstr "Nom del camp"
+
+msgid "Cancel"
+msgstr "Cancel·lar"
+
+msgid "Save field"
+msgstr "Guardar camp"
+
+msgid "Edit field"
+msgstr "Editar camp"
+
+msgid "true"
+msgstr "Veritable"
+
+msgid "false"
+msgstr "Fals"
+
+msgid "True"
+msgstr "Veritable"
+
+msgid "False"
+msgstr "Fals"
+
+msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
+msgstr "Nom no vàlid: els identificadors han de començar amb una lletra o un subratllat (_). Els caràcters posteriors poden ser lletres, guions baixos o números"
+
+msgid "Enumeration cannot contain point-colon"
+msgstr "Els valors no poden contenir valors (;)"
+
+msgid "Create new layer"
+msgstr "Crear capa buida"
+
+msgid "Publish layer"
+msgstr "Publicar capa"
+
+msgid "Error in GetCapabilities"
+msgstr "Error en GetCapabilities"
+
+msgid "Error trying to connect"
+msgstr "Error provant conectar"
+
+msgid "Insert item name"
+msgstr "Inserte nom del item"
+
+msgid "Select form"
+msgstr "Seleccionar formulari"
+
+msgid "Status"
+msgstr "Estat"
+
+msgid "active"
+msgstr "actiu"
+
+msgid "inactive"
+msgstr "inactiu"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Is master?"
+msgstr "Es mestre?"
+
+msgid "Save node"
+msgstr "Guardar node"
+
+msgid "Edit node"
+msgstr "Editar node"
+
+msgid "Convert"
+msgstr "Convertir"
+
+msgid "Autogen"
+msgstr ""
+
+msgid "Autogen ok"
+msgstr ""
+
+msgid "Convert ok"
+msgstr ""
+
+msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
+msgstr "El camp no es pot marcar com obligatori a nivell de base de dades perquè alguns registres contenen valores nuls en aquesta columna. Esborra els valors nuls i torna a provar."
+
+msgid "Node has been reloaded"
+msgstr "El node s'ha recarregat"
+
+msgid "Error reloading node"
+msgstr "Error recarregant el node"
+
+msgid "Connection has been success"
+msgstr "S'ha connectat correctament"
+
+msgid "Filter by project"
+msgstr "Filtrar per projecte"
+
+msgid "Show all layers"
+msgstr "Mostrar totes les capes"
+
+msgid "The action was successfully completed"
+msgstr "L'acció s'ha completat correctament"
+
+msgid "The action failed"
+msgstr "L'acció ha fallat"
+
+msgid "The layer definition was refreshed"
+msgstr "La definició de la capa s'ha refrescat"
+
+msgid "The layer refresh failed"
+msgstr "El refrescat de capa ha fallat"
+
+msgid "Calculated"
+msgstr "Calculat"
+
+msgid "Old name"
+msgstr "Nom anterior"
+
+msgid "New name"
+msgstr "Nou nom"
+
+msgid "Rename"
+msgstr "Canviar nom"
+
+msgid "Field to delete"
+msgstr "Camp a esborrar"
+
+msgid "You must select an extent on the map using the control"
+msgstr "S'ha de seleccionar una extensió en el mapa fent servir el control"

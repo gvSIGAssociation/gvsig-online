@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+<form id="layer-group-form" role="form" method="post" action="/gvsigonline/sampledashboard/sampledashboard_update/">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>				
+			</div>
+			<div class="box">
+				{% csrf_token %}					
+				{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}				
+				{% if message %}
+				<div id="form-error" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+				<div class="box-body">
+					<div class="row">
+						<div class="col-md-12">
+							<label for="samples_id">{% trans "ID" %}</label>
+							<input value="{{ id }}" placeholder="{% trans 'Sample id' %}" name="sample_id" id="sample_id" type="text" class="form-control">
+						</div>
+					</div>
+										
+					<div class="row">
+						<div class="col-md-12">
+							<label for="sample_name">{% trans "Name" %}</label>
+							<input value="{{ name }}" placeholder="{% trans 'Sample name' %}" name="sample_name" id="sample_name" type="text" class="form-control">									
+						</div>
+					</div>
+							
+					<div class="row">
+						<div class="col-md-12">
+							<label for="sample_title">{% trans "Title" %}</label>
+							<input value="{{ title }}" placeholder="{% trans 'Sample title' %}" name="sample_title" id="sample_title" type="text" class="form-control">								
+						</div>
+					</div>
+						
+					<div class="row">
+						<div class="col-md-12">
+							<label for="sample_description">{% trans "Description" %}</label>
+							<input value="{{ description }}" placeholder="{% trans 'Sample description' %}" name="sample_description" id="sample_description" type="text" class="form-control">								
+						</div>
+					</div>
+					
+				</div>				
+			</div>
+		</div>				
+	</div>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-update-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Create new layer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Is needed to save this layer group first, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-update-layer-group-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-update-layer-group-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	//$('#menu-manage-services').addClass("active");
+	//$('#submenu-layergroups').addClass("active");
+</script>
+{% endblock %}

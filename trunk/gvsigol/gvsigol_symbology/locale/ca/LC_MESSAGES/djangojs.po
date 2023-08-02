@@ -1,0 +1,237 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Loading components. Please wait"
+msgstr "Cargando componentes. Por favor espere"
+
+msgid "Color map entry"
+msgstr "Entrada de color"
+
+msgid "Color"
+msgstr "Color"
+
+msgid "Quantity"
+msgstr "Quantitat"
+
+msgid "Label"
+msgstr "Etiqueta"
+
+msgid "Opacity"
+msgstr "Opacitat"
+
+msgid "Rule"
+msgstr "Regla"
+
+msgid "Expressions"
+msgstr "Expressions"
+
+msgid "Save filter"
+msgstr "Guardar filtre"
+
+msgid "Add expression"
+msgstr "Afegir expressió"
+
+msgid "Select field"
+msgstr "Seleccionar camp"
+
+msgid "Select operation"
+msgstr "Seleccionar operació"
+
+msgid "Filter preview"
+msgstr "Previsualitzar filtre"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Value1"
+msgstr "Valor1"
+
+msgid "Value2"
+msgstr "Valor2"
+
+msgid "contains"
+msgstr "Conté"
+
+msgid "Circle"
+msgstr "Cercle"
+
+msgid "Square"
+msgstr "Quadrat"
+
+msgid "Triangle"
+msgstr "Triangle"
+
+msgid "Star"
+msgstr "Estrella"
+
+msgid "Cross"
+msgstr "Creu"
+
+msgid "Stroke"
+msgstr "Línia"
+
+msgid "Stroke color"
+msgstr "Color del línia"
+
+msgid "Stroke width"
+msgstr "Ample de línia"
+
+msgid "Stroke opacity"
+msgstr "Opacitat de línia"
+
+msgid "Select pattern"
+msgstr "Seleccionar patró"
+
+msgid "Graphic"
+msgstr "Gràfic"
+
+msgid "Fill"
+msgstr "Farcit"
+
+msgid "Rotation"
+msgstr "Rotació"
+
+msgid "Select shape"
+msgstr "Seleccionar forma"
+
+msgid "Fill color"
+msgstr "Color del farcit"
+
+msgid "Fill opacity"
+msgstr "Opacitat del farcit"
+
+msgid "Edit rule"
+msgstr "Editar regla"
+
+msgid "Edit filter"
+msgstr "Editar filtre"
+
+msgid "Preview"
+msgstr "Previsualitzar"
+
+msgid "Append symbolizer"
+msgstr "Anyadir simbolitzador"
+
+msgid "Import from library"
+msgstr "Importar desde llibreria"
+
+msgid "Append color map entry"
+msgstr "Anyadir entrada de color"
+
+msgid "Rule name"
+msgstr "Nom de la regla"
+
+msgid "Rule title"
+msgstr "Títol de la regla"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Selected symbol is not compatible with the layer"
+msgstr "El símbol seleccionat no és compatible amb la capa"
+
+msgid "Image symbols can only be edited from the library"
+msgstr "Els símbols de tipus imatge només poden ser editats des de la biblioteca de símbols"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Cursive"
+msgstr "Cursiva"
+
+msgid "Oblique"
+msgstr "Obliqua"
+
+msgid "Bold"
+msgstr "Negreta"
+
+msgid "Is equal to"
+msgstr "És igual a"
+
+msgid "Is null"
+msgstr "És nul"
+
+msgid "Contains"
+msgstr "Conté"
+
+msgid "Is not equal"
+msgstr "No és igual"
+
+msgid "Is greater than"
+msgstr "És més gran que"
+
+msgid "Is greater than or equal to"
+msgstr "És més gran que o igual"
+
+msgid "Is less than"
+msgstr "És menor que"
+
+msgid "Is less than or equal to"
+msgstr "És menor que o igual"
+
+msgid "Is between"
+msgstr "Està entre"
+
+msgid "Font"
+msgstr "Font"
+
+msgid "Halo"
+msgstr "Halo"
+
+msgid "Label field"
+msgstr "Camp de etiqueta"
+
+msgid "Font family"
+msgstr "Família de font"
+
+msgid "Font size"
+msgstr "Mida de font"
+
+msgid "Font color"
+msgstr "Color de font"
+
+msgid "Font weight"
+msgstr "Gruix de font"
+
+msgid "Font style"
+msgstr "Estil de font"
+
+msgid "Halo color"
+msgstr "Color de halo"
+
+msgid "Halo opacity"
+msgstr "Opacitat de halo"
+
+msgid "Halo radius"
+msgstr "Ràdio de halo"
+
+msgid "You must select a field"
+msgstr "Debe seleccionar un campo"
+
+msgid "The number of intervals must be greater than 0"
+msgstr "El número de intervalos debe ser mayor que 0"

@@ -1,0 +1,187 @@
+{% extends extends_template %}
+{% load i18n static %}
+
+{% block content %}
+
+	{% if messages %}
+    <ul class="messages" style="list-style: none;margin-left: -40px;">
+        {% for message in messages %}
+        	{% if message.tags == "info" %}
+            <li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+            {% elif message.tags == "error" %}
+            <li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+	{% endif %}
+	
+	<div id="delete-error" style="color: #ff0000;margin-bottom:15px;padding:15px;background-color:rgba(255,0,0,0.2);display:none">
+	</div>
+	
+	{% include "filemanager_breadcrumbs.html" %}
+	
+	<table class="table">
+	 	<thead>
+	    	<tr>
+		      	{% if popup %}
+		      		<th>{% trans "Select" %}</th>
+		      	{% endif %}
+		      	<th>{% trans "Name" %}</th>
+		      	<th>{% trans "Size" %}</th>
+		      	<th>{% trans "Date" %}</th>
+		      	{% if not popup %}
+		      		{% if not first_level %}
+		      			<th>{% trans "Actions" %}</th>
+		      		{% endif %}
+		      	{% endif %}
+	    	</tr>
+	  	</thead>
+	  	<tbody>
+	    	{% for file in files %}
+	    	<tr>
+	      		{% if popup %}
+	      				<td><a href="javascript: Filemanager.select('{{file.filepath}}');"><i class="fa fa-file"></i></a></td>
+	      		{% endif %}
+	      		{% if file.filetype == "Directory" %}
+	      			<td><img src="{% static "img/folder.png" %}" style="margin-right: 5px;"><a href="?path={{file.filepath}}{% if popup %}&amp;popup=1{% endif %}">{{file.filename}}</a></td>
+	      		{% else %}
+				  	{% url 'fsfilemanager:fdownload' file.filepath as download_url %}
+	      			{% if file.extension|lower == "shp" %}
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/shp.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
+	      			{% elif file.extension|lower == "dbf" %}
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/dbf.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
+	      			{% elif file.extension|lower == "tif" or file.extension|lower == "tiff" or file.extension|lower == "geotiff" %}
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
+	      			{% elif file.extension|lower == "xlsx" or file.extension|lower == "xls" or file.extension|lower == "csv" %}
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/excel.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
+	      			{% elif file.extension|lower == "zip" %}
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/zip.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
+	      			{% else %}
+	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/file.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
+	      			{% endif %}
+	      		{% endif %}
+	      		<td>{{file.filesize}}</td>
+	      		<td>{{file.filedate}}</td>
+	      		{% if not popup %}
+					{% if user.is_superuser or not first_level %}
+	      			<td>
+		      			<div class="btn-group">
+		                  	<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+	                    		<i class="fa fa-wrench"></i>
+	                    	</button>
+	                    	<ul class="dropdown-menu dropdown-menu-right" role="menu">
+	                    	{% if file.filetype == "Directory" %}
+	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
+	                  		{% else %}
+	                  			{% if file.extension|lower == "shp" or file.extension|lower == "dbf" %}
+				      				<li><a href="{% url 'filemanager:export-to-database' %}?path={{file.filepath}}" class="export-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
+				      				<li class="divider"></li>
+				      			{% endif %}  
+				      			{% if is_etl_plugin_installed %}
+				      			{% if file.extension|lower == "xlsx" or file.extension|lower == "csv" %}
+				      				<li><a href="{% url 'transform-to-database' %}?path={{file.filepath}}" class="transform-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Transform to database" %}</a></li>
+				      				<li class="divider"></li>
+				      			{% endif %}    
+				      			{% endif %}   
+				      			{% if file.extension|lower == "zip" %}
+				      				<li><a href="#" data-filepath="{{file.filepath}}" class="unzip-file"><i class="fa fa-file-archive-o" style="color: #f56954;"></i> {% trans "Unzip file" %}</a></li>
+				      				<li class="divider"></li>
+				      			{% endif %}               		
+	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete file" %}</a></li>
+				      		{% endif %}
+				      		</ul>
+		                </div>
+	                </td>
+	                {% endif %}
+	      		{% endif %}
+	    	</tr>
+	    	{% empty %}
+	    	<tr>
+	      		<td colspan="5">
+	        		{% trans "Nothing to see here." %}
+	      		</td>
+	    	</tr>
+	    	{% endfor %}
+	  	</tbody>
+	</table>
+	<div>
+		{% if not popup %}
+			{% if user.is_superuser or not first_level %}
+		  		<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
+		  		<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
+				<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Historical Exports" %}</button></a>
+
+		  	{% endif %}
+
+	  	{% endif %}
+	</div>
+
+	{% if popup %}
+		{% if user.is_superuser or not first_level %}
+			<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
+			<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
+			<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Historical Exports" %}</button></a>
+		{% endif %}
+		<script src="{% static "js/filemanager.js" %}"></script>
+	{% endif %}
+	
+{% endblock %}
+
+{% block extra-scripts %}	
+	<script>
+	$('#menu-manage-files').addClass("active");
+	$(document).ready(function(){	  	
+	  	$('.delete-file').on('click', function () {				
+	  		$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: "{% url 'filemanager:delete-file' %}",
+				data: {
+					path: this.dataset.filepath
+				},
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$.overlayout();
+					nrsp = JSON.parse(response)
+					if('success' in nrsp && nrsp['success'] == false){
+						$("#delete-error").html(nrsp['message']);
+						$("#delete-error").css("display", "block");
+					}else{
+						location.reload();
+					}
+				},
+				error: function(){}
+			});
+		});
+	  	
+	  	$('.unzip-file').on('click', function () {				
+	  		$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: "{% url 'filemanager:unzip-file' %}",
+				data: {
+					path: this.dataset.filepath
+				},
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$.overlayout();
+					nrsp = JSON.parse(response);
+					if('success' in nrsp && nrsp['success'] == false){
+						$("#delete-error").html(nrsp['message']);
+						$("#delete-error").css("display", "block");
+					}else{
+						location.reload();
+					}
+				},
+				error: function(){}
+			});
+		});
+	});
+	</script>
+{% endblock %}

@@ -1,0 +1,254 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: es_ES\n"
+"X-Source-Language: C\n"
+msgid "Catalog"
+msgstr "Catàleg"
+
+msgid "Catalog and downloads"
+msgstr "Catàleg i descarregues"
+
+msgid "Press Ctrl to mark an area"
+msgstr ""
+
+msgid "Clean"
+msgstr "Netejar"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Clean current search, filters and order"
+msgstr "Netejar cerca actual, filtres i ordre"
+
+msgid "Categories"
+msgstr "Categories"
+
+msgid "Separated by"
+msgstr "Separades per"
+
+msgid "Keywords"
+msgstr "Paraules clau"
+
+msgid "Contact for the resource"
+msgstr "Contacte del recurs"
+
+msgid "Resources"
+msgstr "Recursos"
+
+msgid "From..."
+msgstr "Des de..."
+
+msgid "To..."
+msgstr "Fins..."
+
+msgid "Records"
+msgstr "Registres"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "Map"
+msgstr "Mapa"
+
+msgid "Download"
+msgstr "Descarregar"
+
+msgid "No results found"
+msgstr "No s'han trobat resultats"
+
+msgid "Go"
+msgstr "Anar"
+
+msgid "Add"
+msgstr "Afegir"
+
+msgid "Catalog layers"
+msgstr "Capes del catàleg"
+
+msgid "Remove layer"
+msgstr "Esborrar capa"
+
+msgid "List of downloads"
+msgstr "Llistat de descàrregues"
+
+msgid "List of layers"
+msgstr "Llistat de capes"
+
+msgid "Include only results overlapping with the selected area"
+msgstr "Incloure només resultats que es solapen amb l'àrea seleccionada"
+
+msgid "Metadatum"
+msgstr "Metadada"
+
+msgid "Draw rectangle"
+msgstr "Dibuixar rectangle"
+
+msgid "Order by relevance"
+msgstr "Ordenar per rellevància"
+
+msgid "Order by modification date"
+msgstr "Ordenar per data de modificació"
+
+msgid "Order by title"
+msgstr "Ordenar per títol"
+
+msgid "Search..."
+msgstr "Buscar"
+
+msgid "The search is running..."
+msgstr "La cerca s'està executant..."
+
+msgid "Loading..."
+msgstr "Carregant..."
+
+msgid "No layers available"
+msgstr "No hi ha capes disponibles"
+
+msgid "Add to map"
+msgstr "Afegir al mapa"
+
+msgid "Add layer to map"
+msgstr "Afegir capa al mapa"
+
+msgid "Download ShapeFile"
+msgstr "Descarregar Shapefile"
+
+msgid "Download CSV"
+msgstr "Descarregar CSV"
+
+msgid "Download GML"
+msgstr "Descarregar GML"
+
+msgid "Access raster data"
+msgstr "Accedir a dades ràster"
+
+msgid "Access resource"
+msgstr "Accedir al recurs"
+
+msgid "Not filtered"
+msgstr "Sense filtre"
+
+msgid "keywords"
+msgstr "Paraules clau"
+
+msgid "topicCats"
+msgstr "Categories temàtiques"
+
+msgid "categories"
+msgstr "Categories"
+
+msgid "inspireThemes"
+msgstr "Temes d'INSPIRE"
+
+msgid "inspireThemesWithAc"
+msgstr "Temes d'INSPIRE amb Ac"
+
+msgid "inspireThemesURI"
+msgstr "URI de Temes d'INSPIRE"
+
+msgid "denominators"
+msgstr "Denominadors"
+
+msgid "resolutions"
+msgstr "Resolucions"
+
+msgid "spatialRepresentationTypes"
+msgstr "Tipus de representació espacial"
+
+msgid "orgNames"
+msgstr "Noms d'organització"
+
+msgid "orgNamesTree"
+msgstr "Arbre de noms d'organització"
+
+msgid "metadataPOCs"
+msgstr "POCs de metadades"
+
+msgid "serviceTypes"
+msgstr "Tipus de servicis"
+
+msgid "types"
+msgstr "Tipus"
+
+msgid "createDateYears"
+msgstr "Any de creació"
+
+msgid "formats"
+msgstr "Formats"
+
+msgid "titles"
+msgstr "Títols"
+
+msgid "metadataTypes"
+msgstr "Tipus de metadada"
+
+msgid "isValidInspire"
+msgstr "És INSPIRE vàlid"
+
+msgid "isHarvested"
+msgstr "Recol·lectat"
+
+msgid "mdStatus"
+msgstr "Estat de la metadada"
+
+msgid "status"
+msgstr "Estat"
+
+msgid "sourceCatalog"
+msgstr "Catàleg d'origen"
+
+msgid "standards"
+msgstr "Estàndards"
+
+msgid "subTemplateTypes"
+msgstr "Tipus de subplantilla"
+
+msgid "recordOwner"
+msgstr "Propietari del registre"
+
+msgid "groupOwners"
+msgstr "Propietaris del grup"
+
+msgid "publishedForGroup"
+msgstr "Publicat pel grup"
+
+msgid "isPublishedToAll"
+msgstr "Publicat per tots"
+
+msgid "maintenanceAndUpdateFrequencies"
+msgstr "Freqüències de manteniment i actualització"
+
+msgid "mdActions"
+msgstr "Accions de metadada"
+
+msgid "Organization"
+msgstr "Organització"
+
+msgid "Source Catalog"
+msgstr "Catàleg d'origen"
+
+msgid "Year"
+msgstr "Any"
+
+msgid "Representation type"
+msgstr "Tipus de representació"
+
+msgid "Update frequency"
+msgstr "Frequència d'actualització"
+
+msgid "Scale"
+msgstr "Escala"
+
+msgid "Service type"
+msgstr "Tipus de servici"

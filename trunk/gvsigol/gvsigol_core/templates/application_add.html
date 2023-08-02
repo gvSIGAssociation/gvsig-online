@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load l10n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<form id="application-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/application_add/">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<div class="box-tools pull-right">
+							<button id="save_button" class="save_button btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+					<div class="row" style="padding-left: 30px;">
+						{% csrf_token %}													
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+					</div>
+				</div>
+				
+				<ul class="nav nav-tabs">
+              		<li class="active"><a href="#tab-application-main" data-toggle="tab">{% trans "General" %}</a></li>
+              		<li><a href="#tab-application-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>
+            	</ul>
+            	
+            	<div class="tab-content">
+              		<div class="tab-pane active" id="tab-application-main">
+              			<div class="box">
+              				<div class="box-body">
+              					<div class="row">
+		              				<div class="col-md-12 form-group">
+										<label for="application-name">{% trans "Name" %}</label>
+										<input placeholder="{% trans 'Application name' %}" name="application-name" id="application-name" type="text" class="form-control">						
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="application-title">{% trans "Title" %}</label>
+										<input placeholder="{% trans 'Application title' %}" name="application-title" id="application-title" type="text" class="form-control">						
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="application-description">{% trans "Description" %}</label>
+										<input placeholder="{% trans 'Application description' %}" name="application-description" id="application-description" type="text" class="form-control">						
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="application-url">{% trans "URL" %}</label>
+										<input placeholder="{% trans 'Application URL' %}" name="application-url" id="application-url" type="text" class="form-control">						
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="application-conf">{% trans "Configuration" %}</label>
+										<textarea class="form-control" name="application-conf" id="application-conf" rows="5"></textarea>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-md-12" style="margin-bottom: 20px;">
+										<div class="provider-img">
+											<img style="height: 50px; width: 50px;" id="image-preview" src="{{application.image.url}}" alt="">
+										</div>
+										<div class="provider-img-change">
+											<label>{% trans "Change image?" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
+											<input id="application-image" name="application-image" accept=".jpg, .jpeg, .png" type="file" class="file" data-show-preview="true">						
+										</div>
+									</div>
+								</div>
+							</div>
+              			</div>
+              		</div>
+              		
+              		<div class="tab-pane" id="tab-application-usergroups">
+              			<div class="row">
+							<div class="col-md-12">
+								<div id="user-list-box" class="box searchable-list-box">
+									<div class="box-header" style="padding-bottom:0px">
+										<label for="is_public" class="form-label" title="{% trans 'Application will be readable by everyone if public' %}">
+											<span>{% trans "Is public?" %}</span>
+											<input style="position:absolute; margin-left: 10px" type="checkbox" name="is_public" id="is_public" {% if resource_is_public %}checked {% endif %}/>
+										</label>
+										<div class="form-horizontal">
+											<div class="form-group" style="margin-left: 0px; margin-right: 0px">
+											<div class="col-md-6 ">
+											<label class="control-label">{% trans "Allow access to the application for the following user groups:" %}</label>
+											</div>
+											{% if user.is_superuser %}
+											<div class="col-md-4 ">
+											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+											</div>
+											{% else %}
+											<div class="col-md-6 ">
+											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+											</div>
+											{% endif %}
+											</div>
+										</div>
+									</div>
+									<div class="box-body">
+										<ul class="products-list product-list-in-box list">
+											{% for group in groups %}
+											<li class="item">
+												<div class="product-img">
+													<img src="{% static "img/users.png" %}" alt="Users Image">
+												</div>
+												<div class="product-info">
+													<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
+														<div class="checkbox pull-right">													
+															<label>
+																{% if group.checked %}
+																	<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}" checked/>{% trans "Assign user group" %}
+																{% else %}
+																	<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}"/>{% trans "Assign user group" %}
+																{% endif %}
+															</label>
+														</div>
+													</a> 
+													<span class="product-description">{{group.description}}</span>
+												</div>
+											</li> 
+											{% endfor %}
+										</ul>
+										<ul class="pagination"></ul>
+									</div>
+								</div>
+							</div>
+						</div>
+              		</div>
+              		
+          		</div>
+          	</form>
+		</div>
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-applications').addClass("active");
+
+	var conf = document.getElementById('application-conf');
+	var codemirror = CodeMirror.fromTextArea(conf, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	codemirror.setValue('');
+	
+	function readURL(input) {
+  	    if (input.files && input.files[0]) {
+  	        var reader = new FileReader();
+  	        reader.onload = function (e) {
+  	            $('#logo-preview').attr('src', e.target.result);
+  	        };
+  	        reader.readAsDataURL(input.files[0]);
+  	        
+  	    }
+  	}
+	
+	$().ready(function() {
+		var searcheableList = new List('user-list-box', {
+			valueNames: ['searchable-user'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 6,
+			pagination: false
+		});
+		
+		$(".save_button").click(function(e){
+			e.preventDefault(); // prevents default
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				item.show();
+			}
+			$(".application-usergroup-checkbox").prop( "disabled", false)
+			
+    		$("#application-form").submit();
+    	    return false; 
+
+    	});
+		
+		$('#application-form').submit(function() {
+			$("body").overlay();	
+		});
+    	
+		function handleIsPublicResourceCheckbox(searcheableList) {
+			console.log(searcheableList);
+			// inital status
+			$(".application-usergroup-checkbox").prop( "disabled", $("#is_public").is(":checked"));
+			// monitor changes
+			$("#is_public").change(function () {
+				if (this.checked) {
+					$(".application-usergroup-checkbox").prop( "disabled", true);
+				}
+				else {
+					$(".application-usergroup-checkbox").prop( "disabled", false);
+				}
+			});
+			// apply disabled status on searcheableReadList page changes
+			searcheableList.on('updated', function() {
+				console.log("updated");
+				$(".application-usergroup-checkbox").prop( "disabled", $("#is_public").is(":checked"));
+			});
+		}
+		handleIsPublicResourceCheckbox(searcheableList);	
+	});
+</script>
+{% endblock %}

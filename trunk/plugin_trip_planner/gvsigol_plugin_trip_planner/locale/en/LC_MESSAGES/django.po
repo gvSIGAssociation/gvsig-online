@@ -1,0 +1,224 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-02-26 13:36+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: forms_services.py:35 forms_services.py:47 forms_services.py:66
+#: templates/app_mobile_config_update.html:51
+#: templates/gtfs_provider_add.html:43 templates/gtfs_provider_list.html:22
+#: templates/gtfs_provider_update.html:50
+msgid "Name"
+msgstr ""
+
+#: forms_services.py:36 forms_services.py:48 forms_services.py:67
+#: templates/app_mobile_config_update.html:58
+#: templates/gtfs_provider_add.html:50 templates/gtfs_provider_list.html:23
+#: templates/gtfs_provider_update.html:57
+msgid "Description"
+msgstr ""
+
+#: forms_services.py:37 forms_services.py:49
+#: templates/gtfs_provider_add.html:58 templates/gtfs_provider_list.html:24
+#: templates/gtfs_provider_update.html:65
+msgid "Url"
+msgstr ""
+
+#: forms_services.py:38 forms_services.py:50
+#: templates/gtfs_provider_list.html:25 templates/gtfs_provider_update.html:72
+msgid "Active"
+msgstr ""
+
+#: forms_services.py:56
+msgid "Hour"
+msgstr ""
+
+#: forms_services.py:57
+msgid "Minutes"
+msgstr ""
+
+#: forms_services.py:68
+msgid "Config"
+msgstr ""
+
+#: templates/app_mobile_config_update.html:14
+msgid "Update APP Mobile Config"
+msgstr ""
+
+#: templates/app_mobile_config_update.html:16
+#: templates/gtfs_provider_add.html:14 templates/gtfs_provider_update.html:16
+msgid "Save"
+msgstr ""
+
+#: templates/app_mobile_config_update.html:25
+msgid "Mobile configuration saved successfully"
+msgstr ""
+
+#: templates/app_mobile_config_update.html:67
+msgid "Contact URL"
+msgstr ""
+
+#: templates/app_mobile_config_update.html:74
+msgid "Base_layers"
+msgstr ""
+
+#: templates/app_mobile_config_update.html:76
+msgid "Add"
+msgstr ""
+
+#: templates/dashboard_trip_planner_menu.html:9
+#: templates/dashboard_trip_planner_menu.html:22
+msgid "Trip Planner"
+msgstr ""
+
+#: templates/dashboard_trip_planner_menu.html:14
+#: templates/dashboard_trip_planner_menu.html:23
+msgid "Config APP Mobile"
+msgstr ""
+
+#: templates/dashboard_trip_planner_menu.html:20
+msgid "Plugins"
+msgstr ""
+
+#: templates/gtfs_provider_add.html:12
+msgid "Add provider"
+msgstr ""
+
+#: templates/gtfs_provider_add.html:65
+msgid "isActive"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:11
+msgid "GTFS Providers list"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:13
+msgid "Add GTFS provider"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:21
+msgid "Id"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:58
+msgid "Download and Rebuild Graph at:"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:62
+msgid "Enter hour (from 0-23)"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:67
+msgid "Enter minutes (from 0-59)"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:70
+msgid "Set up cronjob"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:87 templates/gtfs_provider_list.html:135
+msgid "Delete provider"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:90
+msgid "The provider will be removed, Do you want continue?"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:93
+msgid "Cancel"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:94
+msgid "Accept"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:111
+msgid "Processing request..."
+msgstr ""
+
+#: templates/gtfs_provider_list.html:112
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:113
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:114
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:115
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:116
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:118
+msgid "Loading..."
+msgstr ""
+
+#: templates/gtfs_provider_list.html:119 templates/gtfs_provider_list.html:120
+msgid "No records available"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:122
+msgid "First"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:123
+msgid "Previous"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:124
+msgid "Next"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:125
+msgid "Last"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:128
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:129
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: templates/gtfs_provider_list.html:139 templates/gtfs_provider_update.html:14
+msgid "Update GTFS provider"
+msgstr ""
+
+#: templates/gtfs_provider_update.html:42
+msgid "ID Field"
+msgstr ""
+
+#: views.py:86
+msgid "Error: provider could not be published"
+msgstr ""
+
+#: views.py:105
+msgid "GTFS Provider not found"
+msgstr ""

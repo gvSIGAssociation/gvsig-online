@@ -1,0 +1,3 @@
+{% load i18n %}
+<input id="{{final_attrs.id}}" type="text" class="vFilemanagerField{% if final_attrs.class %} {{final_attrs.class}}{% endif %}" name="{{final_attrs.name}}" value="{{value}}">
+<a href="javascript:Filemanager.show('{{final_attrs.id}}', '{{url}}?popup=1{% if final_attrs.path %}&amp;path={{final_attrs.path|urlencode|urlencode}}{% endif %}');" class="filemanager-field"></a>

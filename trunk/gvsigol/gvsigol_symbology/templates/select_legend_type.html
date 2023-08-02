@@ -1,0 +1,134 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Create new style" %}</h3>
+			</div>
+			
+			<div class="box-body">
+<!-- 				<div class="row"> -->
+<!-- 					<div class="col-md-12 form-group"> -->
+<!-- 						<label>{% trans "Style name" %}</label> -->
+<!-- 						<input id="symbology-title" name="symbology-title" class="form-control " type="text" placeholder="{% trans "Insert style name" %}"> 					 -->
+<!-- 					</div> -->
+<!-- 				</div> -->
+
+				<div class="row">
+					<div class="col-md-12">
+						<ul class="products-list product-list-in-box">
+						
+							{% if is_vectorial %}
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-map-marker"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/unique_symbol_add/{{layer.id}}/" class="product-title">{% trans "Unique symbol" %}</a> 
+										<span class="product-description"> {% trans "Creates a legend of unique symbol" %} </span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-list"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/unique_values_add/{{layer.id}}/" class="product-title">{% trans "Unique values" %}</a> 
+										<span class="product-description"> {% trans "Creates a legend of unique values" %} </span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-sort-numeric-asc"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/intervals_add/{{layer.id}}/" class="product-title">{% trans "Intervals" %}</a> 
+										<span class="product-description"> {% trans "Creates a legend defined by intervals" %} </span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-terminal"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/expressions_add/{{layer.id}}/" class="product-title">{% trans "Expressions" %}</a> 
+										<span class="product-description"> {% trans "Creates a legend defined by expressions" %} </span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-pencil-square-o"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/custom_add/{{layer.id}}/" class="product-title">{% trans "Custom" %}</a> 
+										<span class="product-description"> {% trans "Creates a custom legend" %} </span>
+									</div>
+								</li>
+								
+<!-- 								<li class="item"> -->
+<!-- 									<div class="product-img"> -->
+<!-- 										<span class="new-style-options-icon"><i class="fa fa-file-code-o"></i></span> -->
+<!-- 									</div> -->
+<!-- 									<div class="product-info"> -->
+<!-- 										<a href="/gvsigonline/symbology/sld_import/{{layer.id}}/" class="product-title">{% trans "Import from SLD" %} -->
+<!-- 										</a>  -->
+<!-- 										<span class="product-description"> {% trans "SLD legend description" %} </span> -->
+<!-- 									</div> -->
+<!-- 								</li> -->
+							
+							{% else %}
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-picture-o"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/color_table_add/{{layer.id}}/" class="product-title">{% trans "Color table" %}</a> 
+										<span class="product-description"> {% trans "Creates a legend for a raster layer defined by a color table" %} </span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-pencil-square-o"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/custom_add/{{layer.id}}/" class="product-title">{% trans "Custom" %}</a> 
+										<span class="product-description"> {% trans "Creates a custom legend" %} </span>
+									</div>
+								</li>
+							{% endif %}
+							
+							{% if is_vectorial and is_points %}
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/clustered_points_add/{{layer.id}}/" class="product-title">{% trans "Clustered Points" %}</a> 
+										<span class="product-description"> {% trans "Creates a legend for clustered points defined by expressions" %} </span>
+									</div>
+								</li>
+							{% endif %}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 		  	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+});
+</script>
+{% endblock %}

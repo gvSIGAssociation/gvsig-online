@@ -1,0 +1,177 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+{% if user.is_staff %}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<a href = "/gvsigonline/filemanager/?path={{ exportations.0.back }}">
+							<button class="btn btn-block btn-default btn-sm"><i class="fa fa-arrow-left margin-r-5"></i> {% trans "Back" %}</button>
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="box">
+				<div class="box-body">
+					<table class="table" id="exportations-table">
+						<thead>
+							<tr>
+								<th>{% trans "ID" %}</th>
+								<th>{% trans "Status" %}</th>
+								<th>{% trans "File" %}</th>
+								<th>{% trans "Time" %}</th>
+								<th>{% trans "Message" %}</th>
+								<th>{% trans "User" %}</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for export in exportations %}
+								<tr>
+									<td> {{ export.id }} </td>
+									<td>
+										{% if export.status == "Success" %}
+											<i id ="icon-{{ export.id }}" class="fa fa-check" style="color:green; display:inline" aria-hidden="true"></i> 
+										{% elif export.status == "Error" %}
+											<i id ="icon-{{ export.id }}" class="fa fa-times" style="color:red; display:inline" aria-hidden="true" ></i>
+										{% elif export.status == "Running" %}
+											<i id = "icon-{{ export.id }}" class="fa fa-spinner fa-spin" style=" display:inline-block"></i> 
+										{% elif export.status == "Warning" %}
+											<i id ="icon-{{ export.id }}" class="fa fa-exclamation-triangle" style="color:orange; display:inline" aria-hidden="true" ></i>
+										{% endif %}
+											
+									</td>
+
+									<td>{{ export.file }}</td>
+									<td>{{ export.time }}</td>
+									<td><p id = "msg-{{ export.id }}">{{ export.message }}</p></td>
+									<td> {{ export.username }} </td>
+									<td>
+										<div id = "btn-{{ export.id }}">
+											{% if export.status == "Error" %}
+												<a href = "{{ export.redirect }}">
+													<button id="try-again" class="btn btn-block btn-default btn-sm">
+														<i class="fa fa-upload margin-r-5"></i> {% trans "Try again" %}
+													</button>
+												</a>
+											{% endif %}
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block extra-scripts %}
+
+<script>
+function actualizarInfoPanel(data){
+
+	for(var i=0;i<data["exportations"].length; i++){
+
+		var _export = data["exportations"][i];
+		var id = _export["id"];
+		var msg = _export["message"];
+		var status = _export['status'];
+		var redirect = _export['redirect'];
+
+		if(status == 'Warning'){
+
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin")
+			$("#icon-"+id).addClass("fa fa-exclamation-triangle")
+			$("#icon-"+id).css("display", "inline");
+			$("#icon-"+id).css("color", "orange");
+
+			$("#msg-"+id).text(msg)
+		}
+
+		if(status == 'Success'){
+
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin")
+			$("#icon-"+id).removeClass("fa fa-times")
+			$("#icon-"+id).addClass("fa fa-check")
+			$("#icon-"+id).css("display", "inline");
+			$("#icon-"+id).css("color", "green");
+
+			$("#msg-"+id).text(msg)
+
+			$("#btn-"+id).remove()
+
+		}
+
+		if(status == 'Running'){
+
+			$("#icon-"+id).addClass("fa fa-spinner fa-spin")
+			$("#icon-"+id).css("display", "inline-block");
+			$("#icon-"+id).css("color", "");
+			$("#msg-"+id).text(msg)
+
+		}
+
+		if(status == 'Error'){
+
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin")
+			$("#icon-"+id).addClass("fa fa-times")
+			$("#icon-"+id).css("display", "inline");
+			$("#icon-"+id).css("color", "red");
+
+			$("#msg-"+id).text(msg)
+
+			$("#btn-"+id).empty();
+
+			html_button = '<a href = '+redirect+'>'
+			html_button +=	'<button id="try-again" class="btn btn-block btn-default btn-sm">'
+			html_button +=		'<i class="fa fa-upload margin-r-5"></i>'+gettext("Try again")
+			html_button +=	'</button>'
+			html_button += '</a>'
+
+			$("#btn-"+id).append(html_button)
+			
+		}
+	}
+}
+
+function getCurrentStatus(){
+	$.ajax({
+		type: 'POST',
+		data: {
+			'status': 'true'
+		},
+		async: true,
+		  url: '/gvsigonline/filemanager/list_exports/',
+		  beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		  },
+		  success	:function(response){
+
+			actualizarInfoPanel(response);  		
+		},
+		  error: function(response){
+			actualizarInfoPanel(response);	
+		  }
+	});
+	return false;
+}
+
+function startCurrentStatus(){
+	interval = setInterval(function(){ 
+		getCurrentStatus();
+	}, 3000);
+}
+
+startCurrentStatus();
+
+</script>
+{% endblock %}

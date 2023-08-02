@@ -1,0 +1,307 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-04 16:38+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:35
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:47
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:66
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:51
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_add.html:43
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:22
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_update.html:50
+msgid "Name"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:36
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:48
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:67
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:58
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_add.html:50
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:23
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_update.html:57
+msgid "Description"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:37
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:49
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_add.html:58
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:24
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_update.html:65
+msgid "Url"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:38
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:50
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:25
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_update.html:72
+msgid "Active"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:56
+msgid "Hour"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:57
+msgid "Minutes"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/forms_services.py:68
+msgid "Config"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:14
+msgid "Update APP Mobile Config"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:16
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_add.html:14
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_update.html:16
+msgid "Save"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:25
+msgid "Mobile configuration saved successfully"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:67
+msgid "Contact URL"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:74
+msgid "Geocoder URL"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:81
+msgid "Base_layers"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/app_mobile_config_update.html:83
+msgid "Add"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/dashboard_trip_planner_menu.html:9
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/dashboard_trip_planner_menu.html:22
+msgid "Trip Planner"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/dashboard_trip_planner_menu.html:14
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/dashboard_trip_planner_menu.html:23
+msgid "Config APP Mobile"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/dashboard_trip_planner_menu.html:20
+msgid "Plugins"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_add.html:12
+msgid "Add provider"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_add.html:65
+msgid "isActive"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:11
+msgid "GTFS Providers list"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:13
+msgid "Add GTFS provider"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:21
+msgid "Id"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:58
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:102
+msgid "Download and Rebuild Graph at:"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:62
+msgid "Enter hour (from 0-23)"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:67
+msgid "Enter minutes (from 0-59)"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:71
+msgid "Run periodically?"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:77
+msgid "All days"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:78
+msgid "Monday"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:79
+msgid "Tuesday"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:80
+msgid "Wednesday"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:81
+msgid "Thursday"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:82
+msgid "Friday"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:83
+msgid "Saturday"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:84
+msgid "Sunday"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:85
+msgid "Every"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:106
+msgid "Select number of..."
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:111
+msgid "... time measure"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:112
+msgid "minutes"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:113
+msgid "hours"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:114
+msgid "days"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:121
+msgid "Set up cronjob"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:124
+msgid "Update Now"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:142
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:190
+msgid "Delete provider"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:145
+msgid "The provider will be removed, Do you want continue?"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:148
+msgid "Cancel"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:149
+msgid "Accept"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:166
+msgid "Processing request..."
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:167
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:168
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:169
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:170
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:171
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:173
+msgid "Loading..."
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:174
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:175
+msgid "No records available"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:177
+msgid "First"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:178
+msgid "Previous"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:179
+msgid "Next"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:180
+msgid "Last"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:183
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:184
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_list.html:194
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_update.html:14
+msgid "Update GTFS provider"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/templates/gtfs_provider_update.html:42
+msgid "ID Field"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/views.py:92
+msgid "Error: provider could not be published"
+msgstr ""
+
+#: plugin_trip_planner/gvsigol_plugin_trip_planner/views.py:111
+msgid "GTFS Provider not found"
+msgstr ""

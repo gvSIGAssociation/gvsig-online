@@ -1,0 +1,355 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "GTFS Providers list" %}</h3>
+				<div class="box-tools pull-right">
+					<button id="button-add-provider" class="btn btn-block btn-default btn-sm fa fa-plus"> <em class="fa fa-plus margin-r-5"></em>{% trans "Add GTFS provider" %}</button>
+				</div>
+			</div>
+			
+			<div class="box-body">
+				<table class="table" id="providers-table">
+					<thead>
+						<tr>
+							<th>{% trans "Id" %}</th>
+							<th class="col-md-1">{% trans "Name" %}</th>
+							<th class="col-md-2">{% trans "Description" %}</th>
+							<th>{% trans "Url" %}</th>
+							<th class="col-md-1 text-center">{% trans "Active" %}</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for prov in providers %}
+						<tr class="ui-state-default">
+							<td class="row-id">{{ prov.id }}</td>
+							<td class="col-md-2">{{ prov.name }}</td>
+							<td class="col-md-2">{{ prov.description }}</td>
+							<td>{{ prov.url }}</td>
+							<td class="col-md-1 text-center">
+							{% if prov.is_active == True %}&#10004;
+							{% else %} - 
+							{% endif %}
+							</td>
+							<td></td>
+							<td></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<div class="box-footer with-border">
+				<div class="box-tools">
+					<form method="post" role="form" method="post"
+						 action="/gvsigonline/trip_planner/gtfs_crontab_update/">
+						{% csrf_token %}
+			  			
+						<div class="form-row">
+							<div class="row">
+								<div class="col-md-12">
+									<label for="repeat_periodically">{% trans "Run periodically?" %}</label>&nbsp;&nbsp;
+									<input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>														
+								</div>
+								
+								<div class="col-md-6 repeat_periodically_time" >
+									<select class="form-control" style="width: 100%;" id="program-day" name="program-day">
+										<option value="all">{% trans 'All days' %}</option>
+										<option value="monday">{% trans 'Monday' %}</option>
+										<option value="tuesday">{% trans 'Tuesday' %}</option>
+										<option value="wednesday">{% trans 'Wednesday' %}</option>
+										<option value="thursday">{% trans 'Thursday' %}</option>
+										<option value="friday">{% trans 'Friday' %}</option>
+										<option value="saturday">{% trans 'Saturday' %}</option>
+										<option value="sunday">{% trans 'Sunday' %}</option>
+										<option value="every">{% trans 'Every' %} ...</option>
+									</select> 	
+								</div>
+								<div class="more-hour-options">
+									<div class="col-md-6 repeat_periodically_time">
+										<div class="form-group">
+											<div class='input-group date'>
+												<input type='text' class="form-control" id='program-time' name='program-time' placeHolder="HH:mm:ss"/>
+												<span class="input-group-addon">
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<div class="more-options">
+									<div class="col-md-12 repeat_periodically_time">
+										<label>{% trans "Download and Rebuild Graph at:" %}</label>
+									</div>
+								
+									<div class="col-md-6 repeat_periodically_time">
+										<input placeholder="{% trans 'Select number of...' %}" name="program-interval" id="program-interval" type="number" value=1 class="form-control">
+									</div>
+									
+									<div class="col-md-6 repeat_periodically_time">
+										<select class="form-control" style="width: 100%;" id="program-unit" name="program-unit">
+											<option value="empty">{% trans '... time measure' %}</option>
+											<option value="minutes">{% trans 'minutes' %}</option>
+											<option value="hours">{% trans 'hours' %}</option>
+											<option value="days">{% trans 'days' %}</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+						</div>	  			
+			    		<input type="submit" class="btn btn-default" value="{% trans "Set up cronjob" %}">
+					</form>
+					<div class="box-tools pull-right">
+						<button id="button-update-now" class="btn btn-block btn-default btn-sm"><em id ="icon-success" class="fa fa-check" aria-hidden="true"></em> <em id = "icon-running" class="fa fa-spinner fa-spin"></em> <em id ="icon-error" class="fa fa-times" aria-hidden="true" ></em> {% trans "Update Now" %}</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>      
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-provider" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete provider" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "The provider will be removed, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-provider-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-provider-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+$('#menu-manage-plugins').addClass("active");
+$('#submenu-trip_planner').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var table = $('#providers-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		    	first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		        last		: '{% trans "Last" %}'
+		    },
+		    aria: {
+		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	        "targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-provider" data-toggle="modal" data-target="#modal-delete-provider" data-placement="bottom" title="' + '{% trans "Delete provider" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	    },{
+	        "targets": -2,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-update-provider" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update GTFS provider" %}' + '" class="btn btn-success"><i class="fa fa-pencil-square-o"></i></button>'
+	    }],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+		 
+	$('#providers-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();     
+	    if (this.name == "button-update-provider") {
+	    	updateProvider(data);
+	    } else if (this.name == "button-delete-provider"){
+	    	deleteProvider(data, row);   
+	    }
+	});
+	
+	$('#button-add-provider').click( function() {
+		location.href = '/gvsigonline/trip_planner/gtfs_provider_add/';
+	});
+	
+	$('#button-update-now').click( function() {
+		location.href = '/gvsigonline/trip_planner/gtfs_crontab_update/';
+	});
+
+	$('#button-execute-gtfs-scripts').click( function() {
+		location.href = '/gvsigonline/trip_planner/execute_gtfs_scripts/';
+	});
+
+	function updateProvider(data){			
+		location.href = '/gvsigonline/trip_planner/gtfs_provider_update/' + data[0] + '/';
+	}
+
+	function deleteProvider(data, row){
+		$('#button-delete-provider-accept').click( function() {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/trip_planner/gtfs_provider_delete/' + data[0] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-provider').modal('hide');
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	}
+	
+	cel_hour = '{{ hour }}'
+	cel_minute = '{{ minute }}'
+	cel_day_of_week = '{{ day_of_week }}'
+	
+	cel_every = '{{ every }}'
+	cel_period = '{{ period }}'
+
+	if(cel_hour){
+		$('#repeat_periodically').prop('checked', true);
+		$('#program-day').val(cel_day_of_week);
+		$('#program-time').val(cel_hour+':'+cel_minute+':00')
+		$(".repeat_periodically_time").slideDown("fast");
+	}else if (cel_every){
+		$('#repeat_periodically').prop('checked', true);
+		$('#program-interval').val(cel_every);
+		$('#program-unit').val(cel_period);
+		$('#program-day').val("every");
+		$(".more-options").slideDown("fast");  // checked
+		$(".more-hour-options").slideUp("fast");
+	}else{
+		$(".repeat_periodically_time").slideUp("fast")
+	}
+
+	$('#repeat_periodically').click(function() {
+
+		if($("#repeat_periodically").is(':checked')){
+			$(".repeat_periodically_time").slideDown("slow");  // checked
+		}
+		else{
+			$(".repeat_periodically_time").slideUp("slow"); 
+		}
+	});
+
+	function edit_progamming_form(value){
+		 if(value == "every"){
+			 $(".more-options").slideDown("slow");  // checked
+			 $(".more-hour-options").slideUp("slow"); 
+		 }else{
+			$(".more-options").slideUp("slow"); 
+			$(".more-hour-options").slideDown("slow"); 
+		 }
+	}
+
+	$('#program-time').datetimepicker({
+		format: 'HH:mm:ss' 
+	});
+	
+	$('#program-day').on('change', function() {
+		edit_progamming_form($(this).val());
+	});
+
+	edit_progamming_form($('#program-day').val())
+
+	
+	////////////////////////////////////////////////////////////////////////
+    function actualizarInfoPanel(data){
+        if(data.status == ''){
+
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+
+        if(data.status == 'Running'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "inline-block");
+            $("#icon-error").css("display", "none");
+			
+        }
+        if(data.status == 'Success'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "inline");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+        }
+        if(data.status == 'Error'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "inline");
+
+        }
+
+    }
+
+    function getCurrentCanvasStatus(){
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/trip_planner/gtfs_update_status/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		  	},
+		  	success	:function(response){
+				  console.log(response)
+		  		actualizarInfoPanel(response);		
+			},
+		  	error: function(response){
+				actualizarInfoPanel(response);	
+		  	}
+		});
+		return false;
+    }
+
+	function startCurrentCanvasStatus(){
+		interval = setInterval(function(){ 
+			getCurrentCanvasStatus();
+		}, 3000);
+	}
+
+    startCurrentCanvasStatus();
+    getCurrentCanvasStatus()
+
+
+
+	   
+});
+</script>
+{% endblock %}

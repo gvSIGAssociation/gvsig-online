@@ -1,0 +1,154 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"PO-Revision-Date: 2021-06-16 14:49+0200\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.3\n"
+
+#: mdstandards/iso19139_2007.py:21
+msgid "author"
+msgstr "autor"
+
+# De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "003 owner"
+#: mdstandards/iso19139_2007.py:22
+msgid "owner"
+msgstr "detentor"
+
+#: mdstandards/iso19139_2007.py:23
+msgid "Contact"
+msgstr "Contato"
+
+# De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "001 resourceProvider"
+#: mdstandards/iso19139_2007.py:24
+msgid "resourceProvider"
+msgstr "fornecedor"
+
+# De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "002 custodian"
+#: mdstandards/iso19139_2007.py:25
+msgid "custodian"
+msgstr "tutor"
+
+# De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "006 originator"
+#: mdstandards/iso19139_2007.py:26
+msgid "originator"
+msgstr "produtor"
+
+# De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "011 publisher"
+#: mdstandards/iso19139_2007.py:27
+msgid "publisher"
+msgstr "editor"
+
+#: templates/catalog_details.html:12
+msgid "About this resource"
+msgstr "Sobre este recurso"
+
+#: templates/catalog_details.html:13 views.py:119
+msgid "Categories"
+msgstr "Categorias"
+
+#: templates/catalog_details.html:17 views.py:125
+msgid "Keywords"
+msgstr "Palavras-chave"
+
+#: templates/catalog_details.html:21
+msgid "Legal constraints"
+msgstr "Restrições legais"
+
+#: templates/catalog_details.html:25 views.py:171
+msgid "Technical information"
+msgstr "Informações Técnicas"
+
+#: templates/catalog_details.html:27 views.py:174
+msgid "Representation type"
+msgstr "Tipo de representação"
+
+#: templates/catalog_details.html:31 views.py:179
+msgid "Scale"
+msgstr "Escala"
+
+#: templates/catalog_details.html:35 views.py:184
+msgid "Coordinate Reference System"
+msgstr "Sistema de Referência de Coordenadas"
+
+#: templates/catalog_details.html:39 views.py:191
+msgid "Metadata identifier"
+msgstr "Identificador de metadados"
+
+#: templates/catalog_details.html:50 views.py:228
+msgid "Download and links"
+msgstr "Baixar e links"
+
+#: templates/catalog_details.html:55
+msgid "Download"
+msgstr "Baixar"
+
+#: templates/catalog_details.html:63
+msgid "Get shape"
+msgstr "Obter forma"
+
+#: templates/catalog_details.html:68 views.py:257
+msgid "Spatial Extent"
+msgstr "Extensão espacial"
+
+#: templates/catalog_details.html:71 views.py:271
+msgid "Temporal Extent"
+msgstr "Extensão temporal"
+
+#: templates/catalog_details.html:72 views.py:262
+msgid "Publication date"
+msgstr "Data de publicação"
+
+#: templates/catalog_details.html:76 views.py:267
+msgid "Period"
+msgstr "Período"
+
+#: views.py:140
+msgid "Resource Contacts"
+msgstr "Contatos de recursos"
+
+#: views.py:151
+msgid "Metadata Contacts"
+msgstr "Contactos de Metadados"
+
+#: views.py:168
+msgid "Resource constraints"
+msgstr "Restrições de recursos"
+
+#: views.py:193
+msgid " Show in Catalog"
+msgstr " Mostrar no Catálogo"
+
+#: views.py:201 views.py:235
+msgid "Resource"
+msgstr "Recurso"
+
+#: views.py:218
+msgid "Online services"
+msgstr "Serviços online"
+
+#: views.py:243 views.py:246 views.py:249
+msgid "Access resource"
+msgstr "Recursos de acesso"
+
+#: views.py:252
+msgid "No resources available"
+msgstr "Não há recursos disponíveis"
+
+#: views.py:284
+msgid "Metadata detail not available"
+msgstr "Detalhe dos metadados não disponíveis"

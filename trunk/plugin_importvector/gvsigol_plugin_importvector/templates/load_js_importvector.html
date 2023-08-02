@@ -1,0 +1,42 @@
+{% load staticfiles %}
+{% load i18n %}
+<script>
+	var IMG_PATH = '{% static "img/" %}';
+</script>
+<script type="text/javascript" src="{% static "js/vendors/shp.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/importVector.js" %}"></script>
+<script type="text/javascript">
+	var map = viewer.core.getMap();
+	var conf = viewer.core.getConf();
+	
+	if (viewer.core.ifToolInConf('gvsigol_plugin_importvector')) {
+		
+		var button = '<li role="presentation"><a id="importvector" role="menuitem" tabindex="-1" href="#"><i class="fa fa-upload m-r-5"></i>'+gettext("Import vector file")+'</a></li>';
+		$('#gvsigol-navbar-file-menu').append(button);
+		
+		var tool = new ImportVector(conf, map);
+		viewer.core.loadTool(tool);
+		
+		/*$.ajax({
+			type : 'POST',
+			async : false,
+			url : '/gvsigonline/print/get_conf/',
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success : function(response) {
+				var url = response.sample_url;
+				
+				var tool = new SampleMenuButton(url, conf, map);
+				viewer.core.loadTool(tool);
+				
+				
+			},
+			error : function() {
+				messageBox.show('error', gettext('Error loading samplemenubutton plugin'));
+			}
+		});*/
+	}
+	
+	
+</script>

@@ -1,0 +1,309 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: es\n"
+"X-Source-Language: C\n"
+
+msgid "Loading components. Please wait"
+msgstr "Cargando componentes. Por favor espere"
+
+msgid "Color map entry"
+msgstr "Entrada de color"
+
+msgid "Color"
+msgstr "Color"
+
+msgid "Percentaje"
+msgstr "Porcentaje"
+
+msgid "Transparency"
+msgstr "Transparencia"
+
+msgid "Delete"
+msgstr "Borrar"
+
+msgid "Quantity"
+msgstr "Cantidad"
+
+msgid "Label"
+msgstr "Etiqueta"
+
+msgid "Opacity"
+msgstr "Opacidad"
+
+msgid "Rule"
+msgstr "Regla"
+
+msgid "Expressions"
+msgstr "Expresiones"
+
+msgid "Save filter"
+msgstr "Guardar filtro"
+
+msgid "Add expression"
+msgstr "Añadir expresión"
+
+msgid "Select field"
+msgstr "Seleccionar campo"
+
+msgid "Select operation"
+msgstr "Seleccionar operación"
+
+msgid "Filter preview"
+msgstr "Previsualizar filtro"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Value1"
+msgstr "Valor1"
+
+msgid "Value2"
+msgstr "Valor2"
+
+msgid "contains"
+msgstr "Contiene"
+
+msgid "Circle"
+msgstr "Círculo"
+
+msgid "Square"
+msgstr "Cuadrado"
+
+msgid "Triangle"
+msgstr "Triángulo"
+
+msgid "Star"
+msgstr "Estrella"
+
+msgid "Cross"
+msgstr "Cruz"
+
+msgid "Stroke"
+msgstr "Linea"
+
+msgid "Stroke color"
+msgstr "Color del linea"
+
+msgid "Stroke width"
+msgstr "Anchura de linea"
+
+msgid "Stroke opacity"
+msgstr "Opacidad de linea"
+
+msgid "Select pattern"
+msgstr "Seleccionar patrón"
+
+msgid "Graphic"
+msgstr "Gráfico"
+
+msgid "Fill"
+msgstr "Relleno"
+
+msgid "Rotation"
+msgstr "Rotación"
+
+msgid "Select shape"
+msgstr "Seleccionar forma"
+
+msgid "Fill color"
+msgstr "Color del relleno"
+
+msgid "Fill opacity"
+msgstr "Opacidad del relleno"
+
+msgid "Edit rule"
+msgstr "Editar regla"
+
+msgid "Edit filter"
+msgstr "Editar filtro"
+
+msgid "Preview"
+msgstr "Previsualizar"
+
+msgid "Append symbolizer"
+msgstr "Añadir simbolizador"
+
+msgid "Import from library"
+msgstr "Importar desde lbrería"
+
+msgid "Append color map entry"
+msgstr "Añadir entrada de color"
+
+msgid "Rule name"
+msgstr "Nombre de la regla"
+
+msgid "Rule title"
+msgstr "Título de la regla"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Selected symbol is not compatible with the layer"
+msgstr "El símbolo seleccionado no es compatible con la capa"
+
+msgid "Image symbols can only be edited from the library"
+msgstr "Los símbolos de tipo imagen solo pueden ser editados des de la biblioteca de símbolos"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Cursive"
+msgstr "Cursiva"
+
+msgid "Oblique"
+msgstr "Oblicua"
+
+msgid "Bold"
+msgstr "Negrita"
+
+msgid "Is equal to"
+msgstr "Es igual a"
+
+msgid "Is null"
+msgstr "Es nul"
+
+msgid "Contains"
+msgstr "Contiene"
+
+msgid "Is not equal"
+msgstr "No es igual"
+
+msgid "Is greater than"
+msgstr "Es mayor que"
+
+msgid "Is greater than or equal to"
+msgstr "Es mayor que o igual"
+
+msgid "Is less than"
+msgstr "Es menor que"
+
+msgid "Is less than or equal to"
+msgstr "Es menor que o igual"
+
+msgid "Is between"
+msgstr "Está entre"
+
+msgid "Font"
+msgstr "Fuente"
+
+msgid "Halo"
+msgstr "Halo"
+
+msgid "Label field"
+msgstr "Campo de etiqueta"
+
+msgid "Font family"
+msgstr "Família de fuente"
+
+msgid "Font size"
+msgstr "Tamaño de fuente"
+
+msgid "Font color"
+msgstr "Color de fuente"
+
+msgid "Font weight"
+msgstr "Grosor de fuente"
+
+msgid "Font style"
+msgstr "Estilo de fuente"
+
+msgid "Halo color"
+msgstr "Color de halo"
+
+msgid "Halo opacity"
+msgstr "Opacidad de halo"
+
+msgid "Halo radius"
+msgstr "Radio de halo"
+
+msgid "You must select a field"
+msgstr "Debe seleccionar un campo"
+
+msgid "The number of intervals must be greater than 0"
+msgstr "El número de intervalos debe ser mayor que 0"
+
+msgid "Has label"
+msgstr "Activar etiquetado"
+
+msgid "Size"
+msgstr "Tamaño"
+
+msgid "Minimum scale denominator"
+msgstr "Denominador mínimo de la escala"
+
+msgid "Maximum scale denominator"
+msgstr "Denominador máximo de la escala"
+
+msgid "Filter"
+msgstr "Filtro"
+
+msgid "Define custom scale denominators?"
+msgstr "Visible por escala"
+
+msgid "No limit"
+msgstr "Sin límite"
+
+msgid "Two or more color definitions are required"
+msgstr "En caso de necesitar alguna, se requieren al menos dos definiciones en la tabla de color"
+
+msgid "Label filter expressions"
+msgstr "Etiqueta filtrada por expresión"
+
+msgid "Minimum interval"
+msgstr "Intervalo mínimo"
+
+msgid "Maximum interval"
+msgstr "Intervalo máximo"
+
+msgid "Append textsymbolizer"
+msgstr "Añadir simbolizador de texto"
+
+msgid "Single feature"
+msgstr "Feature simple"
+
+msgid "Default group"
+msgstr "Grupo por defecto"
+
+msgid "features"
+msgstr "features"
+
+msgid "null_value"
+msgstr "Sin valor"
+
+msgid "You must select a image"
+msgstr "Selecciona una imagen"
+
+msgid "Add"
+msgstr "Añadir"
+
+msgid "AND expression"
+msgstr "Expresión AND"
+
+msgid "OR expression"
+msgstr "Expresión OR"

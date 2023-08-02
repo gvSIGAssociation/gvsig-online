@@ -1,0 +1,262 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Catalog"
+msgstr ""
+
+msgid "Catalog and downloads"
+msgstr ""
+
+msgid "Press Ctrl to mark an area"
+msgstr ""
+
+msgid "Clean"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Clean current search, filters and order"
+msgstr ""
+
+msgid "Categories"
+msgstr ""
+
+msgid "Separated by"
+msgstr ""
+
+msgid "Keywords"
+msgstr ""
+
+msgid "Contact for the resource"
+msgstr ""
+
+msgid "Resources"
+msgstr ""
+
+msgid "From..."
+msgstr ""
+
+msgid "To..."
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
+msgid "Map"
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid "No results found"
+msgstr ""
+
+msgid "Go"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Catalog layers"
+msgstr ""
+
+msgid "Remove layer"
+msgstr ""
+
+msgid "List of downloads"
+msgstr ""
+
+msgid "List of layers"
+msgstr ""
+
+msgid "Include only results overlapping with the selected area"
+msgstr ""
+
+msgid "Metadatum"
+msgstr "Metadata"
+
+msgid "Draw rectangle"
+msgstr ""
+
+msgid "Order by relevance"
+msgstr ""
+
+msgid "Order by modification date"
+msgstr ""
+
+msgid "Order by title"
+msgstr ""
+
+msgid "Search..."
+msgstr ""
+
+msgid "The search is running..."
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "No layers available"
+msgstr ""
+
+msgid "Add to map"
+msgstr ""
+
+msgid "Add layer to map"
+msgstr ""
+
+msgid "Download ShapeFile"
+msgstr ""
+
+msgid "Download CSV"
+msgstr ""
+
+msgid "Download GML"
+msgstr ""
+
+msgid "Access raster data"
+msgstr ""
+
+msgid "Access resource"
+msgstr ""
+
+msgid "Not filtered"
+msgstr ""
+
+msgid "keywords"
+msgstr "Keywords"
+
+msgid "topicCats"
+msgstr "Topic Categories"
+
+msgid "categories"
+msgstr "Categories"
+
+msgid "inspireThemes"
+msgstr "INSPIRE Themes"
+
+msgid "inspireThemesWithAc"
+msgstr "INSPIRE Themes With Ac"
+
+msgid "inspireThemesURI"
+msgstr "INSPIRE Themes URI"
+
+msgid "denominators"
+msgstr "Denominators"
+
+msgid "resolutions"
+msgstr "Resolutions"
+
+msgid "spatialRepresentationTypes"
+msgstr "Spatial representation types"
+
+msgid "orgNames"
+msgstr "Organization names"
+
+msgid "orgNamesTree"
+msgstr "Organization names tree"
+
+msgid "metadataPOCs"
+msgstr "Metadata POCs"
+
+msgid "serviceTypes"
+msgstr "Service types"
+
+msgid "types"
+msgstr "Types"
+
+msgid "createDateYears"
+msgstr "Creation year"
+
+msgid "formats"
+msgstr "Formats"
+
+msgid "titles"
+msgstr "Titles"
+
+msgid "metadataTypes"
+msgstr "Metadata types"
+
+msgid "isValidInspire"
+msgstr "Is valid INSPIRE"
+
+msgid "isHarvested"
+msgstr "Is harvested"
+
+msgid "mdStatus"
+msgstr "Metadata status"
+
+msgid "status"
+msgstr "Status"
+
+msgid "sourceCatalog"
+msgstr "Source catalog"
+
+msgid "standards"
+msgstr "Standards"
+
+msgid "subTemplateTypes"
+msgstr "Subtemplate types"
+
+msgid "recordOwner"
+msgstr "Record owner"
+
+msgid "groupOwners"
+msgstr "Group owners"
+
+msgid "publishedForGroup"
+msgstr "Published for group"
+
+msgid "isPublishedToAll"
+msgstr "Is published to all"
+
+msgid "maintenanceAndUpdateFrequencies"
+msgstr "Maintenance and update frequencies"
+
+msgid "mdActions"
+msgstr "Metadata actions"
+
+msgid "Organization"
+msgstr ""
+
+msgid "Source Catalog"
+msgstr ""
+
+msgid "Year"
+msgstr ""
+
+msgid "Representation type"
+msgstr ""
+
+msgid "Update frequency"
+msgstr ""
+
+msgid "Scale"
+msgstr ""
+
+msgid "Service type"
+msgstr ""
+
+msgid "Draw polygon"
+msgstr ""
+
+msgid "Clear selected area"
+msgstr ""
+
+msgid "Search in catalog"
+msgstr ""

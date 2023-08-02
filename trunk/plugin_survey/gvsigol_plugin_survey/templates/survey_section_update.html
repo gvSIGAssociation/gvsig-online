@@ -1,0 +1,643 @@
+{% extends "base.html" %} {% load staticfiles %} {% load i18n %} 
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box padding-20">
+			<form id="section-form" role="form" method="post"
+				action="/gvsigonline/survey/survey_section_update/{{ section.id }}/">
+				{% csrf_token %}
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Update survey section" %}</h3>
+					<div class="box-tools pull-right">
+						<div class="btn btn-default btn-save-form btn-sm">
+							<i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}
+						</div>
+					</div>
+				</div>
+				<div class="box-body">
+
+					{% if form.errors %}
+					<div id="form-error" style="color: #ff0000;">
+						<ul>
+							{{ form.non_field_errors }}
+							{% for field in form %} 
+							{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li> 
+							{% endif %} 
+							{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+
+					<div class="row">
+						<div class="col-md-9">
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="id_name">{% trans "Name" %}</label> {{ form.name }}
+								</div>
+							</div>
+							
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="id_name">{% trans "Title" %}</label> {{ form.title }}
+								</div>
+							</div>
+							
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="id_srs">{% trans "SRS" %}</label> {{ form.srs }}
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-md-3">
+							<div class="project_linked">
+								<div class="col-md-12 form-group">
+									<label for="id_name">{% trans "Layer linked" %}</label>
+									{% if section.layer_id != None %}
+									<a href="/gvsigonline/services/layer_update/{{section.layer.id}}/" class="product-title">
+										<div class="product-case">
+											<div class="product-img2">
+												<img data-origin="{{ section.layer.type }}" src="{{ section.layer.thumbnail.url }}" height="75" width="90">
+											</div>
+											<div class="product-info">
+												{{section.layer.title}} 
+											</div>
+										</div>
+									</a>
+									{% else %}
+									<div class="product-case no-link">
+										<div class="product-img">
+											<i class="fa fa-chain-broken" aria-hidden="true"></i>
+										</div>
+										<div class="product-info">
+											<span class="product-title">{% trans "Not linked"%}</span> 
+										</div>
+									</div>
+									{% endif %}
+									
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<input id="definition" name="definition" type="hidden" value="">
+					
+					<div class="row">	
+						<div id="section-definition">
+						<div id="user-list-box" class="box searchable-list-box" style="margin-top: 20px;">
+							<div class="box-header with-border">
+								<h3 class="box-title col-md-12">{% trans "Definition" %}
+									<div class="box-tools pull-right">
+										<!-- 
+										<div class="btn btn-info-form btn-default btn-sm">
+											<i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>{% trans "get info" %}
+										</div>
+										-->
+										<div class="btn btn-add-form btn-default btn-sm">
+											<i class="fa fa-plus margin-r-5"></i> {% trans "add form" %}
+										</div>
+										
+										
+									</div>
+								</h3>
+							</div>
+							<div class="box-body toc-layer-update">
+						<div id="toc" class="toc">
+						{% for g in toc %}
+							<div id="lg_{{g.1.name}}" data-name="{{g.1.name}}" data-title="{{g.1.title}}" data-order="{{g.1.order}}" class="box box-default collapsed-box toc-layergroup">
+								<div class="box-header with-border">
+									<span class="handle" style="margin-right: 20px;"> 
+										<i class="fa fa-ellipsis-v"></i>
+										<i class="fa fa-ellipsis-v"></i>
+									</span>
+									<span class="text">{{g.1.title}}</span>
+								</div>	
+							</div>
+			        	{% endfor %}
+			        	
+			        	</div>
+			        	</div>
+			        	</div>
+						
+						</div>
+					</div>
+					
+					
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-link-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Link survey feature type (layer)" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "This survey hasn't got a layer created using the survey's specifications." %}</p>
+				<p>{% trans "To create it, go to the survey's main page and click on 'update project' (yellow button)" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-link-survey-accept" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Form" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Name" %}</label>
+						<input id="form-name" class="form-control" value="">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Title" %}</label>
+						<input id="form-title" class="form-control" value="">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="modal-form-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="modal-form-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modal-formitem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "FormItem" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Name" %}</label>
+						<input id="formitem-name" class="form-control" value="">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Title" %}</label>
+						<input id="formitem-title" class="form-control" value="">
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Type" %}</label>
+						<select id="transformation-operation-select" name="type" class="form-control">
+							<option value="">---</option>
+						</select>
+						<br />
+						<div id="transformation-operation-div">
+							<input type="text" id="fixed_value_text" name="fixed_value_text"
+							class="form-control fill-with-control" value="" disabled>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Mandatory" %}</label>
+						<select id="mandatory" name="mandatory" class="form-control undefined" style="width: 100%">
+							<option value="yes">{% trans "Yes" %}</option>
+							<option value="no" selected="">{% trans "No" %}</option>
+						</select>
+					</div>
+				</div>
+				
+			</div>
+			<div class="modal-footer">
+				<button id="modal-formitem-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="modal-formitem-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete section survey" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "The section survey will be deleted" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-survey-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-survey-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% endblock %} {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/lib/survey/dynamic-forms.js" %}"></script>
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-survey').addClass("active");
+</script>
+<script type="text/javascript">
+
+
+$().ready(function(){ 
+	
+
+	$("#id_srs").prop("disabled", true);
+
+	this.count = 0;
+	this.result = {};
+	var field_definitions = {{ field_definitions|safe }};
+	var self = this;
+	var json = {}
+	var aux_json = '{{section.definition|safe}}';
+	if(!(aux_json == 'None' || aux_json.length == 0)){
+		json = JSON.parse('{{section.definition|safe}}');
+	}
+	for(var section in json){
+		var name = json[section]["formname"];
+		var title = json[section]["formtitle"];
+		var id = document.count;
+		create_form(name, title);
+		
+		var items = json[section]["formitems"];
+		for(var item in items){
+			var comp = $(".section-form[data-order='" + id+"']");
+			
+			var name = items[item]["key"];
+			var title = items[item]["title"];
+			var type = items[item]["type"];
+			var values = items[item]["values"];
+			create_formitem(name, title, type, values, comp);
+		}
+	}
+	
+	createDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
+	
+	$(".product-case.no-link").click(function(){
+		$('#modal-link-survey').modal('show');
+	});
+	
+	function create_stringcombo_item(type, id, name, values){
+		var html = "";
+		html +='<div id="'+id+'" class="stringcombo-item">';
+		var disabled = "";
+		if(type =="stringcombo" || type == "multistringcombo"){
+			disabled = " disabled";
+		}
+ 		html +='<div class="col-md-12 form-group item-group-div">';
+ 		html +='<label class="item-label">'+gettext("Item group")+'</label>';
+ 		if(!(type =="stringcombo" || type == "multistringcombo")){
+ 			html +='<div class="pull-right stringcombo_item_remove_button item-close"><i class="fa fa-times margin-r-5" aria-hidden="true"></i></div>';
+ 		}
+ 		html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="'+name+'"'+disabled+' placeholder="'+gettext("Item group name")+'"><br/>';
+ 		html +='<div class="btn btn-default pull-right add_li" style="margin: 5px;"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>'+gettext("Add item")+'</div>';
+		html +='<div style="clear:both"></div>';
+		html +='<ul class="ul-item">';
+		for(var idx in values){
+			html +='<li class="li-item"><span class="item-title">'+gettext("Item")+'</span><input type="text" class="form-control item-value" style="width:80%" value="'+ values[idx]["item"]+'" placeholder="'+gettext("Escribe el item a añadir...")+'"></span><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div><div style="clear:both"></div></li>';
+		}
+		html +='</ul>';
+		html +='</div>';
+ 		html +='</div>';
+		$("#"+type+"-item_div").append(html);
+		
+		load_functions();
+	}
+	
+	
+	function action_buttonsi(){
+		var self = this;
+		createDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
+		
+		$(".btn-edit-formitem").unbind("click").click(function(){
+			var comp = $(this).parent().parent().parent();
+			var id = comp.attr("id");
+			var order = comp.attr("data-order");
+			
+			var name = document.result[order]["name"];
+			var title = document.result[order]["title"];
+			var type = document.result[order]["itemtype"];
+			var values = document.result[order]["values"];
+			
+			$("#formitem-name").val(name);
+			$("#formitem-title").val(title);	
+			$("#transformation-operation-select").val(type);
+			$("#transformation-operation-select").trigger("change");
+			if(type == "connectedstringcombo" || type == "stringcombo" || type == "multistringcombo"){
+				$("#"+type+"-item_div").removeClass("stringcombo-item").empty();
+				for(var key in values){
+					var vbls = values[key];
+					create_stringcombo_item(type, type+"-"+key, key, vbls)
+				}
+			}else{
+				for(var key in values){
+					var vbl = values[key];
+					if(typeof(vbl) === "boolean"){
+						vbl = "" + vbl;
+					}
+					$("#"+type+"-"+key).val(vbl);
+				}
+			}
+			
+			$('#modal-formitem').modal('show');
+			
+			$('#modal-formitem-accept').unbind("click").click(function() {
+				$("#"+id).attr("data-name", $("#formitem-name").val());
+				$("#"+id).attr("data-title", $("#formitem-title").val());
+				var typex =  $("#transformation-operation-select").val();
+				$("#"+id + " .box-header .text").text($("#formitem-title").val() + ' (' + typex + ')');
+				$("#"+id).attr("id", "lg_" + $("#formitem-name").val());
+				
+				var rule_field_params = getParamsFromDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
+				var values = {}
+				for(var i in rule_field_params["fields"]){
+					var value = rule_field_params["fields"][i];
+					if(value["type"] != "connectedstringcombo" && value["type"] != "stringcombo" && value["type"] != "multistringcombo"){
+						values[value["id"]] = value["current-value"];
+					}else{
+						values = value["current-value"];
+					}
+					
+				}
+				document.result[order] = {
+						'name': $("#formitem-name").val(),
+						'title': $("#formitem-title").val(),
+						'type': 'formitem',
+						'itemtype': typex,
+						'values': values
+				}
+				
+				$('#modal-formitem').modal('hide');
+			});
+		});
+		
+		$(".btn-delete-formitem").unbind("click").click(function(){
+			$(this).parent().parent().parent().remove();
+		});
+		
+	}
+
+	function action_buttons(){
+		var self = this;
+		
+		$(".btn-add-formitem").click(function(){
+			$("#formitem-name").val("");
+			$("#formitem-title").val("");	
+			var formid = $(this).parent().parent().parent();
+			$("#transformation-operation-select").trigger("change");
+			$('#modal-formitem').modal('show');
+			
+			$('#modal-formitem-accept').unbind("click").click(function() {
+				var name = $("#formitem-name").val();
+				var title = $("#formitem-title").val();
+				var typex =  $("#transformation-operation-select").val();
+				var rule_field_params = getParamsFromDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
+				var values = {}
+				for(var i in rule_field_params["fields"]){
+					var value = rule_field_params["fields"][i];
+					if(value["type"] != "connectedstringcombo" && value["type"] != "stringcombo" && value["type"] != "multistringcombo"){
+						values[value["id"]] = value["current-value"];
+					}else{
+						values = value["current-value"];
+					}
+				}
+				create_formitem(name, title, typex, values, formid);
+				
+				$('#modal-formitem').modal('hide');
+			});
+			
+		});
+		
+		$(".btn-collapse-form").unbind("click").click(function(){
+			var comp = $(this).children("i");
+			if(comp.hasClass("fa-chevron-up")){
+				comp.removeClass("fa-chevron-up").addClass("fa-chevron-down");
+				$(this).parent().parent().parent().children(".section-backpanel").slideDown();
+			}else{
+				comp.removeClass("fa-chevron-down").addClass("fa-chevron-up");
+				$(this).parent().parent().parent().children(".section-backpanel").slideUp();
+			}
+			
+		});
+		
+		$(".btn-edit-form").unbind("click").click(function(){
+			var comp = $(this).parent().parent().parent();
+			var id = comp.attr("id");
+			var order = comp.attr("data-order");
+			
+			var name = document.result[order]["name"];
+			var title = document.result[order]["title"];
+			
+			$("#form-name").val(name);
+			$("#form-title").val(title);	
+			$('#modal-form').modal('show');
+			
+			$('#modal-form-accept').unbind("click").click(function() {
+				$("#"+id).attr("data-name", $("#form-name").val());
+				$("#"+id).attr("data-title", $("#form-title").val());
+				$("#"+id + " .box-header .text").text($("#form-title").val());
+				$("#"+id).attr("id", "lg_" + $("#form-name").val());
+				
+				document.result[order] = {
+						'name': $("#form-name").val(),
+						'title': $("#form-title").val(),
+						'type': 'form'
+				}
+				
+				$('#modal-form').modal('hide');
+			});
+		});
+		
+		$(".btn-delete-form").unbind("click").click(function(){
+			$(this).parent().parent().parent().remove();
+		});
+		
+		
+		$(".section-backpanel").sortable({
+			placeholder: "sort-highlight",
+			handle: ".handlei",
+			forcePlaceholderSize: true,
+			zIndex: 999999
+		});
+	}
+	
+	
+	function create_form(name, title){
+		var html = '<div id="lg_'+name+'" data-name="'+name+'" data-title="'+title+'" data-order="'+self.count+'" class="box box-default collapsed-box section-form toc-layergroup">'+
+		'<div class="box-header with-border">'+
+		'	<span class="handle" style="margin-right: 20px;">'+ 
+		'		<i class="fa fa-ellipsis-v"></i>'+
+		'		<i class="fa fa-ellipsis-v"></i>'+
+		'	</span>'+
+		'	<span class="text">'+title+'</span>'+
+		'	<div class="pull-right">'+
+		'		<div class="btn-delete-form btn-right-with-margin">'+
+		'			<i class="fa fa fa-times"></i>'+
+		'		</div>'+
+		'		<div class="btn-edit-form btn-right-with-margin">'+
+		'			<i class="fa fa fa-pencil"></i>'+
+		'		</div>'+
+		'		<div class="btn-add-formitem btn-right-with-margin">'+
+		'			<i class="fa fa fa-plus"></i>'+
+		'		</div>'+
+		'		<div class="btn-collapse-form btn-right-with-margin">'+
+		'			<i class="fa fa-chevron-up"></i>'+
+		'		</div>'+
+		'	</div>'+
+		'</div>'+	
+		'<div class="section-backpanel">'+
+		'</div>'+	
+		'</div>';
+					
+		$("#toc").append(html);
+		action_buttons();
+		
+		self.result[""+self.count] = {
+				'name': name,
+				'title': title,
+				'type': 'form'
+		}
+		self.count ++;
+	}
+	
+	function create_formitem(name, title, type, values, comp){
+		var html = '<div id="lgi_'+name+'" data-name="'+name+'" data-title="'+title+'" data-order="'+document.count+'" class="box-default collapsed-box section-formitem toc-layergroup">'+
+		'<div class="box-header with-border">'+
+		'	<span class="handlei" style="margin-right: 20px;">'+ 
+		'		<i class="fa fa-ellipsis-v"></i>'+
+		'		<i class="fa fa-ellipsis-v"></i>'+
+		'	</span>'+
+		'	<span class="text">'+title+' (' + type + ')' +'</span>'+
+		'	<div class="pull-right">'+
+		'		<div class="btn-delete-formitem btn-right-with-margin">'+
+		'			<i class="fa fa fa-times"></i>'+
+		'		</div>'+
+		'		<div class="btn-edit-formitem btn-right-with-margin">'+
+		'			<i class="fa fa fa-pencil"></i>'+
+		'		</div>'+
+		'	</div>'+
+		'</div>'+	
+		'</div>';
+					
+		comp.find(".section-backpanel").append(html);
+		action_buttonsi();
+		
+		document.result[""+document.count] = {
+				'name': name,
+				'title': title,
+				'type': 'formitem',
+				'itemtype': type,
+				'values': values
+		}
+		document.count ++;
+	}
+	
+	
+	
+	$(".btn-add-form").click(function(){
+		$("#form-name").val("");
+		$("#form-title").val("");	
+		$('#modal-form').modal('show');
+		
+		$('#modal-form-accept').unbind("click").click(function() {
+			var name = $("#form-name").val();
+			var title = $("#form-title").val();
+		
+			create_form(name, title)
+			
+			$('#modal-form').modal('hide');
+		});
+		
+	});
+	
+	action_buttons();
+	
+	$(".toc").sortable({
+		placeholder: "sort-highlight",
+		handle: ".handle",
+		forcePlaceholderSize: true,
+		zIndex: 999999
+	});
+	
+	
+	$(".btn-info-form").click(function(){
+		console.log(document.result);
+	});
+	
+	
+	$(".btn-save-form").click(function(){
+		var forms = [];
+		$(".section-form").each(function(){
+			var comp = $(this);
+			var order = comp.attr("data-order");
+			
+			var aux_form = {
+					'formname': document.result[order]["name"], 
+					'formtitle': document.result[order]["title"], 
+					'formitems': []
+			};
+			
+			comp.find(".section-formitem").each(function(){
+				var comp2 = $(this);
+				var order2 = comp2.attr("data-order");
+				
+				var aux_formitem = {
+						'key': document.result[order2]["name"], 
+						'title': document.result[order2]["title"], 
+						'type': document.result[order2]["itemtype"],
+						'values': document.result[order2]["values"]
+				};
+				
+				aux_form['formitems'].push(aux_formitem);
+			});
+			
+			forms.push(aux_form);
+		});
+		
+		
+		$("#definition").val(JSON.stringify(forms));
+		$("#section-form").submit();
+	});
+	
+	
+	$(".btn-collapse-form").trigger("click");
+});
+</script>
+{% endblock %}

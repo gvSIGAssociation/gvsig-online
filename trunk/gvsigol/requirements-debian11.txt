@@ -1,0 +1,135 @@
+## django
+django==2.2.28
+djangoajax==3.2
+httplib2==0.20.4
+geopy==2.2.0
+gisdata==0.5.4
+
+## auth
+python-ldap==3.3.1
+django-auth-ldap==2.2.0
+
+## django rest framework
+#markdown
+#django-filter
+#django-rest-auth
+#django-formtools
+djangorestframework==3.12.2
+djangorestframework-jwt==1.11.0
+drf-yasg==1.20.0
+django-rest-swagger==2.2.0
+django-rest-swagger-swaggerdoc==1.0.post3
+django-cors-headers==3.7.0
+
+##Instalamos el driver de PostgreSQL para python:
+psycopg2==2.8.6
+
+##Instalamos Pillow para que django soporte la gestion de images;
+pillow==9.2.0
+# *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
+
+## gsconfig
+geoserver-restconfig==2.0.7
+requests==2.28.1
+
+# async requests
+requests-futures==1.0.0
+
+## Scolab tools
+spatialiteintrospect==1.2
+pygdaltools==1.4.0
+# *NOTE:* It requires having gdal tools installed in the system (gdal-bin package)
+
+## Other
+xmltodict
+six==1.15.0
+pytz # don't specify version, since timezones need to be up-to-date
+python-dateutil==2.8.1
+
+numpy==1.23.1
+
+cmislib3==1.0.8
+lxml==4.9.2
+
+# Cron para aguas de valencia
+schedule==1.0.0
+
+# Ver #3727
+openpyxl==3.0.5
+# Lectura de DBFs
+dbfread==2.0.7
+django-excel==0.0.10
+pyexcel-xls==0.6.2
+pyexcel-xlsx==0.6.0
+pyexcel-ods3==0.6.0
+
+# Parseo del getCapabilities (baseLayers)
+pyproj==3.2.1
+OWSLib==0.23.0
+
+limesurveyrc2api==1.0.0
+
+django-jenkins==0.110.0
+
+python-resize-image==1.1.19
+django-activity-stream==0.10.0
+django-jsonfield==1.4.1
+django-jsonfield-compat==0.4.4
+django-jsonfield-backport==1.0.3 # not needed in Django >= 3.1
+
+# xsendfile wrapper
+django-sendfile2==0.7.0
+
+# Comprobar el timestamp de un fichero antes de bajarlo
+tzlocal==2.1
+
+# language code database
+iso-639
+
+# job and queque manager, for download manager and email queues
+celery==5.2.7
+django-celery-beat==2.3.0
+# harcode indirect celery requirements
+kombu>=5.2.4,<6.0
+billiard>=3.6.4.0,<4.0
+vine==5.0.0
+
+# uwsgi server
+uwsgi==2.0.18
+
+# Used by opensea2. To be removed when migrated to Celery
+APScheduler==3.7.0
+
+# soap client, suds deprecated, zeep is used in new developments 
+suds-community==0.8.4
+zeep==3.4.0
+# Plugin PID 
+zeep[xmlsec]==3.4.0
+shortuuid==1.0.11
+
+# plugin_widget
+django_tinymce==3.4.0
+
+# plugin geoetl
+pandas==1.1.5
+#gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
+mgrs==1.4.2
+cx-Oracle==8.2.1
+geomet==0.3.0
+SQLAlchemy==1.3.18
+
+# necesario si se configura OIDC/Keycloak con gvsigol_plugin_oidc_mozilla
+mozilla-django-oidc==2.0.0
+oauthlib==3.2.2
+requests-oauthlib==1.3.1
+
+# plugin gmlcatastro 
+shapely==1.8.4
+
+# read environment
+django-environ==0.10.0
+
+# gtfs editor
+tinydb==3.12.1
+#pycryptodomex==3.6.6
+tables==3.7.0

@@ -1,0 +1,172 @@
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.draw2d_InputPort{
+	fill:#F7F7F7;
+	stroke:#d7d7d7;
+ }
+ .draw2d_OutputPort{
+	fill:#F7F7F7;
+	stroke:#d7d7d7;
+ }
+
+#canvas-parent {
+	height: 78vh;
+	border: 4px;
+	position: relative;
+	overflow: scroll;
+	background-color: #fff;
+}
+
+#canvas-etl{
+	width: 6000px;
+	height: 6000px;
+}
+
+#schema-calculator{
+	list-style-type: none;
+	width: 31%;
+	background-color: #cac5c5;
+	position: fixed;
+	height: 29%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+#functions-calculator{
+	list-style-type: none;
+	width: 31%;
+	background-color: #cac5c5;
+	position: fixed;
+	height: 39%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+#functions-string{
+	list-style-type: none;
+	width: 31%;
+	background-color: #cac5c5;
+	position: fixed;
+	height: 39%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+
+
+#attrs-execute-sql{
+	list-style-type: none;
+	width: 42%;
+	background-color: #f1f1f1;
+	position: fixed;
+	height: 20%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+#attrs-values{
+	list-style-type: none;
+	width: 42%;
+	background-color: #f1f1f1;
+	position: fixed;
+	height: 20%;
+	overflow: auto;
+	cursor: pointer;
+}
+
+.right {
+	float: right;
+	width: 300px;
+	padding: 10px;
+  }
+
+#icon-success{
+	color: green
+}
+
+#icon-error{
+	color: red
+}
+
+.palette_node_element {
+	
+	cursor: move;
+	padding-left: 10px;
+
+}
+
+.column10
+{
+    float: left;
+    width: 10%;
+}
+
+.column20
+{
+    float: left;
+    width: 20%;
+}
+
+.column25
+{
+    float: left;
+    width: 25%;
+}
+
+.column30
+{
+    float: left;
+    width: 30%;
+}
+
+
+.column33
+{
+    float: left;
+    width: 33%;
+}
+
+.column40
+{
+    float: left;
+    width: 40%;
+}
+.column50
+{
+    float: left;
+    width: 50%;
+}
+
+.column60
+{
+    float: left;
+    width: 60%;
+}
+
+.column66
+{
+    float: left;
+    width: 66%;
+}
+
+.column80
+{
+    float: left;
+    width: 80%;
+}
+
+.column90
+{
+    float: left;
+    width: 90%;
+}
+
+.btn-creator {
+	color: #ffffff !important;
+	background-color: #b295e4 !important;
+	border-color: #aa87e7;
+}

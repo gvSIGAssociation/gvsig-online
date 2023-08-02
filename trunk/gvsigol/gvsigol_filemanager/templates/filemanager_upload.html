@@ -1,0 +1,67 @@
+{% extends "filemanager_base.html" %}
+{% load i18n staticfiles %}
+
+{% block content %}
+
+	{% include "filemanager_breadcrumbs.html" %}
+	
+<!-- 	<form id="fileupload" data-url="{% url 'filemanager:upload-file' %}"> -->
+<!-- 	  <input type="hidden" name="path" value="{{path}}"> -->
+<!-- 	  <input type="file" name="files[]" multiple> -->
+<!-- 	</form> -->
+	<div id="fileupload-component" class="fileupload-component"></div>
+	<div style="margin-top: 30px;">
+		<button id="upload-button" type="submit" class="btn btn-default btn-block"><i class="fa fa-upload margin-r-5"></i> {% trans "Upload" %}</button>
+	</div>
+	
+{% endblock %}
+
+{% block extra-scripts %}
+
+	<script src="{% static "js/vendors/jQueryUI/jquery.ui.widget.js" %} "></script>
+	<script src="{% static "js/jquery.iframe-transport.js" %} "></script>
+	<script src="{% static "js/jquery.uploadfile.js" %} "></script>
+	
+	<script>
+	$('#menu-manage-files').addClass("active");
+	$(document).ready(function(){
+		const csrftoken = $.gvsigOL.getCsrfCookie();
+	  	var fileupload = $('#fileupload-component');
+		var path = '';
+	  	fileupload.uploadFile({
+		   	url: "{% url 'filemanager:upload-file' %}",
+		   	fileName: "files",
+		   	multiple: true,
+		   	autoSubmit:false,
+		   	formData: {
+				'csrfmiddlewaretoken': csrftoken
+			},
+		   	onSuccess: function(files,data,xhr){
+	    		var json = JSON.parse(data);
+	    		path = json.path;
+	    	},
+		   	afterUploadAll: function(files,data,xhr){
+	    		$.overlayout();
+				if (window.location.href.includes("popup=1")){
+					location.href = '/gvsigonline/filemanager/?path=' + path + '&popup=1';
+				} else{
+					location.href = '/gvsigonline/filemanager/?path=' + path ;
+				}
+	    		
+	    	},
+	    	onError: function(files,status,errMsg){}
+		});
+	  	
+	  	$('#upload-button').on('click', function () {
+	  		if (fileupload.getFileCount() >= 1) {
+	  			$("body").overlay();
+				fileupload.appendExtraParams({'path': "{{path}}"});
+				fileupload.startUpload();
+	  		} else {
+	  			messageBox.show('warning', gettext('You must select a file'));
+	  		}
+		});
+	});
+	</script>
+	
+{% endblock %}

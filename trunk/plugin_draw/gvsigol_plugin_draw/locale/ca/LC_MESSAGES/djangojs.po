@@ -1,0 +1,111 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: ca\n"
+"X-Source-Language: C\n"
+
+msgid "Show draw tools"
+msgstr "Mostrar herramientas dibujo"
+
+msgid "Close draw bar"
+msgstr "Cerrar barra de dibujo"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Insert text"
+msgstr "Insertar texto"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Clean drawings"
+msgstr "Eliminar dibujos"
+
+msgid "Draw point"
+msgstr "Dibujar punto"
+
+msgid "Draw line"
+msgstr "Dibujar línea"
+
+msgid "Draw polygon"
+msgstr "Dibujar polígono"
+
+msgid "Style settings"
+msgstr "Propietats d'estil"
+
+msgid "Circle"
+msgstr "Círculo"
+
+msgid "Square"
+msgstr "Cuadrado"
+
+msgid "Triangle"
+msgstr "Triángulo"
+
+msgid "Star"
+msgstr "Estrella"
+
+msgid "Cross"
+msgstr "Cruz"
+
+msgid "Point"
+msgstr "Punto"
+
+msgid "Line"
+msgstr "Línea"
+
+msgid "Polygon"
+msgstr "Polígono"
+
+msgid "Text"
+msgstr "Texto"
+
+msgid "Select shape"
+msgstr "Seleccionar forma"
+
+msgid "Size"
+msgstr "Tamaño"
+
+msgid "Fill color"
+msgstr "Color de relleno"
+
+msgid "Fill opacity"
+msgstr "Opacidad del relleno"
+
+msgid "Stroke color"
+msgstr "Color de línea"
+
+msgid "Stroke width"
+msgstr "Grosor de línea"
+
+msgid "Select pattern"
+msgstr "Seleccionar patrón"

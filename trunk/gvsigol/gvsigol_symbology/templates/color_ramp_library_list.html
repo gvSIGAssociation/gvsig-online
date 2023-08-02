@@ -1,0 +1,193 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  	
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button id="button-add-library" class="btn btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add library" %}</button>
+					<button id="button-import-library" class="btn btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i> {% trans "Import library" %}</button>
+				</div>
+			</div>				
+		</div>
+		<div class="box">
+			<div class="box-body">
+				<table class="table" id="libraries-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+						    <th>{% trans "Library" %}</th>
+						    <th>{% trans "Description" %}</th>
+						    <th></th>
+						    <th></th>
+						    <th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for library in libraries %}
+							<tr>
+								<td>{{ library.id }}</td>
+							    <td>{{ library.name }}</td>
+								<td>{{ library.description }}</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>	
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-under-construction" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Under construction" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "This functionality is not yet available" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-library-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-library" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete library" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Library will be removed, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-library-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-library-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-colorramp').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var table = $('#libraries-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		        first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		   		last		: '{% trans "Last" %}'
+		 	},
+		  	aria: {
+		     	sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	        "targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-library" data-toggle="modal" data-target="#modal-delete-library" data-placement="bottom" title="' + '{% trans "Delete library" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	    },{
+	        "targets": -2,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-export-library" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Export library" %}' + '" class="btn btn-warning"><i class="fa fa-download"></i></button>'
+	    },{
+	        "targets": -3,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-update-library" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update library" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	    }],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+		 
+	$('#libraries-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();     
+	    if (this.name == "button-update-library") {
+	        updateLibrary(data);
+	    } else if (this.name == "button-export-library") {
+	    	exportLibrary(data);
+	    } else if (this.name == "button-delete-library") {
+	    	deleteLibrary(data);
+	    } 
+	});
+	
+	$('#button-add-library').on('click', function (){
+		location.href = '/gvsigonline/symbology/color_ramp_library_add/';
+	});
+	
+	$('#button-import-library').on('click', function (){
+		//$('#modal-under-construction').modal("show");
+		location.href = '/gvsigonline/symbology/color_ramp_library_import/';
+	});
+		
+
+	function updateLibrary(data){
+		location.href = '/gvsigonline/symbology/color_ramp_library_update/' + data[0] + '/';
+	}
+	
+	function exportLibrary(data){
+		//$('#modal-under-construction').modal("show");
+		location.href = '/gvsigonline/symbology/color_ramp_library_export/' + data[0] + '/';
+	}
+		
+	function deleteLibrary(data){
+		$('#button-delete-library-accept').click( function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/symbology/color_ramp_library_delete/' + data[0] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-library').modal('hide');
+					$.overlayout();
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	}
+  
+});
+</script>
+{% endblock %}

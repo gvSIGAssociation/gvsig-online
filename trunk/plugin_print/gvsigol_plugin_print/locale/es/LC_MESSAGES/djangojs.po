@@ -1,0 +1,175 @@
+# gvSIG Online.
+# Copyright (C) 2017-2021 SCOLAB.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-03 11:58+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: static/js/lib/tools/print.js:127
+msgid "Print params"
+msgstr "Parametros de impresión"
+
+#: static/js/lib/tools/print.js:133
+msgid "Select print template"
+msgstr "Seleccionar plantilla de impresión"
+
+#: static/js/lib/tools/print.js:135
+msgid "Select template"
+msgstr "Seleccionar plantilla"
+
+#: static/js/lib/tools/print.js:153
+msgid "Title"
+msgstr "Título"
+
+#: static/js/lib/tools/print.js:157
+msgid "Scale"
+msgstr "Escala"
+
+#: static/js/lib/tools/print.js:159
+msgid "AutoScale"
+msgstr "Escala Automática"
+
+#: static/js/lib/tools/print.js:160
+msgid "UserScale"
+msgstr "Escala definida por el usuario"
+
+#: static/js/lib/tools/print.js:173
+msgid "MapGrid"
+msgstr "Rejilla Cartográfica"
+
+#: static/js/lib/tools/print.js:175
+msgid "print-mapgrid-nogrid"
+msgstr "Sin cuadrícula cartográfica"
+
+#: static/js/lib/tools/print.js:176
+msgid "print-mapgrid-point"
+msgstr "Puntos"
+
+#: static/js/lib/tools/print.js:177
+msgid "print-mapgrid-line"
+msgstr "Líneas"
+
+#: static/js/lib/tools/print.js:179
+msgid "print-mapgrid-spacing"
+msgstr "Intervalo de las etiquetas"
+
+#: static/js/lib/tools/print.js:187
+msgid "MapProjection"
+msgstr "Proyección del mapa"
+
+#: static/js/lib/tools/print.js:215
+msgid "MapOverview"
+msgstr "Capas en el Localizador"
+
+#: static/js/lib/tools/print.js:231
+msgid "Resolution"
+msgstr "Resolución"
+
+#: static/js/lib/tools/print.js:244
+msgid "Rotation"
+msgstr "Rotación"
+
+#: static/js/lib/tools/print.js:250
+msgid "Format"
+msgstr "Formato"
+
+#: static/js/lib/tools/print.js:262 static/js/lib/tools/print.js:267
+msgid "Author"
+msgstr "Autor"
+
+#: static/js/lib/tools/print.js:273
+msgid "Legal warning"
+msgstr "Aviso legal"
+
+#: static/js/lib/tools/print.js:279
+msgid "Print"
+msgstr "Imprimir"
+
+#: static/js/lib/tools/print.js:280
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: static/js/lib/tools/print.js:355
+#, fuzzy
+#| msgid "Error loading print plugin"
+msgid "Error creating print job"
+msgstr "Error cargando plugin de impresión"
+
+#: static/js/lib/tools/print.js:358
+msgid "You must select a template"
+msgstr "Ha de seleccionar una plantilla"
+
+#: static/js/lib/tools/print.js:870
+msgid "layers_xyz_cant_be_reprojected"
+msgstr "Las capas externas tipo XYZ no pueden ser reproyectadas."
+
+msgid "legalwarning"
+msgstr ""
+"Todos los contenidos cartográficos de este web y de los servicios que "
+"proporciona son propiedad de esta institución.La institución no es "
+"responsable de la información que se puede obtener a través de enlaces a "
+"sistemas externos."
+
+msgid "Accept"
+msgstr "Aceptar"
+
+msgid "Print map"
+msgstr "Imprimir mapa"
+
+msgid "Function not available"
+msgstr "Herramienta no disponible"
+
+msgid "This functionality is only available on Mozilla Firefox"
+msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
+
+msgid "a4_landscape"
+msgstr "A4 Apaisado"
+
+msgid "a3_sin_leyenda"
+msgstr "A3 sin Leyenda"
+
+msgid "a4_landscape_overview"
+msgstr "A4 Apaisado con Localizador"
+
+msgid "a3_landscape"
+msgstr "A3 Apaisado"
+
+msgid "Legend"
+msgstr "Leyenda"
+
+msgid "tocantins_a4_landscape"
+msgstr "Tocantins A4 Horizontal"
+
+msgid "tocantins_a4_portrait"
+msgstr "Tocantins A4 Vertical"
+
+msgid "tocantins_a3_landscape"
+msgstr "Tocantins A3 Horizontal"
+
+msgid "tocantins_a3_portrait"
+msgstr "Tocantins A3 Vertical"
+
+msgid "a4_landscape_overview_durazno"
+msgstr "Durazno A4 Horizontal"
+
+msgid "a3_landscape_overview_durazno"
+msgstr "Durazno A3 Horizontal"
+
+msgid "print-mapgrid-indent"
+msgstr "Márgen de las etiquetas al borde"

@@ -1,0 +1,123 @@
+{
+	"id": "60a7da3a-0be1-4727-8cfc-3254f604976d",
+	"name": "DEVEL",
+	"values": [
+		{
+			"key": "url",
+			"value": "devel.gvsigonline.com",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "publicprj",
+			"value": "apitestpublicprj",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "prj",
+			"value": "apitestprj",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "prjid",
+			"value": "58",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "keycloak",
+			"value": "false",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "client_id",
+			"value": "swagger-client",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "client_secret",
+			"value": "d2e35ba5-d1a0-43de-b8aa-895d517c0612",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "lyr_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "public_lyr_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "feat_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "public_feat_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "protocol",
+			"value": "https",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testlayer",
+			"value": "testlayerAPIRest",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testpubliclayer",
+			"value": "testpubliclayerAPIRest",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "datastore_id",
+			"value": "75",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "group_id",
+			"value": "126",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "resource_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "user_role",
+			"value": "ug_apitest",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2022-11-04T13:36:50.734Z",
+	"_postman_exported_using": "Postman/9.31.0"
+}
