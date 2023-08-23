@@ -28,7 +28,6 @@
 from django.db import models
 from gvsigol_core.models import Project
 from gvsigol_services.models import Layer, LayerGroup, Datastore
-from gvsigol_auth.models import UserGroup
 
 class Survey(models.Model):
     name = models.CharField(max_length=150) 
@@ -55,12 +54,31 @@ class SurveySection(models.Model):
     
 class SurveyReadGroup(models.Model):
     survey = models.ForeignKey(Survey, default=None, on_delete=models.CASCADE)
-    user_group = models.ForeignKey(UserGroup, default=None, on_delete=models.CASCADE)
+    role = models.TextField(default=None)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['survey', 'role']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['survey', 'role'], name='unique_read_permission_per_role_and_survey')
+        ]
+
     def str(self):
-        return self.survey.name + ' - ' + self.user_group.name
+        return self.survey.name + ' - ' + self.role
       
 class SurveyWriteGroup(models.Model):
     survey = models.ForeignKey(Survey, default=None, on_delete=models.CASCADE)
-    user_group = models.ForeignKey(UserGroup, default=None, on_delete=models.CASCADE)
+    role = models.TextField(default=None)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['survey', 'role']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['survey', 'role'], name='unique_write_permission_per_role_and_survey')
+        ]
+
     def str(self):
-        return self.survey.name + ' - ' + self.user_group.name
+        return self.survey.name + ' - ' + self.role
+

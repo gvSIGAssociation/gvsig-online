@@ -24,7 +24,7 @@ from geoserver.layergroup import LayerGroup
 '''
 from .models import Survey, SurveySection, SurveyReadGroup, SurveyWriteGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
-from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadGroup, LayerWriteGroup
 from gvsigol_services import geographic_servers
 from gvsigol_services.views import layer_delete_operation
@@ -37,6 +37,7 @@ from gvsigol_services.backend_postgis import Introspect
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.contrib.auth.decorators import login_required
+from gvsigol_auth import auth_backend
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
@@ -76,23 +77,13 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 @require_safe
 @staff_required
 def survey_list(request):
-    survey_list = Survey.objects.all().order_by('id')
-    surveys = []
-    
-    admin_group = UserGroup.objects.get(name__exact='admin')
-    sug = UserGroupUser.objects.filter(user_group_id=admin_group.id,user_id=request.user.id).count()
-    if sug > 0:
+    admin_role = auth_backend.get_admin_role()
+    user_roles = auth_backend.get_roles(request)
+    if admin_role in user_roles:
         # Es admin
-        for survey in survey_list:
-            surveys.append(survey)
+        surveys = list(Survey.objects.all().order_by('id'))
     else:
-        ugus = UserGroupUser.objects.filter(user_id=request.user.id)
-        for ugu in ugus:
-            for survey in survey_list:
-                sug = SurveyReadGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
-                if sug > 0:
-                    surveys.append(survey)
-            
+        surveys = list(Survey.objects.filter(surveyreadgroup__role__in=user_roles).distinct().order_by('id'))
             
     response = {
         'surveys': surveys
@@ -104,14 +95,13 @@ def survey_list(request):
 @require_safe
 @staff_required
 def surveys(request):
-    survey_list = Survey.objects.all().order_by('id')
     surveys = []
     
-    admin_group = UserGroup.objects.get(name__exact='admin')
-    sug = UserGroupUser.objects.filter(user_group_id=admin_group.id,user_id=request.user.id).count()
-    if sug > 0:
+    admin_role = auth_backend.get_admin_role()
+    user_roles = auth_backend.get_roles(request)
+    if admin_role in user_roles:
         # Es admin
-        for survey in survey_list:
+        for survey in Survey.objects.all().order_by('id'):
             aux = {
                 'name': survey.name,
                 'title': survey.title
@@ -119,17 +109,13 @@ def surveys(request):
             
             surveys.append(aux)
     else:
-        ugus = UserGroupUser.objects.filter(user_id=request.user.id)
-        for ugu in ugus:
-            for survey in survey_list:
-                sug = SurveyReadGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
-                if sug > 0:
-                    aux = {
-                        'name': survey.name,
-                        'title': survey.title
-                        }
-                    
-                    surveys.append(aux)
+        for survey in Survey.objects.filter(surveyreadgroup__role__in=user_roles).distinct().order_by('id'):
+            aux = {
+                'name': survey.name,
+                'title': survey.title
+                }
+            
+            surveys.append(aux)
             
             
     response = {
@@ -239,7 +225,7 @@ def survey_update(request, survey_id):
     
     if not request.user.is_superuser:
         form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username).distinct().order_by('name')
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
     
     sections = SurveySection.objects.filter(survey_id=survey.id).order_by('order')
     
@@ -437,43 +423,41 @@ def survey_section_delete(request, survey_section_id):
 @staff_required
 def survey_permissions(request, survey_id):
     if request.method == 'POST':
-        assigned_read_roups = []
-        assigned_write_roups = []
+        assigned_read_roles = []
+        assigned_write_roles = []
         for key in request.POST:
             if 'read-usergroup-' in key:
-                assigned_read_roups.append(int(key.split('-')[2]))
+                assigned_read_roles.append(key.split('-')[2])
             if 'write-usergroup-' in key:
-                assigned_write_roups.append(int(key.split('-')[2]))
+                assigned_write_roles.append(key.split('-')[2])
                 
         try:     
             survey = Survey.objects.get(id=int(survey_id))
         except Exception as e:
             return HttpResponseNotFound('<h1>Survey not found{0}</h1>'.format(survey.name))
         
-        agroup = UserGroup.objects.get(name__exact='admin')
+        agroup = auth_backend.get_admin_role()
         
-        read_groups = []
+        read_roles = []
         
         # clean existing groups and assign them again if necessary
         SurveyReadGroup.objects.filter(survey=survey).delete()
-        for group in assigned_read_roups:
+        for role in assigned_read_roles:
             try:
-                group = UserGroup.objects.get(id=group)
                 lrg = SurveyReadGroup()
                 lrg.survey = survey
-                lrg.user_group = group
+                lrg.role = role
                 lrg.save()
                 #read_groups.append(group)
             except Exception as e:
                 pass
             
         SurveyWriteGroup.objects.filter(survey=survey).delete()
-        for group in assigned_write_roups:
+        for role in assigned_write_roles:
             try:
-                group = UserGroup.objects.get(id=group)
                 lrg = SurveyWriteGroup()
                 lrg.survey = survey
-                lrg.user_group = group
+                lrg.role = role
                 lrg.save()
                 #read_groups.append(group)
             except Exception as e:
@@ -483,50 +467,50 @@ def survey_permissions(request, survey_id):
     else:
         try:
             survey = Survey.objects.get(pk=survey_id)
-            rgroups = get_all_read_user_groups_checked_by_survey(survey)   
-            wgroups = get_all_write_user_groups_checked_by_survey(survey)   
+            rgroups = get_all_read_roles_checked_by_survey(survey)   
+            wgroups = get_all_write_roles_checked_by_survey(survey)   
             return render(request, 'survey_permissions_add.html', {'survey_id': survey.id, 'name': survey.name,  'read_groups': rgroups,  'write_groups': wgroups})
         except Exception as e:
             return HttpResponseNotFound('<h1>Survey not found: {0}</h1>'.format(survey_id))
 
 
-def get_all_read_user_groups_checked_by_survey(survey):
-    groups_list = UserGroup.objects.all()
-    read_groups = SurveyReadGroup.objects.filter(survey=survey)
+def get_all_read_roles_checked_by_survey(survey):
+    role_list = auth_backend.get_all_roles()
+    read_roles = SurveyReadGroup.objects.filter(survey=survey)
     
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin' and g.name != 'public':
-            group = {}
-            for lrg in read_groups:
-                if lrg.user_group_id == g.id:
+    roles = []
+    for r in role_list:
+        if r != 'admin' and r != 'public':
+            role = {}
+            for lrg in read_roles:
+                if lrg.role == role:
                     group['read_checked'] = True
             
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
+            role['id'] = r
+            role['name'] = r
+            role['description'] = ''
+            roles.append(group)
     
-    return groups  
+    return roles  
 
-def get_all_write_user_groups_checked_by_survey(survey):
-    groups_list = UserGroup.objects.all()
-    read_groups = SurveyWriteGroup.objects.filter(survey=survey)
+def get_all_write_roles_checked_by_survey(survey):
+    role_list = auth_backend.get_all_roles()
+    write_roles = SurveyWriteGroup.objects.filter(survey=survey)
     
-    groups = []
-    for g in groups_list:
-        if g.name != 'admin' and g.name != 'public':
-            group = {}
-            for lrg in read_groups:
-                if lrg.user_group_id == g.id:
+    roles = []
+    for r in role_list:
+        if r != 'admin' and r != 'public':
+            role = {}
+            for lrg in write_roles:
+                if lrg.role == r:
                     group['write_checked'] = True
             
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
+            role['id'] = r
+            role['name'] = r
+            role['description'] = ''
+            roles.append(role)
     
-    return groups  
+    return roles  
 
 def prepare_string(s):
     return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
@@ -597,11 +581,11 @@ def survey_update_project(request, survey_id):
         project.save()
         
         for permission in permissions:
-            project_usergroup = ProjectUserGroup(
+            project_role = ProjectRole(
                 project = project,
-                user_group = permission.user_group
+                role = permission.role
             )
-            project_usergroup.save()
+            project_role.save()
             
             
         '''
@@ -766,23 +750,23 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
     groupsr = []
     groupsw = []
     for permission in permissionsr:
-        groupsr.append(permission.user_group)
+        groupsr.append(permission.role)
         
         try:
-            lwr = LayerReadGroup()
+            lwr = LayerReadRole()
             lwr.layer = section.layer
-            lwr.group = permission.user_group
+            lwr.role = permission.role
             lwr.save()
         except:
             pass
         
     for permission in permissionsw:
-        groupsw.append(permission.user_group)
+        groupsw.append(permission.role)
         
         try:
-            lwg = LayerWriteGroup()
+            lwg = LayerWriteRole()
             lwg.layer = section.layer
-            lwg.group = permission.user_group
+            lwg.role = permission.role
             lwg.save()
         except:
             pass
@@ -894,23 +878,13 @@ def survey_upload_db(request):
     else:
         form = UploadFileForm()
         
-        survey_list = Survey.objects.all().order_by('id')
-        surveys = []
-        
-        admin_group = UserGroup.objects.get(name__exact='admin')
-        sug = UserGroupUser.objects.filter(user_group_id=admin_group.id,user_id=request.user.id).count()
-        if sug > 0:
+        admin_role = auth_backend.get_admin_role()
+        user_roles = auth_backend.get_roles(request)
+        if admin_role in user_roles:
             # Es admin
-            for survey in survey_list:
-                surveys.append(survey)
+            surveys = list(Survey.objects.all().order_by('id'))
         else:
-            ugus = UserGroupUser.objects.filter(user_id=request.user.id)
-            for ugu in ugus:
-                for survey in survey_list:
-                    sug = SurveyWriteGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
-                    if sug > 0:
-                        surveys.append(survey)
-                
+            surveys = list(Survey.objects.filter(surveyreadgroup__role__in=user_roles).distinct().order_by('id'))                
                 
         return render(request, 'survey_upload.html', {'form': form,  'surveys': surveys})
     

@@ -100,19 +100,6 @@ class Project(models.Model):
         if not self.logo:
             return get_default_logo_image()
         return self.logo.url.replace(settings.BASE_URL, '')
-    
-class ProjectUserGroup(models.Model):
-    project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
-    user_group = models.ForeignKey(UserGroup, default=None, on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return self.project.name + ' - ' + self.user_group.name
-    
-    def clone(self, project):
-        self.pk = None
-        self.project = project
-        self.save()
-        return ProjectUserGroup.objects.get(id=self.pk)
 
 class ProjectRole(models.Model):
     project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
