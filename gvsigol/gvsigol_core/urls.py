@@ -15,6 +15,7 @@ urlpatterns = [
     path('export/<int:pid>/', core_views.export, name='export'),
     path('ogc_services/', core_views.ogc_services, name='ogc_services'),
     path('select_public_project/', core_views.select_public_project, name='select_public_project'),
+    path('select_public_mobile_project/', core_views.select_public_mobile_project, name='select_public_mobile_project'),
     path('documentation/', core_views.documentation, name='documentation'),
     path('blank_page/', core_views.blank_page, name='blank_page'),
     path('portable_project_load/<project_name>/', core_views.portable_project_load, name='portable_project_load'),

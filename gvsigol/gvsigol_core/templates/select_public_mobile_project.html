@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load i18n %}
+{% load include_if_exists %}
+<html>
+<head>
+	
+	<title>{{GVSIGOL_NAME}}</title>
+	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+	
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/fontcustom2/fontcustom.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
+	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+    
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+</head>
+
+<body class="hold-transition layout-top-nav">
+
+	<div class="wrapper">
+
+		<header class="main-header">
+			<nav class="navbar navbar-static-top background-grey">
+				<div class="container">
+					<div class="navbar-header index select-project-logo" style="display: inline-block">
+        				<img src="{% static "img/logo_small.png"%}">
+					</div>
+					<div class="navbar-custom-menu">
+						<ul class="nav navbar-nav">
+							<li>
+								<img id="logo-ue" style="max-height: 60px; margin-right: 10px;" src="{% static "img/logo_ue.png"%}">
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<div class="content-wrapper background-grey">
+			<div class="container">
+				<section class="content background-grey">
+					<div class="box">
+						<div class="box-header with-border">
+							<h3 class="box-title">{% trans "Projects list" %}</h3>
+							<div class="box-tools pull-right">
+								{% if user.is_staff %}
+								<button id="button-add-project" class="btn btn-box-tool"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
+								{% endif %}
+							</div>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% for project in projects %}
+								<li class="item">
+									<div class="product-img">
+										<img src={{project.image}} alt="Project Image">
+									</div>
+									<div class="product-info">
+										<a href="{{frontend_base_url}}/viewer/mobile/{{project.id}}/" class="product-title">{{project.title}} <span class="btn btn-default pull-right"><i style="font-size: 20px;" class="fa fa-play-circle margin-r-5"></i></span></a> 
+										<span class="product-description"> {{project.description}}</span>
+									</div>
+								</li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div>
+
+		<footer class="main-footer">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12 center">
+						<img class="custom-footer-img" style="width: 100%;">
+					</div>
+				</div>
+			</div>
+		</footer>
+
+		
+	</div>
+
+	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jscookie/jscookie-2.2.1.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
+	<script>
+		$.widget.bridge('uibutton', $.ui.button);
+	</script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script>
+		var messageBox = new messageBox();
+	</script>
+	
+	<script type="text/javascript">
+		$().ready(function() {
+		});
+	</script>
+	
+	{% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+	
+</body>
+</html>

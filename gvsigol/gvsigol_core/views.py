@@ -1269,6 +1269,34 @@ def select_public_project(request):
             projects.append(project)
 
         return render(request, 'select_public_project.html', {'projects': projects})
+    
+def select_public_mobile_project(request):
+    public_projects = Project.objects.filter(is_public=True)
+
+    projects = []
+
+    if len (public_projects) <= 0:
+        return render(request, 'select_public_mobile_project.html', {'projects': projects})
+
+    elif len (public_projects) == 1:
+        return redirect('load', project_name=public_projects[0].name)
+
+    elif len (public_projects) > 1:
+        for pp in public_projects:
+            p = Project.objects.get(id=pp.id)
+            image = p.image_url
+            project = {}
+            project['id'] = p.id
+            project['name'] = p.name
+            project['title'] = p.title
+            project['description'] = p.description
+            project['image'] = urllib.parse.unquote(image)
+            projects.append(project)
+
+        return render(request, 'select_public_mobile_project.html', {
+            'projects': projects,
+            'frontend_base_url': settings.FRONTEND_BASE_URL
+        })
 
 
 def documentation(request):
