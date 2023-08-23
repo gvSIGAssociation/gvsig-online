@@ -703,9 +703,9 @@ def get_user_applications(request):
     roles = auth_backend.get_roles(request)
     applications = Application.objects.filter(applicationrole__role__in=roles) \
             | Application.objects.filter(is_public=True)
-    if request.user and request.user.is_authenticated:
-        applications = applications \
-            | Application.objects.filter(created_by=request.user.username)
+    #if request.user and request.user.is_authenticated:
+    #    applications = applications \
+    #        | Application.objects.filter(created_by=request.user.username)
     return applications.distinct()
 
 def get_core_tools(enabled=True):
