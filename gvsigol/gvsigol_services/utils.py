@@ -20,6 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
+import django
 from django.http import response
 from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
 from django.contrib.auth.models import AnonymousUser
@@ -817,23 +818,25 @@ def create_user_workspace(username, role):
     url = server_object.frontend_url + '/'
     ascii_username = ascii_norm_username(username)
     ws_name = 'ws_' + ascii_username
-    if gs.createWorkspace(ws_name, url + ws_name):          
-        # save it on DB if successfully created
-        newWs = Workspace(
-            server = server_object,
-            name = ws_name,
-            description = '',
-            uri = url + ws_name,
-            wms_endpoint = url + ws_name + '/wms',
-            wfs_endpoint = url + ws_name + '/wfs',
-            wcs_endpoint = url + ws_name + '/wcs',
-            wmts_endpoint = url + 'gwc/service/wmts',
-            cache_endpoint = url + 'gwc/service/wms',
-            created_by = username,
-            is_public = False
-        )
-        newWs.save()
-        
+    if gs.createWorkspace(ws_name, url + ws_name):
+        try:          
+            # save it on DB if successfully created
+            newWs = Workspace(
+                server = server_object,
+                name = ws_name,
+                description = '',
+                uri = url + ws_name,
+                wms_endpoint = url + ws_name + '/wms',
+                wfs_endpoint = url + ws_name + '/wfs',
+                wcs_endpoint = url + ws_name + '/wcs',
+                wmts_endpoint = url + 'gwc/service/wmts',
+                cache_endpoint = url + 'gwc/service/wms',
+                created_by = username,
+                is_public = False
+            )
+            newWs.save()
+        except django.db.utils.IntegrityError:
+            pass # ws exists
         ds_name = 'ds_' + ascii_username
         create_datastore(username, ds_name, newWs)
         gs.reload_nodes()
