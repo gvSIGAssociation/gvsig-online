@@ -51,7 +51,6 @@ from gvsigol_auth.utils import ascii_norm_username
 import re
 
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
-    role_list = auth_backend.get_all_roles_details()
     if layer:
         read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
         write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True)
