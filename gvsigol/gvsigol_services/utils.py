@@ -817,7 +817,7 @@ def create_user_workspace(username, role):
     auth_services.get_services().add_data_directory(role)
     url = server_object.frontend_url + '/'
     ascii_username = ascii_norm_username(username)
-    ws_name = 'ws_' + ascii_norm_username
+    ws_name = 'ws_' + ascii_username
     if gs.createWorkspace(ws_name, url + ws_name):          
         # save it on DB if successfully created
         newWs = Workspace(
