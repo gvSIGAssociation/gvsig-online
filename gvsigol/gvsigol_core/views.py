@@ -21,7 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools, can_manage_project
+from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
@@ -155,7 +155,7 @@ def project_list(request):
         project['title'] = p.title
         project['description'] = p.description
         project['is_public'] = p.is_public
-        can_manage = 'true' if can_manage_project(request, p) else 'false'
+        can_manage = 'true' if p.can_manage(request) else 'false'
         project['can_manage'] = can_manage
         projects.append(project)
 
@@ -264,20 +264,21 @@ def project_add(request):
             expiration_date_utc = request.POST.get('expiration_date_utc')
 
         assigned_layergroups = []
-        assigned_roles = []
+        assigned_read_roles = []
+        assigned_manage_roles = []
         for key in request.POST:
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
-            if 'usergroup-' in key:
-                assigned_roles.append(key[len('usergroup-'):])
+            if 'read-role-' in key:
+                assigned_read_roles.append(key[len('read-role-'):])
+            if 'manage-role-' in key:
+                assigned_manage_roles.append(key[len('manage-role-'):])
 
-        groups = None
-        if request.user.is_superuser:
-            groups = auth_backend.get_all_roles_details(exclude_system=True)
-        else:
-            groups = get_primary_user_role_details(request)
 
         if name == '':
+            creator_user_role = auth_backend.get_primary_role(request.user.username)
+            groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
+
             message = _('You must enter an project name')
             return render(request, 'project_add.html',
                           {
@@ -290,6 +291,9 @@ def project_add(request):
                         )
 
         if _valid_name_regex.search(name) == None:
+            creator_user_role = auth_backend.get_primary_role(request.user.username)
+            groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
+
             message = _("Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
             return render(request, 'project_add.html',
                           {
@@ -305,6 +309,9 @@ def project_add(request):
 
         if Project.objects.filter(name=name).exists():
             message = _('Project name already exists')
+            creator_user_role = auth_backend.get_primary_role(request.user.username)
+            groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
+
             return render(request, 'project_add.html', {'message': message,
                                                         'tools': project_tools ,
                                                         'layergroups': _get_prepared_layer_groups(request),
@@ -370,20 +377,38 @@ def project_add(request):
                 project_layergroup.default_baselayer = selected_base_layer
                 project_layergroup.save()
 
-        roles = auth_backend.get_all_roles()
-        for assigned_role in assigned_roles:
-            if assigned_role in roles:
-                project_role = ProjectRole(
-                    project = project,
-                    role = assigned_role
-                )
-                project_role.save()
+            ProjectRole.objects.filter(project_id=project.id).delete()
+            roles = auth_backend.get_all_roles()
+            for role in assigned_read_roles:
+                if role in roles:
+                    project_role = ProjectRole(
+                        project = project,
+                        role = role,
+                        permission = ProjectRole.PERM_READ
+                    )
+                    project_role.save()
+            for role in assigned_manage_roles:
+                if role in roles:
+                    project_role = ProjectRole(
+                        project = project,
+                        role = role,
+                        permission = ProjectRole.PERM_MANAGE
+                    )
+                    project_role.save()
 
-        project_role = ProjectRole(
-            project = project,
-            role = 'admin'
-        )
-        project_role.save()
+            admin_role = auth_backend.get_admin_role()
+            project_role = ProjectRole(
+                project = project,
+                role = admin_role,
+                permission = ProjectRole.PERM_READ
+            )
+            project_role.save()
+            project_role = ProjectRole(
+                project = project,
+                role = admin_role,
+                permission = ProjectRole.PERM_MANAGE
+            )
+            project_role.save()
 
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')
@@ -470,12 +495,15 @@ def project_update(request, pid):
             labels_added = request.POST.get('labels_added')
 
         assigned_layergroups = []
-        assigned_roles = []
+        assigned_read_roles = []
+        assigned_manage_roles = []
         for key in request.POST:
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
-            if 'usergroup-' in key:
-                assigned_roles.append(key[len('usergroup-'):])
+            if 'read-role-' in key:
+                assigned_read_roles.append(key[len('read-role-'):])
+            if 'manage-role-' in key:
+                assigned_manage_roles.append(key[len('manage-role-'):])
 
         has_image = False
         if 'project-image' in request.FILES:
@@ -559,17 +587,34 @@ def project_update(request, pid):
 
         ProjectRole.objects.filter(project_id=project.id).delete()
         roles = auth_backend.get_all_roles()
-        for role in assigned_roles:
+        for role in assigned_read_roles:
             if role in roles:
                 project_role = ProjectRole(
                     project = project,
-                    role = role
+                    role = role,
+                    permission = ProjectRole.PERM_READ
+                )
+                project_role.save()
+        for role in assigned_manage_roles:
+            if role in roles:
+                project_role = ProjectRole(
+                    project = project,
+                    role = role,
+                    permission = ProjectRole.PERM_MANAGE
                 )
                 project_role.save()
 
+        admin_role = auth_backend.get_admin_role()
         project_role = ProjectRole(
             project = project,
-            role = 'admin'
+            role = admin_role,
+            permission = ProjectRole.PERM_READ
+        )
+        project_role.save()
+        project_role = ProjectRole(
+            project = project,
+            role = admin_role,
+            permission = ProjectRole.PERM_MANAGE
         )
         project_role.save()
 
