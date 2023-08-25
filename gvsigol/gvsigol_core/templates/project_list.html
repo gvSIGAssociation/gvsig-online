@@ -29,6 +29,7 @@
 							<th></th>
 							<th></th>
 							<th></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -49,6 +50,7 @@
 								{% endif %}
 								<a id="load_project_jquery" title="JQuery" target="_blank" href="/gvsigonline/core/load/{{project.name}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: brown"></i></a>
 							</td>
+							<td></td>
 							<td></td>
 							<td></td>
 							<th></th>
@@ -195,6 +197,19 @@ $(document).ready(function() {
             }
 	    },{
 	        "targets": -3,
+	        "data": null,
+            "render": function ( data, type, row ) {
+				var filter = 'tr[data-projectid="' + data[0] + '"]';
+				var dataset = $('#projects-table').find(filter).data();
+				if (dataset['canmanage']) {
+            		return '<a title="' + '{% trans "Project layer groups" %}" ' + '" href="/gvsigonline/services/layergroup_list/?project_id='+ data[0] + '" data-toggle="tooltip" data-placement="bottom" class="btn btn-warning"><i class="fa fa-object-group"></i></a>';
+				}
+				else {
+					return '';
+				}
+            }
+	    },{
+	        "targets": -4,
 	        "data": null,
             "render": function ( data, type, row ) {
 				var filter = 'tr[data-projectid="' + data[0] + '"]';

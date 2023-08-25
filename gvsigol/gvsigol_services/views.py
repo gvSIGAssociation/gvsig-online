@@ -2079,6 +2079,10 @@ def layergroup_list(request):
         layergroups_list = LayerGroup.objects.all()
     else:
         layergroups_list = LayerGroup.objects.filter(created_by__exact=request.user.username)
+    project_id = request.GET.get('project_id')
+    if project_id is not None:
+        project = Project.objects.get(id=project_id)
+        layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id).distinct().order_by('id')
 
     layergroups = []
     for lg in layergroups_list:
@@ -2117,6 +2121,7 @@ def layergroup_add_with_project(request, project_id):
         name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
         server_id = request.POST.get('layergroup_server_id')
+        from_page = request.GET.get('from')
         
         cached = False
         if 'cached' in request.POST:
@@ -2149,7 +2154,6 @@ def layergroup_add_with_project(request, project_id):
                 )
                 layergroup.save()
 
-                project_id = request.POST.get('layergroup_project_id')
                 if project_id and project_id != '':
                     project = Project.objects.get(id=int(project_id))
                     project_layergroup = ProjectLayerGroup(
@@ -2173,7 +2177,11 @@ def layergroup_add_with_project(request, project_id):
                         return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
                     if redirect_var == 'import-layer':
                         return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
-
+                    if redirect_var == 'project-update':
+                        return redirect('project_update', pid=project_id)
+                    if redirect_var == 'project-layergroup-list':
+                        url = reverse('layergroup_list') + "?project_id=" + str(project_id)
+                        return redirect(url)
                 return redirect('layergroup_list')
 
 
@@ -2185,13 +2193,13 @@ def layergroup_add_with_project(request, project_id):
             message = _('You must enter a name for layer group')
             return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'workspaces': list(Workspace.objects.values())})
 
-        return redirect('layergroup_list')
-
     else:
         response = {
             'project_id': project_id,
             'servers': list(Server.objects.values())
         }
+        if request.GET.get('redirect'):
+            response['redirect'] = request.GET.get('redirect')
         return render(request, 'layergroup_add.html', response)
 
 
@@ -2232,6 +2240,7 @@ def layergroup_mapserver_toc(group, toc_string):
         if last:
             gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)  
             gs.createOrUpdateSortedGeoserverLayerGroup(toc)
+            gs.set_gwclayer_dynamic_subsets(None, group.name)
             gs.reload_nodes()
 
 
