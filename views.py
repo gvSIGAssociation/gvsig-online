@@ -35,6 +35,7 @@ from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGr
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User, AnonymousUser
+from django.urls import reverse
 from gvsigol_auth.utils import superuser_required, is_superuser, staff_required, get_primary_user_role_details
 from . import utils as core_utils
 from gvsigol_services import geographic_servers, utils, backend_postgis
@@ -413,9 +414,8 @@ def project_add(request):
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')
             if redirect_var == 'new-layer-group':
-                return redirect('layergroup_add_with_project', project_id=str(project.id))
-
-
+                url = reverse('layergroup_add_with_project', kwargs={'project_id': project.id}) + '?redirect=project-update'
+                return redirect(url)
 
         return redirect('project_list')
 
@@ -621,8 +621,8 @@ def project_update(request, pid):
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')
             if redirect_var == 'new-layer-group':
-                return redirect('layergroup_add_with_project', project_id=str(project.id))
-
+                url = reverse('layergroup_add_with_project', kwargs={'project_id': project.id}) + '?redirect=project-update'
+                return redirect(url)
 
         return redirect('project_list')
 
