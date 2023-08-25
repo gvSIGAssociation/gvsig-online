@@ -6,6 +6,8 @@ from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup, Layer
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
+from gvsigol_auth import auth_backend
+from django.contrib.auth.models import User
 
 
 def get_default_logo_image():
@@ -100,14 +102,74 @@ class Project(models.Model):
         if not self.logo:
             return get_default_logo_image()
         return self.logo.url.replace(settings.BASE_URL, '')
+    
+    
+    def can_read(self, request_or_user):
+        """
+        Checks whether the user is allowed to load this project
+
+        Parameters
+        ----------
+        request_or_user: Request | HttpRequest | User
+            A Django Request object | A DRF HttpRequest object | A Django User object
+
+        Returns
+        -------
+        True if the user is allowed to load this project, False otherwise
+        """
+        if isinstance(request_or_user, User):
+            user = request_or_user
+        else:
+            user = request_or_user.user
+        if user.is_superuser:
+            return True
+        elif user.username == self.created_by:
+            return True
+        user_roles = auth_backend.get_roles(request_or_user)
+        return self.projectrole_set.filter(permission=ProjectRole.PERM_READ, role__in=user_roles, ).exists()
+
+    def can_manage(self, request_or_user):
+        """
+        Checks whether the user is allowed to manage (modify settings, set permissions, etc) this project.
+
+        Parameters
+        ----------
+        request_or_user: Request | HttpRequest | User
+            A Django Request object | A DRF HttpRequest object | A Django User object
+
+        Returns
+        -------
+        True if the user is allowed to manage this project, False otherwise
+        """
+        if isinstance(request_or_user, User):
+            user = request_or_user
+        else:
+            user = request_or_user.user
+        if user.is_superuser:
+            return True
+        elif user.is_staff:
+            if user.username == self.created_by:
+                return True
+            user_roles = auth_backend.get_roles(request_or_user)
+            return self.projectrole_set.filter(permission=ProjectRole.PERM_MANAGE, role__in=user_roles, ).exists()
 
 class ProjectRole(models.Model):
+    PERM_READ='read'
+    PERM_MANAGE = 'manage'
+    PERMISSION_CHOICES = [
+        (PERM_READ, PERM_READ),
+        (PERM_MANAGE, PERM_MANAGE),
+    ]
     project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
     role = models.TextField()
+    permission = models.TextField(choices=PERMISSION_CHOICES, default=PERM_READ)
     
     class Meta:
         indexes = [
-            models.Index(fields=['project', 'role']),
+            models.Index(fields=['project', 'permission', 'role']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['project', 'permission', 'role'], name='unique_permission_role_and_project')
         ]
     
     def __str__(self):

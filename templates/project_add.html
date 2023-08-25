@@ -303,18 +303,18 @@
 										<div class="form-horizontal">
 											<div class="form-group" style="margin-left: 0px; margin-right: 0px">
 											<div class="col-md-6 ">
-											<label class="control-label">{% trans "Allow access to the project for the following user groups:" %}</label>
+												<label class="control-label">{% trans "Set project permissions:" %}</label>
 											</div>
 											{% if user.is_superuser %}
 											<div class="col-md-4 ">
-											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+											<input type="text" class="search form-control" placeHolder="{% trans 'Search role...' %}" />
 											</div>
 											<div class="col-md-2 ">
 											<button id="extend-to-lyrs-btn" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs margin-r-5"></i>{% trans "Extend to layers" %}</button>
 											</div>
 											{% else %}
 											<div class="col-md-6 ">
-											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+											<input type="text" class="search form-control" placeHolder="{% trans 'Search role...' %}" />
 											</div>
 											{% endif %}
 											</div>
@@ -328,17 +328,18 @@
 													<img src="{% static "img/users.png" %}" alt="Users Image">
 												</div>
 												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
-														<div class="checkbox pull-right">													
+													<span class="product-title">{{group.name}}
+														<div class="pull-right checkbox form-inline">
 															<label>
-																{% if group.checked %}
-																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}" checked/>{% trans "Assign user group" %}
-																{% else %}
-																	<input class="project-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}"/>{% trans "Assign user group" %}
-																{% endif %}
+																<input class="project-read-checkbox" type="checkbox" name="read-role-{{group.name}}" id="read-role-{{group.name}}" {% if group.read_checked %}checked {% endif %}/>
+																<span>{% trans "Access permission" %}</span>
+															</label>
+															<label style="margin-left:10px">
+																<input type="checkbox" name="manage-role-{{group.name}}" id="manage-role-{{group.name}}" {% if group.manage_checked %}checked {% endif %}/>
+																<span>{% trans "Manage permission" %}</span>
 															</label>
 														</div>
-													</a> 
+													</span>
 													<span class="product-description">{{group.description}}</span>
 												</div>
 											</li> 

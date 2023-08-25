@@ -54,14 +54,7 @@ def can_read_project(request, project):
             project = Project.objects.get(name=project)
         elif isinstance(project, int):
             project = Project.objects.get(pk=project)
-        if project.is_public:
-            return True
-        if request.user.is_superuser:
-            return True
-        if project.created_by == request.user.username:
-            return True
-        roles = auth_backend.get_roles(request)
-        return project.projectrole_set.filter(role__in=roles).exists()
+        return project.can_read(request)
     except Exception as e:
         print(e)
     return False
@@ -80,17 +73,36 @@ def can_manage_project(request, project):
         print(e)
     return False
 
-def get_all_roles_checked_by_project(project):
+def get_checked_project_roles(read_roles, manage_roles, creator_user_role=None):
     role_list = auth_backend.get_all_roles_details()
-    roles_by_project = ProjectRole.objects.filter(project_id=project.id)
     roles = []
+    admin_roles = [ auth_backend.get_admin_role()]
     for role in role_list:
-        if role['name'] != 'admin':
-            for gbu in roles_by_project:
-                if gbu.role == role['name']:
-                    role['checked'] = True
+        if role['name'] not in admin_roles:
+            for read_role in read_roles:
+                if read_role == role['name']:
+                    role['read_checked'] = True
+
+            for manage_role in manage_roles:
+                if manage_role == role['name']:
+                    role['manage_checked'] = True
+            if creator_user_role is not None and role['name'] == creator_user_role:
+                role['read_checked'] = True
+                role['manage_checked'] = True
             roles.append(role)
     return roles
+
+def get_all_roles_checked_by_project(project):
+    if project:
+        read_roles = ProjectRole.objects.filter(project=project, permission=ProjectRole.PERM_READ).values_list('role', flat=True)
+        manage_roles = ProjectRole.objects.filter(project=project, permission=ProjectRole.PERM_MANAGE).values_list('role', flat=True)
+        creator_role = auth_backend.get_primary_role(project.created_by)
+    else:
+        read_roles = []
+        manage_roles = []
+        creator_role = None
+    return get_checked_project_roles(read_roles, manage_roles, creator_role)
+
 
 def get_all_roles_checked_by_application(application):
     role_list = auth_backend.get_all_roles_details()
