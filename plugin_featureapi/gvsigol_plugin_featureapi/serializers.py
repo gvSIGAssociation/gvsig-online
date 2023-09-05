@@ -120,16 +120,20 @@ class FeatureSerializer(serializers.Serializer):
                 geom_col = geom_cols[0]
 
                 native_epsg = 4326
+                tbuffer = buffer
                 if layer.native_srs:
                     native_epsg = layer.native_srs.split(':')[1]
                     native_epsg = int(native_epsg)
+                    if(native_epsg != 4326):
+                        tbuffer = self.get_transformed_buffer_distance(con, 4326, native_epsg, buffer, lon, lat)
+                   
                 epsilon = self.get_epsilon(con, geom_col, epsg, native_epsg, table, schema, buffer, lon, lat)
                 #get_buffer_params = " "
                 #if(getbuffer == True):
                 #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))"
 
                 params = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), {epsilon})), ST_NPoints({geom}) as props"
-                where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom})"
+                where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {tbuffer}), {geom})"
                 sql = sqlbuilder.SQL("SELECT " + params + " FROM {schema}.{table} WHERE " + where + " ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})")
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
@@ -138,7 +142,7 @@ class FeatureSerializer(serializers.Serializer):
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
-                    buffer=sqlbuilder.Literal(buffer),
+                    tbuffer=sqlbuilder.Literal(tbuffer),
                     lat=sqlbuilder.Literal(lat),
                     lon=sqlbuilder.Literal(lon),
                     epsilon=sqlbuilder.Literal(epsilon),
@@ -230,7 +234,7 @@ class FeatureSerializer(serializers.Serializer):
                     native_epsg = layer.native_srs.split(':')[1]
                     native_epsg = int(native_epsg)
 
-                transformed_buffer = self.get_buffer(con, source_epsg, native_epsg, buffer, lon, lat)
+                transformed_buffer = self.get_transformed_buffer_distance(con, source_epsg, native_epsg, buffer, lon, lat)
 
                 params = "ST_AsGeoJSON(ST_Transform({geom}, 4326)), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))"
                 where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom})"
@@ -311,6 +315,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
 
+
     def getBufferGeometry(self, con, lon, lat, buffer):
         sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))")
         query = sql.format(
@@ -321,7 +326,6 @@ class FeatureSerializer(serializers.Serializer):
         con.cursor.execute(query)
         r = con.cursor.fetchone()
         return r[0]
-
 
 
     def showSimplification(self, epsilon, feat):
@@ -369,7 +373,7 @@ class FeatureSerializer(serializers.Serializer):
             perimeter = feat[0]
             return perimeter / div
         
-    def get_buffer(self, con, source_epsg, target_epsg, buffer, lon, lat):
+    def get_transformed_buffer_distance(self, con, source_epsg, target_epsg, buffer, lon, lat):
         query_point = [lon, lat] # 0.39059, 39.48329 x, y
         (x1, y1) = query_point
         x2 = x1 + buffer
