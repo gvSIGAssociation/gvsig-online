@@ -123,7 +123,13 @@ $(document).ready(function() {
 	});
 	
 	$('#button-add-layergroup').click( function() {
-		location.href = '/gvsigonline/services/layergroup_add/';
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('project_id')) {
+			location.href = '/gvsigonline/services/layergroup_add/' + params.get('project_id') + '/' + '?redirect=project-layergroup-list';
+		}
+		else {
+			location.href = '/gvsigonline/services/layergroup_add/';
+		}
 	});
 		 
 	$('#layergroups-table tbody').on('click', 'button', function (){
