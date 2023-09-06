@@ -117,6 +117,8 @@ class Project(models.Model):
         -------
         True if the user is allowed to load this project, False otherwise
         """
+        if self.is_public:
+            return True
         if isinstance(request_or_user, User):
             user = request_or_user
         else:
