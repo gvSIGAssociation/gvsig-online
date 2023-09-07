@@ -129,7 +129,6 @@ viewer.core = {
     },
 	_authenticated() {
 		return this.conf._auth_count == this.conf.auth_urls.length;
-		//return this.conf._auth_count > 0;
 	},
 
     _createMap: function() {
