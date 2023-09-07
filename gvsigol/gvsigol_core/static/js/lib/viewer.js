@@ -82,36 +82,44 @@ viewer.core = {
         const binString = Array.from(byteArray, (x) => String.fromCodePoint(x)).join("");
         return btoa(binString);
     },
+	_authenticateServer: function(url, headers) {
+		var self = this;
+		$.ajax({
+			url: url + "/wms",
+			data: {
+				'SERVICE': 'WMS',
+				'VERSION': '1.1.1',
+				'REQUEST': 'GetCapabilities'
+			},
+			async: true,
+			xhrFields: {
+				withCredentials: true
+			},
+			method: 'GET',
+			headers: headers,
+			error: function(jqXHR){
+				var message = 'Error authenticationg to ' + url + ' [ ' + jqXHR.status + ' - ' + jqXHR.statusText + ']';
+				console.log(message);
+				messageBox.show('warning', message);
+			},
+			success: function(resp){
+				self.conf._auth_count++;
+				console.log('Authenticated to ' + url);
+				if (self._authenticated()) {
+					console.log('Authentication finished.');
+					self._loadWidgets();
+				}
+			}
+		});
+	},
     _authenticate: function() {
-    	var self = this;
+		var self = this;
 		if (self.conf.user && self.conf.user.credentials) {
 			var headers = {
 				"Authorization": "Basic " + self.stringToBase64(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
 			};
 			for (var i=0; i<self.conf.auth_urls.length; i++) {
-				$.ajax({
-					url: self.conf.auth_urls[i] + "/wms",
-					data: {
-						'SERVICE': 'WMS',
-						'VERSION': '1.1.1',
-						'REQUEST': 'GetCapabilities'
-					},
-					async: true,
-					xhrFields: {
-						withCredentials: true
-					},
-					method: 'GET',
-					headers: headers,
-					error: function(jqXHR, textStatus, errorThrown){},
-					success: function(resp){
-						self.conf._auth_count++;
-						console.log('Authenticated');
-						if (self._authenticated()) {
-							console.log('Authentication finished.');
-							self._loadWidgets();
-						}
-					}
-				});
+				self._authenticateServer(self.conf.auth_urls[i], headers);
 			}
 			if (this.conf.auth_urls.length == 0) {
 				self._loadWidgets();
