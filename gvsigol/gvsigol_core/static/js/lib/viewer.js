@@ -98,7 +98,7 @@ viewer.core = {
 			method: 'GET',
 			headers: headers,
 			error: function(jqXHR){
-				var message = 'Error authenticationg to ' + url + ' [ ' + jqXHR.status + ' - ' + jqXHR.statusText + ']';
+				var message = 'Error authenticating to ' + url + ' [ Error ' + jqXHR.status + ' - ' + jqXHR.statusText + ']';
 				console.log(message);
 				messageBox.show('warning', message);
 			},
