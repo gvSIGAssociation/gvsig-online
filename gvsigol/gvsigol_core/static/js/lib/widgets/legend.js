@@ -28,7 +28,8 @@ var legend = function(conf, map) {
 	this.map = map;	
 	this.conf = conf;
 	this.legendContainer = $('#legend-tab');
-	this.loadLegend();
+	this.legendContainer.append('<div class="box-body" style="margin: 10px"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>');
+	this._loaded = false;
 };
 
 /**
@@ -37,20 +38,24 @@ var legend = function(conf, map) {
 legend.prototype.loadLegend = function() {
 	
 	var self = this;
-	var legends = this.getLegendsFromVisibleLayers();
-	this.legendContainer.append(legends);
-	
-	$('.user-block').on('click', function(){
-		var legend = this.dataset.legend;
-		var ui = '';
-		ui += '<div class="box-body">';
-		ui += 	'<img src="' + legend + '" alt="Photo">';
-		ui += '</div>';
+	if (!this._loaded) {
+		this._loaded = true;
+		this.legendContainer.empty();
+		var legends = this.getLegendsFromVisibleLayers();
+		this.legendContainer.append(legends);
 		
-		$('#float-modal .modal-body').empty();
-		$('#float-modal .modal-body').append(ui);
-		$("#float-modal").modal('show');
-	});
+		$('.user-block').on('click', function(){
+			var legend = this.dataset.legend;
+			var ui = '';
+			ui += '<div class="box-body">';
+			ui += 	'<img src="' + legend + '" alt="Photo">';
+			ui += '</div>';
+			
+			$('#float-modal .modal-body').empty();
+			$('#float-modal .modal-body').append(ui);
+			$("#float-modal").modal('show');
+		});
+	}
 };
 
 

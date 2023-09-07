@@ -75,6 +75,7 @@ viewer.core = {
     	this._loadLayers();
     	this._createWidgets();
     	this._loadTools();
+		this.conf._auth_count = 0;
     },
     stringToBase64: function(s) {
 		var byteArray = new TextEncoder().encode(s);
@@ -103,12 +104,33 @@ viewer.core = {
 					headers: headers,
 					error: function(jqXHR, textStatus, errorThrown){},
 					success: function(resp){
+						self.conf._auth_count++;
 						console.log('Authenticated');
+						if (self._authenticated()) {
+							console.log('Authentication finished.');
+							self._loadWidgets();
+						}
 					}
 				});
 			}
+			if (this.conf.auth_urls.length == 0) {
+				self._loadWidgets();
+			}
+			else {
+				// load widgets anyway after 10 seconds, to ensure they are loaded even if login fails
+				setTimeout(function() {
+					self._loadWidgets();
+				}, 10000);
+			}
+			return;
 		}
+		// also load widgets if no auth has been performed
+		self._loadWidgets();
     },
+	_authenticated() {
+		return this.conf._auth_count == this.conf.auth_urls.length;
+		//return this.conf._auth_count > 0;
+	},
 
     _createMap: function() {
     	var self = this;
@@ -256,6 +278,10 @@ viewer.core = {
 		this.rawFilter = new RawFilter(this.conf, this.map);
 		this.selectionTable = new SelectionTable(this.map);
     },
+	_loadWidgets: function() {
+		// load data for widgets requiring authenticated requests
+		this.legend.loadLegend();
+	},
 
     _loadExternalLayer: function(externalLayer, group, checkTileLoadError) {
 	    var self = this;
