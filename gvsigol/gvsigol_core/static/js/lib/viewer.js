@@ -62,8 +62,10 @@ viewer.core = {
 		'rowCallback': new Array()
 	}, 
 
-    initialize: function(conf, extraParams) {
-    	this.conf = conf;
+	initialize: function(conf, extraParams) {
+		this.conf = conf;
+		this.conf._auth_count = 0;
+		this._pendingLayers = {};
     	if (conf.user) {
     		if (!conf.remote_auth) {
         		this._authenticate();
@@ -75,7 +77,6 @@ viewer.core = {
     	this._loadLayers();
     	this._createWidgets();
     	this._loadTools();
-		this.conf._auth_count = 0;
     },
     stringToBase64: function(s) {
 		var byteArray = new TextEncoder().encode(s);
@@ -105,6 +106,7 @@ viewer.core = {
 			success: function(resp){
 				self.conf._auth_count++;
 				console.log('Authenticated to ' + url);
+				self._loadPendingLayers(url);
 				if (self._authenticated()) {
 					console.log('Authentication finished.');
 					self._loadWidgets();
@@ -125,14 +127,16 @@ viewer.core = {
 				self._loadWidgets();
 			}
 			else {
-				// load widgets anyway after 10 seconds, to ensure they are loaded even if login fails
+				// load data anyway after 10 seconds, to ensure they are loaded even if login fails
 				setTimeout(function() {
+					self._loadPendingLayers();
 					self._loadWidgets();
 				}, 10000);
 			}
 			return;
 		}
-		// also load widgets if no auth has been performed
+		// also load data if no auth has been performed
+		self._loadPendingLayers();
 		self._loadWidgets();
     },
 	_authenticated() {
@@ -278,7 +282,34 @@ viewer.core = {
 		}
     	this._loadLayerGroups();
     },
-
+	_loadPendingLayers: function(auth_url) { // layers to be loaded after authentication
+		if (!auth_url) {
+			for (var i=0; i<this.conf.auth_urls.length; i++) {
+				this._loadPendingLayers(this.conf.auth_urls[i]);
+			}
+			return;
+		}
+		if (this._pendingLayers[auth_url]) {
+			var lyrId, layer;
+			for (var i=0; i<this._pendingLayers[auth_url].length; i++) {
+				lyrId = this._pendingLayers[auth_url][i];
+				layer = this._getLayer(lyrId);
+				if (layer) {
+					layer.set("visible", true);
+				}
+			}
+			delete this._pendingLayers[auth_url];
+		}
+	},
+	_getLayer: function(lyrId) {
+		var lyrs = this.map.getLayers().getArray();
+		for (var i=0; i<lyrs.length; i++) {
+			if (lyrs[i].get("id") === lyrId) {
+				return lyrs[i];
+			}
+		}
+		return null;
+	},
     _createWidgets: function() {
     	this.layerTree = new layerTree(this.conf, this.map, this);
     	this.legend = new legend(this.conf, this.map);
@@ -583,10 +614,9 @@ viewer.core = {
 
 	},
 
-	_loadInternalLayer: function(internalLayer, group, checkTileLoadError) {
+	_loadInternalLayer: function(layerConf, group, checkTileLoadError) {
 		var self = this;
 
-		var layerConf = internalLayer;
 		var layerId = this._nextLayerId();
 		layerConf.id = layerId;
 		var url = layerConf.wms_url;
@@ -595,21 +625,39 @@ viewer.core = {
 		}
 		var wmsLayer = null;
 
-		var visible = false;
-	    var baselayer = false;
-	    if (internalLayer['baselayer']) {
+		var visible, baselayer;
+	    if (layerConf['baselayer']) {
 	    	baselayer = true;
-	    	if (internalLayer['default_baselayer']) {
+	    	if (layerConf['default_baselayer']) {
 	    		visible = true;
 	    	}
+			else {
+				visible = false;
+			}
 	    } else {
-	    	visible = internalLayer['visible'];
+	    	visible = layerConf['visible'];
+			baselayer = false;
 	    }
 	    if(group.visible){ visible = false; }
 
+		if (!layerConf.public && visible) {
+			// visible authenticated layers should be loaded after login
+			for (var uidx=0; uidx < self.conf.auth_urls.length; uidx++) {
+				var auth_url = self.conf.auth_urls[uidx];
+				if (url.indexOf(auth_url)!== -1) {
+					if (!self._pendingLayers[auth_url]) {
+						self._pendingLayers[auth_url] = [];
+						
+					}
+					self._pendingLayers[auth_url].push(layerId);
+					visible = false;
+				}
+			}
+		}
+
 	    var format = 'image/png';
 	    if (layerConf.format) {
-	    	format = internalLayer['format'];
+	    	format = layerConf['format'];
 	    }
 		var customLoadFunction = function(image, src) {
 			var xhr = new XMLHttpRequest();
@@ -657,7 +705,7 @@ viewer.core = {
 		if (layerConf.single_image) {
 			var wmsSource = new ol.source.ImageWMS({
 				url: url,
-				visible: layerConf.visible,
+				visible: visible,
 				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
 				serverType: 'geoserver'
 			});
