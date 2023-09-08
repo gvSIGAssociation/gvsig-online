@@ -295,7 +295,7 @@ viewer.core = {
 				lyrId = this._pendingLayers[auth_url][i];
 				layer = this._getLayer(lyrId);
 				if (layer) {
-					layer.set("visible", true);
+					layer.setVisible(true);
 				}
 			}
 			delete this._pendingLayers[auth_url];
@@ -705,7 +705,6 @@ viewer.core = {
 		if (layerConf.single_image) {
 			var wmsSource = new ol.source.ImageWMS({
 				url: url,
-				visible: visible,
 				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
 				serverType: 'geoserver'
 			});
@@ -772,7 +771,6 @@ viewer.core = {
 				}
 				var wmsSource = new ol.source.TileWMS({
 					url: url,
-					visible: layerConf.visible,
 					params: wmsParams,
 					serverType: 'geoserver'
 				});
