@@ -25,7 +25,7 @@ from geoserver.layergroup import LayerGroup
 from .models import Survey, SurveySection, SurveyReadGroup, SurveyWriteGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup
-from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadGroup, LayerWriteGroup
+from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadRole, LayerWriteRole
 from gvsigol_services import geographic_servers
 from gvsigol_services.views import layer_delete_operation
 from .forms import SurveyForm, SurveySectionForm, UploadFileForm
