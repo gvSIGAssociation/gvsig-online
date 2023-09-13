@@ -10,14 +10,14 @@ def groups_to_roles(apps, schema_editor):
         try:
             g.role = g.user_group.name
             g.save()
-        except:
+        except Exception as e:
             print(str(e))
 
     for g in SurveyWriteGroup.objects.all():
         try:
             g.role = g.user_group.name
             g.save()
-        except:
+        except Exception as e:
             print(str(e))
 
 

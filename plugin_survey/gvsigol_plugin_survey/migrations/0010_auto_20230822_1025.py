@@ -7,6 +7,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('gvsigol_plugin_survey', '0009_auto_20210223_1117'),
+        ('gvsigol_core', '0043_projectusergrouprole'),
+        ('gvsigol_auth', '0005_groups_to_roles'),
     ]
 
     operations = [
