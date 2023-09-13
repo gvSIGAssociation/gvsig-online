@@ -128,7 +128,7 @@ class Project(models.Model):
         elif user.username == self.created_by:
             return True
         user_roles = auth_backend.get_roles(request_or_user)
-        return self.projectrole_set.filter(permission=ProjectRole.PERM_READ, role__in=user_roles, ).exists()
+        return self.projectrole_set.filter(permission=ProjectRole.PERM_READ, role__in=user_roles).exists()
 
     def can_manage(self, request_or_user):
         """
@@ -153,7 +153,7 @@ class Project(models.Model):
             if user.username == self.created_by:
                 return True
             user_roles = auth_backend.get_roles(request_or_user)
-            return self.projectrole_set.filter(permission=ProjectRole.PERM_MANAGE, role__in=user_roles, ).exists()
+            return self.projectrole_set.filter(permission=ProjectRole.PERM_MANAGE, role__in=user_roles).exists()
 
 class ProjectRole(models.Model):
     PERM_READ='read'
