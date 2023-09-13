@@ -78,7 +78,8 @@
 				<h4 class="modal-title" id="myModalLabel">{% trans "Delete library" %}</h4>
 			</div>
 			<div class="modal-body">
-				<p>{% trans "Library will be removed, Do you want continue?" %}</p>
+				<p id="library_delete"></p> 
+				
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-library-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
@@ -144,8 +145,10 @@ $(document).ready(function() {
 	        updateLibrary(data);
 	    } else if (this.name == "button-export-library") {
 	    	exportLibrary(data);
-	    } else if (this.name == "button-delete-library") {
-	    	deleteLibrary(data);
+	    } else if (this.name == "button-delete-library") {		
+			var library_name=data["1"];	
+	    	$("#modal-delete-library .modal-body p#library_delete").text(gettext('Library') + ' ' + library_name + ' ' + gettext('will be removed, Do you want continue?'));
+			deleteLibrary(data);
 	    } 
 	});
 	
@@ -187,6 +190,8 @@ $(document).ready(function() {
 			});
 		});
 	}
+
+
   
 });
 </script>

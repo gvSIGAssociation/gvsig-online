@@ -307,3 +307,9 @@ msgstr "Expresión AND"
 
 msgid "OR expression"
 msgstr "Expresión OR"
+
+msgid "Library"
+msgstr "La biblioteca"
+
+msgid "will be removed, Do you want continue?"
+msgstr "será eliminada, ¿Desea continuar?"
