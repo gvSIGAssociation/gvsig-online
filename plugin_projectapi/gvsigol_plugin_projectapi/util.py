@@ -340,11 +340,12 @@ def get_plugins(project):
 
 def get_order_in_project(project_id, layergroup_name):
     project = Project.objects.get(id=project_id)
-    toc_order = json.loads(project.toc_order)
-    order = 1000
-    for key in toc_order:
-        if key == layergroup_name:
-            order = toc_order[key]['order']
-    return order
-
+    try:
+        toc_order = json.loads(project.toc_order)
+        for key in toc_order:
+            if key == layergroup_name:
+                return toc_order[key].get('order', 1000)
+    except:
+        pass
+    return 1000
 
