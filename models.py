@@ -406,10 +406,16 @@ class Layer(models.Model):
         return i, self.source_name, params.get('schema', 'public')
 
 class LayerReadGroup(models.Model):
+    """
+    Deprecated, use LayerReadRole instead. To be removed in v4.0.
+    """
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
 
 class LayerWriteGroup(models.Model):
+    """
+    Deprecated, use LayerReadRole instead. To be removed in v4.0.
+    """
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
 
@@ -429,6 +435,31 @@ class LayerWriteRole(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['layer', 'role']),
+        ]
+
+class LayerManageRole(models.Model):
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
+    role = models.TextField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer', 'role']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['layer', 'role'], name='unique_manage_role_per_layer')
+        ]
+
+
+class LayerGroupManageRole(models.Model):
+    layergroup = models.ForeignKey(LayerGroup, on_delete=models.CASCADE)
+    role = models.TextField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['layergroup', 'role']),
+        ]
+    constraints = [
+           models.UniqueConstraint(fields=['layergroup', 'role'], name='unique_manage_role_per_layergroup')
         ]
 
 class DataRule(models.Model):

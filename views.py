@@ -72,9 +72,10 @@ from gvsigol import settings
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from gvsigol.settings import MOSAIC_DB
 from gvsigol_auth.utils import superuser_required, staff_required, get_primary_user_role, ascii_norm_username
+from gvsigol_auth import auth_backend
 from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
-from gvsigol_core.models import Project, ProjectBaseLayerTiling
+from gvsigol_core.models import Project, ProjectRole, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup, TilingProcessStatus
 from gvsigol_symbology.models import Style
 from gvsigol_core.views import not_found_view
@@ -694,11 +695,11 @@ def layer_list(request):
     if request.user.is_superuser:
         layer_list = Layer.objects.filter(external=False)
         project_list = Project.objects.all()
-        
     else:
-        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(external=False)
-        project_list = Project.objects.filter(created_by__exact=request.user.username)
-
+        user_roles = auth_backend.get_roles(request)
+        layer_list = (Layer.objects.filter(created_by__exact=request.user.username, external=False)
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct()
+        project_list = core_utils.get_user_projects(request, permission=ProjectRole.PERM_MANAGE)
     layers = []
     for l in layer_list:
         projects = []
@@ -754,7 +755,7 @@ def _layer_refresh_extent(layer):
 def layer_refresh_conf(request, layer_id):
     try:
         layer = Layer.objects.get(pk=layer_id)
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_manage_layer(request, layer):
             return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
         _layer_refresh_extent(layer)
         if layer.type.startswith('v_'):
@@ -813,7 +814,7 @@ def layer_delete(request, layer_id):
 def layer_delete_operation(request, layer_id):
     try:
         layer = Layer.objects.get(pk=layer_id)
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_manage_layer(request, layer):
             msg = _('ERROR User is not authorized to perform this operation')
             data = {
                     'status': 'ERROR',
@@ -1190,9 +1191,12 @@ def layer_add_with_group(request, layergroup_id):
 
                 assigned_read_roles = []
                 assigned_write_roles = []
+                assigned_manage_roles = []
                 for key in request.POST:
                     if 'read-usergroup-' in key:
                         assigned_read_roles.append(key[len('read-usergroup-'):])
+                    elif 'manage-usergroup-' in key:
+                        assigned_manage_roles.append(key[len('manage-usergroup-'):])
                 
                 if datastore.type == 'v_PostGIS':
                     extraParams['maxFeatures'] = maxFeatures
@@ -1215,7 +1219,7 @@ def layer_add_with_group(request, layergroup_id):
                                 assigned_write_roles.append(key[len('write-usergroup-'):])
                 else:
                     is_view = False
-                groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
+                groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                 if datastore.type == 'v_PostGIS':
                     for field in fields:
                         if ' ' in field:
@@ -1271,7 +1275,7 @@ def layer_add_with_group(request, layergroup_id):
                     'max_features': maxFeatures
                 }
 
-                utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles)
+                utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                 do_config_layer(server, newRecord, featuretype)
 
                 if redirect_to_layergroup:
@@ -1318,7 +1322,7 @@ def layer_update(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
     try:
         layer = Layer.objects.get(id=int(layer_id))
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_manage_layer(request, layer):
             return forbidden_view(request)
     except Layer.DoesNotExist:
         return not_found_view(request)
@@ -1365,9 +1369,12 @@ def layer_update(request, layer_id):
             vector_tile = True
 
         assigned_read_roles = []
+        assigned_manage_roles = []
         for key in request.POST:
             if 'read-usergroup-' in key:
                 assigned_read_roles.append(key[len('read-usergroup-'):])
+            elif 'manage-usergroup-' in key:
+                assigned_manage_roles.append(key[len('manage-usergroup-'):])
 
         assigned_write_roles = []
         if layer.type == 'v_PostGIS':
@@ -1507,7 +1514,7 @@ def layer_update(request, layer_id):
                 gs.createOrUpdateGeoserverLayerGroup(old_layer_group)
                 gs.createOrUpdateGeoserverLayerGroup(new_layer_group)
 
-            utils.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles)
+            utils.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
             gs.reload_nodes()
         
         if redirect_to_layergroup:
@@ -1685,7 +1692,7 @@ def _parse_form_groups(form_groups, fields):
 def layer_config(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
     layer = Layer.objects.get(id=int(layer_id))
-    if not utils.can_manage_layer(request.user, layer):
+    if not utils.can_manage_layer(request, layer):
         return forbidden_view(request)
     if request.method == 'POST':
         i, params = layer.datastore.get_db_connection()
@@ -1832,7 +1839,7 @@ def convert_to_enumerate(request):
     usr = request.user
 
     layer = Layer.objects.get(id=layer_id)
-    if not utils.can_manage_layer(request.user, layer):
+    if not utils.can_manage_layer(request, layer):
         return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
        
     is_enum, _ = utils.is_field_enumerated(layer, field)
@@ -1993,7 +2000,7 @@ def _layer_cache_clear(layer_id):
 def layer_cache_clear(request, layer_id):
     try:
         layer = Layer.objects.get(id=int(layer_id))
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_manage_layer(request, layer):
             return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
@@ -2410,14 +2417,15 @@ def layer_create_with_group(request, layergroup_id):
             allow_download = True
         
         assigned_read_roles = []
+        assigned_write_roles = []
+        assigned_manage_roles = []
         for key in request.POST:
             if 'read-usergroup-' in key:
                 assigned_read_roles.append(key[len('read-usergroup-'):])
-
-        assigned_write_roles = []
-        for key in request.POST:
-            if 'write-usergroup-' in key:
+            elif 'write-usergroup-' in key:
                 assigned_write_roles.append(key[len('write-usergroup-'):])
+            elif 'manage-usergroup-' in key:
+                assigned_manage_roles.append(key[len('manage-usergroup-'):])
 
         is_public = (request.POST.get('resource-is-public') is not None)
 
@@ -2536,7 +2544,7 @@ def layer_create_with_group(request, layergroup_id):
                     featuretype = {
                         'max_features': maxFeatures
                     }
-                    utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles)
+                    utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                     do_config_layer(server, newRecord, featuretype)
                     if redirect_to_layergroup:
                         layergroup_id = newRecord.layer_group.id
@@ -2553,7 +2561,7 @@ def layer_create_with_group(request, layergroup_id):
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
 
-            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
+            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
             data = {
                 'form': form,
                 'message': msg,
@@ -2569,7 +2577,7 @@ def layer_create_with_group(request, layergroup_id):
             if 'gvsigol_plugin_form' in INSTALLED_APPS:
                 from gvsigol_plugin_form.models import Form
                 forms = Form.objects.all()
-            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles)
+            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
             data = {
                 'form': form,
                 'forms': forms,
@@ -4042,7 +4050,7 @@ def external_layer_add(request):
 def external_layer_update(request, external_layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
     external_layer = Layer.objects.get(id=external_layer_id)
-    if not utils.can_manage_layer(request.user, external_layer):
+    if not utils.can_manage_layer(request, external_layer):
         return forbidden_view(request)
     layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
@@ -4171,7 +4179,7 @@ def external_layer_update(request, external_layer_id):
 @staff_required
 def external_layer_delete(request, external_layer_id):
     external_layer = Layer.objects.get(id=external_layer_id)
-    if not utils.can_manage_layer(request.user, external_layer):
+    if not utils.can_manage_layer(request, external_layer):
         return forbidden_view(request)
     try:
         server = Server.objects.get(id=external_layer.layer_group.server_id)
@@ -4374,7 +4382,7 @@ def cache_list(request):
 @staff_required
 def layer_cache_config(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
-    if not utils.can_manage_layer(request.user, layer):
+    if not utils.can_manage_layer(request, layer):
         return forbidden_view(request)
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
@@ -4673,7 +4681,7 @@ def kill_all_group_tasks(request):
 def update_thumbnail(request, layer_id):
     try:
         layer = Layer.objects.get(id=int(layer_id))
-        if not utils.can_manage_layer(request.user, layer):
+        if not utils.can_manage_layer(request, layer):
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
@@ -4824,7 +4832,7 @@ def db_field_delete(request):
             #layer_name = request.POST['layer_name']
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
-            if not utils.can_manage_layer(request.user, layer):
+            if not utils.can_manage_layer(request, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
             if (layer.datastore.type != 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
@@ -4880,7 +4888,7 @@ def db_field_rename(request):
                 utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=new_field_name))
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
-            if not utils.can_manage_layer(request.user, layer):
+            if not utils.can_manage_layer(request, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
             if not (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
@@ -4945,7 +4953,7 @@ def db_add_field(request):
                 if field_name == ctrl_field.get('name'):
                     return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field_name))
             
-            if not utils.can_manage_layer(request.user, layer):
+            if not utils.can_manage_layer(request, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
             if not (layer.datastore.type == 'v_PostGIS'):
                 return utils.get_exception(400, 'Error in the input params')
