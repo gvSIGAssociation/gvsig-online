@@ -487,21 +487,10 @@ $('#submenu-layers').addClass("active");
 				page: 5,
 				pagination: false
 			});
-		var searcheableWriteList = new List('write-list-box', {
-				valueNames: ['product-title'],
-				listClass:'list',
-				searchClass: 'search',
-				page: 5,
-				pagination: false
-			});
 			
 		$("#dash-submit-button").click(function(e){
 			for(var i=0; i<searcheableReadList.items.length; i++){
 				var item = searcheableReadList.items[i];
-				item.show();
-			}
-			for(var i=0; i<searcheableWriteList.items.length; i++){
-				var item = searcheableWriteList.items[i];
 				item.show();
 			}
 			$(".layer-read-checkbox").prop( "disabled", false)

@@ -702,14 +702,17 @@ def get_setting(key, default=None):
     """
     return get_app_setting(key, getattr(settings, key, default))
 
-def get_user_projects(request):
-    roles = auth_backend.get_roles(request)
-    projects = Project.objects.filter(projectrole__role__in=roles) \
-            | Project.objects.filter(is_public=True)
+def get_user_projects(request, permission=ProjectRole.PERM_READ):
     if request.user and request.user.is_authenticated:
-        projects = projects \
-            | Project.objects.filter(created_by=request.user.username)
-    return projects.distinct()
+        if request.user.is_superuser:
+            return Project.objects.all()
+        roles = auth_backend.get_roles(request)
+        projects = Project.objects.filter(is_public=True) \
+            | Project.objects.filter(created_by=request.user.username) \
+            | Project.objects.filter(projectrole__role__in=roles, projectrole__permission=permission)
+        return projects.distinct()
+    else:
+        return Project.objects.filter(is_public=True)
 
 def get_user_applications(request):
     roles = auth_backend.get_roles(request)

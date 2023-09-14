@@ -536,7 +536,7 @@ def layer_create(request, layer_group_id):
                 featuretype = {
                     'max_features': maxFeatures
                 }
-                services_utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles)
+                services_utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, [])
                 services_views.do_config_layer(server, newRecord, featuretype)
                 return newRecord.id
         except Exception as e:
