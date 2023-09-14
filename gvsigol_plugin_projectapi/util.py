@@ -331,10 +331,13 @@ def _get_properties_names(con, schema, tablename, exclude_cols=[]):
 
 def get_plugins(project):
     plugins = []
-    tools = json.loads(project.tools)
-    for tool in tools:
-        if tool['checked']:
-            plugins.append(tool['name'])
+    try:
+        tools = json.loads(project.tools)
+        for tool in tools:
+            if tool['checked']:
+                plugins.append(tool['name'])
+    except:
+        pass
 
     return plugins
 
