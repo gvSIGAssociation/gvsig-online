@@ -64,7 +64,8 @@ viewer.core = {
 
 	initialize: function(conf, extraParams) {
 		this.conf = conf;
-		this.conf._auth_count = 0;
+		this._auth_count = 0;
+		this._initialized = false;
 		this._pendingLayers = {};
     	if (conf.user) {
     		if (!conf.remote_auth) {
@@ -77,6 +78,7 @@ viewer.core = {
     	this._loadLayers();
     	this._createWidgets();
     	this._loadTools();
+		this._initialized = true;
     },
     stringToBase64: function(s) {
 		var byteArray = new TextEncoder().encode(s);
@@ -104,7 +106,7 @@ viewer.core = {
 				messageBox.show('warning', message);
 			},
 			success: function(resp){
-				self.conf._auth_count++;
+				self._auth_count++;
 				console.log('Authenticated to ' + url);
 				self._loadPendingLayers(url);
 				if (self._authenticated()) {
@@ -140,7 +142,7 @@ viewer.core = {
 		self._loadWidgets();
     },
 	_authenticated() {
-		return this.conf._auth_count == this.conf.auth_urls.length;
+		return this._auth_count == this.conf.auth_urls.length;
 	},
 
     _createMap: function() {
@@ -283,22 +285,30 @@ viewer.core = {
     	this._loadLayerGroups();
     },
 	_loadPendingLayers: function(auth_url) { // layers to be loaded after authentication
-		if (!auth_url) {
-			for (var i=0; i<this.conf.auth_urls.length; i++) {
-				this._loadPendingLayers(this.conf.auth_urls[i]);
-			}
-			return;
-		}
-		if (this._pendingLayers[auth_url]) {
-			var lyrId, layer;
-			for (var i=0; i<this._pendingLayers[auth_url].length; i++) {
-				lyrId = this._pendingLayers[auth_url][i];
-				layer = this._getLayer(lyrId);
-				if (layer) {
-					layer.setVisible(true);
+		if (this._initialized) {
+			if (!auth_url) {
+				for (var i=0; i<this.conf.auth_urls.length; i++) {
+					this._loadPendingLayers(this.conf.auth_urls[i]);
 				}
+				return;
 			}
-			delete this._pendingLayers[auth_url];
+			if (this._pendingLayers[auth_url]) {
+				var lyrId, layer;
+				for (var i=0; i<this._pendingLayers[auth_url].length; i++) {
+					lyrId = this._pendingLayers[auth_url][i];
+					layer = this._getLayer(lyrId);
+					if (layer) {
+						layer.setVisible(true);
+					}
+				}
+				delete this._pendingLayers[auth_url];
+			}
+		}
+		else {
+			var self = this;
+			setTimeout(function() {
+				self._loadPendingLayers(auth_url);
+			}, 10000);
 		}
 	},
 	_getLayer: function(lyrId) {
@@ -318,7 +328,15 @@ viewer.core = {
     },
 	_loadWidgets: function() {
 		// load data for widgets requiring authenticated requests
-		this.legend.loadLegend();
+		if (this._initialized) {
+			this.legend.loadLegend();
+		}
+		else {
+			var self = this;
+			setTimeout(function() {
+				self._loadWidgets();
+			}, 10000);
+		}
 	},
 
     _loadExternalLayer: function(externalLayer, group, checkTileLoadError) {
