@@ -39,7 +39,7 @@ from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server
-from .models import LayerReadRole, LayerWriteRole, LayerManageRole
+from .models import LayerReadRole, LayerWriteRole, LayerManageRole, LayerGroupRole
 from gvsigol_core import utils as core_utils
 import ast
 from django.utils.crypto import get_random_string
@@ -67,6 +67,7 @@ def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
     else:
         read_roles = []
         write_roles = []
+        manage_roles = []
     return get_checked_roles_from_user_input(read_roles, write_roles, manage_roles, creator_user_role=creator_user_role)
  
 def get_read_roles(layer):
@@ -199,10 +200,23 @@ def can_manage_layergroup(request_or_user, layergroup):
             return True
         elif user.is_staff:
             user_roles = auth_backend.get_roles(request_or_user)
-            return layergroup.layergroupmanagerole_set.filter(role__in=user_roles).exists()
+            return layergroup.layergrouprole_set.filter(permission=LayerGroupRole.PERM_MANAGE, role__in=user_roles).exists()
     except Exception as e:
         print(e)
     return False
+
+def get_user_layergroups(request, permission=LayerGroupRole.PERM_MANAGE):
+    """
+    Returns a queryset with the layer groups that are available for a user
+    and a type of permission (currently only manage permission is defined
+    for layer groups).
+
+    Note that the queryset may include duplicates, so set distinct() on
+    the returned queryset if you want to remove them.
+    """
+    user_roles = auth_backend.get_roles(request)
+    return (LayerGroup.objects.filter(created_by=request.user.username) \
+                          | LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission=LayerGroupRole.PERM_MANAGE))
 
 def add_datastore(workspace, type, name, description, connection_params, username):
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
