@@ -1299,6 +1299,8 @@ def layer_add_with_group(request, layergroup_id):
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
                   Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
+            # TODO
+            # lg_list = utils.get_user_layergroups(request)
             form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
         groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
         is_public = False

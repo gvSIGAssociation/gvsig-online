@@ -53,7 +53,7 @@ import re
 
 def _get_user(request_or_user):
     if isinstance(request_or_user, User):
-        return request_or_user.user
+        return request_or_user
     elif isinstance(request_or_user, str):
         return User.objects.get(username=request_or_user)
     else:
