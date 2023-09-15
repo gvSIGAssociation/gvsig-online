@@ -85,7 +85,7 @@ import gvsigol_services.tiling_service as tiling_service
 from . import locks_utils
 from .models import LayerFieldEnumeration, SqlView
 from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
-    LayerLock, Server, Node, ServiceUrl
+    LayerLock, Server, Node, ServiceUrl, LayerGroupRole
 from .rest_geoserver import RequestError
 from . import rest_geoserver
 from . import rest_geowebcache as geowebcache
@@ -927,7 +927,8 @@ def layergroup_list_editable(request):
             if request.user.is_superuser:
                 lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id).order_by('name')
             else:
-                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id, created_by__exact=request.user.username).order_by('name')
+                lg_list = utils.get_user_layergroups(request)
+                lg_list = lg_list.filter(server_id=ds.workspace.server.id).distinct().order_by('name')
             for lg in lg_list:
                 layer_group = {
                     'value': lg.id,
@@ -2085,12 +2086,11 @@ def layergroup_list(request):
     if request.user.is_superuser:
         layergroups_list = LayerGroup.objects.all()
     else:
-        layergroups_list = LayerGroup.objects.filter(created_by__exact=request.user.username)
+        layergroups_list = utils.get_user_layergroups(request)
     project_id = request.GET.get('project_id')
     if project_id is not None:
-        project = Project.objects.get(id=project_id)
-        layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id).distinct().order_by('id')
-
+        layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
+    layergroups_list.distinct().order_by('id')
     layergroups = []
     for lg in layergroups_list:
         if lg.name != '__default__':

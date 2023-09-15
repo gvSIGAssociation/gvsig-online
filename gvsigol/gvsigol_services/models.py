@@ -450,16 +450,21 @@ class LayerManageRole(models.Model):
         ]
 
 
-class LayerGroupManageRole(models.Model):
+class LayerGroupRole(models.Model):
+    PERM_MANAGE = 'manage'
+    PERMISSION_CHOICES = [
+        (PERM_MANAGE, PERM_MANAGE),
+    ]
     layergroup = models.ForeignKey(LayerGroup, on_delete=models.CASCADE)
     role = models.TextField()
+    permission = models.TextField(choices=PERMISSION_CHOICES, default=PERM_MANAGE)
 
     class Meta:
         indexes = [
-            models.Index(fields=['layergroup', 'role']),
+            models.Index(fields=['layergroup', 'permission', 'role']),
         ]
     constraints = [
-           models.UniqueConstraint(fields=['layergroup', 'role'], name='unique_manage_role_per_layergroup')
+           models.UniqueConstraint(fields=['layergroup', 'permission', 'role'], name='unique_permission_role_per_layergroup')
         ]
 
 class DataRule(models.Model):
