@@ -3209,7 +3209,7 @@ def is_numeric_type(type):
 
 
 def is_string_type(type):
-    if type.startswith('character varying') or type.startswith('varchar') or type.startswith('character') or type.startswith('char') or type.startswith('text'):
+    if type.startswith('character varying') or type.startswith('varchar') or type.startswith('character') or type.startswith('char') or type.startswith('text') or type == 'enumeration':
         return True;
     return False;
 
