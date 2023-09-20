@@ -2177,23 +2177,8 @@ def input_Postgis(dicc):
         
         if geometry != '':
 
-            sqlTypeGeom = sql.SQL("SELECT split_part (ST_ASTEXT ({geometry}), '(', 1)  FROM {schema}.{table} WHERE {geometry} IS NOT NULL GROUP BY split_part").format(
-                geometry = sql.Identifier(geometry),
-                schema = sql.Identifier(esq),
-                table = sql.Identifier(tab)                      
-            )
+            type_geom, srid = get_type_n_srid(tab, esq, geometry)
 
-            cur_2.execute(sqlTypeGeom)
-            conn_2.commit()
-            
-            for row in cur_2:
-                if type_geom == '':
-                    type_geom = row[0]
-                elif type_geom != row[0]:
-                    type_geom = 'GEOMETRY'
-                    break
-                else:
-                    pass
 
         if dicc['checkbox'] == 'true':
             where_clause = 'WHERE ' + dicc['clause']
@@ -2523,43 +2508,27 @@ def trans_ExplodeGeom(dicc):
     return [table_name_target]
 
 
-def get_type_n_srid(table_name):
+def get_type_n_srid(table_name, schema = GEOETL_DB["schema"], geom = 'wkb_geometry'):
 
     conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
     #sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
-    sqlTypeGeom = sql.SQL("SELECT split_part (ST_ASTEXT (wkb_geometry), '(', 1)  FROM {schema}.{table} WHERE wkb_geometry IS NOT NULL GROUP BY split_part").format(
-        schema = sql.Identifier(GEOETL_DB["schema"]),
-        table = sql.Identifier(table_name),
-    )
-    cur.execute(sqlTypeGeom)
+    sqlTypeGeom = sql.SQL("SELECT type, srid FROM geometry_columns WHERE f_table_schema = %s AND f_table_name = %s and f_geometry_column = %s").format()
+    
+    cur.execute(sqlTypeGeom, [schema, table_name, geom])
     conn.commit()
 
     type_geom = ''
-    for row in cur:
-        if type_geom == '':
-            type_geom = row[0]
-        elif type_geom != row[0]:
-            type_geom = 'GEOMETRY'
-            break
-        else:
-            pass
-
     srid = 0
-    sqlSrid = sql.SQL('SELECT ST_SRID (wkb_geometry) FROM {schema}.{table} WHERE wkb_geometry IS NOT NULL LIMIT 1').format(
-        schema = sql.Identifier(GEOETL_DB["schema"]),
-        table = sql.Identifier(table_name),
-    )
-
-    cur.execute(sqlSrid)
-    conn.commit()
     for row in cur:
-        srid = row[0]
-        break
+        type_geom = row[0]
+        srid = row[1]
 
     conn.close()
     cur.close()
+
+    print(srid, type_geom)
 
     return srid, type_geom
 

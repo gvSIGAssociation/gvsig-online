@@ -267,8 +267,6 @@ def get_list(request, concat = False):
 @staff_required
 def etl_workspace_list(request):
 
-    print(GEOETL_DB)
-
     create_schema(GEOETL_DB)
 
     #datastores  = Datastore.objects.filter(type = 'v_PostGIS')
@@ -591,7 +589,6 @@ def etl_read_canvas(request):
                 id_ws = None
                 params = None
                 concat = False
-
 
             if id_ws:
                 if ws.can_execute(request):
