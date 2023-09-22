@@ -1052,7 +1052,10 @@ class FeatureSerializer(serializers.Serializer):
         for i, q in enumerate(filter_queries):
             query = None
             if q['type'] == 'query':
-                query = q['field'] + q['operator'] + "'" + str(q['value']) + "'"
+                if q['operator'] != 'IN':
+                    query = q['field'] + q['operator'] + "'" + str(q['value']) + "'"
+                else:
+                    query = q['field'] + " " + q['operator'] + "(" + str(q['value']) + ")"
                 if q['notop'] == True:
                     query = "NOT " + query
             elif q['type'] == 'qGroup':
@@ -1065,7 +1068,10 @@ class FeatureSerializer(serializers.Serializer):
                     opNOT = False
                     if 'notop' in gq:
                         opNOT = gq['notop']
-                    gQuery = gq['field'] + gq['operator'] + "'" + str(gq['value']) + "'"
+                    if gq['operator'] != 'IN':
+                        gQuery = gq['field'] + gq['operator'] + "'" + str(gq['value']) + "'"
+                    else:
+                        gQuery = gq['field'] + " " + gq['operator'] + "(" + str(gq['value']) + ")"
                     if opNOT == True:
                         gQuery = "NOT " + gQuery
                     if j != len(queries) -1:
