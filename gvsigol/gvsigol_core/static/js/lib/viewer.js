@@ -67,18 +67,20 @@ viewer.core = {
 		this._auth_count = 0;
 		this._initialized = false;
 		this._pendingLayers = {};
-    	if (conf.user) {
-    		if (!conf.remote_auth) {
-        		this._authenticate();
-        	}
-    	}
-    	this.extraParams = extraParams;
-    	this._createMap();
-    	this._initToolbar();
-    	this._loadLayers();
-    	this._createWidgets();
-    	this._loadTools();
+		if (this._auth_needed()) {
+			this._authenticate();
+		}
+		this.extraParams = extraParams;
+		this._createMap();
+		this._initToolbar();
+		this._loadLayers();
+		this._createWidgets();
+		this._loadTools();
 		this._initialized = true;
+		if (!this._auth_needed()) {
+			this._loadPendingLayers();
+			this._loadWidgets();
+		}
     },
     stringToBase64: function(s) {
 		var byteArray = new TextEncoder().encode(s);
@@ -109,42 +111,41 @@ viewer.core = {
 				self._auth_count++;
 				console.log('Authenticated to ' + url);
 				self._loadPendingLayers(url);
-				if (self._authenticated()) {
+				if (self._auth_done()) {
 					console.log('Authentication finished.');
 					self._loadWidgets();
 				}
 			}
 		});
 	},
-    _authenticate: function() {
-		var self = this;
-		if (self.conf.user && self.conf.user.credentials) {
-			var headers = {
-				"Authorization": "Basic " + self.stringToBase64(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
-			};
-			for (var i=0; i<self.conf.auth_urls.length; i++) {
-				self._authenticateServer(self.conf.auth_urls[i], headers);
-			}
-			if (this.conf.auth_urls.length == 0) {
-				self._loadWidgets();
-			}
-			else {
-				// load data anyway after 10 seconds, to ensure they are loaded even if login fails
-				setTimeout(function() {
-					self._loadPendingLayers();
-					self._loadWidgets();
-				}, 10000);
-			}
-			return;
-		}
-		// also load data if no auth has been performed
-		self._loadPendingLayers();
-		self._loadWidgets();
-    },
-	_authenticated() {
-		return this._auth_count == this.conf.auth_urls.length;
+	_auth_needed: function() {
+		return (this.conf.user && !this.conf.remote_auth && this.conf.user.credentials);
 	},
-
+	_authenticate: function() {
+		var self = this;
+		var headers = {
+			"Authorization": "Basic " + self.stringToBase64(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+		};
+		for (var i=0; i<self.conf.auth_urls.length; i++) {
+			self._authenticateServer(self.conf.auth_urls[i], headers);
+		}
+		if (this.conf.auth_urls.length == 0) {
+			self._loadWidgets();
+		}
+		else {
+			// load data anyway after 10 seconds, to ensure they are loaded even if login fails
+			setTimeout(function() {
+				self._loadPendingLayers();
+				self._loadWidgets();
+			}, 10000);
+		}
+	},
+	_auth_done() {
+		if (this._auth_needed()) {
+			return this._auth_count == this.conf.auth_urls.length;
+		}	
+		return true;
+	},
     _createMap: function() {
     	var self = this;
 
