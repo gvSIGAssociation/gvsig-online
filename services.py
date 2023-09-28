@@ -268,12 +268,14 @@ class GvSigOnlineServices():
                 group_dn = str("cn=" + group + ",ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, delete_member)
                     
+            except ldap.NO_SUCH_ATTRIBUTE as e:
+                # does not exist, return True since the user does not belong to the group as requested
+                logging.getLogger(LOGGER_NAME).exception("LDAP error")
+                print(e)
+                return True
             except ldap.LDAPError as e:
                 logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
-                if (e.get('result') == 16):
-                    # does not exist, return True since the user does not belong to the group as requested
-                    return True
                 return False
             
     def ldap_delete_default_group_member(self, user):
@@ -283,13 +285,15 @@ class GvSigOnlineServices():
             try:
                 group_dn = str("cn=default,ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, delete_member)
-                    
+            
+            except ldap.NO_SUCH_ATTRIBUTE as e:
+                # does not exist, return True since the user does not belong to the group as requested
+                logging.getLogger(LOGGER_NAME).exception("LDAP error")
+                print(e)
+                return True
             except ldap.LDAPError as e:
                 logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
-                if (e.get('result') == 16):
-                    # does not exist, return True since the user does not belong to the group as requested
-                    return True
                 return False
         
     def ldap_get_last_gid(self):
