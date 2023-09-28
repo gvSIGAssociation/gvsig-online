@@ -1,0 +1,47 @@
+{% load i18n %}
+{% load static from staticfiles %}
+<div class="row">
+    <div class="col-md-12">
+        <div id="read-list-box" class="box searchable-list-box">
+            <div class="box-header">
+                <div class="form-horizontal">
+                    <h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Give the selected groups permissions to edit or execute" %}</h3>
+                    <div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" /></div>
+              </div>
+            </div>
+            <div class="box-body">
+                
+                <ul class="products-list product-list-in-box list">
+                  
+                    {% for group in groups %}
+                    <li class="item">
+                        <div class="product-img">
+                            <img src="{% static "img/users.png" %}" alt="Users Image">
+                        </div>
+                        <div class="product-info">
+                            <span class="product-title">{{group.name}}
+                                <div class="pull-right checkbox form-inline">                                       
+                                        <label>
+                                            <input class="layer-read-checkbox" type="checkbox" name="edit-usergroup-{{group.name}}" id="edit-usergroup-{{group.name}}"
+                                             {% if group.name in editing_role %} checked {% endif %}/>
+                                            <span>{% trans "Edit permissions" %}</span>
+                                        </label>
+                                        <label>
+                                            <input class="layer-read-checkbox" type="checkbox" name="execute-usergroup-{{group.name}}" id="execute-usergroup-{{group.name}}"
+                                             {% if group.name in execution_role %} checked {% endif %}/>
+                                            <span>{% trans "Execute permissions" %}</span>
+                                        </label>                                        
+                                </div>
+                            </span>
+                            <span class="product-description">{{group.description}}</span>
+                        </div>
+                    </li> 
+                    {% endfor %}
+                </ul>
+                <ul class="pagination"></ul>
+            </div>
+        </div>
+    </div>
+    
+    
+</div>

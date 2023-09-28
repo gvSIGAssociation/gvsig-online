@@ -980,3 +980,6 @@ msgstr "Geometría Simple"
 msgid "Stop workspace if some geometry is not simple"
 msgstr "Detén el espacio de trabajo si alguna geometría no es simple"
 
+msgid "Give the selected groups permissions to edit or execute"
+msgstr "Otorgar permisos a los grupos seleccionados para editar o ejecutar"
+

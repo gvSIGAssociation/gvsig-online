@@ -87,7 +87,28 @@ gvsigolETL.Toolbar = Class.extend({
 				formWorkspace.append("time", $("#ws-program-time").val())
 				formWorkspace.append("interval", $("#ws-program-interval").val())
 				formWorkspace.append("unit", $("#ws-program-unit").val())
-			
+
+				assigned_edit_roles = []
+				$.each( $("input[name^='edit-usergroup-']"), function () {
+					if ($(this).is(":checked")) {
+						var id = $(this).attr("id");						
+						var nombre=	id.split("-")[2];										
+						assigned_edit_roles.push(nombre);
+					}
+				});
+
+				assigned_execute_roles = []
+				$.each( $("input[name^='execute-usergroup-']"), function () {
+					if ($(this).is(":checked")) {
+						var id = $(this).attr("id");						
+						var nombre=	id.split("-")[2];													
+						assigned_execute_roles.push(nombre);
+					}
+				});
+
+				formWorkspace.append("editRoles",JSON.stringify(assigned_edit_roles))
+				formWorkspace.append("executeRoles",JSON.stringify(assigned_execute_roles))
+
 				writer.marshal(view, function(json){
 	
 					jsonCanvas = JSON.stringify(json)
@@ -121,13 +142,13 @@ gvsigolETL.Toolbar = Class.extend({
 
 					$('#modal-overwrite-workspace-etl').modal('show')
 
-					$('#button-overwrite-workspace-accept').click(function() {
+					//$('#button-overwrite-workspace-accept').click(function() {
 
-						$('#modal-overwrite-workspace-etl').modal('hide')
+					//	$('#modal-overwrite-workspace-etl').modal('hide')
 
 						$.ajax({
 							type: 'POST',
-							url: '/gvsigonline/etl/etl_workspace_add/',
+							url: '/gvsigonline/etl/etl_workspace_update/',
 							data: formWorkspace,
 							beforeSend:function(xhr){
 								xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
@@ -135,16 +156,18 @@ gvsigolETL.Toolbar = Class.extend({
 							cache: false, 
 							contentType: false, 
 							processData: false,
-							success: function (response) {
-								$('#dialog-save').modal('hide')
+							success	:function(response){
+								$('#modal-overwrite-workspace-etl').modal('hide')						
+								$('#modal-update-workspace-etl').modal('hide');
 								if(response['exists']=="true"){
 									$('#modal-ws-exists').modal('show')
 								}else{
 									location.href = '/gvsigonline/etl/etl_workspace_list/';
 								}
-							}
+							},
+							error: function(){}
 						});
-					});
+					//});
 				}		
 			});
 		});

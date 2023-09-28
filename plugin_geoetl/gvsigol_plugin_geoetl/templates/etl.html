@@ -120,9 +120,16 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                     <h4 class="modal-title">{% trans "Save ETL workspace" %}</h4>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#general">General</a></li>					
+                        <li><a data-toggle="tab" href="#permission">Permisos</a></li>
+    
+                    </ul>
                 </div>
 
                 <div class="modal-body">
+                    <div class="tab-content">
+                        <div id="general" class="tab-pane active">
                     <form id="layer-group-form" role="form">
 
                         <div class="row">
@@ -205,11 +212,16 @@
                         {% endif %}
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans 'Close' %}</button>
-                    <button type="button" class="btn btn-default btn-sm" id="save-etl" title='{% trans "Set parameters of all tasks before save" %}'>{% trans 'Save' %}</button>
+                <div id="permission" class="tab-pane">
+                    {% include 'geoetl_workspaces_permissions.html' %}
+
                 </div>
+            
             </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">{% trans 'Close' %}</button>
+            <button type="button" class="btn btn-default btn-sm" id="save-etl" title='{% trans "Set parameters of all tasks before save" %}'>{% trans 'Save' %}</button>
         </div>
     </div>
 
@@ -660,6 +672,48 @@
             }
         })
     });
+
+    $('#general').on('click', function (e) {
+			e.preventDefault();
+			var $this = $(this);
+
+			$('#general').addClass("active");
+			$('#permission').removeClass("active");
+
+	});
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  			var target = $(e.target).attr("href") // tab activa	
+			if (target=="#permission"){
+				id_wks= $(".modal-body #etl_id").val();
+                if (id_wks == ""){
+					id_wks=0; //todavia no se guardó el wks, es nuevo
+				}
+				$.ajax({
+					type: 'POST',
+					async: false,					
+					url: '/gvsigonline/etl/permissons_tab/' + id_wks + '/',
+					beforeSend: function (xhr) {
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},					
+					success: function(data){
+						
+						document.getElementById("permission").innerHTML = data;
+					}
+					,error: function() {
+					} 
+				});
+
+				$('#general').removeClass("active");
+				$('#permission').addClass("active");
+				$('#general').tab('show');
+				$("#general a:first").tab('show');
+								
+			}
+
+			
+		});
+
 
     $('#close-db').click(function() {
         $("#text-test-connection").text('')
