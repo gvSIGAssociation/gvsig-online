@@ -39,7 +39,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus, database_connections
+from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole
 from gvsigol_services.models import Datastore
 from django.contrib.auth.models import User
 from . import settings as settings_geoetl
@@ -258,9 +258,45 @@ def get_list(request, concat = False):
                 workspace['every'] = interval.every
                 workspace['period'] = interval.period
 
+        
+        
         workspaces.append(workspace)
     
     return workspaces
+
+
+@login_required()
+@staff_required
+def permissons_tab(request, id_wks):
+    
+    all_roles=auth_backend.get_all_roles_details(request)
+    
+    if (id_wks !=0 and id_wks is not None):
+        ws = ETLworkspaces.objects.get(id=id_wks)
+        if ws.can_edit(request):
+
+            role_edit_wks = EtlWorkspaceEditRole.objects.filter(etl_ws=id_wks)
+            editing_role=[]
+            for b in role_edit_wks:
+                editing_role.append(b.role)
+        
+        if ws.can_execute(request):
+
+            role_execute_wks = EtlWorkspaceExecuteRole.objects.filter(etl_ws=id_wks)
+            execution_role=[]
+            for b in role_execute_wks:
+                execution_role.append(b.role)
+    else:        
+        editing_role=all_roles
+        execution_role=all_roles
+        
+    response = {
+            'groups': all_roles,
+            'editing_role' : editing_role,
+            'execution_role' : execution_role
+            }
+     
+    return render(request,  "geoetl_workspaces_permissions.html", response)
 
 
 @login_required()
@@ -442,6 +478,7 @@ def name_user_exists(id, name, user):
             return True
     return False
 
+
 def _etl_workspace_update(instance, request, name, description, workspace, params, concat, periodic_task, set_superuser=False):
     if request.user.is_superuser and set_superuser:
         username = request.user.username
@@ -461,14 +498,44 @@ def _etl_workspace_update(instance, request, name, description, workspace, param
     instance.concat = concat
     instance.save()
 
+    edit_roles= request.POST.get('editRoles') 
+    execute_roles=request.POST.get('executeRoles')
+    
     if instance.id is not None:
         delete_periodic_workspace(instance)
+          
     if periodic_task:
         save_periodic_workspace(request, instance)
 
+    if not (edit_roles == "[]" or edit_roles is None):
+        roles_aux= json.loads(edit_roles)     
+        EtlWorkspaceEditRole.objects.filter(etl_ws=instance.id).delete()      
+        for rol in roles_aux:           
+            try:                         
+                wsRole = EtlWorkspaceEditRole.objects.get(etl_ws_id=instance.id, role=rol)                       
+            except:            
+                wsRole = EtlWorkspaceEditRole()            
+                wsRole.etl_ws = instance
+                wsRole.role = rol
+                wsRole.save()
+
+    if not (execute_roles == "[]" or execute_roles is None):   
+        roles_aux= json.loads(execute_roles)       
+        EtlWorkspaceExecuteRole.objects.filter(etl_ws=instance.id).delete()      
+        for rol in roles_aux:           
+            try:                         
+                ws_role = EtlWorkspaceExecuteRole.objects.get(etl_ws_id=instance.id, role=rol)                       
+            except:            
+                ws_role = EtlWorkspaceExecuteRole()            
+                ws_role.etl_ws = instance
+                ws_role.role = rol
+                ws_role.save()
+
+
+
 @login_required()
 @staff_required
-def etl_workspace_update(request):
+def etl_workspace_update(request):   
     if request.method == 'POST':
         name = request.POST.get('name') 
         description = request.POST.get('description')
@@ -485,6 +552,10 @@ def etl_workspace_update(request):
             ws = ETLworkspaces()
             params = None
         try:
+            if workspace:
+                pass
+            else:
+                workspace = ws.workspace
             _etl_workspace_update(ws, request, name, description, workspace, params, False, periodic_task, set_superuser)
         except EtlWorkspaceExists:
             response = {
@@ -497,7 +568,17 @@ def etl_workspace_update(request):
         }
 
         return render(request, 'dashboard_geoetl_workspaces_list.html', response)
-        
+
+@login_required()
+@staff_required
+def etl_workspaces_roles(request):
+
+    
+    response = {
+        'roles': auth_backend.get_all_roles_details(request)
+    }
+
+    return HttpResponse(json.dumps(response), content_type="application/json")        
 
 @login_required()
 @staff_required
@@ -517,6 +598,7 @@ def etl_workspace_delete(request):
 @login_required()
 @staff_required
 def etl_workspace_add(request):
+    print(request)
     return etl_workspace_update(request)
 
 @login_required()
