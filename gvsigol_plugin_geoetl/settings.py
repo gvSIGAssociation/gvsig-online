@@ -9,8 +9,8 @@ URL_GEOCODER = {
 GEOETL_DB = {
     'host': 'localhost',
     'port': '5432',
-    'database': 'gvsigonline_v3',
-    'user': 'postgres',
-    'password': 'postgres',
+    'database': 'gvsigonline',
+    'user': 'gvsigonline',
+    'password': 'gvsigonline',
     'schema': 'ds_plugin_geoetl'
 }
