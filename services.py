@@ -35,7 +35,7 @@ import imp
 import logging
 
 LDAP_ENCODING = 'utf-8'
-LOGGER_NAME = 'gvisigol'
+LOGGER_NAME = 'gvsigol'
 
 class GvSigOnlineServices():
     
