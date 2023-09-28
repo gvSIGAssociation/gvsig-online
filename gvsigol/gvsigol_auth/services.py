@@ -271,7 +271,7 @@ class GvSigOnlineServices():
             except ldap.LDAPError as e:
                 logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
-                if (e.result == 16):
+                if (e.get('result') == 16):
                     # does not exist, return True since the user does not belong to the group as requested
                     return True
                 return False
@@ -287,7 +287,7 @@ class GvSigOnlineServices():
             except ldap.LDAPError as e:
                 logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
-                if (e.result == 16):
+                if (e.get('result') == 16):
                     # does not exist, return True since the user does not belong to the group as requested
                     return True
                 return False
