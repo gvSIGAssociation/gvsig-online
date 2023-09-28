@@ -32,8 +32,10 @@ import ldap
 import sys
 import os
 import imp
+import logging
 
 LDAP_ENCODING = 'utf-8'
+LOGGER_NAME = 'gvisigol'
 
 class GvSigOnlineServices():
     
@@ -216,6 +218,7 @@ class GvSigOnlineServices():
                 self.ldap.delete_s(dn)
                 
             except ldap.LDAPError as e:
+                logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
             
     def ldap_add_group_member(self, user, group, ignore_existing=False):
@@ -266,7 +269,11 @@ class GvSigOnlineServices():
                 self.ldap.modify_s(group_dn, delete_member)
                     
             except ldap.LDAPError as e:
+                logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
+                if (e.result == 16):
+                    # does not exist, return True since the user does not belong to the group as requested
+                    return True
                 return False
             
     def ldap_delete_default_group_member(self, user):
@@ -278,7 +285,11 @@ class GvSigOnlineServices():
                 self.ldap.modify_s(group_dn, delete_member)
                     
             except ldap.LDAPError as e:
+                logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
+                if (e.result == 16):
+                    # does not exist, return True since the user does not belong to the group as requested
+                    return True
                 return False
         
     def ldap_get_last_gid(self):
