@@ -298,4 +298,4 @@ class SqlViewForm(forms.ModelForm):
             self.fields['datastore'].queryset = Datastore.objects.filter(type__startswith='v_').order_by('name')
         else:
             self.fields['datastore'].queryset = (Datastore.objects.filter( type__startswith='v_', created_by=user.username) |
-                  Datastore.objects.filter( type__startswith='v_', defaultuserdatastore__username=user.username)).distinct().order_by('name')
+                  Datastore.objects.filter( type__startswith='v_', defaultuserdatastore__username=user.username)).order_by('name').distinct()

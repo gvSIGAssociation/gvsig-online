@@ -112,7 +112,7 @@ class PostgisLayerUploadForm(forms.Form):
             qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
         else:
             qs = (Datastore.objects.filter(type="v_PostGIS", created_by=user.username) |
-                  Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=user.username)).distinct().order_by('name')
+                  Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=user.username)).order_by('name').distinct()
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_('Datastore'), required=True,
@@ -172,9 +172,9 @@ class CreateFeatureTypeForm(forms.Form):
             
         else:
             qs = (Datastore.objects.filter(type="v_PostGIS", created_by=request.user.username) |
-                  Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
+                  Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=request.user.username)).order_by('name').distinct()
             
-        qs_lg = (get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).distinct().order_by('name')
+        qs_lg = (get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_('Datastore'), required=True,
