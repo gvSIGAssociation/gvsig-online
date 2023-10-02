@@ -27,7 +27,7 @@ from gvsigol_auth import auth_backend
 from django.db.backends.base import creation
 from .models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadRole, Trigger, LayerWriteRole
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
-from gvsigol_symbology import services as symbology_services
+from gvsigol_symbology.services import create_default_style, clone_style
 from django.utils.translation import ugettext_lazy as _
 from .backend_postgis import Introspect
 import xml.etree.ElementTree as ET

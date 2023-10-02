@@ -19,7 +19,7 @@
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
-from . import backend_geoserver
+
 import logging
 
 logger = logging.getLogger("gvsigol")
@@ -29,6 +29,7 @@ from .models import Server, Node
            
 class GeographicServers:
     def __init__(self):
+        from . import backend_geoserver
         self.servers = []
         for s in Server.objects.all():
             master_node = None
@@ -46,6 +47,7 @@ class GeographicServers:
             return self.servers
         
     def add_server(self, sv_conf):
+        from . import backend_geoserver
         ''' TO CHANGE '''
         master_node = None
         slave_nodes = []
