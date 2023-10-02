@@ -26,7 +26,6 @@ urlpatterns = [
     path('layer_list/', services_views.layer_list, name='layer_list'),
     path('layer_add/', services_views.layer_add, name='layer_add'),
     path('layer_add/<int:layergroup_id>/', services_views.layer_add_with_group, name='layer_add_with_group'),
-    path('get_resources_from_workspace/', services_views.get_resources_from_workspace, name='get_resources_from_workspace'),
     path('layer_update/<int:layer_id>/', services_views.layer_update, name='layer_update'),
     path('layer_delete/<int:layer_id>/', services_views.layer_delete, name='layer_delete'),
     path('layer_config/<int:layer_id>/', services_views.layer_config, name='layer_config'),

@@ -83,7 +83,9 @@ def style_layer_list(request):
     if request.user.is_superuser:
         layers = Layer.objects.filter(external=False)
     else:
-        layers = Layer.objects.filter(created_by__exact=request.user.username).filter(external=False)
+        user_roles = auth_backend.get_roles(request)
+        layers = (Layer.objects.filter(created_by=request.user.username, external=False)
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct()
     
     for lyr in layers:
         layerStyles = StyleLayer.objects.filter(layer=lyr)
@@ -1599,6 +1601,8 @@ def get_wfs_style(request):
         layer_name = request.POST['layer_name']
         layer_query_set = Layer.objects.filter(name=layer_name)
         layer = layer_query_set[0]
+        if not service_utils.can_manage_layer(request, layer):
+            return HttpResponse(json.dumps({'message': 'Not allowed', 'success': False}, indent=4), content_type='application/json')
              
         try:
             layerStyles = StyleLayer.objects.filter(layer=layer)

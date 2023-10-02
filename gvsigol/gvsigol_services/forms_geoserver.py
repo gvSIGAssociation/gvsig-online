@@ -28,6 +28,7 @@ from .models import Workspace, Datastore, LayerGroup
 from gvsigol.settings import SUPPORTED_ENCODINGS
 from gvsigol_core import utils as core_utils
 import json
+from gvsigol_services.utils import get_user_layergroups
 
 supported_encodings = tuple((x,x) for x in SUPPORTED_ENCODINGS)
 supported_encodings = supported_encodings + (('autodetect', _('autodetect')),)
@@ -164,16 +165,16 @@ class CreateFeatureTypeForm(forms.Form):
     time_default_value = forms.CharField(label=_('Default value'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  
+        request = kwargs.pop('request', None)  
         super(CreateFeatureTypeForm, self).__init__(*args, **kwargs)
-        if user.is_superuser:
+        if request.user.is_superuser:
             qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
-            qs_lg = LayerGroup.objects.all().order_by('name')
             
         else:
-            qs = (Datastore.objects.filter(type="v_PostGIS", created_by=user.username) |
-                  Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=user.username)).distinct().order_by('name')
-            qs_lg = (LayerGroup.objects.filter(created_by__exact=user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
+            qs = (Datastore.objects.filter(type="v_PostGIS", created_by=request.user.username) |
+                  Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
+            
+        qs_lg = (get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).distinct().order_by('name')
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_('Datastore'), required=True,

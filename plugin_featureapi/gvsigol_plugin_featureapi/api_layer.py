@@ -471,7 +471,7 @@ def layer_create(request, layer_group_id):
     except:
         maxFeatures = 0
 
-    form = CreateFeatureTypeForm(request.POST, user=request.user)
+    form = CreateFeatureTypeForm(request.POST, request=request)
     if form.is_valid():
         try:
             _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")

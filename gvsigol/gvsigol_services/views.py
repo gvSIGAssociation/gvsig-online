@@ -697,7 +697,7 @@ def layer_list(request):
         project_list = Project.objects.all()
     else:
         user_roles = auth_backend.get_roles(request)
-        layer_list = (Layer.objects.filter(created_by__exact=request.user.username, external=False)
+        layer_list = (Layer.objects.filter(created_by=request.user.username, external=False)
             | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct()
         project_list = core_utils.get_user_projects(request, permission=ProjectRole.PERM_MANAGE)
     layers = []
@@ -924,11 +924,8 @@ def layergroup_list_editable(request):
             return HttpResponseForbidden("[]")
         if ds:
             layer_groups = []
-            if request.user.is_superuser:
-                lg_list = LayerGroup.objects.filter(server_id=ds.workspace.server.id).order_by('name')
-            else:
-                lg_list = utils.get_user_layergroups(request)
-                lg_list = lg_list.filter(server_id=ds.workspace.server.id).distinct().order_by('name')
+            lg_list = utils.get_user_layergroups(request)
+            lg_list = lg_list.filter(server_id=ds.workspace.server.id).distinct().order_by('name')
             for lg in lg_list:
                 layer_group = {
                     'value': lg.id,
@@ -1299,9 +1296,7 @@ def layer_add_with_group(request, layergroup_id):
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
                   Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
-            # TODO
-            # lg_list = utils.get_user_layergroups(request)
-            form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
+            form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).distinct().order_by('name')
         groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
         is_public = False
 
@@ -1538,7 +1533,7 @@ def layer_update(request, layer_id):
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
                   Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
-            form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
+            form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).distinct().order_by('name')
 
         try:
             layerConf = ast.literal_eval(layer.conf)
@@ -2048,47 +2043,11 @@ def layer_group_cache_clear(layergroup):
         gs.clearLayerGroupCache(layergroup.name)
         gs.reload_nodes()
 
-def get_resources_from_workspace(request):
-    # FIXME
-    if request.method == 'POST':
-        wid = request.POST.get('workspace_id')
-        layer_list = Layer.objects.filter(external=False)
-
-        resources = []
-        for r in layer_list:
-            if not resource_published(r):
-                datastore = Datastore.objects.get(id=r.datastore_id)
-                resource = {}
-                if datastore.workspace_id == int(wid):
-                    resource['id'] = r.id
-                    resource['name'] = r.name
-                    resources.append(resource)
-
-        response = {
-            'resources': resources
-        }
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-
-def resource_published(resource):
-    # FIXME
-    published = False
-    layers = Layer.objects.filter(external=False)
-    for layer in layers:
-        if layer.resource.id == resource.id:
-            published = True
-
-    return published
-
 
 @login_required()
 @staff_required
 def layergroup_list(request):
-
-    layergroups_list = None
-    if request.user.is_superuser:
-        layergroups_list = LayerGroup.objects.all()
-    else:
-        layergroups_list = utils.get_user_layergroups(request)
+    layergroups_list = utils.get_user_layergroups(request)
     project_id = request.GET.get('project_id')
     if project_id is not None:
         layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
@@ -2470,7 +2429,7 @@ def layer_create_with_group(request, layergroup_id):
             time_resolution = request.POST.get('time_resolution')
 
 
-        form = CreateFeatureTypeForm(request.POST, user=request.user)
+        form = CreateFeatureTypeForm(request.POST, request=request)
         if form.is_valid():
             try:
                 datastore = form.cleaned_data['datastore']
@@ -2592,7 +2551,7 @@ def layer_create_with_group(request, layergroup_id):
             return render(request, "layer_create.html", data)
 
     else:
-        form = CreateFeatureTypeForm(user=request.user)
+        form = CreateFeatureTypeForm(request=request)
         forms = []
 
         if 'gvsigol_plugin_form' in INSTALLED_APPS:
@@ -3929,14 +3888,16 @@ def describeFeatureTypeWithPk(request):
 @staff_required
 def external_layer_list(request):
     if request.user.is_superuser:
-        external_layer_list = Layer.objects.filter(external=True)
+        external_layer_list = Layer.objects.filter(external=True).order_by('id')
 
         response = {
             'external_layers': external_layer_list
         }
         return render(request, 'external_layer_list.html', response)
     else:
-        external_layer_list = Layer.objects.filter(external=True).filter(created_by__exact=request.user.username)
+        user_roles = auth_backend.get_roles(request)
+        external_layer_list = (Layer.objects.filter(created_by=request.user.username, external=True)
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=True)).order_by('id').distinct()
         response = {
             'external_layers': external_layer_list
         }
@@ -3947,7 +3908,7 @@ def external_layer_list(request):
 @staff_required
 def external_layer_add(request):
     if request.method == 'POST':
-        form = ExternalLayerForm(request.user, request.POST)
+        form = ExternalLayerForm(request, request.POST)
         
         try:
             is_visible = False
@@ -4042,7 +4003,7 @@ def external_layer_add(request):
             form.add_error(None, msg)
 
     else:
-        form = ExternalLayerForm(request.user)
+        form = ExternalLayerForm(request)
 
     return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
 
@@ -4057,7 +4018,7 @@ def external_layer_update(request, external_layer_id):
     layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     if request.method == 'POST':
-        form = ExternalLayerForm(request.user, request.POST)
+        form = ExternalLayerForm(request, request.POST)
         try:
             is_visible = False
             if 'visible' in request.POST:
@@ -4152,7 +4113,7 @@ def external_layer_update(request, external_layer_id):
             }
 
     else:
-        form = ExternalLayerForm(request.user, instance=external_layer)
+        form = ExternalLayerForm(request, instance=external_layer)
 
         if external_layer.external_params:
             params = json.loads(external_layer.external_params)
@@ -4368,11 +4329,13 @@ def cache_list(request):
     layer_list = None
     group_list = None
     if request.user.is_superuser:
-        layer_list = Layer.objects.filter(cached=True).exclude(type__in=['WMTS', 'XYZ'])
+        layer_list = Layer.objects.filter(cached=True).exclude(type__in=['WMTS', 'XYZ']).order_by('id')
         group_list = LayerGroup.objects.filter(cached=True)
     else:
-        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True).exclude(type__in=['WMTS', 'XYZ'])
-        group_list = LayerGroup.objects.filter(created_by__exact=request.user.username).filter(cached=True)
+        user_roles = auth_backend.get_roles(request)
+        layer_list = (Layer.objects.filter(created_by=request.user.username, cached=True)
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, cached=True)).exclude(type__in=['WMTS', 'XYZ']).order_by('id').distinct()
+        group_list = utils.get_user_layergroups(request).filter(cached=True)
     response = {
         'layers': layer_list,
         'groups': group_list
@@ -4435,9 +4398,11 @@ def layer_cache_config(request, layer_id):
        
             layer_list = None
             if request.user.is_superuser:
-                layer_list = Layer.objects.filter(cached=True)
+                layer_list = Layer.objects.filter(cached=True).order_by('id')
             else:
-                layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True)
+                user_roles = auth_backend.get_roles(request)
+                layer_list = (Layer.objects.filter(created_by=request.user.username, cached=True)
+                    | Layer.objects.filter(layermanagerole__role__in=user_roles, cached=True)).exclude(type__in=['WMTS', 'XYZ']).order_by('id').distinct()
         
             response = {
                 'layers': layer_list
@@ -4555,8 +4520,7 @@ def group_cache_config(request, group_id):
                 layer_list = Layer.objects.filter(cached=True)
                 group_list = LayerGroup.objects.filter(cached=True)
             else:
-                group_list = LayerGroup.objects.filter(created_by__exact=request.user.username).filter(cached=True)
-        
+                group_list = utils.get_user_layergroups(request).filter(cached=True)
             response = {
                 'layers': layer_list,
                 'groups': group_list
