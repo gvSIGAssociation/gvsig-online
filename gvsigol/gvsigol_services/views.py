@@ -2051,7 +2051,7 @@ def layergroup_list(request):
     project_id = request.GET.get('project_id')
     if project_id is not None:
         layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
-    layergroups_list.distinct().order_by('id')
+    layergroups_list.order_by('id').distinct()
     layergroups = []
     for lg in layergroups_list:
         if lg.name != '__default__':
