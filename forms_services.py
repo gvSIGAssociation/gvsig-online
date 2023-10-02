@@ -30,6 +30,7 @@ import random
 import json
 from gvsigol.settings import EXTERNAL_LAYER_SUPPORTED_TYPES
 from django.core.exceptions import ValidationError
+from gvsigol_services.utils import get_user_layergroups
 
 
 external_layer_supported_types = tuple((x,x) for x in EXTERNAL_LAYER_SUPPORTED_TYPES)
@@ -231,12 +232,9 @@ class ExternalLayerForm(forms.ModelForm):
     matrixset = forms.ChoiceField(label=_('Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     key = forms.CharField(label=_('Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if user.is_superuser:
-            self.fields['layer_group'].queryset = LayerGroup.objects.all().order_by('name')
-        else:
-            self.fields['layer_group'].queryset = LayerGroup.objects.filter(created_by=user.username).order_by('name')
+        self.fields['layer_group'].queryset = get_user_layergroups(request).order_by('name')
  
 class ServiceUrlForm(forms.ModelForm):
     class Meta:

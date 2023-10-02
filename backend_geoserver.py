@@ -1019,13 +1019,6 @@ class Geoserver():
     def getLayerCreateTypes(self):
         return self.layer_create_types
     
-    def getLayerCreateForm(self, layer_type, user):
-        if layer_type==Geoserver.CREATE_TYPE_SQL_VIEW:
-            return (forms_geoserver.CreateSqlViewForm,  "layer_sql_view.html")
-        if layer_type==Geoserver.CREATE_TYPE_VECTOR_LAYER:
-            return (forms_geoserver.CreateFeatureTypeForm(user=user),  "layer_create.html")
-        return (None, None)
-    
     def getUploadForm(self, datastore_type, user):
         # ensure type is a supported data store type
         if datastore_type=="c_GeoTIFF":
