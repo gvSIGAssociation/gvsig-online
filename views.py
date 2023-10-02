@@ -925,7 +925,7 @@ def layergroup_list_editable(request):
         if ds:
             layer_groups = []
             lg_list = utils.get_user_layergroups(request)
-            lg_list = lg_list.filter(server_id=ds.workspace.server.id).distinct().order_by('name')
+            lg_list = lg_list.filter(server_id=ds.workspace.server.id).order_by('name').distinct()
             for lg in lg_list:
                 layer_group = {
                     'value': lg.id,
@@ -1295,8 +1295,8 @@ def layer_add_with_group(request, layergroup_id):
         form = LayerForm()
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
-            form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).distinct().order_by('name')
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).order_by('name').distinct()
+            form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
         groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
         is_public = False
 
@@ -1532,8 +1532,8 @@ def layer_update(request, layer_id):
 
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).distinct().order_by('name')
-            form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).distinct().order_by('name')
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).order_by('name').distinct()
+            form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
 
         try:
             layerConf = ast.literal_eval(layer.conf)
@@ -2051,7 +2051,7 @@ def layergroup_list(request):
     project_id = request.GET.get('project_id')
     if project_id is not None:
         layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
-    layergroups_list.order_by('id').distinct()
+    layergroups_list = layergroups_list.order_by('id').distinct()
     layergroups = []
     for lg in layergroups_list:
         if lg.name != '__default__':
@@ -5176,7 +5176,7 @@ def _sqlview_update(request, is_update, sql_view=None):
             view_id = sql_view.id
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username, type__startswith='v_') |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username, type__startswith='v_')).distinct().order_by('name')
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username, type__startswith='v_')).order_by('name').distinct()
     return render(request, 'sqlview_add.html', {
             'form': form,
             'view_id': view_id,
@@ -5244,7 +5244,7 @@ def list_datastores_in_db(request):
             datastore_list = Datastore.objects.filter(type__startswith='v_').order_by('name')
         else:
             datastore_list =  (Datastore.objects.filter(created_by=request.user.username, type__startswith='v_') |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username, type__startswith='v_')).distinct().order_by('name')
+                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username, type__startswith='v_')).order_by('name').distinct()
         filtered_datastores = []
         for datastore in datastore_list:
             params = json.loads(datastore.connection_params)
