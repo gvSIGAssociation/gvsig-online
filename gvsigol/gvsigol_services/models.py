@@ -463,7 +463,7 @@ class LayerGroupRole(models.Model):
         indexes = [
             models.Index(fields=['layergroup', 'permission', 'role']),
         ]
-    constraints = [
+        constraints = [
            models.UniqueConstraint(fields=['layergroup', 'permission', 'role'], name='unique_permission_role_per_layergroup')
         ]
 
