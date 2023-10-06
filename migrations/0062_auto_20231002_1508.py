@@ -2,12 +2,13 @@
 
 from django.db import migrations, models
 
-
 def remove_layergrouprole_duplicates(apps, schema_editor):
     LayerGroupRole = apps.get_model("gvsigol_services", "LayerGroupRole")
     for row in LayerGroupRole.objects.all().order_by("-id"):
         try:
-            if LayerGroupRole.objects.filter(layergroup=row.layergroup, role=row.role, permission=row.role).count() > 1:
+            if LayerGroupRole.objects.filter(layergroup=row.layergroup, role=row.role, permission=row.permission).count() > 1:
+                print("Deleting duplicate LayerGroupRole")
+                print(row)
                 row.delete()
         except Exception as e:
             print(str(e))
@@ -15,7 +16,6 @@ def remove_layergrouprole_duplicates(apps, schema_editor):
             schema_editor.execute("ROLLBACK")
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('gvsigol_services', '0061_auto_20230914_1227'),
     ]
