@@ -753,7 +753,10 @@ class Geoserver():
         """
         Updates the gwc layer definition, setting existing grid subsets as dynamic.
         """
-        url = self.gwc_url + "/layers/" + ws_name + ":" + layer_name + ".xml"
+        if ws_name is None:
+            url = self.gwc_url + "/layers/" + layer_name + ".xml"
+        else:
+            url = self.gwc_url + "/layers/" + ws_name + ":" + layer_name + ".xml"
         if user and password:
             auth = (user, password)
         else:
