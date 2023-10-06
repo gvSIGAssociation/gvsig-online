@@ -268,7 +268,7 @@ class GvSigOnlineServices():
                 group_dn = str("cn=" + group + ",ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, delete_member)
                     
-            except ldap.NO_SUCH_ATTRIBUTE as e:
+            except (ldap.NO_SUCH_ATTRIBUTE, ldap.NO_SUCH_OBJECT) as e:
                 # does not exist, return True since the user does not belong to the group as requested
                 logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
@@ -286,7 +286,7 @@ class GvSigOnlineServices():
                 group_dn = str("cn=default,ou=groups," + self.domain)
                 self.ldap.modify_s(group_dn, delete_member)
             
-            except ldap.NO_SUCH_ATTRIBUTE as e:
+            except (ldap.NO_SUCH_ATTRIBUTE, ldap.NO_SUCH_OBJECT) as e:
                 # does not exist, return True since the user does not belong to the group as requested
                 logging.getLogger(LOGGER_NAME).exception("LDAP error")
                 print(e)
