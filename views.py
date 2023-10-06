@@ -1217,7 +1217,7 @@ def layer_add_with_group(request, layergroup_id):
                                 assigned_write_roles.append(key[len('write-usergroup-'):])
                 else:
                     is_view = False
-                groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+                groups = utils.get_layer_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                 if datastore.type == 'v_PostGIS':
                     for field in fields:
                         if ' ' in field:
@@ -2047,7 +2047,7 @@ def layer_group_cache_clear(layergroup):
 @login_required()
 @staff_required
 def layergroup_list(request):
-    layergroups_list = utils.get_user_layergroups(request)
+    layergroups_list = utils.get_user_layergroups(request, permission=LayerGroupRole.PERM_MANAGE)
     project_id = request.GET.get('project_id')
     if project_id is not None:
         layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
@@ -2099,72 +2099,74 @@ def layergroup_add_with_project(request, project_id):
         if 'visible' in request.POST:
             visible = True
 
-        if name != '':
-            name = request.POST.get('layergroup_name') + '_' + ascii_norm_username(request.user.username)
-            if _valid_name_regex.search(name) == None:
-                message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values())})
+        assigned_includeinprojects_roles = []
+        assigned_manage_roles = []
+        for key in request.POST:
+            if 'includeinprojects-userrole-' in key:
+                assigned_includeinprojects_roles.append(key[len('includeinprojects-userrole-'):])
+            elif 'manage-userrole-' in key:
+                assigned_manage_roles.append(key[len('manage-userrole-'):])
+        roles = utils.get_layergroup_checked_roles_from_user_input(assigned_includeinprojects_roles, assigned_manage_roles)
 
-            exists = False
-            layergroups = LayerGroup.objects.all()
-            for lg in layergroups:
-                if name == lg.name:
-                    exists = True
-
-            if not exists:
-                layergroup = LayerGroup(
-                    server_id = server_id,
-                    name = name,
-                    title = title,
-                    cached = cached,
-                    visible = visible,
-                    created_by = request.user.username
-                )
-                layergroup.save()
-
-                if project_id and project_id != '':
-                    project = Project.objects.get(id=int(project_id))
-                    project_layergroup = ProjectLayerGroup(
-                        project = project,
-                        layer_group = layergroup
-                    )
-                    project_layergroup.save()
-
-                    assigned_layergroups = []
-                    prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
-                    for prj_lyrgroup in prj_lyrgroups:
-                        assigned_layergroups.append(prj_lyrgroup.layer_group.id)
-
-                    toc_structure = core_utils.get_json_toc(assigned_layergroups)
-                    project.toc_order = toc_structure
-                    project.save()
-
-                if 'redirect' in request.GET:
-                    redirect_var = request.GET.get('redirect')
-                    if redirect_var == 'create-layer':
-                        return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
-                    if redirect_var == 'import-layer':
-                        return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
-                    if redirect_var == 'project-update':
-                        return redirect('project_update', pid=project_id)
-                    if redirect_var == 'project-layergroup-list':
-                        url = reverse('layergroup_list') + "?project_id=" + str(project_id)
-                        return redirect(url)
-                return redirect('layergroup_list')
-
-
-            else:
-                message = _('Layer group name already exists')
-                return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'workspaces': list(Workspace.objects.values())})
-
-        else:
+        if not name:
             message = _('You must enter a name for layer group')
-            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'workspaces': list(Workspace.objects.values())})
+            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())})
+        
+        name = name + '_' + ascii_norm_username(request.user.username)
+        if _valid_name_regex.search(name) == None:
+            message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())})
 
+        if LayerGroup.objects.filter(name=name).exists():
+            message = _('Layer group name already exists')
+            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())})
+
+        layergroup = LayerGroup(
+            server_id = server_id,
+            name = name,
+            title = title,
+            cached = cached,
+            visible = visible,
+            created_by = request.user.username
+        )
+        layergroup.save()
+        utils.set_layergroup_permissions(layergroup, assigned_includeinprojects_roles, assigned_manage_roles)
+
+        if project_id and project_id != '':
+            project = Project.objects.get(id=int(project_id))
+            project_layergroup = ProjectLayerGroup(
+                project = project,
+                layer_group = layergroup
+            )
+            project_layergroup.save()
+
+            assigned_layergroups = []
+            prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
+            for prj_lyrgroup in prj_lyrgroups:
+                assigned_layergroups.append(prj_lyrgroup.layer_group.id)
+
+            toc_structure = core_utils.get_json_toc(assigned_layergroups)
+            project.toc_order = toc_structure
+            project.save()
+
+        if 'redirect' in request.GET:
+            redirect_var = request.GET.get('redirect')
+            if redirect_var == 'create-layer':
+                return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
+            if redirect_var == 'import-layer':
+                return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
+            if redirect_var == 'project-update':
+                return redirect('project_update', pid=project_id)
+            if redirect_var == 'project-layergroup-list':
+                url = reverse('layergroup_list') + "?project_id=" + str(project_id)
+                return redirect(url)
+        return redirect('layergroup_list')
     else:
+        roles = utils.get_all_user_roles_checked_by_layergroup(None, get_primary_user_role(request))
         response = {
             'project_id': project_id,
-            'servers': list(Server.objects.values())
+            'servers': list(Server.objects.values()),
+            'roles': roles
         }
         if request.GET.get('redirect'):
             response['redirect'] = request.GET.get('redirect')
@@ -2222,6 +2224,15 @@ def layergroup_update(request, lgid):
         layergroup = LayerGroup.objects.get(id=int(lgid))
         if not utils.can_manage_layergroup(request.user, layergroup):
             return forbidden_view(request)
+
+        assigned_includeinprojects_roles = []
+        assigned_manage_roles = []
+        for key in request.POST:
+            if 'includeinprojects-userrole-' in key:
+                assigned_includeinprojects_roles.append(key[len('includeinprojects-userrole-'):])
+            elif 'manage-userrole-' in key:
+                assigned_manage_roles.append(key[len('manage-userrole-'):])
+        roles = utils.get_layergroup_checked_roles_from_user_input(assigned_includeinprojects_roles, assigned_manage_roles)
         
         cached = False
         if 'cached' in request.POST:
@@ -2231,24 +2242,14 @@ def layergroup_update(request, lgid):
         if 'visible' in request.POST:
             visible = True
 
-        sameName = False
         if layergroup.name == name:
-            sameName = True
-
-        exists = False
-        layergroups = LayerGroup.objects.all()
-        for lg in layergroups:
-            if name == lg.name:
-                exists = True
-
-        old_name = layergroup.name
-
-        if sameName:
+            # name not changed
             layergroup.title = title
             layergroup.cached = cached
             layergroup.visible = visible
             layergroup.save()
-            core_utils.toc_update_layer_group(layergroup, old_name, name, title)
+            utils.set_layergroup_permissions(layergroup, assigned_includeinprojects_roles, assigned_manage_roles)
+            core_utils.toc_update_layer_group(layergroup, name, name, title)
 
             layergroup_mapserver_toc(layergroup, toc)
             layer_group_cache_clear(layergroup)
@@ -2261,41 +2262,45 @@ def layergroup_update(request, lgid):
 
             return redirect('layergroup_list')
 
-        else:
-            if not exists:
-                if _valid_name_regex.search(name) == None:
-                    message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                    return render(request, 'layergroup_update.html', {'message': message, 'servers': list(Server.objects.values())})
+        if LayerGroup.objects.filter(name=name).exists():
+            message = _('Layer group name already exists')
+            return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values())})
+        
+        if _valid_name_regex.search(name) == None:
+            message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+            return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values())})
 
-                layergroup.name = name
-                layergroup.title = title
-                layergroup.cached = cached
-                layergroup.visible = visible
-                layergroup.save()
-                core_utils.toc_update_layer_group(layergroup, old_name, name, title)
+        # name changed and is valid
+        old_name = layergroup.name
+        layergroup.name = name
+        layergroup.title = title
+        layergroup.cached = cached
+        layergroup.visible = visible
+        layergroup.save()
+        utils.set_layergroup_permissions(layergroup, assigned_includeinprojects_roles, assigned_manage_roles)
+        core_utils.toc_update_layer_group(layergroup, old_name, name, title)
 
-                layergroup_mapserver_toc(layergroup, toc)
-                layer_group_cache_clear(layergroup)
-                if 'redirect' in request.GET:
-                    redirect_var = request.GET.get('redirect')
-                    if redirect_var == 'create-layer':
-                        return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
-                    if redirect_var == 'import-layer':
-                        return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
-                return redirect('layergroup_list')
+        layergroup_mapserver_toc(layergroup, toc)
+        layer_group_cache_clear(layergroup)
+        if 'redirect' in request.GET:
+            redirect_var = request.GET.get('redirect')
+            if redirect_var == 'create-layer':
+                return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
+            if redirect_var == 'import-layer':
+                return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
+        return redirect('layergroup_list')
 
-            else:
-                message = _('Layer group name already exists')
-                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'servers': list(Server.objects.values())})
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order') 
+        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order')
+        roles = utils.get_all_user_roles_checked_by_layergroup(layergroup, get_primary_user_role(request))
         
         response = {
             'lgid': lgid, 
             'layergroup': layergroup, 
             'layers': layers,
+            'roles': roles,
             'workspaces': list(Workspace.objects.values()),
             'servers': list(Server.objects.values())
         }
@@ -2522,7 +2527,7 @@ def layer_create_with_group(request, layergroup_id):
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
 
-            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+            groups = utils.get_layer_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
             data = {
                 'form': form,
                 'message': msg,
@@ -2538,7 +2543,7 @@ def layer_create_with_group(request, layergroup_id):
             if 'gvsigol_plugin_form' in INSTALLED_APPS:
                 from gvsigol_plugin_form.models import Form
                 forms = Form.objects.all()
-            groups = utils.get_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+            groups = utils.get_layer_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
             data = {
                 'form': form,
                 'forms': forms,
