@@ -38,7 +38,7 @@ from gvsigol_auth.models import UserGroup, User
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
-    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server
+    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server, DefaultUserDatastore
 from .models import LayerReadRole, LayerWriteRole, LayerManageRole, LayerGroupRole
 from gvsigol_core import utils as core_utils
 import ast
@@ -173,6 +173,8 @@ def can_manage_datastore(request_or_user, datastore):
         if user.is_superuser:
             return True
         if datastore.created_by == user.username:
+            return True
+        if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
             return True
     except Exception as e:
         print(e)
