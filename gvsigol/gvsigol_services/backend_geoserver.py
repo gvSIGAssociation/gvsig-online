@@ -2257,7 +2257,8 @@ class Geoserver():
 
     def set_gwclayer_dynamic_subsets(self, workspace, layer_name):
         try:
-            self.rest_catalog.set_gwclayer_dynamic_subsets(workspace.name, layer_name, user=self.user, password=self.password)
+            ws_name = workspace.name if workspace else None
+            self.rest_catalog.set_gwclayer_dynamic_subsets(ws_name, layer_name, user=self.user, password=self.password)
         except:
             logger.exception("Could not update gwc layer subset")
         
