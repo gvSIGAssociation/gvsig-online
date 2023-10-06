@@ -920,11 +920,11 @@ def layergroup_list_editable(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_manage_datastore(request, ds):
             return HttpResponseForbidden("[]")
         if ds:
             layer_groups = []
-            lg_list = utils.get_user_layergroups(request)
+            lg_list = utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')
             lg_list = lg_list.filter(server_id=ds.workspace.server.id).order_by('name').distinct()
             for lg in lg_list:
                 layer_group = {
