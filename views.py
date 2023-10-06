@@ -875,6 +875,7 @@ def project_get_conf(request):
         if not project.toc_order:
             project.toc_order = "{}"
         toc = json.loads(project.toc_order)
+        user_roles = auth_backend.get_roles(request)
 
         used_crs = []
         crs_code = int('EPSG:4326'.split(':')[1])
@@ -890,7 +891,7 @@ def project_get_conf(request):
             epsg = core_utils.get_supported_crs()[crs_code]
             used_crs.append(epsg)
 
-        project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
+        project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id).select_related("layer_group")
         layer_groups = []
         workspaces = []
         
@@ -898,7 +899,7 @@ def project_get_conf(request):
 
         count = 0
         for project_group in project_layers_groups:
-            group = LayerGroup.objects.get(id=project_group.layer_group_id)
+            group = project_group.layer_group
             server = Server.objects.get(id=group.server_id)
 
             conf_group = {}
@@ -920,7 +921,6 @@ def project_get_conf(request):
             conf_group['cache_endpoint'] = server.getCacheEndpoint(relative=True)
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
-            user_roles = auth_backend.get_roles(request)
             
             allows_getmap = True
             servers_list = []
