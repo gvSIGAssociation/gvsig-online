@@ -1,0 +1,40 @@
+{% load i18n %}
+{% load static from staticfiles %}
+				<div class="row">
+					<div class="col-md-12">
+						<div id="read-list-box" class="box searchable-list-box">
+							<div class="box-header">
+								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Give the selected roles permissions to manage the layergroup" %}</h3>
+								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" />
+								</div>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box list">
+									{% for role in roles %}
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/users.png" %}" alt="Users Image">
+										</div>
+										<div class="product-info">
+											<span class="product-title">{{role.name}}
+												<div class="pull-right checkbox form-inline">
+														<label>
+															<input class="layergroup-includeinprojects-checkbox" type="checkbox" name="includeinprojects-userrole-{{role.name}}" id="includeinprojects-userrole-{{role.name}}" {% if role.includeinprojects_checked %}checked {% endif %}/>
+															<span>{% trans "Include In Projects permission" %}</span>
+														</label>
+														<label style="margin-left:10px">
+															<input class="layergroup-manage-checkbox" type="checkbox" name="manage-userrole-{{role.name}}" id="manage-userrole-{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
+															<span>{% trans "Manage permission" %}</span>
+														</label>
+												</div>
+											</span> 
+											<span class="product-description">{{role.description}}</span>
+										</div>
+									</li> 
+									{% endfor %}
+								</ul>
+								<ul class="pagination"></ul>
+							</div>
+						</div>
+					</div>
+				</div>

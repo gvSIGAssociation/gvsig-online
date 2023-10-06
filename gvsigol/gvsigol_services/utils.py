@@ -68,7 +68,16 @@ def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
         read_roles = []
         write_roles = []
         manage_roles = []
-    return get_checked_roles_from_user_input(read_roles, write_roles, manage_roles, creator_user_role=creator_user_role)
+    return get_layer_checked_roles_from_user_input(read_roles, write_roles, manage_roles, creator_user_role=creator_user_role)
+
+def get_all_user_roles_checked_by_layergroup(layergroup, creator_user_role=None):
+    if layergroup:
+        includeinproject_roles = LayerGroupRole.objects.filter(layergroup=layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS).values_list('role', flat=True)
+        manage_roles = LayerGroupRole.objects.filter(layergroup=layergroup, permission=LayerGroupRole.PERM_MANAGE).values_list('role', flat=True)
+    else:
+        includeinproject_roles = []
+        manage_roles = []
+    return get_layergroup_checked_roles_from_user_input(includeinproject_roles, manage_roles, creator_user_role=creator_user_role)
  
 def get_read_roles(layer):
     return list(LayerReadRole.objects.filter(layer_id=layer.id).values_list('role', flat=True))
@@ -180,7 +189,8 @@ def can_manage_datastore(request_or_user, datastore):
         print(e)
     return False
 
-def can_manage_layergroup(request_or_user, layergroup):
+
+def can_use_layergroup(request_or_user, layergroup, permission):
     """
     Checks whether the user has permissions to manage the provided layergroup.
     It accepts a layergroup instance or a layergroup id.
@@ -189,8 +199,10 @@ def can_manage_layergroup(request_or_user, layergroup):
     ----------
     request_or_user: Request | HttpRequest | User | str
         A Django Request object | A DRF HttpRequest object | A Django User object | A username
-    layer: LayerGroup | int
+    layergroup: LayerGroup | int
         A Django LayerGroup instance or a LayerGroup id
+    permission: str
+        The permission to check for the user and layergroup
     """
     try:
         user = _get_user(request_or_user)
@@ -202,11 +214,25 @@ def can_manage_layergroup(request_or_user, layergroup):
             return True
         elif user.is_staff:
             user_roles = auth_backend.get_roles(request_or_user)
-            return layergroup.layergrouprole_set.filter(permission=LayerGroupRole.PERM_MANAGE, role__in=user_roles).exists()
+            return layergroup.layergrouprole_set.filter(permission=permission, role__in=user_roles).exists()
     except Exception as e:
         print(e)
     return False
 
+def can_manage_layergroup(request_or_user, layergroup):
+    """
+    Checks whether the user has permissions to manage the provided layergroup.
+    It accepts a layergroup instance or a layergroup id.
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layergroup: LayerGroup | int
+        A Django LayerGroup instance or a LayerGroup id
+    """
+
+    return can_use_layergroup(request_or_user, layergroup, permission=LayerGroupRole.PERM_MANAGE)
 
 def get_user_layergroups(request, permission=LayerGroupRole.PERM_MANAGE):
     """
@@ -821,7 +847,37 @@ def set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     gs.setLayerDataRules(layer, read_roles, write_roles)
 
-def get_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None):
+def set_layergroup_permissions(layergroup, assigned_includeinproject_roles, assigned_manage_roles):
+    admin_role = auth_backend.get_admin_role()
+    assigned_includeinproject_roles.append(admin_role)
+    assigned_manage_roles.append(admin_role)
+
+    # clean existing groups and assign them again if necessary
+    LayerGroupRole.objects.filter(layergroup=layergroup).delete()
+    all_roles = auth_backend.get_all_roles()
+    for role in assigned_includeinproject_roles:
+        try:
+            if role in all_roles:
+                lyr_includeinproject_role = LayerGroupRole()
+                lyr_includeinproject_role.layergroup = layergroup
+                lyr_includeinproject_role.role = role
+                lyr_includeinproject_role.permission = LayerGroupRole.PERM_INCLUDEINPROJECTS
+                lyr_includeinproject_role.save()
+        except:
+            pass
+    
+    for role in assigned_manage_roles:
+        try:
+            if role in all_roles:
+                layer_manage_role = LayerGroupRole()
+                layer_manage_role.layergroup = layergroup
+                layer_manage_role.role = role
+                layer_manage_role.permission = LayerGroupRole.PERM_MANAGE
+                layer_manage_role.save()
+        except:
+            pass
+
+def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None):
     role_list = auth_backend.get_all_roles_details()
     roles = []
     admin_roles = [ auth_backend.get_admin_role()]
@@ -840,6 +896,25 @@ def get_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer
                     role['manage_checked'] = True
             if creator_user_role is not None and role['name'] == creator_user_role:
                 role['read_checked'] = True
+                role['manage_checked'] = True
+            roles.append(role)
+    return roles
+
+def get_layergroup_checked_roles_from_user_input(layergroup_includeinprojects_roles, layergroup_manage_roles, creator_user_role=None):
+    role_list = auth_backend.get_all_roles_details()
+    roles = []
+    admin_roles = [ auth_backend.get_admin_role()]
+    for role in role_list:
+        # FIXME OIDC CMI: ROLE_ prefix?
+        if role['name'] not in admin_roles:
+            for layergroup_includeinprojects_role in layergroup_includeinprojects_roles:
+                if layergroup_includeinprojects_role == role['name']:
+                    role['includeinprojects_checked'] = True
+            for layergroup_manage_role in layergroup_manage_roles:
+                if layergroup_manage_role == role['name']:
+                    role['manage_checked'] = True
+            if creator_user_role is not None and role['name'] == creator_user_role:
+                role['includeinprojects_checked'] = True
                 role['manage_checked'] = True
             roles.append(role)
     return roles

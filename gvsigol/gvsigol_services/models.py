@@ -451,9 +451,11 @@ class LayerManageRole(models.Model):
 
 
 class LayerGroupRole(models.Model):
+    PERM_INCLUDEINPROJECTS = 'includeinprojects'
     PERM_MANAGE = 'manage'
     PERMISSION_CHOICES = [
         (PERM_MANAGE, PERM_MANAGE),
+        (PERM_INCLUDEINPROJECTS, PERM_INCLUDEINPROJECTS),
     ]
     layergroup = models.ForeignKey(LayerGroup, on_delete=models.CASCADE)
     role = models.TextField()
@@ -466,6 +468,9 @@ class LayerGroupRole(models.Model):
         constraints = [
            models.UniqueConstraint(fields=['layergroup', 'permission', 'role'], name='unique_permission_role_per_layergroup')
         ]
+
+    def __str__(self):
+        return '({}, {}, {})'.format(self.layergroup.name, self.role, self.permission)
 
 class DataRule(models.Model):
     path = models.CharField(max_length=500)

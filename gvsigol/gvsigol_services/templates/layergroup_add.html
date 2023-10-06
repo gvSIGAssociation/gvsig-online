@@ -14,11 +14,12 @@
 					</div>
 				</div>				
 			</div>
-			<div class="box">
-				{% csrf_token %}					
-				{% if form.errors %}
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				{% if form.errors or form.non_field_errors %}
 				<div id="form-error" style="color:#ff0000;">
 					<ul>
+					{{ form.non_field_errors }}
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>
@@ -26,56 +27,74 @@
 					{% endfor %}
 					</ul>
 				</div>
-				{% endif %}				
+				{% endif %}
 				{% if message %}
-				<div id="form-error" style="color:#ff0000;">
+				<div id="form-error-msg" style="color:#ff0000;">
 					<p>* {{ message }}</p>
 				</div>
 				{% endif %}
-				<div class="box-body">
+			</div>
+
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab">{% trans "General" %}</a></li>
+				<li><a href="#tab-layergroup-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="tab-layergroup-general">
 					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="layergroup_server_id">{% trans "Select server" %}</label>
-							<select class="form-control" id="layergroup_server_id" name="layergroup_server_id">
-								{% for server in servers %}
-								<option value="{{server.id}}">{{server.title}}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-body">
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="layergroup_server_id">{% trans "Select server" %}</label>
+											<select class="form-control" id="layergroup_server_id" name="layergroup_server_id">
+												{% for server in servers %}
+												<option value="{{server.id}}">{{server.title}}</option>
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+														
+									<div class="row">
+										<div class="col-md-12">
+											<label for="layergroup_name">{% trans "Name" %}</label>
+											<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control">									
+										</div>
+									</div>
+											
+									<div class="row">
+										<div class="col-md-12">
+											<label for="layergroup_title">{% trans "Title" %}</label>
+											<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control">								
+										</div>
+									</div>
+									<br>
 										
-					<div class="row">
-						<div class="col-md-12">
-							<label for="layergroup_name">{% trans "Name" %}</label>
-							<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control">									
+									<div class="row">
+										<div class="checkbox col-md-6">								
+											<label>
+												<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
+											</label>
+										</div>
+										<div class="checkbox col-md-6">								
+											<label>
+												<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+											</label>
+										</div>
+									</div>
+									<div class="box-tools pull-right">
+										<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
+										<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>				
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
-							
-					<div class="row">
-						<div class="col-md-12">
-							<label for="layergroup_title">{% trans "Title" %}</label>
-							<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control">								
-						</div>
-					</div>
-					<br>
-						
-					<div class="row">
-						<div class="checkbox col-md-6">								
-							<label>
-								<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
-							</label>
-						</div>
-						<div class="checkbox col-md-6">								
-							<label>
-								<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
-							</label>
-						</div>
-					</div>
-					<div class="box-tools pull-right">
-						<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
-						<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>				
-					</div>
-				</div>				
+				</div>
+				<div class="tab-pane" id="tab-layergroup-permissions">
+					{% include "select_layergroup_permissions.html" %}
+				</div>
 			</div>
 		</div>				
 	</div>

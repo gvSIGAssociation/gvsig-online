@@ -27,7 +27,8 @@ from django import apps
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
 from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Application, ApplicationRole
-from gvsigol_services.models import LayerGroup, Layer
+from gvsigol_services.models import LayerGroup, Layer, LayerGroupRole
+from gvsigol_services.utils import can_use_layergroup
 from gvsigol import settings
 import json
 import psycopg2
@@ -121,7 +122,6 @@ def get_all_layer_groups_checked_by_project(request, project):
     groups_list = None
     groups_list = LayerGroup.objects.all()
     layer_groups_by_project = ProjectLayerGroup.objects.filter(project_id=project.id)
-    checked = False
     
     layer_groups = []
     for g in groups_list:
@@ -133,7 +133,7 @@ def get_all_layer_groups_checked_by_project(request, project):
                     layer_group['baselayer_group'] = lgba.baselayer_group
                     if lgba.baselayer_group:
                         layer_group['default_baselayer'] = lgba.default_baselayer
-            if request.user.is_superuser or g.created_by == request.user.username:
+            if can_use_layergroup(request, g, LayerGroupRole.PERM_INCLUDEINPROJECTS):
                 layer_group['editable'] = True
             elif layer_group.get('checked'):
                 layer_group['editable'] = False
