@@ -19,6 +19,7 @@
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
+from django.shortcuts import render, redirect, HttpResponse
 from gvsigol.services_base import BackendNotAvailable
 from gvsigol_core.geom import RASTER
 from django.contrib.gis import gdal
@@ -28,6 +29,7 @@ from django.db.backends.base import creation
 from .models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadRole, Trigger, LayerWriteRole
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology.services import create_default_style, clone_style
+from gvsigol_symbology import services as symbology_services
 from django.utils.translation import ugettext_lazy as _
 from .backend_postgis import Introspect
 import xml.etree.ElementTree as ET
@@ -539,6 +541,7 @@ class Geoserver():
             logger.exception('Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
             return False
     
+     
     def createOverwrittenStyle(self, name, data, overwrite):
         """
         Create new style
@@ -549,6 +552,13 @@ class Geoserver():
         
         except Exception as e:
             logger.exception('Sobreescribiendo estilo: ' + name)
+            error_message = str(e)
+            if (error_message.startswith("There is already a style named")):               
+                symbology_services.delete_style_name(name)
+                #prefix library.name_lib_name
+                msg_name= name.split('_')[2]
+                error="There is already a style named " + msg_name                
+                raise Exception(error)
             return False
     
     def createStyle(self, name, data):
