@@ -62,14 +62,18 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
     name = json_rule.get('name')
     title = json_rule.get('title')
     
+    library = Library.objects.get(id=int(library_id))
+
     if _valid_name_regex.search(name) == None:
         raise InvalidValue(-1, _("Invalid name: '{value}'. Name should not contain any special characters").format(value=name))
         
     #if _valid_title_regex.search(title) == None:
     #    raise InvalidValue(-1, _("Invalid title: '{value}'. Title should not contain any special characters").format(value=title))
     
+    prefix_name= library.name + "_lib_"
+    
     style = Style(
-        name = name,
+        name = prefix_name + name,
         title = title,
         is_default = False,
         type = "US"
@@ -78,7 +82,7 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
     
     rule = Rule(
         style = style,
-        name = name,
+        name = prefix_name + name,
         title = title,
         abstract = "",
         filter = str(""),
@@ -88,7 +92,7 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
     )
     rule.save()
     
-    library = Library.objects.get(id=int(library_id))
+    
     
     library_rule = LibraryRule(
         library = library,
@@ -160,11 +164,11 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
             
     sld_body = sld_builder.build_library_symbol(rule)
 
-    if gs.createStyle(style.name, sld_body): 
+    if gs.createStyle(style.name, sld_body):       
         return True
         
-    else:
-        gs.updateStyle(None, style.name, sld_body)
+    else:          
+        gs.updateStyle(None, style.name, sld_body)        
         return True
     
 def update_symbol(request, json_rule, rule, library_rule, gs):
