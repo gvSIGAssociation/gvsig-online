@@ -23,6 +23,7 @@
 '''
 
 from .models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap
+from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
@@ -542,12 +543,40 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         
         
     return True
+
+     
+#eliminar estilo solo de gvsigonline    
+def delete_style_name(name):
+    try:
+        last_inserted_id = Style.objects.filter(name=name).aggregate(Max('id'))['id__max']
+
+        style = Style.objects.get(id=int(last_inserted_id))
+        
+      
+        layer_styles = StyleLayer.objects.filter(style=style)   
+        for layer_style in layer_styles:
+            layer_style.delete()
+                
+        rules = Rule.objects.filter(style=style)
+        for rule in rules:
+            symbolizers = Symbolizer.objects.filter(rule=rule)
+            for symbolizer in symbolizers:
+                if hasattr(symbolizer, 'rastersymbolizer'):
+                    symbolizer.rastersymbolizer.color_map.delete()
+                symbolizer.delete()
+            rule.delete()
+    
+        style.delete()
+        
+    except Exception as e:
+        raise e
     
 def delete_style(style_id, mapservice):
     try:
         style = Style.objects.get(id=int(style_id))
         
         mapservice.deleteStyle(style.name)
+       
         layer_styles = StyleLayer.objects.filter(style=style)   
         for layer_style in layer_styles:
             layer_style.delete()

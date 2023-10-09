@@ -1505,12 +1505,18 @@ def symbol_add(request, library_id, symbol_type):
                 message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
                 return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
             gs = geographic_servers.get_instance().get_default_server()
-            if services_library.add_symbol(request, json_rule, library_id, symbol_type, gs):
-                gs.reload_nodes()
-                return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
-            else:
-                return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
-        
+            try:
+                if services_library.add_symbol(request, json_rule, library_id, symbol_type, gs):
+                    gs.reload_nodes()
+                    return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+                else:
+                    return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            
+            except Exception as e:                
+                error_message = str(e)  # Get the error message from the exception                                            
+                return HttpResponse(json.dumps({'error_message': error_message}, indent=4), content_type='application/json')
+          
+
         except Exception as e:
             message = str(e)
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
@@ -1579,6 +1585,7 @@ def symbol_update(request, symbol_id):
 @login_required()
 @staff_required
 def symbol_delete(request):
+
     if request.method == 'POST':
         symbol_id = request.POST.get('symbol_id')
              

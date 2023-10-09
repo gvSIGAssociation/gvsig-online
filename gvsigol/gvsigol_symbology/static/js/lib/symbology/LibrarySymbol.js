@@ -145,11 +145,22 @@ LibrarySymbol.prototype.save = function(libraryid, name, title, filter) {
 			if (response.success) {
 				location.href = "/gvsigonline/symbology/library_update/" + libraryid + "/";
 			} else {
-				$("#form-error").append('<p>*' + response.message + '</p>');
+				if (response.error_message != undefined){
+					var error= response.error_message;			
+					var style_name = error.split('named')[1];
+					$("#form-error").append('<p>' + gettext('There is already a style named') + style_name +'</p>');
+				}else{
+					$("#form-error").append('<p>*' + response.message + '</p>');
+				}
+				
 			}
 			
 		},
-	    error: function(){}
+	    //error: function(){}
+		error: function(XMLHttpRequest, textStatus, errorThrown) { 
+			alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+		}     
+		
 	});
 };
 

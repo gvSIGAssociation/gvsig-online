@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-02 03:48+0000\n"
+"POT-Creation-Date: 2023-09-22 00:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgstr ""
 msgid "Default symbol"
 msgstr ""
 
-#: services_library.py:66
+#: services_library.py:68
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
@@ -137,7 +137,7 @@ msgstr ""
 #: templates/library_add.html:39 templates/library_import.html:38
 #: templates/library_import.html:39 templates/library_update.html:43
 #: templates/library_update.html:44 templates/sld_import.html:40
-#: templates/symbol_add.html:22 templates/symbol_update.html:23
+#: templates/symbol_add.html:23 templates/symbol_update.html:23
 #: templates/unique_symbol_add.html:26 templates/unique_symbol_update.html:25
 #: templates/unique_values_add.html:26 templates/unique_values_update.html:25
 msgid "Name"
@@ -161,7 +161,7 @@ msgstr ""
 #: templates/custom_update.html:31 templates/expressions_add.html:32
 #: templates/expressions_update.html:31 templates/external_graphic_add.html:32
 #: templates/external_graphic_update.html:33 templates/intervals_add.html:32
-#: templates/intervals_update.html:32 templates/symbol_add.html:26
+#: templates/intervals_update.html:32 templates/symbol_add.html:27
 #: templates/symbol_update.html:27 templates/unique_symbol_add.html:32
 #: templates/unique_symbol_update.html:31 templates/unique_values_add.html:32
 #: templates/unique_values_update.html:31
@@ -308,7 +308,7 @@ msgstr ""
 #: templates/external_graphic_add.html:145
 #: templates/external_graphic_add.html:149 templates/intervals_add.html:352
 #: templates/intervals_add.html:374 templates/intervals_update.html:363
-#: templates/intervals_update.html:385 templates/symbol_add.html:109
+#: templates/intervals_update.html:385 templates/symbol_add.html:130
 #: templates/symbol_update.html:118 templates/unique_symbol_add.html:234
 #: templates/unique_values_add.html:342 templates/unique_values_update.html:350
 msgid "Field name is required"
@@ -404,16 +404,16 @@ msgstr ""
 
 #: templates/color_ramp_folder_update.html:105
 #: templates/color_ramp_library_list.html:63
-#: templates/color_ramp_library_list.html:87
+#: templates/color_ramp_library_list.html:85
 #: templates/color_ramp_library_update.html:107
-#: templates/color_ramp_list.html:52 templates/library_list.html:66
+#: templates/color_ramp_list.html:52 templates/library_list.html:62
 msgid "Cancel"
 msgstr ""
 
 #: templates/color_ramp_folder_update.html:106
-#: templates/color_ramp_library_list.html:88
+#: templates/color_ramp_library_list.html:86
 #: templates/color_ramp_library_update.html:108
-#: templates/color_ramp_list.html:53 templates/library_list.html:67
+#: templates/color_ramp_list.html:53 templates/library_list.html:63
 msgid "Accept"
 msgstr ""
 
@@ -443,124 +443,110 @@ msgid "This functionality is not yet available"
 msgstr ""
 
 #: templates/color_ramp_library_list.html:78
-#: templates/color_ramp_library_list.html:129 templates/library_list.html:56
-#: templates/library_list.html:108
+#: templates/color_ramp_library_list.html:127 templates/library_list.html:56
+#: templates/library_list.html:104
 msgid "Delete library"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:81 templates/library_list.html:134
-msgid "Library will be removed, Do you want continue?"
-msgstr ""
-
-#: templates/color_ramp_library_list.html:82
-#, python-format
-msgid " Library %(library_name)s will be removed, Do you want continue?."
-msgstr ""
-
-#: templates/color_ramp_library_list.html:105
-#: templates/color_ramp_library_update.html:127 templates/library_list.html:84
+#: templates/color_ramp_library_list.html:103
+#: templates/color_ramp_library_update.html:127 templates/library_list.html:80
 #: templates/style_layer_list.html:62
 msgid "Processing request..."
 msgstr ""
 
-#: templates/color_ramp_library_list.html:106
-#: templates/color_ramp_library_update.html:128 templates/library_list.html:85
+#: templates/color_ramp_library_list.html:104
+#: templates/color_ramp_library_update.html:128 templates/library_list.html:81
 #: templates/style_layer_list.html:63
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:107
-#: templates/color_ramp_library_update.html:129 templates/library_list.html:86
+#: templates/color_ramp_library_list.html:105
+#: templates/color_ramp_library_update.html:129 templates/library_list.html:82
 #: templates/style_layer_list.html:64
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:108
-#: templates/color_ramp_library_update.html:130 templates/library_list.html:87
+#: templates/color_ramp_library_list.html:106
+#: templates/color_ramp_library_update.html:130 templates/library_list.html:83
 #: templates/style_layer_list.html:65
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:109
-#: templates/color_ramp_library_update.html:131 templates/library_list.html:88
+#: templates/color_ramp_library_list.html:107
+#: templates/color_ramp_library_update.html:131 templates/library_list.html:84
 #: templates/style_layer_list.html:66
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:110
-#: templates/color_ramp_library_update.html:132 templates/library_list.html:89
+#: templates/color_ramp_library_list.html:108
+#: templates/color_ramp_library_update.html:132 templates/library_list.html:85
 #: templates/style_layer_list.html:67
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:112
-#: templates/color_ramp_library_update.html:134 templates/library_list.html:91
+#: templates/color_ramp_library_list.html:110
+#: templates/color_ramp_library_update.html:134 templates/library_list.html:87
 #: templates/style_layer_list.html:69
 msgid "Loading..."
 msgstr ""
 
-#: templates/color_ramp_library_list.html:113
-#: templates/color_ramp_library_list.html:114
+#: templates/color_ramp_library_list.html:111
+#: templates/color_ramp_library_list.html:112
 #: templates/color_ramp_library_update.html:135
-#: templates/color_ramp_library_update.html:136 templates/library_list.html:92
-#: templates/library_list.html:93 templates/style_layer_list.html:70
+#: templates/color_ramp_library_update.html:136 templates/library_list.html:88
+#: templates/library_list.html:89 templates/style_layer_list.html:70
 #: templates/style_layer_list.html:71
 msgid "No records available"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:116
-#: templates/color_ramp_library_update.html:138 templates/library_list.html:95
+#: templates/color_ramp_library_list.html:114
+#: templates/color_ramp_library_update.html:138 templates/library_list.html:91
 #: templates/style_layer_list.html:73
 msgid "First"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:117
-#: templates/color_ramp_library_update.html:139 templates/library_list.html:96
+#: templates/color_ramp_library_list.html:115
+#: templates/color_ramp_library_update.html:139 templates/library_list.html:92
 #: templates/style_layer_list.html:74
 msgid "Previous"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:118
-#: templates/color_ramp_library_update.html:140 templates/library_list.html:97
+#: templates/color_ramp_library_list.html:116
+#: templates/color_ramp_library_update.html:140 templates/library_list.html:93
 #: templates/style_layer_list.html:75
 msgid "Next"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:119
-#: templates/color_ramp_library_update.html:141 templates/library_list.html:98
+#: templates/color_ramp_library_list.html:117
+#: templates/color_ramp_library_update.html:141 templates/library_list.html:94
 #: templates/style_layer_list.html:76
 msgid "Last"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:122
-#: templates/color_ramp_library_update.html:144 templates/library_list.html:101
+#: templates/color_ramp_library_list.html:120
+#: templates/color_ramp_library_update.html:144 templates/library_list.html:97
 #: templates/style_layer_list.html:79
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:123
-#: templates/color_ramp_library_update.html:145 templates/library_list.html:102
+#: templates/color_ramp_library_list.html:121
+#: templates/color_ramp_library_update.html:145 templates/library_list.html:98
 #: templates/style_layer_list.html:80
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:133 templates/library_list.html:112
+#: templates/color_ramp_library_list.html:131 templates/library_list.html:108
 msgid "Export library"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:137 templates/library_list.html:116
+#: templates/color_ramp_library_list.html:135 templates/library_list.html:112
 msgid "Update library"
-msgstr ""
-
-#: templates/color_ramp_library_list.html:154
-#, python-format
-msgid "Library %(library_name)s will be removed, Do you want continue?"
 msgstr ""
 
 #: templates/color_ramp_library_update.html:56
@@ -718,19 +704,19 @@ msgid "Symbol libraries"
 msgstr ""
 
 #: templates/external_graphic_add.html:29
-#: templates/external_graphic_update.html:30 templates/symbol_add.html:23
+#: templates/external_graphic_update.html:30 templates/symbol_add.html:24
 #: templates/symbol_update.html:24
 msgid "Symbol name"
 msgstr ""
 
 #: templates/external_graphic_add.html:33
-#: templates/external_graphic_update.html:34 templates/symbol_add.html:27
+#: templates/external_graphic_update.html:34 templates/symbol_add.html:28
 #: templates/symbol_update.html:28
 msgid "Symbol title"
 msgstr ""
 
 #: templates/external_graphic_add.html:36
-#: templates/external_graphic_update.html:37 templates/symbol_add.html:30
+#: templates/external_graphic_update.html:37 templates/symbol_add.html:31
 #: templates/symbol_update.html:31
 msgid ""
 "Specifies a title for the rule. The title is used in display lists and "
@@ -775,24 +761,6 @@ msgstr ""
 msgid "Select field"
 msgstr ""
 
-#: templates/library_list.html:59
-msgid "Library {{ id }} will be removed, Do you want continue?"
-msgstr ""
-
-#: templates/library_list.html:132
-#, python-format
-msgid " Library  %(library_name)s will be removed, Do you want continue? "
-msgstr ""
-
-#: templates/library_list.html:137
-msgid "Library library_name will be removed, Do you want continue?"
-msgstr ""
-
-#: templates/library_list.html:141
-#, python-format
-msgid "Hello, %(library_name)s!"
-msgstr ""
-
 #: templates/library_update.html:32
 msgid "Symbols"
 msgstr ""
@@ -815,11 +783,6 @@ msgstr ""
 
 #: templates/library_update.html:70
 msgid "Add polygon"
-msgstr ""
-
-#: templates/prueba.html:3
-#, python-format
-msgid "%(Library)s: %(variable)s will be removed, Do you want continue?"
 msgstr ""
 
 #: templates/select_legend_type.html:11
@@ -922,7 +885,7 @@ msgstr ""
 msgid "Delete style"
 msgstr ""
 
-#: templates/symbol_add.html:53 templates/symbol_update.html:53
+#: templates/symbol_add.html:55 templates/symbol_update.html:53
 msgid "Edit symbolizer"
 msgstr ""
 
@@ -949,7 +912,7 @@ msgid ""
 msgstr ""
 
 #: views.py:1130 views.py:1177 views.py:1225 views.py:1302 views.py:1365
-#: views.py:1503
+#: views.py:1540
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"

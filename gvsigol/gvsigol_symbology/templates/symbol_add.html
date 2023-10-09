@@ -18,6 +18,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div id="form-error" style="color:#ff0000;"></div>
+						<div id="error-message" style="color:#ff0000;"></div>
 						<div class="form-group">
 							<label>{% trans "Name" %}</label>
 							<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" class="form-control">
@@ -37,6 +38,7 @@
 				</div>
 											
            	</div>
+			 
 
 		</div>
 	</div>				
@@ -63,6 +65,25 @@
 		</div>
 	</div>
 </div>
+
+ <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title" id="errorModalLabel">Error</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">		 
+			<p id="errorMessage"></p>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		</div>
+	  </div>
+	</div>
+  </div>
 {% endblock %}
 {% block extra-scripts %}
 <script>
@@ -107,10 +128,23 @@ $(document).ready(function() {
 			librarySymbol.save("{{library_id}}", name, title, filter);
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
 		}
 		
 	});
 
+
+
 });
 </script>
+
+<script>
+    var errorMessage = "{{ error_message }}";
+    if (errorMessage) {
+        var errorElement = document.getElementById("error-message");
+        errorElement.innerHTML = errorMessage;
+    }
+</script>
+
+
 {% endblock %}
