@@ -521,7 +521,7 @@ class Geoserver():
                 count = i.get_estimated_count(schema, layer.name)
                 i.close()
                 
-            sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, count)
+            sld_body = create_default_style(layer.id, style_name, style_type, geom_type, count)
         
         except Exception as ex:
                 logger.exception('Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
@@ -1480,7 +1480,7 @@ class Geoserver():
                     if has_style and style_from_library is not None :
                         print("DEBUG: has_style AND style_from_library")       
                         if creation_mode == 'CR':
-                            if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
+                            if clone_style(self, layer, original_style_name, final_style_name) is False:
                                 print("DEBUG: Creation mode CR. Clone style False. Creating default") 
                                 self.createDefaultStyle(layer, final_style_name)
                                 stylelayers = StyleLayer.objects.filter(layer=layer)  
@@ -1497,7 +1497,7 @@ class Geoserver():
                         else:
                             print("DEBUG: Has style and style_from_library. Creation mode UPDATE")
                             style_name = datastore.workspace.name + '_' + layer.name + '_default'
-                            symbology_services.clone_style(self, layer, original_style_name, final_style_name)
+                            clone_style(self, layer, original_style_name, final_style_name)
                             stylelayers = StyleLayer.objects.filter(layer=layer)  
                             for stylelayer in stylelayers:
                                 if stylelayer.style.name != final_style_name:
