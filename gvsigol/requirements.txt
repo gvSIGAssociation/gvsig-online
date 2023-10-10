@@ -39,7 +39,7 @@ requests-futures==1.0.0
 
 ## Scolab tools
 spatialiteintrospect==1.2
-pygdaltools==1.4.0
+pygdaltools==1.4.1
 shapely==1.8.4
 # *NOTE:* It requires having gdal tools installed in the system (gdal-bin package)
 
