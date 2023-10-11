@@ -132,7 +132,12 @@
 	$('#button-create-layer').click(function() {
 		$("#myModalLabel").text(gettext("Create new layer"));
 		$('#button-add-layer-group-accept').click( function() {
-			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/?redirect=create-layer');
+			var queryString = '?redirect=create-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				queryString += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/{% if project_id %}{{project_id}}/{% endif %}' + queryString);
 			$('#save_button').trigger('click');
 		});
 	});
@@ -140,7 +145,12 @@
 	$('#button-import-layer').click(function() {
 		$("#myModalLabel").text(gettext("Publish layer"));
 		$('#button-add-layer-group-accept').click( function() {
-			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/?redirect=import-layer');
+			var queryString = '?redirect=import-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				queryString += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/{% if project_id %}&project_id={{project_id}}{% endif %}' + queryString);
 			$('#save_button').trigger('click');
 		});
 	});

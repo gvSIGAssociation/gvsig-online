@@ -5,7 +5,7 @@
 {% block content %}
 
 {% if redirect_to_layergroup %}
-<form id="layer-update-form" role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect">
+<form id="layer-update-form" role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
 {% else %}
 <form id="layer-update-form" role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
 {% endif %}	

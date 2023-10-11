@@ -5,7 +5,7 @@
 {% block content %}	
 
 {% if redirect_to_layergroup %}
-<form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/?redirect=layergroup-redirect">
+<form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
 {% else %}
 <form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/">
 {% endif %}
@@ -514,7 +514,8 @@
 	function updateLayerGroupList(id_datastore) {
 		if (id_datastore) {
 			$("body").overlay();
-			$.getJSON("{% url 'layergroup_list_editable' %}", {id_datastore: id_datastore}, function(data){
+			var layergroup_id = {% if layergroup_id %}{{layergroup_id}}{% else %}null{% endif %};
+			$.getJSON("{% url 'layergroup_list_editable' %}", {id_datastore: id_datastore, layergroup_id: layergroup_id}, function(data){
 				var layer_group_select = $("#id_layer_group");
 				var previousValue = layer_group_select.val();
 				var placeholderSelected = true;
