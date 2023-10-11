@@ -553,14 +553,14 @@ class Geonetwork():
     def get_extent(self, layer_info, ds_type):
         if ds_type == 'imagemosaic':
             ds_type = 'coverage'
-        minx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'])
-        miny = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'])
-        maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['maxx'])
-        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-            maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
+        minx = "{:f}".format(float(layer_info[ds_type]['latLonBoundingBox']['minx']))
+        miny = "{:f}".format(float(layer_info[ds_type]['latLonBoundingBox']['miny']))
+        maxx = "{:f}".format(float(layer_info[ds_type]['latLonBoundingBox']['maxx']))
+        if float(layer_info[ds_type]['latLonBoundingBox']['minx']) > float(layer_info[ds_type]['latLonBoundingBox']['maxx']):
+            maxx = "{:f}".format(float(layer_info[ds_type]['latLonBoundingBox']['minx']) + 1)
         maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-            maxy = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
+        if float(layer_info[ds_type]['latLonBoundingBox']['miny']) > float(layer_info[ds_type]['latLonBoundingBox']['maxy']):
+            maxy = "{:f}".format(float(layer_info[ds_type]['latLonBoundingBox']['miny']) + 1)
         return (minx, miny, maxx, maxy)
     
                 
