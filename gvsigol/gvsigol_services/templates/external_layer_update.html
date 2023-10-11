@@ -287,9 +287,13 @@ $(document).ready(function(){
 	var format_or = "{{ form.format.value }}";
 	var infoformat_or = "{{ form.infoformat.value }}";
 	var matrixset = "{{ form.matrixset.value }}";
-	var params = {{external_layer.external_params|safe}};
-	var version = params['version'];
-	var layer = params['layers'];
+	var params = {% if external_layer.external_params %}{{external_layer.external_params|safe}}{% else %}{}{% endif %};
+	if (params.version) {
+		var version = params.version;
+	}
+	if (params.layers) {
+		var layer = params.layers;
+	}
 	var wmts_success = true;
 	
 	var detailedInfoHTML = document.getElementById('detailed_info_html');
