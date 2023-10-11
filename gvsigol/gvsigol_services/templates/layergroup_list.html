@@ -8,7 +8,8 @@
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
-					<button id="button-add-layergroup" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add layer group" %}</button>
+					{% if project_id %}<a href="{% url 'project_list' %}" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i>{% trans "Return to project list" %}</a>{% endif %}
+					<a href="/gvsigonline/services/layergroup_add/{% if project_id %}{{project_id}}/?redirect=project-layergroup-list{% endif %}" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i>{% trans "Add layer group" %}</a>
 				</div>
 			</div>
 		</div>
@@ -121,17 +122,7 @@ $(document).ready(function() {
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false
 	});
-	
-	$('#button-add-layergroup').click( function() {
-		const params = new URLSearchParams(window.location.search);
-		if (params.has('project_id')) {
-			location.href = '/gvsigonline/services/layergroup_add/' + params.get('project_id') + '/' + '?redirect=project-layergroup-list';
-		}
-		else {
-			location.href = '/gvsigonline/services/layergroup_add/';
-		}
-	});
-		 
+
 	$('#layergroups-table tbody').on('click', 'button', function (){
 		var row = table.row($(this).parents('tr'));
 	    var data = row.data();  
@@ -146,8 +137,15 @@ $(document).ready(function() {
 	    }
 	});
 	
-	function updateLayerGroup(data){			
-		location.href = '/gvsigonline/services/layergroup_update/' + data[0] + '/';
+	function updateLayerGroup(data){	
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('project_id')) {
+			location.href = '/gvsigonline/services/layergroup_update/' + data[0] + '/' + params.get('project_id') + '/' + '?redirect=project-layergroup-list';
+		}
+		else {
+			location.href = '/gvsigonline/services/layergroup_update/' + data[0] + '/';
+		}
+		
 	}
 	
 	function clearCache(data, row, button) {

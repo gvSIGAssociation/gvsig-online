@@ -4,7 +4,7 @@
 
 {% block content %}
 {% if redirect_to_layergroup %}
-<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect">
+<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
 {% else %}
 <form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/">
 {% endif %}	

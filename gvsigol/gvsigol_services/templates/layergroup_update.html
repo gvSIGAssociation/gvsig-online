@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block content %}	
-<form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_update/{{lgid}}/">
+<form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}{% if redirect %}?redirect={{redirect}}{% endif %}">
 	<div class="row">
 		<div class="col-md-12">
 			<div class="row">
@@ -222,7 +222,12 @@
 	$('#button-create-layer').click(function() {
 		$("#myModalLabel2").text(gettext("Create new layer"));
 		$('#button-add-layer-group-accept').click( function() {
-			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_update/{{lgid}}/?redirect=create-layer');
+			var url = '/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}?redirect=create-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				url += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', url);
 			$('#save_button').trigger('click');
 		});
 	});
@@ -230,7 +235,12 @@
 	$('#button-import-layer').click(function() {
 		$("#myModalLabel2").text(gettext("Publish layer"));
 		$('#button-add-layer-group-accept').click( function() {
-			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_update/{{lgid}}/?redirect=import-layer');
+			var url = '/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}?redirect=import-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				url += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', url);
 			$('#save_button').trigger('click');
 		});
 	});
@@ -250,18 +260,38 @@
 		$('#layer-group-form').submit();
 	});
 	
-	
-	function updateLayer(data){			
-		location.href = '/gvsigonline/services/layer_update/' + data + '/?redirect=layergroup-redirect';
+	function getQueryString() {
+		var queryString = '?redirect=layergroup-redirect';
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('redirect')) {
+			queryString += '&from_redirect=' + params.get('redirect');
+		}
+		var project_id = {% if project_id %}{{project_id}}{% else %}null{% endif %};
+		if (project_id!==null) {
+			queryString += '&project_id=' + project_id;
+		}
+		var layergroup_id = {% if layergroup.id %}{{layergroup.id}}{% else %}null{% endif %};
+		if (layergroup_id!==null) {
+			queryString += '&layergroup_id=' + layergroup_id;
+		}
+		return queryString;
+	}
+
+	function updateLayer(data){
+		var url = '/gvsigonline/services/layer_update/' + data + '/' + getQueryString();
+		location.href = url;
 	}
 	
 	function updateExternalLayer(data){			
-		location.href = '/gvsigonline/services/external_layer_update/' + data + '/?redirect=layergroup-redirect';
+		var url = '/gvsigonline/services/external_layer_update/' + data + '/' + getQueryString();
+		location.href = url;
 	}
 	
 	function configLayer(data){			
-		location.href = '/gvsigonline/services/layer_config/' + data + '/?redirect=layergroup-redirect';
+		var url = '/gvsigonline/services/layer_config/' + data  + '/' + getQueryString();
+		location.href = url;
 	}
+
 	function clearCache(data){
 		$("body").overlay();
 		$.ajax({

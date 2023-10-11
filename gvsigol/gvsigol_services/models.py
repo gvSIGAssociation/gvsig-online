@@ -460,7 +460,7 @@ class LayerGroupRole(models.Model):
     layergroup = models.ForeignKey(LayerGroup, on_delete=models.CASCADE)
     role = models.TextField()
     permission = models.TextField(choices=PERMISSION_CHOICES, default=PERM_MANAGE)
-
+    
     class Meta:
         indexes = [
             models.Index(fields=['layergroup', 'permission', 'role']),
@@ -468,7 +468,7 @@ class LayerGroupRole(models.Model):
         constraints = [
            models.UniqueConstraint(fields=['layergroup', 'permission', 'role'], name='unique_permission_role_per_layergroup')
         ]
-
+    
     def __str__(self):
         return '({}, {}, {})'.format(self.layergroup.name, self.role, self.permission)
 

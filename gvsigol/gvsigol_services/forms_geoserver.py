@@ -165,8 +165,10 @@ class CreateFeatureTypeForm(forms.Form):
     time_default_value = forms.CharField(label=_('Default value'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
     def __init__(self, *args, **kwargs):
-        request = kwargs.pop('request', None)  
+        request = kwargs.pop('request', None)
+        layergroup_id = kwargs.pop('layergroup_id', None)
         super(CreateFeatureTypeForm, self).__init__(*args, **kwargs)
+
         if request.user.is_superuser:
             qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
             
@@ -175,6 +177,14 @@ class CreateFeatureTypeForm(forms.Form):
                   Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=request.user.username)).order_by('name').distinct()
             
         qs_lg = (get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
+
+        if layergroup_id:
+            try:
+                lyrgroup = LayerGroup.objects.get(id=layergroup_id)
+                qs = qs.filter(workspace__server__id=lyrgroup.server_id)
+                qs_lg = qs_lg.filter(id=layergroup_id)
+            except:
+                pass
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_('Datastore'), required=True,

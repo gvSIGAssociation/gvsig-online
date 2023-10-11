@@ -41,6 +41,7 @@ urlpatterns = [
     path('layergroup_add/<int:project_id>/', services_views.layergroup_add_with_project, name='layergroup_add_with_project'),
     path('layergroup_delete/<int:lgid>/', services_views.layergroup_delete, name='layergroup_delete'),
     path('layergroup_update/<int:lgid>/', services_views.layergroup_update, name='layergroup_update'),
+    path('layergroup_update/<int:lgid>/<int:project_id>/', services_views.layergroup_update_with_project, name='layergroup_update_with_project'),
     path('enumeration_list/', services_views.enumeration_list, name='enumeration_list'),
     path('enumeration_add/', services_views.enumeration_add, name='enumeration_add'),
     path('enumeration_delete/<int:eid>/', services_views.enumeration_delete, name='enumeration_delete'),
