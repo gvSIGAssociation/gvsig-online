@@ -1361,7 +1361,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		ui += '<div class="nav-tabs-custom">';
 		ui += 	'<ul class="nav nav-tabs">';
 		ui += 		'<li class="active"><a href="#edit_feature_properties" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature properties') + '</a></li>';
-		ui += 		'<li class=""><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
+		ui += 		'<li class="" id="li-createfeature-resources"><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
 		ui += 	'</ul>';
 		ui += 	'<div class="tab-content">';
 		ui += 		'<div class="tab-pane active" id="edit_feature_properties">';
@@ -1853,7 +1853,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		ui += '<div class="nav-tabs-custom">';
 		ui += 	'<ul class="nav nav-tabs">';
 		ui += 		'<li class="active"><a href="#edit_feature_properties" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature properties') + '</a></li>';
-		ui += 		'<li class=""><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
+		ui += 		'<li class="" id="li-editfeature-resources"><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
 		ui += 	'</ul>';
 		ui += 	'<div class="tab-content">';
 		ui += 		'<div class="tab-pane active" id="edit_feature_properties">';
