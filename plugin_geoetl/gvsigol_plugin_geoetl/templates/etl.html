@@ -708,6 +708,13 @@
 				$('#permission').addClass("active");
 				$('#general').tab('show');
 				$("#general a:first").tab('show');
+                var searcheableReadList = new List('read-list-box', {
+				valueNames: ['product-title'],
+				listClass:'list',
+				searchClass: 'search',
+				page: 5,
+				pagination: false
+			});
 								
 			}
 
