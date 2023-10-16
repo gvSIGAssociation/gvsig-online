@@ -2177,7 +2177,7 @@ def input_Postgis(dicc):
         
         if geometry != '':
 
-            type_geom, srid = get_type_n_srid(tab, esq, geometry)
+            srid, type_geom = get_type_n_srid(tab, esq, geometry)
 
 
         if dicc['checkbox'] == 'true':
