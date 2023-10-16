@@ -109,7 +109,7 @@
 			{% if user.is_superuser or not first_level %}
 		  		<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
 		  		<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
-				<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Historical Exports" %}</button></a>
+				<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Export history" %}</button></a>
 
 		  	{% endif %}
 
@@ -120,7 +120,7 @@
 		{% if user.is_superuser or not first_level %}
 			<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
 			<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
-			<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Historical Exports" %}</button></a>
+			<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Export history" %}</button></a>
 		{% endif %}
 		<script src="{% static "js/filemanager.js" %}"></script>
 	{% endif %}
