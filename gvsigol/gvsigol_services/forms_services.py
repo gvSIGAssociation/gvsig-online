@@ -219,7 +219,7 @@ class ExternalLayerForm(forms.ModelForm):
         
     #name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     title = forms.CharField(label=_('Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=None, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     
     type = forms.ChoiceField(label=_('Type'), choices=external_layer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
     version = forms.ChoiceField(label=_('Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
@@ -234,7 +234,7 @@ class ExternalLayerForm(forms.ModelForm):
 
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['layer_group'].queryset = get_user_layergroups(request).order_by('name')
+        self.fields['layer_group'].queryset = get_user_layergroups(request).order_by('name').distinct()
  
 class ServiceUrlForm(forms.ModelForm):
     class Meta:
