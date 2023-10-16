@@ -71,7 +71,7 @@
 
 								<div class="row">
 									<div class="col-md-12 form-group">
-										<label for="application-conf">{% trans "Configuration" %}</label>
+										<label for="application-conf">{% trans "Settings" %}</label>
 										<textarea class="form-control" name="application-conf" id="application-conf" rows="5">{{application.conf}}</textarea>
 									</div>
 								</div>
@@ -97,7 +97,7 @@
 								<div id="user-list-box" class="box searchable-list-box">
 									<div class="box-header" style="padding-bottom:0px">
 										<label for="is_public" class="form-label" title="{% trans 'Application will be readable by everyone if public' %}">
-											<span>{% trans "Is public?" %}</span>
+											<span>{% trans "application.Is public?" %}</span>
 											<input style="position:absolute; margin-left: 10px" type="checkbox" name="is_public" id="is_public" {% if application.is_public %}checked {% endif %}/>
 										</label>
 										<div class="form-horizontal">
