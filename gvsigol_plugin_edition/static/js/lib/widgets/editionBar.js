@@ -1361,7 +1361,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		ui += '<div class="nav-tabs-custom">';
 		ui += 	'<ul class="nav nav-tabs">';
 		ui += 		'<li class="active"><a href="#edit_feature_properties" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature properties') + '</a></li>';
-		ui += 		'<li class="" id="li-createfeature-resources"><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
+		ui += 		'<li class="li-createfeature-resources"><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
 		ui += 	'</ul>';
 		ui += 	'<div class="tab-content">';
 		ui += 		'<div class="tab-pane active" id="edit_feature_properties">';
@@ -1853,7 +1853,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		ui += '<div class="nav-tabs-custom">';
 		ui += 	'<ul class="nav nav-tabs">';
 		ui += 		'<li class="active"><a href="#edit_feature_properties" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature properties') + '</a></li>';
-		ui += 		'<li class="" id="li-editfeature-resources"><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
+		ui += 		'<li class="li-editfeature-resources"><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
 		ui += 	'</ul>';
 		ui += 	'<div class="tab-content">';
 		ui += 		'<div class="tab-pane active" id="edit_feature_properties">';
@@ -2176,7 +2176,94 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 
 		this.detailsTab.empty();
 		var self = this;
+		var datetimearray = [];
+		var enumeration_names = [];
+		var featureProperties = '';
+		
+		var fields = this.selectedLayer.conf.fields;
+		for (var i=0; i<this.featureType.length; i++) {
+			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
+				var name = '<span class="edit-feature-field">' + this.featureType[i].name+'</span>';
+				var visible = false;
+				if(fields){
+					for(var ix =0; ix<fields.length; ix++){
+						if(fields[ix].name.toLowerCase() == this.featureType[i].name){
+							var lang = $("#select-language").val();
+							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
+								name = '<span class="edit-feature-field">' + fields[ix]["title-"+lang] + '</span><br /><span style="font-weight: normal;">('+name+')</span>';
+							}
+							if(fields[ix].infovisible != undefined){
+								visible = fields[ix].infovisible;
+							}
+						}
+					}
+				}
+				if(visible){
+					var value = feature.getProperties()[this.featureType[i].name];
+					featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
+					featureProperties += 	'<label style="color: #444;">' + name + '</label>';
+					if (this.isNumericType(this.featureType[i].type)) {
+						if (value==null) {
+							value = "";
+						}
+						var numeric_conf = this.getNumericProperties(this.featureType[i]);
+						featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="number" '+ numeric_conf +' class="form-control" value="' + value + '">';
+					} else if (this.isDateType(this.featureType[i].type)) {
+						if (value != null) {
+							value = this.modifyDateTime(value);
+						} else {
+							value = "";
+						}
+						var dateformat = this.getDateProperties(this.featureType[i]);
+						datetimearray.push({
+							'name': this.featureType[i].name,
+							'format': dateformat
+						});
+						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input disabled id="' + this.featureType[i].name + '" class="form-control"  value="' + value + '"/></div>';
+						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
+					} else if (this.featureType[i].type.endsWith("enumeration")) {
+						if (value != null) {
+							value = value.trim();
+						}
+						var name = this.featureType[i].name;
+						var has_multiple = false;
+						if(this.featureType[i].type == "multiple_enumeration") {
+							has_multiple = true;
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="' + value + '"></div>';
+						} else {
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+value+'"></div>';
+						}
+					} else if (this.isStringType(this.featureType[i].type)) {
+						if (this.featureType[i].name.startsWith("form_")) {
+							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + value + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+							featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="hidden" value="' + value + '">';
+						} else if (this.featureType[i].name.startsWith("cd_json_")) {
+							featureProperties += '<textarea disabled id="' + this.featureType[i].name + '" rows="4" class="form-control">' + value + '</textarea>';
+						} else {
+							if (value==null) {
+								value = "";
+							}
+							if("length" in this.featureType[i] && this.featureType[i].length>0){
+								featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + value + '">';
+							}else{
+								featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
+							}
+						}
+
+					}  else if (this.featureType[i].type == 'boolean') {
+						if (value) {
+							featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
+						} else {
+							featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
+						}
+					}
+					featureProperties += '</div>';
+				}
+			}
+		}
 		var ui = '';
 		ui += '<div class="box">';
 		ui += 		'<div class="box-header with-border">';
@@ -2186,43 +2273,8 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		ui += 			'</div>';
 		ui += 		'</div>';
 		ui += 		'<div class="box-body no-padding">';
-		for (var i=0; i<this.featureType.length; i++) {
-			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
-				ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-				ui += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
-				if (this.isNumericType(this.featureType[i].type)) {
-					var numeric_conf = this.getNumericProperties(this.featureType[i]);
-					ui += '<input disabled id="' + this.featureType[i].name + '" type="number" '+ numeric_conf+' class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+		ui += 			featureProperties
 
-				} else if (this.isDateType(this.featureType[i].type)) {
-					var dbDate = feature.getProperties()[this.featureType[i].name];
-					if (dbDate != null) {
-						if (dbDate.charAt(dbDate.length - 1) == 'Z') {
-							dbDate = dbDate.slice(0,-1);
-						}
-					} else {
-						var dateformat = this.getDateProperties(this.featureType[i]);
-						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="">';
-					}
-
-
-				} else if (this.isStringType(this.featureType[i].type)) {
-					var value = feature.getProperties()[this.featureType[i].name];
-					if (this.featureType[i].name.startsWith("form_")) {
-						ui += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="'+value+'"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
-					} else{
-						ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
-					}
-				} else if (this.featureType[i].type == 'boolean') {
-					if (feature.getProperties()[this.featureType[i].name]) {
-						ui += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
-					} else {
-						ui += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
-					}
-				}
-				ui += '</div>';
-			}
-		}
 		ui += 		'</div>';
 		ui += 		'<div class="box-footer text-right">';
 		ui += 			'<button id="remove-feature" class="btn btn-default margin-r-5">' + gettext('Remove') + '</button>';
