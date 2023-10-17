@@ -42,7 +42,7 @@
               		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
               		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
               		<li><a  data-id="3" href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>
-              		<li><a  data-id="4" href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>
+              		{% if superuser %}<li><a  data-id="4" href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>{% endif %}
             	</ul>
             	
             	<div class="tab-content">
@@ -1046,6 +1046,7 @@
 				item.show();
 			}
 			$(".project-usergroup-checkbox").prop( "disabled", false);
+			$(".layergroup-input").prop( "disabled", false);
 			var selectedBaseLayer = $('input:radio[name=baselayers-default]:checked').val();
 			var selectedBaseGroup = $('input:radio[name=selected-base-group-btn]:checked').val();
 			console.log(selectedBaseGroup);
