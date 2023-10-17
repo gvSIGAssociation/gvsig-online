@@ -2517,9 +2517,11 @@ def layer_create_with_group(request, layergroup_id):
                     msg = _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.cleaned_data['name'])
                     form.add_error(None, msg)
                 elif not utils.can_manage_datastore(request, datastore):
-                    form.add_error(None, _("You are not allowed to manage the selected datastore"))
+                    msg = _("You are not allowed to manage the selected datastore")
+                    form.add_error(None, msg)
                 elif not utils.can_use_layergroup(request, layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
-                    form.add_error(None, _("You are not allowed to manage the selected layergroup"))
+                    msg = _("You are not allowed to manage the selected layergroup")
+                    form.add_error(None, msg)
 
                 else:
                     server.normalizeTableFields(form.cleaned_data['fields'])
