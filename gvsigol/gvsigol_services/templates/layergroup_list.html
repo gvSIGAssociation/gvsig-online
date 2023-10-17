@@ -7,8 +7,12 @@
 	<div class="col-md-12">
 		<div class="row">
 			<div class="col-md-12 form-group">
-				<div class="box-tools pull-right">
-					{% if project_id %}<a href="{% url 'project_list' %}" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i>{% trans "Return to project list" %}</a>{% endif %}
+				{% if project_id %}
+				<div class="box-tools pull-left">
+					<a href="{% url 'project_list' %}" class="btn btn-block btn-default btn-sm"><i class="fa fa-th-list margin-r-5"></i>{% trans "Return to project list" %}</a>
+				</div>
+				{% endif %}
+				<div class="box-tools pull-right">					
 					<a href="/gvsigonline/services/layergroup_add/{% if project_id %}{{project_id}}/?redirect=project-layergroup-list{% endif %}" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i>{% trans "Add layer group" %}</a>
 				</div>
 			</div>
