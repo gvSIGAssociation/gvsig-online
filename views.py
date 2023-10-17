@@ -420,12 +420,8 @@ def project_add(request):
         return redirect('project_list')
 
     else:
-        roles = None
-        if request.user.is_superuser:
-            roles = auth_backend.get_all_roles_details(exclude_system=True)
-        else:
-            roles = get_primary_user_role_details(request)
-        
+        creator_role = auth_backend.get_primary_role(request.user.username)
+        roles = core_utils.get_all_roles_checked_by_project(None, creator_user_role=creator_role)
         prepared_layer_groups = _get_prepared_layer_groups(request)
         labels = []
         for l in settings.PRJ_LABELS:
@@ -628,7 +624,8 @@ def project_update(request, pid):
 
     else:
         project = Project.objects.get(id=int(pid))
-        roles = core_utils.get_all_roles_checked_by_project(project)
+        creator_role = auth_backend.get_primary_role(project.created_by)
+        roles = core_utils.get_all_roles_checked_by_project(project, creator_user_role=creator_role)
         layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)
 
         if project.toc_order:

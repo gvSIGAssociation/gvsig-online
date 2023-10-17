@@ -75,7 +75,7 @@ def can_manage_project(request, project):
     return False
 
 def get_checked_project_roles(read_roles, manage_roles, creator_user_role=None):
-    role_list = auth_backend.get_all_roles_details()
+    role_list = auth_backend.get_all_roles_details(exclude_system=True)
     roles = []
     admin_roles = [ auth_backend.get_admin_role()]
     for role in role_list:
@@ -93,16 +93,14 @@ def get_checked_project_roles(read_roles, manage_roles, creator_user_role=None):
             roles.append(role)
     return roles
 
-def get_all_roles_checked_by_project(project):
+def get_all_roles_checked_by_project(project, creator_user_role=None):
     if project:
         read_roles = ProjectRole.objects.filter(project=project, permission=ProjectRole.PERM_READ).values_list('role', flat=True)
         manage_roles = ProjectRole.objects.filter(project=project, permission=ProjectRole.PERM_MANAGE).values_list('role', flat=True)
-        creator_role = auth_backend.get_primary_role(project.created_by)
     else:
         read_roles = []
         manage_roles = []
-        creator_role = None
-    return get_checked_project_roles(read_roles, manage_roles, creator_role)
+    return get_checked_project_roles(read_roles, manage_roles, creator_user_role=creator_user_role)
 
 
 def get_all_roles_checked_by_application(application):
