@@ -42,8 +42,8 @@
 		<ul class="nav nav-tabs">
 			<li role="presentation" class="active"><a href="#tab-layer-config" data-toggle="tab">{% trans "Field management" %}</a></li>
 			<li role="presentation"><a href="#tab-layer-field-trans" data-toggle="tab">{% trans "Field titles" %}</a></li>
-			<li role="presentation" id="tab-li-layer-fieldgroups"><a href="#tab-layer-fieldgroups" data-toggle="tab">{% trans "Field groups" %}</a></li>
-			<li role="presentation" id="tab-li-layer-fieldgroup-trans"><a href="#tab-layer-fieldgroup-trans" data-toggle="tab">{% trans "Group titles" %}</a></li>
+			<li role="presentation" class="tab-li-layer-fieldgroups"><a href="#tab-layer-fieldgroups" data-toggle="tab">{% trans "Field groups" %}</a></li>
+			<li role="presentation" class="tab-li-layer-fieldgroup-trans"><a href="#tab-layer-fieldgroup-trans" data-toggle="tab">{% trans "Group titles" %}</a></li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane active" id="tab-layer-config">
@@ -123,7 +123,7 @@
 																				<li><a href="#" class="actions-menu-entry rename-field"><i class="fa fa-edit" style="color: #3c8dbc;"></i> {% trans "Rename" %}</a></li>
 																				<!--  <li><a href="#" class="actions-menu-entry change-field-type"><i class="fa fa-tag" style="color: #3c8dbc;"></i> {% trans "Change type" %}</a></li> -->
 																				{% if not f.calculationLabel %}
-																				<li><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
+																				<li id="li-convert-to-enumerate"><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
 																				{% endif %}
 																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
 																			</ul>
