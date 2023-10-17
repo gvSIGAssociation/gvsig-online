@@ -880,7 +880,7 @@ def set_layergroup_permissions(layergroup, assigned_includeinproject_roles, assi
             pass
 
 def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None):
-    role_list = auth_backend.get_all_roles_details()
+    role_list = auth_backend.get_all_roles_details(exclude_system=True)
     roles = []
     admin_roles = [ auth_backend.get_admin_role()]
     for role in role_list:
@@ -903,7 +903,7 @@ def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles,
     return roles
 
 def get_layergroup_checked_roles_from_user_input(layergroup_includeinprojects_roles, layergroup_manage_roles, creator_user_role=None):
-    role_list = auth_backend.get_all_roles_details()
+    role_list = auth_backend.get_all_roles_details(exclude_system=True)
     roles = []
     admin_roles = [ auth_backend.get_admin_role()]
     for role in role_list:
