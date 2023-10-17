@@ -213,6 +213,8 @@ def can_use_layergroup(request_or_user, layergroup, permission):
         if layergroup.created_by == user.username:
             return True
         elif user.is_staff:
+            if layergroup.name == "__default__":
+                return True
             user_roles = auth_backend.get_roles(request_or_user)
             return layergroup.layergrouprole_set.filter(permission=permission, role__in=user_roles).exists()
     except Exception as e:
