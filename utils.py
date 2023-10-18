@@ -59,7 +59,7 @@ def _get_user(request_or_user):
     else:
         return request_or_user.user
 
-def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
+def get_all_user_roles_checked_by_layer(layer, creator_user_role=None, creator_all=False):
     if layer:
         read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
         write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True)
@@ -68,7 +68,7 @@ def get_all_user_roles_checked_by_layer(layer, creator_user_role=None):
         read_roles = []
         write_roles = []
         manage_roles = []
-    return get_layer_checked_roles_from_user_input(read_roles, write_roles, manage_roles, creator_user_role=creator_user_role)
+    return get_layer_checked_roles_from_user_input(read_roles, write_roles, manage_roles, creator_user_role=creator_user_role, creator_all=creator_all)
 
 def get_all_user_roles_checked_by_layergroup(layergroup, creator_user_role=None):
     if layergroup:
@@ -879,12 +879,11 @@ def set_layergroup_permissions(layergroup, assigned_includeinproject_roles, assi
         except:
             pass
 
-def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None):
+def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None, creator_all=False):
     role_list = auth_backend.get_all_roles_details(exclude_system=True)
     roles = []
     admin_roles = [ auth_backend.get_admin_role()]
     for role in role_list:
-        # FIXME OIDC CMI: ROLE_ prefix?
         if role['name'] not in admin_roles:
             for layer_read_role in layer_read_roles:
                 if layer_read_role == role['name']:
@@ -899,6 +898,8 @@ def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles,
             if creator_user_role is not None and role['name'] == creator_user_role:
                 role['read_checked'] = True
                 role['manage_checked'] = True
+                if creator_all:
+                    role['write_checked'] = True
             roles.append(role)
     return roles
 

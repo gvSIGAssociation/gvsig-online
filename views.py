@@ -2658,7 +2658,8 @@ def layer_create_with_group(request, layergroup_id):
         if 'gvsigol_plugin_form' in INSTALLED_APPS:
             from gvsigol_plugin_form.models import Form
             forms = Form.objects.all()
-        groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
+        # since created layers are empty, it makes sense to set write permissions for the creator
+        groups = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request), creator_all=True)
         data = {
             'form': form,
             'forms': forms,
