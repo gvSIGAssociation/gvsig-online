@@ -1,6 +1,7 @@
 import importlib
-
+import logging
 from gvsigol_auth.django_auth import get_primary_role
+
 
 try:
     from gvsigol import settings
@@ -10,7 +11,9 @@ try:
     else:
         auth_backend = importlib.import_module(settings.GVSIGOL_AUTH_BACKEND)
 except:
+    logging.getLogger('gvsigol').exception('Error importing GVSIGOL_AUTH_BACKEND. Falling back to gvsigol_auth.django_auth')
     auth_backend = importlib.import_module('gvsigol_auth.django_auth')
+
 
 has_group = auth_backend.has_group
 """Checks whether a user has the provided role. Important: provide a

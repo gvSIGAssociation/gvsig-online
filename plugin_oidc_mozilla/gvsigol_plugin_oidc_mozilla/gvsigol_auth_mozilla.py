@@ -18,6 +18,8 @@ from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredErr
 from gvsigol_auth import signals
 from rest_framework.request import Request
 from django.conf import settings
+import importlib
+
 try:
     import threading
 except ImportError: # remove in python 3.7
@@ -25,6 +27,21 @@ except ImportError: # remove in python 3.7
 LOGGER = logging.getLogger('gvsigol')
 KEYCLOAK_TIMEOUT = 30
 
+
+__conf_cache = {}
+
+def get_gvsigol_auth_middleware():
+    if not 'gvsigol_auth_middleware' in __conf_cache:
+        try:
+            from gvsigol import settings
+            if settings.GVSIGOL_AUTH_MIDDLEWARE:
+                __conf_cache['gvsigol_auth_middleware'] = importlib.import_module(settings.GVSIGOL_AUTH_MIDDLEWARE)
+                logging.getLogger('gvsigol').info(f'Configured {settings.GVSIGOL_AUTH_MIDDLEWARE} as GVSIGOL_AUTH_MIDDLEWARE')
+            else:
+                __conf_cache['gvsigol_auth_middleware'] = None
+        except Exception as e:
+            __conf_cache['gvsigol_auth_middleware'] = None
+    return __conf_cache['gvsigol_auth_middleware']
 
 MAIN_SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
 STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
@@ -1375,7 +1392,11 @@ def get_group_details(group):
     return _get_admin_session().get_group_details(group)
 
 def get_primary_role(username):
-    return 'ROLE_UG_' + username.upper()
+    role_name = 'ROLE_UG_' + username.upper()
+    if get_gvsigol_auth_middleware():
+        return get_gvsigol_auth_middleware().get_primary_role(username, role_name)
+    return role_name
+
 
 def to_provider_rolename(role, provider=None):
     # only used for Geoserver at the moment, ignoring provider
