@@ -12,6 +12,18 @@ from gvsigol_plugin_oidc_mozilla.gvsigol_auth_mozilla import MAIN_SUPERUSER_ROLE
 LOGGER = logging.getLogger(__name__)
 
 class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
+    def __init__(self, *args, **kwargs):
+        if self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE', ''):
+            try:
+                self.gvsigol_oidc_config = importlib.import_module(self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE'))
+            except Exception as e:
+                LOGGER.exception('unexpected error importing OIDC_GVSIGOL_CONFIG_MODULE')
+                print(e)
+                self.gvsigol_oidc_config = None
+        else:
+            self.gvsigol_oidc_config = None
+        super().__init__(*args, **kwargs)
+
     def describe_user_by_claims(self, claims):
             username = claims.get('username')
             return 'username {}'.format(username)
@@ -36,16 +48,10 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             if 'username' not in claims:
                 LOGGER.warning('username is required in claims')
                 return False
-        if self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE', ''):
-            try:
-                gvsigol_oidc_config = importlib.import_module(self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE'))
-                if not gvsigol_oidc_config.verify_claims(claims):
+        if self.gvsigol_oidc_config:
+            if not self.gvsigol_oidc_config.verify_claims(claims):
                     LOGGER.warning('gvsigol_verify_claims check failed')
                     return False
-            except Exception as e:
-                LOGGER.exception('error configuring user using OIDC_GVSIGOL_CONFIG_MODULE.config_user')
-                print(e)
-
 
         return True
             
@@ -61,10 +67,9 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             is_staff = (STAFF_ROLE in django_roles)
         )
         
-        if self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE', ''):
+        if self.gvsigol_oidc_config:
             try:
-                gvsigol_oidc_config = importlib.import_module(self.get_settings('OIDC_GVSIGOL_CONFIG_MODULE'))
-                if not gvsigol_oidc_config.config_user(user, claims):
+                if not self.gvsigol_oidc_config.config_user(user, claims):
                     LOGGER.exception('error while configuring user using OIDC_GVSIGOL_CONFIG_MODULE.config_user')
                     return None
             except Exception as e:
