@@ -5,8 +5,23 @@ from django.contrib.auth import get_user_model
 from gvsigol_auth.models import Role
 import gvsigol_auth.services as auth_services
 from gvsigol_auth import signals
-import logging
+import logging, importlib
 LOGGER = logging.getLogger('gvsigol')
+
+__conf_cache = {}
+
+def get_gvsigol_auth_middleware():
+    if not 'gvsigol_auth_middleware' in __conf_cache:
+        try:
+            from gvsigol import settings
+            if settings.GVSIGOL_AUTH_MIDDLEWARE:
+                __conf_cache['gvsigol_auth_middleware'] = importlib.import_module(settings.GVSIGOL_AUTH_MIDDLEWARE)
+                logging.getLogger('gvsigol').info(f'Configured {settings.GVSIGOL_AUTH_MIDDLEWARE} as GVSIGOL_AUTH_MIDDLEWARE')
+            else:
+                __conf_cache['gvsigol_auth_middleware'] = None
+        except Exception as e:
+            __conf_cache['gvsigol_auth_middleware'] = None
+    return __conf_cache['gvsigol_auth_middleware']
 
 def check_group_support():
     return False
@@ -724,7 +739,10 @@ def get_group_details(group):
     return get_role_details(group)
 
 def get_primary_role(username):
-    return 'ug_' + username.lower()
+    role_name = 'ug_' + username.lower()
+    if get_gvsigol_auth_middleware():
+        return get_gvsigol_auth_middleware().get_primary_role(username, role_name)
+    return role_name
 
 def to_provider_rolename(role, provider=None):
     # only used for Geoserver at the moment, ignoring provider
