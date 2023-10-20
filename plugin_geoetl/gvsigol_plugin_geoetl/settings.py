@@ -6,11 +6,21 @@ URL_GEOCODER = {
     'icv-reverse': "http://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?&x=%s&y=%s"
 }
 
+try:
+    from gvsigol import settings_passwords
+    USER = settings_passwords.DB_USER_DEVEL
+    PASS = settings_passwords.DB_PW_DEVEL
+except:
+    USER = 'postgres'
+    PASS = 'postgres'
+
+
+
 GEOETL_DB = {
     'host': 'localhost',
     'port': '5432',
     'database': 'gvsigonline',
-    'user': 'gvsigonline',
-    'password': 'gvsigonline',
+    'user': USER,
+    'password': PASS,
     'schema': 'ds_plugin_geoetl'
 }
