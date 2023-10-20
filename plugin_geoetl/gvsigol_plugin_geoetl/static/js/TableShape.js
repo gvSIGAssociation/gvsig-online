@@ -1,8 +1,10 @@
-var jsonParams = []
+var jsonParams = [];
 
 var formData = new FormData();
 
-var listLabel=[]
+var listLabel=[];
+
+var paramsTransTpl = gettext('Parameters: {}');
 
 function getPerAttr(){
     var memento= this._super();
@@ -172,7 +174,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('InDenova Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('InDenova'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -618,7 +620,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('SEGEX Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('SEGEX'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -1192,7 +1194,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('CSV Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('CSV'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -1420,7 +1422,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('JSON Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('JSON'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -1934,7 +1936,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('Excel Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('Excel'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -2310,7 +2312,7 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('XML Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('XML'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -2765,7 +2767,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('Shapefile Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('Shapefile'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -3008,7 +3010,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('Oracle Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('Oracle'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -3371,7 +3373,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('PostGIS Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('PostGIS'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -3758,7 +3760,7 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('KML/KMZ Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('KML/KMZ'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -4069,7 +4071,7 @@ crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('Grid Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('Grid'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -4385,7 +4387,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Join Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Join'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -4738,7 +4740,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Compare Rows Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Compare Rows'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -5047,7 +5049,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Remove Attribute Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Remove Attribute'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -5307,7 +5309,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext("Rename Attribute Parameters")+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("Rename Attribute"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -5559,7 +5561,7 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext("Concatenate Attributes Parameters")+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("Concatenate Attributes"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -5810,7 +5812,7 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext("Pad Attribute Parameters")+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("Pad Attribute"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -6070,7 +6072,7 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Filter Duplicate Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Filter Duplicate'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -6334,7 +6336,7 @@ trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Validate Geometry Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Validate Geometry'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -6605,7 +6607,7 @@ trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Simple Geometry Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Simple Geometry'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -6871,7 +6873,7 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Modify Value Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Modify Value'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -7112,7 +7114,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Counter Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Counter'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -7359,7 +7361,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Calculator Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Calculator'))+'</h4>'+
                     '</div>'+
                     '<div  class="modal-body">'+
                         '<form>'+
@@ -7716,7 +7718,7 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext("Change Attribute Type Parameters")+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("Change Attribute Type"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -7971,7 +7973,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Execute SQL Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Execute SQL'))+'</h4>'+
                     '</div>'+
                         '<div  class="modal-body">'+
                             '<form>'+
@@ -8484,7 +8486,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext("Create Attribute Parameters")+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("Create Attribute"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -8730,7 +8732,7 @@ trans_ExposeAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext("Expose Attribute Parameters")+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("Expose Attribute"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -9001,7 +9003,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Filter Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Filter'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -9324,7 +9326,7 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Intersection Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Intersection'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -9633,7 +9635,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Spatial Relation Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Spatial Relation'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -10107,7 +10109,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext("Keep Attribute Parameters")+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("Keep Attribute"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -10345,7 +10347,7 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Reproject Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Reproject'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -10605,7 +10607,7 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Cadastral Geometry Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Cadastral Geometry'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -10855,7 +10857,7 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('MGRS Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('MGRS'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -11153,7 +11155,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Text to Point Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Text to Point'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -11431,7 +11433,7 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('WKT to Geometry Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('WKT to Geometry'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -11700,7 +11702,7 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Split Attribute Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Split Attribute'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -11966,7 +11968,7 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Explode List Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Explode List'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -12225,7 +12227,7 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Union Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Union'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -13121,7 +13123,7 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Calculate Area Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Calculate Area'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -13356,7 +13358,7 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Current Date Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Current Date'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -13608,7 +13610,7 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title" >'+gettext('Geocoder Parameters')+'</h4>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Geocoder'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -13968,7 +13970,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+gettext('PostGIS Parameters')+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('PostGIS'))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+

@@ -5,8 +5,8 @@
         <div id="read-list-box" class="box searchable-list-box">
             <div class="box-header">
                 <div class="form-horizontal">
-                    <h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Give the selected groups permissions to edit or execute" %}</h3>
-                    <div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" /></div>
+                    <h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Give the selected roles permissions to edit or execute" %}</h3>
+                    <div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" /></div>
               </div>
             </div>
             <div class="box-body">
@@ -24,12 +24,12 @@
                                         <label>
                                             <input class="layer-read-checkbox" type="checkbox" name="edit-usergroup-{{group.name}}" id="edit-usergroup-{{group.name}}"
                                              {% if group.name in editing_role %} checked {% endif %}/>
-                                            <span>{% trans "Edit permissions" %}</span>
+                                            <span>{% trans "Edit permission" %}</span>
                                         </label>
                                         <label>
                                             <input class="layer-read-checkbox" type="checkbox" name="execute-usergroup-{{group.name}}" id="execute-usergroup-{{group.name}}"
                                              {% if group.name in execution_role %} checked {% endif %}/>
-                                            <span>{% trans "Execute permissions" %}</span>
+                                            <span>{% trans "Execute permission" %}</span>
                                         </label>                                        
                                 </div>
                             </span>
