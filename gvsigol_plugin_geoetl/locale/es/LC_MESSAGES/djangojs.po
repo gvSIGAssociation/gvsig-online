@@ -64,9 +64,6 @@ msgstr "Aceptar"
 msgid "Response"
 msgstr "Respuesta"
 
-msgid "Excel Parameters"
-msgstr "Parámetros Excel"
-
 msgid "Choose excel file:"
 msgstr "Elige excel:"
 
@@ -85,9 +82,6 @@ msgstr "Entrada"
 msgid "Output"
 msgstr "Salida"
 
-msgid "Shapefile Parameters"
-msgstr "Parámetros Shapefile"
-
 msgid "Choose shapefile:"
 msgstr "Elige shapefile:"
 
@@ -96,9 +90,6 @@ msgstr "Ruta:"
 
 msgid "Join"
 msgstr "Unión"
-
-msgid "Join Parameters"
-msgstr "Parámetros Unión"
 
 msgid "Main table attribute:"
 msgstr "Atributo tabla principal:"
@@ -121,17 +112,11 @@ msgstr "Sec. Sin Usar"
 msgid "Remove Attribute"
 msgstr "Elimina Atributo"
 
-msgid "Remove Attribute Parameters"
-msgstr "Parámetros Elimina Atributo"
-
 msgid "Attribute to remove:"
 msgstr "Atributo a eliminar:"
 
 msgid "Rename Attribute"
 msgstr "Renombra Atributo"
-
-msgid "Rename Attribute Parameters"
-msgstr "Parámetros Renombra Atributo"
 
 msgid "Attribute to rename:"
 msgstr "Atributo a renombrar:"
@@ -142,9 +127,6 @@ msgstr "Nuevo nombre:"
 msgid "Modify Value"
 msgstr "Modifica Valor"
 
-msgid "Modify Value Parameters"
-msgstr "Parámetros Modifica Valor"
-
 msgid "Attribute to modify:"
 msgstr "Atributo a modificar:"
 
@@ -154,9 +136,6 @@ msgstr "Nuevo valor:"
 msgid "Create Attribute"
 msgstr "Crea Atributo"
 
-msgid "Create Attribute Parameters"
-msgstr "Parámetros Crea Atributo"
-
 msgid "New attribute:"
 msgstr "Nuevo atributo:"
 
@@ -165,9 +144,6 @@ msgstr "Valor:"
 
 msgid "Filter"
 msgstr "Filtro"
-
-msgid "Filter Parameters"
-msgstr "Parámetros Filtro"
 
 msgid "Attribute:"
 msgstr "Atributo:"
@@ -193,17 +169,8 @@ msgstr "Falso"
 msgid "Keep Attribute"
 msgstr "Mantén Atributo"
 
-msgid "Keep Attribute Parameters"
-msgstr "Parámetros Mantén Atributo"
-
 msgid "Attribute to keep:"
 msgstr "Atributo a manetener:"
-
-msgid "PostgreSQL Parameters"
-msgstr "Parámetros PostgreSQL"
-
-msgid "PostGIS Parameters"
-msgstr "Parámetros PostGIS"
 
 msgid "Host:"
 msgstr "Anfitrión:"
@@ -256,14 +223,11 @@ msgstr "Nombre de tu base de datos"
 msgid "schema.tablename"
 msgstr "esquema.nombretabla"
 
-msgid "Connection parameters are valids."
+msgid "Connection parameters are valid."
 msgstr "Los parámetros de conexión son válidos."
 
-msgid "Connection parameters are not valids."
+msgid "Connection parameters are not valid."
 msgstr "Los parámetros de conexión no son válidos."
-
-msgid "CSV Parameters"
-msgstr "Parámetros CSV"
 
 msgid "Choose csv file:"
 msgstr "Elige csv:"
@@ -277,17 +241,11 @@ msgstr "Insertar si no se carga el PRJ"
 msgid "Reproject"
 msgstr "Reproyectar"
 
-msgid "Reproject Parameters"
-msgstr "Parámetros Reproyectar"
-
 msgid "Source EPSG:"
 msgstr "EPSG origen:"
 
 msgid "Target EPSG:"
 msgstr "EPSG destino:"
-
-msgid "Counter Parameters"
-msgstr "Parámetros Contador"
 
 msgid "New counter attribute:"
 msgstr "Nuevo atributo contador:"
@@ -300,9 +258,6 @@ msgstr "Contador"
 
 msgid "Calculator"
 msgstr "Calculador"
-
-msgid "Calculator Parameters"
-msgstr "Parámetros Calculador"
 
 msgid "Math functions:"
 msgstr "Funciones matemáticas:"
@@ -324,6 +279,9 @@ msgstr "Elige fichero"
 
 msgid "Load sheets"
 msgstr "Carga hojas"
+
+msgid "Set parameters of all tasks before save"
+msgstr "Configura los parámetros de todas las tareas antes de guardar"
 
 msgid "New"
 msgstr "Nuevo"
@@ -403,14 +361,11 @@ msgstr "se sobreescribirá. Si no quieres que se sobreescriba deja el ID vacío.
 msgid "Cadastral Geom."
 msgstr "Geom. Catastral"
 
-msgid "Cadastral Geometry Parameters"
-msgstr "Parámetros Geometría Catastral"
+msgid "Cadastral Geometry"
+msgstr "Geometría Catastral"
 
 msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
 msgstr "Atributo de la Referencia Catastral (salida en EPSG - 4326):"
-
-msgid "MGRS Parameters"
-msgstr "Parámetros MGRS"
 
 msgid "Select mode:"
 msgstr "Selecciona el modo:"
@@ -433,12 +388,8 @@ msgstr "Atributo de latitud"
 msgid "Text to Point"
 msgstr "Texto a Punto"
 
-msgid "Text to Point Parameters"
-msgstr "Parámetros Texto a Punto"
-
 msgid "Insert EPSG:"
 msgstr "Inserta EPSG:"
-
 
 msgid "Add DB"
 msgstr "Añade BBDD"
@@ -509,15 +460,6 @@ msgstr "Elige fichero"
 msgid "Insert if needed"
 msgstr "Inserta si se necesita"
 
-msgid "InDenova Parameters"
-msgstr "Parámetros InDenova"
-
-msgid "KML/KMZ Parameters"
-msgstr "Parámetros KML/KMZ"
-
-msgid "Oracle Parameters"
-msgstr "Parámetros Oracle"
-
 msgid "DB Connection:"
 msgstr "Conexión BBDD"
 
@@ -566,8 +508,8 @@ msgstr "Funciones con textos:"
 msgid "Change Attr. Type"
 msgstr "Cambia Tipo Atr."
 
-msgid "Change Attribute Type Parameters"
-msgstr "Parámetros Cambia Tipo Atributo"
+msgid "Change Attribute Type"
+msgstr "Cambia Tipo Atributo"
 
 msgid "Attribute to change type:"
 msgstr "Atributo a cambiar el tipo:"
@@ -605,9 +547,6 @@ msgstr "Cambios"
 msgid "Comp. Not Used"
 msgstr "Comp. sin usar"
 
-msgid "Compare Rows Parameters"
-msgstr "Parámetros Compara Filas"
-
 msgid "Concatenate Attr."
 msgstr "Concatena Atr."
 
@@ -623,14 +562,11 @@ msgstr "Separador (opc.)"
 msgid "Separator"
 msgstr "Separador"
 
-msgid "Concatenate Attributes Parameters"
-msgstr "Parámetros Concatena Atributos"
+msgid "Concatenate Attributes"
+msgstr "Concatena Atributos"
 
 msgid "Current Date"
 msgstr "Fecha Actual"
-
-msgid "Current Date Parameters"
-msgstr "Parámetros Fecha Actual"
 
 msgid "New date attribute"
 msgstr "Nuevo atributo fecha"
@@ -650,17 +586,11 @@ msgstr "Únicos"
 msgid "Duplicated"
 msgstr "Duplicados"
 
-msgid "Filter Duplicate Parameters"
-msgstr "Parámetros Filtra Duplicados"
-
 msgid "Attributes that must be uniques:"
 msgstr "Atributos que deben ser únicos:"
 
 msgid "Pad Attribute"
 msgstr "Rellena atributo"
-
-msgid "Pad Attribute Parameters"
-msgstr "Parámetros Rellena Atributos"
 
 msgid "Attribute to pad:"
 msgstr "Atributo a rellenar:"
@@ -682,9 +612,6 @@ msgstr "Texto de relleno:"
 
 msgid "Calculate Area"
 msgstr "Calcula Área"
-
-msgid "Calculate Area Parameters"
-msgstr "Parámetros Calcula Área"
 
 msgid "New area attribute:"
 msgstr "Nuevo atributo área:"
@@ -716,9 +643,6 @@ msgstr "Multipolígonos"
 msgid "Geocoder"
 msgstr "Geocodificador"
 
-msgid "Geocoder Parameters"
-msgstr "Parámetros Geocodificador"
-
 msgid "Engine"
 msgstr "Motor"
 
@@ -737,9 +661,6 @@ msgstr "Secundaria"
 msgid "Intersection"
 msgstr "Intersección"
 
-msgid "Intersection Parameters"
-msgstr "Parámetros Intersección"
-
 msgid "Merge attributes of the secondary input to the final output"
 msgstr "Fusiona atributos de la entrada secundaria a la salida final"
 
@@ -751,9 +672,6 @@ msgstr "Vacío para leer el de la entrada"
 
 msgid "Spatial Relation"
 msgstr "Relación Espacial"
-
-msgid "Spatial Relation Parameters"
-msgstr "Parámetros Relación Espacial"
 
 msgid "Intersects"
 msgstr "Intersecta"
@@ -770,20 +688,14 @@ msgstr "Multigeometría para todos los registros de la salida"
 msgid "Union"
 msgstr "Fusión"
 
-msgid "Union Parameters"
-msgstr "Parámetros Fusión"
-
-msgid "WKT to Geometry Parameters"
-msgstr "Parámetros WKT a Geometría"
+msgid "WKT to Geometry"
+msgstr "WKT a Geometría"
 
 msgid "WKT string Attribute:"
 msgstr "Atributo texto WKT:"
 
 msgid "Explode List"
 msgstr "Explota Lista"
-
-msgid "Explode List Parameters"
-msgstr "Parámetros Explota Lista"
 
 msgid "List Name:"
 msgstr "Nombre de la lista:"
@@ -794,9 +706,6 @@ msgstr "Nombre del atributo:"
 msgid "Split Attribute"
 msgstr "Parte Atributo"
 
-msgid "Split Attribute Parameters"
-msgstr "Parámetros Parte Atributo"
-
 msgid "String Attribute:"
 msgstr "Atributo Texto:"
 
@@ -805,9 +714,6 @@ msgstr "Partir por:"
 
 msgid "Execute SQL"
 msgstr "Ejecuta SQL"
-
-msgid "Execute SQL Parameters"
-msgstr "Parámetros Ejecuta SQL"
 
 msgid "Attributes from input:"
 msgstr "Atributos de la entrada:"
@@ -863,14 +769,11 @@ msgstr "Inverso"
 msgid "Direct"
 msgstr "Directo"
 
-msgid "JSON Parameters"
-msgstr "Parámetros JSON"
-
 msgid "Choose JSON file"
 msgstr "Elige .JSON"
 
 msgid "Do you want to load JSON data from an API REST?"
-msgstr "¿Quieres cargar datos JSON desde un API REST"
+msgstr "¿Quieres cargar datos JSON desde una API REST"
 
 msgid "Choose date"
 msgstr "Elige fecha"
@@ -898,9 +801,6 @@ msgstr "Empieza en:"
 
 msgid "Grid"
 msgstr "Cuadrícula"
-
-msgid "Grid Parameters"
-msgstr "Parámetros Cuadrícula"
 
 msgid "How to create the grid?"
 msgstr "¿Cómo crear la cuadrícula?"
@@ -947,14 +847,11 @@ msgstr "Orden"
 msgid "Expose Attributes"
 msgstr "Expón Atributos"
 
-msgid "Expose Attribute Parameters"
-msgstr "Parámetros Expón Atributos"
-
 msgid "Attribute to expose:"
 msgstr "Atributos a exponer:"
 
 msgid "Write attributes to expose separated by space"
-msgstr "Escribe los atributos a exponer separados por un espcacio"
+msgstr "Escribe los atributos a exponer separados por un espacio"
 
 msgid "Validate Geometry"
 msgstr "Valida Geometría"
@@ -965,14 +862,8 @@ msgstr "Válida"
 msgid "Invalid"
 msgstr "No válida"
 
-msgid "Validate Geometry Parameters"
-msgstr "Parámetros Valida Geometría"
-
 msgid "Stop workspace if there are invalid geometries"
 msgstr "Detén el espacio de trabajo si hay geometrías no válidas"
-
-msgid "Simple Geometry Parameters"
-msgstr "Parámetros Geometría Simple"
 
 msgid "Simple Geometry"
 msgstr "Geometría Simple"
@@ -983,3 +874,5 @@ msgstr "Detén el espacio de trabajo si alguna geometría no es simple"
 msgid "Give the selected groups permissions to edit or execute"
 msgstr "Otorgar permisos a los grupos seleccionados para editar o ejecutar"
 
+msgid "Parameters: {}"
+msgstr "Parámetros: {}"

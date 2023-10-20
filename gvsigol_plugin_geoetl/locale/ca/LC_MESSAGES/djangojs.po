@@ -13,20 +13,20 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-24 12:55+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2023-10-20 12:24+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "Undo"
 msgstr "Desfer"
@@ -80,7 +80,7 @@ msgid "Input"
 msgstr "Entrada"
 
 msgid "Output"
-msgstr "Eixida"
+msgstr "Sortida"
 
 msgid "Choose shapefile:"
 msgstr "Tria l'arxiu SHP:"
@@ -464,19 +464,19 @@ msgid "DB Connection:"
 msgstr "Connexió BBDD"
 
 msgid "Get owners:"
-msgstr "Obtén prop.:"
+msgstr "Obtingues prop.:"
 
 msgid "Get owners"
-msgstr "Obtén prop."
+msgstr "Obtingues prop."
 
 msgid "Owners:"
 msgstr "Propietaris:"
 
 msgid "Get tables:"
-msgstr "Obtén taules:"
+msgstr "Obtingues taules:"
 
 msgid "Get tables"
-msgstr "Obtén taules"
+msgstr "Obtingues taules"
 
 msgid "Tables:"
 msgstr "Taules:"
@@ -488,10 +488,10 @@ msgid "SQL statement:"
 msgstr "Sentència SQL:"
 
 msgid "Get schemas:"
-msgstr "Obtén esquema:"
+msgstr "Obtingues esquema:"
 
 msgid "Get schemas"
-msgstr "Obtén esquema"
+msgstr "Obtingues esquema"
 
 msgid "Schema:"
 msgstr "Esquema:"
@@ -663,7 +663,7 @@ msgid "Intersection"
 msgstr "Intersecció"
 
 msgid "Merge attributes of the secondary input to the final output"
-msgstr "Fusiona atributs de l'entrada secundària a l'eixida final"
+msgstr "Fusiona atributs de l'entrada secundària a la sortida final"
 
 msgid "Remove Geom."
 msgstr "Elimina Geom."
@@ -684,7 +684,7 @@ msgid "Within"
 msgstr "Dins de"
 
 msgid "Multigeometry for all features of the output"
-msgstr "Multigeometria per tots els registres d'eixida"
+msgstr "Multigeometria per tots els registres de sortida"
 
 msgid "Union"
 msgstr "Fusió"

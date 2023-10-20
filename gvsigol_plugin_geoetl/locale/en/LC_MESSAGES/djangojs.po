@@ -64,9 +64,6 @@ msgstr ""
 msgid "Response"
 msgstr ""
 
-msgid "Excel Parameters"
-msgstr ""
-
 msgid "Choose excel file:"
 msgstr ""
 
@@ -85,9 +82,6 @@ msgstr ""
 msgid "Output"
 msgstr ""
 
-msgid "Shapefile Parameters"
-msgstr ""
-
 msgid "Choose shapefile:"
 msgstr ""
 
@@ -95,9 +89,6 @@ msgid "Path:"
 msgstr ""
 
 msgid "Join"
-msgstr ""
-
-msgid "Join Parameters"
 msgstr ""
 
 msgid "Main table attribute:"
@@ -121,16 +112,10 @@ msgstr ""
 msgid "Remove Attribute"
 msgstr ""
 
-msgid "Remove Attribute Parameters"
-msgstr ""
-
 msgid "Attribute to remove:"
 msgstr ""
 
 msgid "Rename Attribute"
-msgstr ""
-
-msgid "Rename Attribute Parameters"
 msgstr ""
 
 msgid "Attribute to rename:"
@@ -142,9 +127,6 @@ msgstr ""
 msgid "Modify Value"
 msgstr ""
 
-msgid "Modify Value Parameters"
-msgstr ""
-
 msgid "Attribute to modify:"
 msgstr ""
 
@@ -154,9 +136,6 @@ msgstr ""
 msgid "Create Attribute"
 msgstr ""
 
-msgid "Create Attribute Parameters"
-msgstr ""
-
 msgid "New attribute:"
 msgstr ""
 
@@ -164,9 +143,6 @@ msgid "Value:"
 msgstr ""
 
 msgid "Filter"
-msgstr ""
-
-msgid "Filter Parameters"
 msgstr ""
 
 msgid "Attribute:"
@@ -193,16 +169,7 @@ msgstr ""
 msgid "Keep Attribute"
 msgstr ""
 
-msgid "Keep Attribute Parameters"
-msgstr ""
-
 msgid "Attribute to keep:"
-msgstr ""
-
-msgid "PostgreSQL Parameters"
-msgstr ""
-
-msgid "PostGIS Parameters"
 msgstr ""
 
 msgid "Host:"
@@ -256,13 +223,10 @@ msgstr ""
 msgid "schema.tablename"
 msgstr ""
 
-msgid "Connection parameters are valids."
+msgid "Connection parameters are valid."
 msgstr ""
 
-msgid "Connection parameters are not valids."
-msgstr ""
-
-msgid "CSV Parameters"
+msgid "Connection parameters are not valid."
 msgstr ""
 
 msgid "Choose csv file:"
@@ -277,16 +241,10 @@ msgstr ""
 msgid "Reproject"
 msgstr ""
 
-msgid "Reproject Parameters"
-msgstr ""
-
 msgid "Source EPSG:"
 msgstr ""
 
 msgid "Target EPSG:"
-msgstr ""
-
-msgid "Counter Parameters"
 msgstr ""
 
 msgid "New counter attribute:"
@@ -299,9 +257,6 @@ msgid "Counter"
 msgstr ""
 
 msgid "Calculator"
-msgstr ""
-
-msgid "Calculator Parameters"
 msgstr ""
 
 msgid "Math functions:"
@@ -323,6 +278,9 @@ msgid "Select file"
 msgstr ""
 
 msgid "Load sheets"
+msgstr ""
+
+msgid "Set parameters of all tasks before save"
 msgstr ""
 
 msgid "New"
@@ -403,13 +361,10 @@ msgstr ""
 msgid "Cadastral Geom."
 msgstr ""
 
-msgid "Cadastral Geometry Parameters"
+msgid "Cadastral Geometry"
 msgstr ""
 
 msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
-msgstr ""
-
-msgid "MGRS Parameters"
 msgstr ""
 
 msgid "Select mode:"
@@ -431,9 +386,6 @@ msgid "Latitude attribute:"
 msgstr ""
 
 msgid "Text to Point"
-msgstr ""
-
-msgid "Text to Point Parameters"
 msgstr ""
 
 msgid "Insert EPSG:"
@@ -508,15 +460,6 @@ msgstr ""
 msgid "Insert if needed"
 msgstr ""
 
-msgid "InDenova Parameters"
-msgstr ""
-
-msgid "KML/KMZ Parameters"
-msgstr ""
-
-msgid "Oracle Parameters"
-msgstr ""
-
 msgid "DB Connection:"
 msgstr ""
 
@@ -565,7 +508,7 @@ msgstr ""
 msgid "Change Attr. Type"
 msgstr ""
 
-msgid "Change Attribute Type Parameters"
+msgid "Change Attribute Type"
 msgstr ""
 
 msgid "Attribute to change type:"
@@ -604,9 +547,6 @@ msgstr ""
 msgid "Comp. Not Used"
 msgstr ""
 
-msgid "Compare Rows Parameters"
-msgstr ""
-
 msgid "Concatenate Attr."
 msgstr ""
 
@@ -622,13 +562,10 @@ msgstr ""
 msgid "Separator"
 msgstr ""
 
-msgid "Concatenate Attributes Parameters"
+msgid "Concatenate Attributes"
 msgstr ""
 
 msgid "Current Date"
-msgstr ""
-
-msgid "Current Date Parameters"
 msgstr ""
 
 msgid "New date attribute"
@@ -649,16 +586,10 @@ msgstr ""
 msgid "Duplicated"
 msgstr ""
 
-msgid "Filter Duplicate Parameters"
-msgstr ""
-
 msgid "Attributes that must be uniques:"
 msgstr ""
 
 msgid "Pad Attribute"
-msgstr ""
-
-msgid "Pad Attribute Parameters"
 msgstr ""
 
 msgid "Attribute to pad:"
@@ -680,9 +611,6 @@ msgid "Pad String:"
 msgstr ""
 
 msgid "Calculate Area"
-msgstr ""
-
-msgid "Calculate Area Parameters"
 msgstr ""
 
 msgid "New area attribute:"
@@ -715,9 +643,6 @@ msgstr ""
 msgid "Geocoder"
 msgstr ""
 
-msgid "Geocoder Parameters"
-msgstr ""
-
 msgid "Engine"
 msgstr ""
 
@@ -736,9 +661,6 @@ msgstr ""
 msgid "Intersection"
 msgstr ""
 
-msgid "Intersection Parameters"
-msgstr ""
-
 msgid "Merge attributes of the secondary input to the final output"
 msgstr ""
 
@@ -749,9 +671,6 @@ msgid "Empty to read from input layer"
 msgstr ""
 
 msgid "Spatial Relation"
-msgstr ""
-
-msgid "Spatial Relation Parameters"
 msgstr ""
 
 msgid "Intersects"
@@ -769,19 +688,13 @@ msgstr ""
 msgid "Union"
 msgstr ""
 
-msgid "Union Parameters"
-msgstr ""
-
-msgid "WKT to Geometry Parameters"
+msgid "WKT to Geometry"
 msgstr ""
 
 msgid "WKT string Attribute:"
 msgstr ""
 
 msgid "Explode List"
-msgstr ""
-
-msgid "Explode List Parameters"
 msgstr ""
 
 msgid "List Name:"
@@ -793,9 +706,6 @@ msgstr ""
 msgid "Split Attribute"
 msgstr ""
 
-msgid "Split Attribute Parameters"
-msgstr ""
-
 msgid "String Attribute:"
 msgstr ""
 
@@ -803,9 +713,6 @@ msgid "Split by:"
 msgstr ""
 
 msgid "Execute SQL"
-msgstr ""
-
-msgid "Execute SQL Parameters"
 msgstr ""
 
 msgid "Attributes from input:"
@@ -862,9 +769,6 @@ msgstr ""
 msgid "Direct"
 msgstr ""
 
-msgid "JSON Parameters"
-msgstr ""
-
 msgid "Choose JSON file"
 msgstr ""
 
@@ -896,9 +800,6 @@ msgid "Starts in:"
 msgstr ""
 
 msgid "Grid"
-msgstr ""
-
-msgid "Grid Parameters"
 msgstr ""
 
 msgid "How to create the grid?"
@@ -946,9 +847,6 @@ msgstr ""
 msgid "Expose Attributes"
 msgstr ""
 
-msgid "Expose Attribute Parameters"
-msgstr ""
-
 msgid "Attribute to expose:"
 msgstr ""
 
@@ -964,17 +862,14 @@ msgstr ""
 msgid "Invalid"
 msgstr ""
 
-msgid "Validate Geometry Parameters"
-msgstr ""
-
 msgid "Stop workspace if there are invalid geometries"
-msgstr ""
-
-msgid "Simple Geometry Parameters"
 msgstr ""
 
 msgid "Simple Geometry"
 msgstr ""
 
 msgid "Stop workspace if some geometry is not simple"
+msgstr ""
+
+msgid "Parameters: {}"
 msgstr ""
