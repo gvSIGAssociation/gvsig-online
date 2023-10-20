@@ -875,5 +875,5 @@ msgstr "Detingues l'espai de treball si alguna geometria no és simple"
 msgid "Give the selected groups permissions to edit or execute"
 msgstr "Dona permís als grups seleccionats per editar o executar"
 
-msgid "Paràmetres: {}"
-msgstr ""
+msgid "Parameters: {}"
+msgstr "Paràmetres: {}"
