@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-16 10:15+0000\n"
+"POT-Creation-Date: 2023-10-23 13:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,16 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: gvsigol/settings.py:360
-msgid "Spanish"
+#: templates/mobileview_project_list.html:72
+msgid "Version"
 msgstr ""
 
-#: gvsigol/settings.py:361
-msgid "Valencian"
-msgstr ""
-
-#: gvsigol/settings.py:363
-msgid "English"
-msgstr ""
-
-#: gvsigol/settings.py:365
 #, fuzzy
-#| msgid "Portuguese"
-msgid "Brazilian Portuguese"
-msgstr "Portuguese (Brazil)"
+#~| msgid "Portuguese"
+#~ msgid "Portuguese"
+#~ msgstr "Portuguese (Brazil)"
+
+#, fuzzy
+#~| msgid "Portuguese"
+#~ msgid "Brazilian Portuguese"
+#~ msgstr "Portuguese (Brazil)"

@@ -20,9 +20,20 @@
     @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
+from django.utils.translation import ugettext_noop as _
+
 class ServiceException(Exception):
     pass
 
 class BackendNotAvailable(ServiceException):
     pass
 
+
+# ugettext_noop to keep all languages in .po regardless settings.py
+lang_ca = _("Catalan")
+lang_de = _("German")
+lang_en = _("English")
+lang_es = _("Spanish")
+lang_pt = _("Portuguese")
+lang_pt_br = _("Brazilian Portuguese")
+lang_va = _("Valencian")

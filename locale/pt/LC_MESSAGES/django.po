@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-16 10:15+0000\n"
+"POT-Creation-Date: 2023-10-23 13:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,23 +20,28 @@ msgstr ""
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
 
-#: gvsigol/settings.py:360
-msgid "Spanish"
-msgstr "Espanhol"
+#: templates/mobileview_project_list.html:72
+msgid "Version"
+msgstr ""
 
-#: gvsigol/settings.py:361
-msgid "Valencian"
-msgstr "Valenciano"
+#~ msgid "Catalan"
+#~ msgstr "Catalão"
 
-#: gvsigol/settings.py:363
-msgid "English"
-msgstr "Inglês"
+#~ msgid "English"
+#~ msgstr "Inglês"
 
-#: gvsigol/settings.py:365
+#~ msgid "Spanish"
+#~ msgstr "Espanhol"
+
 #, fuzzy
-#| msgid "Portuguese"
-msgid "Brazilian Portuguese"
-msgstr "Português (Brasil)"
+#~| msgid "Portuguese"
+#~ msgid "Portuguese"
+#~ msgstr "Português (Brasil)"
 
-msgid "Catalan"
-msgstr "Catalão"
+#, fuzzy
+#~| msgid "Portuguese"
+#~ msgid "Brazilian Portuguese"
+#~ msgstr "Português (Brasil)"
+
+#~ msgid "Valencian"
+#~ msgstr "Valenciano"
