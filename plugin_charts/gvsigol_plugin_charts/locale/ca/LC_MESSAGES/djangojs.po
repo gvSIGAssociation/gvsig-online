@@ -19,23 +19,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Language: es\n"
+"X-Language: ca\n"
 "X-Source-Language: C\n"
 
 msgid "Select chart"
-msgstr "Selecciona gráfico"
+msgstr "Selecciona gràfic"
 
 msgid "Show charts view"
-msgstr "Mostrar vista de gráficos"
+msgstr "Mostra vista de gràfics"
 
 msgid "Statistics"
-msgstr "Estadísticas"
+msgstr "Estadístiques"
 
 msgid "X axis"
-msgstr "Eje X"
+msgstr "Eix X"
 
 msgid "Y axis"
-msgstr "Eje Y"
+msgstr "Eix Y"
 
 msgid "Error loading charts plugin"
-msgstr "Error cargando plugin de charts"
+msgstr "Error carregant el plugin de gràfics"

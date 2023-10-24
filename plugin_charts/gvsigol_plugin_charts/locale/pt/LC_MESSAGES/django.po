@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-06 13:50+0000\n"
+"POT-Creation-Date: 2023-10-24 11:12+0000\n"
 "PO-Revision-Date: 2021-06-16 16:22+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -30,385 +30,312 @@ msgstr ""
 "X-Source-Language: C\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: gvsigol_plugin_charts/forms.py:31
-#: gvsigol_plugin_charts/templates/select_chart_type.html:21
+#: forms.py:31 templates/select_chart_type.html:21
 msgid "Bar Chart"
 msgstr "Gráfico de barras"
 
-#: gvsigol_plugin_charts/forms.py:32
-#: gvsigol_plugin_charts/templates/select_chart_type.html:30
+#: forms.py:32 templates/select_chart_type.html:30
 msgid "Line Chart"
 msgstr "Gráfico de linha"
 
-#: gvsigol_plugin_charts/forms.py:33
-#: gvsigol_plugin_charts/templates/select_chart_type.html:39
+#: forms.py:33 templates/select_chart_type.html:39
 msgid "Pie Chart"
 msgstr "Gráfico circular"
 
-#: gvsigol_plugin_charts/forms.py:37
+#: forms.py:37
 msgid "Layer"
 msgstr "Camada"
 
-#: gvsigol_plugin_charts/forms.py:38
+#: forms.py:38
 msgid "Type"
 msgstr "Tipo"
 
-#: gvsigol_plugin_charts/forms.py:39
-#: gvsigol_plugin_charts/templates/barchart_add.html:25
-#: gvsigol_plugin_charts/templates/barchart_add.html:97
-#: gvsigol_plugin_charts/templates/barchart_update.html:25
-#: gvsigol_plugin_charts/templates/barchart_update.html:97
-#: gvsigol_plugin_charts/templates/linechart_add.html:25
-#: gvsigol_plugin_charts/templates/linechart_add.html:97
-#: gvsigol_plugin_charts/templates/linechart_update.html:25
-#: gvsigol_plugin_charts/templates/linechart_update.html:97
-#: gvsigol_plugin_charts/templates/piechart_add.html:25
-#: gvsigol_plugin_charts/templates/piechart_add.html:76
-#: gvsigol_plugin_charts/templates/piechart_update.html:25
-#: gvsigol_plugin_charts/templates/piechart_update.html:76
+#: forms.py:39 templates/barchart_add.html:25 templates/barchart_add.html:97
+#: templates/barchart_update.html:25 templates/barchart_update.html:97
+#: templates/linechart_add.html:25 templates/linechart_add.html:97
+#: templates/linechart_update.html:25 templates/linechart_update.html:97
+#: templates/piechart_add.html:25 templates/piechart_add.html:76
+#: templates/piechart_update.html:25 templates/piechart_update.html:76
 msgid "Title"
 msgstr "Título"
 
-#: gvsigol_plugin_charts/forms.py:40
-#: gvsigol_plugin_charts/templates/barchart_add.html:31
-#: gvsigol_plugin_charts/templates/barchart_update.html:31
-#: gvsigol_plugin_charts/templates/linechart_add.html:31
-#: gvsigol_plugin_charts/templates/linechart_update.html:31
-#: gvsigol_plugin_charts/templates/piechart_add.html:31
-#: gvsigol_plugin_charts/templates/piechart_update.html:31
+#: forms.py:40 templates/barchart_add.html:31 templates/barchart_update.html:31
+#: templates/linechart_add.html:31 templates/linechart_update.html:31
+#: templates/piechart_add.html:31 templates/piechart_update.html:31
 msgid "Description"
 msgstr "Descrição"
 
-#: gvsigol_plugin_charts/models.py:15
+#: models.py:15
 msgid "gvsigol_plugin_charts manual title"
 msgstr "Plugin Charts (Estatistica)"
 
-#: gvsigol_plugin_charts/models.py:16
+#: models.py:16
 msgid "gvsigol_plugin_charts manual desc"
 msgstr "Esse plug-in permite que você crie e visualize gráficos estatísticos"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:11
+#: templates/barchart_add.html:11
 msgid "Add new bar chart"
 msgstr "Adicionar novo gráfico de barras"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:13
-#: gvsigol_plugin_charts/templates/barchart_update.html:13
-#: gvsigol_plugin_charts/templates/linechart_add.html:13
-#: gvsigol_plugin_charts/templates/linechart_update.html:13
-#: gvsigol_plugin_charts/templates/piechart_add.html:13
-#: gvsigol_plugin_charts/templates/piechart_update.html:13
+#: templates/barchart_add.html:13 templates/barchart_update.html:13
+#: templates/linechart_add.html:13 templates/linechart_update.html:13
+#: templates/piechart_add.html:13 templates/piechart_update.html:13
 msgid "Update preview"
 msgstr "Atualizar visualização"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:14
-#: gvsigol_plugin_charts/templates/linechart_add.html:14
-#: gvsigol_plugin_charts/templates/piechart_add.html:14
+#: templates/barchart_add.html:14 templates/linechart_add.html:14
+#: templates/piechart_add.html:14
 msgid "Save"
 msgstr "Salvar"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:26
-#: gvsigol_plugin_charts/templates/linechart_add.html:26
-#: gvsigol_plugin_charts/templates/piechart_add.html:26
+#: templates/barchart_add.html:26 templates/linechart_add.html:26
+#: templates/piechart_add.html:26
 msgid "Insert title"
 msgstr "Digite o título"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:36
-#: gvsigol_plugin_charts/templates/barchart_update.html:36
-#: gvsigol_plugin_charts/templates/linechart_add.html:36
-#: gvsigol_plugin_charts/templates/linechart_update.html:36
-#: gvsigol_plugin_charts/templates/piechart_add.html:36
-#: gvsigol_plugin_charts/templates/piechart_update.html:36
+#: templates/barchart_add.html:36 templates/barchart_update.html:36
+#: templates/linechart_add.html:36 templates/linechart_update.html:36
+#: templates/piechart_add.html:36 templates/piechart_update.html:36
 msgid "Dataset type"
 msgstr "Tipo de conjunto de dados"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:39
-#: gvsigol_plugin_charts/templates/barchart_update.html:39
-#: gvsigol_plugin_charts/templates/linechart_add.html:39
-#: gvsigol_plugin_charts/templates/linechart_update.html:39
-#: gvsigol_plugin_charts/templates/piechart_add.html:39
-#: gvsigol_plugin_charts/templates/piechart_update.html:39
+#: templates/barchart_add.html:39 templates/barchart_update.html:39
+#: templates/linechart_add.html:39 templates/linechart_update.html:39
+#: templates/piechart_add.html:39 templates/piechart_update.html:39
 msgid "Aggregated"
 msgstr "Adicionados"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:39
-#: gvsigol_plugin_charts/templates/barchart_update.html:39
-#: gvsigol_plugin_charts/templates/linechart_add.html:39
-#: gvsigol_plugin_charts/templates/linechart_update.html:39
-#: gvsigol_plugin_charts/templates/piechart_add.html:39
-#: gvsigol_plugin_charts/templates/piechart_update.html:39
+#: templates/barchart_add.html:39 templates/barchart_update.html:39
+#: templates/linechart_add.html:39 templates/linechart_update.html:39
+#: templates/piechart_add.html:39 templates/piechart_update.html:39
 msgid "Show aggregated data for a column"
 msgstr "Mostrar os dados adicionados da coluna"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:43
-#: gvsigol_plugin_charts/templates/barchart_update.html:43
-#: gvsigol_plugin_charts/templates/linechart_add.html:43
-#: gvsigol_plugin_charts/templates/linechart_update.html:43
-#: gvsigol_plugin_charts/templates/piechart_add.html:43
-#: gvsigol_plugin_charts/templates/piechart_update.html:43
+#: templates/barchart_add.html:43 templates/barchart_update.html:43
+#: templates/linechart_add.html:43 templates/linechart_update.html:43
+#: templates/piechart_add.html:43 templates/piechart_update.html:43
 msgid "Single selection"
 msgstr "Seleção Simples"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:43
-#: gvsigol_plugin_charts/templates/barchart_update.html:43
-#: gvsigol_plugin_charts/templates/linechart_add.html:43
-#: gvsigol_plugin_charts/templates/linechart_update.html:43
-#: gvsigol_plugin_charts/templates/piechart_add.html:43
-#: gvsigol_plugin_charts/templates/piechart_update.html:43
+#: templates/barchart_add.html:43 templates/barchart_update.html:43
+#: templates/linechart_add.html:43 templates/linechart_update.html:43
+#: templates/piechart_add.html:43 templates/piechart_update.html:43
 msgid "Shows the data of the last selected element"
 msgstr "Mostrar os dados do último elemento selecionado"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:47
-#: gvsigol_plugin_charts/templates/barchart_update.html:47
-#: gvsigol_plugin_charts/templates/linechart_add.html:47
-#: gvsigol_plugin_charts/templates/linechart_update.html:47
+#: templates/barchart_add.html:47 templates/barchart_update.html:47
+#: templates/linechart_add.html:47 templates/linechart_update.html:47
 msgid "Multiple selection"
 msgstr "Múltipla escolha"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:47
-#: gvsigol_plugin_charts/templates/barchart_update.html:47
-#: gvsigol_plugin_charts/templates/linechart_add.html:47
-#: gvsigol_plugin_charts/templates/linechart_update.html:47
+#: templates/barchart_add.html:47 templates/barchart_update.html:47
+#: templates/linechart_add.html:47 templates/linechart_update.html:47
 msgid "Shows the data of each selected element"
 msgstr "Mostrar os dados de cada elemento selecionado"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:52
-#: gvsigol_plugin_charts/templates/barchart_update.html:52
-#: gvsigol_plugin_charts/templates/linechart_add.html:52
-#: gvsigol_plugin_charts/templates/linechart_update.html:52
-#: gvsigol_plugin_charts/templates/piechart_add.html:48
-#: gvsigol_plugin_charts/templates/piechart_update.html:48
+#: templates/barchart_add.html:52 templates/barchart_update.html:52
+#: templates/linechart_add.html:52 templates/linechart_update.html:52
+#: templates/piechart_add.html:48 templates/piechart_update.html:48
 msgid "Select column with geographic names"
 msgstr "Selecionar coluna com nomes geográficos"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:58
-#: gvsigol_plugin_charts/templates/barchart_update.html:58
-#: gvsigol_plugin_charts/templates/linechart_add.html:58
-#: gvsigol_plugin_charts/templates/linechart_update.html:58
-#: gvsigol_plugin_charts/templates/piechart_add.html:54
-#: gvsigol_plugin_charts/templates/piechart_update.html:54
+#: templates/barchart_add.html:58 templates/barchart_update.html:58
+#: templates/linechart_add.html:58 templates/linechart_update.html:58
+#: templates/piechart_add.html:54 templates/piechart_update.html:54
 msgid "Select column with geometries"
 msgstr "Selecionar coluna com geometrias"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:66
-#: gvsigol_plugin_charts/templates/barchart_update.html:66
-#: gvsigol_plugin_charts/templates/linechart_add.html:66
-#: gvsigol_plugin_charts/templates/linechart_update.html:66
+#: templates/barchart_add.html:66 templates/barchart_update.html:66
+#: templates/linechart_add.html:66 templates/linechart_update.html:66
 msgid "Title for the X axis"
 msgstr "Título para o eixo X"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:67
-#: gvsigol_plugin_charts/templates/linechart_add.html:67
+#: templates/barchart_add.html:67 templates/linechart_add.html:67
 msgid "X axis"
 msgstr "Eixo X"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:70
-#: gvsigol_plugin_charts/templates/barchart_update.html:70
-#: gvsigol_plugin_charts/templates/linechart_add.html:70
-#: gvsigol_plugin_charts/templates/linechart_update.html:70
+#: templates/barchart_add.html:70 templates/barchart_update.html:70
+#: templates/linechart_add.html:70 templates/linechart_update.html:70
 msgid "Title for the Y axis"
 msgstr "Título para o eixo Y"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:71
-#: gvsigol_plugin_charts/templates/linechart_add.html:71
+#: templates/barchart_add.html:71 templates/linechart_add.html:71
 msgid "Y axis"
 msgstr "Eixo Y"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:78
-#: gvsigol_plugin_charts/templates/barchart_update.html:78
-#: gvsigol_plugin_charts/templates/linechart_add.html:78
-#: gvsigol_plugin_charts/templates/linechart_update.html:78
-msgid "Eje Y empieza en 0"
+#: templates/barchart_add.html:78 templates/barchart_update.html:78
+#: templates/linechart_add.html:78 templates/linechart_update.html:78
+msgid "Y axis starts at 0"
 msgstr ""
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:88
-#: gvsigol_plugin_charts/templates/barchart_update.html:88
-#: gvsigol_plugin_charts/templates/linechart_add.html:88
-#: gvsigol_plugin_charts/templates/linechart_update.html:88
-#: gvsigol_plugin_charts/templates/piechart_add.html:67
-#: gvsigol_plugin_charts/templates/piechart_update.html:67
+#: templates/barchart_add.html:88 templates/barchart_update.html:88
+#: templates/linechart_add.html:88 templates/linechart_update.html:88
+#: templates/piechart_add.html:67 templates/piechart_update.html:67
 msgid "Select data columns"
 msgstr "Selecionar colunas de dados"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:91
-#: gvsigol_plugin_charts/templates/barchart_update.html:91
-#: gvsigol_plugin_charts/templates/linechart_add.html:91
-#: gvsigol_plugin_charts/templates/linechart_update.html:91
-#: gvsigol_plugin_charts/templates/piechart_add.html:70
-#: gvsigol_plugin_charts/templates/piechart_update.html:70
+#: templates/barchart_add.html:91 templates/barchart_update.html:91
+#: templates/linechart_add.html:91 templates/linechart_update.html:91
+#: templates/piechart_add.html:70 templates/piechart_update.html:70
 msgid "Selected"
 msgstr "Selecionada"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:94
-#: gvsigol_plugin_charts/templates/barchart_update.html:94
-#: gvsigol_plugin_charts/templates/linechart_add.html:94
-#: gvsigol_plugin_charts/templates/linechart_update.html:94
-#: gvsigol_plugin_charts/templates/piechart_add.html:73
-#: gvsigol_plugin_charts/templates/piechart_update.html:73
+#: templates/barchart_add.html:94 templates/barchart_update.html:94
+#: templates/linechart_add.html:94 templates/linechart_update.html:94
+#: templates/piechart_add.html:73 templates/piechart_update.html:73
 msgid "Column name"
 msgstr "Nome da coluna"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:284
-#: gvsigol_plugin_charts/templates/barchart_update.html:331
-#: gvsigol_plugin_charts/templates/linechart_add.html:286
-#: gvsigol_plugin_charts/templates/linechart_update.html:334
-#: gvsigol_plugin_charts/templates/piechart_add.html:215
-#: gvsigol_plugin_charts/templates/piechart_update.html:252
+#: templates/barchart_add.html:284 templates/barchart_update.html:331
+#: templates/linechart_add.html:286 templates/linechart_update.html:334
+#: templates/piechart_add.html:215 templates/piechart_update.html:252
 msgid "You must select column with geographic names"
 msgstr "Você deve selecionar uma coluna com os nomes geográficos"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:288
-#: gvsigol_plugin_charts/templates/barchart_update.html:335
-#: gvsigol_plugin_charts/templates/linechart_add.html:290
-#: gvsigol_plugin_charts/templates/linechart_update.html:338
-#: gvsigol_plugin_charts/templates/piechart_add.html:219
-#: gvsigol_plugin_charts/templates/piechart_update.html:256
+#: templates/barchart_add.html:288 templates/barchart_update.html:335
+#: templates/linechart_add.html:290 templates/linechart_update.html:338
+#: templates/piechart_add.html:219 templates/piechart_update.html:256
 msgid "You must select column with geometries"
 msgstr "Você deve selecionar uma coluna com as geometrias"
 
-#: gvsigol_plugin_charts/templates/barchart_add.html:292
-#: gvsigol_plugin_charts/templates/barchart_update.html:339
-#: gvsigol_plugin_charts/templates/linechart_add.html:294
-#: gvsigol_plugin_charts/templates/linechart_update.html:342
-#: gvsigol_plugin_charts/templates/piechart_add.html:223
-#: gvsigol_plugin_charts/templates/piechart_update.html:260
+#: templates/barchart_add.html:292 templates/barchart_update.html:339
+#: templates/linechart_add.html:294 templates/linechart_update.html:342
+#: templates/piechart_add.html:223 templates/piechart_update.html:260
 msgid "At least one column must be selected"
 msgstr "Pelo menos uma coluna deve ser selecionada"
 
-#: gvsigol_plugin_charts/templates/barchart_update.html:11
+#: templates/barchart_update.html:11
 msgid "Update bar chart"
 msgstr "Atualizar gráfico de barras"
 
-#: gvsigol_plugin_charts/templates/barchart_update.html:14
-#: gvsigol_plugin_charts/templates/linechart_update.html:14
-#: gvsigol_plugin_charts/templates/piechart_update.html:14
+#: templates/barchart_update.html:14 templates/linechart_update.html:14
+#: templates/piechart_update.html:14
 msgid "Update"
 msgstr "Atualizar"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:14
+#: templates/chart_list.html:14
 msgid "Layer title"
 msgstr "Título da camada"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:15
+#: templates/chart_list.html:15
 msgid "Datastore"
 msgstr "Armazém de dados"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:16
-#: gvsigol_plugin_charts/templates/dashboard_charts_menu.html:9
-#: gvsigol_plugin_charts/templates/dashboard_charts_menu.html:17
+#: templates/chart_list.html:16 templates/dashboard_charts_menu.html:10
+#: templates/dashboard_charts_menu.html:18
 msgid "Charts"
 msgstr "Gráficos"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:60
+#: templates/chart_list.html:60
 msgid "Processing request..."
 msgstr "Solicitação de processamento..."
 
-#: gvsigol_plugin_charts/templates/chart_list.html:61
+#: templates/chart_list.html:61
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Busca%(sep)s"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:62
+#: templates/chart_list.html:62
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:63
+#: templates/chart_list.html:63
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:64
+#: templates/chart_list.html:64
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando de 0 a 0 de 0 registros"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:65
+#: templates/chart_list.html:65
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtragem %(max)s registros"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:67
+#: templates/chart_list.html:67
 msgid "Loading..."
 msgstr "Carregando..."
 
-#: gvsigol_plugin_charts/templates/chart_list.html:68
-#: gvsigol_plugin_charts/templates/chart_list.html:69
+#: templates/chart_list.html:68 templates/chart_list.html:69
 msgid "No records available"
 msgstr "Nenhum registro disponível"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:71
+#: templates/chart_list.html:71
 msgid "First"
 msgstr "Primeiro"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:72
+#: templates/chart_list.html:72
 msgid "Previous"
 msgstr "Anterior"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:73
+#: templates/chart_list.html:73
 msgid "Next"
 msgstr "Seguinte"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:74
+#: templates/chart_list.html:74
 msgid "Last"
 msgstr "Último"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:77
+#: templates/chart_list.html:77
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sSort ascendente"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:78
+#: templates/chart_list.html:78
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sSort descendente"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:84
+#: templates/chart_list.html:84
 msgid "Add chart"
 msgstr "Adicionar gráfico"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:88
+#: templates/chart_list.html:88
 msgid "Update chart"
 msgstr "Atualizar gráfico"
 
-#: gvsigol_plugin_charts/templates/chart_list.html:92
+#: templates/chart_list.html:92
 msgid "Delete chart"
 msgstr "Excluir gráfico"
 
-#: gvsigol_plugin_charts/templates/charts_dashboard.html:37
+#: templates/charts_dashboard.html:37
 msgid "Statistics"
 msgstr "Estatísticas"
 
-#: gvsigol_plugin_charts/templates/dashboard_charts_menu.html:15
+#: templates/dashboard_charts_menu.html:16
 msgid "Plugins"
 msgstr "Plugins"
 
-#: gvsigol_plugin_charts/templates/linechart_add.html:11
+#: templates/linechart_add.html:11
 msgid "Add new line chart"
 msgstr "Adicionar novo gráfico de linhas"
 
-#: gvsigol_plugin_charts/templates/linechart_update.html:11
+#: templates/linechart_update.html:11
 msgid "Update line chart"
 msgstr "Atualizar gráfico de linhas"
 
-#: gvsigol_plugin_charts/templates/piechart_add.html:11
+#: templates/piechart_add.html:11
 msgid "Add new pie chart"
 msgstr "Adicionar novo gráfico circular"
 
-#: gvsigol_plugin_charts/templates/piechart_update.html:11
+#: templates/piechart_update.html:11
 msgid "Update pie chart"
 msgstr "Atualizar gráfico circular"
 
-#: gvsigol_plugin_charts/templates/select_chart_type.html:10
+#: templates/select_chart_type.html:10
 msgid "Create new chart"
 msgstr "Criar novo gráfico"
 
-#: gvsigol_plugin_charts/templates/select_chart_type.html:22
+#: templates/select_chart_type.html:22
 msgid "Create new bar chart"
 msgstr "Criar novo gráfico de barras"
 
-#: gvsigol_plugin_charts/templates/select_chart_type.html:31
+#: templates/select_chart_type.html:31
 msgid "Create new line chart"
 msgstr "Criar novo gráfico de linhas"
 
-#: gvsigol_plugin_charts/templates/select_chart_type.html:40
+#: templates/select_chart_type.html:40
 msgid "Create new pie chart"
 msgstr "Criar novo gráfico circular"

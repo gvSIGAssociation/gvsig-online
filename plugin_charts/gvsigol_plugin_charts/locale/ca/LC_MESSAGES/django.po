@@ -1,50 +1,42 @@
-# gvSIG Online.
-# Copyright (C) 2019-2021 SCOLAB.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-24 11:12+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2023-10-24 13:09+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: forms.py:31 templates/select_chart_type.html:21
 msgid "Bar Chart"
-msgstr ""
+msgstr "Gràfic de barres"
 
 #: forms.py:32 templates/select_chart_type.html:30
 msgid "Line Chart"
-msgstr ""
+msgstr "Gràfic de línies"
 
 #: forms.py:33 templates/select_chart_type.html:39
 msgid "Pie Chart"
-msgstr ""
+msgstr "Diagrama de sectors"
 
 #: forms.py:37
 msgid "Layer"
-msgstr ""
+msgstr "Capa"
 
 #: forms.py:38
 msgid "Type"
-msgstr ""
+msgstr "Tipus"
 
 #: forms.py:39 templates/barchart_add.html:25 templates/barchart_add.html:97
 #: templates/barchart_update.html:25 templates/barchart_update.html:97
@@ -53,178 +45,178 @@ msgstr ""
 #: templates/piechart_add.html:25 templates/piechart_add.html:76
 #: templates/piechart_update.html:25 templates/piechart_update.html:76
 msgid "Title"
-msgstr ""
+msgstr "Titol"
 
 #: forms.py:40 templates/barchart_add.html:31 templates/barchart_update.html:31
 #: templates/linechart_add.html:31 templates/linechart_update.html:31
 #: templates/piechart_add.html:31 templates/piechart_update.html:31
 msgid "Description"
-msgstr ""
+msgstr "Descripció"
 
 #: models.py:15
 msgid "gvsigol_plugin_charts manual title"
-msgstr "Plugin Charts"
+msgstr "Plugin d'Estadística"
 
 #: models.py:16
 msgid "gvsigol_plugin_charts manual desc"
-msgstr "This plugin allows creating and visualizing statistical charts"
+msgstr "Aquest plugin permet crear i visualitzar gràfiques estadístiques"
 
 #: templates/barchart_add.html:11
 msgid "Add new bar chart"
-msgstr ""
+msgstr "Afegir nou gràfic de barres"
 
 #: templates/barchart_add.html:13 templates/barchart_update.html:13
 #: templates/linechart_add.html:13 templates/linechart_update.html:13
 #: templates/piechart_add.html:13 templates/piechart_update.html:13
 msgid "Update preview"
-msgstr ""
+msgstr "Actualitzar previsualització"
 
 #: templates/barchart_add.html:14 templates/linechart_add.html:14
 #: templates/piechart_add.html:14
 msgid "Save"
-msgstr ""
+msgstr "Guarda"
 
 #: templates/barchart_add.html:26 templates/linechart_add.html:26
 #: templates/piechart_add.html:26
 msgid "Insert title"
-msgstr ""
+msgstr "Insereix un títol"
 
 #: templates/barchart_add.html:36 templates/barchart_update.html:36
 #: templates/linechart_add.html:36 templates/linechart_update.html:36
 #: templates/piechart_add.html:36 templates/piechart_update.html:36
 msgid "Dataset type"
-msgstr ""
+msgstr "Tipus de conjunt de dades"
 
 #: templates/barchart_add.html:39 templates/barchart_update.html:39
 #: templates/linechart_add.html:39 templates/linechart_update.html:39
 #: templates/piechart_add.html:39 templates/piechart_update.html:39
 msgid "Aggregated"
-msgstr ""
+msgstr "Agregat"
 
 #: templates/barchart_add.html:39 templates/barchart_update.html:39
 #: templates/linechart_add.html:39 templates/linechart_update.html:39
 #: templates/piechart_add.html:39 templates/piechart_update.html:39
 msgid "Show aggregated data for a column"
-msgstr ""
+msgstr "Mostra les dades agregades per a una columna"
 
 #: templates/barchart_add.html:43 templates/barchart_update.html:43
 #: templates/linechart_add.html:43 templates/linechart_update.html:43
 #: templates/piechart_add.html:43 templates/piechart_update.html:43
 msgid "Single selection"
-msgstr ""
+msgstr "Selecció única"
 
 #: templates/barchart_add.html:43 templates/barchart_update.html:43
 #: templates/linechart_add.html:43 templates/linechart_update.html:43
 #: templates/piechart_add.html:43 templates/piechart_update.html:43
 msgid "Shows the data of the last selected element"
-msgstr ""
+msgstr "Mostra les dades de l'últim element seleccionat"
 
 #: templates/barchart_add.html:47 templates/barchart_update.html:47
 #: templates/linechart_add.html:47 templates/linechart_update.html:47
 msgid "Multiple selection"
-msgstr ""
+msgstr "Selecció múltiple"
 
 #: templates/barchart_add.html:47 templates/barchart_update.html:47
 #: templates/linechart_add.html:47 templates/linechart_update.html:47
 msgid "Shows the data of each selected element"
-msgstr ""
+msgstr "Mostra les dades de cada element seleccionat"
 
 #: templates/barchart_add.html:52 templates/barchart_update.html:52
 #: templates/linechart_add.html:52 templates/linechart_update.html:52
 #: templates/piechart_add.html:48 templates/piechart_update.html:48
 msgid "Select column with geographic names"
-msgstr ""
+msgstr "Selecciona la columna amb els noms geogràfics"
 
 #: templates/barchart_add.html:58 templates/barchart_update.html:58
 #: templates/linechart_add.html:58 templates/linechart_update.html:58
 #: templates/piechart_add.html:54 templates/piechart_update.html:54
 msgid "Select column with geometries"
-msgstr ""
+msgstr "Selecciona la columna amb les geometries"
 
 #: templates/barchart_add.html:66 templates/barchart_update.html:66
 #: templates/linechart_add.html:66 templates/linechart_update.html:66
 msgid "Title for the X axis"
-msgstr ""
+msgstr "Títol per a l'eix X"
 
 #: templates/barchart_add.html:67 templates/linechart_add.html:67
 msgid "X axis"
-msgstr ""
+msgstr "Eix Y"
 
 #: templates/barchart_add.html:70 templates/barchart_update.html:70
 #: templates/linechart_add.html:70 templates/linechart_update.html:70
 msgid "Title for the Y axis"
-msgstr ""
+msgstr "Títol per a l'eix Y"
 
 #: templates/barchart_add.html:71 templates/linechart_add.html:71
 msgid "Y axis"
-msgstr ""
+msgstr "Eix Y"
 
 #: templates/barchart_add.html:78 templates/barchart_update.html:78
 #: templates/linechart_add.html:78 templates/linechart_update.html:78
 msgid "Y axis starts at 0"
-msgstr ""
+msgstr "L'eix Y comença a 0"
 
 #: templates/barchart_add.html:88 templates/barchart_update.html:88
 #: templates/linechart_add.html:88 templates/linechart_update.html:88
 #: templates/piechart_add.html:67 templates/piechart_update.html:67
 msgid "Select data columns"
-msgstr ""
+msgstr "Selecciona les columnes de dades"
 
 #: templates/barchart_add.html:91 templates/barchart_update.html:91
 #: templates/linechart_add.html:91 templates/linechart_update.html:91
 #: templates/piechart_add.html:70 templates/piechart_update.html:70
 msgid "Selected"
-msgstr ""
+msgstr "Seleccionada"
 
 #: templates/barchart_add.html:94 templates/barchart_update.html:94
 #: templates/linechart_add.html:94 templates/linechart_update.html:94
 #: templates/piechart_add.html:73 templates/piechart_update.html:73
 msgid "Column name"
-msgstr ""
+msgstr "Nom de la columna"
 
 #: templates/barchart_add.html:284 templates/barchart_update.html:331
 #: templates/linechart_add.html:286 templates/linechart_update.html:334
 #: templates/piechart_add.html:215 templates/piechart_update.html:252
 msgid "You must select column with geographic names"
-msgstr ""
+msgstr "Has de seleccionar la columna amb els noms geogràfics"
 
 #: templates/barchart_add.html:288 templates/barchart_update.html:335
 #: templates/linechart_add.html:290 templates/linechart_update.html:338
 #: templates/piechart_add.html:219 templates/piechart_update.html:256
 msgid "You must select column with geometries"
-msgstr ""
+msgstr "Has de seleccionar la columna amb les geometries"
 
 #: templates/barchart_add.html:292 templates/barchart_update.html:339
 #: templates/linechart_add.html:294 templates/linechart_update.html:342
 #: templates/piechart_add.html:223 templates/piechart_update.html:260
 msgid "At least one column must be selected"
-msgstr ""
+msgstr "S'ha de seleccionar al menys una columna"
 
 #: templates/barchart_update.html:11
 msgid "Update bar chart"
-msgstr ""
+msgstr "Actualitza el diagrama de barres"
 
 #: templates/barchart_update.html:14 templates/linechart_update.html:14
 #: templates/piechart_update.html:14
 msgid "Update"
-msgstr ""
+msgstr "Actualitza"
 
 #: templates/chart_list.html:14
 msgid "Layer title"
-msgstr ""
+msgstr "Títol de capa"
 
 #: templates/chart_list.html:15
 msgid "Datastore"
-msgstr ""
+msgstr "Magatzem de dades"
 
 #: templates/chart_list.html:16 templates/dashboard_charts_menu.html:10
 #: templates/dashboard_charts_menu.html:18
 msgid "Charts"
-msgstr ""
+msgstr "Gràfics"
 
 #: templates/chart_list.html:60
 msgid "Processing request..."
-msgstr ""
+msgstr "Processant petició..."
 
 #: templates/chart_list.html:61
 #, python-format
@@ -252,11 +244,11 @@ msgstr ""
 
 #: templates/chart_list.html:67
 msgid "Loading..."
-msgstr ""
+msgstr "Carregant..."
 
 #: templates/chart_list.html:68 templates/chart_list.html:69
 msgid "No records available"
-msgstr ""
+msgstr "No hi ha registres disponibles"
 
 #: templates/chart_list.html:71
 msgid "First"
@@ -286,19 +278,19 @@ msgstr ""
 
 #: templates/chart_list.html:84
 msgid "Add chart"
-msgstr ""
+msgstr "Afegir gràfic"
 
 #: templates/chart_list.html:88
 msgid "Update chart"
-msgstr ""
+msgstr "Actualiitzar gràfic"
 
 #: templates/chart_list.html:92
 msgid "Delete chart"
-msgstr ""
+msgstr "Suprimeix el diagrama"
 
 #: templates/charts_dashboard.html:37
 msgid "Statistics"
-msgstr ""
+msgstr "Estadístiques"
 
 #: templates/dashboard_charts_menu.html:16
 msgid "Plugins"
@@ -306,32 +298,32 @@ msgstr ""
 
 #: templates/linechart_add.html:11
 msgid "Add new line chart"
-msgstr ""
+msgstr "Afegeix nou gràfic de línies"
 
 #: templates/linechart_update.html:11
 msgid "Update line chart"
-msgstr ""
+msgstr "Actualitza  gràfic de línies"
 
 #: templates/piechart_add.html:11
 msgid "Add new pie chart"
-msgstr ""
+msgstr "Afegeix nou gràfic de sectors"
 
 #: templates/piechart_update.html:11
 msgid "Update pie chart"
-msgstr ""
+msgstr "Actualitza  gràfic de sectors"
 
 #: templates/select_chart_type.html:10
 msgid "Create new chart"
-msgstr ""
+msgstr "Crea nou gràfic"
 
 #: templates/select_chart_type.html:22
 msgid "Create new bar chart"
-msgstr ""
+msgstr "Crea nou gràfic de barres"
 
 #: templates/select_chart_type.html:31
 msgid "Create new line chart"
-msgstr ""
+msgstr "Crea nou gràfic de línies"
 
 #: templates/select_chart_type.html:40
 msgid "Create new pie chart"
-msgstr ""
+msgstr "Crea nou gràfic de sectors"
