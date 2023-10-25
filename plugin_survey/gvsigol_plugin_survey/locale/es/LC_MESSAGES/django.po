@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-10 09:56+0100\n"
+"POT-Creation-Date: 2023-10-25 09:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,661 +18,815 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: csv_to_db.py:48 csv_to_db.py:66 excel_to_db.py:51 excel_to_db.py:69
-msgid "In process"
-msgstr "En proceso"
-
-#: csv_to_db.py:53
-msgid "CSV file"
-msgstr "CSV"
-
-#: csv_to_db.py:62 csv_to_db.py:144 excel_to_db.py:65 excel_to_db.py:205
-msgid "line"
-msgstr "línea"
-
-#: csv_to_db.py:144 excel_to_db.py:205
-msgid "of"
-msgstr "de"
-
-#: excel_to_db.py:56
-msgid "Excel file"
-msgstr "Excel"
-
-#: forms.py:9
-msgid "Excel"
-msgstr "Excel"
-
-#: forms.py:9
-msgid "CSV"
-msgstr "CSV"
-
-#: forms.py:10
-msgid "Append data"
-msgstr "Añadir datos a la tabla"
-
-#: forms.py:10
-msgid "Replace data"
-msgstr "Reemplazar los datos existentes en la tabla"
-
-#: forms.py:17 forms.py:34 templates/browser/transform_to_database.html.py:73
-#: templates/transformation_add.html:43 templates/transformation_update.html:58
-msgid "Workspace"
-msgstr "Espacio de trabajo"
-
-#: forms.py:18 forms.py:35 templates/transformation_list.html.py:24
-msgid "Datastore"
-msgstr "Almacén de datos"
-
-#: forms.py:19 forms.py:36 templates/browser/transform_to_database.html.py:87
-#: templates/transformation_list.html:25
-msgid "Resource"
-msgstr "Tabla"
-
-#: forms.py:21 forms.py:41
-msgid "File"
-msgstr "Fichero"
-
-#: forms.py:23
-msgid "Transformation"
-msgstr "Transformación"
-
-#: forms.py:24
-msgid "Method"
-msgstr "Método"
-
-#: forms.py:33 templates/transformation_add.html.py:36
-#: templates/transformation_list.html:22
-#: templates/transformation_update.html:36
+#: forms.py:15 forms.py:24 forms.py:31 templates/survey_add.html:40
+#: templates/survey_list.html:24 templates/survey_section_add.html:34
+#: templates/survey_section_update.html:36
+#: templates/survey_section_update.html:170
+#: templates/survey_section_update.html:202 templates/survey_update.html:40
+#: templates/survey_update.html:103 templates/survey_upload.html:39
 msgid "Name"
 msgstr "Nombre"
 
-#: forms.py:38
-msgid "Encoding"
-msgstr "Codificación de caracteres"
-
-#: forms.py:40 templates/transformation_list.html.py:23
-#: templates/transformation_update.html:100
-msgid "Type"
-msgstr "Tipo"
-
-#: forms.py:43
-msgid "Parameters"
-msgstr "Parámetros"
-
-#: settings.py:11 settings_template.py:11
-msgid "Fixed year value"
-msgstr "Año por defecto"
-
-#: settings.py:13 settings.py:74 settings.py:136 settings.py:196
-#: settings.py:198 settings_template.py:13 settings_template.py:74
-#: settings_template.py:136 settings_template.py:196 settings_template.py:198
-msgid "Fixed value"
-msgstr "Valor por defecto"
-
-#: settings.py:19 settings.py:42 settings.py:59 settings.py:81 settings.py:104
-#: settings.py:121 settings.py:143 settings.py:166 settings.py:183
-#: settings_template.py:19 settings_template.py:42 settings_template.py:59
-#: settings_template.py:81 settings_template.py:104 settings_template.py:121
-#: settings_template.py:143 settings_template.py:166 settings_template.py:183
-msgid "format"
-msgstr "Formato"
-
-#: settings.py:28 settings_template.py:28
-msgid "Fixed year cell"
-msgstr "Año desde celda"
-
-#: settings.py:30 settings.py:53 settings.py:92 settings.py:115 settings.py:154
-#: settings.py:177 settings_template.py:30 settings_template.py:53
-#: settings_template.py:92 settings_template.py:115 settings_template.py:154
-#: settings_template.py:177
-msgid "Column"
-msgstr "Nº de columna"
-
-#: settings.py:36 settings.py:98 settings.py:160 settings_template.py:36
-#: settings_template.py:98 settings_template.py:160
-msgid "Row"
-msgstr "Nº de fila"
-
-#: settings.py:51 settings_template.py:51
-msgid "Fixed year column"
-msgstr "Año desde columna"
-
-#: settings.py:72 settings_template.py:72
-msgid "Fixed month value"
-msgstr "Mes por defecto"
-
-#: settings.py:90 settings_template.py:90
-msgid "Fixed month cell"
-msgstr "Mes desde celda"
-
-#: settings.py:113 settings_template.py:113
-msgid "Fixed month column"
-msgstr "Mes desde columna"
-
-#: settings.py:134 settings_template.py:134
-msgid "Fixed day value"
-msgstr "Día por defecto"
-
-#: settings.py:152 settings_template.py:152
-msgid "Fixed day cell"
-msgstr "Día desde celda"
-
-#: settings.py:175 settings_template.py:175
-msgid "Fixed day column"
-msgstr "Día desde columna"
-
-#: settings.py:207 settings_template.py:207
-msgid "Cell value"
-msgstr "Valor de celda"
-
-#: settings.py:209 settings.py:227 settings.py:364 settings.py:392
-#: settings_template.py:209 settings_template.py:227 settings_template.py:364
-#: settings_template.py:392
-msgid "Column index"
-msgstr "Índice de la columna"
-
-#: settings.py:215 settings.py:370 settings_template.py:215
-#: settings_template.py:370
-msgid "Row index"
-msgstr "Índice de la fila"
-
-#: settings.py:225 settings_template.py:225
-msgid "Column value"
-msgstr "Valor de columna"
-
-#: settings.py:237 settings_template.py:237
-msgid "Geometry field from lon/lat values"
-msgstr "Campo geometría desde columnas lon/lat"
-
-#: settings.py:239 settings.py:271 settings.py:297 settings_template.py:239
-#: settings_template.py:271 settings_template.py:297
-msgid "Geometry type"
-msgstr "Tipo de geometría"
-
-#: settings.py:245 settings.py:277 settings.py:303 settings_template.py:245
-#: settings_template.py:277 settings_template.py:303
-msgid "EPSG value"
-msgstr "Valor EPSG"
-
-#: settings.py:253 settings_template.py:253
-msgid "Long column index"
-msgstr "Índice columna longitud"
-
-#: settings.py:259 settings_template.py:259
-msgid "Lat column index"
-msgstr "Índice columna latitud"
-
-#: settings.py:269 settings_template.py:269
-msgid "Geometry field from one field (lon, lat)"
-msgstr "Campo geometría desde una única columna (lon, lat)"
-
-#: settings.py:285 settings.py:311 settings_template.py:285
-#: settings_template.py:311
-msgid "coordinates column index"
-msgstr "Nº columna de las coordenadas"
-
-#: settings.py:295 settings_template.py:295
-msgid "Geometry field from one field (lat, lon)"
-msgstr "Campo geometría desde una única columna (lat/lon)"
-
-#: settings.py:321 settings_template.py:321
-msgid "Geometry from address in field"
-msgstr "Campo geometría desde columna dirección"
-
-#: settings.py:323 settings_template.py:323
-msgid "Address value"
-msgstr "Nº de la columna dirección"
-
-#: settings.py:333 settings_template.py:333
-msgid "Date definition"
-msgstr "Definición de fecha"
-
-#: settings.py:335 settings_template.py:335
-msgid "Years"
-msgstr "Año"
-
-#: settings.py:341 settings_template.py:341
-msgid "Months"
-msgstr "Mes"
-
-#: settings.py:347 settings_template.py:347
-msgid "Days"
-msgstr "Día"
-
-#: settings.py:353 settings.py:381 settings.py:403 settings_template.py:353
-#: settings_template.py:381 settings_template.py:403
-msgid "Locale"
-msgstr "Idioma"
-
-#: settings.py:362 settings_template.py:362
-msgid "Date from cell"
-msgstr "Fecha desde celda"
-
-#: settings.py:376 settings.py:398 settings_template.py:376
-#: settings_template.py:398
-msgid "Date format"
-msgstr "Formato de fecha"
-
-#: settings.py:390 settings_template.py:390
-msgid "Date from column"
-msgstr "Fecha desde columna"
-
-#: settings.py:412 settings_template.py:412
-msgid "Filename value"
-msgstr "Nombre de fichero"
-
-#: settings.py:418 settings_template.py:418
-msgid "Sheet value"
-msgstr "Nombre de hoja"
-
-#: settings.py:424 settings_template.py:424
-msgid "Custom value (experimental)"
-msgstr "Valor calculado (experimental)"
-
-#: settings.py:426 settings_template.py:426
-msgid "code_text"
-msgstr "Código"
-
-#: templates/browser/transform_to_database.html:13
-msgid "Transform"
-msgstr "Transformar"
-
-#: templates/browser/transform_to_database.html:46
-msgid "Origen de los datos:"
+#: forms.py:16 forms.py:25 templates/survey_add.html:47
+#: templates/survey_list.html:25 templates/survey_section_add.html:41
+#: templates/survey_section_update.html:42
+#: templates/survey_section_update.html:176
+#: templates/survey_section_update.html:208 templates/survey_update.html:46
+#: templates/survey_update.html:104
+msgid "Title"
 msgstr ""
 
-#: templates/browser/transform_to_database.html:47
-msgid "Select directory"
-msgstr "Seleccionar directorio"
-
-#: templates/browser/transform_to_database.html:57
-msgid "Ficheros '.xlsx', '.csv' "
-msgstr ""
-
-#: templates/browser/transform_to_database.html:63
-msgid "Transformación a realizar:"
-msgstr ""
-
-#: templates/browser/transform_to_database.html:70
-msgid "Destino de los datos:"
-msgstr ""
-
-#: templates/browser/transform_to_database.html:80
-msgid "Data store"
+#: forms.py:17 templates/survey_add.html:54 templates/survey_update.html:85
+msgid "Datastore"
 msgstr "Almacén de datos"
 
-#: templates/browser/transform_to_database.html:94
-msgid "Method to apply"
-msgstr "Método a aplicar"
+#: forms.py:26 templates/survey_section_add.html:48
+#: templates/survey_section_update.html:48
+msgid "SRS"
+msgstr ""
 
-#: templates/browser/transform_to_database.html:124
-msgid "Default"
-msgstr "Por defecto"
+#: forms.py:27 templates/survey_section_update.html:90
+#, fuzzy
+#| msgid "Date definition"
+msgid "Definition"
+msgstr "Definición de fecha"
 
-#: templates/browser/transform_to_database.html:142
-#: templates/browser/transform_to_database.html:189
-#: templates/transformation_add.html:99 templates/transformation_add.html:146
-#: templates/transformation_update.html:785
-#: templates/transformation_update.html:833
-msgid "Data store contains no resources to publish"
-msgstr "El almacén no contiene recursos"
+#: forms.py:32 templates/survey_upload.html:46
+msgid "File"
+msgstr "Fichero"
 
-#: templates/browser/transform_to_database.html:159
-#: templates/transformation_add.html:116
-#: templates/transformation_update.html:802
-msgid "Choose dataStore"
-msgstr "Elige almacén de datos"
+#: settings.py:13 settings_template.py:13
+msgid "String"
+msgstr ""
 
-#: templates/browser/transform_to_database.html:165
-#: templates/browser/transform_to_database.html:211
-#: templates/browser/transform_to_database.html:219
-#: templates/browser/transform_to_database.html:240
-#: templates/transformation_add.html:122 templates/transformation_add.html:168
-#: templates/transformation_add.html:176 templates/transformation_add.html:197
-#: templates/transformation_update.html:808
-#: templates/transformation_update.html:855
-#: templates/transformation_update.html:863
-#: templates/transformation_update.html:885
-msgid "Service is unavailable"
-msgstr "Servicio no disponible"
+#: settings.py:15 settings.py:33 settings.py:45 settings.py:67 settings.py:89
+#: settings.py:101 settings.py:113 settings.py:135 settings.py:157
+#: settings.py:205 settings.py:217 settings.py:229 settings.py:241
+#: settings.py:253 settings_template.py:15 settings_template.py:33
+#: settings_template.py:45 settings_template.py:67 settings_template.py:89
+#: settings_template.py:101 settings_template.py:113 settings_template.py:135
+#: settings_template.py:157 settings_template.py:205 settings_template.py:217
+#: settings_template.py:229 settings_template.py:241 settings_template.py:253
+msgid "Value"
+msgstr ""
 
-#: templates/browser/transform_to_database.html:172
-#: templates/transformation_add.html:129
-#: templates/transformation_update.html:815
-msgid "No valid workspace selected"
-msgstr "El espacio de trabajo seleccionado no es válido"
+#: settings.py:20 settings_template.py:20
+msgid "Is label"
+msgstr ""
 
-#: templates/browser/transform_to_database.html:206
-#: templates/transformation_add.html:163
-#: templates/transformation_update.html:850
-msgid "Choose resource"
-msgstr "Elige recurso"
+#: settings.py:23 settings_template.py:23
+#: templates/survey_section_update.html:231
+#, fuzzy
+#| msgid "Years"
+msgid "Yes"
+msgstr "Año"
 
-#: templates/browser/transform_to_database.html:226
-#: templates/browser/transform_to_database.html:247
-#: templates/transformation_add.html:183 templates/transformation_add.html:204
-#: templates/transformation_update.html:870
-#: templates/transformation_update.html:892
-msgid "No valid data store selected"
-msgstr "Almacén de datos no válido"
+#: settings.py:23 settings_template.py:23
+#: templates/survey_section_update.html:232
+msgid "No"
+msgstr ""
 
-#: templates/dashboard_etl_menu.html:9 templates/dashboard_etl_menu.html:17
-msgid "Transformations"
-msgstr "Transformaciones"
+#: settings.py:31 settings_template.py:31
+msgid "Multiple String"
+msgstr ""
 
-#: templates/dashboard_etl_menu.html:15
+#: settings.py:43 settings_template.py:43
+msgid "Integer"
+msgstr ""
+
+#: settings.py:50 settings.py:72 settings_template.py:50
+#: settings_template.py:72
+msgid "Min"
+msgstr ""
+
+#: settings.py:55 settings.py:77 settings_template.py:55
+#: settings_template.py:77
+msgid "Max"
+msgstr ""
+
+#: settings.py:65 settings_template.py:65
+msgid "Double"
+msgstr ""
+
+#: settings.py:87 settings_template.py:87
+msgid "Date"
+msgstr ""
+
+#: settings.py:99 settings_template.py:99
+msgid "Time"
+msgstr ""
+
+#: settings.py:111 settings_template.py:111
+msgid "Label"
+msgstr ""
+
+#: settings.py:118 settings.py:140 settings_template.py:118
+#: settings_template.py:140
+msgid "Size"
+msgstr ""
+
+#: settings.py:123 settings.py:145 settings_template.py:123
+#: settings_template.py:145
+msgid "URL"
+msgstr ""
+
+#: settings.py:133 settings_template.py:133
+msgid "Label with line"
+msgstr ""
+
+#: settings.py:155 settings_template.py:155
+msgid "Boolean"
+msgstr ""
+
+#: settings.py:167 settings_template.py:167
+msgid "Stringcombo"
+msgstr ""
+
+#: settings.py:169 settings.py:181 settings.py:193 settings_template.py:169
+#: settings_template.py:181 settings_template.py:193
+msgid "Item"
+msgstr ""
+
+#: settings.py:179 settings_template.py:179
+msgid "Multistringcombo"
+msgstr ""
+
+#: settings.py:191 settings_template.py:191
+msgid "Connected Stringcombo"
+msgstr ""
+
+#: settings.py:203 settings_template.py:203
+msgid "Pictures"
+msgstr ""
+
+#: settings.py:215 settings_template.py:215
+msgid "Sketch"
+msgstr ""
+
+#: settings.py:227 settings_template.py:227
+msgid "Map"
+msgstr ""
+
+#: settings.py:239 settings_template.py:239
+msgid "Hidden"
+msgstr ""
+
+#: settings.py:251 settings_template.py:251
+msgid "Primary key"
+msgstr ""
+
+#: templates/dashboard_survey_menu.html:10
+#: templates/dashboard_survey_menu.html:18
+msgid "Surveys"
+msgstr ""
+
+#: templates/dashboard_survey_menu.html:16
 msgid "Plugins"
 msgstr ""
 
-#: templates/transformation_add.html:12 templates/transformation_list.html:13
-#: templates/transformation_update.html:10
-msgid "Add transformation"
-msgstr "Añadir"
+#: templates/survey_add.html:18 templates/survey_list.html:14
+#, fuzzy
+#| msgid "Add provider"
+msgid "Add survey"
+msgstr "Añadir proveedor"
 
-#: templates/transformation_add.html:14
-msgid "Continue"
-msgstr "Continuar"
+#: templates/survey_add.html:20 templates/survey_permissions_add.html:13
+#: templates/survey_section_add.html:14 templates/survey_section_update.html:13
+msgid "Save"
+msgstr "Guardar"
 
-#: templates/transformation_add.html:50 templates/transformation_update.html:65
-msgid "Data Store"
-msgstr "Almacén de datos"
+#: templates/survey_list.html:11
+#, fuzzy
+#| msgid "Providers list"
+msgid "Surveys list"
+msgstr "Lista de proveedores"
 
-#: templates/transformation_add.html:57 templates/transformation_update.html:72
-msgid "Resource name"
-msgstr "Nombre del recurso"
+#: templates/survey_list.html:13 templates/survey_upload.html:15
+msgid "Upload survey"
+msgstr ""
 
-#: templates/transformation_list.html:11
-msgid "Transformations list"
-msgstr "Lista de transformaciones"
+#: templates/survey_list.html:59
+msgid "Proyecto actualizado correctamente"
+msgstr ""
 
-#: templates/transformation_list.html:58
-msgid "Delete transformation"
-msgstr "Borrar transformación"
+#: templates/survey_list.html:62
+msgid "El proyecto se ha actualizado satisfactoriamente."
+msgstr ""
 
-#: templates/transformation_list.html:61
-msgid "The transformation and its registered rules will be deleted"
-msgstr "La transformación y sus reglas serán borradas"
-
-#: templates/transformation_list.html:64
-#: templates/transformation_update.html:266
-#: templates/transformation_update.html:341
-#: templates/transformation_update.html:366
-msgid "Cancel"
-msgstr "Cancelar"
-
-#: templates/transformation_list.html:65
-#: templates/transformation_update.html:268
-#: templates/transformation_update.html:343
-#: templates/transformation_update.html:368
+#: templates/survey_list.html:65 templates/survey_list.html:87
+#: templates/survey_list.html:109 templates/survey_list.html:131
+#: templates/survey_section_update.html:151
+#: templates/survey_section_update.html:183
+#: templates/survey_section_update.html:240
+#: templates/survey_section_update.html:263 templates/survey_update.html:150
+#: templates/survey_update.html:172 templates/survey_update.html:195
+#: templates/survey_update.html:218
 msgid "Accept"
 msgstr "Aceptar"
 
-#: templates/transformation_list.html:82
-#: templates/transformation_update.html:449
+#: templates/survey_list.html:80
+msgid "ERROR"
+msgstr ""
+
+#: templates/survey_list.html:83
+msgid "Error al generar el proyecto"
+msgstr ""
+
+#: templates/survey_list.html:102
+msgid "Actualizar proyecto"
+msgstr ""
+
+#: templates/survey_list.html:105
+msgid ""
+"ATENCIÓN: Actualizar el proyecto BORRARÁ TODAS LAS CAPAS (y su contenido) "
+"para dar paso a la nueva configuración"
+msgstr ""
+
+#: templates/survey_list.html:108 templates/survey_list.html:130
+#: templates/survey_section_update.html:182
+#: templates/survey_section_update.html:239
+#: templates/survey_section_update.html:262 templates/survey_update.html:171
+#: templates/survey_update.html:217
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/survey_list.html:124
+#, fuzzy
+#| msgid "Delete rule"
+msgid "Delete survey"
+msgstr "Eliminar regla"
+
+#: templates/survey_list.html:127
+msgid "The survey will be deleted"
+msgstr ""
+
+#: templates/survey_list.html:148
 msgid "Processing request..."
 msgstr "Procesando petición"
 
-#: templates/transformation_list.html:83
-#: templates/transformation_update.html:450
+#: templates/survey_list.html:149
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Buscar%(sep)s"
 
-#: templates/transformation_list.html:84
-#: templates/transformation_update.html:451
+#: templates/survey_list.html:150
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
 
-#: templates/transformation_list.html:85
-#: templates/transformation_update.html:452
+#: templates/survey_list.html:151
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
 
-#: templates/transformation_list.html:86
-#: templates/transformation_update.html:453
+#: templates/survey_list.html:152
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando desde 0 a 0 de 0 registros"
 
-#: templates/transformation_list.html:87
-#: templates/transformation_update.html:454
+#: templates/survey_list.html:153
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrando %(max)s registros"
 
-#: templates/transformation_list.html:89
-#: templates/transformation_update.html:456
+#: templates/survey_list.html:155
 msgid "Loading..."
 msgstr "Cargando..."
 
-#: templates/transformation_list.html:90 templates/transformation_list.html:91
-#: templates/transformation_update.html:457
-#: templates/transformation_update.html:458
+#: templates/survey_list.html:156 templates/survey_list.html:157
 msgid "No records available"
 msgstr "No hay registros disponibles"
 
-#: templates/transformation_list.html:93
-#: templates/transformation_update.html:460
+#: templates/survey_list.html:159
 msgid "First"
 msgstr "Primero"
 
-#: templates/transformation_list.html:94
-#: templates/transformation_update.html:461
+#: templates/survey_list.html:160
 msgid "Previous"
 msgstr "Anterior"
 
-#: templates/transformation_list.html:95
-#: templates/transformation_update.html:462
+#: templates/survey_list.html:161
 msgid "Next"
 msgstr "Siguiente"
 
-#: templates/transformation_list.html:96
-#: templates/transformation_update.html:463
+#: templates/survey_list.html:162
 msgid "Last"
 msgstr "Último"
 
-#: templates/transformation_list.html:99
-#: templates/transformation_update.html:466
+#: templates/survey_list.html:165
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrdenar ascendentemente"
 
-#: templates/transformation_list.html:100
-#: templates/transformation_update.html:467
+#: templates/survey_list.html:166
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrdenar descendentemente"
 
-#: templates/transformation_list.html:106
-msgid "Remove transformation"
-msgstr "Borrar transformación"
-
-#: templates/transformation_list.html:110
-msgid "Update transformation"
-msgstr "Actualizar transformación"
-
-#: templates/transformation_update.html:13
-msgid "Save"
-msgstr "Guardar"
-
-#: templates/transformation_update.html:43
-msgid "Example origin file"
-msgstr "Fichero ejemplo de origen de datos"
-
-#: templates/transformation_update.html:49
-msgid "Select file"
-msgstr "Seleccionar fichero"
-
-#: templates/transformation_update.html:57
-msgid "Example destiny BD"
-msgstr "Ejemplo de Base de datos de destino"
-
-#: templates/transformation_update.html:87
-msgid "Excel File"
-msgstr "Excel"
-
-#: templates/transformation_update.html:90
-msgid "CSV File"
-msgstr "CSV"
-
-#: templates/transformation_update.html:109
-msgid "Select sheet"
-msgstr "Seleccionar hoja"
-
-#: templates/transformation_update.html:114
-msgid "All sheets"
-msgstr "Todas las hojas"
-
-#: templates/transformation_update.html:119
-msgid "..."
-msgstr "..."
-
-#: templates/transformation_update.html:128
-msgid "Limit separator"
-msgstr "Separador"
-
-#: templates/transformation_update.html:140
-msgid "Character encoding"
-msgstr "Codificación de caracteres"
-
-#: templates/transformation_update.html:146
-msgid "From row"
-msgstr "Desde la fila"
-
-#: templates/transformation_update.html:152
-msgid "From column"
-msgstr "Desde la columna"
-
-#: templates/transformation_update.html:162
-msgid "Rules"
-msgstr "Reglas"
-
-#: templates/transformation_update.html:165
-msgid "New rule"
-msgstr "Nueva regla"
-
-#: templates/transformation_update.html:174
-msgid "ID"
-msgstr "Id."
-
-#: templates/transformation_update.html:175
-msgid "Field"
-msgstr "Campo de la BD"
-
-#: templates/transformation_update.html:176
-msgid "Field rule"
-msgstr "Campo de la regla"
-
-#: templates/transformation_update.html:216
-msgid "Hojas en las que se aplica"
+#: templates/survey_list.html:172
+msgid "Remove survey"
 msgstr ""
 
-#: templates/transformation_update.html:224
-msgid "Todas las hojas"
-msgstr ""
-
-#: templates/transformation_update.html:228
-msgid "Sólo la hoja..."
-msgstr ""
-
-#: templates/transformation_update.html:238
-msgid "Desde "
-msgstr ""
-
-#: templates/transformation_update.html:243
-msgid "hasta "
-msgstr ""
-
-#: templates/transformation_update.html:251
-msgid "Que cumplan..."
-msgstr ""
-
-#: templates/transformation_update.html:284
-#: templates/transformation_update.html:477
-#: templates/transformation_update.html:614
-msgid "Update rule"
+#: templates/survey_list.html:176
+#, fuzzy
+#| msgid "Update rule"
+msgid "Update project"
 msgstr "Actualizar regla"
 
-#: templates/transformation_update.html:290
-msgid "Preview"
-msgstr "Anterior"
+#: templates/survey_list.html:180 templates/survey_update.html:15
+#, fuzzy
+#| msgid "Update rule"
+msgid "Update survey"
+msgstr "Actualizar regla"
 
-#: templates/transformation_update.html:300
-msgid "Not data loaded yet"
-msgstr "No hay datos cargados aún"
-
-#: templates/transformation_update.html:307
-msgid "Campo de la BD a rellenar"
+#: templates/survey_permissions_add.html:11
+msgid "Survey permissions"
 msgstr ""
 
-#: templates/transformation_update.html:317
-msgid "Tipo del dato"
+#: templates/survey_permissions_add.html:39
+msgid "Survey"
 msgstr ""
 
-#: templates/transformation_update.html:324
-msgid "Rellenar con..."
+#: templates/survey_permissions_add.html:46
+msgid "Warning: Survey will be public if no group is assigned"
 msgstr ""
 
-#: templates/transformation_update.html:359
-#: templates/transformation_update.html:473
-#: templates/transformation_update.html:613
-msgid "Delete rule"
-msgstr "Eliminar regla"
+#: templates/survey_permissions_add.html:52
+msgid "Make survey readable only for the following groups"
+msgstr ""
 
-#: templates/transformation_update.html:362
-msgid "The rule will be removed, Do you want continue?"
-msgstr "La regla será eliminada, ¿Desea continuar?"
+#: templates/survey_permissions_add.html:53
+#: templates/survey_permissions_add.html:86
+msgid "Buscar grupo de usuarios..."
+msgstr ""
 
-#: templates/transformation_update.html:651
-msgid "Resource contains no fields"
-msgstr "El recurso no contiene campos"
+#: templates/survey_permissions_add.html:67
+#: templates/survey_permissions_add.html:69
+#: templates/survey_permissions_add.html:100
+#: templates/survey_permissions_add.html:102
+msgid "Assign user group"
+msgstr ""
 
-#: templates/transformation_update.html:669
-msgid "Choose field"
-msgstr "Elige un campo"
+#: templates/survey_permissions_add.html:85
+msgid "Make survey writable only for the following groups"
+msgstr ""
 
-#: views.py:80 views.py:227
-msgid "Not defined"
+#: templates/survey_section_add.html:12
+msgid "Add survey section"
+msgstr ""
+
+#: templates/survey_section_update.html:10
+#, fuzzy
+#| msgid "Update transformation"
+msgid "Update survey section"
+msgstr "Actualizar transformación"
+
+#: templates/survey_section_update.html:56
+msgid "Layer linked"
+msgstr ""
+
+#: templates/survey_section_update.html:74 templates/survey_update.html:72
+#, fuzzy
+#| msgid "Not defined"
+msgid "Not linked"
 msgstr "Sin definir"
 
-#: views.py:98
-msgid "Error: fill all the transformation fields"
-msgstr "Error: rellena todos los campos"
+#: templates/survey_section_update.html:94
+msgid "get info"
+msgstr ""
 
-#: views.py:105 views.py:143 views.py:172 views.py:240
+#: templates/survey_section_update.html:98
+#, fuzzy
+#| msgid "Date format"
+msgid "add form"
+msgstr "Formato de fecha"
+
+#: templates/survey_section_update.html:144
+msgid "Link survey feature type (layer)"
+msgstr ""
+
+#: templates/survey_section_update.html:147
+msgid ""
+"This survey hasn't got a layer created using the survey's specifications."
+msgstr ""
+
+#: templates/survey_section_update.html:148 templates/survey_update.html:192
+msgid ""
+"To create it, go to the survey's main page and click on 'update "
+"project' (yellow button)"
+msgstr ""
+
+#: templates/survey_section_update.html:165
+msgid "Form"
+msgstr ""
+
+#: templates/survey_section_update.html:197
+msgid "FormItem"
+msgstr ""
+
+#: templates/survey_section_update.html:215
+msgid "Type"
+msgstr "Tipo"
+
+#: templates/survey_section_update.html:229
+msgid "Mandatory"
+msgstr ""
+
+#: templates/survey_section_update.html:256 templates/survey_update.html:211
+msgid "Delete section survey"
+msgstr ""
+
+#: templates/survey_section_update.html:259 templates/survey_update.html:214
+#, fuzzy
+#| msgid "The transformation and its registered rules will be deleted"
+msgid "The section survey will be deleted"
+msgstr "La transformación y sus reglas serán borradas"
+
+#: templates/survey_update.html:18
+msgid "Continue"
+msgstr "Continuar"
+
+#: templates/survey_update.html:54
+#, fuzzy
+#| msgid "Project"
+msgid "Project linked"
+msgstr "Proyecto"
+
+#: templates/survey_update.html:91
+msgid "Feature types (layers)"
+msgstr ""
+
+#: templates/survey_update.html:94
+#, fuzzy
+#| msgid "Geometry type"
+msgid "new feature type"
+msgstr "Tipo de geometría"
+
+#: templates/survey_update.html:120
+msgid "Update section survey"
+msgstr ""
+
+#: templates/survey_update.html:121
+#, fuzzy
+#| msgid "Date definition"
+msgid "Update section definition"
+msgstr "Definición de fecha"
+
+#: templates/survey_update.html:122
+msgid "Remove section survey"
+msgstr ""
+
+#: templates/survey_update.html:144
+msgid "Feature Type (capa) actualizada correctamente"
+msgstr ""
+
+#: templates/survey_update.html:147
+msgid "Feature Type (capa) se ha actualizada satisfactoriamente."
+msgstr ""
+
+#: templates/survey_update.html:165
+msgid "Actualizar feature Type (capa)"
+msgstr ""
+
+#: templates/survey_update.html:168
+msgid ""
+"ATENCIÓN: Actualizar el feature type (capa) BORRARÁ TODOS LOS DATOS para dar "
+"paso a la nueva configuración"
+msgstr ""
+
+#: templates/survey_update.html:188
+msgid "Link survey"
+msgstr ""
+
+#: templates/survey_update.html:191
+msgid ""
+"This survey hasn't got a project created using the survey's specifications."
+msgstr ""
+
+#: templates/survey_upload.html:18
+#, fuzzy
+#| msgid "Update rule"
+msgid "Update"
+msgstr "Actualizar regla"
+
+#: views.py:155
+msgid "You must enter an survey name"
+msgstr ""
+
+#: views.py:159
+#, python-brace-format
+msgid ""
+"Invalid survey name: '{value}'. Identifiers must begin with a letter or an "
+"underscore (_). Subsequent characters can be letters, underscores or numbers"
+msgstr ""
+
+#: views.py:166
+msgid "Exists a project with the same name"
+msgstr ""
+
+#: views.py:177 views.py:220
+#, fuzzy
+#| msgid "Error: transformation could not be published"
+msgid "Error: survey could not be published"
+msgstr "Error: la transformación no pudo ser completada"
+
+#: views.py:338 views.py:374
 msgid "Error: transformation could not be published"
 msgstr "Error: la transformación no pudo ser completada"
 
-#: views.py:206
+#: views.py:412
 msgid "Error: transformation could not be removed"
 msgstr "Error: la transformación no pudo ser borrada"
 
-#: views.py:299 views.py:430
-msgid "Loading sheet"
-msgstr "Cargando hoja..."
+#~ msgid "In process"
+#~ msgstr "En proceso"
 
-#: views.py:304
-msgid "Loading Excel file... (this could take a while)"
-msgstr "Cargando fichero Excel... (esto puede llevar algo de tiempo)"
+#~ msgid "CSV file"
+#~ msgstr "CSV"
 
-#: views.py:379
-msgid "Error in"
-msgstr "Error en "
+#~ msgid "line"
+#~ msgstr "línea"
 
-#: views.py:403
-msgid "Transformation done succesfully"
-msgstr "Transformación realizada satisfactoriamente"
+#~ msgid "of"
+#~ msgstr "de"
 
-#: views.py:412
-msgid "Server error"
-msgstr "Error en el servidor"
+#~ msgid "Excel file"
+#~ msgstr "Excel"
+
+#~ msgid "Excel"
+#~ msgstr "Excel"
+
+#~ msgid "CSV"
+#~ msgstr "CSV"
+
+#~ msgid "Append data"
+#~ msgstr "Añadir datos a la tabla"
+
+#~ msgid "Replace data"
+#~ msgstr "Reemplazar los datos existentes en la tabla"
+
+#~ msgid "Workspace"
+#~ msgstr "Espacio de trabajo"
+
+#~ msgid "Resource"
+#~ msgstr "Tabla"
+
+#~ msgid "Transformation"
+#~ msgstr "Transformación"
+
+#~ msgid "Method"
+#~ msgstr "Método"
+
+#~ msgid "Encoding"
+#~ msgstr "Codificación de caracteres"
+
+#~ msgid "Parameters"
+#~ msgstr "Parámetros"
+
+#~ msgid "Fixed year value"
+#~ msgstr "Año por defecto"
+
+#~ msgid "Fixed value"
+#~ msgstr "Valor por defecto"
+
+#~ msgid "format"
+#~ msgstr "Formato"
+
+#~ msgid "Fixed year cell"
+#~ msgstr "Año desde celda"
+
+#~ msgid "Column"
+#~ msgstr "Nº de columna"
+
+#~ msgid "Row"
+#~ msgstr "Nº de fila"
+
+#~ msgid "Fixed year column"
+#~ msgstr "Año desde columna"
+
+#~ msgid "Fixed month value"
+#~ msgstr "Mes por defecto"
+
+#~ msgid "Fixed month cell"
+#~ msgstr "Mes desde celda"
+
+#~ msgid "Fixed month column"
+#~ msgstr "Mes desde columna"
+
+#~ msgid "Fixed day value"
+#~ msgstr "Día por defecto"
+
+#~ msgid "Fixed day cell"
+#~ msgstr "Día desde celda"
+
+#~ msgid "Fixed day column"
+#~ msgstr "Día desde columna"
+
+#~ msgid "Cell value"
+#~ msgstr "Valor de celda"
+
+#~ msgid "Column index"
+#~ msgstr "Índice de la columna"
+
+#~ msgid "Row index"
+#~ msgstr "Índice de la fila"
+
+#~ msgid "Column value"
+#~ msgstr "Valor de columna"
+
+#~ msgid "Geometry field from lon/lat values"
+#~ msgstr "Campo geometría desde columnas lon/lat"
+
+#~ msgid "EPSG value"
+#~ msgstr "Valor EPSG"
+
+#~ msgid "Long column index"
+#~ msgstr "Índice columna longitud"
+
+#~ msgid "Lat column index"
+#~ msgstr "Índice columna latitud"
+
+#~ msgid "Geometry field from one field (lon, lat)"
+#~ msgstr "Campo geometría desde una única columna (lon, lat)"
+
+#~ msgid "coordinates column index"
+#~ msgstr "Nº columna de las coordenadas"
+
+#~ msgid "Geometry field from one field (lat, lon)"
+#~ msgstr "Campo geometría desde una única columna (lat/lon)"
+
+#~ msgid "Geometry from address in field"
+#~ msgstr "Campo geometría desde columna dirección"
+
+#~ msgid "Address value"
+#~ msgstr "Nº de la columna dirección"
+
+#~ msgid "Months"
+#~ msgstr "Mes"
+
+#~ msgid "Days"
+#~ msgstr "Día"
+
+#~ msgid "Locale"
+#~ msgstr "Idioma"
+
+#~ msgid "Date from cell"
+#~ msgstr "Fecha desde celda"
+
+#~ msgid "Date from column"
+#~ msgstr "Fecha desde columna"
+
+#~ msgid "Filename value"
+#~ msgstr "Nombre de fichero"
+
+#~ msgid "Sheet value"
+#~ msgstr "Nombre de hoja"
+
+#~ msgid "Custom value (experimental)"
+#~ msgstr "Valor calculado (experimental)"
+
+#~ msgid "code_text"
+#~ msgstr "Código"
+
+#~ msgid "Transform"
+#~ msgstr "Transformar"
+
+#~ msgid "Select directory"
+#~ msgstr "Seleccionar directorio"
+
+#~ msgid "Data store"
+#~ msgstr "Almacén de datos"
+
+#~ msgid "Method to apply"
+#~ msgstr "Método a aplicar"
+
+#~ msgid "Default"
+#~ msgstr "Por defecto"
+
+#~ msgid "Data store contains no resources to publish"
+#~ msgstr "El almacén no contiene recursos"
+
+#~ msgid "Choose dataStore"
+#~ msgstr "Elige almacén de datos"
+
+#~ msgid "Service is unavailable"
+#~ msgstr "Servicio no disponible"
+
+#~ msgid "No valid workspace selected"
+#~ msgstr "El espacio de trabajo seleccionado no es válido"
+
+#~ msgid "Choose resource"
+#~ msgstr "Elige recurso"
+
+#~ msgid "No valid data store selected"
+#~ msgstr "Almacén de datos no válido"
+
+#~ msgid "Transformations"
+#~ msgstr "Transformaciones"
+
+#~ msgid "Add transformation"
+#~ msgstr "Añadir"
+
+#~ msgid "Data Store"
+#~ msgstr "Almacén de datos"
+
+#~ msgid "Resource name"
+#~ msgstr "Nombre del recurso"
+
+#~ msgid "Transformations list"
+#~ msgstr "Lista de transformaciones"
+
+#~ msgid "Delete transformation"
+#~ msgstr "Borrar transformación"
+
+#~ msgid "Remove transformation"
+#~ msgstr "Borrar transformación"
+
+#~ msgid "Example origin file"
+#~ msgstr "Fichero ejemplo de origen de datos"
+
+#~ msgid "Select file"
+#~ msgstr "Seleccionar fichero"
+
+#~ msgid "Example destiny BD"
+#~ msgstr "Ejemplo de Base de datos de destino"
+
+#~ msgid "Excel File"
+#~ msgstr "Excel"
+
+#~ msgid "CSV File"
+#~ msgstr "CSV"
+
+#~ msgid "Select sheet"
+#~ msgstr "Seleccionar hoja"
+
+#~ msgid "All sheets"
+#~ msgstr "Todas las hojas"
+
+#~ msgid "..."
+#~ msgstr "..."
+
+#~ msgid "Limit separator"
+#~ msgstr "Separador"
+
+#~ msgid "Character encoding"
+#~ msgstr "Codificación de caracteres"
+
+#~ msgid "From row"
+#~ msgstr "Desde la fila"
+
+#~ msgid "From column"
+#~ msgstr "Desde la columna"
+
+#~ msgid "Rules"
+#~ msgstr "Reglas"
+
+#~ msgid "New rule"
+#~ msgstr "Nueva regla"
+
+#~ msgid "ID"
+#~ msgstr "Id."
+
+#~ msgid "Field"
+#~ msgstr "Campo de la BD"
+
+#~ msgid "Field rule"
+#~ msgstr "Campo de la regla"
+
+#~ msgid "Preview"
+#~ msgstr "Anterior"
+
+#~ msgid "Not data loaded yet"
+#~ msgstr "No hay datos cargados aún"
+
+#~ msgid "The rule will be removed, Do you want continue?"
+#~ msgstr "La regla será eliminada, ¿Desea continuar?"
+
+#~ msgid "Resource contains no fields"
+#~ msgstr "El recurso no contiene campos"
+
+#~ msgid "Choose field"
+#~ msgstr "Elige un campo"
+
+#~ msgid "Error: fill all the transformation fields"
+#~ msgstr "Error: rellena todos los campos"
+
+#~ msgid "Loading sheet"
+#~ msgstr "Cargando hoja..."
+
+#~ msgid "Loading Excel file... (this could take a while)"
+#~ msgstr "Cargando fichero Excel... (esto puede llevar algo de tiempo)"
+
+#~ msgid "Error in"
+#~ msgstr "Error en "
+
+#~ msgid "Transformation done succesfully"
+#~ msgstr "Transformación realizada satisfactoriamente"
+
+#~ msgid "Server error"
+#~ msgstr "Error en el servidor"
 
 #~ msgid "custom_value"
 #~ msgstr "Valor calculado"
-
-#~ msgid "Project"
-#~ msgstr "Proyecto"
 
 #~ msgid "Directory name"
 #~ msgstr "Nombre del directorio"
@@ -685,12 +839,6 @@ msgstr "Error en el servidor"
 
 #~ msgid "Directory"
 #~ msgstr "Directorio"
-
-#~ msgid "Providers list"
-#~ msgstr "Lista de proveedores"
-
-#~ msgid "Add provider"
-#~ msgstr "Añadir proveedor"
 
 #~ msgid "TOC order"
 #~ msgstr "Orden del TOC"
