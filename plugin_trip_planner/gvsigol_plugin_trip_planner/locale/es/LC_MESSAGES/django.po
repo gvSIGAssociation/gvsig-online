@@ -3,20 +3,20 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-26 13:36+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2023-10-25 09:27+0000\n"
+"PO-Revision-Date: 2023-10-25 10:12+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: forms_services.py:35 forms_services.py:47 forms_services.py:66
 #: templates/app_mobile_config_update.html:51
@@ -72,29 +72,29 @@ msgstr "Configuración guardada con éxito"
 msgid "Contact URL"
 msgstr "URL de formulario de contacto"
 
-#: templates/app_mobile_config_update.html:67
+#: templates/app_mobile_config_update.html:74
 msgid "Geocoder URL"
 msgstr "URL de búsqeuda de direcciones"
 
-#: templates/app_mobile_config_update.html:74
+#: templates/app_mobile_config_update.html:81
 msgid "Base_layers"
 msgstr "Capas base"
 
-#: templates/app_mobile_config_update.html:76
+#: templates/app_mobile_config_update.html:83
 msgid "Add"
 msgstr "Añadir"
 
-#: templates/dashboard_trip_planner_menu.html:9
-#: templates/dashboard_trip_planner_menu.html:22
+#: templates/dashboard_trip_planner_menu.html:10
+#: templates/dashboard_trip_planner_menu.html:23
 msgid "Trip Planner"
 msgstr "Planificador de rutas"
 
-#: templates/dashboard_trip_planner_menu.html:14
-#: templates/dashboard_trip_planner_menu.html:23
+#: templates/dashboard_trip_planner_menu.html:15
+#: templates/dashboard_trip_planner_menu.html:24
 msgid "Config APP Mobile"
 msgstr "Configurar APP móvil"
 
-#: templates/dashboard_trip_planner_menu.html:20
+#: templates/dashboard_trip_planner_menu.html:21
 msgid "Plugins"
 msgstr "Plugins"
 
@@ -108,122 +108,180 @@ msgstr "¿Está activo?"
 
 #: templates/gtfs_provider_list.html:11
 msgid "GTFS Providers list"
-msgstr ""
+msgstr "Lista de proveedores GTFS"
 
 #: templates/gtfs_provider_list.html:13
 msgid "Add GTFS provider"
-msgstr ""
+msgstr "Añadir proveedor GTFS"
 
 #: templates/gtfs_provider_list.html:21
 msgid "Id"
 msgstr ""
 
 #: templates/gtfs_provider_list.html:58
-msgid "Download and Rebuild Graph at:"
-msgstr ""
+msgid "Run periodically?"
+msgstr "¿Ejecutar periódicamente?"
 
-#: templates/gtfs_provider_list.html:62
-msgid "Enter hour (from 0-23)"
-msgstr ""
+#: templates/gtfs_provider_list.html:64
+msgid "All days"
+msgstr "Todos los días"
+
+#: templates/gtfs_provider_list.html:65
+msgid "Monday"
+msgstr "Lunes"
+
+#: templates/gtfs_provider_list.html:66
+msgid "Tuesday"
+msgstr "Martes"
 
 #: templates/gtfs_provider_list.html:67
-msgid "Enter minutes (from 0-59)"
-msgstr ""
+msgid "Wednesday"
+msgstr "Miércoles"
+
+#: templates/gtfs_provider_list.html:68
+msgid "Thursday"
+msgstr "Jueves"
+
+#: templates/gtfs_provider_list.html:69
+msgid "Friday"
+msgstr "Viernes"
 
 #: templates/gtfs_provider_list.html:70
-msgid "Set up cronjob"
-msgstr ""
+msgid "Saturday"
+msgstr "Sábado"
 
-#: templates/gtfs_provider_list.html:87 templates/gtfs_provider_list.html:135
-msgid "Delete provider"
-msgstr ""
+#: templates/gtfs_provider_list.html:71
+msgid "Sunday"
+msgstr "Domingo"
 
-#: templates/gtfs_provider_list.html:90
-msgid "The provider will be removed, Do you want continue?"
-msgstr ""
+#: templates/gtfs_provider_list.html:72
+msgid "Every"
+msgstr "Cada"
+
+#: templates/gtfs_provider_list.html:89
+msgid "Download and Rebuild Graph at:"
+msgstr "Descargar y reconstruir grafo en:"
 
 #: templates/gtfs_provider_list.html:93
-msgid "Cancel"
-msgstr ""
+msgid "Select number of..."
+msgstr "Seleccionar número de..."
 
-#: templates/gtfs_provider_list.html:94
-msgid "Accept"
-msgstr ""
+#: templates/gtfs_provider_list.html:98
+msgid "... time measure"
+msgstr "... mesura del temps"
+
+#: templates/gtfs_provider_list.html:99
+#, fuzzy
+#| msgid "Minutes"
+msgid "minutes"
+msgstr "Minutos"
+
+#: templates/gtfs_provider_list.html:100
+msgid "hours"
+msgstr "Horas"
+
+#: templates/gtfs_provider_list.html:101
+msgid "days"
+msgstr "Días"
+
+#: templates/gtfs_provider_list.html:108
+msgid "Set up cronjob"
+msgstr "Configurar ejecución programada"
 
 #: templates/gtfs_provider_list.html:111
-msgid "Processing request..."
-msgstr ""
+msgid "Update Now"
+msgstr "Actualizar ahora"
 
-#: templates/gtfs_provider_list.html:112
+#: templates/gtfs_provider_list.html:128 templates/gtfs_provider_list.html:176
+msgid "Delete provider"
+msgstr "Eliminar proveedor"
+
+#: templates/gtfs_provider_list.html:131
+msgid "The provider will be removed, Do you want continue?"
+msgstr "Se eliminará el proveedor, ¿quieres continuar?"
+
+#: templates/gtfs_provider_list.html:134
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/gtfs_provider_list.html:135
+msgid "Accept"
+msgstr "Aceptar"
+
+#: templates/gtfs_provider_list.html:152
+msgid "Processing request..."
+msgstr "Procesando petición..."
+
+#: templates/gtfs_provider_list.html:153
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:113
+#: templates/gtfs_provider_list.html:154
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:114
+#: templates/gtfs_provider_list.html:155
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:115
+#: templates/gtfs_provider_list.html:156
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:116
+#: templates/gtfs_provider_list.html:157
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:118
+#: templates/gtfs_provider_list.html:159
 msgid "Loading..."
 msgstr ""
 
-#: templates/gtfs_provider_list.html:119 templates/gtfs_provider_list.html:120
+#: templates/gtfs_provider_list.html:160 templates/gtfs_provider_list.html:161
 msgid "No records available"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:122
+#: templates/gtfs_provider_list.html:163
 msgid "First"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:123
+#: templates/gtfs_provider_list.html:164
 msgid "Previous"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:124
+#: templates/gtfs_provider_list.html:165
 msgid "Next"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:125
+#: templates/gtfs_provider_list.html:166
 msgid "Last"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:128
+#: templates/gtfs_provider_list.html:169
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:129
+#: templates/gtfs_provider_list.html:170
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: templates/gtfs_provider_list.html:139 templates/gtfs_provider_update.html:14
+#: templates/gtfs_provider_list.html:180 templates/gtfs_provider_update.html:14
 msgid "Update GTFS provider"
-msgstr ""
+msgstr "Actualizar proveedor GTFS"
 
 #: templates/gtfs_provider_update.html:42
 msgid "ID Field"
-msgstr ""
+msgstr "Campo ID"
 
-#: views.py:86
+#: views.py:155
 msgid "Error: provider could not be published"
-msgstr ""
+msgstr "Error: el proveedor no se pudo publicar"
 
-#: views.py:105
+#: views.py:174
 msgid "GTFS Provider not found"
-msgstr ""
+msgstr "Proveedor GTFS no encontrado"

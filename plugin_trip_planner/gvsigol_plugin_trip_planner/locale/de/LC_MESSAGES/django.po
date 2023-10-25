@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-25 09:27+0000\n"
+"POT-Creation-Date: 2023-10-25 09:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,14 +23,14 @@ msgstr ""
 #: templates/gtfs_provider_add.html:43 templates/gtfs_provider_list.html:22
 #: templates/gtfs_provider_update.html:50
 msgid "Name"
-msgstr "Nom"
+msgstr ""
 
 #: forms_services.py:36 forms_services.py:48 forms_services.py:67
 #: templates/app_mobile_config_update.html:58
 #: templates/gtfs_provider_add.html:50 templates/gtfs_provider_list.html:23
 #: templates/gtfs_provider_update.html:57
 msgid "Description"
-msgstr "Descripció"
+msgstr ""
 
 #: forms_services.py:37 forms_services.py:49
 #: templates/gtfs_provider_add.html:58 templates/gtfs_provider_list.html:24
@@ -41,58 +41,58 @@ msgstr ""
 #: forms_services.py:38 forms_services.py:50
 #: templates/gtfs_provider_list.html:25 templates/gtfs_provider_update.html:72
 msgid "Active"
-msgstr "Actiu"
+msgstr ""
 
 #: forms_services.py:56
 msgid "Hour"
-msgstr "Hora"
+msgstr ""
 
 #: forms_services.py:57
 msgid "Minutes"
-msgstr "Minuts"
+msgstr ""
 
 #: forms_services.py:68
 msgid "Config"
-msgstr "Configuració"
+msgstr ""
 
 #: templates/app_mobile_config_update.html:14
 msgid "Update APP Mobile Config"
-msgstr "Actualitzar configuración de l'APP mòbil"
+msgstr ""
 
 #: templates/app_mobile_config_update.html:16
 #: templates/gtfs_provider_add.html:14 templates/gtfs_provider_update.html:16
 msgid "Save"
-msgstr "Guardar"
+msgstr ""
 
 #: templates/app_mobile_config_update.html:25
 msgid "Mobile configuration saved successfully"
-msgstr "Configuració mòbil guardada correctament"
+msgstr ""
 
 #: templates/app_mobile_config_update.html:67
 msgid "Contact URL"
-msgstr "URL de contacte"
+msgstr ""
 
 #: templates/app_mobile_config_update.html:74
 msgid "Geocoder URL"
-msgstr "URL del geocodificador"
+msgstr ""
 
 #: templates/app_mobile_config_update.html:81
 msgid "Base_layers"
-msgstr "Capes base"
+msgstr ""
 
 #: templates/app_mobile_config_update.html:83
 msgid "Add"
-msgstr "Afegir"
+msgstr ""
 
 #: templates/dashboard_trip_planner_menu.html:10
 #: templates/dashboard_trip_planner_menu.html:23
 msgid "Trip Planner"
-msgstr "Planificador de viatges"
+msgstr ""
 
 #: templates/dashboard_trip_planner_menu.html:15
 #: templates/dashboard_trip_planner_menu.html:24
 msgid "Config APP Mobile"
-msgstr "Configurar APP mòbil"
+msgstr ""
 
 #: templates/dashboard_trip_planner_menu.html:21
 msgid "Plugins"
@@ -100,19 +100,19 @@ msgstr ""
 
 #: templates/gtfs_provider_add.html:12
 msgid "Add provider"
-msgstr "Afegir proveïdor"
+msgstr ""
 
 #: templates/gtfs_provider_add.html:65
 msgid "isActive"
-msgstr "Està actiu"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:11
 msgid "GTFS Providers list"
-msgstr "Llista de proveïdors GTFS"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:13
 msgid "Add GTFS provider"
-msgstr "Afegir proveïdor GTFS"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:21
 msgid "Id"
@@ -120,95 +120,95 @@ msgstr ""
 
 #: templates/gtfs_provider_list.html:58
 msgid "Run periodically?"
-msgstr "Execució periòdicament?"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:64
 msgid "All days"
-msgstr "Tots els dies"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:65
 msgid "Monday"
-msgstr "Dilluns"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:66
 msgid "Tuesday"
-msgstr "Dimarts"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:67
 msgid "Wednesday"
-msgstr "Dimecres"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:68
 msgid "Thursday"
-msgstr "Dijous"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:69
 msgid "Friday"
-msgstr "Divendres"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:70
 msgid "Saturday"
-msgstr "Dissabte"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:71
 msgid "Sunday"
-msgstr "Diumenge"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:72
 msgid "Every"
-msgstr "Cada"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:89
 msgid "Download and Rebuild Graph at:"
-msgstr "Baixa i reconstrueix el graf a:"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:93
 msgid "Select number of..."
-msgstr "Selecciona nombre de..."
+msgstr ""
 
 #: templates/gtfs_provider_list.html:98
 msgid "... time measure"
-msgstr "...mesura temporal"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:99
 msgid "minutes"
-msgstr "minuts"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:100
 msgid "hours"
-msgstr "hores"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:101
 msgid "days"
-msgstr "dies"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:108
 msgid "Set up cronjob"
-msgstr "Configura execució programada"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:111
 msgid "Update Now"
-msgstr "Actualitza ara"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:128 templates/gtfs_provider_list.html:176
 msgid "Delete provider"
-msgstr "Elimina el proveïdor"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:131
 msgid "The provider will be removed, Do you want continue?"
-msgstr "S'eliminarà el proveïdor, voleu continuar?"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:134
 msgid "Cancel"
-msgstr "Cancel·lar"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:135
 msgid "Accept"
-msgstr "Acceptar"
+msgstr ""
 
 #: templates/gtfs_provider_list.html:152
 msgid "Processing request..."
-msgstr "S'està processant la sol·licitud..."
+msgstr ""
 
 #: templates/gtfs_provider_list.html:153
 #, python-format
@@ -270,16 +270,16 @@ msgstr ""
 
 #: templates/gtfs_provider_list.html:180 templates/gtfs_provider_update.html:14
 msgid "Update GTFS provider"
-msgstr "Actualitza proveïdor GTFS"
+msgstr ""
 
 #: templates/gtfs_provider_update.html:42
 msgid "ID Field"
-msgstr "Camp ID"
+msgstr ""
 
 #: views.py:155
 msgid "Error: provider could not be published"
-msgstr "Error: el proveïdor no s'ha pogut publicar"
+msgstr ""
 
 #: views.py:174
 msgid "GTFS Provider not found"
-msgstr "No s'ha trobat el proveïdor GTFS"
+msgstr ""
