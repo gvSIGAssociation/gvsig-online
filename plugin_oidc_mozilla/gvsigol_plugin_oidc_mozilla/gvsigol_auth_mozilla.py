@@ -8,16 +8,15 @@ from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
 from gvsigol.services_base import BackendNotAvailable
-from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT
 from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET
-from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
+from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT, OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_VERIFY_SSL
+
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from requests.exceptions import RequestException, ConnectionError, Timeout, TooManyRedirects
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
 from gvsigol_auth import signals
 from rest_framework.request import Request
-from django.conf import settings
 import importlib
 
 try:
@@ -94,7 +93,7 @@ class OIDCSession():
             self.refresh_url = token_url
         self.token = None
         self._session = None
-        self.oidc_verify_ssl = getattr(settings, 'OIDC_VERIFY_SSL', True)
+        self.oidc_verify_ssl = OIDC_VERIFY_SSL
 
     def _create_session(self):
         extra = {
@@ -144,6 +143,9 @@ class OIDCSession():
             # refresh token is expired (Keycloak session is expired)
             self._create_session()
             return self.get(url, params=params, retry=False)
+        except Exception as e:
+            LOGGER.exception(str(e))
+            raise e
     
     def post(self, url, data=None, json=None, retry=True):
         try:
