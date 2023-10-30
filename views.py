@@ -30,6 +30,7 @@ from gvsigol_services import utils as service_utils
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from .models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
+from gvsigol_auth import auth_backend
 from gvsigol_auth.utils import staff_required
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
     services_unique_values, services_intervals, services_expressions, services_color_table, services_clustered_points, services_custom
