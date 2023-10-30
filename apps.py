@@ -1,6 +1,9 @@
 
 
 from django.apps import AppConfig
+import logging
+
+LOGGER = logging.getLogger('gvsigol')
 
 class GvsigolAuthConfig(AppConfig):
     name = 'gvsigol_auth'
@@ -13,6 +16,7 @@ class GvsigolAuthConfig(AppConfig):
             # ensure we have a proper environment
             from gvsigol_auth.utils import ensure_admin_group
             ensure_admin_group()
-        except:
+        except Exception as e:
             # Don't fail when we are migrating applications!!
+            logging.getLogger('gvsigol').warning(f'GvsigolAuthConfig, problems with auth backend. {str(e)} ')
             pass
