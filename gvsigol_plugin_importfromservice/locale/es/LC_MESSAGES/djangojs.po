@@ -15,6 +15,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,41 +24,61 @@ msgstr ""
 "X-Language: es\n"
 "X-Source-Language: C\n"
 
+#: static/js/lib/_trans.gvsigol.js:2
 msgid "Import from service"
 msgstr "Importar desde servicio"
 
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Error loading importfromservice plugin"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:73
 msgid "Import layer from service"
 msgstr "Importar capa desde servicio"
 
-msgid "Service"
-msgstr "Servicio"
-
-msgid "Service URL"
-msgstr "URL del servicio"
-
+#: static/js/lib/tools/importFromService.js:96
 msgid "Connect"
 msgstr "Conectar"
 
-msgid "Remove layer"
-msgstr "Eliminar capa"
-
-msgid "You must type a valid URL"
-msgstr "Debe introducir una URL válida"
-
-msgid "Load layer"
-msgstr "Cargar capa"
-
-msgid "Imported layers"
-msgstr "Capas importadas"
-
-msgid "Close"
-msgstr "Cerrar"
-
-msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
-msgstr "Contenido mixto: La página fue cargada sobre HTTPS, pero se ha solicitado una URL insegura"
-
+#: static/js/lib/tools/importFromService.js:101
 msgid "Output format not supported"
 msgstr "Formato de salida no soportado"
 
+#: static/js/lib/tools/importFromService.js:102
 msgid "No layers are available"
 msgstr "No hay capas disponibles"
+
+#: static/js/lib/tools/importFromService.js:103
+msgid "You must type a valid URL"
+msgstr "Debe introducir una URL válida"
+
+#: static/js/lib/tools/importFromService.js:104
+msgid ""
+"Mixed content: The page at was loaded over HTTPS, but requested an insecure "
+"URL"
+msgstr ""
+"Contenido mixto: La página fue cargada sobre HTTPS, pero se ha solicitado "
+"una URL insegura"
+
+#: static/js/lib/tools/importFromService.js:114
+msgid "Close"
+msgstr "Cerrar"
+
+#: static/js/lib/tools/importFromService.js:190
+#: static/js/lib/tools/importFromService.js:237
+msgid "Load layer"
+msgstr "Cargar capa"
+
+#: static/js/lib/tools/importFromService.js:437
+msgid "Imported layers"
+msgstr "Capas importadas"
+
+#: static/js/lib/tools/importFromService.js:515
+msgid "Remove layer"
+msgstr "Eliminar capa"
+
+#~ msgid "Service"
+#~ msgstr "Servicio"
+
+#~ msgid "Service URL"
+#~ msgstr "URL del servicio"
