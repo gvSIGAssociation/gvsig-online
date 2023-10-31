@@ -1,18 +1,9 @@
-#    gvSIG Online.
-#    Copyright (C) 2010-2017 SCOLAB.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -29,11 +20,11 @@ msgstr ""
 
 #: static/js/TableShape.js:7
 msgid "Parameters: {}"
-msgstr "Paràmetres: {}"
+msgstr ""
 
 #: static/js/TableShape.js:127
 msgid "File selected is not a "
-msgstr "L'arxiu seleccionat no és un "
+msgstr ""
 
 #: static/js/TableShape.js:177
 msgid "InDenova"
@@ -41,7 +32,7 @@ msgstr ""
 
 #: static/js/TableShape.js:182 static/js/TableShape.js:628
 msgid "Domain:"
-msgstr "Domini:"
+msgstr ""
 
 #: static/js/TableShape.js:186
 msgid "API Key:"
@@ -57,16 +48,16 @@ msgstr ""
 
 #: static/js/TableShape.js:198
 msgid "List urban procedures:"
-msgstr "Llista de procediments urbanístics:"
+msgstr ""
 
 #: static/js/TableShape.js:199
 msgid "Get procedures"
-msgstr "Obtingues els procediments"
+msgstr ""
 
 #: static/js/TableShape.js:203 static/js/TableShape.js:353
 #: static/js/TableShape.js:661 static/js/TableShape.js:887
 msgid "ALL"
-msgstr "TOTS"
+msgstr ""
 
 #: static/js/TableShape.js:207
 msgid "idTram:"
@@ -74,27 +65,27 @@ msgstr ""
 
 #: static/js/TableShape.js:211
 msgid "Description:"
-msgstr "Descripció:"
+msgstr ""
 
 #: static/js/TableShape.js:215
 msgid "Add Procedure:"
-msgstr "Afegir Proc.:"
+msgstr ""
 
 #: static/js/TableShape.js:222 static/js/TableShape.js:673
 msgid "From an initial date"
-msgstr "Des d'una data inicial"
+msgstr ""
 
 #: static/js/TableShape.js:226 static/js/TableShape.js:676
 msgid "Between dates"
-msgstr "Entre dates"
+msgstr ""
 
 #: static/js/TableShape.js:238
 msgid "Current date for initial"
-msgstr "Data actual per a l'inici"
+msgstr ""
 
 #: static/js/TableShape.js:241 static/js/TableShape.js:703
 msgid "Current date for end"
-msgstr "Data actual per al final"
+msgstr ""
 
 #: static/js/TableShape.js:247 static/js/TableShape.js:708
 #: static/js/TableShape.js:1220 static/js/TableShape.js:1460
@@ -119,7 +110,7 @@ msgstr "Data actual per al final"
 #: static/js/TableShape.js:13137 static/js/TableShape.js:13375
 #: static/js/TableShape.js:13666 static/js/TableShape.js:14031
 msgid "Close"
-msgstr "Tancar"
+msgstr ""
 
 #: static/js/TableShape.js:248 static/js/TableShape.js:709
 #: static/js/TableShape.js:1221 static/js/TableShape.js:1461
@@ -144,7 +135,7 @@ msgstr "Tancar"
 #: static/js/TableShape.js:13138 static/js/TableShape.js:13376
 #: static/js/TableShape.js:13667 static/js/TableShape.js:14032
 msgid "Accept"
-msgstr "Acceptar"
+msgstr ""
 
 #: static/js/TableShape.js:483 static/js/TableShape.js:1056
 #: static/js/TableShape.js:1284 static/js/TableShape.js:1579
@@ -168,7 +159,7 @@ msgstr "Acceptar"
 #: static/js/TableShape.js:12970 static/js/TableShape.js:13204
 #: static/js/TableShape.js:13454 static/js/TableShape.js:13813
 msgid "Input"
-msgstr "Entrada"
+msgstr ""
 
 #: static/js/TableShape.js:623
 msgid "SEGEX"
@@ -176,59 +167,57 @@ msgstr ""
 
 #: static/js/TableShape.js:635
 msgid "Entities with website in SEDIPUALB@"
-msgstr "Entitats amb seu electrònica en SEDIPUALB@"
+msgstr ""
 
 #: static/js/TableShape.js:638
 msgid "Get entities"
-msgstr "Obtingues entitats"
+msgstr ""
 
 #: static/js/TableShape.js:647
 msgid "User"
-msgstr "Usuari"
+msgstr ""
 
 #: static/js/TableShape.js:651
 msgid "Password:"
-msgstr "Contrasenya:"
+msgstr ""
 
 #: static/js/TableShape.js:656
 msgid "Types of georeferences in the entity"
-msgstr "Tipus de georreferències en l'entitat"
+msgstr ""
 
 #: static/js/TableShape.js:657
 msgid "Get types"
-msgstr "Obtingues tipus"
+msgstr ""
 
 #: static/js/TableShape.js:666
 msgid "Choose date"
-msgstr "Tria data"
+msgstr ""
 
 #: static/js/TableShape.js:670
 msgid "No date, download all"
-msgstr "Sense data, descarrega tots"
+msgstr ""
 
 #: static/js/TableShape.js:683
 msgid "Init date"
-msgstr "Data d'inici"
+msgstr ""
 
 #: static/js/TableShape.js:687
 msgid "End date"
-msgstr "Data final"
+msgstr ""
 
 #: static/js/TableShape.js:695
 msgid "Minutes before the current date for the init date"
-msgstr "Minuts abans de la data actual per la data d'inici"
+msgstr ""
 
 #: static/js/TableShape.js:699
 msgid ""
 "If files of the selected type of georeference have not been previously "
 "requested, this option will fail."
 msgstr ""
-"Si no s'han fet peticions d'expedients del tipus seleccionat prèviament, "
-"aquesta opció fallarà"
 
 #: static/js/TableShape.js:699
 msgid "Last date guaranteed for the init date."
-msgstr "Última data garantida per la data d'inici."
+msgstr ""
 
 #: static/js/TableShape.js:1197
 msgid "CSV"
@@ -236,12 +225,12 @@ msgstr ""
 
 #: static/js/TableShape.js:1202
 msgid "Choose csv file:"
-msgstr "Tria arxiu csv:"
+msgstr ""
 
 #: static/js/TableShape.js:1203 static/js/TableShape.js:1431
 #: static/js/TableShape.js:2776 static/js/TableShape.js:3769
 msgid "Select file"
-msgstr "Tria arxiu"
+msgstr ""
 
 #: static/js/TableShape.js:1206 static/js/TableShape.js:1434
 #: static/js/TableShape.js:1948 static/js/TableShape.js:1992
@@ -249,11 +238,11 @@ msgstr "Tria arxiu"
 #: static/js/TableShape.js:2779 static/js/TableShape.js:3772
 #: static/js/TableShape.js:3805
 msgid "Path:"
-msgstr "Ruta:"
+msgstr ""
 
 #: static/js/TableShape.js:1210
 msgid "Separator:"
-msgstr "Separador:"
+msgstr ""
 
 #: static/js/TableShape.js:1425
 msgid "JSON"
@@ -261,11 +250,11 @@ msgstr ""
 
 #: static/js/TableShape.js:1430
 msgid "Choose JSON file"
-msgstr "Tria arxiu JSON"
+msgstr ""
 
 #: static/js/TableShape.js:1439
 msgid "Do you want to load JSON data from an API REST?"
-msgstr "Vols carregar dades JSON des d'una API REST"
+msgstr ""
 
 #: static/js/TableShape.js:1442
 msgid "URL:"
@@ -279,59 +268,59 @@ msgstr ""
 #: static/js/TableShape.js:2320 static/js/TableShape.js:2370
 #: static/js/TableShape.js:3801
 msgid "Choose path:"
-msgstr "Tria la ruta:"
+msgstr ""
 
 #: static/js/TableShape.js:1945 static/js/TableShape.js:2321
 msgid "Select path"
-msgstr "Tria la ruta"
+msgstr ""
 
 #: static/js/TableShape.js:1952 static/js/TableShape.js:1953
 msgid "Load sheets"
-msgstr "Carrega fulles"
+msgstr ""
 
 #: static/js/TableShape.js:1956
 msgid "Sheet:"
-msgstr "Fulla:"
+msgstr ""
 
 #: static/js/TableShape.js:1960
 msgid "Attribute columns:"
-msgstr "Columnes d'atributs"
+msgstr ""
 
 #: static/js/TableShape.js:1964
 msgid "Skip header:"
-msgstr "Evitar capçalera:"
+msgstr ""
 
 #: static/js/TableShape.js:1969 static/js/TableShape.js:2351
 #: static/js/TableShape.js:3793
 msgid "Advanced Parameters"
-msgstr "Paràmetres avançats"
+msgstr ""
 
 #: static/js/TableShape.js:1973 static/js/TableShape.js:2355
 msgid "Reading options:"
-msgstr "Opcions de lectura:"
+msgstr ""
 
 #: static/js/TableShape.js:1976
 msgid "Single excel file"
-msgstr "Arxiu excel únic"
+msgstr ""
 
 #: static/js/TableShape.js:1980 static/js/TableShape.js:2362
 msgid "All files in a folder"
-msgstr "Tots els arxius d'una carpeta"
+msgstr ""
 
 #: static/js/TableShape.js:1985 static/js/TableShape.js:2367
 #: static/js/TableShape.js:3798
 msgid "Do you want to (re)-move the files after the process is over?"
-msgstr "Vols eliminar/moure els fitxers després d'acabar el procés?"
+msgstr ""
 
 #: static/js/TableShape.js:1989 static/js/TableShape.js:2371
 #: static/js/TableShape.js:3802
 msgid "Select folder"
-msgstr "Tria carpeta"
+msgstr ""
 
 #: static/js/TableShape.js:1993 static/js/TableShape.js:2375
 #: static/js/TableShape.js:3806
 msgid "For removing files leave this input empty"
-msgstr "Deixa aquest camp buit per eliminar els arxius"
+msgstr ""
 
 #: static/js/TableShape.js:2315
 msgid "XML"
@@ -339,40 +328,36 @@ msgstr ""
 
 #: static/js/TableShape.js:2328 static/js/TableShape.js:2329
 msgid "Get tags"
-msgstr "Obtingues etiquetes"
+msgstr ""
 
 #: static/js/TableShape.js:2340 static/js/TableShape.js:3390
 #: static/js/TableShape.js:7992 static/js/TableShape.js:13988
 msgid "Schema:"
-msgstr "Esquema:"
+msgstr ""
 
 #: static/js/TableShape.js:2345
 msgid "Add other different tags than the selected schema to all records"
 msgstr ""
-"Afegeix altres etiquetes diferents de l'esquema seleccionat a tots els "
-"registres"
 
 #: static/js/TableShape.js:2358
 msgid "Single XML file"
-msgstr "Arxiu XML únic"
+msgstr ""
 
 #: static/js/TableShape.js:2770
-#, fuzzy
-#| msgid "Choose shapefile:"
 msgid "Shapefile"
-msgstr "Tria l'arxiu SHP:"
+msgstr ""
 
 #: static/js/TableShape.js:2775
 msgid "Choose shapefile:"
-msgstr "Tria l'arxiu SHP:"
+msgstr ""
 
 #: static/js/TableShape.js:2783 static/js/TableShape.js:3776
 msgid "Encoding:"
-msgstr "Codificació:"
+msgstr ""
 
 #: static/js/TableShape.js:2794
 msgid "Insert if PRJ is not loaded"
-msgstr "Insereix si no es carrega el PRJ"
+msgstr ""
 
 #: static/js/TableShape.js:3013
 msgid "Oracle"
@@ -381,33 +366,33 @@ msgstr ""
 #: static/js/TableShape.js:3018 static/js/TableShape.js:3381
 #: static/js/TableShape.js:7983 static/js/TableShape.js:13978
 msgid "DB Connection:"
-msgstr "Connexió BBDD"
+msgstr ""
 
 #: static/js/TableShape.js:3022 static/js/TableShape.js:3023
 msgid "Get owners"
-msgstr "Obtén prop."
+msgstr ""
 
 #: static/js/TableShape.js:3026
 msgid "Owners:"
-msgstr "Propietaris:"
+msgstr ""
 
 #: static/js/TableShape.js:3030 static/js/TableShape.js:3031
 #: static/js/TableShape.js:3395 static/js/TableShape.js:3396
 #: static/js/TableShape.js:7997 static/js/TableShape.js:7998
 msgid "Get tables"
-msgstr "Obtén taules"
+msgstr ""
 
 #: static/js/TableShape.js:3034
 msgid "Tables:"
-msgstr "Taules:"
+msgstr ""
 
 #: static/js/TableShape.js:3040
 msgid "Do you want to write a SQL statement?"
-msgstr "Vols escriure una sentència SQL?"
+msgstr ""
 
 #: static/js/TableShape.js:3043
 msgid "SQL statement:"
-msgstr "Sentència SQL:"
+msgstr ""
 
 #: static/js/TableShape.js:3376 static/js/TableShape.js:13973
 msgid "PostGIS"
@@ -417,20 +402,20 @@ msgstr ""
 #: static/js/TableShape.js:7987 static/js/TableShape.js:7988
 #: static/js/TableShape.js:13983 static/js/TableShape.js:13984
 msgid "Get schemas"
-msgstr "Obtén esquema"
+msgstr ""
 
 #: static/js/TableShape.js:3400 static/js/TableShape.js:8002
 #: static/js/TableShape.js:13993
 msgid "Table name:"
-msgstr "Nom de la taula:"
+msgstr ""
 
 #: static/js/TableShape.js:3405
 msgid "Do you want to write a SQL WHERE Clause?"
-msgstr "Vols escriure una clàusula WHERE SQL?"
+msgstr ""
 
 #: static/js/TableShape.js:3408
 msgid "SQL WHERE Clause:"
-msgstr "Clàusula WHERE SQL:"
+msgstr ""
 
 #: static/js/TableShape.js:3763
 msgid "KML/KMZ"
@@ -438,51 +423,51 @@ msgstr ""
 
 #: static/js/TableShape.js:3768
 msgid "Choose file:"
-msgstr "Tria arxiu"
+msgstr ""
 
 #: static/js/TableShape.js:3787
 msgid "Insert if needed"
-msgstr "Inserta si es necessita"
+msgstr ""
 
 #: static/js/TableShape.js:4041 static/js/TableShape.js:4074
 msgid "Grid"
-msgstr "Quadrícula"
+msgstr ""
 
 #: static/js/TableShape.js:4080
 msgid "How to create the grid?"
-msgstr "Com crear la quadrícula?"
+msgstr ""
 
 #: static/js/TableShape.js:4083
 msgid "Grid from extent of input geometry"
-msgstr "Quadrícula a partir de l'extensió de la geometria d'entrada"
+msgstr ""
 
 #: static/js/TableShape.js:4088
 msgid "Grid from initial coordinates (Lower left corner)"
-msgstr "Quadrícula a partir de coordenades (cantonada inferior esquerra)"
+msgstr ""
 
 #: static/js/TableShape.js:4093
 msgid "Rows"
-msgstr "Files"
+msgstr ""
 
 #: static/js/TableShape.js:4098
 msgid "Columns"
-msgstr "Columnes"
+msgstr ""
 
 #: static/js/TableShape.js:4103
 msgid "Width"
-msgstr "Amplària"
+msgstr ""
 
 #: static/js/TableShape.js:4108
 msgid "Height"
-msgstr "Altura"
+msgstr ""
 
 #: static/js/TableShape.js:4113
 msgid "Initial X"
-msgstr "X inicial"
+msgstr ""
 
 #: static/js/TableShape.js:4118
 msgid "Initial Y"
-msgstr "Y inicial"
+msgstr ""
 
 #: static/js/TableShape.js:4123
 msgid "EPSG"
@@ -504,185 +489,185 @@ msgstr ""
 #: static/js/TableShape.js:13214 static/js/TableShape.js:13464
 #: static/js/TableShape.js:13823 static/js/TableShape.js:14188
 msgid "Output"
-msgstr "Eixida"
+msgstr ""
 
 #: static/js/TableShape.js:4357 static/js/TableShape.js:4390
 #: static/js/TableShape.js:4561
 msgid "Join"
-msgstr "Unió"
+msgstr ""
 
 #: static/js/TableShape.js:4395
 msgid "Main table attribute:"
-msgstr "Atribut de la taula principal:"
+msgstr ""
 
 #: static/js/TableShape.js:4399
 msgid "Secondary table attribute:"
-msgstr "Atribut de la taula secundària:"
+msgstr ""
 
 #: static/js/TableShape.js:4541 static/js/TableShape.js:4833
 msgid "Input Main"
-msgstr "Pr. Entrada"
+msgstr ""
 
 #: static/js/TableShape.js:4551
 msgid "Input Sec."
-msgstr "Sec. Entrada"
+msgstr ""
 
 #: static/js/TableShape.js:4571
 msgid "Main Not Used"
-msgstr "Pr. Sense Usar"
+msgstr ""
 
 #: static/js/TableShape.js:4581
 msgid "Sec. Not Used"
-msgstr "Sec. Sense Usar"
+msgstr ""
 
 #: static/js/TableShape.js:4710 static/js/TableShape.js:4743
 msgid "Compare Rows"
-msgstr "Compara files"
+msgstr ""
 
 #: static/js/TableShape.js:4748 static/js/TableShape.js:7369
 #: static/js/TableShape.js:9011 static/js/TableShape.js:13635
 msgid "Attribute:"
-msgstr "Atribut:"
+msgstr ""
 
 #: static/js/TableShape.js:4843
 msgid "Input to comp."
-msgstr "Entrada a comp."
+msgstr ""
 
 #: static/js/TableShape.js:4853 static/js/TableShape.js:9646
 msgid "Equals"
-msgstr "Igual"
+msgstr ""
 
 #: static/js/TableShape.js:4863
 msgid "News"
-msgstr "Nous"
+msgstr ""
 
 #: static/js/TableShape.js:4873
 msgid "Changes"
-msgstr "Canvis"
+msgstr ""
 
 #: static/js/TableShape.js:4883
 msgid "Comp. Not Used"
-msgstr "Comp. no emprada"
+msgstr ""
 
 #: static/js/TableShape.js:5016 static/js/TableShape.js:5052
 msgid "Remove Attribute"
-msgstr "Elimina Atribut"
+msgstr ""
 
 #: static/js/TableShape.js:5056
 msgid "Attribute to remove:"
-msgstr "Atribut a eliminar:"
+msgstr ""
 
 #: static/js/TableShape.js:5279 static/js/TableShape.js:5312
 msgid "Rename Attribute"
-msgstr "Reanomena Atribut"
+msgstr ""
 
 #: static/js/TableShape.js:5317
 msgid "Attribute to rename:"
-msgstr "Atribut a reanomenar:"
+msgstr ""
 
 #: static/js/TableShape.js:5321
 msgid "New name:"
-msgstr "Nou nom:"
+msgstr ""
 
 #: static/js/TableShape.js:5322
 msgid "New name"
-msgstr "Nou nom"
+msgstr ""
 
 #: static/js/TableShape.js:5531
 msgid "Concatenate Attr."
-msgstr "Concatena Atr."
+msgstr ""
 
 #: static/js/TableShape.js:5564
 msgid "Concatenate Attributes"
-msgstr "Concatena Atributs"
+msgstr ""
 
 #: static/js/TableShape.js:5569
 msgid "Attributes to concatenate:"
-msgstr "Atributs a concatenar:"
+msgstr ""
 
 #: static/js/TableShape.js:5573
 msgid "New attribute name:"
-msgstr "Nou nom d'atribut:"
+msgstr ""
 
 #: static/js/TableShape.js:5574 static/js/TableShape.js:8495
 msgid "New attribute name"
-msgstr "Nou nom d'atribut"
+msgstr ""
 
 #: static/js/TableShape.js:5577
 msgid "Separator (opt.):"
-msgstr "Separador (opc.)"
+msgstr ""
 
 #: static/js/TableShape.js:5578
 msgid "Separator"
-msgstr "Separador"
+msgstr ""
 
 #: static/js/TableShape.js:5782 static/js/TableShape.js:5815
 msgid "Pad Attribute"
-msgstr "Omple Atribut"
+msgstr ""
 
 #: static/js/TableShape.js:5820
 msgid "Attribute to pad:"
-msgstr "Atribut a omplir:"
+msgstr ""
 
 #: static/js/TableShape.js:5824
 msgid "Length desired:"
-msgstr "Longitud desitjada"
+msgstr ""
 
 #: static/js/TableShape.js:5828
 msgid "Side to pad:"
-msgstr "Costat a omplir:"
+msgstr ""
 
 #: static/js/TableShape.js:5830
 msgid "Right"
-msgstr "Dreta"
+msgstr ""
 
 #: static/js/TableShape.js:5831
 msgid "Left"
-msgstr "Esquerra"
+msgstr ""
 
 #: static/js/TableShape.js:5835
 msgid "Pad String:"
-msgstr "Text de farciment:"
+msgstr ""
 
 #: static/js/TableShape.js:6039 static/js/TableShape.js:6075
 msgid "Filter Duplicate"
-msgstr "Filtra Duplicats"
+msgstr ""
 
 #: static/js/TableShape.js:6079
 msgid "Attributes that must be uniques:"
-msgstr "Atributs que han de ser únics:"
+msgstr ""
 
 #: static/js/TableShape.js:6176
 msgid "Unique"
-msgstr "Únics"
+msgstr ""
 
 #: static/js/TableShape.js:6186
 msgid "Duplicated"
-msgstr "Duplicats"
+msgstr ""
 
 #: static/js/TableShape.js:6303 static/js/TableShape.js:6339
 msgid "Validate Geometry"
-msgstr "Valida Geometria"
+msgstr ""
 
 #: static/js/TableShape.js:6345
 msgid "Stop workspace if there are invalid geometries"
-msgstr "Detingues l'espai de traball si hi ha geometries no vàlides"
+msgstr ""
 
 #: static/js/TableShape.js:6447
 msgid "Valid"
-msgstr "Vàlida"
+msgstr ""
 
 #: static/js/TableShape.js:6457
 msgid "Invalid"
-msgstr "No vàlida"
+msgstr ""
 
 #: static/js/TableShape.js:6574 static/js/TableShape.js:6610
 msgid "Simple Geometry"
-msgstr "Geometria Simple"
+msgstr ""
 
 #: static/js/TableShape.js:6616
 msgid "Stop workspace if some geometry is not simple"
-msgstr "Detingues l'espai de treball si alguna geometria no és simple"
+msgstr ""
 
 #: static/js/TableShape.js:6715
 msgid "Simple"
@@ -694,269 +679,264 @@ msgstr ""
 
 #: static/js/TableShape.js:6843 static/js/TableShape.js:6876
 msgid "Modify Value"
-msgstr "Modifica Valor"
+msgstr ""
 
 #: static/js/TableShape.js:6881
 msgid "Attribute to modify:"
-msgstr "Atribut a modificar:"
+msgstr ""
 
 #: static/js/TableShape.js:6885
 msgid "New value:"
-msgstr "Nou valor:"
+msgstr ""
 
 #: static/js/TableShape.js:6886 static/js/TableShape.js:8510
 #: static/js/TableShape.js:9030
 msgid "New attribute value"
-msgstr "Nou valor d'atribut"
+msgstr ""
 
 #: static/js/TableShape.js:7084 static/js/TableShape.js:7117
 msgid "Counter"
-msgstr "Comptador"
+msgstr ""
 
 #: static/js/TableShape.js:7122
 msgid "New counter attribute:"
-msgstr "Nou atribut comptador:"
+msgstr ""
 
 #: static/js/TableShape.js:7126 static/js/TableShape.js:12235
 msgid "Group by:"
-msgstr "Agrupa per:"
+msgstr ""
 
 #: static/js/TableShape.js:7330 static/js/TableShape.js:7364
 msgid "Calculator"
-msgstr "Calculador"
+msgstr ""
 
 #: static/js/TableShape.js:7371
 msgid "Attributes:"
-msgstr "Atributs:"
+msgstr ""
 
 #: static/js/TableShape.js:7378
 msgid "Math functions:"
-msgstr "Funcions matemàtiques:"
+msgstr ""
 
 #: static/js/TableShape.js:7415
 msgid "String functions:"
-msgstr "Funcions amb textos:"
+msgstr ""
 
 #: static/js/TableShape.js:7444
 msgid "Expression:"
-msgstr "Expressió:"
+msgstr ""
 
 #: static/js/TableShape.js:7445
 msgid "For more math functions check above link."
-msgstr "Per a més funcions matemàtiques consulta l'enllaç de dalt."
+msgstr ""
 
 #: static/js/TableShape.js:7688
 msgid "Change Attr. Type"
-msgstr "Canvia Tipus Atr."
+msgstr ""
 
-# cmi
 #: static/js/TableShape.js:7721
 msgid "Change Attribute Type"
-msgstr "Canvia Tipus d'Atribut"
+msgstr ""
 
 #: static/js/TableShape.js:7726
 msgid "Attribute to change type:"
-msgstr "Atribut a canviar el tipus:"
+msgstr ""
 
 #: static/js/TableShape.js:7730
 msgid "To data type:"
-msgstr "Al tipus de dada:"
+msgstr ""
 
 #: static/js/TableShape.js:7732 static/js/TableShape.js:8500
 msgid "Varchar"
-msgstr "Cadena de Text"
+msgstr ""
 
 #: static/js/TableShape.js:7733 static/js/TableShape.js:8501
 msgid "Integer"
-msgstr "Sencer"
+msgstr ""
 
 #: static/js/TableShape.js:7734 static/js/TableShape.js:8502
 msgid "Float"
-msgstr "Decimals"
+msgstr ""
 
 #: static/js/TableShape.js:7735 static/js/TableShape.js:8503
 msgid "Date"
-msgstr "Data"
+msgstr ""
 
 #: static/js/TableShape.js:7736 static/js/TableShape.js:8504
 #: static/js/TableShape.js:13369
 msgid "Time Stamp"
-msgstr "Data i hora"
+msgstr ""
 
 #: static/js/TableShape.js:7737 static/js/TableShape.js:8505
 msgid "Boolean"
-msgstr "Booleà"
+msgstr ""
 
 #: static/js/TableShape.js:7943 static/js/TableShape.js:7976
 msgid "Execute SQL"
-msgstr "Executa SQL"
+msgstr ""
 
 #: static/js/TableShape.js:8007
 msgid "Get attributes"
-msgstr "Obtingues atributs"
+msgstr ""
 
 #: static/js/TableShape.js:8011
 msgid "Attributes from input:"
-msgstr "Atributs de l'entrada:"
+msgstr ""
 
 #: static/js/TableShape.js:8019
 msgid "Attributes from new connection:"
-msgstr "Atributs de la nova connexió:"
+msgstr ""
 
 #: static/js/TableShape.js:8029
 msgid "Query:"
-msgstr "Consulta:"
+msgstr ""
 
 #: static/js/TableShape.js:8456 static/js/TableShape.js:8489
 msgid "Create Attribute"
-msgstr "Crea Atribut"
+msgstr ""
 
 #: static/js/TableShape.js:8494
 msgid "New attribute:"
-msgstr "Nou atribut:"
+msgstr ""
 
 #: static/js/TableShape.js:8498
 msgid "Data type:"
-msgstr "Tipus de dada:"
+msgstr ""
 
 #: static/js/TableShape.js:8509 static/js/TableShape.js:9029
 msgid "Value:"
-msgstr "Valor:"
+msgstr ""
 
 #: static/js/TableShape.js:8702
 msgid "Expose Attributes"
-msgstr "Exposa Atributs"
+msgstr ""
 
 #: static/js/TableShape.js:8735
-#, fuzzy
-#| msgid "Expose Attributes"
 msgid "Expose Attribute"
-msgstr "Exposa Atributs"
+msgstr ""
 
 #: static/js/TableShape.js:8740
 msgid "Attribute to expose:"
-msgstr "Atributs a exposar:"
+msgstr ""
 
 #: static/js/TableShape.js:8741
 msgid "Write attributes to expose separated by space"
-msgstr "Escriu els atributs a exposar separats per un espai"
+msgstr ""
 
 #: static/js/TableShape.js:8973 static/js/TableShape.js:9006
 msgid "Filter"
-msgstr "Filtre"
+msgstr ""
 
 #: static/js/TableShape.js:9015
 msgid "Operator:"
-msgstr "Operador:"
+msgstr ""
 
 #: static/js/TableShape.js:9023
 msgid "Starts with"
-msgstr "Comença per"
+msgstr ""
 
 #: static/js/TableShape.js:9024
 msgid "Ends with"
-msgstr "Acaba per"
+msgstr ""
 
 #: static/js/TableShape.js:9025 static/js/TableShape.js:9645
 msgid "Contains"
-msgstr "Conté"
+msgstr ""
 
 #: static/js/TableShape.js:9039
 msgid "Composite Filter:"
-msgstr "Filtre Compost:"
+msgstr ""
 
 #: static/js/TableShape.js:9167
 msgid "True"
-msgstr "Cert"
+msgstr ""
 
 #: static/js/TableShape.js:9177
 msgid "False"
-msgstr "Fals"
+msgstr ""
 
 #: static/js/TableShape.js:9296 static/js/TableShape.js:9329
 msgid "Intersection"
-msgstr "Intersecció"
+msgstr ""
 
 #: static/js/TableShape.js:9335
 msgid "Self intersect layer (Use only data from main input)"
-msgstr "Autointersecta capa (Utilitza només les dades de l'entrada principal)"
+msgstr ""
 
 #: static/js/TableShape.js:9339
 msgid "Merge attributes of the secondary input to the final output"
-msgstr "Fusiona atributs de l'entrada secundària a l'eixida final"
+msgstr ""
 
 #: static/js/TableShape.js:9466 static/js/TableShape.js:9645
 #: static/js/TableShape.js:9646 static/js/TableShape.js:9647
 #: static/js/TableShape.js:9648 static/js/TableShape.js:9649
 #: static/js/TableShape.js:9718 static/js/TableShape.js:9940
 msgid "Main"
-msgstr "Principal"
+msgstr ""
 
 #: static/js/TableShape.js:9476 static/js/TableShape.js:9645
 #: static/js/TableShape.js:9646 static/js/TableShape.js:9647
 #: static/js/TableShape.js:9648 static/js/TableShape.js:9649
 #: static/js/TableShape.js:9728 static/js/TableShape.js:9950
 msgid "Secondary"
-msgstr "Secundària"
+msgstr ""
 
 #: static/js/TableShape.js:9605 static/js/TableShape.js:9638
 #: static/js/TableShape.js:9643
 msgid "Spatial Relation"
-msgstr "Relació Espacial"
+msgstr ""
 
 #: static/js/TableShape.js:9647
 msgid "Intersects"
-msgstr "Intersecta"
+msgstr ""
 
 #: static/js/TableShape.js:9648
 msgid "Touches"
-msgstr "Toca"
+msgstr ""
 
 #: static/js/TableShape.js:9649
 msgid "Within"
-msgstr "Dins de"
+msgstr ""
 
 #: static/js/TableShape.js:9857
 msgid "Difference"
-msgstr "Diferència"
+msgstr ""
 
 #: static/js/TableShape.js:10079 static/js/TableShape.js:10112
 msgid "Keep Attribute"
-msgstr "Mantén Atribut"
+msgstr ""
 
 #: static/js/TableShape.js:10116
 msgid "Attribute to keep:"
-msgstr "Atribut a mantindre:"
+msgstr ""
 
 #: static/js/TableShape.js:10316 static/js/TableShape.js:10350
 msgid "Reproject"
-msgstr "Reprojectar"
+msgstr ""
 
 #: static/js/TableShape.js:10355
 msgid "Source EPSG:"
-msgstr "EPSG origen:"
+msgstr ""
 
 #: static/js/TableShape.js:10357
 msgid "Empty to read from input layer"
-msgstr "Buit per llegir de la capa d'entrada"
+msgstr ""
 
 #: static/js/TableShape.js:10361
 msgid "Target EPSG:"
-msgstr "EPSG destí:"
+msgstr ""
 
 #: static/js/TableShape.js:10574
 msgid "Cadastral Geom."
-msgstr "Geom. Cadastral"
+msgstr ""
 
 #: static/js/TableShape.js:10610
 msgid "Cadastral Geometry"
-msgstr "Geometria Cadastral"
+msgstr ""
 
 #: static/js/TableShape.js:10614
-#, fuzzy
-#| msgid "Cadastral Reference Attribute:"
 msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
-msgstr "Atribut de la Referència Cadastral:"
+msgstr ""
 
 #: static/js/TableShape.js:10824 static/js/TableShape.js:10860
 msgid "MGRS"
@@ -964,240 +944,234 @@ msgstr ""
 
 #: static/js/TableShape.js:10864
 msgid "Select mode:"
-msgstr "Seleccione el mode:"
+msgstr ""
 
 #: static/js/TableShape.js:10866
-#, fuzzy
-#| msgid "MGRS to geographic coordinates:"
 msgid "MGRS to geographic coordinates (EPSG - 4326):"
-msgstr "MGRS a coordenades geogràfiques:"
+msgstr ""
 
 #: static/js/TableShape.js:10867
-#, fuzzy
-#| msgid "Geographic coordinates to MGRS:"
 msgid "Geographic coordinates (EPSG - 4326) to MGRS:"
-msgstr "Coordenades geogràfiques a MGRS:"
+msgstr ""
 
 #: static/js/TableShape.js:10870
 msgid "MGRS grid attribute:"
-msgstr "Atribut del grid MGRS:"
+msgstr ""
 
 #: static/js/TableShape.js:10874 static/js/TableShape.js:11163
 #: static/js/TableShape.js:13654
 msgid "Longitude attribute:"
-msgstr "Atribut de longitud"
+msgstr ""
 
 #: static/js/TableShape.js:10876 static/js/TableShape.js:11167
 #: static/js/TableShape.js:13658
 msgid "Latitude attribute:"
-msgstr "Atribut de latitud"
+msgstr ""
 
 #: static/js/TableShape.js:11122 static/js/TableShape.js:11158
 msgid "Text to Point"
-msgstr "Text a Punt"
+msgstr ""
 
 #: static/js/TableShape.js:11171 static/js/TableShape.js:11445
 msgid "Insert EPSG:"
-msgstr "Inserta EPSG:"
+msgstr ""
 
 #: static/js/TableShape.js:11400
-#, fuzzy
-#| msgid "WKT to Geometry"
 msgid "WKT Geom."
-msgstr "WKT a Geometria"
+msgstr ""
 
 #: static/js/TableShape.js:11436
 msgid "WKT to Geometry"
-msgstr "WKT a Geometria"
+msgstr ""
 
 #: static/js/TableShape.js:11441
 msgid "WKT string Attribute:"
-msgstr "Atribut text WKT:"
+msgstr ""
 
 #: static/js/TableShape.js:11669 static/js/TableShape.js:11705
 msgid "Split Attribute"
-msgstr "Parteix Atribut"
+msgstr ""
 
 #: static/js/TableShape.js:11710
 msgid "String Attribute:"
-msgstr "Atribut Text:"
+msgstr ""
 
 #: static/js/TableShape.js:11714 static/js/TableShape.js:11976
 msgid "List Name:"
-msgstr "Nom de la llista:"
+msgstr ""
 
 #: static/js/TableShape.js:11718
 msgid "Split by:"
-msgstr "Partir per:"
+msgstr ""
 
 #: static/js/TableShape.js:11935 static/js/TableShape.js:11971
 msgid "Explode List"
-msgstr "Explota Llista"
+msgstr ""
 
 #: static/js/TableShape.js:11980
 msgid "Attribute Name:"
-msgstr "Nom de l'atribut:"
+msgstr ""
 
 #: static/js/TableShape.js:12197 static/js/TableShape.js:12230
 msgid "Union"
-msgstr "Fusió"
+msgstr ""
 
 #: static/js/TableShape.js:12240
 msgid "Multigeometry for all features of the output"
-msgstr "Multigeometria per tots els registres d'eixida"
+msgstr ""
 
 #: static/js/TableShape.js:12454
 msgid "Remove Geom."
-msgstr "Elimina Geom."
+msgstr ""
 
 #: static/js/TableShape.js:12636
 msgid "Filter Geom."
-msgstr "Filtra Geom."
+msgstr ""
 
 #: static/js/TableShape.js:12709
 msgid "Points"
-msgstr "Punts"
+msgstr ""
 
 #: static/js/TableShape.js:12719
 msgid "Multipoints"
-msgstr "Multipunts"
+msgstr ""
 
 #: static/js/TableShape.js:12729
 msgid "Lines"
-msgstr "Línies"
+msgstr ""
 
 #: static/js/TableShape.js:12739
 msgid "Multilines"
-msgstr "Multilínies"
+msgstr ""
 
 #: static/js/TableShape.js:12749
 msgid "Polygons"
-msgstr "Polígons"
+msgstr ""
 
 #: static/js/TableShape.js:12759
 msgid "Multipolygons"
-msgstr "Multipolígons"
+msgstr ""
 
 #: static/js/TableShape.js:12898
 msgid "Explode Geometry"
-msgstr "Explota Geometries"
+msgstr ""
 
 #: static/js/TableShape.js:13093 static/js/TableShape.js:13126
 msgid "Calculate Area"
-msgstr "Calcula Àrea"
+msgstr ""
 
 #: static/js/TableShape.js:13131
 msgid "New area attribute:"
-msgstr "Nou atribut àrea:"
+msgstr ""
 
 #: static/js/TableShape.js:13328 static/js/TableShape.js:13361
 msgid "Current Date"
-msgstr "Data Actual"
+msgstr ""
 
 #: static/js/TableShape.js:13366
 msgid "New date attribute"
-msgstr "Nou atribut data"
+msgstr ""
 
 #: static/js/TableShape.js:13580 static/js/TableShape.js:13613
 msgid "Geocoder"
-msgstr "Geocodificador"
+msgstr ""
 
 #: static/js/TableShape.js:13618
 msgid "Engine"
-msgstr "Motor"
+msgstr ""
 
 #: static/js/TableShape.js:13625
 msgid "Mode"
-msgstr "Mode"
+msgstr ""
 
 #: static/js/TableShape.js:13627
 msgid "Direct"
-msgstr "Directe"
+msgstr ""
 
 #: static/js/TableShape.js:13628
 msgid "Reverse"
-msgstr "Invers"
+msgstr ""
 
 #: static/js/TableShape.js:13646
 msgid "Attributes selected:"
-msgstr "Atributs seleccionats:"
+msgstr ""
 
 #: static/js/TableShape.js:13997
 msgid "Operation:"
-msgstr "Operació:"
+msgstr ""
 
 #: static/js/TableShape.js:14000
 msgid "CREATE"
-msgstr "CREAR"
+msgstr ""
 
 #: static/js/TableShape.js:14004
 msgid "APPEND"
-msgstr "AFEGIR"
+msgstr ""
 
 #: static/js/TableShape.js:14008
 msgid "OVERWRITE"
-msgstr "SOBREESCRIURE"
+msgstr ""
 
 #: static/js/TableShape.js:14015
 msgid "UPDATE"
-msgstr "ACTUALITZAR"
+msgstr ""
 
 #: static/js/TableShape.js:14019
 msgid "DELETE"
-msgstr "ELIMINA"
+msgstr ""
 
 #: static/js/TableShape.js:14023
 msgid "Match column:"
-msgstr "Columna coincident:"
+msgstr ""
 
 #: static/js/TableShape.js:14025
 msgid "Order"
-msgstr "Ordre"
+msgstr ""
 
 #: static/js/Toolbar.js:20
 msgid "New"
-msgstr "Nou"
+msgstr ""
 
 #: static/js/Toolbar.js:34
 msgid "Open"
-msgstr "Obrir"
+msgstr ""
 
 #: static/js/Toolbar.js:43
 msgid "Save"
-msgstr "Guardar"
+msgstr ""
 
 #: static/js/Toolbar.js:176
 msgid "Run"
-msgstr "Executar"
+msgstr ""
 
 #: static/js/Toolbar.js:213
 msgid "Add DB"
-msgstr "Afegeix BBDD"
+msgstr ""
 
 #: static/js/Toolbar.js:220
 msgid "Remove"
-msgstr "Eliminar"
+msgstr ""
 
 #: static/js/Toolbar.js:231
 msgid "Undo"
-msgstr "Desfer"
+msgstr ""
 
 #: static/js/Toolbar.js:238
 msgid "Redo"
-msgstr "Refer"
+msgstr ""
 
 #: static/js/Toolbar.js:245
 msgid "Zoom In"
-msgstr "Acostar"
+msgstr ""
 
 #: static/js/Toolbar.js:265
 msgid "Zoom Out"
-msgstr "Allunyar"
+msgstr ""
 
 #: static/js/lib/_trans.gvsigol.js:2
 msgid "Connection parameters are valid."
-msgstr "Els paràmetres de connexió son vàlids."
+msgstr ""
 
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "Connection parameters are not valid."
-msgstr "Els paràmetres de connexió no son vàlids."
+msgstr ""
