@@ -1,3 +1,40 @@
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Save"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Continue"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "Url contact can't be empty"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:5
+msgid "Url contact hasn't correct format"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:6
+msgid "Url geocoder hasn't correct format"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:7 static/js/lib/_trans.gvsigol.js:9
+#: static/js/lib/_trans.gvsigol.js:11
+msgid "Base layer"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:8
+msgid "title can't be empty"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:10
+msgid "url can't be empty"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:12
+msgid "url hasn't correct format"
+msgstr ""
+
 #    gvSIG Online.
 #    Copyright (C) 2010-2017 SCOLAB.
 #
@@ -13,27 +50,10 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+#: static/js/lib/_trans.gvsigol.js:13 static/js/lib/_trans.gvsigol.js:15
 msgid "Insert a base_layer title"
 msgstr ""
 
+#: static/js/lib/_trans.gvsigol.js:14 static/js/lib/_trans.gvsigol.js:16
 msgid "Insert a base_layer url"
-msgstr ""
-
-msgid "Url contact can't be empty"
-msgstr ""
-
-msgid "Url contact hasn't correct format"
-msgstr ""
-
-msgid "Base layer"
-msgstr ""
-
-msgid "title can't be empty"
-msgstr ""
-
-msgid "url can't be empty"
-msgstr ""
-
-msgid "url hasn't correct format"
 msgstr ""

@@ -7,8 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: 2021-06-16 14:49+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -16,40 +18,38 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: mdstandards/iso19139_2007.py:21
+#: mdstandards/iso19139_2007.py:22
 msgid "author"
 msgstr "autor"
 
 # De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "003 owner"
-#: mdstandards/iso19139_2007.py:22
+#: mdstandards/iso19139_2007.py:23
 msgid "owner"
 msgstr "detentor"
 
-#: mdstandards/iso19139_2007.py:23
+#: mdstandards/iso19139_2007.py:24
 msgid "Contact"
 msgstr "Contato"
 
 # De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "001 resourceProvider"
-#: mdstandards/iso19139_2007.py:24
+#: mdstandards/iso19139_2007.py:25
 msgid "resourceProvider"
 msgstr "fornecedor"
 
 # De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "002 custodian"
-#: mdstandards/iso19139_2007.py:25
+#: mdstandards/iso19139_2007.py:26
 msgid "custodian"
 msgstr "tutor"
 
 # De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "006 originator"
-#: mdstandards/iso19139_2007.py:26
+#: mdstandards/iso19139_2007.py:27
 msgid "originator"
 msgstr "produtor"
 
 # De acuerdo a la interpretación que hacen en el perfil MGB/CONCAR del código "011 publisher"
-#: mdstandards/iso19139_2007.py:27
+#: mdstandards/iso19139_2007.py:28
 msgid "publisher"
 msgstr "editor"
 

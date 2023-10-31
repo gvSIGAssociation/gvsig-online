@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:13+0000\n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,23 +26,34 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: gvsigol_filemanager/static/js/jquery.uploadfile.js:68
 msgid "Drag files here"
 msgstr "Arrastrar archivos aquí"
 
+#: gvsigol_filemanager/static/js/jquery.uploadfile.js:69
 msgid "Abort"
 msgstr "Abortar"
 
+#: gvsigol_filemanager/static/js/jquery.uploadfile.js:70
 msgid "Cancel"
 msgstr "Cancelar"
 
+#: gvsigol_filemanager/static/js/jquery.uploadfile.js:71
 msgid "Delete"
 msgstr "Eliminar"
 
+#: gvsigol_filemanager/static/js/jquery.uploadfile.js:72
 msgid "Done"
 msgstr "Hecho"
 
+#: gvsigol_filemanager/static/js/jquery.uploadfile.js:111
 msgid "Select"
 msgstr "Seleccionar"
 
+#: gvsigol_filemanager/static/js/lib/_trans.gvsigol.js:2
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
+
+#: gvsigol_filemanager/static/js/lib/_trans.gvsigol.js:3
+msgid "Try again"
+msgstr ""

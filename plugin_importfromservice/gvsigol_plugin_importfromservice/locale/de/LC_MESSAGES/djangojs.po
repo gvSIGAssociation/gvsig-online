@@ -1,0 +1,76 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: de\n"
+"X-Source-Language: C\n"
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Import from service"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Error loading importfromservice plugin"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:73
+msgid "Import layer from service"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:96
+msgid "Connect"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:101
+msgid "Output format not supported"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:102
+msgid "No layers are available"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:103
+msgid "You must type a valid URL"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:104
+msgid ""
+"Mixed content: The page at was loaded over HTTPS, but requested an insecure "
+"URL"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:114
+msgid "Close"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:190
+#: static/js/lib/tools/importFromService.js:237
+msgid "Load layer"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:437
+msgid "Imported layers"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:515
+msgid "Remove layer"
+msgstr ""

@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-16 11:56+0000\n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -972,8 +972,8 @@ msgstr "Seleccionar formato"
 
 #: gvsigol_symbology/templates/external_graphic_add.html:146
 #: gvsigol_symbology/templates/external_graphic_add.html:152
-#: gvsigol_symbology/views.py:985 gvsigol_symbology/views.py:1189
-#: gvsigol_symbology/views.py:1377
+#: gvsigol_symbology/views.py:986 gvsigol_symbology/views.py:1190
+#: gvsigol_symbology/views.py:1378
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -1135,19 +1135,19 @@ msgstr "Editar simbolizador"
 msgid "Select field to generate unique values"
 msgstr "Seleccionar campo para generar valores únicos"
 
-#: gvsigol_symbology/views.py:143
+#: gvsigol_symbology/views.py:144
 msgid "The layer must contain at least one style"
 msgstr "La capa debe contener al menos un estilo"
 
-#: gvsigol_symbology/views.py:146
+#: gvsigol_symbology/views.py:147
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: gvsigol_symbology/views.py:977
+#: gvsigol_symbology/views.py:978
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: gvsigol_symbology/views.py:1037 gvsigol_symbology/views.py:1062
+#: gvsigol_symbology/views.py:1038 gvsigol_symbology/views.py:1063
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
@@ -1155,9 +1155,9 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: gvsigol_symbology/views.py:1132 gvsigol_symbology/views.py:1179
-#: gvsigol_symbology/views.py:1227 gvsigol_symbology/views.py:1304
-#: gvsigol_symbology/views.py:1367 gvsigol_symbology/views.py:1505
+#: gvsigol_symbology/views.py:1133 gvsigol_symbology/views.py:1180
+#: gvsigol_symbology/views.py:1228 gvsigol_symbology/views.py:1305
+#: gvsigol_symbology/views.py:1368 gvsigol_symbology/views.py:1506
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
@@ -1165,11 +1165,11 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: gvsigol_symbology/views.py:1186 gvsigol_symbology/views.py:1374
+#: gvsigol_symbology/views.py:1187 gvsigol_symbology/views.py:1375
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: gvsigol_symbology/views.py:1192 gvsigol_symbology/views.py:1380
+#: gvsigol_symbology/views.py:1193 gvsigol_symbology/views.py:1381
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
 

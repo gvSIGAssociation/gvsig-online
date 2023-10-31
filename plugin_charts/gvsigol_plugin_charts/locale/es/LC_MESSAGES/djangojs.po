@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,20 +24,39 @@ msgstr ""
 "X-Language: es\n"
 "X-Source-Language: C\n"
 
-msgid "Select chart"
-msgstr "Selecciona gráfico"
-
-msgid "Show charts view"
-msgstr "Mostrar vista de gráficos"
-
-msgid "Statistics"
-msgstr "Estadísticas"
-
+#: static/js/lib/_trans.gvsigol.js:2 static/js/lib/_trans.gvsigol.js:4
+#: static/js/lib/_trans.gvsigol.js:6 static/js/lib/_trans.gvsigol.js:9
 msgid "X axis"
 msgstr "Eje X"
 
+#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/_trans.gvsigol.js:5
+#: static/js/lib/_trans.gvsigol.js:7 static/js/lib/_trans.gvsigol.js:10
 msgid "Y axis"
 msgstr "Eje Y"
 
+#: static/js/lib/_trans.gvsigol.js:8
 msgid "Error loading charts plugin"
 msgstr "Error cargando plugin de charts"
+
+#: static/js/lib/tools/Charts.js:52
+msgid "Select chart"
+msgstr "Selecciona gráfico"
+
+#: static/js/lib/tools/Charts.js:57
+msgid "Show charts view"
+msgstr "Mostrar vista de gráficos"
+
+#: static/js/lib/tools/ChartsView.js:66
+msgid "Layer"
+msgstr ""
+
+#: static/js/lib/tools/ChartsView.js:74
+msgid "Map"
+msgstr ""
+
+#: static/js/lib/tools/ChartsView.js:217
+msgid "Search"
+msgstr ""
+
+#~ msgid "Statistics"
+#~ msgstr "Estadísticas"

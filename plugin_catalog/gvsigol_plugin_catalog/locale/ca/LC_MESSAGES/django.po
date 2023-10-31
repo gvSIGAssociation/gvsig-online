@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,31 +20,31 @@ msgstr ""
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
 
-#: mdstandards/iso19139_2007.py:21
+#: mdstandards/iso19139_2007.py:22
 msgid "author"
 msgstr "Autor"
 
-#: mdstandards/iso19139_2007.py:22
+#: mdstandards/iso19139_2007.py:23
 msgid "owner"
 msgstr "Propietari"
 
-#: mdstandards/iso19139_2007.py:23
+#: mdstandards/iso19139_2007.py:24
 msgid "Contact"
 msgstr "Contacte"
 
-#: mdstandards/iso19139_2007.py:24
+#: mdstandards/iso19139_2007.py:25
 msgid "resourceProvider"
 msgstr ""
 
-#: mdstandards/iso19139_2007.py:25
+#: mdstandards/iso19139_2007.py:26
 msgid "custodian"
 msgstr ""
 
-#: mdstandards/iso19139_2007.py:26
+#: mdstandards/iso19139_2007.py:27
 msgid "originator"
 msgstr ""
 
-#: mdstandards/iso19139_2007.py:27
+#: mdstandards/iso19139_2007.py:28
 msgid "publisher"
 msgstr ""
 

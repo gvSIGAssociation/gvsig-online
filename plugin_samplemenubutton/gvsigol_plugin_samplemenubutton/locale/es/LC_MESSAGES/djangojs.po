@@ -15,65 +15,76 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "AutoScale"
-msgstr "Escala Automática"
-
-msgid "legalwarning"
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Ficha espectáculo piroténico"
 msgstr ""
-"Todos los contenidos cartográficos de este web y de los servicios que proporciona son propiedad de esta institución." 
-"La institución no es responsable de la información que se puede obtener a través de enlaces a sistemas externos."
 
-msgid "Format"
-msgstr "Formato"
-
-msgid "Print params"
-msgstr "Parametros de impresión"
-
-msgid "Scale"
-msgstr "Escala"
-
-msgid "Select print template"
-msgstr "Seleccionar plantilla de impresión"
-
-msgid "Select template"
-msgstr "Seleccionar plantilla"
-
-msgid "Title"
-msgstr "Título"
-
-msgid "Legal warning"
-msgstr "Aviso legal"
-
-msgid "Resolution"
-msgstr "Resolución"
-
-msgid "Rotation"
-msgstr "Rotación"
-
-msgid "Accept"
-msgstr "Aceptar"
-
-msgid "Print"
-msgstr "Imprimir"
-
-msgid "Print map"
-msgstr "Imprimir mapa"
-
-msgid "Cancel"
-msgstr "Cancelar"
-
-msgid "You must select a template"
-msgstr "Ha de seleccionar una plantilla"
-
-msgid "Error loading print plugin"
+#: static/js/lib/_trans.gvsigol.js:3
+#, fuzzy
+#| msgid "Error loading print plugin"
+msgid "Error loading samplemenubutton plugin"
 msgstr "Error cargando plugin de impresión"
 
-msgid "Function not available"
-msgstr "Herramienta no disponible"
+#~ msgid "AutoScale"
+#~ msgstr "Escala Automática"
 
-msgid "This functionality is only available on Mozilla Firefox"
-msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
+#~ msgid "legalwarning"
+#~ msgstr ""
+#~ "Todos los contenidos cartográficos de este web y de los servicios que "
+#~ "proporciona son propiedad de esta institución.La institución no es "
+#~ "responsable de la información que se puede obtener a través de enlaces a "
+#~ "sistemas externos."
+
+#~ msgid "Format"
+#~ msgstr "Formato"
+
+#~ msgid "Print params"
+#~ msgstr "Parametros de impresión"
+
+#~ msgid "Scale"
+#~ msgstr "Escala"
+
+#~ msgid "Select print template"
+#~ msgstr "Seleccionar plantilla de impresión"
+
+#~ msgid "Select template"
+#~ msgstr "Seleccionar plantilla"
+
+#~ msgid "Title"
+#~ msgstr "Título"
+
+#~ msgid "Legal warning"
+#~ msgstr "Aviso legal"
+
+#~ msgid "Resolution"
+#~ msgstr "Resolución"
+
+#~ msgid "Rotation"
+#~ msgstr "Rotación"
+
+#~ msgid "Accept"
+#~ msgstr "Aceptar"
+
+#~ msgid "Print"
+#~ msgstr "Imprimir"
+
+#~ msgid "Print map"
+#~ msgstr "Imprimir mapa"
+
+#~ msgid "Cancel"
+#~ msgstr "Cancelar"
+
+#~ msgid "You must select a template"
+#~ msgstr "Ha de seleccionar una plantilla"
+
+#~ msgid "Function not available"
+#~ msgstr "Herramienta no disponible"
+
+#~ msgid "This functionality is only available on Mozilla Firefox"
+#~ msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"

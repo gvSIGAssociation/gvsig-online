@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-23 13:55+0000\n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: 2023-10-23 15:46+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,27 +17,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: templates/mobileview_project_list.html:72
-msgid "Version"
+#: gvsigol/services_base.py:33 gvsigol/settings.py:369
+msgid "Catalan"
+msgstr "Català"
+
+#: gvsigol/services_base.py:34 gvsigol/settings.py:371
+msgid "German"
+msgstr "Alemany"
+
+#: gvsigol/services_base.py:35 gvsigol/settings.py:372
+msgid "English"
+msgstr "Anglés"
+
+#: gvsigol/services_base.py:36 gvsigol/settings.py:367
+msgid "Spanish"
+msgstr "Espanyol"
+
+#: gvsigol/services_base.py:37 gvsigol/settings.py:373
+msgid "Portuguese"
+msgstr "Portugués"
+
+#: gvsigol/services_base.py:38 gvsigol/settings.py:374
+msgid "Brazilian Portuguese"
+msgstr "Portugués (Brasil)"
+
+#: gvsigol/services_base.py:39 gvsigol/settings.py:368
+msgid "Valencian"
+msgstr "Valencià"
+
+#: gvsigol/settings.py:370
+msgid "Valencian  ca-es-valencia"
 msgstr ""
-
-#~ msgid "Catalan"
-#~ msgstr "Català"
-
-#~ msgid "German"
-#~ msgstr "Alemany"
-
-#~ msgid "English"
-#~ msgstr "Anglés"
-
-#~ msgid "Spanish"
-#~ msgstr "Espanyol"
-
-#~ msgid "Portuguese"
-#~ msgstr "Portugués"
-
-#~ msgid "Brazilian Portuguese"
-#~ msgstr "Portugués (Brasil)"
-
-#~ msgid "Valencian"
-#~ msgstr "Valencià"

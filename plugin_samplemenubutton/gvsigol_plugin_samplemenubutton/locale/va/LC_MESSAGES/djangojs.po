@@ -15,50 +15,61 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "AutoScale"
-msgstr "Escala Automàtica"
-
-msgid "Format"
-msgstr "Format"
-
-msgid "legalwarning"
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Ficha espectáculo piroténico"
 msgstr ""
-"Tots els continguts cartogràfics d'aquest web i dels serveis que proporciona són propietat d'aquesta institució."
-"La institució no és responsable de la informació que es pot obtenir a través d'enllaços a sistemes externs."
 
-msgid "Print params"
-msgstr "Paràmetres d'impresió"
-
-msgid "Select print template"
-msgstr "Seleccionar plantilla d'impressió"
-
-msgid "Select template"
-msgstr "Seleccionar plantilla"
-
-msgid "Title"
-msgstr "Titol"
-
-msgid "Legal warning"
-msgstr "Avís legal"
-
-msgid "Resolution"
-msgstr "Resolució"
-
-msgid "Rotation"
-msgstr "Rotació"
-
-msgid "Print"
-msgstr "Imprimir"
-
-msgid "Cancel"
-msgstr "Cancel.lar"
-
-msgid "You must select a template"
-msgstr "Heu de seleccionar una plantilla"
-
-msgid "Error loading print plugin"
+#: static/js/lib/_trans.gvsigol.js:3
+#, fuzzy
+#| msgid "Error loading print plugin"
+msgid "Error loading samplemenubutton plugin"
 msgstr "Error carregant plugin d'impresió"
+
+#~ msgid "AutoScale"
+#~ msgstr "Escala Automàtica"
+
+#~ msgid "Format"
+#~ msgstr "Format"
+
+#~ msgid "legalwarning"
+#~ msgstr ""
+#~ "Tots els continguts cartogràfics d'aquest web i dels serveis que "
+#~ "proporciona són propietat d'aquesta institució.La institució no és "
+#~ "responsable de la informació que es pot obtenir a través d'enllaços a "
+#~ "sistemes externs."
+
+#~ msgid "Print params"
+#~ msgstr "Paràmetres d'impresió"
+
+#~ msgid "Select print template"
+#~ msgstr "Seleccionar plantilla d'impressió"
+
+#~ msgid "Select template"
+#~ msgstr "Seleccionar plantilla"
+
+#~ msgid "Title"
+#~ msgstr "Titol"
+
+#~ msgid "Legal warning"
+#~ msgstr "Avís legal"
+
+#~ msgid "Resolution"
+#~ msgstr "Resolució"
+
+#~ msgid "Rotation"
+#~ msgstr "Rotació"
+
+#~ msgid "Print"
+#~ msgstr "Imprimir"
+
+#~ msgid "Cancel"
+#~ msgstr "Cancel.lar"
+
+#~ msgid "You must select a template"
+#~ msgstr "Heu de seleccionar una plantilla"

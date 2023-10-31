@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,48 +29,138 @@ msgstr ""
 "X-Language: ca\n"
 "X-Source-Language: C\n"
 
+#: static/js/lib/_trans.gvsigol.js:2
+#, fuzzy
+#| msgid "Edit feature"
+msgid "Edit layer"
+msgstr "Editar element"
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "You are editing the layer"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "The layer you are trying to edit is locked"
+msgstr ""
+
 # editionBar.js
+#: static/js/lib/widgets/editionBar.js:95
 msgid "Add point"
 msgstr "Afegir punt"
 
+#: static/js/lib/widgets/editionBar.js:103
 msgid "Add line"
 msgstr "Afegir línia"
 
+#: static/js/lib/widgets/editionBar.js:111
 msgid "Add polygon"
 msgstr "Afegir polígon"
 
+# editionBar.js
+#: static/js/lib/widgets/editionBar.js:128
+#, fuzzy
+#| msgid "Add point"
+msgid "Add point to center"
+msgstr "Afegir punt"
+
+#: static/js/lib/widgets/editionBar.js:139
 msgid "Edit feature"
 msgstr "Editar element"
 
+#: static/js/lib/widgets/editionBar.js:150
+#: static/js/lib/widgets/editionBar.js:2270
 msgid "Remove feature"
 msgstr "Eliminar element"
 
+#: static/js/lib/widgets/editionBar.js:161
 msgid "Stop edition"
 msgstr "Finalitzar edició"
 
+#: static/js/lib/widgets/editionBar.js:239
+#: static/js/lib/widgets/editionBar.js:245
 msgid "Error starting edition"
 msgstr "Error començant edició"
 
+#: static/js/lib/widgets/editionBar.js:617
+msgid "Select feature to edit"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:637
+msgid "More element info"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:647
+msgid "Detalles de atributos"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1336
+#: static/js/lib/widgets/editionBar.js:1820
+#: static/js/lib/widgets/editionBar.js:2241
+msgid "Show form"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1363
+#: static/js/lib/widgets/editionBar.js:1855
 msgid "Feature properties"
 msgstr "Propietats"
 
+#: static/js/lib/widgets/editionBar.js:1364
+#: static/js/lib/widgets/editionBar.js:1856
 msgid "Feature resources"
 msgstr "Recursos"
 
-msgid "Remove"
-msgstr "Eliminar"
-
-msgid "Failed to remove layer lock"
-msgstr "Fallada al eliminar el bloqueig de la capa"
-
-msgid "New feature"
-msgstr "Nou element"
-
+#: static/js/lib/widgets/editionBar.js:1374
+#: static/js/lib/widgets/editionBar.js:1866
 msgid "Save"
 msgstr "Guardar"
 
+#: static/js/lib/widgets/editionBar.js:1375
+#: static/js/lib/widgets/editionBar.js:1867
+#: static/js/lib/widgets/editionBar.js:2281
 msgid "Cancel"
 msgstr "Cancel·lar"
 
+#: static/js/lib/widgets/editionBar.js:1466
+msgid ""
+"No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, "
+"por favor activarla en Limesurvey"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1537
+#: static/js/lib/widgets/editionBar.js:2036
+msgid ""
+"Version conflict: the feature was edited concurrently. Restart your editing "
+"session to get the last version."
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1632
+#: static/js/lib/widgets/editionBar.js:2439
+#: static/js/lib/widgets/editionBar.js:2442
 msgid "Failed to save the new record. Please check values"
 msgstr "Error al guardar el nou element. Per favor revise els valors"
+
+#: static/js/lib/widgets/editionBar.js:1672
+msgid "can't be null"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1965
+msgid ""
+"There is no active survey to be filled out. To answer the survey, please "
+"activate it in Limesurvey"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:2280
+msgid "Remove"
+msgstr "Eliminar"
+
+#: static/js/lib/widgets/editionBar.js:2494
+msgid "Failed to remove layer lock"
+msgstr "Fallada al eliminar el bloqueig de la capa"
+
+#: static/js/lib/widgets/editionBar.js:2604
+#: static/js/lib/widgets/editionBar.js:2606
+msgid "Error validando la version"
+msgstr ""
+
+#~ msgid "New feature"
+#~ msgstr "Nou element"

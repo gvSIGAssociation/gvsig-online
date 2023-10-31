@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-22 10:22+0100\n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,3 +17,166 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/dashboard_sampledashboard_add.html:12
+#: templates/dashboard_sampledashboard_update.html:12
+msgid "Save"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:37
+#: templates/dashboard_sampledashboard_list.html:20
+#: templates/dashboard_sampledashboard_update.html:37
+msgid "ID"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:38
+#: templates/dashboard_sampledashboard_update.html:38
+msgid "Sample id"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:44
+#: templates/dashboard_sampledashboard_list.html:21
+#: templates/dashboard_sampledashboard_update.html:44
+msgid "Name"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:45
+#: templates/dashboard_sampledashboard_update.html:45
+msgid "Sample name"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:51
+#: templates/dashboard_sampledashboard_list.html:22
+#: templates/dashboard_sampledashboard_update.html:51
+msgid "Title"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:52
+#: templates/dashboard_sampledashboard_update.html:52
+msgid "Sample title"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:58
+#: templates/dashboard_sampledashboard_list.html:23
+#: templates/dashboard_sampledashboard_update.html:58
+msgid "Description"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:59
+#: templates/dashboard_sampledashboard_update.html:59
+msgid "Sample description"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:78
+#: templates/dashboard_sampledashboard_update.html:78
+msgid "Create new layer"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:81
+#: templates/dashboard_sampledashboard_update.html:81
+msgid "Is needed to save this layer group first, Do you want continue?"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:84
+#: templates/dashboard_sampledashboard_list.html:61
+#: templates/dashboard_sampledashboard_update.html:84
+msgid "Cancel"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_add.html:85
+#: templates/dashboard_sampledashboard_list.html:62
+#: templates/dashboard_sampledashboard_update.html:85
+msgid "Accept"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:11
+msgid "Add Sample Entry"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:55
+msgid "Delete test element"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:58
+msgid "This test element will be remove. Are you sure?"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:79
+msgid "Processing request..."
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:80
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:81
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:82
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:83
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:84
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:86
+msgid "Loading..."
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:87
+#: templates/dashboard_sampledashboard_list.html:88
+msgid "No records available"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:90
+msgid "First"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:91
+msgid "Previous"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:92
+msgid "Next"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:93
+msgid "Last"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:96
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:97
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:103
+msgid "Delete samples"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_list.html:107
+msgid "Update samples"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_menu.html:10
+#: templates/dashboard_sampledashboard_menu.html:18
+msgid "Sample Dashboard"
+msgstr ""
+
+#: templates/dashboard_sampledashboard_menu.html:16
+msgid "Plugins"
+msgstr ""

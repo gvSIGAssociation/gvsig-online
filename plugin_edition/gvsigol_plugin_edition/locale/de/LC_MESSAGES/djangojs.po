@@ -1,0 +1,159 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"PO-Revision-Date: 2023-10-26 10:23+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: de\n"
+"X-Source-Language: C\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Edit layer"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "You are editing the layer"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "The layer you are trying to edit is locked"
+msgstr ""
+
+# editionBar.js
+#: static/js/lib/widgets/editionBar.js:95
+msgid "Add point"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:103
+msgid "Add line"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:111
+msgid "Add polygon"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:128
+msgid "Add point to center"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:139
+msgid "Edit feature"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:150
+#: static/js/lib/widgets/editionBar.js:2270
+msgid "Remove feature"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:161
+msgid "Stop edition"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:239
+#: static/js/lib/widgets/editionBar.js:245
+msgid "Error starting edition"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:617
+msgid "Select feature to edit"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:637
+msgid "More element info"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:647
+msgid "Detalles de atributos"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1336
+#: static/js/lib/widgets/editionBar.js:1820
+#: static/js/lib/widgets/editionBar.js:2241
+msgid "Show form"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1363
+#: static/js/lib/widgets/editionBar.js:1855
+msgid "Feature properties"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1364
+#: static/js/lib/widgets/editionBar.js:1856
+msgid "Feature resources"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1374
+#: static/js/lib/widgets/editionBar.js:1866
+msgid "Save"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1375
+#: static/js/lib/widgets/editionBar.js:1867
+#: static/js/lib/widgets/editionBar.js:2281
+msgid "Cancel"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1466
+msgid ""
+"No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, "
+"por favor activarla en Limesurvey"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1537
+#: static/js/lib/widgets/editionBar.js:2036
+msgid ""
+"Version conflict: the feature was edited concurrently. Restart your editing "
+"session to get the last version."
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1632
+#: static/js/lib/widgets/editionBar.js:2439
+#: static/js/lib/widgets/editionBar.js:2442
+msgid "Failed to save the new record. Please check values"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1672
+msgid "can't be null"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1965
+msgid ""
+"There is no active survey to be filled out. To answer the survey, please "
+"activate it in Limesurvey"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:2280
+msgid "Remove"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:2494
+msgid "Failed to remove layer lock"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:2604
+#: static/js/lib/widgets/editionBar.js:2606
+msgid "Error validando la version"
+msgstr ""

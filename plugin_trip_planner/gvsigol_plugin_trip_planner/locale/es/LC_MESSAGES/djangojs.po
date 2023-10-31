@@ -1,3 +1,59 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Save"
+msgstr "Guardar"
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Continue"
+msgstr "Continuar"
+
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "Url contact can't be empty"
+msgstr "La dirección de contacto no puede estar vacía"
+
+#: static/js/lib/_trans.gvsigol.js:5
+msgid "Url contact hasn't correct format"
+msgstr ""
+"La dirección de contacto no tiene el formato adecuado (p. ej 'http://www."
+"direccion.com')"
+
+#: static/js/lib/_trans.gvsigol.js:6
+msgid "Url geocoder hasn't correct format"
+msgstr ""
+"La dirección URL del geocodificador no tiene el formato adecuado (p. ej "
+"'http://www.direccion.com')"
+
+#: static/js/lib/_trans.gvsigol.js:7 static/js/lib/_trans.gvsigol.js:9
+#: static/js/lib/_trans.gvsigol.js:11
+msgid "Base layer"
+msgstr "Capa base"
+
+#: static/js/lib/_trans.gvsigol.js:8
+msgid "title can't be empty"
+msgstr "Título no puede estar en blanco"
+
+#: static/js/lib/_trans.gvsigol.js:10
+msgid "url can't be empty"
+msgstr "Dirección no puede estar vacía"
+
+#: static/js/lib/_trans.gvsigol.js:12
+msgid "url hasn't correct format"
+msgstr ""
+"Dirección no tiene el formato adecuado (p. ej 'http://www.direccion.com')"
+
 #    gvSIG Online.
 #    Copyright (C) 2010-2017 SCOLAB.
 #
@@ -13,27 +69,10 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+#: static/js/lib/_trans.gvsigol.js:13 static/js/lib/_trans.gvsigol.js:15
 msgid "Insert a base_layer title"
 msgstr "Añade un título a la capa base"
 
+#: static/js/lib/_trans.gvsigol.js:14 static/js/lib/_trans.gvsigol.js:16
 msgid "Insert a base_layer url"
 msgstr "Añade una dirección a una capa base"
-
-msgid "Url contact can't be empty"
-msgstr "Dirección de contacto no puede estar vacía"
-
-msgid "Url contact hasn't correct format"
-msgstr "Dirección de contacto no tiene el formato adecuado (p. ej 'http://www.direccion.com')"
-
-msgid "Base layer"
-msgstr "Capa base"
-
-msgid "title can't be empty"
-msgstr "Título no puede estar en blanco"
-
-msgid "url can't be empty"
-msgstr "Dirección no puede estar vacía"
-
-msgid "url hasn't correct format"
-msgstr "Dirección no tiene el formato adecuado (p. ej 'http://www.direccion.com')"

@@ -15,46 +15,61 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: pt_BR\n"
 "X-Generator: Poedit 2.4.3\n"
 
+#: static/js/lib/_trans.gvsigol.js:2 static/js/lib/tools/importVector.js:71
 msgid "Import vector file"
 msgstr "Importar arquivo vetorial"
 
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Error loading samplemenubutton plugin"
+msgstr ""
+
+#: static/js/lib/tools/importVector.js:77
 msgid "Vector file"
 msgstr "Arquivo vetorial"
 
-msgid "Layer title in TOC"
-msgstr "Título da camada no PDC"
-
-msgid "Imported vector files"
-msgstr "Arquivos vetoriais importados"
-
-msgid "Remove layer"
-msgstr "Remover camada"
-
+#: static/js/lib/tools/importVector.js:79
 msgid "You must select a file"
 msgstr "Você deve selecionar um arquivo"
 
+#: static/js/lib/tools/importVector.js:80
+msgid "The file is too large. You can publish it from the administrator"
+msgstr "O arquivo é muito grande. Você pode publicar a partir do administrador"
+
+#: static/js/lib/tools/importVector.js:85
+msgid "Layer title in TOC"
+msgstr "Título da camada no PDC"
+
+#: static/js/lib/tools/importVector.js:87
 msgid "You must indicate a title for the layer"
 msgstr "Você deve indicar um título para a camada"
 
-msgid "Accept"
-msgstr "Aceitar"
-
+#: static/js/lib/tools/importVector.js:93
 msgid "Close"
 msgstr "Fechar"
 
-msgid "The file is too large. You can publish it from the administrator"
-msgstr "O arquivo é muito grande. Você pode publicar a partir do administrador"
+#: static/js/lib/tools/importVector.js:94
+msgid "Accept"
+msgstr "Aceitar"
+
+#: static/js/lib/tools/importVector.js:366
+msgid "Imported vector files"
+msgstr "Arquivos vetoriais importados"
+
+#: static/js/lib/tools/importVector.js:444
+msgid "Remove layer"
+msgstr "Remover camada"

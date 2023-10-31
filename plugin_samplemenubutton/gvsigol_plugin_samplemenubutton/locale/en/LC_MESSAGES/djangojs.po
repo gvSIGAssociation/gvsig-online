@@ -15,51 +15,38 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "AutoScale"
-msgstr "Auto Scale"
-
-msgid "legalwarning"
-msgstr ""
-"All the cartographic contents of this web and of the services that it provides are property of this institution."
-"The institution is not responsible for the information that can be obtained through links to external systems."
-
-msgid "Format"
-msgstr "Format"
-
-msgid "Print params"
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Ficha espectáculo piroténico"
 msgstr ""
 
-msgid "Select print template"
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Error loading samplemenubutton plugin"
 msgstr ""
 
-msgid "Select template"
-msgstr ""
+#~ msgid "AutoScale"
+#~ msgstr "Auto Scale"
 
-msgid "Title"
-msgstr ""
+#~ msgid "legalwarning"
+#~ msgstr ""
+#~ "All the cartographic contents of this web and of the services that it "
+#~ "provides are property of this institution.The institution is not "
+#~ "responsible for the information that can be obtained through links to "
+#~ "external systems."
 
-msgid "Legal warning"
-msgstr ""
+#~ msgid "Format"
+#~ msgstr "Format"
 
-msgid "Resolution"
-msgstr "Resolution"
+#~ msgid "Resolution"
+#~ msgstr "Resolution"
 
-msgid "Rotation"
-msgstr "Rotación"
+#~ msgid "Rotation"
+#~ msgstr "Rotación"
 
-
-msgid "Print"
-msgstr ""
-
-msgid "Cancel"
-msgstr "Cancel"
-
-msgid "You must select a template"
-msgstr ""
-
-msgid "Error loading print plugin"
-msgstr ""
+#~ msgid "Cancel"
+#~ msgstr "Cancel"

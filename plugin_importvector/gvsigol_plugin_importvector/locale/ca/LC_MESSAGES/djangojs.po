@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,29 +29,46 @@ msgstr ""
 "X-Language: ca\n"
 "X-Source-Language: C\n"
 
+#: static/js/lib/_trans.gvsigol.js:2 static/js/lib/tools/importVector.js:71
 msgid "Import vector file"
 msgstr "Importar arxiu vectorial"
 
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Error loading samplemenubutton plugin"
+msgstr ""
+
+#: static/js/lib/tools/importVector.js:77
 msgid "Vector file"
 msgstr "Arxiu vectorial"
 
-msgid "Layer title in TOC"
-msgstr "Títol de la capa al TOC"
-
-msgid "Imported vector files"
-msgstr "Arxius vectorials importats"
-
-msgid "Remove layer"
-msgstr "Eliminar capa"
-
+#: static/js/lib/tools/importVector.js:79
 msgid "You must select a file"
 msgstr "Heu de seleccionar un arxiu"
 
+#: static/js/lib/tools/importVector.js:80
+msgid "The file is too large. You can publish it from the administrator"
+msgstr "El fitxer és massa gran. Podeu publicar-lo des de l'administrador"
+
+#: static/js/lib/tools/importVector.js:85
+msgid "Layer title in TOC"
+msgstr "Títol de la capa al TOC"
+
+#: static/js/lib/tools/importVector.js:87
 msgid "You must indicate a title for the layer"
 msgstr "Heu d'indicar un títol per a la capa"
 
+#: static/js/lib/tools/importVector.js:93
 msgid "Close"
 msgstr "Tancar"
 
-msgid "The file is too large. You can publish it from the administrator"
-msgstr "El fitxer és massa gran. Podeu publicar-lo des de l'administrador"
+#: static/js/lib/tools/importVector.js:94
+msgid "Accept"
+msgstr "D'acord"
+
+#: static/js/lib/tools/importVector.js:366
+msgid "Imported vector files"
+msgstr "Arxius vectorials importats"
+
+#: static/js/lib/tools/importVector.js:444
+msgid "Remove layer"
+msgstr "Eliminar capa"

@@ -15,27 +15,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Import vector file"
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Downloads"
 msgstr ""
 
-msgid "Vector file"
-msgstr ""
-
-msgid "Layer title in TOC"
-msgstr ""
-
-msgid "Imported vector files"
-msgstr ""
-
-msgid "Remove layer"
-msgstr ""
-
-msgid "You must select a file"
-msgstr ""
-
-msgid "You must indicate a title for the layer"
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Error loading staticdownloads plugin"
 msgstr ""

@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,88 +24,143 @@ msgstr ""
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
 
-msgid "Add to download list"
-msgstr ""
-
-msgid "No results found"
-msgstr ""
-
-msgid "View download list"
-msgstr ""
-
-msgid "Available downloads"
-msgstr ""
-
-msgid "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
-msgstr ""
-
-msgid "Email"
-msgstr ""
-
-msgid "No layers have been selected for download"
-msgstr ""
-
-msgid "List of downloads"
-msgstr ""
-
-msgid "Start downloading"
-msgstr ""
-
-msgid ""
-"Your download request has been registered. You will receive an email when your request is ready for download. "
-"You can also use this tracking link to check the status of your request: "
-msgstr ""
-
-msgid "There was an error processing your download request. Please, try again later"
-msgstr ""
-
-msgid "Direct download"
-msgstr ""
-
-msgid "Requires approval"
-msgstr ""
-
-msgid "Approved"
-msgstr ""
-
+#: static/js/downloadManagerClient.js:291
 msgid "Approval"
 msgstr ""
 
-msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
+#: static/js/downloadManagerClient.js:293
+msgid "Requires approval"
 msgstr ""
 
-msgid "Organization (optional)"
+#: static/js/downloadManagerClient.js:296
+msgid "Approved"
 msgstr ""
 
-msgid "Indended usage (optional)"
+#: static/js/downloadManagerClient.js:442
+msgid "Add to download list"
 msgstr ""
 
-msgid "%(number)s days"
+#: static/js/downloadManagerClient.js:460
+#: static/js/downloadManagerClient.js:829
+#: static/js/downloadManagerClient.js:862
+msgid "View download list"
 msgstr ""
 
-msgid "%(number)s hours"
+#: static/js/downloadManagerClient.js:463
+#: static/js/downloadManagerClient.js:569
+#: static/js/downloadManagerClient.js:895
+msgid "Available downloads"
 msgstr ""
 
-msgid "%(number)s minutes"
+#: static/js/downloadManagerClient.js:472
+msgid ""
+"The limit of allowed download items per request has been reached. You can "
+"start a new request to download additional items."
 msgstr ""
 
-msgid "Generic download request"
+#: static/js/downloadManagerClient.js:564
+msgid ""
+"The list of downloads could not be retrieved. Try again later or contact the "
+"service administrator if the error persists"
 msgstr ""
 
+#: static/js/downloadManagerClient.js:624
 msgid "Please, use this form to describe which data you need to download:"
 msgstr ""
 
+#: static/js/downloadManagerClient.js:626
 msgid "Request description"
 msgstr ""
 
-msgid "Send generic request"
+#: static/js/downloadManagerClient.js:630
+#: static/js/downloadManagerClient.js:720
+msgid "Organization (optional)"
 msgstr ""
 
+#: static/js/downloadManagerClient.js:634
+#: static/js/downloadManagerClient.js:724
+msgid "Indended usage (optional)"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:638
+#: static/js/downloadManagerClient.js:731
+msgid "Email"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:643
+msgid "Generic download request"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:645
 msgid "Send request"
 msgstr ""
 
+#: static/js/downloadManagerClient.js:718
 msgid ""
-"The limit of allowed download items per request has been reached. "
-"You can start a new request to download additional items."
+"Some of the selected resources must be approved by an administrator. Please "
+"fill the following information:"
 msgstr ""
 
+#: static/js/downloadManagerClient.js:738
+msgid "No layers have been selected for download"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:746
+msgid "List of downloads"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:748
+msgid "Send generic request"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:749
+msgid "Start downloading"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:822
+#: static/js/downloadManagerClient.js:855
+msgid "<a target=\"_blank\" href=\""
+msgstr ""
+
+#: static/js/downloadManagerClient.js:828
+#: static/js/downloadManagerClient.js:861
+msgid ""
+"There was an error processing your download request. Please, try again later"
+msgstr ""
+
+#: static/js/downloadManagerClient.js:842
+#: static/js/downloadManagerClient.js:875
+msgid "Download request"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "%(number)s days"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "%(number)s hours"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "%(number)s minutes"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:5
+msgid "%(number)s TB"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:6
+msgid "%(number)s GB"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:7
+msgid "%(number)s MB"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:8
+msgid "Error loading download manager conf"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:9
+msgid "Downloads"
+msgstr ""

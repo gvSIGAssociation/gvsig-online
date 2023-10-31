@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-23 13:55+0000\n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,16 +17,38 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: templates/mobileview_project_list.html:72
-msgid "Version"
+#: gvsigol/services_base.py:33 gvsigol/settings.py:369
+msgid "Catalan"
 msgstr ""
 
-#, fuzzy
-#~| msgid "Portuguese"
-#~ msgid "Portuguese"
-#~ msgstr "Portuguese (Brazil)"
+#: gvsigol/services_base.py:34 gvsigol/settings.py:371
+msgid "German"
+msgstr ""
 
+#: gvsigol/services_base.py:35 gvsigol/settings.py:372
+msgid "English"
+msgstr ""
+
+#: gvsigol/services_base.py:36 gvsigol/settings.py:367
+msgid "Spanish"
+msgstr ""
+
+#: gvsigol/services_base.py:37 gvsigol/settings.py:373
 #, fuzzy
-#~| msgid "Portuguese"
-#~ msgid "Brazilian Portuguese"
-#~ msgstr "Portuguese (Brazil)"
+#| msgid "Portuguese"
+msgid "Portuguese"
+msgstr "Portuguese (Brazil)"
+
+#: gvsigol/services_base.py:38 gvsigol/settings.py:374
+#, fuzzy
+#| msgid "Portuguese"
+msgid "Brazilian Portuguese"
+msgstr "Portuguese (Brazil)"
+
+#: gvsigol/services_base.py:39 gvsigol/settings.py:368
+msgid "Valencian"
+msgstr ""
+
+#: gvsigol/settings.py:370
+msgid "Valencian  ca-es-valencia"
+msgstr ""

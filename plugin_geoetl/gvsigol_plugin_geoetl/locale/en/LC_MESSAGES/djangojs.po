@@ -13,12 +13,11 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-24 12:55+0100\n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,848 +27,1166 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Undo"
+#: static/js/TableShape.js:7
+msgid "Parameters: {}"
 msgstr ""
 
-msgid "Redo"
-msgstr ""
-
-msgid "Remove"
-msgstr ""
-
-msgid "Run"
-msgstr ""
-
-msgid "Zoom In"
-msgstr ""
-
-msgid "Zoom Out"
-msgstr ""
-
-msgid "Open"
-msgstr ""
-
-msgid "Save"
-msgstr ""
-
-msgid "Process has been executed succesfully"
-msgstr ""
-
-msgid "Close"
-msgstr ""
-
-msgid "Accept"
-msgstr ""
-
-msgid "Response"
-msgstr ""
-
-msgid "Choose excel file:"
-msgstr ""
-
-msgid "Sheet:"
-msgstr ""
-
-msgid "Attribute columns:"
-msgstr ""
-
-msgid "Skip header:"
-msgstr ""
-
-msgid "Input"
-msgstr ""
-
-msgid "Output"
-msgstr ""
-
-msgid "Choose shapefile:"
-msgstr ""
-
-msgid "Path:"
-msgstr ""
-
-msgid "Join"
-msgstr ""
-
-msgid "Main table attribute:"
-msgstr ""
-
-msgid "Secondary table attribute:"
-msgstr ""
-
-msgid "Input Main"
-msgstr ""
-
-msgid "Input Sec."
-msgstr ""
-
-msgid "Main Not Used"
-msgstr ""
-
-msgid "Sec. Not Used"
-msgstr ""
-
-msgid "Remove Attribute"
-msgstr ""
-
-msgid "Attribute to remove:"
-msgstr ""
-
-msgid "Rename Attribute"
-msgstr ""
-
-msgid "Attribute to rename:"
-msgstr ""
-
-msgid "New name:"
-msgstr ""
-
-msgid "Modify Value"
-msgstr ""
-
-msgid "Attribute to modify:"
-msgstr ""
-
-msgid "New value:"
-msgstr ""
-
-msgid "Create Attribute"
-msgstr ""
-
-msgid "New attribute:"
-msgstr ""
-
-msgid "Value:"
-msgstr ""
-
-msgid "Filter"
-msgstr ""
-
-msgid "Attribute:"
-msgstr ""
-
-msgid "Operator:"
-msgstr ""
-
-msgid "Starts with"
-msgstr ""
-
-msgid "Ends with"
-msgstr ""
-
-msgid "Contains"
-msgstr ""
-
-msgid "True"
-msgstr ""
-
-msgid "False"
-msgstr ""
-
-msgid "Keep Attribute"
-msgstr ""
-
-msgid "Attribute to keep:"
-msgstr ""
-
-msgid "Host:"
-msgstr ""
-
-msgid "Port:"
-msgstr ""
-
-msgid "Database:"
-msgstr ""
-
-msgid "User:"
-msgstr ""
-
-msgid "Password:"
-msgstr ""
-
-msgid "Table name:"
-msgstr ""
-
-msgid "Operation:"
-msgstr ""
-
-msgid "CREATE"
-msgstr ""
-
-msgid "UPDATE"
-msgstr ""
-
-msgid "DELETE"
-msgstr ""
-
-msgid "Match Column:"
-msgstr ""
-
-msgid "Verify connection"
-msgstr ""
-
-msgid "New name"
-msgstr ""
-
-msgid "New attribute value"
-msgstr ""
-
-msgid "New attribute name"
-msgstr ""
-
-msgid "Name of your database"
-msgstr ""
-
-msgid "schema.tablename"
-msgstr ""
-
-msgid "Connection parameters are valid."
-msgstr ""
-
-msgid "Connection parameters are not valid."
-msgstr ""
-
-msgid "Choose csv file:"
-msgstr ""
-
-msgid "Separator:"
-msgstr ""
-
-msgid "Insert if PRJ is not loaded"
-msgstr ""
-
-msgid "Reproject"
-msgstr ""
-
-msgid "Source EPSG:"
-msgstr ""
-
-msgid "Target EPSG:"
-msgstr ""
-
-msgid "New counter attribute:"
-msgstr ""
-
-msgid "Group by:"
-msgstr ""
-
-msgid "Counter"
-msgstr ""
-
-msgid "Calculator"
-msgstr ""
-
-msgid "Math functions:"
-msgstr ""
-
-msgid "Attributes:"
-msgstr ""
-
-msgid "Expression:"
-msgstr ""
-
-msgid "For more math functions check above link"
-msgstr ""
-
-msgid "Set all transformers parameters in canvas"
-msgstr ""
-
-msgid "Select file"
-msgstr ""
-
-msgid "Load sheets"
-msgstr ""
-
-msgid "Set parameters of all tasks before save"
-msgstr ""
-
-msgid "New"
-msgstr ""
-
-msgid "Are you sure?"
-msgstr ""
-
-msgid "If you open a new empty canvas you will lost your current canvas if you have not saved it before"
-msgstr ""
-
+#: static/js/TableShape.js:127
 msgid "File selected is not a "
 msgstr ""
 
-msgid "Save ETL workspace"
+#: static/js/TableShape.js:177
+msgid "InDenova"
 msgstr ""
 
-msgid "Description"
-msgstr ""
-
-msgid "Run periodically?"
-msgstr ""
-
-msgid "All days"
-msgstr ""
-
-msgid "Monday"
-msgstr ""
-
-msgid "Tuesday"
-msgstr ""
-
-msgid "Wednesday"
-msgstr ""
-
-msgid "Thursday"
-msgstr ""
-
-msgid "Friday"
-msgstr ""
-
-msgid "Saturday"
-msgstr ""
-
-msgid "Sunday"
-msgstr ""
-
-msgid "Every"
-msgstr ""
-
-msgid "Run workspace every..."
-msgstr ""
-
-msgid "Select number of..."
-msgstr ""
-
-msgid "... time measure"
-msgstr ""
-
-msgid "minutes"
-msgstr ""
-
-msgid "hours"
-msgstr ""
-
-msgid "days"
-msgstr ""
-
-msgid "Overwrite workspace?"
-msgstr ""
-
-msgid "Workspace"
-msgstr ""
-
-msgid "will be overwrite. If you do not want to overwrite it the ID must be empty."
-msgstr ""
-
-msgid "Cadastral Geom."
-msgstr ""
-
-msgid "Cadastral Geometry"
-msgstr ""
-
-msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
-msgstr ""
-
-msgid "Select mode:"
-msgstr ""
-
-msgid "MGRS to geographic coordinates:"
-msgstr ""
-
-msgid "Geographic coordinates to MGRS:"
-msgstr ""
-
-msgid "MGRS grid attribute:"
-msgstr ""
-
-msgid "Longitude attribute:"
-msgstr ""
-
-msgid "Latitude attribute:"
-msgstr ""
-
-msgid "Text to Point"
-msgstr ""
-
-msgid "Insert EPSG:"
-msgstr ""
-
-msgid "Add DB"
-msgstr ""
-
-msgid "Choose path:"
-msgstr ""
-
-msgid "Select Path"
-msgstr ""
-
-msgid "Advanced Parameters"
-msgstr ""
-
-msgid "Reading options:"
-msgstr ""
-
-msgid "Single excel file"
-msgstr ""
-
-msgid "All files in a folder"
-msgstr ""
-
-msgid "Do you want to (re)-move the files after the process is over?"
-msgstr ""
-
-msgid "Select folder"
-msgstr ""
-
-msgid "For removing files leave this input empty"
-msgstr ""
-
-msgid "Encoding:"
-msgstr ""
-
+#: static/js/TableShape.js:182 static/js/TableShape.js:628
 msgid "Domain:"
 msgstr ""
 
+#: static/js/TableShape.js:186
+msgid "API Key:"
+msgstr ""
+
+#: static/js/TableShape.js:190
+msgid "Client ID:"
+msgstr ""
+
+#: static/js/TableShape.js:194
+msgid "Secret:"
+msgstr ""
+
+#: static/js/TableShape.js:198
 msgid "List urban procedures:"
 msgstr ""
 
+#: static/js/TableShape.js:199
 msgid "Get procedures"
 msgstr ""
 
+#: static/js/TableShape.js:203 static/js/TableShape.js:353
+#: static/js/TableShape.js:661 static/js/TableShape.js:887
 msgid "ALL"
 msgstr ""
 
+#: static/js/TableShape.js:207
+msgid "idTram:"
+msgstr ""
+
+#: static/js/TableShape.js:211
 msgid "Description:"
 msgstr ""
 
+#: static/js/TableShape.js:215
 msgid "Add Procedure:"
 msgstr ""
 
+#: static/js/TableShape.js:222 static/js/TableShape.js:673
 msgid "From an initial date"
 msgstr ""
 
+#: static/js/TableShape.js:226 static/js/TableShape.js:676
 msgid "Between dates"
 msgstr ""
 
+#: static/js/TableShape.js:238
 msgid "Current date for initial"
 msgstr ""
 
+#: static/js/TableShape.js:241 static/js/TableShape.js:703
 msgid "Current date for end"
 msgstr ""
 
-msgid "Choose file:"
-msgstr ""
-
-msgid "Insert if needed"
-msgstr ""
-
-msgid "DB Connection:"
-msgstr ""
-
-msgid "Get owners:"
-msgstr ""
-
-msgid "Get owners"
-msgstr ""
-
-msgid "Owners:"
-msgstr ""
-
-msgid "Get tables:"
-msgstr ""
-
-msgid "Get tables"
-msgstr ""
-
-msgid "Tables:"
-msgstr ""
-
-msgid "Do you want to write a SQL statement?"
-msgstr ""
-
-msgid "SQL statement:"
-msgstr ""
-
-msgid "Get schemas:"
-msgstr ""
-
-msgid "Get schemas"
-msgstr ""
-
-msgid "Schema:"
-msgstr ""
-
-msgid "Do you want to write a SQL WHERE Clause?"
-msgstr ""
-
-msgid "SQL WHERE Clause:"
-msgstr ""
-
-msgid "String functions:"
-msgstr ""
-
-msgid "Change Attr. Type"
-msgstr ""
-
-msgid "Change Attribute Type"
-msgstr ""
-
-msgid "Attribute to change type:"
-msgstr ""
-
-msgid "To data type:"
-msgstr ""
-
-msgid "Varchar"
-msgstr ""
-
-msgid "Integer"
-msgstr ""
-
-msgid "Float"
-msgstr ""
-
-msgid "Boolean"
-msgstr ""
-
-msgid "Compare Rows"
-msgstr ""
-
-msgid "Input to comp."
-msgstr ""
-
-msgid "Equals"
-msgstr ""
-
-msgid "News"
-msgstr ""
-
-msgid "Changes"
-msgstr ""
-
-msgid "Comp. Not Used"
-msgstr ""
-
-msgid "Concatenate Attr."
-msgstr ""
-
-msgid "Attributes to concatenate:"
-msgstr ""
-
-msgid "New attribute name:"
-msgstr ""
-
-msgid "Separator (opt.):"
-msgstr ""
-
-msgid "Separator"
-msgstr ""
-
-msgid "Concatenate Attributes"
-msgstr ""
-
-msgid "Current Date"
-msgstr ""
-
-msgid "New date attribute"
-msgstr ""
-
-msgid "Data type:"
-msgstr ""
-
-msgid "Composite Filter:"
-msgstr ""
-
-msgid "Filter Duplicate"
-msgstr ""
-
-msgid "Unique"
-msgstr ""
-
-msgid "Duplicated"
-msgstr ""
-
-msgid "Attributes that must be uniques:"
-msgstr ""
-
-msgid "Pad Attribute"
-msgstr ""
-
-msgid "Attribute to pad:"
-msgstr ""
-
-msgid "Length desired:"
-msgstr ""
-
-msgid "Side to pad:"
-msgstr ""
-
-msgid "Right"
-msgstr ""
-
-msgid "Left"
-msgstr ""
-
-msgid "Pad String:"
-msgstr ""
-
-msgid "Calculate Area"
-msgstr ""
-
-msgid "New area attribute:"
-msgstr ""
-
-msgid "Explode Geometry"
-msgstr ""
-
-msgid "Filter Geom."
-msgstr ""
-
-msgid "Points"
-msgstr ""
-
-msgid "Multipoints"
-msgstr ""
-
-msgid "Lines"
-msgstr ""
-
-msgid "Multilines"
-msgstr ""
-
-msgid "Polygons"
-msgstr ""
-
-msgid "Multipolygons"
-msgstr ""
-
-msgid "Geocoder"
-msgstr ""
-
-msgid "Engine"
-msgstr ""
-
-msgid "Mode"
-msgstr ""
-
-msgid "Attributes selected:"
-msgstr ""
-
-msgid "Main"
-msgstr ""
-
-msgid "Secondary"
-msgstr ""
-
-msgid "Intersection"
-msgstr ""
-
-msgid "Merge attributes of the secondary input to the final output"
-msgstr ""
-
-msgid "Remove Geom."
-msgstr ""
-
-msgid "Empty to read from input layer"
-msgstr ""
-
-msgid "Spatial Relation"
-msgstr ""
-
-msgid "Intersects"
-msgstr ""
-
-msgid "Touches"
-msgstr ""
-
-msgid "Within"
-msgstr ""
-
-msgid "Multigeometry for all features of the output"
-msgstr ""
-
-msgid "Union"
-msgstr ""
-
-msgid "WKT to Geometry"
-msgstr ""
-
-msgid "WKT string Attribute:"
-msgstr ""
-
-msgid "Explode List"
-msgstr ""
-
-msgid "List Name:"
-msgstr ""
-
-msgid "Attribute Name:"
-msgstr ""
-
-msgid "Split Attribute"
-msgstr ""
-
-msgid "String Attribute:"
-msgstr ""
-
-msgid "Split by:"
-msgstr ""
-
-msgid "Execute SQL"
-msgstr ""
-
-msgid "Attributes from input:"
-msgstr ""
-
-msgid "Attributes from new connection:"
-msgstr ""
-
-msgid "Get attributes"
-msgstr ""
-
-msgid "Query:"
-msgstr ""
-
-msgid "APPEND"
-msgstr ""
-
-msgid "OVERWRITE"
-msgstr ""
-
+#: static/js/TableShape.js:247 static/js/TableShape.js:708
+#: static/js/TableShape.js:1220 static/js/TableShape.js:1460
+#: static/js/TableShape.js:1735 static/js/TableShape.js:2000
+#: static/js/TableShape.js:2382 static/js/TableShape.js:2801
+#: static/js/TableShape.js:3050 static/js/TableShape.js:3414
+#: static/js/TableShape.js:3812 static/js/TableShape.js:4132
+#: static/js/TableShape.js:4416 static/js/TableShape.js:4754
+#: static/js/TableShape.js:5061 static/js/TableShape.js:5327
+#: static/js/TableShape.js:5583 static/js/TableShape.js:5841
+#: static/js/TableShape.js:6084 static/js/TableShape.js:6350
+#: static/js/TableShape.js:6621 static/js/TableShape.js:6891
+#: static/js/TableShape.js:7132 static/js/TableShape.js:7450
+#: static/js/TableShape.js:7743 static/js/TableShape.js:8035
+#: static/js/TableShape.js:8515 static/js/TableShape.js:8753
+#: static/js/TableShape.js:9045 static/js/TableShape.js:9344
+#: static/js/TableShape.js:9655 static/js/TableShape.js:10121
+#: static/js/TableShape.js:10369 static/js/TableShape.js:10619
+#: static/js/TableShape.js:10882 static/js/TableShape.js:11179
+#: static/js/TableShape.js:11453 static/js/TableShape.js:11724
+#: static/js/TableShape.js:11986 static/js/TableShape.js:12245
+#: static/js/TableShape.js:13137 static/js/TableShape.js:13375
+#: static/js/TableShape.js:13666 static/js/TableShape.js:14031
+msgid "Close"
+msgstr ""
+
+#: static/js/TableShape.js:248 static/js/TableShape.js:709
+#: static/js/TableShape.js:1221 static/js/TableShape.js:1461
+#: static/js/TableShape.js:1736 static/js/TableShape.js:2001
+#: static/js/TableShape.js:2383 static/js/TableShape.js:2802
+#: static/js/TableShape.js:3051 static/js/TableShape.js:3415
+#: static/js/TableShape.js:3813 static/js/TableShape.js:4133
+#: static/js/TableShape.js:4417 static/js/TableShape.js:4755
+#: static/js/TableShape.js:5062 static/js/TableShape.js:5328
+#: static/js/TableShape.js:5584 static/js/TableShape.js:5842
+#: static/js/TableShape.js:6085 static/js/TableShape.js:6351
+#: static/js/TableShape.js:6622 static/js/TableShape.js:6892
+#: static/js/TableShape.js:7133 static/js/TableShape.js:7451
+#: static/js/TableShape.js:7744 static/js/TableShape.js:8036
+#: static/js/TableShape.js:8516 static/js/TableShape.js:8754
+#: static/js/TableShape.js:9046 static/js/TableShape.js:9345
+#: static/js/TableShape.js:9656 static/js/TableShape.js:10122
+#: static/js/TableShape.js:10370 static/js/TableShape.js:10620
+#: static/js/TableShape.js:10883 static/js/TableShape.js:11180
+#: static/js/TableShape.js:11454 static/js/TableShape.js:11725
+#: static/js/TableShape.js:11987 static/js/TableShape.js:12246
+#: static/js/TableShape.js:13138 static/js/TableShape.js:13376
+#: static/js/TableShape.js:13667 static/js/TableShape.js:14032
+msgid "Accept"
+msgstr ""
+
+#: static/js/TableShape.js:483 static/js/TableShape.js:1056
+#: static/js/TableShape.js:1284 static/js/TableShape.js:1579
+#: static/js/TableShape.js:1797 static/js/TableShape.js:2173
+#: static/js/TableShape.js:2630 static/js/TableShape.js:2873
+#: static/js/TableShape.js:3234 static/js/TableShape.js:3623
+#: static/js/TableShape.js:3933 static/js/TableShape.js:4233
+#: static/js/TableShape.js:5157 static/js/TableShape.js:5410
+#: static/js/TableShape.js:5661 static/js/TableShape.js:5918
+#: static/js/TableShape.js:6166 static/js/TableShape.js:6437
+#: static/js/TableShape.js:6705 static/js/TableShape.js:6962
+#: static/js/TableShape.js:7207 static/js/TableShape.js:7564
+#: static/js/TableShape.js:7820 static/js/TableShape.js:8332
+#: static/js/TableShape.js:8581 static/js/TableShape.js:8851
+#: static/js/TableShape.js:9157 static/js/TableShape.js:10195
+#: static/js/TableShape.js:10453 static/js/TableShape.js:10701
+#: static/js/TableShape.js:10998 static/js/TableShape.js:11278
+#: static/js/TableShape.js:11547 static/js/TableShape.js:11813
+#: static/js/TableShape.js:12074 static/js/TableShape.js:12331
+#: static/js/TableShape.js:12513 static/js/TableShape.js:12699
+#: static/js/TableShape.js:12970 static/js/TableShape.js:13204
+#: static/js/TableShape.js:13454 static/js/TableShape.js:13813
+msgid "Input"
+msgstr ""
+
+#: static/js/TableShape.js:623
+msgid "SEGEX"
+msgstr ""
+
+#: static/js/TableShape.js:635
 msgid "Entities with website in SEDIPUALB@"
 msgstr ""
 
-msgid "User"
-msgstr ""
-
-msgid "Types of georeferences in the entity"
-msgstr ""
-
-msgid "No date, download all"
-msgstr ""
-
-msgid "Init date"
-msgstr ""
-
-msgid "End date"
-msgstr ""
-
-msgid "Minutes before the current date for the init date"
-msgstr ""
-
-msgid "Time Stamp"
-msgstr ""
-
+#: static/js/TableShape.js:638
 msgid "Get entities"
 msgstr ""
 
+#: static/js/TableShape.js:647
+msgid "User"
+msgstr ""
+
+#: static/js/TableShape.js:651
+msgid "Password:"
+msgstr ""
+
+#: static/js/TableShape.js:656
+msgid "Types of georeferences in the entity"
+msgstr ""
+
+#: static/js/TableShape.js:657
 msgid "Get types"
 msgstr ""
 
-msgid "Reverse"
-msgstr ""
-
-msgid "Direct"
-msgstr ""
-
-msgid "Choose JSON file"
-msgstr ""
-
-msgid "Do you want to load JSON data from an API REST?"
-msgstr ""
-
+#: static/js/TableShape.js:666
 msgid "Choose date"
 msgstr ""
 
-msgid "Difference"
+#: static/js/TableShape.js:670
+msgid "No date, download all"
 msgstr ""
 
-msgid "Date"
+#: static/js/TableShape.js:683
+msgid "Init date"
 msgstr ""
 
+#: static/js/TableShape.js:687
+msgid "End date"
+msgstr ""
+
+#: static/js/TableShape.js:695
+msgid "Minutes before the current date for the init date"
+msgstr ""
+
+#: static/js/TableShape.js:699
+msgid ""
+"If files of the selected type of georeference have not been previously "
+"requested, this option will fail."
+msgstr ""
+
+#: static/js/TableShape.js:699
 msgid "Last date guaranteed for the init date."
 msgstr ""
 
-msgid "If files of the selected type of georeference have not been previously requested, this option will fail."
+#: static/js/TableShape.js:1197
+msgid "CSV"
 msgstr ""
 
-msgid "Is paginated?"
+#: static/js/TableShape.js:1202
+msgid "Choose csv file:"
 msgstr ""
 
-msgid "Pagination parameter:"
+#: static/js/TableShape.js:1203 static/js/TableShape.js:1431
+#: static/js/TableShape.js:2776 static/js/TableShape.js:3769
+msgid "Select file"
 msgstr ""
 
-msgid "Starts in:"
+#: static/js/TableShape.js:1206 static/js/TableShape.js:1434
+#: static/js/TableShape.js:1948 static/js/TableShape.js:1992
+#: static/js/TableShape.js:2324 static/js/TableShape.js:2374
+#: static/js/TableShape.js:2779 static/js/TableShape.js:3772
+#: static/js/TableShape.js:3805
+msgid "Path:"
 msgstr ""
 
-msgid "Grid"
+#: static/js/TableShape.js:1210
+msgid "Separator:"
 msgstr ""
 
-msgid "How to create the grid?"
+#: static/js/TableShape.js:1425
+msgid "JSON"
 msgstr ""
 
-msgid "Grid from extent of input geometry"
+#: static/js/TableShape.js:1430
+msgid "Choose JSON file"
 msgstr ""
 
-msgid "Grid from initial coordinates (Lower left corner)"
+#: static/js/TableShape.js:1439
+msgid "Do you want to load JSON data from an API REST?"
 msgstr ""
 
-msgid "Rows"
+#: static/js/TableShape.js:1442
+msgid "URL:"
 msgstr ""
 
-msgid "Columns"
+#: static/js/TableShape.js:1939
+msgid "Excel"
 msgstr ""
 
-msgid "Width"
+#: static/js/TableShape.js:1944 static/js/TableShape.js:1988
+#: static/js/TableShape.js:2320 static/js/TableShape.js:2370
+#: static/js/TableShape.js:3801
+msgid "Choose path:"
 msgstr ""
 
-msgid "Height"
+#: static/js/TableShape.js:1945 static/js/TableShape.js:2321
+msgid "Select path"
 msgstr ""
 
-msgid "Initial X"
+#: static/js/TableShape.js:1952 static/js/TableShape.js:1953
+msgid "Load sheets"
 msgstr ""
 
-msgid "Initial Y"
+#: static/js/TableShape.js:1956
+msgid "Sheet:"
 msgstr ""
 
-msgid "Self intersect layer (Use only data from main input)"
+#: static/js/TableShape.js:1960
+msgid "Attribute columns:"
 msgstr ""
 
+#: static/js/TableShape.js:1964
+msgid "Skip header:"
+msgstr ""
+
+#: static/js/TableShape.js:1969 static/js/TableShape.js:2351
+#: static/js/TableShape.js:3793
+msgid "Advanced Parameters"
+msgstr ""
+
+#: static/js/TableShape.js:1973 static/js/TableShape.js:2355
+msgid "Reading options:"
+msgstr ""
+
+#: static/js/TableShape.js:1976
+msgid "Single excel file"
+msgstr ""
+
+#: static/js/TableShape.js:1980 static/js/TableShape.js:2362
+msgid "All files in a folder"
+msgstr ""
+
+#: static/js/TableShape.js:1985 static/js/TableShape.js:2367
+#: static/js/TableShape.js:3798
+msgid "Do you want to (re)-move the files after the process is over?"
+msgstr ""
+
+#: static/js/TableShape.js:1989 static/js/TableShape.js:2371
+#: static/js/TableShape.js:3802
+msgid "Select folder"
+msgstr ""
+
+#: static/js/TableShape.js:1993 static/js/TableShape.js:2375
+#: static/js/TableShape.js:3806
+msgid "For removing files leave this input empty"
+msgstr ""
+
+#: static/js/TableShape.js:2315
+msgid "XML"
+msgstr ""
+
+#: static/js/TableShape.js:2328 static/js/TableShape.js:2329
 msgid "Get tags"
 msgstr ""
 
+#: static/js/TableShape.js:2340 static/js/TableShape.js:3390
+#: static/js/TableShape.js:7992 static/js/TableShape.js:13988
+msgid "Schema:"
+msgstr ""
+
+#: static/js/TableShape.js:2345
 msgid "Add other different tags than the selected schema to all records"
 msgstr ""
 
+#: static/js/TableShape.js:2358
 msgid "Single XML file"
 msgstr ""
 
-msgid "Order"
+#: static/js/TableShape.js:2770
+msgid "Shapefile"
 msgstr ""
 
-msgid "Expose Attributes"
+#: static/js/TableShape.js:2775
+msgid "Choose shapefile:"
 msgstr ""
 
-msgid "Attribute to expose:"
+#: static/js/TableShape.js:2783 static/js/TableShape.js:3776
+msgid "Encoding:"
 msgstr ""
 
-msgid "Write attributes to expose separated by space"
+#: static/js/TableShape.js:2794
+msgid "Insert if PRJ is not loaded"
 msgstr ""
 
+#: static/js/TableShape.js:3013
+msgid "Oracle"
+msgstr ""
+
+#: static/js/TableShape.js:3018 static/js/TableShape.js:3381
+#: static/js/TableShape.js:7983 static/js/TableShape.js:13978
+msgid "DB Connection:"
+msgstr ""
+
+#: static/js/TableShape.js:3022 static/js/TableShape.js:3023
+msgid "Get owners"
+msgstr ""
+
+#: static/js/TableShape.js:3026
+msgid "Owners:"
+msgstr ""
+
+#: static/js/TableShape.js:3030 static/js/TableShape.js:3031
+#: static/js/TableShape.js:3395 static/js/TableShape.js:3396
+#: static/js/TableShape.js:7997 static/js/TableShape.js:7998
+msgid "Get tables"
+msgstr ""
+
+#: static/js/TableShape.js:3034
+msgid "Tables:"
+msgstr ""
+
+#: static/js/TableShape.js:3040
+msgid "Do you want to write a SQL statement?"
+msgstr ""
+
+#: static/js/TableShape.js:3043
+msgid "SQL statement:"
+msgstr ""
+
+#: static/js/TableShape.js:3376 static/js/TableShape.js:13973
+msgid "PostGIS"
+msgstr ""
+
+#: static/js/TableShape.js:3385 static/js/TableShape.js:3386
+#: static/js/TableShape.js:7987 static/js/TableShape.js:7988
+#: static/js/TableShape.js:13983 static/js/TableShape.js:13984
+msgid "Get schemas"
+msgstr ""
+
+#: static/js/TableShape.js:3400 static/js/TableShape.js:8002
+#: static/js/TableShape.js:13993
+msgid "Table name:"
+msgstr ""
+
+#: static/js/TableShape.js:3405
+msgid "Do you want to write a SQL WHERE Clause?"
+msgstr ""
+
+#: static/js/TableShape.js:3408
+msgid "SQL WHERE Clause:"
+msgstr ""
+
+#: static/js/TableShape.js:3763
+msgid "KML/KMZ"
+msgstr ""
+
+#: static/js/TableShape.js:3768
+msgid "Choose file:"
+msgstr ""
+
+#: static/js/TableShape.js:3787
+msgid "Insert if needed"
+msgstr ""
+
+#: static/js/TableShape.js:4041 static/js/TableShape.js:4074
+msgid "Grid"
+msgstr ""
+
+#: static/js/TableShape.js:4080
+msgid "How to create the grid?"
+msgstr ""
+
+#: static/js/TableShape.js:4083
+msgid "Grid from extent of input geometry"
+msgstr ""
+
+#: static/js/TableShape.js:4088
+msgid "Grid from initial coordinates (Lower left corner)"
+msgstr ""
+
+#: static/js/TableShape.js:4093
+msgid "Rows"
+msgstr ""
+
+#: static/js/TableShape.js:4098
+msgid "Columns"
+msgstr ""
+
+#: static/js/TableShape.js:4103
+msgid "Width"
+msgstr ""
+
+#: static/js/TableShape.js:4108
+msgid "Height"
+msgstr ""
+
+#: static/js/TableShape.js:4113
+msgid "Initial X"
+msgstr ""
+
+#: static/js/TableShape.js:4118
+msgid "Initial Y"
+msgstr ""
+
+#: static/js/TableShape.js:4123
+msgid "EPSG"
+msgstr ""
+
+#: static/js/TableShape.js:4243 static/js/TableShape.js:5167
+#: static/js/TableShape.js:5420 static/js/TableShape.js:5671
+#: static/js/TableShape.js:5928 static/js/TableShape.js:6972
+#: static/js/TableShape.js:7217 static/js/TableShape.js:7574
+#: static/js/TableShape.js:7830 static/js/TableShape.js:8342
+#: static/js/TableShape.js:8591 static/js/TableShape.js:8861
+#: static/js/TableShape.js:9486 static/js/TableShape.js:9738
+#: static/js/TableShape.js:9960 static/js/TableShape.js:10205
+#: static/js/TableShape.js:10463 static/js/TableShape.js:10711
+#: static/js/TableShape.js:11008 static/js/TableShape.js:11288
+#: static/js/TableShape.js:11557 static/js/TableShape.js:11823
+#: static/js/TableShape.js:12084 static/js/TableShape.js:12341
+#: static/js/TableShape.js:12523 static/js/TableShape.js:12980
+#: static/js/TableShape.js:13214 static/js/TableShape.js:13464
+#: static/js/TableShape.js:13823 static/js/TableShape.js:14188
+msgid "Output"
+msgstr ""
+
+#: static/js/TableShape.js:4357 static/js/TableShape.js:4390
+#: static/js/TableShape.js:4561
+msgid "Join"
+msgstr ""
+
+#: static/js/TableShape.js:4395
+msgid "Main table attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:4399
+msgid "Secondary table attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:4541 static/js/TableShape.js:4833
+msgid "Input Main"
+msgstr ""
+
+#: static/js/TableShape.js:4551
+msgid "Input Sec."
+msgstr ""
+
+#: static/js/TableShape.js:4571
+msgid "Main Not Used"
+msgstr ""
+
+#: static/js/TableShape.js:4581
+msgid "Sec. Not Used"
+msgstr ""
+
+#: static/js/TableShape.js:4710 static/js/TableShape.js:4743
+msgid "Compare Rows"
+msgstr ""
+
+#: static/js/TableShape.js:4748 static/js/TableShape.js:7369
+#: static/js/TableShape.js:9011 static/js/TableShape.js:13635
+msgid "Attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:4843
+msgid "Input to comp."
+msgstr ""
+
+#: static/js/TableShape.js:4853 static/js/TableShape.js:9646
+msgid "Equals"
+msgstr ""
+
+#: static/js/TableShape.js:4863
+msgid "News"
+msgstr ""
+
+#: static/js/TableShape.js:4873
+msgid "Changes"
+msgstr ""
+
+#: static/js/TableShape.js:4883
+msgid "Comp. Not Used"
+msgstr ""
+
+#: static/js/TableShape.js:5016 static/js/TableShape.js:5052
+msgid "Remove Attribute"
+msgstr ""
+
+#: static/js/TableShape.js:5056
+msgid "Attribute to remove:"
+msgstr ""
+
+#: static/js/TableShape.js:5279 static/js/TableShape.js:5312
+msgid "Rename Attribute"
+msgstr ""
+
+#: static/js/TableShape.js:5317
+msgid "Attribute to rename:"
+msgstr ""
+
+#: static/js/TableShape.js:5321
+msgid "New name:"
+msgstr ""
+
+#: static/js/TableShape.js:5322
+msgid "New name"
+msgstr ""
+
+#: static/js/TableShape.js:5531
+msgid "Concatenate Attr."
+msgstr ""
+
+#: static/js/TableShape.js:5564
+msgid "Concatenate Attributes"
+msgstr ""
+
+#: static/js/TableShape.js:5569
+msgid "Attributes to concatenate:"
+msgstr ""
+
+#: static/js/TableShape.js:5573
+msgid "New attribute name:"
+msgstr ""
+
+#: static/js/TableShape.js:5574 static/js/TableShape.js:8495
+msgid "New attribute name"
+msgstr ""
+
+#: static/js/TableShape.js:5577
+msgid "Separator (opt.):"
+msgstr ""
+
+#: static/js/TableShape.js:5578
+msgid "Separator"
+msgstr ""
+
+#: static/js/TableShape.js:5782 static/js/TableShape.js:5815
+msgid "Pad Attribute"
+msgstr ""
+
+#: static/js/TableShape.js:5820
+msgid "Attribute to pad:"
+msgstr ""
+
+#: static/js/TableShape.js:5824
+msgid "Length desired:"
+msgstr ""
+
+#: static/js/TableShape.js:5828
+msgid "Side to pad:"
+msgstr ""
+
+#: static/js/TableShape.js:5830
+msgid "Right"
+msgstr ""
+
+#: static/js/TableShape.js:5831
+msgid "Left"
+msgstr ""
+
+#: static/js/TableShape.js:5835
+msgid "Pad String:"
+msgstr ""
+
+#: static/js/TableShape.js:6039 static/js/TableShape.js:6075
+msgid "Filter Duplicate"
+msgstr ""
+
+#: static/js/TableShape.js:6079
+msgid "Attributes that must be uniques:"
+msgstr ""
+
+#: static/js/TableShape.js:6176
+msgid "Unique"
+msgstr ""
+
+#: static/js/TableShape.js:6186
+msgid "Duplicated"
+msgstr ""
+
+#: static/js/TableShape.js:6303 static/js/TableShape.js:6339
 msgid "Validate Geometry"
 msgstr ""
 
-msgid "Valid"
-msgstr ""
-
-msgid "Invalid"
-msgstr ""
-
+#: static/js/TableShape.js:6345
 msgid "Stop workspace if there are invalid geometries"
 msgstr ""
 
+#: static/js/TableShape.js:6447
+msgid "Valid"
+msgstr ""
+
+#: static/js/TableShape.js:6457
+msgid "Invalid"
+msgstr ""
+
+#: static/js/TableShape.js:6574 static/js/TableShape.js:6610
 msgid "Simple Geometry"
 msgstr ""
 
+#: static/js/TableShape.js:6616
 msgid "Stop workspace if some geometry is not simple"
 msgstr ""
 
-msgid "Parameters: {}"
+#: static/js/TableShape.js:6715
+msgid "Simple"
 msgstr ""
+
+#: static/js/TableShape.js:6725
+msgid "No simple"
+msgstr ""
+
+#: static/js/TableShape.js:6843 static/js/TableShape.js:6876
+msgid "Modify Value"
+msgstr ""
+
+#: static/js/TableShape.js:6881
+msgid "Attribute to modify:"
+msgstr ""
+
+#: static/js/TableShape.js:6885
+msgid "New value:"
+msgstr ""
+
+#: static/js/TableShape.js:6886 static/js/TableShape.js:8510
+#: static/js/TableShape.js:9030
+msgid "New attribute value"
+msgstr ""
+
+#: static/js/TableShape.js:7084 static/js/TableShape.js:7117
+msgid "Counter"
+msgstr ""
+
+#: static/js/TableShape.js:7122
+msgid "New counter attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:7126 static/js/TableShape.js:12235
+msgid "Group by:"
+msgstr ""
+
+#: static/js/TableShape.js:7330 static/js/TableShape.js:7364
+msgid "Calculator"
+msgstr ""
+
+#: static/js/TableShape.js:7371
+msgid "Attributes:"
+msgstr ""
+
+#: static/js/TableShape.js:7378
+msgid "Math functions:"
+msgstr ""
+
+#: static/js/TableShape.js:7415
+msgid "String functions:"
+msgstr ""
+
+#: static/js/TableShape.js:7444
+msgid "Expression:"
+msgstr ""
+
+#: static/js/TableShape.js:7445
+msgid "For more math functions check above link."
+msgstr ""
+
+#: static/js/TableShape.js:7688
+msgid "Change Attr. Type"
+msgstr ""
+
+#: static/js/TableShape.js:7721
+msgid "Change Attribute Type"
+msgstr ""
+
+#: static/js/TableShape.js:7726
+msgid "Attribute to change type:"
+msgstr ""
+
+#: static/js/TableShape.js:7730
+msgid "To data type:"
+msgstr ""
+
+#: static/js/TableShape.js:7732 static/js/TableShape.js:8500
+msgid "Varchar"
+msgstr ""
+
+#: static/js/TableShape.js:7733 static/js/TableShape.js:8501
+msgid "Integer"
+msgstr ""
+
+#: static/js/TableShape.js:7734 static/js/TableShape.js:8502
+msgid "Float"
+msgstr ""
+
+#: static/js/TableShape.js:7735 static/js/TableShape.js:8503
+msgid "Date"
+msgstr ""
+
+#: static/js/TableShape.js:7736 static/js/TableShape.js:8504
+#: static/js/TableShape.js:13369
+msgid "Time Stamp"
+msgstr ""
+
+#: static/js/TableShape.js:7737 static/js/TableShape.js:8505
+msgid "Boolean"
+msgstr ""
+
+#: static/js/TableShape.js:7943 static/js/TableShape.js:7976
+msgid "Execute SQL"
+msgstr ""
+
+#: static/js/TableShape.js:8007
+msgid "Get attributes"
+msgstr ""
+
+#: static/js/TableShape.js:8011
+msgid "Attributes from input:"
+msgstr ""
+
+#: static/js/TableShape.js:8019
+msgid "Attributes from new connection:"
+msgstr ""
+
+#: static/js/TableShape.js:8029
+msgid "Query:"
+msgstr ""
+
+#: static/js/TableShape.js:8456 static/js/TableShape.js:8489
+msgid "Create Attribute"
+msgstr ""
+
+#: static/js/TableShape.js:8494
+msgid "New attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:8498
+msgid "Data type:"
+msgstr ""
+
+#: static/js/TableShape.js:8509 static/js/TableShape.js:9029
+msgid "Value:"
+msgstr ""
+
+#: static/js/TableShape.js:8702
+msgid "Expose Attributes"
+msgstr ""
+
+#: static/js/TableShape.js:8735
+msgid "Expose Attribute"
+msgstr ""
+
+#: static/js/TableShape.js:8740
+msgid "Attribute to expose:"
+msgstr ""
+
+#: static/js/TableShape.js:8741
+msgid "Write attributes to expose separated by space"
+msgstr ""
+
+#: static/js/TableShape.js:8973 static/js/TableShape.js:9006
+msgid "Filter"
+msgstr ""
+
+#: static/js/TableShape.js:9015
+msgid "Operator:"
+msgstr ""
+
+#: static/js/TableShape.js:9023
+msgid "Starts with"
+msgstr ""
+
+#: static/js/TableShape.js:9024
+msgid "Ends with"
+msgstr ""
+
+#: static/js/TableShape.js:9025 static/js/TableShape.js:9645
+msgid "Contains"
+msgstr ""
+
+#: static/js/TableShape.js:9039
+msgid "Composite Filter:"
+msgstr ""
+
+#: static/js/TableShape.js:9167
+msgid "True"
+msgstr ""
+
+#: static/js/TableShape.js:9177
+msgid "False"
+msgstr ""
+
+#: static/js/TableShape.js:9296 static/js/TableShape.js:9329
+msgid "Intersection"
+msgstr ""
+
+#: static/js/TableShape.js:9335
+msgid "Self intersect layer (Use only data from main input)"
+msgstr ""
+
+#: static/js/TableShape.js:9339
+msgid "Merge attributes of the secondary input to the final output"
+msgstr ""
+
+#: static/js/TableShape.js:9466 static/js/TableShape.js:9645
+#: static/js/TableShape.js:9646 static/js/TableShape.js:9647
+#: static/js/TableShape.js:9648 static/js/TableShape.js:9649
+#: static/js/TableShape.js:9718 static/js/TableShape.js:9940
+msgid "Main"
+msgstr ""
+
+#: static/js/TableShape.js:9476 static/js/TableShape.js:9645
+#: static/js/TableShape.js:9646 static/js/TableShape.js:9647
+#: static/js/TableShape.js:9648 static/js/TableShape.js:9649
+#: static/js/TableShape.js:9728 static/js/TableShape.js:9950
+msgid "Secondary"
+msgstr ""
+
+#: static/js/TableShape.js:9605 static/js/TableShape.js:9638
+#: static/js/TableShape.js:9643
+msgid "Spatial Relation"
+msgstr ""
+
+#: static/js/TableShape.js:9647
+msgid "Intersects"
+msgstr ""
+
+#: static/js/TableShape.js:9648
+msgid "Touches"
+msgstr ""
+
+#: static/js/TableShape.js:9649
+msgid "Within"
+msgstr ""
+
+#: static/js/TableShape.js:9857
+msgid "Difference"
+msgstr ""
+
+#: static/js/TableShape.js:10079 static/js/TableShape.js:10112
+msgid "Keep Attribute"
+msgstr ""
+
+#: static/js/TableShape.js:10116
+msgid "Attribute to keep:"
+msgstr ""
+
+#: static/js/TableShape.js:10316 static/js/TableShape.js:10350
+msgid "Reproject"
+msgstr ""
+
+#: static/js/TableShape.js:10355
+msgid "Source EPSG:"
+msgstr ""
+
+#: static/js/TableShape.js:10357
+msgid "Empty to read from input layer"
+msgstr ""
+
+#: static/js/TableShape.js:10361
+msgid "Target EPSG:"
+msgstr ""
+
+#: static/js/TableShape.js:10574
+msgid "Cadastral Geom."
+msgstr ""
+
+#: static/js/TableShape.js:10610
+msgid "Cadastral Geometry"
+msgstr ""
+
+#: static/js/TableShape.js:10614
+msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
+msgstr ""
+
+#: static/js/TableShape.js:10824 static/js/TableShape.js:10860
+msgid "MGRS"
+msgstr ""
+
+#: static/js/TableShape.js:10864
+msgid "Select mode:"
+msgstr ""
+
+#: static/js/TableShape.js:10866
+msgid "MGRS to geographic coordinates (EPSG - 4326):"
+msgstr ""
+
+#: static/js/TableShape.js:10867
+msgid "Geographic coordinates (EPSG - 4326) to MGRS:"
+msgstr ""
+
+#: static/js/TableShape.js:10870
+msgid "MGRS grid attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:10874 static/js/TableShape.js:11163
+#: static/js/TableShape.js:13654
+msgid "Longitude attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:10876 static/js/TableShape.js:11167
+#: static/js/TableShape.js:13658
+msgid "Latitude attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:11122 static/js/TableShape.js:11158
+msgid "Text to Point"
+msgstr ""
+
+#: static/js/TableShape.js:11171 static/js/TableShape.js:11445
+msgid "Insert EPSG:"
+msgstr ""
+
+#: static/js/TableShape.js:11400
+msgid "WKT Geom."
+msgstr ""
+
+#: static/js/TableShape.js:11436
+msgid "WKT to Geometry"
+msgstr ""
+
+#: static/js/TableShape.js:11441
+msgid "WKT string Attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:11669 static/js/TableShape.js:11705
+msgid "Split Attribute"
+msgstr ""
+
+#: static/js/TableShape.js:11710
+msgid "String Attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:11714 static/js/TableShape.js:11976
+msgid "List Name:"
+msgstr ""
+
+#: static/js/TableShape.js:11718
+msgid "Split by:"
+msgstr ""
+
+#: static/js/TableShape.js:11935 static/js/TableShape.js:11971
+msgid "Explode List"
+msgstr ""
+
+#: static/js/TableShape.js:11980
+msgid "Attribute Name:"
+msgstr ""
+
+#: static/js/TableShape.js:12197 static/js/TableShape.js:12230
+msgid "Union"
+msgstr ""
+
+#: static/js/TableShape.js:12240
+msgid "Multigeometry for all features of the output"
+msgstr ""
+
+#: static/js/TableShape.js:12454
+msgid "Remove Geom."
+msgstr ""
+
+#: static/js/TableShape.js:12636
+msgid "Filter Geom."
+msgstr ""
+
+#: static/js/TableShape.js:12709
+msgid "Points"
+msgstr ""
+
+#: static/js/TableShape.js:12719
+msgid "Multipoints"
+msgstr ""
+
+#: static/js/TableShape.js:12729
+msgid "Lines"
+msgstr ""
+
+#: static/js/TableShape.js:12739
+msgid "Multilines"
+msgstr ""
+
+#: static/js/TableShape.js:12749
+msgid "Polygons"
+msgstr ""
+
+#: static/js/TableShape.js:12759
+msgid "Multipolygons"
+msgstr ""
+
+#: static/js/TableShape.js:12898
+msgid "Explode Geometry"
+msgstr ""
+
+#: static/js/TableShape.js:13093 static/js/TableShape.js:13126
+msgid "Calculate Area"
+msgstr ""
+
+#: static/js/TableShape.js:13131
+msgid "New area attribute:"
+msgstr ""
+
+#: static/js/TableShape.js:13328 static/js/TableShape.js:13361
+msgid "Current Date"
+msgstr ""
+
+#: static/js/TableShape.js:13366
+msgid "New date attribute"
+msgstr ""
+
+#: static/js/TableShape.js:13580 static/js/TableShape.js:13613
+msgid "Geocoder"
+msgstr ""
+
+#: static/js/TableShape.js:13618
+msgid "Engine"
+msgstr ""
+
+#: static/js/TableShape.js:13625
+msgid "Mode"
+msgstr ""
+
+#: static/js/TableShape.js:13627
+msgid "Direct"
+msgstr ""
+
+#: static/js/TableShape.js:13628
+msgid "Reverse"
+msgstr ""
+
+#: static/js/TableShape.js:13646
+msgid "Attributes selected:"
+msgstr ""
+
+#: static/js/TableShape.js:13997
+msgid "Operation:"
+msgstr ""
+
+#: static/js/TableShape.js:14000
+msgid "CREATE"
+msgstr ""
+
+#: static/js/TableShape.js:14004
+msgid "APPEND"
+msgstr ""
+
+#: static/js/TableShape.js:14008
+msgid "OVERWRITE"
+msgstr ""
+
+#: static/js/TableShape.js:14015
+msgid "UPDATE"
+msgstr ""
+
+#: static/js/TableShape.js:14019
+msgid "DELETE"
+msgstr ""
+
+#: static/js/TableShape.js:14023
+msgid "Match column:"
+msgstr ""
+
+#: static/js/TableShape.js:14025
+msgid "Order"
+msgstr ""
+
+#: static/js/Toolbar.js:20
+msgid "New"
+msgstr ""
+
+#: static/js/Toolbar.js:34
+msgid "Open"
+msgstr ""
+
+#: static/js/Toolbar.js:43
+msgid "Save"
+msgstr ""
+
+#: static/js/Toolbar.js:176
+msgid "Run"
+msgstr ""
+
+#: static/js/Toolbar.js:213
+msgid "Add DB"
+msgstr ""
+
+#: static/js/Toolbar.js:220
+msgid "Remove"
+msgstr ""
+
+#: static/js/Toolbar.js:231
+msgid "Undo"
+msgstr ""
+
+#: static/js/Toolbar.js:238
+msgid "Redo"
+msgstr ""
+
+#: static/js/Toolbar.js:245
+msgid "Zoom In"
+msgstr ""
+
+#: static/js/Toolbar.js:265
+msgid "Zoom Out"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Connection parameters are valid."
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Connection parameters are not valid."
+msgstr ""
+
+#~ msgid "Esta no existe pero quier conserervarla"
+#~ msgstr "the trans"
+
+#~ msgid "Nada de nada"
+#~ msgstr "the trans"

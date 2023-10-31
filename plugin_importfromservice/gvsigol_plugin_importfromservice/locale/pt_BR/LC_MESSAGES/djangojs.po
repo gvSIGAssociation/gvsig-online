@@ -15,55 +15,76 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: pt_BR\n"
 "X-Generator: Poedit 2.4.3\n"
 
+#: static/js/lib/_trans.gvsigol.js:2
 msgid "Import from service"
 msgstr "Importar de serviço"
 
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Error loading importfromservice plugin"
+msgstr ""
+
+#: static/js/lib/tools/importFromService.js:73
 msgid "Import layer from service"
 msgstr "Importar camada de serviço"
 
-msgid "Service"
-msgstr "Serviços"
-
-msgid "Service URL"
-msgstr "URL do serviço"
-
+#: static/js/lib/tools/importFromService.js:96
 msgid "Connect"
 msgstr "Conexão"
 
-msgid "Remove layer"
-msgstr "Remover camada"
-
-msgid "You must type a valid URL"
-msgstr "Você deve digitar uma URL válida"
-
-msgid "Load layer"
-msgstr "Carregamento da camada"
-
-msgid "Imported layers"
-msgstr "Camadas importadas"
-
-msgid "Close"
-msgstr "Fechar"
-
-msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
-msgstr "Conteúdo misto: a página em foi carregada por HTTPS, mas solicitou um URL não seguro"
-
+#: static/js/lib/tools/importFromService.js:101
 msgid "Output format not supported"
 msgstr "Formato de saída não suportado"
 
+#: static/js/lib/tools/importFromService.js:102
 msgid "No layers are available"
 msgstr "Não há camadas disponíveis"
+
+#: static/js/lib/tools/importFromService.js:103
+msgid "You must type a valid URL"
+msgstr "Você deve digitar uma URL válida"
+
+#: static/js/lib/tools/importFromService.js:104
+msgid ""
+"Mixed content: The page at was loaded over HTTPS, but requested an insecure "
+"URL"
+msgstr ""
+"Conteúdo misto: a página em foi carregada por HTTPS, mas solicitou um URL "
+"não seguro"
+
+#: static/js/lib/tools/importFromService.js:114
+msgid "Close"
+msgstr "Fechar"
+
+#: static/js/lib/tools/importFromService.js:190
+#: static/js/lib/tools/importFromService.js:237
+msgid "Load layer"
+msgstr "Carregamento da camada"
+
+#: static/js/lib/tools/importFromService.js:437
+msgid "Imported layers"
+msgstr "Camadas importadas"
+
+#: static/js/lib/tools/importFromService.js:515
+msgid "Remove layer"
+msgstr "Remover camada"
+
+#~ msgid "Service"
+#~ msgstr "Serviços"
+
+#~ msgid "Service URL"
+#~ msgstr "URL do serviço"

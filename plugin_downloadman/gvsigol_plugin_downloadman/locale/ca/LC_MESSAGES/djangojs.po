@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,94 +24,177 @@ msgstr ""
 "X-Language: ca\n"
 "X-Source-Language: C\n"
 
-msgid "Add to download list"
-msgstr "Afegeix a la llista de descàrregues"
-
-msgid "No results found"
-msgstr "Sense resultats"
-
-msgid "View download list"
-msgstr "Veure la llista de descàrregues"
-
-msgid "Available downloads"
-msgstr "Descàrregues disponibles"
-
-msgid "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
-msgstr "La llista de descàrregues no s'ha pogut recuperar. Torneu-ho a provar més tard o poseu-vos en contacte amb l'administrador del servei si l'error persisteix"
-
-msgid "Email"
-msgstr "Correu electrònic"
-
-msgid "No layers have been selected for download"
-msgstr "No s'han seleccionat capes per descarregar"
-
-msgid "List of downloads"
-msgstr "Llista de descàrregues"
-
-msgid "Start downloading"
-msgstr "Comença a descarregar"
-
-msgid ""
-"Your download request has been registered. You will receive an email when your request is ready for download. "
-"You can also use this tracking link to check the status of your request: "
-msgstr ""
-"S'ha registrat la sol·licitud de descàrrega. Rebrà un correu electrònic quan la sol·licitud estigui llesta per a la seva descàrrega. "
-"També podeu utilitzar aquest enllaç de seguiment per comprovar l'estat de la sol·licitud: "
-
-msgid "There was an error processing your download request. Please, try again later"
-msgstr "S'ha produït un error en processar la sol·licitud de descàrrega. Siusplau, intenta-ho més tard"
-
-msgid "Direct download"
-msgstr "Descàrrega directa"
-
-msgid "Requires approval"
-msgstr "Requereix aprovació"
-
-msgid "Approved"
-msgstr "Aprovat"
-
+#: static/js/downloadManagerClient.js:291
 msgid "Approval"
 msgstr "Aprovat"
 
-msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
-msgstr "Alguns dels recursos seleccionats ha de ser aprovats per un administrador. Si us plau ompliu la següent informacio:"
+#: static/js/downloadManagerClient.js:293
+msgid "Requires approval"
+msgstr "Requereix aprovació"
 
-msgid "Organization (optional)"
-msgstr "Organització (opcional)"
+#: static/js/downloadManagerClient.js:296
+msgid "Approved"
+msgstr "Aprovat"
 
-msgid "Indended usage (optional)"
-msgstr "Ús previst (opcional)"
+#: static/js/downloadManagerClient.js:442
+msgid "Add to download list"
+msgstr "Afegeix a la llista de descàrregues"
 
-msgid "%(number)s days"
-msgstr "%(number)s dies"
+#: static/js/downloadManagerClient.js:460
+#: static/js/downloadManagerClient.js:829
+#: static/js/downloadManagerClient.js:862
+msgid "View download list"
+msgstr "Veure la llista de descàrregues"
 
-msgid "%(number)s hours"
-msgstr "%(number)s hores"
+#: static/js/downloadManagerClient.js:463
+#: static/js/downloadManagerClient.js:569
+#: static/js/downloadManagerClient.js:895
+msgid "Available downloads"
+msgstr "Descàrregues disponibles"
 
-msgid "%(number)s minutes"
-msgstr "%(number)s minuts"
+#: static/js/downloadManagerClient.js:472
+msgid ""
+"The limit of allowed download items per request has been reached. You can "
+"start a new request to download additional items."
+msgstr ""
+"S'ha arribat al límit d'elements de descàrrega permesos en cada sol·licitud. "
+"Pot iniciar una nova sol·licitud per adescarregar elements addicionals."
 
-msgid "Generic download request"
-msgstr "Petició genèrica de descàrrega"
+#: static/js/downloadManagerClient.js:564
+msgid ""
+"The list of downloads could not be retrieved. Try again later or contact the "
+"service administrator if the error persists"
+msgstr ""
+"La llista de descàrregues no s'ha pogut recuperar. Torneu-ho a provar més "
+"tard o poseu-vos en contacte amb l'administrador del servei si l'error "
+"persisteix"
 
+#: static/js/downloadManagerClient.js:624
 msgid "Please, use this form to describe which data you need to download:"
-msgstr "Si us plau, feu servir aquest formulari per descriure quines dades necessites descarregar:"
+msgstr ""
+"Si us plau, feu servir aquest formulari per descriure quines dades "
+"necessites descarregar:"
 
+#: static/js/downloadManagerClient.js:626
 msgid "Request description"
 msgstr "Descripció de la petició"
 
-msgid "Send generic request"
-msgstr "Enviar petició genèrica"
+#: static/js/downloadManagerClient.js:630
+#: static/js/downloadManagerClient.js:720
+msgid "Organization (optional)"
+msgstr "Organització (opcional)"
 
+#: static/js/downloadManagerClient.js:634
+#: static/js/downloadManagerClient.js:724
+msgid "Indended usage (optional)"
+msgstr "Ús previst (opcional)"
+
+#: static/js/downloadManagerClient.js:638
+#: static/js/downloadManagerClient.js:731
+msgid "Email"
+msgstr "Correu electrònic"
+
+#: static/js/downloadManagerClient.js:643
+msgid "Generic download request"
+msgstr "Petició genèrica de descàrrega"
+
+#: static/js/downloadManagerClient.js:645
 msgid "Send request"
 msgstr "Enviar petició"
 
+#: static/js/downloadManagerClient.js:718
 msgid ""
-"The limit of allowed download items per request has been reached. "
-"You can start a new request to download additional items."
+"Some of the selected resources must be approved by an administrator. Please "
+"fill the following information:"
 msgstr ""
-"S'ha arribat al límit d'elements de descàrrega permesos "
-"en cada sol·licitud. Pot iniciar una nova sol·licitud per a"
-"descarregar elements addicionals."
+"Alguns dels recursos seleccionats ha de ser aprovats per un administrador. "
+"Si us plau ompliu la següent informacio:"
 
+#: static/js/downloadManagerClient.js:738
+msgid "No layers have been selected for download"
+msgstr "No s'han seleccionat capes per descarregar"
 
+#: static/js/downloadManagerClient.js:746
+msgid "List of downloads"
+msgstr "Llista de descàrregues"
+
+#: static/js/downloadManagerClient.js:748
+msgid "Send generic request"
+msgstr "Enviar petició genèrica"
+
+#: static/js/downloadManagerClient.js:749
+msgid "Start downloading"
+msgstr "Comença a descarregar"
+
+#: static/js/downloadManagerClient.js:822
+#: static/js/downloadManagerClient.js:855
+msgid "<a target=\"_blank\" href=\""
+msgstr ""
+
+#: static/js/downloadManagerClient.js:828
+#: static/js/downloadManagerClient.js:861
+msgid ""
+"There was an error processing your download request. Please, try again later"
+msgstr ""
+"S'ha produït un error en processar la sol·licitud de descàrrega. Siusplau, "
+"intenta-ho més tard"
+
+#: static/js/downloadManagerClient.js:842
+#: static/js/downloadManagerClient.js:875
+#, fuzzy
+#| msgid "Generic download request"
+msgid "Download request"
+msgstr "Petició genèrica de descàrrega"
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "%(number)s days"
+msgstr "%(number)s dies"
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "%(number)s hours"
+msgstr "%(number)s hores"
+
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "%(number)s minutes"
+msgstr "%(number)s minuts"
+
+#: static/js/lib/_trans.gvsigol.js:5
+#, fuzzy
+#| msgid "%(number)s days"
+msgid "%(number)s TB"
+msgstr "%(number)s dies"
+
+#: static/js/lib/_trans.gvsigol.js:6
+#, fuzzy
+#| msgid "%(number)s days"
+msgid "%(number)s GB"
+msgstr "%(number)s dies"
+
+#: static/js/lib/_trans.gvsigol.js:7
+#, fuzzy
+#| msgid "%(number)s days"
+msgid "%(number)s MB"
+msgstr "%(number)s dies"
+
+#: static/js/lib/_trans.gvsigol.js:8
+msgid "Error loading download manager conf"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:9
+#, fuzzy
+#| msgid "Direct download"
+msgid "Downloads"
+msgstr "Descàrrega directa"
+
+#~ msgid "No results found"
+#~ msgstr "Sense resultats"
+
+#~ msgid ""
+#~ "Your download request has been registered. You will receive an email when "
+#~ "your request is ready for download. You can also use this tracking link "
+#~ "to check the status of your request: "
+#~ msgstr ""
+#~ "S'ha registrat la sol·licitud de descàrrega. Rebrà un correu electrònic "
+#~ "quan la sol·licitud estigui llesta per a la seva descàrrega. També podeu "
+#~ "utilitzar aquest enllaç de seguiment per comprovar l'estat de la "
+#~ "sol·licitud: "

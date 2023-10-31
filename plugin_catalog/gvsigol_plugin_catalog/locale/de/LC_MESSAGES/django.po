@@ -1,0 +1,147 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mdstandards/iso19139_2007.py:22
+msgid "author"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:23
+msgid "owner"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:24
+msgid "Contact"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:25
+msgid "resourceProvider"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:26
+msgid "custodian"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:27
+msgid "originator"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:28
+msgid "publisher"
+msgstr ""
+
+#: templates/catalog_details.html:12
+msgid "About this resource"
+msgstr ""
+
+#: templates/catalog_details.html:13 views.py:119
+msgid "Categories"
+msgstr ""
+
+#: templates/catalog_details.html:17 views.py:125
+msgid "Keywords"
+msgstr ""
+
+#: templates/catalog_details.html:21
+msgid "Legal constraints"
+msgstr ""
+
+#: templates/catalog_details.html:25 views.py:171
+msgid "Technical information"
+msgstr ""
+
+#: templates/catalog_details.html:27 views.py:174
+msgid "Representation type"
+msgstr ""
+
+#: templates/catalog_details.html:31 views.py:179
+msgid "Scale"
+msgstr ""
+
+#: templates/catalog_details.html:35 views.py:184
+msgid "Coordinate Reference System"
+msgstr ""
+
+#: templates/catalog_details.html:39 views.py:191
+msgid "Metadata identifier"
+msgstr ""
+
+#: templates/catalog_details.html:50 views.py:228
+msgid "Download and links"
+msgstr ""
+
+#: templates/catalog_details.html:55
+msgid "Download"
+msgstr ""
+
+#: templates/catalog_details.html:63
+msgid "Get shape"
+msgstr ""
+
+#: templates/catalog_details.html:68 views.py:257
+msgid "Spatial Extent"
+msgstr ""
+
+#: templates/catalog_details.html:71 views.py:271
+msgid "Temporal Extent"
+msgstr ""
+
+#: templates/catalog_details.html:72 views.py:262
+msgid "Publication date"
+msgstr ""
+
+#: templates/catalog_details.html:76 views.py:267
+msgid "Period"
+msgstr ""
+
+#: views.py:140
+msgid "Resource Contacts"
+msgstr ""
+
+#: views.py:151
+msgid "Metadata Contacts"
+msgstr ""
+
+#: views.py:168
+msgid "Resource constraints"
+msgstr ""
+
+#: views.py:193
+msgid " Show in Catalog"
+msgstr ""
+
+#: views.py:201 views.py:235
+msgid "Resource"
+msgstr ""
+
+#: views.py:218
+msgid "Online services"
+msgstr ""
+
+#: views.py:243 views.py:246 views.py:249
+msgid "Access resource"
+msgstr ""
+
+#: views.py:252
+msgid "No resources available"
+msgstr ""
+
+#: views.py:284
+msgid "Metadata detail not available"
+msgstr ""

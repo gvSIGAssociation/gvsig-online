@@ -1,2 +1,20 @@
+#: static/js/lib/_trans.gvsigol.js:2
 msgid "3D View"
+msgstr ""
+
+#: static/js/lib/measureAngle3D.js:31
+msgid "Measure angle"
+msgstr ""
+
+#: static/js/lib/measureAngle3D.js:106 static/js/lib/measureArea3D.js:101
+#: static/js/lib/measureLength3D.js:109
+msgid "Click to continue measuring"
+msgstr ""
+
+#: static/js/lib/measureArea3D.js:13
+msgid "Measure area"
+msgstr ""
+
+#: static/js/lib/measureLength3D.js:34
+msgid "Measure length"
 msgstr ""

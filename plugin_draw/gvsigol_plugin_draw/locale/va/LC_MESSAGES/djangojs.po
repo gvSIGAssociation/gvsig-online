@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,83 +29,129 @@ msgstr ""
 "X-Language: va\n"
 "X-Source-Language: C\n"
 
+#: static/js/lib/_trans.gvsigol.js:2
 msgid "Show draw tools"
 msgstr "Mostrar herramientas dibujo"
 
-msgid "Close draw bar"
-msgstr "Cerrar barra de dibujo"
-
+#: static/js/lib/_trans.gvsigol.js:3
 msgid "Close"
 msgstr "Cerrar"
 
+#: static/js/lib/_trans.gvsigol.js:4
+#: static/js/lib/tools/InsertTextControl.js:37
+#: static/js/lib/tools/InsertTextControl.js:76
+#: static/js/lib/tools/StyleSettings.js:64
 msgid "Insert text"
 msgstr "Insertar texto"
 
+#: static/js/lib/_trans.gvsigol.js:5
 msgid "Delete"
 msgstr "Eliminar"
 
+#: static/js/lib/_trans.gvsigol.js:6
 msgid "Save"
 msgstr "Guardar"
 
+#: static/js/lib/tools/CleanDrawControl.js:33
 msgid "Clean drawings"
 msgstr "Eliminar dibujos"
 
-msgid "Draw point"
-msgstr "Dibujar punto"
+#: static/js/lib/tools/CloseDrawControl.js:40
+msgid "Close draw bar"
+msgstr "Cerrar barra de dibujo"
 
+#: static/js/lib/tools/DrawLineControl.js:65
 msgid "Draw line"
 msgstr "Dibujar línea"
 
+#: static/js/lib/tools/DrawPointControl.js:68
+msgid "Draw point"
+msgstr "Dibujar punto"
+
+#: static/js/lib/tools/DrawPolygonControl.js:67
 msgid "Draw polygon"
 msgstr "Dibujar polígono"
 
+#: static/js/lib/tools/StyleSettings.js:134
 msgid "Style settings"
 msgstr "Propietats d'estil"
 
+#: static/js/lib/tools/StyleSettings.js:146
 msgid "Circle"
 msgstr "Círculo"
 
+#: static/js/lib/tools/StyleSettings.js:147
 msgid "Square"
 msgstr "Cuadrado"
 
+#: static/js/lib/tools/StyleSettings.js:148
 msgid "Triangle"
 msgstr "Triángulo"
 
+#: static/js/lib/tools/StyleSettings.js:149
 msgid "Star"
 msgstr "Estrella"
 
+#: static/js/lib/tools/StyleSettings.js:150
 msgid "Cross"
 msgstr "Cruz"
 
+#: static/js/lib/tools/StyleSettings.js:169
 msgid "Point"
 msgstr "Punto"
 
+#: static/js/lib/tools/StyleSettings.js:170
 msgid "Line"
 msgstr "Línea"
 
+#: static/js/lib/tools/StyleSettings.js:172
 msgid "Polygon"
 msgstr "Polígono"
 
+#: static/js/lib/tools/StyleSettings.js:173
 msgid "Text"
 msgstr "Texto"
 
+#: static/js/lib/tools/StyleSettings.js:196
 msgid "Select shape"
 msgstr "Seleccionar forma"
 
+#: static/js/lib/tools/StyleSettings.js:210
 msgid "Size"
 msgstr "Tamaño"
 
+#: static/js/lib/tools/StyleSettings.js:216
+#: static/js/lib/tools/StyleSettings.js:334
+#: static/js/lib/tools/StyleSettings.js:378
 msgid "Fill color"
 msgstr "Color de relleno"
 
+#: static/js/lib/tools/StyleSettings.js:222
+#: static/js/lib/tools/StyleSettings.js:340
 msgid "Fill opacity"
 msgstr "Opacidad del relleno"
 
+#: static/js/lib/tools/StyleSettings.js:228
+#: static/js/lib/tools/StyleSettings.js:254
+#: static/js/lib/tools/StyleSettings.js:294
+#: static/js/lib/tools/StyleSettings.js:346
+#: static/js/lib/tools/StyleSettings.js:384
 msgid "Stroke color"
 msgstr "Color de línea"
 
+#: static/js/lib/tools/StyleSettings.js:234
+#: static/js/lib/tools/StyleSettings.js:260
+#: static/js/lib/tools/StyleSettings.js:300
+#: static/js/lib/tools/StyleSettings.js:352
+#: static/js/lib/tools/StyleSettings.js:390
 msgid "Stroke width"
 msgstr "Grosor de línea"
 
+#: static/js/lib/tools/StyleSettings.js:272
+#: static/js/lib/tools/StyleSettings.js:312
 msgid "Select pattern"
 msgstr "Seleccionar patrón"
+
+#: static/js/lib/tools/StyleSettings.js:372
+msgid "Font size"
+msgstr ""

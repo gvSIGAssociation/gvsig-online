@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-09 16:52+0000\n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,31 +29,31 @@ msgstr ""
 "X-Language: es\n"
 "X-Source-Language: C\n"
 
-#: mdstandards/iso19139_2007.py:21
+#: mdstandards/iso19139_2007.py:22
 msgid "author"
 msgstr "autor"
 
-#: mdstandards/iso19139_2007.py:22
+#: mdstandards/iso19139_2007.py:23
 msgid "owner"
 msgstr "propietario"
 
-#: mdstandards/iso19139_2007.py:23
+#: mdstandards/iso19139_2007.py:24
 msgid "Contact"
 msgstr "Contacto"
 
-#: mdstandards/iso19139_2007.py:24
+#: mdstandards/iso19139_2007.py:25
 msgid "resourceProvider"
 msgstr "proveedor del recurso"
 
-#: mdstandards/iso19139_2007.py:25
+#: mdstandards/iso19139_2007.py:26
 msgid "custodian"
 msgstr "custodio"
 
-#: mdstandards/iso19139_2007.py:26
+#: mdstandards/iso19139_2007.py:27
 msgid "originator"
 msgstr "creador"
 
-#: mdstandards/iso19139_2007.py:27
+#: mdstandards/iso19139_2007.py:28
 msgid "publisher"
 msgstr "editor"
 
@@ -154,6 +154,5 @@ msgid "No resources available"
 msgstr "No hay recursos disponibles"
 
 #: views.py:284
-#| msgid "Metadata identifier"
 msgid "Metadata detail not available"
 msgstr "El detalle del metadato no está disponible"

@@ -1,7 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -13,6 +14,118 @@ msgstr ""
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
 "X-Generator: Poedit 3.0.1\n"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:2
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:17
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:48
+msgid "Name"
+msgstr "Nome"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:3
+msgid "Workspace"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:4
+msgid "Datastore"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:5
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:36
+msgid "Version"
+msgstr "Version"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:6
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:37
+msgid "Summary"
+msgstr "Sumário"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:7
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:38
+msgid "Requests"
+msgstr "Solicitações"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:8
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:16
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:39
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:47
+msgid "Supported CRS"
+msgstr "CRS Suportado"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:9
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:40
+msgid "Layers"
+msgstr "Camadas"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:10
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:41
+msgid "Organization"
+msgstr "Organização"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:11
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:42
+msgid "Contact person"
+msgstr "Pessoa de contacto"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:12
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:43
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1453
+msgid "Address"
+msgstr "Endereço"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:13
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:44
+msgid "City"
+msgstr "Cidade"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:14
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:45
+msgid "Country"
+msgstr "País"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:15
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:46
+msgid "Email"
+msgstr "E-mail"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:18
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:49
+msgid "Title"
+msgstr "Título"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:19
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:50
+msgid "Abstract"
+msgstr "Resumo"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:20
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:51
+msgid "Queryable"
+msgstr "Consultável"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:21
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:52
+msgid "MaxScaleDenominator"
+msgstr "Denominador de Escala Máxima"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:22
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:53
+msgid "MinScaleDenominator"
+msgstr "Denominador de Escala Mínima"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:23
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:54
+msgid "Default CRS"
+msgstr "SRC padrão"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:24
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:55
+msgid "BoundingBox"
+msgstr "Caixa de delimitação"
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:25
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:56
+msgid "GeographicBoundingBox"
+msgstr "Caixa de delimitação geográfica"
 
 # gvSIG Online.
 # Copyright (C) 2010-2017 SCOLAB.
@@ -30,606 +143,1000 @@ msgstr ""
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # export_a4h.html
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:26
 msgid "Printing date"
 msgstr "Data de impressão"
 
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:27
 msgid "Printing message"
 msgstr "Impressão da mensagem"
 
-# viewer.js
-msgid "Blank"
-msgstr "Em branco"
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:28
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:35
+msgid "Draw rectangle"
+msgstr ""
 
-msgid "OpenStreetMap"
-msgstr "OpenStreetMap"
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:29
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:32
+msgid "Parar proceso"
+msgstr ""
 
-# attributeTable.js
-msgid "Processing request"
-msgstr "Processando solicitação"
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:30
+msgid "too_many_tiles"
+msgstr ""
 
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:31
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:33
+msgid "tile process ended"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/_trans.gvsigol.js:34
+msgid "Parando"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/CloseMeasureControl.js:35
+msgid "Close measure tools"
+msgstr "Fechar ferramentas de medida"
+
+#: gvsigol_core/static/js/lib/tools/CloseSelectControl.js:35
+msgid "Close selection tools"
+msgstr "Fechar ferramentas de seleção"
+
+#: gvsigol_core/static/js/lib/tools/DragZoomControl.js:37
+msgid "Drag Zoom"
+msgstr "Lupa"
+
+#: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:141
+#: gvsigol_core/static/js/lib/tools/measureAngle.js:36
+msgid "Measure angle"
+msgstr "Medir ângulo"
+
+#: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:168
+#: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:153
+#: gvsigol_core/static/js/lib/tools/MeasureLengthControl.js:153
+#: gvsigol_core/static/js/lib/tools/measureAngle.js:138
+#: gvsigol_core/static/js/lib/tools/measureArea.js:138
+#: gvsigol_core/static/js/lib/tools/measureLength.js:136
+msgid "Click to continue measuring"
+msgstr "Clique para continuar a medição"
+
+#: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:183
+#: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:168
+#: gvsigol_core/static/js/lib/tools/MeasureLengthControl.js:168
+#: gvsigol_core/static/js/lib/tools/measureAngle.js:207
+#: gvsigol_core/static/js/lib/tools/measureArea.js:191
+#: gvsigol_core/static/js/lib/tools/measureLength.js:189
+msgid "Click to start measuring"
+msgstr "Clique para iniciar a medição"
+
+#: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:282
+#: gvsigol_core/static/js/lib/tools/measureAngle.js:362
+msgid "Interior angle"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:283
+#: gvsigol_core/static/js/lib/tools/measureAngle.js:363
+msgid "Exterior angle"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:126
+msgid "Measure area and perimeter"
+msgstr "Medir área e perímetro"
+
+#: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:245
+#: gvsigol_core/static/js/lib/tools/measureArea.js:325
+msgid "Area"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:246
+#: gvsigol_core/static/js/lib/tools/measureArea.js:326
+msgid "Perimeter"
+msgstr ""
+
+# measureLength.js
+#: gvsigol_core/static/js/lib/tools/MeasureLengthControl.js:126
+#: gvsigol_core/static/js/lib/tools/measureLength.js:35
+msgid "Measure length"
+msgstr "Medir comprimento"
+
+# measureArea.js
+#: gvsigol_core/static/js/lib/tools/MeasureToolBar.js:42
+msgid "Show measure tools"
+msgstr "Mostrar ferramentas de medida"
+
+#: gvsigol_core/static/js/lib/tools/SelectBoxControl.js:88
+msgid "Select features"
+msgstr "Selecione vários recursos"
+
+#: gvsigol_core/static/js/lib/tools/SelectByBufferControl.js:58
+msgid "Select by buffer"
+msgstr "Selecionar por buffer"
+
+#: gvsigol_core/static/js/lib/tools/SelectByBufferControl.js:130
+#: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:176
+msgid "Select buffer radius (meters)"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/SelectByBufferControl.js:132
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:267
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:340
+#: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:178
 msgid "Search"
 msgstr "Procurar"
 
+#: gvsigol_core/static/js/lib/tools/SelectFeatureControl.js:42
+msgid "Select feature"
+msgstr "Selecione um recurso"
+
+#: gvsigol_core/static/js/lib/tools/SelectToolBar.js:42
+msgid "Show selection tools"
+msgstr "Mostrar ferramentas de seleção"
+
+# attributeTable.js
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:266
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:339
+msgid "Processing request"
+msgstr "Processando solicitação"
+
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:268
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:341
 msgid "Showing"
 msgstr "Exibição"
 
-msgid "Showing from"
-msgstr "Exibição de"
-
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:268
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:269
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:270
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:271
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:341
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:342
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:343
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:344
 msgid "registers"
 msgstr "Cadastros"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:269
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:270
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:342
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:343
+msgid "Showing from"
+msgstr "Exibição de"
+
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:269
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:270
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:342
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:343
 msgid "to"
 msgstr "a"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:269
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:342
+#, fuzzy
+#| msgid "of"
+msgid " of"
+msgstr "de"
+
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:270
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:343
 msgid "of"
 msgstr "de"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:271
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:344
 msgid "Filtering"
 msgstr "Filtro"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:273
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:346
 msgid "Loading"
 msgstr "Carregando"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:274
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:275
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:347
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:348
 msgid "No records available"
 msgstr "Nenhum registro disponível"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:277
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:350
 msgid "First"
 msgstr "Primeiro"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:278
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:351
 msgid "Previous"
 msgstr "Anterior"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:279
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:352
 msgid "Next"
 msgstr "Seguinte"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:280
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:353
 msgid "Last"
 msgstr "Último"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:283
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:356
 msgid "Sort ascending"
 msgstr "Ordenar por ordem crescente"
 
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:284
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:357
 msgid "Sort descending"
 msgstr "Ordenação decrescente"
 
-msgid "Zoom to selection"
-msgstr "Zoom para seleção"
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:501
+#: gvsigol_core/static/js/lib/tools/SelectionTable.js:563
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:487
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:830
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1558
+msgid "Invalid identifier. Unable to get requested geometry"
+msgstr "Identificador inválido. Não é possível obter a geometria solicitada"
 
-msgid "Select all"
-msgstr "Selecionar todos"
+#: gvsigol_core/static/js/lib/tools/ShowMeasureToolbar.js:37
+msgid "Herramientas de medida"
+msgstr ""
 
-msgid "Clear selection"
-msgstr "Limpar seleção"
-
-msgid "You must select at least one row"
-msgstr "Você deve selecionar pelo menos uma linha"
-
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:274
 msgid "Print selection"
 msgstr "Seleção de impressão"
 
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:283
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:297
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:321
+msgid "You must select at least one row"
+msgstr "Você deve selecionar pelo menos uma linha"
+
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:289
+msgid "Zoom to selection"
+msgstr "Zoom para seleção"
+
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:304
+msgid "Select all"
+msgstr "Selecionar todos"
+
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:308
+msgid "Clear selection"
+msgstr "Limpar seleção"
+
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:312
+msgid "PDF Report"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:565
 msgid "Advanced filter"
 msgstr "Filtro avançado"
 
-msgid "A visible layer with temporal properties is needed"
-msgstr "Uma camada visível com propriedades temporais é necessária"
-
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:597
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:80
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:126
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:152
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:282
 msgid "Select field"
 msgstr "Selecionar campo"
 
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:628
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:97
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:128
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:154
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:198
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:284
 msgid "Select value"
 msgstr "Selecionar valor"
 
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:658
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:108
 msgid "Apply filter"
 msgstr "Aplicar filtro"
 
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:659
 msgid "Clear filter"
 msgstr "Limpar filtro"
 
-# editionBar.js
-msgid "Add point to center"
-msgstr "Adicionar um ponto ao centro"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1169
+msgid "Item"
+msgstr ""
 
-msgid "can't be empty"
-msgstr "Não pode estar vazio"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1232
+msgid "Report title"
+msgstr "Título do relatório"
 
-msgid "can't be null"
-msgstr "não pode ser nulo"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1233
+msgid "Insert title"
+msgstr "Digite o título"
 
-msgid "Add point"
-msgstr "Adicionar ponto"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1239
+msgid "Report description"
+msgstr "Descrição do relatório"
 
-msgid "Add line"
-msgstr "Adicionar linha"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1240
+msgid "Insert description"
+msgstr "Digite a descrição"
 
-msgid "Add polygon"
-msgstr "Adicionar poligono"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1246
+msgid "Include images related to report elements"
+msgstr "Incluir imagens relacionadas aos elementos do relatório"
 
-msgid "Edit feature"
-msgstr "Editar função"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1252
+msgid "Include the address related to report elements"
+msgstr "Incluir endereços relacionados aos elementos do relatório"
 
-msgid "Remove feature"
-msgstr "Excluir função"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1258
+msgid "Fields to include"
+msgstr "Campos a incluir"
 
-msgid "Stop edition"
-msgstr "Parar Edição"
-
-msgid "Error starting edition"
-msgstr "Erro na edição inicial"
-
-msgid "Feature properties"
-msgstr "Propriedades"
-
-msgid "Feature resources"
-msgstr "Recursos do elemento"
-
-msgid "remove"
-msgstr "Excluir"
-
-msgid "Failed to remove layer lock"
-msgstr "Falha ao remover ou bloqueio da camada"
-
-msgid "New feature"
-msgstr "Novo recurso"
-
-msgid "Save"
-msgstr "Salvar"
-
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1280
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:134
+#: gvsigol_core/static/js/lib/tools/exportToPDF.js:90
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:116
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:2136
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:2169
 msgid "Cancel"
 msgstr "Cancelar"
 
-msgid "Failed to save the new record. Please check values"
-msgstr "Não foi possível guardar o novo registo. Por favor, verifique os valores"
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1281
+msgid "Generate PDF"
+msgstr "Gerar PDF"
+
+#: gvsigol_core/static/js/lib/tools/attributeTable.js:1353
+msgid "El número máximo de campos a mostrar en la impresión es 8"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/cleanMap.js:36
+msgid "Clean map"
+msgstr "Limpar mapa"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:38
+#, fuzzy
+#| msgid "Coordinates"
+msgid "Coordinate calculator"
+msgstr "Coordenadas"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:94
+msgid "Origin coordinates"
+msgstr "Coordenadas de origem"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:96
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:115
+msgid "Select reference system"
+msgstr "Selecionar sistema de coordenadas"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:103
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:122
+msgid "Format"
+msgstr "Formato"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:113
+msgid "Destination coordinates"
+msgstr "Coordenadas de destino"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:135
+msgid "Calculate"
+msgstr "Calcular"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:154
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:159
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:332
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:337
+msgid "Select format"
+msgstr "Selecionar formato"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:155
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:333
+msgid "Decimal degrees"
+msgstr "Graus decimais"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:156
+msgid "Degrees, minutes and seconds"
+msgstr "Graus, minutos e segundos"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:160
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:338
+msgid "X/Y"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:171
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:220
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:251
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:300
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:102
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:138
+msgid "Longitude"
+msgstr "Longitude"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:174
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:198
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:254
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:278
+msgid "Degrees"
+msgstr "Graus"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:178
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:202
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:258
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:282
+msgid "Minutes"
+msgstr "Minutos"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:182
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:206
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:262
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:286
+msgid "Seconds"
+msgstr "Segundos"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:195
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:224
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:275
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:304
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:106
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:138
+msgid "Latitude"
+msgstr "Latitude"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:363
+msgid "You must fill in all the values"
+msgstr "Você deve preencher todos os valores"
+
+#: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:373
+msgid "Some value is out of range"
+msgstr "Algum valor está fora da faixa"
+
+#: gvsigol_core/static/js/lib/tools/exportToPDF.js:36
+msgid "Export to PDF"
+msgstr ""
 
 # exportToPDF.js
+#: gvsigol_core/static/js/lib/tools/exportToPDF.js:77
+#: gvsigol_core/static/js/lib/tools/exportToPDF.js:78
 msgid "Map title"
 msgstr "Título do mapa"
 
-msgid "Print"
-msgstr "Imprimir"
+#: gvsigol_core/static/js/lib/tools/exportToPDF.js:91
+msgid "Exportar a PDF"
+msgstr ""
 
 # geolocation.js
+#: gvsigol_core/static/js/lib/tools/geolocation.js:35
 msgid "Get current location"
 msgstr "Obter localização atual"
 
 # getFeatureInfo.js
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:38
 msgid "Point information"
 msgstr "Informação do ponto"
 
-msgid "No layers available"
-msgstr "Não há camadas disponíveis"
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:502
+msgid "Elevation"
+msgstr ""
 
-msgid "More info"
-msgstr "Mais informação"
-
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:508
 msgid "Coordinates"
 msgstr "Coordenadas"
 
-msgid "View resources"
-msgstr "Ver recursos"
-
-msgid "Feature info"
-msgstr "Informação"
-
-msgid "Multimedia resources"
-msgstr "Recursos multimédia"
-
-# measureArea.js
-msgid "Show measure tools"
-msgstr "Mostrar ferramentas de medida"
-
-msgid "Measure area and perimeter"
-msgstr "Medir área e perímetro"
-
-msgid "Click to continue measuring"
-msgstr "Clique para continuar a medição"
-
-msgid "Click to start measuring"
-msgstr "Clique para iniciar a medição"
-
-# measureLength.js
-msgid "Measure length"
-msgstr "Medir comprimento"
-
-msgid "Measure angle"
-msgstr "Medir ângulo"
-
-msgid "Close measure tools"
-msgstr "Fechar ferramentas de medida"
-
-msgid "Show selection tools"
-msgstr "Mostrar ferramentas de seleção"
-
-msgid "Select features"
-msgstr "Selecione vários recursos"
-
-msgid "Select feature"
-msgstr "Selecione um recurso"
-
-msgid "Select by buffer"
-msgstr "Selecionar por buffer"
-
-msgid "Close selection tools"
-msgstr "Fechar ferramentas de seleção"
-
-# measureLength.js
-msgid "Search by coordinate"
-msgstr "Busca por coordenadas"
-
-msgid "Select projection"
-msgstr "Seleccionar projecção"
-
-msgid "Coordinate Reference System"
-msgstr "Sistema de Referência de Coordenadas"
-
-msgid "Latitude"
-msgstr "Latitude"
-
-msgid "Longitude"
-msgstr "Longitude"
-
-msgid "Find"
-msgstr "Procurar"
-
-# messageBox.js
-msgid "Success"
-msgstr "Sucesso"
-
-msgid "Warning"
-msgstr "Aviso"
-
-# layerTree.js
-msgid "The layer you are trying to edit is locked"
-msgstr "A camada que você está tentando editar está bloqueada"
-
-msgid "Base layers"
-msgstr "Camadas de base"
-
-msgid "None"
-msgstr "Nenhum"
-
-msgid "No layer"
-msgstr "Nenhuma camada"
-
-msgid "Bing roads"
-msgstr "Bing estradas"
-
-msgid "Bing aerial"
-msgstr "Bing aéreo"
-
-msgid "Bing aerial with labels"
-msgstr "Bing aéreo com marcadores"
-
-msgid "You are editing the layer"
-msgstr "Você está editando a camada"
-
-msgid "Downloads"
-msgstr "Baixar"
-
-msgid "Layer metadata"
-msgstr "Metadados de camada"
-
-msgid "Details"
-msgstr "Detalhes"
-
-msgid "Metadata"
-msgstr "Metadado"
-
-msgid "Download links"
-msgstr "Links para baixar "
-
-msgid "Download shapefile"
-msgstr "Baixar shapefile"
-
-msgid "Download CSV"
-msgstr "Baixar CSV"
-
-msgid "Download GML"
-msgstr "Baixar GML"
-
-msgid "Attribute table"
-msgstr "Tabela de atributos"
-
-msgid "Edit layer"
-msgstr "Editar camada"
-
-msgid "Opacity"
-msgstr "Opacidade"
-
-msgid "Show in geonetwork"
-msgstr "Mostrar em Geonetwork"
-
-msgid "Version"
-msgstr "Version"
-
-msgid "Summary"
-msgstr "Sumário"
-
-msgid "Requests"
-msgstr "Solicitações"
-
-msgid "Supported CRS"
-msgstr "CRS Suportado"
-
-msgid "Layers"
-msgstr "Camadas"
-
-msgid "Organization"
-msgstr "Organização"
-
-msgid "Contact person"
-msgstr "Pessoa de contacto"
-
-msgid "Address"
-msgstr "Endereço"
-
-msgid "City"
-msgstr "Cidade"
-
-msgid "Country"
-msgstr "País"
-
-msgid "Email"
-msgstr "E-mail"
-
-msgid "Name"
-msgstr "Nome"
-
-msgid "Title"
-msgstr "Título"
-
-msgid "Abstract"
-msgstr "Resumo"
-
-msgid "Queryable"
-msgstr "Consultável"
-
-msgid "MaxScaleDenominator"
-msgstr "Denominador de Escala Máxima"
-
-msgid "MinScaleDenominator"
-msgstr "Denominador de Escala Mínima"
-
-msgid "Default CRS"
-msgstr "SRC padrão"
-
-msgid "BoundingBox"
-msgstr "Caixa de delimitação"
-
-msgid "GeographicBoundingBox"
-msgstr "Caixa de delimitação geográfica"
-
-msgid "Zoom to layer"
-msgstr "Zoom para camada"
-
-msgid "Project zoom"
-msgstr "Zoom do projeto"
-
-msgid "Clean map"
-msgstr "Limpar mapa"
-
-msgid "Inverse geocoding"
-msgstr "Geocodificação Inversa"
-
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:606
 msgid "More element info"
 msgstr "Mais informações sobre o elemento"
 
-msgid "Invalid identifier. Unable to get requested geometry"
-msgstr "Identificador inválido. Não é possível obter a geometria solicitada"
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:607
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:1043
+msgid "Multimedia resources"
+msgstr "Recursos multimédia"
 
-msgid "Temporary layers"
-msgstr "Camadas temporárias"
-
-msgid "From"
-msgstr "Desde"
-
-msgid "To"
-msgstr "a"
-
-msgid "Step"
-msgstr "Passo"
-
-msgid "Single"
-msgstr "Individual"
-
-msgid "Range"
-msgstr "Faixa"
-
-msgid "temporary_field"
-msgstr "Parâmetro temporal"
-
-msgid "temporary_endfield"
-msgstr " Campo tempo (intervalo final)"
-
-msgid "second(s)"
-msgstr "segundo(s)"
-
-msgid "minute(s)"
-msgstr "minuto(s)"
-
-msgid "hour(s)"
-msgstr "hora(s)"
-
-msgid "day(s)"
-msgstr "dia(s)"
-
-msgid "month(s)"
-msgstr "mês(es)"
-
-msgid "year(s)"
-msgstr "ano(s)"
-
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:617
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:753
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:775
 msgid "Attribute details"
 msgstr "Detalhes do atributo"
 
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:618
 msgid "Show resources"
 msgstr "Mostrar recursos"
 
-msgid "Enable temporary features"
-msgstr "Ativar recursos temporários"
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:1027
+msgid "View resources"
+msgstr "Ver recursos"
 
-msgid "apply relative date"
-msgstr "aplicar data de referência"
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:1041
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:1126
+#: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:1145
+msgid "Feature info"
+msgstr "Informação"
 
-msgid "Temporary range"
-msgstr "Intervalo temporário"
+#: gvsigol_core/static/js/lib/tools/measureArea.js:36
+#, fuzzy
+#| msgid "Measure angle"
+msgid "Measure area"
+msgstr "Medir ângulo"
 
-msgid "Only relative intervals can be defined if the other field is PRESENT or a concrete date."
-msgstr "Apenas intervalos relativos podem ser definidos se o outro campo for PRESENTE ou uma data concreta"
-
-msgid "Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"
-msgstr "Somente a opção PRESENT está disponível no modo Instantâneo. Você precisa definir uma escala para usar intervalos relativos"
-
-msgid "Image Mosaic"
-msgstr "Mosaico de imagens"
-
-msgid "Share view"
-msgstr "Compartilhar visualização"
-
-msgid "Report title"
-msgstr "Título do relatório"
-
-msgid "Report description"
-msgstr "Descrição do relatório"
-
-msgid "Insert title"
-msgstr "Digite o título"
-
-msgid "Insert description"
-msgstr "Digite a descrição"
-
-msgid "Include images related to report elements"
-msgstr "Incluir imagens relacionadas aos elementos do relatório"
-
-msgid "Include the address related to report elements"
-msgstr "Incluir endereços relacionados aos elementos do relatório"
-
-msgid "Fields to include"
-msgstr "Campos a incluir"
-
-msgid "Generate PDF"
-msgstr "Gerar PDF"
-
-msgid "Origin coordinates"
-msgstr "Coordenadas de origem"
-
-msgid "Select reference system"
-msgstr "Selecionar sistema de coordenadas"
-
-msgid "Format"
-msgstr "Formato"
-
-msgid "Destination coordinates"
-msgstr "Coordenadas de destino"
-
-msgid "Calculate"
-msgstr "Calcular"
-
-msgid "Select format"
-msgstr "Selecionar formato"
-
-msgid "Decimal degrees"
-msgstr "Graus decimais"
-
-msgid "Degrees, minutes and seconds"
-msgstr "Graus, minutos e segundos"
-
-msgid "Degrees"
-msgstr "Graus"
-
-msgid "Minutes"
-msgstr "Minutos"
-
-msgid "Seconds"
-msgstr "Segundos"
-
-msgid "You must fill in all the values"
-msgstr "Você deve preencher todos os valores"
-
-msgid "Some value is out of range"
-msgstr "Algum valor está fora da faixa"
-
-msgid "Raw filter"
-msgstr "Filtro rápido"
-
-msgid "Layer group"
-msgstr "Grupo de camadas"
-
-msgid "Select layer group"
-msgstr "Selecionar grupo de camadas"
-
-msgid "Layer"
-msgstr "Camada"
-
-msgid "Select layer"
-msgstr "Selecionar camada"
-
-msgid "Field"
-msgstr "Campo"
-
-msgid "Operator"
-msgstr "Operador"
-
-msgid "Select operator"
-msgstr "Selecionar operador"
-
-msgid "Value"
-msgstr "Valor"
-
-msgid "Clean filter"
-msgstr "Limpar filtro"
-
-msgid "The selected layer group does not contain queryable layers"
-msgstr "O grupo de camadas selecionado não contém camadas consultáveis"
-
-msgid "The selected layer does not contain queryable fields"
-msgstr "A camada selecionada não contém campos consultáveis"
-
-msgid "The selected field does not contain values"
-msgstr "O campo selecionado não contém valores"
-
-msgid "No results found"
-msgstr "Não foram encontrados resultados"
-
-msgid "Equal to"
-msgstr "É o mesmo que"
-
-msgid "Smaller than"
-msgstr "É menos que"
-
-msgid "Greater than"
-msgstr "É maior que"
-
-msgid "You must fill in all fields"
-msgstr "Você deve preencher todos os campos"
-
-msgid "Find layer"
-msgstr "Buscar camada"
-
+#: gvsigol_core/static/js/lib/tools/navigationHistory.js:43
 msgid "Next view"
 msgstr "Vista seguinte"
 
+#: gvsigol_core/static/js/lib/tools/navigationHistory.js:53
 msgid "Last view"
 msgstr "Vista anterior"
 
-msgid "Zoom in"
-msgstr "Ampliar zoom"
+#: gvsigol_core/static/js/lib/tools/projectZoom.js:37
+msgid "Project zoom"
+msgstr "Zoom do projeto"
 
-msgid "Zoom out"
-msgstr "Reduzir zoom"
+# measureLength.js
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:38
+msgid "Search by coordinate"
+msgstr "Busca por coordenadas"
 
-msgid "Drag Zoom"
-msgstr "Lupa"
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:89
+msgid "Coordinate Reference System"
+msgstr "Sistema de Referência de Coordenadas"
 
-msgid "Search in catalog"
-msgstr "Pesquisa no catálogo"
+#: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:117
+msgid "Find"
+msgstr "Procurar"
 
-msgid "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
-msgstr "A sessão do Geoserver expirou. Deve sair do gvSIG Online e entrar novamente para reiniciar a sessão"
+#: gvsigol_core/static/js/lib/tools/selectFeature.js:43
+#, fuzzy
+#| msgid "Select feature"
+msgid "Select Feature"
+msgstr "Selecione um recurso"
 
-msgid "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
+#: gvsigol_core/static/js/lib/tools/selectFeature.js:135
+#: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:159
+#, fuzzy
+#| msgid "No layers available"
+msgid "No layers available."
+msgstr "Não há camadas disponíveis"
+
+#: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:44
+#, fuzzy
+#| msgid "Select by buffer"
+msgid "Select Feature By Buffer"
+msgstr "Selecionar por buffer"
+
+#: gvsigol_core/static/js/lib/tools/shareView.js:33
+msgid "Share view"
+msgstr "Compartilhar visualização"
+
+#: gvsigol_core/static/js/lib/tools/shareView.js:108
+msgid "Marque para que la URL no expire"
 msgstr ""
-"Você não está autorizado a ler a camada ou a sessão do Geoserver expirou. Deve sair do gvSIG Online e fazer login novamente para reiniciar "
-"a sessão"
 
-msgid "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session"
-msgstr "A camada não existe ou a sessão do Geoserver expirou. Deve sair do gvSIG Online e entrar novamente para reiniciar a sessão"
+#: gvsigol_core/static/js/lib/tools/shareView.js:117
+msgid "Guardar URL"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/tools/shareView.js:118
+msgid "Copiar URL"
+msgstr ""
+
+# viewer.js
+#: gvsigol_core/static/js/lib/viewer.js:154
+msgid "Blank"
+msgstr "Em branco"
+
+#: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:59
+#: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:83
+msgid "Download links"
+msgstr "Links para baixar "
+
+#: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:64
+#, fuzzy
+#| msgid "Download shapefile"
+msgid "Download ShapeFile"
+msgstr "Baixar shapefile"
+
+#: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:67
+msgid "Download CSV"
+msgstr "Baixar CSV"
+
+#: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:70
+msgid "Download GML"
+msgstr "Baixar GML"
+
+#: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:88
+#, fuzzy
+#| msgid "Downloads"
+msgid "Download raster data"
+msgstr "Baixar"
+
+#: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:100
+msgid "Some files could not be uploaded:"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:211
+msgid ""
+"Version conflict: the feature was edited concurrently. Restart your editing "
+"session to get the last version."
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:215
+msgid "Error deleting resource"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:266
+msgid "Find layer"
+msgstr "Buscar camada"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:554
+msgid "Enable temporary features"
+msgstr "Ativar recursos temporários"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:555
+msgid "A visible layer with temporal properties is needed"
+msgstr "Uma camada visível com propriedades temporais é necessária"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:591
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:641
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:670
+msgid "year(s)"
+msgstr "ano(s)"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:594
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:644
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:670
+msgid "month(s)"
+msgstr "mês(es)"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:597
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:647
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:670
+msgid "day(s)"
+msgstr "dia(s)"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:600
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:650
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:670
+msgid "hour(s)"
+msgstr "hora(s)"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:603
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:653
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:670
+msgid "minute(s)"
+msgstr "minuto(s)"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:606
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:656
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:670
+msgid "second(s)"
+msgstr "segundo(s)"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:610
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:660
+msgid "Clear"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:613
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:663
+msgid "apply relative date"
+msgstr "aplicar data de referência"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:668
+msgid "From"
+msgstr "Desde"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:669
+msgid "To"
+msgstr "a"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:670
+msgid "Step"
+msgstr "Passo"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:676
+msgid "Single"
+msgstr "Individual"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:681
+msgid "Range"
+msgstr "Faixa"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:687
+msgid "Temporary layers"
+msgstr "Camadas temporárias"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:799
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:873
+msgid ""
+"Only relative intervals can be defined if the other field is PRESENT or a "
+"concrete date."
+msgstr ""
+"Apenas intervalos relativos podem ser definidos se o outro campo for "
+"PRESENTE ou uma data concreta"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:802
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:814
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:876
+msgid ""
+"Only PRESENT is available in Instant mode. You need to define a RANGE to use "
+"relative intervals"
+msgstr ""
+"Somente a opção PRESENT está disponível no modo Instantâneo. Você precisa "
+"definir uma escala para usar intervalos relativos"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1809
+msgid "No layer"
+msgstr "Nenhuma camada"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1853
+msgid "temporary_field"
+msgstr "Parâmetro temporal"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1862
+msgid "temporary_endfield"
+msgstr " Campo tempo (intervalo final)"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1866
+msgid "Image Mosaic"
+msgstr "Mosaico de imagens"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1948
+msgid "Attribute table"
+msgstr "Tabela de atributos"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1954
+msgid "Downloads"
+msgstr "Baixar"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1960
+msgid "Metadata"
+msgstr "Metadado"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1971
+msgid "Zoom to layer"
+msgstr "Zoom para camada"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1976
+msgid "Crear GML Catastro"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:1980
+msgid "Descarga de GML de Catastro"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:2003
+msgid "Opacity"
+msgstr "Opacidade"
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:2005
+msgid "Swipe"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:2077
+msgid "Parcelas catastrales no validas"
+msgstr ""
+
+#: gvsigol_core/static/js/lib/widgets/layerTree.js:2138
+msgid "Show in geonetwork"
+msgstr "Mostrar em Geonetwork"
+
+# messageBox.js
+#: gvsigol_core/static/js/lib/widgets/messageBox.js:65
+#: gvsigol_core/static/js/lib/widgets/messageBox.js:102
+msgid "Success"
+msgstr "Sucesso"
+
+#: gvsigol_core/static/js/lib/widgets/messageBox.js:70
+#: gvsigol_core/static/js/lib/widgets/messageBox.js:107
+msgid "Warning"
+msgstr "Aviso"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:56
+msgid "Raw filter"
+msgstr "Filtro rápido"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:61
+msgid "Layer group"
+msgstr "Grupo de camadas"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:63
+msgid "Select layer group"
+msgstr "Selecionar grupo de camadas"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:71
+msgid "Layer"
+msgstr "Camada"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:73
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:125
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:281
+msgid "Select layer"
+msgstr "Selecionar camada"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:78
+msgid "Field"
+msgstr "Campo"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:85
+msgid "Operator"
+msgstr "Operador"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:87
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:177
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:283
+msgid "Select operator"
+msgstr "Selecionar operador"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:88
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:182
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:187
+msgid "Equal to"
+msgstr "É o mesmo que"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:89
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:183
+msgid "Smaller than"
+msgstr "É menos que"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:90
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:184
+msgid "Greater than"
+msgstr "É maior que"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:95
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:102
+msgid "Value"
+msgstr "Valor"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:109
+msgid "Clean filter"
+msgstr "Limpar filtro"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:146
+msgid "The selected layer group does not contain queryable layers"
+msgstr "O grupo de camadas selecionado não contém camadas consultáveis"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:171
+msgid "The selected layer does not contain queryable fields"
+msgstr "A camada selecionada não contém campos consultáveis"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:212
+msgid "The selected field does not contain values"
+msgstr "O campo selecionado não contém valores"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:262
+msgid "No results found"
+msgstr "Não foram encontrados resultados"
+
+#: gvsigol_core/static/js/lib/widgets/rawFilter.js:266
+msgid "You must fill in all fields"
+msgstr "Você deve preencher todos os campos"
+
+#, fuzzy
+#~| msgid "Select all"
+#~ msgid "Select"
+#~ msgstr "Selecionar todos"
+
+#~ msgid "Zoom in"
+#~ msgstr "Ampliar zoom"
+
+#~ msgid "Zoom out"
+#~ msgstr "Reduzir zoom"
+
+#~ msgid "OpenStreetMap"
+#~ msgstr "OpenStreetMap"
+
+# editionBar.js
+#~ msgid "Add point to center"
+#~ msgstr "Adicionar um ponto ao centro"
+
+#~ msgid "can't be empty"
+#~ msgstr "Não pode estar vazio"
+
+#~ msgid "can't be null"
+#~ msgstr "não pode ser nulo"
+
+#~ msgid "Add point"
+#~ msgstr "Adicionar ponto"
+
+#~ msgid "Add line"
+#~ msgstr "Adicionar linha"
+
+#~ msgid "Add polygon"
+#~ msgstr "Adicionar poligono"
+
+#~ msgid "Edit feature"
+#~ msgstr "Editar função"
+
+#~ msgid "Remove feature"
+#~ msgstr "Excluir função"
+
+#~ msgid "Stop edition"
+#~ msgstr "Parar Edição"
+
+#~ msgid "Error starting edition"
+#~ msgstr "Erro na edição inicial"
+
+#~ msgid "Feature properties"
+#~ msgstr "Propriedades"
+
+#~ msgid "Feature resources"
+#~ msgstr "Recursos do elemento"
+
+#~ msgid "remove"
+#~ msgstr "Excluir"
+
+#~ msgid "Failed to remove layer lock"
+#~ msgstr "Falha ao remover ou bloqueio da camada"
+
+#~ msgid "New feature"
+#~ msgstr "Novo recurso"
+
+#~ msgid "Save"
+#~ msgstr "Salvar"
+
+#~ msgid "Failed to save the new record. Please check values"
+#~ msgstr ""
+#~ "Não foi possível guardar o novo registo. Por favor, verifique os valores"
+
+#~ msgid "Print"
+#~ msgstr "Imprimir"
+
+#~ msgid "More info"
+#~ msgstr "Mais informação"
+
+#~ msgid "Select projection"
+#~ msgstr "Seleccionar projecção"
+
+# layerTree.js
+#~ msgid "The layer you are trying to edit is locked"
+#~ msgstr "A camada que você está tentando editar está bloqueada"
+
+#~ msgid "Base layers"
+#~ msgstr "Camadas de base"
+
+#~ msgid "None"
+#~ msgstr "Nenhum"
+
+#~ msgid "Bing roads"
+#~ msgstr "Bing estradas"
+
+#~ msgid "Bing aerial"
+#~ msgstr "Bing aéreo"
+
+#~ msgid "Bing aerial with labels"
+#~ msgstr "Bing aéreo com marcadores"
+
+#~ msgid "You are editing the layer"
+#~ msgstr "Você está editando a camada"
+
+#~ msgid "Layer metadata"
+#~ msgstr "Metadados de camada"
+
+#~ msgid "Details"
+#~ msgstr "Detalhes"
+
+#~ msgid "Edit layer"
+#~ msgstr "Editar camada"
+
+#~ msgid "Inverse geocoding"
+#~ msgstr "Geocodificação Inversa"
+
+#~ msgid "Temporary range"
+#~ msgstr "Intervalo temporário"
+
+#~ msgid "Search in catalog"
+#~ msgstr "Pesquisa no catálogo"
+
+#~ msgid ""
+#~ "Geoserver session has expired. Logout from gvSIG Online and login again "
+#~ "to reset the session"
+#~ msgstr ""
+#~ "A sessão do Geoserver expirou. Deve sair do gvSIG Online e entrar "
+#~ "novamente para reiniciar a sessão"
+
+#~ msgid ""
+#~ "You are not allowed to read the layer or Geoserver session has expired. "
+#~ "Logout from gvSIG Online and login again to reset the session"
+#~ msgstr ""
+#~ "Você não está autorizado a ler a camada ou a sessão do Geoserver expirou. "
+#~ "Deve sair do gvSIG Online e fazer login novamente para reiniciar a sessão"
+
+#~ msgid ""
+#~ "The layer does not exists or Geoserver session has expired. Logout from "
+#~ "gvSIG Online and login again to reset the session"
+#~ msgstr ""
+#~ "A camada não existe ou a sessão do Geoserver expirou. Deve sair do gvSIG "
+#~ "Online e entrar novamente para reiniciar a sessão"

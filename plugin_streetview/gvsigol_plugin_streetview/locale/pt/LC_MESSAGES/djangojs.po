@@ -15,7 +15,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Error loading samplemenubutton plugin"
+msgstr ""
+
+#: static/js/lib/tools/StreetView.js:36 static/js/lib/tools/StreetView.js:103
+msgid "Google Street View"
+msgstr ""
+
+#: static/js/lib/tools/StreetView.js:108
+msgid "Close"
+msgstr ""

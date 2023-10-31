@@ -1,5 +1,7 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -7,250 +9,297 @@ msgstr ""
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
 
-msgid "Catalog"
-msgstr "Catálogo"
-
-msgid "Catalog and downloads"
-msgstr "Catálogo e downloads"
-
-msgid "Press Ctrl to mark an area"
-msgstr "Pressione Ctrl para marcar uma área"
-
-msgid "Clean"
-msgstr "Limpar"
-
-msgid "Search"
-msgstr "Pesquisar"
-
-msgid "Clean current search, filters and order"
-msgstr "Limpar a pesquisa atual, filtros e ordem"
-
-msgid "Categories"
-msgstr "Categorias"
-
-msgid "Separated by"
-msgstr "Separado por"
-
-msgid "Keywords"
-msgstr "Palavras-chave"
-
-msgid "Contact for the resource"
-msgstr "Contato para o recurso"
-
-msgid "Resources"
-msgstr "Recursos"
-
-msgid "From..."
-msgstr "A partir de..."
-
-msgid "To..."
-msgstr "Para..."
-
-msgid "Records"
-msgstr "Registros"
-
-msgid "Details"
-msgstr "Detalhes"
-
-msgid "Map"
-msgstr "Mapa"
-
-msgid "Download"
-msgstr "Download"
-
-msgid "No results found"
-msgstr "Nenhum resultado encontrado"
-
-msgid "Go"
-msgstr "Ir"
-
-msgid "Add"
-msgstr "Adicionar"
-
-msgid "Catalog layers"
-msgstr "Catálogo de camadas"
-
-msgid "Remove layer"
-msgstr "Remover a camada"
-
-msgid "List of downloads"
-msgstr "Lista de Downloads"
-
-msgid "List of layers"
-msgstr "Lista de camadas"
-
-msgid "Include only results overlapping with the selected map area"
+#: static/js/catalog.js:68
+#, fuzzy
+#| msgid "Include only results overlapping with the selected map area"
+msgid "Include only results overlapping with the selected area"
 msgstr "Incluir apenas resultados que se sobreponham com a área selecionada"
 
-msgid "Metadatum"
-msgstr "Metadado"
-
-msgid "Draw rectangle"
-msgstr "Desenhar rectângulo"
-
-msgid "Order by relevance"
-msgstr "Ordenar por relevância"
-
-msgid "Order by modification date"
-msgstr "Ordenar por data de modificação"
-
-msgid "Order by title"
-msgstr "Ordenar pelo titulo"
-
+#: static/js/catalog.js:78
 msgid "Search..."
 msgstr "Pesquisar..."
 
+#: static/js/catalog.js:88
+msgid "Clean current search, filters and order"
+msgstr "Limpar a pesquisa atual, filtros e ordem"
+
+#: static/js/catalog.js:99
+msgid "Categories"
+msgstr "Categorias"
+
+#: static/js/catalog.js:102 static/js/catalog.js:109 static/js/catalog.js:116
+msgid "Separated by"
+msgstr "Separado por"
+
+#: static/js/catalog.js:106
+msgid "Keywords"
+msgstr "Palavras-chave"
+
+#: static/js/catalog.js:113
+msgid "Contact for the resource"
+msgstr "Contato para o recurso"
+
+#: static/js/catalog.js:122
+msgid "Resources"
+msgstr "Recursos"
+
+#: static/js/catalog.js:127 static/js/catalog.js:139
+msgid "From..."
+msgstr "A partir de..."
+
+#: static/js/catalog.js:130 static/js/catalog.js:142
+msgid "To..."
+msgstr "Para..."
+
+#: static/js/catalog.js:134
+msgid "Records"
+msgstr "Registros"
+
+#: static/js/catalog.js:157
+msgid "Order by relevance"
+msgstr "Ordenar por relevância"
+
+#: static/js/catalog.js:158
+msgid "Order by modification date"
+msgstr "Ordenar por data de modificação"
+
+#: static/js/catalog.js:159
+msgid "Order by title"
+msgstr "Ordenar pelo titulo"
+
+#: static/js/catalog.js:483 static/js/catalog.js:1352
+msgid "Details"
+msgstr "Detalhes"
+
+#: static/js/catalog.js:488
+msgid "Map"
+msgstr "Mapa"
+
+#: static/js/catalog.js:493
+msgid "Download"
+msgstr "Download"
+
+#: static/js/catalog.js:498
+msgid "Metadatum"
+msgstr "Metadado"
+
+#: static/js/catalog.js:508 static/js/catalog.js:1291
+msgid "No results found"
+msgstr "Nenhum resultado encontrado"
+
+#: static/js/catalog.js:542
 msgid "The search is running..."
 msgstr "A busca está em andamento..."
 
-msgid "Loading..."
-msgstr "Carregando..."
-
-msgid "No layers available"
-msgstr "Não há camadas disponíveis"
-
-msgid "Add to map"
-msgstr "Adicionar no mapa"
-
-msgid "Add layer to map"
-msgstr "Adicionar camada no mapa"
-
+#: static/js/catalog.js:566
 msgid "Download ShapeFile"
 msgstr "Baixar ShapeFile"
 
+#: static/js/catalog.js:569
 msgid "Download CSV"
 msgstr "Baixar CSV"
 
+#: static/js/catalog.js:572
 msgid "Download GML"
 msgstr "Baixar GML"
 
+#: static/js/catalog.js:585
 msgid "Access raster data"
 msgstr "Acesso aos dados raster"
 
+#: static/js/catalog.js:598
 msgid "Access resource"
 msgstr "Acesso aos produtos"
 
+#: static/js/catalog.js:678 static/js/catalog.js:691
+msgid "No layers available"
+msgstr "Não há camadas disponíveis"
+
+#: static/js/catalog.js:725
+msgid "Catalog layers"
+msgstr "Catálogo de camadas"
+
+#: static/js/catalog.js:873
+msgid "Add to map"
+msgstr "Adicionar no mapa"
+
+#: static/js/catalog.js:879
+msgid "Add layer to map"
+msgstr "Adicionar camada no mapa"
+
+#: static/js/catalog.js:1031
+msgid "Remove layer"
+msgstr "Remover a camada"
+
+#: static/js/catalog.js:1272
+msgid "List of downloads"
+msgstr "Lista de Downloads"
+
+#: static/js/catalog.js:1513 static/js/catalog.js:1539
+msgid "Loading..."
+msgstr "Carregando..."
+
+#: static/js/catalog.js:1585 static/js/catalog.js:1671
 msgid "Not filtered"
 msgstr "Não filtrado"
-msgid "keywords"
-msgstr "Palavras-chave"
 
-msgid "topicCats"
-msgstr "Categorias temáticas"
+#: static/js/catalog.js:1700
+msgid "Catalog"
+msgstr "Catálogo"
 
-msgid "categories"
-msgstr "Categorias"
+#: static/js/catalog_map.js:121
+msgid "Draw rectangle"
+msgstr "Desenhar rectângulo"
 
-msgid "inspireThemes"
-msgstr "Tópicos INSPIRE"
-
-msgid "inspireThemesWithAc"
-msgstr "Tópicos INSPIRE com Ac"
-
-msgid "inspireThemesURI"
-msgstr "Tópicos INSPIRE URI"
-
-msgid "denominators"
-msgstr "Denominadores"
-
-msgid "resolutions"
-msgstr "Resoluções"
-
-msgid "spatialRepresentationTypes"
-msgstr "Tipos de representação espacial"
-
-msgid "orgNames"
-msgstr "Nomes das organizações"
-
-msgid "orgNamesTree"
-msgstr "Árvore de nomes de organizações"
-
-msgid "metadataPOCs"
-msgstr "POCs de Metadados"
-
-msgid "serviceTypes"
-msgstr "Tipos de serviços"
-
-msgid "types"
-msgstr "Tipos"
-
-msgid "createDateYears"
-msgstr "Ano de criação"
-
-msgid "formats"
-msgstr "Formatos"
-
-msgid "titles"
-msgstr "Títulos"
-
-msgid "metadataTypes"
-msgstr "Tipos de metadados"
-
-msgid "isValidInspire"
-msgstr "INSPIRE é valido"
-
-msgid "isHarvested"
-msgstr "Dados coletados de"
-
-msgid "mdStatus"
-msgstr "Estado dos metadados"
-
-msgid "status"
-msgstr "Estado"
-
-msgid "sourceCatalog"
-msgstr "Catálogo de produtos"
-
-msgid "standards"
-msgstr "Normas"
-
-msgid "subTemplateTypes"
-msgstr "Tipos de sub-modelos"
-
-msgid "recordOwner"
-msgstr "Proprietário dos metadados"
-
-msgid "groupOwners"
-msgstr "Proprietários do grupo"
-
-msgid "publishedForGroup"
-msgstr "Publicado para o público em geral"
-
-msgid "isPublishedToAll"
-msgstr "É publicado para todos"
-
-msgid "maintenanceAndUpdateFrequencies"
-msgstr "Freqüências de manutenção e atualização"
-
-msgid "mdActions"
-msgstr "Ações de metadados"
-
-msgid "Organization"
-msgstr "Organização"
-
-msgid "Source Catalog"
-msgstr "Catálogo de produtos"
-
-msgid "Year"
-msgstr "Ano"
-
-msgid "Representation type"
-msgstr "Tipo de representação"
-
-msgid "Update frequency"
-msgstr "Freqüência de atualização"
-
-msgid "Scale"
-msgstr "Escala"
-
-msgid "Service type"
-msgstr "Tipo de serviço"
-
+#: static/js/catalog_map.js:156
 msgid "Draw polygon"
 msgstr "Desenhar polígono"
 
+#: static/js/catalog_map.js:173
 msgid "Clear selected area"
 msgstr "Limpar área selecionada"
 
+#: static/js/tools/searchFeaturesInCatalog.js:37
 msgid "Search in catalog"
 msgstr "Pesquisa no catálogo"
+
+#: static/js/tools/searchFeaturesInCatalog.js:186
+#, fuzzy
+#| msgid "Catalog layers"
+msgid "Catalog search"
+msgstr "Catálogo de camadas"
+
+#~ msgid "Catalog and downloads"
+#~ msgstr "Catálogo e downloads"
+
+#~ msgid "Press Ctrl to mark an area"
+#~ msgstr "Pressione Ctrl para marcar uma área"
+
+#~ msgid "Clean"
+#~ msgstr "Limpar"
+
+#~ msgid "Search"
+#~ msgstr "Pesquisar"
+
+#~ msgid "Go"
+#~ msgstr "Ir"
+
+#~ msgid "Add"
+#~ msgstr "Adicionar"
+
+#~ msgid "List of layers"
+#~ msgstr "Lista de camadas"
+
+#~ msgid "keywords"
+#~ msgstr "Palavras-chave"
+
+#~ msgid "topicCats"
+#~ msgstr "Categorias temáticas"
+
+#~ msgid "categories"
+#~ msgstr "Categorias"
+
+#~ msgid "inspireThemes"
+#~ msgstr "Tópicos INSPIRE"
+
+#~ msgid "inspireThemesWithAc"
+#~ msgstr "Tópicos INSPIRE com Ac"
+
+#~ msgid "inspireThemesURI"
+#~ msgstr "Tópicos INSPIRE URI"
+
+#~ msgid "denominators"
+#~ msgstr "Denominadores"
+
+#~ msgid "resolutions"
+#~ msgstr "Resoluções"
+
+#~ msgid "spatialRepresentationTypes"
+#~ msgstr "Tipos de representação espacial"
+
+#~ msgid "orgNames"
+#~ msgstr "Nomes das organizações"
+
+#~ msgid "orgNamesTree"
+#~ msgstr "Árvore de nomes de organizações"
+
+#~ msgid "metadataPOCs"
+#~ msgstr "POCs de Metadados"
+
+#~ msgid "serviceTypes"
+#~ msgstr "Tipos de serviços"
+
+#~ msgid "types"
+#~ msgstr "Tipos"
+
+#~ msgid "createDateYears"
+#~ msgstr "Ano de criação"
+
+#~ msgid "formats"
+#~ msgstr "Formatos"
+
+#~ msgid "titles"
+#~ msgstr "Títulos"
+
+#~ msgid "metadataTypes"
+#~ msgstr "Tipos de metadados"
+
+#~ msgid "isValidInspire"
+#~ msgstr "INSPIRE é valido"
+
+#~ msgid "isHarvested"
+#~ msgstr "Dados coletados de"
+
+#~ msgid "mdStatus"
+#~ msgstr "Estado dos metadados"
+
+#~ msgid "status"
+#~ msgstr "Estado"
+
+#~ msgid "sourceCatalog"
+#~ msgstr "Catálogo de produtos"
+
+#~ msgid "standards"
+#~ msgstr "Normas"
+
+#~ msgid "subTemplateTypes"
+#~ msgstr "Tipos de sub-modelos"
+
+#~ msgid "recordOwner"
+#~ msgstr "Proprietário dos metadados"
+
+#~ msgid "groupOwners"
+#~ msgstr "Proprietários do grupo"
+
+#~ msgid "publishedForGroup"
+#~ msgstr "Publicado para o público em geral"
+
+#~ msgid "isPublishedToAll"
+#~ msgstr "É publicado para todos"
+
+#~ msgid "maintenanceAndUpdateFrequencies"
+#~ msgstr "Freqüências de manutenção e atualização"
+
+#~ msgid "mdActions"
+#~ msgstr "Ações de metadados"
+
+#~ msgid "Organization"
+#~ msgstr "Organização"
+
+#~ msgid "Source Catalog"
+#~ msgstr "Catálogo de produtos"
+
+#~ msgid "Year"
+#~ msgstr "Ano"
+
+#~ msgid "Representation type"
+#~ msgstr "Tipo de representação"
+
+#~ msgid "Update frequency"
+#~ msgstr "Freqüência de atualização"
+
+#~ msgid "Scale"
+#~ msgstr "Escala"
+
+#~ msgid "Service type"
+#~ msgstr "Tipo de serviço"
