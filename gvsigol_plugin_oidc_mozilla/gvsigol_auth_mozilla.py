@@ -9,7 +9,8 @@ from django.contrib.auth import get_user_model
 from django.http import HttpRequest
 from gvsigol.services_base import BackendNotAvailable
 from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET
-from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT, OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_VERIFY_SSL
+from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT, OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
+from django.conf import settings
 
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
@@ -93,7 +94,7 @@ class OIDCSession():
             self.refresh_url = token_url
         self.token = None
         self._session = None
-        self.oidc_verify_ssl = OIDC_VERIFY_SSL
+        self.oidc_verify_ssl = getattr(settings, 'OIDC_VERIFY_SSL', True)
 
     def _create_session(self):
         extra = {
