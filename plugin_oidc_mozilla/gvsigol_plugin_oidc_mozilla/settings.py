@@ -3,8 +3,6 @@ from xmlrpc.client import boolean
 import environ
 import os
 import logging
-from django.conf import settings
-#from gvsigol import settings
 
 
 LOGGER = logging.getLogger('gvsigol')
@@ -54,8 +52,6 @@ LOGIN_REDIRECT_URL_FAILURE = 'index'
 OIDC_GVSIGOL_CONFIG_MODULE = env_plugin_oidc_mozilla('OIDC_GVSIGOL_CONFIG_MODULE')
 OIDC_GVSIGOL_EMAIL_LOGIN = env_plugin_oidc_mozilla('OIDC_GVSIGOL_EMAIL_LOGIN')
 ALLOW_LOGOUT_GET_METHOD = env_plugin_oidc_mozilla('ALLOW_LOGOUT_GET_METHOD')
-# from global settings
-OIDC_VERIFY_SSL = getattr(settings, 'OIDC_VERIFY_SSL', True)
 
 #DJANGO_AUTHENTICATION_BACKENDS="'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',"
 
