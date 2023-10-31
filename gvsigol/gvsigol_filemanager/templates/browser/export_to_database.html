@@ -7,91 +7,98 @@
 	<div class="col-md-12">
 		<div class="box">
 
-			<form role="form" enctype="multipart/form-data" method="post" action="{% url 'filemanager:export-to-database' %}">
+			<form role="form" enctype="multipart/form-data" method="post"
+				action="{% url 'filemanager:export-to-database' %}">
 				<div class="box-header">
 					<div class="box-tools pull-right">
-						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans "Export" %} <i class="fa fa-upload margin-l-5"></i></button>				
+						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans
+							"Export" %} <i class="fa fa-upload margin-l-5"></i></button>
 					</div>
 				</div>
-			
+
 				<div class="box-body">
-				{% csrf_token %}					
+					{% csrf_token %}
 					{% if form.errors %}
 					<div id="form-error" style="color:#ff0000;">
 						<ul>
-						{{ form.non_field_errors }}
-						{% for field in form %}
+							{{ form.non_field_errors }}
+							{% for field in form %}
 							{% if field.errors %}
-								<li>{{field.label}}. {{ field.errors|striptags }}</li>
-							{% endif %}	
-						{% endfor %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}
+							{% endfor %}
 						</ul>
 					</div>
 					{% endif %}
-							
+
 					{% if messages %}
-				    <ul class="messages" style="list-style: none;margin-left: -40px;">
-				        {% for message in messages %}
-				        	{% if message.tags == "info" %}
-				            <li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
-				            {% elif message.tags == "error" %}
-				            <li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
-				            {% endif %}
-				        {% endfor %}
-				    </ul>
+					<ul class="messages" style="list-style: none;margin-left: -40px;">
+						{% for message in messages %}
+						{% if message.tags == "info" %}
+						<li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message
+							}}</li>
+						{% elif message.tags == "error" %}
+						<li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}
+						</li>
+						{% endif %}
+						{% endfor %}
+					</ul>
 					{% endif %}
-					
+
 					<div class="row" style="margin-top:20px;">
 						<div class="col-md-12 form-group">
 							<div class="alert alert-warning alert-dismissible">
-				                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-				                <h4><i class="icon fa fa-warning"></i> {% trans "Warning!" %}</h4>
-				                {% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
-				            </div>
-		            	</div>
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+								<h4><i class="icon fa fa-warning"></i> {% trans "Warning!" %}</h4>
+								{% trans "Before exporting the shapefile check the name of the columns. Column names can
+								not contain spaces or special characters." %}
+							</div>
+						</div>
 					</div>
-					
-					<input type="hidden" name="directory_path" value="{{file.directory}}">	
+
+					<input type="hidden" name="directory_path" value="{{file.directory}}">
 					<input type="hidden" name="file_path" value="{{file.filepath}}">
-					<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">					
-					
+					<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">
+
 					<div class="row">
-						<div class="col-md-12 form-group">	
+						<div class="col-md-12 form-group">
 							<label for="id_mode">{% trans "Table creation mode" %}</label>
-							{{ form.mode }}									
+							{{ form.mode }}
 						</div>
 					</div>
-									
+
 					<div class="row">
-						<div class="col-md-12 form-group">	
+						<div class="col-md-12 form-group">
 							<label for="id_datastore">{% trans "Data store" %}</label>
-							{{ form.datastore }}									
+							{{ form.datastore }}
 						</div>
 					</div>
-							
-					<div class="row">		
+
+					<div class="row">
 						<div class="col-md-12 form-group">
 							<label for="id_name">{% trans "Name" %}</label>
 							{{ form.name }}
+							<select id="select2" class="form-control js-example-basic-single select2-hidden-accessible"
+								style="visibility: hidden;"></select>
 							<p class="text-muted">* {% trans "Layer will be uploaded to the selected data store" %}.</p>
-						</div>	
-					</div>			
-					
-					<div class="row">
-						<div class="col-md-6 form-group">
-							<label for="id_encoding">{% trans "Character encoding" %}</label>	
-							{{ form.encoding }}						
-						</div>
-						<div class="col-md-6 form-group">	
-							<label for="id_srs">{% trans "Coordinate reference system" %}</label>	
-							{{ form.srs }}							
 						</div>
 					</div>
-									
-            	</div>
-			</form>		
+
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="id_encoding">{% trans "Character encoding" %}</label>
+							{{ form.encoding }}
+						</div>
+						<div class="col-md-6 form-group">
+							<label for="id_srs">{% trans "Coordinate reference system" %}</label>
+							{{ form.srs }}
+						</div>
+					</div>
+
+				</div>
+			</form>
 		</div>
-	</div>				
+	</div>
 </div>
 {% endblock %}
 
@@ -99,23 +106,143 @@
 <script type="text/javascript">
 	$('#menu-manage-files').addClass("active");
 	$('#submenu-layers').addClass("active");
-	$(document).ready(function() {
+
+	$(document).ready(function () {
+		$('#select2').next('.select2-container').hide();
+		var ds_options = $("#id_datastore option");
+		
 		// translate default layer group
 		var lgs = $("#id_layer_group");
 		var lg_options = $("#id_layer_group option");
-		for (var i=0; i<lg_options.length; i++) {
+		for (var i = 0; i < lg_options.length; i++) {
 			text = $(lg_options[i]).text();
-			if (text=="__default__") {
+			if (text == "__default__") {
 				$(lg_options[i]).html('{% trans "Default" %}');
 			}
-			if (lgs.val()=="") {
+			if (lgs.val() == "") {
 				lgs.val(1);
 			}
+		};
+
+		function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
+			selectObj.empty().html(' ');
+			var attribs = {
+				value: '__disabled__',
+				text: placeholderOptionText,
+				disabled: 'disabled',
+
+			};
+			if (placeholderSelected) {
+				attribs['selected'] = 'selected';
+			}
+			selectObj.append($('<option>', attribs));
+			if (extraOptions) {
+				for (var i = 0; i < extraOptions.length; i++) {
+					selectObj.append(extraOptions[i]);
+				}
+			}
+		};
+
+		function updateNameValue() {
+			if (window.location.href.includes("?path=")) {
+				var url = window.location.href.split('?path=');
+				if (url != "") {
+					var filename = url[1];
+					var desiredString = (filename.split(".")[0]).toLowerCase();
+					$('#id_name').val(desiredString);
+				}
+
+			}
 		}
+
+		function updateTables(id_datastore, selectObj) {
+			if (id_datastore) {
+				$("body").overlay();
+				$.getJSON("{% url 'list_datastore_tables' %}", { id_datastore: id_datastore }, function (data) {
+					var previousValue = selectObj.val();
+					var placeholderSelected = true;
+
+					if (data == null || data.length == 0) {
+						var text = "{% trans 'Data store is empty' %}";
+						rebuildSelect(selectObj, text, true);
+						selectObj.change();
+						$.overlayout();
+						return;
+					}
+					var options = [];
+					for (var i = 0; i < data.length; i++) {
+						var attribs = {
+							value: data[i],
+							text: data[i]
+						};
+						if (previousValue == data[i]) {
+							attribs['selected'] = 'true';
+							placeholderSelected = false;
+						}
+						options.push($('<option>', attribs));
+					}
+					var text = '{% trans "Choose table" %}';
+					rebuildSelect(selectObj, text, placeholderSelected, options);
+					var updatedValue = selectObj.val();
+					if (previousValue !== updatedValue) {
+						selectObj.change();
+					}
+					$.overlayout();
+
+				}).fail(function () {
+					var text = "{% trans 'Service is unavailable' %}";
+					rebuildSelect(selectObj, text, true);
+					selectObj.change();
+					$.overlayout();
+				});
+			}
+			else {
+				var text = "{% trans 'No valid data store selected' %}";
+				rebuildSelect(selectObj, text, true);
+				selectObj.change();
+			}
+		};
+
+
+		$('#upload-button').click(function (e) {
+			$("body").overlay();
+		});
+
+		$('#id_mode').click(function () {
+			var selectedOption = $(this).val();
+			var id_datastore = $('#id_datastore');
+				id_datastore.val(ds_options.eq(0).val()).trigger('change');
+			if (selectedOption != 'CR') {
+				$('#id_name').hide();
+				var select = $('#select2').select2();
+				rebuildSelect(select, "", false, false);
+				$('#select2').next('.select2-container').show();
+
+			} else {
+				$('#id_name').show();				
+				$('#select2').next('.select2-container').hide();				
+				updateNameValue();				
+			}
+		});
+
+		$('#id_datastore').on('change', function () {
+			// Handle the selected option here
+			var selectedOption = $(this).val();
+			var id_datastore = $('option:selected', $(this)).val();
+			updateTables(id_datastore, $('#select2'));
+			updateNameValue();
+
+		});
+
+		$('#id_datastore').click(function () {
+			var selectedOption = $(this).val();
+			var id_datastore = $('option:selected', $(this)).val();
+			updateTables(id_datastore, $('#select2'));
+		});
+
+
+
 	});
-	
-	$('#upload-button').click(function (e) {
-		$("body").overlay();
-	});
+
 </script>
 {% endblock %}

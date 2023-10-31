@@ -129,9 +129,10 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
         
         form = PostgisLayerUploadForm(user=self.request.user)
-        
-        context['form'] = form
-        context['file'] = self.fm.file_details()
+                      
+        context['file'] = self.fm.file_details()       
+        context['form'] = form  
+
     
         return context
     
