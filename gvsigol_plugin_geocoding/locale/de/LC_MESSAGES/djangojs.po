@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Language: en\n"
+"X-Language: de\n"
 "X-Source-Language: C\n"
 
 #: static/js/lib/_trans.gvsigol.js:2 static/js/lib/_trans.gvsigol.js:3

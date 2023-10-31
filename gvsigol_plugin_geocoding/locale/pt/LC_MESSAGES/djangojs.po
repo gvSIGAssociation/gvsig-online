@@ -15,31 +15,39 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: pt_BR\n"
 "X-Generator: Poedit 2.4.3\n"
 
-msgid "inverse geocoding"
-msgstr "geocodificação inversa"
-
-msgid "There is no active geocoder"
-msgstr "Não há geocodificador ativo"
-
+#: static/js/lib/_trans.gvsigol.js:2 static/js/lib/_trans.gvsigol.js:3
 msgid "Search"
 msgstr "Pesquisar"
 
+#: static/js/lib/_trans.gvsigol.js:4
 msgid "Save"
 msgstr "Salvar"
 
+#: static/js/lib/_trans.gvsigol.js:5
 msgid "Continue"
 msgstr "Continuar"
+
+#: static/js/lib/widgets/search.js:47
+#, fuzzy
+#| msgid "inverse geocoding"
+msgid "Inverse geocoding"
+msgstr "geocodificação inversa"
+
+#: static/js/lib/widgets/search.js:153
+msgid "There is no active geocoder"
+msgstr "Não há geocodificador ativo"
