@@ -16,6 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: gvsigol_core/forms.py:15
 msgid "Clone project and layer permissions"
@@ -221,7 +222,7 @@ msgstr ""
 #: gvsigol_core/templates/application_list.html:27
 #: gvsigol_core/templates/application_update.html:100
 msgid "application.Is public?"
-msgstr "Is public?"
+msgstr ""
 
 #: gvsigol_core/templates/application_add.html:93
 #: gvsigol_core/templates/application_update.html:106
@@ -655,7 +656,7 @@ msgstr ""
 #: gvsigol_core/templates/project_add.html:85
 #: gvsigol_core/templates/project_update.html:113
 msgid "expiration_date"
-msgstr "Expiration date"
+msgstr ""
 
 #: gvsigol_core/templates/project_add.html:92
 #: gvsigol_core/templates/project_update.html:120
