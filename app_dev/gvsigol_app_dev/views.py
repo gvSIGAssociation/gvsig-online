@@ -38,7 +38,4 @@ def index(request):
         from gvsigol_plugin_sync import settings as sync_settings
         resp['GVSIGOL_APP_DOWNLOAD_LINK'] = sync_settings.GVSIGOL_APP_DOWNLOAD_LINK
     
-    if hasattr(settings, 'FRONTEND_REDIRECT_URL'):
-        return redirect(settings.FRONTEND_REDIRECT_URL)
-    else:
-        return render(request, 'index.html', resp)
+    return render(request, 'index.html', resp)
