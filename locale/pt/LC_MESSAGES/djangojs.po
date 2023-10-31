@@ -1,18 +1,345 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: pt_BR\n"
 "X-Generator: Poedit 2.4.3\n"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:63
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:46
+msgid "Select enumeration"
+msgstr "Selecionar enumeração"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:77
+msgid "Select multiple enumeration"
+msgstr "Selecionar enumeração múltipla"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:90
+msgid "Select form"
+msgstr "Selecione o formulário"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:138
+msgid "Select type"
+msgstr "Selecione o tipo"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:153
+msgid "Field name"
+msgstr "Nome do campo"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:176
+msgid "Calculated"
+msgstr "Calculado"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:197
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:30
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:47
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:53
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:58
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:79
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:199
+msgid "Save field"
+msgstr "Gravar campo"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:202
+msgid "Edit field"
+msgstr "Editar campo"
+
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:249
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:284
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:33
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:34
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:61
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:82
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:83
+msgid ""
+"Invalid name: Identifiers must begin with a letter or an underscore (_). "
+"Subsequent characters can be letters, underscores or numbers"
+msgstr ""
+"Nome inválido: Os identificadores devem começar com uma letra ou um "
+"sublinhado (_). Os caracteres subsequentes podem ser letras, sublinhados ou "
+"números"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:2
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:90
+msgid "Tiles processed"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:3
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:91
+msgid "Total of tiles to process"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:4
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:92
+msgid "Total of remaining tiles"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:5
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:93
+msgid "Task ID"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:6
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:94
+msgid "Task status"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:7
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:8
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:95
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:96
+msgid "Error getting tasks"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:9
+msgid "You must select an extent on the map using the control"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:10
+msgid "URL to capabilities document"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:11
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:12
+msgid "Only required if service is authenticated"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:13
+#, fuzzy
+#| msgid "Connection has been success"
+msgid "Connection has been successful"
+msgstr "A conexão foi um sucesso"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:14
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:97
+msgid "Enumeration cannot contain point-colon"
+msgstr "Enumeração não pode conter ponto-colon"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:15
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:98
+msgid "Insert item name"
+msgstr "Inserir nome do item"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:16
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:54
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:99
+msgid "Delete"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:17
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:35
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:43
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:86
+msgid "Error in GetCapabilities"
+msgstr "Erro na obtenção de capacidades"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:18
+msgid "You must select a layer"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:19
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:36
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:44
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:87
+msgid "Error trying to connect"
+msgstr "Erro ao tentar conectar"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:20
+msgid "Node has been reloaded"
+msgstr "O nó foi recarregado"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:21
+msgid "Error reloading node"
+msgstr "Erro ao recarregar o nó"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:22
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:72
+msgid "Status"
+msgstr "Estado"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:23
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:73
+msgid "active"
+msgstr "Ativo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:24
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:74
+msgid "inactive"
+msgstr "Inativo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:25
+msgid "error"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:26
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:28
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:75
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:77
+msgid "URL"
+msgstr "URL"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:27
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:29
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:76
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:78
+msgid "Is master?"
+msgstr "É superusuário?"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:31
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:80
+msgid "Save node"
+msgstr "Gravar nódulo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:32
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:81
+msgid "Edit node"
+msgstr "Editar nodulo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:37
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:100
+msgid "Create new layer"
+msgstr "Criar nova camada"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:38
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:101
+msgid "Publish layer"
+msgstr "Publicar camada"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:39
+msgid "The action was successfully completed"
+msgstr "A ação foi concluída com sucesso"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:40
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:41
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:42
+msgid "The action failed"
+msgstr "A ação fracassou"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:45
+msgid ""
+"The field can not be set as mandatory at database level because some records "
+"contain NULL values in this column. Delete the NULL values and try again."
+msgstr ""
+"O campo não pode ser definido como obrigatório em nível de banco de dados "
+"porque alguns registros contêm valores NULL nesta coluna. Excluir os valores "
+"NULL e tentar novamente."
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:48
+msgid "Convert"
+msgstr "Converter"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:49
+msgid "Autogen"
+msgstr "Autogen"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:50
+msgid "Convert ok"
+msgstr "Converter ok"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:51
+msgid "Autogen ok"
+msgstr "Autogen ok"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:52
+msgid "Field to delete"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:55
+msgid "Field was deleted"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:56
+#, fuzzy
+#| msgid "Field name"
+msgid "Old name"
+msgstr "Nome do campo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:57
+#, fuzzy
+#| msgid "Field name"
+msgid "New name"
+msgstr "Nome do campo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:59
+#, fuzzy
+#| msgid "Field name"
+msgid "Rename"
+msgstr "Nome do campo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:60
+#, fuzzy
+#| msgid "Field name"
+msgid "Field was renamed"
+msgstr "Nome do campo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:62
+#, fuzzy
+#| msgid "Field name"
+msgid "Field was added"
+msgstr "Nome do campo"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:63
+msgid "Group names must be unique"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:64
+#, fuzzy
+#| msgid "The layer definition was refreshed"
+msgid "The layer cache was cleared"
+msgstr "A definição da camada foi refrescada"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:65
+#, fuzzy
+#| msgid "The layer refresh failed"
+msgid "The layer cache clearing failed"
+msgstr "A atualização da camada falhou"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:66
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:88
+#, fuzzy
+#| msgid "The layer definition was refreshed"
+msgid "The layergroup cache was cleared"
+msgstr "A definição da camada foi refrescada"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:67
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:89
+#, fuzzy
+#| msgid "The layer refresh failed"
+msgid "The layergroup cache clearing failed"
+msgstr "A atualização da camada falhou"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:68
+msgid "Show all layers"
+msgstr "Mostrar todas as camadas"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:69
+msgid "Filter by project"
+msgstr "Filtrar por projeto"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:70
+msgid "The layer definition was refreshed"
+msgstr "A definição da camada foi refrescada"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:71
+msgid "The layer refresh failed"
+msgstr "A atualização da camada falhou"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:84
+msgid "Connection has been success"
+msgstr "A conexão foi um sucesso"
 
 # gvSIG Online.
 # Copyright (C) 2010-2017 SCOLAB.
@@ -29,131 +356,21 @@ msgstr ""
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
-msgstr "Você não pode atualizar um tipo de armazenamento de dados GeoTIFF. Exclua-o e crie-o novamente"
-
-msgid "Select type"
-msgstr "Selecione o tipo"
-
-msgid "Select enumeration"
-msgstr "Selecionar enumeração"
-
-msgid "Select multiple enumeration"
-msgstr "Selecionar enumeração múltipla"
-
-msgid "Field name"
-msgstr "Nome do campo"
-
-msgid "Cancel"
-msgstr "Cancelar"
-
-msgid "Save field"
-msgstr "Gravar campo"
-
-msgid "Edit field"
-msgstr "Editar campo"
-
-msgid "true"
-msgstr "Verdadeiro"
-
-msgid "false"
-msgstr "Falso"
-
-msgid "True"
-msgstr "Verdadeiro"
-
-msgid "False"
-msgstr "Falso"
-
-msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:85
+msgid ""
+"You can not update a data store type GeoTIFF. Delete it and create it again"
 msgstr ""
-"Nome inválido: Os identificadores devem começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, sublinhados ou números"
+"Você não pode atualizar um tipo de armazenamento de dados GeoTIFF. Exclua-o "
+"e crie-o novamente"
 
-msgid "Enumeration cannot contain point-colon"
-msgstr "Enumeração não pode conter ponto-colon"
+#~ msgid "true"
+#~ msgstr "Verdadeiro"
 
-msgid "Create new layer"
-msgstr "Criar nova camada"
+#~ msgid "false"
+#~ msgstr "Falso"
 
-msgid "Publish layer"
-msgstr "Publicar camada"
+#~ msgid "True"
+#~ msgstr "Verdadeiro"
 
-msgid "Error in GetCapabilities"
-msgstr "Erro na obtenção de capacidades"
-
-msgid "Error trying to connect"
-msgstr "Erro ao tentar conectar"
-
-msgid "Insert item name"
-msgstr "Inserir nome do item"
-
-msgid "Select form"
-msgstr "Selecione o formulário"
-
-msgid "Status"
-msgstr "Estado"
-
-msgid "active"
-msgstr "Ativo"
-
-msgid "inactive"
-msgstr "Inativo"
-
-msgid "URL"
-msgstr "URL"
-
-msgid "Is master?"
-msgstr "É superusuário?"
-
-msgid "Save node"
-msgstr "Gravar nódulo"
-
-msgid "Edit node"
-msgstr "Editar nodulo"
-
-msgid "Convert"
-msgstr "Converter"
-
-msgid "Autogen"
-msgstr "Autogen"
-
-msgid "Autogen ok"
-msgstr "Autogen ok"
-
-msgid "Convert ok"
-msgstr "Converter ok"
-
-msgid "The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again."
-msgstr ""
-"O campo não pode ser definido como obrigatório em nível de banco de dados porque alguns registros contêm valores NULL nesta coluna. Excluir os valores NULL "
-"e tentar novamente."
-
-msgid "Node has been reloaded"
-msgstr "O nó foi recarregado"
-
-msgid "Error reloading node"
-msgstr "Erro ao recarregar o nó"
-
-msgid "Connection has been success"
-msgstr "A conexão foi um sucesso"
-
-msgid "Filter by project"
-msgstr "Filtrar por projeto"
-
-msgid "Show all layers"
-msgstr "Mostrar todas as camadas"
-
-msgid "The action was successfully completed"
-msgstr "A ação foi concluída com sucesso"
-
-msgid "The action failed"
-msgstr "A ação fracassou"
-
-msgid "The layer definition was refreshed"
-msgstr "A definição da camada foi refrescada"
-
-msgid "The layer refresh failed"
-msgstr "A atualização da camada falhou"
-
-msgid "Calculated"
-msgstr "Calculado"
+#~ msgid "False"
+#~ msgstr "Falso"

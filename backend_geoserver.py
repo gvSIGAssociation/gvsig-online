@@ -551,7 +551,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            logger.exception('Sobreescribiendo estilo: ' + name)
+            logger.exception('Sobrescribiendo estilo: ' + name)
             error_message = str(e)
             if (error_message.startswith("There is already a style named")):               
                 symbology_services.delete_style_name(name)
