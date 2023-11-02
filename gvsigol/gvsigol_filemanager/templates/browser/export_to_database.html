@@ -11,8 +11,7 @@
 				action="{% url 'filemanager:export-to-database' %}">
 				<div class="box-header">
 					<div class="box-tools pull-right">
-						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans
-							"Export" %} <i class="fa fa-upload margin-l-5"></i></button>
+						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans "Export" %} <i class="fa fa-upload margin-l-5"></i></button>
 					</div>
 				</div>
 
@@ -50,8 +49,7 @@
 							<div class="alert alert-warning alert-dismissible">
 								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
 								<h4><i class="icon fa fa-warning"></i> {% trans "Warning!" %}</h4>
-								{% trans "Before exporting the shapefile check the name of the columns. Column names can
-								not contain spaces or special characters." %}
+								{% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
 							</div>
 						</div>
 					</div>
@@ -144,15 +142,16 @@
 		};
 
 		function updateNameValue() {
-			if (window.location.href.includes("?path=")) {
-				var url = window.location.href.split('?path=');
-				if (url != "") {
-					var filename = url[1];
-					var desiredString = (filename.split(".")[0]).toLowerCase();
-					$('#id_name').val(desiredString);
-				}
-
-			}
+			try {
+				const params = new URLSearchParams(window.location.search);
+				if (params.has('path')) {
+					var path_components = params.get('path').split('/');
+					const reNonAsciiChars = /[^a-zA-Z0-9_]/g;
+					const reStartsWithNumber = /^[0-9]/ ;
+					var fileName = path_components[path_components.length-1].split(".")[0].toLocaleLowerCase().replace(reNonAsciiChars, "").replace(reStartsWithNumber, "_");
+					$('#id_name').val(fileName);
+				}	
+			} catch (error) {}
 		}
 
 		function updateTables(id_datastore, selectObj) {
@@ -221,7 +220,7 @@
 			} else {
 				$('#id_name').show();				
 				$('#select2').next('.select2-container').hide();				
-				updateNameValue();				
+				updateNameValue();
 			}
 		});
 
@@ -230,7 +229,6 @@
 			var selectedOption = $(this).val();
 			var id_datastore = $('option:selected', $(this)).val();
 			updateTables(id_datastore, $('#select2'));
-			updateNameValue();
 
 		});
 
@@ -240,7 +238,12 @@
 			updateTables(id_datastore, $('#select2'));
 		});
 
+		$('#select2').on('change', function() {
+			var selectedOption = $(this).val();
+			$('#id_name').val(selectedOption);
+		});
 
+		updateNameValue();
 
 	});
 
