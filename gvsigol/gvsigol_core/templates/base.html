@@ -91,42 +91,11 @@
 							                {% else %}
 							                	{% trans language.name_translated %}
 							                {% endif %}
-											-- {{language.name}} -- {{language.code}} -- {{language.name_local}}
 							            </option>
 							        {% endfor %}								      
-							    </select>
-							</form>
-							<form id="select-language-form0" action="{% url 'set_language' %}" method="post">{% csrf_token %}
-								<input name="next" type="hidden" value="{{ request.get_full_path }}" />
-								<select id="select-language0" name="language" class="form-control" style="margin-top: 10px;">
-									
-									{% for language in LANGUAGES %}
-										<option style="" value="{{ language.0 }}"{% if language.0 == LANGUAGE_CODE %} selected="selected"{% endif %}>
-											{{language.1}}
-										</option>
-									{% endfor %}								      
-								</select>		
-							</form>	
-					    </li>
-						<li>
-							{% get_available_languages as LANGUAGES %}
-							{% for lang in LANGUAGES %} {{lang}} -- {{lang.1}} -- {% trans lang.1 %}{% endfor %}
-						</li>
-						<li>        {% get_language_info for LANGUAGE_CODE as l %}
-							{{ l.code }}
-							{{ l.name }}
-							{{ l.name_local }}
-							{{ l.bidi|yesno:"bi-directional,uni-directional" }}
-						</li>
-						<li>
-							{% get_language_info_list for LANGUAGES as langs %}
-							{% for l in langs %}
-							  {{ l.code }}
-							  {{ l.name }}
-							  {{ l.name_local }}
-							  {{ l.bidi|yesno:"bi-directional,uni-directional" }}
-							{% endfor %}
-						</li>
+							    </select>		
+						    </form>							 
+					    </li>	
 							
 						<li class="dropdown user user-menu">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
@@ -257,9 +226,7 @@
 	    	$("#select-language").change(function() {
 	    		$("#select-language-form").submit();
 			});
-	    	$("#select-language0").change(function() {
-	    		$("#select-language-form0").submit();
-			});
+	    	
 	    	$(".js-example-basic-single").select2();
 	    	
 	    });
