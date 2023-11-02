@@ -378,6 +378,12 @@ USE_L10N = True
 USE_TZ = True
 
 EXTRA_LANG_INFO = {
+    'ca-es@valencia': {
+        'bidi': False,
+        'code': 'ca-es@valencia',
+        'name': 'Valencian',
+        'name_local': 'Valencià'
+    },
     'va': {
         'bidi': False,
         'code': 'va',
@@ -392,10 +398,11 @@ django.conf.locale.LANG_INFO = LANG_INFO
 
 LANGUAGES = (
     ('es', _('Spanish')),
-    ('va', _('Valencian')),
-    #('ca', _('Catalan')), 
+    ('ca-es@valencia', _('Valencian')),
+    ('ca', _('Catalan')),
     ('en', _('English')),
     #('pt', _('Portuguese')),
+    ('de', _('German')),
     ('pt-br', _('Brazilian Portuguese')),
 )
 
