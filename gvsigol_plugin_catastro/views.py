@@ -45,7 +45,7 @@ def get_conf(request):
 @csrf_exempt
 def get_provincias(request):
     if request.method == 'POST':
-        provincias_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaProvincia';
+        provincias_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerProvincias';
         r = requests.get(url = provincias_url, params = {}, verify=False, timeout=2)
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
@@ -55,7 +55,7 @@ def get_municipios(request):
     if request.method == 'POST':
         provincia = request.POST.get('provincia')
 
-        municipio_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaMunicipio?Provincia='+provincia+'&Municipio=';
+        municipio_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerMunicipio?Provincia='+provincia+'&Municipio=';
 
         r = requests.get(url = municipio_url, params = {}, verify=False)
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
@@ -68,7 +68,8 @@ def get_vias(request):
         provincia = request.POST.get('provincia')
         municipio = request.POST.get('municipio')
 
-        address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaVia?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia=";
+        # address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaVia?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia=";
+        address_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerCallejero?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia=";
 
         r = requests.get(url = address_url, params = {}, verify=False)
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
@@ -87,7 +88,7 @@ def get_rc_by_coords(request):
         response['ycen'] = ycen
         response['srs'] = srs
 
-        address_url = settings.URL_API_CATASTRO + '/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS='+srs+'&Coordenada_X='+xcen+'&Coordenada_Y='+ycen
+        address_url = settings.URL_API_CATASTRO + '/COVCCoordenadas.svc/rest/Consulta_RCCOOR?SRS='+srs+'&CoorX='+xcen+'&CoorY='+ycen
         # payload = {
         #     'SRS': srs,
         #     'Coordenada_X': xcen,
@@ -123,8 +124,9 @@ def get_rc_public_data(request):
         body['Municipio'] = ''
         body['RC'] = ref_catastral
 
-        address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/Consulta_DNPRC'
-        r = requests.post(address_url, data = body, verify = False)
+        address_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/Consulta_DNPRC'
+        # r = requests.post(address_url, data = body, verify = False)
+        r = requests.get(address_url, params={"RefCat":ref_catastral}, verify = False)
 
         resp_obj = xmltodict.parse(r.content)
         return JsonResponse(resp_obj)
@@ -227,7 +229,7 @@ def get_referencia_catastral(request):
             rc = params['rc'].lstrip()
 
             '''
-            url = settings.URL_API_CATASTRO + "/OVCCallejero.asmx/Consulta_DNPRC?Provincia="+provincia+"&Municipio="+municipio+"&RC="+rc
+            url = settings.URL_API_CATASTRO + "/COVCCoordenadas.svc/rest/Consulta_DNPRC?Provincia="+provincia+"&Municipio="+municipio+"&RefCat="+rc
 
             r = requests.get(url = url, params = {})
             tree = ElementTree.fromstring(r.content)
@@ -249,7 +251,7 @@ def get_referencia_catastral(request):
                 plantavia = params['plantavia']
                 puertavia = params['puertavia']
 
-                url = settings.URL_API_CATASTRO + "/OVCCallejero.asmx/Consulta_DNPLOC"
+                url = settings.URL_API_CATASTRO + "/OVCWcfCallejero/COVCCallejero.svc/rest/Consulta_DNPLOC"
                 url += "?Provincia="+provincia+"&Municipio="+municipio
                 url += "&Sigla="+tipovia+"&Calle="+nombrevia+"&Numero="+numerovia
                 url += "&Bloque="+bloquevia+"&Escalera="+escaleravia+"&Planta="+plantavia+"&Puerta="+puertavia
@@ -257,7 +259,7 @@ def get_referencia_catastral(request):
                 poligonovia = params['poligonovia']
                 parcelavia = params['parcelavia']
 
-                url = settings.URL_API_CATASTRO + "/OVCCallejero.asmx/Consulta_DNPPP"
+                url = settings.URL_API_CATASTRO + "/OVCWcfCallejero/COVCCallejero.svc/rest/Consulta_DNPPP"
                 url += "?Provincia="+provincia+"&Municipio="+municipio+"&Poligono="+poligonovia+"&Parcela="+parcelavia
 
             print('Location url: ' + url)
@@ -292,7 +294,7 @@ def get_referencia_catastral(request):
 
 
         if rc.__len__() > 0:
-            final_url = settings.URL_API_CATASTRO + "/OVCCoordenadas.asmx/Consulta_CPMRC?Provincia=&Municipio=&SRS="+ srs +"&RC="+ rc[0:14]
+            final_url = settings.URL_API_CATASTRO + "/COVCCoordenadas.svc/rest/Consulta_CPMRC?Provincia=&Municipio=&SRS="+ srs +"&RefCat="+ rc[0:14]
 
             r = requests.get(url = final_url, params = {}, verify=False)
             tree = ElementTree.fromstring(r.content)
