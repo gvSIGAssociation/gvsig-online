@@ -55,7 +55,7 @@ def get_municipios(request):
     if request.method == 'POST':
         provincia = request.POST.get('provincia')
 
-        municipio_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerMunicipio?Provincia='+provincia+'&Municipio=';
+        municipio_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerMunicipios?Provincia='+provincia+'&Municipio=';
 
         r = requests.get(url = municipio_url, params = {}, verify=False)
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
@@ -251,7 +251,7 @@ def get_referencia_catastral(request):
                 plantavia = params['plantavia']
                 puertavia = params['puertavia']
 
-                url = settings.URL_API_CATASTRO + "/OVCWcfCallejero/COVCCallejero.svc/rest/Consulta_DNPLOC"
+                url = settings.URL_API_CATASTRO + "/COVCCallejero.svc/rest/Consulta_DNPLOC"
                 url += "?Provincia="+provincia+"&Municipio="+municipio
                 url += "&Sigla="+tipovia+"&Calle="+nombrevia+"&Numero="+numerovia
                 url += "&Bloque="+bloquevia+"&Escalera="+escaleravia+"&Planta="+plantavia+"&Puerta="+puertavia
@@ -259,7 +259,7 @@ def get_referencia_catastral(request):
                 poligonovia = params['poligonovia']
                 parcelavia = params['parcelavia']
 
-                url = settings.URL_API_CATASTRO + "/OVCWcfCallejero/COVCCallejero.svc/rest/Consulta_DNPPP"
+                url = settings.URL_API_CATASTRO + "/COVCCallejero.svc/rest/Consulta_DNPPP"
                 url += "?Provincia="+provincia+"&Municipio="+municipio+"&Poligono="+poligonovia+"&Parcela="+parcelavia
 
             print('Location url: ' + url)
