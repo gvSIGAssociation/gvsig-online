@@ -12,7 +12,8 @@ fi
 grep -rl "##URL_CATASTRO##" | xargs sed -i "s ##URL_CATASTRO## $URL_CATASTRO g"
 
 if [ -z $URL_API_CATASTRO ]; then
-			URL_API_CATASTRO="http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC"
+			# URL_API_CATASTRO="http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC"
+			URL_API_CATASTRO="https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero"
 			echo "WARNING: URL_API_CATASTRO is not defined, using default value $URL_API_CATASTRO"
 fi
 
