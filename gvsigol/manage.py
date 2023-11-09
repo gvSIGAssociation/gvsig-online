@@ -8,7 +8,7 @@ def main():
     # CMI: to correctly use it from command line
     #sys.path.append("/home/cesar/projects/scolab/gvsig-online/wsgol2/app_dev")
     # END CMI
-    print('INFO: Setting DJANGO_SETTINGS_MODULE to gvsigol.settings')
+    print('INFO manage.py: Setting DJANGO_SETTINGS_MODULE to gvsigol.settings')
 
     if os.environ.get("DEBUG_REMOTE") and os.environ.get("DEBUG_REMOTE")=='True':
         if os.environ.get('RUN_MAIN') or os.environ.get('WERKZEUG_RUN_MAIN'):
