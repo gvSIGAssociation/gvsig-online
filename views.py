@@ -90,6 +90,7 @@ def login_user(request):
             errors.append({'message': _("The username and password you have entered do not match our records")})
         
     else:
+        # TODO: AUTH_WITH_REMOTE_USER deprecated   
         if AUTH_WITH_REMOTE_USER:
             if "HTTP_REMOTE_USER" in request.META:
                 if settings.DEBUG == True:
