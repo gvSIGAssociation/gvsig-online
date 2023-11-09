@@ -123,6 +123,17 @@ $(document).ready(function() {
 					ramp_color_array.push(aux_color_entry);
 					
 				});
+				var array_size = ramp_color_array.length;
+				item =  ramp_color_array[array_size-1]
+				var last_quantity = parseInt(item.quantity); 
+				if  (last_quantity < 100) {
+					var aux_color_entry = {
+							'quantity': '100',
+							'color': item.color,
+							'alpha': item.alpha
+					}
+					ramp_color_array.push(aux_color_entry);
+				}
 				var ramp_color = {
 						'definition' : ramp_color_array
 				};
