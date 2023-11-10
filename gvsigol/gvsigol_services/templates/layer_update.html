@@ -318,7 +318,7 @@
 	          							{% else %}
 	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
 	          							{% endif %}
-										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+										<label for="detailed_info_enabled">{% trans "Enable detailed information" %}</label>												
 									</div>
 								</div>
 								{% if layer.detailed_info_enabled %}
@@ -536,6 +536,7 @@ $('#submenu-layers').addClass("active");
 		var date_fields = {{ date_fields|safe }};
 		var time_enabled_field = "{{ layer.time_enabled_field }}";
 		var time_enabled_endfield = "{{ layer.time_enabled_endfield }}";
+		$("#id_layer_group option[value='']").attr('disabled','disabled');
 		
 		create_date_select("id_time_enabled_field", date_fields, time_enabled_field, false);
 		create_date_select("id_time_enabled_endfield", date_fields, time_enabled_endfield, true);
