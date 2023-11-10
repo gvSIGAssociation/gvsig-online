@@ -1432,13 +1432,9 @@ def layer_update(request, layer_id):
             layerConf['featuretype'] = layerConf.get('featuretype', {})
             layerConf['featuretype']['max_features'] = maxFeatures
 
-        detailed_info_enabled = False
+        detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
         detailed_info_button_title = request.POST.get('detailed_info_button_title')
         detailed_info_html = request.POST.get('detailed_info_html')
-        if 'detailed_info_enabled' in request.POST:
-            detailed_info_enabled = True
-            detailed_info_button_title = request.POST.get('detailed_info_button_title')
-            detailed_info_html = request.POST.get('detailed_info_html')
 
         time_enabled = False
         time_field=''
@@ -2455,6 +2451,10 @@ def layer_create_with_group(request, layergroup_id):
         if 'allow_download' in request.POST:
             allow_download = True
         
+        detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
+        detailed_info_button_title = request.POST.get('detailed_info_button_title')
+        detailed_info_html = request.POST.get('detailed_info_html')
+
         assigned_read_roles = []
         assigned_write_roles = []
         assigned_manage_roles = []
@@ -2564,6 +2564,9 @@ def layer_create_with_group(request, layergroup_id):
                     newRecord.time_default_value_mode = time_default_value_mode
                     newRecord.time_default_value = time_default_value
                     newRecord.time_resolution = time_resolution
+                    newRecord.detailed_info_enabled = detailed_info_enabled
+                    newRecord.detailed_info_button_title = detailed_info_button_title
+                    newRecord.detailed_info_html = detailed_info_html
                     newRecord.save()
                     
                     for i in form.cleaned_data['fields']:
@@ -2626,7 +2629,10 @@ def layer_create_with_group(request, layergroup_id):
                 'groups': groups,
                 'resource_is_public': is_public,
                 'project_id': project_id,
-                'from_redirect': from_redirect
+                'from_redirect': from_redirect,
+                'detailed_info_enabled': detailed_info_enabled,
+                'detailed_info_button_title': detailed_info_button_title,
+                'detailed_info_html': detailed_info_html
             }
             return render(request, "layer_create.html", data)
 
@@ -2647,7 +2653,10 @@ def layer_create_with_group(request, layergroup_id):
                 'redirect_to_layergroup': redirect_to_layergroup,
                 'layergroup_id': layergroup_id,
                 'project_id': project_id,
-                'from_redirect': from_redirect
+                'from_redirect': from_redirect,
+                'detailed_info_enabled': detailed_info_enabled,
+                'detailed_info_button_title': detailed_info_button_title,
+                'detailed_info_html': detailed_info_html
             }
             return render(request, "layer_create.html", data)
 
@@ -4022,14 +4031,10 @@ def external_layer_add(request):
             cached = False
             if 'cached' in request.POST:
                 cached = True
-                
-            detailed_info_enabled = False
+            
+            detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
             detailed_info_html = request.POST.get('detailed_info_html')
-            if 'detailed_info_enabled' in request.POST:
-                detailed_info_enabled = True
-                detailed_info_button_title = request.POST.get('detailed_info_button_title')
-                detailed_info_html = request.POST.get('detailed_info_html')
                 
             crs_list = []
             for key in request.POST:
@@ -4142,14 +4147,10 @@ def external_layer_update(request, external_layer_id):
             cached = False
             if 'cached' in request.POST:
                 cached = True
-                
-            detailed_info_enabled = False
+
+            detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
             detailed_info_html = request.POST.get('detailed_info_html')
-            if 'detailed_info_enabled' in request.POST:
-                detailed_info_enabled = True
-                detailed_info_button_title = request.POST.get('detailed_info_button_title')
-                detailed_info_html = request.POST.get('detailed_info_html')
                 
             crs_list = []
             for key in request.POST:

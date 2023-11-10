@@ -135,29 +135,29 @@
 	          					<div class="box-body">
 	          						<div class="row">
 										<div class="col-md-4 form-group">
-											<input type="checkbox" name="visible" id="visible"/>
-											<label for="visible">{% trans "Visible" %}</label>														
+											<input type="checkbox" name="visible" id="visible" {% if form.visible.value %}checked{% endif %}/>
+											<label for="visible">{% trans "Visible" %}</label>
 										</div>
 										<div class="col-md-4 form-group">
-											<input type="checkbox" name="cached" id="cached"/>
+											<input type="checkbox" name="cached" id="cached" {% if form.cached.value %}checked{% endif %}/>
 											<label for="cached">{% trans "Cached" %}</label>	
 										</div>
 										<div class="col-md-4 form-group">
-											<input type="checkbox" name="queryable" id="queryable" checked/>
+											<input type="checkbox" name="queryable" id="queryable" {% if form.queryable.value %}checked{% endif %}/>
 											<label for="queryable">{% trans "Queryable" %}</label>
 										</div>
 									</div>				
 									<div class="row">
 										<div class="col-md-4 form-group">
-											<input type="checkbox" name="single_image" id="single_image" />	
-											<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
+											<input type="checkbox" name="single_image" id="single_image" {% if form.single_image.value %}checked{% endif %}/>
+											<label for="single_image">{% trans "Single image (No tiles)" %}</label>
 										</div>
 										<div class="col-md-4 form-group" style="padding-bottom:15px">
 											<input type="checkbox" name="time_enabled"  id="time_enabled"/>
 											<label for="time_enabled">{% trans "time_enabled" %}</label>
 										</div>
 										<div class="col-md-4 form-group">
-											<input type="checkbox" name="allow_download"  id="allow_download"/>
+											<input type="checkbox" name="allow_download"  id="allow_download" {% if form.allow_download.value %}checked{% endif %}/>
 											<label for="allow_download">{% trans "Allow downloads" %}</label>
 										</div>
 									</div>					
@@ -250,21 +250,21 @@
 	          					<div class="box-body">
 	          						<div class="row">
 		          						<div class="col-md-6 form-group">
-		          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
-											<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+		          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled" {% if detailed_info_enabled %}checked{% endif %}/>
+											<label for="detailed_info_enabled">{% trans "Enable detailed information" %}</label>												
 										</div>
 									</div>	
-		          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
+		          					<div {% if not detailed_info_enabled %}style="display: none;"{% endif %} class="row" id="detailed_info_button_title-row">
 										<div class="col-md-12 form-group">
 											<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
-											<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+											<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% if detailed_info_button_title %}{{detailed_info_button_title}}{% else %}{% trans "Detailed info" %}{% endif %}" type="text" class="form-control">
 										</div>
 									</div>	
 										
-									<div style="display: none;" class="row" id="detailed_info_html-row">
+									<div {% if not detailed_info_enabled %}style="display: none;"{% endif %}class="row" id="detailed_info_html-row">
 										<div class="col-md-12 form-group">
 											<label for="detailed_info_html">{% trans "HTML" %}</label>
-											<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>						
+											<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{% if detailed_info_html %}{{detailed_info_html}}{% endif %}</textarea>
 										</div>
 									</div>
 								</div>
@@ -593,7 +593,6 @@
 			theme: "xq-dark",
 			lineNumbers: true
 		});
-		
 		var code = '';
 		if (fileExists(HTML_PATH + 'detailed_info.html')) {
 			code += '<iframe width="800" height="600" src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
@@ -604,7 +603,9 @@
 			code += '\t <p>{% trans "Layer description" %}</p> \n';
 			code += '</div> \n';
 		}
-		
+		$('a[data-toggle="tab"][href="#tab-layer-detailedinfo"]').on('shown.bs.tab', function (e) {
+			codemirror.refresh();
+		});
 		$('#detailed_info_enabled').click(function(){
 			if ($('#detailed_info_enabled').is(":checked")) {
 				$('#detailed_info_button_title-row').css('display', 'block');

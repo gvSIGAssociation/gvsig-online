@@ -238,8 +238,8 @@
           					<div class="box-body">
           						<div class="row">
 	          						<div class="col-md-6 form-group">
-	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
-										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled" {% if detailed_info_enabled %}checked{% endif %}/>
+										<label for="detailed_info_enabled">{% trans "Enable detailed information" %}</label>												
 									</div>
 								</div>	
 	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
