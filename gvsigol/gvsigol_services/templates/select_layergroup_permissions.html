@@ -2,7 +2,7 @@
 {% load static from staticfiles %}
 				<div class="row">
 					<div class="col-md-12">
-						<div id="read-list-box" class="box searchable-list-box">
+						<div id="role-list-box" class="box searchable-list-box">
 							<div class="box-header">
 								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Give the selected roles permissions to manage the layergroup" %}</h3>
 								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" />
@@ -16,7 +16,7 @@
 											<img src="{% static "img/users.png" %}" alt="Users Image">
 										</div>
 										<div class="product-info">
-											<span class="product-title">{{role.name}}
+											<span class="product-title searchable-rolename">{{role.name}}
 												<div class="pull-right checkbox form-inline">
 														<label>
 															<input class="layergroup-includeinprojects-checkbox" type="checkbox" name="includeinprojects-userrole-{{role.name}}" id="includeinprojects-userrole-{{role.name}}" {% if role.includeinprojects_checked %}checked {% endif %}/>
@@ -28,7 +28,7 @@
 														</label>
 												</div>
 											</span> 
-											<span class="product-description">{{role.description}}</span>
+											<span class="product-description searchable-roledesc">{{role.description}}</span>
 										</div>
 									</li> 
 									{% endfor %}
