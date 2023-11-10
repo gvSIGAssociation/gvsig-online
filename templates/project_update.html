@@ -220,26 +220,25 @@
 													<img src="{% static "img/layers.png" %}" alt="Layers Image">
 												</div>
 												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title"><span class="searchable-layer">{{layergroup.title}}</span>
-														<div style="margin-right: 10px;" class="radio pull-right{% if layergroup.editable is False %} disabled{% endif%}">													
-															<label>
-																{% if layergroup.baselayer_group %}
-																	<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
-																{% else %}
-																	<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
-																{% endif %}
-															</label>
-														</div>
-														<div style="margin-right: 10px;" class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">
-															<label>
-																{% if layergroup.checked %}
-																	<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
-																{% else %}
-																	<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
-																{% endif %}
-															</label>
-														</div>
-													</a> 
+													<span class="product-title"><span class="searchable-layer">{{layergroup.title}}</span></span>
+													<div style="margin-right: 10px;" class="radio pull-right{% if layergroup.editable is False %} disabled{% endif%}">													
+														<label>
+															{% if layergroup.baselayer_group %}
+																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
+															{% else %}
+																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
+															{% endif %}
+														</label>
+													</div>
+													<div style="margin-right: 10px;" class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">
+														<label>
+															{% if layergroup.checked %}
+																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
+															{% else %}
+																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
+															{% endif %}
+														</label>
+													</div>
 													<span class="product-description"><span class="searchable-layer-desc">{{layergroup.name}}</span></span>
 												</div>
 												<div class="box-body">
@@ -251,20 +250,20 @@
 														{% for l in layergroup.layers %}
 														<li class="item">
 															<div class="product-info">
-																<a href="javascript:void(0)" class="product-title">
+																<span class="product-title">
 																	<div class="checkbox pull-left">	
 																		<span class="searchable-base-layer">{{l.title}}</span><br />
 																	</div>
-																	<div class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">													
-																		<label>
-																			{% if l.baselayer %}
-																				<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
-																			{% else %}
-																				<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
-																			{% endif %}
-																		</label>
-																	</div>
-																</a> <!-- 																<span class="product-description"><span class="searchable-layer">{{base_layers.type}}</span></span> -->
+																</span>
+																<div class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">
+																	<label>
+																		{% if l.baselayer %}
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																		{% else %}
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																		{% endif %}
+																	</label>
+																</div>
 															</div>
 														</li> 
 														{% endfor %}
@@ -308,28 +307,27 @@
 							<div class="col-md-12">
 								<div id="tool-list-box" class="box searchable-list-box">
 									<div class="box-header">
-										<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search tool...' %}" /></div>
+										<div class="col-md-6"><input type="text" class="search-plugins form-control" placeHolder="{% trans 'Search tool...' %}" /></div>
 									</div>
 									<div class="box-body">
-										<ul class="products-list product-list-in-box list">
+										<ul class="products-list product-list-in-box list-plugins">
 											{% for tool in tools %}
 											<li class="item">
 												<div class="product-img">
 													<img src="{% static "img/plugin.png" %}" alt="Plugin Image">
 												</div>
 												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{tool.title}}</span>
-														<div class="checkbox pull-right">													
-															<label>
-																{% if tool.checked %}
-																	<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}" checked/>{% trans "Assign tool" %}
-																{% else %}
-																	<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}"/>{% trans "Assign tool" %}
-																{% endif %}
-															</label>
-														</div>
-													</a> 
-													<span class="product-description">{{tool.description}}</span>
+													<span class="product-title"><span class="searchable-plugintitle">{{tool.title}}</span></span>
+													<div class="checkbox pull-right">
+														<label>
+															{% if tool.checked %}
+																<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}" checked/>{% trans "Assign tool" %}
+															{% else %}
+																<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}"/>{% trans "Assign tool" %}
+															{% endif %}
+														</label>
+													</div>
+													<span class="product-description searchable-plugindesc">{{tool.description}}</span>
 												</div>
 											</li> 
 											{% endfor %}
@@ -379,7 +377,7 @@
 													<img src="{% static "img/users.png" %}" alt="Users Image">
 												</div>
 												<div class="product-info">
-													<span class="product-title">{{group.name}}
+													<span class="product-title"><span class="searchable-rolename">{{group.name}}</span>
 														<div class="pull-right checkbox form-inline">
 															<label>
 																<input class="project-read-checkbox" type="checkbox" name="read-role-{{group.name}}" id="read-role-{{group.name}}" {% if group.read_checked %}checked {% endif %}/>
@@ -391,7 +389,7 @@
 															</label>
 														</div>
 													</span>
-													<span class="product-description">{{group.description}}</span>
+													<span class="product-description searchable-roledesc">{{group.description}}</span>
 												</div>
 											</li> 
 											{% endfor %}
@@ -790,12 +788,12 @@
 	}
 
 	function setOnSelectedLayergroupChanged() {
-		$(".layergroup-input").unbind("click").click(function(){
-	  		if($(this).is(':checked')){	
-		  		var data_id = $(this).attr("data-groupid");
-		  		var data_name = $(this).attr("data-name");
-		  		var data_title = $(this).attr("data-title");
-		  		
+		$(".layergroup-input").unbind("click").on("click", function(){
+			if($(this).is(':checked')){	
+				var data_id = $(this).attr("data-groupid");
+				var data_name = $(this).attr("data-name");
+				var data_title = $(this).attr("data-title");
+				
 				var newdata = '<div id="lg_'+data_id+'" data-groupid="' + data_id +'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
 					'<div class="box-header with-border">'+
 					'	<span class="handle" style="margin-right: 20px;"> '+
@@ -805,23 +803,23 @@
 					'	<span class="text">'+data_title+'</span>'+
 					'</div>'+	
 					'</div>';	
-		  		if($("#selected-base-group-" + data_id).is(':checked')){
+				if($("#selected-base-group-" + data_id).is(':checked')){
 					$("#toc").append(newdata);
-		  		}
+				}
 				else {
 					$("#toc").prepend(newdata);
 				}
-	  		}else{
-	  			var data_id = $(this).attr("data-groupid");
-		  		
-		  		if ($("#selected-base-group-" + data_id).is(':checked')) {
-		  			$("#selected-base-group-" + data_id).prop("checked", false);
-		  			$('.basegroup-layers').css("display", "none");
-		  		}
-		  		
+			}else{
+				var data_id = $(this).attr("data-groupid");
+				
+				if ($("#selected-base-group-" + data_id).is(':checked')) {
+					$("#selected-base-group-" + data_id).prop("checked", false);
+					$('.basegroup-layers').css("display", "none");
+				}
+				
 				$("#lg_"+data_id).remove();
-	  		}
-	  	});
+			}
+		});
 	}
 
 
@@ -952,19 +950,27 @@
 		};
 		
 		var searcheableList = new List('user-list-box', {
-	  		  valueNames: ['searchable-user'],
-	  		  listClass:'list',
-	  		  searchClass: 'search',
-	  		  page: 6,
-	  		  pagination: false
-	  		});
+			valueNames: ['searchable-rolename', 'searchable-roledesc'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 6,
+			pagination: false
+		});
 		
 		var searcheableList2 = new List('layer-list-box', {
-		  valueNames: ['searchable-layer', 'searchable-layer-desc'],
-		  listClass:'list2',
-		  searchClass: 'search2',
-		  page: 6,
-		  pagination: false
+			valueNames: ['searchable-layer', 'searchable-layer-desc', 'searchable-base-layer'],
+			listClass:'list2',
+			searchClass: 'search2',
+			page: 6,
+			pagination: false
+		});
+		
+		var searchablePluginList = new List('tool-list-box', {
+			valueNames: ['searchable-plugintitle', 'searchable-plugindesc'],
+			listClass:'list-plugins',
+			searchClass: 'search-plugins',
+			page: 6,
+			pagination: false
 		});
 		
 		var process_status = null
@@ -1043,6 +1049,10 @@
 			}
 			for(var i=0; i<searcheableList2.items.length; i++){
 				var item = searcheableList2.items[i];
+				item.show();
+			}
+			for(var i=0; i<searchablePluginList.items.length; i++){
+				var item = searchablePluginList.items[i];
 				item.show();
 			}
 			$(".project-usergroup-checkbox").prop( "disabled", false);
@@ -1126,14 +1136,6 @@
 	  	
 	  	$('#add-layer-group-button').click(function() {
 			$('#button-add-layer-group-accept').click( function() {
-				for(var i=0; i<searcheableList.items.length; i++){
-	    			var item = searcheableList.items[i];
-	    			item.show();
-	    		}
-	    		for(var i=0; i<searcheableList2.items.length; i++){
-	    			var item = searcheableList2.items[i];
-	    			item.show();
-	    		}
 				$('#project-form').attr('action', '/gvsigonline/core/project_update/{{pid}}/?redirect=new-layer-group');
 				$('#save_button').trigger('click');
 			});

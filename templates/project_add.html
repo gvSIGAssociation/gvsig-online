@@ -14,7 +14,7 @@
 						</div>
 					</div>
 					<div class="row" style="padding-left: 30px;">
-						{% csrf_token %}													
+						{% csrf_token %}
 						{% if message %}
 						<div id="form-error" style="color:#ff0000;">
 							<p>* {{ message }}</p>
@@ -25,7 +25,6 @@
 				
 				<ul class="nav nav-tabs">
               		<li class="active"><a href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
-<!--               		<li><a href="#tab-project-baselayers" data-toggle="tab">{% trans "Base layers" %}</a></li> -->
               		<li><a href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
               		<li><a href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
               		<li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>
@@ -186,18 +185,17 @@
 													<img src="{% static "img/layers.png" %}" alt="Layers Image">
 												</div>
 												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title"><span class="searchable-layer">{{layergroup.title}}</span>
-														<div style="margin-right: 10px;" class="radio pull-right">													
-															<label>
-																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" value="{{layergroup.id}}" id="selected-base-group-{{layergroup.id}}"/>{% trans "Base group" %}
-															</label>
-														</div>
-														<div style="margin-right: 10px;" class="checkbox pull-right">													
-															<label>
-																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
-															</label>
-														</div>
-													</a>
+													<span class="product-title"><span class="searchable-layer">{{layergroup.title}}</span></span>
+													<div style="margin-right: 10px;" class="radio pull-right">
+														<label>
+															<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" value="{{layergroup.id}}" id="selected-base-group-{{layergroup.id}}"/>{% trans "Base group" %}
+														</label>
+													</div>
+													<div style="margin-right: 10px;" class="checkbox pull-right">
+														<label>
+															<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
+														</label>
+													</div>
 													<span class="product-description"><span class="searchable-layer-desc">{{layergroup.name}}</span></span>
 												</div>
 												<div class="box-body">
@@ -205,16 +203,16 @@
 														{% for l in layergroup.layers %}
 														<li class="item">
 															<div class="product-info">
-																<a href="javascript:void(0)" class="product-title">
+																<span class="product-title">
 																	<div class="checkbox pull-left">	
 																		<span class="searchable-base-layer">{{l.title}}</span><br />
 																	</div>
-																	<div class="checkbox pull-right">													
-																		<label>
-																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}"/><span style="width:150px;">{% trans "Mark as default" %}</span>
-																		</label>
-																	</div>
-																</a> 
+																</span>
+																<div class="checkbox pull-right">
+																	<label>
+																		<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}"/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																	</label>
+																</div>
 															</div>
 														</li> 
 														{% endfor %}
@@ -257,28 +255,27 @@
 							<div class="col-md-12">
 								<div id="tool-list-box" class="box searchable-list-box">
 									<div class="box-header">
-										<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search tool...' %}" /></div>
+										<div class="col-md-6"><input type="text" class="search-plugins form-control" placeHolder="{% trans 'Search tool...' %}" /></div>
 									</div>
 									<div class="box-body">
-										<ul class="products-list product-list-in-box list">
+										<ul class="products-list product-list-in-box list-plugins">
 											{% for tool in tools %}
 											<li class="item">
 												<div class="product-img">
 													<img src="{% static "img/plugin.png" %}" alt="Plugin Image">
 												</div>
 												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{tool.title}}</span>
-														<div class="checkbox pull-right">													
-															<label>
-																{% if tool.checked %}
-																	<input class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}" checked/>{% trans "Assign tool" %}
-																{% else %}
-																	<input class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}"/>{% trans "Assign tool" %}
-																{% endif %}
-															</label>
-														</div>
-													</a> 
-													<span class="product-description">{{tool.description}}</span>
+													<span class="product-title"><span class="searchable-plugintitle">{{tool.title}}</span></span>
+													<div class="checkbox pull-right">													
+														<label>
+															{% if tool.checked %}
+																<input class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}" checked/>{% trans "Assign tool" %}
+															{% else %}
+																<input class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}"/>{% trans "Assign tool" %}
+															{% endif %}
+														</label>
+													</div>
+													<span class="product-description searchable-plugindesc">{{tool.description}}</span>
 												</div>
 											</li> 
 											{% endfor %}
@@ -328,7 +325,7 @@
 													<img src="{% static "img/users.png" %}" alt="Users Image">
 												</div>
 												<div class="product-info">
-													<span class="product-title">{{group.name}}
+													<span class="product-title"><span class="searchable-rolename">{{group.name}}</span>
 														<div class="pull-right checkbox form-inline">
 															<label>
 																<input class="project-read-checkbox" type="checkbox" name="read-role-{{group.name}}" id="read-role-{{group.name}}" {% if group.read_checked %}checked {% endif %}/>
@@ -340,7 +337,7 @@
 															</label>
 														</div>
 													</span>
-													<span class="product-description">{{group.description}}</span>
+													<span class="product-description searchable-roledesc">{{group.description}}</span>
 												</div>
 											</li> 
 											{% endfor %}
@@ -734,7 +731,7 @@
 		};
 		
 		var searcheableList = new List('user-list-box', {
-	  		  valueNames: ['searchable-user'],
+	  		  valueNames: ['searchable-rolename', 'searchable-roledesc'],
 	  		  listClass:'list',
 	  		  searchClass: 'search',
 	  		  page: 6,
@@ -747,6 +744,13 @@
 		  searchClass: 'search2',
 		  page: 6,
 		  pagination: false
+		});
+		var searchablePluginList = new List('tool-list-box', {
+			valueNames: ['searchable-plugintitle', 'searchable-plugindesc'],
+			listClass:'list-plugins',
+		  	searchClass: 'search-plugins',
+			page: 6,
+		  	pagination: false
 		});
 		
 		searcheableList2.on("updated", function(){
@@ -762,6 +766,10 @@
 			}
 			for(var i=0; i<searcheableList2.items.length; i++){
 				var item = searcheableList2.items[i];
+				item.show();
+			}
+			for(var i=0; i<searchablePluginList.items.length; i++){
+				var item = searchablePluginList.items[i];
 				item.show();
 			}
 			$(".project-usergroup-checkbox").prop( "disabled", false);
@@ -842,15 +850,6 @@
     	
     	$('#add-layer-group-button').click(function() {
 			$('#button-add-layer-group-accept').click( function() {
-				for(var i=0; i<searcheableList.items.length; i++){
-	    			var item = searcheableList.items[i];
-	    			item.show();
-	    		}
-	    		for(var i=0; i<searcheableList2.items.length; i++){
-	    			var item = searcheableList2.items[i];
-	    			item.show();
-	    		}
-
 				$('#project-form').attr('action', '/gvsigonline/core/project_add/?redirect=new-layer-group');
 				$('#save_button').trigger('click');
 			});
