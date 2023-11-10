@@ -11,7 +11,7 @@
 					<div class="box-tools pull-right">
 						<div id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</div>					
 					</div>
-				</div>				
+				</div>
 			</div>
 
 			<div class="row" style="padding-left: 30px;">
@@ -245,21 +245,6 @@
 		});
 	});
 	
-	$('#save_button').click(function() {
-		$('#toc').val("");
-		var isFirst = true;
-		$(".layer-item").each(function(){
-			var value = $(this).attr("data-name");
-			if(!isFirst){
-				$('#toc').val($('#toc').val()+',');
-			}
-			$('#toc').val($('#toc').val()+value);
-			
-			isFirst = false;
-		});
-		$('#layer-group-form').submit();
-	});
-	
 	function getQueryString() {
 		var queryString = '?redirect=layergroup-redirect';
 		const params = new URLSearchParams(window.location.search);
@@ -383,6 +368,35 @@
 			handle: ".handle",
 			forcePlaceholderSize: true,
 			zIndex: 999999
+		});
+
+		var searcheableList = new List('role-list-box', {
+			valueNames: ['searchable-rolename', 'searchable-roledesc'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 6,
+			pagination: false
+		});
+	
+		$('#save_button').click(function(e) {
+			e.preventDefault(); // prevents default
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				item.show();
+			}
+			$('#toc').val("");
+			var isFirst = true;
+			$(".layer-item").each(function(){
+				var value = $(this).attr("data-name");
+				if(!isFirst){
+					$('#toc').val($('#toc').val()+',');
+				}
+				$('#toc').val($('#toc').val()+value);
+				
+				isFirst = false;
+			});
+			$('#layer-group-form').submit();
+			return false;
 		});
 	});
 	

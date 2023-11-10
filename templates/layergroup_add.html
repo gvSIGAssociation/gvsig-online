@@ -154,5 +154,24 @@
 			$('#save_button').trigger('click');
 		});
 	});
+
+	$(document).ready(function() {
+		var searcheableList = new List('role-list-box', {
+			valueNames: ['searchable-rolename', 'searchable-roledesc'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 6,
+			pagination: false
+		});
+		$("#save_button").click(function(e){
+			e.preventDefault(); // prevents default
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				item.show();
+			}
+			$("#layer-group-form").submit();
+			return false; 
+		});
+	});
 </script>
 {% endblock %}
