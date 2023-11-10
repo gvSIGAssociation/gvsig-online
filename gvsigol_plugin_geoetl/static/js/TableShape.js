@@ -13924,6 +13924,421 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// BUFFER ////
+
+trans_Buffer = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_Buffer",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Buffer"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-buffer-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Buffer'))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Mode')+'</label>'+
+                                '<select class="form-control" id="mode-option-'+ID+'">'+
+                                    '<option value="radius" selected = "selected"> '+gettext('Insert radius value')+'</option>'+
+                                    '<option value="reach-area"> '+gettext('Make buffer to reach an area')+'</option>'+
+                                '</select>'+    
+                            '</div>'+
+
+                            '<br>'+
+
+                            '<div id = "radius-'+ID+'">'+
+
+                                '<div>'+
+
+                                    '<label class="col-form-label">'+gettext('Radius')+'</label>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="value-'+ID+'" name="radio-radius-'+ID+'" class="form-check-input" value="value" checked="checked">'+
+                                        '<label for="value-'+ID+' class="form-check-label">'+gettext('Insert radius value')+'</label>'+
+                                    '</div>'+
+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="attr-'+ID+'" name="radio-radius-'+ID+'" class="form-check-input" value="attr">'+
+                                        '<label for="attr-'+ID+'" class="form-check-label">'+gettext('Select attribute with the radius value')+'</label>'+
+                                    '</div>'+
+                                '</div>'+
+
+                                '<div>'+
+                                    '<label form="" class="col-form-label">'+gettext('Radius value')+'</label>'+
+                                    '<input id="radius-value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                                '</div>'+
+
+                                '<div>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Radius attribute')+':</label>'+
+                                    '<select class="form-control" id="radius-attr-'+ID+'" disabled> </select>'+
+                                '</div>'+
+
+
+                            '</div>'+
+
+                            '<div id = "reach-area-'+ID+'">'+
+
+                                /*'<div>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Current Area Attribute')+' </label>'+
+                                    '<select class="form-control" id="current-area-attr-'+ID+'"> </select>'+
+                                '</div>'+*/
+                                '<div>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Area attribute to reach')+' </label>'+
+                                    '<select class="form-control" id="area-attr-reach-'+ID+'"> </select>'+
+                                '</div>'+
+
+                                '<div>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Radius increase')+' </label>'+
+                                    '<input id="radius-increase-'+ID+'" type="number" value="0.001" min="0" step="0.001" class="form-control" >'+
+                                '</div>'+
+
+                            '</div>'+
+
+                            '<br>'+
+
+                            '<div id = "style-params-'+ID+'">'+
+
+                                '<label class="col-form-label">'+gettext('Buffer style parameters')+'</label>'+
+                                '<br>'+
+
+                                '<div class ="column50">'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Quadrant segments')+'</label>'+
+                                    '<input id="quad-segs-'+ID+'" type="number" value="8" class="form-control" >'+
+                                '</div>'+
+
+                                '<div class ="column50">'+
+                                    '<label form="attr" class="col-form-label">'+gettext('End cap style')+' </label>'+
+                                    '<select class="form-control" id="end-cap-option-'+ID+'">'+
+                                        '<option value="round">'+gettext('Round')+'</option>'+
+                                        '<option value="flat">'+gettext('Flat')+'</option>'+
+                                        '<option value="square">'+gettext('Square')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
+
+                                '<div class ="column50">'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Join style')+' </label>'+
+                                    '<select class="form-control" id="join-option-'+ID+'">'+
+                                        '<option value="round">'+gettext('Round')+'</option>'+
+                                        '<option value="mitre">'+gettext('Mitre')+'</option>'+
+                                        '<option value="bevel">'+gettext('Bevel')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
+
+                                '<div class ="column50">'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Mitre limit')+' </label>'+
+                                    '<input id="mitre-limit-'+ID+'" type="number" value="5.0" step="0.1" class="form-control" >'+
+                                '</div>'+
+
+                                '<div>'+
+                                    '<label form="attr" class="col-form-label">'+gettext('Side')+' </label>'+
+                                    '<select class="form-control" id="side-option-'+ID+'">'+
+                                        '<option value="both">'+gettext('Both')+'</option>'+
+                                        '<option value="left">'+gettext('Left')+'</option>'+
+                                        '<option value="right">'+gettext('Right')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
+
+                            '</div>'+
+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="buffer-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        $("#reach-area-"+ID).slideUp("slow");
+
+        var context = this
+
+        $("#mode-option-"+ID).change(function() {
+            if($("#mode-option-"+ID).val() == 'radius'){
+
+                $("#radius-"+ID).slideDown("slow");
+                $("#reach-area-"+ID).slideUp("slow");
+
+            }else if($("#mode-option-"+ID).val() == 'reach-area'){
+
+                $("#radius-"+ID).slideUp("slow");
+                $("#reach-area-"+ID).slideDown("slow");
+
+            }
+        });
+
+        $('input:radio[name="radio-radius-'+ID+'"]').change(function(){
+
+            if ($(this).val() == 'value'){
+                
+                $('#radius-value-'+ID).prop('disabled', false)
+                $('#radius-attr-'+ID).prop('disabled', true)
+                
+            }
+            else if ($(this).val() == 'attr'){
+            
+                $('#radius-value-'+ID).prop('disabled', true)
+                $('#radius-attr-'+ID).prop('disabled', false)
+            }
+        });
+
+        icon.on("click", function(){
+
+            if ($('input:radio[name="radio-radius-'+ID+'"]:checked').val() == 'value'){
+                
+                $('#radius-value-'+ID).prop('disabled', false)
+                $('#radius-attr-'+ID).prop('disabled', true)
+                
+            }
+            else if ($('input:radio[name="radio-radius-'+ID+'"]:checked').val() == 'attr'){
+            
+                $('#radius-value-'+ID).prop('disabled', true)
+                $('#radius-attr-'+ID).prop('disabled', false)
+            }
+
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+
+                    $('#radius-attr-'+ID).empty()
+                    //$('#current-area-attr-'+ID).empty()
+                    $('#area-attr-reach-'+ID).empty()
+
+                    for (i = 0; i < schema.length; i++){
+                        
+                        $('#radius-attr-'+ID).append('<option>'+schema[i]+'</option>')
+                        //$('#current-area-attr-'+ID).append('<option>'+schema[i]+'</option>')
+                        $('#area-attr-reach-'+ID).append('<option>'+schema[i]+'</option>')
+                    }
+                }
+
+            },100);
+
+            if($("#mode-option-"+ID).val() == 'radius'){
+    
+                $("#radius-"+ID).slideDown("slow");
+                $("#reach-area-"+ID).slideUp("slow");
+
+            }else if($("#mode-option-"+ID).val() == 'reach-area'){
+
+                $("#radius-"+ID).slideUp("slow");
+                $("#reach-area-"+ID).slideDown("slow");
+
+            }
+            
+            $('#dialog-buffer-'+ID).modal('show')
+
+        });
+
+        $('#buffer-accept-'+ID).click(function() {
+
+            var paramsBuffer = {"id": ID,
+            "parameters": [
+                {
+                "mode-option": $('#mode-option-'+ID).val(),
+                "radio-radius": $('input:radio[name="radio-radius-'+ID+'"]:checked').val(),
+                "radius-value": $('#radius-value-'+ID).val(),
+                "radius-attr": $('#radius-attr-'+ID).val(),
+                //"current-area-attr": $('#current-area-attr-'+ID).val(),
+                "area-attr-reach": $('#area-attr-reach-'+ID).val(),
+                "quad-segs": $('#quad-segs-'+ID).val(),
+                "end-cap-option": $('#end-cap-option-'+ID).val(),
+                "join-option": $('#join-option-'+ID).val(),
+                "mitre-limit": $('#mitre-limit-'+ID).val(),
+                "side-option": $('#side-option-'+ID).val(),
+                "radius-increase": $('#radius-increase-'+ID).val(),
+                "schema": schemaEdge
+                }
+            ]};
+
+            schemaMod =[...schemaEdge]
+            
+            paramsBuffer['schema'] = schemaMod
+            paramsBuffer['schema-old'] = schemaEdge
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsBuffer, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-buffer-'+ID).modal('hide')
+
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+         }
+         
+         listLabel.push([this.id,[input.name], [output.name]])
+
+	     return label1, label2;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        
+        this.remove(this.children.get(index+1).figure);
+        
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes :getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+
 ////////////////////////////////////////////////  SALIDAS /////////////////////////////////////////////////////////
 
 //// OUTPUT POSTGIS ////

@@ -1190,3 +1190,66 @@ msgstr ""
 
 #~ msgid "Nada de nada"
 #~ msgstr "the trans"
+
+msgid "Buffer"
+msgstr ""
+
+msgid "Insert radius value"
+msgstr ""
+
+msgid "Make buffer to reach an area"
+msgstr ""
+
+msgid "Radius"
+msgstr ""
+
+msgid "Select attribute with the radius value"
+msgstr ""
+
+msgid "Radius value"
+msgstr ""
+
+msgid "Radius attribute"
+msgstr ""
+
+msgid "Area attribute to reach"
+msgstr ""
+
+msgid "Radius increase"
+msgstr ""
+
+msgid "Buffer style parameters"
+msgstr ""
+
+msgid "Quadrant segments"
+msgstr ""
+
+msgid "End cap style"
+msgstr ""
+
+msgid "Round"
+msgstr ""
+
+msgid "Flat"
+msgstr ""
+
+msgid "Square"
+msgstr ""
+
+msgid "Join style"
+msgstr ""
+
+msgid "Mitre"
+msgstr ""
+
+msgid "Bevel"
+msgstr ""
+
+msgid "Mitre limit"
+msgstr ""
+
+msgid "Side"
+msgstr ""
+
+msgid "Both"
+msgstr ""

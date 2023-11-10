@@ -1198,3 +1198,66 @@ msgstr "Los parámetros de conexión son válidos."
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "Connection parameters are not valid."
 msgstr "Los parámetros de conexión no son válidos."
+
+msgid "Buffer"
+msgstr "Área de influencia"
+
+msgid "Insert radius value"
+msgstr "Inserta el valor del radio"
+
+msgid "Make buffer to reach an area"
+msgstr "Hacer el área de influencia hasta alcanzar un área"
+
+msgid "Radius"
+msgstr "Radio"
+
+msgid "Select attribute with the radius value"
+msgstr "Selecciona atributo con el valor del radio"
+
+msgid "Radius value"
+msgstr "Valor del radio"
+
+msgid "Radius attribute"
+msgstr "Atributo de radio"
+
+msgid "Area attribute to reach"
+msgstr "Atributo del área a alcanzar"
+
+msgid "Radius increase"
+msgstr "Aumento de radio"
+
+msgid "Buffer style parameters"
+msgstr "Parámetros del estilo del área de influencia"
+
+msgid "Quadrant segments"
+msgstr "Segmentos del cuadrante"
+
+msgid "End cap style"
+msgstr "Estilo en los bordes"
+
+msgid "Round"
+msgstr "Redondo"
+
+msgid "Flat"
+msgstr "Plano"
+
+msgid "Square"
+msgstr "Cuadrado"
+
+msgid "Join style"
+msgstr "Estilo en la unión"
+
+msgid "Mitre"
+msgstr "Esquina"
+
+msgid "Bevel"
+msgstr "Bisel"
+
+msgid "Mitre limit"
+msgstr "Límite de la esquina"
+
+msgid "Side"
+msgstr "Lado"
+
+msgid "Both"
+msgstr "Ambos"
