@@ -1202,3 +1202,67 @@ msgstr "Els paràmetres de connexió son vàlids."
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "Connection parameters are not valid."
 msgstr "Els paràmetres de connexió no son vàlids."
+
+
+msgid "Buffer"
+msgstr "Àrea d'influència"
+
+msgid "Insert radius value"
+msgstr "Insereix el valor del radi"
+
+msgid "Make buffer to reach an area"
+msgstr "Fer l'àrea d'influència fins assolir un àrea"
+
+msgid "Radius"
+msgstr "Radi"
+
+msgid "Select attribute with the radius value"
+msgstr "Selecciona atribut amb el valor del radi"
+
+msgid "Radius value"
+msgstr "Valor del radi"
+
+msgid "Radius attribute"
+msgstr "Atribut de radi"
+
+msgid "Area attribute to reach"
+msgstr "Atribut de l'àrea a assolir"
+
+msgid "Radius increase"
+msgstr "Augment de radi"
+
+msgid "Buffer style parameters"
+msgstr "Paràmetres de l'estil de l'àrea d'influència"
+
+msgid "Quadrant segments"
+msgstr "Segments del quadrant"
+
+msgid "End cap style"
+msgstr "Estil a les vores"
+
+msgid "Round"
+msgstr "Rodó"
+
+msgid "Flat"
+msgstr "Plà"
+
+msgid "Square"
+msgstr "Quadrat"
+
+msgid "Join style"
+msgstr "Estil a la unió"
+
+msgid "Mitre"
+msgstr "Cantó"
+
+msgid "Bevel"
+msgstr "Bisell"
+
+msgid "Mitre limit"
+msgstr "Límit del cantó"
+
+msgid "Side"
+msgstr "Costat"
+
+msgid "Both"
+msgstr "Ambdós"

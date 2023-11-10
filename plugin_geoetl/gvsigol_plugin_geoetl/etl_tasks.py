@@ -4262,3 +4262,183 @@ def trans_SimpGeom(dicc):
     cur.close()          
 
     return [table_name_target_simple, table_name_target_no_simple]
+
+
+def trans_Buffer(dicc):
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    mode_option = dicc['mode-option']
+    radio_radius = dicc['radio-radius']
+    radius_value = dicc['radius-value']
+    radius_attr = dicc['radius-attr']
+    #current_area_attr = dicc['current-area-attr'] 
+    area_attr_reach = dicc['area-attr-reach']
+    radius_increase = float(dicc['radius-increase'])
+    quad_segs = dicc['quad-segs']
+    end_cap = dicc['end-cap-option']
+    join = dicc['join-option']
+    mitre_limit = dicc['mitre-limit']
+    side = dicc['side-option']
+
+    attrs = dicc['schema']
+
+    srid, type_geom = get_type_n_srid(table_name_source)
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+    cur2 = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    style_parameters = "quad_segs="+str(quad_segs)+" endcap="+end_cap+" join="+join+" mitre_limit="+str(mitre_limit)+" side="+side
+
+    sch = ''
+    
+    for attr in attrs:
+        sch += '{},'
+
+    if mode_option == 'radius':
+
+        if radio_radius == 'value':
+
+            sqlDup = sql.SQL("CREATE TABLE {schema}.{tbl_target} AS (SELECT "+sch[:-1]+", ST_BUFFER(wkb_geometry, %s, %s) AS wkb_geometry  FROM {schema}.{tbl_source})").format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            *[sql.Identifier(field) for field in attrs],
+            tbl_source = sql.Identifier(table_name_source)
+            )
+            cur.execute(sqlDup, [radius_value, style_parameters])
+            conn.commit()
+
+        elif radio_radius == 'attr':
+
+            sqlDup = sql.SQL("CREATE TABLE {schema}.{tbl_target} AS (SELECT "+sch[:-1]+", ST_BUFFER(wkb_geometry, {attr}, %s) AS wkb_geometry  FROM {schema}.{tbl_source})").format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            *[sql.Identifier(field) for field in attrs],
+            tbl_source = sql.Identifier(table_name_source),
+            attr = sql.Identifier(radius_attr)
+            )
+            cur.execute(sqlDup, [style_parameters])
+            conn.commit()
+
+    elif mode_option == 'reach-area':
+
+        sqlDup = sql.SQL("CREATE TABLE {schema}.{tbl_target} AS (SELECT * FROM {schema}.{tbl_source})").format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source)
+        )
+        cur.execute(sqlDup)
+        conn.commit()
+
+        sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN "_id_temp" SERIAL;').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target)
+        )
+        cur.execute(sqlAdd)
+        conn.commit()
+
+        sqlSel= sql.SQL('SELECT "_id_temp", ST_AREA(wkb_geometry), {reach_attr}, wkb_geometry FROM {schema}.{tbl_target} ;').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            reach_attr = sql.Identifier(area_attr_reach)
+        )
+        cur.execute(sqlSel)
+        conn.commit()
+
+        for row in cur:
+            noBreak = True
+            
+            dif = row[2] - row[1]
+            
+            if dif > 0:
+                radius_buffer = radius_increase
+                increasement = '+'
+            elif dif < 0:
+                radius_buffer = -radius_increase
+                increasement = '-'
+            else:
+                radius_buffer = 0
+
+            while noBreak:
+
+                if radius_buffer == 0:
+                    break
+
+                else:
+
+                    sqlBuffer= sql.SQL('SELECT ST_AREA(ST_BUFFER(wkb_geometry, %s, %s)) FROM {schema}.{tbl_target} WHERE "_id_temp" = %s;').format(
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
+                        tbl_target = sql.Identifier(table_name_target)
+                    )
+                    cur2.execute(sqlBuffer, [radius_buffer, style_parameters, row[0]])
+                    
+                    for fila in cur2:
+                        area_buffer = fila[0]
+                        break
+
+                    _sqlUp = 'UPDATE {schema}.{tbl_target} SET wkb_geometry = subquery.wkb_geometry FROM ' 
+
+                    if type_geom == 'MULTIPOLYGON':
+                        _sqlUp+= '(SELECT ST_Multi(ST_Buffer(wkb_geometry, %s, %s)) AS wkb_geometry FROM {schema}.{tbl_target} WHERE _id_temp = %s) AS subquery'
+                    else:
+                        _sqlUp+= '(SELECT ST_Buffer(wkb_geometry, %s, %s) AS wkb_geometry FROM {schema}.{tbl_target} WHERE _id_temp = %s) AS subquery'
+                    
+                    _sqlUp+= ' WHERE _id_temp = %s'
+
+                    sqlUpdate = sql.SQL(_sqlUp).format(
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
+                        tbl_target = sql.Identifier(table_name_target)
+                        )
+
+                    cur2.execute(sqlUpdate, [radius_buffer, style_parameters, row[0], row[0]])
+                    conn.commit()
+
+                    if increasement == '+':
+                        if row[2] - area_buffer <= 0:
+                            noBreak = False
+                            break
+
+                    elif increasement == '-':
+                        if row[2] - area_buffer >= 0:
+                            noBreak = False
+                            break
+        cur2.close()
+
+        sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target)
+        )
+
+        cur.execute(sqlDropCol)
+        conn.commit()
+
+
+    if type_geom == 'MULTIPOLYGON':
+        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(ST_Multi(wkb_geometry), {epsg})'
+    else:
+        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
+
+    
+    sqlAlter = sql.SQL(sqlAlter_).format(
+                schema = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_target = sql.Identifier(table_name_target),
+                type_geom = sql.SQL(type_geom),
+                epsg = sql.SQL(str(srid)))
+    
+    cur.execute(sqlAlter)
+    conn.commit()
+
+
+
+    conn.close()
+    cur.close() 
+
+    return [table_name_target]
