@@ -44,11 +44,26 @@ if '__file__' in globals():
 else:
     BASE_DIR = os.path.join(os.path.abspath(os.getcwd()), "gvsigol")
 
+if os.environ.get("UWSGI_ENABLED") and os.environ.get("UWSGI_ENABLED")=='True': 
+    default_static_dir="/opt/gvsigonline/static"
+    default_static_url="/static/"
+    default_media_url="/media/"
+else:
+    default_static_dir=str(os.path.join(BASE_DIR, 'assets'))
+    default_static_url="/gvsigonline/static/"
+    default_media_url="/gvsigonline/media/"
+
+
+
 # Define default environment 
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),    
     BASE_URL=(str,'https://localhost'),
+    STATIC_ROOT=(str,default_static_dir),
+    STATIC_URL=(str,default_static_url),
+    MEDIA_ROOT=(str,'/opt/gvsigol_data'),
+    MEDIA_URL=(str,default_media_url),
     ALLOWED_HOST_NAMES=(list,['http://localhost:8000']),
     GVSIGOL_PLUGINS=(list),
     GVSIGOL_SKIN=(str,'skin-blue'),
@@ -57,7 +72,6 @@ env = environ.Env(
     DB_USER=(str,'gvsigonline'),
     DB_PASS=(str,'gvsigonline'),
     DB_NAME=(str,'gvsigonline'),
-    MEDIA_ROOT=(str,'/var/www/media/'),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
     GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
@@ -77,6 +91,8 @@ env = environ.Env(
     CORS_ORIGIN_ALLOW_ALL = (bool,False),
     # frontend SPA
     USE_SPA_PROJECT_LINKS = (bool,False),
+    FRONTEND_BASE_URL = (str,'/gvsigonline'),
+    FRONTEND_REDIRECT_URL = (str,'/gvsigonline'),
     #Log level
     LOG_LEVEL=(str,"DEBUG")
     
@@ -437,10 +453,9 @@ SITE_ID=1
 #MEDIA_URL = 'https://localhost/media/'
 BASE_URL = env('BASE_URL') 
 MEDIA_ROOT = env('MEDIA_ROOT')
-#MEDIA_ROOT = '/var/www/media'
-MEDIA_URL = 'https://localhost/media/'
-STATIC_URL = '/gvsigonline/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+MEDIA_URL = env('MEDIA_URL')
+STATIC_ROOT = env('STATIC_ROOT')
+STATIC_URL = env('STATIC_URL')
 
 #STATICFILES_DIRS = (
 #    os.path.join(BASE_DIR, 'gvsigol_core/static'),
@@ -751,8 +766,8 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 
 # Frontend SPA
 USE_SPA_PROJECT_LINKS = env('USE_SPA_PROJECT_LINKS')
-FRONTEND_BASE_URL = '/spa'
-FRONTEND_REDIRECT_URL = '/spa'
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL')
+FRONTEND_REDIRECT_URL = env('FRONTEND_REDIRECT_URL')
 
 # prueba para el gtfseditor y el problema con POST
 #APPEND_SLASH=True
