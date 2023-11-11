@@ -15,7 +15,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gvsigol.settings")
 
 print('INFO wsgi.py: Setting DJANGO_SETTINGS_MODULE to gvsigol.settings')
 
-if os.environ.get("DEBUG_REMOTE") and os.environ.get("DEBUG_REMOTE")=='True' and os.environ.get("USE_UWSGI") and os.environ.get("USE_UWSGI")=='True' :
+if os.environ.get("DEBUG_REMOTE") and os.environ.get("DEBUG_REMOTE")=='True' and os.environ.get("UWSGI_ENABLED") and os.environ.get("UWSGI_ENABLED")=='True' :
     #if os.environ.get('RUN_MAIN') or os.environ.get('WERKZEUG_RUN_MAIN'):
     try:
         import debugpy
