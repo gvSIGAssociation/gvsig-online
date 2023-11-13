@@ -105,7 +105,7 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
         json_sym = json.loads(sym.get('json'))
         if symbol_type == 'ExternalGraphicSymbolizer':
             library_path = utils.check_library_path(library)
-            file_name = name + '.png'
+            file_name = prefix_name + name + '.png'
             if utils.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
                 online_resource = utils.get_online_resource(library, file_name)
                 json_sym['online_resource'] = json_sym['online_resource'].replace("online_resource_replace", online_resource)
