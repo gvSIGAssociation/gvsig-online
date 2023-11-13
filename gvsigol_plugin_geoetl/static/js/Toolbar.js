@@ -142,9 +142,9 @@ gvsigolETL.Toolbar = Class.extend({
 
 					$('#modal-overwrite-workspace-etl').modal('show')
 
-					//$('#button-overwrite-workspace-accept').click(function() {
+					$('#button-overwrite-workspace-accept').click(function() {
 
-					//	$('#modal-overwrite-workspace-etl').modal('hide')
+					$('#modal-overwrite-workspace-etl').modal('hide')
 
 						$.ajax({
 							type: 'POST',
@@ -167,7 +167,7 @@ gvsigolETL.Toolbar = Class.extend({
 							},
 							error: function(){}
 						});
-					//});
+					});
 				}		
 			});
 		});
