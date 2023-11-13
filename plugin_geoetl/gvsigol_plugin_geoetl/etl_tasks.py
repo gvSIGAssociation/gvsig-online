@@ -2177,7 +2177,7 @@ def input_Postgis(dicc):
         
         if geometry != '':
 
-            srid, type_geom = get_type_n_srid(tab, esq, geometry)
+            srid, type_geom = get_type_n_srid(tab, esq, geometry, params)
 
 
         if dicc['checkbox'] == 'true':
@@ -2508,9 +2508,15 @@ def trans_ExplodeGeom(dicc):
     return [table_name_target]
 
 
-def get_type_n_srid(table_name, schema = GEOETL_DB["schema"], geom = 'wkb_geometry'):
+def get_type_n_srid(table_name, schema = GEOETL_DB["schema"], geom = 'wkb_geometry', params = None):
 
-    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    if not params:
+
+        conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    else:
+        conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+
+    
     cur = conn.cursor()
 
     #sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
