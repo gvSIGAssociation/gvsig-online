@@ -1982,6 +1982,24 @@ def trans_Union(dicc):
         cur.execute(sqlDup)
         conn.commit()
 
+    if multi == 'true':
+        srid, type_geom = get_type_n_srid(table_name_source)
+
+        if type_geom.startswith('MULTI'):
+            pass
+        else:
+            type_geom = 'MULTI'+type_geom
+
+        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
+        sqlAlter = sql.SQL(sqlAlter_).format(
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
+                    tbl_target = sql.Identifier(table_name_target),
+                    type_geom = sql.SQL(type_geom),
+                    epsg = sql.SQL(str(srid)))
+        
+        cur.execute(sqlAlter)
+        conn.commit()
+
     return [table_name_target]
 
 def input_Indenova(dicc):
@@ -2384,6 +2402,18 @@ def trans_FilterGeom(dicc):
             tbl_source = sql.Identifier(table_name_source)
         )
         cur.execute(sqlDup,[typeGeom[i]])
+        conn.commit()
+
+        srid, tg = get_type_n_srid(table_name_source)
+
+        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
+        sqlAlter = sql.SQL(sqlAlter_).format(
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
+                    tbl_target = sql.Identifier(output[i]),
+                    type_geom = sql.SQL(typeGeom[i][:-1]),
+                    epsg = sql.SQL(str(srid)))
+        
+        cur.execute(sqlAlter)
         conn.commit()
 
     conn.close()
@@ -4426,12 +4456,12 @@ def trans_Buffer(dicc):
         cur.execute(sqlDropCol)
         conn.commit()
 
-
-    if type_geom == 'MULTIPOLYGON':
-        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(ST_Multi(wkb_geometry), {epsg})'
+    if type_geom.startswith('MULTI'):
+        pass
     else:
-        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
+        type_geom = 'MULTI'+type_geom
 
+    sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(ST_Multi(wkb_geometry), {epsg})'
     
     sqlAlter = sql.SQL(sqlAlter_).format(
                 schema = sql.Identifier(GEOETL_DB["schema"]),
