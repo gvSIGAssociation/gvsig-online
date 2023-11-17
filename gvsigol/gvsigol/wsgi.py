@@ -24,6 +24,14 @@ if os.environ.get("DEBUG_REMOTE") and os.environ.get("DEBUG_REMOTE")=='True' and
         print('INFO: Start the VS Code debugger now, waiting...')                
         debugpy.wait_for_client()
         print('INFO: Ready for debugging on port 6000....') 
+        # hot reload
+        #import uwsgi
+        #from uwsgidecorators import timer
+        #from django.utils import autoreload
+        #@timer(3)
+        #def change_code_gracefull_reload(sig):
+        #    if autoreload.code_changed():
+        #        uwsgi.reload()      
     except:
         print('WARNING: Problem loading debugpy.') 
         pass
