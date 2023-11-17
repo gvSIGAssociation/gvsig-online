@@ -24,7 +24,7 @@
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
-import os, sys
+import os
 import ldap
 import django.conf.locale
 from django.conf import settings
@@ -33,12 +33,72 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 import datetime
 from gvsigol.utils import import_settings
+import environ
+
+
+print ("INFO: Ejecutando settings.py !!...........................................")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
     BASE_DIR = os.path.join(os.path.abspath(os.getcwd()), "gvsigol")
+
+if os.environ.get("UWSGI_ENABLED") and os.environ.get("UWSGI_ENABLED")=='True': 
+    default_static_dir="/opt/gvsigonline/static"
+    default_static_url="/static/"
+    default_media_url="/media/"
+else:
+    default_static_dir=str(os.path.join(BASE_DIR, 'assets'))
+    default_static_url="/gvsigonline/static/"
+    default_media_url="/gvsigonline/media/"
+
+
+
+# Define default environment 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False),    
+    BASE_URL=(str,'https://localhost'),
+    STATIC_ROOT=(str,default_static_dir),
+    STATIC_URL=(str,default_static_url),
+    MEDIA_ROOT=(str,'/opt/gvsigol_data/'),
+    MEDIA_URL=(str,default_media_url),
+    ALLOWED_HOST_NAMES=(list,['http://localhost:8000']),
+    GVSIGOL_PLUGINS=(list),
+    GVSIGOL_SKIN=(str,'skin-blue'),
+    DB_HOST=(str,'localhost'),
+    DB_PORT=(str,'5432'),
+    DB_USER=(str,'gvsigonline'),
+    DB_PASS=(str,'gvsigonline'),
+    DB_NAME=(str,'gvsigonline'),
+    # Auth
+    DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
+    GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
+    GVSIGOL_AUTH_MIDDLEWARE=(str,''),
+    OIDC_VERIFY_SSL=(bool, True),
+    # Setup support for proxy headers
+    USE_X_FORWARDED_HOST=(bool,True),
+    SECURE_PROXY_SSL_HEADER=(tuple,('HTTP_X_FORWARDED_PROTO', 'https')),
+    LDAP_ENABLED=(bool,False),
+    AUTH_DASHBOARD_UI=(bool,True),
+    AUTH_READONLY_USERS=(bool,False),
+    # UI
+    IFRAME_MODE_UI=(bool,False),
+    #cors
+    CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),
+    CORS_ALLOW_CREDENTIALS = (bool,True),
+    CORS_ORIGIN_ALLOW_ALL = (bool,False),
+    # frontend SPA
+    USE_SPA_PROJECT_LINKS = (bool,False),
+    FRONTEND_BASE_URL = (str,'/gvsigonline'),
+    FRONTEND_REDIRECT_URL = (str,'/gvsigonline'),
+    #Log level
+    LOG_LEVEL=(str,"DEBUG")
+    
+)
+ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
+environ.Env.read_env(ENVIRON_FILE)
 
 # Eliminando warnings molestos  
 import requests
@@ -64,6 +124,9 @@ if len(SECRET_KEY) == 14:
         except IOError:
             Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
 
+#
+# TODO: Revisar si va a ser necesario con Docker ya que existe un .env que debe añadirse al .svnignore/.gitignore
+#
 try:
     from gvsigol import settings_passwords
 except:
@@ -123,15 +186,14 @@ finally:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['*']
-#USE_X_FORWARDED_HOST = True
-#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
+SECURE_PROXY_SSL_HEADER = env('SECURE_PROXY_SSL_HEADER')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
 #GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
-
 
 
 # Application definition
@@ -139,7 +201,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    #'mozilla_django_oidc',
+    'mozilla_django_oidc',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -157,43 +219,25 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
 
-    ############# APPS ################
-    #'gvsigol_app_librapicassa',
-    #'gvsigol_app_eliana',
-    #'gvsigol_app_cartagena',
-    'gvsigol_app_dev',
-
-    ############# PLUGINS ################
-    'gvsigol_plugin_catalog',
-    'gvsigol_plugin_catastro',
-    #'gvsigol_plugin_albacete_cementerio',
-    #'gvsigol_plugin_business',
-    #'gvsigol_plugin_charts',
-    #'gvsigol_plugin_downloadman',
-    'gvsigol_plugin_draw',
-    'gvsigol_plugin_edition',
-    #'gvsigol_plugin_elevation',
-    #'gvsigol_plugin_geocoding',
-    'gvsigol_plugin_geoetl',
-    'gvsigol_plugin_importfromservice',
-    'gvsigol_plugin_importvector',
-    #'gvsigol_plugin_oidc_mozilla',
-    'gvsigol_plugin_print',
-    #'gvsigol_plugin_restapi',
-    'gvsigol_plugin_baseapi',
-    'gvsigol_plugin_featureapi',
-    'gvsigol_plugin_projectapi',
-    #'gvsigol_plugin_picassa',
-    #'gvsigol_plugin_sigpac',
-    #'gvsigol_plugin_vinya',
-    #'gvsigol_plugin_sampledashboard',
-    #'gvsigol_plugin_gtfs_editor',
-    #'gvsigol_plugin_prueba',
     'actstream',
     #### DEPENDENCIES ######,
-    'django_celery_beat'
+    'django_celery_beat'    
 ]
 
+# environment
+#from dotenv import load_dotenv
+#load_dotenv()
+
+# default environment
+
+#Load plugins
+#plugins = envos.getenv("GVSIGOL_PLUGINS").split(",")
+for i in env('GVSIGOL_PLUGINS'):
+    print("INFO: Loading plugin " + i)
+    INSTALLED_APPS.append(i)
+
+
+# corsheader
 try:
     __import__('corsheaders')
     INSTALLED_APPS.append('corsheaders')
@@ -215,11 +259,10 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'mozilla_django_oidc.middleware.SessionRefresh',
+    'mozilla_django_oidc.middleware.SessionRefresh',    
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -232,7 +275,9 @@ try:
 except ImportError:
     print('ERROR: No ha instalado la libreria corsheaders')
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = env('CORS_ORIGIN_ALLOW_ALL')
+CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
+CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
 
 CRONTAB_ACTIVE = True
 ROOT_URLCONF = 'gvsigol.urls'
@@ -272,11 +317,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gvsigonline',
-        'USER': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-        'PASSWORD': DB_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+        'PASSWORD': env('DB_PASS'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
     }
 }
 POSTGIS_VERSION = (2, 3, 3)
@@ -302,7 +347,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': True,
+    'ENABLED': env('LDAP_ENABLED'),
     'HOST':'localhost',
     'PORT': '389',
     'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
@@ -315,27 +360,31 @@ GVSIGOL_LDAP = {
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
     'django_auth_ldap.backend.LDAPBackend',
-    #'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
+#Load auth backends
+AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + env('DJANGO_AUTHENTICATION_BACKENDS')
+print ("INFO: Additional AUTHENTICATION_BACKENDS = " + str(env('DJANGO_AUTHENTICATION_BACKENDS')))
+
 LOGIN_URL = 'gvsigol_authenticate_user'
 #GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
-GVSIGOL_AUTH_BACKEND = 'gvsigol_auth'
+GVSIGOL_AUTH_BACKEND = env('GVSIGOL_AUTH_BACKEND')
 LOGIN_REDIRECT_URL = "home"
+#LOGIN_REDIRECT_URL = "https://localhost/gvsigonline"
 LOGOUT_REDIRECT_URL = "index"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
     import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
-GVSIGOL_AUTH_MIDDLEWARE = 'gvsigol_app_ciudades_conectadas.authmiddleware'
-
+GVSIGOL_AUTH_MIDDLEWARE = env('GVSIGOL_AUTH_MIDDLEWARE')
 AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
 #AUTH_LDAP_ROOT_DN = "dc=dev,dc=gvsigonline,dc=com"
 #AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 AUTH_LDAP_ROOT_DN = "dc=local,dc=gvsigonline,dc=com"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
-AUTH_DASHBOARD_UI = True
-AUTH_READONLY_USERS = False
+AUTH_DASHBOARD_UI = env('AUTH_DASHBOARD_UI')
+AUTH_READONLY_USERS = env('AUTH_READONLY_USERS')
+OIDC_VERIFY_SSL = env('OIDC_VERIFY_SSL')
 
 # Internationalization
 LANGUAGE_CODE = 'es'
@@ -345,17 +394,17 @@ USE_L10N = True
 USE_TZ = True
 
 EXTRA_LANG_INFO = {
-    'va': {
-        'bidi': False,
-        'code': 'va',
-        'name': 'Valencian',
-        'name_local': 'Valencian'
-    },
     'ca-es@valencia': {
         'bidi': False,
         'code': 'ca-es@valencia',
         'name': 'Valencian',
         'name_local': 'Valencià'
+    },
+    'va': {
+        'bidi': False,
+        'code': 'va',
+        'name': 'Valencian',
+        'name_local': 'Valencian'
     },
 }
 
@@ -365,11 +414,11 @@ django.conf.locale.LANG_INFO = LANG_INFO
 
 LANGUAGES = (
     ('es', _('Spanish')),
+    ('ca-es@valencia', _('Valencian')),
     ('ca', _('Catalan')),
-    ('ca-es@valencia', _('Valencian  ca-es-valencia')),
-    ('de', _('German')),
     ('en', _('English')),
-    ('pt', _('Portuguese')),
+    #('pt', _('Portuguese')),
+    ('de', _('German')),
     ('pt-br', _('Brazilian Portuguese')),
 )
 
@@ -384,16 +433,7 @@ LOCALE_PATHS =  [
 ]
 for app in INSTALLED_APPS:
     if app.startswith('gvsigol_app_') or app.startswith('gvsigol_plugin_'):
-        if os.path.isdir(os.path.join(BASE_DIR, app, 'locale')):
-            LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
-
-for p in sys.path:
-    if os.path.isdir(os.path.join(p, "gvsigol_" + os.path.basename(p))):
-        app_name = "gvsigol_" + os.path.basename(p)
-    else:
-        app_name = None
-    if app_name and app_name in INSTALLED_APPS:
-        LOCALE_PATHS.append(os.path.join(p, app_name, 'locale'))
+        LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
 
 # Email settings
 EMAIL_BACKEND_ACTIVE = True
@@ -411,22 +451,22 @@ SITE_ID=1
 #BASE_URL = 'https://localhost'
 #MEDIA_ROOT = '/usr/local/var/www/media/'
 #MEDIA_URL = 'https://localhost/media/'
-BASE_URL = 'https://localhost'
-MEDIA_ROOT = '/var/www/media/'
-MEDIA_URL = 'https://localhost/media/'
-STATIC_URL = '/gvsigonline/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+BASE_URL = env('BASE_URL') 
+MEDIA_ROOT = env('MEDIA_ROOT')
+MEDIA_URL = env('MEDIA_URL')
+STATIC_ROOT = env('STATIC_ROOT')
+STATIC_URL = env('STATIC_URL')
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'gvsigol_core/static'),
-    os.path.join(BASE_DIR, 'gvsigol_auth/static'),
-    os.path.join(BASE_DIR, 'gvsigol_services/static'),
-    os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
-    os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_librapicassa/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_picassa/static'),
-)
+#STATICFILES_DIRS = (
+#    os.path.join(BASE_DIR, 'gvsigol_core/static'),
+#    os.path.join(BASE_DIR, 'gvsigol_auth/static'),
+#    os.path.join(BASE_DIR, 'gvsigol_services/static'),
+#    os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
+#    os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
+#    os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
+#    os.path.join(BASE_DIR, 'gvsigol_app_librapicassa/static'),
+#    os.path.join(BASE_DIR, 'gvsigol_plugin_picassa/static'),
+#)
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -436,20 +476,20 @@ STATICFILES_FINDERS = (
 GVSIGOL_VERSION = '3.x.x-dev'
 
 GVSIGOL_USERS_CARTODB = {
-    'dbhost': 'localhost',
-    'dbport': '5432',
-    'dbname': 'gvsigonline',
-    'dbuser': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'dbhost': env('DB_HOST'),
+    'dbport': env('DB_PORT'),
+    'dbname': env('DB_NAME'),
+    'dbuser': env('DB_USER'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'dbpassword': env('DB_PASS') # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
 
 MOSAIC_DB = {
-    'host': 'localhost',
-    'port': '5432',
-    'database': 'gvsigonline',
+    'host': env('DB_HOST'),
+    'port': env('DB_PORT'),
+    'database': env('DB_NAME'),
     'schema': 'imagemosaic',
-    'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'user': env('DB_USER'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'passwd': env('DB_PASS') # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
 
 #GDALTOOLS_BASEPATH = '/usr/bin'
@@ -538,19 +578,8 @@ GVSIGOL_BASE_LAYERS = {
     }
 }
 
-#skin-blue
-#skin-blue-light
-#skin-red
-#skin-red-light
-#skin-black
-#skin-black-light
-#skin-green
-#skin-green-light
-#skin-purple
-#skin-purple-light
-#skin-yellow
-#skin-yellow-light
-GVSIGOL_SKIN = "skin-cartagena"
+
+GVSIGOL_SKIN = env('GVSIGOL_SKIN')
 
 GVSIGOL_PATH = 'gvsigonline'
 GVSIGOL_NAME = 'gvsig'
@@ -598,7 +627,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        #'mozilla_django_oidc.contrib.drf.OIDCAuthentication',
+        'mozilla_django_oidc.contrib.drf.OIDCAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -643,7 +672,7 @@ LOGGING = {
         },
         'gvsigol': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': env('LOG_LEVEL'),
             'propagate': False
         },
     },
@@ -658,6 +687,11 @@ LEGACY_GVSIGOL_SERVICES = {
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
 
+
+CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
+CELERY_TASK_ACKS_LATE = True
+CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TASK_ALWAYS_EAGER  = True
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
@@ -695,7 +729,14 @@ RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
 
 LAYERS_ROOT = 'layer_downloads'
 #ALLOWED_HOST_NAMES = ['http://localhost']
-ALLOWED_HOST_NAMES = ['http://gvsigol.localhost', 'http://localhost']
+
+
+ALLOWED_HOST_NAMES = [env('BASE_URL')]
+for i in env('ALLOWED_HOST_NAMES'):
+    print("INFO: Adding allowed host name: " + i)
+    ALLOWED_HOST_NAMES.append(i)
+print ("INFO: ALLOWED_HOST_NAMES = " + str(ALLOWED_HOST_NAMES))
+
 JWT_AUTH = {
     #'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=5),
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
@@ -712,24 +753,25 @@ GRAPH_MODELS = {
     }
 
 GEOETL_DB = {
-    'host': 'localhost',
-    'port': '5432',
-    'database': 'gvsigonline',
-    'user': DB_USER_DEVEL,
-    'password': DB_PW_DEVEL,
+    'host': env('DB_HOST'),
+    'port': env('DB_PORT'),
+    'database': env('DB_NAME'),
+    'user': env('DB_USER'),
+    'password': env('DB_PASS'),
     'schema': 'ds_plugin_geoetl'
 }
 
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 
-CELERY_TASK_ALWAYS_EAGER  = True # ejecutar en el mismo hilo??
-CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
-CELERY_TASK_ACKS_LATE = True
-CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-USE_SPA_PROJECT_LINKS = 'True'
+# Frontend SPA
+USE_SPA_PROJECT_LINKS = env('USE_SPA_PROJECT_LINKS')
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL')
+FRONTEND_REDIRECT_URL = env('FRONTEND_REDIRECT_URL')
 
-FRONTEND_BASE_URL = '/spa'
-#FRONTEND_REDIRECT_URL = '/spa'
+# prueba para el gtfseditor y el problema con POST
+#APPEND_SLASH=True
 
-IFRAME_MODE_UI = False
+# UI iframe mode 
+IFRAME_MODE_UI=env('IFRAME_MODE_UI')
+
