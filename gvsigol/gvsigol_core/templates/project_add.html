@@ -26,8 +26,8 @@
 				<ul class="nav nav-tabs">
               		<li class="active"><a href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
               		<li><a href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
-              		<li><a href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
-              		<li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>
+              		<li><a href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>              		
+					{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
             	</ul>
             	
             	<div class="tab-content">

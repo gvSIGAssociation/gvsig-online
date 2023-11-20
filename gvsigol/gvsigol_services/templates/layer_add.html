@@ -34,8 +34,8 @@
 		
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
-          	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
-          	<li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+          	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>          	
+			{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
           	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
         </ul>
