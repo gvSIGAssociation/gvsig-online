@@ -552,3 +552,5 @@ USE_SPA_PROJECT_LINKS = '##USE_SPA_PROJECT_LINKS##'
 
 # UI iframe mode (hide html elements)
 IFRAME_MODE_UI = False
+# Show/hide permissions tab
+MANAGE_PERMISSION_UI = True

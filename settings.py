@@ -85,6 +85,7 @@ env = environ.Env(
     AUTH_READONLY_USERS=(bool,False),
     # UI
     IFRAME_MODE_UI=(bool,False),
+    MANAGE_PERMISSION_UI=(bool,True),
     #cors
     CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),
     CORS_ALLOW_CREDENTIALS = (bool,True),
@@ -775,3 +776,5 @@ FRONTEND_REDIRECT_URL = env('FRONTEND_REDIRECT_URL')
 # UI iframe mode 
 IFRAME_MODE_UI=env('IFRAME_MODE_UI')
 
+# Allow users to manage permissions 
+MANAGE_PERMISSION_UI=env('MANAGE_PERMISSION_UI')
