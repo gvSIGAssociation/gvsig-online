@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:53+0000\n"
-"PO-Revision-Date: 2023-10-26 10:23+0200\n"
+"PO-Revision-Date: 2023-11-06 15:54+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -28,58 +28,58 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: de\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.1\n"
 
 #: static/js/lib/_trans.gvsigol.js:2
 msgid "Edit layer"
-msgstr ""
+msgstr "Ebene bearbeiten"
 
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "You are editing the layer"
-msgstr ""
+msgstr "Sie bearbeiten die Ebene"
 
 #: static/js/lib/_trans.gvsigol.js:4
 msgid "The layer you are trying to edit is locked"
-msgstr ""
+msgstr "Die Ebene, die Sie zu bearbeiten versuchen, ist gesperrt"
 
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
 msgid "Add point"
-msgstr ""
+msgstr "Punkt"
 
 #: static/js/lib/widgets/editionBar.js:103
 msgid "Add line"
-msgstr ""
+msgstr "Zeile hinzufügen"
 
 #: static/js/lib/widgets/editionBar.js:111
 msgid "Add polygon"
-msgstr ""
+msgstr "Polygon hinzufügen"
 
 #: static/js/lib/widgets/editionBar.js:128
 msgid "Add point to center"
-msgstr ""
+msgstr "Punkt zum Zentrum hinzufügen"
 
 #: static/js/lib/widgets/editionBar.js:139
 msgid "Edit feature"
-msgstr ""
+msgstr "Funktion bearbeiten"
 
 #: static/js/lib/widgets/editionBar.js:150
 #: static/js/lib/widgets/editionBar.js:2270
 msgid "Remove feature"
-msgstr ""
+msgstr "Funktion entfernen"
 
 #: static/js/lib/widgets/editionBar.js:161
 msgid "Stop edition"
-msgstr ""
+msgstr "Ausgabe stoppen"
 
 #: static/js/lib/widgets/editionBar.js:239
 #: static/js/lib/widgets/editionBar.js:245
 msgid "Error starting edition"
-msgstr ""
+msgstr "Fehler beim Starten der Ausgabe"
 
 #: static/js/lib/widgets/editionBar.js:617
 msgid "Select feature to edit"
-msgstr ""
+msgstr "Zu bearbeitendes Merkmal auswählen"
 
 #: static/js/lib/widgets/editionBar.js:637
 msgid "More element info"
@@ -87,40 +87,42 @@ msgstr ""
 
 #: static/js/lib/widgets/editionBar.js:647
 msgid "Detalles de atributos"
-msgstr ""
+msgstr "Einzelheiten der Attribute"
 
 #: static/js/lib/widgets/editionBar.js:1336
 #: static/js/lib/widgets/editionBar.js:1820
 #: static/js/lib/widgets/editionBar.js:2241
 msgid "Show form"
-msgstr ""
+msgstr "Show form"
 
 #: static/js/lib/widgets/editionBar.js:1363
 #: static/js/lib/widgets/editionBar.js:1855
 msgid "Feature properties"
-msgstr ""
+msgstr "Eigenschaften"
 
 #: static/js/lib/widgets/editionBar.js:1364
 #: static/js/lib/widgets/editionBar.js:1856
 msgid "Feature resources"
-msgstr ""
+msgstr "Feature-Ressourcen"
 
 #: static/js/lib/widgets/editionBar.js:1374
 #: static/js/lib/widgets/editionBar.js:1866
 msgid "Save"
-msgstr ""
+msgstr "Save"
 
 #: static/js/lib/widgets/editionBar.js:1375
 #: static/js/lib/widgets/editionBar.js:1867
 #: static/js/lib/widgets/editionBar.js:2281
 msgid "Cancel"
-msgstr ""
+msgstr "Cancel"
 
 #: static/js/lib/widgets/editionBar.js:1466
 msgid ""
 "No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, "
 "por favor activarla en Limesurvey"
 msgstr ""
+"Es gibt keine aktive Umfrage, die ausgefüllt werden muss. Um die Umfrage zu "
+"beantworten, aktivieren Sie sie bitte in Limesurvey"
 
 #: static/js/lib/widgets/editionBar.js:1537
 #: static/js/lib/widgets/editionBar.js:2036
@@ -128,32 +130,37 @@ msgid ""
 "Version conflict: the feature was edited concurrently. Restart your editing "
 "session to get the last version."
 msgstr ""
+"Versionskonflikt: Das Merkmal wurde gleichzeitig bearbeitet. Starten Sie "
+"Ihre Bearbeitungssitzung neu, um die letzte Version zu erhalten."
 
 #: static/js/lib/widgets/editionBar.js:1632
 #: static/js/lib/widgets/editionBar.js:2439
 #: static/js/lib/widgets/editionBar.js:2442
 msgid "Failed to save the new record. Please check values"
 msgstr ""
+"Der neue Datensatz konnte nicht gespeichert werden. Bitte Werte überprüfen"
 
 #: static/js/lib/widgets/editionBar.js:1672
 msgid "can't be null"
-msgstr ""
+msgstr "kann nicht null sein"
 
 #: static/js/lib/widgets/editionBar.js:1965
 msgid ""
 "There is no active survey to be filled out. To answer the survey, please "
 "activate it in Limesurvey"
 msgstr ""
+"Es gibt keine aktive Umfrage, die ausgefüllt werden muss. Um die Umfrage zu "
+"beantworten, aktivieren Sie sie bitte in Limesurvey"
 
 #: static/js/lib/widgets/editionBar.js:2280
 msgid "Remove"
-msgstr ""
+msgstr "Remove"
 
 #: static/js/lib/widgets/editionBar.js:2494
 msgid "Failed to remove layer lock"
-msgstr ""
+msgstr "Ebenensperre konnte nicht entfernt werden"
 
 #: static/js/lib/widgets/editionBar.js:2604
 #: static/js/lib/widgets/editionBar.js:2606
 msgid "Error validando la version"
-msgstr ""
+msgstr "Fehler bei der Validierung der Version"

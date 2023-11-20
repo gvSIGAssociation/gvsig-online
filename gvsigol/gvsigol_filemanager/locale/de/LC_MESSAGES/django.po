@@ -3,169 +3,171 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:52+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2023-11-06 16:05+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.1\n"
 
 #: gvsigol_filemanager/forms.py:5
 msgid "Directory name"
-msgstr ""
+msgstr "Name des Verzeichnisses"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:13
 msgid "Export"
-msgstr ""
+msgstr "Export"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:48
 msgid "Warning!"
-msgstr ""
+msgstr "Warning!"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:49
 msgid ""
 "Before exporting the shapefile check the name of the columns. Column names "
 "can not contain spaces or special characters."
 msgstr ""
+"Überprüfen Sie vor dem Exportieren des Shapefiles den Namen der Spalten. "
+"Spaltennamen dürfen keine Leerzeichen oder Sonderzeichen enthalten."
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:60
 msgid "Table creation mode"
-msgstr ""
+msgstr "Modus der Tabellenerstellung"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:67
 msgid "Data store"
-msgstr ""
+msgstr "Data store"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:74
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:29
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:76
 msgid "Layer will be uploaded to the selected data store"
-msgstr ""
+msgstr "Die Ebene wird in den ausgewählten Datenspeicher hochgeladen"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:82
 msgid "Character encoding"
-msgstr ""
+msgstr "Zeichencodierung"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:86
 msgid "Coordinate reference system"
-msgstr ""
+msgstr "Coordinate reference system"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:109
 msgid "Default"
-msgstr ""
+msgstr "Default"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:27
 msgid "Select"
-msgstr ""
+msgstr "Select"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:30
 msgid "Size"
-msgstr ""
+msgstr "Größe"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:31
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:34
 msgid "Actions"
-msgstr ""
+msgstr "Aktionen"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:74
 msgid "Delete directory"
-msgstr ""
+msgstr "Verzeichnis löschen"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:77
 msgid "Export to database"
-msgstr ""
+msgstr "Export to database"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:82
 msgid "Transform to database"
-msgstr ""
+msgstr "Transform to database"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:87
 msgid "Unzip file"
-msgstr ""
+msgstr "Unzip file"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:90
 msgid "Delete file"
-msgstr ""
+msgstr "Delete file"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:101
 msgid "Nothing to see here."
-msgstr ""
+msgstr "Hier gibt es nichts zu sehen."
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:110
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:121
 #: gvsigol_filemanager/templates/filemanager_create_directory.html:13
 msgid "Create directory"
-msgstr ""
+msgstr "Verzeichnis erstellen"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:111
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:122
 #: gvsigol_filemanager/templates/filemanager_upload.html:14
 msgid "Upload"
-msgstr ""
+msgstr "Upload"
 
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:112
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:123
 msgid "Export history"
-msgstr ""
+msgstr "Export history"
 
 #: gvsigol_filemanager/templates/dashboard_filemanager_menu.html:7
 msgid "File manager"
-msgstr ""
+msgstr "File manager"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:13
 msgid "Back"
-msgstr ""
+msgstr "Zurück"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:23
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:24
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:25
 msgid "File"
-msgstr ""
+msgstr "File"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:26
 msgid "Time"
-msgstr ""
+msgstr "Zeit"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:27
 msgid "Message"
-msgstr ""
+msgstr "Nachricht"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:28
 msgid "User"
-msgstr ""
+msgstr "User"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:58
 msgid "Try again"
-msgstr ""
+msgstr "Erneut versuchen"
 
 #: gvsigol_filemanager/views.py:322 gvsigol_filemanager/views.py:333
 msgid "Error deleting resource"
-msgstr ""
+msgstr "Fehler beim Löschen der Ressource"
 
 #: gvsigol_filemanager/views.py:322
 msgid "exists in datastore"
-msgstr ""
+msgstr "im Datenspeicher vorhanden"
 
 #: gvsigol_filemanager/views.py:356
 msgid "Error unzipping resource"
-msgstr ""
+msgstr "Fehler beim Entpacken der Ressource"
