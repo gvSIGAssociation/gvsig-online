@@ -30,7 +30,7 @@ import random
 import json
 from gvsigol.settings import EXTERNAL_LAYER_SUPPORTED_TYPES
 from django.core.exceptions import ValidationError
-from gvsigol_services.utils import get_user_layergroups
+from gvsigol_services.utils import get_user_layergroups, can_manage_layergroup
 
 
 external_layer_supported_types = tuple((x,x) for x in EXTERNAL_LAYER_SUPPORTED_TYPES)
@@ -182,10 +182,10 @@ class LayerUpdateForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
-    datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single', 'readonly': 'true'}))
+    datastore = forms.CharField(label=_('Datastore'), required=True, max_length=200, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
     name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
     title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=None, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     format = forms.ChoiceField(label=_('Format'), required=False, choices=img_formats, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
@@ -205,7 +205,25 @@ class LayerUpdateForm(forms.ModelForm):
     time_resolution_second = forms.CharField(label=_('Resolution second'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_default_value_mode = forms.ChoiceField(label=_('Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_default_value = forms.DateTimeField(label=_('Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
-    
+
+    def __init__(self, request, *args, **kwargs):
+        layergroup_id = kwargs.pop('layergroup_id')
+        instance = kwargs.get('instance')
+        super().__init__(*args, **kwargs)
+        
+        if instance and not can_manage_layergroup(request, instance.layer_group):
+            self.fields['layer_group'].widget = forms.Select(attrs={'class' : 'form-control js-example-basic-single', 'readonly': 'true', 'disabled': 'true'})
+            self.fields['layer_group'].queryset = LayerGroup.objects.filter(id=instance.layer_group_id)
+            return
+        if request.user.is_superuser:
+            self.fields['layer_group'].queryset = LayerGroup.objects.all().order_by('name')
+        else:
+            self.fields['layer_group'].queryset = (get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
+        if layergroup_id and LayerGroup.objects.filter(id=layergroup_id).exists():
+            lyrgroup_field = self.fields['layer_group']
+            lyrgroup_field.widget = forms.Select(attrs={'class' : 'form-control js-example-basic-single', 'readonly': 'true', 'disabled': 'true'})
+            lyrgroup_field.queryset = lyrgroup_field.queryset.filter(id=layergroup_id)
+
 class LayerUploadTypeForm(forms.ModelForm):
     class Meta:
         model = Datastore
