@@ -40,8 +40,7 @@
 				<ul id="project-update-tabs" class="nav nav-tabs">
               		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
               		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
-              		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
-              		<li><a  data-id="3" href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>					
+              		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>              		
 					{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
               		{% if superuser %}<li><a  data-id="4" href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>{% endif %}
             	</ul>
