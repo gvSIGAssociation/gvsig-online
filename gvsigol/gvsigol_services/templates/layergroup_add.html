@@ -36,8 +36,8 @@
 			</div>
 
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab">{% trans "General" %}</a></li>
-				<li><a href="#tab-layergroup-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab">{% trans "General" %}</a></li>				
+				{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layergroup-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab-layergroup-general">
