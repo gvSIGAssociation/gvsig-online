@@ -1363,12 +1363,14 @@ def layer_update(request, layer_id):
         abstract = request.POST.get('md-abstract')
         updatedParams['title'] = title
         if not layergroup_id:
-            layergroup_id = request.POST.get('layer_group')
+            layergroup_id = request.POST.get('layer_group', layer.layer_group_id)
         try:
             layer_group = LayerGroup.objects.get(id=layergroup_id)
         except LayerGroup.DoesNotExist:
             return not_found_view(request)
-        if not utils.can_use_layergroup(request, layer_group, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
+        if layer.layer_group != layer_group and not (utils.can_manage_layergroup(request, layer.layer_group)
+                                                     and utils.can_manage_layergroup(request, layer_group)):
+            # don't allow changing layer_group if the user can't manage the previous and the new layergroups
             return forbidden_view(request)
         layerConf = ast.literal_eval(layer.conf) if layer.conf else {}
 
@@ -1559,25 +1561,12 @@ def layer_update(request, layer_id):
     else:
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
-        form = LayerUpdateForm(instance=layer)
+        form = LayerUpdateForm(request, layergroup_id=layergroup_id, instance=layer)
         
         if layer.external_params:
             params = json.loads(layer.external_params)
             for key in params:
                 form.initial[key] = params[key]
-
-        if not request.user.is_superuser:
-            form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).order_by('name').distinct()
-            form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
-
-        if layergroup_id:
-            try:
-                lyrgroup = LayerGroup.objects.get(id=layergroup_id)
-                form.fields['datastore'].queryset = form.fields['datastore'].queryset.filter(workspace__server__id=lyrgroup.server_id)
-                form.fields['layer_group'].queryset = form.fields['layer_group'].queryset.filter(id=layergroup_id)
-            except LayerGroup.DoesNotExist:
-                pass
 
         try:
             layerConf = ast.literal_eval(layer.conf)
