@@ -754,6 +754,10 @@ def test_conexion(request):
 
                 response = etl_schema.test_oracle(jsParams['parameters'][0])
 
+            elif jsParams['type-db'] == 'SQLServer':
+
+                response = etl_schema.test_sqlserver(jsParams['parameters'][0])
+
             return HttpResponse(json.dumps(response), content_type="application/json")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')   
@@ -1224,3 +1228,46 @@ def etl_concatenate_workspace_update(request):
 
     response = {}
     return render(request, 'dashboard_geoetl_concat_workspaces.html', response)
+
+@login_required()
+@staff_required
+def etl_tables_sqlserver(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            
+            jsParams = json.loads(request.POST['jsonParamsSQLServer'])
+
+            listtabl = etl_schema.get_tables_sqlserver(jsParams['parameters'][0])
+            response = json.dumps(listtabl)
+
+            return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_schemas_sqlserver(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            
+            jsParams = json.loads(request.POST['jsonParamsSQLServer'])
+
+            listSchema = etl_schema.get_schemas_sqlserver(jsParams['parameters'][0])
+            response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")
+
+
+@login_required()
+@staff_required
+def etl_data_schema_sqlserver(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            
+            jsParams = json.loads(request.POST['jsonSqlServer'])
+
+            listSchema = etl_schema.get_data_schemas_sqlserver(jsParams['parameters'][0])
+            response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")

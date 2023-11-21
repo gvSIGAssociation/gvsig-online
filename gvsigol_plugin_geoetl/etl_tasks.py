@@ -15,7 +15,7 @@ import gdaltools
 import os, shutil, tempfile
 
 import cx_Oracle
-#from geomet import wkt
+import pymssql
 from .models import database_connections, segex_FechaFinGarantizada, cadastral_requests
 import requests
 import base64
@@ -4151,12 +4151,13 @@ def trans_ExposeAttr(dicc):
 
     for row in cur:
         if 'wkb_geometry' == row[0]:
-            schemaList.append('wkb_geometry')
+            if 'wkb_geometry' not in schemaList:
+                schemaList.append('wkb_geometry')
             break
 
     sql_ = 'create table {schema}.{tbl_target} as (select '
 
-    for attr in schemaList:
+    for at in schemaList:
         sql_ = sql_ + '{},'
     
     
@@ -4472,9 +4473,194 @@ def trans_Buffer(dicc):
     cur.execute(sqlAlter)
     conn.commit()
 
-
-
     conn.close()
     cur.close() 
 
     return [table_name_target]
+
+def input_SqlServer(dicc):
+
+    table_name = dicc['id']
+
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params = json.loads(db.connection_params)
+
+    conn_source_sqlserver = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    cursor_source = conn_source_sqlserver.cursor(as_dict=True)
+
+    if dicc['checkbox'] == 'true':
+        _sql = "SELECT name AS COLUMN_NAME, system_type_name AS DATA_TYPE FROM sys.dm_exec_describe_first_result_set ('%s', NULL, 0) ;" % (dicc['sql'])
+
+    else:
+        _sql = "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME  = '%s'" % (dicc['schema-name'], dicc['table-name'])
+  
+    cursor_source.execute(_sql)
+
+    strColumns = ''
+    columns = []
+    data_types = []
+    geometry = None
+
+    for row in cursor_source:
+        columns.append(row['COLUMN_NAME'])
+        data_types.append(row['DATA_TYPE'])
+        if row['DATA_TYPE'] != 'geometry' and row['DATA_TYPE'] != 'geography':
+            strColumns = strColumns + row['COLUMN_NAME'] + ', '
+        else:
+            strColumns = strColumns + row['COLUMN_NAME'] + '.STAsText() AS '+row['COLUMN_NAME']+', '+row['COLUMN_NAME']+'.STSrid AS SRID, '
+            columns.append('SRID')
+            data_types.append('int')
+    
+    if dicc['checkbox'] == 'true':
+        sql_df = "SELECT TOP 1 %s FROM (%s) a" % (strColumns[:-2], dicc['sql'])
+
+    else:
+        sql_df = 'SELECT TOP 1 %s FROM %s.%s.%s' % (strColumns[:-2], params['db-sql-server'], dicc['schema-name'], dicc['table-name'])
+
+    conn_string_source = 'mssql+pymssql://%s:%s@%s/%s' % (params['username-sql-server'], params['password-sql-server'], params['server-sql-server'], params['db-sql-server'])
+    db_source = create_engine(conn_string_source)
+    conn_source = db_source.connect()
+
+    df = pd.read_sql(sql_df, con = conn_source)
+
+    _decimals = ['decimal', 'numeric', 'float', 'real', 'money', 'smallmoney']
+    _integers = ['int', 'bigint', 'smallint', 'tinyint']
+    _text = ['char', 'varchar', 'nchar', 'nvarchar']
+    _date = ['date', 'datetime', 'datetime2', 'datetimeoffset', 'smalldatetime', 'time']
+    _geo = ['geography', 'geometry']
+
+    convert_dict = {}
+    for i in range (0, len(columns)):
+        
+        if data_types[i] in _integers:
+            convert_dict[columns[i]] = 'int64'
+
+        elif data_types[i] in _decimals:
+            convert_dict[columns[i]] = 'float64'
+
+        elif data_types[i] in _text:
+            convert_dict[columns[i]] = 'string'
+
+        elif data_types[i] in _geo:
+            convert_dict[columns[i]] = 'string'
+            geometry = columns[i]
+
+        elif data_types[i] in _date:
+            convert_dict[columns[i]] = 'datetime64'
+        
+        else:
+            convert_dict[columns[i]] = 'string'
+    
+    df = df.astype(convert_dict)
+    
+    conn_string_target= 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
+    db_target = create_engine(conn_string_target)
+    conn_target = db_target.connect()
+
+    df.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
+
+    conn_source.close()
+    db_source.dispose()
+
+    if dicc['checkbox'] == 'true':
+        _sql = "SELECT %s FROM (%s) a" % (strColumns[:-2], dicc['sql'])
+
+    else:
+        _sql = 'SELECT %s FROM %s.%s.%s' % (strColumns[:-2], params['db-sql-server'], dicc['schema-name'], dicc['table-name'])
+
+    cursor_source.execute(_sql)
+
+    count = 1
+
+    for row in cursor_source:
+        
+        for j in row:
+            if convert_dict[j] == 'string' and row[j]:
+                row[j] = row[j].replace("\x00", "\uFFFD")
+
+        df_tar = pd.DataFrame([row])
+        if count == 1:
+            df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
+            count +=1
+        else:
+            df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='append', index=False)
+
+    conn_target.close()
+    db_target.dispose()
+
+    conn_source_sqlserver.close()
+
+    if geometry:
+
+        type_geom = ''
+        srid = 0
+
+        conn_tgt = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+        cur_tgt = conn_tgt.cursor()
+
+        sqlTypeGeom = sql.SQL("SELECT split_part({geomAttr},' (', 1) FROM {schema}.{tbl_target} WHERE {geomAttr} is not null GROUP BY split_part({geomAttr},' (', 1);").format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name),
+            geomAttr = sql.Identifier(geometry))
+
+        cur_tgt.execute(sqlTypeGeom)
+        conn_tgt.commit()
+
+        for row in cur_tgt:
+            if type_geom == '':
+                type_geom = row[0]
+            else:
+                type_geom = 'GEOMETRY'
+
+        sqlSRID =  sql.SQL("SELECT {srid} FROM {schema}.{tbl_target} WHERE {srid} is not null GROUP BY {srid} ;").format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name),
+            srid = sql.Identifier('SRID'))
+
+        cur_tgt.execute(sqlSRID)
+        conn_tgt.commit()
+
+        for row in cur_tgt:
+            if srid == 0:
+                srid = row[0]
+            else:
+                srid = 0
+
+        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ADD COLUMN wkb_geometry geometry ({type_geom},{epsg});'
+        sqlAlter = sql.SQL(sqlAlter_).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name),
+            type_geom = sql.SQL(type_geom),
+            epsg = sql.SQL(str(srid)))
+
+        cur_tgt.execute(sqlAlter)
+        conn_tgt.commit()
+
+        sqlUpdate_ = 'UPDATE {schema}.{tbl_target} SET wkb_geometry = ST_GEOMFROMTEXT({geomAttr}) ;'
+        sqlUpdate = sql.SQL(sqlUpdate_).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name),
+            geomAttr = sql.Identifier(geometry))
+
+        cur_tgt.execute(sqlUpdate)
+        conn_tgt.commit()       
+
+        if srid != 0:
+            sqlDropColumn_ = 'ALTER TABLE {schema}.{tbl_target} DROP COLUMN {geomAttr}, DROP COLUMN "SRID";'
+        else:
+            sqlDropColumn_ = 'ALTER TABLE {schema}.{tbl_target} DROP COLUMN {geomAttr};'
+
+        sqlDropColumn = sql.SQL(sqlDropColumn_).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name),
+            geomAttr = sql.Identifier(geometry))
+
+
+        cur_tgt.execute(sqlDropColumn)
+        conn_tgt.commit()
+
+        cur_tgt.close()
+        conn_tgt.close()
+
+    return [table_name]

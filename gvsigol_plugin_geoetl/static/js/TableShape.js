@@ -3327,6 +3327,395 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// INPUT SQL SERVER ////
+
+input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "input_SqlServer",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3, width:1},attr));
+        
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"SQL Server", 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-input-sql-server-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('SQL Server'))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
+                                '<select id="db-'+ID+'" class="form-control"></select>'+
+                            '</div>'+
+                            '<div class="column20">'+
+                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
+                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<label form="schema-name" class="col-form-label">'+gettext('Schema')+':</label>'+
+                                '<select class="form-control" id="schema-name-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<div class="column20">'+
+                                '<label for ="get-tables" class="col-form-label">'+gettext('Get tables')+':</label><br>'+
+                                '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
+                            '</div>'+
+                            '<div class="column80">'+
+                                '<label form="table-name" class="col-form-label">'+gettext('Table')+':</label>'+
+                                '<select class="form-control" id="table-name-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<br><br><br>'+ 
+                            '<div class="col-md-12">'+
+                                '<input type="checkbox" name="checkbox-sql-server" id="checkbox-'+ID+'"/>'+
+                                '<label for="checkbox">'+gettext('Do you want to write a SQL statement?')+'</label>'+											
+                            '</div>'+
+                            '<div class="more-options-'+ID+'">'+
+                                '<label class="col-form-label">'+gettext('SQL statement:')+'</label>'+
+                                '<textarea id="sql-'+ID+'" rows="10" class="form-control" placeholder=""></textarea>'+
+                            '</div>'+
+                            
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-sql-server-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        var context = this
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'SQLServer'){
+                $('#db-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
+
+        $(".more-options-"+ID).slideUp("slow")
+        
+
+        $("#checkbox-"+ID).change(function() {
+            if($("#checkbox-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
+            }
+        });
+        
+
+        icon.on("click", function(){
+
+            if (typeof get_sch === 'undefined'){
+
+                get_sch = []
+    
+                $("#schema-name-"+ID+" option").each(function()
+                    {  
+                        get_sch.push($(this).val())
+                    }
+                );
+            }
+    
+            if (typeof get_tbl === 'undefined'){
+    
+                get_tbl = []
+    
+                $("#table-name-"+ID+" option").each(function()
+                    {  
+                        get_tbl.push($(this).val())
+                    }
+                );
+            }
+
+            optionList = []
+            $('#db-'+ID+' option').each(function() {
+                optionList.push($(this).val())
+              });
+
+            for(i=0;i<dbc.length;i++){
+
+                if(dbc[i].type == 'SQLServer'){
+
+                    if (! optionList.includes(dbc[i].name)){
+                        $('#db-'+ID).append(
+                            '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                        );
+                    }
+
+                }
+            };
+
+            $('#dialog-input-sql-server-'+ID).modal('show')
+
+            if($("#checkbox-"+ID).is(':checked')){
+                $(".more-options-"+ID).slideDown("slow")
+                $("#checkbox-"+ID).val("true")
+            }else{
+                $(".more-options-"+ID).slideUp("slow")
+                $("#checkbox-"+ID).val("")
+            }
+            
+        });
+
+        $('#get-schemas-'+ID).on("click", function(){
+                                
+            var paramsSQLServerSchemas = {"id": ID,
+            "parameters": [
+                {"db": $('#db-'+ID).val()}
+            ]}
+
+            var formDataSQLServerSchemas = new FormData();
+            
+            formDataSQLServerSchemas.append('jsonParamsSQLServer', JSON.stringify(paramsSQLServerSchemas))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schemas_sqlserver/',
+                data: formDataSQLServerSchemas,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    $('#schema-name-'+ID).empty()
+                    get_sch = []
+
+                    for (i = 0; i < data.length; i++){
+                        $('#schema-name-'+ID).append('<option>'+data[i]+'</option>')
+                        get_sch.push(data[i])
+
+                    }
+                }
+            })
+        });
+
+        $('#get-tables-'+ID).on("click", function(){
+                            
+            var paramsSqlServerTables = {"id": ID,
+            "parameters": [
+                {"db": $('#db-'+ID).val(),
+                "schema-name": $('#schema-name-'+ID).val()}
+            ]}
+
+            var formDataSqlServerTables = new FormData();
+            
+            formDataSqlServerTables.append('jsonParamsSQLServer', JSON.stringify(paramsSqlServerTables))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_tables_sqlserver/',
+                data: formDataSqlServerTables,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+
+                    get_tbl = []
+                    $('#table-name-'+ID).empty()
+
+                    for (i = 0; i < data.length; i++){
+                        $('#table-name-'+ID).append('<option>'+data[i]+'</option>')
+                        get_tbl.push(data[i])
+
+                    }
+                }
+            })
+        });
+
+
+        $('#input-sql-server-accept-'+ID).click(function() {
+            
+            var paramsDataSchemaSqlServer = {"id": ID,
+            "parameters": [
+                {"get_schema-name": get_sch,
+                "get_table-name": get_tbl,
+                "db": $('#db-'+ID).val(),
+                "schema-name": $('#schema-name-'+ID).val(),
+                "table-name": $('#table-name-'+ID).val(),
+                "checkbox": $("#checkbox-"+ID).val(),
+                "sql": $('#sql-'+ID).val()}
+            ]}
+
+            var formDataDataSchemaSqlServer = new FormData();
+            
+            formDataDataSchemaSqlServer.append('jsonSqlServer', JSON.stringify(paramsDataSchemaSqlServer))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_data_schema_sqlserver/',
+                data: formDataDataSchemaSqlServer,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    paramsDataSchemaSqlServer['schema'] = data
+
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    
+                    }
+                })
+            
+            isAlreadyInCanvas(jsonParams, paramsDataSchemaSqlServer, ID)
+
+            icon.setColor('#01b0a0')
+
+            $('#dialog-input-sql-server-'+ID).modal('hide')
+        });
+
+    },
+    
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+	   	 var label =new draw2d.shape.basic.Label({
+	   	     text: gettext('Input'),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#009688",
+	   	     resizeable:true
+	   	 });
+
+	     var output= label.createPort("output");
+         
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     }
+	     else{
+	         this.add(label);
+         }
+         
+         listLabel.push([this.id, [], [output.name]])
+
+         return label;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }
+
+});
+
 
 
 //// INPUT POSTGIS////
