@@ -89,11 +89,11 @@
 						<div class="box">
 		          			<div class="box-body">
 		          				<div class="row">
-		          					<div class="col-md-4 form-group">
+		          					<div class="col-md-4 form-group timeout_layer_property">
 										<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
 										<input name="timeout" id="timeout" value="30000" type="number" class="form-control">														
 									</div>
-		          					<div class="col-md-4 form-group vector_fields">
+		          					<div class="col-md-4 form-group vector_fields max_features_layer_property">
 										<label for="max_features">{% trans "WFS request feature limit" %}</label>
 										<input name="max_features" id="max_features" value="0" type="number" class="form-control">														
 									</div>
@@ -103,7 +103,7 @@
 										<input type="checkbox" name="visible" id="visible"/>
 										<label for="visible">{% trans "Visible" %}</label>														
 									</div>
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group checkbox_cached_layer_property">
 										<input type="checkbox" name="cached" id="cached"/>
 										<label for="cached">{% trans "Cached" %}</label>	
 									</div>
@@ -113,11 +113,11 @@
 									</div>						
 								</div>					
 								<div class="row">
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group checkbox_single_layer_property">
 										<input type="checkbox" name="single_image" id="single_image" />	
 										<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
 									</div>
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group checkbox_time_layer_property">
 										<input type="checkbox" name="time_enabled"  id="time_enabled"/>
 										<label for="time_enabled">{% trans "time_enabled" %}</label>
 									</div>
@@ -128,17 +128,17 @@
 								</div>
 
 								<div class="row">
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group checkbox_real_time_layer_property">
 										<input type="checkbox" name="real_time" id="real_time"/>
 										<label for="real_time">{% trans "View in real time" %}</label>														
 									</div>
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group checkbox_vector_tile_layer_property">
 										<input type="checkbox" name="vector_tile" id="vector_tile"/>
 										<label for="vector_tile">{% trans "Show in vector tile format" %}</label>														
 									</div>
 								</div>
 								<div class="row">
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group update_interval_layer_property">
 									  	<label for="update_interval">{% trans "Update interval (miliseconds)" %}</label>
 									  	<input name="update_interval" id="update_interval" value="1000" type="number" class="form-control">														
 								  	</div>
