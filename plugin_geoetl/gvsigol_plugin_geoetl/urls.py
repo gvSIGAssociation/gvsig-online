@@ -43,6 +43,9 @@ urlpatterns = [
     path('etl/etl_schema_padron_alba/', views.etl_schema_padron_alba, name='etl_schema_padron_alba'),
     path('etl/etl_xml_tags/', views.etl_xml_tags, name='etl_xml_tags'),
     path('etl/etl_workspaces_roles/', views.etl_workspaces_roles, name='etl_workspaces_roles'),
-    path('etl/permissons_tab/<int:id_wks>/', views.permissons_tab, name='permissons_tab')
+    path('etl/permissons_tab/<int:id_wks>/', views.permissons_tab, name='permissons_tab'),
+    path('etl/etl_schemas_sqlserver/', views.etl_schemas_sqlserver, name='etl_schemas_sqlserver'),
+    path('etl/etl_tables_sqlserver/', views.etl_tables_sqlserver, name='etl_tables_sqlserver'),
+    path('etl/etl_data_schema_sqlserver/', views.etl_data_schema_sqlserver, name='etl_data_schema_sqlserver')
    
 ]

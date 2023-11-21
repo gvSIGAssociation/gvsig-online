@@ -18,7 +18,7 @@ from psycopg2 import sql
 from datetime import datetime
 from hashlib import sha256
 import base64
-
+import pymssql
 import xmltodict
 
 def get_sheets_excel(excel, r):
@@ -137,6 +137,14 @@ def test_postgres(dicc):
         return {"result": True}
     except Exception as e:
         print ('Connection postgres: ' + str(e))
+        return {"result": False}
+
+def test_sqlserver(dicc):
+    try:
+        conn = pymssql.connect(dicc['server-sql-server'], dicc['username-sql-server'], dicc['password-sql-server'], dicc['db-sql-server'])
+        conn.close()
+        return {"result": True}
+    except:
         return {"result": False}
 
 def get_schema_csv(dicc):
@@ -563,4 +571,70 @@ def get_xml_tags(f, r):
                     tagList_cleaned.append(item)
 
     return tagList_cleaned[::-1]
+
+
+def get_schemas_sqlserver(dicc):
+
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params = json.loads(db.connection_params)
+
+    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    cursor = conn.cursor(as_dict=True)
+    
+    cursor.execute("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA  WHERE CATALOG_NAME  = '%s'" % (params['db-sql-server']) )
+
+    schemas = []
+    for row in cursor:
+        schemas.append(row['SCHEMA_NAME'])
+
+    conn.close()
+
+    return schemas
+
+
+def get_tables_sqlserver(dicc):
+
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params = json.loads(db.connection_params)
+
+    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    cursor = conn.cursor(as_dict=True)
+    
+    cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG = '%s' AND TABLE_SCHEMA  = '%s' ORDER BY TABLE_NAME" % (params['db-sql-server'], dicc['schema-name']) )
+
+    tables = []
+    for row in cursor:
+        tables.append(row['TABLE_NAME'])
+
+    conn.close()
+
+    return tables
+
+def get_data_schemas_sqlserver(dicc):
+
+    db  = database_connections.objects.get(name = dicc['db'])
+
+    params = json.loads(db.connection_params)
+
+    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    cursor = conn.cursor(as_dict=True)
+
+    if dicc['checkbox'] == 'true':
+        _sql = "SELECT name AS COLUMN_NAME, system_type_name AS DATA_TYPE FROM sys.dm_exec_describe_first_result_set ('%s', NULL, 0) ;" % (dicc['sql'])
+
+    else:
+        _sql = "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME  = '%s'" % (dicc['schema-name'], dicc['table-name']) 
+    
+    cursor.execute(_sql)
+
+    columns = []
+    for row in cursor:
+        if row['DATA_TYPE'] != 'geometry' and row['DATA_TYPE'] != 'geography':
+            columns.append(row['COLUMN_NAME'])
+
+    conn.close()
+
+    return columns
 

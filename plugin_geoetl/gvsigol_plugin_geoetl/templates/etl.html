@@ -28,6 +28,7 @@
                                 <li><a data-shape="input_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
                                 <li><a data-shape="input_Segex" class="palette_node_element draw2d_droppable dropdown-item">SEGEX</a></li>
                                 <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
+                                <li><a data-shape="input_SqlServer" class="palette_node_element draw2d_droppable dropdown-item">SQL Server</a></li>
                                 <li><a data-shape="input_Xml" class="palette_node_element draw2d_droppable dropdown-item">XML</a></li>
                             </div>
                         </div>
@@ -322,6 +323,7 @@
                                     <option value="">---</option>
                                     <option value="PostgreSQL">PostgreSQL/PostGIS</option>
                                     <option value="Oracle">Oracle</option>
+                                    <option value="SQLServer">SQL Server</option>
                                 </select>
                             </div>
                         </div>
@@ -391,8 +393,35 @@
                                     <input type="text" id="dsn" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
                                 </div>
                             </div>
-
                         </div>
+
+                        <div id="sql-server-db" name = "db-form" style = "display:none;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="server" class="col-form-label">{% trans 'Server' %}:</label>
+                                    <input type="text" id="server-sql-server" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="username" class="col-form-label">{% trans 'User name:' %}</label>
+                                    <input id="username-sql-server" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="password" class="col-form-label">{% trans 'Password:' %}</label>
+                                    <input type="password" id="password-sql-server" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="db" class="col-form-label">{% trans 'Database' %}:</label>
+                                    <input type="text" id="db-sql-server" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                        </div>
+
                     </form>
                     <br>
                     <div class="row">
@@ -621,6 +650,8 @@
             $("#postgresql-db").slideDown();
         }else if ($("#type-db").val() == 'Oracle'){
             $("#oracle-db").slideDown();
+        }else if ($("#type-db").val() == 'SQLServer'){
+            $("#sql-server-db").slideDown();
         }
         
     });
@@ -643,7 +674,19 @@
                     "password": $('#password-oracle').val(),
                     "dsn": $('#dsn').val()}
                 ]}
-        }
+        }else if ($("#type-db").val() == 'SQLServer'){
+            var params = {
+                "type-db": $("#type-db").val(),
+                "name-db": $("#name-db").val(),
+                "parameters": [
+                    {
+                    "server-sql-server": $('#server-sql-server').val(),
+                    "username-sql-server": $('#username-sql-server').val(),
+                    "password-sql-server": $('#password-sql-server').val(),
+                    "db-sql-server": $('#db-sql-server').val()
+                    }
+                ]}
+    }
 
         var formData = new FormData();
         
@@ -748,7 +791,19 @@
                     "password": $('#password-oracle').val(),
                     "dsn": $('#dsn').val()}
                 ]}
-        }
+    }else if ($("#type-db").val() == 'SQLServer'){
+            var params = {
+                "type-db": $("#type-db").val(),
+                "name-db": $("#name-db").val(),
+                "parameters": [
+                    {
+                    "server-sql-server": $('#server-sql-server').val(),
+                    "username-sql-server": $('#username-sql-server').val(),
+                    "password-sql-server": $('#password-sql-server').val(),
+                    "db-sql-server": $('#db-sql-server').val()
+                    }
+                ]}
+    }
 
     var formData = new FormData();
     
