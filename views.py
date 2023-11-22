@@ -3781,7 +3781,7 @@ def describe_layer_config(request):
         workspace = request.POST.get('workspace')
         try:
             l = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            if utils.can_read_layer(request, layer):
+            if utils.can_read_layer(request, l.id):
                 read_roles = utils.get_read_roles(l)
                 write_roles = utils.get_write_roles(l)
                 layer = {}
