@@ -394,6 +394,13 @@ class Layer(models.Model):
     def get_qualified_name(self):
         return self.datastore.workspace.name + ":" + self.name
     
+    @property
+    def full_qualified_name(self):
+        if self.datastore is not None:
+            return self.datastore.workspace.server.name + ":" + self.datastore.workspace.name + ":" + self.name
+        else:
+            return self.name
+    
     def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
         from gvsigol_services.utils import clone_layer
         return clone_layer(target_datastore, self, layer_group, copy_data=copy_data, permissions=permissions)
