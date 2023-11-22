@@ -31,7 +31,7 @@ from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
 from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole
-from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole
+from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User, AnonymousUser
@@ -172,7 +172,7 @@ def _get_prepared_layer_groups(request):
     if request.user.is_superuser:
         layergroups = LayerGroup.objects.exclude(name='__default__')
     else:
-        layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by=request.user.username)
+        layergroups = services_utils.get_user_layergroups(request, permissions=[LayerGroupRole.PERM_MANAGE, LayerGroupRole.PERM_INCLUDEINPROJECTS]).distinct()
         
     prepared_layer_groups = []
     for lg in layergroups:
