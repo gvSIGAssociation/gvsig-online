@@ -157,13 +157,35 @@ RawFilter.prototype.registerEvents = function() {
 		
 		var layer = $('option:selected', $(this)).val();
 		var workspace = $('option:selected', $(this)).data('workspace');
+		var fields_trans = self.describeLayerConfig(layer, workspace);
+
 		var fields = self.getFields(layer, workspace);
+
+		var language = $("#select-language").val();
 		
 		var hasFields = false;
 		for (var i=0; i < fields.length; i++) {
 			hasFields = true;
 			if (fields[i].type != 'date' && fields[i].type != 'timestamp' && fields[i].type != 'timestamp with time zone' && fields[i].name != 'wkb_geometry' && fields[i].name != 'geometry' && fields[i].name != 'geom' && fields[i].name != 'modified_by' && fields[i].name != 'last_modification' && fields[i].name != 'feat_version_gvol' && fields[i].name != 'id') {
-				$("#rawfilter-field").append('<option data-layer="' + layer  + '" data-workspace="' + workspace  + '" data-type="' + fields[i].type  + '" value="' + fields[i].name  + '">' + fields[i].name  + '</option>');
+				
+				feat_name = fields[i].name
+				
+				if(fields_trans != null && fields_trans["fields"] != undefined){
+					var fields = fields_trans["fields"];
+					for(var ix=0; ix<fields.length; ix++){
+						if(fields[ix].name.toLowerCase() == feat_name){
+							if("visible" in fields[ix]){
+								column_shown = fields[ix].visible;
+							}
+							var feat_name_trans = fields[ix]["title-"+language];
+							if(feat_name_trans){
+								feat_name = feat_name_trans
+							}
+						}
+					}
+				}
+				
+				$("#rawfilter-field").append('<option data-layer="' + layer  + '" data-workspace="' + workspace  + '" data-type="' + fields[i].type  + '" value="' + fields[i].name  + '">' + feat_name  + '</option>');
 			}
 		}
 		
@@ -395,4 +417,27 @@ RawFilter.prototype.getFeatures = function(layer, workspace, wfsUrl, field, fiel
 	  	error: function(){}
 	});
 	return features;
+};
+
+
+RawFilter.prototype.describeLayerConfig = function(layer, workspace) {
+	var layerConfig = {}
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/services/describe_layer_config/',
+	  	data: {
+	  		'layer': layer,
+			'workspace': workspace
+		},
+	  	success	:function(response){
+	  		if("conf" in response['layer']){
+				layerConfig = JSON.parse(response['layer']['conf'])
+	  		}
+		},
+	  	error: function(){
+		}
+	});
+
+	return layerConfig;
 };
