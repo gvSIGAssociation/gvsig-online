@@ -236,7 +236,7 @@ def can_manage_layergroup(request_or_user, layergroup):
 
     return can_use_layergroup(request_or_user, layergroup, permission=LayerGroupRole.PERM_MANAGE)
 
-def get_user_layergroups(request, permission=LayerGroupRole.PERM_MANAGE):
+def get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE):
     """
     Returns a queryset with the layer groups that are available for a user
     and a type of permission (currently only manage permission is defined
@@ -248,8 +248,12 @@ def get_user_layergroups(request, permission=LayerGroupRole.PERM_MANAGE):
     if request.user.is_superuser:
         return LayerGroup.objects.all()
     user_roles = auth_backend.get_roles(request)
-    return (LayerGroup.objects.filter(created_by=request.user.username) \
-                          | LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission=permission))
+    user_created_groups = LayerGroup.objects.filter(created_by=request.user.username)
+    if isinstance(permissions, list):
+        allowed_groups = LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission__in=permissions)
+    else:
+        allowed_groups = LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission=permissions)
+    return (user_created_groups | allowed_groups)
 
 def add_datastore(workspace, type, name, description, connection_params, username):
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)

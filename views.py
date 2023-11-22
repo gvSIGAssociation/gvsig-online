@@ -928,7 +928,7 @@ def layergroup_list_editable(request):
             if layergroup_id:
                 lg_list = utils.get_user_layergroups(request).filter(id=layergroup_id)
             else:
-                lg_list = utils.get_user_layergroups(request, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS) | LayerGroup.objects.filter(name='__default__')
+                lg_list = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_INCLUDEINPROJECTS) | LayerGroup.objects.filter(name='__default__')
             lg_list = lg_list.filter(server_id=ds.workspace.server.id).order_by('name').distinct()
             for lg in lg_list:
                 layer_group = {
@@ -2098,7 +2098,7 @@ def layer_group_cache_clear(layergroup):
 @login_required()
 @staff_required
 def layergroup_list(request):
-    layergroups_list = utils.get_user_layergroups(request, permission=LayerGroupRole.PERM_MANAGE)
+    layergroups_list = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
     project_id = request.GET.get('project_id')
     if project_id is not None:
         layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
