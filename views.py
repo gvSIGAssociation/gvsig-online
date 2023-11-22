@@ -3762,13 +3762,13 @@ def delete_resources(request):
 
 
 @csrf_exempt
-def describeLayerConfig(request):
+def describe_layer_config(request):
     if request.method == 'POST':
         lyr = request.POST.get('layer')
         workspace = request.POST.get('workspace')
         try:
             l = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            if l.public:
+            if utils.can_read_layer(request, layer):
                 read_roles = utils.get_read_roles(l)
                 write_roles = utils.get_write_roles(l)
                 layer = {}
