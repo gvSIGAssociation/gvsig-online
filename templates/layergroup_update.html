@@ -130,15 +130,15 @@
 									<i class="fa fa-ellipsis-v"></i>
 									<i class="fa fa-ellipsis-v"></i>
 								</span>
-								<span class="text">{{g.1.title}}</span>
-								<div class="box-tools pull-right">
-									<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
-										<i class="fa fa-plus"></i>
-									</button>
-								</div>
-								<span class="text">{{layer.title}}</span>
+								<span class="text">{{layer.title}} </span><span style="margin-left: 20px; color: #999">[{{layer.fqn}}]</span>
 							</div>
 							<div class="box-tools box-tools-buttons pull-right">
+								{% if not layer.can_manage %}
+								<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success" disabled><i class="fa fa-edit"></i></button>
+								<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+								<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger" disabled><i class="fa fa-times"></i></button>
+								{% else %}
 								{% if layer.external %}
 								<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
 								{% else %}
@@ -158,6 +158,7 @@
 								<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
 								{% else %}
 								<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+								{% endif %}
 								{% endif %}
 							</div>
 						</div>

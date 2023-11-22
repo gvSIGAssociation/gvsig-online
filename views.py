@@ -2338,7 +2338,20 @@ def _layergroup_update(request, lgid, project_id):
         return redirect('layergroup_list')
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order')
+        layers = []
+        for layer in  Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order'):
+            lyr_def = {
+                'id': layer.id,
+                'name': layer.name,
+                'fqn': layer.full_qualified_name,
+                'title': layer.title,
+                'type': layer.type,
+                'order': layer.order,
+                'external': layer.external,
+                'cached': layer.cached,
+                'can_manage': utils.can_manage_layer(request, layer)
+            }
+            layers.append(lyr_def)
         roles = utils.get_all_user_roles_checked_by_layergroup(layergroup, get_primary_user_role(request))
         
         response = {
