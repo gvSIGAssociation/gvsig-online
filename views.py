@@ -2600,6 +2600,13 @@ def layer_create_with_group(request, layergroup_id):
                     else:
                         return redirect('layer_list')
 
+            except psycopg2.errors.DuplicateTable as e1:
+                logger.exception("Error creating layer: table already exists")
+                try:
+                    msg = e1.get_message()
+                except:
+                    msg = _("Error: table already exists. Try to publish the layer instead of creating an empty one.")
+                form.add_error(None, msg)
             except Exception as e:
                 logger.exception("Error creating layer")
                 try:
