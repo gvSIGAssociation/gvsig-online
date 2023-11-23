@@ -554,7 +554,7 @@ class Geoserver():
         r = self.session.put(url, json=data, auth=auth)
         if r.status_code==200:
             return
-        raise UploadError(r.status_code, r.text)
+        raise FailedRequestError(r.status_code, r.text)
     
     def create_sql_view(self, workspace, datastore, name, sql_statement, key_column, geom_column, geom_type, srid, id_column=None, title=None, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/datastores/" + datastore + "/featuretypes.json"
