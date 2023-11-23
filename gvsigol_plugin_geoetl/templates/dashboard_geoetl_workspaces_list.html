@@ -155,8 +155,8 @@
 
 							<div class="row">
 								<div class="col-md-12">
-									<input type="checkbox" name="repeat_periodically" id="repeat_periodically" />
-									<label for="repeat_periodically">{% trans "Run periodically?" %}</label>&nbsp;&nbsp;
+									<label for="repeat_periodically"> <input type="checkbox" name="repeat_periodically" id="repeat_periodically" />
+									{% trans "Run periodically?" %}</label>
 								</div>
 
 								<div class="col-md-6 repeat_periodically_time">
@@ -217,7 +217,7 @@
 							</div>
 							{% endif %}
 						</form>
-					</div>				
+					</div>
 					<div id="permission" class="tab-pane">
 						{% include 'geoetl_workspaces_permissions.html' %}
 
@@ -958,7 +958,7 @@
 				$(".modal-body #etl_desc").val( data[4] );
 
 				if(data[5]!=''){
-					$("#repeat_periodically").prop('checked', true)
+					$("#repeat_periodically").prop('checked', true);
 					$(".repeat_periodically_time").slideDown("slow");
 
 					if(data[5].includes(':')){
@@ -966,8 +966,8 @@
 						$(".more-options").slideUp("slow"); 
 						$(".more-hour-options").slideDown("slow");
 						
-						$(".modal-body #ws-program-day").val(data[5].split(' ')[0])
-						$(".modal-body #ws-program-time").val(data[5].split(' ')[1]+':00')
+						$(".modal-body #ws-program-day").val(data[5].split(' ')[0]);
+						$(".modal-body #ws-program-time").val(data[5].split(' ')[1]+':00');
 
 					}else{
 
@@ -1221,7 +1221,6 @@
 		});
 
 		$('#general').on('click', function (e) {
-			e.preventDefault();
 			var $this = $(this);
 
 			$('#general').addClass("active");
@@ -1324,7 +1323,6 @@
 						
 					}
 
-					console.log(params)
 
 			$.ajax({
 					type: 'POST',
@@ -1414,7 +1412,7 @@
 				if($("#change_superuser").is(':checked')){
 					updateData["superuser"] = true
 				} else {
-					updateData["superuser"] = true
+					updateData["superuser"] = false
 				}
 
 				assigned_edit_roles = []
@@ -1472,17 +1470,21 @@
 		}
         
 
-    })	
+    })
 
 
 	$(".more-hour-options").slideUp("slow")
 	
 	$('#repeat_periodically').click(function() {
 
-		if($("#repeat_periodically").is(':checked'))
+		if($("#repeat_periodically").is(':checked')){
 			$(".repeat_periodically_time").slideDown("slow");  // checked
-		else
+		}
+			
+		else{
 			$(".repeat_periodically_time").slideUp("slow"); 
+		}
+			
 	});
 
 	
