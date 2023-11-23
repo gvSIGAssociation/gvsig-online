@@ -158,9 +158,8 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>	
-                                <label for="repeat_periodically">{% trans "Run workspace every..." %}</label>
-                            </div>
-                            
+                                <label >{% trans "Run workspace every..." %}</label>
+                            </div>                      
                             <div class="col-md-6 repeat_periodically_time" >
                                 <select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">
 									<option value="all">{% trans 'All days' %}</option>
@@ -604,10 +603,14 @@
 
     $('#repeat_periodically').click(function() {
 
-            if($("#repeat_periodically").is(':checked'))
+            if($("#repeat_periodically").is(':checked')){
                 $(".repeat_periodically_time").slideDown("slow");  // checked
-            else
+            }
+                
+            else{
                 $(".repeat_periodically_time").slideUp("slow"); 
+            }
+                
         });
 
     function edit_progamming_form(value){
@@ -718,7 +721,6 @@
     });
 
     $('#general').on('click', function (e) {
-			e.preventDefault();
 			var $this = $(this);
 
 			$('#general').addClass("active");
