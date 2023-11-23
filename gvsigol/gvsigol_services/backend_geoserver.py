@@ -673,10 +673,13 @@ class Geoserver():
             return False
         
     def updateBoundingBoxFromData(self, layer):
-        store = layer.datastore
-        if store.type[0]=="v":
-            self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
-        # not available/necessary for coverages
+        try:
+            store = layer.datastore
+            if store.type[0]=="v":
+                self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
+            # not available/necessary for coverages
+        except:
+            logger.exception('Error updating layer bounding box')
 
     def reload_featuretype(self, layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True):
         """
