@@ -171,13 +171,13 @@ RawFilter.prototype.registerEvents = function() {
 				feat_name = fields[i].name
 				
 				if(fields_trans != null && fields_trans["fields"] != undefined){
-					var fields = fields_trans["fields"];
-					for(var ix=0; ix<fields.length; ix++){
+					var fs = fields_trans["fields"];
+					for(var ix=0; ix<fs.length; ix++){
 						if(fields[ix].name.toLowerCase() == feat_name){
-							if("visible" in fields[ix]){
-								column_shown = fields[ix].visible;
+							if("visible" in fs[ix]){
+								column_shown = fs[ix].visible;
 							}
-							var feat_name_trans = fields[ix]["title-"+language];
+							var feat_name_trans = fs[ix]["title-"+language];
 							if(feat_name_trans){
 								feat_name = feat_name_trans
 							}
