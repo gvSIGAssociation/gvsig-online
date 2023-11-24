@@ -146,7 +146,7 @@ def project_list(request):
     if request.user.is_superuser:
         project_list = Project.objects.all()
     else:
-        project_list = get_user_projects(request)
+        project_list = get_user_projects(request, permissions=[ProjectRole.PERM_READ, ProjectRole.PERM_MANAGE])
 
     projects = []
     for p in project_list:
