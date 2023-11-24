@@ -700,17 +700,22 @@ def get_setting(key, default=None):
     """
     return get_app_setting(key, getattr(settings, key, default))
 
-def get_user_projects(request, permission=ProjectRole.PERM_READ):
+def get_user_projects(request, permissions=ProjectRole.PERM_READ):
+    public_projects = Project.objects.filter(is_public=True)
     if request.user and request.user.is_authenticated:
         if request.user.is_superuser:
             return Project.objects.all()
         roles = auth_backend.get_roles(request)
-        projects = Project.objects.filter(is_public=True) \
-            | Project.objects.filter(created_by=request.user.username) \
-            | Project.objects.filter(projectrole__role__in=roles, projectrole__permission=permission)
+        user_created_projects = Project.objects.filter(created_by=request.user.username)
+        if isinstance(permissions, list):
+            allowed_projects = Project.objects.filter(projectrole__role__in=roles, projectrole__permission__in=permissions)
+        else:
+            allowed_projects = Project.objects.filter(projectrole__role__in=roles, projectrole__permission=permissions)
+        projects = public_projects | user_created_projects | allowed_projects
         return projects.distinct()
     else:
-        return Project.objects.filter(is_public=True)
+        return public_projects
+
 
 def get_user_applications(request):
     roles = auth_backend.get_roles(request)
