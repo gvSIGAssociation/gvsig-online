@@ -264,6 +264,7 @@ def project_add(request):
         if 'expiration_date_utc' in request.POST:
             expiration_date_utc = request.POST.get('expiration_date_utc')
 
+        creator_user_role = auth_backend.get_primary_role(request.user.username)
         assigned_layergroups = []
         assigned_read_roles = []
         assigned_manage_roles = []
@@ -275,11 +276,8 @@ def project_add(request):
             if 'manage-role-' in key:
                 assigned_manage_roles.append(key[len('manage-role-'):])
 
-
         if name == '':
-            creator_user_role = auth_backend.get_primary_role(request.user.username)
             groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
-
             message = _('You must enter an project name')
             return render(request, 'project_add.html',
                           {
@@ -292,9 +290,7 @@ def project_add(request):
                         )
 
         if _valid_name_regex.search(name) == None:
-            creator_user_role = auth_backend.get_primary_role(request.user.username)
             groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
-
             message = _("Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
             return render(request, 'project_add.html',
                           {
@@ -309,10 +305,8 @@ def project_add(request):
         toc_order = core_utils.get_json_toc(assigned_layergroups, selected_base_group, json.loads(layer_group_order))
 
         if Project.objects.filter(name=name).exists():
-            message = _('Project name already exists')
-            creator_user_role = auth_backend.get_primary_role(request.user.username)
             groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
-
+            message = _('Project name already exists')
             return render(request, 'project_add.html', {'message': message,
                                                         'tools': project_tools ,
                                                         'layergroups': _get_prepared_layer_groups(request),
@@ -378,38 +372,28 @@ def project_add(request):
                 project_layergroup.default_baselayer = selected_base_layer
                 project_layergroup.save()
 
-            ProjectRole.objects.filter(project_id=project.id).delete()
-            roles = auth_backend.get_all_roles()
-            for role in assigned_read_roles:
-                if role in roles:
-                    project_role = ProjectRole(
-                        project = project,
-                        role = role,
-                        permission = ProjectRole.PERM_READ
-                    )
-                    project_role.save()
-            for role in assigned_manage_roles:
-                if role in roles:
-                    project_role = ProjectRole(
-                        project = project,
-                        role = role,
-                        permission = ProjectRole.PERM_MANAGE
-                    )
-                    project_role.save()
-
-            admin_role = auth_backend.get_admin_role()
-            project_role = ProjectRole(
-                project = project,
-                role = admin_role,
-                permission = ProjectRole.PERM_READ
-            )
-            project_role.save()
-            project_role = ProjectRole(
-                project = project,
-                role = admin_role,
-                permission = ProjectRole.PERM_MANAGE
-            )
-            project_role.save()
+        ProjectRole.objects.filter(project_id=project.id).delete()
+        roles = auth_backend.get_all_roles()
+        admin_role = auth_backend.get_admin_role()
+        mandatory_roles = [admin_role, creator_user_role]
+        assigned_read_roles.extend(mandatory_roles)
+        assigned_manage_roles.extend(mandatory_roles)
+        for role in set(assigned_read_roles):
+            if role in roles:
+                project_role = ProjectRole(
+                    project = project,
+                    role = role,
+                    permission = ProjectRole.PERM_READ
+                )
+                project_role.save()
+        for role in set(assigned_manage_roles):
+            if role in roles:
+                project_role = ProjectRole(
+                    project = project,
+                    role = role,
+                    permission = ProjectRole.PERM_MANAGE
+                )
+                project_role.save()
 
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')
