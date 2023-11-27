@@ -53,6 +53,15 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
             }
 			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
 			var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
+			
+			var tk = viewer.core.conf.user.token;
+			if (typeof tk !== 'undefined' ){
+				shapeLink = shapeLink + '&acces_token=' + tk;
+				gmlLink = gmlLink + 'acces_token=' + tk;
+				csvLink = csvLink + 'acces_token=' + tk;
+			}
+			
+			//var withtoken = shapeLink + '&access_token=' +  viewer.core.conf.user.token;
 			var ui = '';
 			ui += '<div class="row">';
 			ui += 	'<div class="col-md-12 form-group">';	
@@ -94,4 +103,8 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			$('#float-modal').modal('show');
 		}
 	}
+}
+
+DownloadManagerUI.prototype.DownloadFile = function(url) {
+	alert(url);
 }
