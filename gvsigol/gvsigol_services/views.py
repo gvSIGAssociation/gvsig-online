@@ -79,7 +79,7 @@ from gvsigol_core.models import Project, ProjectRole, ProjectBaseLayerTiling
 from gvsigol_core.models import ProjectLayerGroup, TilingProcessStatus
 from gvsigol_symbology.models import Style
 from gvsigol_core.views import not_found_view
-from gvsigol_services.backend_resources import resource_manager 
+from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger, LayerReadRole, LayerWriteRole
 import gvsigol_services.tiling_service as tiling_service
 from . import locks_utils
@@ -151,11 +151,11 @@ def server_add(request):
             # save it on DB if successfully created
             server = Server(**form.cleaned_data)
             server.save()
-            
+
             if len(Server.objects.all()) == 1:
                 server.default = True
                 server.save()
-                
+
             elif len(Server.objects.all()) > 1:
                 if form.cleaned_data['default'] == True:
                     for s in Server.objects.all():
@@ -163,8 +163,8 @@ def server_add(request):
                         s.save()
                     server.default = True
                     server.save()
-                     
-            
+
+
             nodes = json.loads(request.POST.get('nodes'))
             for n in nodes:
                 node = Node(
@@ -174,24 +174,24 @@ def server_add(request):
                     is_master = n['is_master']
                 )
                 node.save()
-            
+
             has_master = False
             if len(Node.objects.all()) > 0:
                 for n in Node.objects.all():
                     if n.is_master:
                         has_master = True
-                
+
                 if not has_master:
                     Node.objects.all()[0].is_master = True
-            
+
             geographic_servers.get_instance().add_server(server)
-            
+
             return HttpResponseRedirect(reverse('server_list'))
-                
+
     else:
         name = 'server_' + ''.join(random.choice(string.ascii_uppercase) for i in range(6))
         form = ServerForm(initial={'name': name})
-            
+
     return render(request, 'server_add.html', {'form': form})
 
 @login_required()
@@ -199,10 +199,10 @@ def server_add(request):
 @superuser_required
 def server_delete(request, svid):
     try:
-    
+
         sv_object = Server.objects.get(id=svid)
         gs = geographic_servers.get_instance().get_server_by_id(svid)
-        
+
         for ws in Workspace.objects.filter(server_id=sv_object.id):
             if gs.deleteWorkspace(ws):
                 datastores = Datastore.objects.filter(workspace_id=ws.id)
@@ -211,21 +211,21 @@ def server_delete(request, svid):
                     for l in layers:
                         gs.deleteLayerStyles(l)
                 ws.delete()
-            
+
             else:
                 return HttpResponseBadRequest()
-        
+
         for n in Node.objects.filter(server_id=sv_object.id):
             n.delete()
-             
+
         sv_object.delete()
         return HttpResponseRedirect(reverse('server_list'))
-        
+
     except Exception as e:
-        print(str(e)) 
-        return HttpResponseNotFound(str(e) ) 
-    
-    
+        print(str(e))
+        return HttpResponseNotFound(str(e) )
+
+
 @login_required()
 @superuser_required
 def server_update(request, svid):
@@ -235,25 +235,25 @@ def server_update(request, svid):
         frontend_url = request.POST.get('server_frontend_url')
         user = request.POST.get('server_user')
         password = request.POST.get('server_password')
-        
+
         server = Server.objects.get(id=int(svid))
-        
+
         old_frontend_url = server.frontend_url
-        
+
         if 'default' in request.POST:
             for s in Server.objects.all():
                 s.default = False
                 s.save()
             server.default = True
             server.save()
-        
+
         server.title = title
         server.description = description
         server.frontend_url = frontend_url
         server.user = user
         server.password = password
-        server.save() 
-        
+        server.save()
+
         workspaces = Workspace.objects.filter(server_id=server.id)
         for ws in workspaces:
             ws.uri = ws.uri.replace(old_frontend_url, frontend_url)
@@ -263,11 +263,11 @@ def server_update(request, svid):
             ws.wmts_endpoint = ws.server.getWmtsEndpoint(ws.name)
             ws.cache_endpoint = ws.server.getCacheEndpoint(ws.name)
             ws.save()
-            
+
         for n in Node.objects.filter(server=server):
             n.delete()
-        
-        json_nodes = json.loads(request.POST.get('nodes')) 
+
+        json_nodes = json.loads(request.POST.get('nodes'))
         for n in json_nodes:
             node = Node(
                 server = server,
@@ -293,33 +293,33 @@ def server_update(request, svid):
             nodes.append(node)
 
         return render(request, 'server_update.html', {'svid': svid, 'server': server, 'nodes': json.dumps(nodes)})
-    
+
 @login_required()
 @require_POST
 @superuser_required
 def get_server(request, svid):
     try:
         s = Server.objects.get(id=svid)
-        
+
         server = {}
         server['name'] = s.name
         server['title'] = s.title
         server['description'] = s.description
         server['type'] = s.type
         server['frontend_url'] = s.frontend_url
-        
+
         response = {
             'server': server
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+
     except:
         return HttpResponseNotFound('<h1>Server not found{0}</h1>'.format(s.name))
 
 @login_required()
 @superuser_required
-@csrf_exempt   
+@csrf_exempt
 def reload_node(request, nid):
     if request.method == 'POST':
         node = Node.objects.get(id=int(nid))
@@ -330,7 +330,7 @@ def reload_node(request, nid):
             response = {'reloaded': False}
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+
 
 @login_required()
 @require_safe
@@ -381,7 +381,7 @@ def workspace_add(request):
 
         if len(Server.objects.all()) > 0:
             if sv == None:
-                sv = Server.objects.all()[0] 
+                sv = Server.objects.all()[0]
         form = WorkspaceForm(initial={'server': sv})
 
     return render(request, 'workspace_add.html', {'form': form})
@@ -552,7 +552,7 @@ def datastore_add(request):
                             gs.reload_nodes()
                         except Exception as e:
                             pass
-                   
+
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
@@ -675,10 +675,10 @@ def datastore_delete(request, dsid):
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 i.delete_mosaic(ds.name, schema)
                 i.close()
-                
+
             gs.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
-        
+
         except:
             logger.exception("Error deleting store")
             return HttpResponseBadRequest()
@@ -699,7 +699,7 @@ def layer_list(request):
         user_roles = auth_backend.get_roles(request)
         layer_list = (Layer.objects.filter(created_by=request.user.username, external=False)
             | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct()
-        project_list = core_utils.get_user_projects(request, permission=ProjectRole.PERM_MANAGE)
+        project_list = core_utils.get_user_projects(request, permissions=ProjectRole.PERM_MANAGE)
     layers = []
     for l in layer_list:
         projects = []
@@ -720,7 +720,7 @@ def layer_list(request):
             'projects': '; '.join(projects)
         }
         layers.append(layer)
-        
+
     projects = []
     for p in project_list:
         project = {
@@ -729,7 +729,7 @@ def layer_list(request):
             'title': p.title
         }
         projects.append(project)
-        
+
     response = {
         'layers': layers,
         'projects': json.dumps(projects)
@@ -937,7 +937,7 @@ def layergroup_list_editable(request):
                 }
                 layer_groups.append(layer_group)
             return JsonResponse(layer_groups, safe=False)
-        
+
     return HttpResponseBadRequest()
 
 @login_required()
@@ -1006,7 +1006,7 @@ def backend_fields_list(request):
         ds = Datastore.objects.get(id=datastore_id)
     if ds:
         if not utils.can_manage_datastore(request.user, ds):
-            return HttpResponseForbidden("[]") 
+            return HttpResponseForbidden("[]")
         layer = Layer.objects.filter(external=False).filter(datastore=ds, name=name).first()
         params = json.loads(ds.connection_params)
         host = params['host']
@@ -1055,7 +1055,7 @@ def backend_fields_list(request):
 
 def do_add_layer(server, datastore, name, title, is_queryable, extraParams):
     workspace = datastore.workspace
-    
+
     # first create the resource on the backend
     server.createResource(
         workspace,
@@ -1133,7 +1133,7 @@ def layer_add_with_group(request, layergroup_id):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
-            
+
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
@@ -1152,7 +1152,7 @@ def layer_add_with_group(request, layergroup_id):
             maxFeatures = int(request.POST.get('max_features', 0))
         except:
             maxFeatures = 0
-            
+
         detailed_info_enabled = False
         detailed_info_button_title = request.POST.get('detailed_info_button_title')
         detailed_info_html = request.POST.get('detailed_info_html')
@@ -1206,7 +1206,7 @@ def layer_add_with_group(request, layergroup_id):
                         assigned_read_roles.append(key[len('read-usergroup-'):])
                     elif 'manage-usergroup-' in key:
                         assigned_manage_roles.append(key[len('manage-usergroup-'):])
-                
+
                 if datastore.type == 'v_PostGIS':
                     extraParams['maxFeatures'] = maxFeatures
                     dts = datastore
@@ -1221,7 +1221,7 @@ def layer_add_with_group(request, layergroup_id):
                     with i as c:
                         fields = c.get_fields(form.cleaned_data['name'], schema)
                         is_view = c.is_view(schema, form.cleaned_data['name'])
-                
+
                     if not is_view:
                         for key in request.POST:
                             if 'write-usergroup-' in key:
@@ -1233,7 +1233,7 @@ def layer_add_with_group(request, layergroup_id):
                     for field in fields:
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
-                
+
                 server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
                 # first create the resource on the backend
                 do_add_layer(server, datastore, form.cleaned_data['name'], form.cleaned_data['title'], is_queryable, extraParams)
@@ -1273,13 +1273,13 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.real_time = real_time
                 newRecord.vector_tile = vector_tile
                 newRecord.update_interval = request.POST.get('update_interval')
-                
+
                 params = {}
                 params['format'] = request.POST.get('format')
                 newRecord.external_params = json.dumps(params)
-                
+
                 newRecord.save()
-                
+
                 featuretype = {
                     'max_features': maxFeatures
                 }
@@ -1390,7 +1390,7 @@ def layer_update(request, layer_id):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
-            
+
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
@@ -1466,7 +1466,7 @@ def layer_update(request, layer_id):
                 time_resolution_day = int(request.POST.get('time_resolution_day'))
                 time_resolution_hour = int(request.POST.get('time_resolution_hour'))
                 time_resolution_minute = int(request.POST.get('time_resolution_minute'))
-                time_resolution_second = int(request.POST.get('time_resolution_second'))                
+                time_resolution_second = int(request.POST.get('time_resolution_second'))
             except:
                 logger.exception('Error getting time values')
 
@@ -1512,22 +1512,22 @@ def layer_update(request, layer_id):
             layer.real_time = real_time
             layer.vector_tile = vector_tile
             layer.update_interval = request.POST.get('update_interval')
-            
+
             params = {}
             params['format'] = request.POST.get('format')
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
             layer.save()
-            
+
             if 'layer-image' in request.FILES:
                 up_file = request.FILES['layer-image']
                 path, _ = utils.get_layer_img(layer.id, up_file.name)
-                
+
                 destination = open(path, 'wb+')
                 for chunk in up_file.chunks():
                     destination.write(chunk)
                     destination.close()
-                  
+
 
             if layer.datastore.type == 'c_ImageMosaic':
                 gs.updateImageMosaicTemporal(layer.datastore, layer)
@@ -1562,7 +1562,7 @@ def layer_update(request, layer_id):
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(request, layergroup_id=layergroup_id, instance=layer)
-        
+
         if layer.external_params:
             params = json.loads(layer.external_params)
             for key in params:
@@ -1572,7 +1572,7 @@ def layer_update(request, layer_id):
             layerConf = ast.literal_eval(layer.conf)
         except:
             layerConf = {}
-        
+
         date_fields = []
         if layer.type.startswith('v_'):
             # ensure we get a value for max_features
@@ -1596,7 +1596,7 @@ def layer_update(request, layer_id):
         html = True
         if layer.detailed_info_html == None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
             html = False
-        
+
         _, layer_image_url = utils.get_layer_img(layer.id, None)
         groups = utils.get_all_user_roles_checked_by_layer(layer)
         return render(request, 'layer_update.html', {
@@ -1657,7 +1657,7 @@ def get_date_fields_from_resource(request):
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             layer_defs = i.get_fields_info(resource_name, schema)
             i.close()
-            
+
             for layer_def in layer_defs:
                 if layer_def['type'] == 'date':
                     date_fields.append(layer_def['name'])
@@ -1702,7 +1702,7 @@ def _parse_form_groups(form_groups, fields):
         }]
     all_fields = { f.get('name'): True for f in fields }
     # ensure all fields and translations are present
-    
+
     for group in form_groups:
         group_fields = group.get('fields', [])
         for field in group_fields:
@@ -1848,7 +1848,7 @@ def layer_config(request, layer_id):
 
 def _set_field_nullable(layer_id, field_name, nullable):
     """
-    Sets a column to NULL or NOT NULL constraint depending on 
+    Sets a column to NULL or NOT NULL constraint depending on
     "mandatory" parameter. "Mandatory" should be True to set a column
     to NOT NULL and False otherwise
     """
@@ -1871,13 +1871,13 @@ def check_nullable(request):
     if(hasnullvalues):
         return utils.get_exception(405, 'The field has null values')
     return HttpResponse('{"response": "ok"}', content_type='application/json')
-    
+
 
 @login_required()
 @require_http_methods(["POST"])
 @staff_required
 def convert_to_enumerate(request):
-    try: 
+    try:
         field = request.POST['field']
         enum_id = request.POST['enum_id']
         layer_name = request.POST['layer_name']
@@ -1890,11 +1890,11 @@ def convert_to_enumerate(request):
     layer = Layer.objects.get(id=layer_id)
     if not utils.can_manage_layer(request, layer):
         return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
-       
+
     is_enum, _ = utils.is_field_enumerated(layer, field)
     if is_enum:
         return utils.get_exception(405, 'The field is already enumerated')
-    
+
     if autogen:
         params = json.loads(layer.datastore.connection_params)
         con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
@@ -1906,12 +1906,12 @@ def convert_to_enumerate(request):
         con.cursor.execute(query, [])
         rows = con.cursor.fetchall()
         enum_table = Enumeration()
-        enum_table.name =  layer_name + "_" + field 
+        enum_table.name =  layer_name + "_" + field
         enum_table.title = re.sub(r'\w+', lambda m:m.group(0).capitalize(), layer_name) + " " + re.sub(r'\w+', lambda m:m.group(0).capitalize(), field)
         enum_table.created_by = usr
         enum_table.save()
         enum_id = enum_table.id
-        
+
         item = EnumerationItem()
         item.name = ''
         item.selected = False
@@ -1931,21 +1931,21 @@ def convert_to_enumerate(request):
                     item.enumeration_id = enum_id
                     item.save()
                 except Exception:
-                    #Si da un error insertando no se inserta ese elemento pero no se bloquea. 
+                    #Si da un error insertando no se inserta ese elemento pero no se bloquea.
                     #Siempre los pueden añadir a mano si falta alguno
-                    pass 
-    
+                    pass
+
     if enum_id == None:
         return utils.get_exception(400, 'We cannot find a enumerated with this name')
-    
+
     field_enum = LayerFieldEnumeration()
     field_enum.layer = layer
     field_enum.field = field
     field_enum.enumeration_id = enum_id
     field_enum.multiple = False
-    field_enum.save()   
-    
-    return HttpResponse('{"response": "ok"}', content_type='application/json') 
+    field_enum.save()
+
+    return HttpResponse('{"response": "ok"}', content_type='application/json')
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -1988,7 +1988,7 @@ def layers_get_temporal_properties(request):
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 temporal_defs = i.get_temporal_info(layer.name, schema, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_default_value_mode, layer.time_default_value)
                 i.close()
-                
+
             if temporal_defs.__len__() > 0 and temporal_defs[0]['min_value'] != '' and temporal_defs[0]['max_value'] != '':
                 aux_min_value = datetime.strptime(temporal_defs[0]['min_value'], '%Y-%m-%d %H:%M:%S')
                 if min_value == '' or datetime.strptime(min_value, '%Y-%m-%d %H:%M:%S') > aux_min_value:
@@ -2034,8 +2034,8 @@ def _layer_cache_clear(layer_id):
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     gs.clearCache(workspace.name, layer)
     gs.reload_nodes()
-            
-    gs.updateBoundingBoxFromData(layer)  
+
+    gs.updateBoundingBoxFromData(layer)
     gs.clearCache(workspace.name, layer)
     gs.updateThumbnail(layer, 'update')
 
@@ -2063,7 +2063,7 @@ def layer_cache_clear(request, layer_id):
     else:
         error_message = ugettext_lazy('Not supported.')
     return JsonResponse({"response": "error", "cause": error_message}, status=400)
-    
+
 @login_required()
 @require_POST
 @staff_required
@@ -2079,7 +2079,7 @@ def layergroup_cache_clear(request, layergroup_id):
     return JsonResponse({"response": "error", "cause": error_message}, status=400)
 
 def layer_group_cache_clear(layergroup):
-    last = None    
+    last = None
     layers = Layer.objects.filter(external=False).filter(layer_group_id=int(layergroup.id))
     for layer in layers:
         if not layer.external:
@@ -2089,7 +2089,7 @@ def layer_group_cache_clear(layergroup):
     if last:
         gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
         gs.deleteGeoserverLayerGroup(layergroup)
-    
+
         gs.createOrUpdateGeoserverLayerGroup(layergroup)
         gs.clearLayerGroupCache(layergroup.name)
         gs.reload_nodes()
@@ -2144,7 +2144,7 @@ def layergroup_add_with_project(request, project_id):
         title = request.POST.get('layergroup_title')
         server_id = request.POST.get('layergroup_server_id')
         from_page = request.GET.get('from')
-        
+
         cached = False
         if 'cached' in request.POST:
             cached = True
@@ -2165,7 +2165,7 @@ def layergroup_add_with_project(request, project_id):
         if not name:
             message = _('You must enter a name for layer group')
             return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())})
-        
+
         name = name + '_' + ascii_norm_username(request.user.username)
         if _valid_name_regex.search(name) == None:
             message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
@@ -2263,9 +2263,9 @@ def layergroup_mapserver_toc(group, toc_string):
 
         toc={}
         toc[group.name] = toc_object
-        
+
         if last:
-            gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)  
+            gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
             gs.createOrUpdateSortedGeoserverLayerGroup(toc)
             gs.set_gwclayer_dynamic_subsets(None, group.name)
             gs.reload_nodes()
@@ -2289,7 +2289,7 @@ def _layergroup_update(request, lgid, project_id):
             elif 'manage-userrole-' in key:
                 assigned_manage_roles.append(key[len('manage-userrole-'):])
         roles = utils.get_layergroup_checked_roles_from_user_input(assigned_includeinprojects_roles, assigned_manage_roles)
-        
+
         cached = False
         if 'cached' in request.POST:
             cached = True
@@ -2302,7 +2302,7 @@ def _layergroup_update(request, lgid, project_id):
             if LayerGroup.objects.filter(name=name).exists():
                 message = _('Layer group name already exists')
                 return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values()), 'project_id': project_id, 'redirect': redirect_var})
-            
+
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
                 return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values()), 'project_id': project_id, 'redirect': redirect_var})
@@ -2324,7 +2324,7 @@ def _layergroup_update(request, lgid, project_id):
             return redirect(url)
         if redirect_var == 'project-update':
             url = reverse('project_update', kwargs={'pid': project_id})
-            return redirect(url)     
+            return redirect(url)
 
         query_string = "?redirect=grouplayer-redirect"
         if from_redirect_var:
@@ -2353,9 +2353,9 @@ def _layergroup_update(request, lgid, project_id):
             }
             layers.append(lyr_def)
         roles = utils.get_all_user_roles_checked_by_layergroup(layergroup, get_primary_user_role(request))
-        
+
         response = {
-            'lgid': lgid, 
+            'lgid': lgid,
             'layergroup': layergroup,
             'layers': layers,
             'roles': roles,
@@ -2397,17 +2397,17 @@ def layergroup_delete(request, lgid):
             default_layer_group = LayerGroup.objects.get(name__exact='__default__')
             layer.layer_group = default_layer_group
             layer.save()
-        
-        gs = geographic_servers.get_instance().get_server_by_id(server.id)  
-        try:      
+
+        gs = geographic_servers.get_instance().get_server_by_id(server.id)
+        try:
             gs.deleteGeoserverLayerGroup(layergroup)
             gs.setDataRules()
             gs.reload_nodes()
-            
+
         except Exception:
             logger.exception("Error deleting layer group")
             layergroup.delete()
-        
+
         response = {
             'deleted': True
         }
@@ -2448,11 +2448,11 @@ def layer_create_with_group(request, layergroup_id):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
-            
+
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
-        
+
         detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
         detailed_info_button_title = request.POST.get('detailed_info_button_title')
         detailed_info_html = request.POST.get('detailed_info_html')
@@ -2570,13 +2570,13 @@ def layer_create_with_group(request, layergroup_id):
                     newRecord.detailed_info_button_title = detailed_info_button_title
                     newRecord.detailed_info_html = detailed_info_html
                     newRecord.save()
-                    
+
                     for i in form.cleaned_data['fields']:
                         if 'enumkey' in i:
                             field_enum = LayerFieldEnumeration()
                             field_enum.layer = newRecord
                             field_enum.field = i['name']
-                            field_enum.enumeration_id = int(i['enumkey']) 
+                            field_enum.enumeration_id = int(i['enumkey'])
                             field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
                             field_enum.save()
                         if i.get('calculation'):
@@ -2588,17 +2588,17 @@ def layer_create_with_group(request, layergroup_id):
                                 trigger.field = i['name']
                                 trigger.procedure = procedure
                                 trigger.save()
-                                
+
                                 trigger.install()
                             except:
                                 logger.exception("Error creating trigger for calculated field")
-                            
+
                     featuretype = {
                         'max_features': maxFeatures
                     }
                     utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                     do_config_layer(server, newRecord, featuretype)
-                    
+
                     if from_redirect:
                         query_string = '?redirect=' + from_redirect
                     else:
@@ -2841,13 +2841,13 @@ def enumeration_update(request, eid):
 @login_required()
 @staff_required
 def create_base_layer(request, pid):
-    if request.method == 'POST': 
+    if request.method == 'POST':
         plg = ProjectLayerGroup.objects.filter(project_id=pid, baselayer_group=True)
         if plg is None or len(plg) == 0:
             return utils.get_exception(400, 'This project does not have base layer')
         id_base_lyr = plg[0].default_baselayer
         base_lyr = Layer.objects.get(id=id_base_lyr)
-            
+
         num_res_levels = None
         try:
             num_res_levels = int(request.POST.get('tiles'))
@@ -2866,7 +2866,7 @@ def create_base_layer(request, pid):
                 tasks.tiling_base_layer(base_layer_process, version, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
-                  
+
     return HttpResponse('{"response": "' + str(base_layer_process[str(pid)]['extent_processed']) + '"}', content_type='application/json')
 
 
@@ -2913,11 +2913,11 @@ def base_layer_process_update(request, pid):
             pass
         return HttpResponse('{"active" : "false"}', content_type='application/json')
 
-        
+
 @login_required()
 @staff_required
 def stop_base_layer_process(request, pid):
-    if request.method == 'POST':  
+    if request.method == 'POST':
         base_layer_tiling = ProjectBaseLayerTiling.objects.get(id=pid)
         version = base_layer_tiling.version
         status_json = {}
@@ -3041,7 +3041,7 @@ def get_feature_info(request):
                         styles = layer['styles']
                     aux_response = fut_session.get(url, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
                     rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
-                    
+
                 else:
                     styles = []
                     cluster = False
@@ -3060,7 +3060,7 @@ def get_feature_info(request):
                     ws= None
                     if 'workspace' in layer:
                         ws = layer['workspace']
-    
+
                     print(url)
                     auth2 = None
                     headers = None
@@ -3092,7 +3092,7 @@ def get_feature_info(request):
                                         break
                                 if auth2 or headers:
                                     break
-    
+
                     aux_response = fut_session.get(url, auth=auth2, headers=headers, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
                     rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
 
@@ -3137,7 +3137,7 @@ def get_feature_info(request):
                     feat['query_layer'] = query_layer
                     features = []
                     features.append(feat)
-    
+
             else:
                 if resultset.get('response'):
                     try:
@@ -3171,12 +3171,12 @@ def get_feature_info(request):
                                         geojson['features'][i]['all_correct'] = resultset['response']
                                         geojson['features'][i]['feature'] = fid
                                         geojson['features'][i]['layer_name'] = resultset['query_layer']
-                                        
+
                                         features = get_clustered_values(geojson['features'], layer.datastore.name)
 
                                 else:
                                     geojson['features'][i]['type']= 'raster'
-                                
+
                                 if not cluster:
                                     geojson['features'][i]['resources'] = resources
                                     geojson['features'][i]['all_correct'] = resultset['response']
@@ -3202,7 +3202,7 @@ def get_feature_info(request):
                         feat['query_layer'] = query_layer
                         features = []
                         features.append(feat)
-            
+
             if features:
                 full_features = full_features + features
 
@@ -3260,7 +3260,7 @@ def get_clustered_values(geojson, ds_name):
         f['resources'] = []
         f['feature'] = str(row[0]['ogc_fid'])
         f['layer_name'] = lyr_name
-        
+
         features.append(f)
 
     return features
@@ -3276,7 +3276,7 @@ def get_unique_values(request):
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace.name)
         if not utils.can_read_layer(request, layer):
             return HttpResponseForbidden(json.dumps({'values': []}), content_type='application/json')
-        
+
         i, source_name, schema = layer.get_db_connection()
         with i as c:
             unique_fields = c.get_unique_values(schema, source_name, field)
@@ -3360,11 +3360,11 @@ def get_datatable_data(request):
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
         pk_defs = i.get_pk_columns(layer.name, params.get('schema', 'public'))
         i.close()
-        
+
         if len(pk_defs) >= 1:
             sortby_field = str(pk_defs[0])
         '''
-        
+
         #wfs_url = request.META['HTTP_ORIGIN'] + wfs_url
         wfs_url = core_utils.get_absolute_url(wfs_url, request.META)
         try:
@@ -3474,8 +3474,8 @@ def get_datatable_data(request):
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
-    
+
+
 @csrf_exempt
 def get_feature_wfs(request):
     if request.method == 'POST':
@@ -3492,20 +3492,20 @@ def get_feature_wfs(request):
         try:
             wfs_url = layer.datastore.workspace.server.getWfsEndpoint(workspace)
             wfs_url = core_utils.get_absolute_url(wfs_url, request.META)
-              
-            cql_filter = None  
+
+            cql_filter = None
             if operator == 'equal_to':
                 if field_type == 'character varying' or field_type == 'enumeration':
                     cql_filter = field + "='" + value + "'"
                 else:
                     cql_filter = field + "=" + value
-            
+
             elif operator == 'smaller_than':
                 cql_filter = field + "<" + value
-                
+
             elif operator == 'greater_than':
                 cql_filter = field + ">" + value
-            
+
             data = {
                 "SERVICE": "WFS",
                 "VERSION": "1.1.0",
@@ -3515,7 +3515,7 @@ def get_feature_wfs(request):
                 "MAXFEATURES": 500,
                 "CQL_FILTER": cql_filter.encode('utf-8')
             }
-            
+
             params = urllib.parse.urlencode(data)
             session = requests.Session()
             if not layer.external:
@@ -3528,7 +3528,7 @@ def get_feature_wfs(request):
                     session.headers.update({'Authorization': 'Bearer ' + request.session.get('oidc_access_token')})
                     print(request.session.get('oidc_access_token'))
             print(wfs_url + "?" + params)
-            
+
             response = session.post(wfs_url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
             geojson = response.json()
 
@@ -3646,7 +3646,7 @@ def get_resource(request, resource_id):
         return sendfile(request, resource.get_abspath(), attachment=False)
     except LayerResource.DoesNotExist:
         return HttpResponseNotFound()
-    
+
 @login_required()
 def upload_resources(request):
     if request.method == 'POST':
@@ -3681,7 +3681,7 @@ def upload_resources(request):
                 response = {'success': True, 'id': res.pk, 'path': path}
                 version, version_date = utils.update_feat_version(res.layer, res.feature)
                 if version is not None:
-                    signals.layerresource_created.send(sender=res.__class__, 
+                    signals.layerresource_created.send(sender=res.__class__,
                        layer=res.layer,
                        featid=res.feature,
                        resource_id=res.pk,
@@ -3718,7 +3718,7 @@ def delete_resource(request):
             response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath}
             if check_version is not None:
                 version, version_date = utils.update_feat_version(resource.layer, resource.feature)
-                signals.layerresource_deleted.send(sender=None, 
+                signals.layerresource_deleted.send(sender=None,
                                                    layer=resource.layer,
                                                    featid=featid,
                                                    resource_id=resource.pk,
@@ -3757,7 +3757,7 @@ def delete_resources(request):
                 resource.delete()
                 historical_filepath = resource_manager.delete_resource(resource)
                 pathlist.append(historical_filepath)
-                signals.layerresource_deleted.send(sender=None, 
+                signals.layerresource_deleted.send(sender=None,
                                                layer=resource.layer,
                                                featid=resource.feature,
                                                resource_id=resource.pk,
@@ -3865,7 +3865,7 @@ def describe_layer_config(request):
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+
 @csrf_exempt
 def describeFeatureType(request):
     if request.method == 'POST':
@@ -3901,14 +3901,14 @@ def _describeFeatureType(layer, skip_pks):
         i.close()
 
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-        expose_pks = gs.datastore_check_exposed_pks(layer.datastore)        
-        
+        expose_pks = gs.datastore_check_exposed_pks(layer.datastore)
+
         for layer_def in layer_defs:
             for geom_def in geom_defs:
                 if layer_def['name'] == geom_def[2]:
                     layer_def['type'] = geom_def[5]
                     layer_def['length'] = geom_def[4]
-        
+
         for layer_def in layer_defs:
             if not expose_pks or skip_pks == 'true':
                 if layer_def['name'] in pk_defs:
@@ -3926,7 +3926,7 @@ def _describeFeatureType(layer, skip_pks):
         print(str(e))
         response = {'fields': [], 'error': str(e)}
         pass
-    
+
     return response
 
 def describe_feature_type(lyr, workspace):
@@ -3939,7 +3939,7 @@ def describe_feature_type(lyr, workspace):
         layer_defs = i.get_fields_info(layer.name, schema)
         geom_defs = i.get_geometry_columns_info(layer.name, schema)
         i.close()
-        
+
         for layer_def in layer_defs:
             for geom_def in geom_defs:
                 if layer_def['name'] == geom_def[2]:
@@ -3960,7 +3960,7 @@ def describe_feature_type(lyr, workspace):
         print(str(e))
         response = {'fields': [], 'error': str(e)}
         pass
-    
+
     return response
 
 @csrf_exempt
@@ -3986,7 +3986,7 @@ def describeFeatureTypeWithPk(request):
             geom_defs = i.get_geometry_columns_info(layer.name, schema)
             pk_defs = i.get_pk_columns(layer.name, schema)
             i.close()
-            
+
             for layer_def in layer_defs:
                 for geom_def in geom_defs:
                     if layer_def['name'] == geom_def[2]:
@@ -4031,20 +4031,20 @@ def external_layer_list(request):
 def external_layer_add(request):
     if request.method == 'POST':
         form = ExternalLayerForm(request, request.POST)
-        
+
         try:
             is_visible = False
             if 'visible' in request.POST:
                 is_visible = True
-    
+
             cached = False
             if 'cached' in request.POST:
                 cached = True
-            
+
             detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
             detailed_info_html = request.POST.get('detailed_info_html')
-                
+
             crs_list = []
             for key in request.POST:
                 if 'crs_' in key:
@@ -4052,10 +4052,10 @@ def external_layer_add(request):
                         'key': key.split('_')[1],
                         'value': request.POST[key]
                     })
-            
+
             layer_group = LayerGroup.objects.get(id=int(request.POST.get('layer_group')))
             server = Server.objects.get(id=layer_group.server_id)
-                
+
             external_layer = Layer()
             external_layer.external = True
             external_layer.public = True
@@ -4072,7 +4072,7 @@ def external_layer_add(request):
             external_layer.detailed_info_html = detailed_info_html
             external_layer.created_by = request.user.username
             external_layer.timeout = request.POST.get('timeout')
-            
+
             params = {}
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                 params['version'] = request.POST.get('version')
@@ -4082,7 +4082,7 @@ def external_layer_add(request):
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
-                
+
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['capabilities'] = request.POST.get('capabilities')
@@ -4099,11 +4099,11 @@ def external_layer_add(request):
 
             external_layer.save()
 
-            
+
 
             external_layer.name = 'externallayer_' + str(external_layer.id)
             external_layer.save()
-            
+
             if external_layer.cached:
                 if external_layer.type == 'WMS':
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
@@ -4152,7 +4152,7 @@ def external_layer_update(request, external_layer_id):
             is_visible = False
             if 'visible' in request.POST:
                 is_visible = True
-    
+
             cached = False
             if 'cached' in request.POST:
                 cached = True
@@ -4160,7 +4160,7 @@ def external_layer_update(request, external_layer_id):
             detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
             detailed_info_html = request.POST.get('detailed_info_html')
-                
+
             crs_list = []
             for key in request.POST:
                 if 'crs_' in key:
@@ -4168,17 +4168,17 @@ def external_layer_update(request, external_layer_id):
                         'key': key.split('_')[1],
                         'value': request.POST[key]
                     })
-            
-            master_node = geographic_servers.get_instance().get_master_node(server.id)   
+
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
             if external_layer.cached and not cached:
                 geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
                 geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-                
+
             if not external_layer.cached and cached:
                 if external_layer.type == 'WMS':
                     geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
                     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-                
+
             external_layer.title = request.POST.get('title')
             external_layer.type = request.POST.get('type')
             external_layer.layer_group = layer_group
@@ -4198,7 +4198,7 @@ def external_layer_update(request, external_layer_id):
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
-                
+
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['capabilities'] = request.POST.get('capabilities')
@@ -4214,7 +4214,7 @@ def external_layer_update(request, external_layer_id):
             #geographic_servers.get_instance().get_server_by_id(server.id).updateThumbnail(external_layer)
             external_layer.external_params = json.dumps(params)
             external_layer.save()
-            
+
             if from_redirect:
                 query_string = '?redirect=' + from_redirect
             else:
@@ -4255,7 +4255,7 @@ def external_layer_update(request, external_layer_id):
             params = json.loads(external_layer.external_params)
             for key in params:
                 form.initial[key] = params[key]
-                
+
         html = True
         if external_layer.detailed_info_html == None or external_layer.detailed_info_html == '' or external_layer.detailed_info_html == 'null':
             html = False
@@ -4288,13 +4288,13 @@ def external_layer_delete(request, external_layer_id):
         server = Server.objects.get(id=external_layer.layer_group.server_id)
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         if external_layer.cached:
-            if external_layer.type == 'WMS':  
+            if external_layer.type == 'WMS':
                 geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
             geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-            
+
         external_layer.delete()
         return redirect('external_layer_list')
-                
+
     except Exception as e:
         if e.server_message:
             if 'Unknown layer' in e.server_message:
@@ -4303,7 +4303,7 @@ def external_layer_delete(request, external_layer_id):
 
         return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
 
-    
+
 
 def ows_get_capabilities(url, service, version, layer, remove_extra_params=True):
     if remove_extra_params:
@@ -4320,7 +4320,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     title = ''
     crs_list = None
     get_map_url = url
-    
+
     auth = Authentication(verify=False)
     try:
         if service == 'WMS':
@@ -4331,7 +4331,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     version = data['WMT_MS_Capabilities']['@version']
                 except:
                     version = WMS_MAX_VERSION
-                
+
             print('Add base layer: ' + url+ ', version: ' + version)
             wms = WebMapService(url, version=version, auth=auth)
 
@@ -4402,7 +4402,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 for matrixset in lyr.tilematrixsets:
                     if not matrixset in matrixsets:
                         matrixsets.append(matrixset)
-                    
+
                 for style_name in lyr.styles:
                     style = lyr.styles[style_name]
                     title = style_name
@@ -4442,7 +4442,7 @@ def get_capabilities(request):
     service = request.GET.get('type')
     version = request.GET.get('version')
     layer = request.GET.get('layer')
-    
+
     data = ows_get_capabilities(url, service, version, layer)
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
 
@@ -4454,10 +4454,10 @@ def get_capabilities_from_url(request):
     service = request.POST.get('type')
     version = request.POST.get('version')
     layer = request.POST.get('layer')
-    
+
     data = ows_get_capabilities(url, service, version, layer, False)
 
-    
+
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
 
 
@@ -4491,7 +4491,7 @@ def layer_cache_config(request, layer_id):
         return forbidden_view(request)
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
-    
+
     if request.method == 'POST':
         format = request.POST.get('input_format')
         grid_set = request.POST.get('input_grid_set')
@@ -4503,39 +4503,39 @@ def layer_cache_config(request, layer_id):
         operation_type = request.POST.get('input_operation_type')
         zoom_start = request.POST.get('input_zoom_start')
         zoom_stop = request.POST.get('input_zoom_stop')
-        
+
         try:
             if layer.external:
                 if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
                     url = master_node.getUrl()
                     geowebcache.get_instance().execute_cache_operation(None, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
-                
+
                 elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
                     all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
                     for n in all_nodes:
                         url = n.getUrl()
                         geowebcache.get_instance().execute_cache_operation(None, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
-                    
+
             else:
                 if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
                     url = master_node.getUrl()
                     geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
-                
+
                 elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
                     all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
                     for n in all_nodes:
                         url = n.getUrl()
                         geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
-            
+
             gs = geographic_servers.get_instance().get_server_by_id(server.id)
             #gs.reload_nodes()
-            
+
             if not layer.external:
                 gs.updateBoundingBoxFromData(layer)
                 gs.updateThumbnail(layer, 'update')
-       
+
             layer_list = None
             if request.user.is_superuser:
                 layer_list = Layer.objects.filter(cached=True).order_by('id')
@@ -4543,12 +4543,12 @@ def layer_cache_config(request, layer_id):
                 user_roles = auth_backend.get_roles(request)
                 layer_list = (Layer.objects.filter(created_by=request.user.username, cached=True)
                     | Layer.objects.filter(layermanagerole__role__in=user_roles, cached=True)).exclude(type__in=['WMTS', 'XYZ']).order_by('id').distinct()
-        
+
             response = {
                 'layers': layer_list
             }
             return render(request, 'cache_list.html', response)
-            
+
         except Exception as e:
             error_message = ugettext_lazy('Error configuring layer. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
@@ -4575,7 +4575,7 @@ def layer_cache_config(request, layer_id):
             else:
                 #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
                 tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
-            
+
             response = {
                 "message": message,
                 "layer_id": layer_id,
@@ -4585,12 +4585,12 @@ def layer_cache_config(request, layer_id):
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
                 "tasks": tasks['long-array-array']
             }
-                
+
             return render(request, 'layer_cache_config.html', response)
-        
+
             """
-        
-    
+
+
     else:
         try:
             config = None
@@ -4602,7 +4602,7 @@ def layer_cache_config(request, layer_id):
             else:
                 #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
                 tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
-            
+
             response = {
                 "layer_id": layer_id,
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
@@ -4612,14 +4612,14 @@ def layer_cache_config(request, layer_id):
                 "tasks": tasks['long-array-array'],
                 "latlong_extent": layer.latlong_extent
             }
-                
+
             return render(request, 'layer_cache_config.html', response)
         except Exception as e:
             error_message = ugettext_lazy('Error accessing layer. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             return redirect('cache_list')
-    
+
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -4639,21 +4639,21 @@ def group_cache_config(request, group_id):
         operation_type = request.POST.get('input_operation_type')
         zoom_start = request.POST.get('input_zoom_start')
         zoom_stop = request.POST.get('input_zoom_stop')
-        
+
         try:
             if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
                 master_node = geographic_servers.get_instance().get_master_node(server.id)
                 url = master_node.getUrl()
                 geowebcache.get_instance().execute_group_cache_operation(layer_group, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
-                
+
             elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
                 all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
                 for n in all_nodes:
                     url = n.getUrl()
                     geowebcache.get_instance().execute_group_cache_operation(layer_group, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
-            
+
             gs = geographic_servers.get_instance().get_server_by_id(server.id)
-            gs.reload_nodes()    
+            gs.reload_nodes()
             layer_list = None
             group_list = None
             if request.user.is_superuser:
@@ -4666,16 +4666,16 @@ def group_cache_config(request, group_id):
                 'groups': group_list
             }
             return render(request, 'cache_list.html', response)
-            
+
         except Exception as e:
             message = e
             config = None
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
-            
+
             #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
             tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
-            
+
             response = {
                 "message": message,
                 "group_id": group_id,
@@ -4685,21 +4685,21 @@ def group_cache_config(request, group_id):
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
                 "tasks": tasks['long-array-array']
             }
-                
+
             return render(request, 'group_cache_config.html', response)
-        
-        
-        
-    
+
+
+
+
     else:
         try:
             config = None
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
-            
+
             #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
             tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
-                    
+
             response = {
                 "group_id": group_id,
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
@@ -4708,14 +4708,14 @@ def group_cache_config(request, group_id):
                 "formats": settings.CACHE_OPTIONS['FORMATS'],
                 "tasks": tasks['long-array-array']
             }
-                
+
             return render(request, 'group_cache_config.html', response)
         except Exception as e:
             error_message = ugettext_lazy('Error accessing layer group. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             return redirect('cache_list')
-    
+
 @login_required()
 @require_POST
 @staff_required
@@ -4725,13 +4725,13 @@ def get_cache_tasks(request):
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
-    
+
     tasks = None
     if layer.external:
         tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
     else:
         tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
-    
+
     return HttpResponse(json.dumps(tasks, indent=4), content_type='application/json')
 
 @login_required()
@@ -4742,9 +4742,9 @@ def get_group_cache_tasks(request):
     layer_group = LayerGroup.objects.get(id=int(group_id))
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
-    
+
     tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
-    
+
     return HttpResponse(json.dumps(tasks, indent=4), content_type='application/json')
 
 @login_required()
@@ -4756,14 +4756,14 @@ def kill_all_tasks(request):
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
-    
+
     if layer.external:
         geowebcache.get_instance().kill_all_tasks(None, layer, server, master_node.getUrl())
     else:
         geowebcache.get_instance().kill_all_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
-    
+
     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-    
+
     return HttpResponse(json.dumps({}, indent=4), content_type='application/json')
 
 @login_required()
@@ -4774,11 +4774,11 @@ def kill_all_group_tasks(request):
     layer_group = LayerGroup.objects.get(id=int(group_id))
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
-    
+
     geowebcache.get_instance().kill_all_tasks(layer_group, server, master_node.getUrl())
-    
+
     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-    
+
     return HttpResponse(json.dumps({}, indent=4), content_type='application/json')
 
 @login_required()
@@ -4793,11 +4793,11 @@ def update_thumbnail(request, layer_id):
         server = Server.objects.get(id=layer_group.server_id)
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
         layer = gs.updateThumbnail(layer, 'update')
-        return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url.replace(settings.BASE_URL, '')}, indent=4), content_type='application/json')    
+        return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url.replace(settings.BASE_URL, '')}, indent=4), content_type='application/json')
     except Exception as e:
         print(str(e))
         return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
-    
+
 
 @login_required()
 @require_safe
@@ -4818,28 +4818,28 @@ def service_url_add(request):
             # save it on DB if successfully created
             service_url = ServiceUrl(**form.cleaned_data)
             service_url.save()
-            
+
             return HttpResponseRedirect(reverse('service_url_list'))
-                
+
     else:
         form = ServiceUrlForm()
-            
+
     return render(request, 'service_url_add.html', {'form': form})
 
 @login_required()
 @require_POST
 @superuser_required
 def service_url_delete(request, svid):
-    try: 
+    try:
         service_url = ServiceUrl.objects.get(id=svid)
         service_url.delete()
         return HttpResponseRedirect(reverse('service_url_list'))
-        
+
     except Exception as e:
-        print(str(e)) 
-        return HttpResponseNotFound(str(e) ) 
-    
-    
+        print(str(e))
+        return HttpResponseNotFound(str(e) )
+
+
 @login_required()
 @superuser_required
 def service_url_update(request, svid):
@@ -4847,22 +4847,22 @@ def service_url_update(request, svid):
         title = request.POST.get('title')
         type = request.POST.get('type')
         url = request.POST.get('url')
-        
+
         service_url = ServiceUrl.objects.get(id=int(svid))
-        
+
         service_url.title = title
         service_url.type = type
         service_url.url = url
-        service_url.save() 
-        
+        service_url.save()
+
         return HttpResponseRedirect(reverse('service_url_list'))
-    
+
     else:
         service_url = ServiceUrl.objects.get(id=int(svid))
         form = ServiceUrlForm(instance=service_url)
-        
+
         return render(request, 'service_url_update.html', {'svid': svid, 'form': form})
-    
+
 @login_required()
 @staff_required
 def test_connection(request):
@@ -4870,7 +4870,7 @@ def test_connection(request):
         datastore_type = request.POST.get('ds_type')
         connection_params = json.loads(request.POST.get('connection_params'))
         if datastore_type == 'v_PostGIS':
-                
+
             try:
                 connection = psycopg2.connect(
                     user = connection_params.get('user'),
@@ -4881,39 +4881,39 @@ def test_connection(request):
                 )
                 response = { 'success': True }
                 connection.close()
-                
+
             except Exception as e:
                 response = {
                     'error': str(e),
-                    'success': False 
+                    'success': False
                 }
         elif datastore_type == 'e_WMS':
             try:
                 user = connection_params.get('username')
                 password = connection_params.get('password')
                 url = connection_params.get('url')
-                
+
                 with requests.get(url, auth=(user, password), stream=True, verify=False) as r:
                     if r.status_code >= 200 or r.status_code < 300:
                         response = { 'success': True }
                     else:
                         response = {
                                 'error': _('Connection failed') + '<br>' + _("Status code: ") + str(r.status_code),
-                                'success': False 
+                                'success': False
                             }
             except Exception as e:
                 logger.exception("Error connecting WMS")
                 response = {
                     'error': _('Connection failed') + '<br>' + escape(strip_tags(str(e))),
-                    'success': False 
+                    'success': False
                 }
         else:
                 response = {
                     'error': _('Connection error'),
-                    'success': False 
+                    'success': False
                 }
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+
 #@login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def register_action(request):
@@ -4921,7 +4921,7 @@ def register_action(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-        
+
         if request.user.is_anonymous:
             action.send(layer, verb="gvsigol_services/layer_activate", action_object=layer)
         else:
@@ -4933,7 +4933,7 @@ def register_action(request):
 @staff_required
 def db_field_delete(request):
     if request.method == 'POST':
-        try: 
+        try:
             field = request.POST.get('field')
             #layer_name = request.POST['layer_name']
             layer_id = request.POST.get('layer_id')
@@ -4950,7 +4950,7 @@ def db_field_delete(request):
             schema = params.get('schema', 'public')
             con.delete_column(schema, layer.source_name, field)
             con.close()
-            
+
             layer_conf = ast.literal_eval(layer.conf) if layer.conf else {}
             for f in layer_conf.get('fields', []):
                 if f['name'] == field:
@@ -4962,12 +4962,12 @@ def db_field_delete(request):
             for trigger in triggers:
                 trigger.drop()
             triggers.delete()
-            
+
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
-            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+            return HttpResponse('{"response": "ok"}', content_type='application/json')
         except psycopg2.ProgrammingError as e:
             logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
             if e.pgcode == '42703':
@@ -4987,7 +4987,7 @@ def db_field_changetype(request):
 @staff_required
 def db_field_rename(request):
     if request.method == 'POST':
-        try: 
+        try:
             field = request.POST.get('field')
             new_field_name = request.POST.get('new_field_name').lower()
             if _valid_sql_name_regex.search(new_field_name) == None:
@@ -5019,7 +5019,7 @@ def db_field_rename(request):
             for enumDef in LayerFieldEnumeration.objects.filter(layer=layer, field=field):
                 enumDef.field = new_field_name
                 enumDef.save()
-                
+
             for triggerDef in Trigger.objects.filter(layer=layer, field=field):
                 triggerDef.drop()
                 triggerDef.field = new_field_name
@@ -5029,7 +5029,7 @@ def db_field_rename(request):
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
-            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+            return HttpResponse('{"response": "ok"}', content_type='application/json')
         except psycopg2.ProgrammingError as e:
             logger.exception(_('Error renaming field. Cause: {0}').format(str(e)))
             if e.pgcode == '42703':
@@ -5054,11 +5054,11 @@ def db_add_field(request):
             enumkey = request.POST.get('enumkey')
             calculation = request.POST.get('calculation')
             layer = Layer.objects.get(id=layer_id)
-            
+
             for ctrl_field in settings.CONTROL_FIELDS:
                 if field_name == ctrl_field.get('name'):
                     return utils.get_exception(400, _('The field name "{0}" is a reserved name').format(field_name))
-            
+
             if not utils.can_manage_layer(request, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
             if not (layer.datastore.type == 'v_PostGIS'):
@@ -5076,12 +5076,12 @@ def db_add_field(request):
                 except psycopg2.ProgrammingError as e:
                     logger.exception("Error adding field")
                     return utils.get_exception(400, _('Error adding field. Probably the field "{0}" already exists. Database message: {1}').format(field_name, str(e)))
-            
+
             if enumkey:
                 field_enum = LayerFieldEnumeration()
                 field_enum.layer = layer
                 field_enum.field = field_name
-                field_enum.enumeration_id = int(enumkey) 
+                field_enum.enumeration_id = int(enumkey)
                 field_enum.multiple = True if field_type == 'multiple_enumeration' else False
                 field_enum.save()
             if calculation:
@@ -5092,20 +5092,20 @@ def db_add_field(request):
                     trigger.field = field_name
                     trigger.procedure = procedure
                     trigger.save()
-                    
+
                     trigger.install()
                 except:
                     logger.exception("Error creating trigger for calculated field")
-            
+
             expose_pks = gs.datastore_check_exposed_pks(layer.datastore)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
             layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
             layer.save()
-            return HttpResponse('{"response": "ok"}', content_type='application/json') 
+            return HttpResponse('{"response": "ok"}', content_type='application/json')
         except Exception as e:
             logger.exception(_('Error creating field. Cause: {0}').format(str(e)))
-            
+
             # clean potential half created field
             if layer:
                 LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
@@ -5217,7 +5217,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                                 raise Exception
                             main_table = table_alias
                         table_fields[table_alias] = c.get_fields(table_name, schema=schema)
-                
+
                     if idx > 0:
                         join_field1 = table.get('join_field1')
                         join_field2 = table.get('join_field2')
@@ -5236,7 +5236,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                     ft_json['datastore_name'] = str(ds)
                     from_def.append(ft_json)
                     from_objs.append(ft_obj)
-                    
+
                 field_objs = []
                 for idx, field in enumerate(form.cleaned_data.get('fields')):
                     table_alias = field.get('table_alias')
@@ -5302,7 +5302,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                             c.delete_geoserver_view_pk_columns(target_schema, sql_view.name)
                         sql_view.delete()
                         view_id = ''
-                        
+
             except Exception as e:
                 logger.exception(str(e))
                 if len(form.errors) == 0:
@@ -5392,6 +5392,6 @@ def list_datastores_in_db(request):
                params.get('port') == port and \
                 params.get('database') == database:
                     filtered_datastores.append({"id": datastore.id, "name": str(datastore)})
-        
+
         return HttpResponse(json.dumps(filtered_datastores))
     return HttpResponseBadRequest()
