@@ -54,8 +54,8 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
 			var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
 			
-			var tk = viewer.core.conf.user.token;
-			if (typeof tk !== 'undefined' ){
+			if (viewer.core.conf.user && viewer.core.conf.user.token){
+			    var tk = viewer.core.conf.user.token;
 				shapeLink = shapeLink + '&access_token=' + tk;
 				gmlLink = gmlLink + '&access_token=' + tk;
 				csvLink = csvLink + '&access_token=' + tk;
