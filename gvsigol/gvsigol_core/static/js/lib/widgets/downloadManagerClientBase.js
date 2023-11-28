@@ -61,7 +61,6 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 				csvLink = csvLink + '&access_token=' + tk;
 			}
 			
-			//var withtoken = shapeLink + '&access_token=' +  viewer.core.conf.user.token;
 			var ui = '';
 			ui += '<div class="row">';
 			ui += 	'<div class="col-md-12 form-group">';	
@@ -103,8 +102,4 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			$('#float-modal').modal('show');
 		}
 	}
-}
-
-DownloadManagerUI.prototype.DownloadFile = function(url) {
-	alert(url);
 }
