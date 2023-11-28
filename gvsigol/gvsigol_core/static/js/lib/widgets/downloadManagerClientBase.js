@@ -56,9 +56,9 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			
 			var tk = viewer.core.conf.user.token;
 			if (typeof tk !== 'undefined' ){
-				shapeLink = shapeLink + '&acces_token=' + tk;
-				gmlLink = gmlLink + 'acces_token=' + tk;
-				csvLink = csvLink + 'acces_token=' + tk;
+				shapeLink = shapeLink + '&access_token=' + tk;
+				gmlLink = gmlLink + 'access_token=' + tk;
+				csvLink = csvLink + 'access_token=' + tk;
 			}
 			
 			//var withtoken = shapeLink + '&access_token=' +  viewer.core.conf.user.token;
