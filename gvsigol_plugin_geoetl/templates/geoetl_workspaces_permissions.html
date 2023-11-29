@@ -10,9 +10,9 @@
               </div>
             </div>
             <div class="box-body">
-                
+
                 <ul class="products-list product-list-in-box list">
-                  
+
                     {% for group in groups %}
                     <li class="item">
                         <div class="product-img">
@@ -20,28 +20,28 @@
                         </div>
                         <div class="product-info">
                             <span class="product-title">{{group.name}}
-                                <div class="pull-right checkbox form-inline">                                       
+                                <div class="pull-right checkbox form-inline">
                                         <label>
-                                            <input class="layer-read-checkbox" type="checkbox" name="edit-usergroup-{{group.name}}" id="edit-usergroup-{{group.name}}"
+                                            <input class="ws-edit-checkbox" type="checkbox" name="edit-usergroup-{{group.name}}" id="edit-usergroup-{{group.name}}"
                                              {% if group.name in editing_role %} checked {% endif %}/>
                                             <span>{% trans "Edit permission" %}</span>
                                         </label>
                                         <label>
-                                            <input class="layer-read-checkbox" type="checkbox" name="execute-usergroup-{{group.name}}" id="execute-usergroup-{{group.name}}"
+                                            <input class="ws-execute-checkbox" type="checkbox" name="execute-usergroup-{{group.name}}" id="execute-usergroup-{{group.name}}"
                                              {% if group.name in execution_role %} checked {% endif %}/>
                                             <span>{% trans "Execute permission" %}</span>
-                                        </label>                                        
+                                        </label>
                                 </div>
                             </span>
                             <span class="product-description">{{group.description}}</span>
                         </div>
-                    </li> 
+                    </li>
                     {% endfor %}
                 </ul>
                 <ul class="pagination"></ul>
             </div>
         </div>
     </div>
-    
-    
+
+
 </div>

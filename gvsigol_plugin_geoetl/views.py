@@ -58,10 +58,10 @@ class EtlWorkspaceExists(Exception):
     pass
 
 def get_conf(request):
-    if request.method == 'POST': 
+    if request.method == 'POST':
         response = {
             'etl_url': settings_geoetl.ETL_URL
-        }       
+        }
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
 def create_schema(connection_params):
@@ -94,7 +94,7 @@ def create_schema(connection_params):
 @login_required()
 @staff_required
 def etl_canvas(request):
-    
+
     #from gvsigol.celery import app as celery_app
     #celery_app.control.purge()
 
@@ -133,10 +133,10 @@ def etl_canvas(request):
         statusModel.message = ''
         statusModel.status = ''
         statusModel.id_ws = None
-        statusModel.save()    
+        statusModel.save()
 
     except:
-        
+
         statusModel = ETLstatus(
             name = 'current_canvas.'+username,
             message = '',
@@ -167,7 +167,7 @@ def etl_canvas(request):
                 periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+instance.name+'.'+str(lgid))
             except:
                 periodicTask = None
-            
+
             if periodicTask:
                 cronid = periodicTask.crontab_id
                 interid = periodicTask.interval_id
@@ -187,7 +187,7 @@ def etl_canvas(request):
                     response['period'] = interval.period
 
             return render(request, 'etl.html', response)
-        
+
         else:
 
             return redirect('etl_workspace_list')
@@ -211,7 +211,8 @@ def get_list(request, concat = False):
     elif user.is_staff:
         user_roles = auth_backend.get_roles(request)
         etl_list = (ETLworkspaces.objects.filter(etlworkspaceexecuterole__role__in=user_roles) |
-                     ETLworkspaces.objects.filter(username=user.username, concat=concat)).distinct()
+                        ETLworkspaces.objects.filter(etlworkspaceeditrole__role__in=user_roles) |
+                        ETLworkspaces.objects.filter(username=user.username, concat=concat)).distinct()
     else:
         etl_list = []
     workspaces = []
@@ -232,7 +233,7 @@ def get_list(request, concat = False):
             periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
         except:
             periodicTask = None
-        
+
         if periodicTask:
             cronid = periodicTask.crontab_id
             interid = periodicTask.interval_id
@@ -240,7 +241,7 @@ def get_list(request, concat = False):
                 crontab = CrontabSchedule.objects.get(id= cronid)
                 if crontab.minute != '0':
                     workspace['minute'] = crontab.minute
-                else: 
+                else:
                     workspace['minute'] = '00'
 
                 if crontab.hour != '0':
@@ -258,19 +259,19 @@ def get_list(request, concat = False):
                 workspace['every'] = interval.every
                 workspace['period'] = interval.period
 
-        
-        
+
+
         workspaces.append(workspace)
-    
+
     return workspaces
 
 
 @login_required()
 @staff_required
 def permissons_tab(request, id_wks):
-    
+
     all_roles=auth_backend.get_all_roles_details(request)
-    
+
     if (id_wks !=0 and id_wks is not None):
         ws = ETLworkspaces.objects.get(id=id_wks)
         if ws.can_edit(request):
@@ -279,23 +280,23 @@ def permissons_tab(request, id_wks):
             editing_role=[]
             for b in role_edit_wks:
                 editing_role.append(b.role)
-        
+
         if ws.can_execute(request):
 
             role_execute_wks = EtlWorkspaceExecuteRole.objects.filter(etl_ws=id_wks)
             execution_role=[]
             for b in role_execute_wks:
                 execution_role.append(b.role)
-    else:        
+    else:
         editing_role=all_roles
         execution_role=all_roles
-        
+
     response = {
             'groups': all_roles,
             'editing_role' : editing_role,
             'execution_role' : execution_role
             }
-     
+
     return render(request,  "geoetl_workspaces_permissions.html", response)
 
 
@@ -315,7 +316,7 @@ def etl_workspace_list(request):
             connection_params = '{ "user": "'+GEOETL_DB['user']+'", "password": "'+GEOETL_DB['password']+'", "host": "'+GEOETL_DB['host']+'", "port":'+GEOETL_DB['port']+', "database": "'+GEOETL_DB['database']+'"}'
         )
         bbdd_con.save()
-        
+
     except Exception as e:
         print(e)
 
@@ -342,10 +343,10 @@ def etl_concat_workspaces(request):
             connection_params = '{ "user": "'+GEOETL_DB['user']+'", "password": "'+GEOETL_DB['password']+'", "host": "'+GEOETL_DB['host']+'", "port":'+GEOETL_DB['port']+', "database": "'+GEOETL_DB['database']+'"}'
         )
         bbdd_con.save()
-        
+
     except Exception as e:
         print(e)
-    
+
     response = {
         'workspaces': get_list(request, True),
         'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
@@ -377,14 +378,14 @@ def save_periodic_workspace(request, workspace):
     my_task_name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id)
 
     if day == 'every':
-        
+
         if unit_program == 'minutes':
             unit_period = IntervalSchedule.MINUTES
         elif unit_program == 'days':
             unit_period = IntervalSchedule.DAYS
         elif unit_program == 'hours':
             unit_period = IntervalSchedule.HOURS
-        
+
         schedule, created = IntervalSchedule.objects.get_or_create(
             every = num_program,
             period=unit_period,
@@ -436,7 +437,7 @@ def delete_periodic_workspace(workspace):
         periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id))
     except:
         periodicTask = None
-    
+
     if periodicTask:
         cronid = periodicTask.crontab_id
         interid = periodicTask.interval_id
@@ -444,12 +445,12 @@ def delete_periodic_workspace(workspace):
         periodicTask.delete()
 
         if interid:
-            
+
             try:
                 intervalTasks = PeriodicTask.objects.get(crontab_id =interid)
             except:
                 intervalTasks = None
-            
+
             if not intervalTasks:
 
                 intervalSchedule = IntervalSchedule.objects.get(id = interid)
@@ -459,9 +460,9 @@ def delete_periodic_workspace(workspace):
                 cronTasks = PeriodicTask.objects.get(crontab_id =cronid)
             except:
                 cronTasks = None
-            
+
             if not cronTasks:
-            
+
                 crontabSchedule = CrontabSchedule.objects.get(id = cronid)
                 crontabSchedule.delete()
 
@@ -498,46 +499,39 @@ def _etl_workspace_update(instance, request, name, description, workspace, param
     instance.concat = concat
     instance.save()
 
-    edit_roles= request.POST.get('editRoles') 
-    execute_roles=request.POST.get('executeRoles')
-    
     if instance.id is not None:
         delete_periodic_workspace(instance)
-          
+
     if periodic_task:
         save_periodic_workspace(request, instance)
 
-    if not (edit_roles == "[]" or edit_roles is None):
-        roles_aux= json.loads(edit_roles)     
-        EtlWorkspaceEditRole.objects.filter(etl_ws=instance.id).delete()      
-        for rol in roles_aux:           
-            try:                         
-                wsRole = EtlWorkspaceEditRole.objects.get(etl_ws_id=instance.id, role=rol)                       
-            except:            
-                wsRole = EtlWorkspaceEditRole()            
-                wsRole.etl_ws = instance
-                wsRole.role = rol
-                wsRole.save()
-
-    if not (execute_roles == "[]" or execute_roles is None):   
-        roles_aux= json.loads(execute_roles)       
-        EtlWorkspaceExecuteRole.objects.filter(etl_ws=instance.id).delete()      
-        for rol in roles_aux:           
-            try:                         
-                ws_role = EtlWorkspaceExecuteRole.objects.get(etl_ws_id=instance.id, role=rol)                       
-            except:            
-                ws_role = EtlWorkspaceExecuteRole()            
-                ws_role.etl_ws = instance
-                ws_role.role = rol
-                ws_role.save()
-
+    edit_roles = json.loads(request.POST.get('editRoles', '[]'))
+    EtlWorkspaceEditRole.objects.filter(etl_ws=instance.id).delete()
+    for rol in edit_roles:
+        try:
+            wsRole = EtlWorkspaceEditRole.objects.get(etl_ws_id=instance.id, role=rol)
+        except:
+            wsRole = EtlWorkspaceEditRole()
+            wsRole.etl_ws = instance
+            wsRole.role = rol
+            wsRole.save()
+    execute_roles = json.loads(request.POST.get('executeRoles', '[]'))
+    EtlWorkspaceExecuteRole.objects.filter(etl_ws=instance.id).delete()
+    for rol in execute_roles:
+        try:
+            ws_role = EtlWorkspaceExecuteRole.objects.get(etl_ws_id=instance.id, role=rol)
+        except:
+            ws_role = EtlWorkspaceExecuteRole()
+            ws_role.etl_ws = instance
+            ws_role.role = rol
+            ws_role.save()
 
 
 @login_required()
 @staff_required
-def etl_workspace_update(request):   
+def etl_workspace_update(request):
     if request.method == 'POST':
-        name = request.POST.get('name') 
+        name = request.POST.get('name')
         description = request.POST.get('description')
         workspace = request.POST.get('workspace')
         periodic_task = request.POST.get('checked') == 'true'
@@ -560,7 +554,7 @@ def etl_workspace_update(request):
         except EtlWorkspaceExists:
             response = {
                 'exists': 'true',
-            }   
+            }
             return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
         response = {
@@ -573,17 +567,17 @@ def etl_workspace_update(request):
 @staff_required
 def etl_workspaces_roles(request):
 
-    
+
     response = {
         'roles': auth_backend.get_all_roles_details(request)
     }
 
-    return HttpResponse(json.dumps(response), content_type="application/json")        
+    return HttpResponse(json.dumps(response), content_type="application/json")
 
 @login_required()
 @staff_required
 def etl_workspace_delete(request):
-    
+
     if request.method == 'POST':
         lgid = request.POST['lgid']
         instance  = ETLworkspaces.objects.get(id=int(lgid))
@@ -611,14 +605,14 @@ def etl_current_canvas_status(request):
 
         response = {
             'status': status, 'message': msg
-        }      
-        
+        }
+
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     except:
         response = {
             'status': '', 'message': ''
-        }      
-        
+        }
+
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @login_required()
@@ -626,35 +620,35 @@ def etl_current_canvas_status(request):
 def etl_list_canvas_status(request):
 
     statusModel  = ETLstatus.objects.all()
-    
+
     workspaces = []
 
     for sm in statusModel:
         if not sm.name.startswith('current_canvas'):
-            
+
             workspace = {}
             workspace['id_ws'] = sm.id_ws
             workspace['status'] = sm.status
             workspace['message'] = sm.message
             workspaces.append(workspace)
-    
+
     response = {
         'workspaces': workspaces
-    }   
+    }
 
-    
+
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+
 @login_required()
 @staff_required
 def etl_read_canvas(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
-        
+
         if form.is_valid():
 
             if request.POST['jsonCanvas'] == 'false':
-                
+
                 id_ws = request.POST['id_ws']
                 ws  = ETLworkspaces.objects.get(id=int(id_ws))
                 jsonCanvas = json.loads(ws.workspace)
@@ -674,24 +668,24 @@ def etl_read_canvas(request):
 
             if id_ws:
                 if ws.can_execute(request):
-                    run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
-                                                                'id_ws': id_ws, 
-                                                                'username': request.user.username, 
+                    run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas,
+                                                                'id_ws': id_ws,
+                                                                'username': request.user.username,
                                                                 'parameters': params,
                                                                 'concat': concat})
-                    
+
             else: # executing a workspace that has not been saved yet
-                run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas, 
-                                                            'id_ws': id_ws, 
+                run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas,
+                                                            'id_ws': id_ws,
                                                             'username': request.user.username,
                                                             'parameters': params,
                                                             'concat': concat})
 
- 
+
         else:
             print ('invalid form')
             print((form.errors))
-       
+
     response = {
            'refresh': True
        }
@@ -737,8 +731,8 @@ def etl_schema_shape(request):
 
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')   
-@staff_required 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def test_conexion(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -749,7 +743,7 @@ def test_conexion(request):
             if jsParams['type-db'] == 'PostgreSQL':
 
                 response = etl_schema.test_postgres(jsParams['parameters'][0])
-                
+
             elif jsParams['type-db'] == 'Oracle':
 
                 response = etl_schema.test_oracle(jsParams['parameters'][0])
@@ -760,8 +754,8 @@ def test_conexion(request):
 
             return HttpResponse(json.dumps(response), content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')   
-@staff_required 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def save_conexion(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -781,19 +775,19 @@ def save_conexion(request):
                     'saved': 'true',
                     'name': jsParams['name-db'],
                     'type': jsParams['type-db']
-                }  
-                
+                }
+
             except Exception as e:
                 response = {
                     'saved': 'false',
-                }  
+                }
                 print(e)
 
             return HttpResponse(json.dumps(response), content_type="application/json")
 
 
 @login_required()
-@staff_required    
+@staff_required
 def etl_schema_csv(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
@@ -802,7 +796,7 @@ def etl_schema_csv(request):
             jsParams = json.loads(request.POST['jsonParamsCSV'])
 
             response = etl_schema.get_schema_csv(jsParams['parameters'][0])
-            
+
             return HttpResponse(json.dumps(response), content_type="application/json")
 
 @login_required()
@@ -811,7 +805,7 @@ def etl_owners_oracle(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            
+
             jsParams = json.loads(request.POST['jsonParamsOracle'])
 
             listOwners = etl_schema.get_owners_oracle(jsParams['parameters'][0])
@@ -825,7 +819,7 @@ def etl_tables_oracle(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            
+
             jsParams = json.loads(request.POST['jsonParamsOracle'])
 
             listtabl = etl_schema.get_tables_oracle(jsParams['parameters'][0])
@@ -839,7 +833,7 @@ def etl_schema_oracle(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            
+
             jsParams = json.loads(request.POST['jsonParamsOracle'])
 
             listSchema = etl_schema.get_schema_oracle(jsParams['parameters'][0])
@@ -858,7 +852,7 @@ def etl_proced_indenova(request):
 
             listProcedures = etl_schema.get_proced_indenova(jsParams['parameters'][0])
             response = json.dumps(listProcedures)
-            
+
             return HttpResponse(response, content_type="application/json")
 
 @login_required()
@@ -872,7 +866,7 @@ def etl_schema_indenova(request):
             listSchema = ['idexp', 'numexp', 'issue', 'idtram', 'nametram', 'initdate', 'status', 'regnumber', 'regdate', 'adirefcatt', 'identifier', 'name', 'town', 'city', 'postalcode', 'country', 'enddate', 'url']
 
             response = json.dumps(listSchema)
-            
+
             return HttpResponse(response, content_type="application/json")
 
 
@@ -923,9 +917,9 @@ def etl_workspace_upload(request):
     file = request.POST['file']
     user = request.POST['username']
     id = None
-    
+
     exists = name_user_exists(id, name, user)
-    
+
     if exists:
         response = {
             'exists': 'true',
@@ -997,7 +991,7 @@ def etl_workspace_is_running(request):
             if sm.status == 'Running':
                 response['run'] = 'true'
                 break
-        
+
         if response['run'] == 'false':
             etl_clean_tmp_tables(request)
 
@@ -1027,10 +1021,10 @@ def etl_clean_tmp_tables(request):
     )
     cursor.execute(create_schema)
     connection.commit()
-    
+
     connection.close()
     cursor.close()
-    
+
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
@@ -1039,7 +1033,7 @@ def etl_clean_tmp_tables(request):
 @staff_required
 def get_workspace_parameters(request):
     if request.method == 'POST':
-        
+
         ws = ETLworkspaces.objects.get(id = request.POST['id'])
         if ws.can_edit(request):
             if ws.parameters:
@@ -1050,8 +1044,8 @@ def get_workspace_parameters(request):
                 except:
                     response['json-user-params'] = json.dumps({})
             else:
-                response = {"db": "", 
-                            "sql-before": "", 
+                response = {"db": "",
+                            "sql-before": "",
                             "sql-after": "",
                             "json-user-params": json.dumps({}),
                             "checkbox-user-params": "",
@@ -1090,7 +1084,7 @@ def set_workspace_parameters(request):
             sql_before = request.POST['sql-before'].splitlines()
             sql_after = request.POST['sql-after'].splitlines()
 
-            
+
 
             params = '{"db": "'+request.POST['db']
             params +='", "sql-before": '+str(sql_before).replace("'", '"')
@@ -1131,7 +1125,7 @@ def etl_entities_segex(request):
             listEntities = etl_schema.get_entities_segex(jsParams['parameters'][0])
 
             response = json.dumps(listEntities)
-            
+
             return HttpResponse(response, content_type="application/json")
 
 def etl_types_segex(request):
@@ -1143,7 +1137,7 @@ def etl_types_segex(request):
             listTypes = etl_schema.get_types_segex(jsParams['parameters'][0])
 
             response = json.dumps(listTypes)
-            
+
             return HttpResponse(response, content_type="application/json")
 
 @login_required()
@@ -1185,7 +1179,7 @@ def etl_xml_tags(request):
             f = request.POST['file']
             r = request.POST['reading']
             listTagsLevels = etl_schema.get_xml_tags(f, r)
-            
+
             response = json.dumps(listTagsLevels)
 
             return HttpResponse(response, content_type="application/json")
@@ -1204,7 +1198,7 @@ def get_workspaces(request):
 @staff_required
 def etl_concatenate_workspace_update(request):
     if request.method == 'POST':
-        name = request.POST.get('name') 
+        name = request.POST.get('name')
         description = request.POST.get('description')
         workspace = request.POST.get('workspace')
         periodic_task = request.POST.get('checked') == 'true'
@@ -1223,7 +1217,7 @@ def etl_concatenate_workspace_update(request):
         except EtlWorkspaceExists:
             response = {
                 'exists': 'true',
-            }   
+            }
             return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
     response = {}
@@ -1235,7 +1229,7 @@ def etl_tables_sqlserver(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            
+
             jsParams = json.loads(request.POST['jsonParamsSQLServer'])
 
             listtabl = etl_schema.get_tables_sqlserver(jsParams['parameters'][0])
@@ -1249,7 +1243,7 @@ def etl_schemas_sqlserver(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            
+
             jsParams = json.loads(request.POST['jsonParamsSQLServer'])
 
             listSchema = etl_schema.get_schemas_sqlserver(jsParams['parameters'][0])
@@ -1264,7 +1258,7 @@ def etl_data_schema_sqlserver(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
-            
+
             jsParams = json.loads(request.POST['jsonSqlServer'])
 
             listSchema = etl_schema.get_data_schemas_sqlserver(jsParams['parameters'][0])

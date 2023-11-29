@@ -1,6 +1,6 @@
-{% extends "base.html" %} 
-{% load staticfiles %} 
-{% load i18n %} 
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
 
 {% block content %}
 {% if user.is_staff %}
@@ -49,10 +49,10 @@
 								<tr data-workspaceid="{{ workspace.id }}" data-editable="{{workspace.editable}}">
 									<td> {{ workspace.id }} </td>
 									<td></td>
-									
+
 										<td>
-											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
-											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
+											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i>
+											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i>
 											<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
 										</td>
 
@@ -79,7 +79,7 @@
 				</div>
 			</div>
 		</div>
-	</div>      
+	</div>
 
 	<!-- Modals -->
 	<div class="modal fade" id="modal-delete-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -118,7 +118,7 @@
 				</button>
 				<h4 class="modal-title">{% trans "Upload ETL Workspace" %}</h4>
 				<ul class="nav nav-tabs">
-					<li class="active"><a data-toggle="tab" href="#general">General</a></li>					
+					<li class="active"><a data-toggle="tab" href="#general">General</a></li>
 					<li><a data-toggle="tab" href="#permission">Permisos</a></li>
 
 				</ul>
@@ -219,8 +219,6 @@
 						</form>
 					</div>
 					<div id="permission" class="tab-pane">
-						{% include 'geoetl_workspaces_permissions.html' %}
-
 					</div>
 
 				</div>
@@ -261,7 +259,7 @@
 	<div id="modal-upload-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
-			
+
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
@@ -275,14 +273,14 @@
 						<div class="row">
 							<div class="col-md-12">
 								<label for="etl_name">{% trans "Name" %}</label>
-								<input placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name_upload" type="text" class="form-control">							
+								<input placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name_upload" type="text" class="form-control">
 							</div>
 						</div>
 
 						<div class="row">
 							<div class="col-md-12">
 								<label for="etl_desc">{% trans "Description" %}</label>
-								<input placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc_upload" id="etl_desc_upload" type="text" class="form-control">								
+								<input placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc_upload" id="etl_desc_upload" type="text" class="form-control">
 							</div>
 						</div>
 
@@ -311,7 +309,7 @@
 	<div id="modal-clean-tmp-tables" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
-			
+
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
@@ -338,7 +336,7 @@
 <div id="modal-set-parameters-workspace" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
-		
+
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
@@ -362,7 +360,7 @@
 							<select id="db" class="form-control"></select>
 						</div>
 					</div>
-					
+
 					<div>
 						<label class="col-form-label" id ="sql-params">{% trans "SQL Parameters" %} <i id ="img-sql-params" class="fa fa-caret-right"></i> </label>
 					</div>
@@ -391,7 +389,7 @@
 					<div id="more-options-user" class="more-options">
 						<div class="row">
 							<div class="col-md-12">
-								<label class="col-form-label">{% trans "Add user parameter" %}</a></label> 
+								<label class="col-form-label">{% trans "Add user parameter" %}</a></label>
 							</div>
 						</div>
 
@@ -430,10 +428,10 @@
 						<div class="row">
 							<div class="col-sm-12">
                                 <input type="checkbox" id="checkbox-user-params" value = 'False'/>
-                                <label for="checkbox"> {% trans "There are variable parameters (The workspace will be executed in a loop)" %} </label>   							
+                                <label for="checkbox"> {% trans "There are variable parameters (The workspace will be executed in a loop)" %} </label>
 							</div>
 						</div>
-						
+
 						<div class="row">
 							<div class="col-sm-4">
 								<label >{% trans "Variable parameter" %}</a></label>
@@ -452,7 +450,7 @@
                                 <div class="form-check">
                                     <input type="radio" name="radio-params-user" class="form-check-input" id="loop-postgres-user-params" value="postgres">
                                     <label>{% trans "Iterative value from a column of a PostgreSQL table" %}</label>
-                                </div>						
+                                </div>
 							</div>
 						</div>
 
@@ -487,7 +485,7 @@
 								<label class="col-form-label">{% trans "Attributes" %}</label>
 								<select id="attr-name-user-params" class="form-control"></select>
 							</div>
-						</div>  
+						</div>
 
 					</div>
 
@@ -536,7 +534,7 @@
             );
 
 		type = $('#type-user-params').val()
-		
+
 		if (type == 'VARCHAR'){
 
 			value = $('#value-user-params').val()
@@ -589,7 +587,7 @@
 		if ($('#checkbox-user-params').is(':checked')){
 
 			$('#checkbox-user-params').val('True')
-					
+
 			$("#loop-user-params").prop('disabled', false)
 			$('[name = "radio-params-user"]').prop('disabled', false)
 			$("#init-loop-integer-user-params").prop('disabled', false)
@@ -600,7 +598,7 @@
 			$("#table-name-user-params").prop('disabled', false)
 			$("#get-attrs").removeClass('disabled')
 			$("#attr-name-user-params").prop('disabled', false)
-					
+
 		}
 
 		else {
@@ -649,14 +647,14 @@
 	})
 
 	$('#get-schemas').on("click", function(){
-                                
+
 		var paramsGetSchemas = {
 		"parameters": [
 			{"db": $('#db').val()}
 		]}
 
 		var formDataGetSchemas = new FormData();
-		
+
 		formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
 
 		$.ajax({
@@ -666,8 +664,8 @@
 			beforeSend:function(xhr){
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
-			cache: false, 
-			contentType: false, 
+			cache: false,
+			contentType: false,
 			processData: false,
 			success: function (data) {
 
@@ -681,7 +679,7 @@
 	});
 
 	$('#get-tables').on("click", function(){
-                                
+
 		var paramsGetSchemas = {
 		"parameters": [
 			{"db": $('#db').val(),
@@ -689,7 +687,7 @@
 		]}
 
 		var formDataGetSchemas = new FormData();
-		
+
 		formDataGetSchemas.append('jsonParams', JSON.stringify(paramsGetSchemas))
 
 		$.ajax({
@@ -699,11 +697,11 @@
 			beforeSend:function(xhr){
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
-			cache: false, 
-			contentType: false, 
+			cache: false,
+			contentType: false,
 			processData: false,
 			success: function (data) {
-				
+
 				$('#table-name-user-params').empty()
 
 				for (i = 0; i < data.length; i++){
@@ -715,7 +713,7 @@
 	});
 
 	$('#get-attrs').on("click", function(){
-                                
+
 		var paramsGetAttrs = {
 		"parameters": [
 			{"db": $('#db').val(),
@@ -724,7 +722,7 @@
 		]}
 
 		var formDataGetAttrs = new FormData();
-		
+
 		formDataGetAttrs.append('jsonParamsPostgres', JSON.stringify(paramsGetAttrs))
 
 		$.ajax({
@@ -734,11 +732,11 @@
 			beforeSend:function(xhr){
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
-			cache: false, 
-			contentType: false, 
+			cache: false,
+			contentType: false,
 			processData: false,
 			success: function (data) {
-				
+
 				$('#attr-name-user-params').empty()
 
 				for (i = 0; i < data.length; i++){
@@ -870,7 +868,7 @@
 					},
 					error: function(){}
 				});
-		
+
 		});
 
 		$('#accept-clean-tmp').on('click', function (){
@@ -937,7 +935,7 @@
 						if(response['exists']=="true"){
 							upload = true
 							$('#modal-ws-exists').modal('show')
-							
+
 						}else{
 							location.reload();
 						}
@@ -946,13 +944,13 @@
 				});
 
 		})
-		
+
 
 		$('#etl-table tbody').on('click', 'button', function (){
 			var row = table.row($(this).parents('tr'));
 			var data = row.data();
 			if (this.name == "button-update-workspace-etl") {
-				
+
 				$(".modal-body #etl_id").val( data[0] );
 				$(".modal-body #etl_name").val( data[3] );
 				$(".modal-body #etl_desc").val( data[4] );
@@ -963,9 +961,9 @@
 
 					if(data[5].includes(':')){
 
-						$(".more-options").slideUp("slow"); 
+						$(".more-options").slideUp("slow");
 						$(".more-hour-options").slideDown("slow");
-						
+
 						$(".modal-body #ws-program-day").val(data[5].split(' ')[0]);
 						$(".modal-body #ws-program-time").val(data[5].split(' ')[1]+':00');
 
@@ -979,22 +977,21 @@
 						$(".modal-body #ws-program-unit").val(data[5].split(' ')[1])
 
 					}
-				
+
 				}else{
 					$("#repeat_periodically").prop('checked', false)
 					$(".repeat_periodically_time").slideUp("slow");
 				}
-				
+
 				$('#modal-update-workspace-etl').modal('show')
-				
-				updateWorkspace(data)
-				
+				$('#modal-update-workspace-etl').attr('data-wsid', data[0]);
+
 			} else if (this.name == "button-delete-workspace-etl"){
-				deleteWorkspace(data);   
+				deleteWorkspace(data);
 			}
 
 			else if (this.name == "button-open-workspace-etl"){
-				openWorkspace(data);  
+				openWorkspace(data);
 			}
 
 			else if (this.name == "button-download-workspace-etl"){
@@ -1002,7 +999,7 @@
 			}
 
 			else if (this.name == "button-run-workspace-etl"){
-				runWorkspace(data);  
+				runWorkspace(data);
 			}
 
 			else if (this.name == "button-set-parameters-workspace"){
@@ -1113,7 +1110,7 @@
 						if (attr_name_user_params == undefined){
 							attr_name_user_params = ""
 						};
-			
+
 
 						$(".modal-body #json-user-params").val(json_user_params)
 
@@ -1131,7 +1128,7 @@
 							$("#table-name-user-params").prop('disabled', false)
 							$("#get-attrs").removeClass('disabled')
 							$("#attr-name-user-params").prop('disabled', false)
-									
+
 						}
 
 						else {
@@ -1154,7 +1151,7 @@
 						for (i = 0; i < get_loop_user_params.length; i++){
 							$('#loop-user-params').append('<option>'+get_loop_user_params[i]+'</option>')
 						};
-						
+
 						$("#loop-user-params").val(loop_user_params)
 
 						if (radio_params_user == 'integer'){
@@ -1188,84 +1185,36 @@
 						$("#init-loop-integer-user-params").val(init_loop_integer_user_params)
 						$("#end-loop-integer-user-params").val(end_loop_integer_user_params)
 
-						
-						
+
+
 						$('#schema-name-user-params').empty()
 						for (i = 0; i < get_schema_name_user_params.length; i++){
 							$('#schema-name-user-params').append('<option>'+get_schema_name_user_params[i]+'</option>')
 						};
-						
+
 						$("#schema-name-user-params").val(schema_name_user_params)
 
 						$('#table-name-user-params').empty()
 						for (i = 0; i < get_table_name_user_params.length; i++){
 							$('#table-name-user-params').append('<option>'+get_table_name_user_params[i]+'</option>')
 						};
-						
+
 						$("#table-name-user-params").val(table_name_user_params)
 
 						$('#attr-name-user-params').empty()
 						for (i = 0; i < get_attr_name_user_params.length; i++){
 							$('#attr-name-user-params').append('<option>'+get_attr_name_user_params[i]+'</option>')
 						};
-						
+
 						$("#attr-name-user-params").val(attr_name_user_params)
 
 						$('#modal-set-parameters-workspace').modal('show')
 					},
 					error: function(){}
 				});
-				 
+
 			}
 
-		});
-
-		$('#general').on('click', function (e) {
-			var $this = $(this);
-
-			$('#general').addClass("active");
-			$('#permission').removeClass("active");
-
-		});
-
-		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-  			var target = $(e.target).attr("href") // tab activa 	
-			
-
-			if (target=="#permission"){
-				id_wks= $(".modal-body #etl_id").val();				
-				if (id_wks == ""){
-					id_wks=0; //todavia no se guardó el wks, es nuevo
-				}
-				$.ajax({
-					type: 'POST',
-					async: false,					
-					url: '/gvsigonline/etl/permissons_tab/' + id_wks + '/',
-					beforeSend: function (xhr) {
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},					
-					success: function(data){						
-						document.getElementById("permission").innerHTML = data;
-						var searcheableReadList = new List('read-list-box', {
-							valueNames: ['product-title'],
-							listClass:'list',
-							searchClass: 'search',
-							page: 5,
-							pagination: false
-			});
-					}
-					,error: function() {
-					} 
-				});
-
-				$('#general').removeClass("active");
-				$('#permission').addClass("active");
-				$('#general').tab('show');
-				$("#general a:first").tab('show');
-								
-			}
-
-			
 		});
 
 		$('#set-parameters').on('click', function (){
@@ -1320,7 +1269,7 @@
 						"table-name-user-params": $(".modal-body #table-name-user-params").val(),
 						"get_attr-name-user-params": get_attr.join('","'),
 						"attr-name-user-params": $(".modal-body #attr-name-user-params").val(),
-						
+
 					}
 
 
@@ -1361,11 +1310,11 @@
 			});
 
 		}
-			
-		function openWorkspace(data){	
-				
+
+		function openWorkspace(data){
+
 			location.href = '/gvsigonline/etl/etl_canvas/?lgid=' + data[0];
-			
+
 		}
 
 		function deleteWorkspace(data){
@@ -1389,75 +1338,6 @@
 			});
 		};
 
-		function updateWorkspace(data){
-			
-			$('#update-etl-workspace').click( function() {
-
-				updateData = {"id": data[0], 
-							"name": $(".modal-body #etl_name").val(), 
-							"description": $(".modal-body #etl_desc").val(), 							
-							"day": $(".modal-body #ws-program-day").val(),
-							"time": $(".modal-body #ws-program-time").val(),
-							"interval": $(".modal-body #ws-program-interval").val(),
-							"unit": $(".modal-body #ws-program-unit").val(),
-							"username": username
-						}
-
-				if($("#repeat_periodically").is(':checked')){
-					updateData["checked"] = true
-				} else {
-					updateData["checked"] = false
-				}
-
-				if($("#change_superuser").is(':checked')){
-					updateData["superuser"] = true
-				} else {
-					updateData["superuser"] = false
-				}
-
-				assigned_edit_roles = []
-				$.each( $("input[name^='edit-usergroup-']"), function () {
-					if ($(this).is(":checked")) {
-						var id = $(this).attr("id");						
-						var nombre=	id.split("-")[2];										
-						assigned_edit_roles.push(nombre);
-					}
-				});
-
-				assigned_execute_roles = []
-				$.each( $("input[name^='execute-usergroup-']"), function () {
-					if ($(this).is(":checked")) {
-						var id = $(this).attr("id");						
-						var nombre=	id.split("-")[2];													
-						assigned_execute_roles.push(nombre);
-					}
-				});
-
-				// //si no es vacio asignar 				
-				updateData["editRoles"]=JSON.stringify(assigned_edit_roles)
-				updateData["executeRoles"]=JSON.stringify(assigned_execute_roles)
-
-				$.ajax({
-					type: 'POST',
-					async: false,
-					data: updateData,
-					url: '/gvsigonline/etl/etl_workspace_update/',
-					beforeSend:function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-					},
-					success	:function(response){
-						
-						$('#modal-update-workspace-etl').modal('hide');
-						if(response['exists']=="true"){
-							$('#modal-ws-exists').modal('show')
-						}else{
-							location.reload();
-						}
-					},
-					error: function(){}
-				});
-			});
-		};
 	});
 
     $('#button-ws-exists-accept').on('click', function(){
@@ -1468,64 +1348,141 @@
 		}else{
 			$('#modal-update-workspace-etl').modal('show')
 		}
-        
+
 
     })
 
 
 	$(".more-hour-options").slideUp("slow")
-	
+
 	$('#repeat_periodically').click(function() {
 
 		if($("#repeat_periodically").is(':checked')){
 			$(".repeat_periodically_time").slideDown("slow");  // checked
 		}
-			
+
 		else{
-			$(".repeat_periodically_time").slideUp("slow"); 
+			$(".repeat_periodically_time").slideUp("slow");
 		}
-			
+
 	});
 
-	
-
-	$("#modal-update-workspace-etl").on("hide.bs.modal", function () {
-		$('#permission').removeClass("active");
-		$('#general').addClass("active");	
+	$("#modal-update-workspace-etl").on("hidden.bs.modal", function () {
 		$('.nav-tabs a:first').tab('show');
-    
 	});
-	
 
 	$('#modal-update-workspace-etl').on('shown.bs.modal', function (e) {
-		$("#general a:first").tab('show');
-		$('#permission').removeClass("active");
-		$('#general').addClass("active");	
-		var searcheableReadList = new List('read-list-box', {
-				valueNames: ['product-title'],
-				listClass:'list',
-				searchClass: 'search',
-				page: 5,
-				pagination: false
+		var searcheableRoleList = null;
+		var id_wks= $(".modal-body #etl_id").val();
+		if (id_wks == ""){
+			id_wks=0; //todavia no se guardó el wks, es nuevo
+		}
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/etl/permissons_tab/' + id_wks + '/',
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function(data){
+				document.getElementById("permission").innerHTML = data;
+				searcheableRoleList = new List('read-list-box', {
+					valueNames: ['product-title'],
+					listClass:'list',
+					searchClass: 'search',
+					page: 5,
+					pagination: false
+				});
+			}
+			,error: function() {
+			}
+		});
+
+
+		$('#update-etl-workspace').off("click").on("click", function() {
+			var updateData = {"id": $('#modal-update-workspace-etl').attr('data-wsid'),
+						"name": $(".modal-body #etl_name").val(),
+						"description": $(".modal-body #etl_desc").val(),
+						"day": $(".modal-body #ws-program-day").val(),
+						"time": $(".modal-body #ws-program-time").val(),
+						"interval": $(".modal-body #ws-program-interval").val(),
+						"unit": $(".modal-body #ws-program-unit").val(),
+						"username": username
+					}
+
+			if($("#repeat_periodically").is(':checked')){
+				updateData["checked"] = true
+			} else {
+				updateData["checked"] = false
+			}
+
+			if($("#change_superuser").is(':checked')){
+				updateData["superuser"] = true
+			} else {
+				updateData["superuser"] = false
+			}
+
+			// access using the List since some elements are hidden and not available in the DOM
+			var assigned_edit_roles = [];
+			var assigned_execute_roles = [];
+			if (searcheableRoleList != null) {
+				for(var i=0; i<searcheableRoleList.items.length; i++){
+					var item = searcheableRoleList.items[i];
+					var ws_edit_checkbox = $(item.elm).find(".ws-edit-checkbox").first();
+					if (ws_edit_checkbox.is(":checked")) {
+						var id = ws_edit_checkbox.attr("id");
+						var nombre=	id.split("-")[2];
+						assigned_edit_roles.push(nombre);
+					}
+					var ws_execute_checkbox = $(item.elm).find(".ws-execute-checkbox").first();
+					if (ws_execute_checkbox.is(":checked")) {
+						var id = ws_execute_checkbox.attr("id");
+						var nombre=	id.split("-")[2];
+						assigned_execute_roles.push(nombre);
+					}
+				}
+			}
+			updateData["editRoles"]=JSON.stringify(assigned_edit_roles)
+			updateData["executeRoles"]=JSON.stringify(assigned_execute_roles)
+
+			$.ajax({
+				type: 'POST',
+				async: false,
+				data: updateData,
+				url: '/gvsigonline/etl/etl_workspace_update/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+
+					$('#modal-update-workspace-etl').modal('hide');
+					if(response['exists']=="true"){
+						$('#modal-ws-exists').modal('show')
+					}else{
+						location.reload();
+					}
+				},
+				error: function(){}
 			});
-  
-	})
+		});
+
+	});
 
 
 	function edit_progamming_form(value){
 		 if(value == "every"){
 			 $(".more-options").slideDown("slow");  // checked
-			 $(".more-hour-options").slideUp("slow"); 
+			 $(".more-hour-options").slideUp("slow");
 		 }else{
-			$(".more-options").slideUp("slow"); 
-			$(".more-hour-options").slideDown("slow"); 
+			$(".more-options").slideUp("slow");
+			$(".more-hour-options").slideDown("slow");
 		 }
 	}
 
 	$('#ws-program-time').datetimepicker({
-		format: 'HH:mm:ss' 
+		format: 'HH:mm:ss'
 	});
-	
+
 	$('#ws-program-day').on('change', function() {
 		edit_progamming_form($(this).val());
 	});
@@ -1549,12 +1506,12 @@
 
 			if(status == 'Running'){
 
-				
+
 				$("#icon-success-"+id).css("display", "none");
 				$("#icon-running-"+id).css("display", "inline-block");
 				$("#icon-running-"+id).attr("title", msg);
 				$("#icon-error-"+id).css("display", "none");
-				
+
 			}
 			if(status == 'Success'){
 
@@ -1587,17 +1544,17 @@
 		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		  	},
 		  	success	:function(response){
-		  		actualizarInfoPanel(response);  		
+		  		actualizarInfoPanel(response);
 			},
 		  	error: function(response){
-				actualizarInfoPanel(response);	
+				actualizarInfoPanel(response);
 		  	}
 		});
 		return false;
     }
 
 	function startCurrentCanvasStatus(){
-		interval = setInterval(function(){ 
+		interval = setInterval(function(){
 			getCurrentCanvasStatus();
 		}, 3000);
 	}
