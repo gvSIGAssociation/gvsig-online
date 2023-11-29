@@ -1,14 +1,14 @@
 idRestore = []
 
 gvsigolETL.Toolbar = Class.extend({
-	
+
 	init:function(elementId, view)
 	{
 		this.html = $("#"+elementId);
 		this.view = view;
-		
+
 		// register this class as event listener for the bar
-		// CommandStack. This is required to update the state of 
+		// CommandStack. This is required to update the state of
 		// the Undo/Redo Buttons.
 		view.getCommandStack().addEventListener(this);
 
@@ -38,19 +38,44 @@ gvsigolETL.Toolbar = Class.extend({
 			location.href = '/gvsigonline/etl/etl_workspace_list/';
 		});
 
-		
+
 		// Inject the SAVE Button
 		this.saveButton  = $('<button id="button-save" class="btn btn-default btn-sm"><i class="fa fa-save margin-r-5"></i>' + gettext('Save') + '</button>');
 		this.html.append(this.saveButton);
-		this.saveButton.click( function() {
-			
+		this.saveButton.off('click').on('click', function() {
+			var searcheableRoleList = null;
+			var id_wks= $(".modal-body #etl_id").val();
+			if (id_wks == ""){
+				id_wks=0; //todavia no se guardó el wks, es nuevo
+			}
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/etl/permissons_tab/' + id_wks + '/',
+				beforeSend: function (xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success: function(data){
+					document.getElementById("permission").innerHTML = data;
+					searcheableRoleList = new List('read-list-box', {
+						valueNames: ['product-title'],
+						listClass:'list',
+						searchClass: 'search',
+						page: 5,
+						pagination: false
+					});
+				}
+				,error: function() {
+				}
+			});
+
 			$('#dialog-save').modal('show')
-			
+
 			$("#save-etl").prop("disabled",false)
 			$('#save-etl').attr('data-toggle','');
 
 			var writer = new draw2d.io.json.Writer();
-			
+
 			writer.marshal(view, function(json){
 
 				for(i=0;i<json.length;i++){
@@ -61,14 +86,14 @@ gvsigolETL.Toolbar = Class.extend({
 					}
 				}
 			});
-			
-			$('#save-etl').click(function() {
+
+			$('#save-etl').off('click').on('click', function() {
 				var formWorkspace = new FormData();
 
 				formWorkspace.append('id', $('#etl_id').val())
 				formWorkspace.append('name', $('#etl_name').val())
 				formWorkspace.append('description', $('#etl_desc').val())
-				
+
 				formWorkspace.append('username', username)
 
 				if($("#repeat_periodically").is(':checked')){
@@ -82,42 +107,46 @@ gvsigolETL.Toolbar = Class.extend({
 				} else {
 					formWorkspace.append("superuser", false)
 				}
-				
+
 				formWorkspace.append("day", $("#ws-program-day").val())
 				formWorkspace.append("time", $("#ws-program-time").val())
 				formWorkspace.append("interval", $("#ws-program-interval").val())
 				formWorkspace.append("unit", $("#ws-program-unit").val())
 
-				assigned_edit_roles = []
-				$.each( $("input[name^='edit-usergroup-']"), function () {
-					if ($(this).is(":checked")) {
-						var id = $(this).attr("id");						
-						var nombre=	id.split("-")[2];										
-						assigned_edit_roles.push(nombre);
-					}
-				});
 
-				assigned_execute_roles = []
-				$.each( $("input[name^='execute-usergroup-']"), function () {
-					if ($(this).is(":checked")) {
-						var id = $(this).attr("id");						
-						var nombre=	id.split("-")[2];													
-						assigned_execute_roles.push(nombre);
+				// access using the List since some elements are hidden and not available in the DOM
+				var assigned_edit_roles = [];
+				var assigned_execute_roles = [];
+				if (searcheableRoleList != null) {
+					for(var i=0; i<searcheableRoleList.items.length; i++){
+						var item = searcheableRoleList.items[i];
+						var ws_edit_checkbox = $(item.elm).find(".ws-edit-checkbox").first();
+						if (ws_edit_checkbox.is(":checked")) {
+							var id = ws_edit_checkbox.attr("id");
+							var nombre=	id.split("-")[2];
+							assigned_edit_roles.push(nombre);
+						}
+						var ws_execute_checkbox = $(item.elm).find(".ws-execute-checkbox").first();
+						if (ws_execute_checkbox.is(":checked")) {
+							var id = ws_execute_checkbox.attr("id");
+							var nombre=	id.split("-")[2];
+							assigned_execute_roles.push(nombre);
+						}
 					}
-				});
+				}
 
-				formWorkspace.append("editRoles",JSON.stringify(assigned_edit_roles))
-				formWorkspace.append("executeRoles",JSON.stringify(assigned_execute_roles))
+				formWorkspace.append("editRoles",JSON.stringify(assigned_edit_roles));
+				formWorkspace.append("executeRoles",JSON.stringify(assigned_execute_roles));
 
 				writer.marshal(view, function(json){
-	
+
 					jsonCanvas = JSON.stringify(json)
-	
+
 					formWorkspace.append('workspace',jsonCanvas)
 				});
 
 				if ($('#etl_id').val()==''){
-			
+
 					$.ajax({
 						type: 'POST',
 						url: '/gvsigonline/etl/etl_workspace_add/',
@@ -125,8 +154,8 @@ gvsigolETL.Toolbar = Class.extend({
 						beforeSend:function(xhr){
 							xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 						},
-						cache: false, 
-						contentType: false, 
+						cache: false,
+						contentType: false,
 						processData: false,
 						success: function (response) {
 							$('#dialog-save').modal('hide')
@@ -142,7 +171,7 @@ gvsigolETL.Toolbar = Class.extend({
 
 					$('#modal-overwrite-workspace-etl').modal('show')
 
-					$('#button-overwrite-workspace-accept').click(function() {
+					$('#button-overwrite-workspace-accept').off('click').on('click', function() {
 
 					$('#modal-overwrite-workspace-etl').modal('hide')
 
@@ -153,11 +182,11 @@ gvsigolETL.Toolbar = Class.extend({
 							beforeSend:function(xhr){
 								xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 							},
-							cache: false, 
-							contentType: false, 
+							cache: false,
+							contentType: false,
 							processData: false,
 							success	:function(response){
-								$('#modal-overwrite-workspace-etl').modal('hide')						
+								$('#modal-overwrite-workspace-etl').modal('hide')
 								$('#modal-update-workspace-etl').modal('hide');
 								if(response['exists']=="true"){
 									$('#modal-ws-exists').modal('show')
@@ -168,7 +197,7 @@ gvsigolETL.Toolbar = Class.extend({
 							error: function(){}
 						});
 					});
-				}		
+				}
 			});
 		});
 
@@ -186,9 +215,9 @@ gvsigolETL.Toolbar = Class.extend({
 			var writer = new draw2d.io.json.Writer();
 
 			writer.marshal(view, function(json){
-				
+
 				jsonCanvas = JSON.stringify(json)
-				
+
 				formData.append('jsonCanvas',jsonCanvas)
 				formData.append('username',username)
 
@@ -199,8 +228,8 @@ gvsigolETL.Toolbar = Class.extend({
 					beforeSend:function(xhr){
 						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
-					cache: false, 
-                    contentType: false, 
+					cache: false,
+                    contentType: false,
                     processData: false,
 					success: function () {
 
@@ -226,7 +255,7 @@ gvsigolETL.Toolbar = Class.extend({
 			this.view.getCommandStack().execute(command);
 			this.disableButton(this.deleteButton, true);
 		},this));
-		
+
 		// Inject the UNDO Button and the callbacks
 		this.undoButton  = $('<button id="button-undo" class="btn btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i>' + gettext('Undo') + '</button>');
 		this.html.append(this.undoButton);
@@ -248,7 +277,7 @@ gvsigolETL.Toolbar = Class.extend({
 			this.disableButton(this.zoomOutButton, false);
 			this.disableButton(this.resetButton, false);
 		      this.view.setZoom(this.view.getZoom()*0.7,true);
-		      
+
 		},this));
 
 		// Inject the RESET ZOOM Button
@@ -258,9 +287,9 @@ gvsigolETL.Toolbar = Class.extend({
 			this.disableButton(this.zoomOutButton, true);
 			this.disableButton(this.resetButton, true);
 		    this.view.setZoom(1.0, true);
-           
+
 		},this));
-		
+
 		// Inject the ZOOM OUT Button and the callback
 		this.zoomOutButton  = $('<button id="button-zoom-in" class="btn btn-default btn-sm"><i class="fa fa-search-minus margin-r-5"></i>'+gettext('Zoom Out')+'</button>');
 		this.html.append(this.zoomOutButton);
@@ -274,7 +303,7 @@ gvsigolETL.Toolbar = Class.extend({
 				}else{
 					this.view.setZoom(zoom, true);
 				}
-				
+
 			}
 
 		},this));
@@ -288,14 +317,14 @@ gvsigolETL.Toolbar = Class.extend({
 		this.disableButton(this.saveButton, true);
 		this.disableButton(this.emptyButton, true);
 
-		
+
 		/*Draw Nodes if a workspace is restored*/
 		if (cnv != null){
-			
+
 			for(o=0 ;o < cnv.length;o++){
-				
+
 				if (cnv[o]['type'] != 'draw2d.Connection'){
-					
+
 					type = cnv[o]['type']
 					if (type == 'input_Postgres'){
 						type = 'input_Postgis'
@@ -303,50 +332,50 @@ gvsigolETL.Toolbar = Class.extend({
 					}
 					x = cnv[o]['x']
 					y = cnv[o]['y']
-	
+
 					id = cnv[o]['id']
 					ports = cnv[o]['ports']
 
 					text = cnv[o]['name']
-					
+
 					parameters = cnv[o]['entities'][0]['parameters']
 					schema = cnv[o]['entities'][0]['schema']
 					schemaold = cnv[o]['entities'][0]['schemaold']
-					
+
 					var figure = eval("new "+type+"();");
-					
+
 					figure.addEntity("id");
-					
+
 					for(j=0;j<listLabel.length;j++){
 						if(listLabel[j][0]==figure.id){
 							arrayPorts = listLabel[j][1].concat(listLabel[j][2])
 							break;
 						};
 					};
-					
+
 					idRestore.push([id, figure.id, ports, arrayPorts])
-					
+
 					taskparameters = {"id": figure.id, "parameters": parameters, "schema": schema, "schema-old": schemaold}
-					
+
 					isAlreadyInCanvas(jsonParams, taskparameters, figure.id)
-					
+
 					// create a command for the undo/redo support
 					var command = new draw2d.command.CommandAdd(view, figure, x, y);
 					view.getCommandStack().execute(command);
-					
+
 					multiIn = 0
 
 					if (parameters && parameters.length != 0){
 
 					Object.keys(parameters[0]).forEach(function(key){
-						
+
 						try{
 							if (parameters[0][key]){
-	
+
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') && !key.includes('option') ){
 
 									if ( typeof schemaold !== 'undefined'){
-									
+
 										if (Array.isArray(schemaold[multiIn])){
 											for (k = 0; k < schemaold[multiIn].length; k++){
 												$('#'+key+'-'+figure.id).append('<option>'+schemaold[multiIn][k]+'</option>')
@@ -358,8 +387,8 @@ gvsigolETL.Toolbar = Class.extend({
 											};
 										}
 								}
-								};	
-								
+								};
+
 								if(key.startsWith('get_')){
 
 									key_ = key.replace('get_', '')
@@ -367,7 +396,7 @@ gvsigolETL.Toolbar = Class.extend({
 									for (k = 0; k < parameters[0][key].length; k++){
 
 										if (Array.isArray(parameters[0][key][k])){
-											
+
 											$('#'+key_+'-'+figure.id).append('<option value ="'+parameters[0][key][k][0]+'">'+parameters[0][key][k][1]+'</option>')
 
 										}else{
@@ -379,16 +408,16 @@ gvsigolETL.Toolbar = Class.extend({
 								multiIn = multiIn + 1
 
 								if($('input:radio[name="'+key+'-'+figure.id+'"]').is(':radio')){
-									
+
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).attr('checked', true)
 									$('#'+parameters[0][key].toLowerCase()+'-'+figure.id).val(parameters[0][key])
 
 								}else if($('#'+key+'-'+figure.id).is(':checkbox')){
-									
+
 									$('#'+key+'-'+figure.id).attr('checked', true)
 									$('#'+key+'-'+figure.id).val(parameters[0][key])
 
-								}else{									
+								}else{
 									$('#'+key+'-'+figure.id).val(parameters[0][key]);
 								}
 							}
@@ -397,11 +426,11 @@ gvsigolETL.Toolbar = Class.extend({
 						}
 					})
 				}
-			
+
 				}else{
 					s = false
 					t = false
-	
+
 					for(j=0;j<idRestore.length;j++){
 						if(cnv[o]['source']['node'] == idRestore[j][0]){
 							cnv[o]['source']['node'] = idRestore[j][1]
@@ -411,10 +440,10 @@ gvsigolETL.Toolbar = Class.extend({
 									break;
 								};
 							};
-	
+
 							s = true
 						};
-	
+
 						if(cnv[o]['target']['node'] == idRestore[j][0]){
 							cnv[o]['target']['node'] = idRestore[j][1]
 							for (k=0; k<idRestore[j][2].length;k++){
@@ -423,10 +452,10 @@ gvsigolETL.Toolbar = Class.extend({
 									break;
 								};
 							};
-	
+
 							t = true
 						};
-	
+
 						if(s == true && t == true){
 							break;
 						};
@@ -453,14 +482,14 @@ gvsigolETL.Toolbar = Class.extend({
 	{
 		this.disableButton(this.deleteButton,event.figure===null);
 	},
-	
+
 	/**
 	 * @method
-	 * Sent when an event occurs on the command stack. draw2d.command.CommandStackEvent.getDetail() 
+	 * Sent when an event occurs on the command stack. draw2d.command.CommandStackEvent.getDetail()
 	 * can be used to identify the type of event which has occurred.
-	 * 
+	 *
 	 * @template
-	 * 
+	 *
 	 * @param {draw2d.command.CommandStackEvent} event
 	 **/
 	stackChanged:function(event)
@@ -470,9 +499,9 @@ gvsigolETL.Toolbar = Class.extend({
 		this.disableButton(this.runButton, false);
 		this.disableButton(this.saveButton, false);
 		this.disableButton(this.emptyButton, false);
-	
+
 	},
-	
+
 	disableButton:function(button, flag)
 	{
 	   button.prop("disabled", flag);
