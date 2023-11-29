@@ -4458,16 +4458,16 @@ def trans_Buffer(dicc):
         conn.commit()
 
     if type_geom.startswith('MULTI'):
-        pass
+        tg = 'MULTIPOLYGON'
     else:
-        type_geom = 'MULTI'+type_geom
+        tg = 'POLYGON'
 
     sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(ST_Multi(wkb_geometry), {epsg})'
     
     sqlAlter = sql.SQL(sqlAlter_).format(
                 schema = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
-                type_geom = sql.SQL(type_geom),
+                type_geom = sql.SQL(tg),
                 epsg = sql.SQL(str(srid)))
     
     cur.execute(sqlAlter)
