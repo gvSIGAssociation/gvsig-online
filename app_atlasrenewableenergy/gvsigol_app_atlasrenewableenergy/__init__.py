@@ -1,0 +1,1 @@
+default_app_config = 'gvsigol_app_atlasrenewableenergy.apps.GvsigolAtlasrenewableenergyConfig'

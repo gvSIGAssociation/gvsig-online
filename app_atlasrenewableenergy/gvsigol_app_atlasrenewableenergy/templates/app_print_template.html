@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% load staticfiles %}
+	{% load i18n %}
+	
+  	<link media="screen" rel="stylesheet" type="text/css" href="{% static "js/vendors/ol-4.0.1/ol.css" %}" />
+   
+	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol.js" %}"></script>
+
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF-1.3.5/dist/jspdf.debug.js" %}"></script>
+    
+    <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+	
+    <script type="text/javascript">
+    	var doc = new jsPDF('landscape', 'mm', 'letter');
+    	
+		var PIXEL_SIZE = 3.779528;   	
+    	var MAP_WIDTH_MM = 260;
+    	var MAP_HEIGHT_MM = 250;
+    	
+    	var IMAGE_PATH 	= '{% static "img/" %}';
+    	
+    	var imageUrls = new Array();
+    	var arrayImages	= new Array();
+    	var mapDataUrl = null;
+    	var header = null;
+    	var north = null;
+    	var count = 0;
+    	
+		function init() {			
+			var originalMap = this.opener.map;			
+			createMap(originalMap);	
+			getExtraImages(originalMap);
+		}
+		
+		function getExtraImages (originalMap){
+			
+			var logo = {
+				type: 'logo',
+				url: IMAGE_PATH + 'print_logo.png',
+			};
+			imageUrls.push(logo);
+			
+			var north = {
+				type: 'north',
+				url: IMAGE_PATH + 'print_north.png',
+			};
+			imageUrls.push(north);
+					
+			getImagesFromUrl();
+		}
+		
+		function getImagesFromUrl() {
+			
+			var img = new Image, data, ret={data: null, pending: true};
+		        
+		    img.onError = function() {
+		    	throw new Error('Cannot load image: "'+url+'"');
+		    };
+		        
+		    img.onload = function() {
+		    	if (count < imageUrls.length) {
+		    		var image = {
+		    			type	: img.iType,
+		    			data	: img
+		    		};
+		    		arrayImages.push(image);
+			        getImagesFromUrl();	
+			    
+			    } else {
+			        var image = {
+		    			type	: img.iType,
+		    			data	: img
+		    		};
+		    		arrayImages.push(image);
+		            
+		            var logoImage = null;
+		            var northImage = null;
+    				for (var i=0; i<arrayImages.length; i++) {
+    					if (arrayImages[i].type == 'logo') {
+    						logoImage = arrayImages[i].data;
+    						
+    					} else if (arrayImages[i].type == 'north') {
+    						northImage = arrayImages[i].data;
+    					}
+					}
+					
+					var logoCanvas = document.createElement('canvas');
+					logoCanvas.setAttribute('style','background-color: #ffffff;');
+					logoCanvas.setAttribute('id','logoCanvas');
+					document.body.appendChild(logoCanvas);
+					logoCanvas.width = logoImage.width;
+					logoCanvas.height = logoImage.height;
+		    		var logoContext = logoCanvas.getContext("2d");
+		    		logoContext.fillStyle = '#fff';  /// set white fill style
+		    		logoContext.fillRect(0, 0, logoCanvas.width, logoCanvas.height);
+		    		logoContext.drawImage(logoImage, 0, 0, logoImage.width, logoImage.height);
+		    		logo = logoCanvas.toDataURL('image/jpeg').slice('data:image/jpeg;base64,'.length);
+		    		logo = atob(logo);
+					document.body.removeChild(logoCanvas);
+					
+					var northCanvas = document.createElement('canvas');
+					northCanvas.setAttribute('style','background-color: #ffffff;');
+					northCanvas.setAttribute('id','northCanvas');
+					document.body.appendChild(northCanvas);
+		    		northCanvas.width = northImage.width;
+		    		northCanvas.height = northImage.height;
+		    		var northContext = northCanvas.getContext("2d");
+					northContext.fillStyle = '#fff';  /// set white fill style
+					northContext.fillRect(0, 0, northCanvas.width, northCanvas.height);
+					northContext.drawImage(northImage, 0, 0, northImage.width, northImage.height);
+					north = northCanvas.toDataURL('image/jpeg').slice('data:image/jpeg;base64,'.length);
+					north = atob(north);
+					document.body.removeChild(northCanvas);
+							
+					createPDF();
+		    	}
+		    };
+		    
+		    img.iType = imageUrls[count].type;
+	        	        	
+	        img.src = imageUrls[count].url;
+	        count++;
+		}
+		
+		function calculateAspectRatioFit (srcWidth, srcHeight, maxWidth, maxHeight) {
+        	var ratio = [(maxWidth / srcWidth), (maxHeight / srcHeight) ];
+        	ratio = Math.min(ratio[0], ratio[1]);
+
+        	return { width:srcWidth*ratio, height:srcHeight*ratio };
+     	}
+		
+		function createMap(originalMap) {
+			originalMap.once('postcompose', function(event) {
+				var canvas = event.context.canvas;
+				//mapDataUrl = canvas.toDataURL('image/jpeg').slice('data:image/jpeg;base64,'.length);
+				mapDataUrl = canvasToImage(canvas, '#ffffff');
+				//mapDataUrl = atob(mapDataUrl);
+			});
+			originalMap.renderSync();			
+		}
+		
+		function canvasToImage(canvas, backgroundColor){
+			//cache height and width		
+			var w = canvas.width;
+			var h = canvas.height;
+			
+			var context = canvas.getContext("2d");
+		 
+			var data;
+		 
+			if(backgroundColor)
+			{
+				//get the current ImageData for the canvas.
+				data = context.getImageData(0, 0, w, h);
+		 
+				//store the current globalCompositeOperation
+				var compositeOperation = context.globalCompositeOperation;
+		 
+				//set to draw behind current content
+				context.globalCompositeOperation = "destination-over";
+		 
+				//set background color
+				context.fillStyle = backgroundColor;
+		 
+				//draw background / rect on entire canvas
+				context.fillRect(0,0,w,h);
+			}
+		 
+			//get the image data from the canvas
+			var imageData = canvas.toDataURL("image/jpeg");
+		 
+			if(backgroundColor)
+			{
+				//clear the canvas
+				context.clearRect (0,0,w,h);
+		 
+				//restore it with original / cached ImageData
+				context.putImageData(data, 0,0);
+		 
+				//reset the globalCompositeOperation to what it was
+				context.globalCompositeOperation = compositeOperation;
+			}
+		 
+			//return the Base64 encoded data url string
+			return imageData;
+		}
+		
+		function createPDF(){
+			
+			//logo
+			doc.addImage(logo, 'JPEG', 230, 5, 38, 15);
+			
+			//Pre - Título
+			doc.setFontType("italic");
+			doc.setTextColor(50, 50, 50);
+			doc.setFontSize(20);
+			doc.text(10, 15, this.opener.title);
+			
+			//Mapa
+			var pdfMapWidthInPx = parseInt(MAP_WIDTH_MM * PIXEL_SIZE);
+			var pdfMapHeightInPx = parseInt(MAP_HEIGHT_MM * PIXEL_SIZE);
+			var newSize = calculateAspectRatioFit(this.opener.map.getSize()[0], this.opener.map.getSize()[1], pdfMapWidthInPx, pdfMapHeightInPx);		
+			var mmNewWidth = newSize.width / PIXEL_SIZE;
+			var mmNewHeight= newSize.height / PIXEL_SIZE;				
+			doc.setLineWidth(0.5);
+			doc.setDrawColor(80,80,80);
+			doc.line(10, 24.5, 270, 24.5);
+			doc.addImage(mapDataUrl, 'JPEG', 10, 25, mmNewWidth, mmNewHeight + 20);
+			doc.setDrawColor(0,0,0);
+			
+			//Fecha
+			doc.setFontType("italic");
+			doc.setTextColor(50, 50, 50);
+			doc.setFontSize(8);
+			doc.text(10, 200, gettext('Print date') + ': ' + Date());
+			
+			//Condiciones
+			doc.setFontType("italic");
+			doc.setTextColor(50, 50, 50);
+			doc.setFontSize(7);
+			doc.text(10, 205, gettext("Printing message"));
+			
+			//Atribucion
+			doc.setFontType("italic");
+			doc.setTextColor(50, 50, 50);
+			doc.setFontSize(8);
+			doc.text(225, 205, "© 2018 SCOLAB");
+			
+			//north
+			doc.addImage(north, 'JPEG', 250, 182, 12, 12);
+			
+			//Leyenda
+			//doc.setDrawColor(255,0,0);
+			//doc.setFillColor(255,0,0);
+			//doc.rect(70, 170, 200, 35, 'FD');
+			//doc.addImage(legend, 'JPEG', 20, 170, 200, 35);
+			
+	        //doc.output('datauri');
+	        var uri = doc.output('dataurlstring');
+	        openDataUriWindow(uri);
+		}
+		
+		function openDataUriWindow(url) {
+		    var html = '<html>' +
+		        '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' +
+		        '<body>' +
+		        '<iframe id="pdf-iframe" src="' + url + '"></iframe>' +
+		        '</body></html>';
+		    a = window.open("", "_self");
+	    	a.document.write(html);
+	    	//this.close();
+		}
+	</script> 
+</head>
+<body onLoad=init();>
+</body>
+</html>
+
