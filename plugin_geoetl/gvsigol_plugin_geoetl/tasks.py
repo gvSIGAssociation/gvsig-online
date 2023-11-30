@@ -254,8 +254,8 @@ def run_canvas_background(**kwargs):
                     if send_mail_params.send_after:
                         em = send_mail_params.emails
                         sendEmail(id_ws, 'Process has been executed successfully', 'Success', em.split(' '))
-                except:
-                    pass
+                except Exception as ex:
+                    print('No se ha podido enviar el mail por: '+str(ex))
             
             
             else:
@@ -279,8 +279,8 @@ def run_canvas_background(**kwargs):
                     if send_mail_params.send_fails:
                         em = send_mail_params.emails
                         sendEmail(id_ws, str(e), 'Error', em.split(' '))
-                except:
-                    pass
+                except Exception as ex:
+                    print('No se ha podido enviar el mail por: '+str(ex))
 
             else:
                 statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
@@ -478,7 +478,7 @@ def sendEmail(id, msg, sub, listMails):
         if sub == 'Error':
         
             subject = 'El proceso ETL '+str(id)+ ' ha fallado'
-            body = 'El proceso ETL '+str(id)+ 'ha fallado con el siguiente error: '+ ':\n\n'
+            body = 'El proceso ETL '+str(id)+ ' ha fallado con el siguiente error: '+ ':\n\n'
             body += msg
 
 
