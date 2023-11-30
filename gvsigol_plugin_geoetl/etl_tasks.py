@@ -4340,13 +4340,20 @@ def trans_Buffer(dicc):
     for attr in attrs:
         sch += '{},'
 
+    if  type_geom.startswith('MULTI'):
+        multi ='ST_MULTI'
+    else:
+        multi =''
+
     if mode_option == 'radius':
 
         if radio_radius == 'value':
 
-            sqlDup = sql.SQL("CREATE TABLE {schema}.{tbl_target} AS (SELECT "+sch[:-1]+", ST_BUFFER(wkb_geometry, %s, %s) AS wkb_geometry  FROM {schema}.{tbl_source})").format(
+
+            sqlDup = sql.SQL("CREATE TABLE {schema}.{tbl_target} AS (SELECT "+sch[:-1]+", {multi}(ST_BUFFER(wkb_geometry, %s, %s)) AS wkb_geometry  FROM {schema}.{tbl_source})").format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
+            multi = sql.SQL(multi),
             *[sql.Identifier(field) for field in attrs],
             tbl_source = sql.Identifier(table_name_source)
             )
@@ -4355,9 +4362,10 @@ def trans_Buffer(dicc):
 
         elif radio_radius == 'attr':
 
-            sqlDup = sql.SQL("CREATE TABLE {schema}.{tbl_target} AS (SELECT "+sch[:-1]+", ST_BUFFER(wkb_geometry, {attr}, %s) AS wkb_geometry  FROM {schema}.{tbl_source})").format(
+            sqlDup = sql.SQL("CREATE TABLE {schema}.{tbl_target} AS (SELECT "+sch[:-1]+", {multi}(ST_BUFFER(wkb_geometry, {attr}, %s)) AS wkb_geometry  FROM {schema}.{tbl_source})").format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
+            multi = sql.SQL(multi),
             *[sql.Identifier(field) for field in attrs],
             tbl_source = sql.Identifier(table_name_source),
             attr = sql.Identifier(radius_attr)
@@ -4462,11 +4470,12 @@ def trans_Buffer(dicc):
     else:
         tg = 'POLYGON'
 
-    sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(ST_Multi(wkb_geometry), {epsg})'
+    sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID({multi}(wkb_geometry), {epsg})'
     
     sqlAlter = sql.SQL(sqlAlter_).format(
                 schema = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
+                multi = sql.SQL(multi),
                 type_geom = sql.SQL(tg),
                 epsg = sql.SQL(str(srid)))
     

@@ -120,7 +120,8 @@ def test_oracle(dicc):
         )
         conn.close()
         return {"result": True}
-    except:
+    except Exception as e:
+        print('Connection Oracle: ' + str(e))
         return {"result": False}
 
 def test_postgres(dicc):

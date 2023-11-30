@@ -119,3 +119,17 @@ class EtlWorkspaceEditRole(models.Model):
         constraints = [
            models.UniqueConstraint(fields=['etl_ws', 'role'], name='unique_edit_permission_per_role_and_etlws')
         ]
+
+class SendEmails(models.Model):
+    etl_ws = models.ForeignKey(ETLworkspaces, on_delete=models.CASCADE)
+    send_after = models.BooleanField(default=False)
+    send_fails = models.BooleanField(default=False)
+    emails = models.TextField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['etl_ws']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['etl_ws'], name='unique_etlws_per_send_row')
+        ]

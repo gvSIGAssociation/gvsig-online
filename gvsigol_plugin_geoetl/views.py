@@ -39,7 +39,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole
+from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole, SendEmails
 from gvsigol_services.models import Datastore
 from django.contrib.auth.models import User
 from . import settings as settings_geoetl
@@ -1062,6 +1062,18 @@ def get_workspace_parameters(request):
                             "attr-name-user-params": ""
                             }
 
+            try:
+                send_mail_params = SendEmails.objects.get(etl_ws_id = request.POST['id'])
+                response['checkbox-send-mail-after'] = str(send_mail_params.send_after).capitalize()
+                response['checkbox-send-mail-fails'] = str(send_mail_params.send_fails).capitalize()
+                response['emails'] = send_mail_params.emails
+
+            except:
+
+                response['checkbox-send-mail-after'] = 'False'
+                response['checkbox-send-mail-fails'] = 'False'
+                response['email'] = ''
+
             response['dbcs'] = []
 
             databases  = database_connections.objects.all()
@@ -1106,6 +1118,24 @@ def set_workspace_parameters(request):
 
             ws.parameters = params
             ws.save()
+
+            try:
+                send_mail_params = SendEmails.objects.get(etl_ws_id = request.POST['id'])
+
+                send_mail_params.send_after = request.POST['checkbox-send-mail-after']
+                send_mail_params.send_fails = request.POST['checkbox-send-mail-fails']
+                send_mail_params.emails = request.POST['emails']
+                send_mail_params.save()
+
+            except:
+
+                send_mail_params = SendEmails(
+                    send_after = request.POST['checkbox-send-mail-after'],
+                    send_fails = request.POST['checkbox-send-mail-fails'],
+                    emails = request.POST['emails'],
+                    etl_ws_id = request.POST['id']
+                )
+                send_mail_params.save()
 
             response = {}
 
@@ -1263,5 +1293,24 @@ def etl_data_schema_sqlserver(request):
 
             listSchema = etl_schema.get_data_schemas_sqlserver(jsParams['parameters'][0])
             response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def get_emails(request):
+
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+    
+            users = User.objects.all()
+            emails = []
+
+            for user in users:
+                if user.email not in emails:
+                    emails.append(user.email)
+
+            response = json.dumps(emails)
 
             return HttpResponse(response, content_type="application/json")
