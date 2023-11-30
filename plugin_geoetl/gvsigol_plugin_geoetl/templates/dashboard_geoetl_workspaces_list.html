@@ -120,7 +120,6 @@
 				<ul class="nav nav-tabs">
 					<li class="active"><a data-toggle="tab" href="#general">General</a></li>
 					<li><a data-toggle="tab" href="#permission">Permisos</a></li>
-
 				</ul>
 			</div>
 			<div class="modal-body">
@@ -361,134 +360,192 @@
 						</div>
 					</div>
 
-					<div>
-						<label class="col-form-label" id ="sql-params">{% trans "SQL Parameters" %} <i id ="img-sql-params" class="fa fa-caret-right"></i> </label>
+					<ul class="nav nav-tabs">
+						<li class="active"><a data-toggle="tab" href="#sqlparams">{% trans "SQL Parameters" %}</a></li>					
+						<li><a data-toggle="tab" href="#userparams">{% trans "User Parameters" %} </a></li>
+						<li><a data-toggle="tab" href="#schedulemails">{% trans "Schedule e-mails" %} </a></li>
+					</ul>
+
+					<div class="tab-content">
+						<div id="sqlparams" class="tab-pane active">
+					
+							<div>
+								<label class="col-form-label" id ="sql-params">{% trans "SQL Parameters" %}</label>
+							</div>
+
+							<div id="more-options-sql" class="more-options">
+
+								<div class="row">
+									<div class="col-md-12">
+										<label class="col-form-label">{% trans "SQL before running workspace" %}</a></label>
+										<textarea id="sql-before" rows="3" class="form-control"></textarea>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-md-12">
+										<label class="col-form-label">{% trans "SQL after running workspace" %}</a></label>
+										<textarea id="sql-after" rows="3" class="form-control"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div id="userparams" class="tab-pane">
+
+							<div>
+								<label class="col-form-label" id ="user-params">{% trans "User Parameters" %} </label>
+							</div>
+
+							<div id="more-options-user" class="more-options">
+								<div class="row">
+									<div class="col-md-12">
+										<label class="col-form-label">{% trans "Add user parameter" %}</a></label> 
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-4">
+										<label >{% trans "Name" %}</a></label>
+										<input type="text" id="name-user-params" class="form-control"></input>
+									</div>
+									<div class="col-sm-4">
+										<label >{% trans "Type" %}</a></label>
+											<select class="form-control" id="type-user-params">
+												<option value="VARCHAR"> {% trans "Varchar" %}</option>
+												<option value="INTEGER"> {% trans "Integer" %}</option>
+												<option value="FLOAT"> {% trans "Float" %} </option>
+											</select>
+									</div>
+
+									<div class="col-sm-4">
+										<label >{% trans "Value" %}</a></label>
+										<input type="text" id="value-user-params" class="form-control"></input>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-12">
+										<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-user-params"><i class="fa fa-minus" aria-hidden="true"></i></button>
+										<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-user-params"><i class="fa fa-plus" aria-hidden="true"></i></button>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-12">
+										<input type="text" id="json-user-params" class="form-control" readonly="readonly" value ="{}"></input>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-12">
+										<input type="checkbox" id="checkbox-user-params" value = 'False'/>
+										<label for="checkbox"> {% trans "There are variable parameters (The workspace will be executed in a loop)" %} </label>   							
+									</div>
+								</div>
+								
+								<div class="row">
+									<div class="col-sm-4">
+										<label >{% trans "Variable parameter" %}</a></label>
+										<select class="form-control" id="loop-user-params">
+
+										</select>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-12">
+										<div class="form-check">
+											<input type="radio" name="radio-params-user" class="form-check-input" id="loop-integer-user-params" value="integer">
+											<label>{% trans "Integer iterative value from" %}</label> <input type="number" id="init-loop-integer-user-params" value="0" size ="3"/><label>{% trans " to " %} </label> <input type="number" id="end-loop-integer-user-params" value="0" size ="3"/>
+										</div>
+										<div class="form-check">
+											<input type="radio" name="radio-params-user" class="form-check-input" id="loop-postgres-user-params" value="postgres">
+											<label>{% trans "Iterative value from a column of a PostgreSQL table" %}</label>
+										</div>						
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-4">
+										<label class="col-form-label">{% trans "Get schemas" %}</label><br>
+										<a href="#" id="get-schemas" class="btn btn-default btn-sm">{% trans "Get schemas" %}</a>
+									</div>
+									<div class="col-sm-8">
+										<label class="col-form-label">{% trans "Schemas" %}</label>
+										<select id="schema-name-user-params" class="form-control"></select>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-4">
+										<label class="col-form-label">{% trans "Get tables" %}</label><br>
+										<a href="#" id="get-tables" class="btn btn-default btn-sm">{% trans "Get tables" %}</a>
+									</div>
+									<div class="col-sm-8">
+										<label class="col-form-label">{% trans "Tables" %}</label>
+										<select id="table-name-user-params" class="form-control"></select>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-sm-4">
+										<label class="col-form-label">{% trans "Get attributes" %}</label><br>
+										<a href="#" id="get-attrs" class="btn btn-default btn-sm">{% trans "Get attributes" %}</a>
+									</div>
+									<div class="col-sm-8">
+										<label class="col-form-label">{% trans "Attributes" %}</label>
+										<select id="attr-name-user-params" class="form-control"></select>
+									</div>
+								</div>  
+
+							</div>
+						</div>
+						<div id="schedulemails" class="tab-pane">
+							<div class="row">
+								<div class="col-sm-12">
+									<label class="col-form-label" id ="schedulemails-params">{% trans "Schedule e-mails" %}</label>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-4">
+									<a href="#" id="get-mails" class="btn btn-default btn-sm">{% trans "Get e-mails" %}</a>
+								</div>
+								<div class="col-sm-8">
+									<select  id="email-list" class="form-control"></select>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-mail"><i class="fa fa-minus" aria-hidden="true"></i></button>
+									<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-mail"><i class="fa fa-plus" aria-hidden="true"></i></button>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<input type="text" id="emails" class="form-control" value =""></input>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<input type="checkbox" id="checkbox-send-mail-after" value = 'False'/>
+									<label for="checkbox"> {% trans "Send e-mail after process finishes correctly" %} </label>   							
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<input type="checkbox" id="checkbox-send-mail-fails" value = 'False'/>
+									<label for="checkbox"> {% trans "Send e-mail if process fails" %} </label>   							
+								</div>
+							</div>
+
+
+						</div>
 					</div>
-
-					<div id="more-options-sql" class="more-options">
-
-						<div class="row">
-							<div class="col-md-12">
-								<label class="col-form-label">{% trans "SQL before running workspace" %}</a></label>
-								<textarea id="sql-before" rows="3" class="form-control"></textarea>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12">
-								<label class="col-form-label">{% trans "SQL after running workspace" %}</a></label>
-								<textarea id="sql-after" rows="3" class="form-control"></textarea>
-							</div>
-						</div>
-					</div>
-
-					<div>
-						<label class="col-form-label" id ="user-params">{% trans "User Parameters" %} <i id ="img-user-params" class="fa fa-caret-right"></i> </label>
-					</div>
-
-					<div id="more-options-user" class="more-options">
-						<div class="row">
-							<div class="col-md-12">
-								<label class="col-form-label">{% trans "Add user parameter" %}</a></label>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label >{% trans "Name" %}</a></label>
-								<input type="text" id="name-user-params" class="form-control"></input>
-							</div>
-							<div class="col-sm-4">
-								<label >{% trans "Type" %}</a></label>
-									<select class="form-control" id="type-user-params">
-										<option value="VARCHAR"> {% trans "Varchar" %}</option>
-										<option value="INTEGER"> {% trans "Integer" %}</option>
-										<option value="FLOAT"> {% trans "Float" %} </option>
-									</select>
-							</div>
-
-							<div class="col-sm-4">
-								<label >{% trans "Value" %}</a></label>
-								<input type="text" id="value-user-params" class="form-control"></input>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-12">
-								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-user-params"><i class="fa fa-minus" aria-hidden="true"></i></button>
-								<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-user-params"><i class="fa fa-plus" aria-hidden="true"></i></button>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-sm-12">
-								<input type="text" id="json-user-params" class="form-control" readonly="readonly" value ="{}"></input>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-12">
-                                <input type="checkbox" id="checkbox-user-params" value = 'False'/>
-                                <label for="checkbox"> {% trans "There are variable parameters (The workspace will be executed in a loop)" %} </label>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label >{% trans "Variable parameter" %}</a></label>
-								<select class="form-control" id="loop-user-params">
-
-								</select>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-12">
-                                <div class="form-check">
-                                    <input type="radio" name="radio-params-user" class="form-check-input" id="loop-integer-user-params" value="integer">
-                                    <label>{% trans "Integer iterative value from" %}</label> <input type="number" id="init-loop-integer-user-params" value="0" size ="3"/><label>{% trans " to " %} </label> <input type="number" id="end-loop-integer-user-params" value="0" size ="3"/>
-                                </div>
-                                <div class="form-check">
-                                    <input type="radio" name="radio-params-user" class="form-check-input" id="loop-postgres-user-params" value="postgres">
-                                    <label>{% trans "Iterative value from a column of a PostgreSQL table" %}</label>
-                                </div>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label class="col-form-label">{% trans "Get schemas" %}</label><br>
-								<a href="#" id="get-schemas" class="btn btn-default btn-sm">{% trans "Get schemas" %}</a>
-							</div>
-							<div class="col-sm-8">
-								<label class="col-form-label">{% trans "Schemas" %}</label>
-								<select id="schema-name-user-params" class="form-control"></select>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label class="col-form-label">{% trans "Get tables" %}</label><br>
-								<a href="#" id="get-tables" class="btn btn-default btn-sm">{% trans "Get tables" %}</a>
-							</div>
-							<div class="col-sm-8">
-								<label class="col-form-label">{% trans "Tables" %}</label>
-								<select id="table-name-user-params" class="form-control"></select>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-4">
-								<label class="col-form-label">{% trans "Get attributes" %}</label><br>
-								<a href="#" id="get-attrs" class="btn btn-default btn-sm">{% trans "Get attributes" %}</a>
-							</div>
-							<div class="col-sm-8">
-								<label class="col-form-label">{% trans "Attributes" %}</label>
-								<select id="attr-name-user-params" class="form-control"></select>
-							</div>
-						</div>
-
-					</div>
-
 				</form>
 			</div>
 			<div class="modal-footer">
@@ -513,18 +570,70 @@
 
 	username = '{{ user.username }}'
 
-	//Parámetros de usuario
 
-	$("#sql-params").click(function(){
-		$("#img-sql-params").toggleClass('fa-caret-right fa-caret-down')
-        $("#more-options-sql").slideToggle("slow");
-        });
+	//Envio de mails
 
-	$("#user-params").click(function(){
-		$("#img-user-params").toggleClass('fa-caret-right fa-caret-down')
-		$("#more-options-user").slideToggle("slow");
+
+	$('#get-mails').on("click", function(){
+
+	$.ajax({
+		type: 'POST',
+		url: '/gvsigonline/etl/get_emails/',
+		data: {},
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		},
+		cache: false, 
+		contentType: false, 
+		processData: false,
+		success: function (data) {
+
+			console.log(data)
+			
+			$('#email-list').empty()
+
+			for (i = 0; i < data.length; i++){
+				$('#email-list').append('<option>'+data[i]+'</option>')
+			}
+		}
+	})
+});
+
+	$('#add-mail').click(function(){
+		mail = $('#email-list').val();
+
+		mails =$('#emails').val();
+
+		if (mails==''){
+			$('#emails').val(mail)
+		}else{
+			listMails = mails.split(' ');
+
+			if(!listMails.includes(mail)){
+
+				mails = mails +' '+mail
+				$('#emails').val(mails)
+
+			}
+
+		};
+
 	});
 
+	$('#quit-mail').click(function(){
+
+		mails =$('#emails').val();
+
+		listMails = mails.split(' ');
+
+		listMails.pop();
+
+		$('#emails').val(listMails.join(' '));
+
+	});
+
+
+	//Parámetros de usuario
 
 	$('#add-user-params').click(function(){
 		name = $('#name-user-params').val()
@@ -581,6 +690,28 @@
 		$('#json-user-params').val(jsonString);
 
 	});
+
+	$('#checkbox-send-mail-after').change(function(){
+
+		if ($('#checkbox-send-mail-after').is(':checked')){
+			$('#checkbox-send-mail-after').val('True')
+
+		} else {
+			$('#checkbox-send-mail-after').val('False')
+		}
+
+	});
+
+	$('#checkbox-send-mail-fails').change(function(){
+
+		if ($('#checkbox-send-mail-fails').is(':checked')){
+			$('#checkbox-send-mail-fails').val('True')
+
+		} else {
+			$('#checkbox-send-mail-fails').val('False')
+		}
+
+		});
 
 	$('#checkbox-user-params').change(function(){
 
@@ -1004,13 +1135,6 @@
 
 			else if (this.name == "button-set-parameters-workspace"){
 
-				$(".more-options").slideUp("slow");
-				$("#img-sql-params").removeClass('fa-caret-down')
-				$("#img-sql-params").addClass('fa-caret-right')
-
-				$("#img-user-params").removeClass('fa-caret-down')
-				$("#img-user-params").addClass('fa-caret-right')
-
 				$('#name-user-params').val('')
 				$('#type-user-params').val('VARCHAR')
 				$('#value-user-params').val('')
@@ -1113,6 +1237,30 @@
 
 
 						$(".modal-body #json-user-params").val(json_user_params)
+
+						$('#emails').val(response['emails'])
+						
+						checkbox_send_mail_after = response['checkbox-send-mail-after']
+						
+						if (checkbox_send_mail_after == 'True'){
+							$('#checkbox-send-mail-after').val('True')
+							$('#checkbox-send-mail-after').prop('checked', true);
+
+						} else {
+							$('#checkbox-send-mail-after').val('False')
+							$('#checkbox-send-mail-after').prop('checked', false);
+						}
+
+						checkbox_send_mail_fails = response['checkbox-send-mail-fails']
+
+						if (checkbox_send_mail_fails == 'True'){
+							$('#checkbox-send-mail-fails').val('True')
+							$('#checkbox-send-mail-fails').prop('checked', true);
+
+						} else {
+							$('#checkbox-send-mail-fails').val('False')
+							$('#checkbox-send-mail-fails').prop('checked', false);
+						}
 
 						if (checkbox_user_params == 'True'){
 							$('#checkbox-user-params').val('True')
@@ -1250,7 +1398,6 @@
 				radio = 'postgres'
 			}
 
-
 			params = {
 						"id": $(".modal-body #etl_id").val(),
 						"db": $(".modal-body #db").val(),
@@ -1269,9 +1416,11 @@
 						"table-name-user-params": $(".modal-body #table-name-user-params").val(),
 						"get_attr-name-user-params": get_attr.join('","'),
 						"attr-name-user-params": $(".modal-body #attr-name-user-params").val(),
-
+						"checkbox-send-mail-after": $(".modal-body #checkbox-send-mail-after").val(),
+						"checkbox-send-mail-fails": $(".modal-body #checkbox-send-mail-fails").val(),
+						"emails": $('#emails').val()
+						
 					}
-
 
 			$.ajax({
 					type: 'POST',

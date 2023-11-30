@@ -2,9 +2,10 @@
 from gvsigol.celery import app as celery_app
 from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
+from django.core.mail import send_mail
 from celery.utils.log import get_task_logger
 
-from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests
+from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests, SendEmails
 from gvsigol import settings
 
 from . import etl_tasks, views
@@ -248,6 +249,15 @@ def run_canvas_background(**kwargs):
                 statusModel.message = 'Process has been executed successfully'
                 statusModel.status = 'Success'
                 statusModel.save()  
+                try:
+                    send_mail_params = SendEmails.objects.get(etl_ws_id = id_ws)
+                    if send_mail_params.send_after:
+                        em = send_mail_params.emails
+                        sendEmail(id_ws, 'Process has been executed successfully', 'Success', em.split(' '))
+                except:
+                    pass
+            
+            
             else:
                 statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
                 statusModel.message ='Process has been executed successfully'
@@ -264,6 +274,14 @@ def run_canvas_background(**kwargs):
                 statusModel.message = str(e)[:600]
                 statusModel.status = 'Error'
                 statusModel.save()
+                try:
+                    send_mail_params = SendEmails.objects.get(etl_ws_id = id_ws)
+                    if send_mail_params.send_fails:
+                        em = send_mail_params.emails
+                        sendEmail(id_ws, str(e), 'Error', em.split(' '))
+                except:
+                    pass
+
             else:
                 statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
                 statusModel.message = str(e)[:600]
@@ -452,3 +470,24 @@ def getLoopListFromPostgres(params):
     cursor.close()
 
     return loopList
+
+
+def sendEmail(id, msg, sub, listMails):
+    if settings.EMAIL_BACKEND_ACTIVE:
+
+        if sub == 'Error':
+        
+            subject = 'El proceso ETL '+str(id)+ ' ha fallado'
+            body = 'El proceso ETL '+str(id)+ 'ha fallado con el siguiente error: '+ ':\n\n'
+            body += msg
+
+
+        else:
+            subject = 'El proceso ETL '+str(id)+ ' ha finalizado correctamente'
+        
+            body = msg
+
+        toAddress = listMails           
+        fromAddress = settings.EMAIL_HOST_USER
+        
+        send_mail(subject, body, fromAddress, toAddress, False, settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
