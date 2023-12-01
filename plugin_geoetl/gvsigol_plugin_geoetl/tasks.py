@@ -28,6 +28,9 @@ def run_canvas_background(**kwargs):
 
     else:
         listConcatIds = [kwargs["id_ws"]]
+
+
+    errormsg = ''
     
     for wspc in listConcatIds:
         
@@ -175,6 +178,7 @@ def run_canvas_background(**kwargs):
                                                     parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))
 
                             print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
+                            errormsg = 'ERROR: In '+n[1]['type'] +' ('+n[1]['id']+ ')' +' Node. '
                             #execute input task
                             if n[1]['type'].startswith('input'):
 
@@ -271,27 +275,27 @@ def run_canvas_background(**kwargs):
             
             if id_ws:
                 statusModel  = ETLstatus.objects.get(id_ws = id_ws)
-                statusModel.message = str(e)[:600]
+                statusModel.message = errormsg  + str(e)[:600]
                 statusModel.status = 'Error'
                 statusModel.save()
                 try:
                     send_mail_params = SendEmails.objects.get(etl_ws_id = id_ws)
                     if send_mail_params.send_fails:
                         em = send_mail_params.emails
-                        sendEmail(id_ws, str(e), 'Error', em.split(' '))
+                        sendEmail(id_ws, errormsg  + str(e), 'Error', em.split(' '))
                 except Exception as ex:
                     print('No se ha podido enviar el mail por: '+str(ex))
 
             else:
                 statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-                statusModel.message = str(e)[:600]
+                statusModel.message = errormsg  + str(e)[:600]
                 statusModel.status = 'Error'
                 statusModel.save()
             
             delete_tables(tables_list_name)
             
-            logger.error('ERROR: In '+n[1]['type']+' Node, '+ str(e))
-            print('ERROR: In '+n[1]['type']+' Node, '+ str(e))
+            logger.error('ERROR: In '+n[1]['type']+' Node. '+ str(e))
+            print('ERROR: In '+n[1]['type']+' Node. '+ str(e))
             break
         
     
@@ -477,15 +481,14 @@ def sendEmail(id, msg, sub, listMails):
 
         if sub == 'Error':
         
-            subject = 'El proceso ETL '+str(id)+ ' ha fallado'
-            body = 'El proceso ETL '+str(id)+ ' ha fallado con el siguiente error: '+ ':\n\n'
+            subject = 'Error en ejecución ETL'
+            body = 'Estás recibiendo este email porque el proceso ETL '+str(id)+ ' ha fallado con el siguiente error: '+ '\n\n'
             body += msg
 
 
         else:
-            subject = 'El proceso ETL '+str(id)+ ' ha finalizado correctamente'
-        
-            body = msg
+            subject = 'Ejecución ETL finalizada'
+            body = 'Estás recibiendo este email porque el proceso ETL '+str(id)+ ' ha finalizado correctamente'
 
         toAddress = listMails           
         fromAddress = settings.EMAIL_HOST_USER
