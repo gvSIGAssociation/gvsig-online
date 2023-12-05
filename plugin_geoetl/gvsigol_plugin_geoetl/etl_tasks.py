@@ -1435,15 +1435,40 @@ def trans_CadastralGeom(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source});').format(
-        schema = sql.Identifier(GEOETL_DB["schema"]),
-        tbl_target = sql.Identifier(table_name_target),
-        tbl_source = sql.Identifier(table_name_source))
-    
-    cur.execute(sqlDup)
+
+    # Definición de la columna de texto
+    refcat_column = sql.Identifier("refcat")
+    text_column = sql.SQL("{} TEXT").format(refcat_column)
+
+    # Definición de la columna de geometría multipolígono
+    geom_column = sql.Identifier("wkb_geometry")
+    geometry_column = sql.SQL("{} GEOMETRY(MULTIPOLYGON, 4326)").format(geom_column)
+
+    # Crear la tabla
+    create_table_query = sql.SQL("CREATE TABLE IF NOT EXISTS {}.{} ({});").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier("geometriacatastral"),
+        sql.SQL(', ').join([text_column, geometry_column])
+    )
+
+    # Ejecutar la consulta para crear la tabla
+    cur.execute(create_table_query)
     conn.commit()
 
-    sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN "_id_temp" SERIAL, ADD COLUMN "wkb_geometry" geometry(MultiPolygon, 4326); ').format(
+
+    sqlJoin_ = 'create table {sch}.{tbl_target} as (select A0.*, A1.wkb_geometry from {sch}.{tbl_source} AS A0 LEFT JOIN {sch}."geometriacatastral" AS A1 ON A0.{attr} = A1."refcat");'
+
+    sqlJoin = sql.SQL(sqlJoin_).format(
+        sch = sql.Identifier(GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target),
+        tbl_source = sql.Identifier(table_name_source),
+        attr = sql.Identifier(attr))
+        
+    cur.execute(sqlJoin)
+    conn.commit()    
+
+
+    sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN "_id_temp" SERIAL; ').format(
         schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
     )
@@ -1451,7 +1476,7 @@ def trans_CadastralGeom(dicc):
     cur.execute(sqlAdd)
     conn.commit()
 
-    sqlSel = sql.SQL('SELECT {attr}, "_id_temp" FROM {schema}.{tbl_target};').format(
+    sqlSel = sql.SQL('SELECT {attr}, "_id_temp" FROM {schema}.{tbl_target} WHERE wkb_geometry is NULL').format(
         attr = sql.Identifier(attr),
         schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
@@ -1512,13 +1537,38 @@ def trans_CadastralGeom(dicc):
                                     'coordinates': [coordinates]
                                     }
             
-                    sqlInsert = sql.SQL('UPDATE {schema}.{tbl_target} SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON( %s), %s) WHERE "_id_temp" = %s').format(
-                            schema = sql.Identifier(GEOETL_DB["schema"]),
-                            tbl_target = sql.Identifier(table_name_target)
+                sqlUpdate = sql.SQL('UPDATE {schema}.{tbl_target} SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON( %s), %s) WHERE "_id_temp" = %s').format(
+                        schema = sql.Identifier(GEOETL_DB["schema"]),
+                        tbl_target = sql.Identifier(table_name_target)
+                    )
+                
+                cur2.execute(sqlUpdate,[str(json.dumps(i["geometry"])), srs, str(row[1])])
+                conn.commit()
+        
+                insert = True
+
+                sqlSelDup = sql.SQL('SELECT count(*) FROM {schema}.geometriacatastral WHERE refcat = %s').format(
+                        schema = sql.Identifier(GEOETL_DB["schema"])
+                    )
+
+                cur2.execute(sqlSelDup, [row[0]])
+                conn.commit()
+
+                for d in cur2:
+                    print(d)
+                    if int(d[0]) > 0:
+                        insert = False
+
+                if insert:
+                    
+                    sqlInsert = sql.SQL('INSERT INTO {schema}.geometriacatastral(refcat, wkb_geometry) VALUES (%s, ST_SetSRID(ST_GeomFromGeoJSON( %s), %s))').format(
+                            schema = sql.Identifier(GEOETL_DB["schema"])
                         )
                     
-                    cur2.execute(sqlInsert,[str(json.dumps(i["geometry"])), srs, str(row[1])])
+                    cur2.execute(sqlInsert, [row[0], str(json.dumps(i["geometry"])), srs])
                     conn.commit()
+            
+            
             except Exception as e:
                 print(str(e))
 
