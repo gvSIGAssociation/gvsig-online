@@ -47,12 +47,9 @@ else:
 if os.environ.get("UWSGI_ENABLED") and os.environ.get("UWSGI_ENABLED")=='True': 
     default_static_dir="/opt/gvsigonline/static"
     default_static_url="/static/"
-    default_media_url="/media/"
 else:
     default_static_dir=str(os.path.join(BASE_DIR, 'assets'))
     default_static_url="/gvsigonline/static/"
-    default_media_url="/gvsigonline/media/"
-
 
 
 # Define default environment 
@@ -63,7 +60,7 @@ env = environ.Env(
     STATIC_ROOT=(str,default_static_dir),
     STATIC_URL=(str,default_static_url),
     MEDIA_ROOT=(str,'/opt/gvsigol_data/'),
-    MEDIA_URL=(str,default_media_url),
+    MEDIA_URL=(str,'/media/'),
     ALLOWED_HOST_NAMES=(list,['http://localhost:8000']),
     GVSIGOL_PLUGINS=(list),
     GVSIGOL_SKIN=(str,'skin-blue'),
@@ -95,7 +92,7 @@ env = environ.Env(
     FRONTEND_BASE_URL = (str,'/gvsigonline'),
     FRONTEND_REDIRECT_URL = (str,'/gvsigonline'),
     #Log level
-    LOG_LEVEL=(str,"DEBUG")
+    LOG_LEVEL=(str,"DEBUG"),
     
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
@@ -413,15 +410,18 @@ EXTRA_LANG_INFO = {
 LANG_INFO = dict(list(django.conf.locale.LANG_INFO.items()) + list(EXTRA_LANG_INFO.items()))
 django.conf.locale.LANG_INFO = LANG_INFO
 
+
+
 LANGUAGES = (
     ('es', _('Spanish')),
-    ('ca-es@valencia', _('Valencian')),
-    ('ca', _('Catalan')),
+    #('ca-es@valencia', _('Valencian')),
+    #('ca', _('Catalan')),
     ('en', _('English')),
     #('pt', _('Portuguese')),
-    ('de', _('German')),
-    ('pt-br', _('Brazilian Portuguese')),
+    #('de', _('German')),
+    #('pt-br', _('Brazilian Portuguese')),
 )
+
 
 LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol/locale'),
