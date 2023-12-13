@@ -5,8 +5,8 @@ urlpatterns = [
     path('server_list/', services_views.server_list, name='server_list'),
     path('server_add/', services_views.server_add, name='server_add'),
     path('server_delete/<int:svid>/', services_views.server_delete, name='server_delete'),
-    path('server_update/<int:svid>/', services_views.server_update, name='server_update'), 
-    path('get_server/<int:svid>/', services_views.get_server, name='get_server'),  
+    path('server_update/<int:svid>/', services_views.server_update, name='server_update'),
+    path('get_server/<int:svid>/', services_views.get_server, name='get_server'),
     path('reload_node/<int:nid>/', services_views.reload_node, name='reload_node'),
     path('workspace_list/', services_views.workspace_list, name='workspace_list'),
     path('workspace_add/', services_views.workspace_add, name='workspace_add'),
@@ -103,4 +103,6 @@ urlpatterns = [
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
     path('get_resource/<int:resource_id>/', services_views.get_resource, name='get_layer_resource'),
+    path('dnie/', services_views.test_dnie, name='test_dnie'),
+    path('dnie2/', services_views.test_dnie2, name='test_dnie2'),
 ]
