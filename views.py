@@ -5399,7 +5399,7 @@ def list_datastores_in_db(request):
 def test_dnie(request):
     cert_s_dn = request.META.get('HTTP_X_SSL_CLIENT_S_DN')
     if cert_s_dn:
-        dni = ''
+        nif = ''
         for i in cert_s_dn.split(","):
             if i.startswith("serialNumber="):
                 nif = i[len("serialNumber="):]
