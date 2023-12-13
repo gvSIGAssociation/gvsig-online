@@ -5395,3 +5395,16 @@ def list_datastores_in_db(request):
 
         return HttpResponse(json.dumps(filtered_datastores))
     return HttpResponseBadRequest()
+
+def test_dnie(request):
+    cert_s_dn = request.META.get('HTTP_X_SSL_CLIENT_S_DN')
+    for i in cert_s_dn.split(","):
+        if i.startswith("serialNumber="):
+            dni = i[len("serialNumber="):]
+            response = "DNI: {}<br>S_DN: {}".format(dni, cert_s_dn)
+            return HttpResponse(response)
+    return HttpResponse("No autenticado")
+
+def test_dnie2(request):
+    # este método debe mostrar no validado ya que se accede por una URL que no activa el certificado
+    return test_dnie(request)
