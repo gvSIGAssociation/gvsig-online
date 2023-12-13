@@ -5402,8 +5402,13 @@ def test_dnie(request):
         dni = ''
         for i in cert_s_dn.split(","):
             if i.startswith("serialNumber="):
-                dni = i[len("serialNumber="):]
-        response = "DNI: {}<br>S_DN: {}".format(dni, cert_s_dn)
+                nif = i[len("serialNumber="):]
+                if len(nif) != 8:
+                    if len(nif) == 15:
+                        prefix = 'IDCES-' # prefijo FNMT
+                        if nif.startswith(prefix):
+                            nif = nif[len(prefix):]
+        response = "DNI: {}<br>S_DN: {}".format(nif, cert_s_dn)
         return HttpResponse(response)
     return HttpResponse("No autenticado")
 
