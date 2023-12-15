@@ -145,7 +145,8 @@ def test_sqlserver(dicc):
         conn = pymssql.connect(dicc['server-sql-server'], dicc['username-sql-server'], dicc['password-sql-server'], dicc['db-sql-server'])
         conn.close()
         return {"result": True}
-    except:
+    except Exception as e:
+        print('Connection SQL Server Failed: ' + str(e))
         return {"result": False}
 
 def get_schema_csv(dicc):
