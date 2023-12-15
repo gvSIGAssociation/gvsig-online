@@ -2164,16 +2164,31 @@ def layergroup_add_with_project(request, project_id):
 
         if not name:
             message = _('You must enter a name for layer group')
-            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())})
+            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())}
+            if from_redirect:
+                response['redirect'] = from_redirect
+            elif redirect_var:
+                response['redirect'] = redirect_var
+            return render(request, 'layergroup_add.html', response)
 
         name = name + '_' + ascii_norm_username(request.user.username)
         if _valid_name_regex.search(name) == None:
             message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())})
+            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())}
+            if from_redirect:
+                response['redirect'] = from_redirect
+            elif redirect_var:
+                response['redirect'] = redirect_var
+            return render(request, 'layergroup_add.html', redirect_var)
 
         if LayerGroup.objects.filter(name=name).exists():
             message = _('Layer group name already exists')
-            return render(request, 'layergroup_add.html', {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())})
+            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())}
+            if from_redirect:
+                response['redirect'] = from_redirect
+            elif redirect_var:
+                response['redirect'] = redirect_var
+            return render(request, 'layergroup_add.html', redirect_var)
 
         layergroup = LayerGroup(
             server_id = server_id,

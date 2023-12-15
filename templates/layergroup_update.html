@@ -2,14 +2,15 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
+{% block content %}
 <form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}{% if redirect %}?redirect={{redirect}}{% endif %}">
 	<div class="row">
 		<div class="col-md-12">
 			<div class="row">
 				<div class="col-md-12 form-group">
 					<div class="box-tools pull-right">
-						<div id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</div>					
+						<a href="javascript:window.history.back();" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
+						<button id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
 					</div>
 				</div>
 			</div>
@@ -23,7 +24,7 @@
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}	
+						{% endif %}
 					{% endfor %}
 					</ul>
 				</div>
@@ -34,10 +35,10 @@
 				</div>
 				{% endif %}
 			</div>
-		
+
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab">{% trans "General" %}</a></li>				
-				{% if MANAGE_PERMISSION_UI or user.is_superuser %}<li><a href="#tab-layergroup-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}				
+				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab">{% trans "General" %}</a></li>
+				{% if MANAGE_PERMISSION_UI or user.is_superuser %}<li><a href="#tab-layergroup-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab-layergroup-general">
@@ -54,29 +55,29 @@
 													<option value="{{server.id}}" selected>{{server.title}}</option>
 												{% else %}
 													<option value="{{server.id}}">{{server.title}}</option>
-												{% endif %}	
+												{% endif %}
 											{% endfor %}
 											</select>
 										</div>
 									</div>
-														
+
 									<div class="row">
 										<div class="col-md-12">
-											<label>{% trans "Name" %}</label>	
-											<input readonly placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">							
+											<label>{% trans "Name" %}</label>
+											<input readonly placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">
 										</div>
 									</div>
-									
+
 									<div class="row">
 										<div class="col-md-12">
 											<label>{% trans "Title" %}</label>
-											<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control" value="{{layergroup.title}}">							
+											<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control" value="{{layergroup.title}}">
 										</div>
 									</div>
 									<br>
-										
+
 									<div class="row">
-										<div class="checkbox col-md-6">								
+										<div class="checkbox col-md-6">
 											<label>
 												{% if layergroup.cached %}
 													<input type="checkbox" name="cached" id="cached" checked/>{% trans "Create cache for the layer group" %}
@@ -85,7 +86,7 @@
 												{% endif %}
 											</label>
 										</div>
-										<div class="checkbox col-md-6">								
+										<div class="checkbox col-md-6">
 											<label>
 												{% if layergroup.visible %}
 													<input type="checkbox" name="visible" id="visible" checked/>{% trans "Is visible" %}
@@ -105,28 +106,28 @@
 					{% include "select_layergroup_permissions.html" %}
 				</div>
 			</div>
-		</div>				
+		</div>
 	</div>
 </form>
 &nbsp;
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">			
+		<div class="box">
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "Group layers" %}</h3>
 				<div class="box-tools pull-right">
 						<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
-						<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>				
+						<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>
 					</div>
 			</div>
-					
-			<div class="box-body">					
+
+			<div class="box-body">
 				<div id="toc" class="toc">
 					{% for layer in layers %}
 					<div data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default collapsed-box toc-layergroup layer-item" style="border-top: none;">
 						<div class="box-header">
 							<div class="handle">
-								<span class="" style="margin-right: 20px;"> 
+								<span class="" style="margin-right: 20px;">
 									<i class="fa fa-ellipsis-v"></i>
 									<i class="fa fa-ellipsis-v"></i>
 								</span>
@@ -167,7 +168,7 @@
 		        </div>
 			</div>
 		</div>
-	</div>				
+	</div>
 </div>
 
 <!-- Modal -->
@@ -213,13 +214,13 @@
 		</div>
 	</div>
 </div>
-	
+
 {% endblock %}
 {% block extra-scripts %}
 <script>
 	$('#menu-manage-services').addClass("active");
 	$('#submenu-layergroups').addClass("active");
-	
+
 	$('#button-create-layer').click(function() {
 		$("#myModalLabel2").text(gettext("Create new layer"));
 		$('#button-add-layer-group-accept').click( function() {
@@ -232,7 +233,7 @@
 			$('#save_button').trigger('click');
 		});
 	});
-	
+
 	$('#button-import-layer').click(function() {
 		$("#myModalLabel2").text(gettext("Publish layer"));
 		$('#button-add-layer-group-accept').click( function() {
@@ -245,7 +246,7 @@
 			$('#save_button').trigger('click');
 		});
 	});
-	
+
 	function getQueryString() {
 		var queryString = '?redirect=layergroup-redirect';
 		const params = new URLSearchParams(window.location.search);
@@ -267,13 +268,13 @@
 		var url = '/gvsigonline/services/layer_update/' + data + '/' + getQueryString();
 		location.href = url;
 	}
-	
-	function updateExternalLayer(data){			
+
+	function updateExternalLayer(data){
 		var url = '/gvsigonline/services/external_layer_update/' + data + '/' + getQueryString();
 		location.href = url;
 	}
-	
-	function configLayer(data){			
+
+	function configLayer(data){
 		var url = '/gvsigonline/services/layer_config/' + data  + '/' + getQueryString();
 		location.href = url;
 	}
@@ -297,7 +298,7 @@
 			}
 		});
 	}
-	
+
 	function deleteLayer(data){
 		$('#button-delete-layer-accept').click( function() {
 			$("body").overlay();
@@ -342,9 +343,9 @@
 			});
 		});
 	}
-	
+
 	$(document).ready(function() {
-		
+
 		$('.box-tools-buttons button').on('click', function (){
 			var data = $(this).attr("data-id");
 			if (this.name == "button-update-layer") {
@@ -353,17 +354,17 @@
 				updateExternalLayer(data);
 			} else if (this.name == "button-config-layer"){
 				configLayer(data);
-				
+
 			} else if (this.name == "button-clear-cache"){
 				clearCache(data);
-				
+
 			} else if (this.name == "button-delete-layer"){
-		        deleteLayer(data);   
+		        deleteLayer(data);
 		    } else if (this.name == "button-delete-externallayer"){
-		    	deleteExternalLayer(data);   
+		    	deleteExternalLayer(data);
 		    }
 		});
-		
+
 		$(".toc").sortable({
 			placeholder: "sort-highlight",
 			handle: ".handle",
@@ -378,7 +379,7 @@
 			page: 6,
 			pagination: false
 		});
-	
+
 		$('#save_button').click(function(e) {
 			e.preventDefault(); // prevents default
 			for(var i=0; i<searcheableList.items.length; i++){
@@ -393,13 +394,14 @@
 					$('#toc').val($('#toc').val()+',');
 				}
 				$('#toc').val($('#toc').val()+value);
-				
+
 				isFirst = false;
 			});
+			$('#modal-add-layer').modal('hide');
 			$('#layer-group-form').submit();
 			return false;
 		});
 	});
-	
+
 </script>
 {% endblock %}
