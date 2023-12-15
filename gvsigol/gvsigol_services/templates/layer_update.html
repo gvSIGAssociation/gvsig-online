@@ -8,15 +8,16 @@
 <form id="layer-update-form" role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
 {% else %}
 <form id="layer-update-form" role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
-{% endif %}	
+{% endif %}
 <div class="row">
 	<div class="col-md-12">
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
-					<button id="dash-submit-button" class="btn btn-default btn-sm">{% trans "Save" %}</button>
+					<a href="javascript:window.history.back();" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
+					<button id="dash-submit-button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
 				</div>
-			</div>	
+			</div>
 			<div class="row" style="padding-left: 30px;">
 				{% csrf_token %}
 				<div id="form-error" style="color:#ff0000;">
@@ -25,13 +26,13 @@
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}	
+						{% endif %}
 					{% endfor %}
 					</ul>
 				</div>
-			</div>			
+			</div>
 		</div>
-		
+
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
           	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
@@ -39,9 +40,9 @@
           	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
         </ul>
-        
+
         <div class="tab-content">
-        
+
           	<div class="tab-pane active" id="tab-layer-general">
           		<div class="row">
 					<div class="col-md-12">
@@ -52,7 +53,7 @@
 										<label for="workspace">{% trans "Workspace" %}</label>
 										<input readonly="true" name="workspace" id="workspace" type="text" class="form-control" value="{{workspace.name}}">
 									</div>
-								</div>	
+								</div>
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="datastore">{% trans "Data Store" %}</label>
@@ -80,7 +81,7 @@
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="id_format">{% trans "Format" %}</label>
-										{{ form.format }}						
+										{{ form.format }}
 									</div>
 								</div>
 								<div class="row">
@@ -90,16 +91,16 @@
 										</div>
 										<div class="provider-img-change">
 											<label>{% trans "Icon" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png, .svg)
-											<input id="layer-image" name="layer-image" accept=".jpg, .jpeg, .png, .svg" type="file" class="file" data-show-preview="true">						
+											<input id="layer-image" name="layer-image" accept=".jpg, .jpeg, .png, .svg" type="file" class="file" data-show-preview="true">
 										</div>
-									</div>	
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
           	</div>
-          	
+
           	<div class="tab-pane" id="tab-layer-properties">
 		    	<div class="row">
 					<div class="col-md-12">
@@ -108,12 +109,12 @@
 		          				<div class="row">
 			          				<div class="col-md-4 form-group timeout_layer_property">
 	          							<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
-										<input name="timeout" id="timeout" value="{{layer.timeout}}" type="number" class="form-control">														
+										<input name="timeout" id="timeout" value="{{layer.timeout}}" type="number" class="form-control">
 									</div>
 									{% if datastore_type|slice:":2" == "v_" %}
 			          				<div class="col-md-4 form-group max_features_layer_property">
 	          							<label for="max_features">{% trans "WFS request feature limit" %}</label>
-										<input name="max_features" id="max_features" value="{{layer_conf.featuretype.max_features}}" type="number" class="form-control">														
+										<input name="max_features" id="max_features" value="{{layer_conf.featuretype.max_features}}" type="number" class="form-control">
 									</div>
 									{% endif %}
 								</div>
@@ -171,7 +172,7 @@
 										{% endif %}
 										<label for="allow_download">{% trans "Allow downloads" %}</label>
 									</div>
-								</div>	
+								</div>
 								<div class="row">
 									<div class="col-md-4 form-group checkbox_real_time_layer_property">
 										{% if layer.real_time %}
@@ -179,7 +180,7 @@
 										{% else %}
 										<input type="checkbox" name="real_time" id="real_time"/>
 										{% endif %}
-										<label for="real_time">{% trans "View in real time" %}</label>														
+										<label for="real_time">{% trans "View in real time" %}</label>
 									</div>
 									<div class="col-md-4 form-group checkbox_vector_tile_layer_property">
 										{% if layer.vector_tile %}
@@ -187,13 +188,13 @@
 										{% else %}
 										<input type="checkbox" name="vector_tile" id="vector_tile"/>
 										{% endif %}
-										<label for="vector_tile">{% trans "Show in vector tile format" %}</label>														
+										<label for="vector_tile">{% trans "Show in vector tile format" %}</label>
 									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-4 form-group update_interval_layer_property">
 									  	<label for="update_interval">{% trans "Update interval (miliseconds)" %}</label>
-									  	<input name="update_interval" id="update_interval" value="{{layer.update_interval}}" type="number" class="form-control">														
+									  	<input name="update_interval" id="update_interval" value="{{layer.update_interval}}" type="number" class="form-control">
 								  	</div>
 							  	</div>
 								<div class="box-body time_enabled-check">
@@ -203,7 +204,7 @@
 											<label class="active" for="id_time_enabled_field">{% trans "time_enabled field" %}</label>
 											{{ form.time_enabled_field }}
 										</div>
-									</div>		
+									</div>
 									<div class="row">
 										<div class="col-md-12 form-group">
 											<label class="active" for="id_time_enabled_endfield">{% trans "End time_enabled field" %}</label>
@@ -225,7 +226,7 @@
 									</div>
 									<div class="row time_presentation">
 										<div class="col-md-12 form-group">
-											<label class="active" for="id_time_resolution">{% trans "Time resolution (years, months, weeks, days, hours, minutes and seconds)" %}</label><br />		
+											<label class="active" for="id_time_resolution">{% trans "Time resolution (years, months, weeks, days, hours, minutes and seconds)" %}</label><br />
 											{{ form.time_resolution_year }}
 											{{ form.time_resolution_month }}
 											{{ form.time_resolution_week }}
@@ -296,7 +297,7 @@
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
-										<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{{layer.abstract}}</textarea>	     	
+										<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{{layer.abstract}}</textarea>
 							        </div>
 								</div>
 								{% endif %}
@@ -305,7 +306,7 @@
 					</div>
 				</div>
           	</div>
-          	
+
           	<div class="tab-pane" id="tab-layer-detailedinfo">
           		<div class="row">
 					<div class="col-md-12">
@@ -318,7 +319,7 @@
 	          							{% else %}
 	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
 	          							{% endif %}
-										<label for="detailed_info_enabled">{% trans "Enable detailed information" %}</label>												
+										<label for="detailed_info_enabled">{% trans "Enable detailed information" %}</label>
 									</div>
 								</div>
 								{% if layer.detailed_info_enabled %}
@@ -328,10 +329,10 @@
 	          					{% endif %}
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
-										<input value="{{layer.detailed_info_button_title}}" placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+										<input value="{{layer.detailed_info_button_title}}" placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">
 									</div>
-								</div>	
-								{% if layer.detailed_info_enabled %}	
+								</div>
+								{% if layer.detailed_info_enabled %}
 								<div class="row" id="detailed_info_html-row">
 								{% else %}
 								<div style="display: none;" class="row" id="detailed_info_html-row">
@@ -341,8 +342,8 @@
 										{% if layer.detailed_info_html != None %}
 										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{layer.detailed_info_html}}</textarea>
 										{% else %}
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>	
-										{% endif %}					
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>
+										{% endif %}
 									</div>
 								</div>
 							</div>
@@ -350,8 +351,8 @@
 					</div>
 				</div>
           	</div>
-        		
-		</div> 
+
+		</div>
 	</div>
 </div>
 </form>
@@ -361,15 +362,15 @@
 <script type="text/javascript">
 $('#menu-manage-services').addClass("active");
 $('#submenu-layers').addClass("active");
-	
+
 	function readURL(input) {
 	    if (input.files && input.files[0]) {
 	        var reader = new FileReader();
-	        
+
 	        reader.onload = function (e) {
 	            $('#image-preview').attr('src', e.target.result);
 	        }
-	        
+
 	        reader.readAsDataURL(input.files[0]);
 	    }
 	}
@@ -384,11 +385,11 @@ $('#submenu-layers').addClass("active");
 			value: '__disabled__',
 			text: placeholderOptionText,
 			disabled: 'disabled',
-			
+
 		};
 		if (placeholderSelected) {
 			attribs['selected'] = 'selected';
-		} 
+		}
 		selectObj.append($('<option>', attribs));
 		if (extraOptions) {
 			for (var i=0; i<extraOptions.length; i++) {
@@ -396,16 +397,16 @@ $('#submenu-layers').addClass("active");
 			}
 		}
 	};
-	
+
 	function make_temporal_form(){
 		$(".time_presentation").css("display", "none");
 		$(".time_default_value").css("display", "none");
-		
+
 		var tm_pr = $("#id_time_presentation option:selected").val();
 		if(tm_pr == "DISCRETE_INTERVAL"){
 			$(".time_presentation").css("display", "block");
 		}
-		
+
 		var tm_dv = $("#id_time_default_value_mode option:selected").val();
 		if(tm_dv == "NEAREST" || tm_dv == "FIXED"){
 			$(".time_default_value").css("display", "block");
@@ -414,14 +415,14 @@ $('#submenu-layers').addClass("active");
 				showClose: true
 			});
 		}
-		
+
 	};
-	
+
 	function create_date_select(field, data, previousValue, allow_blank){
 		var language = $("#select-language").val();
 		var name_select = $("#"+field);
 		var placeholderSelected = true;
-		
+
 		if (data==null || data.length==0) {
 			var text = "{% trans 'Resource contains no fields' %}";
 			rebuildSelect(name_select, text, true);
@@ -453,7 +454,7 @@ $('#submenu-layers').addClass("active");
 		rebuildSelect(name_select, text, placeholderSelected, options);
 	};
 
-	
+
 	function temporary_field(field){
 		if(field.prop("checked")){
 			field.parent().addClass("time_enabled-check");
@@ -466,14 +467,14 @@ $('#submenu-layers').addClass("active");
 			$(".box-body.time_enabled-check").css("display", "none");
 		}
 	};
-	
+
 	function fileExists(url) {
 	    if(url){
 	        var req = new XMLHttpRequest();
 	        req.open('GET', url, false);
 	        req.send();
 	        return req.status==200;
-	        
+
 	    } else {
 	        return false;
 	    }
@@ -487,7 +488,7 @@ $('#submenu-layers').addClass("active");
 				page: 5,
 				pagination: false
 			});
-			
+
 		$("#dash-submit-button").click(function(e){
 			for(var i=0; i<searcheableReadList.items.length; i++){
 				var item = searcheableReadList.items[i];
@@ -495,14 +496,14 @@ $('#submenu-layers').addClass("active");
 			}
 			$(".layer-read-checkbox").prop( "disabled", false)
 			$("#layer-update-form").submit();
-			return false; 
+			return false;
 		});
 
 		var detailedInfoHTML = document.getElementById('detailed_info_html');
 		if ('False' == '{{html|safe}}') {
 			if (fileExists(HTML_PATH + 'detailed_info.html')) {
 				detailedInfoHTML.innerHTML = '<iframe width="800" height="600" src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
-				
+
 			} else {
 				var aux = '';
 				aux += '<div class="col-md-12"> \n';
@@ -512,7 +513,7 @@ $('#submenu-layers').addClass("active");
 				detailedInfoHTML.innerHTML = aux;
 			}
 		}
-		
+
 		var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
 			mode: "text/html",
 	        extraKeys: {"Ctrl-Space": "autocomplete"},
@@ -520,27 +521,27 @@ $('#submenu-layers').addClass("active");
 			theme: "xq-dark",
 			lineNumbers: true
 		});
-		
+
 		$('#detailed_info_enabled').click(function(){
 			if ($('#detailed_info_enabled').is(":checked")) {
 				$('#detailed_info_button_title-row').css('display', 'block');
 				$('#detailed_info_html-row').css('display', 'block');
 				codemirror.refresh();
-				
+
 			} else {
 				$('#detailed_info_button_title-row').css('display', 'none');
 				$('#detailed_info_html-row').css('display', 'none');
 			}
 		});
-		
+
 		var date_fields = {{ date_fields|safe }};
 		var time_enabled_field = "{{ layer.time_enabled_field }}";
 		var time_enabled_endfield = "{{ layer.time_enabled_endfield }}";
 		$("#id_layer_group option[value='']").attr('disabled','disabled');
-		
+
 		create_date_select("id_time_enabled_field", date_fields, time_enabled_field, false);
 		create_date_select("id_time_enabled_endfield", date_fields, time_enabled_endfield, true);
-		
+
 		$('#id_time_resolution_year').val({{ layer.time_resolution_year }});
 		$('#id_time_resolution_month').val({{ layer.time_resolution_month }});
 		$('#id_time_resolution_week').val({{ layer.time_resolution_week }});
@@ -548,9 +549,9 @@ $('#submenu-layers').addClass("active");
 		$('#id_time_resolution_hour').val({{ layer.time_resolution_hour }});
 		$('#id_time_resolution_minute').val({{ layer.time_resolution_minute }});
 		$('#id_time_resolution_second').val({{ layer.time_resolution_second }});
-		
+
 		$('#select-style option[value="{{layer.style}}"]').attr('selected','selected');
-		
+
 		// translate default layer group
 		var lgs = $("#id_layer_group");
 		var lg_options = $("#id_layer_group option");
@@ -563,40 +564,40 @@ $('#submenu-layers').addClass("active");
 				lgs.val(1);
 			}
 		}
-		
+
 		$('#dash-submit-button').click( function() {
 			$("body").overlay();
 		});
-		
+
 		$('#time_enabled').click(function(){
 			temporary_field($(this));
 		});
-		
+
 		temporary_field($('#time_enabled'));
 
 		$("#id_time_presentation").change(function(){
 			make_temporal_form();
 		});
-		
+
 		$("#id_time_default_value_mode").change(function(){
 			make_temporal_form();
 		})
-		
-		
+
+
 		make_temporal_form();
-		
+
 		$('#datetimepicker').datetimepicker({
 			format: 'DD-MM-YYYY HH:mm:ss',
 			showClose: true
 		});
-		
+
 		{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
 		{% if 'CATALOG_FACETS_CONFIG' in plugins_config.gvsigol_plugin_catalog %}
 		facetsConfig: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL }},
 		{% endif %}
 		$('#create_metadata_btn').click(function() {
 			var url = '{% url 'create_metadata' layer_id %}';
-			$.ajax({url: url, type: 'post', data: {}, 
+			$.ajax({url: url, type: 'post', data: {},
 				headers: {'X-CSRFToken': Cookies.get('csrftoken')},
 				success: function(data, textStatus, jqXHR) {
 					if (data.status=='ok') {

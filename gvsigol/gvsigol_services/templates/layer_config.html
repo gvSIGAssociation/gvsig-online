@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load key %}
 
-{% block content %}	
+{% block content %}
 
 {% if redirect_to_layergroup %}
 <form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
@@ -15,7 +15,8 @@
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
-					<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Save" %} <i class="fa fa-floppy-o margin-l-5"></i></button>					
+					<a href="javascript:window.history.back();" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
+					<button type="submit" class="btn btn-default btn-sm  save-button"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
 				</div>
 			</div>
 		</div>
@@ -27,12 +28,12 @@
 				{% for field in form %}
 					{% if field.errors %}
 						<li>{{field.label}}. {{ field.errors|striptags }}</li>
-					{% endif %}	
+					{% endif %}
 				{% endfor %}
 				</ul>
 			</div>
 			{% endif %}
-					
+
 			{% if message %}
 			<div id="form-error" style="color:#ff0000;">
 				<p>* {{ message }}</p>
@@ -140,7 +141,7 @@
 																<input type="hidden" name="counter" value="{{counter}}" />
 																{% endif %}
 														{% endwith %}
-													{% endfor %}	
+													{% endfor %}
 												</tbody>
 											</table>
 										</div>
@@ -192,7 +193,7 @@
 																<input type="hidden" name="counter" value="{{counter}}" />
 															{% endif %}
 														{% endwith %}
-													{% endfor %}	
+													{% endfor %}
 												</tbody>
 											</table>
 										</div>
@@ -214,7 +215,7 @@
 									<div class="box box-default collapsed-box sortable-fieldgroup" data-groupid="{{counter}}" style="border-top: none;">
 										<div class="box-header">
 											<div class="handle form-inline">
-												<span class="" style="margin-right: 20px;"> 
+												<span class="" style="margin-right: 20px;">
 													<i class="fa fa-ellipsis-v"></i>
 													<i class="fa fa-ellipsis-v"></i>
 												</span>
@@ -230,7 +231,7 @@
 									<div data-name="{{f}}"  class="box box-default collapsed-box sortable-fieldgroup-field" style="padding-left: 45px; border-top: none;">
 										<div class="box-header">
 											<div class="handle">
-												<span class="" style="margin-right: 20px;"> 
+												<span class="" style="margin-right: 20px;">
 													<i class="fa fa-ellipsis-v"></i>
 													<i class="fa fa-ellipsis-v"></i>
 												</span>
@@ -286,7 +287,7 @@
 																{% endfor %}
 															</tr>
 														{% endwith %}
-													{% endfor %}	
+													{% endfor %}
 												</tbody>
 											</table>
 										</div>
@@ -327,21 +328,21 @@
 
 	$('#menu-manage-services').addClass("active");
 	$('#submenu-layers').addClass("active");
-	
+
 	$(document).ready(function() {
 		$('.save-button').click( function() {
 			$("body").overlay();
 		});
-		
+
 		var fields = {{ fields_json|safe }};
 		var available_languages = {{ available_languages_array|safe }};
-		
+
 		for(var i=0; i<fields.length; i++){
 			var field = fields[i];
 			for(var j=0; j<available_languages.length; j++){
 				var lang = available_languages[j];
 				$("input[name=field-title-"+lang+"-"+(i+1)+"]").val(field["title-"+lang]);
-				
+
 			}
 		}
 	});
@@ -393,7 +394,7 @@
 			}
 		}
 	});
-	
+
 	$('.convert-to-enumerate').on('click', function (evt){
 		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
 		converToEnumModal(fieldName);
@@ -410,14 +411,14 @@
 		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
 		renameFieldModal(fieldName);
 	});
-	
+
 	function converToEnumModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
 		$('#my-modal-dialog .modal-title').text('{% trans "Convert to enum" %}');
-		
+
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
-		
+
 		ui += '<div class="col-md-12 form-group">';
 		ui += 	'<label>' + gettext('Select enumeration') + '</label>';
 		ui += 	'<select id="enumeration-list" class="form-control">';
@@ -426,7 +427,7 @@
 				'{% endfor%}'
 		ui += 	'</select>';
 		ui += '</div>';
-		
+
 		ui += '</div>';
 		$('#my-modal-dialog .modal-body').append(ui);
 		var buttons = '';
@@ -435,7 +436,7 @@
 		buttons += '<button id="autogen" type="button" class="btn btn-default">' + gettext('Autogen') + '</button>';
 		$('#my-modal-dialog .modal-footer').empty();
 		$('#my-modal-dialog .modal-footer').append(buttons);
-		
+
 		$('#convert').on('click', function () {
 			$.ajax({
 				type: 'POST',
@@ -461,7 +462,7 @@
 				}
 			});
 		});
-		
+
 		$('#autogen').on('click', function () {
 			$.ajax({
 				type: 'POST',
@@ -487,7 +488,7 @@
 				}
 			});
 		});
-		
+
 		$('#my-modal-dialog').modal('show');
 	}
 
@@ -529,7 +530,7 @@
 				document.getElementById('confirm-delete').disabled = true;
 			}
 		});
-		
+
 		$('#confirm-delete').on('click', function () {
 			$.ajax({
 				type: 'POST',
@@ -589,7 +590,7 @@
 		buttons += '<button id="confirm-rename" type="button" class="btn btn-warning">' + gettext('Rename') + '</button>';
 		$('#my-modal-dialog .modal-footer').empty();
 		$('#my-modal-dialog .modal-footer').append(buttons);
-		
+
 		$('#confirm-rename').on('click', function () {
 			var new_name = document.getElementById('new-field-name').value;
 			if (validateRegex(new_name)) {
@@ -638,7 +639,7 @@
 		{% endfor%}
 		return enumerations;
 	}
-	
+
 	function getForms() {
 		var forms = [];
 		{% for f in forms %}
@@ -646,7 +647,7 @@
 		{% endfor%}
 		return forms;
 	}
-	
+
 	function addField(field) {
 		$.ajax({
 			type: 'POST',
@@ -675,7 +676,7 @@
 			}
 		});
 	}
-	
+
 	function getAddFieldConfig() {
 		var config = {};
 		{% if GVSIGOL_ENABLE_ENUMERATIONS %}
@@ -683,13 +684,13 @@
 		{% else %}
 		config.enableEnums = false;
 		{% endif %}
-		
+
 		{% if 'gvsigol_plugin_form' in INSTALLED_APPS %}
 		config.enableForms = true;
 		{% else %}
 		config.enableForms = false;
 		{% endif %}
-		
+
 		config.enumerations = [];
 		{% for e in enumerations %}
 		config.enumerations.push({"id": "{{e.id}}", "title": "{{e.title}}"});
@@ -706,7 +707,7 @@
 		return config;
 	}
 	var addFieldConfig = getAddFieldConfig();
-	
+
 	$("#add-field-button").on('click', function(e){
 		createModalContent(null, 'create', '{% trans "New field" %}', addFieldConfig);
 	});

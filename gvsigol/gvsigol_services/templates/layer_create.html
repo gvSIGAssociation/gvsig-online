@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
+{% block content %}
 
 {% if redirect_to_layergroup %}
 <form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
@@ -14,41 +14,42 @@
 			<div class="row">
 				<div class="col-md-12 form-group">
 					<div class="box-tools pull-right">
-						<button id="submit-button" class="btn btn-default btn-sm save-button">{% trans "Save" %}</button>
+						<a href="javascript:window.history.back();" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
+						<button id="submit-button" class="btn btn-default btn-sm save-button"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
 					</div>
-				</div>				
+				</div>
 			</div>
 
 			<div class="row" style="padding-left: 30px;">
-				{% csrf_token %}					
+				{% csrf_token %}
 				{% if form.errors %}
 				<div id="form-error" style="color:#ff0000;">
 					<ul>
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}	
+						{% endif %}
 					{% endfor %}
 					</ul>
 				</div>
 				{% endif %}
-							
+
 				{% if message %}
 				<div id="form-error" style="color:#ff0000;">
 					<p>* {{ message }}</p>
 				</div>
 				{% endif %}
 			</div>
-			
+
 			<ul class="nav nav-tabs">
              	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
              	<li><a href="#tab-layer-fields" data-toggle="tab">{% trans "Fields" %}</a></li>
-             	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>             	
+             	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
 				 {% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
           		<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           		<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
            	</ul>
-           	
+
            	<div class="tab-content">
              	<div class="tab-pane active" id="tab-layer-general">
              		<div class="row">
@@ -58,43 +59,43 @@
 									<div class="row">
 										<div class="col-md-12 form-group">
 											<label for="id_datastore">{% trans "Data Store" %}</label>
-											{{ form.datastore }}						
+											{{ form.datastore }}
 										</div>
-									</div>					
+									</div>
 									<div class="row">
 										<div class="col-md-12 form-group">
 											<label for="id_name">{% trans "Resource name" %}</label>
-											{{ form.name }}						
+											{{ form.name }}
 										</div>
-									</div>					
+									</div>
 									<div class="row">
 										<div class="col-md-12 form-group">
 											<label for="id_title">{% trans "Title" %}</label>
-											{{ form.title }}						
+											{{ form.title }}
 										</div>
-									</div>						
+									</div>
 									<div class="row">
 										<div class="col-md-6 form-group">
-											<label for="id_geom_type">{% trans "Geometry type" %}</label>	
-											{{ form.geom_type }}						
+											<label for="id_geom_type">{% trans "Geometry type" %}</label>
+											{{ form.geom_type }}
 										</div>
-										<div class="col-md-6 form-group">	
-											<label for="id_srs">{% trans "Coordinate reference system" %}</label>	
-											{{ form.srs }}							
+										<div class="col-md-6 form-group">
+											<label for="id_srs">{% trans "Coordinate reference system" %}</label>
+											{{ form.srs }}
 										</div>
-									</div>	
+									</div>
 									<div class="row">
 										<div class="col-md-12 form-group">
 											<label for="id_layer_group">{% trans "Layer group" %}</label>
-											{{ form.layer_group }}						
+											{{ form.layer_group }}
 										</div>
-									</div>								
+									</div>
 				            	</div>
 							</div>
 						</div>
 					</div>
              	</div>
-             		
+
              	<div class="tab-pane" id="tab-layer-fields">
              		<div class="row">
 						<div class="col-md-12">
@@ -126,8 +127,8 @@
 							</div>
 						</div>
 					</div>
-             	</div>	
-             	
+             	</div>
+
              	<div class="tab-pane" id="tab-layer-properties">
 	          		<div class="row">
 						<div class="col-md-12">
@@ -140,13 +141,13 @@
 										</div>
 										<div class="col-md-4 form-group checkbox_cached_layer_property">
 											<input type="checkbox" name="cached" id="cached" {% if form.cached.value %}checked{% endif %}/>
-											<label for="cached">{% trans "Cached" %}</label>	
+											<label for="cached">{% trans "Cached" %}</label>
 										</div>
 										<div class="col-md-4 form-group">
 											<input type="checkbox" name="queryable" id="queryable" {% if form.queryable.value %}checked{% endif %}/>
 											<label for="queryable">{% trans "Queryable" %}</label>
 										</div>
-									</div>				
+									</div>
 									<div class="row">
 										<div class="col-md-4 form-group checkbox_single_layer_property">
 											<input type="checkbox" name="single_image" id="single_image" {% if form.single_image.value %}checked{% endif %}/>
@@ -160,7 +161,7 @@
 											<input type="checkbox" name="allow_download"  id="allow_download" {% if form.allow_download.value %}checked{% endif %}/>
 											<label for="allow_download">{% trans "Allow downloads" %}</label>
 										</div>
-									</div>					
+									</div>
 									<div class="box-body time_enabled-check">
 										<div class="row">
 											<div class="col-md-12 form-group">
@@ -234,7 +235,7 @@
 	          						<div class="row">
 	          							<div class="col-md-12 form-group">
 											<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
-								        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
+								        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>
 								        </div>
 									</div>
 								</div>
@@ -242,7 +243,7 @@
 						</div>
 					</div>
 	          	</div>
-             	
+
              	<div class="tab-pane" id="tab-layer-detailedinfo">
 	          		<div class="row">
 						<div class="col-md-12">
@@ -251,16 +252,16 @@
 	          						<div class="row">
 		          						<div class="col-md-6 form-group">
 		          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled" {% if detailed_info_enabled %}checked{% endif %}/>
-											<label for="detailed_info_enabled">{% trans "Enable detailed information" %}</label>												
+											<label for="detailed_info_enabled">{% trans "Enable detailed information" %}</label>
 										</div>
-									</div>	
+									</div>
 		          					<div {% if not detailed_info_enabled %}style="display: none;"{% endif %} class="row" id="detailed_info_button_title-row">
 										<div class="col-md-12 form-group">
 											<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
 											<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% if detailed_info_button_title %}{{detailed_info_button_title}}{% else %}{% trans "Detailed info" %}{% endif %}" type="text" class="form-control">
 										</div>
-									</div>	
-										
+									</div>
+
 									<div {% if not detailed_info_enabled %}style="display: none;"{% endif %}class="row" id="detailed_info_html-row">
 										<div class="col-md-12 form-group">
 											<label for="detailed_info_html">{% trans "HTML" %}</label>
@@ -272,9 +273,9 @@
 						</div>
 					</div>
 	          	</div>
-          	
-         	</div>		
-		</div>				
+
+         	</div>
+		</div>
 	</div>
 </form>
 
@@ -302,11 +303,11 @@
 <script type="text/javascript">
 	$('#menu-manage-services').addClass("active");
 	$('#submenu-layers').addClass("active");
-	
+
 	$('.save-button').click( function() {
 		$("body").overlay();
 	});
-	
+
 	function getConfig() {
 		var config = {};
 		{% if GVSIGOL_ENABLE_ENUMERATIONS %}
@@ -314,13 +315,13 @@
 		{% else %}
 		config.enableEnums = false;
 		{% endif %}
-		
+
 		{% if 'gvsigol_plugin_form' in INSTALLED_APPS %}
 		config.enableForms = true;
 		{% else %}
 		config.enableForms = false;
 		{% endif %}
-		
+
 		config.enumerations = [];
 		{% for e in enumerations %}
 		config.enumerations.push({"id": "{{e.id}}", "title": "{{e.title}}"});
@@ -328,7 +329,7 @@
 		config.forms = [];
 		{% for f in forms %}
 		config.forms.push({"name": "{{f.name}}", "title": "{{f.title}}"});
-		{% endfor%}		
+		{% endfor%}
 		config.triggerProcedures = [];
 		{% for tp in procedures %}
 		config.triggerProcedures.push({"id": "{{tp.signature}}", "label": "{{tp.localized_label}}"});
@@ -338,9 +339,9 @@
 	var config = getConfig();
 	var date_fields = new Array();
 	var fields = new Array();
-	
+
 	function addField(field) {
-		
+
 		fields.push(field);
 		console.log(field);
 		var ui = '';
@@ -351,28 +352,28 @@
 		ui += 	'<td><a class="edit-field-' + field.id + '" data-fieldid="' + field.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 		ui += 	'<td><a class="delete-field-' + field.id + '" data-fieldid="' + field.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 		ui += '</tr>';
-		
-		$('#field-list-table tbody').append(ui);	
-		
-		$(".edit-field-" + field.id).on('click', function(e){	
+
+		$('#field-list-table tbody').append(ui);
+
+		$(".edit-field-" + field.id).on('click', function(e){
 			e.preventDefault();
 			createModalContent(field.id, 'update', '{% trans "New field" %}', config);
 		});
-		$(".delete-field-" + field.id).on('click', function(e){	
+		$(".delete-field-" + field.id).on('click', function(e){
 			e.preventDefault();
 			deleteField(field.id);
-			
+
 			var data = get_date_fields();
 			create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val(), false);
 			create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val(), true);
 		});
-		
+
 		var data = get_date_fields();
 		create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val(), false);
 		create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val(), true);
-		
+
 	};
-	
+
 	function get_date_fields() {
 		var self = this;
 		self.date_fields = [];
@@ -385,10 +386,10 @@
 				self.date_fields.push($("#field-name-"+id).text());
 			}
 		});
-		
+
 		return self.date_fields;
 	}
-	
+
 	function updateField(field) {
 		for (var i=0; i < fields.length; i++) {
 			if (fields[i].id == field.id) {
@@ -405,7 +406,7 @@
 		create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val(), false);
 		create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val(), true);
 	};
-	
+
 	function deleteField(id) {
 		for (var i=0; i < fields.length; i++) {
 			if (fields[i].id == id) {
@@ -419,7 +420,7 @@
 			}
 		}
 	};
-	
+
 	function getFieldById(id) {
 		for (var i=0; i < fields.length; i++) {
 			if (fields[i].id == id) {
@@ -427,16 +428,16 @@
 			}
 		}
 	};
-	
+
 	function make_temporal_form(){
 		$(".time_presentation").css("display", "none");
 		$(".time_default_value").css("display", "none");
-		
+
 		var tm_pr = $("#id_time_presentation option:selected").text();
 		if(tm_pr == "DISCRETE_INTERVAL"){
 			$(".time_presentation").css("display", "block");
 		}
-		
+
 		var tm_dv = $("#id_time_default_value_mode option:selected").text();
 		if(tm_dv == "NEAREST" || tm_dv == "FIXED"){
 			$(".time_default_value").css("display", "block");
@@ -445,20 +446,20 @@
 				showClose: true
 			});
 		}
-		
+
 	};
-	
+
 	function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
 		selectObj.empty().html(' ');
 		var attribs = {
 			value: '__disabled__',
 			text: placeholderOptionText,
 			disabled: 'disabled',
-			
+
 		};
 		if (placeholderSelected) {
 			attribs['selected'] = 'selected';
-		} 
+		}
 		selectObj.append($('<option>', attribs));
 		if (extraOptions) {
 			for (var i=0; i<extraOptions.length; i++) {
@@ -466,12 +467,12 @@
 			}
 		}
 	}
-	
+
 	function create_date_select(field, data, previousValue, allow_blank){
 		var language = $("#select-language").val();
 		var name_select = $("#"+field);
 		var placeholderSelected = true;
-		
+
 		if (data==null || data.length==0) {
 			var text = "{% trans 'Resource contains no fields' %}";
 			rebuildSelect(name_select, text, true);
@@ -497,7 +498,7 @@
 		rebuildSelect(name_select, text, placeholderSelected, options);
 	};
 
-	
+
 	function temporary_field(field){
 		if(field.prop("checked")){
 			field.parent().addClass("time_enabled-check");
@@ -510,7 +511,7 @@
 			$(".box-body.time_enabled-check").css("display", "none");
 		}
 	};
-	
+
 	function updateLayerGroupList(id_datastore) {
 		if (id_datastore) {
 			$("body").overlay();
@@ -519,7 +520,7 @@
 				var layer_group_select = $("#id_layer_group");
 				var previousValue = layer_group_select.val();
 				var placeholderSelected = true;
-				
+
 				if (data==null || data.length==0) {
 					var text = "{% trans 'No layer groups available' %}";
 					rebuildSelect(layer_group_select, text, true);
@@ -541,7 +542,7 @@
 				var text = '{% trans "Choose layer group" %}';
 				rebuildSelect(layer_group_select, text, placeholderSelected, options);
 				$.overlayout();
-				
+
 			}).fail(function() {
 				var layer_group_select = $("#id_layer_group");
 				var text = "{% trans 'No layer groups available' %}";
@@ -555,20 +556,20 @@
 			rebuildSelect(layer_group_select, text, true);
 		}
 	};
-	
+
 	function fileExists(url) {
 	    if(url){
 	        var req = new XMLHttpRequest();
 	        req.open('GET', url, false);
 	        req.send();
 	        return req.status==200;
-	        
+
 	    } else {
 	        return false;
 	    }
 	};
-	
-	
+
+
 	$(document).ready(function() {
 		var searcheableReadList = new List('read-list-box', {
 			valueNames: ['searchable-rolename', 'searchable-roledesc'],
@@ -584,7 +585,7 @@
 			}
 			$(".layer-read-checkbox").prop( "disabled", false)
 			$("#layer-create-form").submit();
-			return false; 
+			return false;
 		});
 		var detailedInfoHTML = document.getElementById('detailed_info_html');
 		var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
@@ -596,7 +597,7 @@
 		var code = '';
 		if (fileExists(HTML_PATH + 'detailed_info.html')) {
 			code += '<iframe width="800" height="600" src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
-			
+
 		} else {
 			code += '<div class="col-md-12"> \n';
 			code += '\t <h2>{% trans "Layer title" %}</h2> \n';
@@ -612,20 +613,20 @@
 				$('#detailed_info_html-row').css('display', 'block');
 				codemirror.setValue(code);
 				codemirror.refresh();
-				
+
 			} else {
 				$('#detailed_info_button_title-row').css('display', 'none');
 				$('#detailed_info_html-row').css('display', 'none');
 			}
 		});
-		
+
 		updateLayerGroupList($("#id_datastore").val());
-		
+
 		$("#id_datastore").change(function() {
 			var id_datastore = $('option:selected', $(this)).val();
 			updateLayerGroupList(id_datastore);
 		});
-		
+
 		// translate default layer group
 		var opts = $("#id_layer_group > option");
 		for(var i=0; i<opts.length; i++){
@@ -633,10 +634,10 @@
 				opts[i].text ='{% trans "Default" %}';
 			}
 		}
-		
+
 		$('#id_layer_group').select2();
-		
-		
+
+
 		var lgs = $("#id_layer_group");
 		var lg_options = $(".select2-results__option");
 		for (var i=0; i<lg_options.length; i++) {
@@ -645,46 +646,46 @@
 				$(lg_options[i]).text('{% trans "Default" %}');
 			}
 		}
-		
+
 		$("#select2-id_layer_group-container").on('change',function() {
 			var text = $(this).text();
 			if (text=="__default__") {
 				$(this).text('{% trans "Default" %}');
 			}
 		});
-		
+
 		$("#add-field-button").on('click', function(e){
 			createModalContent(null, 'create', '{% trans "New field" %}', config);
 		});
-		
+
 		$("form").submit(function(event) {
 			var fieldsAsStr;
 			if (fields.length > 0) {
 				fieldsAsStr = JSON.stringify(fields);
-				
+
 			} else {
 				$("#form-error").html("<p>{% trans 'At least one field must be defined' %}</p>").show();
 			}
-			
+
 			$("#fields").val(fieldsAsStr);
 		});
-		
+
 		$('#time_enabled').click(function(){
 			temporary_field($(this));
 		});
-		
+
 		temporary_field($('#time_enabled'));
 
 		$("#id_time_presentation").change(function(){
 			make_temporal_form();
 		});
-		
+
 		$("#id_time_default_value_mode").change(function(){
 			make_temporal_form();
 		})
-		
+
 		make_temporal_form();
-		
+
 		var layergroup_id = "{{layergroup_id}}";
 		if(layergroup_id != "None"){
 			$("#id_layer_group").val(layergroup_id).trigger('change');
