@@ -5,7 +5,7 @@
 {% block content %}
 
 {% if redirect_to_layergroup %}
-<form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
+<form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/{% if layergroup_id %}{{layergroup_id}}/{% endif %}?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
 {% else %}
 <form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/">
 {% endif %}
@@ -14,7 +14,7 @@
 			<div class="row">
 				<div class="col-md-12 form-group">
 					<div class="box-tools pull-right">
-						<a href="javascript:window.history.back();" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
+						<a href="{{back_url}}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
 						<button id="submit-button" class="btn btn-default btn-sm save-button"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
 					</div>
 				</div>
@@ -583,7 +583,8 @@
 				var item = searcheableReadList.items[i];
 				item.show();
 			}
-			$(".layer-read-checkbox").prop( "disabled", false)
+			$(".layer-read-checkbox").prop( "disabled", false);
+			$.overlayout();
 			$("#layer-create-form").submit();
 			return false;
 		});
