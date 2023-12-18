@@ -4084,6 +4084,7 @@ def external_layer_list(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def external_layer_add(request):
+    back_url = reverse('external_layer_list')
     if request.method == 'POST':
         form = ExternalLayerForm(request, request.POST)
 
@@ -4165,7 +4166,7 @@ def external_layer_add(request):
                     geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
                     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
-            return redirect('external_layer_list')
+            return HttpResponseRedirect(back_url)
 
         except Exception as e:
             logger.exception("Error creating external layer")
@@ -4178,7 +4179,7 @@ def external_layer_add(request):
     else:
         form = ExternalLayerForm(request)
 
-    return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
+    return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS, 'back_url': back_url})
 
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -4191,6 +4192,19 @@ def external_layer_update(request, external_layer_id):
     external_layer = Layer.objects.get(id=external_layer_id)
     if not utils.can_manage_layer(request, external_layer):
         return forbidden_view(request)
+
+    if redirect_to_layergroup:
+        if from_redirect:
+            query_string = '?redirect=' + from_redirect
+        else:
+            query_string = ''
+        if project_id:
+            back_url = reverse('layergroup_update_with_project', kwargs={'lgid': layergroup_id, 'project_id': project_id}) + query_string
+        else:
+            back_url = reverse('layergroup_update', kwargs={'lgid': layergroup_id}) + query_string
+    else:
+        back_url = reverse('external_layer_list')
+
     if request.method == 'POST':
         form = ExternalLayerForm(request, request.POST)
         if not layergroup_id:
@@ -4270,19 +4284,15 @@ def external_layer_update(request, external_layer_id):
             external_layer.external_params = json.dumps(params)
             external_layer.save()
 
-            if from_redirect:
-                query_string = '?redirect=' + from_redirect
-            else:
-                query_string = ''
-
             if redirect_to_layergroup:
+                # recalculate to_url since layergroup_id may change
                 if project_id:
-                    return HttpResponseRedirect(reverse('layergroup_update_with_project', kwargs={'lgid': layergroup_id, 'project_id': project_id}) + query_string)
+                    to_url = reverse('layergroup_update_with_project', kwargs={'lgid': layergroup_id, 'project_id': project_id}) + query_string
                 else:
-                    return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}) + query_string)
+                    to_url = reverse('layergroup_update', kwargs={'lgid': layergroup_id}) + query_string
             else:
-                return redirect('external_layer_list')
-
+                to_url = back_url
+            return HttpResponseRedirect(to_url)
 
         except Exception as e:
             try:
@@ -4300,7 +4310,8 @@ def external_layer_update(request, external_layer_id):
                 'redirect_to_layergroup': redirect_to_layergroup,
                 'project_id': project_id,
                 'layergroup_id': layergroup_id,
-                'from_redirect': from_redirect
+                'from_redirect': from_redirect,
+                'back_url': back_url
             }
 
     else:
@@ -4325,7 +4336,8 @@ def external_layer_update(request, external_layer_id):
             'redirect_to_layergroup': redirect_to_layergroup,
             'project_id': project_id,
             'layergroup_id': layergroup_id,
-            'from_redirect': from_redirect
+            'from_redirect': from_redirect,
+            'back_url': back_url
         }
 
     return render(request, 'external_layer_update.html', response)
