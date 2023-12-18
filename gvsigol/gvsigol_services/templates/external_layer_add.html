@@ -12,7 +12,7 @@
 					<a href="{{back_url}}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
 					<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
 				</div>
-			</div>	
+			</div>
 			<div class="row" style="padding-left: 30px;">
 				{% csrf_token %}
 				<div id="form-error" style="color:#ff0000;">
@@ -21,137 +21,137 @@
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}	
+						{% endif %}
 					{% endfor %}
 					</ul>
 				</div>
-			</div>			
+			</div>
 		</div>
-		
+
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
           	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
           	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
         </ul>
-        
+
         <div class="tab-content">
-        
+
         	<div class="tab-pane active" id="tab-layer-general">
           		<div class="row">
 					<div class="col-md-12">
 						<div class="box">
           					<div class="box-body">
-          						<div class="row">		
+          						<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="id_type">{% trans "Type" %}</label>
 										{{ form.type }}
-									</div>	
-								</div>	
-								<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
+									</div>
+								</div>
+								<div class="row layers-control xyz-control wms-control wmts-control osm-control">
 									<div class="col-md-12 form-group">
 										<label for="id_url">{% trans "Url" %}</label>
 										{{ form.url }}
 										<input type="hidden" name="get_map_url" id="get_map_url">
-									</div>	
+									</div>
 								</div>
 								<div class="row layers-control wms-control wmts-control">
 									<div class="col-md-9 form-group">
-										<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>					
+										<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>
 									</div>
 									<div class="col-md-3 form-group">
-										<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>					
+										<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>
 									</div>
 								</div>
-								<div class="row">		
+								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="id_title">{% trans "Title" %}</label>
 										{{ form.title }}
-									</div>	
+									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="id_layer_group">{% trans "Layer group" %}</label>
-										{{ form.layer_group }}						
+										{{ form.layer_group }}
 									</div>
-								</div>	
-								<div class="row layers-control wms-control wmts-control">		
+								</div>
+								<div class="row layers-control wms-control wmts-control">
 									<div class="col-md-12 form-group">
 										<label for="id_version">{% trans "Version" %}</label>
 										{{ form.version }}
-									</div>	
+									</div>
 								</div>
-								<div class="row layers-control bing-control wms-control wmts-control">		
+								<div class="row layers-control bing-control wms-control wmts-control">
 									<div class="col-md-12 form-group">
 										<label for="id_layers">{% trans "Layers" %}</label>
 										{{ form.layers }}
 										<datalist id="id_layer_list">
 										</datalist>
-									</div>	
+									</div>
 								</div>
-								<div class="row layers-control wms-control wmts-control">		
+								<div class="row layers-control wms-control wmts-control">
 									<div class="col-md-12 form-group">
 										<label for="id_format">{% trans "Format" %}</label>
 										{{ form.format }}
 										<datalist id="id_format_list">
 										</datalist>
-									</div>	
+									</div>
 								</div>
-								<div class="row layers-control wms-control wmts-control">		
+								<div class="row layers-control wms-control wmts-control">
 									<div class="col-md-12 form-group">
 										<label for="id_infoformat">{% trans "Featureinfo format" %}</label>
 										{{ form.infoformat }}
 										<datalist id="id_infoformat_list">
 										</datalist>
-									</div>	
+									</div>
 								</div>
-								<div class="row layers-control wmts-control">		
+								<div class="row layers-control wmts-control">
 									<div class="col-md-12 form-group">
 										<label for="id_format">{% trans "MatrixSet" %}</label>
 										{{ form.matrixset }}
 									</div>
 									<div class="col-md-9 form-group">
-										<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>					
+										<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>
 									</div>
 								</div>
-								<div class="row layers-control bing-control xyz-control osm-control">		
+								<div class="row layers-control bing-control xyz-control osm-control">
 									<div class="col-md-12 form-group">
 										<label for="id_apikey">{% trans "Api-key" %}</label>
 										{{ form.key }}
-									</div>	
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
           	</div>
-          	
+
           	<div class="tab-pane" id="tab-layer-properties">
           		<div class="row">
 					<div class="col-md-12">
 						<div class="box">
           					<div class="box-body">
-          						<div class="row">	
+          						<div class="row">
 									<div class="col-md-4 form-group">
 										<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
-										<input name="timeout" id="timeout" value="30000" type="number" class="form-control">														
+										<input name="timeout" id="timeout" value="30000" type="number" class="form-control">
 									</div>
 									<div class="col-md-4 form-group">
 										<input type="checkbox" name="visible" id="visible"/>
 										<label for="visible">{% trans "Visible" %}</label>
-																								
+
 									</div>
 									<div class="col-md-4 form-group">
 										<input type="checkbox" name="cached" id="cached"/>
-										<label for="cached">{% trans "Cached" %}</label>	
-									</div>			
+										<label for="cached">{% trans "Cached" %}</label>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
           	</div>
-        
+
 	        <div class="tab-pane" id="tab-layer-metadata">
 	         	<div class="row">
 					<div class="col-md-12">
@@ -160,7 +160,7 @@
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
-							        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
+							        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>
 							        </div>
 								</div>
 							</div>
@@ -168,7 +168,7 @@
 					</div>
 				</div>
 	         </div>
-          	
+
           	<div class="tab-pane" id="tab-layer-detailedinfo">
           		<div class="row">
 					<div class="col-md-12">
@@ -177,20 +177,20 @@
           						<div class="row">
 	          						<div class="col-md-6 form-group">
 	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
-										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>
 									</div>
-								</div>	
+								</div>
 	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
-										<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+										<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">
 									</div>
-								</div>	
-									
+								</div>
+
 								<div style="display: none;" class="row" id="detailed_info_html-row">
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_html">{% trans "HTML" %}</label>
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>						
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>
 									</div>
 								</div>
 							</div>
@@ -198,9 +198,9 @@
 					</div>
 				</div>
           	</div>
-          	
+
         </div>
-	</div>				
+	</div>
 </div>
 </form>
 {% endblock %}
@@ -217,13 +217,13 @@ function fileExists(url) {
         req.open('GET', url, false);
         req.send();
         return req.status==200;
-        
+
     } else {
         return false;
     }
-};	
+};
 
-$(document).ready(function(){ 
+$(document).ready(function(){
 	var url = "";
 	var format_or = "";
 	var infoformat_or = "";
@@ -231,45 +231,45 @@ $(document).ready(function(){
 	var version = "";
 	var layer = "";
 	var bing_layers = {{bing_layers|safe}};
-	
+
 	var detailedInfoHTML = document.getElementById('detailed_info_html');
-	
+
 	var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
 		mode: "text/html",
         extraKeys: {"Ctrl-Space": "autocomplete"},
 		theme: "xq-dark",
 		lineNumbers: true
 	});
-	
+
 	var code = '';
 	if (fileExists(HTML_PATH + 'detailed_info.html')) {
 		code += '<iframe width="800" height="600" src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
-		
+
 	} else {
 		code += '<div class="col-md-12"> \n';
 		code += '\t <h2>{% trans "Layer title" %}</h2> \n';
 		code += '\t <p>{% trans "Layer description" %}</p> \n';
 		code += '</div> \n';
 	}
-	
+
 	$('#detailed_info_enabled').click(function(){
 		if ($('#detailed_info_enabled').is(":checked")) {
 			$('#detailed_info_button_title-row').css('display', 'block');
 			$('#detailed_info_html-row').css('display', 'block');
 			codemirror.setValue(code);
 			codemirror.refresh();
-			
+
 		} else {
 			$('#detailed_info_button_title-row').css('display', 'none');
 			$('#detailed_info_html-row').css('display', 'none');
 		}
 	});
-	
+
 	function updateFormfields(){
 		var type = $("#id_type option:selected").val();
 		$(".layers-control").css("display","none");
 		$("."+type.toLowerCase()+"-control").css("display","block");
-		
+
 		if(type == "Bing"){
 			$("#id_layers").empty();
 			for(index in bing_layers){
@@ -277,11 +277,11 @@ $(document).ready(function(){
 			}
 		}
 	};
-	
+
 	$("#id_type").change(function(){
 		updateFormfields();
 	})
-	
+
 	updateFormfields();
 
 	function showAlertMatrix(){
@@ -289,7 +289,7 @@ $(document).ready(function(){
 
 		if(matrixset.includes("3857") || matrixset.includes("4326")){
 			$("#matrixset-alert").css("display", "none");
-			
+
 		}else{
 			$("#matrixset-alert").css("display", "block");
 		}
@@ -299,8 +299,8 @@ $(document).ready(function(){
 		showAlertMatrix();
 	})
 
-	
-	
+
+
 	$("#connect-button").click(function() {
 		//getLayersFromCapabilities(this.value);
 		url = $("#id_url").val();
@@ -313,10 +313,10 @@ $(document).ready(function(){
 
 		type = $("#id_type option:selected").val();
 		version = "";
-		
+
 		getNewLayersFromCapabilities(url, type, version, "", true);
 	});
-	
+
 	function getNewLayersFromCapabilities(url, type, version, layer, edit_version){
 		$.ajax({
 	        type: "POST",
@@ -334,7 +334,7 @@ $(document).ready(function(){
 			success: function(data) {
 				if('response' in data && data['response'] == '500'){
 					$("#form-error ul").empty().append("<li>"+gettext('Error in GetCapabilities')+': '+data['message']+'</li>')
-				}else{		
+				}else{
 				if('title' in data){
 					if($("#id_title").val() == ""){
 						$("#id_title").val(data['title']);
@@ -344,7 +344,7 @@ $(document).ready(function(){
 				if('get_map_url' in data){
 					$("#get_map_url").val(data['get_map_url']);
 				}
-				
+
 				if (data.crs_list) {
 					for (var i=0; i<data.crs_list.length; i++) {
 						var minx = data.crs_list[i][0].toString();
@@ -360,7 +360,7 @@ $(document).ready(function(){
 						}).appendTo('form');
 					}
 				}
-				
+
 				if (data.capabilities) {
 					$('<input>').attr({
 					    type: 'hidden',
@@ -369,7 +369,7 @@ $(document).ready(function(){
 					    value: JSON.stringify(data.capabilities)
 					}).appendTo('form');
 				}
-				
+
 				 if('layers' in data){
 					$("#id_layers").empty();
 					$("#id_layers").append('<option value="empty" selected>' + gettext('You must select a layer') + '</option>');
@@ -382,7 +382,7 @@ $(document).ready(function(){
 						}
 					}
 				}
-				 
+
 				 if('formats' in data){
 					 $("#id_format").empty();
 						var layers = data['formats'];
@@ -394,7 +394,7 @@ $(document).ready(function(){
 							}
 						}
 					}
-				 
+
 				 if('infoformats' in data){
 					 $("#id_infoformat").empty();
 						var layers = data['infoformats'];
@@ -406,7 +406,7 @@ $(document).ready(function(){
 							}
 						}
 					}
-				 
+
 				 if(type == "WMTS" && 'matrixsets' in data){
 					 $("#id_matrixset").empty();
 						var layers = data['matrixsets'];
@@ -418,14 +418,14 @@ $(document).ready(function(){
 							}
 						}
 					}
-				 
+
 				 if(edit_version && 'version' in data){
 					 var version = data['version'];
 					 $("#id_version").empty();
 					 if(version == '1.0.0'){
 						 $("#id_version").append("<option value=\"1.0.0\" selected>1.0.0</option>")
 					 }
-					 
+
 					 if(version == '1.1.1'){
 						 $("#id_version").append("<option value=\"1.1.1\" selected>1.1.1</option>")
 					 }else{
@@ -433,11 +433,11 @@ $(document).ready(function(){
 						 	$("#id_version").append("<option value=\"1.1.1\">1.1.1</option>")
 						 }
 					 }
-					 
+
 					 if(version == '1.3.0'){
 						 $("#id_version").append("<option value=\"1.3.0\" selected>1.3.0</option>")
 					 }
-					 
+
 					 $("#id_version").unbind("change").change(function() {
 							url = $("#id_url").val();
 							type = $("#id_type option:selected").val();
@@ -445,11 +445,11 @@ $(document).ready(function(){
 							layer = $("#id_layers option:selected").val();
 							matrixset = $("#id_matrixset option:selected").val();
 							format_or = $("#id_format option:selected").val();
-							
+
 							getNewLayersFromCapabilities(url, type, version, layer, false);
 							$('#id_version option[value="'+version+'"]').prop('selected', true);
 						});
-						
+
 					$("#id_layers").unbind("change").change(function() {
 							url = $("#id_url").val();
 							type = $("#id_type option:selected").val();
@@ -457,23 +457,23 @@ $(document).ready(function(){
 							layer = $( this ).val();
 							matrixset = $("#id_matrixset option:selected").val();
 							format_or = $("#id_format option:selected").val();
-							
+
 							$('#id_layers option[value="'+layer+'"]').prop('selected', true);
 							getNewLayersFromCapabilities(url, type, version, layer, false);
 							showAlertMatrix()
-							
+
 						});
 				 }
-				 
+
 			  }
 			},
 			error: function(err){
 				alert(gettext("Error trying to connect"));
 			}
 		});
-		
+
 	}
-	
+
 });
 </script>
 {% endblock %}
