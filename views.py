@@ -1112,6 +1112,19 @@ def layer_add_with_group(request, layergroup_id):
     redirect_to_layergroup = request.GET.get('redirect')
     from_redirect = request.GET.get('from_redirect')
     project_id = request.GET.get('project_id')
+
+    if redirect_to_layergroup:
+        if from_redirect:
+            query_string = '?redirect=' + from_redirect
+        else:
+            query_string = ''
+        if project_id:
+            back_url =  reverse('layergroup_update_with_project', kwargs={'lgid': layergroup_id, 'project_id': project_id})+query_string
+        else:
+            back_url = reverse('layergroup_update', kwargs={'lgid': layergroup_id})+query_string
+    else:
+        back_url = reverse('layer_list')
+
     groups = []
     if request.method == 'POST':
         form = LayerForm(request.POST)
@@ -1287,18 +1300,15 @@ def layer_add_with_group(request, layergroup_id):
                 utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                 do_config_layer(server, newRecord, featuretype)
 
-                if redirect_to_layergroup:
-                    layergroup_id = newRecord.layer_group.id
-                    if from_redirect:
-                        query_string = '?redirect=' + from_redirect
-                    else:
-                        query_string = ''
+                if redirect_to_layergroup and (layergroup_id != newRecord.layer_group.id):
+                    new_layergroup_id = newRecord.layer_group.id
                     if project_id:
-                        return HttpResponseRedirect(reverse('layergroup_update_with_project', kwargs={'lgid': layergroup_id, 'project_id': project_id})+query_string)
+                        to_url =  reverse('layergroup_update_with_project', kwargs={'lgid': new_layergroup_id, 'project_id': project_id})+query_string
                     else:
-                        return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id})+query_string)
+                        to_url = reverse('layergroup_update', kwargs={'lgid': new_layergroup_id})+query_string
                 else:
-                    return redirect('layer_list')
+                    to_url = back_url
+                return HttpResponseRedirect(to_url)
             except rest_geoserver.RequestError as e:
                 msg = e.server_message
                 logger.exception(msg)
@@ -1336,7 +1346,8 @@ def layer_add_with_group(request, layergroup_id):
             'redirect_to_layergroup': redirect_to_layergroup,
             'layergroup_id': layergroup_id,
             'from_redirect': from_redirect,
-            'project_id': project_id
+            'project_id': project_id,
+            'back_url': back_url
             })
 
 @login_required()
@@ -1363,9 +1374,12 @@ def layer_update(request, layer_id):
         abstract = request.POST.get('md-abstract')
         updatedParams['title'] = title
         if not layergroup_id:
-            layergroup_id = request.POST.get('layer_group', layer.layer_group_id)
+            layergroup_id = request.POST.get('layer_group', None)
         try:
-            layer_group = LayerGroup.objects.get(id=layergroup_id)
+            if layergroup_id:
+                layer_group = LayerGroup.objects.get(id=layergroup_id)
+            else:
+                layer_group = layer.layer_group
         except LayerGroup.DoesNotExist:
             return not_found_view(request)
         if layer.layer_group != layer_group and not (utils.can_manage_layergroup(request, layer.layer_group)
@@ -2139,6 +2153,13 @@ def layergroup_add(request):
 def layergroup_add_with_project(request, project_id):
     redirect_var = request.GET.get('redirect')
     from_redirect = request.GET.get('from_redirect')
+    if redirect_var == 'project-layergroup-list':
+        back_url = reverse('layergroup_list') + "?project_id=" + str(project_id)
+    elif redirect_var == 'project-update':
+        back_url = reverse('project_update', args=[project_id])
+    else:
+        back_url = reverse('layergroup_list')
+
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
@@ -2164,7 +2185,7 @@ def layergroup_add_with_project(request, project_id):
 
         if not name:
             message = _('You must enter a name for layer group')
-            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())}
+            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values()), 'back_url': back_url}
             if from_redirect:
                 response['redirect'] = from_redirect
             elif redirect_var:
@@ -2174,7 +2195,7 @@ def layergroup_add_with_project(request, project_id):
         name = name + '_' + ascii_norm_username(request.user.username)
         if _valid_name_regex.search(name) == None:
             message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())}
+            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values()), 'back_url': back_url}
             if from_redirect:
                 response['redirect'] = from_redirect
             elif redirect_var:
@@ -2183,7 +2204,7 @@ def layergroup_add_with_project(request, project_id):
 
         if LayerGroup.objects.filter(name=name).exists():
             message = _('Layer group name already exists')
-            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values())}
+            response = {'message': message, 'servers': list(Server.objects.values()), 'project_id': project_id, 'roles': roles, 'workspaces': list(Workspace.objects.values()), 'back_url': back_url}
             if from_redirect:
                 response['redirect'] = from_redirect
             elif redirect_var:
@@ -2239,7 +2260,8 @@ def layergroup_add_with_project(request, project_id):
         response = {
             'servers': list(Server.objects.values()),
             'roles': roles,
-            'project_id': project_id
+            'project_id': project_id,
+            'back_url': back_url
         }
         if redirect_var:
             response['redirect'] = redirect_var
@@ -2288,6 +2310,10 @@ def layergroup_mapserver_toc(group, toc_string):
 def _layergroup_update(request, lgid, project_id):
     redirect_var = request.GET.get('redirect')
     from_redirect_var = request.GET.get('from_redirect')
+    if redirect_var == 'project-layergroup-list':
+        back_url = reverse('layergroup_list') + "?project_id=" + str(project_id)
+    else:
+        back_url = reverse('layergroup_list')
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
@@ -2316,11 +2342,11 @@ def _layergroup_update(request, lgid, project_id):
         if layergroup.name != name: # name changed
             if LayerGroup.objects.filter(name=name).exists():
                 message = _('Layer group name already exists')
-                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values()), 'project_id': project_id, 'redirect': redirect_var})
+                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values()), 'project_id': project_id, 'redirect': redirect_var, 'back_url': back_url})
 
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values()), 'project_id': project_id, 'redirect': redirect_var})
+                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values()), 'project_id': project_id, 'redirect': redirect_var, 'back_url': back_url})
 
         old_name = layergroup.name
         layergroup.name = name
@@ -2377,7 +2403,8 @@ def _layergroup_update(request, lgid, project_id):
             'workspaces': list(Workspace.objects.values()),
             'servers': list(Server.objects.values()),
             'project_id': project_id,
-            'redirect': redirect_var
+            'redirect': redirect_var,
+            'back_url': back_url
         }
 
         return render(request, 'layergroup_update.html', response)
@@ -2444,6 +2471,20 @@ def layer_create_with_group(request, layergroup_id):
     from_redirect = request.GET.get('from_redirect')
     project_id = request.GET.get('project_id')
     layer_type = "gs_vector_layer"
+
+    if redirect_to_layergroup:
+        if from_redirect:
+            query_string = '?redirect=' + from_redirect
+        else:
+            query_string = ''
+        if project_id:
+            back_url = reverse('layergroup_update_with_project', kwargs={'lgid': layergroup_id, 'project_id': project_id}) + query_string
+        else:
+            back_url = reverse('layergroup_update', kwargs={'lgid': layergroup_id}) + query_string
+    else:
+        back_url = reverse('layer_list')
+
+
     if request.method == 'POST':
 
         abstract = request.POST.get('md-abstract')
@@ -2614,19 +2655,15 @@ def layer_create_with_group(request, layergroup_id):
                     utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                     do_config_layer(server, newRecord, featuretype)
 
-                    if from_redirect:
-                        query_string = '?redirect=' + from_redirect
-                    else:
-                        query_string = ''
-
                     if redirect_to_layergroup:
-                        layergroup_id = newRecord.layer_group.id
+                        new_layergroup_id = newRecord.layer_group.id
                         if project_id:
-                            return HttpResponseRedirect(reverse('layergroup_update_with_project', kwargs={'lgid': layergroup_id, 'project_id': project_id}) + query_string)
+                            to_url = reverse('layergroup_update_with_project', kwargs={'lgid': new_layergroup_id, 'project_id': project_id}) + query_string
                         else:
-                            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}) + query_string)
+                            to_url = reverse('layergroup_update', kwargs={'lgid': new_layergroup_id}) + query_string
                     else:
-                        return redirect('layer_list')
+                        to_url = back_url
+                    return HttpResponseRedirect(to_url)
 
             except psycopg2.errors.DuplicateTable as e1:
                 logger.exception("Error creating layer: table already exists")
@@ -2656,7 +2693,8 @@ def layer_create_with_group(request, layergroup_id):
                 'from_redirect': from_redirect,
                 'detailed_info_enabled': detailed_info_enabled,
                 'detailed_info_button_title': detailed_info_button_title,
-                'detailed_info_html': detailed_info_html
+                'detailed_info_html': detailed_info_html,
+                'back_url': back_url
             }
             return render(request, "layer_create.html", data)
 
@@ -2680,7 +2718,8 @@ def layer_create_with_group(request, layergroup_id):
                 'from_redirect': from_redirect,
                 'detailed_info_enabled': detailed_info_enabled,
                 'detailed_info_button_title': detailed_info_button_title,
-                'detailed_info_html': detailed_info_html
+                'detailed_info_html': detailed_info_html,
+                'back_url': back_url
             }
             return render(request, "layer_create.html", data)
 
@@ -2704,7 +2743,8 @@ def layer_create_with_group(request, layergroup_id):
             'redirect_to_layergroup': redirect_to_layergroup,
             'layergroup_id': layergroup_id,
             'project_id': project_id,
-            'from_redirect': from_redirect
+            'from_redirect': from_redirect,
+            'back_url': back_url
         }
         return render(request, "layer_create.html", data)
 
