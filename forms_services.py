@@ -46,9 +46,9 @@ time_presentation_op = (
 )
 #time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('LIST', _('list')))
 time_default_value_mode_op = (
-    ('MINIMUM', _('smallest domain value')), 
-    ('MAXIMUM', _('biggest domain value')), 
-    ('NEAREST', _('nearest to the reference value')), 
+    ('MINIMUM', _('smallest domain value')),
+    ('MAXIMUM', _('biggest domain value')),
+    ('NEAREST', _('nearest to the reference value')),
     ('FIXED', _('reference value'))
 )
 #time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
@@ -65,7 +65,7 @@ supported_types = (
     ('v_PostGIS', _('PostGIS vector')),
     ('c_GeoTIFF', _('GeoTiff')),
     ('e_WMS', _('Cascading WMS')),
-    ('c_ImageMosaic', _('ImageMosaic')), 
+    ('c_ImageMosaic', _('ImageMosaic')),
 )
 
 service_types = (
@@ -77,7 +77,7 @@ service_types = (
 
 def random_id():
     return 'server_' + ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-    
+
 
 class ServerForm(forms.Form):
     name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1', 'readonly': 'true'}))
@@ -89,8 +89,8 @@ class ServerForm(forms.Form):
     password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={'class' : 'form-control', 'tabindex': '8'}))
     default = forms.BooleanField(label=_('Default'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
 
-class WorkspaceForm(forms.Form):  
-    server = forms.ModelChoiceField(label=_('Server'), required=True, queryset=Server.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'})) 
+class WorkspaceForm(forms.Form):
+    server = forms.ModelChoiceField(label=_('Server'), required=True, queryset=Server.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
     description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
     uri = forms.CharField(required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
@@ -100,11 +100,11 @@ class WorkspaceForm(forms.Form):
     wmts_endpoint = forms.CharField(label=_('WMTS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
     cache_endpoint = forms.CharField(label=_('Cache URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '8'}))
     is_public = forms.BooleanField(label=_('Is public?'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
-    
+
 class DatastoreForm(forms.Form):
     workspace = forms.ModelChoiceField(label=_('Workspace'), required=True, queryset=Workspace.objects.all().order_by('name'), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
     type = forms.ChoiceField(label=_('Type'), choices=supported_types, required=True, widget=forms.Select(attrs={'class':'form-control'}))
-    file = forms.CharField(label=_('File'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
+    file = forms.CharField(label=_('File'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
     connection_params = forms.CharField(label=_('Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
@@ -121,11 +121,11 @@ class DatastoreForm(forms.Form):
         if name and workspace:
             gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
             if gs.datastore_exists(workspace.name, name):
-                self.add_error('name', _("Datastore already exists")) 
+                self.add_error('name', _("Datastore already exists"))
 
         if connection_params:
             try:
-                json.loads(connection_params) 
+                json.loads(connection_params)
             except:
                 self.add_error('connection_params', _("Error: Invalid JSON format"))
         return cleaned_data
@@ -135,17 +135,17 @@ class DatastoreUpdateForm(forms.ModelForm):
         model = Datastore
         fields = ['type', 'name', 'description', 'connection_params']
     type = forms.CharField(label=_('Type'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))
-    name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))   
+    name = forms.CharField(label=_('Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))
     description = forms.CharField(label=_('Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class':'form-control', 'tabindex': '1'}))
     connection_params = forms.CharField(label=_('Connection params'), required=True, widget=forms.Textarea(attrs={'class':'form-control connection_params', 'tabindex': '2'}))
-    
+
     def clean(self):
         cleaned_data = super(DatastoreUpdateForm, self).clean()
-        connection_params = cleaned_data.get("connection_params") 
-        
+        connection_params = cleaned_data.get("connection_params")
+
         if connection_params:
             try:
-                cleaned_data['connection_params_json'] = json.loads(connection_params) 
+                cleaned_data['connection_params_json'] = json.loads(connection_params)
             except:
                 self.add_error('connection_params', _("Error: Invalid JSON format"))
         return cleaned_data
@@ -164,9 +164,9 @@ class LayerForm(forms.ModelForm):
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     time_enabled_field = forms.CharField(label=_('Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_enabled_endfield = forms.CharField(label=_('End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
-    
+
     time_resolution = forms.ChoiceField(label=_('Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
-    
+
     time_presentation = forms.ChoiceField(label=_('Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_resolution_year = forms.IntegerField(label=_('Resolution year'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_resolution_month = forms.IntegerField(label=_('Resolution month'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
@@ -177,7 +177,7 @@ class LayerForm(forms.ModelForm):
     time_resolution_second = forms.IntegerField(label=_('Resolution second'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_default_value_mode = forms.ChoiceField(label=_('Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_default_value = forms.DateTimeField(label=_('Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
-    
+
 class LayerUpdateForm(forms.ModelForm):
     class Meta:
         model = Layer
@@ -190,9 +190,9 @@ class LayerUpdateForm(forms.ModelForm):
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #cached = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
-    
+
     time_resolution = forms.ChoiceField(label=_('Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
-  
+
     time_enabled_field = forms.ChoiceField(label=_('Field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_enabled_endfield = forms.ChoiceField(label=_('End field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_presentation = forms.ChoiceField(label=_('Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
@@ -210,7 +210,7 @@ class LayerUpdateForm(forms.ModelForm):
         layergroup_id = kwargs.pop('layergroup_id')
         instance = kwargs.get('instance')
         super().__init__(*args, **kwargs)
-        
+
         if instance and not can_manage_layergroup(request, instance.layer_group):
             self.fields['layer_group'].widget = forms.Select(attrs={'class' : 'form-control js-example-basic-single', 'readonly': 'true', 'disabled': 'true'})
             self.fields['layer_group'].queryset = LayerGroup.objects.filter(id=instance.layer_group_id)
@@ -234,14 +234,14 @@ class ExternalLayerForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = ['title', 'layer_group', 'type', 'version', 'url', 'layers', 'format', 'key']
-        
+
     #name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     title = forms.CharField(label=_('Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=LayerGroup.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
-    
+
     type = forms.ChoiceField(label=_('Type'), choices=external_layer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
     version = forms.ChoiceField(label=_('Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
-   
+
     url = forms.CharField(label=_('URL'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     layers = forms.ChoiceField(label=_('Layers'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
 
@@ -253,14 +253,14 @@ class ExternalLayerForm(forms.ModelForm):
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['layer_group'].queryset = get_user_layergroups(request).order_by('name').distinct()
- 
+
 class ServiceUrlForm(forms.ModelForm):
     class Meta:
         model = ServiceUrl
         fields = ['title', 'type', 'url']
     title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
     type = forms.ChoiceField(label=_('Type'), required=False, choices=service_types, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '2'}))
-    url = forms.CharField(label=_('URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))   
+    url = forms.CharField(label=_('URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
 
 
 class SqlViewForm(forms.ModelForm):
@@ -276,7 +276,7 @@ class SqlViewForm(forms.ModelForm):
         from_tables = json.loads(self.cleaned_data.get('from_tables', []))
         if len(from_tables) == 0:
             raise ValidationError(ugettext_lazy('At least one table must be selected'), code='from_table')
-        
+
         table_aliases = []
         for idx, table in enumerate(from_tables, start=1):
             alias = table.get('alias')
@@ -296,7 +296,7 @@ class SqlViewForm(forms.ModelForm):
                 raise ValidationError(ugettext_lazy('Duplicated alias'), code='from_table_alias')
             table_aliases.append(alias)
         return from_tables
-    
+
     def clean_fields(self):
         fields = json.loads(self.cleaned_data.get('fields', []))
         if len(fields) == 0:
@@ -312,7 +312,7 @@ class SqlViewForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if user.is_superuser:            
+        if user.is_superuser:
             self.fields['datastore'].queryset = Datastore.objects.filter(type__startswith='v_').order_by('name')
         else:
             self.fields['datastore'].queryset = (Datastore.objects.filter( type__startswith='v_', created_by=user.username) |
