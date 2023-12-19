@@ -95,7 +95,7 @@ billiard>=3.6.4.0,<4.0
 vine==5.0.0
 
 # uwsgi server
-uwsgi==2.0.18
+uwsgi==2.0.23
 
 # Used by opensea2. To be removed when migrated to Celery
 APScheduler==3.7.0
