@@ -733,7 +733,6 @@ def load_project(request, project_name):
 
         plugins_config = core_utils.get_plugins_config()
         enabled_plugins = core_utils.get_enabled_plugins(project)
-        url_doc= manual(request,'viewer')
         resp = {
             'has_image': bool(project.image),
             'supported_crs': core_utils.get_supported_crs(),
@@ -747,7 +746,7 @@ def load_project(request, project_name):
             'is_shared_view': False,
             'main_page': settings.LOGOUT_REDIRECT_URL,
             'is_viewer_template': True,
-            'url_doc': url_doc
+            'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', '')
         }
         response = render(request, 'viewer.html', resp)
 
@@ -785,7 +784,8 @@ def load_public_project(request, project_name):
         'enabled_plugins': enabled_plugins,
         'is_shared_view': False,
         'main_page': settings.LOGOUT_REDIRECT_URL,
-        'is_viewer_template': True
+        'is_viewer_template': True,
+            'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', '')
         }
     )
 
@@ -1325,56 +1325,31 @@ def select_public_mobile_project(request):
             'projects': projects,
             'frontend_base_url': settings.FRONTEND_BASE_URL
         })
+    
 
+def get_manual(request, doc_name):
+    lang = request.LANGUAGE_CODE
+    base_docs_url = getattr(settings, 'DOC_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
+
+    doc_path = os.path.join(base_docs_url, lang, doc_name)
+    if os.path.exists(doc_path):
+        return {
+            'url': '/docs/' + os.path.relpath(doc_path, base_docs_url),
+            'lang': None
+        }
+    return {
+        'url': '/docs/es/' + doc_name,
+        'lang': 'es'
+    }
 
 def documentation(request):
     lang = request.LANGUAGE_CODE
     base_docs_url = getattr(settings, 'DOC_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
 
-    intro_path = os.path.join(base_docs_url, lang, 'gvsigol_intro.pdf')
-    if os.path.exists(intro_path):
-        intro = {
-            'url': '/docs/' + os.path.relpath(intro_path, base_docs_url),
-            'lang': None
-        }
-    else:
-        intro = {
-            'url': '/docs/es/gvsigol_intro.pdf',
-            'lang': 'es'
-        }
-    admin_path = os.path.join(base_docs_url, lang, 'gvsigol_admin_guide.pdf')
-    if os.path.exists(admin_path):
-        admin = {
-            'url': '/docs/' + os.path.relpath(admin_path, base_docs_url),
-            'lang': None
-        }
-    else:
-        admin = {
-            'url': '/docs/es/gvsigol_admin_guide.pdf',
-            'lang': 'es'
-        }
-    viewer_path = os.path.join(base_docs_url, lang, 'gvsigol_user_manual.pdf')
-    if os.path.exists(viewer_path):
-        viewer = {
-            'url': '/docs/' + os.path.relpath(viewer_path, base_docs_url),
-            'lang': None
-        }
-    else:
-        viewer = {
-            'url': '/docs/es/gvsigol_user_manual.pdf',
-            'lang': 'es'
-        }
-    mobile_path = os.path.join(base_docs_url, lang, 'gvsigmapps_manual.pdf')
-    if os.path.exists(mobile_path):
-        mobile = {
-            'url': '/docs/' + os.path.relpath(mobile_path, base_docs_url),
-            'lang': None
-        }
-    else:
-        mobile = {
-            'url': '/docs/es/gvsigmapps_manual.pdf',
-            'lang': 'es'
-        }
+    intro = get_manual(request, 'gvsigol_intro.pdf')
+    admin = get_manual(request, 'gvsigol_admin_guide.pdf')
+    viewer = get_manual(request, 'gvsigol_user_manual.pdf')
+    mobile = get_manual(request, 'gvsigmapps_manual.pdf')
 
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
@@ -1400,7 +1375,6 @@ def documentation(request):
                         'lang': 'es'
                     })
         
-        
     response = {
         'intro': intro,
         'admin': admin,
@@ -1409,24 +1383,6 @@ def documentation(request):
         'mobile': mobile
     }
     return render(request, 'documentation.html', response)
-
-def manual(request,doc_type):
-    lang = request.LANGUAGE_CODE
-    base_docs_url = getattr(settings, 'DOC_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
-    if (doc_type=='viewer'):
-        viewer_path = os.path.join(base_docs_url, lang, 'gvsigol_user_manual.pdf')
-        if os.path.exists(viewer_path):
-            url = '/docs/' + os.path.relpath(viewer_path, base_docs_url)   
-        else:            
-            url = '/docs/es/gvsigol_user_manual.pdf'            
-            
-    elif (doc_type=='admin'):
-        admin_path = os.path.join(base_docs_url, lang, 'gvsigol_admin_guide.pdf')
-        if os.path.exists(admin_path):            
-            url= '/docs/' + os.path.relpath(admin_path, base_docs_url)                
-        else:
-            url= '/docs/es/gvsigol_admin_guide.pdf'
-    return url
 
 def do_save_shared_view(pid, description, view_state, expiration, user, internal = False, url = False):
     
