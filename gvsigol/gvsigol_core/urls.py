@@ -17,7 +17,6 @@ urlpatterns = [
     path('select_public_project/', core_views.select_public_project, name='select_public_project'),
     path('select_public_mobile_project/', core_views.select_public_mobile_project, name='select_public_mobile_project'),
     path('documentation/', core_views.documentation, name='documentation'),
-    path('manual/', core_views.manual, name='manual'),
     path('blank_page/', core_views.blank_page, name='blank_page'),
     path('portable_project_load/<project_name>/', core_views.portable_project_load, name='portable_project_load'),
     path('save_shared_view/', core_views.save_shared_view, name='save_shared_view'),
