@@ -733,6 +733,7 @@ def load_project(request, project_name):
 
         plugins_config = core_utils.get_plugins_config()
         enabled_plugins = core_utils.get_enabled_plugins(project)
+        url_doc= manual(request,'viewer')
         resp = {
             'has_image': bool(project.image),
             'supported_crs': core_utils.get_supported_crs(),
@@ -745,7 +746,8 @@ def load_project(request, project_name):
             'enabled_plugins': enabled_plugins,
             'is_shared_view': False,
             'main_page': settings.LOGOUT_REDIRECT_URL,
-            'is_viewer_template': True
+            'is_viewer_template': True,
+            'url_doc': url_doc
         }
         response = render(request, 'viewer.html', resp)
 
@@ -1407,6 +1409,24 @@ def documentation(request):
         'mobile': mobile
     }
     return render(request, 'documentation.html', response)
+
+def manual(request,doc_type):
+    lang = request.LANGUAGE_CODE
+    base_docs_url = getattr(settings, 'DOC_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
+    if (doc_type=='viewer'):
+        viewer_path = os.path.join(base_docs_url, lang, 'gvsigol_user_manual.pdf')
+        if os.path.exists(viewer_path):
+            url = '/docs/' + os.path.relpath(viewer_path, base_docs_url)   
+        else:            
+            url = '/docs/es/gvsigol_user_manual.pdf'            
+            
+    elif (doc_type=='admin'):
+        admin_path = os.path.join(base_docs_url, lang, 'gvsigol_admin_guide.pdf')
+        if os.path.exists(admin_path):            
+            url= '/docs/' + os.path.relpath(admin_path, base_docs_url)                
+        else:
+            url= '/docs/es/gvsigol_admin_guide.pdf'
+    return url
 
 def do_save_shared_view(pid, description, view_state, expiration, user, internal = False, url = False):
     
