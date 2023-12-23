@@ -253,19 +253,20 @@ ACTSTREAM_SETTINGS = {
     'USE_JSONFIELD': True,
 }
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'mozilla_django_oidc.middleware.SessionRefresh',    
+    'django.contrib.auth.middleware.AuthenticationMiddleware',   
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
+
 
 try:
     __import__('corsheaders')
@@ -383,6 +384,9 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_
 AUTH_DASHBOARD_UI = env('AUTH_DASHBOARD_UI')
 AUTH_READONLY_USERS = env('AUTH_READONLY_USERS')
 OIDC_VERIFY_SSL = env('OIDC_VERIFY_SSL')
+
+if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
+    MIDDLEWARE.insert(6, 'mozilla_django_oidc.middleware.SessionRefresh')
 
 # Internationalization
 LANGUAGE_CODE = 'es'
@@ -623,16 +627,21 @@ WMTS_MAX_VERSION = '1.0.0'
 WMS_MAX_VERSION = '1.3.0'
 BING_LAYERS = ['Road','Aerial','AerialWithLabels']
 
+# REST framework
+default_auth_classes_list = [
+    'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    'rest_framework.authentication.SessionAuthentication',
+    'rest_framework.authentication.BasicAuthentication'
+]
+if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
+    default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
+
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'mozilla_django_oidc.contrib.drf.OIDCAuthentication',
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': tuple (default_auth_classes_list)
 }
 
 
