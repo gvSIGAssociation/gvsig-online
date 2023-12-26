@@ -746,7 +746,8 @@ def load_project(request, project_name):
             'is_shared_view': False,
             'main_page': settings.LOGOUT_REDIRECT_URL,
             'is_viewer_template': True,
-            'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', '')
+            'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', ''),
+            'project_title' : project.title            
         }
         response = render(request, 'viewer.html', resp)
 
@@ -785,7 +786,8 @@ def load_public_project(request, project_name):
         'is_shared_view': False,
         'main_page': settings.LOGOUT_REDIRECT_URL,
         'is_viewer_template': True,
-            'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', '')
+        'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', ''),
+        'project_title' : project.title 
         }
     )
 
