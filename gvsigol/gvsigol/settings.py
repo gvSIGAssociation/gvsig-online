@@ -106,6 +106,18 @@ env = environ.Env(
     #TODO: split string host, pass, etc
     CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
 
+    #Email    
+    EMAIL_BACKEND_ACTIVE=(bool,True),
+    EMAIL_USE_TLS=(bool,True),
+    EMAIL_HOST=(str,'localhost'),
+    EMAIL_HOST_USER=(str,''),
+    EMAIL_HOST_PASSWORD=(str,''),
+    EMAIL_PORT=(str,'587'),
+    EMAIL_TIMEOUT=(str,'60'),
+    DEFAULT_FROM_EMAIL=(str,'noreply@gvsigonline.com'),
+    #Bing
+    BING_KEY=(str,'')
+
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -444,15 +456,26 @@ for app in INSTALLED_APPS:
         LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
 
 # Email settings
-EMAIL_BACKEND_ACTIVE = True
+EMAIL_BACKEND_ACTIVE = env('EMAIL_BACKEND_ACTIVE')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = True
-#EMAIL_HOST = ''
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = EMAIL_USER_DEVEL
-EMAIL_HOST_PASSWORD = EMAIL_PASSWORD_DEVEL
-EMAIL_PORT = 587
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_TIMEOUT = env('EMAIL_TIMEOUT')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SITE_ID=1
+
+#EMAIL_BACKEND_ACTIVE = True
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_USE_TLS = True
+#EMAIL_HOST = ''
+#EMAIL_HOST = env('EMAIL_HOST')
+#EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+#EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+#EMAIL_PORT = 587
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -582,7 +605,7 @@ GVSIGOL_ENABLE_ENUMERATIONS = True
 GVSIGOL_BASE_LAYERS = {
     'bing': {
         'active': False,
-        'key': BING_KEY_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+        'key': env('BING_KEY')
     }
 }
 
@@ -693,11 +716,12 @@ LOGGING = {
 
 TEMPORAL_ADVANCED_PARAMETERS = False
 
+#TODO: set environment variables
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': 'https://localhost/geoserver',
-    'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'USER': 'admin',
+    'PASSWORD': 'geoserver'
 }
 
 
