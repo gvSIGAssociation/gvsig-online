@@ -77,14 +77,15 @@ env = environ.Env(
     # Setup support for proxy headers
     USE_X_FORWARDED_HOST=(bool,True),
     SECURE_PROXY_SSL_HEADER=(tuple,('HTTP_X_FORWARDED_PROTO', 'https')),
-    LDAP_ENABLED=(bool,False),
     AUTH_DASHBOARD_UI=(bool,True),
     AUTH_READONLY_USERS=(bool,False),
     # UI
     IFRAME_MODE_UI=(bool,False),
     MANAGE_PERMISSION_UI=(bool,True),
+    #csrf
+    CSRF_TRUSTED_ORIGINS = (list,['localhost']),
     #cors
-    CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),
+    CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),    
     CORS_ALLOW_CREDENTIALS = (bool,True),
     CORS_ORIGIN_ALLOW_ALL = (bool,False),
     # frontend SPA
@@ -93,7 +94,18 @@ env = environ.Env(
     FRONTEND_REDIRECT_URL = (str,'/gvsigonline'),
     #Log level
     LOG_LEVEL=(str,"DEBUG"),
-    
+    # LDAP
+    LDAP_ENABLED=(bool,False),
+    LDAP_HOST=(str,'localhost'),
+    LDAP_PORT=(str,'389'),
+    LDAP_ROOT_DN=(str,'dc=local,dc=gvsigonline,dc=com'),
+    LDAP_BIND_USER=(str,'gvsigonline'),
+    LDAP_BIND_PASSWD=(str,'gvsigonline'),
+    LDAP_AD_SUFFIX=(str,''),
+    #CELERY
+    #TODO: split string host, pass, etc
+    CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
+
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -278,6 +290,8 @@ CORS_ORIGIN_ALLOW_ALL = env('CORS_ORIGIN_ALLOW_ALL')
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
 
+CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
+
 CRONTAB_ACTIVE = True
 ROOT_URLCONF = 'gvsigol.urls'
 
@@ -331,30 +345,21 @@ AUTH_WITH_REMOTE_USER = False
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
 GVSIGOL_LDAP = {
     'ENABLED': env('LDAP_ENABLED'),
-    'HOST':'localhost',
-    'PORT': '389',
-    'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
-    'USERNAME': LDAP_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'PASSWORD': LDAP_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'AD': ''
-}
-
+    'HOST': env('LDAP_HOST'),
+    'PORT': env('LDAP_PORT'),
+    'DOMAIN': env('LDAP_ROOT_DN'),
+    'USERNAME': env('LDAP_BIND_USER'),
+    'PASSWORD': env('LDAP_BIND_PASSWD'),
+    'AD': env('LDAP_AD_SUFFIX')
+}    
 
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
@@ -376,11 +381,9 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
     import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 GVSIGOL_AUTH_MIDDLEWARE = env('GVSIGOL_AUTH_MIDDLEWARE')
-AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
-#AUTH_LDAP_ROOT_DN = "dc=dev,dc=gvsigonline,dc=com"
-#AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
-AUTH_LDAP_ROOT_DN = "dc=local,dc=gvsigonline,dc=com"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=local,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_SERVER_URI = "ldap://" + env('LDAP_HOST') + ":" + env('LDAP_PORT')
+AUTH_LDAP_ROOT_DN = env('LDAP_ROOT_DN')
+AUTH_LDAP_USER_SEARCH = LDAPSearch(env('LDAP_ROOT_DN'), ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 AUTH_DASHBOARD_UI = env('AUTH_DASHBOARD_UI')
 AUTH_READONLY_USERS = env('AUTH_READONLY_USERS')
 OIDC_VERIFY_SSL = env('OIDC_VERIFY_SSL')
@@ -484,8 +487,8 @@ GVSIGOL_USERS_CARTODB = {
     'dbhost': env('DB_HOST'),
     'dbport': env('DB_PORT'),
     'dbname': env('DB_NAME'),
-    'dbuser': env('DB_USER'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'dbpassword': env('DB_PASS') # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'dbuser': env('DB_USER'), 
+    'dbpassword': env('DB_PASS') 
 }
 
 MOSAIC_DB = {
@@ -493,8 +496,8 @@ MOSAIC_DB = {
     'port': env('DB_PORT'),
     'database': env('DB_NAME'),
     'schema': 'imagemosaic',
-    'user': env('DB_USER'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'passwd': env('DB_PASS') # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'user': env('DB_USER'), 
+    'passwd': env('DB_PASS')
 }
 
 #GDALTOOLS_BASEPATH = '/usr/bin'
@@ -698,7 +701,7 @@ LEGACY_GVSIGOL_SERVICES = {
 }
 
 
-CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_TASK_ACKS_LATE = True
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_TASK_ALWAYS_EAGER  = True
