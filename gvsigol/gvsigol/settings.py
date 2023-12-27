@@ -137,62 +137,62 @@ if len(SECRET_KEY) == 14:
 #
 # TODO: Revisar si va a ser necesario con Docker ya que existe un .env que debe añadirse al .svnignore/.gitignore
 #
-try:
-    from gvsigol import settings_passwords
-except:
-    # Store your passwords for local development in 'settings_passwds.py'
-    # Do not write any password here!!!!
-    pw_file = open(os.path.join(BASE_DIR, 'gvsigol', 'settings_passwords.py'), 'w')
-    pw_file.write("BING_KEY_DEVEL='yourbingkey'\n")
-    pw_file.write("DB_USER_DEVEL='postgres'\n")
-    pw_file.write("DB_PW_DEVEL='postgres'\n")
-    pw_file.write("LDAP_USER_DEVEL='yourldapuser'\n")
-    pw_file.write("LDAP_PW_DEVEL='yourldapkey'\n")
-    pw_file.write("GEOSERVER_USER_DEVEL='admin'\n")
-    pw_file.write("GEOSERVER_PW_DEVEL='geoserver'\n")
-    pw_file.write("EMAIL_USER_DEVEL='example@youremaildomain.org'\n")
-    pw_file.write("EMAIL_PASSWORD_DEVEL=''\n")
-    pw_file.close()
-    from gvsigol import settings_passwords
-finally:
-    # Store your passwords for local development in 'settings_passwords.py'
-    # Do not write any password here!!!!
-    try:
-        BING_KEY_DEVEL = settings_passwords.BING_KEY_DEVEL
-    except:
-        BING_KEY_DEVEL = ''
-    try:
-        DB_USER_DEVEL = settings_passwords.DB_USER_DEVEL
-    except:
-        DB_USER_DEVEL = 'postgres'
-    try:
-        DB_PW_DEVEL = settings_passwords.DB_PW_DEVEL
-    except:
-        DB_PW_DEVEL = 'postgres'
-    try:
-        LDAP_USER_DEVEL = settings_passwords.LDAP_USER_DEVEL
-    except:
-        LDAP_USER_DEVEL = ''
-    try:
-        LDAP_PW_DEVEL = settings_passwords.LDAP_PW_DEVEL
-    except:
-        LDAP_PW_DEVEL = ''
-    try:
-        GEOSERVER_USER_DEVEL = settings_passwords.GEOSERVER_USER_DEVEL
-    except:
-        GEOSERVER_USER_DEVEL = 'admin'
-    try:
-        GEOSERVER_PW_DEVEL = settings_passwords.GEOSERVER_PW_DEVEL
-    except:
-        GEOSERVER_PW_DEVEL = 'geoserver'
-    try:
-        EMAIL_USER_DEVEL = settings_passwords.EMAIL_USER_DEVEL
-    except:
-        EMAIL_USER_DEVEL = ''
-    try:
-        EMAIL_PASSWORD_DEVEL = settings_passwords.EMAIL_PASSWORD_DEVEL
-    except:
-        EMAIL_PASSWORD_DEVEL = ''
+# try:
+#     from gvsigol import settings_passwords
+# except:
+#     # Store your passwords for local development in 'settings_passwds.py'
+#     # Do not write any password here!!!!
+#     pw_file = open(os.path.join(BASE_DIR, 'gvsigol', 'settings_passwords.py'), 'w')
+#     pw_file.write("BING_KEY_DEVEL='yourbingkey'\n")
+#     pw_file.write("DB_USER_DEVEL='postgres'\n")
+#     pw_file.write("DB_PW_DEVEL='postgres'\n")
+#     pw_file.write("LDAP_USER_DEVEL='yourldapuser'\n")
+#     pw_file.write("LDAP_PW_DEVEL='yourldapkey'\n")
+#     pw_file.write("GEOSERVER_USER_DEVEL='admin'\n")
+#     pw_file.write("GEOSERVER_PW_DEVEL='geoserver'\n")
+#     pw_file.write("EMAIL_USER_DEVEL='example@youremaildomain.org'\n")
+#     pw_file.write("EMAIL_PASSWORD_DEVEL=''\n")
+#     pw_file.close()
+#     from gvsigol import settings_passwords
+# finally:
+#     # Store your passwords for local development in 'settings_passwords.py'
+#     # Do not write any password here!!!!
+#     try:
+#         BING_KEY_DEVEL = settings_passwords.BING_KEY_DEVEL
+#     except:
+#         BING_KEY_DEVEL = ''
+#     try:
+#         DB_USER_DEVEL = settings_passwords.DB_USER_DEVEL
+#     except:
+#         DB_USER_DEVEL = 'postgres'
+#     try:
+#         DB_PW_DEVEL = settings_passwords.DB_PW_DEVEL
+#     except:
+#         DB_PW_DEVEL = 'postgres'
+#     try:
+#         LDAP_USER_DEVEL = settings_passwords.LDAP_USER_DEVEL
+#     except:
+#         LDAP_USER_DEVEL = ''
+#     try:
+#         LDAP_PW_DEVEL = settings_passwords.LDAP_PW_DEVEL
+#     except:
+#         LDAP_PW_DEVEL = ''
+#     try:
+#         GEOSERVER_USER_DEVEL = settings_passwords.GEOSERVER_USER_DEVEL
+#     except:
+#         GEOSERVER_USER_DEVEL = 'admin'
+#     try:
+#         GEOSERVER_PW_DEVEL = settings_passwords.GEOSERVER_PW_DEVEL
+#     except:
+#         GEOSERVER_PW_DEVEL = 'geoserver'
+#     try:
+#         EMAIL_USER_DEVEL = settings_passwords.EMAIL_USER_DEVEL
+#     except:
+#         EMAIL_USER_DEVEL = ''
+#     try:
+#         EMAIL_PASSWORD_DEVEL = settings_passwords.EMAIL_PASSWORD_DEVEL
+#     except:
+#         EMAIL_PASSWORD_DEVEL = ''
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
