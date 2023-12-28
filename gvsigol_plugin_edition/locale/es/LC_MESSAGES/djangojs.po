@@ -25,18 +25,16 @@ msgstr ""
 "X-Source-Language: C\n"
 
 #: static/js/lib/_trans.gvsigol.js:2
-#, fuzzy
-#| msgid "Edit feature"
 msgid "Edit layer"
-msgstr "Editar elemento"
+msgstr "Editar capa"
 
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "You are editing the layer"
-msgstr ""
+msgstr "Usted está editando la capa"
 
 #: static/js/lib/_trans.gvsigol.js:4
 msgid "The layer you are trying to edit is locked"
-msgstr ""
+msgstr "La capa que intanta editar está bloqueada"
 
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
@@ -53,10 +51,8 @@ msgstr "Añadir polígono"
 
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:128
-#, fuzzy
-#| msgid "Add point"
 msgid "Add point to center"
-msgstr "Añadir punto"
+msgstr "Añadir punto al centro"
 
 #: static/js/lib/widgets/editionBar.js:139
 msgid "Edit feature"
@@ -78,15 +74,15 @@ msgstr "Error comenzando edición"
 
 #: static/js/lib/widgets/editionBar.js:617
 msgid "Select feature to edit"
-msgstr ""
+msgstr "Seleccionar elemento a editar"
 
 #: static/js/lib/widgets/editionBar.js:637
 msgid "More element info"
-msgstr ""
+msgstr "Más información del elemento"
 
 #: static/js/lib/widgets/editionBar.js:647
-msgid "Detalles de atributos"
-msgstr ""
+msgid "Attribute details"
+msgstr "Detalles del atributo"
 
 #: static/js/lib/widgets/editionBar.js:1336
 #: static/js/lib/widgets/editionBar.js:1820
@@ -127,6 +123,8 @@ msgid ""
 "Version conflict: the feature was edited concurrently. Restart your editing "
 "session to get the last version."
 msgstr ""
+"Conflicto de versión: el elemento fue editado concurrentemente. Reincie "
+"su sesión de edición para obtener la última versión."
 
 #: static/js/lib/widgets/editionBar.js:1632
 #: static/js/lib/widgets/editionBar.js:2439
@@ -136,7 +134,7 @@ msgstr "Error al guardar el nuevo elemento. Por favor revise los valores"
 
 #: static/js/lib/widgets/editionBar.js:1672
 msgid "can't be null"
-msgstr ""
+msgstr "No puede ser nulo"
 
 #: static/js/lib/widgets/editionBar.js:1965
 msgid ""
@@ -154,8 +152,8 @@ msgstr "Fallo al eliminar el bloqueo de la capa"
 
 #: static/js/lib/widgets/editionBar.js:2604
 #: static/js/lib/widgets/editionBar.js:2606
-msgid "Error validando la version"
-msgstr ""
+msgid "Error validating version"
+msgstr "Error validando la versión"
 
 #~ msgid "New feature"
 #~ msgstr "Nuevo elemento"

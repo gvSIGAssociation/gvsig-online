@@ -86,7 +86,7 @@ msgid "More element info"
 msgstr ""
 
 #: static/js/lib/widgets/editionBar.js:647
-msgid "Detalles de atributos"
+msgid "Attribute details"
 msgstr "Einzelheiten der Attribute"
 
 #: static/js/lib/widgets/editionBar.js:1336
@@ -162,5 +162,5 @@ msgstr "Ebenensperre konnte nicht entfernt werden"
 
 #: static/js/lib/widgets/editionBar.js:2604
 #: static/js/lib/widgets/editionBar.js:2606
-msgid "Error validando la version"
+msgid "Error validating version"
 msgstr "Fehler bei der Validierung der Version"

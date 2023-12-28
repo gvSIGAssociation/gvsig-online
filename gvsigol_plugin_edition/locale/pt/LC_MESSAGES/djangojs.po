@@ -31,18 +31,16 @@ msgstr ""
 "X-Generator: Poedit 2.4.3\n"
 
 #: static/js/lib/_trans.gvsigol.js:2
-#, fuzzy
-#| msgid "Edit feature"
 msgid "Edit layer"
-msgstr "Editar recurso"
+msgstr "Editar camada"
 
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "You are editing the layer"
-msgstr ""
+msgstr "Você está editando a camada"
 
 #: static/js/lib/_trans.gvsigol.js:4
 msgid "The layer you are trying to edit is locked"
-msgstr ""
+msgstr "A camada que você está tentando editar está bloqueada"
 
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
@@ -58,11 +56,8 @@ msgid "Add polygon"
 msgstr "Adicionar polígono"
 
 # editionBar.js
-#: static/js/lib/widgets/editionBar.js:128
-#, fuzzy
-#| msgid "Add point"
 msgid "Add point to center"
-msgstr "Adicionar ponto"
+msgstr "Adicionar um ponto ao centro"
 
 #: static/js/lib/widgets/editionBar.js:139
 msgid "Edit feature"
@@ -84,15 +79,15 @@ msgstr "Erro na edição inicial"
 
 #: static/js/lib/widgets/editionBar.js:617
 msgid "Select feature to edit"
-msgstr ""
+msgstr "Selecione o recurso a ser editado"
 
 #: static/js/lib/widgets/editionBar.js:637
 msgid "More element info"
-msgstr ""
+msgstr "Mais informações sobre o elemento"
 
 #: static/js/lib/widgets/editionBar.js:647
-msgid "Detalles de atributos"
-msgstr ""
+msgid "Attribute details"
+msgstr "Detalhes do atributo"
 
 #: static/js/lib/widgets/editionBar.js:1336
 #: static/js/lib/widgets/editionBar.js:1820
@@ -133,6 +128,8 @@ msgid ""
 "Version conflict: the feature was edited concurrently. Restart your editing "
 "session to get the last version."
 msgstr ""
+"Conflito de versão: o recurso foi editado simultaneamente. Reinicie sua "
+"sessão de edição para obter a última versão."
 
 #: static/js/lib/widgets/editionBar.js:1632
 #: static/js/lib/widgets/editionBar.js:2439
@@ -142,7 +139,7 @@ msgstr "Falhou em salvar o novo registro. Por favor, verifique os valores"
 
 #: static/js/lib/widgets/editionBar.js:1672
 msgid "can't be null"
-msgstr ""
+msgstr "não pode ser nulo"
 
 #: static/js/lib/widgets/editionBar.js:1965
 msgid ""
@@ -160,8 +157,8 @@ msgstr "Falha ao remover o bloqueio da camada"
 
 #: static/js/lib/widgets/editionBar.js:2604
 #: static/js/lib/widgets/editionBar.js:2606
-msgid "Error validando la version"
-msgstr ""
+msgid "Error validating version"
+msgstr "Erro ao validar a versão"
 
 #~ msgid "New feature"
 #~ msgstr "Novo recurso"

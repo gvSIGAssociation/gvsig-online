@@ -644,7 +644,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 					if(fields_trans["fields"]){
 						var fields = fields_trans["fields"];
 						var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
-						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Detalles de atributos")+'"><i class="fa fa-pencil" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
+						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Attribute details")+'"><i class="fa fa-pencil" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
 
 						var feature_added = 0;
 
@@ -2601,9 +2601,9 @@ EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, versi
 				success = 0; //No hay servidor
 				return;
 			} else if(response.responseText && response.responseText != '') {
-				messageBox.show('error', gettext('Error validando la version') + " " + response.responseText);
+				messageBox.show('error', gettext('Error validating version') + " " + response.responseText);
 			} else {
-				messageBox.show('error', gettext('Error validando la version'));
+				messageBox.show('error', gettext('Error validating version'));
 			}
 			success = -1 //Error en la respuesta
 			return;
