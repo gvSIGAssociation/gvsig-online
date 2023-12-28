@@ -55,12 +55,12 @@ msgstr "El número de intervalos debe ser mayor que 0"
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:10
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:28
 msgid "No data to show"
-msgstr ""
+msgstr "No hi ha dades a mostrar"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:11
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:29
 msgid "Band"
-msgstr ""
+msgstr "Banda"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:12
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:30
@@ -75,41 +75,39 @@ msgstr ""
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:14
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:32
 msgid "Mean"
-msgstr ""
+msgstr "Mitjana"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:15
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:33
 msgid "Stdev"
-msgstr ""
+msgstr "Desviació típica"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:17
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:35
 msgid "Library"
-msgstr ""
+msgstr "La biblioteca"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:18
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:36
 msgid "will be removed, Do you want continue?"
-msgstr ""
+msgstr "serà esborrada. Vol continuar?"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:80
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:80
-#, fuzzy
-#| msgid "Edit rule"
 msgid "rule"
-msgstr "Editar regla"
+msgstr "regla"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:81
 msgid "Single feature"
-msgstr ""
+msgstr "Entitat simple"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:140
 msgid "Default group"
-msgstr ""
+msgstr "Grup per defecte"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:140
 msgid "features"
-msgstr ""
+msgstr "entitats"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:195
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:120
@@ -120,23 +118,19 @@ msgstr "Expressions"
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:123
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:303
 msgid "Add"
-msgstr ""
+msgstr "Afegir"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:204
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:129
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:309
-#, fuzzy
-#| msgid "Add expression"
 msgid "AND expression"
-msgstr "Afegir expressió"
+msgstr "Expressió AND"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:205
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:130
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:310
-#, fuzzy
-#| msgid "Add expression"
 msgid "OR expression"
-msgstr "Afegir expressió"
+msgstr "Expressió OR"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:208
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:133
@@ -166,7 +160,7 @@ msgstr "Seleccionar camp"
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:447
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:198
 msgid "Count features"
-msgstr ""
+msgstr "Contar registres"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:465
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:467
@@ -203,23 +197,21 @@ msgid "Opacity"
 msgstr "Opacitat"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:61
-msgid "Percentaje"
-msgstr ""
+msgid "Percentage"
+msgstr "Percentatge"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:63
 msgid "Transparency"
-msgstr ""
+msgstr "Transparència"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:64
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorTable.js:141
 #: gvsigol_symbology/static/js/lib/symbology/ColorTable.js:259
-#, fuzzy
-#| msgid "You must select a field"
 msgid "You must select a image"
-msgstr "Debe seleccionar un campo"
+msgstr "Ha de seleccionar una imatge"
 
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:81
 msgid "Rule"
@@ -227,7 +219,7 @@ msgstr "Regla"
 
 #: gvsigol_symbology/static/js/lib/symbology/LibrarySymbol.js:151
 msgid "There is already a style named"
-msgstr ""
+msgstr "Ja hi ha un estil anomenat"
 
 #: gvsigol_symbology/static/js/lib/symbology/LibraryUtils.js:28
 #: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:46
@@ -304,7 +296,7 @@ msgstr "Seleccionar forma"
 
 #: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:96
 msgid "Size"
-msgstr ""
+msgstr "Mida"
 
 #: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:110
 #: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:76
@@ -333,10 +325,8 @@ msgid "Append symbolizer"
 msgstr "Anyadir simbolitzador"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:123
-#, fuzzy
-#| msgid "Append symbolizer"
 msgid "Append textsymbolizer"
-msgstr "Anyadir simbolitzador"
+msgstr "Afegir simbolitzador"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:126
 msgid "Import from library"
@@ -354,33 +344,33 @@ msgstr "Títol de la regla"
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:200
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:201
 msgid "Minimum interval"
-msgstr ""
+msgstr "Interval mínim"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:206
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:207
 msgid "Maximum interval"
-msgstr ""
+msgstr "Interval màxim"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:215
 msgid "Define custom scale denominators?"
-msgstr ""
+msgstr "Visible per escala"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:220
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:151
 msgid "Minimum scale denominator"
-msgstr ""
+msgstr "Denominador mínim d'escala"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:221
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:227
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:152
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:158
 msgid "No limit"
-msgstr ""
+msgstr "Sense límit"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:226
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:157
 msgid "Maximum scale denominator"
-msgstr ""
+msgstr "Denominador màxim d'escala"
 
 #: gvsigol_symbology/static/js/lib/symbology/Rule.js:232
 msgid "Save"
@@ -462,19 +452,15 @@ msgid "Halo"
 msgstr "Halo"
 
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:121
-#, fuzzy
-#| msgid "Filter preview"
 msgid "Filter"
-msgstr "Previsualitzar filtre"
+msgstr "Filtre"
 
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:134
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:136
 msgid "Has label"
-msgstr ""
+msgstr "Activar etiqueta"
 
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:146
-#, fuzzy
-#| msgid "Rule title"
 msgid "Rules title"
 msgstr "Títol de la regla"
 
@@ -516,11 +502,11 @@ msgstr "Ràdio de halo"
 
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:300
 msgid "Label filter expressions"
-msgstr ""
+msgstr "Etiqueta filtrada per expressió"
 
 #: gvsigol_symbology/static/js/lib/symbology/UniqueValues.js:163
 msgid "null_value"
-msgstr ""
+msgstr "Sense valor"
 
 #~ msgid "Loading components. Please wait"
 #~ msgstr "Cargando componentes. Por favor espere"

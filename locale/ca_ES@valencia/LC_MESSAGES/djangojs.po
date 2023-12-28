@@ -203,7 +203,7 @@ msgid "Opacity"
 msgstr "Opacitat"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:61
-msgid "Percentaje"
+msgid "Percentage"
 msgstr ""
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:63

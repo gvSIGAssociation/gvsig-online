@@ -189,8 +189,8 @@ msgid "Opacity"
 msgstr "Opacity"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:61
-msgid "Percentaje"
-msgstr "Percentaje"
+msgid "Percentage"
+msgstr "Percentage"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:63
 msgid "Transparency"

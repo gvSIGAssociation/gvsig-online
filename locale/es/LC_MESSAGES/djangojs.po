@@ -58,12 +58,12 @@ msgstr "El número de intervalos debe ser mayor que 0"
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:10
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:28
 msgid "No data to show"
-msgstr ""
+msgstr "No hay datos a mostrar"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:11
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:29
 msgid "Band"
-msgstr ""
+msgstr "Banda"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:12
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:30
@@ -78,12 +78,12 @@ msgstr ""
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:14
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:32
 msgid "Mean"
-msgstr ""
+msgstr "Media"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:15
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:33
 msgid "Stdev"
-msgstr ""
+msgstr "Desviación típica"
 
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:17
 #: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:35
@@ -97,14 +97,12 @@ msgstr "será eliminada, ¿Desea continuar?"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:80
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:80
-#, fuzzy
-#| msgid "Edit rule"
 msgid "rule"
-msgstr "Editar regla"
+msgstr "regla"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:81
 msgid "Single feature"
-msgstr "Feature simple"
+msgstr "Entidad simple"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:140
 msgid "Default group"
@@ -112,7 +110,7 @@ msgstr "Grupo por defecto"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:140
 msgid "features"
-msgstr "features"
+msgstr "entidades"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:195
 #: gvsigol_symbology/static/js/lib/symbology/Expressions.js:120
@@ -164,10 +162,8 @@ msgstr "Seleccionar campo"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:447
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:198
-#, fuzzy
-#| msgid "features"
 msgid "Count features"
-msgstr "features"
+msgstr "Contar registros"
 
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:465
 #: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:467
@@ -204,7 +200,7 @@ msgid "Opacity"
 msgstr "Opacidad"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:61
-msgid "Percentaje"
+msgid "Percentage"
 msgstr "Porcentaje"
 
 #: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:63
@@ -226,7 +222,7 @@ msgstr "Regla"
 
 #: gvsigol_symbology/static/js/lib/symbology/LibrarySymbol.js:151
 msgid "There is already a style named"
-msgstr ""
+msgstr "Ya existe un estilo con el nombre"
 
 #: gvsigol_symbology/static/js/lib/symbology/LibraryUtils.js:28
 #: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:46
@@ -468,8 +464,6 @@ msgid "Has label"
 msgstr "Activar etiquetado"
 
 #: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:146
-#, fuzzy
-#| msgid "Rule title"
 msgid "Rules title"
 msgstr "Título de la regla"
 
