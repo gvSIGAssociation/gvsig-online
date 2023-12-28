@@ -100,19 +100,19 @@ msgstr ""
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:5
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:93
 msgid "Task ID"
-msgstr ""
+msgstr "ID Tarea"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:6
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:94
 msgid "Task status"
-msgstr ""
+msgstr "Estado de la tarea"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:7
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:8
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:95
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:96
 msgid "Error getting tasks"
-msgstr ""
+msgstr "Error obteniendo las tareas"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:9
 msgid "You must select an extent on the map using the control"
@@ -120,16 +120,14 @@ msgstr "Debes seleccionar una extensión en el mapa utilizando el control"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:10
 msgid "URL to capabilities document"
-msgstr ""
+msgstr "URL del documento capabilites"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:11
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:12
 msgid "Only required if service is authenticated"
-msgstr ""
+msgstr "Sólo se requiere si el servicio es autenticado"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:13
-#, fuzzy
-#| msgid "Connection has been success"
 msgid "Connection has been successful"
 msgstr "La conexión ha sido exitosa"
 
@@ -147,7 +145,7 @@ msgstr "Inserte nombre del item"
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:54
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:99
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:17
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:35
@@ -158,7 +156,7 @@ msgstr "Error en GetCapabilities"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:18
 msgid "You must select a layer"
-msgstr ""
+msgstr "Debe seleccionar una capa"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:19
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:36
@@ -268,10 +266,8 @@ msgid "Field to delete"
 msgstr "Campo a eliminar"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:55
-#, fuzzy
-#| msgid "Field to delete"
 msgid "Field was deleted"
-msgstr "Campo a eliminar"
+msgstr "El campo se ha eliminado"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:56
 msgid "Old name"
@@ -286,46 +282,32 @@ msgid "Rename"
 msgstr "Renombrar"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:60
-#, fuzzy
-#| msgid "Field name"
 msgid "Field was renamed"
-msgstr "Nombre del campo"
+msgstr "El campo fue renombrado"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:62
-#, fuzzy
-#| msgid "Field name"
 msgid "Field was added"
-msgstr "Nombre del campo"
+msgstr "El campo fue añadido"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:63
 msgid "Group names must be unique"
-msgstr ""
+msgstr "Los nombres de los grupos deben ser únicos"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:64
-#, fuzzy
-#| msgid "The layer definition was refreshed"
 msgid "The layer cache was cleared"
-msgstr "La definición de capa fue refrescada"
+msgstr "La caché de capa fue borrada"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:65
-#, fuzzy
-#| msgid "The layer refresh failed"
 msgid "The layer cache clearing failed"
-msgstr "Falló el refrescado de capa"
+msgstr "El borrado de la caché de capa ha fallado"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:66
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:88
-#, fuzzy
-#| msgid "The layer definition was refreshed"
 msgid "The layergroup cache was cleared"
-msgstr "La definición de capa fue refrescada"
+msgstr "La caché del grupo de capas fue borrada"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:67
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:89
-#, fuzzy
-#| msgid "The layer refresh failed"
 msgid "The layergroup cache clearing failed"
-msgstr "Falló el refrescado de capa"
+msgstr "Falló el borrado de la caché del grupo de capas"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:68
 msgid "Show all layers"
