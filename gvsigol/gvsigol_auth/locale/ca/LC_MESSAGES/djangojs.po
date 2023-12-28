@@ -20,4 +20,4 @@ msgstr ""
 
 #: gvsigol_auth/static/js/lib/_trans.gvsigol.js:2
 msgid "Error deleting role"
-msgstr ""
+msgstr "Error en suprimir el rol"

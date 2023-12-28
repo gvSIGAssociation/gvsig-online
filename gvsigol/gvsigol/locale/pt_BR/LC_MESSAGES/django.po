@@ -46,7 +46,7 @@ msgstr "Português"
 #, fuzzy
 #| msgid "Portuguese"
 msgid "Brazilian Portuguese"
-msgstr "Português"
+msgstr "Português do Brasil"
 
 #: gvsigol/services_base.py:39 gvsigol/settings.py:368
 msgid "Valencian"

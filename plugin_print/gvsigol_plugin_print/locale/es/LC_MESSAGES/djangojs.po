@@ -65,7 +65,7 @@ msgstr "Escala definida por el usuario"
 
 #: static/js/lib/tools/print.js:190
 msgid "MapGrid"
-msgstr "Rejilla Cartográfica"
+msgstr "Rejilla cartográfica"
 
 #: static/js/lib/tools/print.js:192
 msgid "print-mapgrid-nogrid"

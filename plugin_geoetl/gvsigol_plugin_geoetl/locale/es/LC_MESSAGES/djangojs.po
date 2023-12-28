@@ -357,10 +357,8 @@ msgid "Single XML file"
 msgstr "Archivo XML único"
 
 #: static/js/TableShape.js:2770
-#, fuzzy
-#| msgid "Choose shapefile:"
 msgid "Shapefile"
-msgstr "Elige shapefile:"
+msgstr "Shapefile"
 
 #: static/js/TableShape.js:2775
 msgid "Choose shapefile:"
@@ -827,8 +825,6 @@ msgid "Expose Attributes"
 msgstr "Expón Atributos"
 
 #: static/js/TableShape.js:8735
-#, fuzzy
-#| msgid "Expose Attributes"
 msgid "Expose Attribute"
 msgstr "Expón Atributos"
 
@@ -964,16 +960,12 @@ msgid "Select mode:"
 msgstr "Selecciona el modo:"
 
 #: static/js/TableShape.js:10866
-#, fuzzy
-#| msgid "MGRS to geographic coordinates:"
 msgid "MGRS to geographic coordinates (EPSG - 4326):"
-msgstr "MGRS a coordenadas geográficas:"
+msgstr "MGRS a coordenadas geográficas (EPSG - 4326):"
 
 #: static/js/TableShape.js:10867
-#, fuzzy
-#| msgid "Geographic coordinates to MGRS:"
 msgid "Geographic coordinates (EPSG - 4326) to MGRS:"
-msgstr "Coordenadas geográficas a MGRS:"
+msgstr "Coordenadas geográficas (EPSG - 4326) a MGRS:"
 
 #: static/js/TableShape.js:10870
 msgid "MGRS grid attribute:"
@@ -998,10 +990,8 @@ msgid "Insert EPSG:"
 msgstr "Inserta EPSG:"
 
 #: static/js/TableShape.js:11400
-#, fuzzy
-#| msgid "WKT to Geometry"
 msgid "WKT Geom."
-msgstr "WKT a Geometría"
+msgstr "Geom. WKT"
 
 #: static/js/TableShape.js:11436
 msgid "WKT to Geometry"

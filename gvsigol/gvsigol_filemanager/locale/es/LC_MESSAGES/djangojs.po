@@ -56,4 +56,4 @@ msgstr "Debe seleccionar un archivo"
 
 #: gvsigol_filemanager/static/js/lib/_trans.gvsigol.js:3
 msgid "Try again"
-msgstr ""
+msgstr "Inténtelo de nuevo"

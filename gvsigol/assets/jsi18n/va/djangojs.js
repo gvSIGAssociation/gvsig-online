@@ -217,7 +217,7 @@
     "Opacity": "Opacidad", 
     "OpenStreetMap": "OpenStreetMap", 
     "Organization": "Organizaci\\u00f3n", 
-    "Percentaje": "Porcentaje", 
+    "Percentage": "Porcentaje", 
     "Point information": "Informaci\\u00f3n en el punto", 
     "Preview": "Previsualizar", 
     "Previous": "Previo", 

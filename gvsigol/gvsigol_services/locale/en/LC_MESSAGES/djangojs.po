@@ -246,15 +246,15 @@ msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:49
 msgid "Autogen"
-msgstr ""
+msgstr "Autogenerate"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:50
 msgid "Convert ok"
-msgstr ""
+msgstr "Enumed field successfully assigned"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:51
 msgid "Autogen ok"
-msgstr ""
+msgstr "Enum field successfully generated"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:52
 msgid "Field to delete"

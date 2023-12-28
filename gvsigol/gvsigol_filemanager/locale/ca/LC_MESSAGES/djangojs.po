@@ -56,4 +56,4 @@ msgstr "Heu de seleccionar un arxiu"
 
 #: gvsigol_filemanager/static/js/lib/_trans.gvsigol.js:3
 msgid "Try again"
-msgstr ""
+msgstr "Torna-ho a provar"

@@ -956,7 +956,7 @@ msgstr "Geometria Cadastral"
 #, fuzzy
 #| msgid "Cadastral Reference Attribute:"
 msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
-msgstr "Atribut de la Referència Cadastral:"
+msgstr "Atribut de la Referència Cadastral (eixida en EPSG - 4326):"
 
 #: static/js/TableShape.js:10824 static/js/TableShape.js:10860
 msgid "MGRS"

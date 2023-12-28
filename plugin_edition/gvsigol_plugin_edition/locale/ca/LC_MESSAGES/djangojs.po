@@ -30,18 +30,16 @@ msgstr ""
 "X-Source-Language: C\n"
 
 #: static/js/lib/_trans.gvsigol.js:2
-#, fuzzy
-#| msgid "Edit feature"
 msgid "Edit layer"
 msgstr "Editar element"
 
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "You are editing the layer"
-msgstr ""
+msgstr "Esteu editant la capa"
 
 #: static/js/lib/_trans.gvsigol.js:4
 msgid "The layer you are trying to edit is locked"
-msgstr ""
+msgstr "La capa que intenta editar està bloquejada"
 
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
@@ -58,10 +56,8 @@ msgstr "Afegir polígon"
 
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:128
-#, fuzzy
-#| msgid "Add point"
 msgid "Add point to center"
-msgstr "Afegir punt"
+msgstr "Afegir punt al centre"
 
 #: static/js/lib/widgets/editionBar.js:139
 msgid "Edit feature"
@@ -83,21 +79,21 @@ msgstr "Error començant edició"
 
 #: static/js/lib/widgets/editionBar.js:617
 msgid "Select feature to edit"
-msgstr ""
+msgstr "Selecciona l'element a editar"
 
 #: static/js/lib/widgets/editionBar.js:637
 msgid "More element info"
-msgstr ""
+msgstr "Més informació del element"
 
 #: static/js/lib/widgets/editionBar.js:647
-msgid "Detalles de atributos"
-msgstr ""
+msgid "Attribute details"
+msgstr "Detalls de l'atribut"
 
 #: static/js/lib/widgets/editionBar.js:1336
 #: static/js/lib/widgets/editionBar.js:1820
 #: static/js/lib/widgets/editionBar.js:2241
 msgid "Show form"
-msgstr ""
+msgstr "Mostrar formulari"
 
 #: static/js/lib/widgets/editionBar.js:1363
 #: static/js/lib/widgets/editionBar.js:1855
@@ -132,6 +128,8 @@ msgid ""
 "Version conflict: the feature was edited concurrently. Restart your editing "
 "session to get the last version."
 msgstr ""
+"Conflicte de versions: l'element s'ha editat simultàniament. "
+"Reinicieu la sessió d'edició per a obtenir l'última versió"
 
 #: static/js/lib/widgets/editionBar.js:1632
 #: static/js/lib/widgets/editionBar.js:2439
@@ -141,7 +139,7 @@ msgstr "Error al guardar el nou element. Per favor revise els valors"
 
 #: static/js/lib/widgets/editionBar.js:1672
 msgid "can't be null"
-msgstr ""
+msgstr "No pot ser nul"
 
 #: static/js/lib/widgets/editionBar.js:1965
 msgid ""
@@ -159,8 +157,8 @@ msgstr "Fallada al eliminar el bloqueig de la capa"
 
 #: static/js/lib/widgets/editionBar.js:2604
 #: static/js/lib/widgets/editionBar.js:2606
-msgid "Error validando la version"
-msgstr ""
+msgid "Error validating version"
+msgstr "Error en validar la versió"
 
 #~ msgid "New feature"
 #~ msgstr "Nou element"

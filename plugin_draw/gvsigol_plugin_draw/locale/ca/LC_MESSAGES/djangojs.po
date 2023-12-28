@@ -154,4 +154,4 @@ msgstr "Seleccionar patrón"
 
 #: static/js/lib/tools/StyleSettings.js:372
 msgid "Font size"
-msgstr ""
+msgstr "Mida de font"

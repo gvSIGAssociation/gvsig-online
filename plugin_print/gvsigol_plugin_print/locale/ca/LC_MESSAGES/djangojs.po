@@ -22,10 +22,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: static/js/lib/_trans.gvsigol.js:2
-#, fuzzy
-#| msgid "Print"
 msgid "Print map"
-msgstr "Imprimir"
+msgstr "Imprimir mapa"
 
 #: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:298
 msgid "Print"
@@ -59,7 +57,7 @@ msgstr "Escala"
 
 #: static/js/lib/tools/print.js:176
 msgid "AutoScale"
-msgstr "Escala Automàtica"
+msgstr "Escala automàtica"
 
 #: static/js/lib/tools/print.js:177
 #, fuzzy
@@ -69,31 +67,31 @@ msgstr "Escala"
 
 #: static/js/lib/tools/print.js:190
 msgid "MapGrid"
-msgstr ""
+msgstr "Graella cartogràfica"
 
 #: static/js/lib/tools/print.js:192
 msgid "print-mapgrid-nogrid"
-msgstr ""
+msgstr "Sense graella"
 
 #: static/js/lib/tools/print.js:193
 msgid "print-mapgrid-point"
-msgstr ""
+msgstr "Punts"
 
 #: static/js/lib/tools/print.js:194
 msgid "print-mapgrid-line"
-msgstr ""
+msgstr "Línies"
 
 #: static/js/lib/tools/print.js:196
 msgid "print-mapgrid-spacing"
-msgstr ""
+msgstr "Espaiat"
 
 #: static/js/lib/tools/print.js:204
 msgid "MapProjection"
-msgstr ""
+msgstr "Prejecció del mapa"
 
 #: static/js/lib/tools/print.js:233
 msgid "MapOverview"
-msgstr ""
+msgstr "Capes en el Localitzador"
 
 #: static/js/lib/tools/print.js:250
 msgid "Resolution"
@@ -109,7 +107,7 @@ msgstr "Format"
 
 #: static/js/lib/tools/print.js:281 static/js/lib/tools/print.js:286
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: static/js/lib/tools/print.js:292
 msgid "Legal warning"
@@ -135,7 +133,7 @@ msgstr "Llegenda"
 
 #: static/js/lib/tools/print.js:938
 msgid "layers_xyz_cant_be_reprojected"
-msgstr ""
+msgstr "Les capes externes tipus XYZ no es poden reprojectar"
 
 #~ msgid "legalwarning"
 #~ msgstr ""

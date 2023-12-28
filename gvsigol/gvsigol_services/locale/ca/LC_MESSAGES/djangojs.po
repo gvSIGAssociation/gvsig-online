@@ -107,14 +107,14 @@ msgstr ""
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:6
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:94
 msgid "Task status"
-msgstr ""
+msgstr "Estat de la tasca"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:7
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:8
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:95
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:96
 msgid "Error getting tasks"
-msgstr ""
+msgstr "Error en obtenir les tasques"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:9
 msgid "You must select an extent on the map using the control"
@@ -122,16 +122,14 @@ msgstr "S'ha de seleccionar una extensió en el mapa fent servir el control"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:10
 msgid "URL to capabilities document"
-msgstr ""
+msgstr "URL al document capabilities"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:11
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:12
 msgid "Only required if service is authenticated"
-msgstr ""
+msgstr "Només es requereix si el servei es autenticat"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:13
-#, fuzzy
-#| msgid "Connection has been success"
 msgid "Connection has been successful"
 msgstr "S'ha connectat correctament"
 
@@ -149,7 +147,7 @@ msgstr "Inserte nom del item"
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:54
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:99
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:17
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:35
@@ -160,7 +158,7 @@ msgstr "Error en GetCapabilities"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:18
 msgid "You must select a layer"
-msgstr ""
+msgstr "Ha de seleccionar una capa"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:19
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:36
@@ -255,25 +253,23 @@ msgstr "Convertir"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:49
 msgid "Autogen"
-msgstr ""
+msgstr "Autogenerar"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:50
 msgid "Convert ok"
-msgstr ""
+msgstr "S'ha assignat el camp enumerat correctament"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:51
 msgid "Autogen ok"
-msgstr ""
+msgstr "Generació correcta del camp enumerat"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:52
 msgid "Field to delete"
 msgstr "Camp a esborrar"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:55
-#, fuzzy
-#| msgid "Field to delete"
 msgid "Field was deleted"
-msgstr "Camp a esborrar"
+msgstr "S'ha suprimit el camp"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:56
 msgid "Old name"
@@ -288,46 +284,34 @@ msgid "Rename"
 msgstr "Canviar nom"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:60
-#, fuzzy
-#| msgid "Field name"
 msgid "Field was renamed"
-msgstr "Nom del camp"
+msgstr "S'ha canviat el nom del camp"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:62
-#, fuzzy
-#| msgid "Field name"
 msgid "Field was added"
-msgstr "Nom del camp"
+msgstr "S'ha afegit el camp"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:63
 msgid "Group names must be unique"
-msgstr ""
+msgstr "Els noms dels grups han de ser únics"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:64
-#, fuzzy
-#| msgid "The layer definition was refreshed"
 msgid "The layer cache was cleared"
-msgstr "La definició de la capa s'ha refrescat"
+msgstr "S'ha netejat la memòria cau de la capa"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:65
-#, fuzzy
-#| msgid "The layer refresh failed"
 msgid "The layer cache clearing failed"
-msgstr "El refrescat de capa ha fallat"
+msgstr "Ha fallat la neteja de la memòria cau de la capa"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:66
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:88
-#, fuzzy
-#| msgid "The layer definition was refreshed"
 msgid "The layergroup cache was cleared"
-msgstr "La definició de la capa s'ha refrescat"
+msgstr "S'ha netejat la memòria cau del grup de capes"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:67
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:89
-#, fuzzy
-#| msgid "The layer refresh failed"
 msgid "The layergroup cache clearing failed"
-msgstr "El refrescat de capa ha fallat"
+msgstr "Ha fallat la neteja de la memòria cau del grup de capes"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:68
 msgid "Show all layers"
