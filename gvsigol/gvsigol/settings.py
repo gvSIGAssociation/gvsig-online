@@ -222,17 +222,14 @@ SECURE_PROXY_SSL_HEADER = env('SECURE_PROXY_SSL_HEADER')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'django.contrib.auth',
-    'mozilla_django_oidc',
+    'django.contrib.auth',    
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
-    'django_extensions',
     'rest_framework',
-
     ############# CORE ################
     'gvsigol_statistics',
     'gvsigol_auth',
@@ -240,7 +237,6 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-
     'actstream',
     #### DEPENDENCIES ######,
     'django_celery_beat'    
@@ -272,10 +268,22 @@ try:
 except ImportError:
     print('ERROR: No ha instalado la libreria drf_yasg')
 
+# django_extensions
+try:
+    __import__('django_extensions')
+    INSTALLED_APPS.append('django_extensions')
+except ImportError:
+    print('ERROR: No ha instalado la libreria django_extensions')
+
+# oidc_mozilla
+if 'gvsigol_plugin_oidc_mozilla' in INSTALLED_APPS:
+    INSTALLED_APPS.append('mozilla_django_oidc')
+
 ACTSTREAM_SETTINGS = {
     'FETCH_RELATIONS': True,
     'USE_JSONFIELD': True,
 }
+
 
 
 MIDDLEWARE = [
