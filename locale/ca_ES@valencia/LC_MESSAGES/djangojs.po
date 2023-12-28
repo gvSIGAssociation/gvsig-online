@@ -831,7 +831,7 @@ msgstr "Unic"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:681
 msgid "Range"
-msgstr "Range"
+msgstr "Rang"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:687
 msgid "Temporary layers"

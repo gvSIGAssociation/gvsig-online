@@ -154,7 +154,7 @@ msgstr "Missatge d'impressió"
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:28
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:35
 msgid "Draw rectangle"
-msgstr ""
+msgstr "Dibuixa un rectangle"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:29
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:32
@@ -212,12 +212,12 @@ msgstr "Feu clic per començar la mesura"
 #: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:282
 #: gvsigol_core/static/js/lib/tools/measureAngle.js:362
 msgid "Interior angle"
-msgstr ""
+msgstr "Angle interior"
 
 #: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:283
 #: gvsigol_core/static/js/lib/tools/measureAngle.js:363
 msgid "Exterior angle"
-msgstr ""
+msgstr "Angle exterior"
 
 #: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:126
 msgid "Measure area and perimeter"
@@ -226,12 +226,12 @@ msgstr "Mesura de l’àrea i el perímetre"
 #: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:245
 #: gvsigol_core/static/js/lib/tools/measureArea.js:325
 msgid "Area"
-msgstr ""
+msgstr "Àrea"
 
 #: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:246
 #: gvsigol_core/static/js/lib/tools/measureArea.js:326
 msgid "Perimeter"
-msgstr ""
+msgstr "Perímetre"
 
 # measureLength.js
 #: gvsigol_core/static/js/lib/tools/MeasureLengthControl.js:126
@@ -257,7 +257,7 @@ msgstr "Seleccionar per buffer"
 #: gvsigol_core/static/js/lib/tools/SelectByBufferControl.js:130
 #: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:176
 msgid "Select buffer radius (meters)"
-msgstr ""
+msgstr "Seleccioneu el radi del buffer (metres)"
 
 #: gvsigol_core/static/js/lib/tools/SelectByBufferControl.js:132
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:267
@@ -381,7 +381,7 @@ msgstr "Identificador no vàlid. No es pot obtenir la geometria sol·licitada"
 
 #: gvsigol_core/static/js/lib/tools/ShowMeasureToolbar.js:37
 msgid "Herramientas de medida"
-msgstr ""
+msgstr "Eines de mesura"
 
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:274
 msgid "Print selection"
@@ -407,7 +407,7 @@ msgstr "Netejar selecció"
 
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:312
 msgid "PDF Report"
-msgstr ""
+msgstr "Informe PDF"
 
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:565
 msgid "Advanced filter"
@@ -590,7 +590,7 @@ msgstr "Algun valor està fora de rang"
 
 #: gvsigol_core/static/js/lib/tools/exportToPDF.js:36
 msgid "Export to PDF"
-msgstr ""
+msgstr "Exportar a PDF"
 
 # exportToPDF.js
 #: gvsigol_core/static/js/lib/tools/exportToPDF.js:77
@@ -614,7 +614,7 @@ msgstr "Informació en el punt"
 
 #: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:502
 msgid "Elevation"
-msgstr ""
+msgstr "Elevació"
 
 #: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:508
 msgid "Coordinates"
@@ -747,17 +747,19 @@ msgstr "Descarregues"
 
 #: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:100
 msgid "Some files could not be uploaded:"
-msgstr ""
+msgstr "No s'han pogut pujar alguns fitxers:"
 
 #: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:211
 msgid ""
 "Version conflict: the feature was edited concurrently. Restart your editing "
 "session to get the last version."
 msgstr ""
+"Conflicte de versions: l'element s'ha editat simultàniament. Reinicieu "
+"la sessió d'edició per a obtenir l'última versió."
 
 #: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:215
 msgid "Error deleting resource"
-msgstr ""
+msgstr "Error esborrant recurs"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:266
 msgid "Find layer"
@@ -810,7 +812,7 @@ msgstr "segon(s)"
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:610
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:660
 msgid "Clear"
-msgstr ""
+msgstr "Netejar"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:613
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:663
@@ -835,7 +837,7 @@ msgstr "Unic"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:681
 msgid "Range"
-msgstr "Range"
+msgstr "Rang"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:687
 msgid "Temporary layers"
@@ -935,7 +937,7 @@ msgstr "Netejar filtre"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:61
 msgid "Layer group"
-msgstr ""
+msgstr "Grup de capes"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:63
 #, fuzzy
@@ -959,11 +961,11 @@ msgstr "Valor seleccionat"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:78
 msgid "Field"
-msgstr ""
+msgstr "Camp"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:85
 msgid "Operator"
-msgstr ""
+msgstr "Operador"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:87
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:177
@@ -977,22 +979,22 @@ msgstr "Seleccionar format"
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:182
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:187
 msgid "Equal to"
-msgstr ""
+msgstr "Igual a"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:89
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:183
 msgid "Smaller than"
-msgstr ""
+msgstr "Més petit que"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:90
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:184
 msgid "Greater than"
-msgstr ""
+msgstr "Més gran que"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:95
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:102
 msgid "Value"
-msgstr ""
+msgstr "Valor"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:109
 #, fuzzy
@@ -1002,19 +1004,19 @@ msgstr "Netejar filtre"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:146
 msgid "The selected layer group does not contain queryable layers"
-msgstr ""
+msgstr "El grup de capes seleccionat no conté capes consultables"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:171
 msgid "The selected layer does not contain queryable fields"
-msgstr ""
+msgstr "La capa seleccionada no conté camps consultables"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:212
 msgid "The selected field does not contain values"
-msgstr ""
+msgstr "El camp seleccionat no conté valors"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:262
 msgid "No results found"
-msgstr ""
+msgstr "No s'han trobat resultats"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:266
 #, fuzzy

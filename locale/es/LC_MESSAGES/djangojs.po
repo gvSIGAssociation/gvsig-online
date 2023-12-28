@@ -206,12 +206,12 @@ msgstr "Click para empezar a medir"
 #: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:282
 #: gvsigol_core/static/js/lib/tools/measureAngle.js:362
 msgid "Interior angle"
-msgstr ""
+msgstr "Ángulo interior"
 
 #: gvsigol_core/static/js/lib/tools/MeasureAngleControl.js:283
 #: gvsigol_core/static/js/lib/tools/measureAngle.js:363
 msgid "Exterior angle"
-msgstr ""
+msgstr "Ángulo exterior"
 
 #: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:126
 msgid "Measure area and perimeter"
@@ -220,12 +220,12 @@ msgstr "Medir área y perímetro"
 #: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:245
 #: gvsigol_core/static/js/lib/tools/measureArea.js:325
 msgid "Area"
-msgstr ""
+msgstr "Área"
 
 #: gvsigol_core/static/js/lib/tools/MeasureAreaControl.js:246
 #: gvsigol_core/static/js/lib/tools/measureArea.js:326
 msgid "Perimeter"
-msgstr ""
+msgstr "Perímetro"
 
 # measureLength.js
 #: gvsigol_core/static/js/lib/tools/MeasureLengthControl.js:126
@@ -249,7 +249,7 @@ msgstr "Seleccionar por buffer"
 #: gvsigol_core/static/js/lib/tools/SelectByBufferControl.js:130
 #: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:176
 msgid "Select buffer radius (meters)"
-msgstr ""
+msgstr "Seleccione el radio del buffer (metros)"
 
 #: gvsigol_core/static/js/lib/tools/SelectByBufferControl.js:132
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:267
@@ -397,7 +397,7 @@ msgstr "Limpiar selección"
 
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:312
 msgid "PDF Report"
-msgstr ""
+msgstr "Informe PDF"
 
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:565
 msgid "Advanced filter"
@@ -431,7 +431,7 @@ msgstr "Limpiar filtro"
 
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:1169
 msgid "Item"
-msgstr ""
+msgstr "Ítem"
 
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:1232
 msgid "Report title"
@@ -580,7 +580,7 @@ msgstr "Algún valor está fuera de rango"
 
 #: gvsigol_core/static/js/lib/tools/exportToPDF.js:36
 msgid "Export to PDF"
-msgstr ""
+msgstr "Exportar a PDF"
 
 # exportToPDF.js
 #: gvsigol_core/static/js/lib/tools/exportToPDF.js:77
@@ -604,7 +604,7 @@ msgstr "Información en el punto"
 
 #: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:502
 msgid "Elevation"
-msgstr ""
+msgstr "Elevación"
 
 #: gvsigol_core/static/js/lib/tools/getFeatureInfo.js:508
 msgid "Coordinates"
@@ -737,17 +737,19 @@ msgstr "Descargas"
 
 #: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:100
 msgid "Some files could not be uploaded:"
-msgstr ""
+msgstr "Algunos ficheros no se pudieron subir:"
 
 #: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:211
 msgid ""
 "Version conflict: the feature was edited concurrently. Restart your editing "
 "session to get the last version."
 msgstr ""
+"Conflicto de versiones: el elemento se ha editado simultáneamente. Reinicie "
+"su sesión de edición para obtener la última versión."
 
 #: gvsigol_core/static/js/lib/widgets/gvsigolResourceManager.js:215
 msgid "Error deleting resource"
-msgstr ""
+msgstr "Error borrando recurso"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:266
 msgid "Find layer"
@@ -800,7 +802,7 @@ msgstr "segundo(s)"
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:610
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:660
 msgid "Clear"
-msgstr ""
+msgstr "Limpiar"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:613
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:663
