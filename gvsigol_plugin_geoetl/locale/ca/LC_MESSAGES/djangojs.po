@@ -358,10 +358,8 @@ msgid "Single XML file"
 msgstr "Arxiu XML únic"
 
 #: static/js/TableShape.js:2770
-#, fuzzy
-#| msgid "Choose shapefile:"
 msgid "Shapefile"
-msgstr "Tria l'arxiu SHP:"
+msgstr "Shapefile"
 
 #: static/js/TableShape.js:2775
 msgid "Choose shapefile:"
@@ -829,8 +827,6 @@ msgid "Expose Attributes"
 msgstr "Exposa Atributs"
 
 #: static/js/TableShape.js:8735
-#, fuzzy
-#| msgid "Expose Attributes"
 msgid "Expose Attribute"
 msgstr "Exposa Atributs"
 
@@ -954,10 +950,8 @@ msgid "Cadastral Geometry"
 msgstr "Geometria Cadastral"
 
 #: static/js/TableShape.js:10614
-#, fuzzy
-#| msgid "Cadastral Reference Attribute:"
 msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
-msgstr "Atribut de la Referència Cadastral:"
+msgstr "Atribut de la Referència Cadastral (sortida en EPSG - 4326):"
 
 #: static/js/TableShape.js:10824 static/js/TableShape.js:10860
 msgid "MGRS"
@@ -968,16 +962,12 @@ msgid "Select mode:"
 msgstr "Seleccione el mode:"
 
 #: static/js/TableShape.js:10866
-#, fuzzy
-#| msgid "MGRS to geographic coordinates:"
 msgid "MGRS to geographic coordinates (EPSG - 4326):"
-msgstr "MGRS a coordenades geogràfiques:"
+msgstr "MGRS a coordenades geogràfiques (EPSG - 4326):"
 
 #: static/js/TableShape.js:10867
-#, fuzzy
-#| msgid "Geographic coordinates to MGRS:"
 msgid "Geographic coordinates (EPSG - 4326) to MGRS:"
-msgstr "Coordenades geogràfiques a MGRS:"
+msgstr "Coordenades geogràfiques (EPSG - 4326) a MGRS:"
 
 #: static/js/TableShape.js:10870
 msgid "MGRS grid attribute:"
@@ -1002,10 +992,8 @@ msgid "Insert EPSG:"
 msgstr "Inserta EPSG:"
 
 #: static/js/TableShape.js:11400
-#, fuzzy
-#| msgid "WKT to Geometry"
 msgid "WKT Geom."
-msgstr "WKT a Geometria"
+msgstr "Geom. WKT"
 
 #: static/js/TableShape.js:11436
 msgid "WKT to Geometry"
