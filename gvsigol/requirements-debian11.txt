@@ -50,6 +50,7 @@ numpy==1.23.1
 
 cmislib3==1.0.8
 lxml==4.9.2
+unidecode==1.3.7
 
 # Cron para aguas de valencia
 schedule==1.0.0
