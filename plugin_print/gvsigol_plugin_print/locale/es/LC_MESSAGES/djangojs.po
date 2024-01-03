@@ -16,7 +16,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"POT-Creation-Date: 2024-01-03 11:31+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid "Print map"
 msgstr "Imprimir mapa"
 
-#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:298
+#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:303
 msgid "Print"
 msgstr "Imprimir"
 
@@ -107,29 +107,33 @@ msgstr "Formato"
 msgid "Author"
 msgstr "Autor"
 
-#: static/js/lib/tools/print.js:292
+#: static/js/lib/tools/print.js:291
+msgid "Notes"
+msgstr "Notas"
+
+#: static/js/lib/tools/print.js:297
 msgid "Legal warning"
 msgstr "Aviso legal"
 
-#: static/js/lib/tools/print.js:299
+#: static/js/lib/tools/print.js:304
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: static/js/lib/tools/print.js:378
+#: static/js/lib/tools/print.js:383
 #, fuzzy
 #| msgid "Error loading print plugin"
 msgid "Error creating print job"
 msgstr "Error cargando plugin de impresión"
 
-#: static/js/lib/tools/print.js:381
+#: static/js/lib/tools/print.js:386
 msgid "You must select a template"
 msgstr "Ha de seleccionar una plantilla"
 
-#: static/js/lib/tools/print.js:875
+#: static/js/lib/tools/print.js:886
 msgid "Legend"
 msgstr "Leyenda"
 
-#: static/js/lib/tools/print.js:938
+#: static/js/lib/tools/print.js:952
 msgid "layers_xyz_cant_be_reprojected"
 msgstr "Las capas externas tipo XYZ no pueden ser reproyectadas."
 

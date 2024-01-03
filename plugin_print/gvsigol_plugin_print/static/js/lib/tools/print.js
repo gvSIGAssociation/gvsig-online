@@ -287,6 +287,11 @@ print.prototype.handler = function(e) {
 		ui += 				'<input id="print-author" class="form-control" value="' + author + '">';
 		ui += 			'</div>';
 
+		ui += 			'<div id="print-ui-note" class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Notes') + '</label>';
+		ui += 				'<input id="print-note" class="form-control" value="">';
+		ui += 			'</div>';
+
 		
 		ui += 			'<div id="print-ui-legal-warning" class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
@@ -410,6 +415,11 @@ print.prototype.updateUI = function() {
 		$('#print-ui-author').show();
 	else
 		$('#print-ui-author').hide();
+
+	if (this.supports('notes'))
+		$('#print-ui-note').show();
+	else
+		$('#print-ui-note').hide();
 
 	if (this.supports('overviewMap')) 
 		$('#print-ui-mapoverview').show();
@@ -635,6 +645,7 @@ print.prototype.createPrintJob = function(template) {
 	var mapgridIndent = 5; //$("#print-mapgrid-indent").val();
 	var mapgridSpacing = $("#print-mapgrid-spacing").val();
 	var author = $("#print-author").val();
+	var note = $("#print-note").val();
 
 	self.projection = projection;
 	self.dpi = parseInt(dpi);
@@ -913,6 +924,9 @@ print.prototype.createPrintJob = function(template) {
 			"layers": auxLayers,
 			// "bbox": f.getGeometry().getExtent() // TODO: DEFINIR EL CENTRO EN LUGAR DEL BBOX
 		};
+	}
+	if (self.supports('notes')) {
+		dataToPost.attributes.notes = note;
 	}
 	$.ajax({
 		type: 'POST',

@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"POT-Creation-Date: 2024-01-03 11:31+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "Print map"
 msgstr "Imprimir"
 
-#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:298
+#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:303
 msgid "Print"
 msgstr "Imprimir"
 
@@ -113,27 +113,31 @@ msgstr "Formato"
 msgid "Author"
 msgstr "Autor"
 
-#: static/js/lib/tools/print.js:292
+#: static/js/lib/tools/print.js:291
+msgid "Notes"
+msgstr ""
+
+#: static/js/lib/tools/print.js:297
 msgid "Legal warning"
 msgstr "Aviso legal"
 
-#: static/js/lib/tools/print.js:299
+#: static/js/lib/tools/print.js:304
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: static/js/lib/tools/print.js:378
+#: static/js/lib/tools/print.js:383
 msgid "Error creating print job"
 msgstr ""
 
-#: static/js/lib/tools/print.js:381
+#: static/js/lib/tools/print.js:386
 msgid "You must select a template"
 msgstr "Você deve selecionar um modelo"
 
-#: static/js/lib/tools/print.js:875
+#: static/js/lib/tools/print.js:886
 msgid "Legend"
 msgstr "Legenda"
 
-#: static/js/lib/tools/print.js:938
+#: static/js/lib/tools/print.js:952
 msgid "layers_xyz_cant_be_reprojected"
 msgstr "Camadas externas do tipo XYZ não podem ser reprojetadas."
 
