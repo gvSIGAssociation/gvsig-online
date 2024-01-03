@@ -1179,7 +1179,7 @@ def project_get_conf(request):
             'project_tools': project_tools,
             "view": {
                 "restricted_extent": project.restricted_extent,
-                "extent": [ float(f) for f in project.extent.split(',')],
+                "extent": [ float(f) for f in project.extent.split(',') ] if project.extent else None,
                 "extent4326": [project.extent4326_minx, project.extent4326_miny, project.extent4326_maxx, project.extent4326_maxy],
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon,
