@@ -82,7 +82,6 @@ from gvsigol_core.views import not_found_view
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger, LayerReadRole, LayerWriteRole
 import gvsigol_services.tiling_service as tiling_service
-from . import locks_utils
 from .models import LayerFieldEnumeration, SqlView
 from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
     LayerLock, Server, Node, ServiceUrl, LayerGroupRole
@@ -3607,56 +3606,6 @@ def get_feature_wfs(request):
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-
-
-@login_required()
-def add_layer_lock(request):
-    layer_name = None
-    try:
-        ws_name = request.POST['workspace']
-        layer_name = request.POST['layer']
-        locks_utils.add_layer_lock(layer_name, request, ws_name=ws_name)
-        return HttpResponse('{"response": "ok"}', content_type='application/json')
-    except Exception as e:
-        return HttpResponseNotFound('<h1>Layer is locked: {0}</h1>'.format(layer_name))
-
-
-@login_required()
-def remove_layer_lock(request):
-    try:
-        ws_name = request.POST['workspace']
-        layer_name = request.POST['layer']
-        if ":" in layer_name:
-            layer_name = layer_name.split(":")[1]
-        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
-        locks_utils.remove_layer_lock(layer, request, check_writable=True)
-        return HttpResponse('{"response": "ok"}', content_type='application/json')
-    except Exception as e:
-        return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
-
-@login_required()
-@require_safe
-@staff_required
-def lock_list(request):
-
-    lock_list = None
-    if request.user.is_superuser:
-        lock_list = LayerLock.objects.all()
-    else:
-        lock_list = LayerLock.objects.filter(created_by__exact=request.user.username)
-
-    response = {
-        'locks': lock_list
-    }
-    return render(request, 'lock_list.html', response)
-
-@login_required()
-@require_http_methods(["GET", "POST", "HEAD"])
-@staff_required
-def unlock_layer(request, lock_id):
-    lock = LayerLock.objects.get(id=int(lock_id))
-    lock.delete()
-    return redirect('lock_list')
 
 @csrf_exempt
 def get_feature_resources(request):
