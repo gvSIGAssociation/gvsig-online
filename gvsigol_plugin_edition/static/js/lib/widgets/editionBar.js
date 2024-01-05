@@ -459,7 +459,6 @@ EditionBar.prototype.stopEdition = function() {
 	$('#editionbar').remove();
 	this.updateServiceBoundingBox(this.selectedLayer.workspace, this.selectedLayer.layer_name);
 	this.selectedLayer.latlong_extent = null;
-	this.removeLayerLock();
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
 	if(this.contextmenu){
@@ -2469,29 +2468,6 @@ EditionBar.prototype.updateServiceBoundingBox = function(workspace,layerName) {
 		},
 	  	beforeSend:function(xhr){
 	    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-	  	}
-	});
-};
-
-/**
- * TODO
- */
-EditionBar.prototype.removeLayerLock = function() {
-	var self = this;
-	$.ajax({
-		type: 'POST',
-		async: true,
-	  	url: '/gvsigonline/services/remove_layer_lock/',
-	  	data: {
-		  	workspace: self.selectedLayer.workspace,
-		  	layer: self.selectedLayer.layer_name
-		},
-	  	beforeSend:function(xhr){
-	    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-	  	},
-	  	success	:function(response){},
-	  	error: function(){
-	  		messageBox.show('error', gettext('Failed to remove layer lock'));
 	  	}
 	});
 };
