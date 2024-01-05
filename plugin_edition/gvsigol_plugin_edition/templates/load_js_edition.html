@@ -102,32 +102,9 @@
 		 */
 		function startEdition(layer) {
 			var layerTree = viewer.core.getLayerTree();
-			$.ajax({
-				type: 'POST',
-				async: true,
-			  	url: '/gvsigonline/services/add_layer_lock/',
-			  	data: {
-				  	workspace: layer.workspace,
-				  	layer: layer.layer_name
-				},
-				origdata: {
-					layer: layer,
-					layertree: layerTree
-				},
-			  	beforeSend:function(xhr){
-			    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-			  	},
-			  	success	:function(response){
-			  		var self = this.origdata.layertree;
-			  		var selectedLayer = this.origdata.layer;
-			  		var featureType = describeFeatureType(selectedLayer);
-			  		var editionBar = new EditionBar(layerTree, map, featureType, selectedLayer);
-			  		layerTree.setEditionBar(editionBar);
-			  	},
-			  	error: function(){
-			  		messageBox.show('error', gettext('The layer you are trying to edit is locked'));
-			  	}
-			});
+	  		var featureType = describeFeatureType(layer);
+	  		var editionBar = new EditionBar(layerTree, map, featureType, selectedLayer);
+	  		layerTree.setEditionBar(editionBar);
 		};
 		
 		/**
