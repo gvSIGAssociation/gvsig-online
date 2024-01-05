@@ -2191,8 +2191,8 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
 								name = '<span class="edit-feature-field">' + fields[ix]["title-"+lang] + '</span><br /><span style="font-weight: normal;">('+name+')</span>';
 							}
-							if(fields[ix].infovisible != undefined){
-								visible = fields[ix].infovisible;
+							if(fields[ix].visible != undefined){
+								visible = fields[ix].visible;
 							}
 						}
 					}
