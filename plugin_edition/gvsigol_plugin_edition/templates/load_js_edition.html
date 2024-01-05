@@ -103,7 +103,7 @@
 		function startEdition(layer) {
 			var layerTree = viewer.core.getLayerTree();
 	  		var featureType = describeFeatureType(layer);
-	  		var editionBar = new EditionBar(layerTree, map, featureType, selectedLayer);
+	  		var editionBar = new EditionBar(layerTree, map, featureType, layer);
 	  		layerTree.setEditionBar(editionBar);
 		};
 		
