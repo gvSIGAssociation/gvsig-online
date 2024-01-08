@@ -835,11 +835,11 @@ class Symbolizer(SLDNode):
             name = name[0:-1] + 'Symbolizer'
 
         xpath = self._parent.xpath('sld:%s' % name, namespaces=SLDNode._nsmap)
-        if len(xpath) < 1:
-            self._node = self._parent.makeelement('{%s}%s' % (SLDNode._nsmap['sld'], name), nsmap=SLDNode._nsmap)
-            self._parent.append(self._node)
-        else:
-            self._node = xpath[0]
+        #if len(xpath) < 1:
+        self._node = self._parent.makeelement('{%s}%s' % (SLDNode._nsmap['sld'], name), nsmap=SLDNode._nsmap)
+        self._parent.append(self._node)
+        #else:
+        #    self._node = xpath[0]
 
         setattr(self.__class__, 'Fill', SLDNode.makeproperty('sld', cls=Fill,
                 docstring="The parameters for describing the fill styling."))
