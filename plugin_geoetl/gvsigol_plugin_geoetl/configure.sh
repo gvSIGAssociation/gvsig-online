@@ -20,7 +20,7 @@ function configure() {
 		echo "WARNING: ETL_URL is not defined, using default"					
 		ETL_URL='/etlurl'
 	fi	
-	grep -rl "##ETL_URL##" | xargs sed -i "s ##ETL_URL##/$ETL_URL g"
+	grep -rl "##ETL_URL##" | xargs sed -i "s ##ETL_URL## $ETL_URL g"
 
 	echo "INFO: DB"	
 	if [ -z $ETL_DB_HOST ]; then
