@@ -46,6 +46,7 @@ from . import serializers
 from . import util
 from gvsigol.urls import urlpatterns
 import psycopg2
+from gvsigol_core.utils import get_user_projects
 
 class DateFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
@@ -326,8 +327,7 @@ class ProjectListView(ListAPIView):
         except Exception:
             raise HttpException(400, "Bad parameter lang")
         
-        projects_by_user = util.get_projects_ids_by_user(request)
-        queryset = projects_by_user
+        queryset = get_user_projects(request)
         if(label is not None): 
             queryset = queryset.filter(labels__contains=label)
         now = datetime.now()
