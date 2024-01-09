@@ -45,7 +45,8 @@ def get_template(md_type):
             tpl_path = os.path.join(BASE_DIR, app.name, 'mdtemplates/dataset.xml')
             if os.path.exists(tpl_path):
                 return tpl_path
-    return os.path.join(BASE_DIR, 'gvsigol_plugin_catalog/mdtemplates/dataset19139.xml')
+    module_dir = os.path.dirname(__file__)
+    return os.path.abspath(os.path.join(module_dir, '..', 'mdtemplates/dataset19139.xml'))
 
 def getCrsCodeAnchor(crs):
     code = ET.Element(namespacedTag('gmd', 'code', namespaces))
