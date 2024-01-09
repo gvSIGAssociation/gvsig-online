@@ -20,7 +20,7 @@ def set_default_images_as_empty(apps, schema_editor):
     except Exception as error:
         import logging
         logger = logging.getLogger()
-        logging.basicConfig()
+        #logging.basicConfig()
         logger.exception(str(error))
         print(error)
         
