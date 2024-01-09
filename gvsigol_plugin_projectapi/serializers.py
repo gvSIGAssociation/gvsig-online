@@ -42,7 +42,7 @@ import sys
 from gvsigol_auth import utils as auth_utils
 from gvsigol_auth import auth_backend
 
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 class UserSerializer(serializers.ModelSerializer):

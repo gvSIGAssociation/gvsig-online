@@ -34,7 +34,7 @@ from gvsigol_services import signals
 from django.http import HttpResponseForbidden, HttpResponseNotFound
 from django_sendfile import sendfile
 
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__) 
 
 

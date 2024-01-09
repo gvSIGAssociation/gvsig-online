@@ -41,7 +41,7 @@ from gvsigol_services import views as serviceviews
 from gvsigol_core import utils as coreutils
 from operator import itemgetter
 
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 class LayerSerializer(serializers.ModelSerializer):
