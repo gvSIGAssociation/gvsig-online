@@ -43,6 +43,7 @@ from django.core.validators import URLValidator
 import logging
 import sys
 logger = logging.getLogger("gvsigol")
+from threading import Lock
 
 
 def can_read_project(request, project):
@@ -467,97 +468,107 @@ def sendMail(user, password):
 
 supported_crs = {}
 supported_crs_array = []
-def get_supported_crs(used_crs=None):   
+crs_lock = Lock()
+
+def get_supported_crs(used_crs=None):
     global supported_crs
     global supported_crs_array
-    if (not supported_crs) or used_crs:
-        
-        if settings.USE_DEFAULT_SUPPORTED_CRS:
-            for item in list(settings.SUPPORTED_CRS.items()):
-                supported_crs_array.append(item[1])
-            supported_crs = settings.SUPPORTED_CRS
-            return settings.SUPPORTED_CRS
-        
-        supported_crs = {}
-        
-        file_crs = genfromtxt(os.path.join(settings.BASE_DIR, 'gvsigol_core/static/crs_axis_order/mapaxisorder.csv'), skip_header=1)
-        
-        db = settings.DATABASES['default']
-        
-        dbhost = settings.DATABASES['default']['HOST']
-        dbport = settings.DATABASES['default']['PORT']
-        dbname = settings.DATABASES['default']['NAME']
-        dbuser = settings.DATABASES['default']['USER']
-        dbpassword = settings.DATABASES['default']['PASSWORD']
-        
-        #connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
+    acquired = crs_lock.acquire(timeout=15)
+    if acquired:
         try:
-            connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
-            connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            print("Connect ... ")
-        
-        except Exception as e:
-            print("Failed to connect!", e)
-            return []
-        cursor = connection.cursor()
-        
-        try:        
-            create_schema = "SELECT * FROM public.spatial_ref_sys ORDER BY srid;"       
-            cursor.execute(create_schema)
-            rows = cursor.fetchall()
-    
-        except Exception as e:
-            print("SQL Error", e)
-            if not e.pgcode == '42710':
-                return supported_crs   
-            cursor.close();
-            connection.close();
+            if (not supported_crs) or used_crs:
                 
-        for row in rows:
-            s = row[4]
-            
-            unit_found = s.find('+units=')
-            unit_const = '+units='.__len__()
-            if unit_found > -1:
-                data = s[unit_found+unit_const:unit_found+unit_const+1]
-                if data == 'm':
-                    unit = 'meter'
-            else:
-                unit = 'degree'
-            
-            
-            s2 = row[3]
-            data = s2[s2.find('[')+1:s2.find(',')]
-            data = data.replace('"', '')
+                if settings.USE_DEFAULT_SUPPORTED_CRS:
+                    for item in list(settings.SUPPORTED_CRS.items()):
+                        supported_crs_array.append(item[1])
+                    supported_crs = settings.SUPPORTED_CRS
+                    return settings.SUPPORTED_CRS
                 
-            axis_order = ''
-            if row[2] in file_crs and row[4]:
-                axis_order = ' +axis=neu'
+                supported_crs = {}
+                
+                file_crs = genfromtxt(os.path.join(settings.BASE_DIR, 'gvsigol_core/static/crs_axis_order/mapaxisorder.csv'), skip_header=1)
+                
+                db = settings.DATABASES['default']
+                
+                dbhost = settings.DATABASES['default']['HOST']
+                dbport = settings.DATABASES['default']['PORT']
+                dbname = settings.DATABASES['default']['NAME']
+                dbuser = settings.DATABASES['default']['USER']
+                dbpassword = settings.DATABASES['default']['PASSWORD']
+                
+                #connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
+                try:
+                    connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
+                    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+                    print("Connect ... ")
+                
+                except Exception as e:
+                    print("Failed to connect!", e)
+                    return []
+                cursor = connection.cursor()
+                
+                try:        
+                    create_schema = "SELECT * FROM public.spatial_ref_sys ORDER BY srid;"       
+                    cursor.execute(create_schema)
+                    rows = cursor.fetchall()
             
-            if row[4]:
-                crs = {
-                    'code': row[1] + ':' + str(row[2]),
-                    'title': data,
-                    'definition': row[4] + axis_order,
-                    'units': unit+'s'
-                }
-            
-            if not used_crs:
-                supported_crs[row[0]] = crs
-                supported_crs_array.append(crs)
-            else:
-                for crs in used_crs:
-                    current_crs = row[1]+':'+str(row[2])
-                    if current_crs == crs['code']:
-                        supported_crs[str(row[0])] = crs
+                except Exception as e:
+                    print("SQL Error", e)
+                    if not e.pgcode == '42710':
+                        return supported_crs   
+                    cursor.close();
+                    connection.close();
+                        
+                for row in rows:
+                    s = row[4]
+                    
+                    unit_found = s.find('+units=')
+                    unit_const = len('+units=')
+                    if unit_found > -1:
+                        if s[unit_found+unit_const] == 'm':
+                            unit = 'meter'
+                        else:
+                            continue # skip unsupported unit
+                    else:
+                        unit = 'degree'
+                    
+                    
+                    s2 = row[3]
+                    title = s2[s2.find('[')+1:s2.find(',')]
+                    title = title.replace('"', '')
+                        
+                    axis_order = ''
+                    if row[2] in file_crs and row[4]:
+                        axis_order = ' +axis=neu'
+                    
+                    if row[4]:
+                        crs = {
+                            'code': row[1] + ':' + str(row[2]),
+                            'title': title,
+                            'definition': row[4] + axis_order,
+                            'units': unit+'s'
+                        }
+                    
+                    if not used_crs:
+                        supported_crs[row[0]] = crs
                         supported_crs_array.append(crs)
-
-    return supported_crs    
+                    else:
+                        for crs in used_crs:
+                            current_crs = row[1]+':'+str(row[2])
+                            if current_crs == crs['code']:
+                                supported_crs[str(row[0])] = crs
+                                supported_crs_array.append(crs)
+            return supported_crs
+        except:
+            pass
+        finally:
+            crs_lock.release()
+    # return from settings if everything fails
+    return settings.SUPPORTED_CRS
    
 def get_supported_crs_array(used_crs=None):  
     global supported_crs_array
-    if (not supported_crs_array) or used_crs:   
-        get_supported_crs(used_crs)
+    get_supported_crs(used_crs)
     return supported_crs_array
      
 def get_plugins_config():
