@@ -327,7 +327,7 @@ class ProjectListView(ListAPIView):
             raise HttpException(400, "Bad parameter lang")
         
         projects_by_user = util.get_projects_ids_by_user(request)
-        queryset = Project.objects.filter(id__in=projects_by_user)
+        queryset = projects_by_user
         if(label is not None): 
             queryset = queryset.filter(labels__contains=label)
         now = datetime.now()
