@@ -44,7 +44,7 @@ from psycopg2 import sql as sqlbuilder
 from psycopg2.extensions import quote_ident
 from rest_framework.exceptions import ParseError, UnsupportedMediaType
 import logging
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 def count(con, schema, table, comparator='=', field=None, value=None):
