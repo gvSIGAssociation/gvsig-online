@@ -433,7 +433,7 @@ class Introspect:
             return True
         except Exception as e:
             import logging
-            logging.basicConfig()
+            #logging.basicConfig()
             logger = logging.getLogger()
             logger.exception(str(e))
             print(str(e))

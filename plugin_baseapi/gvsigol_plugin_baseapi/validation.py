@@ -34,7 +34,7 @@ from . import util
 from psycopg2 import sql as sqlbuilder
 from datetime import datetime
 import logging
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 

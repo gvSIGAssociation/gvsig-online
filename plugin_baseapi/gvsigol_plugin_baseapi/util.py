@@ -40,7 +40,7 @@ from gvsigol_services.utils import get_public_layers_query, get_layerread_by_use
 from psycopg2 import sql as sqlbuilder
 from psycopg2.extensions import quote_ident
 import logging
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 def count(con, schema, table, comparator='=', field=None, value=None):

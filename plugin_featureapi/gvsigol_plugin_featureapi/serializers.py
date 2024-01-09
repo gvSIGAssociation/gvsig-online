@@ -45,7 +45,7 @@ import ast
 from gvsigol_services import views as serviceviews
 from gvsigol_plugin_featureapi.export import VectorLayerExporter
 import sys
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 
   

@@ -60,7 +60,7 @@ def fix_triggers(apps, schema_editor):
     except Exception as error:
         import logging
         logger = logging.getLogger()
-        logging.basicConfig()
+        #logging.basicConfig()
         logger.exception(str(error))
         print(error)
         
