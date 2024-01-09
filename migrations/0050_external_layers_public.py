@@ -14,7 +14,7 @@ def set_external_layers_as_public(apps, schema_editor):
     except Exception as error:
         import logging
         logger = logging.getLogger()
-        logging.basicConfig()
+        #logging.basicConfig()
         logger.exception(str(error))
         print(error)
         
