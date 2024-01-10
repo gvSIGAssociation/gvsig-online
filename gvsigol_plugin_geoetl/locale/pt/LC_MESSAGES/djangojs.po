@@ -1175,3 +1175,12 @@ msgstr ""
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "Connection parameters are not valid."
 msgstr ""
+
+msgid "Nearest Neighbor"
+msgstr "Vizinho Mais Próximo"
+
+msgid "Tolerance"
+msgstr "Tolerância"
+
+msgid "Matched"
+msgstr "Emparelhados"

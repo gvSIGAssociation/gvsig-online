@@ -1254,3 +1254,13 @@ msgstr "Costat"
 
 msgid "Both"
 msgstr "Ambdós"
+
+msgid "Nearest Neighbor"
+msgstr "Veí Més Proper"
+
+msgid "Tolerance"
+msgstr "Tolerància"
+
+msgid "Matched"
+msgstr "Emparellats"
+

@@ -1253,3 +1253,12 @@ msgstr ""
 
 msgid "Both"
 msgstr ""
+
+msgid "Nearest Neighbor"
+msgstr ""
+
+msgid "Tolerance"
+msgstr ""
+
+msgid "Matched"
+msgstr ""
