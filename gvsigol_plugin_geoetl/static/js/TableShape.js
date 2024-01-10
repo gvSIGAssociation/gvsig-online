@@ -2847,6 +2847,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                 contentType: false, 
                 processData: false,
                 success: function (data) {
+                    data.unshift('ogc_fid')
                     paramsSHP['schema'] = data
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                     }
@@ -5203,6 +5204,8 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
                 let unique = chars.filter((c, index) => {
                     return chars.indexOf(c) === index;
                 });
+
+                unique.push('_distance')
 
                 schemaMod = [unique, schemaEdge[0],schemaEdge[1]]
             }

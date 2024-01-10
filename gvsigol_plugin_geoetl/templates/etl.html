@@ -418,6 +418,12 @@
                                     <input type="text" id="db-sql-server" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label form="db" class="col-form-label">{% trans 'TDS Version' %}:</label>
+                                    <input type="text" id="tds-version-sql-server" value="7.0" size="10" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
                         </div>
 
                     </form>
@@ -685,7 +691,8 @@
                     "server-sql-server": $('#server-sql-server').val(),
                     "username-sql-server": $('#username-sql-server').val(),
                     "password-sql-server": $('#password-sql-server').val(),
-                    "db-sql-server": $('#db-sql-server').val()
+                    "db-sql-server": $('#db-sql-server').val(),
+                    "tds-version-sql-server": $('#tds-version-sql-server').val()
                     }
                 ]}
     }
@@ -758,7 +765,8 @@
                     "server-sql-server": $('#server-sql-server').val(),
                     "username-sql-server": $('#username-sql-server').val(),
                     "password-sql-server": $('#password-sql-server').val(),
-                    "db-sql-server": $('#db-sql-server').val()
+                    "db-sql-server": $('#db-sql-server').val(),
+                    "tds-version-sql-server": $('#tds-version-sql-server').val()
                     }
                 ]}
     }

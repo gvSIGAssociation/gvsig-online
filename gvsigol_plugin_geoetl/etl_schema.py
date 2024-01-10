@@ -142,7 +142,7 @@ def test_postgres(dicc):
 
 def test_sqlserver(dicc):
     try:
-        conn = pymssql.connect(dicc['server-sql-server'], dicc['username-sql-server'], dicc['password-sql-server'], dicc['db-sql-server'])
+        conn = pymssql.connect(dicc['server-sql-server'], dicc['username-sql-server'], dicc['password-sql-server'], dicc['db-sql-server'], tds_version = dicc["tds-version-sql-server"])
         conn.close()
         return {"result": True}
     except Exception as e:
