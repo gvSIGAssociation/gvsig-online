@@ -5084,6 +5084,311 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// JOIN ////
+
+trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "trans_NearestNeighbor",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext('Nearest Neighbor'), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-neighbor-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Nearest Neighbor'))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div>'+
+                                '<label form="attr1" class="col-form-label">'+gettext('Group by:')+'</label>'+
+                                '<select class="form-control" id="attr-'+ID+'">'+
+                                '<option></option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<div>'+
+                                '<label form="tol" class="col-form-label">'+gettext('Tolerance')+':</label>'+
+                                '<input id="tol-'+ID+'" type="number" value="" min="0" step="0.010" class="form-control" >'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="neighbor-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+        
+        
+      var context = this
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+
+                    $('#attr-'+ID).empty()
+                    $('#attr-'+ID).append('<option> </option>')
+                    for (i = 0; i < schemaEdge[0].length; i++){
+                        $('#attr-'+ID).append('<option>'+schemaEdge[0][i]+'</option>')
+                    }
+                }
+
+            },100);
+
+            $('#dialog-neighbor-'+ID).modal('show')
+
+        });
+
+        $('#neighbor-accept-'+ID).click(function() {
+            //importante el orden de estos parametros, los mismos que en el formulario
+            var paramsNeighbor = {"id": ID,
+            "parameters": [
+                {"attr": $('#attr-'+ID).val(),
+                "tol": $('#tol-'+ID).val()}
+            ]}
+
+            paramsNeighbor['schema-old'] = schemaEdge
+
+            if (Array.isArray(schemaEdge[0])){
+                
+                chars = schemaEdge[0].concat(schemaEdge[1])
+
+                let unique = chars.filter((c, index) => {
+                    return chars.indexOf(c) === index;
+                });
+
+                schemaMod = [unique, schemaEdge[0],schemaEdge[1]]
+            }
+            else{
+                schemaMod = [...schemaEdge]
+            }
+
+            paramsNeighbor['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+
+            isAlreadyInCanvas(jsonParams, paramsNeighbor, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-neighbor-'+ID).modal('hide')
+
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext('Input Main'),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#107dac",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext('Input Sec.'),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:10, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label3 =new draw2d.shape.basic.Label({
+            text: gettext('Matched'),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label4 =new draw2d.shape.basic.Label({
+            text: gettext("Main Not Used"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var label5 =new draw2d.shape.basic.Label({
+            text: gettext("Sec. Not Used"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#107dac",
+            resizeable:true
+        });
+
+        var input1 = label1.createPort("input");
+        input1.setName("input_"+label1.id);
+
+        var input2 = label2.createPort("input");
+        input2.setName("input_"+label2.id);
+
+	    var output1= label3.createPort("output");
+        output1.setName("output_"+label3.id);
+
+	    var output2= label4.createPort("output");
+        output2.setName("output_"+label4.id);
+
+	    var output3= label5.createPort("output");
+        output3.setName("output_"+label5.id);
+
+	    if($.isNumeric(optionalIndex)){
+            this.add(label1, null, optionalIndex+1);
+            this.add(label2, null, optionalIndex+1);
+            this.add(label3, null, optionalIndex+1);
+            this.add(label4, null, optionalIndex+1);
+            this.add(label5, null, optionalIndex+1);
+	    }
+	    else{
+            this.add(label1);
+            this.add(label2);
+            this.add(label3);
+            this.add(label4);
+            this.add(label5);
+        }
+         
+        listLabel.push([this.id, [input1.name, input2.name], [output1.name, output2.name, output3.name]])
+
+	    return label1, label2, label3, label4, label5;
+    },
+        /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+
+     /**
+      * @method
+      * Set the name of the DB table. Visually it is the header of the shape
+      * 
+      * @param name
+      */
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     
+     
+     /**
+      * @method 
+      * Return an objects with all important attributes for XML or JSON serialization
+      * 
+      * @returns {Object}
+      */
+     getPersistentAttributes : getPerAttr,
+     
+     /**
+      * @method 
+      * Read all attributes from the serialized properties and transfer them into the shape.
+      *
+      * @param {Object} memento
+      * @return
+      */
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
 
 //// COMPARE ROWS ////
 

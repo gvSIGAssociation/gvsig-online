@@ -4723,3 +4723,417 @@ def input_SqlServer(dicc):
         conn_tgt.close()
 
     return [table_name]
+
+def trans_NearestNeighbor(dicc):
+
+    attr = dicc['attr']
+    tol = dicc['tol']
+
+
+    table_name_source_0 = dicc['data'][0]
+    table_name_source_1 = dicc['data'][1]
+
+    table_name_target_matched = dicc['id']+'_0'
+    table_name_target_0_not_used = dicc['id']+'_1'
+    table_name_target_1_not_used = dicc['id']+'_2'
+
+    output = [table_name_target_matched, table_name_target_0_not_used, table_name_target_1_not_used]
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    schemas =[]
+
+    for table_name in dicc['data']:
+
+        sqlDatetype = 'SELECT column_name from information_schema.columns '
+        sqlDatetype += 'where table_schema = %s and table_name = %s '
+        cur.execute(sql.SQL(sqlDatetype).format(
+        ),[GEOETL_DB["schema"], table_name])
+        conn.commit()
+
+        sc =[]
+        for row in cur:
+            sc.append(row[0])
+        schemas.append(sc)
+
+        cur.execute(sql.SQL('ALTER TABLE {schema}.{tbl} ADD COLUMN "_id_temp" SERIAL; ').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl = sql.Identifier(table_name)
+        ))
+
+        cur.execute(sql.SQL('CREATE INDEX IF NOT EXISTS "{tbl}_geom_idx" ON {schema}."{tbl}" USING GIST (wkb_geometry);').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl = sql.SQL(table_name)
+        ))
+
+    schemaList =[]
+    schema = ''
+
+    schemaListA0 =[]
+    schemaA0 = ''
+
+    schemaListA1 =[]
+    schemaA1 = ''
+
+    for name in schemas[0]:
+        schemaList.append(name)
+        schemaListA0.append(name)
+        if schema == '':
+            schema = 'A0.{}'
+            schemaA0 = 'A0.{}'
+        else:
+            schema = schema + ', A0.{}'
+            schemaA0 = schemaA0 + ', A0.{}'
+
+    for name in schemas[1]:
+        schemaListA1.append(name)
+        if name not in schemaList:
+            schemaList.append(name)
+            schema = schema + ', A1.{}'
+
+        if schemaA1 == '':
+            schemaA1 = 'A1.{}'
+        else:
+            schemaA1 = schemaA1 + ', A1.{}'
+
+    for out in output:
+
+        sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+            sql.Identifier(GEOETL_DB["schema"]),
+            sql.Identifier(out))
+        
+        cur.execute(sqlDrop)
+        conn.commit()
+        
+    if attr == '' and tol == '':
+
+        sqlMatched_ = """CREATE TABLE {sch}.{tbl_matched} AS 
+            (SELECT DISTINCT ON (A0."_id_temp")
+                    """ + schema +""", 
+                    ST_Distance(A0.wkb_geometry, A1.wkb_geometry) AS _distance,
+                    A1."_id_temp"
+                FROM 
+                    {sch}.{tbl_source_0} AS A0 
+                JOIN 
+                    {sch}.{tbl_source_1} AS A1 ON 1=1
+                ORDER BY A0._id_temp, ST_Distance(A0.wkb_geometry, A1.wkb_geometry) )"""
+
+        sqlMatched = sql.SQL(sqlMatched_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_matched = sql.Identifier(table_name_target_matched),
+                *[sql.Identifier(field) for field in schemaList],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+            )
+        cur.execute(sqlMatched)
+        conn.commit()
+
+        sqlNotJoin1_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (
+                SELECT 
+                    """ + schemaA0 +"""
+                FROM 
+                    {sch}.{tbl_source_0} AS A0 
+
+                WHERE A0."_id_temp" IS NULL
+            )"""
+
+        sqlNotJoin1 = sql.SQL(sqlNotJoin1_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_0_not_used),
+                *[sql.Identifier(field) for field in schemaListA0],
+                tbl_source_0 = sql.Identifier(table_name_source_0)
+            )
+        
+        cur.execute(sqlNotJoin1)
+        conn.commit()
+
+
+        sqlNotJoin2_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (SELECT 
+                """ + schemaA1 +"""
+            FROM 
+                {sch}.{tbl_source_1} AS A1
+            WHERE A1."_id_temp" NOT IN
+                (SELECT 
+                    _id_temp
+                FROM
+                    {sch}.{tbl_matched}
+                )
+            ) """
+
+        sqlNotJoin2 = sql.SQL(sqlNotJoin2_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_1_not_used),
+                *[sql.Identifier(field) for field in schemaListA1],
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                tbl_matched = sql.Identifier(table_name_target_matched)
+            )
+        
+        cur.execute(sqlNotJoin2)
+        conn.commit()
+
+        sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target_matched)
+        )
+
+        cur.execute(sqlDropCol)
+        conn.commit()
+
+
+    elif attr != '' and tol == '':
+        sqlMatched_ = """CREATE TABLE {sch}.{tbl_matched} AS 
+            (SELECT
+                """ +schema.replace('A0.', '').replace('A1.', '') +""",
+                _distance 
+            FROM (
+                SELECT 
+                    """ + schema +""", 
+                    ST_Distance(A0.wkb_geometry, A1.wkb_geometry) AS _distance,
+                    ROW_NUMBER() OVER (PARTITION BY A0._id_temp ORDER BY ST_Distance(A0.wkb_geometry, A1.wkb_geometry)) AS rn
+                FROM 
+                    {sch}.{tbl_source_0} AS A0 
+                LEFT JOIN 
+                    {sch}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr}
+                WHERE A1.{attr} IS NOT NULL
+            ) AS subconsulta
+            WHERE rn = 1)"""
+
+        sqlMatched = sql.SQL(sqlMatched_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_matched = sql.Identifier(table_name_target_matched),
+                *[sql.Identifier(field) for field in schemaList],
+                *[sql.Identifier(field) for field in schemaList],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                attr = sql.Identifier(attr)
+            )
+        cur.execute(sqlMatched)
+        conn.commit()
+
+        sqlNotJoin1_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (
+                SELECT 
+                    """ + schemaA0 +"""
+                FROM 
+                    {sch}.{tbl_source_0} AS A0 
+                LEFT JOIN 
+                    {sch}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr}
+                WHERE A1.{attr} IS NULL
+            )"""
+
+        sqlNotJoin1 = sql.SQL(sqlNotJoin1_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_0_not_used),
+                *[sql.Identifier(field) for field in schemaListA0],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                attr = sql.Identifier(attr)
+            )
+        
+        cur.execute(sqlNotJoin1)
+        conn.commit()
+
+        sqlNotJoin2_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (
+                SELECT 
+                    """ + schemaA1 +"""
+                FROM 
+                    {sch}.{tbl_source_0} AS A0 
+                RIGHT JOIN 
+                    {sch}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr}
+                WHERE A0.{attr} IS NULL
+            ) """
+
+        sqlNotJoin2 = sql.SQL(sqlNotJoin2_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_1_not_used),
+                *[sql.Identifier(field) for field in schemaListA1],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                attr = sql.Identifier(attr)
+            )
+        
+        cur.execute(sqlNotJoin2)
+        conn.commit()
+
+    elif attr == '' and tol != '':
+
+        sqlMatched_ = """CREATE TABLE {sch}.{tbl_matched} AS 
+            (SELECT DISTINCT ON (A0."_id_temp")
+                    """ + schema +""", 
+                    ST_Distance(A0.wkb_geometry, A1.wkb_geometry) AS _distance,
+                    A0."_id_temp" AS _id_temp_a0,
+                    A1."_id_temp" AS _id_temp_a1
+                FROM 
+                    {sch}.{tbl_source_0} AS A0 
+                JOIN 
+                    {sch}.{tbl_source_1} AS A1 
+                ON 
+                    ST_DWithin(A0.wkb_geometry, A1.wkb_geometry, {tol})
+                ORDER BY 
+                    A0._id_temp, ST_Distance(A0.wkb_geometry, A1.wkb_geometry) )"""
+
+        sqlMatched = sql.SQL(sqlMatched_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_matched = sql.Identifier(table_name_target_matched),
+                *[sql.Identifier(field) for field in schemaList],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                tol = sql.SQL(tol)
+            )
+        cur.execute(sqlMatched)
+        conn.commit()
+
+        sqlNotJoin1_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (SELECT 
+                """ + schemaA0 +"""
+            FROM 
+                {sch}.{tbl_source_0} AS A0
+            WHERE A0."_id_temp" NOT IN
+                (SELECT 
+                    _id_temp_a0
+                FROM
+                    {sch}.{tbl_matched}
+                )
+            ) """
+
+        sqlNotJoin1 = sql.SQL(sqlNotJoin1_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_0_not_used),
+                *[sql.Identifier(field) for field in schemaListA0],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_matched = sql.Identifier(table_name_target_matched)
+            )
+        
+        cur.execute(sqlNotJoin1)
+        conn.commit()
+
+        sqlNotJoin2_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (SELECT 
+                """ + schemaA1 +"""
+            FROM 
+                {sch}.{tbl_source_1} AS A1
+            WHERE A1."_id_temp" NOT IN
+                (SELECT 
+                    _id_temp_a1
+                FROM
+                    {sch}.{tbl_matched}
+                )
+            ) """
+
+        sqlNotJoin2 = sql.SQL(sqlNotJoin2_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_1_not_used),
+                *[sql.Identifier(field) for field in schemaListA1],
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                tbl_matched = sql.Identifier(table_name_target_matched)
+            )
+        
+        cur.execute(sqlNotJoin2)
+        conn.commit()
+
+        sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp_a0, DROP COLUMN _id_temp_a1;').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target_matched)
+        )
+
+        cur.execute(sqlDropCol)
+        conn.commit()
+
+
+    elif attr != '' and tol != '':
+
+        sqlMatched_ = """CREATE TABLE {sch}.{tbl_matched} AS 
+            (SELECT
+                """ + schema.replace('A0.', '').replace('A1.', '') + """,
+                _distance, 
+                _id_temp_a0, 
+                _id_temp_a1
+            FROM (
+                SELECT 
+                    """ + schema +""", 
+                    ST_Distance(A0.wkb_geometry, A1.wkb_geometry) AS _distance,
+                    ROW_NUMBER() OVER (PARTITION BY A0._id_temp ORDER BY ST_Distance(A0.wkb_geometry, A1.wkb_geometry)) AS rn,
+                    A0."_id_temp" AS _id_temp_a0,
+                    A1."_id_temp" AS _id_temp_a1
+                FROM 
+                    {sch}.{tbl_source_0} AS A0 
+                LEFT JOIN 
+                    {sch}.{tbl_source_1} AS A1 ON A0.{attr} = A1.{attr}
+                WHERE ST_DWithin(A0.wkb_geometry, A1.wkb_geometry, {tol}) AND A1.{attr} IS NOT NULL
+            ) AS subconsulta
+            WHERE rn = 1)"""
+
+        sqlMatched = sql.SQL(sqlMatched_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_matched = sql.Identifier(table_name_target_matched),
+                *[sql.Identifier(field) for field in schemaList],
+                *[sql.Identifier(field) for field in schemaList],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                attr = sql.Identifier(attr),
+                tol = sql.SQL(tol)
+            )
+        cur.execute(sqlMatched)
+        conn.commit()
+
+        sqlNotJoin1_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (SELECT 
+                """ + schemaA0 +"""
+            FROM 
+                {sch}.{tbl_source_0} AS A0
+            WHERE A0."_id_temp" NOT IN
+                (SELECT 
+                    _id_temp_a0
+                FROM
+                    {sch}.{tbl_matched}
+                )
+            ) """
+
+        sqlNotJoin1 = sql.SQL(sqlNotJoin1_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_0_not_used),
+                *[sql.Identifier(field) for field in schemaListA0],
+                tbl_source_0 = sql.Identifier(table_name_source_0),
+                tbl_matched = sql.Identifier(table_name_target_matched)
+            )
+        
+        cur.execute(sqlNotJoin1)
+        conn.commit()
+
+        sqlNotJoin2_ = """CREATE TABLE {sch}.{tbl_} AS 
+            (SELECT 
+                """ + schemaA1 +"""
+            FROM 
+                {sch}.{tbl_source_1} AS A1
+            WHERE A1."_id_temp" NOT IN
+                (SELECT 
+                    _id_temp_a1
+                FROM
+                    {sch}.{tbl_matched}
+                )
+            ) """
+
+        sqlNotJoin2 = sql.SQL(sqlNotJoin2_).format(
+                sch = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_ = sql.Identifier(table_name_target_1_not_used),
+                *[sql.Identifier(field) for field in schemaListA1],
+                tbl_source_1 = sql.Identifier(table_name_source_1),
+                tbl_matched = sql.Identifier(table_name_target_matched)
+            )
+        
+        cur.execute(sqlNotJoin2)
+        conn.commit()
+
+        sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp_a0, DROP COLUMN _id_temp_a1;').format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target_matched)
+        )
+
+        cur.execute(sqlDropCol)
+        conn.commit()
+
+    return output

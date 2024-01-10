@@ -1251,3 +1251,13 @@ msgstr "Lado"
 
 msgid "Both"
 msgstr "Ambos"
+
+msgid "Nearest Neighbor"
+msgstr "Vecino Más Próximo"
+
+msgid "Tolerance"
+msgstr "Tolerancia"
+
+msgid "Matched"
+msgstr "Emparejados"
+
