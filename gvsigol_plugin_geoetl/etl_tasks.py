@@ -4545,7 +4545,7 @@ def input_SqlServer(dicc):
 
     params = json.loads(db.connection_params)
 
-    conn_source_sqlserver = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    conn_source_sqlserver = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'], params['db-sql-server'], tds_version = params["tds-version-sql-server"])
     cursor_source = conn_source_sqlserver.cursor(as_dict=True)
 
     if dicc['checkbox'] == 'true':
@@ -4576,8 +4576,10 @@ def input_SqlServer(dicc):
 
     else:
         sql_df = 'SELECT TOP 1 %s FROM %s.%s.%s' % (strColumns[:-2], params['db-sql-server'], dicc['schema-name'], dicc['table-name'])
-
-    conn_string_source = 'mssql+pymssql://%s:%s@%s/%s' % (params['username-sql-server'], params['password-sql-server'], params['server-sql-server'], params['db-sql-server'])
+    
+    os.environ['TDSVER'] = params["tds-version-sql-server"]
+    
+    conn_string_source = "mssql+pymssql://%s:%s@%s/%s" % (params['username-sql-server'], params['password-sql-server'], params['server-sql-server'], params['db-sql-server'])
     db_source = create_engine(conn_string_source)
     conn_source = db_source.connect()
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-10 09:56+0100\n"
+"POT-Creation-Date: 2024-01-11 15:34+0100\n"
 "PO-Revision-Date: 2023-10-16 15:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -101,7 +101,7 @@ msgstr "Cancelar"
 #: templates/dashboard_geoetl_concat_workspaces.html:252
 #: templates/dashboard_geoetl_workspaces_list.html:104
 #: templates/dashboard_geoetl_workspaces_list.html:252 templates/etl.html:247
-#: templates/etl.html:273 templates/etl.html:298 templates/etl.html:463
+#: templates/etl.html:273 templates/etl.html:298 templates/etl.html:479
 msgid "Accept"
 msgstr "Aceptar"
 
@@ -231,18 +231,18 @@ msgstr "¿Cambiar a superusuario?"
 #: templates/dashboard_geoetl_workspaces_list.html:300
 #: templates/dashboard_geoetl_workspaces_list.html:327
 #: templates/dashboard_geoetl_workspaces_list.html:552 templates/etl.html:223
-#: templates/etl.html:434
+#: templates/etl.html:450
 msgid "Close"
 msgstr "Cerrar"
 
 #: templates/dashboard_geoetl_concat_workspaces.html:227 templates/etl.html:224
-#: templates/etl.html:436
+#: templates/etl.html:452
 msgid "Save"
 msgstr "Guardar"
 
 #: templates/dashboard_geoetl_concat_workspaces.html:242
 #: templates/dashboard_geoetl_workspaces_list.html:242 templates/etl.html:288
-#: templates/etl.html:453
+#: templates/etl.html:469
 msgid "Not allowed"
 msgstr "No permitido"
 
@@ -786,11 +786,15 @@ msgstr ""
 msgid "Database"
 msgstr "Base de datos:"
 
-#: templates/etl.html:435
+#: templates/etl.html:423
+msgid "TDS Version"
+msgstr "Versión TDS"
+
+#: templates/etl.html:451
 msgid "Verify connection"
 msgstr "Verifica conexión"
 
-#: templates/etl.html:458
+#: templates/etl.html:474
 msgid "DataBase Connection not saved. Probably, database name already exists."
 msgstr ""
 "La conexión no se ha guardado. Probablemente, el nombre de la base de datos "
