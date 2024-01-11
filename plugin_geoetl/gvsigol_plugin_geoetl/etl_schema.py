@@ -581,7 +581,8 @@ def get_schemas_sqlserver(dicc):
 
     params = json.loads(db.connection_params)
 
-    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'], tds_version = params["tds-version-sql-server"])
+    
     cursor = conn.cursor(as_dict=True)
     
     cursor.execute("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA  WHERE CATALOG_NAME  = '%s'" % (params['db-sql-server']) )
@@ -601,7 +602,7 @@ def get_tables_sqlserver(dicc):
 
     params = json.loads(db.connection_params)
 
-    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'], params['db-sql-server'], tds_version = '7.0')
     cursor = conn.cursor(as_dict=True)
     
     cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG = '%s' AND TABLE_SCHEMA  = '%s' ORDER BY TABLE_NAME" % (params['db-sql-server'], dicc['schema-name']) )
@@ -620,7 +621,8 @@ def get_data_schemas_sqlserver(dicc):
 
     params = json.loads(db.connection_params)
 
-    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'])
+    conn = pymssql.connect(params['server-sql-server'], params['username-sql-server'], params['password-sql-server'], params['db-sql-server'], tds_version = params["tds-version-sql-server"])    
+    
     cursor = conn.cursor(as_dict=True)
 
     if dicc['checkbox'] == 'true':

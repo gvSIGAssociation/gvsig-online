@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-10 09:55+0100\n"
+"POT-Creation-Date: 2024-01-11 15:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,7 +99,7 @@ msgstr ""
 #: templates/dashboard_geoetl_concat_workspaces.html:252
 #: templates/dashboard_geoetl_workspaces_list.html:104
 #: templates/dashboard_geoetl_workspaces_list.html:252 templates/etl.html:247
-#: templates/etl.html:273 templates/etl.html:298 templates/etl.html:463
+#: templates/etl.html:273 templates/etl.html:298 templates/etl.html:479
 msgid "Accept"
 msgstr ""
 
@@ -229,18 +229,18 @@ msgstr ""
 #: templates/dashboard_geoetl_workspaces_list.html:300
 #: templates/dashboard_geoetl_workspaces_list.html:327
 #: templates/dashboard_geoetl_workspaces_list.html:552 templates/etl.html:223
-#: templates/etl.html:434
+#: templates/etl.html:450
 msgid "Close"
 msgstr ""
 
 #: templates/dashboard_geoetl_concat_workspaces.html:227 templates/etl.html:224
-#: templates/etl.html:436
+#: templates/etl.html:452
 msgid "Save"
 msgstr ""
 
 #: templates/dashboard_geoetl_concat_workspaces.html:242
 #: templates/dashboard_geoetl_workspaces_list.html:242 templates/etl.html:288
-#: templates/etl.html:453
+#: templates/etl.html:469
 msgid "Not allowed"
 msgstr ""
 
@@ -778,11 +778,15 @@ msgstr ""
 msgid "Database"
 msgstr ""
 
-#: templates/etl.html:435
+#: templates/etl.html:423
+msgid "TDS Version"
+msgstr ""
+
+#: templates/etl.html:451
 msgid "Verify connection"
 msgstr ""
 
-#: templates/etl.html:458
+#: templates/etl.html:474
 msgid "DataBase Connection not saved. Probably, database name already exists."
 msgstr ""
 
