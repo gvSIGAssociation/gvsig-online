@@ -26,6 +26,7 @@ import re
 from zipfile import ZipFile
 import time
 import math
+import numpy as np
 from . import etl_schema
 import xml.etree.ElementTree as ET
 
@@ -4579,11 +4580,11 @@ def input_SqlServer(dicc):
     
     os.environ['TDSVER'] = params["tds-version-sql-server"]
     
-    conn_string_source = "mssql+pymssql://%s:%s@%s/%s" % (params['username-sql-server'], params['password-sql-server'], params['server-sql-server'], params['db-sql-server'])
+    """conn_string_source = "mssql+pymssql://%s:%s@%s/%s" % (params['username-sql-server'], params['password-sql-server'], params['server-sql-server'], params['db-sql-server'])
     db_source = create_engine(conn_string_source)
-    conn_source = db_source.connect()
+    conn_source = db_source.connect()"""
 
-    df = pd.read_sql(sql_df, con = conn_source)
+    df = pd.read_sql(sql_df, con = conn_source_sqlserver)
 
     _decimals = ['decimal', 'numeric', 'float', 'real', 'money', 'smallmoney']
     _integers = ['int', 'bigint', 'smallint', 'tinyint']
@@ -4592,27 +4593,40 @@ def input_SqlServer(dicc):
     _geo = ['geography', 'geometry']
 
     convert_dict = {}
+
     for i in range (0, len(columns)):
         
         if data_types[i] in _integers:
             convert_dict[columns[i]] = 'int64'
+            if not df.iloc[0][columns[i]]:
+                df.iloc[0, df.columns.get_loc(columns[i])] = np.nan_to_num(np.nan)
+                
 
         elif data_types[i] in _decimals:
             convert_dict[columns[i]] = 'float64'
+            if not df.iloc[0][columns[i]]:
+                df.iloc[0, df.columns.get_loc(columns[i])] = np.nan_to_num(np.nan)
 
         elif data_types[i] in _text:
             convert_dict[columns[i]] = 'string'
+            if not df.iloc[0][columns[i]]:
+                df.iloc[0, df.columns.get_loc(columns[i])] = ''
 
         elif data_types[i] in _geo:
             convert_dict[columns[i]] = 'string'
             geometry = columns[i]
+            if not df.iloc[0][columns[i]]:
+                df.iloc[0, df.columns.get_loc(columns[i])] = ''
 
         elif data_types[i] in _date:
-            convert_dict[columns[i]] = 'datetime64'
-        
+            convert_dict[columns[i]] = 'datetime64[ns]'
+            if not df.iloc[0][columns[i]]:
+                df.iloc[0, df.columns.get_loc(columns[i])] = np.nan_to_num(np.nan)
         else:
             convert_dict[columns[i]] = 'string'
-    
+            if not df.iloc[0][columns[i]]:
+                df.iloc[0, df.columns.get_loc(columns[i])] = ''
+
     df = df.astype(convert_dict)
     
     conn_string_target= 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
@@ -4621,8 +4635,8 @@ def input_SqlServer(dicc):
 
     df.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
 
-    conn_source.close()
-    db_source.dispose()
+    #conn_source.close()
+    #db_source.dispose()
 
     if dicc['checkbox'] == 'true':
         _sql = "SELECT %s FROM (%s) a" % (strColumns[:-2], dicc['sql'])
