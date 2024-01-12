@@ -4587,7 +4587,7 @@ def input_SqlServer(dicc):
     df = pd.read_sql(sql_df, con = conn_source_sqlserver)
 
     _decimals = ['decimal', 'numeric', 'float', 'real', 'money', 'smallmoney']
-    _integers = ['int', 'bigint', 'smallint', 'tinyint']
+    _integers = ['int', 'bigint', 'smallint', 'tinyint', 'bit']
     _text = ['char', 'varchar', 'nchar', 'nvarchar']
     _date = ['date', 'datetime', 'datetime2', 'datetimeoffset', 'smalldatetime', 'time']
     _geo = ['geography', 'geometry']
@@ -4652,7 +4652,10 @@ def input_SqlServer(dicc):
         
         for j in row:
             if convert_dict[j] == 'string' and row[j]:
-                row[j] = row[j].replace("\x00", "\uFFFD")
+                try:
+                    row[j] = row[j].replace("\x00", "\uFFFD")
+                except:
+                    pass
 
         df_tar = pd.DataFrame([row])
         if count == 1:
