@@ -1547,7 +1547,7 @@ def not_found_sharedview(request):
     response.status_code = 404
     return response
 
-def _project_clone(project, new_project_name, title, target_server, target_workspace_name, target_datastore_name, username, permission_choice, copy_data=True):
+def _project_clone(project, new_project_name, title, target_server, target_workspace_name, target_datastore_name, username, permission_choice, copy_data=True, clean_on_failure=False):
     if target_server.frontend_url.endswith("/"):
         uri = target_server.frontend_url + target_workspace_name
     else:
@@ -1563,14 +1563,40 @@ def _project_clone(project, new_project_name, title, target_server, target_works
         "wmts_endpoint": target_server.getWmtsEndpoint(target_workspace_name),
         "cache_endpoint": target_server.getCacheEndpoint(target_workspace_name)
     }
-
-    target_workspace = services_utils.create_workspace(target_server.id, target_workspace_name, uri, values, username)
-    if target_workspace:
+    try:
+        target_workspace = None
+        datastore = None
+        new_project = None
+        target_workspace = services_utils.create_workspace(target_server.id, target_workspace_name, uri, values, username)
+        if not target_workspace:
+            raise Exception('Error creating target workspace')
         datastore = services_utils.create_datastore(username, target_datastore_name, target_workspace)
         new_project = project.clone(target_datastore=datastore, name=new_project_name, title=title, copy_layer_data=copy_data, permissions=permission_choice)
         server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
         server.reload_nodes()
         return new_project
+    except Exception as e:
+        if clean_on_failure:
+            try:
+                if target_workspace:
+                    if datastore:
+                        services_utils._workspace_delete(target_workspace, delete_data=True)
+                    else:
+                        services_utils._workspace_delete(target_workspace, delete_data=False)
+                    gs = geographic_servers.get_instance().get_server_by_id(server.id)
+                
+                    if new_project:
+                        lyr_groups = [prj_lg.layer_group for prj_lg in new_project.projectlayergroup_set.filter(baselayer_group=False)]
+                        new_project.delete()
+                        for lyr_group in lyr_groups:
+                            gs.deleteGeoserverLayerGroup(lyr_group)
+                            lyr_group.delete()
+
+                        gs.setDataRules()
+                    gs.reload_nodes()
+            except:
+                pass
+        raise
 
 @login_required()
 @superuser_required
