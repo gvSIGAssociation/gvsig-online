@@ -86,11 +86,12 @@ env = environ.Env(
     IFRAME_MODE_UI=(bool,False),
     MANAGE_PERMISSION_UI=(bool,True),
     #csrf
-    CSRF_TRUSTED_ORIGINS = (list,['localhost']),
+    CSRF_TRUSTED_ORIGINS = (list,['localhost', 'localhost:9000', 'https:localhost']),
     #cors
     CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),    
     CORS_ALLOW_CREDENTIALS = (bool,True),
     CORS_ORIGIN_ALLOW_ALL = (bool,False),
+    CORS_REPLACE_HTTPS_REFERER = (bool,False),
     # frontend SPA
     USE_SPA_PROJECT_LINKS = (bool,False),
     FRONTEND_BASE_URL = (str,'/gvsigonline'),
@@ -312,6 +313,7 @@ except ImportError:
 CORS_ORIGIN_ALLOW_ALL = env('CORS_ORIGIN_ALLOW_ALL')
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
+CORS_REPLACE_HTTPS_REFERER = env('CORS_REPLACE_HTTPS_REFERER')
 
 CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
 
