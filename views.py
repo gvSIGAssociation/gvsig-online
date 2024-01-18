@@ -422,15 +422,7 @@ def workspace_delete(request, wsid):
     ws = None
     try:
         ws = Workspace.objects.get(id=wsid)
-        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
-        gs.deleteWorkspace(ws)
-        datastores = Datastore.objects.filter(workspace_id=ws.id)
-        for ds in datastores:
-            layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
-            for l in layers:
-                gs.deleteLayerStyles(l)
-        ws.delete()
-        gs.reload_nodes()
+        utils._workspace_delete(ws, reload_nodes=True)
         return HttpResponseRedirect(reverse('workspace_list'))
     except BackendNotAvailable:
         return HttpResponse('The map server is not available. Try again later or contact the system administrators', status=503)
@@ -642,48 +634,15 @@ def datastore_delete(request, dsid):
         delete_schema = False
         if request.POST.get('delete_schema') == 'true':
             delete_schema = True
-
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-        try:
-            gs.deleteDatastore(ds.workspace, ds, delete_schema)
-            layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
-            for l in layers:
-                gs.deleteLayerStyles(l)
-
-            Datastore.objects.all().filter(name=ds.name).delete()
-            if ds.type == 'c_ImageMosaic':
-                got_params = json.loads(ds.connection_params)
-                mosaic_url = got_params["url"].replace("file://", "")
-                split_mosaic_url = mosaic_url.split("/")
-
-                mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
-
-                if os.path.isfile(mosaic_url + "/" + ds.name + ".properties"):
-                    os.remove(mosaic_url + "/" + ds.name + ".properties")
-                if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
-                    os.remove(mosaic_url + "/" + mosaic_name + ".properties")
-                if os.path.isfile(mosaic_url + "/sample_image.dat"):
-                    os.remove(mosaic_url + "/sample_image.dat")
-
-                host = MOSAIC_DB['host']
-                port = MOSAIC_DB['port']
-                dbname = MOSAIC_DB['database']
-                user = MOSAIC_DB['user']
-                passwd = MOSAIC_DB['passwd']
-                schema = 'imagemosaic'
-                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-                i.delete_mosaic(ds.name, schema)
-                i.close()
-
-            gs.reload_nodes()
-            return HttpResponseRedirect(reverse('datastore_list'))
-
-        except:
-            logger.exception("Error deleting store")
-            return HttpResponseBadRequest()
+        gs.deleteDatastore(ds.workspace, delete_schema=delete_schema)
+        utils.delete_datastore_elements(ds, gs=gs)
+        return HttpResponseRedirect(reverse('datastore_list'))
 
     except:
-        return HttpResponseNotFound('<h1>Datastore not found{0}</h1>'.format(ds.name))
+        logger.exception("Error deleting store")
+        return HttpResponseBadRequest()
+
 
 @login_required()
 @require_safe
@@ -2445,9 +2404,9 @@ def layergroup_delete(request, lgid):
             gs.setDataRules()
             gs.reload_nodes()
 
-        except Exception:
+        except Exception: # ignore Geoserver failures because the group may only exist in gvsigol
             logger.exception("Error deleting layer group")
-            layergroup.delete()
+        layergroup.delete()
 
         response = {
             'deleted': True

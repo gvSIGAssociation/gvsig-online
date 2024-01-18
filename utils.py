@@ -1005,3 +1005,46 @@ def create_user_workspace(username, role):
         ds_name = 'ds_' + ascii_username
         create_datastore(username, ds_name, newWs)
         gs.reload_nodes()
+
+def delete_datastore_elements(ds, gs=None):
+    if not gs:
+        gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+    layers = Layer.objects.filter(external=False).filter(datastore=ds)
+    for l in layers:
+        gs.deleteLayerStyles(l)
+
+    Datastore.objects.all().filter(name=ds.name).delete()
+    if ds.type == 'c_ImageMosaic':
+        got_params = json.loads(ds.connection_params)
+        mosaic_url = got_params["url"].replace("file://", "")
+        split_mosaic_url = mosaic_url.split("/")
+
+        mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+
+        if os.path.isfile(mosaic_url + "/" + ds.name + ".properties"):
+            os.remove(mosaic_url + "/" + ds.name + ".properties")
+        if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
+            os.remove(mosaic_url + "/" + mosaic_name + ".properties")
+        if os.path.isfile(mosaic_url + "/sample_image.dat"):
+            os.remove(mosaic_url + "/sample_image.dat")
+
+        host = MOSAIC_DB['host']
+        port = MOSAIC_DB['port']
+        dbname = MOSAIC_DB['database']
+        user = MOSAIC_DB['user']
+        passwd = MOSAIC_DB['passwd']
+        schema = 'imagemosaic'
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        i.delete_mosaic(ds.name, schema)
+        i.close()
+
+def _workspace_delete(ws, delete_data=False, reload_nodes=False):
+        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
+        gs.deleteWorkspace(ws)
+        datastores = Datastore.objects.filter(workspace_id=ws.id)
+        for ds in datastores:
+            if delete_data:
+                gs.deleteDatastore(ds.workspace, delete_schema=True)
+            delete_datastore_elements(ds, gs=gs)
+        ws.delete()
+        gs.reload_nodes()
