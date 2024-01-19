@@ -1262,3 +1262,27 @@ msgstr ""
 
 msgid "Matched"
 msgstr ""
+
+msgid "Correct Spelling"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Spanish"
+msgstr ""
+
+msgid "Spain"
+msgstr ""
+
+msgid "English"
+msgstr ""
+
+msgid "British"
+msgstr ""
+
+msgid "String attribute to correct"
+msgstr ""
+
+msgid "Correct only the accent marks"
+msgstr ""
