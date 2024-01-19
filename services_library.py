@@ -539,114 +539,148 @@ def remove_accents(string):
 
 def upload_library(name, description, file):
     gs = geographic_servers.get_instance().get_default_server()
+
+    try:
+        library = Library.objects.get(name=name)
+        if library is not None:
+            raise Exception("Error nombre") #ya existe una biblioteca con ese nombre
     
-    library = Library(
-        name = name,
-        description = description
-    )
-    library.save()
-            
-    library_path = utils.check_library_path(library)
-    file_path = utils.__get_uncompressed_file_upload_path(file)
-    utils.copyrecursively(file_path+"/resources/", library_path)
-    
-    file_list = os.listdir(file_path)
-    for file in file_list:
-        if not os.path.isdir(file_path+"/"+file):
-            f = open(file_path+"/"+file, 'r')
-            sld = sld_reader.parse(f)
-            
-            style_name = remove_accents(sld.NamedLayer[0].Name)
-            sld.NamedLayer[0].Name = style_name
-            style_title = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0].Title
-            r = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0]
-            
-            style = Style(
-                name = style_name,
-                title = style_title,
-                is_default = True,
-                type = "US"
-            )
-            style.save()
-            
-            rule = Rule(
-                style = style,
-                name = style_name,
-                title = style_title,
-                abstract = '',
-                filter = str(""),
-                minscale = -1 if r.MinScaleDenominator is None else r.MinScaleDenominator,
-                maxscale = -1 if r.MaxScaleDenominator is None else r.MaxScaleDenominator,
-                order = 0
-            )
-            rule.save()
-            
-            library_rule = LibraryRule(
-                library = library,
-                rule = rule
-            )
-            library_rule.save()
-            
-            scount = r.Symbolizer.__len__()-1
-            for s in r.Symbolizer:
-                if s.original_tagname_ == 'PointSymbolizer':
-                    opacity = s.Graphic.Opacity.valueOf_
-                    rotation = s.Graphic.Rotation.valueOf_
-                    size = s.Graphic.Size.valueOf_
-                    if len(s.Graphic.Mark) >= 1:
-                        mark = s.Graphic.Mark[0]
-                        
+    except Library.DoesNotExist:
+
+        library = Library(
+            name = name,
+            description = description
+        )
+        library.save()
+        prefix_name= library.name + "_lib_"        
+        library_path = utils.check_library_path(library)
+        file_path = utils.__get_uncompressed_file_upload_path(file)
+        utils.copyrecursively(file_path+"/resources/", library_path)
+        
+        file_list = os.listdir(file_path)
+        for file in file_list:
+            if not os.path.isdir(file_path+"/"+file):
+                f = open(file_path+"/"+file, 'r')
+                sld = sld_reader.parse(f)
+                
+                style_name = remove_accents(sld.NamedLayer[0].Name)
+                sld.NamedLayer[0].Name = prefix_name + style_name
+                style_title = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0].Title
+                r = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0]
+                
+                style = Style(
+                    name = prefix_name + style_name,
+                    title = style_title,
+                    is_default = True,
+                    type = "US"
+                )
+                style.save()
+                
+                rule = Rule(
+                    style = style,
+                    name = style_name,
+                    title = style_title,
+                    abstract = '',
+                    filter = str(""),
+                    minscale = -1 if r.MinScaleDenominator is None else r.MinScaleDenominator,
+                    maxscale = -1 if r.MaxScaleDenominator is None else r.MaxScaleDenominator,
+                    order = 0
+                )
+                rule.save()
+                
+                library_rule = LibraryRule(
+                    library = library,
+                    rule = rule
+                )
+                library_rule.save()
+                
+                scount = r.Symbolizer.__len__()-1
+                for s in r.Symbolizer:
+                    if s.original_tagname_ == 'PointSymbolizer':
+                        opacity = s.Graphic.Opacity.valueOf_
+                        rotation = s.Graphic.Rotation.valueOf_
+                        size = s.Graphic.Size.valueOf_
+                        if len(s.Graphic.Mark) >= 1:
+                            mark = s.Graphic.Mark[0]
+                            
+                            stroke = '#000000'
+                            if mark.Stroke.CssParameter.__len__() > 0:
+                                stroke = mark.Stroke.CssParameter[0].valueOf_
+                                
+                            stroke_width = 1
+                            if mark.Stroke.CssParameter.__len__() > 1:
+                                stroke_width = mark.Stroke.CssParameter[1].valueOf_
+                                
+                            stroke_opacity = 1
+                            if mark.Stroke.CssParameter.__len__() > 2:
+                                stroke_opacity = mark.Stroke.CssParameter[2].valueOf_
+                                
+                            stroke_dash_array = 'none'
+                            if mark.Stroke.CssParameter.__len__() > 3:
+                                stroke_dash_array = mark.Stroke.CssParameter[3].valueOf_
+                                
+                            symbolizer = MarkSymbolizer(
+                                rule = rule,
+                                order = scount,
+                                opacity = opacity,
+                                size = size,
+                                rotation = rotation,
+                                well_known_name = mark.WellKnownName,
+                                fill = mark.Fill.CssParameter[0].valueOf_,
+                                fill_opacity = mark.Fill.CssParameter[1].valueOf_,
+                                stroke = stroke,
+                                stroke_width = stroke_width,
+                                stroke_opacity = stroke_opacity,
+                                stroke_dash_array = stroke_dash_array 
+                            )
+                            symbolizer.save()
+                            
+                        if len(s.Graphic.ExternalGraphic) >= 1:
+                            external_graphic = s.Graphic.ExternalGraphic[0]
+                            online_resource = external_graphic.OnlineResource.href.split('/')
+                            online_resource[-2] = library.name
+                            new_online_resource = settings.MEDIA_URL + online_resource[-3]+'/'+ library.name + '/' + remove_accents(online_resource[-1])
+                            symbolizer = ExternalGraphicSymbolizer(
+                                rule = rule,
+                                order = scount,
+                                opacity = opacity,
+                                size = size,
+                                rotation = rotation,
+                                online_resource = new_online_resource,
+                                format = external_graphic.Format
+                            )
+                            symbolizer.save()
+                            
+                    elif s.original_tagname_ == 'LineSymbolizer':
                         stroke = '#000000'
-                        if mark.Stroke.CssParameter.__len__() > 0:
-                            stroke = mark.Stroke.CssParameter[0].valueOf_
+                        if s.Stroke:
+                            if s.Stroke.CssParameter.__len__() > 0:
+                                stroke = s.Stroke.CssParameter[0].valueOf_
+                                
+                            stroke_width = 1
+                            if s.Stroke.CssParameter.__len__() > 1:
+                                stroke_width = s.Stroke.CssParameter[1].valueOf_
+                                
+                            stroke_opacity = 1
+                            if s.Stroke.CssParameter.__len__() > 2:
+                                stroke_opacity = s.Stroke.CssParameter[2].valueOf_
+                                
+                            stroke_dash_array = 'none'
+                            if s.Stroke.CssParameter.__len__() > 3:
+                                stroke_dash_array = s.Stroke.CssParameter[3].valueOf_
+                                
+                            symbolizer = LineSymbolizer(
+                                rule = rule,
+                                order = scount,
+                                stroke = stroke,
+                                stroke_width = stroke_width,
+                                stroke_opacity = stroke_opacity,
+                                stroke_dash_array =stroke_dash_array                 
+                            )
+                            symbolizer.save()
                             
-                        stroke_width = 1
-                        if mark.Stroke.CssParameter.__len__() > 1:
-                            stroke_width = mark.Stroke.CssParameter[1].valueOf_
-                            
-                        stroke_opacity = 1
-                        if mark.Stroke.CssParameter.__len__() > 2:
-                            stroke_opacity = mark.Stroke.CssParameter[2].valueOf_
-                            
-                        stroke_dash_array = 'none'
-                        if mark.Stroke.CssParameter.__len__() > 3:
-                            stroke_dash_array = mark.Stroke.CssParameter[3].valueOf_
-                            
-                        symbolizer = MarkSymbolizer(
-                            rule = rule,
-                            order = scount,
-                            opacity = opacity,
-                            size = size,
-                            rotation = rotation,
-                            well_known_name = mark.WellKnownName,
-                            fill = mark.Fill.CssParameter[0].valueOf_,
-                            fill_opacity = mark.Fill.CssParameter[1].valueOf_,
-                            stroke = stroke,
-                            stroke_width = stroke_width,
-                            stroke_opacity = stroke_opacity,
-                            stroke_dash_array = stroke_dash_array 
-                        )
-                        symbolizer.save()
-                        
-                    if len(s.Graphic.ExternalGraphic) >= 1:
-                        external_graphic = s.Graphic.ExternalGraphic[0]
-                        online_resource = external_graphic.OnlineResource.href.split('/')
-                        online_resource[-2] = library.name
-                        new_online_resource = settings.MEDIA_URL + online_resource[-3]+'/'+ library.name + '/' + remove_accents(online_resource[-1])
-                        symbolizer = ExternalGraphicSymbolizer(
-                            rule = rule,
-                            order = scount,
-                            opacity = opacity,
-                            size = size,
-                            rotation = rotation,
-                            online_resource = new_online_resource,
-                            format = external_graphic.Format
-                        )
-                        symbolizer.save()
-                        
-                elif s.original_tagname_ == 'LineSymbolizer':
-                    stroke = '#000000'
-                    if s.Stroke:
+                    elif s.original_tagname_ == 'PolygonSymbolizer':
+                        stroke = '#000000'
                         if s.Stroke.CssParameter.__len__() > 0:
                             stroke = s.Stroke.CssParameter[0].valueOf_
                             
@@ -661,58 +695,31 @@ def upload_library(name, description, file):
                         stroke_dash_array = 'none'
                         if s.Stroke.CssParameter.__len__() > 3:
                             stroke_dash_array = s.Stroke.CssParameter[3].valueOf_
-                            
-                        symbolizer = LineSymbolizer(
+                        
+                        
+                        symbolizer = PolygonSymbolizer(
                             rule = rule,
                             order = scount,
+                            fill = s.Fill.CssParameter[0].valueOf_,
+                            fill_opacity = s.Fill.CssParameter[1].valueOf_,
                             stroke = stroke,
                             stroke_width = stroke_width,
                             stroke_opacity = stroke_opacity,
-                            stroke_dash_array =stroke_dash_array                 
+                            stroke_dash_array =stroke_dash_array                
                         )
                         symbolizer.save()
                         
-                elif s.original_tagname_ == 'PolygonSymbolizer':
-                    stroke = '#000000'
-                    if s.Stroke.CssParameter.__len__() > 0:
-                        stroke = s.Stroke.CssParameter[0].valueOf_
-                        
-                    stroke_width = 1
-                    if s.Stroke.CssParameter.__len__() > 1:
-                        stroke_width = s.Stroke.CssParameter[1].valueOf_
-                        
-                    stroke_opacity = 1
-                    if s.Stroke.CssParameter.__len__() > 2:
-                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_
-                        
-                    stroke_dash_array = 'none'
-                    if s.Stroke.CssParameter.__len__() > 3:
-                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_
+                    scount-= 1
                     
-                    
-                    symbolizer = PolygonSymbolizer(
-                        rule = rule,
-                        order = scount,
-                        fill = s.Fill.CssParameter[0].valueOf_,
-                        fill_opacity = s.Fill.CssParameter[1].valueOf_,
-                        stroke = stroke,
-                        stroke_width = stroke_width,
-                        stroke_opacity = stroke_opacity,
-                        stroke_dash_array =stroke_dash_array                
-                    )
-                    symbolizer.save()
-                    
-                scount-= 1
-                
-            output = io.StringIO()
-            sld.export(output, 0)
-            sld_body = output.getvalue()
-            output.close()
-           
-            gs.createStyle(style.name, sld_body)
-    gs.reload_nodes()
+                output = io.StringIO()
+                sld.export(output, 0)
+                sld_body = output.getvalue()
+                output.close()
+            
+                gs.createStyle(style.name, sld_body)
+        gs.reload_nodes()
 
-    utils.__delete_temporaries(file_path)
+        utils.__delete_temporaries(file_path)
 
 def upload_sld(file):
     rules = []             

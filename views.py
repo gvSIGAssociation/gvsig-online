@@ -1195,7 +1195,7 @@ def color_ramp_library_import(request):
             return render(request, 'color_ramp_library_import.html', {'message': message})
         
         except Exception as e:
-            message = str(e)
+            message = str(e)            
             return render(request, 'color_ramp_library_import.html', {'message': message})
     
     else:   
@@ -1384,6 +1384,8 @@ def library_import(request):
         
         except Exception as e:
             message = str(e)
+            if (message == "Error nombre"):
+                message = _('There is already a library with that name')
             return render(request, 'library_import.html', {'message': message})
     
     else:   
