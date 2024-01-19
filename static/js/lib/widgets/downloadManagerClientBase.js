@@ -53,12 +53,14 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
             }
 			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
 			var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
+			var geojsonLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=json&typeName=' + layer.layer_name;
 			
 			if (viewer.core.conf.user && viewer.core.conf.user.token){
 			    var tk = viewer.core.conf.user.token;
 				shapeLink = shapeLink + '&access_token=' + tk;
 				gmlLink = gmlLink + '&access_token=' + tk;
 				csvLink = csvLink + '&access_token=' + tk;
+				geojsonLink = geojsonLink + '&access_token=' + tk;
 			}
 			
 			var ui = '';
@@ -75,7 +77,10 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			ui += 		'<a href="' + csvLink + '"><div><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download CSV') + '</div></a>';
 			ui += 	'</div>';
 			ui += 	'<div class="col-md-4 form-group download-btn">';	
-			ui += 		'<a target="_blank" href="' + gmlLink + '"><div><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download GML') + '</div></a>';
+			ui += 		'<a target="_blank" href="' + gmlLink + '" download="layer.gml"><div><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download GML') + '</div></a>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group download-btn">';	
+			ui += 		'<a target="_blank" href="' + geojsonLink + '" download="layer.geojson"><div><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download GeoJSON') + '</div></a>';
 			ui += 	'</div>';
 			ui += '</div>';
 			
