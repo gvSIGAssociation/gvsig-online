@@ -13,7 +13,6 @@ from collections import defaultdict
 import mgrs
 import gdaltools
 import os, shutil, tempfile
-#import enchant
 
 import cx_Oracle
 import pymssql
@@ -5158,7 +5157,7 @@ def trans_NearestNeighbor(dicc):
 
     return output
 
-"""
+
 def trans_CorrectSpelling(dicc):
 
     attr = dicc['attr']
@@ -5202,6 +5201,12 @@ def trans_CorrectSpelling(dicc):
     cur.execute(sqlRename)
     conn.commit()
 
+    try:
+        import enchant
+    
+    except:
+        raise ValueError("The enchant library could not be imported.")
+    
     # Seleccionar el diccionario para el idioma español
     dictionary = enchant.Dict(lang)
 
@@ -5274,4 +5279,3 @@ def trans_CorrectSpelling(dicc):
         pass
 
     return [table_name_target]
-"""
