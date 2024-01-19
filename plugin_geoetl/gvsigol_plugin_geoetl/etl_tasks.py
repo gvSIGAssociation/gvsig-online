@@ -13,6 +13,7 @@ from collections import defaultdict
 import mgrs
 import gdaltools
 import os, shutil, tempfile
+import enchant
 
 import cx_Oracle
 import pymssql
@@ -5156,3 +5157,120 @@ def trans_NearestNeighbor(dicc):
         conn.commit()
 
     return output
+
+
+def trans_CorrectSpelling(dicc):
+
+    attr = dicc['attr']
+    lang = dicc['lang-option']
+    accent_mark = dicc['accent-mark']
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+    cur_2 = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target)
+        )
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} as (select * from {schema}.{table_source});').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target),
+        table_source = sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlAdd = sql.SQL('ALTER TABLE {schema}.{table_target} ADD COLUMN _corrected VARCHAR, ADD COLUMN _id_temp SERIAL').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target)
+    )
+    cur.execute(sqlAdd)
+    conn.commit()
+
+    sqlRename = sql.SQL('SELECT {attr}, _id_temp FROM {schema}.{table_target}').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target),
+        attr = sql.Identifier(attr)
+    )
+    cur.execute(sqlRename)
+    conn.commit()
+
+    # Seleccionar el diccionario para el idioma español
+    dictionary = enchant.Dict(lang)
+
+    for row in cur:
+        if row[0]:
+
+            if row[0] == "Calle Torero Manuel Jimenez Diaz 'Chicuelo Ii'":
+                o = 0
+            # Dividir el texto en palabras
+            words = row[0].split()
+            
+            #Comprobamos que sean numeros romanos para corregirlos y esten todos en mayusculas
+            roman_pattern = "^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"
+            
+            corrected_words = []
+            for word in words:
+                try:
+                    if re.match(roman_pattern, word.upper()) is not None:
+                        corrected_words.append(word.upper())
+                    elif not dictionary.check(word):
+
+                        #de esta manera solo corregiremos los acentos
+                        if accent_mark == 'true':
+
+                            corrected_word = dictionary.suggest(word)[0]
+
+                            import unicodedata
+                            
+                            corrected_word_no_accents = ''.join(char for char in unicodedata.normalize('NFD', corrected_word) if unicodedata.category(char) != 'Mn')
+                            word_no_accents = ''.join(char for char in unicodedata.normalize('NFD', word) if unicodedata.category(char) != 'Mn')
+
+                            if corrected_word_no_accents == word_no_accents:
+                                corrected_words.append(corrected_word)
+                            else:
+                                corrected_words.append(word)
+
+                        else:
+
+                            corrected_words.append(dictionary.suggest(word)[0])
+                    
+                    else:
+                        corrected_words.append(word)
+                except:
+                    corrected_words.append(word)
+
+            # Unir las palabras corregidas de nuevo en un texto
+            corrected_text = ' '.join(corrected_words)
+
+            sqlUpdate = sql.SQL('UPDATE {schema}.{table_target} SET _corrected = %s WHERE _id_temp = %s').format(
+                schema = sql.Identifier(GEOETL_DB["schema"]),
+                table_target = sql.Identifier(table_name_target)
+            )
+            cur_2.execute(sqlUpdate, [corrected_text, row[1]])
+            conn.commit()
+
+    sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
+
+    cur.execute(sqlDropCol)
+    conn.commit()    
+    
+    conn.close()
+    cur.close()
+
+    try:
+        cur_2.close()
+    except:
+        pass
+
+    return [table_name_target]

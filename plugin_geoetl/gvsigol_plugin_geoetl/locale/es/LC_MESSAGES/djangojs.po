@@ -1261,3 +1261,26 @@ msgstr "Tolerancia"
 msgid "Matched"
 msgstr "Emparejados"
 
+msgid "Correct Spelling"
+msgstr "Corrige Ortografía"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Spanish"
+msgstr "Español"
+
+msgid "Spain"
+msgstr "España"
+
+msgid "English"
+msgstr "Inglés"
+
+msgid "British"
+msgstr "Británico"
+
+msgid "String attribute to correct"
+msgstr "Atributo con el texto a corregir"
+
+msgid "Correct only the accent marks"
+msgstr "Corrige únicamente las tildes"
