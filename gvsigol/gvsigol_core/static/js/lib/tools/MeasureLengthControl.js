@@ -241,10 +241,10 @@ MeasureLengthControl.prototype.formatLength = function(line) {
 	}
 
 	var output;
-	if (length > 100) {
-		output = (Math.round(length / 1000 * 100) / 100) + ' ' + 'km';
+	if (length < 3000) {
+		output = (Math.round(length * 100) / 100) + ' ' + 'm';
 	} else {
-	    output = (Math.round(length * 100) / 100) + ' ' + 'm';
+		output = (Math.round(length / 1000 * 100) / 100) + ' ' + 'km';
 	}
 	return output;
 };
