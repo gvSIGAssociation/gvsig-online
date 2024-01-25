@@ -287,9 +287,14 @@ print.prototype.handler = function(e) {
 		ui += 				'<input id="print-author" class="form-control" value="' + author + '">';
 		ui += 			'</div>';
 
-		ui += 			'<div id="print-ui-note" class="col-md-12 form-group">';
-		ui += 				'<label>' + gettext('Notes') + '</label>';
-		ui += 				'<input id="print-note" class="form-control" value="">';
+		ui += 			'<div id="print-ui-service" class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Service') + '</label>';
+		ui += 				'<input id="print-service" class="form-control" value="">';
+		ui += 			'</div>';
+
+		ui += 			'<div id="print-ui-background-carto" class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Background Cartography') + '</label>';
+		ui += 				'<input id="print-background-carto" class="form-control" value="">';
 		ui += 			'</div>';
 
 		
@@ -416,10 +421,15 @@ print.prototype.updateUI = function() {
 	else
 		$('#print-ui-author').hide();
 
-	if (this.supports('notes'))
-		$('#print-ui-note').show();
+	if (this.supports('service'))
+		$('#print-ui-service').show();
 	else
-		$('#print-ui-note').hide();
+		$('#print-ui-service').hide();
+
+	if (this.supports('backgroundCartography'))
+		$('#print-ui-background-carto').show();
+	else
+		$('#print-ui-background-carto').hide();
 
 	if (this.supports('overviewMap')) 
 		$('#print-ui-mapoverview').show();
@@ -645,7 +655,8 @@ print.prototype.createPrintJob = function(template) {
 	var mapgridIndent = 5; //$("#print-mapgrid-indent").val();
 	var mapgridSpacing = $("#print-mapgrid-spacing").val();
 	var author = $("#print-author").val();
-	var note = $("#print-note").val();
+	var service = $("#print-service").val();
+	var backgroundCartography = $("#print-background-carto").val();
 
 	self.projection = projection;
 	self.dpi = parseInt(dpi);
@@ -894,6 +905,10 @@ print.prototype.createPrintJob = function(template) {
 		dataToPost.attributes.author = author;
 	}
 
+	if (self.supports('visorName')) {
+		dataToPost.attributes.visorName = self.conf.project_title;
+	}
+
 	if (self.supports('legalWarning')) {
 		dataToPost.attributes.legalWarning = legalWarning;
 	}
@@ -925,8 +940,11 @@ print.prototype.createPrintJob = function(template) {
 			// "bbox": f.getGeometry().getExtent() // TODO: DEFINIR EL CENTRO EN LUGAR DEL BBOX
 		};
 	}
-	if (self.supports('notes')) {
-		dataToPost.attributes.notes = note;
+	if (self.supports('backgroundCartography')) {
+		dataToPost.attributes.backgroundCartography = backgroundCartography;
+	}
+	if (self.supports('service')) {
+		dataToPost.attributes.service = service;
 	}
 	$.ajax({
 		type: 'POST',
