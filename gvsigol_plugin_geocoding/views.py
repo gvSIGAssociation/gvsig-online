@@ -564,7 +564,7 @@ def get_geocoder():
     
     return geocoder
 
-
+@csrf_exempt
 def get_providers_activated(request):
     providers = Provider.objects.all()
     types = []
