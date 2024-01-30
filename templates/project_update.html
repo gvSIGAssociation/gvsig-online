@@ -258,10 +258,13 @@
 																<div class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">
 																	<label>
 																		{% if l.baselayer %}
-																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Base by default" %}</span>
 																		{% else %}
-																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Base by default" %}</span>
 																		{% endif %}
+																		
+																		<input type="radio" class="overview-layer" name="overview-layer" value="{{l.id}}" id="overview-{{l.id}}" /><span style="width:150px;" >{% trans "Overview" %}</span>
+
 																	</label>
 																</div>
 															</div>
@@ -278,6 +281,7 @@
 							</div>
 							<input type="hidden" id="selected_base_layer" name="selected_base_layer"/>
 							<input type="hidden" id="selected_base_group" name="selected_base_group"/>
+							<input type="hidden" id="selected_overview_layer" name="selected_overview_layer"/>
 							<div class="col-md-3" style="background-color:#eee">
 								<div class="box searchable-list-box">
 									<div class="box-body toc-layer-update">
@@ -585,6 +589,11 @@
 
 {% block extra-scripts %}
 <script type="text/javascript">
+
+	if ('{{project.custom_overview}}' == 'True'){
+		$("input[name=overview-layer][value=" + '{{project.layer_overview}}' + "]").prop('checked', true);
+	}
+
 	$('#menu-manage-projects').addClass("active");
 	$('#submenu-projects').addClass("active");
 	 function readURL(input) {
@@ -1059,9 +1068,11 @@
 			$(".layergroup-input").prop( "disabled", false);
 			var selectedBaseLayer = $('input:radio[name=baselayers-default]:checked').val();
 			var selectedBaseGroup = $('input:radio[name=selected-base-group-btn]:checked').val();
-			console.log(selectedBaseGroup);
+			var selectedOverviewLayer = $('input:radio[name=overview-layer]:checked').val();
+			
 			$("#selected_base_layer").val(selectedBaseLayer);
 			$("#selected_base_group").val(selectedBaseGroup);
+			$("#selected_overview_layer").val(selectedOverviewLayer);
 			
 			var toc = {};
 			var root = $('#toc');
