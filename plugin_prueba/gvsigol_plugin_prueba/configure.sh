@@ -12,7 +12,6 @@ function configure() {
 		grep -rl "##LAYER_RECINTOS##"  | xargs sed -i "s ##LAYER_RECINTOS## $LAYER_RECINTOS g"
 		grep -rl "##LAYER_POLIGONOS##"  | xargs sed -i "s ##LAYER_POLIGONOS## $LAYER_POLIGONOS g"
 		grep -rl "##LAYER_MUNICIPIOS##"  | xargs sed -i "s ##LAYER_MUNICIPIOS## $LAYER_MUNICIPIOS g"
-		grep -rl "##WFS_URL_ICV##"  | xargs sed -i "s ##WFS_URL_ICV## $WFS_URL_ICV g"
 }
 
 function move_to_working_dir()
