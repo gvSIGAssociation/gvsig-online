@@ -708,11 +708,12 @@ viewer.core = {
 			xyz.layer_name = externalLayer['name'];
     		xyz.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(xyz);
-		}
+		
+			if (externalLayer['layer_id'] == layer_overview_id){
+				overviewSource.push(xyzSource)
+			};
 
-		if (externalLayer['layer_id'] == layer_overview_id){
-			overviewSource.push(xyzSource)
-		};
+		}
 
 	},
 
