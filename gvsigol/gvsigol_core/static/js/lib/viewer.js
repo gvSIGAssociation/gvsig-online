@@ -296,18 +296,8 @@ viewer.core = {
     	var self = this;
 		var ajaxRequests = new Array();
 		
-		if (! this.conf.custom_overview){
-			
-			var oSource = new ol.source.OSM({
-				url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
-			});
-
-			overviewSource = [oSource];
-
-		}else{
-
-			overviewSource = [];
-		}
+		overviewSource = [];
+		
 		var layer_overview_id = parseInt(this.conf.layer_overview)
 
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
@@ -321,10 +311,18 @@ viewer.core = {
 				} else {
 					this._loadInternalLayer(layerConf, group, checkTileLoadError, layer_overview_id);
 				}
-
 			}
 		}
     	this._loadLayerGroups();
+
+		if (! this.conf.custom_overview || overviewSource.length == 0){
+			
+			var oSource = new ol.source.OSM({
+				url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
+			});
+
+			overviewSource.push(oSource);
+		}
 
 		if(overviewSource[0] != 'Image'){
 			var overviewLayer = new ol.layer.Tile({source: overviewSource[0]});
