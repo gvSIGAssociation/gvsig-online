@@ -223,6 +223,7 @@ def project_add(request):
         toc_mode = request.POST.get('toc_mode')
         tools = request.POST.get('project_tools')
         expiration_date_utc = request.POST.get('expiration_date_utc')
+        layer_overview = request.POST.get('selected_overview_layer')
 
         is_public = False
         if 'is_public' in request.POST:
@@ -314,6 +315,11 @@ def project_add(request):
                                                         'has_geocoding_plugin': has_geocoding_plugin
                                                     })
 
+        if layer_overview == '':
+            custom_overview = False
+        else:
+            custom_overview = True
+
         project = Project(
             name = name,
             title = title,
@@ -335,7 +341,9 @@ def project_add(request):
             extent4326_maxx = extent4326_maxx,
             extent4326_maxy = extent4326_maxy,
             tools = tools,
-            labels = labels_added
+            labels = labels_added,
+            custom_overview = custom_overview,
+            layer_overview = layer_overview
         )
         if expiration_date_utc is not None and expiration_date_utc != '':
             try:
@@ -441,6 +449,7 @@ def project_update(request, pid):
         toc_mode = request.POST.get('toc_mode')
         tools = request.POST.get('project_tools')
         expiration_date_utc = request.POST.get('expiration_date_utc')
+        layer_overview = request.POST.get('selected_overview_layer')
 
         is_public = False
         if 'is_public' in request.POST:
@@ -493,6 +502,11 @@ def project_update(request, pid):
         if 'project-logo' in request.FILES:
             has_logo = True
 
+        if layer_overview == '':
+            custom_overview = False
+        else:
+            custom_overview = True
+
         project = Project.objects.get(id=int(pid))
 
         old_order = project.toc_order
@@ -525,6 +539,9 @@ def project_update(request, pid):
         project.extent4326_maxx = extent4326_maxx
         project.extent4326_maxy = extent4326_maxy
         project.labels = labels_added
+        project.custom_overview = custom_overview
+        project.layer_overview = layer_overview
+
         if expiration_date_utc is not None and expiration_date_utc != '':
             try:
                 ts = int(expiration_date_utc) / 1000
@@ -937,6 +954,7 @@ def project_get_conf(request):
                             else:
                                 layer['baselayer'] = False
                                 
+                            layer['layer_id'] = l.id
                             layer['name'] = l.name
                             layer['title'] = l.title
                             layer['abstract'] = l.abstract
@@ -1093,6 +1111,7 @@ def project_get_conf(request):
                     else:
                         layer['baselayer'] = False
                     
+                    layer['layer_id'] = l.id
                     layer['opacity'] = 1
                     layer['external'] = True   
                     layer['name'] = l.name
@@ -1200,7 +1219,9 @@ def project_get_conf(request):
             'errors': errors,
             'auth_urls': auth_urls,
             'check_tileload_error': settings.CHECK_TILELOAD_ERROR,
-            'SHP_DOWNLOAD_DEFAULT_ENCODING': getattr(settings, 'SHP_DOWNLOAD_DEFAULT_ENCODING', 'UTF-8')
+            'SHP_DOWNLOAD_DEFAULT_ENCODING': getattr(settings, 'SHP_DOWNLOAD_DEFAULT_ENCODING', 'UTF-8'),
+            'custom_overview': project.custom_overview,
+            'layer_overview': project.layer_overview
             
         }
         

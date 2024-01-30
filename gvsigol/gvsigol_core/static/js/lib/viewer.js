@@ -170,20 +170,45 @@ viewer.core = {
 
 		this.zoombar = new ol.control.Zoom();
 
-		var osm = new ol.layer.Tile({
-    		source: new ol.source.OSM({
-    			url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
-    		})
-    	});
+		var wmsSource = new ol.layer.Tile({
+			extent: [-13884991, 2870341, -7455066, 6338219],
+			source: new ol.source.TileWMS({
+			  url: 'https://ahocevar.com/geoserver/wms',
+			  params: {'LAYERS': 'topp:states', 'TILED': true},
+			  serverType: 'geoserver',
+			  // Countries have transparency, so do not fade tiles:
+			  transition: 0,
+			})
+		  });
+
+		/*  var default_srs = 'EPSG:3857';
+		  var projection = new ol.proj.get(default_srs);
+		  var projectionExtent = projection.getExtent();
+		  var size = ol.extent.getWidth(projectionExtent) / 256;
+		  var resolutions = new Array(21);
+		  var matrixIds = new Array(21);
+		  for (var z = 0; z < 21; ++z) {
+			  resolutions[z] = size / Math.pow(2, z);
+			  matrixIds[z] = default_srs+':'+z;
+		  }
+
+		  var wmtsLayer = new ol.layer.Tile({
+			source: new ol.source.WMTS({
+				url: 'https://www.ign.es/wmts/pnoa-ma?request=GetCapabilities&service=WMTS',
+				layer: 'OI.OrthoimageCoverage',
+				format: 'image/jpeg',
+				matrixSet: 'InspireCRS84Quad',
+				tileGrid: new ol.tilegrid.WMTS({
+					origin: ol.extent.getTopLeft(projectionExtent),
+					resolutions: resolutions,
+					matrixIds: matrixIds,
+				}),
+				style: 'default',
+			}),
+		});*/
 
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, shiftDragZoom: false});
-		this.overviewmap = new ol.control.OverviewMap({
-			collapsed: false, 
-			layers: [osm],
-			collapseLabel: '»',
-			label: '«'
-		});
-		
+
 		var view = new ol.View({
     		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
     		minZoom: 0,
@@ -196,7 +221,7 @@ viewer.core = {
       		controls: [
       			this.zoombar,
 				new ol.control.ScaleLine(),
-      			this.overviewmap,
+      			//this.overviewmap,
       			mousePositionControl
       		],
       		renderer: 'canvas',
@@ -270,20 +295,53 @@ viewer.core = {
     _loadLayers: function() {
     	var self = this;
 		var ajaxRequests = new Array();
+		
+		if (! this.conf.custom_overview){
+			
+			var oSource = new ol.source.OSM({
+				url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
+			});
+
+			overviewSource = [oSource];
+
+		}else{
+
+			overviewSource = [];
+		}
+		var layer_overview_id = parseInt(this.conf.layer_overview)
+
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
 			var group = this.conf.layerGroups[i];
 			for (var k=0; k<group.layers.length; k++) {
 				var layerConf = group.layers[k];
+				
 				var checkTileLoadError = this.conf.check_tileload_error;
 				if (layerConf.external) {
-					this._loadExternalLayer(layerConf, group, checkTileLoadError);
+					this._loadExternalLayer(layerConf, group, checkTileLoadError, layer_overview_id);
 				} else {
-					this._loadInternalLayer(layerConf, group, checkTileLoadError);
+					this._loadInternalLayer(layerConf, group, checkTileLoadError, layer_overview_id);
 				}
 
 			}
 		}
     	this._loadLayerGroups();
+
+		if(overviewSource[0] != 'Image'){
+			var overviewLayer = new ol.layer.Tile({source: overviewSource[0]});
+		}else{
+			var overviewLayer = new ol.layer.Image({source: overviewSource[1]});
+		}
+
+		overviewLayer.setVisible(true);
+
+		this.overviewmap = new ol.control.OverviewMap({
+			collapsed: false, 
+			layers: [overviewLayer],
+			collapseLabel: '»',
+			label: '«'
+		});
+
+		this.map.addControl(this.overviewmap)
     },
 	_loadPendingLayers: function(auth_url) { // layers to be loaded after authentication
 		if (this._initialized) {
@@ -340,9 +398,8 @@ viewer.core = {
 		}
 	},
 
-    _loadExternalLayer: function(externalLayer, group, checkTileLoadError) {
+    _loadExternalLayer: function(externalLayer, group, checkTileLoadError, layer_overview_id) {
 	    var self = this;
-
 	    var visible = false;
 	    var baselayer = false;
 	    if (externalLayer['baselayer']) {
@@ -457,6 +514,10 @@ viewer.core = {
 			});
 
 			this.map.addLayer(wmsLayer);
+
+			if (externalLayer['layer_id'] == layer_overview_id){
+				overviewSource.push(wmsSource)
+			}
 		}
     	
     	if (externalLayer['type'] == 'WMTS') {
@@ -553,9 +614,13 @@ viewer.core = {
 	    		wmtsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
 	    		wmtsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
 	    		wmtsLayer.detailed_info_html = externalLayer['detailed_info_html'];
-	    		wmtsLayer.setZIndex(parseInt(externalLayer.order));
+	    		wmtsLayer.setZIndex(parseInt(externalLayer.order));				
 				self.map.addLayer(wmtsLayer);
-			
+
+				if (externalLayer['layer_id'] == layer_overview_id){
+					overviewSource.push(wmtsSource)
+				}
+
     		} catch(err){
     			console.log(err);
     			
@@ -563,15 +628,17 @@ viewer.core = {
 		}
 
     	if (externalLayer['type'] == 'Bing') {
-    		var bingLayer = new ol.layer.Tile({
+    		bingSource = new ol.source.BingMaps({
+				key: externalLayer['key'],
+				imagerySet: externalLayer['layers']
+			})
+
+			var bingLayer = new ol.layer.Tile({
 				id: layerId,
 				visible: visible,
 				label: externalLayer['layers'],
 				preload: Infinity,
-				source: new ol.source.BingMaps({
-					key: externalLayer['key'],
-					imagerySet: externalLayer['layers']
-				})
+				source: bingSource
 			});
 			bingLayer.baselayer = baselayer;
 			bingLayer.layer_name = externalLayer['name'];
@@ -579,6 +646,12 @@ viewer.core = {
 			bingLayer.external = true;
 			bingLayer.imported = false;
 			this.map.addLayer(bingLayer);
+			
+			if (externalLayer['layer_id'] == layer_overview_id){
+				
+				overviewSource.push(bingSource)
+			};
+
     	}
 
     	if (externalLayer['type'] == 'OSM') {
@@ -603,6 +676,10 @@ viewer.core = {
 			osm.layer_name = externalLayer['name'];
     		osm.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(osm);
+
+			if (externalLayer['layer_id'] == layer_overview_id){
+				overviewSource.push(osm_source)
+			};
 		}
 
     	if (externalLayer['type'] == 'XYZ') {
@@ -613,15 +690,17 @@ viewer.core = {
 			}else{
 				url = externalLayer['url']
 			}
+
+			xyzSource = new ol.source.XYZ({
+				url: url,
+				crossOrigin: 'anonymous'
+		  })
 			
 			var xyz = new ol.layer.Tile({
     			id: layerId,
     			label: externalLayer['title'],
     		  	visible: visible,
-    		  	source: new ol.source.XYZ({
-    		  		url: url,
-    		  		crossOrigin: 'anonymous'
-    		    })
+    		  	source: xyzSource
     		});
     		xyz.baselayer = baselayer;
     		xyz.external = true;
@@ -631,9 +710,13 @@ viewer.core = {
 			this.map.addLayer(xyz);
 		}
 
+		if (externalLayer['layer_id'] == layer_overview_id){
+			overviewSource.push(xyzSource)
+		};
+
 	},
 
-	_loadInternalLayer: function(layerConf, group, checkTileLoadError) {
+	_loadInternalLayer: function(layerConf, group, checkTileLoadError, layer_overview_id) {
 		var self = this;
 
 		var layerId = this._nextLayerId();
@@ -736,6 +819,11 @@ viewer.core = {
 				visible: visible
 			});
 
+			if (layerConf['layer_id'] == layer_overview_id){
+				overviewSource.push('Image')
+				overviewSource.push(wmsSource)
+			};
+
 		} else {
 			if(url.endsWith('/gwc/service/wmts')){
 				var default_srs = 'EPSG:3857';
@@ -778,6 +866,10 @@ viewer.core = {
 		        wmsLayer.baselayer = baselayer;
 		        wmsLayer.layer_name=layerConf.workspace + ':' + layerConf.name;
 
+				if (layerConf['layer_id'] == layer_overview_id){
+					overviewSource.push(wmtsSource)
+				};
+
 			}else{
 				var wmsParams = {
 					'LAYERS': layerConf.workspace + ':' + layerConf.name,
@@ -803,6 +895,10 @@ viewer.core = {
 					visible: visible
 				});
 			}
+
+			if (layerConf['layer_id'] == layer_overview_id){
+				overviewSource.push(wmsSource)
+			};
 		}
 
 		if(wmsLayer){
@@ -920,6 +1016,10 @@ viewer.core = {
 					wmsLayer.getSource().updateParams({"_time": Date.now()});
 				}, updateInterval);
 			}
+
+			if (layerConf['layer_id'] == layer_overview_id){
+				overviewSource.push(wmsLayer.getSource())
+			};
 		}
 	},
 
@@ -1240,7 +1340,7 @@ viewer.core = {
 			var exceptToolId = null;
 		}
 		else {
-			var exceptToolObj = null;
+			var exceptToolObj = null;viewer.core
 			var exceptToolId = exceptTool;
 		}
 		for (var i=0; i<this.tools.length; i++){
