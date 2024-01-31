@@ -101,4 +101,5 @@ urlpatterns = [
     path('get_resource/<int:resource_id>/', services_views.get_resource, name='get_layer_resource'),
     path('dnie/', services_views.test_dnie, name='test_dnie'),
     path('dnie2/', services_views.test_dnie2, name='test_dnie2'),
+    path('dnie-external/', services_views.test_dnie_external, name='test_dnie_external'),
 ]
