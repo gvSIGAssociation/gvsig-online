@@ -5391,3 +5391,9 @@ def test_dnie(request):
 def test_dnie2(request):
     # este método debe mostrar no validado ya que se accede por una URL que no activa el certificado
     return test_dnie(request)
+
+def test_dnie_external(request):
+    response = ""
+    for header, value in request.headers.items():
+        response += "{}: {}<br>".format(header, value)
+    return HttpResponse(response)
