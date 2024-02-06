@@ -635,7 +635,7 @@ def datastore_delete(request, dsid):
         if request.POST.get('delete_schema') == 'true':
             delete_schema = True
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-        gs.deleteDatastore(ds.workspace, delete_schema=delete_schema)
+        gs.deleteDatastore(ds.workspace, ds, delete_schema=delete_schema)
         utils.delete_datastore_elements(ds, gs=gs)
         return HttpResponseRedirect(reverse('datastore_list'))
 
