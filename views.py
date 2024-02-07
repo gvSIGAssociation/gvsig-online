@@ -46,6 +46,7 @@ from operator import itemgetter
 from django.core.mail import send_mail
 from owslib.util import Authentication
 from owslib.wmts import WebMapTileService
+from django.utils import timezone
 import gvsigol
 import urllib.request, urllib.parse, urllib.error
 import random
@@ -545,7 +546,9 @@ def project_update(request, pid):
         if expiration_date_utc is not None and expiration_date_utc != '':
             try:
                 ts = int(expiration_date_utc) / 1000
-                project.expiration_date = datetime.datetime.fromtimestamp(ts)
+                #project.expiration_date = datetime.datetime.fromtimestamp(ts)
+                aware_datetime = timezone.make_aware(datetime.datetime.fromtimestamp(ts), timezone=timezone.get_current_timezone())
+                project.expiration_date=aware_datetime
             except Exception as e:
                 pass
         else:
