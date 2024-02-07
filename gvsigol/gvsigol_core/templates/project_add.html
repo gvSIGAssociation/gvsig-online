@@ -82,7 +82,13 @@
 									</div>
 									<div class="col-md-3 form-group">
 										<label for="id_expiration_date">{% trans "expiration_date" %}</label>
-										<input type="datetime-local" name="expiration_date"  id="expiration_date" class="form-control" />
+										<!-- <input type="datetime-local" name="expiration_date"  id="expiration_date" class="form-control" /> -->
+										<div class="input-group date" id="expiration_date">
+											<input onkeydown="return false" name="datetimepicker-start-value" type="text" class="form-control" />
+											<span class="input-group-addon">
+												<span class="glyphicon glyphicon-calendar"></span>
+											</span>
+										</div>	
 										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />							
 									</div>
 								</div>
@@ -411,6 +417,19 @@
 <script type="text/javascript">
 	$('#menu-manage-projects').addClass("active");
 	$('#submenu-projects').addClass("active");
+
+	$('#expiration_date').datetimepicker({
+        //    inline: true,
+        //    sideBySide: true,
+		format: 'YYYY-MM-DD'
+    });
+	
+	$('#expiration_date').on('dp.change', function(e){ 
+    	//let localDateStr = $("#expiration_date").val()
+		var localDateStr = e.date;
+        var milliseconds = localDateStr.valueOf();
+		$("#expiration_date_utc").val(getUTCMillisFromLocal(milliseconds))
+	});
 	
 	function readURL(input) {
   	    if (input.files && input.files[0]) {
@@ -421,7 +440,7 @@
   	        reader.readAsDataURL(input.files[0]);
   	        
   	    }
-  	}
+  	}	
 	
 	var epsg3857Bounds = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 	var epsg4326Bounds = [-180.0, -90.0, 180.0, 90.0];
