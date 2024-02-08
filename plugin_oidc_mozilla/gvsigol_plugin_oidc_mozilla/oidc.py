@@ -1,4 +1,5 @@
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+#from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 
 import importlib
 import json
@@ -41,12 +42,13 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         # Verify claims required by default configuration
         scopes_str = self.get_settings('OIDC_RP_SCOPES', 'openid email username')
         scopes = scopes_str.split()
-        if 'email' in scopes and 'username' in scopes:
+        if 'username' in scopes and 'username' not in claims:
+            LOGGER.warning('username is required in claims')
+            return False
+
+        if 'email' in scopes and not claims.get('username', '').startswith('service-account'): # FIXME: buscar exclusion mas robusta para service account
             if 'email' not in claims:
                 LOGGER.warning('email is required in claims')
-                return False
-            if 'username' not in claims:
-                LOGGER.warning('username is required in claims')
                 return False
         if self.gvsigol_oidc_config:
             if not self.gvsigol_oidc_config.verify_claims(claims):
@@ -61,8 +63,8 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         django_roles = claims.get('gvsigol_roles', [])
         user = self.UserModel.objects.create_user(username,
             email=email,
-            first_name = claims.get('first_name', ''),
-            last_name = claims.get('last_name', ''),
+            first_name = claims.get('given_name', ''),
+            last_name = claims.get('family_name', ''),
             is_superuser = (MAIN_SUPERUSER_ROLE in django_roles),
             is_staff = (STAFF_ROLE in django_roles)
         )
@@ -84,9 +86,9 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         
 
     def update_user(self, user, claims):
-        user.email = claims.get('email')
-        user.first_name = claims.get('first_name', '')
-        user.last_name = claims.get('last_name', '')
+        user.email = claims.get('email', '')
+        user.first_name = claims.get('given_name', '')
+        user.last_name = claims.get('family_name', '')
         django_roles = claims.get('gvsigol_roles', [])
         user.is_superuser = (MAIN_SUPERUSER_ROLE in django_roles)
         user.is_staff = (STAFF_ROLE in django_roles)
@@ -184,3 +186,19 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         print(user_obj)
         return super().has_perm(user_obj, perm, obj)
     """
+
+"""
+Example in case a custom OIDCAuthentication is needed for DRF:
+
+class GvsigOIDCAuthentication(OIDCAuthentication):
+    def __init__(self, backend=None):
+        super().__init__(backend=backend)
+
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except Exception as e:
+            LOGGER.exception('Error authenticating')
+            print(e)
+            raise
+"""
