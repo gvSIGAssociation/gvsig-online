@@ -687,23 +687,48 @@ class FeatureSerializer(serializers.Serializer):
             raise HttpException(400, "Field options cannot be queried. Unexpected error: " + format(e))
             
 
-    def list_by_extent(self, validation, lyr_id, epsg, minlat, minlon, maxlat, maxlon, zip, resources):
+    def list_by_extent(self, validation, lyr_id, epsg, minlat, minlon, maxlat, maxlon, zip, resources, max_feat, page, pagination):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
         con = None
         try:
             i, table, schema = services_utils.get_db_connect_from_layer(layer)
-            with i as con: 
+            with i as con:
+                
+                if max_feat or page:
+
+
+                    if not max_feat:
+                        max_feat = settings.NUM_MAX_FEAT
+                    if not page:
+                        page = 0
+
+                    pagination.page = page
+                    pagination.max_ = max_feat
+
+                    num_entries = util.count(con, schema, table)
+                    offset = max_feat * page
+                    if(page > math.floor(num_entries/float(max_feat)) or page < 0):
+                        raise HttpException(404, "Page NOT found")
+                    limit_offset = sqlbuilder.SQL('ORDER BY "ogc_fid" LIMIT {max_feat} OFFSET {offset}').format(
+                                max_feat=sqlbuilder.Literal(max_feat),
+                                offset=sqlbuilder.Literal(offset))
+
+                    links = {"links" : [pagination.get_links(num_entries)]}
+                else:
+                    limit_offset = sqlbuilder.SQL("")
+                    links = {} 
+                
                 geom_cols = con.get_geometry_columns(table, schema=schema)
                 properties = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
                 idfield = util.get_layer_pk_name(con, schema, table)
                 geom_col = geom_cols[0]
 
-                epsilon = "ST_Perimeter(ST_Transform({geom}, 4326)) / 10000"
-                params = "st_AsGeoJSON(st_transform({geom}, 4326)), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, 4326), " + epsilon + "  )), ST_NPoints({geom})"
-                where = "ST_INTERSECTS('SRID=4326;POLYGON(({minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}, {minlon} {maxlat}))'::geometry, st_transform({geom}, 4326))"
-                sql = "SELECT " + params + " FROM {schema}.{table} WHERE " + where
+                epsilon = "ST_Perimeter(ST_Transform({geom}, {epsg})) / 10000"
+                params = "st_AsGeoJSON(st_transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), " + epsilon + "  )), ST_NPoints({geom})"
+                where = "ST_INTERSECTS('SRID={epsg};POLYGON(({minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}, {minlon} {maxlat}))'::geometry, st_transform({geom}, {epsg}))"
+                sql = "SELECT " + params + " FROM {schema}.{table} WHERE " + where + ' {limit_offset}'
                 query = sqlbuilder.SQL(sql).format(
                     geom=sqlbuilder.Identifier(geom_col),
                     schema=sqlbuilder.Identifier(schema),
@@ -712,10 +737,13 @@ class FeatureSerializer(serializers.Serializer):
                     maxlat=sqlbuilder.Literal(maxlat),
                     maxlon=sqlbuilder.Literal(maxlon),
                     minlat=sqlbuilder.Literal(minlat),
+                    epsg=sqlbuilder.Literal(epsg),
                     properties=properties,
+                    limit_offset=limit_offset
                 )
 
                 con.cursor.execute(query)
+
                 nbytes = 0
 
                 feat_list = []
@@ -750,6 +778,7 @@ class FeatureSerializer(serializers.Serializer):
 
                     feat_list.append(element)
 
+                feat_list.append(links)
 
                 if(not zip):
                     return {
@@ -1315,6 +1344,7 @@ class LayerSerializer(serializers.ModelSerializer):
     workspace = serializers.SerializerMethodField('get_layer_workspace_')
     writable = serializers.SerializerMethodField('is_writable')
     service_version = serializers.SerializerMethodField('get_external_service_version')
+    native_srs = serializers.SerializerMethodField('get_native_srs')
 
     def is_writable(self, obj):
         try:
@@ -1389,10 +1419,16 @@ class LayerSerializer(serializers.ModelSerializer):
             pass
         return datetime(2000, 1, 1)
 
+    def get_native_srs(self, obj):
+        try:
+            return obj.native_srs
+        except Exception:
+            pass
+
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'external', 'service_version']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'external', 'service_version', 'native_srs']
 
 
 

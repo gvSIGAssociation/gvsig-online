@@ -73,6 +73,9 @@ class BBoxFeatureFilter(BaseFilterBackend):
             coreapi.Field(name="maxlon", description="Longitude", required=True, location='query', example='-0.390024'),
             coreapi.Field(name="zip", description="true to get a zip file. Default false", required=False, location='query', example='true'),
             coreapi.Field(name="resources", description="true to get the attached resources. Default false", required=False, location='query', example='true'),
+            coreapi.Field(name="epsg", description="if empty the request will use EPSG 4326 by default", required=False, location='query', example='4326'),
+            coreapi.Field(name="max", description="Maximum number of elements to return", required=False, location='query', example='100'),
+            coreapi.Field(name="page", description="Number of page", required=False, location='query', example='1'),
         ]
         return fields
 
@@ -101,16 +104,17 @@ class DateFeatureFilter(BaseFilterBackend):
 class Pagination():
     def __init__(self, request):
         self.request = request
+        self.max_ = settings.NUM_MAX_FEAT
+        self.page = 0
 
     def get_pagination_params(self):
-        self.max_ = settings.NUM_MAX_FEAT
+        
         if 'max' in self.request.GET:
             try:
                 self.max_ = int(self.request.GET['max'])
             except Exception:
                 raise HttpException(400, "Bad parameter max_feat. The value must be an integer")
             
-        self.page = 0
         if 'page' in self.request.GET:
             try:
                 self.page = int(self.request.GET['page'])
@@ -127,17 +131,26 @@ class Pagination():
             }
         ]
         path = self.request.build_absolute_uri()
+        
+        extent = '?'
+        if 'minlat' in path:
+            extent = path[path.rfind('?'):path.rfind('&max=')]
+
         path = path[:path.rfind('?')]
+        
+        path += extent
+        if extent != '?':
+            path += '&'
         
         if total > ((self.page + 1) * self.max_):
             links.append({
                 "rel" : "next",
-                "href": path + "?max=" + str(self.max_) + "&page=" + str(self.page + 1)
+                "href": path + "max=" + str(self.max_) + "&page=" + str(self.page + 1)
             }) 
         if self.page > 0:
             links.append({
                 "rel" : "prev",
-                "href": path + "?max=" + str(self.max_) + "&page=" + str(self.page - 1)
+                "href": path + "max=" + str(self.max_) + "&page=" + str(self.page - 1)
             }) 
         return links
 
@@ -265,7 +278,10 @@ class FeaturesExtentView(ListAPIView):
                                     400: "Features cannot be obtained. Unexpected error:..."})
     @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
     def get(self, request, lyr_id):
+
         validation = Validation(request)
+        pagination = Pagination(request)
+
         try:
             minlon = 0
             if 'minlon' in self.request.GET:
@@ -310,9 +326,30 @@ class FeaturesExtentView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter resources. The value must be a value true or false")
 
+            epsg = 4326
+            if 'epsg' in self.request.GET:
+                try:
+                    epsg = int(self.request.GET['epsg'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+
+            max_feat = None
+            if 'max' in self.request.GET:
+                try:
+                    max_feat = int(self.request.GET['max'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter max. The value must be an integer")
+
+            page = None
+            if 'page' in self.request.GET:
+                try:
+                    page = int(self.request.GET['page'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter page. The value must be an integer")
+
 
             validation.check_feature_list(lyr_id)
-            result = serializers.FeatureSerializer().list_by_extent(validation, lyr_id, 4326, minlat, minlon, maxlat, maxlon, zip, resources)
+            result = serializers.FeatureSerializer().list_by_extent(validation, lyr_id, epsg, minlat, minlon, maxlat, maxlon, zip, resources, max_feat, page, pagination)
             
             if(zip):
                 response = HttpResponse(FileWrapper(open(result, 'rb')), content_type='application/zip')
