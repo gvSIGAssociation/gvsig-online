@@ -47,6 +47,46 @@ msgstr "Seleccionar plantilla de impresión"
 msgid "Select template"
 msgstr "Seleccionar plantilla"
 
+#: static/js/lib/tools/print.js:162 static/js/lib/tools/print.js:164
+msgid "a4_landscape"
+msgstr "A4 Apaisado"
+
+#: static/js/lib/tools/print.js:162 static/js/lib/tools/print.js:164
+msgid "albacete_a4_landscape"
+msgstr "A4 Apaisado"
+
+#: static/js/lib/tools/print.js:164
+msgid "a3_sin_leyenda"
+msgstr "A3 sin Leyenda"
+
+#: static/js/lib/tools/print.js:164
+msgid "a4_landscape_overview"
+msgstr "A4 Apaisado con Localizador"
+
+#: static/js/lib/tools/print.js:164
+msgid "a3_landscape"
+msgstr "A3 Apaisado"
+
+#: static/js/lib/tools/print.js:164
+msgid "albacete_a3_sin_leyenda"
+msgstr "A3 sin Leyenda"
+
+#: static/js/lib/tools/print.js:164
+msgid "albacete_a4_landscape_overview"
+msgstr "A4 Apaisado con Localizador"
+
+#: static/js/lib/tools/print.js:164
+msgid "albacete_a3_landscape"
+msgstr "A3 Apaisado"
+
+#: static/js/lib/tools/print.js:164
+msgid "albacete_a4_sin_leyenda"
+msgstr "A4 Apaisado sin Leyenda"
+
+#: static/js/lib/tools/print.js:164
+msgid "albacete_a3_landscape_overview"
+msgstr "A3 Apaisado con Localizador"
+
 #: static/js/lib/tools/print.js:170
 msgid "Title"
 msgstr "Título"
@@ -159,18 +199,6 @@ msgstr "Las capas externas tipo XYZ no pueden ser reproyectadas."
 
 #~ msgid "This functionality is only available on Mozilla Firefox"
 #~ msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
-
-#~ msgid "a4_landscape"
-#~ msgstr "A4 Apaisado"
-
-#~ msgid "a3_sin_leyenda"
-#~ msgstr "A3 sin Leyenda"
-
-#~ msgid "a4_landscape_overview"
-#~ msgstr "A4 Apaisado con Localizador"
-
-#~ msgid "a3_landscape"
-#~ msgstr "A3 Apaisado"
 
 #~ msgid "tocantins_a4_landscape"
 #~ msgstr "Tocantins A4 Horizontal"
