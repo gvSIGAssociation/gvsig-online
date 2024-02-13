@@ -23,12 +23,22 @@ from django.utils.translation import ugettext as _
 from . import settings
 from gvsigol import settings as core_settings
 import json, requests
+from .models import Provider
     
 class CartoCiudad2():
     
     def __init__(self, provider):
         self.urls = settings.GEOCODING_PROVIDER['new_cartociudad']
-        self.postal_codes = self.urls['cod_postal_filter']
+
+        cartociudad_providers = Provider.objects.filter(type = 'new_cartociudad')
+
+        for cc_provider in cartociudad_providers:
+            cc_provider_params = json.loads(cc_provider.params)
+            postal_code = cc_provider_params['cod_postal_filter']
+            limit_ = cc_provider_params['max_results']
+        
+        self.postal_codes = postal_code
+        self.limit = limit_
         self.providers=[]
         self.append(provider)
         self.category = provider.category
@@ -52,11 +62,10 @@ class CartoCiudad2():
         params = {
             'q': query,
             'autocancel': True,
-            'limit': self.urls['max_results'],
+            'limit': self.limit,
             'cod_postal_filter': self.postal_codes
         }
 
-        json_results = []
         if self.providers.__len__() > 0 :
             provider = self.providers[0]
             json_results = self.get_json_from_url(self.urls['candidates_url'], params)
@@ -64,7 +73,7 @@ class CartoCiudad2():
                 json_result['category'] = provider.category
                 json_result['image'] = str(provider.image)
                 json_result['srs'] = 'EPSG:4258'
-            
+
         return json_results
     
     
