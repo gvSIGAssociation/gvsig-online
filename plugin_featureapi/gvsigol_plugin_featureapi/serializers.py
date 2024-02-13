@@ -728,6 +728,25 @@ class FeatureSerializer(serializers.Serializer):
                 epsilon = "ST_Perimeter(ST_Transform({geom}, {epsg})) / 10000"
                 params = "st_AsGeoJSON(st_transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), " + epsilon + "  )), ST_NPoints({geom})"
                 where = "ST_INTERSECTS('SRID={epsg};POLYGON(({minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}, {minlon} {maxlat}))'::geometry, st_transform({geom}, {epsg}))"
+                
+                
+                sql = "SELECT count(*) FROM {schema}.{table} WHERE " + where
+                query = sqlbuilder.SQL(sql).format(
+                    geom=sqlbuilder.Identifier(geom_col),
+                    schema=sqlbuilder.Identifier(schema),
+                    table=sqlbuilder.Identifier(table),
+                    minlon=sqlbuilder.Literal(minlon),
+                    maxlat=sqlbuilder.Literal(maxlat),
+                    maxlon=sqlbuilder.Literal(maxlon),
+                    minlat=sqlbuilder.Literal(minlat),
+                    epsg=sqlbuilder.Literal(epsg),
+                    properties=properties
+                )
+
+                con.cursor.execute(query)
+                for feat in con.cursor.fetchall():
+                    lendata = feat[0]
+                
                 sql = "SELECT " + params + " FROM {schema}.{table} WHERE " + where + ' {limit_offset}'
                 query = sqlbuilder.SQL(sql).format(
                     geom=sqlbuilder.Identifier(geom_col),
@@ -785,6 +804,7 @@ class FeatureSerializer(serializers.Serializer):
                         #"crs": { "type":"name","properties":{"name":"EPSG:4326"}},
                         "type":"FeatureCollection",
                         "totalfeatures" : con.cursor.rowcount,
+                        "lendata": lendata,
                         "features" : feat_list
                     }
                 else:
