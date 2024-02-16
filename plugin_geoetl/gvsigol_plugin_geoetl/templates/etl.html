@@ -94,7 +94,8 @@
                             </div>
                         </div>
                         <div class="btn-group">
-                            <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Workflows Transformers" %}'> <i class="fa fa-cog"></i>  </button>
+                            <button class="btn btn-primary" role="button" id="button-tasks" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Workflows Transformers" %}'
+                            {% if editablerestrictedly == 'true' %} disabled {% endif %}> <i class="fa fa-cog"></i>  </button>
                             <div class="dropdown-menu">
                                 <li><a data-shape="trans_ExecuteSQL" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Execute SQL" %}</a></li>
                             </div>
