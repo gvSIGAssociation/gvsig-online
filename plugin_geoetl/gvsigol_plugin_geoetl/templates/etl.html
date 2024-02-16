@@ -16,7 +16,8 @@
                     <h3 class="box-title">{% trans "ETL - Extract, Transform & Load" %}</h3>
                     <div class="box-tools pull-right">
                         <div class="btn-group" >
-                            <button class="btn btn-success" type="button" id="button-inputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top"  title='{% trans "Inputs" %}'> <i class="fa fa-sign-in"></i> </button>
+                            <button class="btn btn-success" type="button" id="button-inputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top"  title='{% trans "Inputs" %}'
+                            {% if editablerestrictedly == 'true' %} disabled {% endif %}> <i class="fa fa-sign-in"></i> </button>
                             <div class="dropdown-menu">
                                 <li><a data-shape="input_Csv" class="palette_node_element draw2d_droppable dropdown-item">CSV</a></li>
                                 <li><a data-shape="input_Excel" class="palette_node_element draw2d_droppable dropdown-item">Excel</a></li>
@@ -99,7 +100,8 @@
                             </div>
                         </div>
                         <div class="btn-group">
-                            <button class="btn btn-warning" role="button" id="button-outputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Outputs" %}'> <i class="fa fa-sign-out"></i> </button>
+                            <button class="btn btn-warning" role="button" id="button-outputs" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="top" title='{% trans "Outputs" %}'
+                            {% if editablerestrictedly == 'true' %} disabled {% endif %}> <i class="fa fa-sign-out"></i> </button>
                             <div class="dropdown-menu">
                                 <li><a  data-shape="output_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
                             </div>
@@ -498,6 +500,18 @@
     workspace = '{{ workspace }}'
     fm_directory = '{{ fm_directory }}'
     username = '{{ user.username }}'
+    editablerestrictedly = '{{ editablerestrictedly }}'
+
+    if (editablerestrictedly){
+        $('#etl_id').prop("disabled", true)
+        $('#etl_name').prop("disabled", true)
+        $('#etl_desc').prop("disabled", true)
+        $('#repeat_periodically').prop("disabled", true)
+        $('#ws-program-day').prop("disabled", true)
+        $('#ws-program-time').prop("disabled", true)
+        $('#ws-program-interval').prop("disabled", true)
+        $('#ws-program-unit').prop("disabled", true)
+    }
 
     if('{{day_of_week}}'){
         dataPeriodic = '{{day_of_week}}'+' '+'{{hour}}'+':'+'{{minute}}'
@@ -603,7 +617,7 @@
             $(".more-options").slideDown("slow");  // checked
             $(".more-hour-options").slideUp("slow");
 
-            $(".modal-body #ws-program-day").val('all')
+            $(".modal-body #ws-program-day").val('every')
             $(".modal-body #ws-program-interval").val(dataPeriodic.split(' ')[0])
             $(".modal-body #ws-program-unit").val(dataPeriodic.split(' ')[1])
 
