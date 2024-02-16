@@ -247,7 +247,12 @@ gvsigolETL.Toolbar = Class.extend({
 		});
 
 		// Inject the Add Database Connection Button
-		this.bbddButton  = $('<button id="button-add-bbdd" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5" ></i>' + gettext('Add DB') + '</button>');
+		if (editablerestrictedly){
+			this.bbddButton  = $('<button class="btn btn-default btn-sm" disabled><i class="fa fa-database margin-r-5" ></i>' + gettext('Add DB') + '</button>');
+		}
+		else{
+			this.bbddButton  = $('<button id="button-add-bbdd" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5" ></i>' + gettext('Add DB') + '</button>');
+		}
 		this.html.append(this.bbddButton);
 		this.bbddButton.click( function() {
 			$('#modal-add-db').modal('show')
