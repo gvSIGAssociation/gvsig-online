@@ -23,12 +23,20 @@
                                 <div class="pull-right checkbox form-inline">
                                         <label>
                                             <input class="ws-edit-checkbox" type="checkbox" name="edit-usergroup-{{group.name}}" id="edit-usergroup-{{group.name}}"
-                                             {% if group.name in editing_role %} checked {% endif %}/>
-                                            <span>{% trans "Edit permission" %}</span>
+                                             {% if group.name in editing_role %} checked {% endif %} 
+                                             {% if editablerestrictedly == 'true' %} disabled {% endif %}/>
+                                            <span>{% trans "Edit permission" %} </span>
+                                        </label>
+                                        <label>
+                                            <input class="ws-restricted-edit-checkbox" type="checkbox" name="restricted-edit-usergroup-{{group.name}}" id="restricted_edit-usergroup-{{group.name}}"
+                                             {% if group.name in editing_restricted_role %} checked {% endif %}
+                                             {% if editablerestrictedly == 'true' %} disabled {% endif %}/>
+                                            <span>{% trans "Restricted edition permission" %}</span>
                                         </label>
                                         <label>
                                             <input class="ws-execute-checkbox" type="checkbox" name="execute-usergroup-{{group.name}}" id="execute-usergroup-{{group.name}}"
-                                             {% if group.name in execution_role %} checked {% endif %}/>
+                                             {% if group.name in execution_role %} checked {% endif %}
+                                             {% if editablerestrictedly == 'true' %} disabled {% endif %}/>
                                             <span>{% trans "Execute permission" %}</span>
                                         </label>
                                 </div>

@@ -117,6 +117,7 @@ gvsigolETL.Toolbar = Class.extend({
 				// access using the List since some elements are hidden and not available in the DOM
 				var assigned_edit_roles = [];
 				var assigned_execute_roles = [];
+				var assigned_restricted_edit_roles = [];
 				if (searcheableRoleList != null) {
 					for(var i=0; i<searcheableRoleList.items.length; i++){
 						var item = searcheableRoleList.items[i];
@@ -132,11 +133,18 @@ gvsigolETL.Toolbar = Class.extend({
 							var nombre=	id.split("-")[2];
 							assigned_execute_roles.push(nombre);
 						}
+						var ws_restricted_edit_checkbox = $(item.elm).find(".ws-restricted-edit-checkbox").first();
+						if (ws_restricted_edit_checkbox.is(":checked")) {
+							var id = ws_restricted_edit_checkbox.attr("id");
+							var nombre=	id.split("-")[2];
+							assigned_restricted_edit_roles.push(nombre);
+						}
 					}
 				}
 
 				formWorkspace.append("editRoles",JSON.stringify(assigned_edit_roles));
 				formWorkspace.append("executeRoles",JSON.stringify(assigned_execute_roles));
+				formWorkspace.append("restrictedEditRoles",JSON.stringify(assigned_restricted_edit_roles));
 
 				writer.marshal(view, function(json){
 
@@ -317,7 +325,6 @@ gvsigolETL.Toolbar = Class.extend({
 		this.disableButton(this.saveButton, true);
 		this.disableButton(this.emptyButton, true);
 
-
 		/*Draw Nodes if a workspace is restored*/
 		if (cnv != null){
 
@@ -420,6 +427,23 @@ gvsigolETL.Toolbar = Class.extend({
 								}else{
 									$('#'+key+'-'+figure.id).val(parameters[0][key]);
 								}
+							
+								if ( (type.startsWith('input_') || type.startsWith('output_'))  && editablerestrictedly){
+									
+									$('#'+key+'-'+figure.id).prop("disabled", true)
+									$('input:radio[name="'+key+'-'+figure.id+'"]').prop("disabled", true)
+									href = $("[href]")
+									$('[id$="accept-'+figure.id+'"]').prop("disabled", true)
+
+									Object.entries(href).forEach(function(entry){
+										if ((entry[1].id).includes(figure.id)){
+											$("#"+entry[1].id).addClass('disabled')
+										}
+									})
+									
+								}
+							
+							
 							}
 
 						} catch {

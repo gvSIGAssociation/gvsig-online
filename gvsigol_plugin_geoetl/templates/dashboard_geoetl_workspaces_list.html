@@ -46,7 +46,7 @@
 						</thead>
 						<tbody>
 							{% for workspace in workspaces %}
-								<tr data-workspaceid="{{ workspace.id }}" data-editable="{{workspace.editable}}">
+								<tr data-workspaceid="{{ workspace.id }}" data-editable="{{workspace.editable}}" data-execute="{{workspace.execute}}" data-editablerestrictedly="{{workspace.editable_restrictedly}}">
 									<td> {{ workspace.id }} </td>
 									<td></td>
 
@@ -948,7 +948,7 @@
 				"render": function ( data, type, row ) {
 					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
 					var dataset = $('#etl-table').find(filter).data();
-					if (dataset['editable']) {
+					if (dataset['editable'] || dataset['editablerestrictedly']) {
 						return '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>';
 					}
 					else {
@@ -1486,7 +1486,6 @@
 				});
 			});
 		};
-
 	});
 
     $('#button-ws-exists-accept').on('click', function(){
@@ -1497,10 +1496,7 @@
 		}else{
 			$('#modal-update-workspace-etl').modal('show')
 		}
-
-
     })
-
 
 	$(".more-hour-options").slideUp("slow")
 
@@ -1574,6 +1570,7 @@
 			// access using the List since some elements are hidden and not available in the DOM
 			var assigned_edit_roles = [];
 			var assigned_execute_roles = [];
+			var assigned_restricted_edit_roles = [];
 			if (searcheableRoleList != null) {
 				for(var i=0; i<searcheableRoleList.items.length; i++){
 					var item = searcheableRoleList.items[i];
@@ -1589,10 +1586,19 @@
 						var nombre=	id.split("-")[2];
 						assigned_execute_roles.push(nombre);
 					}
+					var ws_restricted_edit_checkbox = $(item.elm).find(".ws-restricted-edit-checkbox").first();
+					if (ws_restricted_edit_checkbox.is(":checked")) {
+						var id = ws_restricted_edit_checkbox.attr("id");
+						var nombre=	id.split("-")[2];
+						assigned_restricted_edit_roles.push(nombre);
+					}
 				}
 			}
 			updateData["editRoles"]=JSON.stringify(assigned_edit_roles)
 			updateData["executeRoles"]=JSON.stringify(assigned_execute_roles)
+			updateData["restrictedEditRoles"]=JSON.stringify(assigned_restricted_edit_roles)
+
+			console.log(assigned_restricted_edit_roles)
 
 			$.ajax({
 				type: 'POST',

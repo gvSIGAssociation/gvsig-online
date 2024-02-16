@@ -60,6 +60,29 @@ class ETLworkspaces(models.Model):
         user_roles = auth_backend.get_roles(request_or_user)
         return self.etlworkspaceeditrole_set.filter(role__in=user_roles).exists()
 
+    def can_edit_restrictedly(self, request_or_user):
+        """
+        Checks whether the user can edit restrictedly this workspace.
+
+        Parameters
+        ----------
+        request_or_user: Request | HttpRequest | User
+            A Django Request object | A DRF HttpRequest object | A Django User object
+
+        Returns
+        -------
+        True if the user can edit restrictedly this workspace, False otherwise
+        """
+        if isinstance(request_or_user, User):
+            user = request_or_user
+        else:
+            user = request_or_user.user
+        if user.is_staff and user.username == self.username:
+            return True
+
+        user_roles = auth_backend.get_roles(request_or_user)
+        return self.etlworkspaceeditrestrictedrole_set.filter(role__in=user_roles).exists()
+
 class ETLstatus(models.Model):
 
     name = models.CharField(max_length=250)
@@ -118,6 +141,18 @@ class EtlWorkspaceEditRole(models.Model):
         ]
         constraints = [
            models.UniqueConstraint(fields=['etl_ws', 'role'], name='unique_edit_permission_per_role_and_etlws')
+        ]
+
+class EtlWorkspaceEditRestrictedRole(models.Model):
+    etl_ws = models.ForeignKey(ETLworkspaces, on_delete=models.CASCADE)
+    role = models.TextField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['etl_ws', 'role']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['etl_ws', 'role'], name='unique_restricted_edit_permission_per_role_and_etlws')
         ]
 
 class SendEmails(models.Model):

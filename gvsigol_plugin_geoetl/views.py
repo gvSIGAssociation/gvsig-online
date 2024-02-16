@@ -39,7 +39,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole, SendEmails
+from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails
 from gvsigol_services.models import Datastore
 from django.contrib.auth.models import User
 from . import settings as settings_geoetl
@@ -150,7 +150,7 @@ def etl_canvas(request):
 
         instance  = ETLworkspaces.objects.get(id=int(lgid))
 
-        if instance.can_edit(request):
+        if instance.can_edit(request) or instance.can_edit_restrictedly(request):
 
             response = {
                 'id':lgid,
@@ -162,6 +162,9 @@ def etl_canvas(request):
                 'dbc': dbc,
                 'providers': providers
             }
+
+            if instance.can_edit_restrictedly(request) and not instance.can_edit(request):
+                response['editablerestrictedly'] = 'true'
 
             try:
                 periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+instance.name+'.'+str(lgid))
@@ -212,6 +215,7 @@ def get_list(request, concat = False):
         user_roles = auth_backend.get_roles(request)
         etl_list = (ETLworkspaces.objects.filter(etlworkspaceexecuterole__role__in=user_roles) |
                         ETLworkspaces.objects.filter(etlworkspaceeditrole__role__in=user_roles) |
+                        ETLworkspaces.objects.filter(etlworkspaceeditrestrictedrole__role__in=user_roles) |
                         ETLworkspaces.objects.filter(username=user.username, concat=concat)).distinct()
     else:
         etl_list = []
@@ -226,8 +230,11 @@ def get_list(request, concat = False):
         workspace['username'] = w.username
         if user.is_superuser or w.username == request.user.username:
             workspace['editable'] = 'true'
+            workspace['execute'] = 'true'
         else:
             workspace['editable'] = 'true' if w.can_edit(request) else 'false'
+            workspace['editable_restrictedly'] = 'true' if w.can_edit_restrictedly(request) else 'false'
+            workspace['execute'] = 'true' if w.can_execute(request) else 'false'
 
         try:
             periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
@@ -274,28 +281,42 @@ def permissons_tab(request, id_wks):
 
     if (id_wks !=0 and id_wks is not None):
         ws = ETLworkspaces.objects.get(id=id_wks)
+
+        editing_role=[]
+        execution_role=[]
+        editing_restricted_role=[]
+
         if ws.can_edit(request):
 
             role_edit_wks = EtlWorkspaceEditRole.objects.filter(etl_ws=id_wks)
-            editing_role=[]
             for b in role_edit_wks:
                 editing_role.append(b.role)
 
         if ws.can_execute(request):
 
             role_execute_wks = EtlWorkspaceExecuteRole.objects.filter(etl_ws=id_wks)
-            execution_role=[]
             for b in role_execute_wks:
                 execution_role.append(b.role)
+
+        if ws.can_edit_restrictedly(request):
+
+            role_edit_restrictedly_wks = EtlWorkspaceEditRestrictedRole.objects.filter(etl_ws=id_wks)
+            for b in role_edit_restrictedly_wks:
+                editing_restricted_role.append(b.role)
     else:
         editing_role=all_roles
         execution_role=all_roles
+        editing_restricted_role = all_roles
 
     response = {
             'groups': all_roles,
             'editing_role' : editing_role,
-            'execution_role' : execution_role
+            'execution_role' : execution_role,
+            'editing_restricted_role' : editing_restricted_role
             }
+
+    if ws.can_edit_restrictedly(request) and not ws.can_edit(request):
+        response['editablerestrictedly'] = 'true'
 
     return render(request,  "geoetl_workspaces_permissions.html", response)
 
@@ -484,7 +505,7 @@ def _etl_workspace_update(instance, request, name, description, workspace, param
     if request.user.is_superuser and set_superuser:
         username = request.user.username
     else:
-        if instance.username is None:
+        if instance.username is None or instance.can_edit_restrictedly(request):
             username = instance.username
         else:
             username = request.user.username
@@ -526,6 +547,17 @@ def _etl_workspace_update(instance, request, name, description, workspace, param
             ws_role.role = rol
             ws_role.save()
 
+    editing_restricted_roles = json.loads(request.POST.get('restrictedEditRoles', '[]'))
+    EtlWorkspaceEditRestrictedRole.objects.filter(etl_ws=instance.id).delete()
+    for rol in editing_restricted_roles:
+        try:
+            ws_role = EtlWorkspaceEditRestrictedRole.objects.get(etl_ws_id=instance.id, role=rol)
+        except:
+            ws_role = EtlWorkspaceEditRestrictedRole()
+            ws_role.etl_ws = instance
+            ws_role.role = rol
+            ws_role.save()
+
 
 @login_required()
 @staff_required
@@ -534,15 +566,16 @@ def etl_workspace_update(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         workspace = request.POST.get('workspace')
-        periodic_task = request.POST.get('checked') == 'true'
-        set_superuser = request.POST.get('superuser') == 'true'
+        periodic_task = request.POST.get('checked')
+        set_superuser = request.POST.get('superuser')
         try:
             id = int(request.POST.get('id'))
             ws = ETLworkspaces.objects.get(id = id)
-            if not ws.can_edit(request):
+            if not ws.can_edit(request) and not ws.can_edit_restrictedly(request):
                 return HttpResponse(json.dumps({'status': 'not allowed'}, indent=4), content_type='folder/json')
             params = ws.parameters
-        except:
+        except Exception as e:
+            print(str(e))
             ws = ETLworkspaces()
             params = None
         try:

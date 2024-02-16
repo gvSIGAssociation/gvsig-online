@@ -15483,7 +15483,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if ((JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]) && !editablerestrictedly){
                     schema = schemaEdge
                     $('#match-'+ID).empty()
 
