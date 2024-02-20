@@ -160,26 +160,26 @@ msgstr "Las capas externas tipo XYZ no pueden ser reproyectadas."
 #~ msgid "This functionality is only available on Mozilla Firefox"
 #~ msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
 
-#~ msgid "a4_landscape"
-#~ msgstr "A4 Apaisado"
+msgid "a4_landscape"
+msgstr "A4 Apaisado"
 
-#~ msgid "a3_sin_leyenda"
-#~ msgstr "A3 sin Leyenda"
+msgid "a3_sin_leyenda"
+msgstr "A3 sin Leyenda"
 
-#~ msgid "a4_landscape_overview"
-#~ msgstr "A4 Apaisado con Localizador"
+msgid "a4_landscape_overview"
+msgstr "A4 Apaisado con Localizador"
 
-#~ msgid "a3_landscape"
-#~ msgstr "A3 Apaisado"
+msgid "a3_landscape"
+msgstr "A3 Apaisado"
 
-#~ msgid "a4_sin_leyenda"
-#~ msgstr "A4 Apaisado sin Leyenda"
+msgid "a4_sin_leyenda"
+msgstr "A4 Apaisado sin Leyenda"
 
-#~ msgid "a3_landscape_overview"
-#~ msgstr "A3 Apaisado con Localizador"
+msgid "a3_landscape_overview"
+msgstr "A3 Apaisado con Localizador"
 
-#~ msgid "a4_portrait"
-#~ msgstr "A4 Vertical"
+msgid "a4_portrait"
+msgstr "A4 Vertical"
 
 #~ msgid "tocantins_a4_landscape"
 #~ msgstr "Tocantins A4 Horizontal"
