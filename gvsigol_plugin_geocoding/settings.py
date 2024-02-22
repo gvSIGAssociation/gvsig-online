@@ -39,6 +39,7 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('ide_uy', _('IDE Uruguay Geocoder')),
                 ('postgres', _('Simple Geocoder')),
                 ('generic', _('Generic API Service Geocoder')),
+                ('uy_sudir', _('Direcciones SuDIR Geocoder')),
             )
 
 GEOCODING_PROVIDER = {
@@ -88,9 +89,16 @@ GEOCODING_PROVIDER = {
 
     
     'ide_uy': {
-        'candidates_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/candidates',
-        'find_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/find',
-        'reverse_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/reverse',  
+        'candidates_url': 'http://localhost:8090/api/v1/geocode/candidates',
+        'find_url': 'http://localhost:8090/api/v1/geocode/find',
+        'reverse_url': 'http://localhost:8090/api/v1/geocode/reverse',  
+        'max_results': 10,
+        'filter': ''
+    },
+    'uy_sudir': {
+        'candidates_url': 'http://localhost:8081/direcciones/geocode/candidates',
+        'find_url': 'http://localhost:8081/direcciones/geocode/find',
+        'reverse_url': 'http://localhost:8081/direcciones/geocode/reverse',  
         'max_results': 10,
         'filter': ''
     },

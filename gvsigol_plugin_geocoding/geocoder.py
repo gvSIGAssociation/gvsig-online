@@ -29,6 +29,7 @@ from .cartociudad import Cartociudad
 from .nominatim import Nominatim 
 from .geocoder_postgres import GeocoderPostgres
 from .ide_uy import IdeUY
+from .uy_sudir import UY_SuDIR
 from .generic import GenericAPI
 import json, ast
 from .models import Provider
@@ -78,6 +79,9 @@ class Geocoder():
             geocoder['cartociudad'] = Cartociudad(provider, provider.type)
             self.geocoders.append(geocoder)
         
+        if provider.type == 'uy_sudir':
+            geocoder[provider.type] = UY_SuDIR(provider)
+            self.geocoders.append(geocoder)
           
     def search_candidates(self, query):
         suggestions = []
