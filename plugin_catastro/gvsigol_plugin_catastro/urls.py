@@ -12,5 +12,6 @@ urlpatterns = [
     path('catastro/get_referencia_catastral_polygon/', views.get_referencia_catastral_polygon, name='get_referencia_catastral_polygon'),
     path('catastro/get_rc_info/', views.get_rc_info, name='get_rc_info'),
     path('catastro/get_rc_public_data/', views.get_rc_public_data, name='get_rc_public_data'),
+    path('catastro/get_rc_parcel_public_data/', views.get_rc_parcel_public_data, name='get_rc_parce_public_data'),
     path('catastro/get_rc_by_coords/', views.get_rc_by_coords, name='get_rc_by_coords')
 ]

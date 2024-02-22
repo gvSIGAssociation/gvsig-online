@@ -132,6 +132,25 @@ def get_rc_public_data(request):
         return JsonResponse(resp_obj)
 
 @csrf_exempt
+def get_rc_parcel_public_data(request):
+    if request.method == 'POST':
+        ref_catastral = request.POST.get('RC')
+
+        params = {}
+        params['service'] = 'wfs'
+        params['version'] = '2'
+        params['request'] = 'getfeature'
+        params['STOREDQUERIE_ID'] = 'GetParcel'
+        params['refcat'] = ref_catastral
+        params['srsname'] = 'EPSG::4326'
+
+        address_url = settings.URL_CATASTRO_INSPIRE
+        r = requests.get(address_url, params=params, verify = False)
+
+        resp_obj = xmltodict.parse(r.content)
+        return JsonResponse(resp_obj)
+
+@csrf_exempt
 def get_rc_info(request):
     if request.method == 'POST':
         xcen = request.POST.get('xcen')
