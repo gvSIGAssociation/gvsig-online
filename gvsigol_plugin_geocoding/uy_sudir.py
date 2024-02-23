@@ -60,11 +60,7 @@ class UY_SuDIR():
         if self.providers.__len__() > 0 :
             provider = self.providers[0]
             json_results = self.get_json_from_url(self.urls['candidates_url'], params)
-            for json_result in json_results:
-                json_result['address'] = ''
-                if (json_result['direccion'] is not None):
-                    json_result['address'] = json_result['direccion']
-                    
+            for json_result in json_results:                    
                 json_result['category'] = provider.category
                 json_result['source'] = provider.type
                 #If there is not a defined image, use provider's image
@@ -77,7 +73,7 @@ class UY_SuDIR():
     def find(self, address_str, exactly_one):
         address = json.loads(address_str)
         print((str(address)))
-        typeSearch = address['address[tipo]']
+        typeSearch = address['address[type]']
         
         
         params = {}
@@ -86,13 +82,13 @@ class UY_SuDIR():
             'id': address['address[id]'],
             'idcalle': address['address[via_circulacion_id]'],
             'idcalleEsq': address['address[idViaEsq]'],
-            'nomvia': address['address[via_circulacion_nombre]'],
-            'source': 'ide_uy',
-            'localidad': address['address[unidad_territorial_nombre]'],
-            'departamento': address['address[departamento_nombre]']
+            'nomvia': address['address[nomVia]'],
+            'source': 'uy_sudir',
+            'localidad': address['address[localidad]'],
+            'departamento': address['address[departamento]']
         }
-        if ('0' != address['address[numero]']):
-            params['portal'] = address['address[numero]']
+        if ('0' != address['address[portalNumber]']):
+            params['portal'] = address['address[portalNumber]']
         if ('' != address['address[letra]']):
             params['letra'] = address['address[letra]']
             
