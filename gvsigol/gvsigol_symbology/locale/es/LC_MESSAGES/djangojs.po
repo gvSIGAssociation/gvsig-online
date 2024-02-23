@@ -15,499 +15,483 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:52+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2024-02-23 02:15+0000\n"
+"PO-Revision-Date: 2024-02-22 23:47-0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: es\n"
 "X-Source-Language: C\n"
+"X-Generator: Poedit 3.4.2\n"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:2
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:4
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:6
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:8
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:19
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:20
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:22
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:24
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:26
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:37
+#: static/js/lib/_trans.gvsigol.js:2 static/js/lib/_trans.gvsigol.js:4
+#: static/js/lib/_trans.gvsigol.js:6 static/js/lib/_trans.gvsigol.js:8
+#: static/js/lib/_trans.gvsigol.js:19 static/js/lib/_trans.gvsigol.js:20
+#: static/js/lib/_trans.gvsigol.js:22 static/js/lib/_trans.gvsigol.js:24
+#: static/js/lib/_trans.gvsigol.js:26 static/js/lib/_trans.gvsigol.js:37
 msgid "You must select a field"
 msgstr "Debe seleccionar un campo"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:3
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:5
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:7
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:9
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:16
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:21
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:23
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:25
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:27
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:34
+#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/_trans.gvsigol.js:5
+#: static/js/lib/_trans.gvsigol.js:7 static/js/lib/_trans.gvsigol.js:9
+#: static/js/lib/_trans.gvsigol.js:16 static/js/lib/_trans.gvsigol.js:21
+#: static/js/lib/_trans.gvsigol.js:23 static/js/lib/_trans.gvsigol.js:25
+#: static/js/lib/_trans.gvsigol.js:27 static/js/lib/_trans.gvsigol.js:34
 msgid "The number of intervals must be greater than 0"
 msgstr "El número de intervalos debe ser mayor que 0"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:10
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:28
+#: static/js/lib/_trans.gvsigol.js:10 static/js/lib/_trans.gvsigol.js:28
 msgid "No data to show"
 msgstr "No hay datos a mostrar"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:11
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:29
+#: static/js/lib/_trans.gvsigol.js:11 static/js/lib/_trans.gvsigol.js:29
 msgid "Band"
 msgstr "Banda"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:12
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:30
+#: static/js/lib/_trans.gvsigol.js:12 static/js/lib/_trans.gvsigol.js:30
 msgid "Min"
 msgstr ""
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:13
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:31
+#: static/js/lib/_trans.gvsigol.js:13 static/js/lib/_trans.gvsigol.js:31
 msgid "Max"
 msgstr ""
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:14
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:32
+#: static/js/lib/_trans.gvsigol.js:14 static/js/lib/_trans.gvsigol.js:32
 msgid "Mean"
 msgstr "Media"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:15
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:33
+#: static/js/lib/_trans.gvsigol.js:15 static/js/lib/_trans.gvsigol.js:33
 msgid "Stdev"
 msgstr "Desviación típica"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:17
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:35
+#: static/js/lib/_trans.gvsigol.js:17 static/js/lib/_trans.gvsigol.js:35
 msgid "Library"
 msgstr "La biblioteca"
 
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:18
-#: gvsigol_symbology/static/js/lib/_trans.gvsigol.js:36
+#: static/js/lib/_trans.gvsigol.js:18 static/js/lib/_trans.gvsigol.js:36
 msgid "will be removed, Do you want continue?"
 msgstr "será eliminada, ¿Desea continuar?"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:80
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:80
+#: static/js/lib/symbology/ClusteredPoints.js:80
+#: static/js/lib/symbology/Expressions.js:80
 msgid "rule"
 msgstr "regla"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:81
+#: static/js/lib/symbology/ClusteredPoints.js:81
 msgid "Single feature"
 msgstr "Entidad simple"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:140
+#: static/js/lib/symbology/ClusteredPoints.js:140
 msgid "Default group"
 msgstr "Grupo por defecto"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:140
+#: static/js/lib/symbology/ClusteredPoints.js:140
 msgid "features"
 msgstr "entidades"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:195
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:120
+#: static/js/lib/symbology/ClusteredPoints.js:195
+#: static/js/lib/symbology/Expressions.js:120
 msgid "Expressions"
 msgstr "Expresiones"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:198
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:123
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:303
+#: static/js/lib/symbology/ClusteredPoints.js:198
+#: static/js/lib/symbology/Expressions.js:123
+#: static/js/lib/symbology/TextSymbolizer.js:313
 msgid "Add"
 msgstr "Añadir"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:204
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:129
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:309
+#: static/js/lib/symbology/ClusteredPoints.js:204
+#: static/js/lib/symbology/Expressions.js:129
+#: static/js/lib/symbology/TextSymbolizer.js:319
 msgid "AND expression"
 msgstr "Expresión AND"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:205
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:130
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:310
+#: static/js/lib/symbology/ClusteredPoints.js:205
+#: static/js/lib/symbology/Expressions.js:130
+#: static/js/lib/symbology/TextSymbolizer.js:320
 msgid "OR expression"
 msgstr "Expresión OR"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:208
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:133
+#: static/js/lib/symbology/ClusteredPoints.js:208
+#: static/js/lib/symbology/Expressions.js:133
 msgid "Save filter"
 msgstr "Guardar filtro"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:234
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:574
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:595
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:159
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:511
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:535
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:499
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:520
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:794
+#: static/js/lib/symbology/ClusteredPoints.js:234
+#: static/js/lib/symbology/ClusteredPoints.js:574
+#: static/js/lib/symbology/ClusteredPoints.js:595
+#: static/js/lib/symbology/Expressions.js:159
+#: static/js/lib/symbology/Expressions.js:511
+#: static/js/lib/symbology/Expressions.js:535
+#: static/js/lib/symbology/TextSymbolizer.js:509
+#: static/js/lib/symbology/TextSymbolizer.js:530
+#: static/js/lib/symbology/TextSymbolizer.js:835
 msgid "Value"
 msgstr "Valor"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:445
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:382
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:384
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:429
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:431
+#: static/js/lib/symbology/ClusteredPoints.js:445
+#: static/js/lib/symbology/Expressions.js:382
+#: static/js/lib/symbology/Expressions.js:384
+#: static/js/lib/symbology/TextSymbolizer.js:439
+#: static/js/lib/symbology/TextSymbolizer.js:441
 msgid "Select field"
 msgstr "Seleccionar campo"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:447
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:198
+#: static/js/lib/symbology/ClusteredPoints.js:447
+#: static/js/lib/symbology/TextSymbolizer.js:199
 msgid "Count features"
 msgstr "Contar registros"
 
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:465
-#: gvsigol_symbology/static/js/lib/symbology/ClusteredPoints.js:467
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:402
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:404
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:449
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:451
+#: static/js/lib/symbology/ClusteredPoints.js:465
+#: static/js/lib/symbology/ClusteredPoints.js:467
+#: static/js/lib/symbology/Expressions.js:402
+#: static/js/lib/symbology/Expressions.js:404
+#: static/js/lib/symbology/TextSymbolizer.js:459
+#: static/js/lib/symbology/TextSymbolizer.js:461
 msgid "Select operation"
 msgstr "Seleccionar operación"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorMapEntry.js:62
+#: static/js/lib/symbology/ColorMapEntry.js:62
 msgid "Color map entry"
 msgstr "Entrada de color"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorMapEntry.js:72
-#: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:62
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:158
+#: static/js/lib/symbology/ColorMapEntry.js:72
+#: static/js/lib/symbology/ColorRamp.js:62 static/js/lib/symbology/Rule.js:158
 msgid "Color"
 msgstr "Color"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorMapEntry.js:78
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:159
+#: static/js/lib/symbology/ColorMapEntry.js:78
+#: static/js/lib/symbology/Rule.js:159
 msgid "Quantity"
 msgstr "Cantidad"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorMapEntry.js:84
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:160
+#: static/js/lib/symbology/ColorMapEntry.js:84
+#: static/js/lib/symbology/Rule.js:160
 msgid "Label"
 msgstr "Etiqueta"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorMapEntry.js:90
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:161
+#: static/js/lib/symbology/ColorMapEntry.js:90
+#: static/js/lib/symbology/Rule.js:161
 msgid "Opacity"
 msgstr "Opacidad"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:61
+#: static/js/lib/symbology/ColorRamp.js:61
 msgid "Percentage"
 msgstr "Porcentaje"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:63
+#: static/js/lib/symbology/ColorRamp.js:63
 msgid "Transparency"
 msgstr "Transparencia"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorRamp.js:64
+#: static/js/lib/symbology/ColorRamp.js:64
 msgid "Delete"
 msgstr "Borrar"
 
-#: gvsigol_symbology/static/js/lib/symbology/ColorTable.js:141
-#: gvsigol_symbology/static/js/lib/symbology/ColorTable.js:259
+#: static/js/lib/symbology/ColorTable.js:141
+#: static/js/lib/symbology/ColorTable.js:259
 msgid "You must select a image"
 msgstr "Selecciona una imagen"
 
-#: gvsigol_symbology/static/js/lib/symbology/Expressions.js:81
+#: static/js/lib/symbology/Expressions.js:81
 msgid "Rule"
 msgstr "Regla"
 
-#: gvsigol_symbology/static/js/lib/symbology/LibrarySymbol.js:151
+#: static/js/lib/symbology/LibrarySymbol.js:151
 msgid "There is already a style named"
 msgstr "Ya existe un estilo con el nombre"
 
-#: gvsigol_symbology/static/js/lib/symbology/LibraryUtils.js:28
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:46
+#: static/js/lib/symbology/LibraryUtils.js:28
+#: static/js/lib/symbology/SymbologyUtils.js:46
 msgid "Circle"
 msgstr "Círculo"
 
-#: gvsigol_symbology/static/js/lib/symbology/LibraryUtils.js:29
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:47
+#: static/js/lib/symbology/LibraryUtils.js:29
+#: static/js/lib/symbology/SymbologyUtils.js:47
 msgid "Square"
 msgstr "Cuadrado"
 
-#: gvsigol_symbology/static/js/lib/symbology/LibraryUtils.js:30
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:48
+#: static/js/lib/symbology/LibraryUtils.js:30
+#: static/js/lib/symbology/SymbologyUtils.js:48
 msgid "Triangle"
 msgstr "Triángulo"
 
-#: gvsigol_symbology/static/js/lib/symbology/LibraryUtils.js:31
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:49
+#: static/js/lib/symbology/LibraryUtils.js:31
+#: static/js/lib/symbology/SymbologyUtils.js:49
 msgid "Star"
 msgstr "Estrella"
 
-#: gvsigol_symbology/static/js/lib/symbology/LibraryUtils.js:32
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:50
+#: static/js/lib/symbology/LibraryUtils.js:32
+#: static/js/lib/symbology/SymbologyUtils.js:50
 msgid "Cross"
 msgstr "Cruz"
 
-#: gvsigol_symbology/static/js/lib/symbology/LineSymbolizer.js:63
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:71
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:66
+#: static/js/lib/symbology/LineSymbolizer.js:63
+#: static/js/lib/symbology/MarkSymbolizer.js:71
+#: static/js/lib/symbology/PolygonSymbolizer.js:66
 msgid "Stroke"
 msgstr "Linea"
 
-#: gvsigol_symbology/static/js/lib/symbology/LineSymbolizer.js:73
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:130
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:96
+#: static/js/lib/symbology/LineSymbolizer.js:73
+#: static/js/lib/symbology/MarkSymbolizer.js:130
+#: static/js/lib/symbology/PolygonSymbolizer.js:96
 msgid "Stroke color"
 msgstr "Color del linea"
 
-#: gvsigol_symbology/static/js/lib/symbology/LineSymbolizer.js:79
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:136
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:102
+#: static/js/lib/symbology/LineSymbolizer.js:79
+#: static/js/lib/symbology/MarkSymbolizer.js:136
+#: static/js/lib/symbology/PolygonSymbolizer.js:102
 msgid "Stroke width"
 msgstr "Anchura de linea"
 
-#: gvsigol_symbology/static/js/lib/symbology/LineSymbolizer.js:85
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:142
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:108
+#: static/js/lib/symbology/LineSymbolizer.js:85
+#: static/js/lib/symbology/MarkSymbolizer.js:142
+#: static/js/lib/symbology/PolygonSymbolizer.js:108
 msgid "Stroke opacity"
 msgstr "Opacidad de linea"
 
-#: gvsigol_symbology/static/js/lib/symbology/LineSymbolizer.js:91
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:148
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:114
+#: static/js/lib/symbology/LineSymbolizer.js:91
+#: static/js/lib/symbology/MarkSymbolizer.js:148
+#: static/js/lib/symbology/PolygonSymbolizer.js:114
 msgid "Select pattern"
 msgstr "Seleccionar patrón"
 
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:69
+#: static/js/lib/symbology/MarkSymbolizer.js:69
 msgid "Graphic"
 msgstr "Gráfico"
 
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:70
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:65
+#: static/js/lib/symbology/MarkSymbolizer.js:70
+#: static/js/lib/symbology/PolygonSymbolizer.js:65
 msgid "Fill"
 msgstr "Relleno"
 
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:72
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:170
+#: static/js/lib/symbology/MarkSymbolizer.js:72
+#: static/js/lib/symbology/MarkSymbolizer.js:170
 msgid "Rotation"
 msgstr "Rotación"
 
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:82
+#: static/js/lib/symbology/MarkSymbolizer.js:82
 msgid "Select shape"
 msgstr "Seleccionar forma"
 
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:96
+#: static/js/lib/symbology/MarkSymbolizer.js:96
 msgid "Size"
 msgstr "Tamaño"
 
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:110
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:76
+#: static/js/lib/symbology/MarkSymbolizer.js:110
+#: static/js/lib/symbology/PolygonSymbolizer.js:76
 msgid "Fill color"
 msgstr "Color del relleno"
 
-#: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:116
-#: gvsigol_symbology/static/js/lib/symbology/PolygonSymbolizer.js:82
+#: static/js/lib/symbology/MarkSymbolizer.js:116
+#: static/js/lib/symbology/PolygonSymbolizer.js:82
 msgid "Fill opacity"
 msgstr "Opacidad del relleno"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:90
+#: static/js/lib/symbology/Rule.js:90
 msgid "Edit rule"
 msgstr "Editar regla"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:92
+#: static/js/lib/symbology/Rule.js:92
 msgid "Edit filter"
 msgstr "Editar filtro"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:112
+#: static/js/lib/symbology/Rule.js:112
 msgid "Preview"
 msgstr "Previsualizar"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:121
+#: static/js/lib/symbology/Rule.js:121
 msgid "Append symbolizer"
 msgstr "Añadir simbolizador"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:123
+#: static/js/lib/symbology/Rule.js:123
 msgid "Append textsymbolizer"
 msgstr "Añadir simbolizador de texto"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:126
+#: static/js/lib/symbology/Rule.js:126
 msgid "Import from library"
 msgstr "Importar desde lbrería"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:188
+#: static/js/lib/symbology/Rule.js:188
 msgid "Rule name"
 msgstr "Nombre de la regla"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:192
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:145
+#: static/js/lib/symbology/Rule.js:192
+#: static/js/lib/symbology/TextSymbolizer.js:146
 msgid "Rule title"
 msgstr "Título de la regla"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:200
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:201
+#: static/js/lib/symbology/Rule.js:200 static/js/lib/symbology/Rule.js:201
 msgid "Minimum interval"
 msgstr "Intervalo mínimo"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:206
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:207
+#: static/js/lib/symbology/Rule.js:206 static/js/lib/symbology/Rule.js:207
 msgid "Maximum interval"
 msgstr "Intervalo máximo"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:215
+#: static/js/lib/symbology/Rule.js:215
 msgid "Define custom scale denominators?"
 msgstr "Visible por escala"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:220
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:151
+#: static/js/lib/symbology/Rule.js:220
+#: static/js/lib/symbology/TextSymbolizer.js:152
 msgid "Minimum scale denominator"
 msgstr "Denominador mínimo de la escala"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:221
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:227
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:152
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:158
+#: static/js/lib/symbology/Rule.js:221 static/js/lib/symbology/Rule.js:227
+#: static/js/lib/symbology/TextSymbolizer.js:153
+#: static/js/lib/symbology/TextSymbolizer.js:159
 msgid "No limit"
 msgstr "Sin límite"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:226
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:157
+#: static/js/lib/symbology/Rule.js:226
+#: static/js/lib/symbology/TextSymbolizer.js:158
 msgid "Maximum scale denominator"
 msgstr "Denominador máximo de la escala"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:232
+#: static/js/lib/symbology/Rule.js:232
 msgid "Save"
 msgstr "Guardar"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:438
+#: static/js/lib/symbology/Rule.js:438
 msgid "Selected symbol is not compatible with the layer"
 msgstr "El símbolo seleccionado no es compatible con la capa"
 
-#: gvsigol_symbology/static/js/lib/symbology/Rule.js:593
+#: static/js/lib/symbology/Rule.js:593
 msgid "Image symbols can only be edited from the library"
 msgstr ""
 "Los símbolos de tipo imagen solo pueden ser editados des de la biblioteca de "
 "símbolos"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:35
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:41
+#: static/js/lib/symbology/SymbologyUtils.js:35
+#: static/js/lib/symbology/SymbologyUtils.js:41
 msgid "Normal"
 msgstr "Normal"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:36
+#: static/js/lib/symbology/SymbologyUtils.js:36
 msgid "Cursive"
 msgstr "Cursiva"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:37
+#: static/js/lib/symbology/SymbologyUtils.js:37
 msgid "Oblique"
 msgstr "Oblicua"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:42
+#: static/js/lib/symbology/SymbologyUtils.js:42
 msgid "Bold"
 msgstr "Negrita"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:71
+#: static/js/lib/symbology/SymbologyUtils.js:71
 msgid "Is equal to"
 msgstr "Es igual a"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:72
+#: static/js/lib/symbology/SymbologyUtils.js:72
 msgid "Is null"
 msgstr "Es nul"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:73
+#: static/js/lib/symbology/SymbologyUtils.js:73
 msgid "Contains"
 msgstr "Contiene"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:74
+#: static/js/lib/symbology/SymbologyUtils.js:74
 msgid "Is not equal"
 msgstr "No es igual"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:75
+#: static/js/lib/symbology/SymbologyUtils.js:75
 msgid "Is greater than"
 msgstr "Es mayor que"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:76
+#: static/js/lib/symbology/SymbologyUtils.js:76
 msgid "Is greater than or equal to"
 msgstr "Es mayor que o igual"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:77
+#: static/js/lib/symbology/SymbologyUtils.js:77
 msgid "Is less than"
 msgstr "Es menor que"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:78
+#: static/js/lib/symbology/SymbologyUtils.js:78
 msgid "Is less than or equal to"
 msgstr "Es menor que o igual"
 
-#: gvsigol_symbology/static/js/lib/symbology/SymbologyUtils.js:79
+#: static/js/lib/symbology/SymbologyUtils.js:79
 msgid "Is between"
 msgstr "Está entre"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:116
+#: static/js/lib/symbology/TextSymbolizer.js:117
 msgid "General"
 msgstr ""
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:118
+#: static/js/lib/symbology/TextSymbolizer.js:119
 msgid "Font"
 msgstr "Fuente"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:119
+#: static/js/lib/symbology/TextSymbolizer.js:120
 msgid "Halo"
 msgstr "Halo"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:121
+#: static/js/lib/symbology/TextSymbolizer.js:122
 msgid "Filter"
 msgstr "Filtro"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:134
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:136
+#: static/js/lib/symbology/TextSymbolizer.js:135
+#: static/js/lib/symbology/TextSymbolizer.js:137
 msgid "Has label"
 msgstr "Activar etiquetado"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:146
+#: static/js/lib/symbology/TextSymbolizer.js:147
 msgid "Rules title"
 msgstr "Título de la regla"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:178
+#: static/js/lib/symbology/TextSymbolizer.js:179
 msgid "Label field"
 msgstr "Campo de etiqueta"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:206
+#: static/js/lib/symbology/TextSymbolizer.js:207
 msgid "Font family"
 msgstr "Família de fuente"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:220
+#: static/js/lib/symbology/TextSymbolizer.js:221
 msgid "Font size"
 msgstr "Tamaño de fuente"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:226
+#: static/js/lib/symbology/TextSymbolizer.js:227
 msgid "Font color"
 msgstr "Color de fuente"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:232
+#: static/js/lib/symbology/TextSymbolizer.js:233
 msgid "Font weight"
 msgstr "Grosor de fuente"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:246
+#: static/js/lib/symbology/TextSymbolizer.js:247
 msgid "Font style"
 msgstr "Estilo de fuente"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:268
+#: static/js/lib/symbology/TextSymbolizer.js:269
 msgid "Halo color"
 msgstr "Color de halo"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:274
+#: static/js/lib/symbology/TextSymbolizer.js:275
 msgid "Halo opacity"
 msgstr "Opacidad de halo"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:280
+#: static/js/lib/symbology/TextSymbolizer.js:281
 msgid "Halo radius"
 msgstr "Radio de halo"
 
-#: gvsigol_symbology/static/js/lib/symbology/TextSymbolizer.js:300
+#: static/js/lib/symbology/TextSymbolizer.js:302
+#: static/js/lib/symbology/TextSymbolizer.js:304
+msgid "Show labels"
+msgstr "Mostrar etiquetas"
+
+#: static/js/lib/symbology/TextSymbolizer.js:310
 msgid "Label filter expressions"
 msgstr "Etiqueta filtrada por expresión"
 
-#: gvsigol_symbology/static/js/lib/symbology/UniqueValues.js:163
+#: static/js/lib/symbology/UniqueValues.js:163
 msgid "null_value"
 msgstr "Sin valor"
 

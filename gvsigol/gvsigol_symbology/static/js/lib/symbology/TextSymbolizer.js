@@ -43,6 +43,7 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 	this.layer = null;
 	this.layerName = layerName;
 	this.AnchorPointX = 0.5;
+	this.is_label_actived=false;
 	if(options && options.anchor_point_x != null && options.anchor_point_x != ""){
 		this.AnchorPointX = options.anchor_point_x;
 	}
@@ -110,7 +111,7 @@ TextSymbolizer.prototype.getTableUI = function() {
 TextSymbolizer.prototype.getTabMenu = function(alwaysAllowed) {
 	var ui = '';
 	if(alwaysAllowed){
-		this.is_actived = true;
+		this.is_actived = true;			
 	}
 	if(!alwaysAllowed){
 		ui += '<li id="general-tab" class="active"><a href="#label-general-tab" data-toggle="tab">' + gettext('General') + '</a></li>';
@@ -138,7 +139,7 @@ TextSymbolizer.prototype.getGeneralTabUI = function(alwaysAllowed) {
 		ui += 		'</div>';
 		ui += 	'</div>';
 	}else{
-		this.is_actived = true;
+		this.is_actived = true;		
 	}
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
@@ -295,6 +296,15 @@ TextSymbolizer.prototype.getFilterTabUI = function() {
 	
 	var ui = '';
 	ui += '<div class="tab-pane" id="label-filter-tab">';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	if(this.is_label_actived){
+		ui += 			'<input id="label-has-label-on" type="checkbox" class="has-label" checked>   ' + gettext('Show labels') + '</input>';
+	}else{
+		ui += 			'<input id="label-has-label-on" type="checkbox" class="has-label">   ' + gettext('Show labels') + '</input>';
+	}
+	ui += 		'</div>';
+	ui += 	'</div>';
 	ui += '<div class="box">';
 	ui += 	'<div class="box-header with-border">';
 	ui += 		'<h3 class="box-title">' + gettext('Label filter expressions') + '</h3>';
@@ -448,7 +458,7 @@ TextSymbolizer.prototype.addExpression = function(expression) {
 	ui += 			'<div class="col-md-6 form-group">';
 	ui += 				'<label>' + gettext('Select operation') + '</label>';
 	ui += 				'<select data-labelid="'+count+'" id="label-operation'+count+'" class="form-control expression-operation filter-component">';
-	ui += 					'<option disabled selected value> -- ' + gettext('Select operation') + ' -- </option>';
+	ui += 					'<option disabled selected value>  -- ' + gettext('Select operation') + ' -- </option>';
 	for (var i in operations) {
 		if (operations[i].value != 'is_between' && operations[i].value != 'is_null') {
 			if (expression.operation == operations[i].value) {
@@ -694,6 +704,37 @@ TextSymbolizer.prototype.registerEvents = function() {
 		self.is_actived = $(this).is(':checked');
 		self.initializeForm();
 	});
+
+	$('#label-has-label-on').on('change', function() {
+		self.is_label_actived = $(this).is(':checked');
+		self.is_actived=false;
+		if (!self.is_label_actived){
+			$('#label-field0').prop("disabled",true);
+			$('#label-operation0').prop("disabled",true);
+			$('#label-value-select0').prop("disabled",true);			
+			$('#label-has-label-on').prop('checked', false);
+			$("#font-tab a").removeAttr("data-toggle");
+			$("#halo-tab a").removeAttr("data-toggle");
+			$("#filter-tab a").removeAttr("data-toggle");
+			$("#text-title").prop("disabled",true);
+			$("#text-minscale").prop("disabled",true);
+			$("#text-maxscale").prop("disabled",true);
+		
+		}else{
+			$('#label-field0').prop("disabled",false);
+			$('#label-operation0').prop("disabled",false);
+			$('#label-value-select0').prop("disabled",false);
+			$("#font-tab a").attr("data-toggle", "tab");
+			$("#halo-tab a").attr("data-toggle", "tab");
+			$("#filter-tab a").attr("data-toggle", "tab");
+			$("#text-title").prop("disabled",false);
+			$("#text-minscale").prop("disabled",false);
+			$('#label-has-label-on').prop('checked', true);
+			$("#font-tab a").attr("data-toggle", "tab");		
+	    	$("#text-maxscale").prop("disabled",false);	
+			self.is_actived=true;				
+		}
+	});
 	
 	$('#label-label').on('change', function() {
 		self.label = this.value;
@@ -895,6 +936,7 @@ TextSymbolizer.prototype.initializeForm = function() {
 	    $("#text-title").prop("disabled",true);
 	    $("#text-minscale").prop("disabled",true);
 	    $("#text-maxscale").prop("disabled",true);
+		//$('#label-has-label-on').prop('checked', false)
 	} else {
 		$("#font-tab a").attr("data-toggle", "tab");
 		$("#halo-tab a").attr("data-toggle", "tab");
@@ -902,11 +944,16 @@ TextSymbolizer.prototype.initializeForm = function() {
 		$("#text-title").prop("disabled",false);
 	    $("#text-minscale").prop("disabled",false);
 	    $("#text-maxscale").prop("disabled",false);
+		$('#label-has-label-on').prop('checked', true)
 	}
 };
 
 TextSymbolizer.prototype.is_activated = function() {
 	return this.is_actived;
+}
+
+TextSymbolizer.prototype.is_label_actived = function() {
+	return this.is_label_actived;
 }
 
 TextSymbolizer.prototype.updatePreview = function() {
@@ -1005,6 +1052,7 @@ TextSymbolizer.prototype.toJSON = function(){
 		id: this.id,
 		type: this.type,
 		is_actived: this.is_actived,
+		is_label_actived: this.is_label_actived,
 		label: this.label,
 		title: this.title,
 		font_family: this.font_family,
