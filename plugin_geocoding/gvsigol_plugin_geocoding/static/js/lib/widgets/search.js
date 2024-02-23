@@ -321,6 +321,34 @@ search.prototype.initUI = function() {
 					});
 				}
 
+				if(response.types[i] == "uy_sudir"){
+					self.menus.push({
+						text: 'Dirección de IDE Uruguay',
+						classname: 'geocoding-contextmenu', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'uy_sudir'
+								},
+								success	:function(response){
+									self.locate(response, response.srs, false);
+								},
+								error: function(xhr, status, error) {
+									  console.error(xhr.responseText);
+								}
+							});
+						}
+					});
+				}
+
 				if(response.types[i] == "generic"){
 					self.menus.push({
 						text: 'Dirección de IDE de Albacete',
@@ -537,7 +565,7 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 		if(fromCombo){			
 			var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');
 			var txtPopup = $("#autocomplete").val();
-			if (address.source == "ide_uy") {
+			if (address.source == "ide_uy" || address.source == "uy_sudir") {
 				if(address.state && (address.state == 2)){
 					txtPopup += '<br> (Aproximado)';
 				}
@@ -604,6 +632,34 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 					}					
 					
 					this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');	
+				} else if (address.source == "uy_sudir") {
+					var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
+					var callejero = "";
+					if(address.tip_via && (address.tip_via.trim() != 0)){
+						callejero = address.tip_via + " ";
+					}
+					if(address.address && (address.address.trim() != 0)){
+						callejero = callejero + address.address;
+					}
+					if ((address.localidad) && (address.type !== 'LOCALIDAD'))
+					{
+						callejero += '<br>Localidad: ' + address.localidad;				
+					}
+					if ((address.departamento) && (address.type !== 'LOCALIDAD'))
+					{
+						callejero += '<br>Departamento:' + address.departamento;				
+					}
+					if (address.olc)
+					{
+						callejero += '<br><span style="color:grey">OLC: ' + address.olc + '</span> <button onclick="navigator.clipboard.writeText(\''
+						 + address.olc + '\');">Copiar</button>' ;				
+					}
+					if (address.olc_Asignado)
+					{
+						callejero += '<br>OLC Asignado: ' + address.olc_Asignado;				
+					}					
+					
+					this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');
 				} else if (address.source == "generic") {
 					var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');
 					var txtPopup = "";
@@ -657,7 +713,7 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 				this.map.addOverlay(nPopup);
 				// TODO: MIRAR SI VIENE DEL COMBO? => 	var txtPopup = $("#autocomplete").val();
 				var txtPopup = a.address;
-				if (a.source == "ide_uy") {
+				if (a.source == "ide_uy" || a.source == 'uy_sudir') {
 					if(a.state && (a.state == 2)){
 						txtPopup += '<br> (Aproximado)';
 					}
