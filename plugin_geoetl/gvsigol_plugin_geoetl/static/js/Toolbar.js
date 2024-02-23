@@ -264,9 +264,15 @@ gvsigolETL.Toolbar = Class.extend({
 		this.deleteButton.click($.proxy(function(){
 			var node = this.view.getPrimarySelection();
 			//$('div[id*="'+node.id+'"]').remove()
-			var command= new draw2d.command.CommandDelete(node);
-			this.view.getCommandStack().execute(command);
-			this.disableButton(this.deleteButton, true);
+			
+			if (editablerestrictedly && (node.cssClass.startsWith('input_') || node.cssClass.startsWith('output_') || node.cssClass == 'trans_ExecuteSQL')){
+
+			}else{
+				var command= new draw2d.command.CommandDelete(node);
+				this.view.getCommandStack().execute(command);
+				this.disableButton(this.deleteButton, true);
+			}
+
 		},this));
 
 		// Inject the UNDO Button and the callbacks
@@ -336,6 +342,8 @@ gvsigolETL.Toolbar = Class.extend({
 			for(o=0 ;o < cnv.length;o++){
 
 				if (cnv[o]['type'] != 'draw2d.Connection'){
+
+					
 
 					type = cnv[o]['type']
 					if (type == 'input_Postgres'){
@@ -433,7 +441,7 @@ gvsigolETL.Toolbar = Class.extend({
 									$('#'+key+'-'+figure.id).val(parameters[0][key]);
 								}
 							
-								if ( (type.startsWith('input_') || type.startsWith('output_'))  && editablerestrictedly){
+								if ( (type.startsWith('input_') || type.startsWith('output_') || type == 'trans_ExecuteSQL')  && editablerestrictedly){
 									
 									$('#'+key+'-'+figure.id).prop("disabled", true)
 									$('input:radio[name="'+key+'-'+figure.id+'"]').prop("disabled", true)
