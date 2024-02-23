@@ -143,7 +143,7 @@ function passSchemaToEdgeConnected(id, listLabel, schema, canvasCtxt){
 
 document.addEventListener("DOMContentLoaded",function () {
 
-    var routerToUse =new draw2d.layout.connection.SplineConnectionRouter();
+    var routerToUse = new draw2d.layout.connection.SplineConnectionRouter();
     var app  = new gvsigolETL.Application();
 
     app.view.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({

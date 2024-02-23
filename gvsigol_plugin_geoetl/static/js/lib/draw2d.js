@@ -30471,6 +30471,7 @@ _packages2.default.policy.canvas.DefaultKeyboardPolicy = _packages2.default.poli
   onKeyDown: function onKeyDown(canvas, keyCode, shiftKey, ctrlKey) {
     //
     if (keyCode === 46 && canvas.getPrimarySelection() !== null) {
+
       // create a single undo/redo transaction if the user delete more than one element. 
       // This happens with command stack transactions.
       //
@@ -30481,18 +30482,23 @@ _packages2.default.policy.canvas.DefaultKeyboardPolicy = _packages2.default.poli
         // In this case the connection is deleted by the DeleteCommand itself and it is not allowed to
         // delete a figure twice.
         //
-        if (figure instanceof _packages2.default.Connection) {
-          if (selection.contains(figure.getSource(), true)) {
-            return;
-          }
-          if (selection.contains(figure.getTarget(), true)) {
-            return;
-          }
-        }
-        var cmd = figure.createCommand(new _packages2.default.command.CommandType(_packages2.default.command.CommandType.DELETE));
-        if (cmd !== null) {
-          canvas.getCommandStack().execute(cmd);
-        }
+		if (editablerestrictedly && (figure.cssClass.startsWith('input_') || figure.cssClass.startsWith('output_') || figure.cssClass == 'trans_ExecuteSQL')){
+		
+		} else {
+
+			if (figure instanceof _packages2.default.Connection) {
+				if (selection.contains(figure.getSource(), true)) {
+					return;
+				}
+				if (selection.contains(figure.getTarget(), true)) {
+					return;
+				}
+			}
+			var cmd = figure.createCommand(new _packages2.default.command.CommandType(_packages2.default.command.CommandType.DELETE));
+			if (cmd !== null) {
+			canvas.getCommandStack().execute(cmd);
+			}
+		}
       });
       // execute all single commands at once.
       canvas.getCommandStack().commitTransaction();

@@ -561,6 +561,61 @@ def _etl_workspace_update(instance, request, name, description, workspace, param
 
 @login_required()
 @staff_required
+def changeInputsAndOutputs(request):
+    
+    id = int(request.POST.get('id'))
+    ws = ETLworkspaces.objects.get(id = id)
+    wks_saved = json.loads(ws.workspace)
+    wks_to_save = json.loads(request.POST.get('workspace'))
+
+    workspace = []
+
+    inout_to_save = []
+    con_to_save = []
+
+    inout_saved = []
+
+
+    for item in wks_to_save:
+        if item['type'].startswith('input_') or item['type'].startswith('output_') or item['type'] == 'trans_ExecuteSQL':
+            inout_to_save.append(item)
+        elif item['type'] != 'draw2d.Connection':
+            workspace.append(item)
+        else:
+            con_to_save.append(item)
+
+    for item in wks_saved:
+        if item['type'].startswith('input_') or item['type'].startswith('output_') or item['type'] == 'trans_ExecuteSQL':
+            workspace.append(item)
+            inout_saved.append(item)
+
+    for i in inout_to_save:
+        #id_to_depr = i['id']
+        for io in inout_saved:
+            if i['type'] == io['type'] and i['entities'][0]['parameters'] == io['entities'][0]['parameters']:
+                id_to_keep = io['id']
+                id_port_to_keep = io['ports'][0]['name']
+                break
+
+        for c in con_to_save:
+            if c['source']['node'] == i['id']:
+                c['source']['node'] = id_to_keep
+                c['source']['port'] = id_port_to_keep
+
+            elif c['target']['node'] == i['id']:
+                c['target']['node'] = id_to_keep
+                c['target']['port'] = id_port_to_keep
+
+
+    for con in con_to_save:
+        workspace.append(con)
+
+    return json.dumps(workspace)
+
+
+
+@login_required()
+@staff_required
 def etl_workspace_update(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -568,11 +623,16 @@ def etl_workspace_update(request):
         workspace = request.POST.get('workspace')
         periodic_task = request.POST.get('checked')
         set_superuser = request.POST.get('superuser')
+        
         try:
             id = int(request.POST.get('id'))
             ws = ETLworkspaces.objects.get(id = id)
             if not ws.can_edit(request) and not ws.can_edit_restrictedly(request):
                 return HttpResponse(json.dumps({'status': 'not allowed'}, indent=4), content_type='folder/json')
+
+            if not ws.can_edit(request) and ws.can_edit_restrictedly(request):
+                workspace = changeInputsAndOutputs(request)
+
             params = ws.parameters
         except Exception as e:
             print(str(e))
@@ -625,7 +685,6 @@ def etl_workspace_delete(request):
 @login_required()
 @staff_required
 def etl_workspace_add(request):
-    print(request)
     return etl_workspace_update(request)
 
 @login_required()
