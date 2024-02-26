@@ -28,6 +28,7 @@ import urllib.request, urllib.error, urllib.parse
 from urllib.parse import urlparse
 from gvsigol import settings
 from . import settings
+from pyproj import Proj, transform
 
 class icv():
     
@@ -67,14 +68,22 @@ class icv():
                     boundingbox_coords = result.get('boundingbox', '').split(',')
                     coord_x = boundingbox_coords[0] if boundingbox_coords else ''
                     coord_y = boundingbox_coords[1] if len(boundingbox_coords) > 1 else ''
+                    
+                    in_proj = Proj(init='epsg:25830')
+                    out_proj = Proj(init='epsg:4326')
+                    lng, lat = transform(in_proj, out_proj, float(coord_x), float(coord_y))
+
                     suggestion = {
                         'source': 'icv',
+                        'category': self.category,
                         'type': 'icv',
                         'address': result.get('titulo', ''),
                         'id': result.get('id', ''),
-                        'lat': coord_y,
-                        'lng': coord_x,
-                        'srs': 'EPSG:25830'
+                        'lat': lat,
+                        'lng': lng,
+                        'y': coord_y,
+                        'x': coord_x,
+                        'srs': 'EPSG:4326'
                     }
                     suggestions.append(suggestion)
         except Exception as e:
@@ -98,8 +107,10 @@ class icv():
         suggestion['address'] = json_results['address[address]']
         suggestion['id'] = json_results['address[address]']
         suggestion['lat'] = json_results['address[lat]']
+        suggestion['y'] = json_results['address[y]']
         suggestion['lng'] = json_results['address[lng]']
-        suggestion['srs'] = 'EPSG:25830'
+        suggestion['x'] = json_results['address[x]']
+        suggestion['srs'] = 'EPSG:4326'
         
         return suggestion
     
@@ -110,9 +121,20 @@ class icv():
         https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?x=7valorx&y=valory
         '''
 
-        params = {
+        coordenadas = {
             'y': coordinate[1],
             'x': coordinate[0]
+        }
+        
+        in_proj = Proj(init='epsg:4326')
+        out_proj = Proj(init='epsg:25830')
+        coord_x = coordinate[0]
+        coord_y= coordinate[1]
+        
+        lng, lat = transform(in_proj, out_proj, float(coord_x), float(coord_y))
+        params= {
+            'x': lng,
+            'y': lat
         }
         url=self.urls['reverse_url']
         json_res = requests.get(url=url, params=params)
@@ -124,22 +146,24 @@ class icv():
         suggestion = {
             'source': 'icv',
             'type': 'icv',
-            'adress': '',
+            'address': '',
             'calle': '',
             'nombre': '',
             'numero': '',
             'codigo_ine': '',
             'municipio': '',
-            'lat': coordinate[1],
-            'lng': coordinate[0],
-            'srs': 'EPSG:25830'
+            'lat': '',
+            'lng': '',
+            'y': '',
+            'x': '',
+            'srs': 'EPSG:4326'
         }
 
         if 'dtipo_vial' in json_results:
             suggestion['dtipo_vial'] = json_results['dtipo_vial']
             
         if 'calle' in json_results:
-            suggestion['adress'] = json_results['calle']
+            suggestion['address'] = json_results['nombre']
         
         if 'calle' in json_results:
             suggestion['calle'] = json_results['calle']
@@ -159,6 +183,13 @@ class icv():
         if 'y' in json_results and 'x' in json_results:
             suggestion['y'] = json_results['y']
             suggestion['x'] = json_results['x']
+            in_proj = Proj(init='epsg:25830')
+            out_proj = Proj(init='epsg:4326')
+            coord_x = json_results['x']
+            coord_y = json_results['y']
+            lng, lat = transform(in_proj, out_proj, float(coord_x), float(coord_y))
+            suggestion['lat'] = str(lat)
+            suggestion['lng'] = str(lng)
         
         
 

@@ -150,7 +150,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de ICV',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:25830');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG: 3857', 'EPSG:4258');	
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -163,7 +163,7 @@ search.prototype.initUI = function() {
 									'type': 'icv'
 								},
 								success	:function(response){
-									self.locate(response, 'EPSG:25830', false);
+									self.locate(response, 'EPSG:4258', false);
 								},
 								error: function(){}
 							});
