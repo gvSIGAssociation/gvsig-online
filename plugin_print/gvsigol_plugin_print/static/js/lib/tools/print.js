@@ -1126,6 +1126,7 @@ print.prototype.getTemplates = function() {
 	  	},
 	  	error: function(){}
 	});
+	templates.sort();
 	return templates;
 };
 
