@@ -162,8 +162,8 @@ class icv():
         if 'dtipo_vial' in json_results:
             suggestion['dtipo_vial'] = json_results['dtipo_vial']
             
-        if 'calle' in json_results:
-            suggestion['address'] = json_results['nombre']
+        if 'nombre' in json_results:
+            suggestion['address'] = json_results['nombre'] + ' ' + json_results['numero']
         
         if 'calle' in json_results:
             suggestion['calle'] = json_results['calle']
