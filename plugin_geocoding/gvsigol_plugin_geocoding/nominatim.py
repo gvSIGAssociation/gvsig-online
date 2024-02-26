@@ -96,7 +96,7 @@ class Nominatim():
         suggestion['id'] = locations['address[address]']
         suggestion['lat'] = locations['address[lat]']
         suggestion['lng'] = locations['address[lng]']
-        suggestion['srs'] = 'EPSG:4326'
+        suggestion['srs'] = 'EPSG:3857'
 
         return suggestion
         
@@ -124,6 +124,6 @@ class Nominatim():
         suggestion['address'] = _('Not founded')
         suggestion['lat'] = coordinate[1]
         suggestion['lng'] = coordinate[0]
-        suggestion['srs'] = 'EPSG:4326'
+        suggestion['srs'] = 'EPSG:3857'
         return suggestion
         

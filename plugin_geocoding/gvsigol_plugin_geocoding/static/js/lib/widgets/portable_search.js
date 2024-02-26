@@ -145,6 +145,31 @@ search.prototype.initUI = function() {
 						}
 					});
 				}
+				if(response.types[i] == "icv"){
+					menus.push({
+						text: 'Dirección de ICV',
+						classname: 'geocoding-contextmenu', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:25830');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'icv'
+								},
+								success	:function(response){
+									self.locate(response, 'EPSG:25830', false);
+								},
+								error: function(){}
+							});
+						}
+					});
+				}
 			}
 
 			if(menus.length > 0){
@@ -215,7 +240,7 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 	var self = this;	
 	this.map.removeOverlay(this.popup);
 	this.popup = new ol.Overlay.Popup();
-	this.map.addOverlay(this.popup);
+	this.map.addOverlay(this.popup); ol.proj.transform
 	if(address != null){
 		var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
 		if(fromCombo){

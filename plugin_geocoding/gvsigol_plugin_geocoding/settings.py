@@ -28,7 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_TITLE = 'Catálogo de metadatos'
 APP_DESCRIPTION = 'Catálogo de metadatos'
 
-GEOCODING_PROVIDER_NAME='nominatim'
+GEOCODING_PROVIDER_NAME='Nominatim'
 
 GEOCODING_SUPPORTED_TYPES = (
                 ('googlemaps', _('Google Maps services')),
@@ -39,7 +39,7 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('ide_uy', _('IDE Uruguay Geocoder')),
                 ('postgres', _('Simple Geocoder')),
                 ('generic', _('Generic API Service Geocoder')),
-                ('uy_sudir', _('Direcciones SuDIR Geocoder')),
+                ('icv', _('ICV services')),
             )
 
 GEOCODING_PROVIDER = {
@@ -64,6 +64,12 @@ GEOCODING_PROVIDER = {
         'url': 'http://nominatim.openstreetmap.org',
         'country_codes': ''
     },
+    'icv': {
+    'candidates_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
+    'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
+    'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?x=valorx&y=valor',
+    'country_codes': 'es'  
+},
     'googlemaps': {
         "candidates_url": "https://maps.googleapis.com/maps/api/place/autocomplete/json?language=es&components=country:es",
         'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
@@ -89,16 +95,9 @@ GEOCODING_PROVIDER = {
 
     
     'ide_uy': {
-        'candidates_url': 'http://localhost:8090/api/v1/geocode/candidates',
-        'find_url': 'http://localhost:8090/api/v1/geocode/find',
-        'reverse_url': 'http://localhost:8090/api/v1/geocode/reverse',  
-        'max_results': 10,
-        'filter': ''
-    },
-    'uy_sudir': {
-        'candidates_url': 'http://localhost:8081/direcciones/geocode/candidates',
-        'find_url': 'http://localhost:8081/direcciones/geocode/find',
-        'reverse_url': 'http://localhost:8081/direcciones/geocode/reverse',  
+        'candidates_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/candidates',
+        'find_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/find',
+        'reverse_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/reverse',  
         'max_results': 10,
         'filter': ''
     },

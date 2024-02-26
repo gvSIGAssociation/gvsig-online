@@ -36,6 +36,7 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('ide_uy', _('IDE Uruguay Geocoder')),
                 ('postgres', _('Simple Geocoder')),
                 ('generic', _('Generic API Service Geocoder')),
+                ('icv', _('ICV services')),
             )
 
 GEOCODING_PROVIDER = {
@@ -60,6 +61,11 @@ GEOCODING_PROVIDER = {
         'url': 'http://nominatim.openstreetmap.org',
         'country_codes': ''
     },
+    'icv': {
+    'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10&&query=loriguilla',
+    'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php',
+    'country_codes': 'es'  
+},
     'googlemaps': {        
         "candidates_url": "https://maps.googleapis.com/maps/api/place/autocomplete/json?language=es&components=country:es",
         'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
