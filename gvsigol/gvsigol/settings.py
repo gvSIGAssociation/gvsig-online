@@ -37,9 +37,10 @@ import environ
 
 
 print ("INFO: Ejecutando settings.py !!...........................................")
-print ("INFO: Current environment:")
-for name, value in os.environ.items():
-    print("{0}: {1}".format(name, value))
+if os.environ.get("DEBUG")=='True':
+    print ("INFO: Current environment:")
+    for name, value in os.environ.items():
+        print("{0}: {1}".format(name, value))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
