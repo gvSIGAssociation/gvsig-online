@@ -715,10 +715,10 @@ class FeatureSerializer(serializers.Serializer):
                                 max_feat=sqlbuilder.Literal(max_feat),
                                 offset=sqlbuilder.Literal(offset))
 
-                    links = {"links" : [pagination.get_links(num_entries)]}
+                    links = [pagination.get_links(num_entries)]
                 else:
                     limit_offset = sqlbuilder.SQL("")
-                    links = {} 
+                    links = []
                 
                 geom_cols = con.get_geometry_columns(table, schema=schema)
                 properties = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
@@ -797,15 +797,14 @@ class FeatureSerializer(serializers.Serializer):
 
                     feat_list.append(element)
 
-                feat_list.append(links)
-
                 if(not zip):
                     return {
                         #"crs": { "type":"name","properties":{"name":"EPSG:4326"}},
                         "type":"FeatureCollection",
                         "totalfeatures" : con.cursor.rowcount,
                         "lendata": lendata,
-                        "features" : feat_list
+                        "features" : feat_list,
+                        "links": links
                     }
                 else:
                     result = self.splitArray(nbytes, feat_list)
