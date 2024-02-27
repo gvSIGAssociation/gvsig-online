@@ -2054,11 +2054,17 @@ def trans_Union(dicc):
     return [table_name_target]
 
 def input_Indenova(dicc):
+
+    api  = database_connections.objects.get(name = dicc['api'])
+
+    params_str = api.connection_params
+    params = json.loads(params_str)
     
-    domain = dicc['domain']
-    api_key = dicc['api-key']
-    client_id = dicc['client-id']
-    secret = dicc['secret']
+    domain = params['domain']
+    api_key = params['api-key']
+    client_id = params['client-id']
+    secret = params['secret']
+
     auth = (client_id+':'+secret).encode()
 
     table_name = dicc['id']
@@ -2103,6 +2109,8 @@ def input_Indenova(dicc):
 
             headers_token = {'esigna-auth-api-key': api_key, "Authorization": "Bearer "+token.decode()}
             r_date = requests.get(url_date, headers = headers_token)
+
+            print(r_date)
 
             if r_date.status_code == 200:
                 for j in json.loads(r_date.content.decode('utf8')):
@@ -3744,7 +3752,12 @@ def trans_Geocoder(dicc):
 
 def input_Segex(dicc):
 
-    entity = dicc['entities-list'][0]
+    api  = database_connections.objects.get(name = dicc['api'])
+
+    params_str = api.connection_params
+    params = json.loads(params_str)
+
+    entity = params['entities-list'][0]
 
     types_list = dicc['types-list']
 
@@ -3752,12 +3765,12 @@ def input_Segex(dicc):
 
     schema = dicc['schema']
 
-    if dicc['domain'] == 'PRE':
+    if params['domain'] == 'PRE':
         url = 'https://pre-%s.sedipualba.es/apisegex/' % (entity)
     else:
         url = 'https://%s.sedipualba.es/apisegex/' % (entity)
 
-    wsSegUser = dicc['user']
+    wsSegUser = params['user']
 
     conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     db = create_engine(conn_string)
@@ -3777,7 +3790,7 @@ def input_Segex(dicc):
 
             while offset%100 == 0:
 
-                wsSegPass = etl_schema.getwsSegPass(dicc['password'])
+                wsSegPass = etl_schema.getwsSegPass(params['password'])
                 
                 listGeoref = 'Georef/ListGeorefs?wsSegUser=%s&wsSegPass=%s&idEntidad=%s&idTipo=%s&offset=%s' % (wsSegUser, wsSegPass, entity, tp, offset)
                 
@@ -3793,7 +3806,7 @@ def input_Segex(dicc):
 
                     elif dicc['init-segex'] == 'init-guaranteed':
 
-                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = dicc['entities-list'][1], type = tp)
+                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = params['entities-list'][1], type = tp)
                         ts_init = segexModel.fechafingarantizada.strftime('%Y-%m-%d %H:%M:%S')
 
                     else:
@@ -3814,7 +3827,7 @@ def input_Segex(dicc):
                         ts_init = subs_ts.strftime('%Y-%m-%d %H:%M:%S')
 
                     elif dicc['init-segex'] == 'init-guaranteed':
-                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = dicc['entities-list'][1], type = tp)
+                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = params['entities-list'][1], type = tp)
                         ts_init = segexModel.fechafingarantizada.strftime('%Y-%m-%d %H:%M:%S')
 
                     else:
@@ -3840,14 +3853,14 @@ def input_Segex(dicc):
                 print('listGeorefStatus: '+str(r.status_code))
 
                 try:
-                    segexModel  = segex_FechaFinGarantizada.objects.get(entity = dicc['entities-list'][1], type = tp)
+                    segexModel  = segex_FechaFinGarantizada.objects.get(entity = params['entities-list'][1], type = tp)
                     segexModel.fechafingarantizada = r.json()['FechaFinGarantizada']
                     segexModel.save()
 
                 except:
                     
                     segexModel = segex_FechaFinGarantizada(
-                        entity = dicc['entities-list'][1],
+                        entity = params['entities-list'][1],
                         type = tp,
                         fechafingarantizada = r.json()['FechaFinGarantizada']
                     )
@@ -3857,7 +3870,7 @@ def input_Segex(dicc):
 
                     for georef in r.json()['Georefs']:
 
-                        wsSegPass = etl_schema.getwsSegPass(dicc['password'])
+                        wsSegPass = etl_schema.getwsSegPass(params['password'])
 
                         getGeoref = 'Georef/GetGeoref?wsSegUser=%s&wsSegPass=%s&idEntidad=%s&idGeoref=%s' % (wsSegUser, wsSegPass, entity, georef['IdGeoref'])
 

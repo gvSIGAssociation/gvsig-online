@@ -1284,3 +1284,9 @@ msgstr "Atributo con el texto a corregir"
 
 msgid "Correct only the accent marks"
 msgstr "Corrige únicamente las tildes"
+
+msgid "API Connection:"
+msgstr "Conexión API:"
+
+msgid "Add connection"
+msgstr "Añade conexión"
