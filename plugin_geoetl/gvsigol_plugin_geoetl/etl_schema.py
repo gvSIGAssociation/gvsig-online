@@ -265,9 +265,13 @@ def get_schema_oracle(dicc):
 
 def get_proced_indenova(dicc):
 
-    domain = dicc['domain']
+    api  = database_connections.objects.get(name = dicc['api'])
 
-    api_key = dicc['api-key']
+    params_str = api.connection_params
+    params = json.loads(params_str)
+
+    domain = params['domain']
+    api_key = params['api-key']
 
     url_list = domain + "//api/rest/process/v1/process/list?idsection=27"
 
@@ -439,16 +443,21 @@ def get_entities_segex(dicc):
 
 def get_types_segex (dicc):
 
-    entity = dicc['entities-list'][0]
+    api  = database_connections.objects.get(name = dicc['api'])
 
-    if dicc['domain'] == 'PRE':
+    params_str = api.connection_params
+    params = json.loads(params_str)
+
+    entity = params['entities-list'][0]
+
+    if params['domain'] == 'PRE':
         url = 'https://pre-%s.sedipualba.es/apisegex/' % (entity)
     else:
         url = 'https://%s.sedipualba.es/apisegex/' % (entity)
 
-    wsSegUser = dicc['user']
+    wsSegUser = params['user']
 
-    wsSegPass = getwsSegPass(dicc['password'])
+    wsSegPass = getwsSegPass(params['password'])
 
     listTipos = 'Georef/ListTiposGeoref?wsSegUser=%s&wsSegPass=%s&idEntidad=%s' % (wsSegUser, wsSegPass, entity)
 

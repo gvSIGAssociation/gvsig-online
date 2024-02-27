@@ -179,21 +179,9 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div>'+
-                                '<label class="col-form-label" >'+gettext('Domain:')+'</label>'+
-                                '<input type="text" id="domain-'+ID+'" name="file" class="form-control"></input>'+
-                            '</div>'+ 
-                            '<div>'+
-                                '<label class="col-form-label" >'+gettext('API Key:')+'</label>'+
-                                '<input type="text" id="api-key-'+ID+'" name="file" class="form-control"></input>'+
-                            '</div>'+ 
-                            '<div>'+
-                                '<label class="col-form-label" >'+gettext('Client ID:')+'</label>'+
-                                '<input type="text" id="client-id-'+ID+'" name="file" class="form-control"></input>'+
+                                '<label form="db" class="col-form-label">'+gettext('API Connection:')+'</label>'+
+                                '<select id="api-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div>'+
-                                '<label class="col-form-label" >'+gettext('Secret:')+'</label>'+
-                                '<input type="text" id="secret-'+ID+'" name="file" class="form-control"></input>'+
-                            '</div>'+ 
                             '<div class="column33">'+
                                 '<label class="col-form-label" >'+gettext('List urban procedures:')+'</label><br>'+
                                 '<a href="#" id="get-proced-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>'+gettext('Get procedures')+'</a>'+
@@ -255,6 +243,15 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 
         $('#end-date-'+ID).prop('disabled', true)
         $("#checkbox-"+ID).prop('disabled', true)
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'indenova'){
+                $('#api-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
 
         $("#add-proced-"+ID).click(function() {
 
@@ -326,11 +323,12 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
             
             var paramsProced = {"id": ID,
             "parameters": [
-                {"domain": $('#domain-'+ID).val(),
-                "api-key": $('#api-key-'+ID).val()/*,
+                {"api": $('#api-'+ID).val()}
+                /*{"domain": $('#domain-'+ID).val(),
+                "api-key": $('#api-key-'+ID).val(),
                 "client-id": $('#client-id-'+ID).val(),
-                "secret": $('#secret-'+ID).val()*/
-                }
+                "secret": $('#secret-'+ID).val()
+                }*/
             ]};
 
             var formDataProced = new FormData();
@@ -425,10 +423,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
             "parameters": [
                 {   
                     "get_proced-list": get_,
-                    "domain": $('#domain-'+ID).val(),
-                    "api-key": $('#api-key-'+ID).val(),
-                    "client-id": $('#client-id-'+ID).val(),
-                    "secret": $('#secret-'+ID).val(),
+                    "api": $('#api-'+ID).val(),
                     "proced-list": $('#proced-list-'+ID).val(),
                     "init-date": $('#init-date-'+ID).val(),
                     "end-date": $('#end-date-'+ID).val(),
@@ -624,32 +619,10 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div>'+
-                                '<label class="col-form-label" >'+gettext('Domain:')+'</label>'+
-                                    '<select class="form-control" id="domain-'+ID+'">'+
-                                        '<option value="PRO"> https://sedipualba.es/apisegex/ </option>'+
-                                        '<option value="PRE"> https://pre.sedipualba.es/apisegex/ </option>'+
-                                    '</select>'+
-                            '</div>'+
-
-                            '<label class="col-form-label" >'+gettext('Entities with website in SEDIPUALB@')+':</label><br>'+
-
-                            '<div class="column33">'+
-                                '<a href="#" id="get-entities-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>'+gettext('Get entities')+'</a>'+
-                            '</div>'+
-
-                            '<div class="box-tools column66">'+
-                                '<select class="form-control" id="entities-list-'+ID+'" name="entities-list" >'+
-                                '</select>'+
-                            '</div>'+
 
                             '<div>'+
-                                '<label class="col-form-label" >'+gettext('User')+' (wsSegUser): </label>'+
-                                '<input type="text" id="user-'+ID+'" name="file" class="form-control"></input>'+
-                            '</div>'+ 
-                            '<div>'+
-                                '<label class="col-form-label" >'+gettext('Password:')+'</label>'+
-                                '<input type="text" id="password-'+ID+'" name="file" class="form-control"></input>'+
+                                '<label form="db" class="col-form-label">'+gettext('API Connection:')+'</label>'+
+                                '<select id="api-'+ID+'" class="form-control"></select>'+
                             '</div>'+
 
                             '<div>'+
@@ -664,7 +637,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
 
                             '<div>'+
                                 '<label>'+gettext('Choose date')+'</label><br>'+
-                                    '<div class="radio-inline">'+
+                                    '<div >'+
                                     
                                         '<input  type="radio" name="date-segex-'+ID+'"  id="check-no-date-'+ID+'" value="check-no-date">'+	
                                         '<label  for="no-date">'+gettext('No date, download all')+'</label>'+
@@ -713,6 +686,15 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
         '</div>')
 
         var context = this
+
+        for(i=0;i<dbc.length;i++){
+
+            if(dbc[i].type == 'segex'){
+                $('#api-'+ID).append(
+                    '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
+                );
+            }
+        };
 
         $('#init-date-'+ID).prop('disabled', true)
         $('#end-date-'+ID).prop('disabled', true)
@@ -794,56 +776,6 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
         });
 
 
-        $('#get-entities-'+ID).click(function(){
-                
-            $(this).hover(function(){
-                $(this).css('cursor','wait');
-                
-            });
-            
-            var paramsEntities = {"id": ID,
-            "parameters": [
-                {"domain": $('#domain-'+ID).val()
-                }
-            ]};
-
-            var formDataEntities = new FormData();
-
-            formDataEntities.append('jsonParamsEntities', JSON.stringify(paramsEntities))
-
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/etl_entities_segex/',
-                data: formDataEntities,
-                beforeSend:function(xhr){
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-                },
-                cache: false, 
-                contentType: false, 
-                processData: false,
-                success: function (data) {
-
-                    $('#entities-list-'+ID).empty()
-                    
-                    $('#get-entities-'+ID).hover(function(){
-                        $(this).css('cursor','pointer');
-                    });
-
-                    get_ = []
-                    
-                    for(i=0;i<data.length;i++){
-                        $('#entities-list-'+ID).append('<option value="'+data[i][0]+'">'+data[i][1]+'</option>')
-                        get_.push([data[i][0], data[i][1]])
-                    };
-                },
-                error: function(){
-                    $('#get-entities-'+ID).hover(function(){
-                        $(this).css('cursor','pointer');
-                    });
-                }
-            })
-        });
-
 
         $('#types-list-'+ID).click(function(){
             if($(this).val()=='all'){
@@ -860,10 +792,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
             
             var paramsTypes = {"id": ID,
             "parameters": [
-                {"domain": $('#domain-'+ID).val(),
-                "entities-list": [$('#entities-list-'+ID).val(), $( "#entities-list-"+ID+" option:selected" ).text()],
-                "user": $('#user-'+ID).val(),
-                "password": $('#password-'+ID).val()
+                {"api": $('#api-'+ID).val()
                 }
             ]};
 
@@ -974,14 +903,6 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 $("#checkbox-end-"+ID).val("")
             };
 
-            if (typeof get_ === 'undefined'){
-                get_ = []
-                $("#entities-list-"+ID+" option").each(function()
-                    {  
-                        get_.push([$(this).val(), $(this).text()])
-                    }
-                );
-            }
 
 
             if (typeof get_types === 'undefined'){
@@ -1008,12 +929,8 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
             var paramsSegex= {"id": ID,
             "parameters": [
                 {   
-                    "get_entities-list": get_,
                     "get_types-list": get_types,
-                    "domain": $('#domain-'+ID).val(),
-                    "entities-list": [$('#entities-list-'+ID).val(), $("#entities-list-"+ID+" option:selected" ).text()],
-                    "user": $('#user-'+ID).val(),
-                    "password": $('#password-'+ID).val(),
+                    "api": $('#api-'+ID).val(),
                     "types-list": $('#types-list-'+ID).val(),
                     "minute-before": $('#minute-before-'+ID).val(),
                     "init-date": $('#init-date-'+ID).val(),

@@ -1286,3 +1286,9 @@ msgstr ""
 
 msgid "Correct only the accent marks"
 msgstr ""
+
+msgid "API Connection:"
+msgstr ""
+
+msgid "Add connection"
+msgstr ""

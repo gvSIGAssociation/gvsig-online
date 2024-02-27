@@ -313,12 +313,24 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">{% trans 'Add DataBase Connection' %}</h4>
+                    <h4 class="modal-title">{% trans 'Add Connection' %}</h4>
                 </div>
                 <div class="modal-body">
                     <form id="layer-group-form" role="form">
 
                         <div class="row">
+                            <div class="col-md-12">
+                                <label for="type-con" >{% trans 'Add Connection' %}</label>
+                                <select  class="form-control" style="width: 100%;" id="type-con" name="type-con">
+                                    <option value="">---</option>
+                                    <option value="db">{% trans 'Add DB' %}</option>
+                                    <option value="api">{% trans 'Add API' %}</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div id="type-db-div" class="row" style = "display:none;">
                             <div class="col-md-12">
                                 <label for="type-db" >{% trans 'Type' %}</label>
                                 <select  class="form-control" style="width: 100%;" id="type-db" name="type-db">
@@ -330,12 +342,30 @@
                             </div>
                         </div>
 
+
+
+                        <div id="type-api-div" class="row" style = "display:none;">
+                            <div class="col-md-12">
+                                <label for="type-api" >{% trans 'Type' %}</label>
+                                <select  class="form-control" style="width: 100%;" id="type-api" name="type-api">
+                                    <option value="">---</option>
+                                    <option value="indenova">InDenova</option>
+                                    <option value="segex">SEGEX</option>
+                                    <option value="padron-atm">Padrón ATM</option>
+                                </select>
+                            </div>
+                        </div>
+
+
                         <div class="row">
                             <div class="col-md-12">
                                 <label form="name" class="col-form-label">{% trans 'Name' %}</label>
                                 <input id="name-db" type="text" value="" class="form-control" pattern="[A-Za-z]{3}">
                             </div>
                         </div>
+
+
+                        <!--    /////////////////DATABASES /////////////-->
 
                         <div id="postgresql-db" name = "db-form" style = "display:none;">
 
@@ -439,6 +469,88 @@
                                 </div>
                             </div>
                         </div>
+
+
+                        <!-- /////////   APIs    /////////// -->
+
+                        <div id="indenova-api" name = "api-form" style = "display:none;">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label" >{% trans 'Domain' %}</label>
+                                    <input type="text" id="domain-indenova" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'API Key' %}</label>
+                                    <input type="text" id="api-key-indenova" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Client ID' %}</label>
+                                    <input type="text" id="client-id-indenova" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Secret' %}</label>
+                                    <input type="text" id="secret-indenova" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="segex-api" name = "api-form" style = "display:none;">
+
+                            <div class="row">
+                                <div class="col-md-12">
+
+                                    <label class="col-form-label" >{% trans 'Domain' %}</label>
+                                    <select class="form-control" id="domain-segex">
+                                        <option value="PRO"> https://sedipualba.es/apisegex/ </option>
+                                        <option value="PRE"> https://pre.sedipualba.es/apisegex/ </option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label" >{% trans 'Entities with website in SEDIPUALB@' %}:</label><br>
+
+                                    <div class="col-md-4">
+                                        <a href="#" id="get-entities-segex" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>{% trans 'Get entities' %}</a>
+                                    </div>
+
+                                    <div class="box-tools col-md-8">
+                                        <select class="form-control" id="entities-list-segex" name="entities-list" >
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label" >{% trans 'User' %} (wsSegUser)</label>
+                                    <input type="text" id="user-segex" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Password' %}</label>
+                                    <input type="text" id="password-segex" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                        </div>
+
+
 
                     </form>
                     <br>
@@ -675,9 +787,28 @@
 
     })
 
+    $('#type-con').on('change', function() {
+
+        $("#type-db-div").slideUp();
+        $("#type-api-div").slideUp();
+        $("[name = 'db-form']").slideUp();
+        $("[name = 'api-form']").slideUp();
+        $("#text-test-connection").text('')
+        $("#type-db").val("")
+        $("#type-api").val("")
+
+        if ($("#type-con").val() == 'db'){
+            $("#type-db-div").slideDown();
+        }else if ($("#type-con").val() == 'api'){
+            $("#type-api-div").slideDown();
+        }
+
+    });
+
     $('#type-db').on('change', function() {
 
         $("[name = 'db-form']").slideUp();
+        $("#type-api").val("")
         $("#text-test-connection").text('')
 
         if ($("#type-db").val() == 'PostgreSQL'){
@@ -686,6 +817,20 @@
             $("#oracle-db").slideDown();
         }else if ($("#type-db").val() == 'SQLServer'){
             $("#sql-server-db").slideDown();
+        }
+
+    });
+
+    $('#type-api').on('change', function() {
+
+        $("[name = 'api-form']").slideUp();
+        $("#type-db").val("")
+        $("#text-test-connection").text('')
+
+        if ($("#type-api").val() == 'indenova'){
+            $("#indenova-api").slideDown();
+        }else if ($("#type-api").val() == 'segex'){
+            $("#segex-api").slideDown();
         }
 
     });
@@ -763,62 +908,142 @@
 
     $('#save-db').click(function() {
 
-    if ($("#type-db").val() == 'PostgreSQL'){
-        var params = {
-            "type-db": $("#type-db").val(),
-            "name-db": $("#name-db").val(),
-            "parameters": [
-                {"host": $('#host').val(),
-                "port": $('#port').val(),
-                "database": $('#database').val(),
-                "user": $('#user').val(),
-                "password": $('#password-postgres').val()}
-            ]}
-    }else if ($("#type-db").val() == 'Oracle'){
-            var params = {"type-db": $("#type-db").val(),
+        if ($("#type-con").val() == 'db'){
+
+            if ($("#type-db").val() == 'PostgreSQL'){
+                var params = {
+                    "type-db": $("#type-db").val(),
                     "name-db": $("#name-db").val(),
-                "parameters": [
-                    {"username": $('#username').val(),
-                    "password": $('#password-oracle').val(),
-                    "dsn": $('#dsn').val()}
+                    "parameters": [
+                        {"host": $('#host').val(),
+                        "port": $('#port').val(),
+                        "database": $('#database').val(),
+                        "user": $('#user').val(),
+                        "password": $('#password-postgres').val()}
                 ]}
-    }else if ($("#type-db").val() == 'SQLServer'){
-            var params = {
-                "type-db": $("#type-db").val(),
-                "name-db": $("#name-db").val(),
-                "parameters": [
-                    {
-                    "server-sql-server": $('#server-sql-server').val(),
-                    "username-sql-server": $('#username-sql-server').val(),
-                    "password-sql-server": $('#password-sql-server').val(),
-                    "db-sql-server": $('#db-sql-server').val(),
-                    "tds-version-sql-server": $('#tds-version-sql-server').val()
-                    }
-                ]}
-    }
-
-    var formData = new FormData();
-
-    formData.append('jsonParams', JSON.stringify(params))
-
-    $.ajax({
-        type: 'POST',
-        url: '/gvsigonline/etl/save_conexion/',
-        data: formData,
-        beforeSend:function(xhr){
-            xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-        },
-        cache: false,
-        contentType: false,
-        processData: false,
-        success: function (response) {
-            $('#modal-add-db').modal('hide')
-
-            if(response['saved']=="false"){
-                $('#modal-db-exists').modal('show')
-            }else{
-                dbc.push({"name": response['name'], "type": response['type']})
+            }else if ($("#type-db").val() == 'Oracle'){
+                var params = {"type-db": $("#type-db").val(),
+                        "name-db": $("#name-db").val(),
+                    "parameters": [
+                        {"username": $('#username').val(),
+                        "password": $('#password-oracle').val(),
+                        "dsn": $('#dsn').val()}
+                    ]}
+            }else if ($("#type-db").val() == 'SQLServer'){
+                var params = {
+                    "type-db": $("#type-db").val(),
+                    "name-db": $("#name-db").val(),
+                    "parameters": [
+                        {
+                        "server-sql-server": $('#server-sql-server').val(),
+                        "username-sql-server": $('#username-sql-server').val(),
+                        "password-sql-server": $('#password-sql-server').val(),
+                        "db-sql-server": $('#db-sql-server').val(),
+                        "tds-version-sql-server": $('#tds-version-sql-server').val()
+                        }
+                    ]}
             }
+        } else if ($("#type-con").val() == 'api'){
+
+            if ($("#type-api").val() == 'indenova'){
+                var params = {
+                    "type-db": $("#type-api").val(),
+                    "name-db": $("#name-db").val(),
+                    "parameters": [
+                        {
+                        "domain": $('#domain-indenova').val(),
+                        "api-key": $('#api-key-indenova').val(),
+                        "client-id": $('#client-id-indenova').val(),
+                        "secret": $('#secret-indenova').val()
+                        }
+                ]}
+            
+            
+            } else if ($("#type-api").val() == 'segex'){
+                var params = {
+                    "type-db": $("#type-api").val(),
+                    "name-db": $("#name-db").val(),
+                    "parameters": [
+                        {
+                        "domain": $('#domain-segex').val(),
+                        "entities-list": [$('#entities-list-segex').val(), $("#entities-list-segex option:selected" ).text()],
+                        "user": $('#user-segex').val(),
+                        "password": $('#password-segex').val()
+                        }
+                ]}
+            
+            }
+        }
+
+        var formData = new FormData();
+
+        formData.append('jsonParams', JSON.stringify(params))
+
+        $.ajax({
+            type: 'POST',
+            url: '/gvsigonline/etl/save_conexion/',
+            data: formData,
+            beforeSend:function(xhr){
+                xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+            },
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                $('#modal-add-db').modal('hide')
+
+                if(response['saved']=="false"){
+                    $('#modal-db-exists').modal('show')
+                }else{
+                    dbc.push({"name": response['name'], "type": response['type']})
+                }
+                }
+            })
+    });
+
+    $('#get-entities-segex').click(function(){
+                
+        $(this).hover(function(){
+            $(this).css('cursor','wait');
+        });
+        
+        var paramsEntities = {"id": 0,
+        "parameters": [
+            {"domain": $('#domain-segex').val()
+            }
+        ]};
+
+        var formDataEntities = new FormData();
+
+        formDataEntities.append('jsonParamsEntities', JSON.stringify(paramsEntities))
+
+        $.ajax({
+            type: 'POST',
+            url: '/gvsigonline/etl/etl_entities_segex/',
+            data: formDataEntities,
+            beforeSend:function(xhr){
+                xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+            },
+            cache: false, 
+            contentType: false, 
+            processData: false,
+            success: function (data) {
+
+                $('#entities-list-segex').empty()
+                
+                $('#get-entities-segex').hover(function(){
+                    $(this).css('cursor','pointer');
+                });
+                
+                for(i=0;i<data.length;i++){
+                    $('#entities-list-segex').append('<option value="'+data[i][0]+'">'+data[i][1]+'</option>')
+
+                };
+            },
+            error: function(){
+                $('#get-entities-segex').hover(function(){
+                    $(this).css('cursor','pointer');
+                });
             }
         })
     });
