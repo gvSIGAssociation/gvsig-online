@@ -186,30 +186,23 @@ class ApplicationConfView(ListAPIView):
                          responses={404: "Database connection NOT found<br>User NOT found",
                                     403: "The project is not allowed to this user"})
     @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
-    def get(self, request):
+    def get(self, request, name):
         v = Validation(request)   
         try:   
-            applicationid = 0
-            if 'applicationid' in self.request.GET:
-                try:
-                    applicationid = int(self.request.GET['applicationid'])
-                except Exception:
-                    raise HttpException(400, "Bad parameter project. The value must be a integer") 
-
             try:
                 v.check_get_application_list()
             except HttpException as e:
                 return e.get_exception()
 
             queryset = None
-            applications_by_user = util.get_applications_ids_by_user(request, False)
-            if applicationid != 0:
-                if applicationid in applications_by_user:
-                    queryset = Application.objects.filter(id=applicationid)
+            applications_by_user = util.get_applications_names_by_user(request, False)
+            if name:
+                if name in applications_by_user:
+                    queryset = Application.objects.filter(name=name)
                 else:
                     raise HttpException(403, "The application is not allowed to this user")  
             else:
-                queryset = Application.objects.filter(id__in=applications_by_user)
+                queryset = Application.objects.filter(name__in=applications_by_user)
             serializer = AppInfoSerializer(queryset, many=True, context={'request': request, 'user': request.user.username})
 
             result = {

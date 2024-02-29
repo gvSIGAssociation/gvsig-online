@@ -63,7 +63,7 @@ urlpatterns = [
     path('api/v1/public/projectconf/', api_info.PublicProjectConfView.as_view(), name='get_public_project_configuration'),
 
     path('api/v1/applications/', api.ApplicationListView.as_view(), name='application_list'),
-    path('api/v1/applicationconf/', api_info.ApplicationConfView.as_view(), name='applicationconf'),
+    path('api/v1/applicationconf/<str:name>/', api_info.ApplicationConfView.as_view(), name='applicationconf'),
 ]
 
 
