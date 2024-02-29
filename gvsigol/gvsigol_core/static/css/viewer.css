@@ -487,17 +487,20 @@ html, body {
 }
 
 .panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs li,
-.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #minimize-table{
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #minimize-table,
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div #selection-table-tabs #minimize-selectiontable {
 	display:none;
 }
 
-.panel-wrapper .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #maximize-table {
+.panel-wrapper .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #maximize-table,
+.panel-wrapper .panel-content .row .col-md-12 .nav-tabs-custom div #selection-table-tabs #maximize-selectiontable {
 	display:none;
 }
 
 .panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs li.pull-right,
-.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #maximize-table {
-	display:block;
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #maximize-table,
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div #selection-table-tabs #maximize-selectiontable {
+	display:block !important;
 	background-color: rgba(255,255,255,1);
 }
 
