@@ -140,6 +140,7 @@ SelectionTable.prototype.addTable = function(features, layerName, workspace, url
 
 	var featureType = this.describeFeatureType(layerName, workspace);
 	this.createTableUI(featureType, features, layerName, workspace, url, this.tabCount);
+	bottomPanel.maximizePanel();
 };
 
 /**
@@ -351,7 +352,7 @@ SelectionTable.prototype.registerEvents = function() {
 
 	$("#maximize-selectiontable").on('click', function(){
 		bottomPanel.maximizePanel();
-		bottomPanel.maximizePanel();
+		//bottomPanel.maximizePanel();
 	});
 
 	$(".selection-table-tab").on('click', function(e){

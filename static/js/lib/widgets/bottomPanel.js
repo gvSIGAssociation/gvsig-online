@@ -25,7 +25,7 @@
  */
 var bottomPanel = function(layer, map) {	
 	this.isVisible = false;
-	this.animationDuration = 500;
+	this.animationDuration = 300;
 	this.animationEasing = 'linear';
 	this.initialize();
 };
@@ -50,6 +50,7 @@ bottomPanel.prototype.initialize = function() {
  * TODO
  */
 bottomPanel.prototype.hidePanel = function() {
+	$('.panel-wrapper').removeClass("minimized-table");
 	$('.panel-wrapper').css('display', 'none');
 };
 
