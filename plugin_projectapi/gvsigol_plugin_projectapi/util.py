@@ -235,6 +235,20 @@ def get_applications_ids_by_user(request, mobile=False):
     '''
     return [app.id for app in get_user_applications(request)]
 
+def get_applications_names_by_user(request, mobile=False):
+    '''
+    Obtiene las aplicaciones en las que un usuario tiene permisos, es decir que aparece
+    con el check activo en la pestaña "Grupo de usuarios" de la aplicación.
+    Además incluye las aplicaciones públicas.
+    FIXME: No se usa el parámetro mobile
+
+    Parámetros
+    ==========
+    request: HttpRequest
+        Objeto HttpRequest de Django con la petición en curso
+    '''
+    return [app.name for app in get_user_applications(request)]
+
 def get_layergroups_by_user(request):
     '''
     Obtiene los grupos de capas que tienen capas para las que el usuario tiene permiso de lectura

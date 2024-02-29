@@ -527,6 +527,8 @@ class PublicInfoSerializer(serializers.ModelSerializer):
 
 class AppInfoSerializer(serializers.ModelSerializer):
     conf = serializers.SerializerMethodField('get_application_conf')
+    image = serializers.SerializerMethodField('get_project_image')
+    relative_image = serializers.SerializerMethodField('get_project_relative_image')
 
     def get_application_conf (self, obj):
         conf = json.loads(obj.conf)
@@ -534,10 +536,20 @@ class AppInfoSerializer(serializers.ModelSerializer):
             conf = json.loads(obj.conf)
 
         return conf
+    
+    def get_project_image(self, obj):
+        # FIXME: we should to consider HTTP_ORIGIN and ALLOWED_HOST_NAMES to build the URL
+        # See gvsigol_core.utils.get_absolute_url method
+        return settings.BASE_URL + obj.image_url
+
+    def get_project_relative_image(self, obj):
+        # FIXME: we should to consider HTTP_ORIGIN and ALLOWED_HOST_NAMES to build the URL
+        # See gvsigol_core.utils.get_absolute_url method
+        return obj.image_url
 
     class Meta:
         model = Application
-        fields = ['conf']
+        fields = ['conf', 'image', 'relative_image']
         
 
 
