@@ -55,6 +55,16 @@ else:
     default_static_dir=str(os.path.join(BASE_DIR, 'assets'))
     default_static_url="/gvsigonline/static/"
 
+# not all supported languages will be enabled in LANGUAGES
+_all_gvsigol_supported_languages = {
+    'es': 'Spanish',
+    'ca-es@valencia': 'Valencian',
+    'ca': 'Catalan',
+    'en': 'English',
+    'pt': 'Portuguese',
+    'de': 'German',
+    'pt-br': 'Brazilian Portuguese'
+}
 
 # Define default environment 
 env = environ.Env(
@@ -73,6 +83,8 @@ env = environ.Env(
     DB_USER=(str,'gvsigonline'),
     DB_PASS=(str,'gvsigonline'),
     DB_NAME=(str,'gvsigonline'),
+    LANGUAGES = (tuple, ('es','en')),
+    EXTRA_MIDDLEWARE = (list,[]),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
     GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
@@ -290,20 +302,32 @@ ACTSTREAM_SETTINGS = {
 }
 
 
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',   
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
 
+try:
+    _extra_middleware = [x.split(':') for x in env('EXTRA_MIDDLEWARE')]
+    for _previous_middleware, _mdlwr, _next_middleware in _extra_middleware:
+        if _next_middleware:
+            _insert_at = MIDDLEWARE.index(_next_middleware)
+            MIDDLEWARE.insert(_insert_at, _mdlwr)
+        elif _previous_middleware:
+            _insert_at = MIDDLEWARE.index(_previous_middleware) + 1
+            MIDDLEWARE.insert(_insert_at, _mdlwr)
+        else:
+            MIDDLEWARE.append(_mdlwr)
+except:
+    print('ERROR: Incorrect syntax in EXTRA_MIDDLEWARE variable')
 
 try:
     __import__('corsheaders')
@@ -415,7 +439,8 @@ AUTH_READONLY_USERS = env('AUTH_READONLY_USERS')
 OIDC_VERIFY_SSL = env('OIDC_VERIFY_SSL')
 
 if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
-    MIDDLEWARE.insert(6, 'mozilla_django_oidc.middleware.SessionRefresh')
+    _insert_at = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1
+    MIDDLEWARE.insert(_insert_at, 'mozilla_django_oidc.middleware.SessionRefresh')
 
 # Internationalization
 LANGUAGE_CODE = 'es'
@@ -443,17 +468,9 @@ EXTRA_LANG_INFO = {
 LANG_INFO = dict(list(django.conf.locale.LANG_INFO.items()) + list(EXTRA_LANG_INFO.items()))
 django.conf.locale.LANG_INFO = LANG_INFO
 
+lang_list = [ (lang_code, _(_all_gvsigol_supported_languages.get(lang_code))) for lang_code in env('LANGUAGES') ]
 
-
-LANGUAGES = (
-    ('es', _('Spanish')),
-    #('ca-es@valencia', _('Valencian')),
-    #('ca', _('Catalan')),
-    ('en', _('English')),
-    #('pt', _('Portuguese')),
-    #('de', _('German')),
-    #('pt-br', _('Brazilian Portuguese')),
-)
+LANGUAGES = lang_list
 
 
 LOCALE_PATHS =  [
