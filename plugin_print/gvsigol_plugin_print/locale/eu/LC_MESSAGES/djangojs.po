@@ -1,0 +1,135 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-04 10:55+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Print map"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:308
+msgid "Print"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "Error loading print plugin"
+msgstr ""
+
+#: static/js/lib/tools/print.js:144
+msgid "Print params"
+msgstr ""
+
+#: static/js/lib/tools/print.js:150
+msgid "Select print template"
+msgstr ""
+
+#: static/js/lib/tools/print.js:152
+msgid "Select template"
+msgstr ""
+
+#: static/js/lib/tools/print.js:170
+msgid "Title"
+msgstr ""
+
+#: static/js/lib/tools/print.js:174
+msgid "Scale"
+msgstr ""
+
+#: static/js/lib/tools/print.js:176
+msgid "AutoScale"
+msgstr ""
+
+#: static/js/lib/tools/print.js:177
+msgid "UserScale"
+msgstr ""
+
+#: static/js/lib/tools/print.js:190
+msgid "MapGrid"
+msgstr ""
+
+#: static/js/lib/tools/print.js:192
+msgid "print-mapgrid-nogrid"
+msgstr ""
+
+#: static/js/lib/tools/print.js:193
+msgid "print-mapgrid-point"
+msgstr ""
+
+#: static/js/lib/tools/print.js:194
+msgid "print-mapgrid-line"
+msgstr ""
+
+#: static/js/lib/tools/print.js:196
+msgid "print-mapgrid-spacing"
+msgstr ""
+
+#: static/js/lib/tools/print.js:204
+msgid "MapProjection"
+msgstr ""
+
+#: static/js/lib/tools/print.js:233
+msgid "MapOverview"
+msgstr ""
+
+#: static/js/lib/tools/print.js:250
+msgid "Resolution"
+msgstr ""
+
+#: static/js/lib/tools/print.js:263
+msgid "Rotation"
+msgstr ""
+
+#: static/js/lib/tools/print.js:269
+msgid "Format"
+msgstr ""
+
+#: static/js/lib/tools/print.js:281 static/js/lib/tools/print.js:286
+msgid "Author"
+msgstr ""
+
+#: static/js/lib/tools/print.js:291
+msgid "Service"
+msgstr ""
+
+#: static/js/lib/tools/print.js:296
+msgid "Background Cartography"
+msgstr ""
+
+#: static/js/lib/tools/print.js:302
+msgid "Legal warning"
+msgstr ""
+
+#: static/js/lib/tools/print.js:309
+msgid "Cancel"
+msgstr ""
+
+#: static/js/lib/tools/print.js:388
+msgid "Error creating print job"
+msgstr ""
+
+#: static/js/lib/tools/print.js:391
+msgid "You must select a template"
+msgstr ""
+
+#: static/js/lib/tools/print.js:897
+msgid "Legend"
+msgstr ""
+
+#: static/js/lib/tools/print.js:970
+msgid "layers_xyz_cant_be_reprojected"
+msgstr ""
