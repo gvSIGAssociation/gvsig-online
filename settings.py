@@ -57,13 +57,14 @@ else:
 
 # not all supported languages will be enabled in LANGUAGES
 _all_gvsigol_supported_languages = {
-    'es': 'Spanish',
-    'ca-es@valencia': 'Valencian',
-    'ca': 'Catalan',
-    'en': 'English',
-    'pt': 'Portuguese',
-    'de': 'German',
-    'pt-br': 'Brazilian Portuguese'
+    'es': _('Spanish'),
+    'ca-es@valencia': _('Valencian'),
+    'ca': _('Catalan'),
+    'en': _('English'),
+    'pt': _('Portuguese'),
+    'de': _('German'),
+    'pt-br': _('Brazilian Portuguese'),
+    'eu': _('Basque')
 }
 
 # Define default environment 
@@ -449,6 +450,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+
 EXTRA_LANG_INFO = {
     'ca-es@valencia': {
         'bidi': False,
@@ -456,22 +458,14 @@ EXTRA_LANG_INFO = {
         'name': 'Valencian',
         'name_local': 'Valencià'
     },
-    'va': {
-        'bidi': False,
-        'code': 'va',
-        'name': 'Valencian',
-        'name_local': 'Valencian'
-    },
 }
 
 # Add custom languages not provided by Django
 LANG_INFO = dict(list(django.conf.locale.LANG_INFO.items()) + list(EXTRA_LANG_INFO.items()))
 django.conf.locale.LANG_INFO = LANG_INFO
 
-lang_list = [ (lang_code, _(_all_gvsigol_supported_languages.get(lang_code))) for lang_code in env('LANGUAGES') ]
-
+lang_list = [ (lang_code, _all_gvsigol_supported_languages.get(lang_code)) for lang_code in env('LANGUAGES') ]
 LANGUAGES = lang_list
-
 
 LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol/locale'),
