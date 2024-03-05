@@ -86,6 +86,7 @@ env = environ.Env(
     DB_NAME=(str,'gvsigonline'),
     LANGUAGES = (tuple, ('es','en')),
     EXTRA_MIDDLEWARE = (list,[]),
+    GVSIGOL_CLIENT_NAME = (str,'gvsig'),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
     GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
@@ -642,6 +643,7 @@ GVSIGOL_NAME = 'gvsig'
 GVSIGOL_SURNAME = 'OL'
 GVSIGOL_NAME_SHORT = 'g'
 GVSIGOL_SURNAME_SHORT = 'OL'
+GVSIGOL_CLIENT_NAME = env('GVSIGOL_CLIENT_NAME')
 
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)

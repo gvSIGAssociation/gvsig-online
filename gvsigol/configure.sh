@@ -56,6 +56,11 @@ function configure() {
 	echo "WARNING: GVSIGOL_SURNAME_SHORT is not defined using, using OL."	
 		GVSIGOL_SURNAME_SHORT="OL"	
 	fi
+	echo "INFO: Replace GVSIGOL_CLIENT_NAME"
+	if [ -z $GVSIGOL_CLIENT_NAME ]; then
+		echo "WARNING: GVSIGOL_CLIENT_NAME is not defined using, using gvsig."	
+		GVSIGOL_CLIENT_NAME=$GVSIGOL_NAME	
+	fi
 
 	grep -rl "##GVSIGOL_PATH##"  | xargs sed -i "s ##GVSIGOL_PATH## $GVSIGOL_PATH g"
 	grep -rl "/gvsigonline/" | xargs sed -i "s /gvsigonline/ /$GVSIGOL_PATH/ g"
@@ -64,6 +69,7 @@ function configure() {
 	grep -rl "##GVSIGOL_SURNAME##"  | xargs sed -i "s ##GVSIGOL_SURNAME## $GVSIGOL_SURNAME g"
 	grep -rl "##GVSIGOL_NAME_SHORT##"  | xargs sed -i "s ##GVSIGOL_NAME_SHORT## $GVSIGOL_NAME_SHORT g"
 	grep -rl "##GVSIGOL_SURNAME_SHORT##"  | xargs sed -i "s ##GVSIGOL_SURNAME_SHORT## $GVSIGOL_SURNAME_SHORT g"
+	grep -rl "##GVSIGOL_CLIENT_NAME##"  | xargs sed -i "s ##GVSIGOL_CLIENT_NAME## $GVSIGOL_CLIENT_NAME g"
 	
 	echo "INFO: Replace GVSIGOL_PLUGINS"
 	if [ -z $GVSIGOL_PLUGINS ]; then
