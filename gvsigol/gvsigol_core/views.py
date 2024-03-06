@@ -767,7 +767,8 @@ def load_project(request, project_name):
             'main_page': settings.LOGOUT_REDIRECT_URL,
             'is_viewer_template': True,
             'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', ''),
-            'project_title' : project.title            
+            'project_title' : project.title,
+            'viewer_default_crs': settings.VIEWER_DEFAULT_CRS      
         }
         response = render(request, 'viewer.html', resp)
 
@@ -1224,7 +1225,8 @@ def project_get_conf(request):
             'check_tileload_error': settings.CHECK_TILELOAD_ERROR,
             'SHP_DOWNLOAD_DEFAULT_ENCODING': getattr(settings, 'SHP_DOWNLOAD_DEFAULT_ENCODING', 'UTF-8'),
             'custom_overview': project.custom_overview,
-            'layer_overview': project.layer_overview
+            'layer_overview': project.layer_overview,
+            'viewer_default_crs': settings.VIEWER_DEFAULT_CRS      
             
         }
         

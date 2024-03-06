@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 {% load staticfiles %}
 {% load i18n %}
 {% load include_if_exists %}
@@ -258,7 +257,7 @@
 						<form>
 					      	<select id="custom-mouse-position-projection" class="custom-mouse-position-projection">
 					      		{% for key, value in supported_crs.items %}
-						      		{% if key == "4326" %}
+						      		{% if key == viewer_default_crs %}
 						        		<option value="{{value.code}}" data-attr="{{value.units}}" selected>{{value.title}}</option>
 						        	{% else %}
 						        		<option value="{{value.code}}" data-attr="{{value.units}}">{{value.title}}</option>
