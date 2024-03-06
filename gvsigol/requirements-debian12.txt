@@ -22,7 +22,7 @@ django-rest-swagger-swaggerdoc==1.0.post3
 django-cors-headers==3.7.0
 
 ##Instalamos el driver de PostgreSQL para python:
-psycopg2==2.9.5
+psycopg2==2.8.6
 
 ##Instalamos Pillow para que django soporte la gestion de images;
 pillow==10.2.0
