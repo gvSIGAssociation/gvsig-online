@@ -46,7 +46,7 @@ six==1.15.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.8.1
 
-numpy==1.23.1
+numpy==1.23.3
 
 cmislib3==1.0.8
 lxml==4.9.2
