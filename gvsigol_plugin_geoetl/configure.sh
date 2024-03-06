@@ -24,8 +24,8 @@ function configure() {
 
 	echo "INFO: DB"	
 	if [ -z $ETL_DB_HOST ]; then
-		echo "WARNING: ETL_DB_HOST is not defined, using GVSIGOL_HOST."					
-		ETL_DB_HOST=$GVSIGOL_HOST
+		echo "WARNING: ETL_DB_HOST is not defined, using DB_HOST."					
+		ETL_DB_HOST=$DB_HOST
 	fi
 	grep -rl "##ETL_DB_HOST##"  | xargs sed -i "s/##ETL_DB_HOST##/$ETL_DB_HOST/g"
 	if [ -z $ETL_DB_NAME ]; then
