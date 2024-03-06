@@ -87,6 +87,7 @@ env = environ.Env(
     LANGUAGES = (tuple, ('es','en')),
     EXTRA_MIDDLEWARE = (list,[]),
     GVSIGOL_CLIENT_NAME = (str,'gvsig'),
+    VIEWER_DEFAULT_CRS=(str,'EPSG:4326'),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
     GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
@@ -841,3 +842,5 @@ IFRAME_MODE_UI=env('IFRAME_MODE_UI')
 
 # Allow users to manage permissions 
 MANAGE_PERMISSION_UI=env('MANAGE_PERMISSION_UI')
+
+VIEWER_DEFAULT_CRS=env('VIEWER_DEFAULT_CRS')
