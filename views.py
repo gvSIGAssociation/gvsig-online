@@ -808,7 +808,8 @@ def load_public_project(request, project_name):
         'main_page': settings.LOGOUT_REDIRECT_URL,
         'is_viewer_template': True,
         'url_doc': get_manual(request, 'gvsigol_user_manual.pdf').get('url', ''),
-        'project_title' : project.title 
+        'project_title' : project.title,
+        'viewer_default_crs': settings.VIEWER_DEFAULT_CRS     
         }
     )
 
@@ -1521,7 +1522,8 @@ def load_shared_view(request, view_name):
             'is_shared_view': True,
             'shared_view_name': shared_view.name,
             'main_page': settings.LOGOUT_REDIRECT_URL,
-            'is_viewer_template': True
+            'is_viewer_template': True,
+            'viewer_default_crs': settings.VIEWER_DEFAULT_CRS
             }
         )
 
