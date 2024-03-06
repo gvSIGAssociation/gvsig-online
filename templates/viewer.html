@@ -258,7 +258,7 @@
 					      	<select id="custom-mouse-position-projection" class="custom-mouse-position-projection">
 					      		{% for key, value in supported_crs.items %}
 						      		{% if value.code == viewer_default_crs %}
-						        		<option value="{{value.code}}" data-attr="{{value.units}}" selected>{{value.title}}</option>
+						        		<option value="{{value.code}}" data-attr="{{value.units}}" selected>{{value.code}}  {{viewer_default_crs}}</option>
 						        	{% else %}
 						        		<option value="{{value.code}}" data-attr="{{value.units}}">{{value.title}}</option>
 						        	{% endif %}
