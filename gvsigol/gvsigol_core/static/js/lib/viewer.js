@@ -162,7 +162,7 @@ viewer.core = {
 
 		var mousePositionControl = new ol.control.MousePosition({
 	        coordinateFormat: ol.coordinate.createStringXY(4),
-	        projection: 'EPSG:' + this.conf.viewer_default_crs,
+	        projection: this.conf.viewer_default_crs,
 	        className: 'custom-mouse-position-output',
 	        target: document.getElementById('custom-mouse-position-output'),
 	        undefinedHTML: '--------,--------'
