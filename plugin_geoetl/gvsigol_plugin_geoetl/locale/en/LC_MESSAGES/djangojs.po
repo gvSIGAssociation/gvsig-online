@@ -981,6 +981,9 @@ msgstr ""
 msgid "Text to Point"
 msgstr ""
 
+msgid "Point to text"
+msgstr ""
+
 #: static/js/TableShape.js:11171 static/js/TableShape.js:11445
 msgid "Insert EPSG:"
 msgstr ""
