@@ -523,7 +523,7 @@ def _etl_workspace_update(instance, request, name, description, workspace, param
     if instance.id is not None:
         delete_periodic_workspace(instance)
 
-    if periodic_task:
+    if periodic_task == 'true':
         save_periodic_workspace(request, instance)
 
     edit_roles = json.loads(request.POST.get('editRoles', '[]'))

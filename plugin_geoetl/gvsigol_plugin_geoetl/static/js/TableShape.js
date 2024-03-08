@@ -12037,6 +12037,20 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Mode')+':</label>'+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="txt-to-point-'+ID+'" name="txt-to-point-'+ID+'" class="form-check-input" value="txt-to-point" checked="checked">'+
+                                    '<label class="form-check-label">'+gettext('Text to Point')+'</label>'+
+                                '</div>'+
+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="point-to-txt-'+ID+'" name="txt-to-point-'+ID+'" class="form-check-input" value="point-to-txt">'+
+                                    '<label class="form-check-label">'+gettext('Point to text')+'</label>'+
+                                '</div>'+
+                            '</div>'+
+
                             '<div class="column33">'+
                                 '<label form="attr" class="col-form-label">'+gettext('Longitude attribute:')+' (X) </label>'+
                                 '<select class="form-control" id="lon-'+ID+'"> </select>'+
@@ -12062,6 +12076,25 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
         '</div>')
 
 
+        $('input:radio[name="txt-to-point-'+ID+'" ]').change(function(){
+
+            if ($(this).val() == 'txt-to-point'){
+                
+                $('#lon-'+ID).prop('disabled', false)
+                $('#lat-'+ID).prop('disabled', false)
+                $('#epsg-'+ID).prop('disabled', false)
+                
+                
+            }
+            else if ($(this).val() == 'point-to-txt'){
+            
+                $('#lon-'+ID).prop('disabled', true)
+                $('#lat-'+ID).prop('disabled', true)
+                $('#epsg-'+ID).prop('disabled', true)
+            }
+        });
+
+
         for(i=0;i<srs.length;i++){
 
             epsg = srs[i].code.split(":")[1]
@@ -12072,6 +12105,21 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
         }
 
         icon.on("click", function(){
+
+            if ($('input:radio[name="txt-to-point-'+ID+'" ]:checked').val() == 'txt-to-point'){
+                
+                $('#lon-'+ID).prop('disabled', false)
+                $('#lat-'+ID).prop('disabled', false)
+                $('#epsg-'+ID).prop('disabled', false)
+                
+            }
+            else if ($('input:radio[name="txt-to-point-'+ID+'" ]:checked').val() == 'point-to-txt'){
+            
+                $('#lon-'+ID).prop('disabled', true)
+                $('#lat-'+ID).prop('disabled', true)
+                $('#epsg-'+ID).prop('disabled', true)
+            }
+
 
             setTimeout(function(){
                 
@@ -12119,11 +12167,20 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                 "parameters": [
                     {"epsg": $('#epsg-'+ID).val(),
                     "lon": $('#lon-'+ID).val(),
-                    "lat": $('#lat-'+ID).val()}
+                    "lat": $('#lat-'+ID).val(),
+                    "txt-to-point": $('input:radio[name="txt-to-point-'+ID+'"]:checked').val()}
                 ]
             };
-            
             schemaMod =[...schemaEdge]
+
+            console.log(paramsTextToPoint)
+            
+            if ($('input:radio[name="txt-to-point-'+ID+'" ]:checked').val() == 'point-to-txt'){
+                schemaMod.push('_xlon')
+                schemaMod.push('_ylat')
+
+            }
+            
             
             //updating schema-old and schema parameters in json
             paramsTextToPoint['schema-old'] = schemaEdge
