@@ -119,7 +119,7 @@ env = environ.Env(
     LDAP_HOST=(str,'localhost'),
     LDAP_PORT=(str,'389'),
     LDAP_ROOT_DN=(str,'dc=local,dc=gvsigonline,dc=com'),
-    LDAP_BIND_USER=(str,'gvsigonline'),
+    LDAP_BIND_USER=(str,'cn=admin,dc=local,dc=gvsigonline,dc=com'),
     LDAP_BIND_PASSWD=(str,'gvsigonline'),
     LDAP_AD_SUFFIX=(str,''),
     #CELERY
