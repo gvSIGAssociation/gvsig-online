@@ -132,9 +132,9 @@ TextSymbolizer.prototype.getGeneralTabUI = function(alwaysAllowed) {
 		ui += 	'<div class="row">';
 		ui += 		'<div class="col-md-12 form-group">';
 		if(this.is_actived){
-			ui += 			'<input id="label-has-label" type="checkbox" class="has-label" checked>   ' + gettext('Has label') + '</input>';
+			ui += '<input id="label-has-label" type="checkbox" class="has-label" checked>   ' + gettext('Has label') + '</input>';
 		}else{
-			ui += 			'<input id="label-has-label" type="checkbox" class="has-label">   ' + gettext('Has label') + '</input>';
+			ui += '<input id="label-has-label" type="checkbox" class="has-label">   ' + gettext('Has label') + '</input>';
 		}
 		ui += 		'</div>';
 		ui += 	'</div>';
@@ -299,9 +299,9 @@ TextSymbolizer.prototype.getFilterTabUI = function() {
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	if(this.is_label_actived){
-		ui += 			'<input id="label-has-label-on" type="checkbox" class="has-label" checked>   ' + gettext('Show labels') + '</input>';
+		ui += '<input id="label-has-label-on" type="checkbox" class="has-label" checked>   ' + gettext('Show labels') + '</input>';
 	}else{
-		ui += 			'<input id="label-has-label-on" type="checkbox" class="has-label">   ' + gettext('Show labels') + '</input>';
+		ui += '<input id="label-has-label-on" type="checkbox" class="has-label">   ' + gettext('Show labels') + '</input>';
 	}
 	ui += 		'</div>';
 	ui += 	'</div>';
