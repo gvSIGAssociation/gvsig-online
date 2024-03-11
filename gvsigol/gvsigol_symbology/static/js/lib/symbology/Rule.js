@@ -59,6 +59,7 @@ var Rule = function(id, name, title, options, utils) {
 };
 
 Rule.prototype.getTableUI = function(allowImport, type, editableRule) {
+
 	var self = this;
 	var ui = '';
 	this.type = type;
@@ -242,8 +243,10 @@ Rule.prototype.registerEvents = function(type) {
 		$("#save-rule-metadata-" + self.id).on('click', function(e){
 			var name = $("#r-name-" + self.id).val();
 			var title = $("#r-title-" + self.id).val();
-			var minscale = $("#r-minscale-" + self.id).val();
-			var maxscale = $("#r-maxscale-" + self.id).val();
+			//var minscale = $("#r-minscale-" + self.id).val();
+			var minscale = $("#symbol-minscale").val();
+			//var maxscale = $("#r-maxscale-" + self.id).val();
+			var maxscale=$("#symbol-maxscale").val();
 			
 			if(type == "intervals"){
 				var minvalue = $("#minvalue-" + self.id).val();
