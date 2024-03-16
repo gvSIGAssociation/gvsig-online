@@ -54,7 +54,8 @@ numpy==1.19.1 # latest version supporting Python 3.6
 
 cmislib3==1.0.8
 lxml==4.9.1
-unidecode==1.3.7
+python-slugify[unidecode]=6.1.2
+unidecode==1.3.8
 
 # Cron para aguas de valencia
 schedule==1.0.0

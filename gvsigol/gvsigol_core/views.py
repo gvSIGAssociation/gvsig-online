@@ -68,7 +68,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from gvsigol_auth import signals
 
-_valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+_valid_projectname_regex=re.compile("^[a-zA-Z0-9_\-]+$")
 import logging
 logger = logging.getLogger("gvsigol")
 
@@ -291,7 +291,7 @@ def project_add(request):
                           }
                         )
 
-        if _valid_name_regex.search(name) == None:
+        if _valid_projectname_regex.search(name) == None:
             groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
             message = _("Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
             return render(request, 'project_add.html',
@@ -1252,6 +1252,8 @@ def project_get_conf(request):
             # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
             if request.session.get('oidc_access_token'):
                 conf['user']['token'] = request.session.get('oidc_access_token')
+                conf['user']['refresh_token'] = request.session.get('oidc_refresh_token')
+                conf['user']['refresh_expires_in'] = request.session.get('oidc_refresh_expires_in')
             else:
                 conf['user']['credentials'] = {
                     'username': request.session['username'],
@@ -1803,7 +1805,7 @@ def application_add(request):
             message = _('You must enter an application name')
             return render(request, 'application_add.html', {'message': message, 'groups': groups})
 
-        if _valid_name_regex.search(name) == None:
+        if _valid_projectname_regex.search(name) == None:
             message = _("Invalid application name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
             return render(request, 'application_add.html', {'message': message, 'groups': groups})
 
