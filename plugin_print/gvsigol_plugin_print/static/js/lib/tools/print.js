@@ -297,6 +297,10 @@ print.prototype.handler = function(e) {
 		ui += 				'<input id="print-background-carto" class="form-control" value="">';
 		ui += 			'</div>';
 
+		ui += 			'<div id="print-ui-note" class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Notes') + '</label>';
+		ui += 				'<textarea id="print-note" class="form-control" rows="3"></textarea>';
+		ui += 			'</div>';
 		
 		ui += 			'<div id="print-ui-legal-warning" class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
@@ -420,6 +424,11 @@ print.prototype.updateUI = function() {
 		$('#print-ui-author').show();
 	else
 		$('#print-ui-author').hide();
+
+	if (this.supports('notes'))
+		$('#print-ui-note').show();
+	else
+		$('#print-ui-note').hide();
 
 	if (this.supports('service'))
 		$('#print-ui-service').show();
@@ -655,6 +664,7 @@ print.prototype.createPrintJob = function(template) {
 	var mapgridIndent = 5; //$("#print-mapgrid-indent").val();
 	var mapgridSpacing = $("#print-mapgrid-spacing").val();
 	var author = $("#print-author").val();
+	var note = $("#print-note").val();
 	var service = $("#print-service").val();
 	var backgroundCartography = $("#print-background-carto").val();
 
@@ -912,7 +922,9 @@ print.prototype.createPrintJob = function(template) {
 	if (self.supports('legalWarning')) {
 		dataToPost.attributes.legalWarning = legalWarning;
 	}
-
+	if (self.supports('notes')) {
+		dataToPost.attributes.notes = note;
+	}
 	if (self.supports('overviewMap')) {
 		bAcceptsOverview = true;
 		dataToPost.attributes.overviewMap = {

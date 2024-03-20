@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-04 10:55+0000\n"
+"POT-Creation-Date: 2024-03-20 11:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Print map"
 msgstr ""
 
-#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:308
+#: static/js/lib/_trans.gvsigol.js:3 static/js/lib/tools/print.js:312
 msgid "Print"
 msgstr ""
 
@@ -110,26 +110,26 @@ msgstr ""
 msgid "Background Cartography"
 msgstr ""
 
-#: static/js/lib/tools/print.js:302
+#: static/js/lib/tools/print.js:301
+msgid "Notes"
+msgstr ""
+
+#: static/js/lib/tools/print.js:306
 msgid "Legal warning"
 msgstr ""
 
-#: static/js/lib/tools/print.js:309
+#: static/js/lib/tools/print.js:313
 msgid "Cancel"
 msgstr ""
 
-#: static/js/lib/tools/print.js:388
+#: static/js/lib/tools/print.js:392
 msgid "Error creating print job"
 msgstr ""
 
-#: static/js/lib/tools/print.js:391
+#: static/js/lib/tools/print.js:395
 msgid "You must select a template"
 msgstr ""
 
-#: static/js/lib/tools/print.js:897
-msgid "Legend"
-msgstr ""
-
-#: static/js/lib/tools/print.js:970
+#: static/js/lib/tools/print.js:982
 msgid "layers_xyz_cant_be_reprojected"
 msgstr ""
