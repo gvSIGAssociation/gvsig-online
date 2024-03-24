@@ -527,7 +527,7 @@ def datastore_add(request):
             name = form.cleaned_data['name']
             if _valid_name_regex.search(name) == None:
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
-            elif name.isupper():
+            elif name.lower() != name:
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must be in lowercase.").format(value=name))
             else:
                 ws = form.cleaned_data['workspace']
