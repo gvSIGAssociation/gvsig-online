@@ -76,6 +76,7 @@ env = environ.Env(
     STATIC_URL=(str,default_static_url),
     MEDIA_ROOT=(str,'/opt/gvsigol_data/'),
     MEDIA_URL=(str,'/media/'),
+    DOCS_URL=(str, '/docs/'),
     ALLOWED_HOST_NAMES=(list,['http://localhost:8000']),
     GVSIGOL_PLUGINS=(list),
     GVSIGOL_SKIN=(str,'skin-blue'),
