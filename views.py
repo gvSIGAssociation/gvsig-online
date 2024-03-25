@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 
 '''
     gvSIG Online.
@@ -1358,28 +1358,32 @@ def select_public_mobile_project(request):
         })
     
 
-def get_manual(request, doc_name):
-    lang = request.LANGUAGE_CODE
-    base_docs_url = getattr(settings, 'DOC_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
+def get_manual(request, doc_name, forced_lang=None):
+    if forced_lang:
+        lang = forced_lang
+    else:
+        lang = request.LANGUAGE_CODE
+
+    base_docs_url = getattr(settings, 'DOCS_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
 
     doc_path = os.path.join(base_docs_url, lang, doc_name)
     if os.path.exists(doc_path):
         return {
-            'url': '/docs/' + os.path.relpath(doc_path, base_docs_url),
-            'lang': None
+            'url': settings.DOCS_URL + os.path.relpath(doc_path, base_docs_url),
+            'lang': forced_lang
         }
-    return {
-        'url': '/docs/es/' + doc_name,
-        'lang': 'es'
-    }
+    elif not forced_lang:
+        return get_manual(request, doc_name, 'es')
+
 
 def documentation(request):
     lang = request.LANGUAGE_CODE
-    base_docs_url = getattr(settings, 'DOC_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
+    base_docs_url = getattr(settings, 'DOCS_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
 
     intro = get_manual(request, 'gvsigol_intro.pdf')
     admin = get_manual(request, 'gvsigol_admin_guide.pdf')
     viewer = get_manual(request, 'gvsigol_user_manual.pdf')
+    spaviewer = get_manual(request, 'gvsigolfrontend_manual.pdf')
     mobile = get_manual(request, 'gvsigmapps_manual.pdf')
 
     plugins_base_path = base_docs_url + '/plugins'
@@ -1407,12 +1411,18 @@ def documentation(request):
                     })
         
     response = {
-        'intro': intro,
-        'admin': admin,
-        'viewer': viewer,
-        'plugin_manuals': plugin_manuals,
-        'mobile': mobile
+        'plugin_manuals': plugin_manuals
     }
+    if intro:
+        response['intro'] = intro
+    if admin:
+        response['admin'] = admin
+    if viewer:
+        response['viewer'] = viewer
+    if spaviewer:
+        response['spaviewer'] = spaviewer
+    if mobile:
+        response['mobile'] = mobile
     return render(request, 'documentation.html', response)
 
 def do_save_shared_view(pid, description, view_state, expiration, user, internal = False, url = False):
