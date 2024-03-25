@@ -142,11 +142,11 @@ function configure() {
 	fi
 	grep -rl "##STATIC_PATH##"  | xargs sed -i "s ##STATIC_PATH## $STATIC_PATH g"
 
-	if [ -z $DOCS_URL ]; then
-		echo "WARNING: DOCS_URL is not defined, using /docs/"
-		DOCS_URL="/docs/"
+	if [ -z $GVSIGOL_DOCS_URL ]; then
+		echo "WARNING: GVSIGOL_DOCS_URL is not defined, using /docs/"
+		GVSIGOL_DOCS_URL="/docs/"
 	fi
-	grep -rl "##DOCS_URL##"  | xargs sed -i "s ##DOCS_URL## $DOCS_URL g"
+	grep -rl "##GVSIGOL_DOCS_URL##"  | xargs sed -i "s ##GVSIGOL_DOCS_URL## $GVSIGOL_DOCS_URL g"
 
 	if [ -z $GVSIGOL_SKIN ]; then
 		echo "WARNING: GVSIGOL_SKIN is not defined, using skin-blue"					
