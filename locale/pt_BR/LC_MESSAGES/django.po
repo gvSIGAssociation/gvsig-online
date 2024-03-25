@@ -476,10 +476,6 @@ msgid "Map viewer user manual"
 msgstr "Manual do usuário do visualizador de mapas"
 
 #: gvsigol_core/templates/documentation.html:62
-#, fuzzy
-#| msgid ""
-#| "This manual provides a review of each of the features offered by the map "
-#| "viewer"
 msgid ""
 "This manual provides a review of each of the features offered by the JQuery "
 "based map viewer"
@@ -488,16 +484,10 @@ msgstr ""
 "pelo visor de mapas baseado em JQuery"
 
 #: gvsigol_core/templates/documentation.html:72
-#, fuzzy
-#| msgid "Map viewer user manual"
 msgid "Map viewer user manual (ReactJS)"
 msgstr "Manual do usuário do visualizador de mapas (ReactJS)"
 
 #: gvsigol_core/templates/documentation.html:73
-#, fuzzy
-#| msgid ""
-#| "This manual provides a review of each of the features offered by the map "
-#| "viewer"
 msgid ""
 "This manual provides a review of each of the features offered by the React "
 "based map viewer"

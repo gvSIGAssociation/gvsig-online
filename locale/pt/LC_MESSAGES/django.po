@@ -458,10 +458,8 @@ msgid "Shared views"
 msgstr "Vista compartilhada"
 
 #: gvsigol_core/templates/dashboard_core_menu.html:14
-#, fuzzy
-#| msgid "Web application"
 msgid "Applications"
-msgstr "Aplicação Web"
+msgstr "Aplicações"
 
 #: gvsigol_core/templates/documentation.html:51
 msgid "Web application"
@@ -469,7 +467,7 @@ msgstr "Aplicação Web"
 
 #: gvsigol_core/templates/documentation.html:61
 msgid "Map viewer user manual"
-msgstr "Manual do usuÃ¡rio do visualizador de mapas"
+msgstr "Manual do usuário do visualizador de mapas"
 
 #: gvsigol_core/templates/documentation.html:62
 msgid ""
@@ -481,7 +479,7 @@ msgstr ""
 
 #: gvsigol_core/templates/documentation.html:72
 msgid "Map viewer user manual (ReactJS)"
-msgstr "Manual do usuÃ¡rio do visualizador de mapas (ReactJS)"
+msgstr "Manual do usuário do visualizador de mapas (ReactJS)"
 
 #: gvsigol_core/templates/documentation.html:73
 msgid ""
