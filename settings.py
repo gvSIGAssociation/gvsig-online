@@ -77,6 +77,7 @@ env = environ.Env(
     MEDIA_ROOT=(str,'/opt/gvsigol_data/'),
     MEDIA_URL=(str,'/media/'),
     DOCS_URL=(str, '/docs/'),
+    DOCS_PATH=(str, '/opt/gvsigonline/docs'),
     ALLOWED_HOST_NAMES=(list,['http://localhost:8000']),
     GVSIGOL_PLUGINS=(list),
     GVSIGOL_SKIN=(str,'skin-blue'),
@@ -516,6 +517,8 @@ MEDIA_ROOT = env('MEDIA_ROOT')
 MEDIA_URL = env('MEDIA_URL')
 STATIC_ROOT = env('STATIC_ROOT')
 STATIC_URL = env('STATIC_URL')
+DOCS_URL = env('DOCS_URL')
+DOCS_PATH = env('DOCS_PATH')
 
 #STATICFILES_DIRS = (
 #    os.path.join(BASE_DIR, 'gvsigol_core/static'),
