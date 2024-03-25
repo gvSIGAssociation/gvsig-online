@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-05 14:25+0000\n"
+"POT-Creation-Date: 2024-03-25 15:34+0000\n"
 "PO-Revision-Date: 2023-11-06 15:22+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -275,7 +275,7 @@ msgstr "Die Anmeldung wird entfernt. Möchten Sie fortfahren?"
 #: gvsigol_core/templates/project_update.html:561
 #: gvsigol_core/templates/project_update.html:587
 #: gvsigol_core/templates/shared_view_list.html:53
-#: gvsigol_core/templates/viewer.html:292
+#: gvsigol_core/templates/viewer.html:291
 #: gvsigol_core/templates/viewer_compress.html:294
 msgid "Cancel"
 msgstr "Cancel"
@@ -287,8 +287,8 @@ msgstr "Cancel"
 #: gvsigol_core/templates/project_update.html:562
 #: gvsigol_core/templates/project_update.html:588
 #: gvsigol_core/templates/shared_view_list.html:54
-#: gvsigol_core/templates/viewer.html:293
-#: gvsigol_core/templates/viewer.html:315
+#: gvsigol_core/templates/viewer.html:292
+#: gvsigol_core/templates/viewer.html:314
 #: gvsigol_core/templates/viewer_compress.html:295
 #: gvsigol_core/templates/viewer_compress.html:317
 msgid "Accept"
@@ -404,14 +404,14 @@ msgstr "Erweitern auf Ebenen"
 
 #: gvsigol_core/templates/base.html:116
 #: gvsigol_core/templates/base_compress.html:116
-#: gvsigol_core/templates/viewer.html:170
+#: gvsigol_core/templates/viewer.html:169
 #: gvsigol_core/templates/viewer_compress.html:171
 msgid "Sign out"
 msgstr "Abmelden"
 
 #: gvsigol_core/templates/base.html:135
 #: gvsigol_core/templates/base_compress.html:135
-#: gvsigol_core/templates/viewer.html:165
+#: gvsigol_core/templates/viewer.html:164
 #: gvsigol_core/templates/viewer_compress.html:166
 msgid "Dashboard"
 msgstr "Dashboard"
@@ -423,7 +423,7 @@ msgstr "Home"
 
 #: gvsigol_core/templates/base.html:173
 #: gvsigol_core/templates/base_compress.html:173
-#: gvsigol_core/templates/documentation.html:124
+#: gvsigol_core/templates/documentation.html:143
 #: gvsigol_core/templates/ogc_services.html:99
 msgid "Version"
 msgstr "Version"
@@ -445,11 +445,45 @@ msgstr "Anwendungen"
 msgid "Web application"
 msgstr "Webanwendung"
 
+#: gvsigol_core/templates/documentation.html:61
+msgid "Map viewer user manual"
+msgstr "Map Viewer Benutzerhandbuch"
+
 #: gvsigol_core/templates/documentation.html:62
+#, fuzzy
+#| msgid ""
+#| "This manual provides a review of each of the features offered by the map "
+#| "viewer"
+msgid ""
+"This manual provides a review of each of the features offered by the JQuery "
+"based map viewer"
+msgstr ""
+"Dieses Handbuch gibt einen Überblick über die einzelnen Funktionen des "
+"JQuery-basierten Kartenviewers"
+
+#: gvsigol_core/templates/documentation.html:72
+#, fuzzy
+#| msgid "Map viewer user manual"
+msgid "Map viewer user manual (ReactJS)"
+msgstr "Map Viewer Benutzerhandbuch (ReactJS)"
+
+#: gvsigol_core/templates/documentation.html:73
+#, fuzzy
+#| msgid ""
+#| "This manual provides a review of each of the features offered by the map "
+#| "viewer"
+msgid ""
+"This manual provides a review of each of the features offered by the React "
+"based map viewer"
+msgstr ""
+"Dieses Handbuch gibt einen Überblick über die einzelnen Funktionen des "
+"React-basierten Kartenviewers"
+
+#: gvsigol_core/templates/documentation.html:85
 msgid "Introduction and concepts"
 msgstr "Einführung und Konzepte"
 
-#: gvsigol_core/templates/documentation.html:63
+#: gvsigol_core/templates/documentation.html:86
 msgid ""
 "Features of the platform and license. Definition of the objects and entities "
 "that are part of the environment."
@@ -457,11 +491,11 @@ msgstr ""
 "Merkmale der Plattform und der Lizenz. Definition der Objekte und Entitäten, "
 "die Teil der Umgebung sind."
 
-#: gvsigol_core/templates/documentation.html:71
+#: gvsigol_core/templates/documentation.html:96
 msgid "Administration Guide"
 msgstr "Leitfaden für die Verwaltung"
 
-#: gvsigol_core/templates/documentation.html:72
+#: gvsigol_core/templates/documentation.html:97
 msgid ""
 "This guide is intended for platform admin users. It teaches the steps to "
 "carry out the management of users and groups, services, symbology, "
@@ -471,27 +505,15 @@ msgstr ""
 "Schritte zur Verwaltung von Benutzern und Gruppen, Diensten, Symbolen, "
 "Projekten ... "
 
-#: gvsigol_core/templates/documentation.html:82
-msgid "Map viewer user manual"
-msgstr "Map Viewer Benutzerhandbuch"
-
-#: gvsigol_core/templates/documentation.html:83
-msgid ""
-"This manual provides a review of each of the features offered by the map "
-"viewer"
-msgstr ""
-"Dieses Handbuch gibt einen Überblick über die einzelnen Funktionen des "
-"Kartenviewers"
-
-#: gvsigol_core/templates/documentation.html:102
+#: gvsigol_core/templates/documentation.html:120
 msgid "Mobile application"
 msgstr "Mobile Anwendung"
 
-#: gvsigol_core/templates/documentation.html:111
+#: gvsigol_core/templates/documentation.html:129
 msgid "User manual"
 msgstr "Benutzerhandbuch"
 
-#: gvsigol_core/templates/documentation.html:112
+#: gvsigol_core/templates/documentation.html:130
 msgid ""
 "Learn how to manage geographic information from a mobile device or tablet"
 msgstr ""
@@ -608,7 +630,7 @@ msgstr "Ebenengruppen"
 
 #: gvsigol_core/templates/project_add.html:29
 #: gvsigol_core/templates/project_update.html:43
-#: gvsigol_core/templates/viewer.html:117
+#: gvsigol_core/templates/viewer.html:116
 #: gvsigol_core/templates/viewer_compress.html:118
 msgid "Tools"
 msgstr "Werkzeuge"
@@ -1040,7 +1062,7 @@ msgid "Public viewers - %(GVSIGOL_CLIENT_NAME)s"
 msgstr ""
 
 #: gvsigol_core/templates/select_public_project.html:47
-#: gvsigol_core/templates/viewer.html:177
+#: gvsigol_core/templates/viewer.html:176
 #: gvsigol_core/templates/viewer_compress.html:178
 msgid "Sign in"
 msgstr "Eintragen"
@@ -1085,58 +1107,58 @@ msgstr "Gemeinsame Ansicht löschen"
 msgid "Update TOC"
 msgstr "TOC aktualisieren"
 
-#: gvsigol_core/templates/viewer.html:92 gvsigol_core/templates/viewer.html:567
+#: gvsigol_core/templates/viewer.html:91 gvsigol_core/templates/viewer.html:635
 #: gvsigol_core/templates/viewer_compress.html:93
 #: gvsigol_core/templates/viewer_compress.html:523
 msgid "Close"
 msgstr "Close"
 
-#: gvsigol_core/templates/viewer.html:124
+#: gvsigol_core/templates/viewer.html:123
 #: gvsigol_core/templates/viewer_compress.html:125
 msgid "Views"
 msgstr "Views"
 
-#: gvsigol_core/templates/viewer.html:127
+#: gvsigol_core/templates/viewer.html:126
 #: gvsigol_core/templates/viewer_compress.html:128
 msgid "View 2D"
 msgstr "View 2D"
 
-#: gvsigol_core/templates/viewer.html:210
+#: gvsigol_core/templates/viewer.html:209
 #: gvsigol_core/templates/viewer_compress.html:211
 msgid "Layer tree"
 msgstr "Ebenenbaum"
 
-#: gvsigol_core/templates/viewer.html:211
+#: gvsigol_core/templates/viewer.html:210
 #: gvsigol_core/templates/viewer_compress.html:212
 msgid "Legend"
 msgstr "Legende"
 
-#: gvsigol_core/templates/viewer.html:212
+#: gvsigol_core/templates/viewer.html:211
 #: gvsigol_core/templates/viewer_compress.html:213
 msgid "Filters"
 msgstr "Filter"
 
-#: gvsigol_core/templates/viewer.html:213
+#: gvsigol_core/templates/viewer.html:212
 #: gvsigol_core/templates/viewer_compress.html:214
 msgid "Details"
 msgstr "Einzelheiten"
 
-#: gvsigol_core/templates/viewer.html:214
+#: gvsigol_core/templates/viewer.html:213
 #: gvsigol_core/templates/viewer_compress.html:215
 msgid "Temporary"
 msgstr "Vorübergehend"
 
-#: gvsigol_core/templates/viewer.html:286
+#: gvsigol_core/templates/viewer.html:285
 #: gvsigol_core/templates/viewer_compress.html:288
 msgid "End edition"
 msgstr "Ende der Ausgabe"
 
-#: gvsigol_core/templates/viewer.html:289
+#: gvsigol_core/templates/viewer.html:288
 #: gvsigol_core/templates/viewer_compress.html:291
 msgid "Changes don't saved will be missed. Continue?"
 msgstr "Änderungen, die nicht gespeichert werden, werden vermisst. Weiter?"
 
-#: gvsigol_core/templates/viewer.html:309
+#: gvsigol_core/templates/viewer.html:308
 #: gvsigol_core/templates/viewer_compress.html:311
 msgid "Error loading layers"
 msgstr "Fehler beim Laden von Ebenen"
@@ -1247,35 +1269,35 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "Projektname existiert bereits"
 
-#: gvsigol_core/views.py:1389 gvsigol_core/views.py:1399
+#: gvsigol_core/views.py:1398 gvsigol_core/views.py:1408
 msgid " manual title"
 msgstr " Handbuch-Titel"
 
-#: gvsigol_core/views.py:1390 gvsigol_core/views.py:1400
+#: gvsigol_core/views.py:1399 gvsigol_core/views.py:1409
 msgid " manual desc"
 msgstr " manueller Abstieg"
 
-#: gvsigol_core/views.py:1483 gvsigol_core/views.py:1485
+#: gvsigol_core/views.py:1498 gvsigol_core/views.py:1500
 msgid "Shared view"
 msgstr "Gemeinsame Ansicht"
 
-#: gvsigol_core/views.py:1486
+#: gvsigol_core/views.py:1501
 msgid "Link"
 msgstr "Link"
 
-#: gvsigol_core/views.py:1639 gvsigol_core/views.py:1662
+#: gvsigol_core/views.py:1655 gvsigol_core/views.py:1678
 msgid "Operation not allowed on project: "
 msgstr "Betrieb im Projekt nicht erlaubt: "
 
-#: gvsigol_core/views.py:1657
+#: gvsigol_core/views.py:1673
 msgid "The project was successfully cloned."
 msgstr "Das Projekt wurde erfolgreich geklont."
 
-#: gvsigol_core/views.py:1799
+#: gvsigol_core/views.py:1815
 msgid "You must enter an application name"
 msgstr "Sie müssen einen Anwendungsnamen eingeben"
 
-#: gvsigol_core/views.py:1803
+#: gvsigol_core/views.py:1819
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1286,7 +1308,7 @@ msgstr ""
 "oder einem Unterstrich (_) beginnen. Nachfolgende Zeichen können Buchstaben, "
 "Unterstriche oder Zahlen sein"
 
-#: gvsigol_core/views.py:1807
+#: gvsigol_core/views.py:1823
 msgid "Application name already exists"
 msgstr "Anwendungsname existiert bereits"
 
