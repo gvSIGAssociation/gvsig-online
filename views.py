@@ -1388,7 +1388,7 @@ def documentation(request):
         if  app_name.startswith('gvsigol_'):
             the_path = os.path.join(plugins_base_path, app_name, app_name + '_' + lang + '.pdf')
             if os.path.exists(the_path):
-                the_url = '/docs/' + os.path.relpath(the_path, base_docs_url)
+                the_url = settings.DOCS_URL + os.path.relpath(the_path, base_docs_url)
                 plugin_manuals.append({
                     'url': the_url,
                     'title': _(app_name + ' manual title'),
@@ -1398,7 +1398,7 @@ def documentation(request):
             else:
                 plugin_path = os.path.join(plugins_base_path, app_name, app_name + '_es.pdf')
                 if os.path.exists(plugin_path):
-                    the_url = '/docs/' + os.path.relpath(plugin_path, base_docs_url)
+                    the_url = settings.DOCS_URL + os.path.relpath(plugin_path, base_docs_url)
                     plugin_manuals.append({
                         'url': the_url,
                         'title': _(app_name + ' manual title'),
