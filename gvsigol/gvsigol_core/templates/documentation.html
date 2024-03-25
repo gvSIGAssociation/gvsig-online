@@ -54,6 +54,7 @@
 							<ul class="products-list product-list-in-box">
 								{% if user.is_active %}
 								{% if user.is_superuser or user.is_staff %}
+								{% if intro %}
 								<li class="item">
 									<div class="product-img">
 					                	<i class="fa fa-user"></i>
@@ -63,6 +64,8 @@
 										<span class="product-description">{% trans "Features of the platform and license. Definition of the objects and entities that are part of the environment." %}</span>
 									</div>
 								</li>
+								{% endif %}
+								{% if admin %}
 								<li class="item">
 									<div class="product-img">
 					                	<i class="fa fa-cogs"></i>
@@ -74,20 +77,34 @@
 								</li>
 								{% endif %}
 								{% endif %}
+								{% endif %}
+								{% if viewer %}
 								<li class="item">
 									<div class="product-img">
-					                	<i class="fa fa-globe"></i>
-					                </div>
+										<i class="fa fa-globe"></i>
+									</div>
 									<div class="product-info">
 										<a href="{{viewer.url}}" class="product-title ">{% trans "Map viewer user manual" %} {% if viewer.lang %}[{{viewer.lang}}]{% endif %}</a> 
 										<span class="product-description">{% trans "This manual provides a review of each of the features offered by the map viewer" %}</span>
 									</div>
 								</li>
+								{% endif %}
+								{% if spaviewer %}
+								<li class="item">
+									<div class="product-img">
+										<i class="fa fa-globe"></i>
+									</div>
+									<div class="product-info">
+										<a href="{{spaviewer.url}}" class="product-title ">{% trans "Map viewer user manual (ReactJS)" %} {% if spaviewer.lang %}[{{spaviewer.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "This manual provides a review of each of the features offered by the map viewer" %}</span>
+									</div>
+								</li>
+								{% endif %}
 								{% for plugin_manual in plugin_manuals %}
 								<li class="item">
 									<div class="product-img">
-					                	<i class="fa fa-cubes"></i>
-					                </div>
+										<i class="fa fa-cubes"></i>
+									</div>
 									<div class="product-info">
 										<a href="{{plugin_manual.url}}" class="product-title ">{% trans plugin_manual.title %} {% if plugin_manual.lang %}[{{plugin_manual.lang}}]{% endif %}</a> 
 										<span class="product-description">{% trans plugin_manual.desc %}</span>
@@ -97,6 +114,7 @@
 							</ul>
 						</div>
 					</div>
+					{% if mobile %}
 					<div class="box">
 						<div class="box-header with-border">
 							<h3 class="box-title" style="margin-right: 20px;">{% trans "Mobile application" %}</h3>
@@ -115,6 +133,7 @@
 							</ul>
 						</div>
 					</div>
+					{% endif %}
 				</section>
 			</div>
 		</div>
