@@ -48,7 +48,7 @@ from owslib.util import Authentication
 from owslib.wmts import WebMapTileService
 from django.utils import timezone
 import gvsigol
-import urllib.request, urllib.parse, urllib.error
+from urllib.parse import urlparse, quote, unquote, urljoin
 import random
 import datetime
 import string
@@ -117,7 +117,7 @@ def home(request):
         project['name'] = p.name
         project['title'] = p.title
         project['description'] = p.description
-        project['image'] = urllib.parse.unquote(image)
+        project['image'] = unquote(image)
 
         if p.is_public:
             public_projects.append(project)
@@ -1295,7 +1295,7 @@ def toc_update(request, pid):
 def export(request, pid):
     p = Project.objects.get(id=pid)
     image = p.image_url
-    return render(request, 'app_print_template.html', {'print_logo_url': urllib.parse.unquote(image)})
+    return render(request, 'app_print_template.html', {'print_logo_url': unquote(image)})
 
 def ogc_services(request):
     wms = ServiceUrl.objects.filter(type='WMS')
@@ -1304,59 +1304,80 @@ def ogc_services(request):
     csw = ServiceUrl.objects.filter(type='CSW')
     return render(request, 'services_view.html', {'wms': wms, 'wmts': wmts, 'wfs': wfs, 'csw': csw})
 
+def _get_spa_project_url(projectid):
+    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/", quote(str(projectid) + "/"))
+
+def _get_spa_mobileproject_url(projectid):
+    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/mobile/", quote(str(projectid) + "/"))
+
 def select_public_project(request):
     public_projects = Project.objects.filter(is_public=True)
+    public_apps = Application.objects.filter(is_public=True)
 
-    projects = []
-
-    if len (public_projects) <= 0:
-        return render(request, 'select_public_project.html', {'projects': projects})
-
-    elif len (public_projects) == 1:
+    if len (public_projects) == 1 and len(public_apps) == 0:
         return redirect('load', project_name=public_projects[0].name)
-
-    elif len (public_projects) > 1:
-        for pp in public_projects:
-            p = Project.objects.get(id=pp.id)
-            image = p.image_url
-            project = {}
-            project['id'] = p.id
-            project['name'] = p.name
-            project['title'] = p.title
-            project['description'] = p.description
-            project['image'] = urllib.parse.unquote(image)
-            projects.append(project)
-
-        return render(request, 'select_public_project.html', {'projects': projects})
+    elif len (public_projects) == 0 and len(public_apps) == 1:
+        return redirect(public_apps[0].absurl)
     
+    projects = []
+    apps = []
+    for p in public_projects:
+        image = p.image_url
+        project = {}
+        project['id'] = p.id
+        project['name'] = p.name
+        project['title'] = p.title
+        project['description'] = p.description
+        project['image'] = unquote(image)
+        if settings.USE_SPA_PROJECT_LINKS:
+            project['absurl'] = _get_spa_project_url(p.id)
+        else:
+            project['absurl'] = reverse('load', args=(p.name,))
+        projects.append(project)
+    for pa in public_apps:
+        image = pa.image_url
+        app = {}
+        app['id'] = pa.id
+        app['name'] = pa.name
+        app['title'] = pa.title
+        app['description'] = pa.description
+        app['image'] = unquote(image)
+        app['absurl'] = pa.absurl
+        apps.append(app)
+    return render(request, 'select_public_project.html', {'projects': projects, 'applications': apps})
+
 def select_public_mobile_project(request):
     public_projects = Project.objects.filter(is_public=True)
+    public_apps = Application.objects.filter(is_public=True)
+
+    if len (public_projects) == 1 and len(public_apps) == 0:
+        return redirect(_get_spa_project_url(public_projects[0]))
+    elif len (public_projects) == 0 and len(public_apps) == 1:
+        return redirect(public_apps[0].absurl)
 
     projects = []
-
-    if len (public_projects) <= 0:
-        return render(request, 'select_public_mobile_project.html', {'projects': projects})
-
-    elif len (public_projects) == 1:
-        return redirect('load', project_name=public_projects[0].name)
-
-    elif len (public_projects) > 1:
-        for pp in public_projects:
-            p = Project.objects.get(id=pp.id)
-            image = p.image_url
-            project = {}
-            project['id'] = p.id
-            project['name'] = p.name
-            project['title'] = p.title
-            project['description'] = p.description
-            project['image'] = urllib.parse.unquote(image)
-            projects.append(project)
-
-        return render(request, 'select_public_mobile_project.html', {
-            'projects': projects,
-            'frontend_base_url': settings.FRONTEND_BASE_URL
-        })
-    
+    apps = []
+    for p in public_projects:
+        image = p.image_url
+        project = {}
+        project['id'] = p.id
+        project['name'] = p.name
+        project['title'] = p.title
+        project['description'] = p.description
+        project['image'] = unquote(image)
+        project['absurl'] = _get_spa_mobileproject_url(p.id)
+        projects.append(project)
+    for pa in public_apps:
+        image = pa.image_url
+        app = {}
+        app['id'] = pa.id
+        app['name'] = pa.name
+        app['title'] = pa.title
+        app['description'] = pa.description
+        app['image'] = unquote(image)
+        app['absurl'] = pa.absurl
+        apps.append(app)
+    return render(request, 'select_public_mobile_project.html', {'projects': projects, 'applications': apps})
 
 def get_manual(request, doc_name, forced_lang=None):
     if forced_lang:

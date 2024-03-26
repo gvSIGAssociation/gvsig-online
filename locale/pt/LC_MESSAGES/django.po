@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-25 15:34+0000\n"
+"POT-Creation-Date: 2024-03-26 10:31+0000\n"
 "PO-Revision-Date: 2021-06-15 19:08+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -148,10 +148,8 @@ msgid "Name"
 msgstr "Nome"
 
 #: gvsigol_core/templates/application_add.html:38
-#, fuzzy
-#| msgid "Web application"
 msgid "Application name"
-msgstr "Aplicação Web"
+msgstr "Nome da aplicação"
 
 #: gvsigol_core/templates/application_add.html:43
 #: gvsigol_core/templates/application_list.html:25
@@ -169,10 +167,8 @@ msgstr "Tí­tulo"
 
 #: gvsigol_core/templates/application_add.html:44
 #: gvsigol_core/templates/application_update.html:54
-#, fuzzy
-#| msgid "Web application"
 msgid "Application title"
-msgstr "Aplicação Web"
+msgstr "Título da aplicação"
 
 #: gvsigol_core/templates/application_add.html:49
 #: gvsigol_core/templates/application_update.html:60
@@ -184,10 +180,8 @@ msgstr "Descrição"
 
 #: gvsigol_core/templates/application_add.html:50
 #: gvsigol_core/templates/application_update.html:61
-#, fuzzy
-#| msgid "Project description"
 msgid "Application description"
-msgstr "Descrição do projeto"
+msgstr "Descrição da aplicação"
 
 #: gvsigol_core/templates/application_add.html:55
 #: gvsigol_core/templates/application_list.html:26
@@ -202,10 +196,8 @@ msgstr ""
 
 #: gvsigol_core/templates/application_add.html:56
 #: gvsigol_core/templates/application_update.html:68
-#, fuzzy
-#| msgid "Web application"
 msgid "Application URL"
-msgstr "Aplicação Web"
+msgstr "URL da aplicação"
 
 #: gvsigol_core/templates/application_add.html:61
 #: gvsigol_core/templates/application_update.html:74
@@ -236,10 +228,8 @@ msgstr ""
 #: gvsigol_core/templates/application_add.html:87
 #: gvsigol_core/templates/application_list.html:27
 #: gvsigol_core/templates/application_update.html:100
-#, fuzzy
-#| msgid "Web application"
 msgid "application.Is public?"
-msgstr "Aplicação Web"
+msgstr "É pública?"
 
 #: gvsigol_core/templates/application_add.html:93
 #: gvsigol_core/templates/application_update.html:106
@@ -261,29 +251,23 @@ msgid "Assign user group"
 msgstr "Atribuir grupo de usuários"
 
 #: gvsigol_core/templates/application_list.html:11
-#, fuzzy
-#| msgid "Web application"
 msgid "Add application"
-msgstr "Aplicação Web"
+msgstr "Adicionar aplicação"
 
 #: gvsigol_core/templates/application_list.html:17
-#, fuzzy
-#| msgid "Web application"
 msgid "Applications list"
-msgstr "Aplicação Web"
+msgstr "Lista de aplicações"
 
 #: gvsigol_core/templates/application_list.html:65
 #: gvsigol_core/templates/application_list.html:112
-#, fuzzy
-#| msgid "Web application"
 msgid "Delete application"
-msgstr "Aplicação Web"
+msgstr "Eliminar a aplicação"
 
 #: gvsigol_core/templates/application_list.html:68
 #, fuzzy
 #| msgid "The project will be removed, Do you want continue?"
 msgid "Application will be removed, Do you want continue?"
-msgstr "O projeto será removido. Você quer continuar?"
+msgstr "A aplicação será removida. Você quer continuar?"
 
 #: gvsigol_core/templates/application_list.html:71
 #: gvsigol_core/templates/project_add.html:382
@@ -424,6 +408,7 @@ msgstr ""
 
 #: gvsigol_core/templates/base.html:116
 #: gvsigol_core/templates/base_compress.html:116
+#: gvsigol_core/templates/select_public_project.html:66
 #: gvsigol_core/templates/viewer.html:169
 #: gvsigol_core/templates/viewer_compress.html:171
 msgid "Sign out"
@@ -431,6 +416,7 @@ msgstr "Sair"
 
 #: gvsigol_core/templates/base.html:135
 #: gvsigol_core/templates/base_compress.html:135
+#: gvsigol_core/templates/select_public_project.html:63
 #: gvsigol_core/templates/viewer.html:164
 #: gvsigol_core/templates/viewer_compress.html:166
 msgid "Dashboard"
@@ -592,8 +578,6 @@ msgstr "Lista de projetos privados"
 
 #: gvsigol_core/templates/home.html:75
 #: gvsigol_core/templates/project_list.html:11
-#: gvsigol_core/templates/select_public_mobile_project.html:61
-#: gvsigol_core/templates/select_public_project.html:62
 msgid "Add project"
 msgstr "Adicionar projeto"
 
@@ -603,7 +587,8 @@ msgstr "Pesquisar projetos..."
 
 #: gvsigol_core/templates/home.html:89 gvsigol_core/templates/home.html:91
 #: gvsigol_core/templates/home.html:118 gvsigol_core/templates/home.html:120
-#: gvsigol_core/templates/select_public_project.html:74
+#: gvsigol_core/templates/select_public_project.html:95
+#: gvsigol_core/templates/select_public_project.html:115
 msgid "Load project"
 msgstr "Carregar projeto"
 
@@ -933,7 +918,7 @@ msgstr ""
 
 #: gvsigol_core/templates/project_list.html:17
 #: gvsigol_core/templates/select_public_mobile_project.html:58
-#: gvsigol_core/templates/select_public_project.html:59
+#: gvsigol_core/templates/select_public_project.html:85
 msgid "Projects list"
 msgstr "Lista de projetos"
 
@@ -1062,12 +1047,19 @@ msgstr ""
 msgid "Stop Process"
 msgstr ""
 
+#: gvsigol_core/templates/select_public_mobile_project.html:78
+#: gvsigol_core/templates/select_public_project.html:105
+#, fuzzy
+#| msgid "Web application"
+msgid "Application list"
+msgstr "Aplicação Web"
+
 #: gvsigol_core/templates/select_public_project.html:8
 #, python-format
 msgid "Public viewers - %(GVSIGOL_CLIENT_NAME)s"
 msgstr ""
 
-#: gvsigol_core/templates/select_public_project.html:47
+#: gvsigol_core/templates/select_public_project.html:72
 #: gvsigol_core/templates/viewer.html:176
 #: gvsigol_core/templates/viewer_compress.html:178
 msgid "Sign in"
@@ -1275,39 +1267,39 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "O nome do projeto já existe"
 
-#: gvsigol_core/views.py:1398 gvsigol_core/views.py:1408
+#: gvsigol_core/views.py:1419 gvsigol_core/views.py:1429
 msgid " manual title"
 msgstr ""
 
-#: gvsigol_core/views.py:1399 gvsigol_core/views.py:1409
+#: gvsigol_core/views.py:1420 gvsigol_core/views.py:1430
 #, fuzzy
 #| msgid "User manual"
 msgid " manual desc"
 msgstr "Manual do usuário"
 
-#: gvsigol_core/views.py:1498 gvsigol_core/views.py:1500
+#: gvsigol_core/views.py:1519 gvsigol_core/views.py:1521
 msgid "Shared view"
 msgstr "Vista compartilhada"
 
-#: gvsigol_core/views.py:1501
+#: gvsigol_core/views.py:1522
 msgid "Link"
 msgstr "Link"
 
-#: gvsigol_core/views.py:1655 gvsigol_core/views.py:1678
+#: gvsigol_core/views.py:1676 gvsigol_core/views.py:1699
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1673
+#: gvsigol_core/views.py:1694
 msgid "The project was successfully cloned."
 msgstr ""
 
-#: gvsigol_core/views.py:1815
+#: gvsigol_core/views.py:1836
 #, fuzzy
 #| msgid "You must enter an project name"
 msgid "You must enter an application name"
 msgstr "É  necessário inserir um nome de projeto"
 
-#: gvsigol_core/views.py:1819
+#: gvsigol_core/views.py:1840
 #, fuzzy, python-brace-format
 #| msgid ""
 #| "Invalid project name: '{value}'. Identifiers must begin with a letter or "
@@ -1322,7 +1314,7 @@ msgstr ""
 "uma letra ou uma sublinhado (_). Os caracteres subsequentes podem ser "
 "letras, sublinhados ou números"
 
-#: gvsigol_core/views.py:1823
+#: gvsigol_core/views.py:1844
 #, fuzzy
 #| msgid "Project name already exists"
 msgid "Application name already exists"

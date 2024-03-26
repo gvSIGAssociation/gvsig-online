@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-25 15:34+0000\n"
+"POT-Creation-Date: 2024-03-26 10:31+0000\n"
 "PO-Revision-Date: 2023-10-16 13:06+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -400,6 +400,7 @@ msgstr "Amplia a les capes"
 
 #: gvsigol_core/templates/base.html:116
 #: gvsigol_core/templates/base_compress.html:116
+#: gvsigol_core/templates/select_public_project.html:66
 #: gvsigol_core/templates/viewer.html:169
 #: gvsigol_core/templates/viewer_compress.html:171
 msgid "Sign out"
@@ -407,6 +408,7 @@ msgstr "Tancar sessió"
 
 #: gvsigol_core/templates/base.html:135
 #: gvsigol_core/templates/base_compress.html:135
+#: gvsigol_core/templates/select_public_project.html:63
 #: gvsigol_core/templates/viewer.html:164
 #: gvsigol_core/templates/viewer_compress.html:166
 msgid "Dashboard"
@@ -568,8 +570,6 @@ msgstr "Llistat de projectes.privats"
 
 #: gvsigol_core/templates/home.html:75
 #: gvsigol_core/templates/project_list.html:11
-#: gvsigol_core/templates/select_public_mobile_project.html:61
-#: gvsigol_core/templates/select_public_project.html:62
 msgid "Add project"
 msgstr "Afegir projecte"
 
@@ -579,7 +579,8 @@ msgstr "Cercar projectes..."
 
 #: gvsigol_core/templates/home.html:89 gvsigol_core/templates/home.html:91
 #: gvsigol_core/templates/home.html:118 gvsigol_core/templates/home.html:120
-#: gvsigol_core/templates/select_public_project.html:74
+#: gvsigol_core/templates/select_public_project.html:95
+#: gvsigol_core/templates/select_public_project.html:115
 msgid "Load project"
 msgstr "Carregar projecte"
 
@@ -675,8 +676,6 @@ msgstr "Grups seleccionables"
 
 #: gvsigol_core/templates/project_add.html:84
 #: gvsigol_core/templates/project_update.html:113
-#, fuzzy
-#| msgid "Expiration date"
 msgid "expiration_date"
 msgstr "Data d'expiració"
 
@@ -915,7 +914,7 @@ msgstr "Clonar permisos"
 
 #: gvsigol_core/templates/project_list.html:17
 #: gvsigol_core/templates/select_public_mobile_project.html:58
-#: gvsigol_core/templates/select_public_project.html:59
+#: gvsigol_core/templates/select_public_project.html:85
 msgid "Projects list"
 msgstr "Llistat de projectes"
 
@@ -1040,12 +1039,19 @@ msgstr "Continua la baixada"
 msgid "Stop Process"
 msgstr "Aturar procés"
 
+#: gvsigol_core/templates/select_public_mobile_project.html:78
+#: gvsigol_core/templates/select_public_project.html:105
+#, fuzzy
+#| msgid "Applications list"
+msgid "Application list"
+msgstr "Llistat d'aplicacions"
+
 #: gvsigol_core/templates/select_public_project.html:8
 #, python-format
 msgid "Public viewers - %(GVSIGOL_CLIENT_NAME)s"
 msgstr ""
 
-#: gvsigol_core/templates/select_public_project.html:47
+#: gvsigol_core/templates/select_public_project.html:72
 #: gvsigol_core/templates/viewer.html:176
 #: gvsigol_core/templates/viewer_compress.html:178
 msgid "Sign in"
@@ -1253,37 +1259,37 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "El nom del projecte ja existeix"
 
-#: gvsigol_core/views.py:1398 gvsigol_core/views.py:1408
+#: gvsigol_core/views.py:1419 gvsigol_core/views.py:1429
 msgid " manual title"
 msgstr ""
 
-#: gvsigol_core/views.py:1399 gvsigol_core/views.py:1409
+#: gvsigol_core/views.py:1420 gvsigol_core/views.py:1430
 #, fuzzy
 #| msgid "User manual"
 msgid " manual desc"
 msgstr "Manual d'usuari"
 
-#: gvsigol_core/views.py:1498 gvsigol_core/views.py:1500
+#: gvsigol_core/views.py:1519 gvsigol_core/views.py:1521
 msgid "Shared view"
 msgstr "Vista compartida"
 
-#: gvsigol_core/views.py:1501
+#: gvsigol_core/views.py:1522
 msgid "Link"
 msgstr "Enllaç"
 
-#: gvsigol_core/views.py:1655 gvsigol_core/views.py:1678
+#: gvsigol_core/views.py:1676 gvsigol_core/views.py:1699
 msgid "Operation not allowed on project: "
 msgstr "Operació no permesa en el projecte: "
 
-#: gvsigol_core/views.py:1673
+#: gvsigol_core/views.py:1694
 msgid "The project was successfully cloned."
 msgstr "El projecte s'ha clonat correctament."
 
-#: gvsigol_core/views.py:1815
+#: gvsigol_core/views.py:1836
 msgid "You must enter an application name"
 msgstr "Ha d'introduir un nom d'aplicació"
 
-#: gvsigol_core/views.py:1819
+#: gvsigol_core/views.py:1840
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1294,7 +1300,7 @@ msgstr ""
 "una lletra o guió baix (_). Els següents caràcters poden ser lletres, guió "
 "baix o nombres"
 
-#: gvsigol_core/views.py:1823
+#: gvsigol_core/views.py:1844
 msgid "Application name already exists"
 msgstr "El nom de l'aplicació ja existeix"
 

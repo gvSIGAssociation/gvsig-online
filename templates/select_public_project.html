@@ -29,7 +29,7 @@
     
 </head>
 
-<body class="hold-transition layout-top-nav">
+<body class="hold-transition layout-top-nav external-no-skin">
 
 	<div class="wrapper">
 
@@ -37,14 +37,40 @@
 			<nav class="navbar navbar-static-top background-grey">
 				<div class="container">
 					<div class="navbar-header index select-project-logo">
-        				<img src="{% static "img/logo_small.png"%}">
+						<a href="{% url 'index' %}"><img src="{% static 'img/logo_small.png' %}"></a>
 					</div>
 					<div class="navbar-custom-menu">
 						<ul class="nav navbar-nav">
 							<li>
-								<img id="logo-ue" style="max-height: 60px; margin-right: 10px;" src="{% static "img/logo_ue.png"%}">
+								<img id="logo-ue" style="max-height: 60px; margin-right: 10px;" src="{% static 'img/logo_ue.png' %}" onerror="this.style.display='none'">
 							</li>
+							{% if user.is_authenticated %}
+							<li class="dropdown user user-menu {{GVSIGOL_SKIN}}">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+									<i class="fa fa-user"></i>
+									<span class="hidden-xs">{{user.username}}</span>
+								</a>
+								<ul class="dropdown-menu">
+									<li class="user-header">
+										<img src="{% static "img/user.png" %}" class="img-circle" alt="User Image">
+										<p>
+											{{user.username}}
+											<small>{{user.email}}</small>
+										</p>
+									</li>
+									<li class="user-footer">
+										<div class="pull-left">
+											<a href="/gvsigonline/core/" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
+										</div>
+										<div class="pull-right">
+											<a href="{% url 'gvsigol_logout_user' %}" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
+										</div>
+									</li>
+								</ul>
+							</li>
+							{% else %}
 							<li><a href="{% url 'gvsigol_authenticate_user' %}">{% trans "Sign in" %}</a></li>
+							{% endif %}
 						</ul>
 					</div>
 				</div>
@@ -57,11 +83,6 @@
 					<div class="box">
 						<div class="box-header with-border">
 							<h3 class="box-title">{% trans "Projects list" %}</h3>
-							<div class="box-tools pull-right">
-								{% if user.is_staff %}
-								<button id="button-add-project" class="btn btn-box-tool"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
-								{% endif %}
-							</div>
 						</div>
 						<div class="box-body">
 							<ul class="products-list product-list-in-box">
@@ -71,8 +92,28 @@
 										<img src={{project.image}} alt="Project Image">
 									</div>
 									<div class="product-info">
-										<a href="/gvsigonline/core/load/{{project.name}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
+										<a href="{{project.absurl}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
 										<span class="product-description"> {{project.description}}</span>
+									</div>
+								</li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+					<div class="box">
+						<div class="box-header with-border">
+							<h3 class="box-title">{% trans "Application list" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% for application in applications %}
+								<li class="item">
+									<div class="product-img">
+										<img src={{application.image}} alt="Project Image">
+									</div>
+									<div class="product-info">
+										<a href="{{application.absurl}}" class="product-title">{{application.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
+										<span class="product-description"> {{application.description}}</span>
 									</div>
 								</li>
 								{% endfor %}
@@ -117,12 +158,12 @@
 		});
 	</script>
 	
-	{% for app in INSTALLED_APPS %}												  
-		{% if 'gvsigol_app_' in app %}	
-			{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+	{% for app in INSTALLED_APPS %}
+		{% if 'gvsigol_app_' in app %}
+			{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}
 				{% include_if_exists aux %}
 			{% endwith %}
-		{% endif %}		    					
+		{% endif %}
 	{% endfor %}
 	
 </body>
