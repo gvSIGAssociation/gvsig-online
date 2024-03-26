@@ -112,7 +112,7 @@ env = environ.Env(
     CORS_REPLACE_HTTPS_REFERER = (bool,False),
     # frontend SPA
     USE_SPA_PROJECT_LINKS = (bool,False),
-    FRONTEND_BASE_URL = (str,'/gvsigonline'),
+    FRONTEND_BASE_URL = (str,'/spa'),
     FRONTEND_REDIRECT_URL = (str,'/gvsigonline'),
     #Log level
     LOG_LEVEL=(str,"DEBUG"),
