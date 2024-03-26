@@ -1323,8 +1323,8 @@ def etl_concatenate_workspace_update(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         workspace = request.POST.get('workspace')
-        periodic_task = request.POST.get('checked') == 'true'
-        set_superuser = request.POST.get('superuser') == 'true'
+        periodic_task = request.POST.get('checked')
+        set_superuser = request.POST.get('superuser')
         try:
             id = int(request.POST.get('id'))
             ws = ETLworkspaces.objects.get(id = id)
