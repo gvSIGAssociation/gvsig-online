@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-26 10:31+0000\n"
+"POT-Creation-Date: 2024-03-26 11:28+0000\n"
 "PO-Revision-Date: 2023-10-16 12:57+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -579,8 +579,8 @@ msgstr "Cercar projectes..."
 
 #: gvsigol_core/templates/home.html:89 gvsigol_core/templates/home.html:91
 #: gvsigol_core/templates/home.html:118 gvsigol_core/templates/home.html:120
-#: gvsigol_core/templates/select_public_project.html:95
-#: gvsigol_core/templates/select_public_project.html:115
+#: gvsigol_core/templates/select_public_project.html:96
+#: gvsigol_core/templates/select_public_project.html:128
 msgid "Load project"
 msgstr "Carregar projecte"
 
@@ -1036,7 +1036,7 @@ msgid "Stop Process"
 msgstr "Aturar procés"
 
 #: gvsigol_core/templates/select_public_mobile_project.html:78
-#: gvsigol_core/templates/select_public_project.html:105
+#: gvsigol_core/templates/select_public_project.html:118
 msgid "Application list"
 msgstr "Llistat d'aplicacions"
 
@@ -1050,6 +1050,10 @@ msgstr ""
 #: gvsigol_core/templates/viewer_compress.html:178
 msgid "Sign in"
 msgstr "Iniciar sessió"
+
+#: gvsigol_core/templates/select_public_project.html:107
+msgid "There are no public projects"
+msgstr "No hi ha projectes públics"
 
 #: gvsigol_core/templates/services_view.html:58
 msgid "WMS Services"
