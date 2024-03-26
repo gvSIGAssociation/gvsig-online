@@ -37,12 +37,12 @@
 			<nav class="navbar navbar-static-top background-grey">
 				<div class="container">
 					<div class="navbar-header index select-project-logo" style="display: inline-block">
-        				<img src="{% static "img/logo_small.png"%}">
+						<a href="{% url 'index' %}"><img src="{% static 'img/logo_small.png' %}"></a>
 					</div>
 					<div class="navbar-custom-menu">
 						<ul class="nav navbar-nav">
 							<li>
-								<img id="logo-ue" style="max-height: 60px; margin-right: 10px;" src="{% static "img/logo_ue.png"%}">
+								<img id="logo-ue" style="max-height: 60px; margin-right: 10px;" src="{% static 'img/logo_ue.png' %}" onerror="this.style.display='none'">
 							</li>
 						</ul>
 					</div>
@@ -56,11 +56,6 @@
 					<div class="box">
 						<div class="box-header with-border">
 							<h3 class="box-title">{% trans "Projects list" %}</h3>
-							<div class="box-tools pull-right">
-								{% if user.is_staff %}
-								<button id="button-add-project" class="btn btn-box-tool"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
-								{% endif %}
-							</div>
 						</div>
 						<div class="box-body">
 							<ul class="products-list product-list-in-box">
@@ -70,8 +65,28 @@
 										<img src={{project.image}} alt="Project Image">
 									</div>
 									<div class="product-info">
-										<a href="{{frontend_base_url}}/viewer/mobile/{{project.id}}/" class="product-title">{{project.title}} <span class="btn btn-default pull-right"><i style="font-size: 20px;" class="fa fa-play-circle margin-r-5"></i></span></a> 
+										<a href="{{project.absurl}}" class="product-title">{{project.title}} <span class="btn btn-default pull-right"><i style="font-size: 20px;" class="fa fa-play-circle margin-r-5"></i></span></a>
 										<span class="product-description"> {{project.description}}</span>
+									</div>
+								</li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+					<div class="box">
+						<div class="box-header with-border">
+							<h3 class="box-title">{% trans "Application list" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% for application in applications %}
+								<li class="item">
+									<div class="product-img">
+										<img src={{application.image}} alt="Project Image">
+									</div>
+									<div class="product-info">
+										<a href="{{application.absurl}}" class="product-title">{{application.title}} <span class="btn btn-default pull-right"><i style="font-size: 20px;" class="fa fa-play-circle margin-r-5"></i></span></a>
+										<span class="product-description"> {{application.description}}</span>
 									</div>
 								</li>
 								{% endfor %}

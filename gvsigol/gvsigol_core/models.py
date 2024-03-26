@@ -8,6 +8,7 @@ from django.utils.translation import ugettext as _
 from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
 from gvsigol_auth import auth_backend
 from django.contrib.auth.models import User
+from urllib.parse import quote, urlparse, urljoin
 
 
 def get_default_logo_image():
@@ -354,6 +355,17 @@ class Application(models.Model):
         if not self.image:
             return get_default_application_image()
         return self.image.url.replace(settings.BASE_URL, '')
+    
+    @property
+    def absurl(self):
+        app_url = self.url.format(id=quote(str(self.id), safe=''), name=quote(self.name, safe=''))
+        parsed = urlparse(app_url)
+        if parsed.netloc:
+            return app_url
+        elif parsed.path.startswith('/'):  # absolute path reference, ignore path from FRONTEND_BASE_URL
+            return urljoin(settings.FRONTEND_BASE_URL + "/", quote(app_url))
+        else:
+            return urljoin(settings.FRONTEND_BASE_URL + "/", quote(app_url))
     
 class ApplicationRole(models.Model):
     application = models.ForeignKey(Application, default=None, on_delete=models.CASCADE)

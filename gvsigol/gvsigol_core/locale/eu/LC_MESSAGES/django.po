@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-25 15:34+0000\n"
+"POT-Creation-Date: 2024-03-26 10:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -397,6 +397,7 @@ msgstr ""
 
 #: gvsigol_core/templates/base.html:116
 #: gvsigol_core/templates/base_compress.html:116
+#: gvsigol_core/templates/select_public_project.html:66
 #: gvsigol_core/templates/viewer.html:169
 #: gvsigol_core/templates/viewer_compress.html:171
 msgid "Sign out"
@@ -404,6 +405,7 @@ msgstr ""
 
 #: gvsigol_core/templates/base.html:135
 #: gvsigol_core/templates/base_compress.html:135
+#: gvsigol_core/templates/select_public_project.html:63
 #: gvsigol_core/templates/viewer.html:164
 #: gvsigol_core/templates/viewer_compress.html:166
 msgid "Dashboard"
@@ -554,8 +556,6 @@ msgstr ""
 
 #: gvsigol_core/templates/home.html:75
 #: gvsigol_core/templates/project_list.html:11
-#: gvsigol_core/templates/select_public_mobile_project.html:61
-#: gvsigol_core/templates/select_public_project.html:62
 msgid "Add project"
 msgstr ""
 
@@ -565,7 +565,8 @@ msgstr ""
 
 #: gvsigol_core/templates/home.html:89 gvsigol_core/templates/home.html:91
 #: gvsigol_core/templates/home.html:118 gvsigol_core/templates/home.html:120
-#: gvsigol_core/templates/select_public_project.html:74
+#: gvsigol_core/templates/select_public_project.html:95
+#: gvsigol_core/templates/select_public_project.html:115
 msgid "Load project"
 msgstr ""
 
@@ -889,7 +890,7 @@ msgstr ""
 
 #: gvsigol_core/templates/project_list.html:17
 #: gvsigol_core/templates/select_public_mobile_project.html:58
-#: gvsigol_core/templates/select_public_project.html:59
+#: gvsigol_core/templates/select_public_project.html:85
 msgid "Projects list"
 msgstr ""
 
@@ -1014,12 +1015,17 @@ msgstr ""
 msgid "Stop Process"
 msgstr ""
 
+#: gvsigol_core/templates/select_public_mobile_project.html:78
+#: gvsigol_core/templates/select_public_project.html:105
+msgid "Application list"
+msgstr ""
+
 #: gvsigol_core/templates/select_public_project.html:8
 #, python-format
 msgid "Public viewers - %(GVSIGOL_CLIENT_NAME)s"
 msgstr ""
 
-#: gvsigol_core/templates/select_public_project.html:47
+#: gvsigol_core/templates/select_public_project.html:72
 #: gvsigol_core/templates/viewer.html:176
 #: gvsigol_core/templates/viewer_compress.html:178
 msgid "Sign in"
@@ -1224,35 +1230,35 @@ msgstr ""
 msgid "Project name already exists"
 msgstr ""
 
-#: gvsigol_core/views.py:1398 gvsigol_core/views.py:1408
+#: gvsigol_core/views.py:1419 gvsigol_core/views.py:1429
 msgid " manual title"
 msgstr ""
 
-#: gvsigol_core/views.py:1399 gvsigol_core/views.py:1409
+#: gvsigol_core/views.py:1420 gvsigol_core/views.py:1430
 msgid " manual desc"
 msgstr ""
 
-#: gvsigol_core/views.py:1498 gvsigol_core/views.py:1500
+#: gvsigol_core/views.py:1519 gvsigol_core/views.py:1521
 msgid "Shared view"
 msgstr ""
 
-#: gvsigol_core/views.py:1501
+#: gvsigol_core/views.py:1522
 msgid "Link"
 msgstr ""
 
-#: gvsigol_core/views.py:1655 gvsigol_core/views.py:1678
+#: gvsigol_core/views.py:1676 gvsigol_core/views.py:1699
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1673
+#: gvsigol_core/views.py:1694
 msgid "The project was successfully cloned."
 msgstr ""
 
-#: gvsigol_core/views.py:1815
+#: gvsigol_core/views.py:1836
 msgid "You must enter an application name"
 msgstr ""
 
-#: gvsigol_core/views.py:1819
+#: gvsigol_core/views.py:1840
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1260,6 +1266,6 @@ msgid ""
 "numbers"
 msgstr ""
 
-#: gvsigol_core/views.py:1823
+#: gvsigol_core/views.py:1844
 msgid "Application name already exists"
 msgstr ""
