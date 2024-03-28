@@ -317,15 +317,26 @@ def update_user(
     """
     User = get_user_model()
     user = User.objects.get(username=username)
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = email
-    user.is_superuser = superuser
-    user.is_staff = staff
+    if first_name is not None:
+        user.first_name = first_name
+    if last_name is not None:
+        user.last_name = last_name
+    if email is not None:
+        user.email = email
+    if superuser is not None:
+        user.is_superuser = superuser
+    if staff is not None:
+        user.is_staff = staff
     if password:
+        old_password = user.password
         user.set_password(password)
-        auth_services.get_services().ldap_change_user_password(user, password)
-    user.save()
+        user.save()
+        try:
+            auth_services.get_services().ldap_change_user_password(user, password)
+        except:
+            user.password = old_password
+            user.save()
+            raise
     if roles is not None:
         set_roles(username, roles)
     if superuser:
