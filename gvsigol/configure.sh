@@ -336,7 +336,7 @@ function configure() {
 			DRF_DEFAULT_AUTHENTICATION_CLASSES="'rest_framework_jwt.authentication.JSONWebTokenAuthentication',\n        'rest_framework.authentication.SessionAuthentication',\n        'rest_framework.authentication.BasicAuthentication'"
 		fi
 		if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
-			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend'
+			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend'"
 			DJANGO_AUTHENTICATION_BACKENDS="'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend'"
 		fi
 	fi
