@@ -23,7 +23,7 @@
 from django.shortcuts import render
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from gvsigol.services_base import BackendNotAvailable
+from gvsigol.basetypes import BackendNotAvailable
 import gvsigol.settings
 from functools import wraps
 from django.contrib.auth.models import User
