@@ -20,7 +20,7 @@
 '''
 
 from django.shortcuts import render, redirect, HttpResponse
-from gvsigol.services_base import BackendNotAvailable
+from gvsigol.basetypes import BackendNotAvailable
 from gvsigol_core.geom import RASTER
 from django.contrib.gis import gdal
 from gvsigol.settings import CONTROL_FIELDS

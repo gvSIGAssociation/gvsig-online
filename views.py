@@ -60,7 +60,7 @@ from owslib.wmts import WebMapTileService
 import requests
 from requests_futures.sessions import FuturesSession
 
-from gvsigol.services_base import BackendNotAvailable
+from gvsigol.basetypes import BackendNotAvailable
 
 from .backend_postgis import Introspect
 from .backend_postgis import SqlFrom, SqlField, SqlJoinFields

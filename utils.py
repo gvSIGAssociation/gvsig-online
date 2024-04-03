@@ -22,7 +22,7 @@
 '''
 import django
 from django.http import response
-from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
+from gvsigol.basetypes import CloneConf
 from django.contrib.auth.models import AnonymousUser
 import hashlib
 import json
@@ -644,99 +644,110 @@ def set_time_enabled(server, layer):
                 time_resolution = time_resolution + (int(layer.time_resolution_second))
         server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
 
+def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
+    if not clone_conf:
+        clone_conf = CloneConf()
+    if layer.external:
+        if clone_conf.external_lyrs == CloneConf.LAYER_CLONE:
+            layer.pk = None
+            # lyr.name = new_name # TODO should we change name when cloning?
+            if layer_group is not None:
+                layer.layer_group = layer_group
+            layer.save()
+            new_layer_instance = Layer.objects.get(id=layer.pk)
+            return new_layer_instance
+    elif layer.type == 'v_PostGIS':
+        if clone_conf.vector_lyrs == CloneConf.LAYER_CLONE:
+            # create the table
+            dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+            dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+            dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+            dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+            dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+            i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
+            table_name = layer.source_name if layer.source_name else layer.name
+            new_table_name = i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=clone_conf.copy_data)
+            i.close()
 
-def clone_layer(target_datastore, layer, layer_group, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
-    if layer.type == 'v_PostGIS': # operation not defined for the rest of types
-        # create the table
-        dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
-        dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
-        dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
-        dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
-        dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
-        i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
-        table_name = layer.source_name if layer.source_name else layer.name
-        new_table_name = i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=copy_data)
-        i.close()
+            from gvsigol_services import views
+            server = geographic_servers.get_instance().get_server_by_id(target_datastore.workspace.server.id)
 
-        from gvsigol_services import views
-        server = geographic_servers.get_instance().get_server_by_id(target_datastore.workspace.server.id)
-
-        layerConf = ast.literal_eval(layer.conf) if layer.conf else {}
-        extraParams = {
-            "max_features": layerConf.get('featuretype', {}).get('', 0)
-        }
-        # add layer to Geoserver
-        views.do_add_layer(server, target_datastore, new_table_name, layer.title, layer.queryable, extraParams)
-        
-        new_name = new_table_name
-        if Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
-            base_name = target_datastore.workspace.name + "_" + layer.name
-            new_name = base_name
-            i = 1
-            salt = ''
-            while Layer.objects.filter(name=layer.name, datastore=target_datastore).exists():
-                new_name = base_name + '_' + str(i) + salt
-                i = i + 1
-                if (i%1000) == 0:
-                    salt = '_' + get_random_string(3)
-        
-        # clone layer
-        old_id = layer.pk
-        layer.pk = None
-        layer.name = new_name
-        layer.datastore = target_datastore
-        if layer_group is not None:
-            layer.layer_group = layer_group
-        layer.save()
-
-        new_layer_instance = Layer.objects.get(id=layer.pk)
-        old_instance = Layer.objects.get(id=old_id)
-        
-        if permissions != CLONE_PERMISSION_SKIP:
-            admin_role = auth_backend.get_admin_role()
-            read_roles = [ admin_role ]
-            write_roles = [ admin_role ]
-
-            for layer_read_role in LayerReadRole.objects.filter(layer=old_instance):
-                layer_read_role.pk = None
-                layer_read_role.layer = new_layer_instance
-                layer_read_role.save()
-                read_roles.append(layer_read_role.role)
+            layerConf = ast.literal_eval(layer.conf) if layer.conf else {}
+            extraParams = {
+                "max_features": layerConf.get('featuretype', {}).get('', 0)
+            }
+            # add layer to Geoserver
+            views.do_add_layer(server, target_datastore, new_table_name, layer.title, layer.queryable, extraParams)
             
-            for layer_write_role in LayerWriteRole.objects.filter(layer=old_instance):
-                layer_write_role.pk = None
-                layer_write_role.layer = new_layer_instance
-                layer_write_role.save()
-                write_roles.append(layer_write_role.role)
-            for layer_manage_role in LayerManageRole.objects.filter(layer=old_instance):
-                layer_manage_role.pk = None
-                layer_manage_role.layer = new_layer_instance
-                layer_manage_role.save()
-            server.setLayerDataRules(layer, read_roles, write_roles)
+            new_name = new_table_name
+            if Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
+                base_name = target_datastore.workspace.name + "_" + layer.name
+                new_name = base_name
+                i = 1
+                salt = ''
+                while Layer.objects.filter(name=layer.name, datastore=target_datastore).exists():
+                    new_name = base_name + '_' + str(i) + salt
+                    i = i + 1
+                    if (i%1000) == 0:
+                        salt = '_' + get_random_string(3)
+            
+            # clone layer
+            old_id = layer.pk
+            layer.pk = None
+            layer.name = new_name
+            layer.datastore = target_datastore
+            if layer_group is not None:
+                layer.layer_group = layer_group
+            layer.save()
+
+            new_layer_instance = Layer.objects.get(id=layer.pk)
+            old_instance = Layer.objects.get(id=old_id)
+            
+            if clone_conf.permissions != CloneConf.PERMISSION_SKIP:
+                admin_role = auth_backend.get_admin_role()
+                read_roles = [ admin_role ]
+                write_roles = [ admin_role ]
+
+                for layer_read_role in LayerReadRole.objects.filter(layer=old_instance):
+                    layer_read_role.pk = None
+                    layer_read_role.layer = new_layer_instance
+                    layer_read_role.save()
+                    read_roles.append(layer_read_role.role)
+                
+                for layer_write_role in LayerWriteRole.objects.filter(layer=old_instance):
+                    layer_write_role.pk = None
+                    layer_write_role.layer = new_layer_instance
+                    layer_write_role.save()
+                    write_roles.append(layer_write_role.role)
+                for layer_manage_role in LayerManageRole.objects.filter(layer=old_instance):
+                    layer_manage_role.pk = None
+                    layer_manage_role.layer = new_layer_instance
+                    layer_manage_role.save()
+                server.setLayerDataRules(layer, read_roles, write_roles)
+            
+            set_time_enabled(server, new_layer_instance)
+            
+            for enum in LayerFieldEnumeration.objects.filter(layer=old_instance):
+                enum.pk = None
+                enum.layer = new_layer_instance
+                enum.save()
+            
+            from gvsigol_symbology.services import clone_layer_styles
+            clone_layer_styles(server, old_instance, new_layer_instance)
+            
+            for lyr_res in LayerResource.objects.filter(layer=old_instance):
+                lyr_res.pk = None
+                lyr_res.layer = new_layer_instance
+                lyr_res.save()
+            """
+            TODO:
+            - models from plugins (for instance metadata, charts, etc)
+            """
+            server.updateThumbnail(new_layer_instance, 'create')
         
-        set_time_enabled(server, new_layer_instance)
-        
-        for enum in LayerFieldEnumeration.objects.filter(layer=old_instance):
-            enum.pk = None
-            enum.layer = new_layer_instance
-            enum.save()
-        
-        from gvsigol_symbology.services import clone_layer_styles
-        clone_layer_styles(server, old_instance, new_layer_instance)
-        
-        for lyr_res in LayerResource.objects.filter(layer=old_instance):
-            lyr_res.pk = None
-            lyr_res.layer = new_layer_instance
-            lyr_res.save()
-        """
-        TODO:
-        - models from plugins (for instance metadata, charts, etc)
-        """
-        server.updateThumbnail(new_layer_instance, 'create')
-    
-        core_utils.toc_add_layer(new_layer_instance)
-        server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
-        return new_layer_instance
+            core_utils.toc_add_layer(new_layer_instance)
+            server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
+            return new_layer_instance
     return layer
 
 def get_feat_version(introspect_con, schema, table, featid):

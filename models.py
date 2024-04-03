@@ -34,9 +34,7 @@ from .backend_postgis import Introspect
 import json, ast
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import Group
-
-CLONE_PERMISSION_CLONE = "clone"
-CLONE_PERMISSION_SKIP = "skip"
+from gvsigol.basetypes import CloneConf
 
 class Server(models.Model):
     TYPE_CHOICES = (
@@ -178,7 +176,9 @@ class LayerGroup(models.Model):
     def __str__(self):
         return self.name
     
-    def clone(self, recursive=True, target_datastore=None, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
+    def clone(self, target_datastore=None, clone_conf=None):
+        if not clone_conf:
+            clone_conf = CloneConf()
         old_id = self.pk
         new_name = target_datastore.workspace.name + "_" + self.name
         i = 1
@@ -193,9 +193,9 @@ class LayerGroup(models.Model):
         self.save()
         
         new_instance =  LayerGroup.objects.get(id=self.pk)
-        if recursive:
+        if clone_conf.recursive:
             for lyr in LayerGroup.objects.get(id=old_id).layer_set.all():
-                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, copy_data=copy_layer_data, permissions=permissions)
+                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, clone_conf=clone_conf)
         return new_instance
 
 def get_default_layer_thumbnail():
@@ -401,9 +401,11 @@ class Layer(models.Model):
         else:
             return self.name
     
-    def clone(self, target_datastore, recursive=True, layer_group=None, copy_data=True, permissions=CLONE_PERMISSION_CLONE):
+    def clone(self, target_datastore, recursive=True, layer_group=None, clone_conf=None):
+        if not clone_conf:
+            clone_conf = CloneConf()
         from gvsigol_services.utils import clone_layer
-        return clone_layer(target_datastore, self, layer_group, copy_data=copy_data, permissions=permissions)
+        return clone_layer(target_datastore, self, layer_group, clone_conf=clone_conf)
     
     def get_config_manager(self):
         return LayerConfig(self)
