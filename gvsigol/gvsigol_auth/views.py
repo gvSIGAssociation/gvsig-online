@@ -19,7 +19,7 @@
 '''
 from django.http.response import JsonResponse
 from gvsigol import settings
-from gvsigol.services_base import BackendNotAvailable
+from gvsigol.basetypes import BackendNotAvailable
 from gvsigol.utils import default_sorter
 from gvsigol_auth.django_auth import get_admin_role
 '''

@@ -17,12 +17,12 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from geoserver.workspace import Workspace
 
-from gvsigol_auth import auth_backend
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
+
+from gvsigol_auth import auth_backend
 from django import apps
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
