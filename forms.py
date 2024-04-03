@@ -8,12 +8,13 @@ from django import forms
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
 from gvsigol_core.models import Project
-from gvsigol_services.models import Workspace, Server, CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
+from gvsigol.basetypes import CloneConf
+from gvsigol_services.models import Workspace, Server
 from gvsigol_services import utils as services_utils
 
 PERMISSION_CHOICES = (
-    (CLONE_PERMISSION_CLONE, _("Clone project and layer permissions")),
-    (CLONE_PERMISSION_SKIP, _("Don't apply any permission. Cloned layers will become public")),
+    (CloneConf.PERMISSION_CLONE, _("Clone project and layer permissions")),
+    (CloneConf.PERMISSION_SKIP, _("Don't apply any permission. Cloned layers will become public")),
     )
 
 class CloneProjectForm(forms.Form):
@@ -50,7 +51,7 @@ class CloneProjectForm(forms.Form):
                                 ),
                             ])
     copy_data = forms.BooleanField(required=False, initial=False)
-    permission_choice = forms.ChoiceField(required=True, choices=PERMISSION_CHOICES, initial=CLONE_PERMISSION_CLONE, widget=forms.Select(attrs={'class':'form-control'}))
+    permission_choice = forms.ChoiceField(required=True, choices=PERMISSION_CHOICES, initial=CloneConf.PERMISSION_CLONE, widget=forms.Select(attrs={'class':'form-control'}))
 
     def clean_project_name(self):
         data = self.cleaned_data['project_name']

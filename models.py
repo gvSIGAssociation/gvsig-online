@@ -5,7 +5,7 @@ from gvsigol import settings
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup, Layer
 from django.utils.translation import ugettext as _
-from gvsigol_services.models import CLONE_PERMISSION_CLONE, CLONE_PERMISSION_SKIP
+from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.contrib.auth.models import User
 from urllib.parse import quote, urlparse, urljoin
@@ -54,7 +54,9 @@ class Project(models.Model):
     def __str__(self):
         return self.name + ' - ' + self.description
     
-    def clone(self, target_datastore, name, title, recursive=True, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
+    def clone(self, target_datastore, name, title, clone_conf=None):
+        if not clone_conf:
+            clone_conf = CloneConf()
         old_pid = self.pk
         self.pk = None
         self.name = name
@@ -62,12 +64,12 @@ class Project(models.Model):
         self.save()
         new_project_instance = Project.objects.get(id=self.pk)
 
-        if recursive:
+        if clone_conf.recursive:
             old_project = Project.objects.get(id=old_pid)
             for prj_lg in old_project.projectlayergroup_set.all():
-                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, copy_layer_data=copy_layer_data, permissions=permissions)
+                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, clone_conf=clone_conf)
             
-            if permissions != CLONE_PERMISSION_SKIP:
+            if clone_conf.permissions != CloneConf.PERMISSION_SKIP:
                 for prj_ur in old_project.projectrole_set.all():
                     prj_ur.clone(project=new_project_instance)
         return new_project_instance
@@ -196,10 +198,17 @@ class ProjectLayerGroup(models.Model):
     def __str__(self):
         return self.project.name + ' - ' + self.layer_group.name
     
-    def clone(self, recursive=True, project=None, target_datastore=None, copy_layer_data=True, permissions=CLONE_PERMISSION_CLONE):
-        if recursive:
-            if not self.baselayer_group:
-                self.layer_group = self.layer_group.clone(target_datastore=target_datastore, copy_layer_data=copy_layer_data,  permissions=permissions)
+    def clone(self, project=None, target_datastore=None, clone_conf=None):
+        if not clone_conf:
+            clone_conf = CloneConf()
+        if not clone_conf.recursive:
+            return
+        if self.baselayer_group:
+            if clone_conf.base_lyrgroup == CloneConf.LYRGROUP_SKIP:
+                return
+        else: # non base layer groups are always cloned
+            self.layer_group = self.layer_group.clone(target_datastore=target_datastore, clone_conf=clone_conf)
+        
         self.pk = None
         if project:
             self.project = project

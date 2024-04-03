@@ -27,6 +27,7 @@ from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
 from django.http.response import JsonResponse
 from gvsigol_core import forms
+from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
@@ -1396,6 +1397,7 @@ def get_manual(request, doc_name, forced_lang=None, default=None):
     elif not forced_lang:
         return get_manual(request, doc_name, 'es', default=default)
     return default
+    return default
 
 
 def documentation(request):
@@ -1609,7 +1611,9 @@ def not_found_sharedview(request):
     response.status_code = 404
     return response
 
-def _project_clone(project, new_project_name, title, target_server, target_workspace_name, target_datastore_name, username, permission_choice, copy_data=True, clean_on_failure=False):
+def _project_clone(project, new_project_name, title, target_server, target_workspace_name, target_datastore_name, username, clone_conf=None):
+    if not clone_conf:
+        clone_conf = CloneConf()
     if target_server.frontend_url.endswith("/"):
         uri = target_server.frontend_url + target_workspace_name
     else:
@@ -1633,12 +1637,12 @@ def _project_clone(project, new_project_name, title, target_server, target_works
         if not target_workspace:
             raise Exception('Error creating target workspace')
         datastore = services_utils.create_datastore(username, target_datastore_name, target_workspace)
-        new_project = project.clone(target_datastore=datastore, name=new_project_name, title=title, copy_layer_data=copy_data, permissions=permission_choice)
+        new_project = project.clone(target_datastore=datastore, name=new_project_name, title=title, clone_conf=clone_conf)
         server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
         server.reload_nodes()
         return new_project
     except Exception as e:
-        if clean_on_failure:
+        if clone_conf.clean_on_failure:
             try:
                 if target_workspace:
                     if datastore:
@@ -1657,6 +1661,7 @@ def _project_clone(project, new_project_name, title, target_server, target_works
                         gs.setDataRules()
                     gs.reload_nodes()
             except:
+                logger.exception("Could not clean_on_failure")
                 pass
         raise
 
@@ -1683,6 +1688,8 @@ def project_clone(request, pid):
             copy_data = form.cleaned_data.get('copy_data')
             permission_choice = form.cleaned_data.get('permission_choice')
 
+            clone_conf = CloneConf(copy_data=copy_data, permissions=permission_choice)
+
             if _project_clone(project,
                            name,
                            title,
@@ -1690,8 +1697,7 @@ def project_clone(request, pid):
                            target_workspace_name,
                            target_datastore_name,
                            request.user.username,
-                           permission_choice,
-                           copy_data=copy_data):
+                           clone_conf):
                 messages.add_message(request, messages.INFO, _('The project was successfully cloned.'))
                 return redirect('project_update', pid=project.id)
     else:
