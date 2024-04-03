@@ -7,8 +7,8 @@ from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
-from gvsigol.services_base import BackendNotAvailable
-from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET
+from gvsigol.basetypes import BackendNotAvailable
+from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET, GVSIGOL_SUPERUSER_ROLE, GVSIGOL_STAFF_ROLE
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT, OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
 from django.conf import settings
 
@@ -43,8 +43,8 @@ def get_gvsigol_auth_middleware():
             __conf_cache['gvsigol_auth_middleware'] = None
     return __conf_cache['gvsigol_auth_middleware']
 
-MAIN_SUPERUSER_ROLE = 'GVSIGOL_DJANGO_SUPERUSER'
-STAFF_ROLE = 'GVSIGOL_DJANGO_STAFF'
+MAIN_SUPERUSER_ROLE = GVSIGOL_SUPERUSER_ROLE
+STAFF_ROLE = GVSIGOL_STAFF_ROLE
 SUPERUSER_ROLES = {MAIN_SUPERUSER_ROLE, 'ADMIN'}
 SYSTEM_ROLES = SUPERUSER_ROLES | {STAFF_ROLE} | {'AUTHENTICATED', 'offline_access', 'uma_authorization'}
 
