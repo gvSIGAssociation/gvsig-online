@@ -19,7 +19,7 @@
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import HttpResponse
 from gvsigol.basetypes import BackendNotAvailable
 from gvsigol_core.geom import RASTER
 from django.contrib.gis import gdal
@@ -2272,6 +2272,8 @@ class Geoserver():
         try:
             ws_name = workspace.name if workspace else None
             self.rest_catalog.set_gwclayer_dynamic_subsets(ws_name, layer_name, user=self.user, password=self.password)
-        except:
+        except Exception as e:
             logger.exception("Could not update gwc layer subset")
-        
+            logger.error("gwc subset error - ws: {} - layer: {}".format(str(ws_name), str(layer_name)))
+            if isinstance(e, RequestError):
+                logger.error(e.get_detailed_message())
