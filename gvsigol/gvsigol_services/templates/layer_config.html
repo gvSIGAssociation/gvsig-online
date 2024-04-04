@@ -414,7 +414,7 @@
 
 	function converToEnumModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text('{% trans "Convert to enum" %}');
+		$('#my-modal-dialog .modal-title').text(gettext("Convert to enum"));
 
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
@@ -494,18 +494,18 @@
 
 	function deleteFieldModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text('{% trans "Delete field" %}');
+		$('#my-modal-dialog .modal-title').text(gettext("Delete field"));
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
 		ui += '<div class="col-md-12 form-group">';
 		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
-		ui += '{% trans "Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the field to confirm the deletion:" %}'
+		ui += gettext("Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the field to confirm the deletion:");
 		ui += '<code>' + fieldName + '</code>';
 		ui += '</div>';
 		ui += '</div>';
 		ui += '<div class="col-md-12 form-group">';
 		ui += 	'<label for="deleted-field-name">' + gettext('Field to delete') + '</label>';
-		ui += 	'<input placeholder="' + "{% trans 'Field name' %}" + '" name="deleted-field-name" id="deleted-field-name" type="text" class="form-control">';
+		ui += 	'<input placeholder="' + gettext('Field name') + '" name="deleted-field-name" id="deleted-field-name" type="text" class="form-control">';
 		ui += '</div>';
 		ui += '</div>';
 		$('#my-modal-dialog .modal-body').append(ui);
@@ -565,14 +565,14 @@
 
 	function renameFieldModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text('{% trans "Rename field" %}');
+		$('#my-modal-dialog .modal-title').text(gettext("Rename field"));
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
 		ui += '<div id="field-errors" class="col-md-12 form-group">';
 		ui += '</div>';
 		ui += '<div class="col-md-12 form-group">';
 		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
-		ui += '{% trans "Warning: renaming a field may have side effects, such as breaking a field-based legend." %}'
+		ui += gettext("Warning: renaming a field may have side effects, such as breaking a field-based legend.");
 		ui += '</div>';
 		ui += '</div>';
 		ui += '<div class="col-md-12 form-group">';
@@ -581,7 +581,7 @@
 		ui += '</div>';
 		ui += '<div class="col-md-12 form-group">';
 		ui += 	'<label for="new-field-name">' + gettext('New name') + '</label>';
-		ui += 	'<input placeholder="' + "{% trans 'Field name' %}" + '" name="new-field-name" id="new-field-name" type="text" class="form-control">';
+		ui += 	'<input placeholder="' + gettext('Field name') + '" name="new-field-name" id="new-field-name" type="text" class="form-control">';
 		ui += '</div>';
 		ui += '</div>';
 		$('#my-modal-dialog .modal-body').append(ui);
@@ -709,7 +709,7 @@
 	var addFieldConfig = getAddFieldConfig();
 
 	$("#add-field-button").on('click', function(e){
-		createModalContent(null, 'create', '{% trans "New field" %}', addFieldConfig);
+		createModalContent(null, 'create', gettext("New field"), addFieldConfig);
 	});
 	var createFieldGroupTrans = function(groupId, groupName){
 		var clonedRow = $('.fieldgroup-trans-row').first().clone()[0];
