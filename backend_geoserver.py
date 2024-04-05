@@ -61,6 +61,7 @@ import threading
 from . import geographic_servers
 from requests.exceptions import RetryError, ConnectionError, Timeout, TooManyRedirects
 import psycopg2.errors
+from urllib.parse import urlparse, ParseResult
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -2082,7 +2083,19 @@ class Geoserver():
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
         wms = core_utils.get_absolute_url(ws.wms_endpoint, {})
-        response = req.get(wms, params=values, verify=False, stream=True, proxies=settings.PROXIES)
+        try:
+            response = req.get(wms, params=values, verify=False, stream=True, proxies=settings.PROXIES)
+        except ConnectionError:
+            # In some installations, the public Geoserver URL is not available from gvsigol server.
+            # Try using service URL instead
+            # TODO: create a generic way to get the internal WMS endpoint
+            ws.wms_endpoint
+            parsed_internal_url = urlparse(self.conf_url)
+            parsed_wms_url = urlparse(wms)
+            new_path = parsed_internal_url.path + "/" + ws.name + "/wms"
+            new_url = ParseResult(scheme=parsed_internal_url.scheme, netloc=parsed_internal_url.netloc, path=new_path, params=parsed_wms_url.params, query=parsed_wms_url.query, fragment=parsed_wms_url.fragment)
+            wms = new_url.geturl()
+            response = req.get(wms, params=values, verify=False, stream=True, proxies=settings.PROXIES)
         print(response.url)
         
         with open(out_file, 'wb') as f:
