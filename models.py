@@ -436,6 +436,9 @@ class LayerReadRole(models.Model):
         indexes = [
             models.Index(fields=['layer', 'role']),
         ]
+        constraints = [
+           models.UniqueConstraint(fields=['layer', 'role'], name='unique_read_role_per_layer')
+        ]
 
 class LayerWriteRole(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
@@ -444,6 +447,9 @@ class LayerWriteRole(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['layer', 'role']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['layer', 'role'], name='unique_write_role_per_layer')
         ]
 
 class LayerManageRole(models.Model):
