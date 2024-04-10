@@ -31,6 +31,7 @@
 								<th>{% trans "ID" %}</th>
 								<th></th>
 								<th>{% trans "Status" %}</th>
+								<th>{% trans "Last execution" %}</th>
 								<th>{% trans "Name" %}</th>
 								<th>{% trans "Description" %}</th>
 								<th>{% trans "Periodicity" %}</th>
@@ -45,12 +46,17 @@
 								<tr  data-workspaceid="{{ workspace.id }}" data-editable="{{workspace.editable}}">
 									<td> {{ workspace.id }} </td>
 									<td></td>
-										<td>
-											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none" aria-hidden="true"></i> 
-											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i> 
-											<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true" ></i>
-										</td>
+									
+									<td>
+										<div>
+											<i id ="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:green; display:none;" aria-hidden="true" ></i>
+											<i id = "icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style=" display:none"></i>
+											<i id ="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:red; display:none" aria-hidden="true"></i>
+											<button type="button" name="see-msg-status" id="see-msg-status-{{ workspace.id }}" data-toggle="tooltip" data-placement="bottom" title='{% trans "See status message" %}' class="btn btn-light pull-right" style="display:none;" value="{{ workspace.id }}"><i class="fa fa-eye"></i></button>
+										</div>
+									</td>
 
+									<td>{{ workspace.last_run }}</td>
 									<td>{{ workspace.name }}</td>
 									<td>{{ workspace.description }}</td>
 									{% if workspace.every %}
@@ -830,6 +836,8 @@
 			var msg = workspace["message"];
 			var status = workspace['status'];
 
+			$("#see-msg-status-"+id).css("display", "inline-block");
+
 			if(status == ''){
 
 				$("#icon-success-"+id).css("display", "none");
@@ -843,14 +851,12 @@
 				
 				$("#icon-success-"+id).css("display", "none");
 				$("#icon-running-"+id).css("display", "inline-block");
-				$("#icon-running-"+id).attr("title", msg);
 				$("#icon-error-"+id).css("display", "none");
 				
 			}
 			if(status == 'Success'){
 
 				$("#icon-success-"+id).css("display", "inline");
-				$("#icon-success-"+id).attr("title", msg);
 				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "none");
 
@@ -860,7 +866,6 @@
 				$("#icon-success-"+id).css("display", "none");
 				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "inline");
-				$("#icon-error-"+id).attr("title", msg);
 
 			}
 		}
@@ -894,6 +899,40 @@
 
     startCurrentCanvasStatus();
     getCurrentCanvasStatus()
+
+	$("button[name='see-msg-status']").click(function() {
+
+var formData = new FormData();
+	
+formData.append('id_ws', $(this).val())
+
+$.ajax({
+	type: 'POST',
+	url: '/gvsigonline/etl/get_status_msg/',
+	data: formData,
+	beforeSend:function(xhr){
+		xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+	},
+	cache: false, 
+	contentType: false, 
+	processData: false,
+	success: function (resp) {
+
+		if(resp.status == 'Error'){
+			messageBox.show('error', resp.message)
+		} else if(resp.status == 'Success'){
+			messageBox.show('success', resp.message)
+		}else {
+			messageBox.show('warning', resp.message)
+		}
+
+		},
+	error: function () {
+		messageBox.show('error', 'No se ha podido hacer la consulta del estado.')
+		}
+	})
+
+})
 
 </script>
 <script type="text/javascript" src="{% static "js/lib/draw2d.js" %}"></script>

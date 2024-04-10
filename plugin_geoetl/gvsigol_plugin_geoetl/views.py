@@ -207,7 +207,7 @@ def etl_canvas(request):
             }
             return render(request, 'etl.html', response)
 
-def get_list(request, concat = False):
+def get_list(request, concat = False, datetime_string = False):
     user = request.user
     if user.is_superuser:
         etl_list = ETLworkspaces.objects.filter(concat=concat)
@@ -225,6 +225,17 @@ def get_list(request, concat = False):
         workspace['id'] = w.id
         workspace['name'] = w.name
         workspace['description'] = w.description
+        try:
+            status = ETLstatus.objects.get(id_ws= w.id)
+            if status.last_exec is not None:
+                if datetime_string:
+                    workspace['last_run'] = str(status.last_exec)
+                else:
+                    workspace['last_run'] = status.last_exec
+            else:
+                workspace['last_run'] = ''
+        except:
+            workspace['last_run'] = ''
         if concat == True:
             workspace['workspace'] = w.workspace
         workspace['username'] = w.username
@@ -1311,7 +1322,7 @@ def etl_xml_tags(request):
 def get_workspaces(request):
 
     response = {
-        'workspaces': sorted(get_list(request), key=lambda d: d['id'])
+        'workspaces': sorted(get_list(request, False, True), key=lambda d: d['id'])
     }
 
     return HttpResponse(json.dumps(response), content_type="application/json")
@@ -1406,3 +1417,19 @@ def get_emails(request):
             response = json.dumps(emails)
 
             return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def get_status_msg(request):
+    
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            
+            statusModel  = ETLstatus.objects.get(id_ws = request.POST['id_ws'])
+            response = {
+                'status': statusModel.status,
+                'message':statusModel.message
+            }
+            
+            return HttpResponse(json.dumps(response), content_type="application/json")

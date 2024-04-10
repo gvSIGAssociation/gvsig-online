@@ -30,14 +30,6 @@ gvsigolETL.Toolbar = Class.extend({
 
 		});
 
-		// Inject the OPEN Button
-		this.openButton  = $('<button id="button-open" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>' + gettext('Open') + '</button>');
-		this.html.append(this.openButton);
-		this.openButton.click( function() {
-
-			location.href = '/gvsigonline/etl/etl_workspace_list/';
-		});
-
 
 		// Inject the SAVE Button
 		this.saveButton  = $('<button id="button-save" class="btn btn-default btn-sm"><i class="fa fa-save margin-r-5"></i>' + gettext('Save') + '</button>');

@@ -89,6 +89,7 @@ class ETLstatus(models.Model):
     message = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=50, null=True, blank=True)
     id_ws = models.IntegerField(null=True, blank=True)
+    last_exec = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     
     def __str__(self):
         return self.name

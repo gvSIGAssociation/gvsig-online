@@ -16,6 +16,7 @@ from psycopg2 import sql
 import json
 from datetime import date, datetime, timedelta
 import copy
+from django.utils import timezone
 
 logger = get_task_logger(__name__)
 
@@ -49,7 +50,6 @@ def run_canvas_background(**kwargs):
             username = kwargs["username"]
             params = kwargs["parameters"]
 
-
     
         if id_ws:
             try:
@@ -57,6 +57,7 @@ def run_canvas_background(**kwargs):
                 statusModel  = ETLstatus.objects.get(id_ws = id_ws)
                 statusModel.message = 'Running'
                 statusModel.status = 'Running'
+                statusModel.last_exec = timezone.now()
                 statusModel.save()
 
             except:
@@ -65,7 +66,8 @@ def run_canvas_background(**kwargs):
                     name = 'name',
                     message = 'Running',
                     status = 'Running',
-                    id_ws = id_ws
+                    id_ws = id_ws,
+                    last_exec = timezone.now()
                 )
                 
                 statusModel.save()
@@ -74,6 +76,7 @@ def run_canvas_background(**kwargs):
             statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
             statusModel.message = 'Running'
             statusModel.status = 'Running'
+            statusModel.last_exec = timezone.now()
             statusModel.save()
         
         nodes=[]
@@ -275,7 +278,7 @@ def run_canvas_background(**kwargs):
             
             if id_ws:
                 statusModel  = ETLstatus.objects.get(id_ws = id_ws)
-                statusModel.message = errormsg  + str(e)[:600]
+                statusModel.message = errormsg  + str(e)
                 statusModel.status = 'Error'
                 statusModel.save()
                 try:
@@ -288,7 +291,7 @@ def run_canvas_background(**kwargs):
 
             else:
                 statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-                statusModel.message = errormsg  + str(e)[:600]
+                statusModel.message = errormsg  + str(e)
                 statusModel.status = 'Error'
                 statusModel.save()
             
