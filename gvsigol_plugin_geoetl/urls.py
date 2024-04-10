@@ -47,6 +47,7 @@ urlpatterns = [
     path('etl/etl_schemas_sqlserver/', views.etl_schemas_sqlserver, name='etl_schemas_sqlserver'),
     path('etl/etl_tables_sqlserver/', views.etl_tables_sqlserver, name='etl_tables_sqlserver'),
     path('etl/etl_data_schema_sqlserver/', views.etl_data_schema_sqlserver, name='etl_data_schema_sqlserver'),
-    path('etl/get_emails/', views.get_emails, name='get_emails')
+    path('etl/get_emails/', views.get_emails, name='get_emails'),
+    path('etl/get_status_msg/', views.get_status_msg, name='get_status_msg')
    
 ]
