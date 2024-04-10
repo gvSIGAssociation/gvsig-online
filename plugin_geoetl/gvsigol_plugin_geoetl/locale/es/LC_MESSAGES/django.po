@@ -87,7 +87,7 @@ msgstr "Concatenación"
 #: templates/dashboard_geoetl_concat_workspaces.html:55
 #: templates/dashboard_geoetl_workspaces_list.html:59
 msgid "See status message"
-msgstr ""
+msgstr "Ver mensaje de estado"
 
 #: templates/dashboard_geoetl_concat_workspaces.html:91
 #: templates/dashboard_geoetl_concat_workspaces.html:360
