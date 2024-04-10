@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+{% if user.is_staff %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 form-group">
+            <div class="box-tools pull-right">
+                <a id="button-create-sentilo" class="btn btn-sm btn-default" href="/gvsigonline/sentilo/sentilo_conf"> Create new sentilo integration</a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="box">
+                <div class="box-body">
+                    <table class="table" id="sentilo-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>dominio</th>
+                                <th>intervalo de actualización</th>
+                                <th>Ultima ejecución</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for config in configs %}
+                                <tr>
+                                    <td>{{ config.id }}</td>
+                                    <td>{{ config.domain }}</td>
+                                    <td>{{ config.intervalo_de_actualizacion }}</td>
+                                    <td>{{ config.last_run }}</td>
+                                    <td></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal fade" id="modal-delete-sentilo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">Delete sentilo</h4>
+			</div>
+			<div class="modal-body">
+				<p id="sentilo_delete"> ¿Está seguro que desea eliminar esta entrada?</p> 
+				
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-sentilo-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-sentilo-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+    $(document).ready(function() {
+        var table = $('#sentilo-table').DataTable({
+            responsive: true,
+            "columnDefs": [{
+                "targets": -1,
+                "data": null,
+                "defaultContent": '<button type="button" name="button-delete-sentilo" data-toggle="modal" data-target="#modal-delete-sentilo" data-placement="bottom" title="' + '{% trans "Delete sentilo" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+            }],
+            "dom": 'T<"clear">lfrtip',
+            "bLengthChange": false
+        });
+             
+        $('#sentilo-table tbody').on('click', 'button', function (){
+            var row = table.row($(this).parents('tr'));
+            var data = row.data();
+            console.log("TABLE CLICEKD", this.name)   
+            if (this.name == "button-delete-sentilo") {		
+                console.log("INSIDE IF", data);
+                deletesentilo(data);
+            } 
+        });
+        
+        $('#button-add-sentilo').on('click', function (){
+            location.href = '/gvsigonline/sentilo/sentilo_conf/';
+        });
+        
+            
+        function deletesentilo(data){
+            console.log('deletesentilo', data);
+            $('#button-delete-sentilo-accept').click( function() {
+                console.log("DELETE CLICKED");
+                $("body").overlay();
+                $.ajax({
+                    type: 'DELETE',
+                    async: false,
+                    url: '/gvsigonline/sentilo/delete/' + data[0] + '/',
+                    beforeSend:function(xhr){
+                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                    },
+                    success	:function(response){
+                        $('#modal-delete-sentilo').modal('hide');
+                        $.overlayout();
+                        location.reload();
+                    },
+                    error: function(){}
+                });
+            });
+        }
+    
+    
+      
+    });
+</script>
+{% endblock %}

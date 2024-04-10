@@ -1,0 +1,14 @@
+{% load staticfiles %}
+{% load i18n %}
+{% if user.is_staff or user.is_superuser %}
+
+<li id="menu-plugin-sentilo">
+	<a href="/gvsigonline/sentilo/list/">
+		<i class="fa-solid fa-cloud"></i>
+		<!-- <span>{% trans "Extract, Transform & Load" %}</span>  -->
+		<span>Configuración Conexión Sentilo</span>
+	
+	</a>
+</li>
+
+{% endif %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+{% if user.is_staff %}
+<link rel="stylesheet" href="{% static "css/sentilo_conf.css" %}">
+
+<div class="container">
+    <h1>Configuración Sentilo</h1>
+    <form id="sentilo-form" role="form" method="post" action="/gvsigonline/sentilo/sentilo_conf/">
+        {% csrf_token %}
+        <div id="sentilo-api" name="api-form">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="col-form-label">Domain</label>
+                    <input type="text" name="domain" id="domain-sentilo" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="col-form-label">Sentilo Identity Key</label>
+                    <input type="text" name="sentilo_identity_key" id="identity-key-sentilo" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="col-form-label">Tabla de datos</label>
+                    <input type="text" id="sentilo_db" name="tabla_de_datos" class="form-control" value="sentilo_data">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="col-form-label">Sentilo Sensors (comma separated list)</label>
+                    <input type="text" name="sentilo_sensors" id="sensors" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="col-form-label">Intervalo de actualización (minutos)</label>
+                    <input name="intervalo_de_actualizacion" type="text" id="intervalo" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="sentilo-submit-container-button col-md-12">
+                    <button type="submit" id="sentilo-submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+           
+        </div>
+
+
+    </form>
+</div>
+
+{% else %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <p>Debes ser administrador para acceder a esta página</p>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+```
