@@ -25,7 +25,7 @@ django-cors-headers==3.7.0
 psycopg2==2.8.6
 
 ##Instalamos Pillow para que django soporte la gestion de images;
-pillow==10.2.0
+pillow==10.3.0
 # *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
 
 ## gsconfig
