@@ -396,8 +396,8 @@ function configure() {
 	fi
 	grep -l "##LANGUAGE_CODE##" gvsigol/settings_tpl.py | xargs sed -i "s ##LANGUAGE_CODE## $LANGUAGE_CODE g"
 	if [ -z $VIEWER_DEFAULT_CRS ]; then
-		echo "WARNING: LANGUAGE_CODE is not defined, using '4326'"
-		VIEWER_DEFAULT_CRS="EPSG:4326"
+		echo "WARNING: VIEWER_DEFAULT_CRS is not defined, using '4326'"
+		VIEWER_DEFAULT_CRS=False
 	fi
 	grep -l "##VIEWER_DEFAULT_CRS##" gvsigol/settings_tpl.py | xargs sed -i "s ##VIEWER_DEFAULT_CRS## $VIEWER_DEFAULT_CRS g"
 }
