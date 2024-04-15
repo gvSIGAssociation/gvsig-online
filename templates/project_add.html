@@ -131,6 +131,10 @@
 										<label for="restricted_extent">{% trans "Restricted extent" %}</label>&nbsp;&nbsp;
 										<input type="checkbox" name="restricted_extent" id="restricted_extent"/>														
 									</div>
+									<div class="col-md-6 form-group pull-right">
+										<label for="id_srs">{% trans "Coordinate reference system" %} {% trans "by default" %}</label>
+										{{ form.srs }}
+									</div>
 								</div>
 
 								<div class="row">
@@ -423,6 +427,10 @@
         //    sideBySide: true,
 		format: 'YYYY-MM-DD'
     });
+
+	$("#id_srs option[value='']").remove();
+	$('#id_srs').val('EPSG:3857')
+
 	
 	$('#expiration_date').on('dp.change', function(e){ 
     	//let localDateStr = $("#expiration_date").val()

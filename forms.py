@@ -11,11 +11,15 @@ from gvsigol_core.models import Project
 from gvsigol.basetypes import CloneConf
 from gvsigol_services.models import Workspace, Server
 from gvsigol_services import utils as services_utils
+from gvsigol_core import utils as core_utils
 
 PERMISSION_CHOICES = (
     (CloneConf.PERMISSION_CLONE, _("Clone project and layer permissions")),
     (CloneConf.PERMISSION_SKIP, _("Don't apply any permission. Cloned layers will become public")),
     )
+
+supported_srs = tuple((x['code'],x['code']+' - '+x['title']) for x in core_utils.get_supported_crs_array())
+supported_srs_and_blank = (('', '---------'),) + supported_srs
 
 class CloneProjectForm(forms.Form):
     project_title = forms.CharField(required=True,
@@ -75,4 +79,7 @@ class CloneProjectForm(forms.Form):
         except:
             self.add_error("target_server", _('Server does not exist'))
         return data
-    
+
+class getSupportedSRS(forms.Form):
+    srs = forms.ChoiceField(label=_('SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+

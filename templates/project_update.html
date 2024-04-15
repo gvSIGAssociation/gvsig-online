@@ -163,6 +163,10 @@
 										<input type="checkbox" name="restricted_extent"  id="restricted_extent"/>
 										{% endif %}								
 									</div>
+									<div class="col-md-6 form-group pull-right">
+										<label for="id_srs">{% trans "Coordinate reference system" %} {% trans "by default" %}</label>
+										{{ form.srs }}
+									</div>
 								</div>	
 								<div class="row">
 									<div class="col-md-12" style="margin-bottom: 20px;">
@@ -609,6 +613,9 @@
 		format: 'YYYY-MM-DD'
     });
 	
+	$("#id_srs option[value='']").remove(); 
+	$('#id_srs').val('{{project.viewer_default_crs}}')
+
 	function readURL(input) {
 	        if (input.files && input.files[0]) {
 	            var reader = new FileReader();
