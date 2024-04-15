@@ -122,7 +122,7 @@ def home(request):
 
         #if VIEWER_DEFAULT_CRS defined in settings all projects will be force to the specificated EPSG
         #if not, EPSG must be defined in project configuration. 3857 by default.
-        if settings.VIEWER_DEFAULT_CRS:
+        if settings.VIEWER_DEFAULT_CRS != 'False':
             p.viewer_default_crs = settings.VIEWER_DEFAULT_CRS
             p.save()
 
