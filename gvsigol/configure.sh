@@ -69,7 +69,7 @@ function configure() {
 	grep -rl "##GVSIGOL_SURNAME##"  | xargs sed -i "s ##GVSIGOL_SURNAME## $GVSIGOL_SURNAME g"
 	grep -rl "##GVSIGOL_NAME_SHORT##"  | xargs sed -i "s ##GVSIGOL_NAME_SHORT## $GVSIGOL_NAME_SHORT g"
 	grep -rl "##GVSIGOL_SURNAME_SHORT##"  | xargs sed -i "s ##GVSIGOL_SURNAME_SHORT## $GVSIGOL_SURNAME_SHORT g"
-	grep -rl "##GVSIGOL_CLIENT_NAME##"  | xargs sed -i "s ##GVSIGOL_CLIENT_NAME## $GVSIGOL_CLIENT_NAME g"
+	grep -rl "##GVSIGOL_CLIENT_NAME##"  | xargs sed -i "s/##GVSIGOL_CLIENT_NAME##/$GVSIGOL_CLIENT_NAME/g"
 	
 	echo "INFO: Replace GVSIGOL_PLUGINS"
 	if [ -z $GVSIGOL_PLUGINS ]; then
