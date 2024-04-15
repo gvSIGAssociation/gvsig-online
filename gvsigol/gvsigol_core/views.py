@@ -120,6 +120,12 @@ def home(request):
         project['description'] = p.description
         project['image'] = unquote(image)
 
+        #if VIEWER_DEFAULT_CRS defined in settings all projects will be force to the specificated EPSG
+        #if not, EPSG must be defined in project configuration. 3857 by default.
+        if settings.VIEWER_DEFAULT_CRS:
+            p.viewer_default_crs = settings.VIEWER_DEFAULT_CRS
+            p.save()
+
         if p.is_public:
             public_projects.append(project)
         else:
@@ -203,6 +209,7 @@ def project_add(request):
         has_geocoding_plugin = providers.__len__() > 0
 
     project_tools = get_available_tools(True, False)
+    form = forms.getSupportedSRS()
 
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -226,6 +233,8 @@ def project_add(request):
         tools = request.POST.get('project_tools')
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
+        viewer_default_crs = request.POST.get('srs')
+
 
         is_public = False
         if 'is_public' in request.POST:
@@ -288,7 +297,8 @@ def project_add(request):
                             'layergroups': _get_prepared_layer_groups(request),
                             'tools': project_tools,
                             'groups': groups,
-                            'has_geocoding_plugin': has_geocoding_plugin
+                            'has_geocoding_plugin': has_geocoding_plugin,
+                            'form': form
                           }
                         )
 
@@ -301,7 +311,8 @@ def project_add(request):
                             'layergroups': _get_prepared_layer_groups(request),
                             'tools': project_tools,
                             'groups': groups,
-                            'has_geocoding_plugin': has_geocoding_plugin
+                            'has_geocoding_plugin': has_geocoding_plugin,
+                            'form': form
                           }
                         )
     
@@ -314,7 +325,8 @@ def project_add(request):
                                                         'tools': project_tools ,
                                                         'layergroups': _get_prepared_layer_groups(request),
                                                         'groups': groups,
-                                                        'has_geocoding_plugin': has_geocoding_plugin
+                                                        'has_geocoding_plugin': has_geocoding_plugin,
+                                                        'form': form
                                                     })
 
         if layer_overview == '':
@@ -345,7 +357,8 @@ def project_add(request):
             tools = tools,
             labels = labels_added,
             custom_overview = custom_overview,
-            layer_overview = layer_overview
+            layer_overview = layer_overview,
+            viewer_default_crs = viewer_default_crs
         )
         if expiration_date_utc is not None and expiration_date_utc != '':
             try:
@@ -421,7 +434,7 @@ def project_add(request):
         for l in settings.PRJ_LABELS:
             labels.append({'label': l, 'checked': ''})
 
-        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin, 'label_list': labels})
+        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin, 'label_list': labels, 'form': form})
 
 
 @login_required()
@@ -452,6 +465,7 @@ def project_update(request, pid):
         tools = request.POST.get('project_tools')
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
+        viewer_default_crs = request.POST.get('srs')
 
         is_public = False
         if 'is_public' in request.POST:
@@ -543,6 +557,7 @@ def project_update(request, pid):
         project.labels = labels_added
         project.custom_overview = custom_overview
         project.layer_overview = layer_overview
+        project.viewer_default_crs = viewer_default_crs
 
         if expiration_date_utc is not None and expiration_date_utc != '':
             try:
@@ -702,6 +717,9 @@ def project_update(request, pid):
         
         if project.expiration_date is not None:
             project.expiration_date = int(project.expiration_date.timestamp() * 1000)
+        
+        
+        form = forms.getSupportedSRS()
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
                                                        'project': project,
@@ -712,7 +730,8 @@ def project_update(request, pid):
                                                        'superuser' : is_superuser(request.user), 
                                                        'processing_icon' : icon,
                                                        'url_base_lyr' : url_base_lyr,
-                                                       'label_list': labels
+                                                       'label_list': labels,
+                                                       'form': form
                                                        })
 
 
@@ -769,7 +788,7 @@ def load_project(request, project_name):
             'is_viewer_template': True,
             'url_doc': get_manual(request, 'gvsigol_user_manual.pdf', default={}).get('url', 'javascript:void(0)'),
             'project_title' : project.title,
-            'viewer_default_crs': settings.VIEWER_DEFAULT_CRS
+            'viewer_default_crs': project.viewer_default_crs
         }
         response = render(request, 'viewer.html', resp)
 
@@ -810,7 +829,7 @@ def load_public_project(request, project_name):
         'is_viewer_template': True,
         'url_doc': get_manual(request, 'gvsigol_user_manual.pdf', default={}).get('url', 'javascript:void(0)'),
         'project_title' : project.title,
-        'viewer_default_crs': settings.VIEWER_DEFAULT_CRS
+        'viewer_default_crs': project.viewer_default_crs
         }
     )
 
@@ -1228,7 +1247,7 @@ def project_get_conf(request):
             'SHP_DOWNLOAD_DEFAULT_ENCODING': getattr(settings, 'SHP_DOWNLOAD_DEFAULT_ENCODING', 'UTF-8'),
             'custom_overview': project.custom_overview,
             'layer_overview': project.layer_overview,
-            'viewer_default_crs': settings.VIEWER_DEFAULT_CRS      
+            'viewer_default_crs': project.viewer_default_crs      
             
         }
         
@@ -1559,7 +1578,7 @@ def load_shared_view(request, view_name):
             'shared_view_name': shared_view.name,
             'main_page': settings.LOGOUT_REDIRECT_URL,
             'is_viewer_template': True,
-            'viewer_default_crs': settings.VIEWER_DEFAULT_CRS
+            'viewer_default_crs': project.viewer_default_crs
             }
         )
 

@@ -50,6 +50,7 @@ class Project(models.Model):
     expiration_date = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     custom_overview = models.BooleanField(default=False)
     layer_overview = models.CharField(max_length=250, null=True, blank=True, default=None)
+    viewer_default_crs = models.CharField(max_length=250, null=True, blank=True, default='EPSG:3857')
     
     def __str__(self):
         return self.name + ' - ' + self.description
