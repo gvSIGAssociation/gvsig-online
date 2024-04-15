@@ -234,6 +234,9 @@ def project_add(request):
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
+        
+        if settings.VIEWER_DEFAULT_CRS != 'False':
+            viewer_default_crs = settings.VIEWER_DEFAULT_CRS
 
 
         is_public = False
@@ -466,6 +469,9 @@ def project_update(request, pid):
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
+
+        if settings.VIEWER_DEFAULT_CRS != 'False':
+            viewer_default_crs = settings.VIEWER_DEFAULT_CRS
 
         is_public = False
         if 'is_public' in request.POST:
