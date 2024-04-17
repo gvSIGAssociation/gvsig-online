@@ -964,11 +964,10 @@ def project_get_conf(request):
                     try:
                         read_roles = services_utils.get_read_roles(l)
                         write_roles = services_utils.get_write_roles(l)
-    
-                        readable = False
-                        if l.public:
+                        if request.user.is_superuser or l.public:
                             readable = True
                         else:
+                            readable = False
                             for user_role in user_roles:
                                 if user_role in read_roles:
                                     readable = True
