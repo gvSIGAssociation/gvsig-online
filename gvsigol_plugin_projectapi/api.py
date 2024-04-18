@@ -48,6 +48,8 @@ from gvsigol.urls import urlpatterns
 import psycopg2
 from gvsigol_core.utils import get_user_projects
 
+from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_RP_CLIENT_ID, MOBILE_CLIENT_ID
+
 class DateFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
         fields = [
@@ -185,11 +187,12 @@ class Pagination():
 #--------------------------------------------------   
 class PlatformView(ListAPIView):
     serializer_class = None
-   
+    permission_classes=[AllowAny]
+
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_platform_info', operation_summary='Get information about the platform', 
                          responses={404: "Database connection NOT found<br>User NOT found"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['GET'])
     def get(self, request):
         apps = core_settings.INSTALLED_APPS
         installed_apps = []
@@ -234,12 +237,25 @@ class PlatformView(ListAPIView):
                 postres_plugins.append({'name' : row[0], 'version' : row[1]})
         except Exception as e:
             print("Failed to connect!", e)
-
+        
+        auth = {
+            'type' : 'gvSIGOnline',
+            'url' : core_settings.BASE_URL + "/" + core_settings.GVSIGOL_PATH + "/auth/api-token-auth/"
+        }
+        if core_settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla':
+            auth = {
+                'type': 'OAuth',
+                'url': OIDC_OP_BASE_URL,
+                'oidc_rp_client_id': OIDC_RP_CLIENT_ID,
+                'realm' : OIDC_OP_REALM_NAME,
+                'mobile_client_id' : MOBILE_CLIENT_ID
+            }
         info = {
             'gvsigonline_version': core_settings.GVSIGOL_VERSION,
             'gvsigonline_plugins': installed_apps,
             'rest_api_calls': api_calls,
-            'postgres_plugins' : postres_plugins
+            'postgres_plugins' : postres_plugins,
+            'authentication' : auth
         }
         result = {
             "content" : info,
