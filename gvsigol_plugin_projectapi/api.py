@@ -48,7 +48,8 @@ from gvsigol.urls import urlpatterns
 import psycopg2
 from gvsigol_core.utils import get_user_projects
 
-from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_RP_CLIENT_ID, MOBILE_CLIENT_ID
+if core_settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla':
+    from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_RP_CLIENT_ID, MOBILE_CLIENT_ID
 
 class DateFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
