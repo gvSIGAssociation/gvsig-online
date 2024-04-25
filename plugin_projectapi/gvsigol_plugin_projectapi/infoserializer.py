@@ -463,7 +463,7 @@ class InfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', "extent_array", 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date']
+        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', "extent_array", 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date', 'viewer_default_crs']
         #fields = '__all__'
 
 
@@ -522,7 +522,7 @@ class PublicInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date']
+        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date', 'viewer_default_crs']
         #fields = '__all__'
 
 class AppInfoSerializer(serializers.ModelSerializer):
