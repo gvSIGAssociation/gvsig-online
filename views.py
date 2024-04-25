@@ -120,11 +120,6 @@ def home(request):
         project['description'] = p.description
         project['image'] = unquote(image)
 
-        #if VIEWER_DEFAULT_CRS defined in settings all projects will be force to the specificated EPSG
-        #if not, EPSG must be defined in project configuration. 3857 by default.
-        if settings.VIEWER_DEFAULT_CRS != 'False':
-            p.viewer_default_crs = settings.VIEWER_DEFAULT_CRS
-            p.save()
 
         if p.is_public:
             public_projects.append(project)
@@ -235,8 +230,6 @@ def project_add(request):
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
         
-        if settings.VIEWER_DEFAULT_CRS != 'False':
-            viewer_default_crs = settings.VIEWER_DEFAULT_CRS
 
 
         is_public = False
@@ -469,9 +462,6 @@ def project_update(request, pid):
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
-
-        if settings.VIEWER_DEFAULT_CRS != 'False':
-            viewer_default_crs = settings.VIEWER_DEFAULT_CRS
 
         is_public = False
         if 'is_public' in request.POST:
