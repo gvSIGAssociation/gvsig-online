@@ -36,9 +36,13 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             return self.UserModel.objects.none()
         return self.UserModel.objects.filter(username=username)
 
-    def verify_claims(self, claims):
+    def verify_claims(self, claims, token_payload=None):
         """Verify the provided claims to decide if authentication should be allowed."""
+        """ TODO: submit 'sub' check to mozilla-django-oidc and remove this method """
 
+        if token_payload: # checking id token sub against userinfo sub is recommended by OIDC spec
+            if token_payload.get('sub') != claims.get('sub'):
+                 return False
         # Verify claims required by default configuration
         scopes_str = self.get_settings('OIDC_RP_SCOPES', 'openid email username')
         scopes = scopes_str.split()
@@ -56,7 +60,38 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
                     return False
 
         return True
-            
+
+    def get_or_create_user(self, access_token, id_token, payload):
+        """Returns a User instance if 1 user is found. Creates a user if not found
+        and configured to do so. Returns nothing if multiple users are matched."""
+
+        user_info = self.get_userinfo(access_token, id_token, payload)
+
+        claims_verified = self.verify_claims(user_info, payload)
+        if not claims_verified:
+            msg = "Claims verification failed"
+            raise SuspiciousOperation(msg)
+
+        # email based filtering
+        users = self.filter_users_by_claims(user_info)
+
+        if len(users) == 1:
+            return self.update_user(users[0], user_info)
+        elif len(users) > 1:
+            # In the rare case that two user accounts have the same email address,
+            # bail. Randomly selecting one seems really wrong.
+            msg = "Multiple users returned"
+            raise SuspiciousOperation(msg)
+        elif self.get_settings("OIDC_CREATE_USER", True):
+            user = self.create_user(user_info)
+            return user
+        else:
+            LOGGER.debug(
+                "Login failed: No user with %s found, and " "OIDC_CREATE_USER is False",
+                self.describe_user_by_claims(user_info),
+            )
+            return None
+         
     def create_user(self, claims):
         email = claims.get('email')
         username = claims.get('username', '')
@@ -66,7 +101,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             first_name = claims.get('given_name', ''),
             last_name = claims.get('family_name', ''),
             is_superuser = (MAIN_SUPERUSER_ROLE in django_roles),
-            is_staff = (STAFF_ROLE in django_roles)
+            is_staff = (STAFF_ROLE in django_roles or MAIN_SUPERUSER_ROLE in django_roles)
         )
         
         if self.gvsigol_oidc_config:
@@ -91,10 +126,36 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         user.last_name = claims.get('family_name', '')
         django_roles = claims.get('gvsigol_roles', [])
         user.is_superuser = (MAIN_SUPERUSER_ROLE in django_roles)
-        user.is_staff = (STAFF_ROLE in django_roles)
+        user.is_staff = (STAFF_ROLE in django_roles or MAIN_SUPERUSER_ROLE in django_roles)
         user.save()
 
         return user
+
+    def _store_tokens(self, id_token, id_token_payload, nonce, token_info):
+        session = self.request.session
+        if self.get_settings('OIDC_STORE_ID_TOKEN', False):
+            session["oidc_id_token"] = id_token
+            session['oidc_id_token_payload'] = id_token_payload
+
+        if self.get_settings('OIDC_STORE_ACCESS_TOKEN', False):
+            access_token = token_info.get('access_token')
+            access_token_bytes = force_bytes(access_token)
+            key = self._get_key(access_token_bytes)
+            access_token_payload = self.verify_token(access_token_bytes, key, nonce=nonce)
+            print(access_token_payload)
+            session['oidc_access_token'] = access_token
+            session['oidc_access_token_payload'] = access_token_payload
+
+        self.store_tokens(access_token, id_token)
+        if self.get_settings('OIDC_STORE_REFRESH_TOKEN', False):
+            # get refresh token
+            refresh_token = token_info.get('refresh_token')
+            expires_in =  token_info.get('expires_in')
+            refresh_expires_in =  token_info.get('refresh_expires_in')
+            not_before_policy =  token_info.get('not-before-policy')
+            session['oidc_refresh_token'] = refresh_token
+            session['oidc_refresh_expires_in'] = refresh_expires_in
+
 
     def authenticate(self, request, **kwargs):
         """Authenticates a user based on the OIDC code flow."""
@@ -106,6 +167,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         state = self.request.GET.get('state')
         code = self.request.GET.get('code')
         nonce = kwargs.pop('nonce', None)
+        code_verifier = kwargs.pop("code_verifier", None)
 
         if not code or not state:
             return None
@@ -123,26 +185,21 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
                 reverse(reverse_url)
             ),
         }
+        # Send code_verifier with token request if using PKCE
+        if code_verifier is not None:
+            token_payload.update({"code_verifier": code_verifier})
 
         # Get the token
         token_info = self.get_token(token_payload)
         id_token = token_info.get('id_token')
-        access_token = token_info.get('access_token')
-
+        access_token = token_info.get("access_token")
         # Validate the token
         id_token_bytes = force_bytes(id_token)
         key = self._get_key(id_token_bytes)
         payload = self.verify_token(id_token_bytes, key, nonce=nonce)
 
-        access_token_bytes = force_bytes(access_token)
-        key = self._get_key(access_token_bytes)
-        access_token_payload = self.verify_token(access_token_bytes, key, nonce=nonce)
-        print(access_token_payload)
-        self.request.session['oidc_access_token_payload'] = access_token_payload
-        self.request.session['oidc_id_token_payload'] = payload
-
         if payload:
-            self.store_tokens(access_token, id_token)
+            self._store_tokens(id_token, payload, nonce, token_info)
             try:
                 return self.get_or_create_user(access_token, id_token, payload)
             except SuspiciousOperation as exc:
