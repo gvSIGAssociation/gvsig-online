@@ -64,6 +64,7 @@ class LayerSerializer(serializers.ModelSerializer):
     default_baselayer = serializers.SerializerMethodField('get_default_baselayer_')
     order = serializers.SerializerMethodField('get_order_')
     external_params = serializers.SerializerMethodField('get_external_params_')
+    featureapi_endpoint = serializers.SerializerMethodField('get_featureapi_endpoint_')
 
     def get_field_group(self, form_groups, lang):
         field_group = {}
@@ -343,10 +344,17 @@ class LayerSerializer(serializers.ModelSerializer):
         if 'capabilities' in external_params:
             external_params.pop('capabilities')
         return external_params
+    
+    def get_featureapi_endpoint_(self, obj):
+        try:
+            return obj.featureapi_endpoint
+
+        except Exception:
+            pass
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint']
 
 
 class LayerGroupSerializer(serializers.ModelSerializer):
