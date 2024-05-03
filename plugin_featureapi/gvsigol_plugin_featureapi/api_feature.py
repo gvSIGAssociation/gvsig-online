@@ -876,6 +876,14 @@ class FeatureByPointView(ListAPIView):
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
 
+            result['actions'] = [{
+                'componentName': 'CopyCoordinate',
+                'componentPath': 'common'
+            }, {
+                'componentName': 'OpenInGoogleMaps',
+                'componentPath': 'common'
+            }]
+
             result = {
                 "content" : result,
                 "links" : [{
