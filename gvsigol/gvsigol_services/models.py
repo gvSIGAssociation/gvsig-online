@@ -387,6 +387,7 @@ class Layer(models.Model):
     source_name = models.TextField(null=True, blank=True) # table name for postgis layers, not defined for the rest
     real_time = models.BooleanField(default=False)
     update_interval = models.IntegerField(null=True, default=1000)
+    featureapi_endpoint = models.CharField(max_length=100, null=False, default='/api/v1')
     
     def __str__(self):
         return self.name
