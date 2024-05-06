@@ -878,10 +878,12 @@ class FeatureByPointView(ListAPIView):
 
             result['actions'] = [{
                 'componentName': 'CopyCoordinate',
-                'componentPath': 'common'
+                'componentPath': 'common',
+                'componentProps': {}
             }, {
                 'componentName': 'OpenInGoogleMaps',
-                'componentPath': 'common'
+                'componentPath': 'common',
+                'componentProps': {}
             }]
 
             result = {
