@@ -49,7 +49,7 @@ import psycopg2
 from gvsigol_core.utils import get_user_projects
 
 if core_settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla':
-    from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_RP_CLIENT_ID, MOBILE_CLIENT_ID
+    from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_RP_CLIENT_ID, OIDC_MOBILE_CLIENT_ID
 
 class DateFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
@@ -249,7 +249,7 @@ class PlatformView(ListAPIView):
                 'url': OIDC_OP_BASE_URL,
                 'oidc_rp_client_id': OIDC_RP_CLIENT_ID,
                 'realm' : OIDC_OP_REALM_NAME,
-                'mobile_client_id' : MOBILE_CLIENT_ID
+                'mobile_client_id' : OIDC_MOBILE_CLIENT_ID
             }
         info = {
             'gvsigonline_version': core_settings.GVSIGOL_VERSION,
