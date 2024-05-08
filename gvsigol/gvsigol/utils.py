@@ -4,6 +4,9 @@ def import_settings(module_name, globals_dict):
     try:
         module_settings = importlib.import_module(module_name)
         for item in dir(module_settings):
+            if isinstance(item, str):
+                if item.startswith("_"):
+                    continue
             globals_dict[item] = getattr(module_settings, item)
     except Exception as e:
         print(str(e))
