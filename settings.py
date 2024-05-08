@@ -34,6 +34,7 @@ from django.core.files.storage import FileSystemStorage
 import datetime
 from gvsigol.utils import import_settings
 import environ
+import json
 
 
 print ("INFO: Ejecutando settings.py !!...........................................")
@@ -90,6 +91,7 @@ env = environ.Env(
     EXTRA_MIDDLEWARE = (list,[]),
     GVSIGOL_CLIENT_NAME = (str,'gvsig'),
     VIEWER_DEFAULT_CRS=(str,'EPSG:4326'),
+    SUPPORTED_CRS =(list,[3857,4326]),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
     GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
@@ -565,62 +567,15 @@ MAX_ZOOM_LEVEL = 20
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
 USE_DEFAULT_SUPPORTED_CRS = True
-SUPPORTED_CRS = {
-    '3857': {
-        'code': 'EPSG:3857',
-        'title': 'WGS 84 / Pseudo-Mercator',
-        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
-        'units': 'meters'
-    },
-    '900913': {
-        'code': 'EPSG:900913',
-        'title': 'Google Maps Global Mercator -- Spherical Mercator',
-        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
-        'units': 'meters'
-    },
-    '4326': {
-        'code': 'EPSG:4326',
-        'title': 'WGS84',
-        'definition': '+proj=longlat +datum=WGS84 +no_defs +axis=neu',
-        'units': 'degrees'
-    },
-    '4258': {
-        'code': 'EPSG:4258',
-        'title': 'ETRS89',
-        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +axis=neu',
-        'units': 'degrees'
-    },
-    '25830': {
-        'code': 'EPSG:25830',
-        'title': 'ETRS89 / UTM zone 30N',
-        'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-        'units': 'meters'
-    },
-    '25829': {
-        'code': 'EPSG:25829',
-        'title': 'ETRS89 / UTM zone 29N',
-        'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-        'units': 'meters'
-    },
-    '102033': {
-        'code': 'EPSG:102033',
-        'title': 'South America Albers Equal Area Conic',
-        'definition': '+proj=aea +lat_1=-5 +lat_2=-42 +lat_0=-32 +lon_0=-60 +x_0=0 +y_0=0 +ellps=aust_SA +units=m +no_defs',
-        'units': 'meters'
-    },
-    '32721': {
-        'code': 'EPSG:32721',
-        'title': 'WGS 84 / UTM zone 21S',
-        'definition': '+proj=utm +zone=21 +south +datum=WGS84 +units=m +no_defs',
-        'units': 'meters'
-    },
-    '4674': {
-        'code': 'EPSG:4674',
-        'title': 'SIRGAS 2000 Geographic2D',
-        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs',
-        'units': 'degrees'
-    }
-}
+
+SUPPORTED_CRS = {}
+path_crs_definitions_json = os.path.join(os.path.dirname(__file__), 'crs_definitions.json')
+with open(path_crs_definitions_json, 'r') as file:
+    crs_definitions_json = json.load(file)
+
+for i in env('SUPPORTED_CRS'):
+    SUPPORTED_CRS[i] = crs_definitions_json[i]
+
 
 GVSIGOL_TOOLS = {
     'get_feature_info_control': {
