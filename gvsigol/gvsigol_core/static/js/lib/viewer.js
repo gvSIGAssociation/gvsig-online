@@ -766,7 +766,6 @@ viewer.core = {
 			if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 				var bearer_token = "Bearer " + self.conf.user.token;
 				xhr.setRequestHeader('Authorization', bearer_token);
-				xhr.withCredentials = true;
 			}
 			xhr.responseType = "blob";
 			xhr.onload = function () {

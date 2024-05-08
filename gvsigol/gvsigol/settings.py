@@ -569,13 +569,10 @@ SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
 USE_DEFAULT_SUPPORTED_CRS = True
 
 SUPPORTED_CRS = {}
-print(os.path.dirname(__file__))
 path_crs_definitions_json = os.path.join(os.path.dirname(__file__), 'crs_definitions.json')
-
-print("crs def path: {path_crs_definitions_json}".format(path_crs_definitions_json=path_crs_definitions_json))
 with open(path_crs_definitions_json, 'r') as file:
     crs_definitions_json = json.load(file)
-#print(crs_definitions_json)
+
 for i in env('SUPPORTED_CRS'):
     SUPPORTED_CRS[i] = crs_definitions_json[i]
 

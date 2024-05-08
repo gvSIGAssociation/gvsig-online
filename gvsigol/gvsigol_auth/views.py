@@ -306,6 +306,8 @@ def password_reset_complete(request):
         errors =  _('Invalid token. Your link has expired, you need to ask for another one.')
             
     return render(request, 'registration/password_reset_confirm.html', {'errors': errors})
+       
+
 
 
 def password_reset_success(request):
