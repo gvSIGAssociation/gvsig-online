@@ -91,7 +91,7 @@ env = environ.Env(
     EXTRA_MIDDLEWARE = (list,[]),
     GVSIGOL_CLIENT_NAME = (str,'gvsig'),
     VIEWER_DEFAULT_CRS=(str,'EPSG:4326'),
-    SUPPORTED_CRS =(list,[3857,4326]),
+    SUPPORTED_CRS =(list,["3857", "4326"]),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
     GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
@@ -572,7 +572,6 @@ SUPPORTED_CRS = {}
 path_crs_definitions_json = os.path.join(os.path.dirname(__file__), 'crs_definitions.json')
 with open(path_crs_definitions_json, 'r') as file:
     crs_definitions_json = json.load(file)
-
 for i in env('SUPPORTED_CRS'):
     SUPPORTED_CRS[i] = crs_definitions_json[i]
 
