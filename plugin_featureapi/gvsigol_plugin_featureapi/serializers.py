@@ -1066,7 +1066,8 @@ class FeatureSerializer(serializers.Serializer):
         return sqlbuilder.SQL(", ").join(colnames)
 
     def _get_strict_search_where(self, introspect, schema, tablename, text, exclude_cols=[]):
-        fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
+        #fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
+        fields = introspect.get_fields(tablename, schema=schema)
         colnames = [ f for f in fields if f not in exclude_cols]
         where = None
         for i in colnames:
@@ -1074,7 +1075,9 @@ class FeatureSerializer(serializers.Serializer):
                 where = where + " OR "
             else:
                 where = " WHERE ("
-            where = where + "lower(unaccent(" + i + ")) like lower(unaccent({text}))"
+            #where = where + 'lower(unaccent("' + i + '")) like lower(unaccent({text}))'
+            where = where + 'lower(unaccent(CAST("' + i + '" AS VARCHAR))) like lower(unaccent({text}))'
+
 
         where = where + ")"
 
