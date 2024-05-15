@@ -42,6 +42,7 @@ from . import utils as core_utils
 from gvsigol_services import geographic_servers, utils, backend_postgis
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
+from django.conf import settings as django_settings
 import gvsigol_services.utils as services_utils
 from operator import itemgetter
 from django.core.mail import send_mail
@@ -1264,11 +1265,14 @@ def project_get_conf(request):
                     'roles': auth_backend.get_roles(request)
                 }
             }
-            # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
             if request.session.get('oidc_access_token'):
                 conf['user']['token'] = request.session.get('oidc_access_token')
                 conf['user']['refresh_token'] = request.session.get('oidc_refresh_token')
-                conf['user']['refresh_expires_in'] = request.session.get('oidc_refresh_expires_in')
+                try:
+                    conf['user']['refresh_url'] = django_settings.OIDC_OP_TOKEN_ENDPOINT
+                    conf['user']['client_id'] = django_settings.OIDC_RP_CLIENT_ID
+                except:
+                    pass
             else:
                 conf['user']['credentials'] = {
                     'username': request.session['username'],
