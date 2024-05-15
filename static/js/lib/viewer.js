@@ -70,6 +70,9 @@ viewer.core = {
 		if (this._auth_needed()) {
 			this._authenticate();
 		}
+		else {
+			this._refresh_token();
+		}
 		this.extraParams = extraParams;
 		this._createMap();
 		this._initToolbar();
@@ -145,6 +148,49 @@ viewer.core = {
 			return this._auth_count == this.conf.auth_urls.length;
 		}	
 		return true;
+	},
+	_refresh_token: async function () {
+		try{
+			if (viewer.core.conf.user 
+				&& viewer.core.conf.user.refresh_token
+				&& viewer.core.conf.user.refresh_url
+				&& viewer.core.conf.user.client_id
+			) {
+				var url = viewer.core.conf.user.refresh_url;
+				var client_id = viewer.core.conf.user.client_id;
+				
+				const response = await fetch(url, {
+					method: 'POST',
+					headers:{
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					credentials: 'include',
+					body: new URLSearchParams({
+						'client_id': client_id,
+						'grant_type': 'refresh_token',
+						'refresh_token': viewer.core.conf.user.refresh_token,
+						'scope': 'openid',
+						'audience': client_id
+					})
+				});
+
+				if (response.ok) {
+					const responseJson = await response.json();
+					viewer.core.conf.user.token = responseJson.access_token;
+					viewer.core.conf.user.refresh_token = responseJson.refresh_token;
+					setTimeout(viewer.core._refresh_token, 1000*(responseJson.expires_in-10));
+				}
+				else {
+					console.log("refresh failed");
+					console.log(response);
+				}
+			}
+			else {
+				console.log('refresh_token not available');
+			}
+		} catch (error) {
+			console.error("There has been a problem with your fetch operation:", error);
+		}
 	},
     _createMap: function() {
     	var self = this;
@@ -763,9 +809,10 @@ viewer.core = {
 		var customLoadFunction = function(image, src) {
 			var xhr = new XMLHttpRequest();
 			xhr.open("GET", src);
-			if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+			if (self.conf.user && self.conf.user.token) {
 				var bearer_token = "Bearer " + self.conf.user.token;
 				xhr.setRequestHeader('Authorization', bearer_token);
+				xhr.withCredentials = true;
 			}
 			xhr.responseType = "blob";
 			xhr.onload = function () {
@@ -809,7 +856,7 @@ viewer.core = {
 				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
 				serverType: 'geoserver'
 			});
-			if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+			if (self.conf.user && self.conf.user.token) {
 				wmsSource.setImageLoadFunction(customLoadFunction);
 			};
 			wmsLayer = new ol.layer.Image({
@@ -854,7 +901,7 @@ viewer.core = {
 					tileGrid: tileGrid,
 					wrapX: true
 				});
-				if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				if (self.conf.user && self.conf.user.token) {
 					wmtsSource.setTileLoadFunction(customLoadFunction);
 				};
 		        var wmsLayer = new ol.layer.Tile({
@@ -884,7 +931,7 @@ viewer.core = {
 					params: wmsParams,
 					serverType: 'geoserver'
 				});
-				if (self.conf.user && self.conf.user.token) { // FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
+				if (self.conf.user && self.conf.user.token) {
 					wmsSource.setTileLoadFunction(customLoadFunction);
 				};
 				
