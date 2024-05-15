@@ -150,11 +150,8 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         if self.get_settings('OIDC_STORE_REFRESH_TOKEN', False):
             # get refresh token
             refresh_token = token_info.get('refresh_token')
-            expires_in =  token_info.get('expires_in')
-            refresh_expires_in =  token_info.get('refresh_expires_in')
-            not_before_policy =  token_info.get('not-before-policy')
+            #not_before_policy =  token_info.get('not-before-policy')
             session['oidc_refresh_token'] = refresh_token
-            session['oidc_refresh_expires_in'] = refresh_expires_in
 
 
     def authenticate(self, request, **kwargs):
