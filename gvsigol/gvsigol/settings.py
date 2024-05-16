@@ -35,7 +35,7 @@ import datetime
 from gvsigol.utils import import_settings
 import environ
 import json
-
+import sys
 
 print ("INFO: Ejecutando settings.py !!...........................................")
 if os.environ.get("DEBUG")=='True':
@@ -89,7 +89,7 @@ env = environ.Env(
     DB_NAME=(str,'gvsigonline'),
     LANGUAGES = (tuple, ('es','en')),
     EXTRA_MIDDLEWARE = (list,[]),
-    GVSIGOL_CLIENT_NAME = (str,'gvsig'),
+    GVSIGOL_CUSTOMER_NAME = (str,'gvsig'),
     VIEWER_DEFAULT_CRS=(str,'EPSG:4326'),
     SUPPORTED_CRS =(list,["3857", "4326"]),
     # Auth
@@ -484,8 +484,12 @@ LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale')
 ]
 for app in INSTALLED_APPS:
-    if app.startswith('gvsigol_app_') or app.startswith('gvsigol_plugin_'):
+    if app.startswith('gvsigol_plugin_'):
         LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
+    elif app.startswith('gvsigol_app_'):
+        for p in sorted(set(sys.path)): # may be located out of BASEDIR if PYTHONPATH is used to add apps
+            if os.path.isdir(os.path.join(p, app)):
+                LOCALE_PATHS.insert(0, os.path.join(p, app, 'locale'))
 
 # Email settings
 EMAIL_BACKEND_ACTIVE = env('EMAIL_BACKEND_ACTIVE')
@@ -603,7 +607,7 @@ GVSIGOL_NAME = 'gvsig'
 GVSIGOL_SURNAME = 'OL'
 GVSIGOL_NAME_SHORT = 'g'
 GVSIGOL_SURNAME_SHORT = 'OL'
-GVSIGOL_CLIENT_NAME = env('GVSIGOL_CLIENT_NAME')
+GVSIGOL_CUSTOMER_NAME = env('GVSIGOL_CUSTOMER_NAME')
 
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)

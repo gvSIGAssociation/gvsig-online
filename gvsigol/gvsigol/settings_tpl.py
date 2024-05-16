@@ -286,6 +286,9 @@ LOCALE_PATHS = (
     '##GVSIGOL_HOME##/gvsigol/gvsigol_filemanager/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_statistics/locale',
 )
+for app in INSTALLED_APPS:
+    if app.startswith('gvsigol_app_'):
+        LOCALE_PATHS.insert(0, os.path.join('##GVSIGOL_HOME##/gvsigol/', app, 'locale'))
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -397,7 +400,7 @@ GVSIGOL_NAME = '##GVSIGOL_NAME##'
 GVSIGOL_SURNAME = '##GVSIGOL_SURNAME##'
 GVSIGOL_NAME_SHORT = '##GVSIGOL_NAME_SHORT##'
 GVSIGOL_SURNAME_SHORT = '##GVSIGOL_SURNAME_SHORT##'
-GVSIGOL_CLIENT_NAME = '##GVSIGOL_CLIENT_NAME##'
+GVSIGOL_CUSTOMER_NAME = '##GVSIGOL_CUSTOMER_NAME##'
 
 FILEMANAGER_DIRECTORY = '##FILEMANAGER_DIR##'
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
