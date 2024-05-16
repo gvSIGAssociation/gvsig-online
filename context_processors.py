@@ -39,5 +39,5 @@ def global_settings(request):
         'AUTH_DASHBOARD_UI': gvsigol.settings.AUTH_DASHBOARD_UI,
         'IFRAME_MODE_UI':  gvsigol.settings.IFRAME_MODE_UI,
         'MANAGE_PERMISSION_UI': gvsigol.settings.MANAGE_PERMISSION_UI,
-        'GVSIGOL_CLIENT_NAME': gvsigol.settings.GVSIGOL_CLIENT_NAME
+        'GVSIGOL_CUSTOMER_NAME': gvsigol.settings.GVSIGOL_CUSTOMER_NAME
     }
