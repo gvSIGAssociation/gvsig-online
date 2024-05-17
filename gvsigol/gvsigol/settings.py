@@ -484,9 +484,7 @@ LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale')
 ]
 for app in INSTALLED_APPS:
-    if app.startswith('gvsigol_plugin_'):
-        LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
-    elif app.startswith('gvsigol_app_'):
+    if app.startswith('gvsigol_app_'):
         for p in sorted(set(sys.path)): # may be located out of BASEDIR if PYTHONPATH is used to add apps
             if os.path.isdir(os.path.join(p, app)):
                 LOCALE_PATHS.insert(0, os.path.join(p, app, 'locale'))
