@@ -277,7 +277,7 @@ django.conf.locale.LANG_INFO = LANG_INFO
 LANGUAGES = [ ##LANGUAGES##
 ]
 
-LOCALE_PATHS = (
+LOCALE_PATHS = [
     '##GVSIGOL_HOME##/gvsigol/gvsigol/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_core/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_services/locale',
@@ -285,7 +285,7 @@ LOCALE_PATHS = (
     '##GVSIGOL_HOME##/gvsigol/gvsigol_auth/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_filemanager/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_statistics/locale',
-)
+]
 for app in INSTALLED_APPS:
     if app.startswith('gvsigol_app_'):
         LOCALE_PATHS.insert(0, os.path.join('##GVSIGOL_HOME##/gvsigol/', app, 'locale'))
