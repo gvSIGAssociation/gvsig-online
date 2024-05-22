@@ -8,7 +8,7 @@ from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
 from gvsigol.basetypes import BackendNotAvailable
-from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET, GVSIGOL_SUPERUSER_ROLE, GVSIGOL_STAFF_ROLE
+from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET, GVSIGOL_SUPERUSER_ROLE, GVSIGOL_STAFF_ROLE, OIDC_RP_CLIENT_ID
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT, OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
 from django.conf import settings
 
@@ -74,7 +74,9 @@ def token_updater(new_token):
 
 def provider_logout(request):
     query_string = urlencode({
-        "post_logout_redirect_uri": request.build_absolute_uri(reverse('index'))
+        "post_logout_redirect_uri": request.build_absolute_uri(reverse('index')),
+        "client_id": OIDC_RP_CLIENT_ID
+
     })
     url = "{}?{}".format(OIDC_OP_LOGOUT_ENDPOINT, query_string)
     print(url)
