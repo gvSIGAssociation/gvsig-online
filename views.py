@@ -1482,10 +1482,16 @@ def layer_update(request, layer_id):
             layer.detailed_info_enabled = detailed_info_enabled
             layer.detailed_info_button_title = detailed_info_button_title
             layer.detailed_info_html = detailed_info_html
-            layer.timeout = request.POST.get('timeout')
+            try:
+                layer.timeout = int(request.POST.get('timeout'))
+            except:
+                layer.timeout = None
             layer.real_time = real_time
             layer.vector_tile = vector_tile
-            layer.update_interval = request.POST.get('update_interval')
+            try:
+                layer.update_interval = int(request.POST.get('update_interval'))
+            except:
+                layer.update_interval = None
 
             params = {}
             params['format'] = request.POST.get('format')
