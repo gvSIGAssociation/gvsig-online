@@ -115,7 +115,9 @@ env = environ.Env(
     # frontend SPA
     USE_SPA_PROJECT_LINKS = (bool,False),
     FRONTEND_BASE_URL = (str,'/spa'),
-    FRONTEND_REDIRECT_URL = (str,'/gvsigonline'),
+    # TODO: revisar si es necesaria o podemos usar la anterior. 
+    # Esta variable puede ser una url completa, no un path y se usa en el view.py de la app, ej. app_libra
+    FRONTEND_REDIRECT_URL = (str,'/spa'),
     #Log level
     LOG_LEVEL=(str,"DEBUG"),
     # LDAP
