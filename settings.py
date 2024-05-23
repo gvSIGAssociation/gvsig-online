@@ -644,12 +644,12 @@ BING_LAYERS = ['Road','Aerial','AerialWithLabels']
 
 # REST framework
 default_auth_classes_list = [
-    'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     'rest_framework.authentication.SessionAuthentication',
+    'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     'rest_framework.authentication.BasicAuthentication'
 ]
 if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
-    default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
+    default_auth_classes_list.insert(1,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
 
 
 REST_FRAMEWORK = {
