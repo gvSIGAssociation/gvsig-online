@@ -857,18 +857,21 @@ def get_roles(request_or_user):
     list[str]
         The list of roles of the user
     """
-    if isinstance(request_or_user, HttpRequest):
-        claims = request_or_user.session.get('oidc_access_token_payload', {})
-        return claims.get('gvsigol_roles', [])
-    elif isinstance(request_or_user, Request):
-        claims = request_or_user._request.session.get('oidc_access_token_payload', {})
-        return claims.get('gvsigol_roles', [])
-    User = get_user_model()
+    try:
+        if isinstance(request_or_user, HttpRequest):
+            claims = request_or_user.session.get('oidc_access_token_payload')
+            return claims.get('gvsigol_roles', [])
+        elif isinstance(request_or_user, Request):
+            claims = request_or_user._request.session.get('oidc_access_token_payload')
+            return claims.get('gvsigol_roles', [])
+    except:
+        # oidc_access_token_payload may be absent if a session has not been set; then we'll get roles from auth server
+        pass
     if isinstance(request_or_user, str):
         username = request_or_user
     else:
-        if request_or_user.is_authenticated:
-            username = request_or_user.username
+        if request_or_user.user.is_authenticated:
+            username = request_or_user.user.username
         else:
             return []
     return _get_admin_session().get_roles(username)
