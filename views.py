@@ -1998,3 +1998,10 @@ def application_delete(request, appid):
         except:
             logger.exception("Error deleting application")
             return HttpResponseForbidden({"deleted": False, "error": "Not allowed"})
+
+
+def default_index(request, template="index.html", response={}):
+    if settings.USE_SPA_PROJECT_LINKS and settings.FRONTEND_REDIRECT_URL:    
+        return redirect(settings.FRONTEND_REDIRECT_URL)
+    else:
+        return render(request, 'index.html', response)
