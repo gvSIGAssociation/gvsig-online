@@ -56,7 +56,7 @@
 										</div>
 									</td>
 
-									<td>{{ workspace.last_run }}</td>
+									<td><div id ="last-run-{{ workspace.id }}" >{{ workspace.last_run }}</div></td>
 									<td>{{ workspace.name }}</td>
 									<td>{{ workspace.description }}</td>
 									{% if workspace.every %}
@@ -431,9 +431,9 @@
 			if (this.name == "button-update-workspace-etl") {
 				
 				$(".modal-body #etl_id").val( data[0] );
-				$(".modal-body #etl_name").val( data[3] );
-				$(".modal-body #etl_desc").val( data[4] );
-				$(".modal-body #wks-concatenated").val( data[7] );
+				$(".modal-body #etl_name").val( data[4] );
+				$(".modal-body #etl_desc").val( data[5] );
+				$(".modal-body #wks-concatenated").val( data[8] );
 
 				if(data[5]!=''){
 					$("#repeat_periodically").prop('checked', true)
@@ -836,6 +836,8 @@
 			var msg = workspace["message"];
 			var status = workspace['status'];
 
+			var last_exec = workspace['last_exec'];
+
 			$("#see-msg-status-"+id).css("display", "inline-block");
 
 			if(status == ''){
@@ -868,6 +870,8 @@
 				$("#icon-error-"+id).css("display", "inline");
 
 			}
+
+			$("#last-run-"+id).text(last_exec);
 		}
 
     }
