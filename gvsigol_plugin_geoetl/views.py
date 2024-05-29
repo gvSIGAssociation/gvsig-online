@@ -213,9 +213,9 @@ def get_list(request, concat = False, datetime_string = False):
         etl_list = ETLworkspaces.objects.filter(concat=concat)
     elif user.is_staff:
         user_roles = auth_backend.get_roles(request)
-        etl_list = (ETLworkspaces.objects.filter(etlworkspaceexecuterole__role__in=user_roles) |
-                        ETLworkspaces.objects.filter(etlworkspaceeditrole__role__in=user_roles) |
-                        ETLworkspaces.objects.filter(etlworkspaceeditrestrictedrole__role__in=user_roles) |
+        etl_list = (ETLworkspaces.objects.filter(etlworkspaceexecuterole__role__in=user_roles, concat=concat) |
+                        ETLworkspaces.objects.filter(etlworkspaceeditrole__role__in=user_roles, concat=concat) |
+                        ETLworkspaces.objects.filter(etlworkspaceeditrestrictedrole__role__in=user_roles, concat=concat) |
                         ETLworkspaces.objects.filter(username=user.username, concat=concat)).distinct()
     else:
         etl_list = []
@@ -276,8 +276,6 @@ def get_list(request, concat = False, datetime_string = False):
                 interval = IntervalSchedule.objects.get(id= interid)
                 workspace['every'] = interval.every
                 workspace['period'] = interval.period
-
-
 
         workspaces.append(workspace)
 
@@ -733,6 +731,7 @@ def etl_list_canvas_status(request):
             workspace['id_ws'] = sm.id_ws
             workspace['status'] = sm.status
             workspace['message'] = sm.message
+            workspace['last_exec'] = str(sm.last_exec)
             workspaces.append(workspace)
 
     response = {
@@ -770,7 +769,7 @@ def etl_read_canvas(request):
                 concat = False
 
             if id_ws:
-                if ws.can_execute(request):
+                if ws.can_execute(request) or ws.can_edit(request) or ws.can_edit_restrictedly(request):
                     run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas,
                                                                 'id_ws': id_ws,
                                                                 'username': request.user.username,
