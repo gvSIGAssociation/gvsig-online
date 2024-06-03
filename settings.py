@@ -576,6 +576,10 @@ SUPPORTED_CRS = {}
 path_crs_definitions_json = os.path.join(os.path.dirname(__file__), 'crs_definitions.json')
 with open(path_crs_definitions_json, 'r') as file:
     crs_definitions_json = json.load(file)
+if '3857' not in env('SUPPORTED_CRS'):
+    SUPPORTED_CRS['3857'] = crs_definitions_json['3857']
+if '4326' not in env('SUPPORTED_CRS'):
+    SUPPORTED_CRS['4326'] = crs_definitions_json['4326']
 for i in env('SUPPORTED_CRS'):
     SUPPORTED_CRS[i] = crs_definitions_json[i]
 
