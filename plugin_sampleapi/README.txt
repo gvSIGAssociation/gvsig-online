@@ -15,11 +15,11 @@
 - Vemos las migraciones aplicadas
 /docker-entrypoint.sh python manage.py showmigrations
 - Limpiamos el historial de migracioas
-/docker-entrypoint.sh  python manage.py migrate --fake sampleapi zero
+/docker-entrypoint.sh  python manage.py migrate --fake gvsigol_plugin_sampleapi zero
 - Eliminamos las migraciones del plugin 
-- Eliminamos las tablas 
+- Conectamos a la bbdd para eliminar las tablas 
  PGPASSWORD=$DB_PASS psql -h $DB_HOST -U $DB_USER -d $DB_NAME
-
+- Ejecutamos SQL para eliminar tablas (adaptar al plugin)
 DO
 $do$
 DECLARE
@@ -38,7 +38,6 @@ LOOP
 END LOOP;
 END
 $do$;
-
 
 - Creamos migraciones
 /docker-entrypoint.sh python manage.py makemigrations
