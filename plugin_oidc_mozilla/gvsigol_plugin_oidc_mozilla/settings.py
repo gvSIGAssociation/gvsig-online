@@ -38,7 +38,7 @@ env_plugin_oidc_mozilla = environ.Env(
     OIDC_STORE_ID_TOKEN=(bool, True),
     OIDC_STORE_ACCESS_TOKEN=(bool, True),
     OIDC_STORE_REFRESH_TOKEN=(bool, False),
-    OIDC_MOBILE_CLIENT_ID=(str, 'OIDC_MOBILE_CLIENT_ID')
+    OIDC_MOBILE_CLIENT_ID=(str, 'gvsigmapps')
  )
 OIDC_OP_BASE_URL = env_plugin_oidc_mozilla('OIDC_OP_BASE_URL')
 OIDC_OP_REALM_NAME = env_plugin_oidc_mozilla('OIDC_OP_REALM_NAME')
