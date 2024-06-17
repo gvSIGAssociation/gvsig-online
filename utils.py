@@ -331,9 +331,14 @@ def get_absolute_url(url, headers):
         validate = URLValidator(schemes=['https','http'])
         validate(url)
         return url
-    except:
-        # relative URL
-        pass
+    except Exception as e: # relative URL
+        if settings.DEBUG == True: # more permissive validation to allow URLs similar to https://gvsigol-geoserver/geoserver
+            try:
+                parsed = urlparse(url)
+                if all([parsed.scheme, parsed.netloc]):
+                    return url
+            except:
+                pass
     base_url = settings.BASE_URL
     try:
         origin = headers.get('HTTP_ORIGIN')
