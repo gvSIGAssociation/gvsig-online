@@ -18,20 +18,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-import json
 import logging
-import os
-
-from django.contrib.auth.decorators import login_required
-from django.http.response import HttpResponse
-
-from gvsigol import settings as core_settings
-from gvsigol import settings
-from gvsigol_services import utils as servicesutils
-from django.http import HttpResponseForbidden, HttpResponseNotFound
-from django_sendfile import sendfile
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.views.decorators.http import require_safe
 
 #logging.basicConfig()
 logger = logging.getLogger(__name__) 
 
 
+@require_safe
+def get_csrftoken(request):
+    """
+    Exposes the CSRF token for Ajax requests. This is safe, since a different CSRFToken is generated for
+    each session, so 3rd party sites requesting this method will get a different token (unless 
+    credentials=yes is used and the 3rd party site is allowed in CORS configuration for authenticated
+    requests).
+    """
+    return JsonResponse({
+        'csrftoken': get_token(request)
+    })

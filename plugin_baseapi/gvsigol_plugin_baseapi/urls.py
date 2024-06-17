@@ -24,7 +24,7 @@ from django.urls import path, re_path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import routers
-
+from gvsigol_plugin_baseapi import views
 from gvsigol import settings
 import gvsigol_plugin_baseapi.settings as settings_local
 
@@ -52,6 +52,7 @@ urlpatterns = [
     re_path(r'^swagger(?P<format>.json|.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
+    path('csrftoken/', views.get_csrftoken, name='get-csrftoken'),
 ]
 
 
