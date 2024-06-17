@@ -42,8 +42,9 @@ from future.builtins import int
 from django.core.validators import URLValidator
 import logging
 import sys
-logger = logging.getLogger("gvsigol")
 from threading import Lock
+from urllib.parse import urlparse
+logger = logging.getLogger("gvsigol")
 
 
 def can_read_project(request, project):
