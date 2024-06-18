@@ -18,5 +18,5 @@ class GvsigolAuthConfig(AppConfig):
             ensure_admin_group()
         except Exception as e:
             # Don't fail when we are migrating applications!!
-            logging.getLogger('gvsigol').warning(f'GvsigolAuthConfig, problems with auth backend. {str(e)} ')
+            logging.getLogger('gvsigol').exception(f'GvsigolAuthConfig, problems with auth backend. {str(e)} ')
             pass

@@ -838,8 +838,12 @@ def get_groups(request_or_user):
     if isinstance(request_or_user, str):
         username = request_or_user
     else:
-        if request_or_user.user.is_authenticated:
-            username = request_or_user.user.username
+        if isinstance(request_or_user, get_user_model()):
+            user = request_or_user
+        else:
+            user = request_or_user.user
+        if user.is_authenticated:
+            username = user.username
         else:
             return []
     return _get_admin_session().get_groups(username)
@@ -876,8 +880,12 @@ def get_roles(request_or_user):
     if isinstance(request_or_user, str):
         username = request_or_user
     else:
-        if request_or_user.user.is_authenticated:
-            username = request_or_user.user.username
+        if isinstance(request_or_user, get_user_model()):
+            user = request_or_user
+        else:
+            user = request_or_user.user
+        if user.is_authenticated:
+            username = user.username
         else:
             return []
     return _get_admin_session().get_roles(username)
