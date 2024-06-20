@@ -262,7 +262,18 @@ class Geoserver():
                     params_dict['Estimated extends'] = params_dict.get('Estimated extends', 'true')
                     params_dict['encode functions'] = params_dict.get('encode functions', 'true')
                     params_dict['Expose primary keys'] = params_dict.get('Expose primary keys', 'true')
-                utils.create_schema_for_datastore(params_dict)
+                    if params_dict.get('jndiReferenceName', ''):
+                        driver = 'PostGIS (JNDI)'
+                        try:
+                            del params_dict['database']
+                            del params_dict['host']
+                            del params_dict['port']
+                            del params_dict['user']
+                            del params_dict['passwd']
+                        except KeyError:
+                            pass
+
+                utils.create_schema_for_datastore(json.loads(connection_params)) # load again to pass unaltered parameters
                 ds = catalog.create_datastore(name, workspace.name)
                 ds.connection_parameters.update(params_dict)
                 
@@ -290,8 +301,12 @@ class Geoserver():
                 return False
             ds.description = description # description is ignored by gsconfig at the moment
             ds.type = driver
-            response = catalog.save(ds) # FIXME: we should check response.status to ensure the operation was correct
-            return True
+            response = catalog.save(ds)
+            if response.status_code == 201:
+                return True
+            logger.error(f'Error creating datastore - Status code: {response.status_code}')
+            logger.error(response.text)
+            return False
         except Exception as e:
             logger.exception("Error creating datastore")
             print("Backend MapService - createDatastore Error", e)

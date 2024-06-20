@@ -296,8 +296,8 @@ def create_datastore(username, ds_name, ws):
     dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
     dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
     dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
-    connection_params = '{ "host": "' + dbhost + '", "port": "' + dbport + '", "database": "' + dbname + '", "schema": "' + ds_name + '", "user": "' + dbuser + '", "passwd": "' + dbpassword + '", "dbtype": "postgis" }'
-
+    jndiname = settings.GVSIGOL_USERS_CARTODB.get('jndiname', '')
+    connection_params = f'{{"host": "{dbhost}", "port": "{dbport}", "database": "{dbname}", "schema": "{ds_name}", "user": "{dbuser}", "passwd": "{dbpassword}", "dbtype": "postgis", "jndiReferenceName": "{jndiname}"}}'
     if create_schema(ds_name):
         return add_datastore(ws, ds_type, ds_name, description, connection_params, username)
 
