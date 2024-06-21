@@ -262,9 +262,9 @@ def password_reset(request):
 
 
 
-def password_reset_confirmation(request, user_id, uid, token):
+def password_reset_confirmation(request, username, uid, token):
     context = {
-        'user_id' : user_id,
+        'username' : username,
         'uid': uid,
         'token': token
         }
