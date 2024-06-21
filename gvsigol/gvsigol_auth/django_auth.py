@@ -330,7 +330,8 @@ def update_user(
     if password:
         old_password = user.password
         user.set_password(password)
-        user.save()
+    user.save()
+    if password: # update pass in ldap only if saving the django model was successfully saved to ensure the password is accepted
         try:
             auth_services.get_services().ldap_change_user_password(user, password)
         except:
