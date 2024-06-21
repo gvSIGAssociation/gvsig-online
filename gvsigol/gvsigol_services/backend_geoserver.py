@@ -359,6 +359,17 @@ class Geoserver():
                 # directly updating connection_parameters won't work, we need to set the dict again
                 params = ds.connection_parameters
                 params.update(params_dict)
+                if params.get('jndiReferenceName'):
+                    ds.type = 'PostGIS (JNDI)'
+                    try:
+                        del params['database']
+                        del params['host']
+                        del params['port']
+                        del params['user']
+                        del params['passwd']
+                    except KeyError:
+                        pass
+                
                 ds.connection_parameters = params
                 utils.create_schema_for_datastore(params_dict)
                 
