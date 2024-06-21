@@ -387,6 +387,7 @@ def user_add(request):
                         try:    
                             auth_utils.sendMail(user, form.data['password1'])
                         except Exception as ex:
+                            logger.exception(ex)
                             print(str(ex))
                             pass
         
