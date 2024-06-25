@@ -635,7 +635,7 @@ def get_data_schemas_sqlserver(dicc):
     cursor = conn.cursor(as_dict=True)
 
     if dicc['checkbox'] == 'true':
-        _sql = "SELECT name AS COLUMN_NAME, system_type_name AS DATA_TYPE FROM sys.dm_exec_describe_first_result_set ('%s', NULL, 0) ;" % (dicc['sql'])
+        _sql = "SELECT name AS COLUMN_NAME, system_type_name AS DATA_TYPE FROM sys.dm_exec_describe_first_result_set ('%s', NULL, 0) ;" % (dicc['sql'].replace("'", "''"))
 
     else:
         _sql = "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME  = '%s'" % (dicc['schema-name'], dicc['table-name']) 
