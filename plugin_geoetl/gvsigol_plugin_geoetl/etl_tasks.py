@@ -4582,7 +4582,7 @@ def input_SqlServer(dicc):
     cursor_source = conn_source_sqlserver.cursor(as_dict=True)
 
     if dicc['checkbox'] == 'true':
-        _sql = "SELECT name AS COLUMN_NAME, system_type_name AS DATA_TYPE FROM sys.dm_exec_describe_first_result_set ('%s', NULL, 0) ;" % (dicc['sql'])
+        _sql = "SELECT name AS COLUMN_NAME, system_type_name AS DATA_TYPE FROM sys.dm_exec_describe_first_result_set ('%s', NULL, 0) ;" % (dicc['sql'].replace("'", "''"))
 
     else:
         _sql = "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME  = '%s'" % (dicc['schema-name'], dicc['table-name'])
@@ -4603,6 +4603,8 @@ def input_SqlServer(dicc):
             strColumns = strColumns + row['COLUMN_NAME'] + '.STAsText() AS '+row['COLUMN_NAME']+', '+row['COLUMN_NAME']+'.STSrid AS SRID, '
             columns.append('SRID')
             data_types.append('int')
+            
+    cursor_source.close()
     
     if dicc['checkbox'] == 'true':
         sql_df = "SELECT TOP 1 %s FROM (%s) a" % (strColumns[:-2], dicc['sql'])
@@ -4675,12 +4677,14 @@ def input_SqlServer(dicc):
 
     else:
         _sql = 'SELECT %s FROM %s.%s.%s' % (strColumns[:-2], params['db-sql-server'], dicc['schema-name'], dicc['table-name'])
+    
+    cursor_source = conn_source_sqlserver.cursor(as_dict=True)
 
     cursor_source.execute(_sql)
 
     count = 1
 
-    for row in cursor_source:
+    for row in cursor_source:      
         
         for j in row:
             if convert_dict[j] == 'string' and row[j]:
@@ -4690,12 +4694,15 @@ def input_SqlServer(dicc):
                     pass
 
         df_tar = pd.DataFrame([row])
+
         if count == 1:
             df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
             count +=1
         else:
             df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='append', index=False)
-
+        
+            
+    
     conn_target.close()
     db_target.dispose()
 
