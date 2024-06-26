@@ -323,6 +323,7 @@ class GvSigOnlineServices():
             return int(last_gid)
             
         except ldap.LDAPError as e:
+            logging.getLogger(LOGGER_NAME).exception(str(e))
             print(e)
     
        
