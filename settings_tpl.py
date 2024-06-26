@@ -325,7 +325,8 @@ GVSIGOL_USERS_CARTODB = {
     'dbport': '##DB_PORT##',
     'dbname': '##DB_NAME##',
     'dbuser': '##DB_USER##',
-    'dbpassword': '##DB_PASSWD##'
+    'dbpassword': '##DB_PASSWD##',
+    'jndiname': '##DB_JNDI_NAME##'
 }
 
 # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
