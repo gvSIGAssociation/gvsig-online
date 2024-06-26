@@ -161,6 +161,7 @@ class GvSigOnlineServices():
                     print(e)
                     return False
             except ldap.LDAPError as e:
+                logging.getLogger(LOGGER_NAME).exception(str(e))
                 print(e)
                 return False
         
@@ -176,6 +177,7 @@ class GvSigOnlineServices():
                 self.ldap.delete_s(dn)
                 
             except ldap.LDAPError as e:
+                logging.getLogger(LOGGER_NAME).exception(str(e))
                 print(e)
         
     def ldap_add_user(self, username, first_name, password, is_superuser):
@@ -233,6 +235,7 @@ class GvSigOnlineServices():
                 print(e)
                 return False
             except ldap.LDAPError as e:
+                logging.getLogger(LOGGER_NAME).exception(str(e))
                 print(e)
                 return False
             
@@ -354,6 +357,7 @@ class GvSigOnlineServices():
             return int(last_uid)
             
         except ldap.LDAPError as e:
+            logging.getLogger(LOGGER_NAME).exception(str(e))
             print(e)
             
             
@@ -384,6 +388,7 @@ class GvSigOnlineServices():
             return int(last_uid)
             
         except ldap.LDAPError as e:
+            logging.getLogger(LOGGER_NAME).exception(str(e))
             print(e)
             
             
