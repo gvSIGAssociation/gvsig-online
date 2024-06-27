@@ -368,6 +368,7 @@
 						<li class="active"><a data-toggle="tab" href="#sqlparams">{% trans "SQL Parameters" %}</a></li>					
 						<li><a data-toggle="tab" href="#userparams">{% trans "User Parameters" %} </a></li>
 						<li><a data-toggle="tab" href="#schedulemails">{% trans "Schedule e-mails" %} </a></li>
+						<li><a data-toggle="tab" href="#endpoint">{% trans "Endpoint Parameters" %} </a></li>
 					</ul>
 
 					<div class="tab-content">
@@ -501,7 +502,6 @@
 										<select id="attr-name-user-params" class="form-control"></select>
 									</div>
 								</div>  
-
 							</div>
 						</div>
 						<div id="schedulemails" class="tab-pane">
@@ -546,8 +546,47 @@
 									<label for="checkbox"> {% trans "Send e-mail if process fails" %} </label>   							
 								</div>
 							</div>
+						</div>
 
+						<div id="endpoint" class="tab-pane">
+							<div class="row">
+								<div class="col-sm-12">
+									<label class="col-form-label">{% trans "URL" %}</label>
+									<input type="text" id="url-endpoint" class="form-control" value =""></input>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-4">
+									<label >{% trans "Method" %}</a></label>
+										<select class="form-control" id="method-endpoint">
+											<option value="POST" default> POST</option>
+											<option value="GET"> GET</option>
+											<option value="PUT"> PUT </option>
+											<option value="DELETE"> DELETE </option>
+										</select>
+								</div>
+							</div>
 
+							<div class="row">
+								<div class="col-md-12">
+									<label class="col-form-label">{% trans "Endpoint Parameters" %}</a></label>
+									<textarea id="parameters-endpoint" placeholder = "{% trans 'Write parameters as JSON (optional). Example:' %} &#10;{&#10;&#9;&quot;headers&quot;: {&#10;&#9;&#9;&quot;Accept&quot;: &quot;application/json&quot;,&#10;&#9;&#9;...&#10;&#9;&#9;},&#10;&#9;&quot;params&quot;: {&#10;&#9;&#9;&quot;key1&quot;: &quot;param1&quot;,&#10;&#9;&#9;...&#10;&#9;&#9;},&#10;&#9;...&#10;}"  rows="5" class="form-control"></textarea>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<input type="checkbox" id="checkbox-send-endpoint-after" value = 'False'/>
+									<label for="checkbox"> {% trans "Send to endpoint after process finishes correctly" %} </label>   							
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<input type="checkbox" id="checkbox-send-endpoint-fails" value = 'False'/>
+									<label for="checkbox"> {% trans "Send to endpoint if process fails" %} </label>   							
+								</div>
+							</div>
 						</div>
 					</div>
 				</form>
@@ -591,8 +630,6 @@
 		contentType: false, 
 		processData: false,
 		success: function (data) {
-
-			console.log(data)
 			
 			$('#email-list').empty()
 
@@ -715,7 +752,29 @@
 			$('#checkbox-send-mail-fails').val('False')
 		}
 
-		});
+	});
+
+	$('#checkbox-send-endpoint-after').change(function(){
+
+		if ($('#checkbox-send-endpoint-after').is(':checked')){
+			$('#checkbox-send-endpoint-after').val('True')
+
+		} else {
+			$('#checkbox-send-endpoint-after').val('False')
+		}
+
+	});
+
+	$('#checkbox-send-endpoint-fails').change(function(){
+
+		if ($('#checkbox-send-endpoint-fails').is(':checked')){
+			$('#checkbox-send-endpoint-fails').val('True')
+
+		} else {
+			$('#checkbox-send-endpoint-fails').val('False')
+		}
+
+	});
 
 	$('#checkbox-user-params').change(function(){
 
@@ -1266,6 +1325,32 @@
 							$('#checkbox-send-mail-fails').prop('checked', false);
 						}
 
+						$('#url-endpoint').val(response['url-endpoint'])
+						$('#parameters-endpoint').val(response['parameters-endpoint'])
+						$('#method-endpoint select').val(response['method-endpoint'])
+						
+						checkbox_send_endpoint_after = response['checkbox-send-endpoint-after']
+						
+						if (checkbox_send_endpoint_after && checkbox_send_endpoint_after != 'False'){
+							$('#checkbox-send-endpoint-after').val('True')
+							$('#checkbox-send-endpoint-after').prop('checked', true);
+
+						} else {
+							$('#checkbox-send-endpoint-after').val('False')
+							$('#checkbox-send-endpoint-after').prop('checked', false);
+						}
+
+						checkbox_send_endpoint_fails = response['checkbox-send-endpoint-fails']
+
+						if (checkbox_send_endpoint_fails && checkbox_send_endpoint_fails != 'False'){
+							$('#checkbox-send-endpoint-fails').val('True')
+							$('#checkbox-send-endpoint-fails').prop('checked', true);
+
+						} else {
+							$('#checkbox-send-mail-fails').val('False')
+							$('#checkbox-send-mail-fails').prop('checked', false);
+						}
+
 						if (checkbox_user_params == 'True'){
 							$('#checkbox-user-params').val('True')
 							$('#checkbox-user-params').prop('checked', true);
@@ -1402,6 +1487,8 @@
 				radio = 'postgres'
 			}
 
+			console.log($('#method-endpoint').val())
+
 			params = {
 						"id": $(".modal-body #etl_id").val(),
 						"db": $(".modal-body #db").val(),
@@ -1422,7 +1509,12 @@
 						"attr-name-user-params": $(".modal-body #attr-name-user-params").val(),
 						"checkbox-send-mail-after": $(".modal-body #checkbox-send-mail-after").val(),
 						"checkbox-send-mail-fails": $(".modal-body #checkbox-send-mail-fails").val(),
-						"emails": $('#emails').val()
+						"emails": $('#emails').val(),
+						"url-endpoint": $('#url-endpoint').val(),
+						"method-endpoint": $('#method-endpoint').val(),
+						"parameters-endpoint": $('#parameters-endpoint').val(),
+						"checkbox-send-endpoint-after": $(".modal-body #checkbox-send-endpoint-after").val(),
+						"checkbox-send-endpoint-fails": $(".modal-body #checkbox-send-endpoint-fails").val(),
 						
 					}
 
@@ -1601,8 +1693,6 @@
 			updateData["editRoles"]=JSON.stringify(assigned_edit_roles)
 			updateData["executeRoles"]=JSON.stringify(assigned_execute_roles)
 			updateData["restrictedEditRoles"]=JSON.stringify(assigned_restricted_edit_roles)
-
-			console.log(assigned_restricted_edit_roles)
 
 			$.ajax({
 				type: 'POST',

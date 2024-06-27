@@ -169,3 +169,19 @@ class SendEmails(models.Model):
         constraints = [
            models.UniqueConstraint(fields=['etl_ws'], name='unique_etlws_per_send_row')
         ]
+        
+class SendEndpoint(models.Model):
+    etl_ws = models.ForeignKey(ETLworkspaces, on_delete=models.CASCADE)
+    send_after = models.BooleanField(default=False)
+    send_fails = models.BooleanField(default=False)
+    url = models.TextField(null=True, blank=True)
+    parameters = models.TextField(null=True, blank=True)
+    method = models.CharField(max_length=10)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['etl_ws']),
+        ]
+        constraints = [
+           models.UniqueConstraint(fields=['etl_ws'], name='unique_etlws_per_endpoint_row')
+        ]

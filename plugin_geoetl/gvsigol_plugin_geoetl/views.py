@@ -39,7 +39,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails
+from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint
 from gvsigol_services.models import Datastore
 from django.contrib.auth.models import User
 from . import settings as settings_geoetl
@@ -1175,6 +1175,24 @@ def get_workspace_parameters(request):
                 response['checkbox-send-mail-after'] = 'False'
                 response['checkbox-send-mail-fails'] = 'False'
                 response['email'] = ''
+                
+            try:
+                
+                send_endpoint_params = SendEndpoint.objects.get(etl_ws_id = request.POST['id'])
+                response['checkbox-send-endpoint-after'] = send_endpoint_params.send_after
+                response['checkbox-send-endpoint-fails'] = send_endpoint_params.send_fails
+                response['url-endpoint'] = send_endpoint_params.url
+                response['parameters-endpoint'] = send_endpoint_params.parameters
+                response['method-endpoint'] = send_endpoint_params.method
+
+                
+            except:
+
+                response['checkbox-send-endpoint-after'] = 'False'
+                response['checkbox-send-endpoint-fails'] = 'False'
+                response['url-endpoint'] = ''
+                response['parameters-endpoint'] = ''
+                response['method-endpoint'] = 'POST'
 
             response['dbcs'] = []
 
@@ -1238,6 +1256,28 @@ def set_workspace_parameters(request):
                     etl_ws_id = request.POST['id']
                 )
                 send_mail_params.save()
+                
+            try:
+                send_endpoint_params = SendEndpoint.objects.get(etl_ws_id = request.POST['id'])
+                
+                send_endpoint_params.send_after = request.POST['checkbox-send-endpoint-after']
+                send_endpoint_params.send_fails = request.POST['checkbox-send-endpoint-fails']
+                send_endpoint_params.url = request.POST['url-endpoint']
+                send_endpoint_params.parameters = request.POST['parameters-endpoint']
+                send_endpoint_params.method = request.POST['method-endpoint'],
+                send_endpoint_params.save()
+
+            except:
+                
+                send_endpoint_params = SendEndpoint(
+                    send_after = request.POST['checkbox-send-endpoint-after'],
+                    send_fails = request.POST['checkbox-send-endpoint-fails'],
+                    url = request.POST['url-endpoint'],
+                    parameters = request.POST['parameters-endpoint'],
+                    method = request.POST['method-endpoint'],
+                    etl_ws_id = request.POST['id']
+                )
+                send_endpoint_params.save()
 
             response = {}
 
