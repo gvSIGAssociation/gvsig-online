@@ -5,7 +5,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSch
 from django.core.mail import send_mail
 from celery.utils.log import get_task_logger
 
-from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests, SendEmails
+from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests, SendEmails, SendEndpoint
 from gvsigol import settings
 
 from . import etl_tasks, views
@@ -17,6 +17,8 @@ import json
 from datetime import date, datetime, timedelta
 import copy
 from django.utils import timezone
+import requests
+import re
 
 logger = get_task_logger(__name__)
 
@@ -263,6 +265,13 @@ def run_canvas_background(**kwargs):
                         sendEmail(id_ws, 'Process has been executed successfully', 'Success', em.split(' '))
                 except Exception as ex:
                     print('No se ha podido enviar el mail por: '+str(ex))
+                    
+                try:
+                    send_endpoint = SendEndpoint.objects.get(etl_ws_id = id_ws)
+                    if send_endpoint.send_after:
+                        requestEndpoint(id_ws)
+                except Exception as ex:
+                    print('No se ha podido hacer el request por: '+str(ex))
             
             
             else:
@@ -288,6 +297,14 @@ def run_canvas_background(**kwargs):
                         sendEmail(id_ws, errormsg  + str(e), 'Error', em.split(' '))
                 except Exception as ex:
                     print('No se ha podido enviar el mail por: '+str(ex))
+                    
+                    
+                try:
+                    send_endpoint = SendEndpoint.objects.get(etl_ws_id = id_ws)
+                    if send_endpoint.send_fails:
+                        requestEndpoint(id_ws)
+                except Exception as ex:
+                    print('No se ha podido hacer el request por: '+str(ex))
 
             else:
                 statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
@@ -449,7 +466,6 @@ def periodic_cadastral_requests():
         except:
             pass
 
-
 def getLoopListFromPostgres(params):
     
     db_model  = database_connections.objects.get(name = params['db'])
@@ -497,3 +513,61 @@ def sendEmail(id, msg, sub, listMails):
         fromAddress = settings.EMAIL_HOST_USER
         
         send_mail(subject, body, fromAddress, toAddress, False, settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        
+def requestEndpoint(_id):
+    send_endpoint = SendEndpoint.objects.get(etl_ws_id = _id)
+    
+    if send_endpoint.parameters or send_endpoint.parameters != '':
+    
+        request_options = json.loads(send_endpoint.parameters)
+        
+    else:
+        request_options = {}
+        
+    kwargs = {}
+    if request_options:
+        if 'params' in request_options:
+            kwargs['params'] = request_options['params']
+        if 'data' in request_options:
+            kwargs['data'] = request_options['data']
+        if 'json' in request_options:
+            kwargs['json'] = request_options['json']
+        if 'files' in request_options:
+            kwargs['files'] = request_options['files']
+        if 'headers' in request_options:
+            kwargs['headers'] = request_options['headers']
+        if 'cookies' in request_options:
+            kwargs['cookies'] = request_options['cookies']
+        if 'auth' in request_options:
+            kwargs['auth'] = request_options['auth']
+        if 'timeout' in request_options:
+            kwargs['timeout'] = request_options['timeout']
+        if 'allow_redirects' in request_options:
+            kwargs['allow_redirects'] = request_options['allow_redirects']
+        if 'proxies' in request_options:
+            kwargs['proxies'] = request_options['proxies']
+        if 'verify' in request_options:
+            kwargs['verify'] = request_options['verify']
+        if 'stream' in request_options:
+            kwargs['stream'] = request_options['stream']
+        if 'format' in request_options:
+            kwargs['format'] = request_options['format']
+    
+    method = send_endpoint.method
+    
+    if method.startswith('('):
+        patron = r"'([^']*)'"
+        method = re.findall(patron, method)[0]
+        
+        
+        
+    if method == 'GET':
+        response = requests.get(send_endpoint.url, **kwargs)
+    elif method == 'POST':
+        response = requests.post(send_endpoint.url, **kwargs)
+    elif method == 'PUT':
+        response = requests.put(send_endpoint.url, **kwargs)
+    elif method == 'DELETE':
+        response = requests.delete(send_endpoint.url, **kwargs)
+        
+    print('El estado de la petición del espacio de trabajo '+str(_id)+' request ha sido: '+ str(response.status_code))
