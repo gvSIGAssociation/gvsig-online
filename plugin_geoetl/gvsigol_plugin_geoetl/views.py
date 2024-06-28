@@ -501,6 +501,18 @@ def delete_periodic_workspace(workspace):
         statusModel.delete()
     except:
         pass
+    
+    try:
+        send_email  = SendEmail.objects.get(etl_ws = workspace.id)
+        send_email.delete()
+    except:
+        pass
+    
+    try:
+        send_endpoint  = SendEndpoint.objects.get(etl_ws = workspace.id)
+        send_endpoint.delete()
+    except:
+        pass
 
 def name_user_exists(id, name, user):
     workspaces = ETLworkspaces.objects.filter(name=name, username=user)
