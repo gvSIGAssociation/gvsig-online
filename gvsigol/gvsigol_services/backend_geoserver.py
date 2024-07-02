@@ -358,8 +358,9 @@ class Geoserver():
             if format_nature == "v": # vector
                 # directly updating connection_parameters won't work, we need to set the dict again
                 params = ds.connection_parameters
+                jndi_changed = (params.get('jndiReferenceName') != params_dict.get('jndiReferenceName'))
                 params.update(params_dict)
-                if params.get('jndiReferenceName'):
+                if params_dict.get('jndiReferenceName'):
                     ds.type = 'PostGIS (JNDI)'
                     try:
                         del params['database']
@@ -369,9 +370,19 @@ class Geoserver():
                         del params['passwd']
                     except KeyError:
                         pass
-                
+                else:
+                    ds.type = 'PostGIS'
+                    try:
+                        del params['jndiReferenceName']
+                    except KeyError:
+                        pass
                 ds.connection_parameters = params
+                if ds.enabled and jndi_changed: # ensure changes are applied by disabling and reenabling store
+                    ds.enabled = False
+                    catalog.save(ds)
+                    ds.enabled = True
                 utils.create_schema_for_datastore(params_dict)
+                
                 
             elif format_nature == "c": # coverage (raster)
                 if driver == "GeoTIFF":
