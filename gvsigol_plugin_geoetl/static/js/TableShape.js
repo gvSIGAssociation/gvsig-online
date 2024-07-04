@@ -10886,7 +10886,7 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
     addEntity: function( optionalIndex)
     {
 	   	 var label1 =new draw2d.shape.basic.Label({
-	   	     text: gettext("Main"),
+	   	     text: gettext("Input"),
 	   	     stroke:0.2,
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
