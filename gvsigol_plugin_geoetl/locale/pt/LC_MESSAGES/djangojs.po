@@ -1184,3 +1184,24 @@ msgstr "Tolerância"
 
 msgid "Matched"
 msgstr "Emparelhados"
+
+msgid "Clustering"
+msgstr "Agrupamento"
+
+msgid "Algorithm"
+msgstr "Algoritmo"
+
+msgid "DBSCAN"
+msgstr "DBSCAN"
+
+msgid "K-means"
+msgstr "K-means"
+
+msgid "Desire distance"
+msgstr "Distância desejada"
+
+msgid "Density (Minimum points)"
+msgstr "Densidade (Mínimo de pontos)"
+
+msgid "Number of clusters"
+msgstr "Número de agrupamentos"

@@ -1293,3 +1293,25 @@ msgstr "Conexión API:"
 
 msgid "Add connection"
 msgstr "Añade conexión"
+
+
+msgid "Clustering"
+msgstr "Agrupamiento"
+
+msgid "Algorithm"
+msgstr "Algoritmo"
+
+msgid "DBSCAN"
+msgstr "DBSCAN"
+
+msgid "K-means"
+msgstr "K-medias"
+
+msgid "Desire distance"
+msgstr "Distancia deseada"
+
+msgid "Density (Minimum points)"
+msgstr "Densidad (Mínimo de puntos)"
+
+msgid "Number of clusters"
+msgstr "Número de agrupamientos"

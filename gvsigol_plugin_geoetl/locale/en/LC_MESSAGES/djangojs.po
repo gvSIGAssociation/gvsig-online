@@ -1295,3 +1295,25 @@ msgstr ""
 
 msgid "Add connection"
 msgstr ""
+
+msgid "Clustering"
+msgstr ""
+
+msgid "Algorithm"
+msgstr ""
+
+msgid "DBSCAN"
+msgstr ""
+
+msgid "K-means"
+msgstr ""
+
+msgid "Desire distance"
+msgstr ""
+
+msgid "Density (Minimum points)"
+msgstr ""
+
+msgid "Number of clusters"
+msgstr ""
+
