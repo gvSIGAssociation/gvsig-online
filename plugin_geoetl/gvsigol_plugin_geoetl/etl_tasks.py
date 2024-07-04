@@ -5318,3 +5318,80 @@ def trans_CorrectSpelling(dicc):
         pass
 
     return [table_name_target]
+
+
+def trans_Cluster(dicc):
+    
+    option = dicc['option']
+    eps = dicc['eps']
+    minpoints = dicc['minpoints']
+    num_clusters = dicc['number-clusters']
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} as (select * from {schema}.{table_source});').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target),
+        table_source = sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlDup)
+    conn.commit()
+
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN IF NOT EXISTS _cluster INTEGER, ADD COLUMN IF NOT EXISTS _id_temp SERIAL;').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target))
+    
+    cur.execute(sqlAlter)
+    conn.commit()
+    
+    if option == 'ST_ClusterDBSCAN':
+
+        sqlUpdate = sql.SQL(""" UPDATE {schema}.{tbl_target} 
+                            SET _cluster = subquery.cluster_id 
+                            FROM (
+                                SELECT ST_ClusterDBSCAN(wkb_geometry, eps := {eps}, minpoints := {minpoints}) OVER () AS cluster_id, _id_temp
+                                FROM {schema}.{tbl_target} 
+                            ) AS subquery
+                            WHERE {schema}.{tbl_target}._id_temp = subquery._id_temp; """).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            eps = sql.SQL(str(eps)),
+            minpoints = sql.SQL(str(minpoints)))
+                            
+    elif option == 'ST_ClusterKMeans':
+        
+        sqlUpdate = sql.SQL(""" UPDATE {schema}.{tbl_target} 
+                        SET _cluster = subquery.cluster_id 
+                        FROM (
+                            SELECT ST_ClusterKMeans(wkb_geometry, {num_clusters}) OVER () AS cluster_id, _id_temp
+                            FROM {schema}.{tbl_target} 
+                        ) AS subquery
+                        WHERE {schema}.{tbl_target}._id_temp = subquery._id_temp; """).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            num_clusters = sql.SQL(str(num_clusters)))
+
+    cur.execute(sqlUpdate)
+    conn.commit()
+    
+    sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target)
+    )
+
+    cur.execute(sqlDropCol)
+    conn.commit()   
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
