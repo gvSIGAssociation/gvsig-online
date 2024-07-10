@@ -104,7 +104,7 @@ from django.contrib import messages
 from . import tasks
 import time
 from django.core import serializers as serial
-from django.core.exceptions import PermissionDenied
+from django.db.models import Max
 from gvsigol_auth.signals import role_deleted
 
 logger = logging.getLogger("gvsigol")
@@ -1465,6 +1465,8 @@ def layer_update(request, layer_id):
             layer.allow_download = allow_download
             layer.single_image = single_image
             layer.layer_group = layer_group
+            max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
+            layer.order = max_order + 1 if max_order is not None else layer.order
             layer.time_enabled = time_enabled
             layer.time_enabled_field = time_field
             layer.time_enabled_endfield = time_endfield
@@ -2574,6 +2576,8 @@ def layer_create_with_group(request, layergroup_id):
                     )
                     if not newRecord.source_name:
                         newRecord.source_name = newRecord.name
+                    max_order = layergroup.layer_set.aggregate(Max('order')).get('order__max')
+                    newRecord.order = max_order + 1 if max_order is not None else newRecord.order
                     newRecord.time_enabled = time_enabled
                     newRecord.time_enabled_field = time_field
                     newRecord.time_enabled_endfield = time_endfield
@@ -4032,7 +4036,9 @@ def external_layer_add(request):
             external_layer.external = True
             external_layer.public = True
             external_layer.title = request.POST.get('title')
-            external_layer.layer_group_id = layer_group.id
+            external_layer.layer_group = layer_group
+            max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
+            external_layer.order = max_order + 1 if max_order is not None else external_layer.order
             external_layer.type = request.POST.get('type')
             external_layer.visible = is_visible
             external_layer.queryable = False
