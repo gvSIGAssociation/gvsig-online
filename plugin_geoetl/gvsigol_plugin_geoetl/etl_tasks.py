@@ -1326,7 +1326,7 @@ def trans_Counter(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    if gbAttr == '':
+    if gbAttr == '-':
 
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select * from {schema}.{tbl_source})').format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
@@ -2032,7 +2032,7 @@ def trans_Union(dicc):
     cur.execute(sqlIndex)
     conn.commit()
 
-    if groupby == '':
+    if groupby == '-':
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select ST_Union(wkb_geometry) as wkb_geometry from {schema}.{tbl_source});').format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
@@ -5326,6 +5326,8 @@ def trans_Cluster(dicc):
     eps = dicc['eps']
     minpoints = dicc['minpoints']
     num_clusters = dicc['number-clusters']
+    max_radius = dicc['max-radius']
+    attr = dicc['attr']
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
@@ -5369,16 +5371,46 @@ def trans_Cluster(dicc):
                             
     elif option == 'ST_ClusterKMeans':
         
-        sqlUpdate = sql.SQL(""" UPDATE {schema}.{tbl_target} 
-                        SET _cluster = subquery.cluster_id 
-                        FROM (
-                            SELECT ST_ClusterKMeans(wkb_geometry, {num_clusters}) OVER () AS cluster_id, _id_temp
-                            FROM {schema}.{tbl_target} 
-                        ) AS subquery
-                        WHERE {schema}.{tbl_target}._id_temp = subquery._id_temp; """).format(
-            schema = sql.Identifier(GEOETL_DB["schema"]),
-            tbl_target = sql.Identifier(table_name_target),
-            num_clusters = sql.SQL(str(num_clusters)))
+        if int(float(max_radius)) == 0:
+            max_radius = ''
+        elif attr == '-':
+            max_radius = ', '+max_radius
+        else:
+            max_radius = ', max_radius:='+max_radius
+            
+        if attr == '-':
+            
+            sqlUpdate = sql.SQL(""" UPDATE {schema}.{tbl_target} 
+                            SET _cluster = subquery.cluster_id 
+                            FROM (
+                                SELECT ST_ClusterKMeans(wkb_geometry, {num_clusters}{max_radius}) OVER () AS cluster_id, _id_temp
+                                FROM {schema}.{tbl_target} 
+                            ) AS subquery
+                            WHERE {schema}.{tbl_target}._id_temp = subquery._id_temp; """).format(
+                schema = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_target = sql.Identifier(table_name_target),
+                num_clusters = sql.SQL(str(num_clusters)),
+                max_radius = sql.SQL(str(max_radius)))
+        else:
+            
+            
+            sqlUpdate = sql.SQL(""" UPDATE {schema}.{tbl_target} 
+                            SET _cluster = subquery.cluster_id 
+                            FROM (
+                                SELECT ST_ClusterKMeans(
+                                    ST_Force4D(
+                                        wkb_geometry, 
+                                        mvalue := {attr}
+                                    ),
+                                    {num_clusters}{max_radius}) OVER () AS cluster_id, _id_temp
+                                FROM {schema}.{tbl_target} 
+                            ) AS subquery
+                            WHERE {schema}.{tbl_target}._id_temp = subquery._id_temp; """).format(
+                schema = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_target = sql.Identifier(table_name_target),
+                num_clusters = sql.SQL(str(num_clusters)),
+                attr = sql.SQL(str(attr)),
+                max_radius = sql.SQL(str(max_radius)))
 
     cur.execute(sqlUpdate)
     conn.commit()
@@ -5390,6 +5422,36 @@ def trans_Cluster(dicc):
 
     cur.execute(sqlDropCol)
     conn.commit()   
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+
+def trans_Voronoi(dicc):
+    
+    tolerance = dicc['tolerance']
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} AS (SELECT ST_VoronoiPolygons(wkb_geometry, {tolerance}) as wkb_geometry from {schema}.{table_source});').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target),
+        tolerance = sql.SQL(str(tolerance)),
+        table_source = sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlDup)
+    conn.commit() 
 
     conn.close()
     cur.close()
