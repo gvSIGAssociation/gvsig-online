@@ -2337,7 +2337,7 @@ msgstr "Es necesario guardar el grupo de capas primero, ¿Desea continuar?"
 
 #: gvsigol_services/templates/layergroup_list.html:12
 msgid "Return to project list"
-msgstr ""
+msgstr "Volver al listado de proyectos"
 
 #: gvsigol_services/templates/layergroup_list.html:16
 msgid "Add layer group"
