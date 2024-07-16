@@ -684,10 +684,10 @@ class Geoserver():
         
     def deleteLayerStyles(self, lyr):
         try:
-            layer_styles = StyleLayer.objects.filter(layer=lyr)
+            layer_styles = StyleLayer.objects.filter(layer=lyr).select_related('style')
     
             for layer_style in layer_styles:
-                style = Style.objects.get(id=layer_style.style_id)
+                style = layer_style.style
                 catalog = self.getGsconfig()
                 gs_style = catalog.get_style(style.name, workspace=None)
                 catalog.delete(gs_style, purge=True, recurse=True)
