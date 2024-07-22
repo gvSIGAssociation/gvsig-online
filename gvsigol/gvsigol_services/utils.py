@@ -365,7 +365,7 @@ def delete_schema_for_datastore(connection_params):
     cursor = connection.cursor()
 
     try:
-        delete_schema = "DROP SCHEMA IF EXISTS " + schema +  ";"
+        delete_schema = "DROP SCHEMA IF EXISTS " + schema +  " CASCADE ;"
         cursor.execute(delete_schema)
 
     except Exception as e:
@@ -1051,11 +1051,14 @@ def delete_datastore_elements(ds, gs=None):
 
 def _workspace_delete(ws, delete_data=False, reload_nodes=False):
         gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
+        for ds in Datastore.objects.filter(workspace=ws):
+            try:
+                if delete_data:
+                    gs.deleteDatastore(ds.workspace, delete_schema=True)
+                delete_datastore_elements(ds, gs=gs)
+            except:
+                logger.exception("Error deleting datastore")
         gs.deleteWorkspace(ws)
-        datastores = Datastore.objects.filter(workspace_id=ws.id)
-        for ds in datastores:
-            if delete_data:
-                gs.deleteDatastore(ds.workspace, delete_schema=True)
-            delete_datastore_elements(ds, gs=gs)
         ws.delete()
-        gs.reload_nodes()
+        if reload_nodes:
+            gs.reload_nodes()
