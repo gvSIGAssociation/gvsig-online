@@ -3069,22 +3069,18 @@ def get_feature_info(request):
 
                 else:
                     styles = []
-                    cluster = False
-                    if 'styles' in layer:
-                        styles = layer['styles']
-
-                    for s in styles:
-                        if s['is_default'] == True:
-                            name_style = s['name']
-                            ms = Style.objects.get(name = name_style)
-                            if ms.type == 'CP':
-                                cluster = True
-
                     urls.append(url)
                     query_layer = layer['query_layer']
-                    ws= None
+                    ws = None
                     if 'workspace' in layer:
                         ws = layer['workspace']
+
+                    cluster = False
+                    for s in styles:
+                        if s['is_default'] == True:
+                            style_name = s['name']
+                            if Style.objects.filter(type = 'CP', name=style_name, stylelayer__layer__name=query_layer, stylelayer__layer__datastore__workspace__name=ws).exists():
+                                cluster = True
 
                     print(url)
                     auth2 = None
