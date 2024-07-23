@@ -4905,13 +4905,15 @@ def register_action(request):
     if request.method == 'POST':
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
-        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+        try:
+            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
 
-        if request.user.is_anonymous:
-            action.send(layer, verb="gvsigol_services/layer_activate", action_object=layer)
-        else:
-            action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
-
+            if request.user.is_anonymous:
+                action.send(layer, verb="gvsigol_services/layer_activate", action_object=layer)
+            else:
+                action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
+        except:
+            logger.exception(f"register action - layer: ${layer_name} - ws: ${workspace}")
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
 
 @login_required()
