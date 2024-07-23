@@ -11339,18 +11339,18 @@ trans_Voronoi = draw2d.shape.layout.VerticalLayout.extend({
 
         $('#voronoi-accept-'+ID).click(function() {
 
-            var paramsUnion = {"id": ID,
+            var paramsVoronoi = {"id": ID,
             "parameters": [
                 {"tolerance": $('#tolerance-'+ID).val()}
             ]}
 
             schemaMod =[]
 
-            paramsUnion['schema'] = schemaMod
-            paramsUnion['schema-old'] = schemaEdge
+            paramsVoronoi['schema'] = schemaMod
+            paramsVoronoi['schema-old'] = schemaEdge
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
-            isAlreadyInCanvas(jsonParams, paramsUnion, ID)
+            isAlreadyInCanvas(jsonParams, paramsVoronoi, ID)
 
             icon.setColor('#4682B4')
             
@@ -13710,7 +13710,7 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
                                 '<select class="form-control" id="group-by-attr-'+ID+'"> </select>'+
                             '</div>'+
                             '<div>'+
-                                '<input type="checkbox" name="multi" id="multi-'+ID+'" value=""/>'+
+                                '<input type="checkbox" name="multi" id="multi-'+ID+'" value="" />'+
                                 '<label for="checkbox">'+gettext('Multigeometry for all features of the output')+'</label>'+
                             '</div>'+
                         '</form>'+
@@ -13772,12 +13772,13 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
             ]}
 
 
-            if($('#group-by-attr-'+ID).val()=== ""){
+            if($('#group-by-attr-'+ID).val()=== "-"){
                 schemaMod =[...schemaEdge]
+                schemaMod.shift();
             }else{
                 schemaMod=[$('#group-by-attr-'+ID).val()]
             }
-            schemaMod.shift();
+            
             paramsUnion['schema'] = schemaMod
             paramsUnion['schema-old'] = schemaEdge
 
