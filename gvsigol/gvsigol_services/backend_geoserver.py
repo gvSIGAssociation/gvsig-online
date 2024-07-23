@@ -814,7 +814,7 @@ class Geoserver():
                     return self.createCoverage(workspace, store, name, title)
         except rest_geoserver.RequestError as e:
             logger.exception('Creando capa: ' + name)
-            raise rest_geoserver.FailedRequestError(-1, str(e.server_message))
+            raise rest_geoserver.FailedRequestError(-1, e.get_server_message())
         except Exception as e:
             logger.exception('Creando capa: ' + name)
             raise rest_geoserver.FailedRequestError(-1, str(e))
