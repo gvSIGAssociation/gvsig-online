@@ -944,9 +944,14 @@ class RequestError(Exception):
     def get_message(self):
         return self.__str__()
 
+    def get_server_message(self):
+        try:
+            return self.server_message.decode('utf-8', 'replace')
+        except:
+            return str(self.server_message)
+    
     def get_detailed_message(self):
-        from builtins import str as text
-        msg = 'Status: ' + text(self.status_code)
+        msg = 'Status: ' + str(self.status_code)
         if isinstance(self.server_message, str):
             msg += '\nServer message: ' + self.server_message
         else:
