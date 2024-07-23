@@ -822,6 +822,9 @@ class Geoserver():
             return self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, user=self.user, password=self.password, extraParams=extraParams)
         except rest_geoserver.FailedRequestError as e:
             logger.exception('ERROR createFeatureType failed: ' + name)
+            logger.error("Status code: " + str(e.status_code))
+            logger.error("Msg: ")
+            logger.error(e)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             logger.exception('ERROR createFeatureType failed: ' + name)
