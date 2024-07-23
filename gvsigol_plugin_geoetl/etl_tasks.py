@@ -2051,23 +2051,50 @@ def trans_Union(dicc):
 
         cur.execute(sqlDup)
         conn.commit()
+        
+    srid, type_geom = get_type_n_srid(table_name_source)
 
     if multi == 'true':
-        srid, type_geom = get_type_n_srid(table_name_source)
+        
         if type_geom.startswith('MULTI'):
             pass
         else:
             type_geom = 'MULTI'+type_geom
-
-        sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
-        sqlAlter = sql.SQL(sqlAlter_).format(
-                    schema = sql.Identifier(GEOETL_DB["schema"]),
-                    tbl_target = sql.Identifier(table_name_target),
-                    type_geom = sql.SQL(type_geom),
-                    epsg = sql.SQL(str(srid)))
+            
+    else:
+        sqlTypeGeom_ = """SELECT SUBSTRING(ST_AsText(wkb_geometry) FROM 1 FOR POSITION('(' IN ST_AsText(wkb_geometry)) - 1)  AS geom_type
+                        FROM {schema}.{tbl_target}
+                        GROUP BY SUBSTRING(ST_AsText(wkb_geometry) FROM 1 FOR POSITION('(' IN ST_AsText(wkb_geometry)) - 1) """
         
-        cur.execute(sqlAlter)
+        sqlTypeGeom = sql.SQL(sqlTypeGeom_).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target))
+        
+        cur.execute(sqlTypeGeom)
         conn.commit()
+        
+        type_geom = 'GEOMETRY'
+        
+        count = 1
+        
+        for row in cur:
+            print(row, count)
+            if count == 1 and row[0] is not None:
+                type_geom = row[0]
+            elif count > 1:
+                type_geom = 'GEOMETRY'
+                break
+            count+=1
+
+    sqlAlter_ = 'ALTER TABLE {schema}.{tbl_target} ALTER COLUMN wkb_geometry TYPE geometry({type_geom},{epsg}) USING ST_SetSRID(wkb_geometry, {epsg})'
+    sqlAlter = sql.SQL(sqlAlter_).format(
+                schema = sql.Identifier(GEOETL_DB["schema"]),
+                tbl_target = sql.Identifier(table_name_target),
+                type_geom = sql.SQL(type_geom),
+                epsg = sql.SQL(str(srid)))
+        
+    cur.execute(sqlAlter)
+    conn.commit()
 
     return [table_name_target]
 
@@ -2611,11 +2638,30 @@ def trans_ExplodeGeom(dicc):
     
     srid, type_geom = get_type_n_srid(table_name_source)
     
-    if type_geom.startswith('MULTI'):
-        type_geom = type_geom[5:]
-
-    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
-    cur = conn.cursor()
+    sqlTypeGeom_ = """SELECT SUBSTRING(ST_AsText(wkb_geometry) FROM 1 FOR POSITION('(' IN ST_AsText(wkb_geometry)) - 1)  AS geom_type
+                    FROM {schema}.{tbl_target}
+                    GROUP BY SUBSTRING(ST_AsText(wkb_geometry) FROM 1 FOR POSITION('(' IN ST_AsText(wkb_geometry)) - 1) """
+    
+    sqlTypeGeom = sql.SQL(sqlTypeGeom_).format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        tbl_target = sql.Identifier(table_name_target))
+    
+    cur.execute(sqlTypeGeom)
+    conn.commit()
+    
+    type_geom = 'GEOMETRY'
+    
+    count = 1
+    
+    for row in cur:
+        print(row, count)
+        if count == 1 and row[0] is not None:
+            type_geom = row[0]
+        elif count > 1:
+            type_geom = 'GEOMETRY'
+            break
+        count+=1
+            
 
     sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN wkb_geometry TYPE Geometry({type_geom}, {srid})').format(
         schema = sql.Identifier(GEOETL_DB["schema"]),
