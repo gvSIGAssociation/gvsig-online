@@ -1054,7 +1054,7 @@ def _workspace_delete(ws, delete_data=False, reload_nodes=False):
         for ds in Datastore.objects.filter(workspace=ws):
             try:
                 if delete_data:
-                    gs.deleteDatastore(ds.workspace, delete_schema=True)
+                    gs.deleteDatastore(ds.workspace, ds, delete_schema=True)
                 delete_datastore_elements(ds, gs=gs)
             except:
                 logger.exception("Error deleting datastore")
