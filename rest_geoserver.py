@@ -928,9 +928,15 @@ class RequestError(Exception):
 
     def __str__(self):
         if self.message:
-            return str(self.message)
+            try:
+                return self.message.decode('utf-8', 'replace')
+            except:
+                return str(self.message)
         else:
-            return str(self.server_message)
+            try:
+                return self.server_message.decode('utf-8', 'replace')
+            except:
+                return str(self.server_message)
 
     def set_message(self, message):
         self.message = message
