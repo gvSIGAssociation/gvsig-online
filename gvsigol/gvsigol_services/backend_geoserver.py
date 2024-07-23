@@ -272,6 +272,11 @@ class Geoserver():
                             del params_dict['passwd']
                         except KeyError:
                             pass
+                    else:
+                        try:
+                            del params_dict['jndiReferenceName']
+                        except KeyError:
+                            pass
 
                 utils.create_schema_for_datastore(json.loads(connection_params)) # load again to pass unaltered parameters
                 ds = catalog.create_datastore(name, workspace.name)
