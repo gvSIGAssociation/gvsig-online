@@ -2054,7 +2054,6 @@ def trans_Union(dicc):
 
     if multi == 'true':
         srid, type_geom = get_type_n_srid(table_name_source)
-
         if type_geom.startswith('MULTI'):
             pass
         else:
@@ -2609,6 +2608,24 @@ def trans_ExplodeGeom(dicc):
     )
     cur.execute(sqlRename)
     conn.commit()
+    
+    srid, type_geom = get_type_n_srid(table_name_source)
+    
+    if type_geom.startswith('MULTI'):
+        type_geom = type_geom[5:]
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN wkb_geometry TYPE Geometry({type_geom}, {srid})').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_name = sql.Identifier(table_name_target),
+        type_geom = sql.SQL(type_geom),
+        srid = sql.SQL(str(srid))
+    )
+
+    cur.execute(sqlAlter)
+    conn.commit()
 
     conn.close()
     cur.close()
@@ -2626,10 +2643,7 @@ def get_type_n_srid(table_name, schema = GEOETL_DB["schema"], geom = 'wkb_geomet
 
     
     cur = conn.cursor()
-
-    #sqlTypeGeom = 'SELECT ST_ASTEXT (wkb_geometry) FROM '+GEOETL_DB['schema']+'."'+table_name+'" WHERE wkb_geometry IS NOT NULL LIMIT 1'
     sqlTypeGeom = sql.SQL("SELECT type, srid FROM geometry_columns WHERE f_table_schema = %s AND f_table_name = %s and f_geometry_column = %s").format()
-    
     cur.execute(sqlTypeGeom, [schema, table_name, geom])
     conn.commit()
 
@@ -5444,14 +5458,44 @@ def trans_Voronoi(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} AS (SELECT ST_VoronoiPolygons(wkb_geometry, {tolerance}) as wkb_geometry from {schema}.{table_source});').format(
+    """sqlDup = sql.SQL('CREATE TABLE {schema}.{table_target} AS (SELECT ST_VoronoiPolygons(wkb_geometry, {tolerance}) as wkb_geometry from {schema}.{table_source});').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_target = sql.Identifier(table_name_target),
+        tolerance = sql.SQL(str(tolerance)),
+        table_source = sql.Identifier(table_name_source)
+    )"""
+    sqlDup = sql.SQL('''
+        CREATE TABLE {schema}.{table_target} AS (
+            WITH voronoi AS (
+                SELECT (ST_Dump(ST_VoronoiPolygons(wkb_geometry, {tolerance}))).geom AS geom
+                FROM {schema}.{table_source}
+            )
+            SELECT ST_Multi(ST_Collect(geom)) AS wkb_geometry
+            FROM voronoi
+            WHERE ST_GeometryType(geom) = 'ST_Polygon'
+        );
+    ''').format(
         schema = sql.Identifier(GEOETL_DB["schema"]),
         table_target = sql.Identifier(table_name_target),
         tolerance = sql.SQL(str(tolerance)),
         table_source = sql.Identifier(table_name_source)
     )
     cur.execute(sqlDup)
-    conn.commit() 
+    conn.commit()
+    
+    srid, type_geom = get_type_n_srid(table_name_source)
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN wkb_geometry TYPE Geometry(MultiPolygon, {srid})').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        table_name = sql.Identifier(table_name_target),
+        srid = sql.SQL(str(srid))
+    )
+
+    cur.execute(sqlAlter)
+    conn.commit()
 
     conn.close()
     cur.close()
