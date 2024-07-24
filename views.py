@@ -1274,10 +1274,15 @@ def project_get_conf(request):
                 except:
                     pass
             else:
-                conf['user']['credentials'] = {
-                    'username': request.session['username'],
-                    'password': request.session['password']
-                }
+                try:
+                    conf['user']['credentials'] = {
+                        'username': request.session['username'],
+                        'password': request.session['password']
+                    }
+                except KeyError:
+                    # happens when using OIDC auth, the session has expired and the token has not been provided
+                    logger.debug(str(user_roles))
+                    return JsonResponse({"status": "error", "message": "Token missing or expired"}, status_code=401)
         if is_shared_view:
             view_name = request.POST.get('shared_view_name')
             shared_view = SharedView.objects.get(name__exact=view_name)
