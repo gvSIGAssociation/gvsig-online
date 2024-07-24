@@ -4913,7 +4913,7 @@ def register_action(request):
             else:
                 action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
         except:
-            logger.exception(f"register action - layer: ${layer_name} - ws: ${workspace}")
+            logger.exception(f"register action - layer: {layer_name} - ws: {workspace}")
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
 
 @login_required()
