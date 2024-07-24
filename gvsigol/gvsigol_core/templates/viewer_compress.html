@@ -486,6 +486,8 @@
 				}
 			},
 			error : function() {
+				console.log(e);
+				messageBox.show('error', gettext('Session has expired'));
 			}
 		});
 	</script>

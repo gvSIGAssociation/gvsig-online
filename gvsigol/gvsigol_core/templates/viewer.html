@@ -527,7 +527,9 @@
 					$('#modal-layer_loading_error').modal('show');
 				}
 			},
-			error : function() {
+			error : function(e) {
+				console.log(e);
+				messageBox.show('error', gettext('Session has expired'));
 			}
 		});
 	</script>
