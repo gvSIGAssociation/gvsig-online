@@ -141,7 +141,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             access_token = token_info.get('access_token')
             access_token_bytes = force_bytes(access_token)
             key = self._get_key(access_token_bytes)
-            access_token_payload = self.verify_token(access_token_bytes, key, nonce=nonce)
+            access_token_payload = self.verify_token(access_token_bytes, key)
             print(access_token_payload)
             session['oidc_access_token'] = access_token
             session['oidc_access_token_payload'] = access_token_payload
@@ -230,9 +230,10 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         payload = json.loads(payload_data.decode('utf-8'))
         token_nonce = payload.get('nonce')
 
-        if self.get_settings('OIDC_USE_NONCE', True) and nonce != token_nonce:
-            msg = 'JWT Nonce verification failed.'
-            raise SuspiciousOperation(msg)
+        if nonce is not None: # nonce is not relevant for access token and is not included in KC >= 25, so skip test when not provided
+            if self.get_settings('OIDC_USE_NONCE', True) and nonce != token_nonce:
+                msg = 'JWT Nonce verification failed.'
+                raise SuspiciousOperation(msg)
         return payload
     """
     TODO: map claims to django permissions (if needed)
