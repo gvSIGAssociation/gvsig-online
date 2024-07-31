@@ -307,7 +307,7 @@ class Geoserver():
             ds.description = description # description is ignored by gsconfig at the moment
             ds.type = driver
             response = catalog.save(ds)
-            if response.status_code == 201:
+            if response.status_code == 200 or response.status_code == 201:
                 return True
             logger.error(f'Error creating datastore - Status code: {response.status_code}')
             logger.error(response.text)
