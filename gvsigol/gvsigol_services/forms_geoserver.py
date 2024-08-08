@@ -29,19 +29,28 @@ from gvsigol.settings import SUPPORTED_ENCODINGS
 from gvsigol_core import utils as core_utils
 import json
 from gvsigol_services.utils import get_user_layergroups
+from .shp2postgis import MODE_APPEND, MODE_CREATE, MODE_OVERWRITE
 
 supported_encodings = tuple((x,x) for x in SUPPORTED_ENCODINGS)
-supported_encodings = supported_encodings + (('autodetect', _('autodetect')),)
+supported_encodings = (('autodetect', _('autodetect')),) + supported_encodings
 supported_srs = tuple((x['code'],x['code']+' - '+x['title']) for x in core_utils.get_supported_crs_array())
 supported_srs_and_blank = (('', '---------'),) + supported_srs
 
-MODE_CREATE="CR"
-MODE_APPEND="AP"
-MODE_OVERWRITE="OW"
 postgis_modes = ((MODE_CREATE, _('Create')),  (MODE_APPEND, _('Append')), (MODE_OVERWRITE, _('Overwrite')))
 geometry_types = (('Point', _('Point')), ('MultiPoint', _('Multipoint')),
                   ('LineString', _('Line')), ('MultiLineString', _('Multiline')),
                   ('Polygon', _('Polygon')), ('MultiPolygon', _('Multipolygon')))
+
+PRESERVE_PK = 'preserve_pk'
+DO_NOT_PRESERVE_PK = 'do_not_preserve_pk'
+preserve_pk_choices = ((PRESERVE_PK, _('Preserve primary key values')), (DO_NOT_PRESERVE_PK, _('Do not preserve primary key values')))
+
+PRESERVE_TABLE_NOT_APPLIC = "not_applic"
+PRESERVE_TABLE = "ow_trunc"
+DO_NOT_PRESERVE_TABLE = "ow_no_trunc"
+
+preserve_table_choices = ((PRESERVE_TABLE_NOT_APPLIC, _('Not applicable')),(PRESERVE_TABLE, _('Preserve table structure (truncate mode)')),  (DO_NOT_PRESERVE_TABLE, _('Delete and recreate table')))
+
 
 time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')),)
 #time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('LIST', _('list')))
@@ -91,22 +100,24 @@ class VectorLayerUploadForm(forms.Form):
 
 class PostgisLayerUploadForm(forms.Form):
     datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
-    #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
     file = forms.CharField(label=_('File'), required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     mode = forms.ChoiceField(label=_('Mode'), required=True, choices=postgis_modes, widget=forms.Select(attrs={'class':'form-control'}))
     name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    #title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    #layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
     encoding = forms.ChoiceField(label=_('Encoding'), required=True, choices=supported_encodings, widget=forms.Select(attrs={'class':'form-control'}))
     srs = forms.ChoiceField(label=_('SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
-    #visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    #queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    #cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
-    #single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    preserve_pk = forms.ChoiceField(label=_('Preserve primary key'), required=True, choices=preserve_pk_choices, initial=PRESERVE_PK, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    pk_column = forms.ChoiceField(label=_('Primary key column'), required=False, choices=[], widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    truncate = forms.ChoiceField(label=_('Preserve table structure'), required=False, choices=preserve_table_choices, initial=PRESERVE_TABLE_NOT_APPLIC, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  
+        user = kwargs.pop('user', None)
+        source_columns = kwargs.pop('source_columns', [])
+        if 'ogc_fid' in source_columns:
+            pk_column = 'ogc_fid'
+        else:
+            pk_column = ''
+            source_columns.insert(0, pk_column)
+        pk_column_choices = [(col, col) for col in source_columns]
         super(PostgisLayerUploadForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
             qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
@@ -117,6 +128,12 @@ class PostgisLayerUploadForm(forms.Form):
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_('Datastore'), required=True,
             queryset=qs,
+            widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
+        )
+        self.fields["pk_column"] = forms.ChoiceField(
+            label=_('Primary key column'), required=False,
+            choices = pk_column_choices,
+            initial = pk_column,
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )
     

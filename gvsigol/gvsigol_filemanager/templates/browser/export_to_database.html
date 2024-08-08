@@ -7,7 +7,7 @@
 	<div class="col-md-12">
 		<div class="box">
 
-			<form role="form" enctype="multipart/form-data" method="post"
+			<form id="export-shp-form" role="form" enctype="multipart/form-data" method="post"
 				action="{% url 'filemanager:export-to-database' %}">
 				<div class="box-header">
 					<div class="box-tools pull-right">
@@ -76,7 +76,7 @@
 						<div class="col-md-12 form-group">
 							<label for="id_name">{% trans "Name" %}</label>
 							{{ form.name }}
-							<select id="select2" class="form-control js-example-basic-single select2-hidden-accessible"
+							<select id="table_name_select" class="form-control js-example-basic-single select2-hidden-accessible"
 								style="visibility: hidden;"></select>
 							<p class="text-muted">* {% trans "Layer will be uploaded to the selected data store" %}.</p>
 						</div>
@@ -90,6 +90,20 @@
 						<div class="col-md-6 form-group">
 							<label for="id_srs">{% trans "Coordinate reference system" %}</label>
 							{{ form.srs }}
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="id_truncate">{% trans "Preserve table structure" %}</label>
+							{{ form.truncate }}
+						</div>
+						<div class="col-md-3 form-group">
+							<label for="id_pk_column">{% trans "Primary key column" %}</label>
+							{{ form.pk_column }}
+						</div>
+						<div class="col-md-3 form-group">
+							<label for="id_preserve_pk">{% trans "Primary key values" %}</label>
+							{{ form.preserve_pk }}
 						</div>
 					</div>
 
@@ -106,9 +120,22 @@
 	$('#submenu-layers').addClass("active");
 
 	$(document).ready(function () {
-		$('#select2').next('.select2-container').hide();
+		$('#table_name_select').next('.select2-container').hide();
 		var ds_options = $("#id_datastore option");
-		
+		function setTruncate() {
+			if ($('#id_mode').val() == 'OW') {
+				$('#id_truncate').prop('disabled', false);
+				$('#id_truncate').val('ow_trunc');
+				$('#id_truncate').trigger('change');
+			}
+			else {
+				$('#id_truncate').prop('disabled', true);
+				$('#id_truncate').val('not_applic');
+				$('#id_truncate').trigger('change');
+			}
+		}
+		setTruncate();
+
 		// translate default layer group
 		var lgs = $("#id_layer_group");
 		var lg_options = $("#id_layer_group option");
@@ -154,12 +181,38 @@
 			} catch (error) {}
 		}
 
+		function updatePkSelect() {
+			var selectedMode = $('#id_mode').val();
+			if (selectedMode == 'AP') {
+				$('#id_pk_column').prop('disabled', true);
+				$('#id_pk_column').trigger('change');
+			}
+			else if (selectedMode == 'OW') {
+				var truncate = $('#id_truncate').val();
+				if (truncate == 'ow_no_trunc') {
+					$('#id_pk_column').prop('disabled', false);
+					$('#id_pk_column').trigger('change');
+				}
+				else {
+					$('#id_pk_column').prop('disabled', true);
+					$('#id_pk_column').trigger('change');
+				}
+			} else {
+				$('#id_pk_column').prop('disabled', false);
+				$('#id_pk_column').trigger('change');
+			}
+		}
+
 		function updateTables(id_datastore, selectObj) {
 			if (id_datastore) {
 				$("body").overlay();
 				$.getJSON("{% url 'list_datastore_tables' %}", { id_datastore: id_datastore }, function (data) {
 					var previousValue = selectObj.val();
+					console.log(previousValue);
 					var placeholderSelected = true;
+					if (!previousValue) {
+						previousValue = $('#id_name').val();
+					}
 
 					if (data == null || data.length == 0) {
 						var text = "{% trans 'Data store is empty' %}";
@@ -204,47 +257,68 @@
 
 
 		$('#upload-button').click(function (e) {
-			$("body").overlay();
+			//$("body").overlay();
+		});
+		$("#export-form").on("submit", function(evt) {
+			if (this.el.checkValidity && !this.el.checkValidity()) {
+				console.log("not valid");
+			}
+			else {
+				console.log("valid");
+			}
+			return true;
 		});
 
-		$('#id_mode').click(function () {
+		$('#id_mode').on("change", function() {
 			var selectedOption = $(this).val();
 			var id_datastore = $('#id_datastore');
-				id_datastore.val(ds_options.eq(0).val()).trigger('change');
+			id_datastore.val(ds_options.eq(0).val()).trigger('change');
 			if (selectedOption != 'CR') {
 				$('#id_name').hide();
-				var select = $('#select2').select2();
+				var select = $('#table_name_select').select2();
 				rebuildSelect(select, "", false, false);
-				$('#select2').next('.select2-container').show();
-
+				$('#table_name_select option[value='+$('#id_name').val()+']').attr('selected', 'selected');
+				$('#table_name_select').trigger('change');
+				$('#table_name_select').next('.select2-container').show();
 			} else {
-				$('#id_name').show();				
-				$('#select2').next('.select2-container').hide();				
+				$('#id_name').show();
+				$('#table_name_select').next('.select2-container').hide();
 				updateNameValue();
 			}
+			setTruncate();
+			updatePkSelect();
+		});
+		$('#id_name').on("change", function() {
+			console.log($(this));
+			console.log($(this).val());
 		});
 
 		$('#id_datastore').on('change', function () {
 			// Handle the selected option here
 			var selectedOption = $(this).val();
 			var id_datastore = $('option:selected', $(this)).val();
-			updateTables(id_datastore, $('#select2'));
+			updateTables(id_datastore, $('#table_name_select'));
 
 		});
 
 		$('#id_datastore').click(function () {
 			var selectedOption = $(this).val();
 			var id_datastore = $('option:selected', $(this)).val();
-			updateTables(id_datastore, $('#select2'));
+			updateTables(id_datastore, $('#table_name_select'));
 		});
 
-		$('#select2').on('change', function() {
+		$('#table_name_select').on('change', function() {
 			var selectedOption = $(this).val();
-			$('#id_name').val(selectedOption);
+			console.log(selectedOption);
+			if (selectedOption !== null) {
+				$('#id_name').val(selectedOption);
+			}
 		});
-
+		$('#id_truncate').on('change', function() {
+			updatePkSelect();
+		})
 		updateNameValue();
-
+		updatePkSelect();
 	});
 
 </script>

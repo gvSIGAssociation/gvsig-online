@@ -62,30 +62,11 @@ from . import geographic_servers
 from requests.exceptions import RetryError, ConnectionError, Timeout, TooManyRedirects
 import psycopg2.errors
 from urllib.parse import urlparse, ParseResult
+from .shp2postgis import _valid_sql_name_regex, shp2postgis, do_export_to_postgis, get_fields_from_shape
+from .exceptions import UnsupportedRequestError, BadFormat, WrongElevationPattern, WrongTimePattern, InvalidValue, UserInputError
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
-
-class UnsupportedRequestError(Exception):
-    pass
-
-class BadFormat(rest_geoserver.UploadError):
-    pass
-
-class WrongElevationPattern(rest_geoserver.UploadError):
-    pass
-
-class WrongTimePattern(rest_geoserver.UploadError):
-    pass
-
-class InvalidValue(rest_geoserver.RequestError):
-    pass
-
-class UserInputError(rest_geoserver.UploadError):
-    pass
-
-#_valid_sql_name_regex=re.compile("^[^\W\d][\w]*$")
-_valid_sql_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 """
 Types that can be created from gvSIG Online
@@ -1148,228 +1129,6 @@ class Geoserver():
             print("__update_raster_stats failed!!")
             print(e)
             pass
-    
-    def __columntypes_ogr(self, dbf_field_defs):
-        col_types = []
-        for field in dbf_field_defs:
-            if _valid_sql_name_regex.search(field.name) == None:
-                raise InvalidValue(-1, _("Invalid field name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=field.name))
-            if field.type == 'N' and field.decimal_count == 0 and field.length > 18:
-                col_types.append(self.__quote_identifier_ogr_column_types(field.name) + "=numeric(" + str(field.length) + "," + str(field.decimal_count) + ")")
-        return ",".join(col_types)
-    
-    def __quote_identifier_ogr(self, field_name):
-        return '"' + field_name.replace('\\', '\\\\').replace('"', '\\"') + '"'
-
-    def __quote_identifier_ogr_column_types(self, field_name):
-        return field_name.replace('\\', '\\\\').replace('"', '\\"')
-
-    def __fieldmapping_sql(self, creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password):
-        if creation_mode == forms_geoserver.MODE_CREATE:
-            # no mapping needed
-            return
-        
-        i = Introspect(db, host=host, port=port, user=user, password=password)
-        with i as c:
-            try:
-                db_fields = c.get_fields(table_name, schema=schema)
-                db_pks = c.get_pk_columns(table_name, schema=schema)
-            except psycopg2.errors.UndefinedTable as e:
-                raise rest_geoserver.RequestError(-1, _('Overwrite or append was specified but the table does not exist: {0}'.format(table_name)))
-
-        if len(db_pks) == 1:
-            db_pk = db_pks[0]
-        else:
-            db_pk = 'ogc_fid'
-        
-        if 'ogc_fid' in shp_fields:
-            # ogr will use this as pk, nothing to do
-            pk = 'ogc_fid'
-        elif db_pk in shp_fields:
-            pk = db_pk
-        else:
-            pk = None
-
-        fields = []
-        pending = []
-        for f in shp_fields:
-            if f == pk:
-                fields.append(self.__quote_identifier_ogr(f) + ' as ogc_fid')
-            elif f in db_fields:
-                ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == f), None)
-                if ctrl_field:
-                    if creation_mode==forms_geoserver.MODE_APPEND:
-                        # skip control field in append mode
-                        continue
-                    elif ctrl_field.get('type', '').startswith('timestamp'):
-                        fields.append('CAST("' + f + '" AS timestamp)')
-                        continue
-                fields.append(self.__quote_identifier_ogr(f))
-            else:
-                pending.append(f)
-        
-        if (pk is None or pk == 'ogc_fid') and len(pending) == 0:
-            # no mapping needed
-            return
-        for f in pending:
-            # try to find a mapping
-            db_mapped_field = None
-            for db_field in db_fields:
-                if db_field.startswith(f):
-                    db_mapped_field = db_field
-            if not db_mapped_field:
-                for db_field in db_fields:
-                    if db_field.startswith(f.rstrip('0123456789')):
-                        # remove numbers in the right side of the field name to try to match with db
-                        db_mapped_field = db_field
-            if db_mapped_field:
-                ctrl_field = next((the_f for the_f in CONTROL_FIELDS if the_f.get('name') == db_mapped_field), None)
-                if ctrl_field:
-                    if creation_mode==forms_geoserver.MODE_APPEND:
-                        # skip control field in append mode
-                        continue
-                    elif ctrl_field.get('type', '').startswith('timestamp'):
-                        fields.append('CAST(' + self.__quote_identifier_ogr(f) + ' AS timestamp) as "' + db_mapped_field + '"')
-                        db_fields.remove(db_mapped_field)
-                        continue
-                fields.append(self.__quote_identifier_ogr(f)  + ' as "' + db_mapped_field + '"')
-                db_fields.remove(db_mapped_field)
-            else:
-                fields.append(self.__quote_identifier_ogr(f))
-        
-        shp_name = os.path.splitext(os.path.basename(shp_path))[0]
-        sql = "SELECT " + ",".join(fields) + " FROM " + shp_name
-        return sql
-    
-    def shp2postgis(self, shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=forms_geoserver.MODE_CREATE, encoding="autodetect", sql=None, column_types=None):
-        ogr = gdaltools.ogr2ogr()
-        ogr.set_encoding(encoding)
-        ogr.set_input(shp_path, srs=srs)
-        conn = gdaltools.PgConnectionString(host=host, port=port, dbname=dbname, schema=schema, user=user, password=password)
-        ogr.set_output(conn, table_name=table_name)
-        if creation_mode == forms_geoserver.MODE_CREATE:
-            ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_CREATE, data_source_mode=ogr.MODE_DS_UPDATE)
-        elif creation_mode == forms_geoserver.MODE_APPEND:
-                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_APPEND, data_source_mode=ogr.MODE_DS_UPDATE)
-        elif creation_mode == forms_geoserver.MODE_OVERWRITE:
-                ogr.set_output_mode(layer_mode=ogr.MODE_LAYER_OVERWRITE, data_source_mode=ogr.MODE_DS_UPDATE)
-        creation_options = {
-            "LAUNDER": "YES",
-            "PRECISION": "NO"
-        }
-        if column_types:
-            creation_options['COLUMN_TYPES'] = column_types
-        ogr.layer_creation_options = creation_options
-        ogr.config_options = {
-            "OGR_TRUNCATE": "NO"
-        }
-        ogr.set_sql(sql)
-        ogr.set_dim("2")
-        ogr.geom_type = "PROMOTE_TO_MULTI"
-        ogr.execute()
-        print(" ".join(ogr.safe_args))
-        return ogr.stderr if ogr.stderr is not None else ''
-
-    def __do_export_to_postgis(self, name, datastore, form_data, shp_path, shp_fields):
-        try:
-            name = name.lower()
-            # get & sanitize parameters
-            srs = form_data.get('srs')
-            encoding = form_data.get('encoding')
-            creation_mode = form_data.get('mode')
-            if not encoding in self.supported_encodings_plain or not srs in self.supported_srs_plain:
-                raise rest_geoserver.RequestError()
-            # FIXME: sanitize connection parameters too!!!
-            # We are going to perform a command line execution with them,
-            # so we must be ABSOLUTELY sure that no code injection can be
-            # performed
-            ds_params = json.loads(datastore.connection_params) 
-            db = ds_params.get('database')
-            host = ds_params.get('host')
-            port = ds_params.get('port')
-            schema = ds_params.get('schema', "public")
-            port = str(int(port))
-            user = ds_params.get('user')
-            password = ds_params.get('passwd')
-            if _valid_sql_name_regex.search(name) == None:
-                raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
-            if _valid_sql_name_regex.search(db) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid database name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(user) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid user name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(schema) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
-
-            shp_field_names = [f.name for f in shp_fields]
-            sql = self.__fieldmapping_sql(creation_mode, shp_path, shp_field_names, name, host, port, db, schema, user, password)
-            column_types = self.__columntypes_ogr(shp_fields)
-            stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding, sql=sql, column_types=column_types)
-            if stderr.startswith("ERROR"): # some errors don't return non-0 status so will not directly raise an exception
-                raise rest_geoserver.RequestError(-1, stderr)
-            with Introspect(db, host=host, port=port, user=user, password=password) as i:
-                # add control fields
-                db_fields = i.get_fields(name, schema=schema)
-                for control_field in settings.CONTROL_FIELDS:
-                    has_control_field = False
-                    for field in db_fields:
-                        if field == control_field['name']:
-                            try:
-                                i.set_field_default(schema, name, control_field['name'], control_field.get('default'))
-                            except:
-                                logger.exception("Error setting default value for control field: " + control_field['name'])
-                            has_control_field = True
-                    if not has_control_field:
-                        try:
-                            i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
-                        except:
-                            logger.exception("Error adding control field: " + control_field['name'])
-                i.update_pk_sequences(name, schema=schema)
-            
-            if creation_mode == forms_geoserver.MODE_OVERWRITE:
-                # re-install triggers
-                for trigger in Trigger.objects.filter(layer__datastore=datastore, layer__source_name=name):
-                    try:
-                        trigger.drop()
-                        trigger.install()
-                    except:
-                        logger.exception("Failed to install trigger: " + str(trigger))
-                
-            for layer in Layer.objects.filter(datastore=datastore, source_name=name):
-                self.reload_featuretype(layer)
-                expose_pks = self.datastore_check_exposed_pks(datastore)
-                layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
-                layer.save()
-            if not stderr:
-                return True
-        except rest_geoserver.RequestError as e:
-            logger.exception(e)
-            raise
-        except gdaltools.GdalToolsError as e:
-            logger.exception(str(e))
-            if e.code > 0 and creation_mode == forms_geoserver.MODE_OVERWRITE:
-                params = json.loads(datastore.connection_params)
-                host = params['host']
-                port = params['port']
-                dbname = params['database']
-                user = params['user']
-                passwd = params['passwd']
-                schema = params.get('schema', 'public')
-                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-                i.delete_table(schema, name)
-                i.close()
-                try:
-                    stderr = self.shp2postgis(shp_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding)
-                    if stderr:
-                        raise rest_geoserver.RequestError(-1, stderr)
-                    return True
-                except gdaltools.GdalToolsError as e:
-                    raise rest_geoserver.RequestError(e.code, str(e))
-            raise rest_geoserver.RequestError(e.code, str(e))
-        except Exception as e:
-            logger.exception(str(e))
-            message =  _("Error uploading the layer. Review the file format. Cause: ") + str(e)
-            raise rest_geoserver.RequestError(-1, message)
-        raise rest_geoserver.RequestWarning(stderr)
 
     def prepare_string(self, s):
         return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
@@ -1471,7 +1230,7 @@ class Geoserver():
                         original_style_name = layer_name
                     shp_abs = os.path.join(dir_path, f)
                     try:
-                        self.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                        shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                     except Exception as e:
                         print("ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido ")
                         continue 
@@ -1596,26 +1355,17 @@ class Geoserver():
         except Exception as e:
             logging.exception(e)
             raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
-    
-    
-    def get_fields_from_shape(self, shp_path):
-        fields = {}
-        fields['fields'] = {}
-        
-        dbf_file = shp_path.replace('.shp', '.dbf').replace('.SHP', '.dbf')
-        if not os.path.isfile(dbf_file):
-            dbf_file = dbf_file.replace('.dbf', '.DBF')
-        table = DBF(dbf_file)                
-        return table.fields  
         
         
     def exportShpToPostgis(self, form_data):
         name = form_data['name']
         ds = form_data['datastore']
         shp_path = form_data['file'] 
+        pk_column = form_data.get('pk_column')
+        preserve_pk = (form_data.get('preserve_pk') != forms_geoserver.DO_NOT_PRESERVE_PK)
+        truncate = (form_data.get('truncate') == forms_geoserver.PRESERVE_TABLE)
         
-        
-        fields = self.get_fields_from_shape(shp_path)
+        fields = get_fields_from_shape(shp_path)
         for field in fields:
             if ' ' in field.name:
                 raise InvalidValue(-1, _("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field.name))
@@ -1623,14 +1373,23 @@ class Geoserver():
         
         if _valid_sql_name_regex.search(name) == None:
             raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
-                    
-        try:
-            self.__do_export_to_postgis(name, ds, form_data, shp_path, fields)
-            return True
 
-        except Exception as e:
-            print(e)
-            raise e
+        name = name.lower()
+        # get & sanitize parameters
+        srs = form_data.get('srs')
+        encoding = form_data.get('encoding')
+        creation_mode = form_data.get('mode')
+        if not encoding in self.supported_encodings_plain:
+            msg = _("Error uploading the layer. Review the file format. Cause: ") + "Unsupported encoding"
+            logger.error(msg)
+            raise rest_geoserver.RequestError(server_message="Unsupported encoding")
+        if not srs in self.supported_srs_plain:
+            msg = _("Error uploading the layer. Review the file format. Cause: ") + "Unsupported SRS"
+            logger.error(msg)
+            raise rest_geoserver.RequestError(server_message=msg)
+
+        return do_export_to_postgis(self, name, ds, creation_mode, shp_path, fields, srs, encoding, pk_column, preserve_pk, truncate)
+
     
     def shpdir2postgis(self, request, datastore, application, dir_path, layergroup, table_definition,creation_mode, defaults):
         try:

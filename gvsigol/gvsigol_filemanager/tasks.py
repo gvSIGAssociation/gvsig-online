@@ -29,8 +29,13 @@ def postBackground(**kwargs):
     export.save()
 
     user = User.objects.get(username = username)
-
-    form = PostgisLayerUploadForm(post, files, user=user)
+    """
+    post.get('file_path')
+    shp_def = get_fields_from_shape(file_details.get('fileurl'))
+    shp_columns = [col.name for col in shp_def]
+    form = PostgisLayerUploadForm(user=self.request.user, source_columns=shp_columns)
+    """
+    form = PostgisLayerUploadForm(post, files, user=user, source_columns=[post.get('pk_column', '')])
     if form.is_valid():
         try:
             gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)

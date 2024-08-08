@@ -30,6 +30,7 @@ from django.shortcuts import render
 from .tasks import postBackground
 from .models import exports_historical
 from gvsigol.celery import app as celery_app
+from gvsigol_services.shp2postgis import get_fields_from_shape
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
@@ -128,12 +129,12 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
     def get_context_data(self, **kwargs):
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
         
-        form = PostgisLayerUploadForm(user=self.request.user)
-                      
-        context['file'] = self.fm.file_details()       
+        file_details = self.fm.file_details()
+        shp_def = get_fields_from_shape(file_details.get('fileurl'))
+        shp_columns = [col.name for col in shp_def]
+        form = PostgisLayerUploadForm(user=self.request.user, source_columns=shp_columns)
+        context['file'] = file_details
         context['form'] = form  
-
-    
         return context
     
     def post(self, request, *args, **kwargs):
@@ -164,9 +165,7 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         export_md.save()
 
         try:
-
             postBackground.apply_async(kwargs = {'id': export_md.id, 'post': request.POST, 'files': request.FILES, 'username': request.user.username})
-
             return redirect('/gvsigonline/filemanager/list_exports/')
         
         except Exception as e:
