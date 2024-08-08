@@ -2816,3 +2816,14 @@ msgstr ""
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
+
+msgid ""
+"gvSIG Online only supports overwriting/appending tables with primary key"
+"named ogc_fid due to the version of gdal/ogr installed on the server."
+msgstr ""
+
+msgid ""
+"The export has failed because it would create duplicate values in the {pkfield} field, "
+"which does not allow duplicate values. Consider correcting the data or read the User Manual"
+" for the option 'Do not preserve primary key'. Details: {details}"
+msgstr ""
