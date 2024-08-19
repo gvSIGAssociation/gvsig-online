@@ -198,22 +198,23 @@ def _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, 
             db_fields.remove(db_mapped_field)
         else:
             fields.append(quote_identifier_ogr(shp_field_def.name))
-    return fields
+    return fields, db_pk
 
 def fieldmapping_sql(creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column):
     if creation_mode == MODE_CREATE:
         fields =  _creation_fieldmapping(shp_fields, default_creation_options, default_column_types, pk_column)
+        db_pk = None
     else:
         # TODO: seguramente FID no funciona para el append
         # if creation_mode == MODE_OVERWRITE:
         #   fields = _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column)
         # else:
         #   fields = _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types)
-        fields = _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column)
+        fields, db_pk = _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column)
     
     shp_name = os.path.splitext(os.path.basename(shp_path))[0]
     sql = "SELECT " + ",".join(fields) + " FROM " + shp_name
-    return sql
+    return sql, db_pk
 
 def create_vrt_shp(shp_path, target_folder, pk_column, encoding, srs):
     lyr_basename = os.path.basename(shp_path)
@@ -335,7 +336,7 @@ def do_export_to_postgis(gs, name, datastore, creation_mode, shp_path, shp_field
 
         orig_shp_path = shp_path
         shp_path = create_symlinks(shp_path, tmp_folder)
-        sql = fieldmapping_sql(creation_mode, shp_path, shp_fields, name, host, port, db, schema, user, password, creation_options, column_types, pk_column)
+        sql, db_pk = fieldmapping_sql(creation_mode, shp_path, shp_fields, name, host, port, db, schema, user, password, creation_options, column_types, pk_column)
         column_types = ",".join(list(column_types.values()))
         creation_options['COLUMN_TYPES'] = column_types
         config_options = {}
@@ -344,7 +345,7 @@ def do_export_to_postgis(gs, name, datastore, creation_mode, shp_path, shp_field
         if preserve_pk:
             if creation_mode == MODE_APPEND or (creation_mode == MODE_OVERWRITE and truncate):
                 preserve_fid = True
-                shp_path = create_vrt_shp(shp_path, tmp_folder, pk_column, encoding, srs)
+                shp_path = create_vrt_shp(shp_path, tmp_folder, db_pk, encoding, srs)
             else:
                 preserve_fid = False
         else:
