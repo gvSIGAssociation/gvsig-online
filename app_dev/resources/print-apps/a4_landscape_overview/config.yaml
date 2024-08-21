@@ -1,0 +1,102 @@
+credentials:
+  - !credential
+    matchers:
+      - !dnsMatch
+        host: ##GVSIGOL_HOST##
+        port: 443
+        pathRegex : /geoserver.+
+    password: ##GEOSERVER_PASSWD##
+    username: root
+#proxies:
+#   - !proxy
+#     scheme: http
+#     host: proxy-te.nube.red.uy
+#     port: 3128
+#     matchers:
+#       - !localMatch
+#         reject: true
+#       - !dnsMatch
+#         host: www.camptocamp.org
+#         reject: true
+#       - !acceptAll {}
+allowedReferers:
+   - !hostnameMatch
+     host: ##GVSIGOL_HOST##
+     allowSubDomains: true
+
+templates:
+  #===========================================================================
+  A4 landscape with Overview: !template
+  #===========================================================================
+    reportTemplate: a4_landscape_overview.jrxml
+    attributes:
+      title: !string
+        default: "Default Title"
+      crs: !string
+        default: "EPSG:3857"
+      crsPermanent: !string
+        default: "EPSG:3857"
+      legalWarning: !string
+        default: "Legal Warning"
+      map: !map
+        zoomLevels: !zoomLevels
+          scales: [5000, 10000, 25000, 50000, 100000, 500000]
+        maxDpi: 400
+        width: 580
+        height: 450
+        default:
+          useAdjustBounds: true
+      overviewMap: !overviewMap
+        width: 200
+        height: 200
+        maxDpi: 400
+      scalebar: !scalebar
+        width: 150
+        height: 25
+        default:
+          backgroundColor: "rgba(255, 255, 255, 0)"
+          align: "center"
+          fontSize: 9
+          barSize: 5
+          geodetic: false
+      northArrowDef: !northArrow
+        size: 60
+        default:
+          graphic: "file://NorthArrow_10.svg"
+          backgroundColor: "rgba(255, 255, 255, 0)"
+      legend: !legend {}
+      logo_url: !string
+        default: "logo.png"
+      scale: !string
+        default: ""
+    processors:
+    - !configureHttpRequests
+      httpProcessors:
+        - !restrictUris
+          matchers:
+            - !localMatch {}
+            - !acceptAll {}              
+        - !forwardHeaders
+          headers: [Referer, User-Agent]
+        # Add a static header to all http requests
+        - !addHeaders
+          headers:
+            newHeader : 'headerValue'
+    - !reportBuilder # compile all reports in current directory
+      directory: '.'
+    - !createMap
+      inputMapper: {map: map}
+      outputMapper: {mapSubReport: mapSubReport}
+    - !createScalebar {}
+    - !createOverviewMap {}
+    - !createNorthArrow
+        inputMapper: {map: map, northArrowDef: northArrow}
+    - !prepareLegend # create a datasource for the report with the 'legend' attribute
+      maxWidth: 200
+      dpi: 200
+      template: legend.jrxml
+      inputMapper: {legend: legend}
+      outputMapper:
+        legendDataSource: legendDataSource
+        legendSubReport: legendSubReport
+        numberOfLegendRows: numberOfLegendRows
