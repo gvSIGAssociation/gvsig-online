@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"POT-Creation-Date: 2024-08-21 10:16+0000\n"
 "PO-Revision-Date: 2023-10-16 13:15+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -20,19 +20,19 @@ msgstr ""
 "X-Source-Language: C\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: gvsigol_filemanager/forms.py:5
+#: forms.py:5
 msgid "Directory name"
 msgstr "Nom del directori"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:13
+#: templates/browser/export_to_database.html:14
 msgid "Export"
 msgstr "Exportar"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:48
+#: templates/browser/export_to_database.html:51
 msgid "Warning!"
 msgstr "Avís!"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:49
+#: templates/browser/export_to_database.html:52
 msgid ""
 "Before exporting the shapefile check the name of the columns. Column names "
 "can not contain spaces or special characters."
@@ -40,137 +40,167 @@ msgstr ""
 "Abans d'exportar el shapefile revise el nom de les columnes. El nom de les "
 "columnes no pot contenir espais ni caràcters especials."
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:60
+#: templates/browser/export_to_database.html:63
 msgid "Table creation mode"
 msgstr "Mode de creació de la taula"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:67
+#: templates/browser/export_to_database.html:70
 msgid "Data store"
 msgstr "Magatzem de dades"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:74
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:29
+#: templates/browser/export_to_database.html:77
+#: templates/browser/filemanager_list.html:29
 msgid "Name"
 msgstr "Nom"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:76
+#: templates/browser/export_to_database.html:81
 msgid "Layer will be uploaded to the selected data store"
 msgstr "La capa serà pujada al magatzem seleccionat"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:82
+#: templates/browser/export_to_database.html:87
 msgid "Character encoding"
 msgstr "Codificació de caracters"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:86
+#: templates/browser/export_to_database.html:91
 msgid "Coordinate reference system"
 msgstr "Sistema de referència de coordenades"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:109
+#: templates/browser/export_to_database.html:97
+msgid "Preserve table structure"
+msgstr ""
+
+#: templates/browser/export_to_database.html:101
+msgid "Primary key column"
+msgstr ""
+
+#: templates/browser/export_to_database.html:105
+msgid "Primary key values"
+msgstr ""
+
+#: templates/browser/export_to_database.html:145
 msgid "Default"
 msgstr "Per defecte"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:27
+#: templates/browser/export_to_database.html:218
+#, fuzzy
+#| msgid "Data store"
+msgid "Data store is empty"
+msgstr "Magatzem de dades"
+
+#: templates/browser/export_to_database.html:236
+msgid "Choose table"
+msgstr ""
+
+#: templates/browser/export_to_database.html:245
+msgid "Service is unavailable"
+msgstr ""
+
+#: templates/browser/export_to_database.html:252
+msgid "No valid data store selected"
+msgstr ""
+
+#: templates/browser/filemanager_list.html:27
 msgid "Select"
 msgstr "Seleccionar"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:30
+#: templates/browser/filemanager_list.html:30
 msgid "Size"
 msgstr "Mida"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:31
+#: templates/browser/filemanager_list.html:31
 msgid "Date"
 msgstr "Data"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:34
+#: templates/browser/filemanager_list.html:34
 msgid "Actions"
 msgstr "Accions"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:74
+#: templates/browser/filemanager_list.html:74
 msgid "Delete directory"
 msgstr "Eliminar directori"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:77
+#: templates/browser/filemanager_list.html:77
 msgid "Export to database"
 msgstr "Exportar a bse de dades"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:82
+#: templates/browser/filemanager_list.html:82
 msgid "Transform to database"
 msgstr "Transformar a base de dades"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:87
+#: templates/browser/filemanager_list.html:87
 msgid "Unzip file"
 msgstr "Descomprimir arxiu"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:90
+#: templates/browser/filemanager_list.html:90
 msgid "Delete file"
 msgstr "Eliminar arxiu"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:101
+#: templates/browser/filemanager_list.html:101
 msgid "Nothing to see here."
 msgstr "No hi ha arxius per mostrar."
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:110
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:121
-#: gvsigol_filemanager/templates/filemanager_create_directory.html:13
+#: templates/browser/filemanager_list.html:110
+#: templates/browser/filemanager_list.html:121
+#: templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Crear directori"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:111
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:122
-#: gvsigol_filemanager/templates/filemanager_upload.html:14
+#: templates/browser/filemanager_list.html:111
+#: templates/browser/filemanager_list.html:122
+#: templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Pujar"
 
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:112
-#: gvsigol_filemanager/templates/browser/filemanager_list.html:123
+#: templates/browser/filemanager_list.html:112
+#: templates/browser/filemanager_list.html:123
 msgid "Export history"
 msgstr "Històric d'exportacions"
 
-#: gvsigol_filemanager/templates/dashboard_filemanager_menu.html:7
+#: templates/dashboard_filemanager_menu.html:7
 msgid "File manager"
 msgstr "Administrador d'arxius"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:13
+#: templates/filemanager_exports_historical.html:13
 msgid "Back"
 msgstr "Enrere"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:23
+#: templates/filemanager_exports_historical.html:23
 msgid "ID"
 msgstr ""
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:24
+#: templates/filemanager_exports_historical.html:24
 msgid "Status"
 msgstr "Estat"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:25
+#: templates/filemanager_exports_historical.html:25
 msgid "File"
 msgstr "Arxiu"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:26
+#: templates/filemanager_exports_historical.html:26
 msgid "Time"
 msgstr "Temps"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:27
+#: templates/filemanager_exports_historical.html:27
 msgid "Message"
 msgstr "Missatge"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:28
+#: templates/filemanager_exports_historical.html:28
 msgid "User"
 msgstr "Usuari"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:58
+#: templates/filemanager_exports_historical.html:58
 msgid "Try again"
 msgstr "Torna a provar"
 
-#: gvsigol_filemanager/views.py:322 gvsigol_filemanager/views.py:333
+#: views.py:322 views.py:333
 msgid "Error deleting resource"
 msgstr "Error eliminant el recurs"
 
-#: gvsigol_filemanager/views.py:322
+#: views.py:322
 msgid "exists in datastore"
 msgstr "Existeix en el magatzem de dades"
 
-#: gvsigol_filemanager/views.py:356
+#: views.py:356
 msgid "Error unzipping resource"
 msgstr "Error descomprimint el recurs"
 
