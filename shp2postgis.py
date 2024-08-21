@@ -202,8 +202,11 @@ def _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, 
 
 def fieldmapping_sql(creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column):
     if creation_mode == MODE_CREATE:
+        if not pk_column:
+            db_pk = 'ogc_fid'
+        else:
+            db_pk = pk_column
         fields =  _creation_fieldmapping(shp_fields, default_creation_options, default_column_types, pk_column)
-        db_pk = None
     else:
         # TODO: seguramente FID no funciona para el append
         # if creation_mode == MODE_OVERWRITE:
@@ -323,8 +326,6 @@ def do_export_to_postgis(gs, name, datastore, creation_mode, shp_path, shp_field
             raise InvalidValue(-1, _("The connection parameters contain an invalid user name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
         if _valid_sql_name_regex.search(schema) == None:
             raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
-        if not pk_column:
-            pk_column = 'ogc_fid'
 
         creation_options = {}
         column_types = {}
@@ -420,7 +421,7 @@ def do_export_to_postgis(gs, name, datastore, creation_mode, shp_path, shp_field
                     raise rest_geoserver.RequestError(e.code, str(e))
             elif e.message.decode("UTF-8").startswith("ERROR 1") and \
                 ('pkey' in e.message.decode("UTF-8") or 'duplicate key' in e.message.decode("UTF-8") or 'lave duplicada' in e.message.decode("UTF-8")): # TODO no debería hacer el decode aqui
-                msg = _("The export has failed because it would create duplicate values in the {pkfield} field, which does not allow duplicate values. Consider correcting the data or read the User Manual for the option 'Do not preserve primary key'. Details: {details}").format(pkfield=pk_column, details=str(e))
+                msg = _("The export has failed because it would create duplicate values in the {pkfield} field, which does not allow duplicate values. Consider correcting the data or read the User Manual for the option 'Do not preserve primary key'. Details: {details}").format(pkfield=db_pk, details=str(e))
                 raise rest_geoserver.RequestError(e.code, msg)
         raise rest_geoserver.RequestError(e.code, str(e))
     except Exception as e:
