@@ -1,12 +1,12 @@
-credentials:
-  - !credential
-    matchers:
-      - !dnsMatch
-        host: ##GVSIGOL_HOST##
-        port: 443
-        pathRegex : /geoserver.+
-    password: ##GEOSERVER_PASSWD##
-    username: root
+# credentials:
+#   - !credential
+#     matchers:
+#       - !dnsMatch
+#         host: ##GVSIGOL_HOST##
+#         port: 443
+#         pathRegex : /geoserver.+
+#     password: ##GEOSERVER_PASSWD##
+#     username: root
 #proxies:
 #   - !proxy
 #     scheme: http
@@ -19,10 +19,10 @@ credentials:
 #         host: www.camptocamp.org
 #         reject: true
 #       - !acceptAll {}
-allowedReferers:
-   - !hostnameMatch
-     host: ##GVSIGOL_HOST##
-     allowSubDomains: true
+# allowedReferers:
+#    - !hostnameMatch
+#      host: ##GVSIGOL_HOST##
+#      allowSubDomains: true
 
 templates:
   #===========================================================================
