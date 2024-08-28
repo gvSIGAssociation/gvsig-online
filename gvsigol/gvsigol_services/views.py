@@ -4906,7 +4906,10 @@ def register_action(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         try:
-            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+            if workspace:
+                layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+            else:
+                layer = Layer.objects.get(name=layer_name, external=True)
 
             if request.user.is_anonymous:
                 action.send(layer, verb="gvsigol_services/layer_activate", action_object=layer)
