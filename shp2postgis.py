@@ -303,8 +303,17 @@ def read_encoding(shp_path):
                 enc = enc[:-1]
             return enc
     except:
-        pass
-
+        try:
+            # assume iso-8859-15 if no .cst or .cpg file exists and DBF lib can't detect internal encoding
+            if not (os.path.isfile(name + ".cpg") or os.path.isfile(name + ".CPG")):
+                dbf_file = name + ".dbf"
+                if not os.path.isfile(dbf_file):
+                    dbf_file = name + ".DBF"
+                with DBF(dbf_file) as table:
+                    if table.encoding == 'ascii':
+                        return 'iso-8859-15'
+        except:
+            pass
 
 def do_export_to_postgis(gs, name, datastore, creation_mode, shp_path, shp_fields, srs, encoding, pk_column=None, preserve_pk=None, truncate=None):
     tmp_folder = None
