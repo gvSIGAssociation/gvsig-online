@@ -1672,13 +1672,17 @@ def _project_clone(project, new_project_name, title, target_server, target_works
                         services_utils._workspace_delete(target_workspace, delete_data=True)
                     else:
                         services_utils._workspace_delete(target_workspace, delete_data=False)
-                    gs = geographic_servers.get_instance().get_server_by_id(server.id)
+                    if datastore:
+                        gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+                    else:
+                        gs = None
                 
                     if new_project:
                         lyr_groups = [prj_lg.layer_group for prj_lg in new_project.projectlayergroup_set.filter(baselayer_group=False)]
                         new_project.delete()
                         for lyr_group in lyr_groups:
-                            gs.deleteGeoserverLayerGroup(lyr_group)
+                            if gs:
+                                gs.deleteGeoserverLayerGroup(lyr_group)
                             lyr_group.delete()
 
                         gs.setDataRules()
