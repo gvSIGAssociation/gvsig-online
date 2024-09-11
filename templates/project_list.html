@@ -189,7 +189,7 @@ $(document).ready(function() {
 				var filter = 'tr[data-projectid="' + data[0] + '"]';
 				var dataset = $('#projects-table').find(filter).data();
 				if (dataset['canmanage']) {
-                	return '<a title="' + '{% trans "Clone project" %}" ' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-primary"><i class="fa fa-clone"></i></a>';
+                	return '<a {% if IFRAME_MODE_UI %} style="display: none" {% endif %} title="' + '{% trans "Clone project" %}" ' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-primary clone-project-button"><i class="fa fa-clone"></i></a>';
 				}
 				else {
 					return '';
