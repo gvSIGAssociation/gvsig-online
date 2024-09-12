@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"POT-Creation-Date: 2024-09-12 11:27+0000\n"
 "PO-Revision-Date: 2022-05-20 16:48+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -420,33 +420,33 @@ msgstr ""
 "Si no heu sol·licitat un restabliment de contrasenya, ignoreu aquest correu "
 "electrònic. La contrasenya no canviarà."
 
-#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:171 gvsigol_auth/views.py:299
+#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:172 gvsigol_auth/views.py:300
 msgid "Your account has been disabled"
 msgstr "La contrasenya ha estat desactivada"
 
-#: gvsigol_auth/views.py:88 gvsigol_auth/views.py:90 gvsigol_auth/views.py:173
-#: gvsigol_auth/views.py:175 gvsigol_auth/views.py:301
+#: gvsigol_auth/views.py:88 gvsigol_auth/views.py:90 gvsigol_auth/views.py:174
+#: gvsigol_auth/views.py:176 gvsigol_auth/views.py:302
 msgid "The username and password you have entered do not match our records"
 msgstr "L'usuari i contrasenya introduïts no coincideixen"
 
-#: gvsigol_auth/views.py:250
+#: gvsigol_auth/views.py:251
 msgid "User account does not exist"
 msgstr "El compte d'usuari no existeix"
 
-#: gvsigol_auth/views.py:254
+#: gvsigol_auth/views.py:255
 msgid "That did not work"
 msgstr "Això no ha funcionat"
 
-#: gvsigol_auth/views.py:305
+#: gvsigol_auth/views.py:306
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr ""
 "Token invàlid. El vostre enllaç ha caducat, heu de sol·licitar-ne un altre."
 
-#: gvsigol_auth/views.py:393
+#: gvsigol_auth/views.py:395
 msgid "User creation failed"
 msgstr "La creació de l'usuari ha fallat"
 
-#: gvsigol_auth/views.py:513
+#: gvsigol_auth/views.py:515
 msgid ""
 "The authentication server is not available. Try again later or contact "
 "system administrators."
@@ -454,7 +454,7 @@ msgstr ""
 "El servidor d'autenticació no està disponible. Prova de nou més tard o "
 "contacta amb els administradors del sistema."
 
-#: gvsigol_auth/views.py:546
+#: gvsigol_auth/views.py:548
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
@@ -465,11 +465,11 @@ msgstr ""
 "començar amb una lletra o un subratllat (_). Els caràcters posteriors poden "
 "ser lletres, guions baixos o números"
 
-#: gvsigol_auth/views.py:590
+#: gvsigol_auth/views.py:592
 msgid "Admin is a reserved role"
 msgstr "Admin és un rol reservat"
 
-#: gvsigol_auth/views.py:594
+#: gvsigol_auth/views.py:596
 #, python-brace-format
 msgid ""
 "Invalid user role name: '{value}'. Identifiers must begin with a letter or "
@@ -480,7 +480,7 @@ msgstr ""
 "lletra o un subratllat (_). Els caràcters posteriors poden ser lletres, "
 "guions baixos o números"
 
-#: gvsigol_auth/views.py:619
+#: gvsigol_auth/views.py:621
 msgid "System roles can't be deleted"
 msgstr "Els rols d'usuari no es poden eliminar"
 

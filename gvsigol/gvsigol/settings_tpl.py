@@ -256,9 +256,9 @@ USE_L10N = True
 USE_TZ = True
 
 EXTRA_LANG_INFO = {
-    'ca-es@valencia': {
+    'ca-es-valencia': {
         'bidi': False,
-        'code': 'ca-es@valencia',
+        'code': 'ca-es-valencia',
         'name': 'Valencian',
         'name_local': 'Valencià'
     },

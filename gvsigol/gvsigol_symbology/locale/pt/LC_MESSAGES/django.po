@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"POT-Creation-Date: 2024-09-12 11:27+0000\n"
 "PO-Revision-Date: 2021-06-14 17:57+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -428,8 +428,8 @@ msgstr "Fechar"
 
 #: gvsigol_symbology/templates/clustered_points_add.html:262
 #: gvsigol_symbology/templates/clustered_points_update.html:268
-#: gvsigol_symbology/templates/color_ramp_add.html:129
-#: gvsigol_symbology/templates/color_ramp_update.html:135
+#: gvsigol_symbology/templates/color_ramp_add.html:140
+#: gvsigol_symbology/templates/color_ramp_update.html:146
 #: gvsigol_symbology/templates/color_table_add.html:377
 #: gvsigol_symbology/templates/color_table_update.html:406
 #: gvsigol_symbology/templates/custom_add.html:119
@@ -1144,7 +1144,7 @@ msgstr ""
 
 #: gvsigol_symbology/views.py:1133 gvsigol_symbology/views.py:1180
 #: gvsigol_symbology/views.py:1228 gvsigol_symbology/views.py:1305
-#: gvsigol_symbology/views.py:1368 gvsigol_symbology/views.py:1506
+#: gvsigol_symbology/views.py:1368 gvsigol_symbology/views.py:1508
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
@@ -1159,6 +1159,10 @@ msgstr "É necessário entrar um nome para a biblioteca"
 #: gvsigol_symbology/views.py:1193 gvsigol_symbology/views.py:1381
 msgid "You must enter a name for the library and select a file"
 msgstr "É necessário entrar um nome para a biblioteca e selecionar um arquivo"
+
+#: gvsigol_symbology/views.py:1388
+msgid "There is already a library with that name"
+msgstr ""
 
 #~ msgid "Library will be removed, Do you want continue?"
 #~ msgstr "A biblioteca será removida. Quer continuar?"

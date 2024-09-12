@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-16 12:27+0000\n"
+"POT-Creation-Date: 2024-09-12 11:27+0000\n"
 "PO-Revision-Date: 2021-06-15 19:08+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -520,11 +520,11 @@ msgstr ""
 "Saiba como gerenciar informações geográficas de um dispositivo celular ou "
 "tablet"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:459
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:465
 msgid "Username"
 msgstr "Nome de usuário"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:462
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:468
 msgid "Email"
 msgstr "Correio electrónico"
 
@@ -548,7 +548,7 @@ msgstr "Você está logado como usuário básico"
 msgid "Last login"
 msgstr "Último Login"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:463
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:469
 msgid "Password"
 msgstr "Senha"
 
@@ -1127,9 +1127,9 @@ msgstr "Excluir visão compartilhada "
 msgid "Update TOC"
 msgstr "Atualização PDC"
 
-#: gvsigol_core/templates/viewer.html:91 gvsigol_core/templates/viewer.html:566
+#: gvsigol_core/templates/viewer.html:91 gvsigol_core/templates/viewer.html:568
 #: gvsigol_core/templates/viewer_compress.html:93
-#: gvsigol_core/templates/viewer_compress.html:523
+#: gvsigol_core/templates/viewer_compress.html:525
 msgid "Close"
 msgstr "Fechar"
 
@@ -1183,91 +1183,91 @@ msgstr "As alterações não guardadas serão perdidas. Continuar?"
 msgid "Error loading layers"
 msgstr "Erro nas camadas carregadas"
 
-#: gvsigol_core/utils.py:442
+#: gvsigol_core/utils.py:448
 msgid "New user account"
 msgstr "Nova conta de usuário"
 
-#: gvsigol_core/utils.py:458
+#: gvsigol_core/utils.py:464
 msgid "Account data"
 msgstr "Dados da conta"
 
-#: gvsigol_core/utils.py:460
+#: gvsigol_core/utils.py:466
 msgid "First name"
 msgstr "Nome"
 
-#: gvsigol_core/utils.py:461
+#: gvsigol_core/utils.py:467
 msgid "Last name"
 msgstr "Sobrenome"
 
-#: gvsigol_core/utils.py:744
+#: gvsigol_core/utils.py:750
 msgid "Navigation history"
 msgstr "Histórico de navegação"
 
-#: gvsigol_core/utils.py:745
+#: gvsigol_core/utils.py:751
 msgid "Browse the view forward and backward"
 msgstr "Navegue pela janela para a frente e para trás"
 
-#: gvsigol_core/utils.py:749
+#: gvsigol_core/utils.py:755
 msgid "Zoom tools"
 msgstr "Ferramentas de zoom"
 
-#: gvsigol_core/utils.py:750
+#: gvsigol_core/utils.py:756
 msgid "Zoom in, zoom out, ..."
 msgstr "Ampliar, diminuir o zoom..."
 
-#: gvsigol_core/utils.py:754
+#: gvsigol_core/utils.py:760
 msgid "Feature info"
 msgstr "Informação de caracterí­sticas"
 
-#: gvsigol_core/utils.py:755
+#: gvsigol_core/utils.py:761
 msgid "Map information at point"
 msgstr "Informações do mapa no ponto"
 
-#: gvsigol_core/utils.py:759
+#: gvsigol_core/utils.py:765
 msgid "Measure tools"
 msgstr "Ferramentas de medida"
 
-#: gvsigol_core/utils.py:760
+#: gvsigol_core/utils.py:766
 msgid "It allows to measure areas and distances"
 msgstr "Permite medir áreas e distâncias"
 
-#: gvsigol_core/utils.py:764
+#: gvsigol_core/utils.py:770
 msgid "Search coordinates"
 msgstr "Procurar coordenadas"
 
-#: gvsigol_core/utils.py:765
+#: gvsigol_core/utils.py:771
 msgid "Center the map at given coordinates"
 msgstr "Centrar o mapa em coordenadas dadas"
 
-#: gvsigol_core/utils.py:769
+#: gvsigol_core/utils.py:775
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenadas"
 
-#: gvsigol_core/utils.py:770
+#: gvsigol_core/utils.py:776
 msgid "Transform coordinates between different systems"
 msgstr "Transformar coordenadas entre diferentes sistemas"
 
-#: gvsigol_core/utils.py:774
+#: gvsigol_core/utils.py:780
 msgid "Geolocation"
 msgstr "Geolocalização"
 
-#: gvsigol_core/utils.py:775
+#: gvsigol_core/utils.py:781
 msgid "Center the map in the current position"
 msgstr "Centrar o mapa na posição actual"
 
-#: gvsigol_core/utils.py:779
+#: gvsigol_core/utils.py:785
 msgid "Share view"
 msgstr "Vista de compartilhamento"
 
-#: gvsigol_core/utils.py:780
+#: gvsigol_core/utils.py:786
 msgid "Allows you to share the view in its current state"
 msgstr "Permite-lhe compartilhar a visualizasão em seu estado atual"
 
-#: gvsigol_core/utils.py:784
+#: gvsigol_core/utils.py:790
 msgid "Select feature"
 msgstr "Seleccionar caracterí­stica"
 
-#: gvsigol_core/utils.py:785
+#: gvsigol_core/utils.py:791
 msgid "Select features from current layers"
 msgstr "Selecionar características das camadas atuais"
 
@@ -1289,39 +1289,39 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "O nome do projeto já existe"
 
-#: gvsigol_core/views.py:1440 gvsigol_core/views.py:1450
+#: gvsigol_core/views.py:1445 gvsigol_core/views.py:1455
 msgid " manual title"
 msgstr ""
 
-#: gvsigol_core/views.py:1441 gvsigol_core/views.py:1451
+#: gvsigol_core/views.py:1446 gvsigol_core/views.py:1456
 #, fuzzy
 #| msgid "User manual"
 msgid " manual desc"
 msgstr "Manual do usuário"
 
-#: gvsigol_core/views.py:1540 gvsigol_core/views.py:1542
+#: gvsigol_core/views.py:1545 gvsigol_core/views.py:1547
 msgid "Shared view"
 msgstr "Vista compartilhada"
 
-#: gvsigol_core/views.py:1543
+#: gvsigol_core/views.py:1548
 msgid "Link"
 msgstr "Link"
 
-#: gvsigol_core/views.py:1700 gvsigol_core/views.py:1724
+#: gvsigol_core/views.py:1709 gvsigol_core/views.py:1733
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1719
+#: gvsigol_core/views.py:1728
 msgid "The project was successfully cloned."
 msgstr ""
 
-#: gvsigol_core/views.py:1861
+#: gvsigol_core/views.py:1870
 #, fuzzy
 #| msgid "You must enter an project name"
 msgid "You must enter an application name"
 msgstr "É  necessário inserir um nome de projeto"
 
-#: gvsigol_core/views.py:1865
+#: gvsigol_core/views.py:1874
 #, fuzzy, python-brace-format
 #| msgid ""
 #| "Invalid project name: '{value}'. Identifiers must begin with a letter or "
@@ -1336,7 +1336,7 @@ msgstr ""
 "uma letra ou uma sublinhado (_). Os caracteres subsequentes podem ser "
 "letras, sublinhados ou números"
 
-#: gvsigol_core/views.py:1869
+#: gvsigol_core/views.py:1878
 #, fuzzy
 #| msgid "Project name already exists"
 msgid "Application name already exists"

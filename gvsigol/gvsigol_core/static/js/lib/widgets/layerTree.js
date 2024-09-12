@@ -62,7 +62,7 @@ layerTree.prototype.refreshSlider = function() {
 };
 
 layerTree.prototype.createTree = function() {
-	
+	console.log("createTree");
 	var self = this;
 	this.layerCount = 0;
 	var groupCount = 1;

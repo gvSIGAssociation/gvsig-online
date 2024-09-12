@@ -66,24 +66,34 @@ viewer.core = {
 		this.conf = conf;
 		this._auth_count = 0;
 		this._initialized = false;
+		this._pendingLayers_ = [];
+		this._configuredLayers = {};
 		this._pendingLayers = {};
-		if (this._auth_needed()) {
+		this._authenticatedCapabilities = {};
+		this._parsedCapabilities = {};
+		this._parsedAuthenticatedCapabilities = {};
+		this._pendingAuthenticatedWmtsLayers = {};
+		this._pendingWmtsLayers = {};
+		this._asyncPendingLayers = [];
+		if (this._authNeeded()) {
 			this._authenticate();
 		}
 		else {
 			this._refresh_token();
 		}
+		this._loadCapabilities();
 		this.extraParams = extraParams;
 		this._createMap();
 		this._initToolbar();
-		this._loadLayers();
+		this._createLayers();
+		//this._loadLayers();
 		this._createWidgets();
 		this._loadTools();
 		this._initialized = true;
-		if (!this._auth_needed()) {
+		if (!this._authNeeded()) {
 			this._loadPendingLayers();
-			this._loadWidgets();
 		}
+		this._loadWidgets();
     },
     stringToBase64: function(s) {
 		var byteArray = new TextEncoder().encode(s);
@@ -114,14 +124,14 @@ viewer.core = {
 				self._auth_count++;
 				console.log('Authenticated to ' + url);
 				self._loadPendingLayers(url);
-				if (self._auth_done()) {
+				if (self._authDone()) {
 					console.log('Authentication finished.');
-					self._loadWidgets();
+					self._loadAuthenticatedCapabilities();
 				}
 			}
 		});
 	},
-	_auth_needed: function() {
+	_authNeeded: function() {
 		return (this.conf.user && !this.conf.remote_auth && this.conf.user.credentials);
 	},
 	_authenticate: function() {
@@ -143,8 +153,14 @@ viewer.core = {
 			}, 10000);
 		}
 	},
-	_auth_done() {
-		if (this._auth_needed()) {
+	_asyncLayersLoaded() {
+		if (this._asyncPendingLayers.length>0) {
+			return false;
+		}
+		return true;
+	},
+	_authDone() {
+		if (this._authNeeded()) {
 			return this._auth_count == this.conf.auth_urls.length;
 		}	
 		return true;
@@ -185,26 +201,29 @@ viewer.core = {
 					console.log(response);
 				}
 			}
-			else {
-				console.log('refresh_token not available');
-			}
 		} catch (error) {
 			console.error("There has been a problem with your fetch operation:", error);
 		}
 	},
-    _createMap: function() {
-    	var self = this;
-
-    	var blank = new ol.layer.Tile({
-    		id: this._nextLayerId(),
-    		label: gettext('Blank'),
-          	visible: false,
-    	    source: new ol.source.XYZ({
-    	       url: "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
-    	    })
-    	});
-    	blank.baselayer = true;
-    	var default_layers = [blank];
+	_createEmptyLayer: function(label) {
+		var id = this._nextLayerId(); 
+		var lyr = new ol.layer.Tile({
+			id: id,
+			label: label,
+			visible: false,
+			source: this._transparentSource
+		});
+		lyr.id = id;
+		return lyr;
+	},
+	_createMap: function() {
+		var self = this;
+		this._transparentSource = new ol.source.XYZ({
+			url: "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
+		});
+		var blank = this._createEmptyLayer(gettext('Blank'));
+		blank.baselayer = true;
+		var default_layers = [blank];
 
 		var mousePositionControl = new ol.control.MousePosition({
 	        coordinateFormat: ol.coordinate.createStringXY(4),
@@ -215,43 +234,6 @@ viewer.core = {
 	    });
 
 		this.zoombar = new ol.control.Zoom();
-
-		var wmsSource = new ol.layer.Tile({
-			extent: [-13884991, 2870341, -7455066, 6338219],
-			source: new ol.source.TileWMS({
-			  url: 'https://ahocevar.com/geoserver/wms',
-			  params: {'LAYERS': 'topp:states', 'TILED': true},
-			  serverType: 'geoserver',
-			  // Countries have transparency, so do not fade tiles:
-			  transition: 0,
-			})
-		  });
-
-		/*  var default_srs = 'EPSG:3857';
-		  var projection = new ol.proj.get(default_srs);
-		  var projectionExtent = projection.getExtent();
-		  var size = ol.extent.getWidth(projectionExtent) / 256;
-		  var resolutions = new Array(21);
-		  var matrixIds = new Array(21);
-		  for (var z = 0; z < 21; ++z) {
-			  resolutions[z] = size / Math.pow(2, z);
-			  matrixIds[z] = default_srs+':'+z;
-		  }
-
-		  var wmtsLayer = new ol.layer.Tile({
-			source: new ol.source.WMTS({
-				url: 'https://www.ign.es/wmts/pnoa-ma?request=GetCapabilities&service=WMTS',
-				layer: 'OI.OrthoimageCoverage',
-				format: 'image/jpeg',
-				matrixSet: 'InspireCRS84Quad',
-				tileGrid: new ol.tilegrid.WMTS({
-					origin: ol.extent.getTopLeft(projectionExtent),
-					resolutions: resolutions,
-					matrixIds: matrixIds,
-				}),
-				style: 'default',
-			}),
-		});*/
 
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, shiftDragZoom: false});
 
@@ -337,9 +319,185 @@ viewer.core = {
     		  }
     	});
     },
+	_getWMTSCapabilities: function(url, authenticated) {
+		var getCapabilitiesUrl = url + "?request=GetCapabilities&services=WMTS&version=1.0.0";
+		if (authenticated===undefined) {
+			authenticated = false;
+		}
+		fetch(getCapabilitiesUrl)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+					return response.text();
+				})
+			.then(data => {
+				var xmlDoc = jQuery.parseXML(data);
+				var parser = new ol.format.WMTSCapabilities();
+				var result = parser.read(xmlDoc);
+				if (authenticated) {
+					this._parsedCapabilities[url] = result;
+				}
+				else {
+					this._parsedAuthenticatedCapabilities[url] = result;
+				}
+				this._loadPendingWmtsLayers(url, result, authenticated);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
 
-    _loadLayers: function() {
-    	var self = this;
+	},
+	_isWMTSLayer: function(layerConf) {
+		if (layerConf.external) {
+			return layerConf['type'] == 'WMTS';
+		}
+		return (layerConf.cached && (!layerConf.single_image) && layerConf.cache_url.endsWith('/gwc/service/wmts'));
+	},
+	_isLayerAuthenticated: function(layerConf) {
+		if (!layerConf.public && !layerConf.external) {
+		//if (!layerConf.public && this._authNeeded() && !layerConf.external) {
+			var url = this._getLayerUrl(layerConf);
+			if (this._pendingLayers[url]) {
+				return true;
+			}
+			for (var uidx=0; uidx < this.conf.auth_urls.length; uidx++) {
+				var auth_url = this.conf.auth_urls[uidx];
+				if (url.indexOf(auth_url)!== -1) {
+					return true;
+				}
+			}
+		}
+		return false;
+	},
+	_getLayerUrl: function(layerConf) {
+		if (!layerConf.external) { //only defined for internal layers at the moment
+			if (layerConf.cached) {
+				return layerConf.cache_url;
+			}
+			else {
+				return layerConf.wms_url;
+			}
+		}
+	},
+	_loadAuthenticatedCapabilities: function() {
+		for (url in this._authenticatedCapabilities) {
+			this._getWMTSCapabilities(url, true);
+		}
+		delete this._authenticatedCapabilities;
+	},
+	_loadCapabilities: function() {
+		var capabilitiesUrls = {};
+		var authenticatedCapabilitiesUrls = {};
+		for (var i=0; i<this.conf.layerGroups.length; i++) {
+			var group = this.conf.layerGroups[i];
+			for (var k=0; k<group.layers.length; k++) {
+				var layerConf = group.layers[k];
+				if (!layerConf.external) { // external layers use a cached capabilities
+					if (this._isWMTSLayer(layerConf)) {
+						var url = this._getLayerUrl(layerConf);
+						if (this._isLayerAuthenticated(layerConf)) {
+							if (!(url in authenticatedCapabilitiesUrls)) {
+								if (this._authDone()) {
+									this._getWMTSCapabilities(url, true);
+									authenticatedCapabilitiesUrls[url] = true;
+								}
+								else {
+									// capabilities of authenticated layers must be retrieved after authentication
+									this._authenticatedCapabilities[url] = true;
+								}
+							}
+						}
+						else {
+							if (!(url in capabilitiesUrls)) {
+								this._getWMTSCapabilities(url);
+								capabilitiesUrls[url] = true;
+							}
+						}
+					}
+				
+				}
+			}
+		}
+	},
+	_createLayers: function() {
+		overviewSource = [];
+		
+		var layer_overview_id = parseInt(this.conf.layer_overview)
+
+		for (var i=0; i<this.conf.layerGroups.length; i++) {
+			var group = this.conf.layerGroups[i];
+			for (var k=0; k<group.layers.length; k++) {
+				var layerConf = group.layers[k];
+				
+				var checkTileLoadError = this.conf.check_tileload_error;
+				if (layerConf.external) {
+					this._loadExternalLayer(layerConf, group, checkTileLoadError, layer_overview_id);
+				} else {
+					this._createInternalLayer(layerConf, group, checkTileLoadError, layer_overview_id);
+				}
+			}
+		}
+    	this._loadLayerGroups();
+
+		if (! this.conf.custom_overview || overviewSource.length == 0){
+			
+			var oSource = new ol.source.OSM({
+				url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
+			});
+
+			overviewSource.push(oSource);
+		}
+
+		console.log(overviewSource[0] instanceof ol.source.ImageWMS);
+		if(overviewSource[0] != 'Image'){
+			var overviewLayer = new ol.layer.Tile({source: overviewSource[0]});
+		}else{
+			var overviewLayer = new ol.layer.Image({source: overviewSource[1]});
+		}
+
+		overviewLayer.setVisible(true);
+
+		this.overviewmap = new ol.control.OverviewMap({
+			collapsed: false, 
+			layers: [overviewLayer],
+			collapseLabel: '»',
+			label: '«'
+		});
+
+		this.map.addControl(this.overviewmap)
+	},
+	_loadPendingWmtsLayers: function(url, parsedCapabilities, authenticated) {
+		var pendingLayers;
+		if (authenticated) {
+			pendingLayers = this._pendingAuthenticatedWmtsLayers[url];
+		}
+		else {
+			pendingLayers = this._pendingWmtsLayers[url];
+		}
+		if (pendingLayers) {
+			var completed = [];
+			for (var i=0; i<pendingLayers.length; i++) {
+				var conf = pendingLayers[i];
+				completed.push(conf);
+				conf.layerConf.pendingConf.parsedCapabilities = parsedCapabilities;
+				this._createInternalLayer(conf.layerConf, conf.group, conf.checkTileLoadError, conf.layer_overview_id);
+			}
+			delete pendingLayers[url];
+		}
+	},
+	_loadAllPendingWmtsLayers: function() {
+		for (var url in this._parsedCapabilities) {
+			this._loadPendingWmtsLayers(url, this._parsedCapabilities[url]);
+			delete this._parsedCapabilities[url];
+		}
+		for (var url in this._parsedAuthenticatedCapabilities) {
+			this._loadPendingWmtsLayers(url, this._parsedAuthenticatedCapabilities[url], true);
+			delete this._parsedAuthenticatedCapabilities[url];
+		}
+	},
+	_loadLayers: function() {
+		var self = this;
 		var ajaxRequests = new Array();
 		
 		overviewSource = [];
@@ -359,7 +517,7 @@ viewer.core = {
 				}
 			}
 		}
-    	this._loadLayerGroups();
+		this._loadLayerGroups();
 
 		if (! this.conf.custom_overview || overviewSource.length == 0){
 			
@@ -423,26 +581,33 @@ viewer.core = {
 		}
 		return null;
 	},
-    _createWidgets: function() {
-    	this.layerTree = new layerTree(this.conf, this.map, this);
-    	this.legend = new legend(this.conf, this.map);
+	_createWidgets: function() {
+		this.layerTree = new layerTree(this.conf, this.map, this);
+		this.legend = new legend(this.conf, this.map);
 		this.rawFilter = new RawFilter(this.conf, this.map);
 		this.selectionTable = new SelectionTable(this.map);
-    },
-	_loadWidgets: function() {
-		// load data for widgets requiring authenticated requests
-		if (this._initialized) {
+	},
+	_loadWidgets: function(forced, times) {
+		// load data for widgets requiring authenticated requests or initialization to be completed
+		forced = !! forced;
+		times = typeof times === 'undefined'?1:times+1;
+		if ((this._initialized && this._authDone() && this._asyncLayersLoaded()) ||  forced) {
+			this.layerTree.createTree();
 			this.legend.loadLegend();
 		}
 		else {
 			var self = this;
 			setTimeout(function() {
-				self._loadWidgets();
-			}, 10000);
+				if (times < 8) {
+					self._loadWidgets(false, times);
+				}
+				else {
+					self._loadWidgets(true);
+				}
+			}, 2000);
 		}
 	},
-
-    _loadExternalLayer: function(externalLayer, group, checkTileLoadError, layer_overview_id) {
+	_loadExternalLayer: function(externalLayer, group, checkTileLoadError, layer_overview_id) {
 	    var self = this;
 	    var visible = false;
 	    var baselayer = false;
@@ -760,6 +925,407 @@ viewer.core = {
 		}
 
 	},
+	_doLoadInternalLayer: function(wmsLayer, layerConf, baselayer, group, checkTileLoadError) {
+		var self = this;
+		wmsLayer.on('change:visible', function(){
+			self.legend.reloadLegend();
+		});
+		wmsLayer.id = layerConf.id;
+		wmsLayer.baselayer = baselayer;
+		wmsLayer.layer_name = layerConf.name;
+		wmsLayer.wms_url = layerConf.wms_url;
+		wmsLayer.wms_url_no_auth = layerConf.wms_url_no_auth;
+		wmsLayer.wfs_url = layerConf.wfs_url;
+		wmsLayer.wcs_url = layerConf.wcs_url;
+		wmsLayer.wfs_url_no_auth = layerConf.wfs_url_no_auth;
+		wmsLayer.cache_url = layerConf.cache_url;
+		wmsLayer.title = layerConf.title;
+		wmsLayer.abstract = layerConf.abstract;
+		wmsLayer.detailed_info_enabled = layerConf.detailed_info_enabled;
+		wmsLayer.detailed_info_button_title = layerConf.detailed_info_button_title;
+		wmsLayer.detailed_info_html = layerConf.detailed_info_html;
+		wmsLayer.metadata = layerConf.metadata || '';
+		wmsLayer.metadata_url = layerConf.metadata_url || '';
+		wmsLayer.legend = layerConf.legend;
+		wmsLayer.legend_no_auth = layerConf.legend_no_auth;
+		wmsLayer.legend_graphic = layerConf.legend_graphic;
+		wmsLayer.legend_graphic_no_auth = layerConf.legend_graphic_no_auth;
+		wmsLayer.queryable = layerConf.queryable;
+		wmsLayer.is_vector = layerConf.is_vector;
+		wmsLayer.write_roles = layerConf.write_roles;
+		wmsLayer.namespace = layerConf.namespace;
+		wmsLayer.workspace = layerConf.workspace
+		wmsLayer.crs = layerConf.crs;
+		wmsLayer.order = layerConf.order;
+		wmsLayer.styles = layerConf.styles;
+		wmsLayer.setZIndex(parseInt(layerConf.order));
+		wmsLayer.conf = JSON.parse(layerConf.conf);
+		wmsLayer.parentGroup = group.groupName;
+		wmsLayer.external = false;
+		wmsLayer.imported = false;
+		wmsLayer.allow_download = layerConf.allow_download;
+
+		var latLong = new Array();
+		for (i in layerConf.latlong_extent.split(',')) {
+			latLong.push(parseFloat(layerConf.latlong_extent.split(',')[i]));
+		}
+		wmsLayer.latlong_extent = latLong;
+		wmsLayer.time_resolution = layerConf.time_resolution;
+
+		wmsLayer.setOpacity(layerConf.opacity);
+		if (layerConf.placeholder) {
+			console.log("placeholder");
+			for (var i=0; i<viewer.core.map.getLayers().getLength(); i++) {
+				var l = viewer.core.map.getLayers().item(i);
+				if (l.getProperties().id == layerConf.pendingConf.placeholderId) {
+					console.log(viewer.core.map);
+					console.log(this.map);
+					viewer.core.map.getLayers().setAt(idx, wmsLayer);
+					console.log(`${layerConf.id}: delete pendingConf`);
+					delete layerConf.pendingConf;
+					delete layerConf.placeholder;
+					break;
+				}
+			}
+		}
+		else {
+			this.map.addLayer(wmsLayer);
+		}
+
+		wmsLayer.getSource().layer_name = layerConf.name;
+
+		if (checkTileLoadError) {
+			wmsLayer.getSource().loadend = false;
+			wmsLayer.getSource().on('tileloadstart', function() {
+				var time = 0;
+				var pid;
+				var _this = this;
+
+				var iLayer = null;
+				self.map.getLayers().forEach(function(layer){
+					if (layer.layer_name) {
+						if (layer.layer_name === _this.layer_name) {
+							iLayer = layer;
+						}
+					}
+											
+				}, _this);
+				self._setTileLoadError(false, iLayer);
+
+				pid = setInterval(function() {
+					if (time < layerConf.timeout) {
+						time += 1000;
+					} else {
+						if (!_this.loadend) {
+							clearInterval(pid);
+							if (iLayer) {
+								self._setTileLoadError(true, iLayer);
+							}
+
+						}
+	
+					}
+				}, 1000);
+			
+			});
+			wmsLayer.getSource().on('tileloadend', function() {
+				this.loadend = true;
+			
+			});
+			wmsLayer.getSource().on('tileloaderror', function(e){
+				console.log(e);
+				var aux = self._check_error_is_TileOutOfRange(e.tile);
+				if (aux){
+					return;
+				}
+				var iLayer = null;
+				self.map.getLayers().forEach(function(layer){
+					if (layer.layer_name) {
+						if (layer.layer_name === this.layer_name) {
+							iLayer = layer;
+						}
+					}
+				}, this);
+				if (iLayer) {
+					self._setTileLoadError(true, iLayer);
+				}
+			});	
+		}
+
+		if (layerConf.real_time) {
+			var updateInterval = layerConf.update_interval;
+			setInterval(function() {
+				wmsLayer.getSource().updateParams({"_time": Date.now()});
+			}, updateInterval);
+		}
+		let layer_overview_id = parseInt(this.conf.layer_overview);
+		if (layerConf['layer_id'] == layer_overview_id){
+			overviewSource.push(wmsLayer.getSource())
+		};
+	},
+	_createLayerPlaceholder: function(layerConf, group) {
+		var lyr = this._createEmptyLayer(layerConf._createEmptyLayer);
+		lyr.baselayer = layerConf.baselayer;
+		lyr.layer_name = layerConf.name;
+		lyr.placeholder = true;
+		lyr.parentGroup = group.groupName;
+		this.map.addLayer(lyr);
+		return lyr;
+	},
+	_createInternalLayer: function(layerConf, group, checkTileLoadError, layer_overview_id) {
+		var url = this._getLayerUrl(layerConf);
+		console.log(`${layerConf.workspace}:${layerConf.name} - ${layerConf.title}`);
+		console.log(`is wmts: ${this._isWMTSLayer(layerConf)}`);
+		console.log(layerConf);
+		
+		if (!layerConf.pendingConf) {
+			if (this._isWMTSLayer(layerConf)) {
+				if (this._isLayerAuthenticated(layerConf)) {
+					console.log("Authenticated: true");
+					console.log(this._parsedAuthenticatedCapabilities);
+					console.log(url);
+					console.log((!(url in this._parsedAuthenticatedCapabilities)));
+					if (!(url in this._parsedAuthenticatedCapabilities)) {
+						// TODO CMI aquí me quedo adaptando método _createInternalLayer a parsedCapabilities y placeholders
+						
+						var placeholder = this._createLayerPlaceholder(layerConf, group);
+						console.log(`${placeholder.id}: placeholder for authenticated wmts`)
+						console.log(url);
+						layerConf.pendingConf = {
+							placeholderId: placeholder.id
+						}
+						if (!this._pendingAuthenticatedWmtsLayers[url]) {
+							this._pendingAuthenticatedWmtsLayers[url] = [];
+						}
+						this._pendingAuthenticatedWmtsLayers[url].push({
+							layerConf: layerConf,
+							group: group,
+							checkTileLoadError: checkTileLoadError,
+							layerOverviewId: layer_overview_id
+						});
+						return;
+					}
+				}
+				else {
+					console.log("Authenticated: false");
+					console.log(url);
+					console.log((!(url in this._parsedCapabilities)));
+					if (!(url in this._parsedCapabilities)) {
+						var placeholder = this._createLayerPlaceholder(layerConf, group);
+						console.log(`${placeholder.id}: placeholder for not authenticated wmts`)
+						console.log(url);
+						layerConf.pendingConf = {
+							placeholderId: placeholder.id
+						}
+						if (!this._pendingWmtsLayers[url]) {
+							this._pendingWmtsLayers[url] = [];
+						}
+						this._pendingWmtsLayers[url].push({
+							layerConf: layerConf,
+							group: group,
+							checkTileLoadError: checkTileLoadError,
+							layerOverviewId: layer_overview_id
+						});
+						return;
+					}
+				}
+			}
+		}
+		console.log("not pending");
+		var self = this;
+
+		var layerId = this._nextLayerId();
+		layerConf.id = layerId;
+		
+		var wmsLayer = null;
+
+		var visible, baselayer;
+		if (layerConf['baselayer']) {
+			baselayer = true;
+			if (layerConf['default_baselayer']) {
+				visible = true;
+			}
+			else {
+				visible = false;
+			}
+		} else {
+			visible = layerConf['visible'];
+			baselayer = false;
+		}
+		if(group.visible){ visible = false; }
+
+		if (!this._authDone() && !layerConf.public && visible) {
+			// visible authenticated layers should be loaded after login
+			if (this._isLayerAuthenticated(layerConf)) {
+				if (!self._pendingLayers[auth_url]) {
+					self._pendingLayers[auth_url] = [];
+				}
+				self._pendingLayers[auth_url].push(layerId);
+				visible = false;				
+			}
+		}
+
+		var format = 'image/png';
+		if (layerConf.format) {
+			format = layerConf['format'];
+		}
+		var customLoadFunction = function(image, src) {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", src);
+			if (self.conf.user && self.conf.user.token) {
+				var bearer_token = "Bearer " + self.conf.user.token;
+				xhr.setRequestHeader('Authorization', bearer_token);
+				xhr.withCredentials = true;
+			}
+			xhr.responseType = "blob";
+			xhr.onload = function () {
+				if (xhr.status == 401) {
+					console.log(xhr.getAllResponseHeaders());
+					messageBox.show("error", "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+				}
+				else if (xhr.status == 403) {
+					console.log(xhr.getAllResponseHeaders());
+					messageBox.show("error", "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+				}
+				else if (xhr.getResponseHeader("content-type").indexOf("application/vnd.ogc.se_xml") !== -1) {
+					// returned in cross-domain requests instead of the 401 error
+					console.log(xhr.status)
+					console.log(xhr.getAllResponseHeaders());
+					const reader = new FileReader();
+
+					// This fires after the blob has been read/loaded.
+					reader.addEventListener('loadend', (e) => {
+						const text = reader.result;
+						var parser = new DOMParser();
+						xmlDoc = parser.parseFromString(text, "text/xml");
+						var exception = xmlDoc.getElementsByTagName("ServiceException");
+						if (exception && exception.length>0) {
+							if (exception[0].getAttribute('code') == 'LayerNotDefined') {
+								messageBox.show("error", "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+							}
+						}
+					});
+					reader.readAsText(this.response);
+				}
+				var urlCreator = window.URL || window.webkitURL;
+				var imageUrl = urlCreator.createObjectURL(this.response);
+				image.getImage().src = imageUrl;
+			};
+			xhr.send();
+		};
+		if (layerConf.single_image) {
+			var wmsSource = new ol.source.ImageWMS({
+				url: url,
+				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
+				serverType: 'geoserver'
+			});
+			if (self.conf.user && self.conf.user.token) {
+				wmsSource.setImageLoadFunction(customLoadFunction);
+			};
+			wmsLayer = new ol.layer.Image({
+				id: layerId,
+				source: wmsSource,
+				visible: visible
+			});
+
+			if (layerConf['layer_id'] == layer_overview_id){
+				overviewSource.push('Image')
+				overviewSource.push(wmsSource)
+			};
+
+		} else {
+			if(url.endsWith('/gwc/service/wmts')){
+				var default_srs = 'EPSG:3857';
+				var pendingConf = layerConf.pendingConf;
+				console.log(layerConf);
+				if (pendingConf) {
+					var capabilities = pendingConf.parsedCapabilities;
+					//delete layerConf.pendingConf;
+				}
+				else if (this._isLayerAuthenticated(layerConf)) {
+					var capabilities = this._parsedAuthenticatedCapabilities[url];
+				}
+				else {
+					var capabilities = this._parsedCapabilities[url];
+				}
+				let layerName = layerConf.workspace + ':' + layerConf.name;
+				var options = ol.source.WMTS.optionsFromCapabilities(capabilities, {
+					matrixSet: default_srs,
+					layer: layerName,
+					format: format,
+					wrapX: true
+				});
+				var wmtsSource = new ol.source.WMTS((options));
+				if (self.conf.user && self.conf.user.token) {
+					wmtsSource.setTileLoadFunction(customLoadFunction);
+				};
+				var layer = new ol.layer.Tile({
+						id: layerId,
+						source: wmtsSource,
+						visible: visible
+					});
+				layer.baselayer = baselayer;
+				layer.layer_name = layerName;
+				this._doLoadInternalLayer(layer, layerConf, baselayer, group, checkTileLoadError);
+				/*
+				//if (!url in this._parsedCapabilities) {
+					layerConf.pendingConf = {
+				var default_srs = 'EPSG:3857';
+				this._asyncPendingLayers.push(layerId);
+				var getCapabilitiesUrl = url + "?request=GetCapabilities&services=WMTS";
+				fetch(getCapabilitiesUrl)
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+							return response.text();
+						})
+					.then(data => {
+						var xmlDoc = jQuery.parseXML(data);
+						var parser = new ol.format.WMTSCapabilities();
+						var result = parser.read(xmlDoc);
+						
+					})
+					.catch((error) => {
+						console.log(error)
+					})
+					.finally(() =>  {
+						let idx = this._asyncPendingLayers.indexOf(layerConf.id);
+						if (idx>=0) {
+							this._asyncPendingLayers.splice(idx, 1);
+						}
+					});*/
+			}else{
+				console.log(layerConf);
+				var wmsParams = {
+					'LAYERS': layerConf.workspace + ':' + layerConf.name,
+					'FORMAT': format,
+					'VERSION': '1.1.1'
+				};
+				if (layerConf.cached) {
+					wmsParams['WIDTH'] = self.conf.tile_size;
+					wmsParams['HEIGHT'] = self.conf.tile_size;
+				}
+				var wmsSource = new ol.source.TileWMS({
+					url: url,
+					params: wmsParams,
+					serverType: 'geoserver'
+				});
+				if (self.conf.user && self.conf.user.token) {
+					wmsSource.setTileLoadFunction(customLoadFunction);
+				};
+				
+				wmsLayer = new ol.layer.Tile({
+					id: layerId,
+					source: wmsSource,
+					visible: visible
+				});
+			}
+		}
+		if(wmsLayer){
+			this._doLoadInternalLayer(wmsLayer, layerConf, baselayer, group, checkTileLoadError);
+		}
+	},
 
 	_loadInternalLayer: function(layerConf, group, checkTileLoadError, layer_overview_id) {
 		var self = this;
@@ -874,48 +1440,44 @@ viewer.core = {
 			if(url.endsWith('/gwc/service/wmts')){
 				var default_srs = 'EPSG:3857';
 				var projection = new ol.proj.get(default_srs);
-				var projectionExtent = projection.getExtent();
-				var size = ol.extent.getWidth(projectionExtent) / 256;
-				var resolutions = new Array(21);
-				var matrixIds = new Array(21);
-				for (var z = 0; z < 21; ++z) {
-				    resolutions[z] = size / Math.pow(2, z);
-				    matrixIds[z] = default_srs+':'+z;
-				}
-
-				var tileGrid = new ol.tilegrid.WMTS(
-				        {
-				            origin: ol.extent.getTopLeft(projectionExtent),
-				            resolutions: resolutions,
-				            matrixIds: matrixIds
-				        }
-				);
-
-
-				var wmtsSource = new ol.source.WMTS({
-					layer: layerConf.workspace + ':' + layerConf.name,
-					url: url,
-					projection: projection,
-					matrixSet: default_srs,
-					format:format,
-					tileGrid: tileGrid,
-					wrapX: true
-				});
-				if (self.conf.user && self.conf.user.token) {
-					wmtsSource.setTileLoadFunction(customLoadFunction);
-				};
-		        var wmsLayer = new ol.layer.Tile({
-			 		id: layerId,
-			 		source: wmtsSource,
-			 		visible: visible
-			 	});
-		        wmsLayer.baselayer = baselayer;
-		        wmsLayer.layer_name=layerConf.workspace + ':' + layerConf.name;
-
-				if (layerConf['layer_id'] == layer_overview_id){
-					overviewSource.push(wmtsSource)
-				};
-
+				this._asyncPendingLayers.push(layerId);
+				var getCapabilitiesUrl = url + "?request=GetCapabilities&services=WMTS";
+				fetch(getCapabilitiesUrl)
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+							return response.text();
+						})
+					.then(data => {
+						var xmlDoc = jQuery.parseXML(data);
+						var parser = new ol.format.WMTSCapabilities();
+						var result = parser.read(xmlDoc);
+						let layerName = layerConf.workspace + ':' + layerConf.name;
+						var options = ol.source.WMTS.optionsFromCapabilities(result, {
+							matrixSet: default_srs,
+							layer: layerName,
+							format: format,
+							wrapX: true
+						});
+						var wmtsSource = new ol.source.WMTS((options));
+						if (self.conf.user && self.conf.user.token) {
+							wmtsSource.setTileLoadFunction(customLoadFunction);
+						};
+						var layer = new ol.layer.Tile({
+							 id: layerId,
+							 source: wmtsSource,
+							 visible: visible
+						 });
+						layer.baselayer = baselayer;
+						layer.layer_name = layerName;
+						this._doLoadInternalLayer(layer, layerConf, baselayer, group, checkTileLoadError);
+					}).finally(() =>  {
+						let idx = this._asyncPendingLayers.indexOf(layerConf.id);
+						if (idx>=0) {
+							this._asyncPendingLayers.splice(idx, 1);
+						}
+					});
 			}else{
 				var wmsParams = {
 					'LAYERS': layerConf.workspace + ':' + layerConf.name,
@@ -941,131 +1503,9 @@ viewer.core = {
 					visible: visible
 				});
 			}
-
-			if (layerConf['layer_id'] == layer_overview_id){
-				overviewSource.push(wmsSource)
-			};
 		}
-
 		if(wmsLayer){
-			wmsLayer.on('change:visible', function(){
-				self.legend.reloadLegend();
-			});
-			wmsLayer.id = layerId;
-			wmsLayer.baselayer = baselayer;
-			wmsLayer.layer_name = layerConf.name;
-			wmsLayer.wms_url = layerConf.wms_url;
-			wmsLayer.wms_url_no_auth = layerConf.wms_url_no_auth;
-			wmsLayer.wfs_url = layerConf.wfs_url;
-			wmsLayer.wcs_url = layerConf.wcs_url;
-			wmsLayer.wfs_url_no_auth = layerConf.wfs_url_no_auth;
-			wmsLayer.cache_url = layerConf.cache_url;
-			wmsLayer.title = layerConf.title;
-			wmsLayer.abstract = layerConf.abstract;
-			wmsLayer.detailed_info_enabled = layerConf.detailed_info_enabled;
-			wmsLayer.detailed_info_button_title = layerConf.detailed_info_button_title;
-			wmsLayer.detailed_info_html = layerConf.detailed_info_html;
-			wmsLayer.metadata = layerConf.metadata || '';
-			wmsLayer.metadata_url = layerConf.metadata_url || '';
-			wmsLayer.legend = layerConf.legend;
-			wmsLayer.legend_no_auth = layerConf.legend_no_auth;
-			wmsLayer.legend_graphic = layerConf.legend_graphic;
-			wmsLayer.legend_graphic_no_auth = layerConf.legend_graphic_no_auth;
-			wmsLayer.queryable = layerConf.queryable;
-			wmsLayer.is_vector = layerConf.is_vector;
-			wmsLayer.write_roles = layerConf.write_roles;
-			wmsLayer.namespace = layerConf.namespace;
-			wmsLayer.workspace = layerConf.workspace
-			wmsLayer.crs = layerConf.crs;
-			wmsLayer.order = layerConf.order;
-			wmsLayer.styles = layerConf.styles;
-			wmsLayer.setZIndex(parseInt(layerConf.order));
-			wmsLayer.conf = JSON.parse(layerConf.conf);
-			wmsLayer.parentGroup = group.groupName;
-			wmsLayer.external = false;
-			wmsLayer.imported = false;
-			wmsLayer.allow_download = layerConf.allow_download;
-
-			var latLong = new Array();
-			for (i in layerConf.latlong_extent.split(',')) {
-				latLong.push(parseFloat(layerConf.latlong_extent.split(',')[i]));
-			}
-			wmsLayer.latlong_extent = latLong;
-			wmsLayer.time_resolution = layerConf.time_resolution;
-
-			wmsLayer.setOpacity(layerConf.opacity);
-			this.map.addLayer(wmsLayer);
-
-			wmsLayer.getSource().layer_name = layerConf.name;
-
-			if (checkTileLoadError) {
-				wmsLayer.getSource().loadend = false;
-				wmsLayer.getSource().on('tileloadstart', function() {
-					var time = 0;
-					var pid;
-					var _this = this;
-
-					var iLayer = null;
-					self.map.getLayers().forEach(function(layer){
-						if (layer.layer_name) {
-							if (layer.layer_name === _this.layer_name) {
-								iLayer = layer;
-							}
-						}
-												
-					}, _this);
-					self._setTileLoadError(false, iLayer);
-
-					pid = setInterval(function() {
-						if (time < layerConf.timeout) {
-							time += 1000;
-						} else {
-							if (!_this.loadend) {
-								clearInterval(pid);
-								if (iLayer) {
-									self._setTileLoadError(true, iLayer);
-								}
-
-							}
-		
-						}
-					}, 1000);
-				
-				});
-				wmsLayer.getSource().on('tileloadend', function() {
-					this.loadend = true;
-				
-				});
-				wmsLayer.getSource().on('tileloaderror', function(e){
-					console.log(e);
-					var aux = self._check_error_is_TileOutOfRange(e.tile);
-					if (aux){
-						return;
-					}
-					var iLayer = null;
-					self.map.getLayers().forEach(function(layer){
-						if (layer.layer_name) {
-							if (layer.layer_name === this.layer_name) {
-								iLayer = layer;
-							}
-						}						
-					}, this);								
-					if (iLayer) {
-						self._setTileLoadError(true, iLayer);
-					}								
-				});	
-			}
-
-			if (layerConf.real_time) {
-				var updateInterval = layerConf.update_interval;
-				setInterval(function() {
-					wmsLayer.getSource().updateParams({"_time": Date.now()});
-				}, updateInterval);
-			}
-
-			if (layerConf['layer_id'] == layer_overview_id){
-				overviewSource.push(wmsLayer.getSource())
-			};
+			this._doLoadInternalLayer(wmsLayer, layerConf, baselayer, group, checkTileLoadError);
 		}
 	},
 

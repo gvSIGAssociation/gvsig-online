@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-18 23:50+0000\n"
+"POT-Creation-Date: 2024-09-12 11:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,915 +17,1138 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:31
+#: gvsigol_symbology/models.py:31
 msgid "Circle"
 msgstr ""
 
-#: models.py:32
+#: gvsigol_symbology/models.py:32
 msgid "Square"
 msgstr ""
 
-#: models.py:33
+#: gvsigol_symbology/models.py:33
 msgid "Triangle"
 msgstr ""
 
-#: models.py:34
+#: gvsigol_symbology/models.py:34
 msgid "star"
 msgstr ""
 
-#: models.py:35
+#: gvsigol_symbology/models.py:35
 msgid "Cross"
 msgstr ""
 
-#: services.py:48
+#: gvsigol_symbology/services.py:48
 msgid "Default style for: "
 msgstr ""
 
-#: services.py:80
+#: gvsigol_symbology/services.py:80
 msgid "Default symbol"
 msgstr ""
 
-#: services_library.py:68
+#: gvsigol_symbology/services_library.py:68
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
 
-#: templates/base_symbology.html:110 templates/base_symbology_compress.html:109
+#: gvsigol_symbology/templates/base_symbology.html:110
+#: gvsigol_symbology/templates/base_symbology_compress.html:109
 msgid "Sign out"
 msgstr ""
 
-#: templates/base_symbology.html:129 templates/base_symbology_compress.html:127
+#: gvsigol_symbology/templates/base_symbology.html:129
+#: gvsigol_symbology/templates/base_symbology_compress.html:127
 msgid "Dashboard"
 msgstr ""
 
-#: templates/base_symbology.html:135 templates/base_symbology_compress.html:133
+#: gvsigol_symbology/templates/base_symbology.html:135
+#: gvsigol_symbology/templates/base_symbology_compress.html:133
 msgid "Home"
 msgstr ""
 
-#: templates/base_symbology.html:172 templates/base_symbology_compress.html:170
+#: gvsigol_symbology/templates/base_symbology.html:172
+#: gvsigol_symbology/templates/base_symbology_compress.html:170
 msgid "Version"
 msgstr ""
 
-#: templates/base_symbology.html:176 templates/base_symbology_compress.html:174
+#: gvsigol_symbology/templates/base_symbology.html:176
+#: gvsigol_symbology/templates/base_symbology_compress.html:174
 msgid "All rights reserved"
 msgstr ""
 
-#: templates/clustered_points_add.html:11 templates/custom_add.html:11
-#: templates/expressions_add.html:11 templates/intervals_add.html:11
-#: templates/unique_symbol_add.html:11 templates/unique_values_add.html:11
+#: gvsigol_symbology/templates/clustered_points_add.html:11
+#: gvsigol_symbology/templates/custom_add.html:11
+#: gvsigol_symbology/templates/expressions_add.html:11
+#: gvsigol_symbology/templates/intervals_add.html:11
+#: gvsigol_symbology/templates/unique_symbol_add.html:11
+#: gvsigol_symbology/templates/unique_values_add.html:11
 msgid "Add new style"
 msgstr ""
 
-#: templates/clustered_points_add.html:13
-#: templates/clustered_points_update.html:13 templates/color_table_add.html:14
-#: templates/color_table_update.html:14 templates/custom_add.html:13
-#: templates/custom_update.html:13 templates/expressions_add.html:13
-#: templates/expressions_update.html:13 templates/intervals_add.html:13
-#: templates/intervals_update.html:13 templates/unique_symbol_add.html:13
-#: templates/unique_symbol_update.html:13 templates/unique_values_add.html:13
-#: templates/unique_values_update.html:13
+#: gvsigol_symbology/templates/clustered_points_add.html:13
+#: gvsigol_symbology/templates/clustered_points_update.html:13
+#: gvsigol_symbology/templates/color_table_add.html:14
+#: gvsigol_symbology/templates/color_table_update.html:14
+#: gvsigol_symbology/templates/custom_add.html:13
+#: gvsigol_symbology/templates/custom_update.html:13
+#: gvsigol_symbology/templates/expressions_add.html:13
+#: gvsigol_symbology/templates/expressions_update.html:13
+#: gvsigol_symbology/templates/intervals_add.html:13
+#: gvsigol_symbology/templates/intervals_update.html:13
+#: gvsigol_symbology/templates/unique_symbol_add.html:13
+#: gvsigol_symbology/templates/unique_symbol_update.html:13
+#: gvsigol_symbology/templates/unique_values_add.html:13
+#: gvsigol_symbology/templates/unique_values_update.html:13
 msgid "Update preview"
 msgstr ""
 
-#: templates/clustered_points_add.html:14
-#: templates/clustered_points_update.html:14 templates/expressions_add.html:14
-#: templates/expressions_update.html:14 templates/intervals_add.html:14
-#: templates/intervals_update.html:14 templates/unique_symbol_add.html:14
-#: templates/unique_symbol_update.html:14 templates/unique_values_add.html:14
-#: templates/unique_values_update.html:14
+#: gvsigol_symbology/templates/clustered_points_add.html:14
+#: gvsigol_symbology/templates/clustered_points_update.html:14
+#: gvsigol_symbology/templates/expressions_add.html:14
+#: gvsigol_symbology/templates/expressions_update.html:14
+#: gvsigol_symbology/templates/intervals_add.html:14
+#: gvsigol_symbology/templates/intervals_update.html:14
+#: gvsigol_symbology/templates/unique_symbol_add.html:14
+#: gvsigol_symbology/templates/unique_symbol_update.html:14
+#: gvsigol_symbology/templates/unique_values_add.html:14
+#: gvsigol_symbology/templates/unique_values_update.html:14
 msgid "Labeling"
 msgstr ""
 
-#: templates/clustered_points_add.html:15
-#: templates/clustered_points_update.html:15 templates/color_ramp_add.html:13
-#: templates/color_ramp_folder_add.html:14
-#: templates/color_ramp_folder_update.html:15
-#: templates/color_ramp_library_add.html:12
-#: templates/color_ramp_library_import.html:12
-#: templates/color_ramp_library_update.html:15
-#: templates/color_ramp_update.html:13 templates/color_table_add.html:15
-#: templates/color_table_update.html:15 templates/custom_add.html:14
-#: templates/custom_update.html:14 templates/expressions_add.html:15
-#: templates/expressions_update.html:15 templates/external_graphic_add.html:12
-#: templates/intervals_add.html:15 templates/intervals_update.html:15
-#: templates/library_add.html:12 templates/library_import.html:12
-#: templates/sld_import.html:14 templates/symbol_add.html:11
-#: templates/symbol_update.html:12 templates/unique_symbol_add.html:15
-#: templates/unique_symbol_update.html:15 templates/unique_values_add.html:15
-#: templates/unique_values_update.html:15
+#: gvsigol_symbology/templates/clustered_points_add.html:15
+#: gvsigol_symbology/templates/clustered_points_update.html:15
+#: gvsigol_symbology/templates/color_ramp_add.html:13
+#: gvsigol_symbology/templates/color_ramp_folder_add.html:14
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:15
+#: gvsigol_symbology/templates/color_ramp_library_add.html:12
+#: gvsigol_symbology/templates/color_ramp_library_import.html:12
+#: gvsigol_symbology/templates/color_ramp_library_update.html:15
+#: gvsigol_symbology/templates/color_ramp_update.html:13
+#: gvsigol_symbology/templates/color_table_add.html:15
+#: gvsigol_symbology/templates/color_table_update.html:15
+#: gvsigol_symbology/templates/custom_add.html:14
+#: gvsigol_symbology/templates/custom_update.html:14
+#: gvsigol_symbology/templates/expressions_add.html:15
+#: gvsigol_symbology/templates/expressions_update.html:15
+#: gvsigol_symbology/templates/external_graphic_add.html:12
+#: gvsigol_symbology/templates/intervals_add.html:15
+#: gvsigol_symbology/templates/intervals_update.html:15
+#: gvsigol_symbology/templates/library_add.html:12
+#: gvsigol_symbology/templates/library_import.html:12
+#: gvsigol_symbology/templates/sld_import.html:14
+#: gvsigol_symbology/templates/symbol_add.html:11
+#: gvsigol_symbology/templates/symbol_update.html:12
+#: gvsigol_symbology/templates/unique_symbol_add.html:15
+#: gvsigol_symbology/templates/unique_symbol_update.html:15
+#: gvsigol_symbology/templates/unique_values_add.html:15
+#: gvsigol_symbology/templates/unique_values_update.html:15
 msgid "Save"
 msgstr ""
 
-#: templates/clustered_points_add.html:26
-#: templates/clustered_points_update.html:25 templates/color_ramp_add.html:24
-#: templates/color_ramp_folder_add.html:40
-#: templates/color_ramp_folder_add.html:41
-#: templates/color_ramp_folder_update.html:48
-#: templates/color_ramp_folder_update.html:49
-#: templates/color_ramp_library_add.html:38
-#: templates/color_ramp_library_add.html:39
-#: templates/color_ramp_library_import.html:38
-#: templates/color_ramp_library_import.html:39
-#: templates/color_ramp_library_update.html:41
-#: templates/color_ramp_library_update.html:42
-#: templates/color_ramp_update.html:24 templates/color_table_add.html:26
-#: templates/color_table_update.html:26 templates/custom_add.html:24
-#: templates/custom_update.html:25 templates/expressions_add.html:26
-#: templates/expressions_update.html:25 templates/external_graphic_add.html:28
-#: templates/external_graphic_update.html:29 templates/intervals_add.html:26
-#: templates/intervals_update.html:26 templates/library_add.html:38
-#: templates/library_add.html:39 templates/library_import.html:38
-#: templates/library_import.html:39 templates/library_update.html:43
-#: templates/library_update.html:44 templates/sld_import.html:40
-#: templates/symbol_add.html:23 templates/symbol_update.html:23
-#: templates/unique_symbol_add.html:26 templates/unique_symbol_update.html:25
-#: templates/unique_values_add.html:26 templates/unique_values_update.html:25
+#: gvsigol_symbology/templates/clustered_points_add.html:26
+#: gvsigol_symbology/templates/clustered_points_update.html:25
+#: gvsigol_symbology/templates/color_ramp_add.html:24
+#: gvsigol_symbology/templates/color_ramp_folder_add.html:40
+#: gvsigol_symbology/templates/color_ramp_folder_add.html:41
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:48
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:49
+#: gvsigol_symbology/templates/color_ramp_library_add.html:38
+#: gvsigol_symbology/templates/color_ramp_library_add.html:39
+#: gvsigol_symbology/templates/color_ramp_library_import.html:38
+#: gvsigol_symbology/templates/color_ramp_library_import.html:39
+#: gvsigol_symbology/templates/color_ramp_library_update.html:41
+#: gvsigol_symbology/templates/color_ramp_library_update.html:42
+#: gvsigol_symbology/templates/color_ramp_update.html:24
+#: gvsigol_symbology/templates/color_table_add.html:26
+#: gvsigol_symbology/templates/color_table_update.html:26
+#: gvsigol_symbology/templates/custom_add.html:24
+#: gvsigol_symbology/templates/custom_update.html:25
+#: gvsigol_symbology/templates/expressions_add.html:26
+#: gvsigol_symbology/templates/expressions_update.html:25
+#: gvsigol_symbology/templates/external_graphic_add.html:28
+#: gvsigol_symbology/templates/external_graphic_update.html:29
+#: gvsigol_symbology/templates/intervals_add.html:26
+#: gvsigol_symbology/templates/intervals_update.html:26
+#: gvsigol_symbology/templates/library_add.html:38
+#: gvsigol_symbology/templates/library_add.html:39
+#: gvsigol_symbology/templates/library_import.html:38
+#: gvsigol_symbology/templates/library_import.html:39
+#: gvsigol_symbology/templates/library_update.html:43
+#: gvsigol_symbology/templates/library_update.html:44
+#: gvsigol_symbology/templates/sld_import.html:40
+#: gvsigol_symbology/templates/symbol_add.html:23
+#: gvsigol_symbology/templates/symbol_update.html:23
+#: gvsigol_symbology/templates/unique_symbol_add.html:26
+#: gvsigol_symbology/templates/unique_symbol_update.html:25
+#: gvsigol_symbology/templates/unique_values_add.html:26
+#: gvsigol_symbology/templates/unique_values_update.html:25
 msgid "Name"
 msgstr ""
 
-#: templates/clustered_points_add.html:27
-#: templates/clustered_points_update.html:26 templates/color_ramp_add.html:25
-#: templates/color_ramp_update.html:25 templates/color_table_add.html:27
-#: templates/color_table_update.html:27 templates/custom_add.html:25
-#: templates/custom_update.html:26 templates/expressions_add.html:27
-#: templates/expressions_update.html:26 templates/intervals_add.html:27
-#: templates/intervals_update.html:27 templates/select_legend_type.html:17
-#: templates/unique_symbol_add.html:27 templates/unique_symbol_update.html:26
-#: templates/unique_values_add.html:27 templates/unique_values_update.html:26
+#: gvsigol_symbology/templates/clustered_points_add.html:27
+#: gvsigol_symbology/templates/clustered_points_update.html:26
+#: gvsigol_symbology/templates/color_ramp_add.html:25
+#: gvsigol_symbology/templates/color_ramp_update.html:25
+#: gvsigol_symbology/templates/color_table_add.html:27
+#: gvsigol_symbology/templates/color_table_update.html:27
+#: gvsigol_symbology/templates/custom_add.html:25
+#: gvsigol_symbology/templates/custom_update.html:26
+#: gvsigol_symbology/templates/expressions_add.html:27
+#: gvsigol_symbology/templates/expressions_update.html:26
+#: gvsigol_symbology/templates/intervals_add.html:27
+#: gvsigol_symbology/templates/intervals_update.html:27
+#: gvsigol_symbology/templates/select_legend_type.html:17
+#: gvsigol_symbology/templates/unique_symbol_add.html:27
+#: gvsigol_symbology/templates/unique_symbol_update.html:26
+#: gvsigol_symbology/templates/unique_values_add.html:27
+#: gvsigol_symbology/templates/unique_values_update.html:26
 msgid "Style name"
 msgstr ""
 
-#: templates/clustered_points_add.html:32
-#: templates/clustered_points_update.html:31 templates/color_table_add.html:32
-#: templates/color_table_update.html:32 templates/custom_add.html:30
-#: templates/custom_update.html:31 templates/expressions_add.html:32
-#: templates/expressions_update.html:31 templates/external_graphic_add.html:32
-#: templates/external_graphic_update.html:33 templates/intervals_add.html:32
-#: templates/intervals_update.html:32 templates/symbol_add.html:27
-#: templates/symbol_update.html:27 templates/unique_symbol_add.html:32
-#: templates/unique_symbol_update.html:31 templates/unique_values_add.html:32
-#: templates/unique_values_update.html:31
+#: gvsigol_symbology/templates/clustered_points_add.html:32
+#: gvsigol_symbology/templates/clustered_points_update.html:31
+#: gvsigol_symbology/templates/color_table_add.html:32
+#: gvsigol_symbology/templates/color_table_update.html:32
+#: gvsigol_symbology/templates/custom_add.html:30
+#: gvsigol_symbology/templates/custom_update.html:31
+#: gvsigol_symbology/templates/expressions_add.html:32
+#: gvsigol_symbology/templates/expressions_update.html:31
+#: gvsigol_symbology/templates/external_graphic_add.html:32
+#: gvsigol_symbology/templates/external_graphic_update.html:33
+#: gvsigol_symbology/templates/intervals_add.html:32
+#: gvsigol_symbology/templates/intervals_update.html:32
+#: gvsigol_symbology/templates/symbol_add.html:27
+#: gvsigol_symbology/templates/symbol_update.html:27
+#: gvsigol_symbology/templates/unique_symbol_add.html:32
+#: gvsigol_symbology/templates/unique_symbol_update.html:31
+#: gvsigol_symbology/templates/unique_values_add.html:32
+#: gvsigol_symbology/templates/unique_values_update.html:31
 msgid "Title"
 msgstr ""
 
-#: templates/clustered_points_add.html:33
-#: templates/clustered_points_update.html:32 templates/color_table_add.html:33
-#: templates/color_table_update.html:33 templates/custom_add.html:31
-#: templates/custom_update.html:32 templates/expressions_add.html:33
-#: templates/expressions_update.html:32 templates/intervals_add.html:33
-#: templates/intervals_update.html:33 templates/unique_symbol_add.html:33
-#: templates/unique_symbol_update.html:32 templates/unique_values_add.html:33
-#: templates/unique_values_update.html:32
+#: gvsigol_symbology/templates/clustered_points_add.html:33
+#: gvsigol_symbology/templates/clustered_points_update.html:32
+#: gvsigol_symbology/templates/color_table_add.html:33
+#: gvsigol_symbology/templates/color_table_update.html:33
+#: gvsigol_symbology/templates/custom_add.html:31
+#: gvsigol_symbology/templates/custom_update.html:32
+#: gvsigol_symbology/templates/expressions_add.html:33
+#: gvsigol_symbology/templates/expressions_update.html:32
+#: gvsigol_symbology/templates/intervals_add.html:33
+#: gvsigol_symbology/templates/intervals_update.html:33
+#: gvsigol_symbology/templates/unique_symbol_add.html:33
+#: gvsigol_symbology/templates/unique_symbol_update.html:32
+#: gvsigol_symbology/templates/unique_values_add.html:33
+#: gvsigol_symbology/templates/unique_values_update.html:32
 msgid "Style title"
 msgstr ""
 
-#: templates/clustered_points_add.html:38
-#: templates/clustered_points_update.html:37 templates/color_table_add.html:38
-#: templates/color_table_update.html:38 templates/expressions_add.html:38
-#: templates/expressions_update.html:37 templates/intervals_add.html:38
-#: templates/intervals_update.html:38 templates/unique_symbol_add.html:38
-#: templates/unique_symbol_update.html:37 templates/unique_values_add.html:38
-#: templates/unique_values_update.html:37
+#: gvsigol_symbology/templates/clustered_points_add.html:38
+#: gvsigol_symbology/templates/clustered_points_update.html:37
+#: gvsigol_symbology/templates/color_table_add.html:38
+#: gvsigol_symbology/templates/color_table_update.html:38
+#: gvsigol_symbology/templates/expressions_add.html:38
+#: gvsigol_symbology/templates/expressions_update.html:37
+#: gvsigol_symbology/templates/intervals_add.html:38
+#: gvsigol_symbology/templates/intervals_update.html:38
+#: gvsigol_symbology/templates/unique_symbol_add.html:38
+#: gvsigol_symbology/templates/unique_symbol_update.html:37
+#: gvsigol_symbology/templates/unique_values_add.html:38
+#: gvsigol_symbology/templates/unique_values_update.html:37
 msgid "Min. scale"
 msgstr ""
 
-#: templates/clustered_points_add.html:39
-#: templates/clustered_points_add.html:43
-#: templates/clustered_points_update.html:38
-#: templates/clustered_points_update.html:42 templates/color_table_add.html:39
-#: templates/color_table_add.html:43 templates/color_table_update.html:39
-#: templates/color_table_update.html:43 templates/expressions_add.html:39
-#: templates/expressions_add.html:43 templates/expressions_update.html:38
-#: templates/expressions_update.html:42 templates/intervals_add.html:39
-#: templates/intervals_add.html:43 templates/intervals_update.html:39
-#: templates/intervals_update.html:43 templates/unique_symbol_add.html:39
-#: templates/unique_symbol_add.html:43 templates/unique_symbol_update.html:38
-#: templates/unique_symbol_update.html:42 templates/unique_values_add.html:39
-#: templates/unique_values_add.html:43 templates/unique_values_update.html:38
-#: templates/unique_values_update.html:42
+#: gvsigol_symbology/templates/clustered_points_add.html:39
+#: gvsigol_symbology/templates/clustered_points_add.html:43
+#: gvsigol_symbology/templates/clustered_points_update.html:38
+#: gvsigol_symbology/templates/clustered_points_update.html:42
+#: gvsigol_symbology/templates/color_table_add.html:39
+#: gvsigol_symbology/templates/color_table_add.html:43
+#: gvsigol_symbology/templates/color_table_update.html:39
+#: gvsigol_symbology/templates/color_table_update.html:43
+#: gvsigol_symbology/templates/expressions_add.html:39
+#: gvsigol_symbology/templates/expressions_add.html:43
+#: gvsigol_symbology/templates/expressions_update.html:38
+#: gvsigol_symbology/templates/expressions_update.html:42
+#: gvsigol_symbology/templates/intervals_add.html:39
+#: gvsigol_symbology/templates/intervals_add.html:43
+#: gvsigol_symbology/templates/intervals_update.html:39
+#: gvsigol_symbology/templates/intervals_update.html:43
+#: gvsigol_symbology/templates/unique_symbol_add.html:39
+#: gvsigol_symbology/templates/unique_symbol_add.html:43
+#: gvsigol_symbology/templates/unique_symbol_update.html:38
+#: gvsigol_symbology/templates/unique_symbol_update.html:42
+#: gvsigol_symbology/templates/unique_values_add.html:39
+#: gvsigol_symbology/templates/unique_values_add.html:43
+#: gvsigol_symbology/templates/unique_values_update.html:38
+#: gvsigol_symbology/templates/unique_values_update.html:42
 msgid "No limit"
 msgstr ""
 
-#: templates/clustered_points_add.html:42
-#: templates/clustered_points_update.html:41 templates/color_table_add.html:42
-#: templates/color_table_update.html:42 templates/expressions_add.html:42
-#: templates/expressions_update.html:41 templates/intervals_add.html:42
-#: templates/intervals_update.html:42 templates/unique_symbol_add.html:42
-#: templates/unique_symbol_update.html:41 templates/unique_values_add.html:42
-#: templates/unique_values_update.html:41
+#: gvsigol_symbology/templates/clustered_points_add.html:42
+#: gvsigol_symbology/templates/clustered_points_update.html:41
+#: gvsigol_symbology/templates/color_table_add.html:42
+#: gvsigol_symbology/templates/color_table_update.html:42
+#: gvsigol_symbology/templates/expressions_add.html:42
+#: gvsigol_symbology/templates/expressions_update.html:41
+#: gvsigol_symbology/templates/intervals_add.html:42
+#: gvsigol_symbology/templates/intervals_update.html:42
+#: gvsigol_symbology/templates/unique_symbol_add.html:42
+#: gvsigol_symbology/templates/unique_symbol_update.html:41
+#: gvsigol_symbology/templates/unique_values_add.html:42
+#: gvsigol_symbology/templates/unique_values_update.html:41
 msgid "Max. scale"
 msgstr ""
 
-#: templates/clustered_points_add.html:46
-#: templates/clustered_points_update.html:45 templates/color_table_add.html:46
-#: templates/color_table_update.html:46 templates/expressions_add.html:46
-#: templates/expressions_update.html:45 templates/intervals_add.html:46
-#: templates/intervals_update.html:46 templates/unique_symbol_add.html:46
-#: templates/unique_symbol_update.html:45 templates/unique_values_add.html:46
-#: templates/unique_values_update.html:45
+#: gvsigol_symbology/templates/clustered_points_add.html:46
+#: gvsigol_symbology/templates/clustered_points_update.html:45
+#: gvsigol_symbology/templates/color_table_add.html:46
+#: gvsigol_symbology/templates/color_table_update.html:46
+#: gvsigol_symbology/templates/expressions_add.html:46
+#: gvsigol_symbology/templates/expressions_update.html:45
+#: gvsigol_symbology/templates/intervals_add.html:46
+#: gvsigol_symbology/templates/intervals_update.html:46
+#: gvsigol_symbology/templates/unique_symbol_add.html:46
+#: gvsigol_symbology/templates/unique_symbol_update.html:45
+#: gvsigol_symbology/templates/unique_values_add.html:46
+#: gvsigol_symbology/templates/unique_values_update.html:45
 msgid ""
 "Specifies the minimum and maximum scale denominator (inclusive) for the "
 "scale range in which this rule applies"
 msgstr ""
 
-#: templates/clustered_points_add.html:52
-#: templates/clustered_points_update.html:52
-#: templates/clustered_points_update.html:54 templates/color_table_add.html:52
-#: templates/color_table_update.html:53 templates/color_table_update.html:55
-#: templates/custom_add.html:37 templates/custom_update.html:39
-#: templates/custom_update.html:41 templates/expressions_add.html:52
-#: templates/expressions_update.html:52 templates/expressions_update.html:54
-#: templates/intervals_add.html:52 templates/intervals_update.html:53
-#: templates/intervals_update.html:55 templates/sld_import.html:55
-#: templates/unique_symbol_add.html:52 templates/unique_symbol_update.html:52
-#: templates/unique_symbol_update.html:54 templates/unique_values_add.html:52
-#: templates/unique_values_update.html:52
-#: templates/unique_values_update.html:54
+#: gvsigol_symbology/templates/clustered_points_add.html:52
+#: gvsigol_symbology/templates/clustered_points_update.html:52
+#: gvsigol_symbology/templates/clustered_points_update.html:54
+#: gvsigol_symbology/templates/color_table_add.html:52
+#: gvsigol_symbology/templates/color_table_update.html:53
+#: gvsigol_symbology/templates/color_table_update.html:55
+#: gvsigol_symbology/templates/custom_add.html:37
+#: gvsigol_symbology/templates/custom_update.html:39
+#: gvsigol_symbology/templates/custom_update.html:41
+#: gvsigol_symbology/templates/expressions_add.html:52
+#: gvsigol_symbology/templates/expressions_update.html:52
+#: gvsigol_symbology/templates/expressions_update.html:54
+#: gvsigol_symbology/templates/intervals_add.html:52
+#: gvsigol_symbology/templates/intervals_update.html:53
+#: gvsigol_symbology/templates/intervals_update.html:55
+#: gvsigol_symbology/templates/sld_import.html:55
+#: gvsigol_symbology/templates/unique_symbol_add.html:52
+#: gvsigol_symbology/templates/unique_symbol_update.html:52
+#: gvsigol_symbology/templates/unique_symbol_update.html:54
+#: gvsigol_symbology/templates/unique_values_add.html:52
+#: gvsigol_symbology/templates/unique_values_update.html:52
+#: gvsigol_symbology/templates/unique_values_update.html:54
 msgid "Set as default style"
 msgstr ""
 
-#: templates/clustered_points_add.html:64
-#: templates/clustered_points_update.html:67 templates/expressions_add.html:64
-#: templates/expressions_update.html:67
+#: gvsigol_symbology/templates/clustered_points_add.html:64
+#: gvsigol_symbology/templates/clustered_points_update.html:67
+#: gvsigol_symbology/templates/expressions_add.html:64
+#: gvsigol_symbology/templates/expressions_update.html:67
 msgid "Add new rule"
 msgstr ""
 
-#: templates/clustered_points_add.html:65
+#: gvsigol_symbology/templates/clustered_points_add.html:65
 msgid "Creates a new rule for clustered points"
 msgstr ""
 
-#: templates/clustered_points_add.html:85
-#: templates/clustered_points_update.html:88 templates/expressions_add.html:85
-#: templates/expressions_update.html:88 templates/intervals_add.html:96
-#: templates/intervals_update.html:100 templates/unique_symbol_add.html:93
-#: templates/unique_symbol_update.html:96 templates/unique_values_add.html:93
-#: templates/unique_values_update.html:96
+#: gvsigol_symbology/templates/clustered_points_add.html:85
+#: gvsigol_symbology/templates/clustered_points_update.html:88
+#: gvsigol_symbology/templates/expressions_add.html:85
+#: gvsigol_symbology/templates/expressions_update.html:88
+#: gvsigol_symbology/templates/intervals_add.html:96
+#: gvsigol_symbology/templates/intervals_update.html:100
+#: gvsigol_symbology/templates/unique_symbol_add.html:93
+#: gvsigol_symbology/templates/unique_symbol_update.html:96
+#: gvsigol_symbology/templates/unique_values_add.html:93
+#: gvsigol_symbology/templates/unique_values_update.html:96
 msgid "Import symbol"
 msgstr ""
 
-#: templates/clustered_points_add.html:90
-#: templates/clustered_points_update.html:93 templates/color_table_add.html:179
-#: templates/color_table_update.html:200 templates/expressions_add.html:90
-#: templates/expressions_update.html:93 templates/intervals_add.html:101
-#: templates/intervals_add.html:197 templates/intervals_update.html:105
-#: templates/intervals_update.html:201 templates/unique_symbol_add.html:98
-#: templates/unique_symbol_update.html:101 templates/unique_values_add.html:98
-#: templates/unique_values_add.html:194 templates/unique_values_update.html:101
-#: templates/unique_values_update.html:197
+#: gvsigol_symbology/templates/clustered_points_add.html:90
+#: gvsigol_symbology/templates/clustered_points_update.html:93
+#: gvsigol_symbology/templates/color_table_add.html:179
+#: gvsigol_symbology/templates/color_table_update.html:200
+#: gvsigol_symbology/templates/expressions_add.html:90
+#: gvsigol_symbology/templates/expressions_update.html:93
+#: gvsigol_symbology/templates/intervals_add.html:101
+#: gvsigol_symbology/templates/intervals_add.html:197
+#: gvsigol_symbology/templates/intervals_update.html:105
+#: gvsigol_symbology/templates/intervals_update.html:201
+#: gvsigol_symbology/templates/unique_symbol_add.html:98
+#: gvsigol_symbology/templates/unique_symbol_update.html:101
+#: gvsigol_symbology/templates/unique_values_add.html:98
+#: gvsigol_symbology/templates/unique_values_add.html:194
+#: gvsigol_symbology/templates/unique_values_update.html:101
+#: gvsigol_symbology/templates/unique_values_update.html:197
 msgid "Select library"
 msgstr ""
 
-#: templates/clustered_points_add.html:92
-#: templates/clustered_points_update.html:95 templates/expressions_add.html:92
-#: templates/expressions_update.html:95 templates/intervals_add.html:103
-#: templates/intervals_update.html:107 templates/unique_symbol_add.html:100
-#: templates/unique_symbol_update.html:103 templates/unique_values_add.html:100
-#: templates/unique_values_update.html:103
+#: gvsigol_symbology/templates/clustered_points_add.html:92
+#: gvsigol_symbology/templates/clustered_points_update.html:95
+#: gvsigol_symbology/templates/expressions_add.html:92
+#: gvsigol_symbology/templates/expressions_update.html:95
+#: gvsigol_symbology/templates/intervals_add.html:103
+#: gvsigol_symbology/templates/intervals_update.html:107
+#: gvsigol_symbology/templates/unique_symbol_add.html:100
+#: gvsigol_symbology/templates/unique_symbol_update.html:103
+#: gvsigol_symbology/templates/unique_values_add.html:100
+#: gvsigol_symbology/templates/unique_values_update.html:103
 msgid "Select symbol library"
 msgstr ""
 
-#: templates/clustered_points_add.html:111
-#: templates/clustered_points_update.html:114
-#: templates/color_table_add.html:158 templates/color_table_add.html:216
-#: templates/color_table_update.html:179 templates/color_table_update.html:237
-#: templates/expressions_add.html:111 templates/expressions_update.html:114
-#: templates/intervals_add.html:122 templates/intervals_add.html:176
-#: templates/intervals_add.html:234 templates/intervals_update.html:126
-#: templates/intervals_update.html:180 templates/intervals_update.html:238
-#: templates/unique_symbol_add.html:119 templates/unique_symbol_update.html:122
-#: templates/unique_values_add.html:119 templates/unique_values_add.html:173
-#: templates/unique_values_add.html:231 templates/unique_values_update.html:122
-#: templates/unique_values_update.html:176
-#: templates/unique_values_update.html:234
+#: gvsigol_symbology/templates/clustered_points_add.html:111
+#: gvsigol_symbology/templates/clustered_points_update.html:114
+#: gvsigol_symbology/templates/color_table_add.html:158
+#: gvsigol_symbology/templates/color_table_add.html:216
+#: gvsigol_symbology/templates/color_table_update.html:179
+#: gvsigol_symbology/templates/color_table_update.html:237
+#: gvsigol_symbology/templates/expressions_add.html:111
+#: gvsigol_symbology/templates/expressions_update.html:114
+#: gvsigol_symbology/templates/intervals_add.html:122
+#: gvsigol_symbology/templates/intervals_add.html:176
+#: gvsigol_symbology/templates/intervals_add.html:234
+#: gvsigol_symbology/templates/intervals_update.html:126
+#: gvsigol_symbology/templates/intervals_update.html:180
+#: gvsigol_symbology/templates/intervals_update.html:238
+#: gvsigol_symbology/templates/unique_symbol_add.html:119
+#: gvsigol_symbology/templates/unique_symbol_update.html:122
+#: gvsigol_symbology/templates/unique_values_add.html:119
+#: gvsigol_symbology/templates/unique_values_add.html:173
+#: gvsigol_symbology/templates/unique_values_add.html:231
+#: gvsigol_symbology/templates/unique_values_update.html:122
+#: gvsigol_symbology/templates/unique_values_update.html:176
+#: gvsigol_symbology/templates/unique_values_update.html:234
 msgid "Close"
 msgstr ""
 
-#: templates/clustered_points_add.html:262
-#: templates/clustered_points_update.html:268 templates/color_ramp_add.html:140
-#: templates/color_ramp_update.html:146 templates/color_table_add.html:377
-#: templates/color_table_update.html:406 templates/custom_add.html:119
-#: templates/expressions_add.html:261 templates/expressions_update.html:267
-#: templates/external_graphic_add.html:145
-#: templates/external_graphic_add.html:149 templates/intervals_add.html:352
-#: templates/intervals_add.html:374 templates/intervals_update.html:363
-#: templates/intervals_update.html:385 templates/symbol_add.html:130
-#: templates/symbol_update.html:118 templates/unique_symbol_add.html:234
-#: templates/unique_values_add.html:342 templates/unique_values_update.html:350
+#: gvsigol_symbology/templates/clustered_points_add.html:262
+#: gvsigol_symbology/templates/clustered_points_update.html:268
+#: gvsigol_symbology/templates/color_ramp_add.html:140
+#: gvsigol_symbology/templates/color_ramp_update.html:146
+#: gvsigol_symbology/templates/color_table_add.html:377
+#: gvsigol_symbology/templates/color_table_update.html:406
+#: gvsigol_symbology/templates/custom_add.html:119
+#: gvsigol_symbology/templates/expressions_add.html:261
+#: gvsigol_symbology/templates/expressions_update.html:267
+#: gvsigol_symbology/templates/external_graphic_add.html:145
+#: gvsigol_symbology/templates/external_graphic_add.html:149
+#: gvsigol_symbology/templates/intervals_add.html:352
+#: gvsigol_symbology/templates/intervals_add.html:374
+#: gvsigol_symbology/templates/intervals_update.html:363
+#: gvsigol_symbology/templates/intervals_update.html:385
+#: gvsigol_symbology/templates/symbol_add.html:130
+#: gvsigol_symbology/templates/symbol_update.html:118
+#: gvsigol_symbology/templates/unique_symbol_add.html:234
+#: gvsigol_symbology/templates/unique_values_add.html:342
+#: gvsigol_symbology/templates/unique_values_update.html:350
 msgid "Field name is required"
 msgstr ""
 
-#: templates/clustered_points_update.html:11
-#: templates/color_ramp_update.html:11 templates/color_table_update.html:11
-#: templates/custom_update.html:11 templates/expressions_update.html:11
-#: templates/intervals_update.html:11 templates/style_layer_list.html:90
-#: templates/unique_symbol_update.html:11
-#: templates/unique_values_update.html:11
+#: gvsigol_symbology/templates/clustered_points_update.html:11
+#: gvsigol_symbology/templates/color_ramp_update.html:11
+#: gvsigol_symbology/templates/color_table_update.html:11
+#: gvsigol_symbology/templates/custom_update.html:11
+#: gvsigol_symbology/templates/expressions_update.html:11
+#: gvsigol_symbology/templates/intervals_update.html:11
+#: gvsigol_symbology/templates/style_layer_list.html:90
+#: gvsigol_symbology/templates/unique_symbol_update.html:11
+#: gvsigol_symbology/templates/unique_values_update.html:11
 msgid "Update style"
 msgstr ""
 
-#: templates/clustered_points_update.html:68 templates/expressions_add.html:65
-#: templates/expressions_update.html:68
+#: gvsigol_symbology/templates/clustered_points_update.html:68
+#: gvsigol_symbology/templates/expressions_add.html:65
+#: gvsigol_symbology/templates/expressions_update.html:68
 msgid "Creates a new rule based on an expression"
 msgstr ""
 
-#: templates/color_ramp_add.html:11
+#: gvsigol_symbology/templates/color_ramp_add.html:11
 msgid "Add new color ramp"
 msgstr ""
 
-#: templates/color_ramp_add.html:40 templates/color_ramp_update.html:40
+#: gvsigol_symbology/templates/color_ramp_add.html:40
+#: gvsigol_symbology/templates/color_ramp_update.html:40
 msgid "Steps"
 msgstr ""
 
-#: templates/color_ramp_add.html:41 templates/color_ramp_update.html:41
+#: gvsigol_symbology/templates/color_ramp_add.html:41
+#: gvsigol_symbology/templates/color_ramp_update.html:41
 msgid "Add step"
 msgstr ""
 
-#: templates/color_ramp_add.html:63 templates/color_ramp_update.html:62
+#: gvsigol_symbology/templates/color_ramp_add.html:63
+#: gvsigol_symbology/templates/color_ramp_update.html:62
 msgid "Edit color ramp entry"
 msgstr ""
 
-#: templates/color_ramp_add.html:103 templates/color_ramp_update.html:109
-#: templates/color_table_add.html:371 templates/color_table_update.html:400
+#: gvsigol_symbology/templates/color_ramp_add.html:103
+#: gvsigol_symbology/templates/color_ramp_update.html:109
+#: gvsigol_symbology/templates/color_table_add.html:371
+#: gvsigol_symbology/templates/color_table_update.html:400
 msgid "Two or more color definitions are required"
 msgstr ""
 
-#: templates/color_ramp_folder_add.html:12
+#: gvsigol_symbology/templates/color_ramp_folder_add.html:12
 msgid "Add Ramp category"
 msgstr ""
 
-#: templates/color_ramp_folder_add.html:47
-#: templates/color_ramp_folder_add.html:48
-#: templates/color_ramp_folder_update.html:55
-#: templates/color_ramp_folder_update.html:56
-#: templates/color_ramp_library_add.html:44
-#: templates/color_ramp_library_add.html:45
-#: templates/color_ramp_library_import.html:44
-#: templates/color_ramp_library_import.html:45
-#: templates/color_ramp_library_list.html:23
-#: templates/color_ramp_library_update.html:48
-#: templates/color_ramp_library_update.html:49
-#: templates/color_ramp_library_update.html:68 templates/library_add.html:44
-#: templates/library_add.html:45 templates/library_import.html:44
-#: templates/library_import.html:45 templates/library_list.html:23
-#: templates/library_update.html:50 templates/library_update.html:51
+#: gvsigol_symbology/templates/color_ramp_folder_add.html:47
+#: gvsigol_symbology/templates/color_ramp_folder_add.html:48
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:55
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:56
+#: gvsigol_symbology/templates/color_ramp_library_add.html:44
+#: gvsigol_symbology/templates/color_ramp_library_add.html:45
+#: gvsigol_symbology/templates/color_ramp_library_import.html:44
+#: gvsigol_symbology/templates/color_ramp_library_import.html:45
+#: gvsigol_symbology/templates/color_ramp_library_list.html:23
+#: gvsigol_symbology/templates/color_ramp_library_update.html:48
+#: gvsigol_symbology/templates/color_ramp_library_update.html:49
+#: gvsigol_symbology/templates/color_ramp_library_update.html:68
+#: gvsigol_symbology/templates/library_add.html:44
+#: gvsigol_symbology/templates/library_add.html:45
+#: gvsigol_symbology/templates/library_import.html:44
+#: gvsigol_symbology/templates/library_import.html:45
+#: gvsigol_symbology/templates/library_list.html:23
+#: gvsigol_symbology/templates/library_update.html:50
+#: gvsigol_symbology/templates/library_update.html:51
 msgid "Description"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:13
-#: templates/color_ramp_library_update.html:13
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:13
+#: gvsigol_symbology/templates/color_ramp_library_update.html:13
 msgid "Update ramp color library"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:41
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:41
 msgid "Library name"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:42
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:42
 msgid "Library Name"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:63
-#: templates/dashboard_symbology_menu.html:9
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:63
+#: gvsigol_symbology/templates/dashboard_symbology_menu.html:9
 msgid "Color ramps"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:65
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:65
 msgid "Add ramp color"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:99 templates/color_ramp_list.html:46
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:99
+#: gvsigol_symbology/templates/color_ramp_list.html:46
 msgid "Delete color ramp"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:102
-#: templates/color_ramp_list.html:49
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:102
+#: gvsigol_symbology/templates/color_ramp_list.html:49
 msgid "Color ramp will be removed, Do you want continue?"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:105
-#: templates/color_ramp_library_list.html:63
-#: templates/color_ramp_library_list.html:85
-#: templates/color_ramp_library_update.html:107
-#: templates/color_ramp_list.html:52 templates/library_list.html:62
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:105
+#: gvsigol_symbology/templates/color_ramp_library_list.html:63
+#: gvsigol_symbology/templates/color_ramp_library_list.html:85
+#: gvsigol_symbology/templates/color_ramp_library_update.html:107
+#: gvsigol_symbology/templates/color_ramp_list.html:52
+#: gvsigol_symbology/templates/library_list.html:62
 msgid "Cancel"
 msgstr ""
 
-#: templates/color_ramp_folder_update.html:106
-#: templates/color_ramp_library_list.html:86
-#: templates/color_ramp_library_update.html:108
-#: templates/color_ramp_list.html:53 templates/library_list.html:63
+#: gvsigol_symbology/templates/color_ramp_folder_update.html:106
+#: gvsigol_symbology/templates/color_ramp_library_list.html:86
+#: gvsigol_symbology/templates/color_ramp_library_update.html:108
+#: gvsigol_symbology/templates/color_ramp_list.html:53
+#: gvsigol_symbology/templates/library_list.html:63
 msgid "Accept"
 msgstr ""
 
-#: templates/color_ramp_library_import.html:50 templates/library_import.html:50
+#: gvsigol_symbology/templates/color_ramp_library_import.html:50
+#: gvsigol_symbology/templates/library_import.html:50
 msgid "Select file"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:11 templates/library_list.html:11
+#: gvsigol_symbology/templates/color_ramp_library_list.html:11
+#: gvsigol_symbology/templates/library_list.html:11
 msgid "Add library"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:12 templates/library_list.html:12
+#: gvsigol_symbology/templates/color_ramp_library_list.html:12
+#: gvsigol_symbology/templates/library_list.html:12
 msgid "Import library"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:22 templates/library_list.html:22
-#: templates/library_update.html:31
+#: gvsigol_symbology/templates/color_ramp_library_list.html:22
+#: gvsigol_symbology/templates/library_list.html:22
+#: gvsigol_symbology/templates/library_update.html:31
 msgid "Library"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:57
+#: gvsigol_symbology/templates/color_ramp_library_list.html:57
 msgid "Under construction"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:60
+#: gvsigol_symbology/templates/color_ramp_library_list.html:60
 msgid "This functionality is not yet available"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:78
-#: templates/color_ramp_library_list.html:127 templates/library_list.html:56
-#: templates/library_list.html:104
+#: gvsigol_symbology/templates/color_ramp_library_list.html:78
+#: gvsigol_symbology/templates/color_ramp_library_list.html:127
+#: gvsigol_symbology/templates/library_list.html:56
+#: gvsigol_symbology/templates/library_list.html:104
 msgid "Delete library"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:103
-#: templates/color_ramp_library_update.html:127 templates/library_list.html:80
-#: templates/style_layer_list.html:62
+#: gvsigol_symbology/templates/color_ramp_library_list.html:103
+#: gvsigol_symbology/templates/color_ramp_library_update.html:127
+#: gvsigol_symbology/templates/library_list.html:80
+#: gvsigol_symbology/templates/style_layer_list.html:62
 msgid "Processing request..."
 msgstr ""
 
-#: templates/color_ramp_library_list.html:104
-#: templates/color_ramp_library_update.html:128 templates/library_list.html:81
-#: templates/style_layer_list.html:63
+#: gvsigol_symbology/templates/color_ramp_library_list.html:104
+#: gvsigol_symbology/templates/color_ramp_library_update.html:128
+#: gvsigol_symbology/templates/library_list.html:81
+#: gvsigol_symbology/templates/style_layer_list.html:63
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:105
-#: templates/color_ramp_library_update.html:129 templates/library_list.html:82
-#: templates/style_layer_list.html:64
+#: gvsigol_symbology/templates/color_ramp_library_list.html:105
+#: gvsigol_symbology/templates/color_ramp_library_update.html:129
+#: gvsigol_symbology/templates/library_list.html:82
+#: gvsigol_symbology/templates/style_layer_list.html:64
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:106
-#: templates/color_ramp_library_update.html:130 templates/library_list.html:83
-#: templates/style_layer_list.html:65
+#: gvsigol_symbology/templates/color_ramp_library_list.html:106
+#: gvsigol_symbology/templates/color_ramp_library_update.html:130
+#: gvsigol_symbology/templates/library_list.html:83
+#: gvsigol_symbology/templates/style_layer_list.html:65
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:107
-#: templates/color_ramp_library_update.html:131 templates/library_list.html:84
-#: templates/style_layer_list.html:66
+#: gvsigol_symbology/templates/color_ramp_library_list.html:107
+#: gvsigol_symbology/templates/color_ramp_library_update.html:131
+#: gvsigol_symbology/templates/library_list.html:84
+#: gvsigol_symbology/templates/style_layer_list.html:66
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:108
-#: templates/color_ramp_library_update.html:132 templates/library_list.html:85
-#: templates/style_layer_list.html:67
+#: gvsigol_symbology/templates/color_ramp_library_list.html:108
+#: gvsigol_symbology/templates/color_ramp_library_update.html:132
+#: gvsigol_symbology/templates/library_list.html:85
+#: gvsigol_symbology/templates/style_layer_list.html:67
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:110
-#: templates/color_ramp_library_update.html:134 templates/library_list.html:87
-#: templates/style_layer_list.html:69
+#: gvsigol_symbology/templates/color_ramp_library_list.html:110
+#: gvsigol_symbology/templates/color_ramp_library_update.html:134
+#: gvsigol_symbology/templates/library_list.html:87
+#: gvsigol_symbology/templates/style_layer_list.html:69
 msgid "Loading..."
 msgstr ""
 
-#: templates/color_ramp_library_list.html:111
-#: templates/color_ramp_library_list.html:112
-#: templates/color_ramp_library_update.html:135
-#: templates/color_ramp_library_update.html:136 templates/library_list.html:88
-#: templates/library_list.html:89 templates/style_layer_list.html:70
-#: templates/style_layer_list.html:71
+#: gvsigol_symbology/templates/color_ramp_library_list.html:111
+#: gvsigol_symbology/templates/color_ramp_library_list.html:112
+#: gvsigol_symbology/templates/color_ramp_library_update.html:135
+#: gvsigol_symbology/templates/color_ramp_library_update.html:136
+#: gvsigol_symbology/templates/library_list.html:88
+#: gvsigol_symbology/templates/library_list.html:89
+#: gvsigol_symbology/templates/style_layer_list.html:70
+#: gvsigol_symbology/templates/style_layer_list.html:71
 msgid "No records available"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:114
-#: templates/color_ramp_library_update.html:138 templates/library_list.html:91
-#: templates/style_layer_list.html:73
+#: gvsigol_symbology/templates/color_ramp_library_list.html:114
+#: gvsigol_symbology/templates/color_ramp_library_update.html:138
+#: gvsigol_symbology/templates/library_list.html:91
+#: gvsigol_symbology/templates/style_layer_list.html:73
 msgid "First"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:115
-#: templates/color_ramp_library_update.html:139 templates/library_list.html:92
-#: templates/style_layer_list.html:74
+#: gvsigol_symbology/templates/color_ramp_library_list.html:115
+#: gvsigol_symbology/templates/color_ramp_library_update.html:139
+#: gvsigol_symbology/templates/library_list.html:92
+#: gvsigol_symbology/templates/style_layer_list.html:74
 msgid "Previous"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:116
-#: templates/color_ramp_library_update.html:140 templates/library_list.html:93
-#: templates/style_layer_list.html:75
+#: gvsigol_symbology/templates/color_ramp_library_list.html:116
+#: gvsigol_symbology/templates/color_ramp_library_update.html:140
+#: gvsigol_symbology/templates/library_list.html:93
+#: gvsigol_symbology/templates/style_layer_list.html:75
 msgid "Next"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:117
-#: templates/color_ramp_library_update.html:141 templates/library_list.html:94
-#: templates/style_layer_list.html:76
+#: gvsigol_symbology/templates/color_ramp_library_list.html:117
+#: gvsigol_symbology/templates/color_ramp_library_update.html:141
+#: gvsigol_symbology/templates/library_list.html:94
+#: gvsigol_symbology/templates/style_layer_list.html:76
 msgid "Last"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:120
-#: templates/color_ramp_library_update.html:144 templates/library_list.html:97
-#: templates/style_layer_list.html:79
+#: gvsigol_symbology/templates/color_ramp_library_list.html:120
+#: gvsigol_symbology/templates/color_ramp_library_update.html:144
+#: gvsigol_symbology/templates/library_list.html:97
+#: gvsigol_symbology/templates/style_layer_list.html:79
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:121
-#: templates/color_ramp_library_update.html:145 templates/library_list.html:98
-#: templates/style_layer_list.html:80
+#: gvsigol_symbology/templates/color_ramp_library_list.html:121
+#: gvsigol_symbology/templates/color_ramp_library_update.html:145
+#: gvsigol_symbology/templates/library_list.html:98
+#: gvsigol_symbology/templates/style_layer_list.html:80
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:131 templates/library_list.html:108
+#: gvsigol_symbology/templates/color_ramp_library_list.html:131
+#: gvsigol_symbology/templates/library_list.html:108
 msgid "Export library"
 msgstr ""
 
-#: templates/color_ramp_library_list.html:135 templates/library_list.html:112
+#: gvsigol_symbology/templates/color_ramp_library_list.html:135
+#: gvsigol_symbology/templates/library_list.html:112
 msgid "Update library"
 msgstr ""
 
-#: templates/color_ramp_library_update.html:56
+#: gvsigol_symbology/templates/color_ramp_library_update.html:56
 msgid "Categories"
 msgstr ""
 
-#: templates/color_ramp_library_update.html:58
+#: gvsigol_symbology/templates/color_ramp_library_update.html:58
 msgid "Add category"
 msgstr ""
 
-#: templates/color_ramp_library_update.html:67
+#: gvsigol_symbology/templates/color_ramp_library_update.html:67
 msgid "Category"
 msgstr ""
 
-#: templates/color_ramp_library_update.html:101
+#: gvsigol_symbology/templates/color_ramp_library_update.html:101
 msgid "Delete folder"
 msgstr ""
 
-#: templates/color_ramp_library_update.html:104
+#: gvsigol_symbology/templates/color_ramp_library_update.html:104
 msgid "Folder will be removed, Do you want continue?"
 msgstr ""
 
-#: templates/color_ramp_library_update.html:151
+#: gvsigol_symbology/templates/color_ramp_library_update.html:151
 msgid "Delete category"
 msgstr ""
 
-#: templates/color_ramp_library_update.html:155
+#: gvsigol_symbology/templates/color_ramp_library_update.html:155
 msgid "Update category"
 msgstr ""
 
-#: templates/color_ramp_list.html:11
+#: gvsigol_symbology/templates/color_ramp_list.html:11
 msgid "Symbol Ramp Colors"
 msgstr ""
 
-#: templates/color_ramp_list.html:13
+#: gvsigol_symbology/templates/color_ramp_list.html:13
 msgid "Add color ramp"
 msgstr ""
 
-#: templates/color_ramp_list.html:14
+#: gvsigol_symbology/templates/color_ramp_list.html:14
 msgid "Import color ramp"
 msgstr ""
 
-#: templates/color_table_add.html:11
+#: gvsigol_symbology/templates/color_table_add.html:11
 msgid "Add new color table"
 msgstr ""
 
-#: templates/color_table_add.html:13 templates/color_table_update.html:13
+#: gvsigol_symbology/templates/color_table_add.html:13
+#: gvsigol_symbology/templates/color_table_update.html:13
 msgid "Raster statistics"
 msgstr ""
 
-#: templates/color_table_add.html:59 templates/color_table_update.html:64
-#: templates/color_table_update.html:66
+#: gvsigol_symbology/templates/color_table_add.html:59
+#: gvsigol_symbology/templates/color_table_update.html:64
+#: gvsigol_symbology/templates/color_table_update.html:66
 msgid "Has custom legend?"
 msgstr ""
 
-#: templates/color_table_add.html:64 templates/color_table_update.html:76
-#: templates/external_graphic_add.html:39
-#: templates/external_graphic_update.html:40
+#: gvsigol_symbology/templates/color_table_add.html:64
+#: gvsigol_symbology/templates/color_table_update.html:76
+#: gvsigol_symbology/templates/external_graphic_add.html:39
+#: gvsigol_symbology/templates/external_graphic_update.html:40
 msgid "Select image"
 msgstr ""
 
-#: templates/color_table_add.html:87 templates/color_table_update.html:108
-#: templates/intervals_add.html:70 templates/intervals_update.html:74
+#: gvsigol_symbology/templates/color_table_add.html:87
+#: gvsigol_symbology/templates/color_table_update.html:108
+#: gvsigol_symbology/templates/intervals_add.html:70
+#: gvsigol_symbology/templates/intervals_update.html:74
 msgid "Select number of intervals"
 msgstr ""
 
-#: templates/color_table_add.html:92 templates/color_table_update.html:113
-#: templates/intervals_add.html:75 templates/intervals_update.html:79
-#: templates/unique_values_add.html:72 templates/unique_values_update.html:75
+#: gvsigol_symbology/templates/color_table_add.html:92
+#: gvsigol_symbology/templates/color_table_update.html:113
+#: gvsigol_symbology/templates/intervals_add.html:75
+#: gvsigol_symbology/templates/intervals_update.html:79
+#: gvsigol_symbology/templates/unique_values_add.html:72
+#: gvsigol_symbology/templates/unique_values_update.html:75
 msgid " "
 msgstr ""
 
-#: templates/color_table_add.html:93 templates/color_table_update.html:114
-#: templates/intervals_add.html:76 templates/intervals_update.html:80
-#: templates/unique_values_add.html:73 templates/unique_values_update.html:76
+#: gvsigol_symbology/templates/color_table_add.html:93
+#: gvsigol_symbology/templates/color_table_update.html:114
+#: gvsigol_symbology/templates/intervals_add.html:76
+#: gvsigol_symbology/templates/intervals_update.html:80
+#: gvsigol_symbology/templates/unique_values_add.html:73
+#: gvsigol_symbology/templates/unique_values_update.html:76
 msgid "Apply ramp color"
 msgstr ""
 
-#: templates/color_table_add.html:113 templates/color_table_update.html:134
+#: gvsigol_symbology/templates/color_table_add.html:113
+#: gvsigol_symbology/templates/color_table_update.html:134
 msgid "Edit color map entry"
 msgstr ""
 
-#: templates/color_table_add.html:135 templates/color_table_update.html:156
+#: gvsigol_symbology/templates/color_table_add.html:135
+#: gvsigol_symbology/templates/color_table_update.html:156
 msgid "Raster properties"
 msgstr ""
 
-#: templates/color_table_add.html:149 templates/color_table_update.html:170
-#: templates/intervals_add.html:167 templates/intervals_update.html:171
-#: templates/unique_values_add.html:164 templates/unique_values_update.html:167
+#: gvsigol_symbology/templates/color_table_add.html:149
+#: gvsigol_symbology/templates/color_table_update.html:170
+#: gvsigol_symbology/templates/intervals_add.html:167
+#: gvsigol_symbology/templates/intervals_update.html:171
+#: gvsigol_symbology/templates/unique_values_add.html:164
+#: gvsigol_symbology/templates/unique_values_update.html:167
 msgid "Warning"
 msgstr ""
 
-#: templates/color_table_add.html:155 templates/color_table_update.html:176
-#: templates/intervals_add.html:173 templates/intervals_update.html:177
-#: templates/unique_values_add.html:170 templates/unique_values_update.html:173
+#: gvsigol_symbology/templates/color_table_add.html:155
+#: gvsigol_symbology/templates/color_table_update.html:176
+#: gvsigol_symbology/templates/intervals_add.html:173
+#: gvsigol_symbology/templates/intervals_update.html:177
+#: gvsigol_symbology/templates/unique_values_add.html:170
+#: gvsigol_symbology/templates/unique_values_update.html:173
 msgid "Rules needed to apply a color ramp"
 msgstr ""
 
-#: templates/color_table_add.html:157 templates/color_table_add.html:215
-#: templates/color_table_update.html:178 templates/color_table_update.html:236
-#: templates/intervals_add.html:175 templates/intervals_add.html:233
-#: templates/intervals_update.html:179 templates/intervals_update.html:237
-#: templates/unique_values_add.html:172 templates/unique_values_add.html:230
-#: templates/unique_values_update.html:175
-#: templates/unique_values_update.html:233
+#: gvsigol_symbology/templates/color_table_add.html:157
+#: gvsigol_symbology/templates/color_table_add.html:215
+#: gvsigol_symbology/templates/color_table_update.html:178
+#: gvsigol_symbology/templates/color_table_update.html:236
+#: gvsigol_symbology/templates/intervals_add.html:175
+#: gvsigol_symbology/templates/intervals_add.html:233
+#: gvsigol_symbology/templates/intervals_update.html:179
+#: gvsigol_symbology/templates/intervals_update.html:237
+#: gvsigol_symbology/templates/unique_values_add.html:172
+#: gvsigol_symbology/templates/unique_values_add.html:230
+#: gvsigol_symbology/templates/unique_values_update.html:175
+#: gvsigol_symbology/templates/unique_values_update.html:233
 msgid "Apply"
 msgstr ""
 
-#: templates/color_table_add.html:174 templates/color_table_update.html:195
-#: templates/intervals_add.html:192 templates/intervals_update.html:196
-#: templates/unique_values_add.html:189 templates/unique_values_update.html:192
+#: gvsigol_symbology/templates/color_table_add.html:174
+#: gvsigol_symbology/templates/color_table_update.html:195
+#: gvsigol_symbology/templates/intervals_add.html:192
+#: gvsigol_symbology/templates/intervals_update.html:196
+#: gvsigol_symbology/templates/unique_values_add.html:189
+#: gvsigol_symbology/templates/unique_values_update.html:192
 msgid "Select color ramp"
 msgstr ""
 
-#: templates/color_table_add.html:181 templates/color_table_update.html:202
-#: templates/intervals_add.html:199 templates/intervals_update.html:203
-#: templates/unique_values_add.html:196 templates/unique_values_update.html:199
+#: gvsigol_symbology/templates/color_table_add.html:181
+#: gvsigol_symbology/templates/color_table_update.html:202
+#: gvsigol_symbology/templates/intervals_add.html:199
+#: gvsigol_symbology/templates/intervals_update.html:203
+#: gvsigol_symbology/templates/unique_values_add.html:196
+#: gvsigol_symbology/templates/unique_values_update.html:199
 msgid "Select ramp library"
 msgstr ""
 
-#: templates/color_table_add.html:190 templates/color_table_update.html:211
-#: templates/intervals_add.html:208 templates/intervals_update.html:212
-#: templates/unique_values_add.html:205 templates/unique_values_update.html:208
+#: gvsigol_symbology/templates/color_table_add.html:190
+#: gvsigol_symbology/templates/color_table_update.html:211
+#: gvsigol_symbology/templates/intervals_add.html:208
+#: gvsigol_symbology/templates/intervals_update.html:212
+#: gvsigol_symbology/templates/unique_values_add.html:205
+#: gvsigol_symbology/templates/unique_values_update.html:208
 msgid "Select category"
 msgstr ""
 
-#: templates/color_table_add.html:192 templates/color_table_update.html:213
-#: templates/intervals_add.html:210 templates/intervals_update.html:214
-#: templates/unique_values_add.html:207 templates/unique_values_update.html:210
+#: gvsigol_symbology/templates/color_table_add.html:192
+#: gvsigol_symbology/templates/color_table_update.html:213
+#: gvsigol_symbology/templates/intervals_add.html:210
+#: gvsigol_symbology/templates/intervals_update.html:214
+#: gvsigol_symbology/templates/unique_values_add.html:207
+#: gvsigol_symbology/templates/unique_values_update.html:210
 msgid "Select ramp category"
 msgstr ""
 
-#: templates/color_table_add.html:198 templates/color_table_update.html:219
-#: templates/intervals_add.html:216 templates/intervals_update.html:220
-#: templates/unique_values_add.html:213 templates/unique_values_update.html:216
+#: gvsigol_symbology/templates/color_table_add.html:198
+#: gvsigol_symbology/templates/color_table_update.html:219
+#: gvsigol_symbology/templates/intervals_add.html:216
+#: gvsigol_symbology/templates/intervals_update.html:220
+#: gvsigol_symbology/templates/unique_values_add.html:213
+#: gvsigol_symbology/templates/unique_values_update.html:216
 msgid "Invert ramp color"
 msgstr ""
 
-#: templates/color_table_add.html:247 templates/color_table_update.html:268
-#: templates/external_graphic_add.html:73
-#: templates/external_graphic_update.html:74
+#: gvsigol_symbology/templates/color_table_add.html:247
+#: gvsigol_symbology/templates/color_table_update.html:268
+#: gvsigol_symbology/templates/external_graphic_add.html:73
+#: gvsigol_symbology/templates/external_graphic_update.html:74
 msgid "The file format is not supported"
 msgstr ""
 
-#: templates/dashboard_symbology_menu.html:4
+#: gvsigol_symbology/templates/dashboard_symbology_menu.html:4
 msgid "Symbology"
 msgstr ""
 
-#: templates/dashboard_symbology_menu.html:6
+#: gvsigol_symbology/templates/dashboard_symbology_menu.html:6
 msgid "Layer styles"
 msgstr ""
 
-#: templates/dashboard_symbology_menu.html:8
+#: gvsigol_symbology/templates/dashboard_symbology_menu.html:8
 msgid "Symbol libraries"
 msgstr ""
 
-#: templates/external_graphic_add.html:29
-#: templates/external_graphic_update.html:30 templates/symbol_add.html:24
-#: templates/symbol_update.html:24
+#: gvsigol_symbology/templates/external_graphic_add.html:29
+#: gvsigol_symbology/templates/external_graphic_update.html:30
+#: gvsigol_symbology/templates/symbol_add.html:24
+#: gvsigol_symbology/templates/symbol_update.html:24
 msgid "Symbol name"
 msgstr ""
 
-#: templates/external_graphic_add.html:33
-#: templates/external_graphic_update.html:34 templates/symbol_add.html:28
-#: templates/symbol_update.html:28
+#: gvsigol_symbology/templates/external_graphic_add.html:33
+#: gvsigol_symbology/templates/external_graphic_update.html:34
+#: gvsigol_symbology/templates/symbol_add.html:28
+#: gvsigol_symbology/templates/symbol_update.html:28
 msgid "Symbol title"
 msgstr ""
 
-#: templates/external_graphic_add.html:36
-#: templates/external_graphic_update.html:37 templates/symbol_add.html:31
-#: templates/symbol_update.html:31
+#: gvsigol_symbology/templates/external_graphic_add.html:36
+#: gvsigol_symbology/templates/external_graphic_update.html:37
+#: gvsigol_symbology/templates/symbol_add.html:31
+#: gvsigol_symbology/templates/symbol_update.html:31
 msgid ""
 "Specifies a title for the rule. The title is used in display lists and "
 "legends"
 msgstr ""
 
-#: templates/external_graphic_add.html:43
-#: templates/external_graphic_update.html:44
+#: gvsigol_symbology/templates/external_graphic_add.html:43
+#: gvsigol_symbology/templates/external_graphic_update.html:44
 msgid "Size"
 msgstr ""
 
-#: templates/external_graphic_add.html:44
-#: templates/external_graphic_update.html:45
+#: gvsigol_symbology/templates/external_graphic_add.html:44
+#: gvsigol_symbology/templates/external_graphic_update.html:45
 msgid "Symbol size (in pixels)"
 msgstr ""
 
-#: templates/external_graphic_add.html:47
-#: templates/external_graphic_update.html:48
+#: gvsigol_symbology/templates/external_graphic_add.html:47
+#: gvsigol_symbology/templates/external_graphic_update.html:48
 msgid "Select format"
 msgstr ""
 
-#: templates/external_graphic_add.html:146
-#: templates/external_graphic_add.html:152 views.py:986 views.py:1190
-#: views.py:1378
+#: gvsigol_symbology/templates/external_graphic_add.html:146
+#: gvsigol_symbology/templates/external_graphic_add.html:152
+#: gvsigol_symbology/views.py:986 gvsigol_symbology/views.py:1190
+#: gvsigol_symbology/views.py:1378
 msgid "You must select a file"
 msgstr ""
 
-#: templates/external_graphic_update.html:12 templates/symbol_update.html:11
+#: gvsigol_symbology/templates/external_graphic_update.html:12
+#: gvsigol_symbology/templates/symbol_update.html:11
 msgid "Delete"
 msgstr ""
 
-#: templates/external_graphic_update.html:13 templates/library_update.html:12
+#: gvsigol_symbology/templates/external_graphic_update.html:13
+#: gvsigol_symbology/templates/library_update.html:12
 msgid "Update"
 msgstr ""
 
-#: templates/intervals_add.html:64 templates/intervals_update.html:68
+#: gvsigol_symbology/templates/intervals_add.html:64
+#: gvsigol_symbology/templates/intervals_update.html:68
 msgid "Select numeric field"
 msgstr ""
 
-#: templates/intervals_add.html:66 templates/intervals_update.html:70
-#: templates/unique_values_add.html:66 templates/unique_values_update.html:69
+#: gvsigol_symbology/templates/intervals_add.html:66
+#: gvsigol_symbology/templates/intervals_update.html:70
+#: gvsigol_symbology/templates/unique_values_add.html:66
+#: gvsigol_symbology/templates/unique_values_update.html:69
 msgid "Select field"
 msgstr ""
 
-#: templates/library_update.html:32
+#: gvsigol_symbology/templates/library_update.html:32
 msgid "Symbols"
 msgstr ""
 
-#: templates/library_update.html:65
+#: gvsigol_symbology/templates/library_update.html:65
 msgid "Library symbols"
 msgstr ""
 
-#: templates/library_update.html:67
+#: gvsigol_symbology/templates/library_update.html:67
 msgid "Add external graphic"
 msgstr ""
 
-#: templates/library_update.html:68
+#: gvsigol_symbology/templates/library_update.html:68
 msgid "Add point"
 msgstr ""
 
-#: templates/library_update.html:69
+#: gvsigol_symbology/templates/library_update.html:69
 msgid "Add line"
 msgstr ""
 
-#: templates/library_update.html:70
+#: gvsigol_symbology/templates/library_update.html:70
 msgid "Add polygon"
 msgstr ""
 
-#: templates/select_legend_type.html:11
+#: gvsigol_symbology/templates/select_legend_type.html:11
 msgid "Create new style"
 msgstr ""
 
-#: templates/select_legend_type.html:18
+#: gvsigol_symbology/templates/select_legend_type.html:18
 msgid "Insert style name"
 msgstr ""
 
-#: templates/select_legend_type.html:32
+#: gvsigol_symbology/templates/select_legend_type.html:32
 msgid "Unique symbol"
 msgstr ""
 
-#: templates/select_legend_type.html:33
+#: gvsigol_symbology/templates/select_legend_type.html:33
 msgid "Creates a legend of unique symbol"
 msgstr ""
 
-#: templates/select_legend_type.html:41
+#: gvsigol_symbology/templates/select_legend_type.html:41
 msgid "Unique values"
 msgstr ""
 
-#: templates/select_legend_type.html:42
+#: gvsigol_symbology/templates/select_legend_type.html:42
 msgid "Creates a legend of unique values"
 msgstr ""
 
-#: templates/select_legend_type.html:50
+#: gvsigol_symbology/templates/select_legend_type.html:50
 msgid "Intervals"
 msgstr ""
 
-#: templates/select_legend_type.html:51
+#: gvsigol_symbology/templates/select_legend_type.html:51
 msgid "Creates a legend defined by intervals"
 msgstr ""
 
-#: templates/select_legend_type.html:59
+#: gvsigol_symbology/templates/select_legend_type.html:59
 msgid "Expressions"
 msgstr ""
 
-#: templates/select_legend_type.html:60
+#: gvsigol_symbology/templates/select_legend_type.html:60
 msgid "Creates a legend defined by expressions"
 msgstr ""
 
-#: templates/select_legend_type.html:68 templates/select_legend_type.html:99
+#: gvsigol_symbology/templates/select_legend_type.html:68
+#: gvsigol_symbology/templates/select_legend_type.html:99
 msgid "Custom"
 msgstr ""
 
-#: templates/select_legend_type.html:69 templates/select_legend_type.html:100
+#: gvsigol_symbology/templates/select_legend_type.html:69
+#: gvsigol_symbology/templates/select_legend_type.html:100
 msgid "Creates a custom legend"
 msgstr ""
 
-#: templates/select_legend_type.html:78
+#: gvsigol_symbology/templates/select_legend_type.html:78
 msgid "Import from SLD"
 msgstr ""
 
-#: templates/select_legend_type.html:80
+#: gvsigol_symbology/templates/select_legend_type.html:80
 msgid "SLD legend description"
 msgstr ""
 
-#: templates/select_legend_type.html:90
+#: gvsigol_symbology/templates/select_legend_type.html:90
 msgid "Color table"
 msgstr ""
 
-#: templates/select_legend_type.html:91
+#: gvsigol_symbology/templates/select_legend_type.html:91
 msgid "Creates a legend for a raster layer defined by a color table"
 msgstr ""
 
-#: templates/select_legend_type.html:111
+#: gvsigol_symbology/templates/select_legend_type.html:111
 msgid "Clustered Points"
 msgstr ""
 
-#: templates/select_legend_type.html:112
+#: gvsigol_symbology/templates/select_legend_type.html:112
 msgid "Creates a legend for clustered points defined by expressions"
 msgstr ""
 
-#: templates/sld_import.html:12
+#: gvsigol_symbology/templates/sld_import.html:12
 msgid "Import SLD"
 msgstr ""
 
-#: templates/sld_import.html:47
+#: gvsigol_symbology/templates/sld_import.html:47
 msgid "Select SLD"
 msgstr ""
 
-#: templates/style_layer_list.html:14
+#: gvsigol_symbology/templates/style_layer_list.html:14
 msgid "Layer name"
 msgstr ""
 
-#: templates/style_layer_list.html:15
+#: gvsigol_symbology/templates/style_layer_list.html:15
 msgid "Asigned to layer group"
 msgstr ""
 
-#: templates/style_layer_list.html:16
+#: gvsigol_symbology/templates/style_layer_list.html:16
 msgid "Styles"
 msgstr ""
 
-#: templates/style_layer_list.html:86
+#: gvsigol_symbology/templates/style_layer_list.html:86
 msgid "Add style"
 msgstr ""
 
-#: templates/style_layer_list.html:94
+#: gvsigol_symbology/templates/style_layer_list.html:94
 msgid "Delete style"
 msgstr ""
 
-#: templates/symbol_add.html:55 templates/symbol_update.html:53
+#: gvsigol_symbology/templates/symbol_add.html:55
+#: gvsigol_symbology/templates/symbol_update.html:53
 msgid "Edit symbolizer"
 msgstr ""
 
-#: templates/unique_values_add.html:64 templates/unique_values_update.html:67
+#: gvsigol_symbology/templates/unique_values_add.html:64
+#: gvsigol_symbology/templates/unique_values_update.html:67
 msgid "Select field to generate unique values"
 msgstr ""
 
-#: views.py:144
+#: gvsigol_symbology/views.py:144
 msgid "The layer must contain at least one style"
 msgstr ""
 
-#: views.py:147
+#: gvsigol_symbology/views.py:147
 msgid "Can not delete a default style"
 msgstr ""
 
-#: views.py:978
+#: gvsigol_symbology/views.py:978
 msgid "Error importing SLD"
 msgstr ""
 
-#: views.py:1038 views.py:1063
+#: gvsigol_symbology/views.py:1038 gvsigol_symbology/views.py:1063
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
 msgstr ""
 
-#: views.py:1133 views.py:1180 views.py:1228 views.py:1305 views.py:1368
-#: views.py:1508
+#: gvsigol_symbology/views.py:1133 gvsigol_symbology/views.py:1180
+#: gvsigol_symbology/views.py:1228 gvsigol_symbology/views.py:1305
+#: gvsigol_symbology/views.py:1368 gvsigol_symbology/views.py:1508
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
 msgstr ""
 
-#: views.py:1187 views.py:1375
+#: gvsigol_symbology/views.py:1187 gvsigol_symbology/views.py:1375
 msgid "You must enter a name for the library"
 msgstr ""
 
-#: views.py:1193 views.py:1381
+#: gvsigol_symbology/views.py:1193 gvsigol_symbology/views.py:1381
 msgid "You must enter a name for the library and select a file"
 msgstr ""
 
-#: views.py:1388
+#: gvsigol_symbology/views.py:1388
 msgid "There is already a library with that name"
 msgstr ""
