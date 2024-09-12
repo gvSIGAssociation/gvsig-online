@@ -64,7 +64,7 @@
 										<div id="last-run-{{ workspace.id }}">
 											{% load tz %}
 											{% timezone "Europe/Madrid" %}
-												{{ workspace.last_run|date:"d/m/Y H:i" }}
+												{{ workspace.last_run|date:"d/m/Y H:i:s" }}
 											{% endtimezone %}
 										</div>
 									</td>									<td>{{ workspace.name }}</td>
@@ -1752,9 +1752,10 @@
     var year = d.getFullYear();
     var hours = ("0" + d.getHours()).slice(-2);
     var minutes = ("0" + d.getMinutes()).slice(-2);
+    var seconds = ("0" + d.getSeconds()).slice(-2);  // Incluir los segundos
     
-    // Formatear como dd/mm/yyyy hh:mm
-    return day + "/" + month + "/" + year + " " + hours + ":" + minutes;
+    // Formatear como dd/mm/yyyy hh:mm:ss
+    return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds;
 }
 
     function actualizarInfoPanel(data){
