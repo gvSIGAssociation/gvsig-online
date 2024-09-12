@@ -56,7 +56,14 @@
 										</div>
 									</td>
 
-									<td><div id ="last-run-{{ workspace.id }}" >{{ workspace.last_run }}</div></td>
+									<td>
+										<div id="last-run-{{ workspace.id }}">
+											{% load tz %}
+											{% timezone "Europe/Madrid" %}
+												{{ workspace.last_run|date:"d/m/Y H:i" }}
+											{% endtimezone %}
+										</div>
+									</td>	
 									<td>{{ workspace.name }}</td>
 									<td>{{ workspace.description }}</td>
 									{% if workspace.every %}
@@ -827,6 +834,21 @@
 		edit_progamming_form($(this).val());
 	});
 
+	function formatDate(date) {
+		// Crear un objeto de fecha de JavaScript
+		var d = new Date(date);
+		
+		// Obtener las partes de la fecha
+		var day = ("0" + d.getDate()).slice(-2);  // Asegura que siempre haya dos dígitos
+		var month = ("0" + (d.getMonth() + 1)).slice(-2);  // Los meses comienzan en 0
+		var year = d.getFullYear();
+		var hours = ("0" + d.getHours()).slice(-2);
+		var minutes = ("0" + d.getMinutes()).slice(-2);
+		
+		// Formatear como dd/mm/yyyy hh:mm
+		return day + "/" + month + "/" + year + " " + hours + ":" + minutes;
+	}
+
     function actualizarInfoPanel(data){
 
 		for(var i=0;i<data["workspaces"].length; i++){
@@ -871,7 +893,7 @@
 
 			}
 
-			$("#last-run-"+id).text(last_exec);
+			$("#last-run-" + id).text(formatDate(last_exec));
 		}
 
     }
