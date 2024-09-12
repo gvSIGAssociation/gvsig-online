@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"POT-Creation-Date: 2024-09-12 11:27+0000\n"
 "PO-Revision-Date: 2023-10-23 15:47+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -20,34 +20,34 @@ msgstr ""
 "X-Source-Language: C\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: gvsigol/services_base.py:33 gvsigol/settings.py:369
+#: gvsigol/basetypes.py:32 gvsigol/settings.py:63
 msgid "Catalan"
 msgstr "Català"
 
-#: gvsigol/services_base.py:34 gvsigol/settings.py:371
+#: gvsigol/basetypes.py:33 gvsigol/settings.py:66
 msgid "German"
 msgstr "Alemany"
 
-#: gvsigol/services_base.py:35 gvsigol/settings.py:372
+#: gvsigol/basetypes.py:34 gvsigol/settings.py:64
 msgid "English"
 msgstr "Anglès"
 
-#: gvsigol/services_base.py:36 gvsigol/settings.py:367
+#: gvsigol/basetypes.py:35 gvsigol/settings.py:61
 msgid "Spanish"
 msgstr "Espanyol"
 
-#: gvsigol/services_base.py:37 gvsigol/settings.py:373
+#: gvsigol/basetypes.py:36 gvsigol/settings.py:65
 msgid "Portuguese"
 msgstr "Portuguès"
 
-#: gvsigol/services_base.py:38 gvsigol/settings.py:374
+#: gvsigol/basetypes.py:37 gvsigol/settings.py:67
 msgid "Brazilian Portuguese"
 msgstr "Portuguès (Brasil)"
 
-#: gvsigol/services_base.py:39 gvsigol/settings.py:368
+#: gvsigol/basetypes.py:38 gvsigol/settings.py:62
 msgid "Valencian"
 msgstr "Valencià"
 
-#: gvsigol/settings.py:370
-msgid "Valencian  ca-es-valencia"
+#: gvsigol/settings.py:68
+msgid "Basque"
 msgstr ""
