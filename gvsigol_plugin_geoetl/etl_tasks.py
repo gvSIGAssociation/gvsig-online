@@ -2655,7 +2655,6 @@ def trans_ExplodeGeom(dicc):
     count = 1
     
     for row in cur:
-        print(row, count)
         if count == 1 and row[0] is not None:
             type_geom = row[0]
         elif count > 1:
