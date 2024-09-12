@@ -17,7 +17,6 @@ import json
 from datetime import date, datetime, timedelta
 import copy
 from django.utils import timezone
-from pytz import timezone as pytz_timezone
 import requests
 import re
 
