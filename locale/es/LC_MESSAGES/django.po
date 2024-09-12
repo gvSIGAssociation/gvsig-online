@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"POT-Creation-Date: 2024-09-12 11:27+0000\n"
 "PO-Revision-Date: 2022-05-20 11:54+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -422,32 +422,32 @@ msgstr ""
 "Si no solicitaste un restablecimiento de contraseña, por favor ignora este "
 "email. Tu contraseña no cambiará."
 
-#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:171 gvsigol_auth/views.py:299
+#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:172 gvsigol_auth/views.py:300
 msgid "Your account has been disabled"
 msgstr "Su cuenta ha sido deshabilitada"
 
-#: gvsigol_auth/views.py:88 gvsigol_auth/views.py:90 gvsigol_auth/views.py:173
-#: gvsigol_auth/views.py:175 gvsigol_auth/views.py:301
+#: gvsigol_auth/views.py:88 gvsigol_auth/views.py:90 gvsigol_auth/views.py:174
+#: gvsigol_auth/views.py:176 gvsigol_auth/views.py:302
 msgid "The username and password you have entered do not match our records"
 msgstr "El nombre de usuario y contraseña no coinciden"
 
-#: gvsigol_auth/views.py:250
+#: gvsigol_auth/views.py:251
 msgid "User account does not exist"
 msgstr "La cuenta de usuario no existe"
 
-#: gvsigol_auth/views.py:254
+#: gvsigol_auth/views.py:255
 msgid "That did not work"
 msgstr "Eso no funcionó"
 
-#: gvsigol_auth/views.py:305
+#: gvsigol_auth/views.py:306
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr "Token no válido. Su enlace ha caducado, debe solicitar otro."
 
-#: gvsigol_auth/views.py:393
+#: gvsigol_auth/views.py:395
 msgid "User creation failed"
 msgstr "La creación del usuario falló"
 
-#: gvsigol_auth/views.py:513
+#: gvsigol_auth/views.py:515
 msgid ""
 "The authentication server is not available. Try again later or contact "
 "system administrators."
@@ -455,7 +455,7 @@ msgstr ""
 "El servidor de autenticación no está disponible. Pruebe de nuevo más tarde o "
 "contacte a los administradores del sistema"
 
-#: gvsigol_auth/views.py:546
+#: gvsigol_auth/views.py:548
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
@@ -466,11 +466,11 @@ msgstr ""
 "comenzar con una letra o un guión bajo (_). Los caracteres subsiguientes "
 "pueden ser letras, guiones bajos o números"
 
-#: gvsigol_auth/views.py:590
+#: gvsigol_auth/views.py:592
 msgid "Admin is a reserved role"
 msgstr "Admin es un rol reservado"
 
-#: gvsigol_auth/views.py:594
+#: gvsigol_auth/views.py:596
 #, python-brace-format
 msgid ""
 "Invalid user role name: '{value}'. Identifiers must begin with a letter or "
@@ -481,7 +481,7 @@ msgstr ""
 "una letra o un guión bajo (_). Los caracteres subsiguientes pueden ser "
 "letras, guiones bajos o números"
 
-#: gvsigol_auth/views.py:619
+#: gvsigol_auth/views.py:621
 msgid "System roles can't be deleted"
 msgstr "Los roles de sistema no se pueden eliminar"
 
