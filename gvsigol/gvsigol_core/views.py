@@ -1940,7 +1940,7 @@ def application_update(request, appid):
                 assigned_roles.append(key[len('usergroup-'):])
 
         has_image = False
-        if 'project-image' in request.FILES:
+        if 'application-image' in request.FILES:
             has_image = True
 
         app = Application.objects.get(id=int(appid))
