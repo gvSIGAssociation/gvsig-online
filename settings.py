@@ -217,7 +217,8 @@ INSTALLED_APPS = [
 
 #Load plugins
 #plugins = envos.getenv("GVSIGOL_PLUGINS").split(",")
-for i in env('GVSIGOL_PLUGINS'):
+GVSIGOL_PLUGINS= env('GVSIGOL_PLUGINS')
+for i in GVSIGOL_PLUGINS:
     print("INFO: Loading plugin " + i)
     INSTALLED_APPS.append(i)
 
