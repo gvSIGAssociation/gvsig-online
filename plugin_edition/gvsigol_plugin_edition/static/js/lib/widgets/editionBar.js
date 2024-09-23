@@ -1801,7 +1801,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
 					} else if (this.featureType[i].type.endsWith("enumeration")) {
-						if (value != null) {
+						if (value != null && value.trim) {
 							value = value.trim();
 						}
 						var name = this.featureType[i].name;
@@ -2222,7 +2222,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
 					} else if (this.featureType[i].type.endsWith("enumeration")) {
-						if (value != null) {
+						if (value != null && value.trim) {
 							value = value.trim();
 						}
 						var name = this.featureType[i].name;
