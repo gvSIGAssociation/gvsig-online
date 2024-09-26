@@ -118,9 +118,8 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
                 config_staff_user(user.username)
 
         return user
-        
 
-    def update_user(self, user, claims):
+    def default_update_user(self, user, claims):
         user.email = claims.get('email', '')
         user.first_name = claims.get('given_name', '')
         user.last_name = claims.get('family_name', '')
@@ -128,8 +127,13 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         user.is_superuser = (MAIN_SUPERUSER_ROLE in django_roles)
         user.is_staff = (STAFF_ROLE in django_roles or MAIN_SUPERUSER_ROLE in django_roles)
         user.save()
-
         return user
+
+
+    def update_user(self, user, claims):
+        if self.gvsigol_oidc_config and hasattr(self.gvsigol_oidc_config, 'update_user'):
+            return self.gvsigol_oidc_config.update_user(user, claims, self)
+        return self.default_update_user(user, claims)
 
     def _store_tokens(self, id_token, id_token_payload, nonce, token_info):
         session = self.request.session
@@ -196,13 +200,13 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         payload = self.verify_token(id_token_bytes, key, nonce=nonce)
 
         if payload:
-            self._store_tokens(id_token, payload, nonce, token_info)
             try:
                 return self.get_or_create_user(access_token, id_token, payload)
             except SuspiciousOperation as exc:
                 LOGGER.warning('failed to get or create user: %s', exc)
                 return None
-
+            finally:
+                self._store_tokens(id_token, payload, nonce, token_info)
         return None
 
     def _get_key(self, token):
