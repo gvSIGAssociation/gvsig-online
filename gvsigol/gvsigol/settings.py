@@ -132,6 +132,7 @@ env = environ.Env(
     #CELERY
     #TODO: split string host, pass, etc
     CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
+    CELERY_TASK_ALWAYS_EAGER =(bool,False),
 
     #Email    
     EMAIL_BACKEND_ACTIVE=(bool,True),
@@ -155,7 +156,7 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: keep the secret key used inogc_fid production secret!
 SECRET_KEY = '##SECRET_KEY##'
 if len(SECRET_KEY) == 14:
     # It has not been replaced by deployment scripts
@@ -665,7 +666,7 @@ LEGACY_GVSIGOL_SERVICES = {
 CELERY_BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_TASK_ACKS_LATE = True
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-CELERY_TASK_ALWAYS_EAGER  = True
+CELERY_TASK_ALWAYS_EAGER = env('CELERY_TASK_ALWAYS_EAGER')
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
