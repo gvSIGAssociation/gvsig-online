@@ -695,10 +695,9 @@ class FeatureSerializer(serializers.Serializer):
         try:
             i, table, schema = services_utils.get_db_connect_from_layer(layer)
             with i as con:
-                
+                idfield = util.get_layer_pk_name(con, schema, table)
+
                 if max_feat or page:
-
-
                     if not max_feat:
                         max_feat = settings.NUM_MAX_FEAT
                     if not page:
@@ -711,9 +710,10 @@ class FeatureSerializer(serializers.Serializer):
                     offset = max_feat * page
                     if(page > math.floor(num_entries/float(max_feat)) or page < 0):
                         raise HttpException(404, "Page NOT found")
-                    limit_offset = sqlbuilder.SQL('ORDER BY "ogc_fid" LIMIT {max_feat} OFFSET {offset}').format(
+                    limit_offset = sqlbuilder.SQL('ORDER BY {id_field} LIMIT {max_feat} OFFSET {offset}').format(
                                 max_feat=sqlbuilder.Literal(max_feat),
-                                offset=sqlbuilder.Literal(offset))
+                                offset=sqlbuilder.Literal(offset),
+                                id_field=sqlbuilder.Identifier(idfield))
 
                     links = [pagination.get_links(num_entries)]
                 else:
@@ -722,7 +722,6 @@ class FeatureSerializer(serializers.Serializer):
                 
                 geom_cols = con.get_geometry_columns(table, schema=schema)
                 properties = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
-                idfield = util.get_layer_pk_name(con, schema, table)
                 geom_col = geom_cols[0]
 
                 epsilon = "ST_Perimeter(ST_Transform({geom}, {epsg})) / 10000"
