@@ -133,7 +133,8 @@ env = environ.Env(
     #TODO: split string host, pass, etc
     CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
     CELERY_TASK_ALWAYS_EAGER =(bool,False),
-
+    # Session
+    SECRET_KEY=(str,'qz$rai5n3e1!13k&7ug1db72@-&g#r2o%bem68#-z+5um%etgk'),
     #Email    
     EMAIL_BACKEND_ACTIVE=(bool,True),
     EMAIL_USE_TLS=(bool,True),
@@ -157,7 +158,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # SECURITY WARNING: keep the secret key used inogc_fid production secret!
-SECRET_KEY = '##SECRET_KEY##'
+SECRET_KEY = env('SECRET_KEY')
 if len(SECRET_KEY) == 14:
     # It has not been replaced by deployment scripts
     # Generate a random one
@@ -287,6 +288,12 @@ try:
 except ImportError:
     print('ERROR: No ha instalado la libreria corsheaders')
 
+# try:
+#     __import__('csp')
+#     MIDDLEWARE.append('csp.middleware.CSPMiddleware')
+# except ImportError:
+#     print('ERROR: No ha instalado la libreria django-csp')
+
 CORS_ORIGIN_ALLOW_ALL = env('CORS_ORIGIN_ALLOW_ALL')
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
@@ -396,7 +403,8 @@ if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
 
 # Internationalization
 LANGUAGE_CODE = 'es'
-TIME_ZONE = 'UTC'
+#TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Madrid'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -755,3 +763,20 @@ IFRAME_MODE_UI=env('IFRAME_MODE_UI')
 MANAGE_PERMISSION_UI=env('MANAGE_PERMISSION_UI')
 
 VIEWER_DEFAULT_CRS=env('VIEWER_DEFAULT_CRS')
+
+
+
+#CSP_DEFAULT_SRC = ("'self'", '*')
+#CSP_DEFAULT_SRC = ("'self'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
+#CSP_SCRIPT_SRC = ("'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
+#CSP_FRAME_ANCESTORS = ("'self'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
+
+#CSP_DEFAULT_SRC = ("'none'", '*')
+#CSP_SCRIPT_SRC = ("'none'", '*')
+#CSP_FRAME_ANCESTORS = ("'none'", '*')
+
+#CSP_DEFAULT_SRC = ("'self'", "'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
+#CSP_SCRIPT_SRC = ("'self'","'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
+#CSP_FRAME_ANCESTORS = ("'self'", 'https://localhost/','https://gvsigol-keycloak:8443/','http://localhost:3000/')
+#CSP_FRAME_ANCESTORS = ('*')||||||| .r8141
+
