@@ -219,6 +219,7 @@ INSTALLED_APPS = [
 
 #Load plugins
 #plugins = envos.getenv("GVSIGOL_PLUGINS").split(",")
+
 GVSIGOL_PLUGINS= env('GVSIGOL_PLUGINS')
 for i in GVSIGOL_PLUGINS:
     print("INFO: Loading plugin " + i)
@@ -347,6 +348,22 @@ DATABASES = {
     }
 }
 POSTGIS_VERSION = (2, 3, 3)
+
+#DATABASE_ROUTERS = ['gvsigol.routers.DatabaseRouter']
+
+DATABASE_ROUTERS = []
+
+# Import routers from plugins
+GVSIGOL_PLUGINS= env('GVSIGOL_PLUGINS')
+for i in GVSIGOL_PLUGINS:    
+    try:
+        aux = i + '.routers'
+        __import__(aux)
+        #from aux import *
+        print("INFO: Import database router " + i)
+        DATABASE_ROUTERS.append(aux+'.Router')
+    except Exception as e:
+        pass 
 
 AUTH_WITH_REMOTE_USER = False
 
