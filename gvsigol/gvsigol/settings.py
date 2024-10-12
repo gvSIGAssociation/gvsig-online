@@ -345,6 +345,11 @@ DATABASES = {
         'PASSWORD': env('DB_PASS'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
+        'TEST': {
+            'NAME': 'test',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+        }, 
     }
 }
 POSTGIS_VERSION = (2, 3, 3)
