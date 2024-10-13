@@ -77,17 +77,21 @@
 											<label>
 												<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
 											</label>
-										</div>
-										<div class="checkbox col-md-6">
+											<label></label>
 											<label>
 												<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
 											</label>
 										</div>
+										<!--<div class="checkbox col-md-6">
+											<label>
+												<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+											</label>
+										</div>-->
 									</div>
-									<div class="box-tools pull-right">
+									<!--<div class="box-tools pull-right">
 										<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
 										<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>
-									</div>
+									</div>-->
 								</div>
 							</div>
 						</div>
@@ -101,7 +105,7 @@
 	</div>
 </form>
 
-<!-- Modal -->
+<!-- Modal 
 <div class="modal fade" id="modal-add-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -121,7 +125,7 @@
 			</div>
 		</div>
 	</div>
-</div>
+</div>-->
 {% endblock %}
 
 {% block extra-scripts %}
@@ -130,7 +134,7 @@
 	$('#submenu-layergroups').addClass("active");
 
 
-	$('#button-create-layer').click(function() {
+/*	$('#button-create-layer').click(function() {
 		$("#myModalLabel").text(gettext("Create new layer"));
 		$('#button-add-layer-group-accept').click( function() {
 			var queryString = '?redirect=create-layer';
@@ -174,6 +178,6 @@
 			$("#layer-group-form").submit();
 			return false;
 		});
-	});
+	});*/
 </script>
 {% endblock %}
