@@ -32,6 +32,7 @@ urlpatterns = LOGIN_PATHS + [
 if settings.AUTH_DASHBOARD_UI:
     urlpatterns = urlpatterns + [
         path('user_list/', auth_views.user_list, name='user_list'),
+        path('datatables_user_list/', auth_views.datatables_user_list, name='datatables-user-list'),
         path('user_update/<username>/', auth_views.user_update, name='user_update'),
 
         path('group_list/', auth_views.group_list, name='group_list'),

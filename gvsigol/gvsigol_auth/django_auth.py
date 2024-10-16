@@ -6,6 +6,7 @@ from gvsigol_auth.models import Role
 import gvsigol_auth.services as auth_services
 from gvsigol_auth import signals
 import logging, importlib
+from django.db.models import Q
 LOGGER = logging.getLogger('gvsigol')
 
 __conf_cache = {}
@@ -632,6 +633,74 @@ def _get_user_representation(user):
     user_repr["roles"] = user.role_set.all().values_list('name', flat=True)
     return user_repr
 
+def get_filtered_users_details(exclude_system=False, search=None, first=None, max=None):
+    """
+    Gets the list of the users and details (id, username, first_name, last_name
+    is_superuser, is_staff, email, roles) available in the system, potentially filtered
+    and paginated.
+
+    Parameters
+    ----------
+    exclude_system: boolean (default: False)
+        Exclude system users, as defined by get_system_users()
+    search: string (default: None)
+        Search string to filter returned results
+    first: integer
+        Pagination offset
+    max:
+        Maximum number of results returned
+
+    Returns
+    -------
+    dict()
+        A dictionary containing the number of matched users, the number returned and the
+         list of dictionaries containing the user details. Example:
+         {
+         "numberMatched": 20,
+         "numberReturned": 2,
+         "users: [
+            {
+                "id": 1,
+                "username": "username1",
+                "first_name": "Firstname1",
+                "last_name": "Lastname1",
+                "is_superuser": True,
+                "is_staff": True,
+                "email": "example1@example.com",
+                roles": ["role1", "role2"]},
+            },
+            {
+                "id": 2,
+                "username": "username2",
+                "first_name": "Firstname2",
+                "last_name": "Lastname2",
+                "is_superuser": False,
+                "is_staff": True,
+                "email": "example2@example.com",
+                roles": ["role2", "role3"]},
+            }
+        ]
+    """
+    User = get_user_model()
+    if exclude_system:
+        base_query = User.objects.exclude(username__in=get_system_users())
+    else:
+        base_query = User.objects.all()
+    if search:
+        base_query = base_query.filter(Q(username__contains=search) | Q(email__contains=search) | Q(id__contains=search))
+    if max is not None:
+        if first is not None:
+            base_query = base_query[first:first+max]
+        else:
+            base_query = base_query[:max]
+    user_list = base_query.prefetch_related('role_set')
+    
+    users = []
+    for user in user_list:
+        users.append(_get_user_representation(user))
+    return users
+
+
 def get_users_details(exclude_system=False):
     """
     Gets the list of the users and details (id, username, first_name, last_name
@@ -645,7 +714,7 @@ def get_users_details(exclude_system=False):
     Returns
     -------
     list[dict()]
-        A list of dictionaries containing the group details. Example:
+        A list of dictionaries containing the user details. Example:
         [{
             "id": 1,
             "username": "username1",
