@@ -697,17 +697,17 @@ class KeycloakAdminSession(OIDCSession):
         users = []
         count = 0
         try:
-            if max is not None:
-                query_params = {'max': max}
-            else:
-                query_params = {"max": -1}
+            query_params = {}
             if search:
-                query_params['search'] = f'*{search}*'
+                query_params['search'] = search
+            matched_response = self.get(self.admin_url + '/users/count', params=query_params)
+            matched_count = int(matched_response.text)
             if first is not None:
                 query_params['first'] = first
-            
-            count_response = self.get(self.admin_url + '/users/count', params=query_params)
-            count = count_response.text
+            if max is not None:
+                query_params['max'] = max
+            else:
+                query_params['max'] = -1
             query_params["briefRepresentation"] = True
             response = self.get(self.admin_url + '/users', params=query_params)
             excluded_sytem_users = 0
@@ -732,12 +732,12 @@ class KeycloakAdminSession(OIDCSession):
                         })
                     else:
                         excluded_sytem_users = excluded_sytem_users + 1
-            count = int(count) - excluded_sytem_users
+            matched_count = matched_count - excluded_sytem_users
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
         except RequestException:
             LOGGER.exception('requests error getting users details')
-        return {"numberMatched": int(count), "numberReturned": len(users), "users": users}
+        return {"numberMatched": matched_count, "numberReturned": len(users), "users": users}
     
     def get_users_details(self, exclude_system=False):
         users = []
