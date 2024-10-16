@@ -690,7 +690,9 @@ def get_filtered_users_details(exclude_system=False, search=None, first=None, ma
         base_query = base_query.filter(Q(username__contains=search) | Q(email__contains=search) | Q(id__contains=search))
     matched_count = base_query.count()
     if max is not None:
+        max = int(max)
         if first is not None:
+            first = int(first)
             base_query = base_query[first:first+max]
         else:
             base_query = base_query[:max]
