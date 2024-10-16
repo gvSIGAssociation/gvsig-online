@@ -43,7 +43,7 @@ from .utils import superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from . import utils as auth_utils
 import json
 import re
@@ -327,9 +327,10 @@ def user_list(request):
     }     
     return render(request, 'user_list.html', response)
 
+@csrf_exempt
+@require_http_methods(["HEAD", "POST"])
 @login_required()
 @superuser_required
-@require_http_methods(["HEAD", "POST"])
 def datatables_user_list(request):
     draw = request.POST.get('draw')
     start = request.POST.get('start')
