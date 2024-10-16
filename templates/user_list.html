@@ -87,7 +87,10 @@ $(document).ready(function() {
 		responsive: true,
 		processing: true,
 		serverSide: true,
-		ajax: "{% url 'datatables-user-list' %}",
+		ajax: {
+			url: "{% url 'datatables-user-list' %}",
+			type: 'POST'
+		},
 	    language: {
 	    	processing		: '{% trans "Processing request..." %}',
 		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',

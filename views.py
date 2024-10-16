@@ -29,6 +29,7 @@ from gvsigol_auth.django_auth import get_admin_role
 from django.urls import reverse
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -328,14 +329,15 @@ def user_list(request):
 
 @login_required()
 @superuser_required
+@require_http_methods(["HEAD", "POST"])
 def datatables_user_list(request):
-    draw = request.GET.get('draw')
-    start = request.GET.get('start')
-    length = request.GET.get('length')
+    draw = request.POST.get('draw')
+    start = request.POST.get('start')
+    length = request.POST.get('length')
     search = None
-    for key in request.GET:
+    for key in request.POST:
         if key.startswith('search[value]'):
-            search = request.GET.get(key)
+            search = request.POST.get(key)
     
     try:
         response = auth_backend.get_filtered_users_details(exclude_system=True, first=start, max=length, search=search)
