@@ -254,7 +254,7 @@ class KeycloakAdminSession(OIDCSession):
 
     def get_all_groups(self, exclude_system=False):
         try:
-            response = self.get(self.admin_url + '/groups').json()
+            response = self.get(self.admin_url + '/groups', params={"max": -1}).json()
             return list(self._flatten_groups(response))
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
@@ -264,7 +264,7 @@ class KeycloakAdminSession(OIDCSession):
 
     def get_all_groups_details(self, exclude_system=False):
         try:
-            response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False}).json()
+            response = self.get(self.admin_url + '/groups', params={"briefRepresentation": False, "max": -1}).json()
             return list(self._flatten_group_details(response))
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
@@ -274,7 +274,7 @@ class KeycloakAdminSession(OIDCSession):
 
     def get_all_roles(self, exclude_system=False):
         try:
-            response = self.get(self.admin_url + '/roles').json()
+            response = self.get(self.admin_url + '/roles', params={"max": -1}).json()
             if exclude_system:
                 system_roles = get_system_roles()
                 return [r.get('name') for r in response if r.get('name') not in system_roles]
@@ -287,7 +287,7 @@ class KeycloakAdminSession(OIDCSession):
 
     def get_all_roles_details(self, exclude_system=False):
         try:
-            response = self.get(self.admin_url + '/roles').json()
+            response = self.get(self.admin_url + '/roles', params={"max": -1}).json()
             if exclude_system:
                 system_roles = get_system_roles()
             else:
@@ -696,7 +696,7 @@ class KeycloakAdminSession(OIDCSession):
     def get_users_details(self, exclude_system=False):
         users = []
         try:
-            response = self.get(self.admin_url + '/users', params={"briefRepresentation": True})
+            response = self.get(self.admin_url + '/users', params={"briefRepresentation": True, "max": -1})
             if response.status_code == 200:
                 if exclude_system:
                     system_users = get_system_users()
