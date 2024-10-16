@@ -688,6 +688,7 @@ def get_filtered_users_details(exclude_system=False, search=None, first=None, ma
         base_query = User.objects.all()
     if search:
         base_query = base_query.filter(Q(username__contains=search) | Q(email__contains=search) | Q(id__contains=search))
+    matched_count = base_query.count()
     if max is not None:
         if first is not None:
             base_query = base_query[first:first+max]
@@ -698,7 +699,7 @@ def get_filtered_users_details(exclude_system=False, search=None, first=None, ma
     users = []
     for user in user_list:
         users.append(_get_user_representation(user))
-    return users
+    return {"numberMatched": int(matched_count), "numberReturned": len(users), "users": users}
 
 
 def get_users_details(exclude_system=False):
