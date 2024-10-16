@@ -692,11 +692,58 @@ class KeycloakAdminSession(OIDCSession):
         except RequestException as e:
             LOGGER.exception('requests error adding user to role')
         return []
-        
+
+    def get_filtered_users_details(self, exclude_system=False, search=None, first=None, max=None):
+        users = []
+        count = 0
+        try:
+            if max is not None:
+                query_params = {'max': max}
+            else:
+                query_params = {"max": -1}
+            if search:
+                query_params['search'] = f'*{search}*'
+            if first is not None:
+                query_params['first'] = first
+            
+            count_response = self.get(self.admin_url + '/users/count', params=query_params)
+            count = count_response.text
+            query_params["briefRepresentation"] = True
+            response = self.get(self.admin_url + '/users', params=query_params)
+            excluded_sytem_users = 0
+            if response.status_code == 200:
+                if exclude_system:
+                    system_users = get_system_users()
+                else:
+                    system_users = []
+                for user in response.json():
+                    if user.get('username') not in system_users:
+                        user_id = user.get('id')
+                        roles = self._get_user_roles(user_id)
+                        users.append({
+                            "id": user.get('id'),
+                            "username": user.get('username'),
+                            "first_name": user.get('firstName', ''),
+                            "last_name": user.get('lastName', ''),
+                            "is_superuser": MAIN_SUPERUSER_ROLE in roles,
+                            "is_staff": STAFF_ROLE in roles,
+                            "email": user.get('email'),
+                            "roles": roles
+                        })
+                    else:
+                        excluded_sytem_users = excluded_sytem_users + 1
+            count = int(count) - excluded_sytem_users
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            raise BackendNotAvailable from e
+        except RequestException:
+            LOGGER.exception('requests error getting users details')
+        return {"numberMatched": int(count), "numberReturned": len(users), "users": users}
+    
     def get_users_details(self, exclude_system=False):
         users = []
         try:
-            response = self.get(self.admin_url + '/users', params={"briefRepresentation": True, "max": -1})
+            query_params = {"briefRepresentation": True, "max": -1}
+            response = self.get(self.admin_url + '/users', params=query_params)
             if response.status_code == 200:
                 if exclude_system:
                     system_users = get_system_users()
@@ -1321,7 +1368,7 @@ def get_users_details(exclude_system=False):
     Returns
     -------
     list[dict()]
-        A list of dictionaries containing the group details. Example:
+        A list of dictionaries containing the user details. Example:
         [{
             "id": 1,
             "username": "username1",
@@ -1344,6 +1391,58 @@ def get_users_details(exclude_system=False):
         }]
     """
     return _get_admin_session().get_users_details(exclude_system=exclude_system)
+
+def get_filtered_users_details(exclude_system=False, search=None, first=None, max=None):
+    """
+    Gets the list of the users and details (id, username, first_name, last_name
+    is_superuser, is_staff, email, roles) available in the system, potentially filtered
+    and paginated.
+
+    Parameters
+    ----------
+    exclude_system: boolean (default: False)
+        Exclude system users, as defined by get_system_users()
+    search: string (default: None)
+        Search string to filter returned results
+    first: integer
+        Pagination offset
+    max:
+        Maximum number of results returned
+    Returns
+    -------
+    dict()
+        A dictionary containing the number of matched users, the number returned and the
+         list of dictionaries containing the user details. Example:
+         {
+         "numberMatched": 20,
+         "numberReturned": 2,
+         "users: [
+            {
+                "id": 1,
+                "username": "username1",
+                "first_name": "Firstname1",
+                "last_name": "Lastname1",
+                "is_superuser": True,
+                "is_staff": True,
+                "email": "example1@example.com",
+                roles": ["role1", "role2"]},
+            },
+            {
+                "id": 2,
+                "username": "username2",
+                "first_name": "Firstname2",
+                "last_name": "Lastname2",
+                "is_superuser": False,
+                "is_staff": True,
+                "email": "example2@example.com",
+                roles": ["role2", "role3"]},
+            }
+        ]
+    """
+    return _get_admin_session().get_filtered_users_details(exclude_system=exclude_system,
+                                                           search=search,
+                                                           first=first,
+                                                           max=max)
 
 def get_user_details(user=None, user_id=None):
     """
