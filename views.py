@@ -316,7 +316,7 @@ def password_reset_success(request):
 @login_required()
 @superuser_required
 def user_list(request):
-    users = auth_backend.get_users_details(exclude_system=True)
+    users = []
     for user in users:
         user["roles"] = "; ".join(user["roles"])
                       
@@ -325,6 +325,49 @@ def user_list(request):
         'read_only_users': settings.AUTH_READONLY_USERS
     }     
     return render(request, 'user_list.html', response)
+
+@login_required()
+@superuser_required
+def datatables_user_list(request):
+    draw = request.GET.get('draw')
+    start = request.GET.get('start')
+    length = request.GET.get('length')
+    search = None
+    for key in request.GET:
+        if key.startswith('search[value]'):
+            search = request.GET.get(key)
+    
+    try:
+        response = auth_backend.get_filtered_users_details(exclude_system=True, first=start, max=length, search=search)
+        users = response.get('users')
+        user_list = []
+        for user in users:
+            user_list.append([
+                                user.get('id'),
+                                user.get('username'),
+                                user.get('first_name'),
+                                user.get('last_name'),
+                                user.get('email'),
+                                user.get('is_superuser'),
+                                user.get('is_staff'),
+                                "; ".join(user.get("roles", []))
+                            ])
+    except Exception as e:
+        return JsonResponse({
+            "draw": draw,
+            "recordsTotal": 0,
+            "recordsFiltered": 0,
+            "data": [],
+            "error": str(e)
+        })
+    data = {
+        "draw": draw,
+        "recordsTotal": -1,
+        "recordsFiltered": response.get('numberMatched'),
+        "data": user_list
+    }
+    return JsonResponse(data)
+
 
 @login_required()
 @superuser_required

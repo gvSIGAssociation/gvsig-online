@@ -85,13 +85,16 @@
 $(document).ready(function() {
 	var table = $('#users-table').DataTable({
 		responsive: true,
+		processing: true,
+		serverSide: true,
+		ajax: "{% url 'datatables-user-list' %}",
 	    language: {
 	    	processing		: '{% trans "Processing request..." %}',
 		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
 		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
 		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
 		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoFiltered	: '',
 		    infoPostFix		: "",
 		    loadingRecords	: '{% trans "Loading..." %}',
 		    zeroRecords		: '{% trans "No records available" %}',
@@ -108,17 +111,62 @@ $(document).ready(function() {
 		    }
 		},
 		"columnDefs": [{
+			"targets": 0,
+			"sortable": false,
+			"orderable": false
+		},
+		{
+			"targets": 1,
+			"sortable": false,
+			"orderable": false
+		},
+		{
+			"targets": 2,
+			"sortable": false,
+			"orderable": false
+		},
+		{
+			"targets": 3,
+			"sortable": false,
+			"orderable": false
+		},
+		{
+			"targets": 4,
+			"sortable": false,
+			"orderable": false
+		},
+		{
+			"targets": 5,
+			"sortable": false,
+			"orderable": false
+		},
+		{
+			"targets": 6,
+			"sortable": false,
+			"orderable": false
+		},
+		{
+			"targets": 7,
+			"sortable": false,
+			"orderable": false
+		},
+		{
 	        "targets": -1,
 	        "data": null,
-	        "defaultContent": {% if read_only_users %}''{% else %}'<button type="button" name="button-delete-user" data-toggle="modal" data-target="#modal-delete-user" data-placement="bottom" title="' + '{% trans "Delete user" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'{% endif %}
+	        "defaultContent": {% if read_only_users %}''{% else %}'<button type="button" name="button-delete-user" data-toggle="modal" data-target="#modal-delete-user" data-placement="bottom" title="' + '{% trans "Delete user" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'{% endif %},
+			"sortable": false,
+			"orderable": false
+
 	    },{
 	        "targets": -2,
 	        "data": null,
-	        "defaultContent": '<button type="button" name="button-update-user" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update user" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	        "defaultContent": '<button type="button" name="button-update-user" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update user" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>',
+			"sortable": false,
+			"orderable": false
 	    }],
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false,
-		"order": [[ 1, 'asc' ]]
+		"order": []
 	});
 		 
 	$('#users-table tbody').on('click', 'button', function (){

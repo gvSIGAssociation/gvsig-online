@@ -403,7 +403,7 @@ exclude_system: boolean (default: False)
 Returns
 -------
 list[dict()]
-    A list of dictionaries containing the group details. Example:
+    A list of dictionaries containing the user details. Example:
     [{
         "id": 1,
         "username": "username1",
@@ -424,6 +424,55 @@ list[dict()]
         "email": "example2@example.com",
         roles": ["role2", "role3"]},
     }]
+"""
+
+
+get_filtered_users_details = auth_backend.get_filtered_users_details
+"""
+Gets the list of the users and details (id, username, first_name, last_name
+is_superuser, is_staff, email, roles) available in the system, potentially filtered
+and paginated.
+
+Parameters
+----------
+exclude_system: boolean (default: False)
+    Exclude system users, as defined by get_system_users()
+search: string (default: None)
+    Search string to filter returned results
+first: integer
+    Pagination offset
+max:
+    Maximum number of results returned
+Returns
+-------
+dict()
+    A dictionary containing the number of matched users, the number returned and the
+        list of dictionaries containing the user details. Example:
+        {
+        "numberMatched": 20,
+        "numberReturned": 2,
+        "users: [
+        {
+            "id": 1,
+            "username": "username1",
+            "first_name": "Firstname1",
+            "last_name": "Lastname1",
+            "is_superuser": True,
+            "is_staff": True,
+            "email": "example1@example.com",
+            roles": ["role1", "role2"]},
+        },
+        {
+            "id": 2,
+            "username": "username2",
+            "first_name": "Firstname2",
+            "last_name": "Lastname2",
+            "is_superuser": False,
+            "is_staff": True,
+            "email": "example2@example.com",
+            roles": ["role2", "role3"]},
+        }
+    ]
 """
 
 get_user_details = auth_backend.get_user_details
