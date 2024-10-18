@@ -146,8 +146,8 @@ env = environ.Env(
     DEFAULT_FROM_EMAIL=(str,'noreply@gvsigonline.com'),
     #Bing
     BING_KEY=(str,''),
-    DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 26214400) # The default size 2621440 (2.5M) is too small and prevents adding external layers from servers having large getcapabilites document
-
+    DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 26214400), # The default size 2621440 (2.5M) is too small and prevents adding external layers from servers having large getcapabilites document
+    FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774)
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -769,6 +769,7 @@ GEOETL_DB = {
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 DATA_UPLOAD_MAX_MEMORY_SIZE = env('DATA_UPLOAD_MAX_MEMORY_SIZE')
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = env('FILE_UPLOAD_DIRECTORY_PERMISSIONS')
 
 # Frontend SPA
 USE_SPA_PROJECT_LINKS = env('USE_SPA_PROJECT_LINKS')
