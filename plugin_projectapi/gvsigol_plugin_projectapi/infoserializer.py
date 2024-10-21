@@ -354,7 +354,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled']
 
 
 class LayerGroupSerializer(serializers.ModelSerializer):
