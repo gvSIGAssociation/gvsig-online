@@ -35,6 +35,7 @@ from rest_framework.parsers import FormParser
 from gvsigol_plugin_featureapi.export import VectorLayerExporter
 from gvsigol_plugin_featureapi.serializers import FeatureSerializer, LayerChangesSerializer, LayerCreateSerializer, StyleSerializer
 from gvsigol_plugin_featureapi.serializers import LayerSerializer
+from gvsigol_plugin_featureapi.serializers import LayerTimeSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services import geographic_servers
 from gvsigol_services import views as serviceviews
@@ -667,6 +668,42 @@ class LayersData(ListAPIView):
         return HttpException(404, "Data NOT exists for this layer").get_exception()
 
 
+#--------------------------------------------------
+#                 LayersTime
+#--------------------------------------------------
+class LayersTime(ListAPIView):
+    serializer_class = LayerTimeSerializer
+    
+    @swagger_auto_schema(operation_id='get_layer_time_info', operation_summary='Gets the time information of a layer',
+                         responses={404: "The layer has not datastore. Maybe is a external layer or a raster layer<br>Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id):
+        v = Validation(request)    
+        try:
+            v.check_get_layer_data(lyr_id)
+        except HttpException as e:
+            return e.get_exception()
+        
+        layer = Layer.objects.get(id = int(lyr_id))
+        if(layer.type == 'v_PostGIS'):
+            try:
+                queryset = Layer.objects.select_related('datastore').get(id = lyr_id)
+                queryset.connections = util.get_pool_connection(queryset)
+                serializer = LayerTimeSerializer(queryset, context={'request': request, 'user': request.user.username})
+                result = {
+                    "content" : serializer.data
+                }
+                util.destroy_pool_connection(queryset.connections)
+
+                return JsonResponse(result, safe=False)
+            except HttpException as e:
+                print(e)
+                return e.get_exception()
+            except Exception as e:
+                print(e)
+                return(e)
+        
 
 #--------------------------------------------------
 #                  LayersStyle
