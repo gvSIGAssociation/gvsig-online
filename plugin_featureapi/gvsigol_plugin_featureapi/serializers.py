@@ -1449,7 +1449,19 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'external', 'service_version', 'native_srs']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'created_by', 
+                  'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 
+                  'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'external', 'service_version', 
+                  'native_srs', 'time_enabled']
+
+
+class LayerTimeSerializer(serializers.ModelSerializer):
+        
+    class Meta:
+        model = Layer
+        fields = ['id', 'name', 'time_enabled', 'time_enabled_endfield', 'time_enabled_field', 'time_default_value', 'time_default_value_mode', 
+                  'time_presentation', 'time_resolution_day', 'time_resolution_hour', 'time_resolution_minute', 'time_resolution_month', 'time_resolution_second',
+                  'time_resolution_week', 'time_resolution_year']  
 
 
 
