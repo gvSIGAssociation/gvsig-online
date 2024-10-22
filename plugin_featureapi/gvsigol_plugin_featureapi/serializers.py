@@ -1461,7 +1461,7 @@ class LayerTimeSerializer(serializers.ModelSerializer):
         model = Layer
         fields = ['id', 'name', 'time_enabled', 'time_enabled_endfield', 'time_enabled_field', 'time_default_value', 'time_default_value_mode', 
                   'time_presentation', 'time_resolution_day', 'time_resolution_hour', 'time_resolution_minute', 'time_resolution_month', 'time_resolution_second',
-                  'time_resolution_week', 'time_resolution_year']  
+                  'time_resolution_week', 'time_resolution_year', 'time_resolution']  
 
 
 
