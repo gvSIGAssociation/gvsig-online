@@ -328,13 +328,15 @@ class KeycloakAdminSession(OIDCSession):
             else:
                 realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
             user_rep = {
-                "credentials": [{"value": password}],
                 "email": email,
                 "enabled": True,
                 "firstName": first_name,
                 "lastName": last_name,
-                "username": username
+                "username": username,
+                'emailVerified': True
             }
+            if password is not None:
+                user_rep["credentials"] = [{"value": password}]
             response = self.post(self.admin_url + '/users', json=user_rep)
             if response.status_code == 201:
                 set_roles(username, list(realm_roles))
@@ -345,7 +347,7 @@ class KeycloakAdminSession(OIDCSession):
                     user = User(
                         username=username,
                         email=email,
-                        password=password,
+                        password='' if password is None else password,
                         first_name=first_name,
                         last_name=last_name,
                         is_superuser=superuser,
