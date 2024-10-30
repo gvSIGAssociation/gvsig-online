@@ -17,19 +17,34 @@ from django.urls import include, re_path, path
 from django.conf.urls import i18n
 from django.views.i18n import JavaScriptCatalog
 from django.contrib import admin
+from django.views.decorators.cache import cache_page
+from django.views.decorators.http import etag
 
 from . import settings
+from django.utils import timezone
 
 packages = [ app for app in settings.INSTALLED_APPS
                 if app.startswith('gvsigol_plugin_')
                  or app.startswith('gvsigol_app_')
             ]
 
+def get_version():
+    return settings.GVSIGOL_VERSION
+
+def get_jsi18n_etag(request, language_code):
+    return get_version()
+
 GVSIGOL_URL_PREFIX = settings.GVSIGOL_PATH + '/'
 urlpatterns = [
     path(GVSIGOL_URL_PREFIX, include([
         path('i18n/', include(i18n)),
         path('jsi18n/', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
+        path('jsi18n/<language_code>/', 
+             etag(get_jsi18n_etag)(
+                cache_page(86400, key_prefix="jsi18n-%s" % get_version())(
+                    JavaScriptCatalog.as_view(packages=packages)
+                )
+            ), name='javascript-i18n-catalog'),
         path('admin/', admin.site.urls)
     ])),
 ]
