@@ -538,7 +538,7 @@ msgstr "Ha iniciat sessió com a usuari bàsic"
 
 #: gvsigol_core/templates/home.html:30
 msgid "Last login"
-msgstr "Última conexió"
+msgstr "Última connexió"
 
 #: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:469
 msgid "Password"
