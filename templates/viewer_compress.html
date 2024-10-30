@@ -323,7 +323,8 @@
 	<div id="floating-modal">
 	</div>
 
-	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+	{% get_current_language as LANGUAGE_CODE %}
+	<script type="text/javascript" src="{% url 'javascript-i18n-catalog' LANGUAGE_CODE %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/polyfill-fetch.js" %}"></script>
 	<script>
 		if (!String.prototype.startsWith) {
@@ -448,13 +449,10 @@
 
 		var extraParams = {{extra_params|safe}};
 		$.ajax({
-			type : 'POST',
+			type : 'GET',
 			async : false,
 			url : '/gvsigonline/core/project_get_conf/',
 			data : data,
-			beforeSend : function(xhr) {
-				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-			},
 			success : function(response) {
 				for (var key in response.supported_crs) {
 					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);
