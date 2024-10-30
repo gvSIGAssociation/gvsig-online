@@ -538,7 +538,7 @@ msgstr "Ha iniciat sessió com a usuari bàsic"
 
 #: gvsigol_core/templates/home.html:30
 msgid "Last login"
-msgstr "Última conexió"
+msgstr "Última connexió"
 
 #: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:469
 msgid "Password"
@@ -570,7 +570,7 @@ msgstr "Actualitzar contrasenya"
 
 #: gvsigol_core/templates/home.html:72
 msgid "Private projects list"
-msgstr "Llistat de projectes.privats"
+msgstr "Llistat de projectes privats"
 
 #: gvsigol_core/templates/home.html:75
 #: gvsigol_core/templates/project_list.html:11
