@@ -828,7 +828,7 @@ def layer_delete_operation(request, layer_id):
                 'status_code': 400,
                 'message': str(e),
             }
-        return JsonResponse(data, status_code=400)
+        return JsonResponse(data, status=400)
 
 
 
