@@ -68,7 +68,7 @@ def get_fields_from_shape(shp_path):
     dbf_file = file_name + ".dbf"
     if not os.path.isfile(dbf_file):
         dbf_file = file_name + ".DBF"
-    with DBF(dbf_file) as table:
+    with DBF(dbf_file, char_decode_errors='ignore') as table:
         return table.fields
 
 def check_field_names(dbf_field_defs):
