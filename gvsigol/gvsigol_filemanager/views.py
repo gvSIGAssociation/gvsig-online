@@ -7,7 +7,7 @@ from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from gvsigol_core import utils as core_utils
 from django.views.generic import TemplateView, FormView
 from django.shortcuts import HttpResponse, redirect
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ngettext
 from gvsigol.settings import FILEMANAGER_DIRECTORY, INSTALLED_APPS
 from django.urls import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
@@ -31,10 +31,12 @@ from .tasks import postBackground
 from .models import exports_historical
 from gvsigol.celery import app as celery_app
 from gvsigol_services.shp2postgis import get_fields_from_shape
+import re
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+_valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 def can_manage_path(request, path):
     if path is not None:
@@ -130,11 +132,28 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
         
         file_details = self.fm.file_details()
-        shp_def = get_fields_from_shape(file_details.get('fileurl'))
-        shp_columns = [col.name for col in shp_def]
+        column_name_error = None
+        try:
+            shp_def = get_fields_from_shape(file_details.get('fileurl'))
+            shp_columns = [col.name for col in shp_def]
+            offending_fields = []
+            for name in shp_columns:
+                if _valid_name_regex.search(name) == None:
+                    offending_fields.append(name)
+            if len(offending_fields) > 0:
+                column_name_error = ngettext(
+                        "Field '{}' contains non-ASCII characters in field name and is not suported. Rename this fields and try again. Allowed characters are a-z, A-Z, _ or numbers; the first character can't be a number.",
+                        "Fields [{}] contain non-ASCII characters in field name and are not suported. Rename these fields and try again. Allowed characters are a-z, A-Z, _ or numbers; the first character can't be a number.",
+                        len(offending_fields)).format(", ".join(offending_fields))
+        except UnicodeError:
+            shp_columns = []
+            column_name_error = _("The layer contains non-ASCII characters in field names and it is not suported. Rename the offending fields and try again. Allowed characters are a-z, A-Z, _ or numbers; the first character can't be a number.")
         form = PostgisLayerUploadForm(user=self.request.user, source_columns=shp_columns)
         context['file'] = file_details
-        context['form'] = form  
+        context['form'] = form
+        context["back_url"] = '%s?path=%s' % (reverse_lazy('filemanager:browser'), file_details.get('directory'))
+        if column_name_error:
+            context["not_supported_error"] = column_name_error
         return context
     
     def post(self, request, *args, **kwargs):

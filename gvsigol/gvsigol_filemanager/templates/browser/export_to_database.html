@@ -11,7 +11,10 @@
 				action="{% url 'filemanager:export-to-database' %}">
 				<div class="box-header">
 					<div class="box-tools pull-right">
+						<a href="{{back_url}}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
+						{% if not_supported_error == None %}
 						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans "Export" %} <i class="fa fa-upload margin-l-5"></i></button>
+						{% endif %}
 					</div>
 				</div>
 
@@ -46,11 +49,18 @@
 
 					<div class="row" style="margin-top:20px;">
 						<div class="col-md-12 form-group">
+							{% if not_supported_error %}
+							<div class="alert alert-danger">
+								<h4><i class="icon fa fa-warning"></i> {% trans "Error!" %}</h4>
+								{{ not_supported_error }}
+							</div>
+							{% else %}
 							<div class="alert alert-warning alert-dismissible">
 								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-								<h4><i class="icon fa fa-warning"></i> {% trans "Warning!" %}</h4>
+								<h4><i class="icon fa fa-warning"></i>{% trans "Warning!" %}</h4>
 								{% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
 							</div>
+							{% endif %}
 						</div>
 					</div>
 
