@@ -1586,6 +1586,7 @@ def load_shared_view(request, view_name):
             return redirect(shared_url)
 
         plugins_config = core_utils.get_plugins_config()
+        enabled_plugins = core_utils.get_enabled_plugins(project)
         response = render(request, 'viewer.html', {
             'has_image': bool(project.image),
             'supported_crs': core_utils.get_supported_crs(),
@@ -1595,6 +1596,7 @@ def load_shared_view(request, view_name):
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
+            'enabled_plugins': enabled_plugins,
             'is_shared_view': True,
             'shared_view_name': shared_view.name,
             'main_page': settings.LOGOUT_REDIRECT_URL,
