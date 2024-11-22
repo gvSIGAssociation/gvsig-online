@@ -28,7 +28,7 @@ from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
 from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Application, ApplicationRole
 from gvsigol_services.models import LayerGroup, Layer, LayerGroupRole
-from gvsigol_services.utils import can_use_layergroup
+from gvsigol_services.authorization import can_use_layergroup
 from gvsigol import settings
 import json
 import psycopg2
@@ -522,8 +522,11 @@ def get_supported_crs(used_crs=None):
                     print("SQL Error", e)
                     if not e.pgcode == '42710':
                         return supported_crs   
-                    cursor.close();
-                    connection.close();
+                finally:
+                    try:
+                        connection.close();
+                    except:
+                        pass
                         
                 for row in rows:
                     s = row[4]

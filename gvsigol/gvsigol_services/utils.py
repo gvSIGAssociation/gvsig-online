@@ -34,13 +34,13 @@ import psycopg2
 from . import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import MEDIA_ROOT
-from gvsigol_auth.models import UserGroup, User
+from gvsigol_auth.models import User
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server, DefaultUserDatastore
 from .models import LayerReadRole, LayerWriteRole, LayerManageRole, LayerGroupRole
-from gvsigol_core import utils as core_utils
+from gvsigol_core.utils import toc_add_layer
 import ast
 from django.utils.crypto import get_random_string
 from psycopg2 import sql as sqlbuilder
@@ -50,25 +50,29 @@ from gvsigol_auth import auth_backend
 from gvsigol_auth import services as auth_services
 from gvsigol_auth.utils import ascii_norm_username
 import re
+from gvsigol_services import apps as gvsigol_services_apps
+from gvsigol_services.authorization import _get_user, can_use_layergroup, get_authz_server_for_layer
 
-def _get_user(request_or_user):
-    if isinstance(request_or_user, User):
-        return request_or_user
-    elif isinstance(request_or_user, str):
-        return User.objects.get(username=request_or_user)
-    else:
-        return request_or_user.user
 
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None, creator_all=False):
     if layer:
         read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
         write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True)
         manage_roles = LayerManageRole.objects.filter(layer=layer).values_list('role', flat=True)
+        external_perm_roles = list(
+                                    LayerReadRole.objects.filter(layer=layer, external=True).values_list('role', flat=True) \
+                                .union( \
+                                    LayerWriteRole.objects.filter(layer=layer, external=True).values_list('role', flat=True)
+                                )
+                                )
     else:
         read_roles = []
         write_roles = []
         manage_roles = []
-    return get_layer_checked_roles_from_user_input(read_roles, write_roles, manage_roles, creator_user_role=creator_user_role, creator_all=creator_all)
+        external_perm_roles = []
+    return get_layer_checked_roles_from_user_input(read_roles, write_roles, manage_roles,
+                                                   creator_user_role=creator_user_role, creator_all=creator_all,
+                                                   external_perm_roles=external_perm_roles)
 
 def get_all_user_roles_checked_by_layergroup(layergroup, creator_user_role=None):
     if layergroup:
@@ -97,23 +101,15 @@ def can_write_layer(request_or_user, layer):
         A Django Layer instance or a layer id
     """
     try:
-        user = _get_user(request_or_user)
-        if not isinstance(layer, Layer):
-            layer = Layer.objects.get(id=layer)
-        
-        if user.is_superuser:
-            return True
-        if isinstance(user, AnonymousUser):
-            return False
-        roles = get_roles(request_or_user)
-        return LayerWriteRole.objects.filter(layer=layer, role__in=roles).exists()
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_write_layer(request_or_user, layer)
     except Exception as e:
         print(e)
     return False
 
 def can_read_layer(request_or_user, layer):
     """
-    Checks whether the user has permissions to manage the provided layer.
+    Checks whether the user has permissions to read the provided layer.
 
     Parameters
     ----------
@@ -123,16 +119,24 @@ def can_read_layer(request_or_user, layer):
         A Django Layer instance or a layer id
     """
     try:
-        user = _get_user(request_or_user)
-        if not isinstance(layer, Layer):
-            layer = Layer.objects.get(id=layer)
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_read_layer(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return False
 
-        if layer.public or user.is_superuser:
-            return True
-        if isinstance(user, AnonymousUser):
-            return False
-        roles = get_roles(request_or_user)
-        return LayerReadRole.objects.filter(layer=layer, role__in=roles).exists()
+def can_read_feature(request_or_user, layer, feature):
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_read_feature(request_or_user, layer, feature)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_write_feature(request_or_user, layer, feature):
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_write_feature(request_or_user, layer, feature)
     except Exception as e:
         print(e)
     return False
@@ -185,38 +189,6 @@ def can_manage_datastore(request_or_user, datastore):
             return True
         if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
             return True
-    except Exception as e:
-        print(e)
-    return False
-
-
-def can_use_layergroup(request_or_user, layergroup, permission):
-    """
-    Checks whether the user has permissions to manage the provided layergroup.
-    It accepts a layergroup instance or a layergroup id.
-
-    Parameters
-    ----------
-    request_or_user: Request | HttpRequest | User | str
-        A Django Request object | A DRF HttpRequest object | A Django User object | A username
-    layergroup: LayerGroup | int
-        A Django LayerGroup instance or a LayerGroup id
-    permission: str
-        The permission to check for the user and layergroup
-    """
-    try:
-        user = _get_user(request_or_user)
-        if not isinstance(layergroup, LayerGroup):
-            layergroup = LayerGroup.objects.get(id=layergroup)
-        if user.is_superuser:
-            return True
-        if layergroup.created_by == user.username:
-            return True
-        elif user.is_staff:
-            if layergroup.name == "__default__":
-                return True
-            user_roles = auth_backend.get_roles(request_or_user)
-            return layergroup.layergrouprole_set.filter(permission=permission, role__in=user_roles).exists()
     except Exception as e:
         print(e)
     return False
@@ -745,7 +717,7 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
             """
             server.updateThumbnail(new_layer_instance, 'create')
         
-            core_utils.toc_add_layer(new_layer_instance)
+            toc_add_layer(new_layer_instance)
             server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
             return new_layer_instance
     return layer
@@ -894,7 +866,7 @@ def set_layergroup_permissions(layergroup, assigned_includeinproject_roles, assi
         except:
             pass
 
-def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None, creator_all=False):
+def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None, creator_all=False, external_perm_roles=[]):
     role_list = auth_backend.get_all_roles_details(exclude_system=True)
     roles = []
     admin_roles = [ auth_backend.get_admin_role()]
@@ -915,6 +887,8 @@ def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles,
                 role['manage_checked'] = True
                 if creator_all:
                     role['write_checked'] = True
+            if role['name'] in external_perm_roles: # permission assigned by specific perm management plugins
+                role['external'] = True
             roles.append(role)
     return roles
 

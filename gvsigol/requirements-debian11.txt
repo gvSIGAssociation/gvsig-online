@@ -29,7 +29,7 @@ pillow==10.3.0
 # *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
 
 ## gsconfig
-geoserver-restconfig==2.0.10
+geoserver-restconfig==2.0.12
 requests==2.31.0
 
 # async requests
@@ -138,6 +138,9 @@ django-environ==0.10.0
 tinydb==3.15.2
 #pycryptodomex==3.6.6
 tables==3.8.0
+
+# geoserver-acl client
+certifi>=2024.8.30
 
 # model versions
 django-simple-history==3.0.0

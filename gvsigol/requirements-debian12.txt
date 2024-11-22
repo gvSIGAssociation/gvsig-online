@@ -138,3 +138,6 @@ django-environ==0.10.0
 tinydb==3.15.2
 #pycryptodomex==3.6.6
 tables==3.8.0
+
+# geoserver-acl client
+certifi>=2024.8.30

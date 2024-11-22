@@ -36,6 +36,7 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import Group
 from gvsigol.basetypes import CloneConf
 
+
 class Server(models.Model):
     TYPE_CHOICES = (
         ('geoserver', 'geoserver'),
@@ -49,6 +50,7 @@ class Server(models.Model):
     user = models.CharField(max_length=25)
     password = models.CharField(max_length=100)
     default = models.BooleanField(default=False)
+    authz_service_conf = JSONField(default=None, null=True)
     
     def _get_relative_url(self, url):
         if url.startswith(settings.BASE_URL + '/'):
@@ -120,7 +122,8 @@ class Node(models.Model):
         return self.url
 
 def get_default_server():
-    theServer = Server.objects.get(default=True)
+     # note: using only() to avoid errors applying Server migrations on new deploys
+    theServer = Server.objects.filter(default=True).only('id').first()
     return theServer.id
 
 class Workspace(models.Model):
@@ -413,7 +416,8 @@ class Layer(models.Model):
 
     def get_db_connection(self):
         i, params = self.datastore.get_db_connection()
-        return i, self.source_name, params.get('schema', 'public')
+        source_name = self.source_name if self.source_name else self.name
+        return i, source_name, params.get('schema', 'public')
 
 class LayerReadGroup(models.Model):
     """
@@ -432,6 +436,18 @@ class LayerWriteGroup(models.Model):
 class LayerReadRole(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     role = models.TextField()
+    """
+    Some limits have been aplied to the read permission for this role on this layer, such as
+    - a CQL filter to limit the records available for read or write
+    - some fields are hidden or read-only
+    - ...
+    """
+    filtered = models.BooleanField(default=False)
+    """
+    This permission has been set using some high level or plugin-specific UI, so it
+    should not be editable in the general layer permission UI.
+    """
+    external = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
@@ -444,6 +460,18 @@ class LayerReadRole(models.Model):
 class LayerWriteRole(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     role = models.TextField()
+    """
+    Some limits have been aplied to the read permission for this role on this layer, such as
+    - a CQL filter to limit the records available for read or write
+    - some fields are hidden or read-only
+    - ...
+    """
+    filtered = models.BooleanField(default=False)
+    """
+    This permission has been set using some high level or plugin-specific UI, so it
+    should not be editable in the general layer permission UI.
+    """
+    external = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
@@ -487,6 +515,7 @@ class LayerGroupRole(models.Model):
     
     def __str__(self):
         return '({}, {}, {})'.format(self.layergroup.name, self.role, self.permission)
+
 
 class DataRule(models.Model):
     path = models.CharField(max_length=500)

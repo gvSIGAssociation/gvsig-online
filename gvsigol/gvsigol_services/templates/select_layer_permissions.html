@@ -18,33 +18,41 @@
 							</div>
 							<div class="box-body">
 								<ul class="products-list product-list-in-box list">
-									{% for group in groups %}
+									{% for role in roles %}
 									<li class="item">
 										<div class="product-img">
-											<img src="{% static "img/users.png" %}" alt="Users Image">
+											{% if role.external %}
+											<img src="{% static "img/users.png" %}" title="{% trans 'Non editable permissions since they have been set by a specific permission tool' %}" style="opacity: 0.4">
+											{% else %}
+											<img src="{% static "img/users.png" %}" alt="{% trans 'Generic user role image' %}">
+											{% endif %}
 										</div>
 										<div class="product-info">
-											<span class="product-title"><span class="searchable-rolename">{{group.name}}</span>
+											<span class="product-title"><span class="searchable-rolename">{{role.name}}</span>
 												<div class="pull-right checkbox form-inline">
 														<label>
-															<input class="layer-read-checkbox" type="checkbox" name="read-usergroup-{{group.name}}" id="read-usergroup-{{group.name}}" {% if group.read_checked %}checked {% endif %}/>
+															{% if role.external %}
+															<input class="layer-read-checkbox" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}" {% if role.read_checked %}checked {% endif %} disabled />
+															{% else %}
+															<input class="layer-read-checkbox" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}" {% if role.read_checked %}checked {% endif %}/>
+															{% endif %}
 															<span>{% trans "Read permission" %}</span>
 														</label>
 														<label style="margin-left:10px">
-															{% if is_view %}
-															<input type="checkbox" name="write-usergroup-{{group.name}}" id="write-usergroup-{{group.name}}" title="{% trans 'SQL views can\'t be edited.' %}" disabled />
+															{% if is_view or role.external %}
+															<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}" title="{% trans 'SQL views can\'t be edited.' %}" disabled />
 															{% else %}
-															<input type="checkbox" name="write-usergroup-{{group.name}}" id="write-usergroup-{{group.name}}" {% if group.write_checked %}checked {% endif %}/>
-															<span>{% trans "Write permission" %}</span>
+															<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}" {% if role.write_checked %}checked {% endif %}/>
 															{% endif %}
+															<span>{% trans "Write permission" %}</span>
 														</label>
 														<label style="margin-left:10px">
-															<input class="layer-manage-checkbox" type="checkbox" name="manage-usergroup-{{group.name}}" id="manage-usergroup-{{group.name}}" {% if group.manage_checked %}checked {% endif %}/>
+															<input class="layer-manage-checkbox" type="checkbox" name="manage-usergroup-{{role.name}}" id="manage-usergroup-{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
 															<span>{% trans "Permission to manage" %}</span>
 														</label>
 												</div>
 											</span> 
-											<span class="product-description searchable-roledesc">{{group.description}}</span>
+											<span class="product-description searchable-roledesc">{{role.description}}</span>
 										</div>
 									</li> 
 									{% endfor %}
