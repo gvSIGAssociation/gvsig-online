@@ -536,7 +536,7 @@ class LayerResource(models.Model):
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     """The primary key of the feature. This makes mandatory for
     gvSIG Online layers to have a numeric, non-complex primary key"""
-    feature = models.IntegerField()
+    feature = models.BigIntegerField()
     type = models.IntegerField(choices=TYPE_CHOICES)
     path = models.CharField(max_length=500)
     """The title of the resource (optional)"""

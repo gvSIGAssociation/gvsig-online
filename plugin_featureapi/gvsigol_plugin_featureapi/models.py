@@ -30,7 +30,7 @@ class FeatureVersions(models.Model):
     date = models.DateTimeField(null=True, blank=True)
     usr = models.CharField(max_length=150, default='')
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
-    feat_id = models.IntegerField(default=0)
+    feat_id = models.BigIntegerField(default=0)
     operation = models.IntegerField(default=1) #1-CREATE 2-UPDATE 3-DELETE
     resource = models.CharField(max_length=500, null=True)
     
