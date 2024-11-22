@@ -1294,7 +1294,7 @@ def project_get_conf(request):
             except KeyError:
                 # happens when using OIDC auth, the session has expired and the token has not been provided
                 logger.debug(str(user_roles))
-                return JsonResponse({"status": "error", "message": "Token missing or expired"}, status_code=401)
+                return JsonResponse({"status": "error", "message": "Token missing or expired"}, status=401)
     if is_shared_view:
         view_name = request.POST.get('shared_view_name')
         shared_view = SharedView.objects.get(name__exact=view_name)
@@ -1779,10 +1779,10 @@ def project_permissions_to_layer(request, pid):
                     server.setLayerReadRules(layer, read_roles)
             return JsonResponse({"status": "success"})
         except Project.DoesNotExist:
-            return JsonResponse({"status": "error"}, status_code=404)
+            return JsonResponse({"status": "error"}, status=404)
         except:
-            return JsonResponse({"status": "error"}, status_code=500)
-    return JsonResponse({"status": "error"}, status_code=400)
+            return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error"}, status=400)
 
 @superuser_required
 def extend_permissions_to_layer(request):
