@@ -491,7 +491,7 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
     def get(self, request, lyr_id, feat_id):
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_get_feature(lyr_id, feat_id)
             feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, 4326)
             result = {
                 "content" : feat,
@@ -551,7 +551,7 @@ class FeatureGetView(RetrieveDestroyAPIView):
     @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id, feat_id):
         validation = Validation(request)
-        validation.check_get_feature(lyr_id)
+        validation.check_get_feature(lyr_id, feat_id)
         try:
             feat = serializers.FeatureSerializer().get(None, lyr_id, feat_id, 4326)
             result = {
@@ -586,7 +586,7 @@ class FeatureVersionsView(ListAPIView):
     def get(self, request, lyr_id, feat_id):
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_get_feature(lyr_id, feat_id)
             feat_changes = FeatureVersions.objects.filter(feat_id = feat_id, layer_id=lyr_id)
             serializer = FeatureChangeSerializer(feat_changes, many=True)
         
@@ -616,7 +616,7 @@ class FeatureVersionsDeleted(ListAPIView):
     def get(self, request, lyr_id):
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_get_layer_features(lyr_id)
             date_ = util.get_param_date(request)
             if date_ is None:
                 feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=3)
@@ -650,7 +650,7 @@ class FeatureVersionsCreated(ListAPIView):
     def get(self, request, lyr_id):
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_get_layer_features(lyr_id)
             date_ = util.get_param_date(request)
             if date_ is None:
                 feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=1)
@@ -684,7 +684,7 @@ class FeatureVersionsUpdated(ListAPIView):
     def get(self, request, lyr_id):
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_get_layer_features(lyr_id)
             date_ = util.get_param_date(request)
             if date_ is None:
                 feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=2)
@@ -718,7 +718,7 @@ class FeatureVersionsAddedResources(ListAPIView):
     def get(self, request, lyr_id):
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_get_layer_features(lyr_id)
             date_ = util.get_param_date(request)
             if date_ is None:
                 feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=4)
@@ -753,7 +753,7 @@ class FeatureVersionsDeletedResources(ListAPIView):
     def get(self, request, lyr_id):
         validation = Validation(request)
         try:
-            validation.check_get_feature(lyr_id)
+            validation.check_get_layer_features(lyr_id)
             date_ = util.get_param_date(request)
             if date_ is None:
                 feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=5)
@@ -1114,11 +1114,11 @@ class FileAttachedView(ListAPIView):
     @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
     def get(self, request, resource_id):
         validation = Validation(request)
-
+    
         try:
             lyr_resource = LayerResource.objects.get(id=resource_id)
             try:
-                validation.check_read_permission(lyr_resource.layer)
+                validation.check_read_feature_permission(lyr_resource.layer, lyr_resource.feature)
             except HttpException as e:
                 return e.get_exception()
         except Exception as e:
