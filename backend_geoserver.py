@@ -26,7 +26,7 @@ from django.contrib.gis import gdal
 from gvsigol.settings import CONTROL_FIELDS
 from gvsigol_auth import auth_backend
 from django.db.backends.base import creation
-from .models import Server, Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadRole, Trigger, LayerWriteRole
+from .models import Server, Layer, LayerGroup, Datastore, Workspace
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology.services import create_default_style, clone_style
 from gvsigol_symbology import services as symbology_services
@@ -64,6 +64,8 @@ import psycopg2.errors
 from urllib.parse import urlparse, ParseResult
 from .shp2postgis import _valid_sql_name_regex, shp2postgis, do_export_to_postgis, get_fields_from_shape
 from .exceptions import UnsupportedRequestError, BadFormat, WrongElevationPattern, WrongTimePattern, InvalidValue, UserInputError
+import importlib
+from gvsigol_services.authorization import PlainAuthorizationService, get_authz_servers, get_authz_server_for_layer
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -77,7 +79,7 @@ OTHER_SUPPORTED_SQL_TYPES = ["character", "text", "numeric"]
 class Geoserver():
     CREATE_TYPE_SQL_VIEW = "gs_sql_view"
     CREATE_TYPE_VECTOR_LAYER = "gs_vector_layer"
-    def __init__(self, id, default, name, user, password, master_node, slave_nodes):
+    def __init__(self, id, default, name, user, password, master_node, slave_nodes, authz_srv_conf=None):
         self.id = id
         self.default = default
         self.name = name
@@ -88,6 +90,8 @@ class Geoserver():
         self.rest_catalog = rest_geoserver.Geoserver(self.rest_url, self.gwc_url)
         self.user = user
         self.password = password
+        self.authz_srv_conf = authz_srv_conf
+        self.auth_service = None
         self.supported_types = (
             ('v_PostGIS', _('PostGIS vector')),
             ('c_GeoTIFF', _('GeoTiff')),
@@ -109,7 +113,32 @@ class Geoserver():
     def getGsconfig(self):
         return gscat.Catalog(self.rest_url, self.user, self.password, validate_ssl_certificate=False)
     
-    
+    def getAuthorizationService(self):
+        if self.auth_service:
+            return self.auth_service
+        try:
+            if getattr(settings, "AUTH_SERVICE_CLASS", ''):
+                full_clazz_name = getattr(settings, "AUTH_SERVICE_CLASS")
+                class_path, class_name = full_clazz_name.rsplit(".", 1)
+                module = importlib.import_module(class_path)
+                AuthServiceClass = getattr(module, class_name)
+                if self.authz_srv_conf:
+                    self.auth_service = AuthServiceClass(self.id, self.authz_srv_conf)
+                    return self.auth_service
+        except Exception as e:
+            logger.exception("Error getting auth service")
+        if self.authz_srv_conf:
+            try:
+                module = importlib.import_module('gvsigol_plugin_gsacl.authservice')
+                AuthServiceClass = getattr(module, 'AclAuthorizationService')
+                self.auth_service = AuthServiceClass(self.id, self.authz_srv_conf)
+                return self.auth_service
+            except Exception as e:
+                logger.exception("Error getting auth service")
+        logger.info("Using PlainAuthorizationService")
+        self.auth_service = PlainAuthorizationService()
+        return self.auth_service
+
     def getSupportedTypes(self):
         return self.supported_types
     
@@ -1356,7 +1385,6 @@ class Geoserver():
             logging.exception(e)
             raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
         
-        
     def exportShpToPostgis(self, form_data):
         name = form_data['name']
         ds = form_data['datastore']
@@ -1607,154 +1635,24 @@ class Geoserver():
             raise
     
     def setDataRules(self):
-        url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
-        layers = Layer.objects.filter(external=False)
-        for layer in layers:
-            if layer.public:
-                who_can_read = [ "*" ]
-            else:
-                read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True).distinct()
-                if len(read_roles)>0:
-                    who_can_read = [ auth_backend.to_provider_rolename(read_role, provider="geoserver") for read_role in read_roles ]
-                else:
-                    who_can_read = [ auth_backend.to_provider_rolename(auth_backend.get_admin_role(), provider="geoserver") ]
-            
-            datastore = Datastore.objects.get(id=layer.datastore_id)
-            workspace = Workspace.objects.get(id=datastore.workspace_id)
-
-            data = {}
-            read_rule_path = workspace.name + "." + layer.name + ".r"
-            read_rule_roles = ",".join(who_can_read)
-            rules = DataRule.objects.filter(path=read_rule_path)
-            rules.delete()
-            read_rule = DataRule(
-                path = read_rule_path,
-                roles = read_rule_roles
-            )
-            data[read_rule_path] = read_rule_roles
-            read_rule.save()
-            # try to modify the rule
-            result = self.rest_catalog.get_session().put(url, json=data, verify=False, auth=(self.user, self.password))
-            if result.status_code == 409:
-                # If modifying failed, try to add the rule.
-                # We could delete and then add, but it is safer in this way (the layer remains protected in every instant)
-                # It also safe if the geoserver/gvsigol rules get incoherent
-                result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
-
-            write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True).distinct()
-            if len(write_roles) > 0:
-                who_can_write = [ auth_backend.to_provider_rolename(write_role, provider="geoserver") for write_role in write_roles ]
-            elif layer.type.startswith('c_'):
-                who_can_write = []
-            else:
-                who_can_write = [ auth_backend.to_provider_rolename(auth_backend.get_admin_role(), provider="geoserver") ] 
-            write_rule_path = workspace.name + "." + layer.name + ".w"
-            if  len(who_can_write) > 0:
-                write_rule_roles =  ",".join(who_can_write)
-                rules = DataRule.objects.filter(path=write_rule_path)
-                rules.delete()
-                write_rule = DataRule(
-                    path = write_rule_path,
-                    roles = write_rule_roles
-                )
-                write_rule.save()
-                data[write_rule_path] = write_rule_roles
-                # try to modify the rule
-                result = self.rest_catalog.get_session().put(url, json=data, verify=False, auth=(self.user, self.password))
-                if result.status_code == 409:
-                    # If modifying failed, try to add the rule.
-                    # We could delete and then add, but it is safer in this way (the layer remains protected in every instant)
-                    # It also safe if the geoserver/gvsigol rules get incoherent
-                    result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
-            else:
-                # clean any existing write rule for the layer 
-                self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/layers/" + write_rule_path, verify=False, auth=(self.user, self.password))
-                rules = DataRule.objects.filter(path=write_rule_path)
-                rules.delete()
-        self.setWfsTransactionRules()
+        """
+        (Re)Sets data rules in Geoserver for all layers, based on gvSIG Online
+        permissions
+        """
+        for server in get_authz_servers():
+            server.set_data_rules()
 
     def setLayerDataRules(self, layer, read_roles, write_roles):
-        self.setLayerReadRules(layer, read_roles)
-        self.setLayerWriteRules(layer, write_roles)
-        self.setWfsTransactionRules()
-    
-    def setLayerReadRules(self, layer, read_roles):
-        url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
-        geoserver_admin_role = auth_backend.to_provider_rolename(auth_backend.get_admin_role(), provider='geoserver')
-        if layer.public:
-            who_can_read = [ "*" ]
-        else:
-            if len(read_roles) > 0:
-                who_can_read = [ auth_backend.to_provider_rolename(g, provider="geoserver") for g in read_roles]
-                if not geoserver_admin_role in who_can_read:
-                    who_can_read.append(geoserver_admin_role)
-            else:
-                who_can_read = [ geoserver_admin_role ]
-        read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
-        read_rule_roles = ",".join(who_can_read)
-        rules = DataRule.objects.filter(path=read_rule_path)
-        rules.delete()
-        read_rule = DataRule(
-            path = read_rule_path,
-            roles = read_rule_roles
-            )
-        read_rule.save()
-        data = { read_rule_path: read_rule_roles}
-        # try to modify the rule
-        result = self.rest_catalog.get_session().put(url, json=data, verify=False, auth=(self.user, self.password))
-        if result.status_code == 409:
-            # If modifying failed, try to add the rule.
-            # We could delete and then add, but it is safer in this way (the layer remains protected in every instant)
-            # It also safe if the geoserver/gvsigol rules get incoherent
-            result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
-    
-    def setLayerWriteRules(self, layer, write_roles):
-        url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
-        who_can_write = [ auth_backend.to_provider_rolename(g, provider="geoserver") for g in write_roles ]
-        write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
-        # now add the rule if necessary
-        if len(who_can_write)>0:
-            write_rule_roles =  ",".join(who_can_write)
-            rules = DataRule.objects.filter(path=write_rule_path)
-            rules.delete()
-            write_rule = DataRule(
-                path = write_rule_path,
-                roles = write_rule_roles
-                )
-            write_rule.save()
-            data = { write_rule_path: write_rule_roles}
-            # try to modify the rule
-            result = self.rest_catalog.get_session().put(url, json=data, verify=False, auth=(self.user, self.password))
-            if result.status_code == 409:
-                # If modifying failed, try to add the rule.
-                # We could delete and then add, but it is safer in this way (the layer remains protected in every instant)
-                # It also safe if the geoserver/gvsigol rules get incoherent 
-                result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
-        else:
-            # clean any existing write rule for the layer 
-            self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/layers/" + write_rule_path, verify=False, auth=(self.user, self.password))
-            rules = DataRule.objects.filter(path=write_rule_path)
-            rules.delete()
-    
-    def setWfsTransactionRules(self):
-        write_roles = LayerWriteRole.objects.all().values_list('role', flat=True).distinct()
-        transaction_roles = [ auth_backend.to_provider_rolename(role, provider="geoserver") for role in write_roles ]
-        if  len(transaction_roles) > 0:
-            services_url = self.rest_catalog.get_service_url() + "/security/acl/services.json"
-            service = {}
-            service_write_roles =  ",".join(transaction_roles)
-            service['wfs.Transaction'] = service_write_roles
-            result = self.rest_catalog.get_session().put(services_url, json=service, verify=False, auth=(self.user, self.password))
-            if result.status_code == 409:
-                self.rest_catalog.get_session().post(services_url, json=service, verify=False, auth=(self.user, self.password))
-    
+        """
+        (Re)sets data rules in Geoserver for the provided layer, based in the
+        provided read and write roles and whether layer is public
+        """
+        server = get_authz_server_for_layer(layer)
+        server.set_layer_data_rules(layer, read_roles, write_roles)
+
     def deleteLayerRules(self, layer):
-        url = self.rest_catalog.get_service_url() + "/security/acl/layers/"
-        read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
-        self.rest_catalog.get_session().delete(url + read_rule_path, verify=False, auth=(self.user, self.password))
-        write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
-        self.rest_catalog.get_session().delete(url + write_rule_path, verify=False, auth=(self.user, self.password))
-        self.setWfsTransactionRules()
+        server = get_authz_server_for_layer(layer)
+        server.delete_layer_rules(layer)
 
     def clearCache(self, ws, layer):
         try:

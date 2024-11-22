@@ -40,7 +40,7 @@ class GeographicServers:
                 else:
                     slave_nodes.append(n.url)
                     
-            gs = backend_geoserver.Geoserver(s.id, s.default, s.name, s.user, s.password, master_node, slave_nodes)
+            gs = backend_geoserver.Geoserver(s.id, s.default, s.name, s.user, s.password, master_node, slave_nodes, authz_srv_conf=s.authz_service_conf)
             self.servers.append(gs)
         
     def get_servers(self):
@@ -76,10 +76,8 @@ class GeographicServers:
                 return s
             
     def get_master_node(self, id):
-        for n in Node.objects.filter(server_id=int(id)):
-            if n.is_master:
-                return n   
-            
+        return Node.objects.filter(server_id=int(id), is_master=True).first()
+    
     def get_all_nodes(self, id):
         return Node.objects.filter(server_id=int(id))
     
