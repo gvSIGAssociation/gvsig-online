@@ -207,7 +207,25 @@ class Validation():
             raise HttpException(404, "Layer NOT found")
         except User.DoesNotExist:
             raise HttpException(404, "User NOT found")
-        
+
+    def check_read_feature_permission(self, lyr, feat_id):
+        try:
+            if not services_utils.can_read_feature(self.request, lyr, feat_id):
+                raise HttpException(403, "The user does not have permission to read this feature or layer")
+        except Layer.DoesNotExist:
+            raise HttpException(404, "Layer NOT found")
+        except User.DoesNotExist:
+            raise HttpException(404, "User NOT found")
+
+    def check_edit_feature_permission(self, lyr, feat_id):
+        try:
+            if not services_utils.can_write_feature(self.request, lyr, feat_id):
+                raise HttpException(403, "The user does not have permission to write this feature or layer")
+        except Layer.DoesNotExist:
+            raise HttpException(404, "Layer NOT found")
+        except User.DoesNotExist:
+            raise HttpException(404, "User NOT found")
+
     def user_exists(self):
         # FIXME OIDC. Los usuarios pueden no exisir en el modelo de
         # Django todavía (si nunca hicieron Login) pero son usuarios validos en Keycloak.
@@ -217,9 +235,19 @@ class Validation():
     def layer_exists(self, lyr_id):
         if Layer.objects.filter(id=lyr_id).count() == 0:
             raise HttpException(404, "Layer NOT found")
+    
+    def get_layer(self, lyr_id):
+        """
+        Checks that the layer exists and returns the Django Layer instance.
+        It raises HttpException with 404 if the layer does not exist.
+        """
+        try:
+            return Layer.objects.get(id=lyr_id)
+        except Layer.DoesNotExists:
+            raise HttpException(404, "Layer NOT found")
 
-    def layer_type_postgis(self, lyr_id):
-        if not Layer.objects.filter(id=lyr_id, type='v_PostGIS').exists():
+    def layer_type_postgis(self, layer):
+        if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
 
     def project_exists(self, prj_id):
@@ -286,11 +314,16 @@ class Validation():
         con.close()
         self.check_version_feature(content, idfield)
         
-    def check_get_feature(self, lyr_id):
-        self.layer_exists(lyr_id)
-        self.layer_type_postgis(lyr_id)
-        self.check_read_permission(lyr_id)
-        
+    def check_get_layer_features(self, lyr_id):
+        layer = self.get_layer(lyr_id)
+        self.layer_type_postgis(layer)
+        self.check_read_permission(layer)
+
+    def check_get_feature(self, lyr_id, feature_id):
+        layer = self.get_layer(lyr_id)
+        self.layer_type_postgis(layer)
+        self.check_read_feature_permission(layer, feature_id)
+
     def check_delete_feature(self, lyr_id):
         self.check_edit_permission(lyr_id)
         
