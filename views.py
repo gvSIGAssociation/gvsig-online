@@ -1778,7 +1778,7 @@ def project_permissions_to_layer(request, pid):
                         last_server_id = layer.datastore.workspace.server_id
                         server = geographic_servers.get_instance().get_server_by_id(last_server_id)
                     read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
-                    server.setLayerReadRules(layer, read_roles)
+                    server.setLayerDataRules(layer, read_roles, None)
             return JsonResponse({"status": "success"})
         except Project.DoesNotExist:
             return JsonResponse({"status": "error"}, status=404)
@@ -1817,7 +1817,7 @@ def extend_permissions_to_layer(request):
                         last_server_id = layer.datastore.workspace.server_id
                         server = geographic_servers.get_instance().get_server_by_id(last_server_id)
                     read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True).distinct()
-                    server.setLayerReadRules(layer, read_roles)
+                    server.setLayerDataRules(layer, read_roles, None)
             return JsonResponse({"status": "success"})
         except Project.DoesNotExist:
             return JsonResponse({"status": "error"}, status=404)
