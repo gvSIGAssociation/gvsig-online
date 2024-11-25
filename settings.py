@@ -147,7 +147,9 @@ env = environ.Env(
     #Bing
     BING_KEY=(str,''),
     DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 26214400), # The default size 2621440 (2.5M) is too small and prevents adding external layers from servers having large getcapabilites document
-    FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774)
+    FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774),
+    #DRF
+    DRF_PAGE_SIZE=(int,100)
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -347,8 +349,6 @@ DATABASES = {
         'PORT': env('DB_PORT'),
         'TEST': {
             'NAME': 'test',
-            'USER': 'postgres',
-            'PASSWORD': 'postgres',
         }, 
     }
 }
@@ -630,12 +630,14 @@ default_auth_classes_list = [
 if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
     default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
 
-
+DRF_PAGE_SIZE = env('DRF_PAGE_SIZE')
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': tuple (default_auth_classes_list)
+    'DEFAULT_AUTHENTICATION_CLASSES': tuple (default_auth_classes_list),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': DRF_PAGE_SIZE
 }
 
 
