@@ -638,7 +638,12 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
             dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
             i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
             table_name = layer.source_name if layer.source_name else layer.name
-            new_table_name = i.clone_table(layer.datastore.name, table_name, target_datastore.name, table_name, copy_data=clone_conf.copy_data)
+            schema_name = layer.datastore.name
+            try:
+                schema_name = json.loads(layer.datastore.connection_params)["schema"]
+            except:
+                pass
+            new_table_name = i.clone_table(schema_name, table_name, target_datastore.name, table_name, copy_data=clone_conf.copy_data)
             i.close()
 
             from gvsigol_services import views
