@@ -493,14 +493,19 @@ class Introspect:
         return [r[0] for r in self.cursor.fetchall()]
 
     def get_fields_by_datatype(self, datatype, table, schema='public'):
-        sql = "SELECT column_name FROM information_schema.columns WHERE table_schema = %s AND table_name = %s AND "
-        for i in datatype:
-            sql = sql + "data_type = %s "
-        self.cursor.execute("""
-        SELECT column_name FROM information_schema.columns
-        WHERE table_schema = %s AND table_name = %s AND data_type = %s
-        """, [schema, table, datatype])
+        if isinstance(datatype, list):
+            datatype_sqls = []
+            for i in datatype:
+                datatype_sqls.append(sqlbuilder.SQL('data_type = {dt}').format(dt=sqlbuilder.Literal(i)))
+            data_type_cond=sqlbuilder.SQL(" OR ").join(datatype_sqls)
+        else:
+            data_type_cond = sqlbuilder.SQL('data_type = {dt}').format(dt=datatype)
         
+        query = sqlbuilder.SQL("""SELECT column_name FROM information_schema.columns
+                       WHERE table_schema = %s AND table_name = %s AND ({data_type_cond})""").format(
+            data_type_cond=data_type_cond
+        )
+        self.cursor.execute(query, [schema, table])
         return [r[0] for r in self.cursor.fetchall()]
 
     def _parse_sql_identifier(self, s, expected_next_char, pattern=plainIdentifierPattern):

@@ -31,18 +31,14 @@
 											<span class="product-title"><span class="searchable-rolename">{{role.name}}</span>
 												<div class="pull-right checkbox form-inline">
 														<label>
-															{% if role.external %}
-															<input class="layer-read-checkbox" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}" {% if role.read_checked %}checked {% endif %} disabled />
-															{% else %}
-															<input class="layer-read-checkbox" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}" {% if role.read_checked %}checked {% endif %}/>
-															{% endif %}
+															<input class="layer-read-checkbox{% if role.external is False %} gvsigol-checkable{% endif %}" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}"{% if role.read_checked %} checked{% endif %}{% if role.external %} disabled{% endif %} />
 															<span>{% trans "Read permission" %}</span>
 														</label>
 														<label style="margin-left:10px">
-															{% if is_view or role.external %}
+															{% if is_view %}
 															<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}" title="{% trans 'SQL views can\'t be edited.' %}" disabled />
 															{% else %}
-															<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}" {% if role.write_checked %}checked {% endif %}/>
+															<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}"{% if role.write_checked %} checked {% endif %}{% if role.external %} disabled{% endif %} />
 															{% endif %}
 															<span>{% trans "Write permission" %}</span>
 														</label>
@@ -65,19 +61,19 @@
 <script type="text/javascript">
 	function handleIsPublicResourceCheckbox(searcheableReadList) {
 		// inital status
-		$(".layer-read-checkbox").prop( "disabled", $("#resource-is-public").is(":checked"));		// monitor changes
+		$(".layer-read-checkbox.gvsigol-checkable").prop( "disabled", $("#resource-is-public").is(":checked"));		// monitor changes
 		// monitor changes
 		$("#resource-is-public").change(function () {
 			if (this.checked) {
-				$(".layer-read-checkbox").prop( "disabled", true);
+				$(".layer-read-checkbox.gvsigol-checkable").prop( "disabled", true);
 			}
 			else {
-				$(".layer-read-checkbox").prop( "disabled", false);
+				$(".layer-read-checkbox.gvsigol-checkable").prop( "disabled", false);
 			}
 		});
 		// apply disabled status on searcheableReadList page changes
 		searcheableReadList.on('updated', function() {
-			$(".layer-read-checkbox").prop( "disabled", $("#resource-is-public").is(":checked"));
+			$(".layer-read-checkbox.gvsigol-checkable").prop( "disabled", $("#resource-is-public").is(":checked"));
 		});
 	}
 </script>
