@@ -37,7 +37,7 @@ def get_authz_servers():
     else:
         authz_servers = []
         for server in Server.objects.all():
-            gs = geographic_servers.get_instance().get_server_by_id(server)
+            gs = geographic_servers.get_instance().get_server_by_id(server.id)
             authz_servers.append(gs.getAuthorizationService())
         return authz_servers
 
