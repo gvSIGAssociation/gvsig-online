@@ -43,7 +43,6 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden, HttpResponseServerError
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
@@ -3101,23 +3100,12 @@ def get_feature_info(request):
                         for server in servers:
                             server_url_obj = urlparse(server.frontend_url)
                             if url_obj.netloc == server_url_obj.netloc:
-                                if request.session.get('password') is not None:
-                                    auth2 = (request.session['username'], request.session['password'])
-                                    break
-                                elif request.session.get('oidc_access_token'):
-                                    # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
-                                    headers = {'Authorization': 'Bearer ' + request.session.get('oidc_access_token')}
-                                    break
+                                auth2, headers = utils.getAuthElements(request)
                             elif server_url_obj.netloc == '':
                                 for host in settings.ALLOWED_HOST_NAMES:
                                     host_obj = urlparse(host)
                                     if url_obj.netloc == host_obj.netloc:
-                                        auth2 = (request.session['username'], request.session['password'])
-                                        break
-                                    elif request.session.get('oidc_access_token'):
-                                        # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
-                                        headers = {'Authorization': 'Bearer ' + request.session.get('oidc_access_token')}
-                                        break
+                                        auth2, headers = utils.getAuthElements(request)
                                 if auth2 or headers:
                                     break
 
@@ -3461,14 +3449,7 @@ def get_datatable_data(request):
                 recordsTotal = gs.getFeatureCount(request, wfs_url, qualified_name, None)
                 recordsFiltered = gs.getFeatureCount(request, wfs_url, qualified_name, values['cql_filter'])
 
-            req = requests.Session()
-            if request.session.get('username') is not None and request.session.get('password') is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
-            elif request.session.get('oidc_access_token'):
-                # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
-                req.headers.update({'Authorization': 'Bearer ' + request.session.get('oidc_access_token')})
-
+            req = gs.getUserAuthSession(request)
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
             try:
                 geojson = response.json()
@@ -3547,18 +3528,11 @@ def get_feature_wfs(request):
             }
 
             params = urllib.parse.urlencode(data)
-            session = requests.Session()
             if not layer.external:
-                if 'username' in request.session and 'password' in request.session:
-                    if request.session['username'] is not None and request.session['password'] is not None:
-                        session.auth = (request.session['username'], request.session['password'])
-                        #session.auth = ('admin', 'geoserver')
-                elif request.session.get('oidc_access_token'):
-                    # FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
-                    session.headers.update({'Authorization': 'Bearer ' + request.session.get('oidc_access_token')})
-                    print(request.session.get('oidc_access_token'))
+                session = utils.getUserAuthSession(request)
+            else:
+                session = requests.Session()
             print(wfs_url + "?" + params)
-
             response = session.post(wfs_url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
             geojson = response.json()
 
