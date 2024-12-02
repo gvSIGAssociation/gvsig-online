@@ -666,6 +666,7 @@ class FeatureSerializer(serializers.Serializer):
                     "links" : [pagination.get_links(num_entries)]
                 }
         except Exception as e:
+            logger.exception("Error processing query")
             if isinstance(e, HttpException):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
