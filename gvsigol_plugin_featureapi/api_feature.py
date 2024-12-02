@@ -531,7 +531,7 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
                 except Exception as e:
                     pass
 
-            validation.check_delete_feature(lyr_id)
+            validation.check_delete_feature(lyr_id, feat_id)
             serializers.FeatureSerializer().delete(validation, lyr_id, feat_id, version)
             return HttpException(204, "OK").get_exception()
         except HttpException as e:
@@ -1151,7 +1151,7 @@ class FileDeleteView(RetrieveDestroyAPIView):
     def get(self, request, lyr_id, feat_id, resource_id):
         validation = Validation(request)
         try:
-            validation.check_read_permission(lyr_id)
+            validation.check_read_feature_permission(self, lyr_id, feat_id)
         except HttpException as e:
             return e.get_exception()
         try:
@@ -1182,7 +1182,7 @@ class FileDeleteView(RetrieveDestroyAPIView):
             return HttpException(400, "Resource NOT found").get_exception()
         try:
             path = resource.path
-            validation.check_delete_image(lyr_id, resource)
+            validation.check_delete_image(lyr_id, feat_id, resource)
             
             url_historical = resource_manager.store_historical(resource.path, resource.layer.id, resource.feature)
             resource.delete()
