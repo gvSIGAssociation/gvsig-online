@@ -410,8 +410,8 @@ class Validation():
     def check_get_resource_list(self, lyr_id):
         self.check_get_layer(lyr_id)
         
-    def check_uploaded_image(self, request, lyr_id):
-        self.check_edit_permission(lyr_id)
+    def check_uploaded_image(self, request, lyr_id, feat_id):
+        self.check_edit_feature_permission(lyr_id, feat_id)
         
         try:
             image = request.FILES['image']
