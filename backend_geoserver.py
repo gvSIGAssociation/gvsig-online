@@ -1696,7 +1696,15 @@ class Geoserver():
         except Exception as e:
             print(str(e))
             raise
-        
+    
+    def getUserAuthSession(self, request):
+        if request:
+            return utils.getUserAuthSession(request)
+        else:
+            session = requests.Session()
+            session.auth = (self.user, self.password)
+            return session
+
     def getFeatureCount(self, request, url, layer_name, f):   
         if f == None:
             values = {
@@ -1720,8 +1728,7 @@ class Geoserver():
             if f != '':
                 values['CQL_FILTER'] = f.encode('utf-8')
             
-        req = requests.Session()
-        req.auth = (self.user, self.password)
+        req = self.getUserAuthSession(request)
         response = req.post(url, data=values, verify=False, proxies=settings.PROXIES)
         root = ET.fromstring(response.text)
         numberOfFeatures = int(root.attrib['numberOfFeatures'])

@@ -52,6 +52,7 @@ from gvsigol_auth.utils import ascii_norm_username
 import re
 from gvsigol_services import apps as gvsigol_services_apps
 from gvsigol_services.authorization import _get_user, can_use_layergroup, get_authz_server_for_layer
+import requests
 
 
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None, creator_all=False):
@@ -1041,3 +1042,28 @@ def _workspace_delete(ws, delete_data=False, reload_nodes=False):
         ws.delete()
         if reload_nodes:
             gs.reload_nodes()
+
+def getAuthElements(request):
+    auth = None
+    headers = None
+    if request.session.get('username') is not None and request.session.get('password') is not None:
+        auth = (request.session['username'], request.session['password'])
+    elif request.headers.get("Authorization", '').startswith("Bearer "):
+        # Django stored token is only refreshed upon view load
+        # so it is not refreshed on the server side while a project is being used,
+        # then we prefer client-provided user token
+        headers = {'Authorization': request.headers.get("Authorization", '')}
+    elif request.session.get('oidc_access_token'):
+        headers = {'Authorization': 'Bearer ' + request.session.get('oidc_access_token')}
+    return auth, headers
+
+
+
+def getUserAuthSession(request):
+    session = requests.Session()
+    auth, headers = getAuthElements(request)
+    if auth:
+        session.auth = auth
+    if headers:
+        session.headers.update(headers)
+    return session
