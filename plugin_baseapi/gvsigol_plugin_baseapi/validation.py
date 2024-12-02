@@ -421,8 +421,8 @@ class Validation():
         except Exception:
             raise HttpException(400, "Error in the input parameters.")
     
-    def check_delete_image(self, lyr_id, resource):
-        self.check_edit_permission(lyr_id)
+    def check_delete_image(self, lyr_id, feat_id, resource):
+        self.check_edit_feature_permission(lyr_id, feat_id)
         if(int(resource.layer_id) != int(lyr_id)):
             raise HttpException(400, "The layer does not have this resource.")
 
