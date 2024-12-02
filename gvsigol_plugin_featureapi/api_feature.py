@@ -1011,7 +1011,7 @@ class FileUploadView(ListCreateAPIView):
     def get(self, request, lyr_id, feat_id):
         v = Validation(request)    
         try:
-            v.check_get_resource_list(lyr_id)
+            v.check_get_resource_list(lyr_id, feat_id)
         except HttpException as e:
             return e.get_exception()
         resourceset = LayerResource.objects.filter(layer_id=lyr_id, feature=feat_id)
@@ -1040,7 +1040,7 @@ class FileUploadView(ListCreateAPIView):
             except Exception as e:
                 raise HttpException(400, "Layer NOT found")
 
-            v.check_uploaded_image(request, lyr_id)
+            v.check_uploaded_image(request, lyr_id, feat_id)
             i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
             with i as con: # connection will auoclose
                 table_info = con.get_table_info(table, schema=schema)
@@ -1083,7 +1083,7 @@ class ResourcesView(ListCreateAPIView):
     @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id, feat_id):
         v = Validation(request)
-        v.check_read_permission(lyr_id)
+        v.check_read_feature_permission(lyr_id, feat_id)
         resourceset = LayerResource.objects.filter(layer_id=lyr_id, feature=feat_id)
         serializer = serializers.LayerResourceSerializer(resourceset, many=True)
         result = {
