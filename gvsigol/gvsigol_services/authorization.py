@@ -107,7 +107,47 @@ class PlainAuthorizationService():
     def __init__(authn_server_conf):
         pass
     
-    def get_restrictions(self, request_or_user, layer_id):
+    def get_write_restrictions(self, request_or_user, layer_id):
+        """
+        Sample output:
+        {
+            "grant" : "ALLOW",
+            "catalogMode" : "CHALLENGE",
+            "cqlFilterRead" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "cqlFilterWrite" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "attributes" : [ {
+                "name" : "cod_est",
+                "dataType" : "String",
+                "access" : "READONLY" 
+            }, {
+                "name" : "estadofisd",
+                "dataType" : "String",
+                "access" : "READWRITE" 
+            }, {
+                "name" : "fecha_alta",
+                "dataType" : "Date",
+                "access" : "READONLY" 
+            }, {
+                "name" : "tipo_estfc",
+                "dataType" : "integer",
+                "access" : "NONE" 
+            }
+        }
+        """
+        try:
+            if self.can_write_layer(request_or_user, layer_id):
+                return {
+                    "grant" : "ALLOW",
+                    "catalogMode" : "CHALLENGE"
+                }
+        except Exception as e:
+            print(e)
+        return {
+            "grant" : "DENY",
+            "catalogMode" : "CHALLENGE"
+        }
+
+    def get_read_restrictions(self, request_or_user, layer_id):
         """
         Sample output:
         {
