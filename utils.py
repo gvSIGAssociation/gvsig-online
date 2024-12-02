@@ -90,6 +90,88 @@ def get_read_roles(layer):
 def get_write_roles(layer):
     return list(LayerWriteRole.objects.filter(layer_id=layer.id).values_list('role', flat=True))
 
+def get_read_restrictions(request_or_user, layer):
+    """
+    Checks any cql filter read restriction for the user.
+        {
+            "grant" : "ALLOW",
+            "catalogMode" : "CHALLENGE",
+            "cqlFilterRead" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "attributes" : [ {
+                "name" : "cod_est",
+                "dataType" : "String",
+                "access" : "READONLY" 
+            }, {
+                "name" : "estadofisd",
+                "dataType" : "String",
+                "access" : "READWRITE" 
+            }, {
+                "name" : "fecha_alta",
+                "dataType" : "Date",
+                "access" : "READONLY" 
+            }, {
+                "name" : "tipo_estfc",
+                "dataType" : "integer",
+                "access" : "NONE" 
+            }
+        }
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.get_read_restrictions(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return False
+
+def get_write_restrictions(request_or_user, layer):
+    """
+    Checks any cql filter write restriction for the user.
+    Sample output:
+        {
+            "grant" : "ALLOW",
+            "catalogMode" : "CHALLENGE",
+            "cqlFilterRead" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "cqlFilterWrite" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "attributes" : [ {
+                "name" : "cod_est",
+                "dataType" : "String",
+                "access" : "READONLY" 
+            }, {
+                "name" : "estadofisd",
+                "dataType" : "String",
+                "access" : "READWRITE" 
+            }, {
+                "name" : "fecha_alta",
+                "dataType" : "Date",
+                "access" : "READONLY" 
+            }, {
+                "name" : "tipo_estfc",
+                "dataType" : "integer",
+                "access" : "NONE" 
+            }
+        }
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.get_read_restrictions(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return False
+
 def can_write_layer(request_or_user, layer):
     """
     Checks whether the user has permissions to write the provided layer.
