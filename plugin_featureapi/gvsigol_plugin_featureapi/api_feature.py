@@ -207,8 +207,8 @@ class FeaturesView(CreateAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter filter. The value must be a string")
                     
-            validation.check_feature_list(lyr_id)
-            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter)
+            restrictions = validation.check_read_restrictions(lyr_id)
+            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter, restrictions.get('cqlFilterRead'))
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()

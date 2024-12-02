@@ -547,7 +547,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None):
+    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None, cqlFilterRead=None):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
@@ -555,20 +555,32 @@ class FeatureSerializer(serializers.Serializer):
         try:
             i, table, schema = services_utils.get_db_connect_from_layer(layer)
             with i as con: # connection will autoclose
+                where_components = []
+                where_count_components = []
+                if cqlFilterRead:
+                    where_components.append(self._get_cql_permissions_filter(cqlFilterRead))
+                    where_count_components.append(self._get_cql_permissions_filter(cqlFilterRead))
                 if(date is not None):
                     #Es importante +00 para que considere que la fecha de entrada es UTC
                     date_val =  str(date) + "+00"
+                    """
                     where = sqlbuilder.SQL("WHERE {date_field} >={date_val}").format(
                                date_field=sqlbuilder.Identifier(settings.DATE_FIELD),
                                date_val=sqlbuilder.Literal(date_val)
                     )
-                    num_entries = util.count(con, schema, table, ">=", field=settings.DATE_FIELD, value=date_val)
-                else:
-                    where = sqlbuilder.SQL("")
-                    num_entries = util.count(con, schema, table)
+                    """
+                    where_components.append(sqlbuilder.SQL("({date_field} >= {date_val})").format(
+                               date_field=sqlbuilder.Identifier(settings.DATE_FIELD),
+                               date_val=sqlbuilder.Literal(date_val))
+                    )
+                    where_count_components.append(sqlbuilder.SQL("({date_field} >= {date_val})").format(
+                               date_field=sqlbuilder.Identifier(settings.DATE_FIELD),
+                               date_val=sqlbuilder.Literal(date_val))
+                    )
+
                 max_feat, page = pagination.get_pagination_params()
                 offset = max_feat * page
-                if(pagination.page > math.floor(num_entries/float(pagination.max_)) or pagination.page < 0):
+                if pagination.page < 0:
                     raise HttpException(404, "Page NOT found")
                 limit_offset = sqlbuilder.SQL("LIMIT {max_feat} OFFSET {offset}").format(
                             max_feat=sqlbuilder.Literal(max_feat),
@@ -576,44 +588,44 @@ class FeatureSerializer(serializers.Serializer):
                 geom_cols = con.get_geometry_columns(table, schema=schema)
                 properties = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
                 geom_col = geom_cols[0]
-                whereCount = None
 
-                if text is not None:
+                if filter is not None:
+                    where_components.append(self._get_filter_where(filter))
+                    where_count_components.append(self._get_filter_where(filter))
+                if text is not None: # text search must be the last one in the where parts because it sometimes adds an ORDER BY clause
                     excluded = [geom_cols[0], 'modified_by', 'feat_date_gvol', 'feat_version_gvol', 'last_modification']
-                    where = None
-                    #whereCount = None
                     if strict_search == True:
-                        where = self._get_strict_search_where(con, schema, table, text, exclude_cols=excluded)
-                        whereCount = where
+                        where_components.append(self._get_strict_search_where(con, schema, table, text, exclude_cols=excluded))
+                        where_count_components.append(self._get_strict_search_where(con, schema, table, text, exclude_cols=excluded))
                     else:
                         if self._exists_trigram_extension(con):
-                            where = self._get_search_where_trigram(con, True, schema, table, text, exclude_cols=excluded)
-                            whereCount = self._get_search_where_trigram(con, False, schema, table, text, exclude_cols=excluded)
+                            where_components.append(self._get_search_where_trigram(con, True, schema, table, text, exclude_cols=excluded))
+                            where_count_components.append(self._get_search_where_trigram(con, False, schema, table, text, exclude_cols=excluded))
                             self._set_limit_trigram(con)
                         else:
-                            where = self._get_search_where_tsvector(con, schema, table, text, exclude_cols=excluded)
-                            whereCount = where
-                if filter is not None:
-                    if text is not None:
-                        where = where + self._get_filter_where_and(filter)
-                        whereCount = where
-                    
-                    else:
-                        where = self._get_filter_where(filter)
-                        whereCount = where
-                    
-                if whereCount is not None:                    
-                    sqlCount = sqlbuilder.SQL("SELECT count(*) FROM {schema}.{table} {where}")
+                            where_components.append(self._get_search_where_tsvector(con, schema, table, text, exclude_cols=excluded))
+                            where_count_components.append(self._get_search_where_tsvector(con, schema, table, text, exclude_cols=excluded))
+
+                if len(where_count_components)>0:
+                    sqlCount = sqlbuilder.SQL("SELECT count(*) FROM {schema}.{table} WHERE {where}")
                     queryCount = sqlCount.format(
                         schema=sqlbuilder.Identifier(schema),
                         table=sqlbuilder.Identifier(table),
-                        where=whereCount,
+                        where=sqlbuilder.SQL(" AND ").join(where_count_components),
                     )
                     con.cursor.execute(queryCount)
                     for r in con.cursor.fetchall():
                         num_entries = r[0]
                         break
-                    
+                else:
+                    num_entries = util.count(con, schema, table)
+                if pagination.page > math.floor(num_entries/float(pagination.max_)):
+                    raise HttpException(404, "Page NOT found")
+
+                if len(where_components)>0:
+                    where = sqlbuilder.SQL(" WHERE {conditions}").format(conditions=sqlbuilder.SQL(" AND ").join(where_components))
+                else:
+                    where = sqlbuilder.SQL('')
                 if onlyprops == False:
                     sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where} {limit_offset}")
                 else:
@@ -1068,90 +1080,94 @@ class FeatureSerializer(serializers.Serializer):
         #fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
         fields = introspect.get_fields(tablename, schema=schema)
         colnames = [ f for f in fields if f not in exclude_cols]
-        where = None
-        for i in colnames:
-            if where is not None :
-                where = where + " OR "
-            else:
-                where = " WHERE ("
-            #where = where + 'lower(unaccent("' + i + '")) like lower(unaccent({text}))'
-            where = where + 'lower(unaccent(CAST("' + i + '" AS VARCHAR))) like lower(unaccent({text}))'
+        
+        text_sql=sqlbuilder.Literal("%" + text + "%")
+        where_parts = [
+            sqlbuilder.SQL('(lower(unaccent(CAST({column} AS VARCHAR))) like lower(unaccent({text}))').format(
+                    column=sqlbuilder.Identifier(column),
+                    text=text_sql
+                )
+                for column in colnames
+        ]
+        return sqlbuilder.SQL("({condition})").format(condition=sqlbuilder.SQL(" OR ").join(where_parts))
 
-
-        where = where + ")"
-
-        return sqlbuilder.SQL(where).format(
-            text=sqlbuilder.Literal("%" + text + "%"))
+    def _get_cql_permissions_filter(self, cql_filter):
+        """
+        Limits the rows available for the user according to the geoserver-acl config
+        """
+        return sqlbuilder.SQL(" ( {cql_filter} )".format(sqlbuilder.SQL(cql_filter)))
 
     def _get_filter_where(self, filter):
-        where = self._get_filter_query(filter)
-        where = " WHERE (" + where + ")"
-        return sqlbuilder.SQL(where)
-
-    def _get_filter_where_and(self, filter):
-        where = self._get_filter_query(filter)
-        where_and = " AND (" + where + ")"
-        return sqlbuilder.SQL(where_and)
-
-    def _get_filter_query(self, filter):
         filter_queries = filter['filterQueries']
-        filter_operator = None
-        where = None
-        if 'filterOperator' in filter:
-            filter_operator = filter['filterOperator']
-        for i, q in enumerate(filter_queries):
-            query = None
-            if q['type'] == 'query':
-                if q['operator'] != 'IN':
-                    query = q['field'] + q['operator'] + "'" + str(q['value']) + "'"
-                else:
-                    query = q['field'] + " " + q['operator'] + "(" + str(q['value']) + ")"
-                if q['notop'] == True:
-                    query = "NOT " + query
-            elif q['type'] == 'qGroup':
-                query = "("
-                queries = q['querys']
-                qGroup_operator = None
-                if 'op' in q:
-                    qGroup_operator = q['op']
-                for j, gq in enumerate(queries):
-                    opNOT = False
-                    if 'notop' in gq:
-                        opNOT = gq['notop']
-                    if gq['operator'] != 'IN':
-                        gQuery = gq['field'] + gq['operator'] + "'" + str(gq['value']) + "'"
+        filter_operator = filter.get('filterOperator', 'AND').strip()
+        if filter_operator in ['AND', 'OR']:
+            query_parts = []
+            for q in filter_queries:
+                if q['type'] == 'query':
+                    if q.get('notop') == True:
+                        not_query = sqlbuilder.SQL(" NOT ")
                     else:
-                        gQuery = gq['field'] + " " + gq['operator'] + "(" + str(gq['value']) + ")"
-                    if opNOT == True:
-                        gQuery = "NOT " + gQuery
-                    if j != len(queries) -1:
-                        gQuery = gQuery + qGroup_operator
-                    query = query + gQuery
-                query = query + ")"
-            if i != len(filter_queries) - 1:
-                query = query + filter_operator
-            if where is not None:
-                where = where + query
-            else:
-                where = query
-        return where
+                        not_query = sqlbuilder.SQL("")
+                    operator = q['operator'].strip()
+                    if operator == 'IN':
+                        query = sqlbuilder.SQL("({not_query}{column} IN ({values}))").format(
+                            column=sqlbuilder.Identifier(q['field']),
+                            values=sqlbuilder.SQL(str(q['value'])),
+                            not_query=not_query
+                            )
+                    elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
+                        query = sqlbuilder.SQL("({not_query}{column} {operator} ({value}))").format(
+                            column=sqlbuilder.Identifier(q['field']),
+                            operator=sqlbuilder.SQL(operator),
+                            values=sqlbuilder.Literal(str(q['value'])),
+                            not_query=not_query
+                            )
+                    query_parts.append(query)
+                elif q['type'] == 'qGroup':
+                    queries = q['querys']
+                    query_group_parts = []
+                    qGroup_operator = q.get('op', 'AND').strip()
+                    if qGroup_operator in ['AND', 'OR']:
+                        for gq in queries:
+                            if gq.get('notop'):
+                                not_query = sqlbuilder.SQL(" NOT ")
+                            else:
+                                not_query = sqlbuilder.SQL("")
+                            operator = q['operator'].strip()
+                            if operator == 'IN':
+                                query = sqlbuilder.SQL("({not_query}{column} IN ({values}))").format(
+                                    column=sqlbuilder.Identifier(q['field']),
+                                    values=sqlbuilder.SQL(str(q['value'])),
+                                    not_query=not_query
+                                    )
+                            elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
+                                query = sqlbuilder.SQL("({not_query}{column} {operator} ({value}))").format(
+                                    column=sqlbuilder.Identifier(q['field']),
+                                    operator=sqlbuilder.SQL(operator),
+                                    values=sqlbuilder.Literal(str(q['value'])),
+                                    not_query=not_query
+                                    )
+                            query_group_parts.append(query)
+                        query = sqlbuilder.SQL(" {operator} ").format(operator=qGroup_operator).join(query_group_parts)
+                        query_parts.append(query)
+            if len(query_parts>0):
+                return sqlbuilder.SQL("({conditions})").format(
+                    conditions=sqlbuilder.SQL(" {operator} ").format(operator=filter_operator).join(query_parts)
+                    )
+        return sqlbuilder.SQL('(1 = 1)')
   
     def _get_search_where_tsvector(self, introspect, schema, tablename, text, exclude_cols=[]):
         fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
         colnames = [ f for f in fields if f not in exclude_cols]
-        where = None
-        for i in colnames:
-            if where is not None :
-                where = where + " || "
-            else:
-                where = " WHERE "
-            where = where + "to_tsvector({languaje}, coalesce(" + i + ", '')::varchar)"
-        where = where + " @@ plainto_tsquery({languaje}, {text})"
-
-        return sqlbuilder.SQL(where).format(
-            text=sqlbuilder.Literal(text),
-            languaje=sqlbuilder.Literal("spanish"))
-
+        where_parts = [
+            sqlbuilder.SQL("to_tsvector({languaje}, coalesce({column}, '')::varchar)").format(
+                language=sqlbuilder.Literal("spanish"),
+                column=column)
+                for column in colnames
+        ]
+        return sqlbuilder.SQL("({condition}) @@ plainto_tsquery({language}, {text})").format(condition=sqlbuilder.SQL(" || ").join(where_parts),
+                                                                                               language=sqlbuilder.Literal("spanish"),
+                                                                                               text=sqlbuilder.Literal(text))
 
     def _set_limit_trigram(self, con):
         sql = "SELECT set_limit(0.17)"
@@ -1162,28 +1178,17 @@ class FeatureSerializer(serializers.Serializer):
     def _get_search_where_trigram(self, introspect, order, schema, tablename, text, exclude_cols=[]):
         fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
         colnames = [ f for f in fields if f not in exclude_cols]
-        where = None
-        for i in colnames:
-            if where is not None :
-                where = where + " OR  "
-            else:
-                where = " WHERE "
-            where = where + i + " % unaccent({text})"
 
+        where_parts = [ sqlbuilder.SQL("{column} % unaccent({text})").format(column=sqlbuilder.Identifier(column), text=sqlbuilder.Literal(text))
+                    for column in colnames]
+        where = sqlbuilder.SQL("({condition})").format(condition=sqlbuilder.SQL(" OR ").join(where_parts))
         if order == True:
-            where = where + " ORDER BY (SELECT max(x) FROM unnest(ARRAY["
-
-            for i in colnames:
-                if where.endswith(")"):
-                    where = where + " ,  "
-                where = where + " SIMILARITY( unaccent(" + i + "), unaccent({text}))"
-
-            where = where + "]) as x) DESC"
-
-        return sqlbuilder.SQL(where).format(
-            text=sqlbuilder.Literal(text),
-        )
-
+            order_by_parts = [sqlbuilder.SQL(" SIMILARITY( unaccent({column}), unaccent({text}))").format(column=sqlbuilder.Identifier(column),
+                                                                                                          text=sqlbuilder.Literal(text))
+                                                                                                          for column in colnames]
+            order_by = sqlbuilder.SQL(" ORDER BY (SELECT max(x) FROM unnest(ARRAY[{cols}]) as x) DESC").format(cols=sqlbuilder.SQL(" , ").join(order_by_parts))
+            where = where + order_by
+        return where
 
     def _exists_trigram_extension(self, con):
         sql = "SELECT count(*) from pg_extension where extname = 'pg_trgm'"

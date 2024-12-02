@@ -217,6 +217,35 @@ class Validation():
         except User.DoesNotExist:
             raise HttpException(404, "User NOT found")
 
+    def check_read_restrictions(self, lyr):
+        try:
+            if not isinstance(lyr, Layer):
+                lyr = Layer.objects.get(id=lyr)
+            restrictions = services_utils.get_read_restrictions(self.request, lyr)
+            if restrictions.get('grant') == 'ALLOW':
+                return restrictions
+            else:
+                raise HttpException(403, "The user does not have permission to read this layer")
+        except Layer.DoesNotExist:
+            raise HttpException(404, "Layer NOT found")
+        except User.DoesNotExist:
+            raise HttpException(404, "User NOT found")
+
+    def check_write_restrictions(self, lyr):
+        try:
+            if not isinstance(lyr, Layer):
+                lyr = Layer.objects.get(id=lyr)
+            restrictions = services_utils.get_write_restrictions(self.request, lyr)
+            if restrictions.get('grant') == 'ALLOW':
+                return restrictions
+            else:
+                raise HttpException(403, "The user does not have permission to read this layer")
+        except Layer.DoesNotExist:
+            raise HttpException(404, "Layer NOT found")
+        except User.DoesNotExist:
+            raise HttpException(404, "User NOT found")
+
+
     def check_edit_feature_permission(self, lyr, feat_id):
         try:
             if not services_utils.can_write_feature(self.request, lyr, feat_id):
@@ -324,8 +353,8 @@ class Validation():
         self.layer_type_postgis(layer)
         self.check_read_feature_permission(layer, feature_id)
 
-    def check_delete_feature(self, lyr_id):
-        self.check_edit_permission(lyr_id)
+    def check_delete_feature(self, lyr_id, feature_id):
+        self.check_edit_feature_permission(lyr_id, feature_id)
         
     def check_get_layer_data(self, lyr_id):
         self.user_exists()
