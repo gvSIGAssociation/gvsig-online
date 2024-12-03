@@ -189,6 +189,7 @@ class Pagination():
 class PlatformView(ListAPIView):
     serializer_class = None
     permission_classes=[AllowAny]
+    pagination_class = None
 
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_platform_info', operation_summary='Get information about the platform', 
@@ -274,6 +275,7 @@ class PlatformView(ListAPIView):
 #--------------------------------------------------   
 class UserView(ListAPIView):
     serializer_class = UserSerializer
+    pagination_class = None
    
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_user', operation_summary='Get information about the user', 
@@ -298,6 +300,7 @@ class UserView(ListAPIView):
 #--------------------------------------------------   
 class ServerView(ListAPIView):
     serializer_class = GsInstanceSerializer
+    pagination_class = None
    
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_server', operation_summary='Get information about the user', 
@@ -327,6 +330,7 @@ class ProjectListView(ListAPIView):
     serializer_class = ProjectsSerializer
     filter_backends = (ProjectFilter,)
     permission_classes = [AllowAny]
+    pagination_class = None
    
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_project_list', operation_summary='Gets the list of projects', 
@@ -365,6 +369,7 @@ class ProjectListView(ListAPIView):
 
 class ProjectView(ListAPIView):
     serializer_class = serializers.ProjectsSerializer
+    pagination_class = None
         
     @swagger_auto_schema(operation_id='get_project', operation_summary='Gets a specific project using its ID', 
                          responses={404: "Database connection NOT found<br>User NOT found<br>Project NOT found", 
@@ -431,6 +436,7 @@ class PublicProjectListView(ListAPIView):
     serializer_class = ProjectsSerializer
     permission_classes = [AllowAny]
     filter_backends = (ProjectFilter,)
+    pagination_class = None
    
     @swagger_auto_schema(operation_id='get_public_project_list', operation_summary='Gets the list of projects', 
                          responses={404: "Database connection NOT found<br>User NOT found"})
@@ -465,6 +471,7 @@ class PublicProjectListView(ListAPIView):
     
 class ProjectLayersView(ListAPIView):
     serializer_class = LayerSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layers_from_project', operation_summary='Gets the list of layers in a specific project',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Project NOT found", 
@@ -503,6 +510,7 @@ class ProjectLayersView(ListAPIView):
     
 class ProjectGroupsView(ListAPIView):
     serializer_class = serializers.LayerGroupSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_groups_from_project', operation_summary='Gets the list of groups in a specific project',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Project NOT found", 
@@ -548,6 +556,7 @@ def get_content(request):
  
 class ProjectBaseLayerData(ListAPIView):
     serializer_class = LayerSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_base_layer_data', operation_summary='Gets the data of the base layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -589,6 +598,7 @@ class ProjectBaseLayerData(ListAPIView):
  
 class LayerGroupsListView(ListAPIView):
     serializer_class = serializers.LayerGroupSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_group_list', operation_summary='Gets the list of groups in the application',
                          responses={404: "Database connection NOT found<br>User NOT found"})
@@ -616,6 +626,7 @@ class LayerGroupsListView(ListAPIView):
  
 class LayerGroupView(ListAPIView):
     serializer_class = serializers.LayerGroupSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_group', operation_summary='Gets a specific group from its ID',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Group NOT found", 
@@ -647,6 +658,7 @@ class LayerGroupView(ListAPIView):
                   
 class LayerGroupLayersView(ListAPIView):
     serializer_class = LayerSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layers_from_group', operation_summary='Gets the list of layers of a specific group',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Group NOT found", 
@@ -689,6 +701,7 @@ def get_param_date(request):
 
 class GeoserverAPIKey(ListAPIView):
     serializer_class = None 
+    pagination_class = None
 
     @swagger_auto_schema(operation_id='get_geoserver_api_key', operation_summary='Gets the geoserver API Key',
                          responses={404: "User NOT found", 401: "API Key file not exists"})
@@ -734,6 +747,7 @@ class GeoserverAPIKey(ListAPIView):
 class ApplicationListView(ListAPIView):
     serializer_class = ProjectsSerializer
     permission_classes = [AllowAny]
+    pagination_class = None
    
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_application_list', operation_summary='Gets the list of applications', 
