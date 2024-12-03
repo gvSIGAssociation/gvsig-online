@@ -108,6 +108,7 @@ class LayerFieldOptions(ListAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (FieldOptionsFilter, )
     permission_classes=[AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layer_field_options', operation_summary='Gets the options list of a layer field',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
@@ -141,6 +142,7 @@ class PublicLayerFieldOptions(ListAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (FieldOptionsFilter, )
     permission_classes=[AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layer_field_options', operation_summary='Gets the options list of a layer field',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
@@ -173,6 +175,7 @@ class PublicLayerFieldOptions(ListAPIView):
 #--------------------------------------------------
 class Legend(ListAPIView):
     serializer_class = None
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_geoserver_legend', operation_summary='Get the geoserver legend',
                           responses={
@@ -200,6 +203,7 @@ class Legend(ListAPIView):
 class PublicLegend(ListAPIView):
     serializer_class = None
     permission_classes=[AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_geoserver_public_legend', operation_summary='If the layer is public get the geoserver legend',
                           responses={
@@ -240,6 +244,7 @@ class PublicLegend(ListAPIView):
 class LayerChanges(ListAPIView):
     serializer_class = LayerChangesSerializer
     filter_backends = (TimestampFilter,)
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='check_changes', operation_summary='Checks if a layer has changes since the last update',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -311,6 +316,8 @@ class LayerChanges(ListAPIView):
 #--------------------------------------------------
 class LayerListView(ListCreateAPIView):
     parser_classes = (FormParser,)
+    pagination_class = None
+
     def get_serializer_class(self):
         if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
             return LayerSerializer
@@ -551,6 +558,7 @@ def layer_create(request, layer_group_id):
 #--------------------------------------------------
 class LayersView(DestroyAPIView):
     serializer_class = FeatureSerializer
+    pagination_class = None
     def get_permissions(self):
         if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
             return [ AllowAny() ]
@@ -615,6 +623,7 @@ class LayersView(DestroyAPIView):
 #--------------------------------------------------
 class LayersData(ListAPIView):
     serializer_class = LayerSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layer_data', operation_summary='Gets the data of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -673,6 +682,7 @@ class LayersData(ListAPIView):
 #--------------------------------------------------
 class LayersTime(ListAPIView):
     serializer_class = LayerTimeSerializer
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layer_time_info', operation_summary='Gets the time information of a layer',
                          responses={404: "The layer has not datastore. Maybe is a external layer or a raster layer<br>Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -710,6 +720,7 @@ class LayersTime(ListAPIView):
 #--------------------------------------------------         
 class LayersStyle(ListAPIView):
     permission_classes = [AllowAny]
+    pagination_class = None
     @swagger_auto_schema(operation_id='get_layer_style', operation_summary='Gets the style of the layer',
                          responses={400: "The layer is not in the user datastore",
                                     403: "The layer is not allowed to this user", 
@@ -742,6 +753,7 @@ class LayersStyle(ListAPIView):
 class LayersSymbStyle(ListAPIView):
     serializer_class = StyleSerializer
     permission_classes = [AllowAny]
+    pagination_class = None
     @swagger_auto_schema(operation_id='get_layer_symb_style', operation_summary='Gets the list of styles of the layer',
                          responses={400: "The layer is not in the user datastore",
                                     403: "The layer is not allowed to this user", 
@@ -767,6 +779,7 @@ class LayersSymbStyle(ListAPIView):
 class LayerDescription(ListAPIView): 
     serializer_class = FeatureSerializer
     filter_backends = (LangFilter,)
+    pagination_class = None
 
     @swagger_auto_schema(operation_id='get_layer_description', operation_summary='Gets the structure of the fields of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -860,6 +873,7 @@ class LayerDescription(ListAPIView):
 #--------------------------------------------------
 class LayerCapabilities(ListAPIView):
     permission_classes = [AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layer_capabilities', operation_summary='Gets capabilities of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
