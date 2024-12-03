@@ -162,6 +162,7 @@ class FeaturesView(CreateAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (PaginationFeatureFilter,)
     permission_classes = [AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_feature_list', operation_summary='Gets the feature list of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
@@ -271,6 +272,7 @@ class FeaturesView(CreateAPIView):
 class FeaturesExtentView(ListAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (BBoxFeatureFilter,)
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_feature_list_by_extent', operation_summary='Gets the feature list of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
@@ -371,6 +373,7 @@ class PublicFeaturesView(CreateAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (PaginationFeatureFilter,)
     permission_classes = [AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_feature_list', operation_summary='Gets the feature list of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
@@ -479,6 +482,7 @@ class PublicFeaturesView(CreateAPIView):
 #--------------------------------------------------
 class FeaturesDeleteView(RetrieveDestroyAPIView):
     serializer_class = FeatureSerializer
+    pagination_class = None
     def get_permissions(self):
         if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
             return [ AllowAny() ]
@@ -544,6 +548,7 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
 class FeatureGetView(RetrieveDestroyAPIView):
     serializer_class = FeatureSerializer
     permission_classes = [AllowAny]
+    pagination_class = None
         
     @swagger_auto_schema(operation_id='get_feature', operation_summary='Gets a feature from a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
@@ -577,7 +582,7 @@ class FeatureGetView(RetrieveDestroyAPIView):
 #--------------------------------------------------
 class FeatureVersionsView(ListAPIView):
     serializer_class = FeatureChangeSerializer
-        
+    pagination_class = None    
 
     @swagger_auto_schema(operation_id='get_feature_versions', operation_summary='Gets the list of versions of a feature',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
@@ -607,7 +612,8 @@ class FeatureVersionsView(ListAPIView):
 #--------------------------------------------------  
 class FeatureVersionsDeleted(ListAPIView):
     serializer_class = FeatureChangeSerializer
-    filter_backends = (DateFeatureFilter,)    
+    filter_backends = (DateFeatureFilter,)   
+    pagination_class = None 
 
     @swagger_auto_schema(operation_id='get_deleted_features', operation_summary='Gets the list of deleted features',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -641,7 +647,8 @@ class FeatureVersionsDeleted(ListAPIView):
 #--------------------------------------------------
 class FeatureVersionsCreated(ListAPIView):
     serializer_class = FeatureChangeSerializer
-    filter_backends = (DateFeatureFilter,)    
+    filter_backends = (DateFeatureFilter,)   
+    pagination_class = None 
 
     @swagger_auto_schema(operation_id='get_created_features', operation_summary='Gets the list of created features',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -675,7 +682,8 @@ class FeatureVersionsCreated(ListAPIView):
 #--------------------------------------------------
 class FeatureVersionsUpdated(ListAPIView):
     serializer_class = FeatureChangeSerializer
-    filter_backends = (DateFeatureFilter,)   
+    filter_backends = (DateFeatureFilter,) 
+    pagination_class = None  
 
     @swagger_auto_schema(operation_id='get_updated_features', operation_summary='Gets the list of updated features',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -710,6 +718,7 @@ class FeatureVersionsUpdated(ListAPIView):
 class FeatureVersionsAddedResources(ListAPIView):
     serializer_class = FeatureChangeSerializer
     filter_backends = (DateFeatureFilter,)    
+    pagination_class = None
 
     @swagger_auto_schema(operation_id='get_added_resources', operation_summary='Gets the list of resources added in the layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -744,7 +753,7 @@ class FeatureVersionsAddedResources(ListAPIView):
 class FeatureVersionsDeletedResources(ListAPIView):
     serializer_class = FeatureChangeSerializer
     filter_backends = (DateFeatureFilter,)
-        
+    pagination_class = None
 
     @swagger_auto_schema(operation_id='get_deleted_resources', operation_summary='Gets the list of resources deleted in the layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -781,6 +790,7 @@ class FeatureByPointView(ListAPIView):
     serializer_class = FeatureSerializer
     filter_backends = (CoordsFeatureFilter,)
     permission_classes = [AllowAny]
+    pagination_class = None
         
     @swagger_auto_schema(operation_id='get_feature_by_point', operation_summary='Gets a feature from a pair of coordinates',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
@@ -906,6 +916,7 @@ class PublicFeatureByPointView(ListAPIView):
     serializer_class = FeatureSerializer
     permission_classes=[AllowAny]
     filter_backends = (CoordsFeatureFilter,)
+    pagination_class = None
         
     @swagger_auto_schema(operation_id='get_public_feature_by_point', operation_summary='Gets a feature from a pair of coordinates',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
@@ -998,6 +1009,7 @@ class PublicFeatureByPointView(ListAPIView):
 class FileUploadView(ListCreateAPIView):
     parser_classes = (MultiPartParser,)
     serializer_class = FileUploadSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -1076,6 +1088,7 @@ class FileUploadView(ListCreateAPIView):
 class ResourcesView(ListCreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = serializers.LayerResourceSerializer
+    pagination_class = None
 
     @swagger_auto_schema(operation_id='get_list_attached_files', operation_summary='Get the list of resources attached to the feature',
                           responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
@@ -1105,6 +1118,7 @@ class FileAttachedView(ListAPIView):
     parser_classes = (MultiPartParser,)
     serializer_class = FileUploadSerializer
     permission_classes = [AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_attached_file', operation_summary='Get the resource attached to the feature',
                           responses={
@@ -1141,6 +1155,7 @@ class FileDeleteView(RetrieveDestroyAPIView):
     parser_classes = (MultiPartParser,)
     serializer_class = FileUploadSerializer
     permission_classes = [AllowAny]
+    pagination_class = None
     
     @swagger_auto_schema(operation_id='get_attached_file_legacy', operation_summary='Get the resource attached to the feature',
                           responses={
