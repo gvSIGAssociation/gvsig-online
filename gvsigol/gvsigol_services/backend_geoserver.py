@@ -1999,3 +1999,10 @@ class Geoserver():
             logger.error("gwc subset error - ws: {} - layer: {}".format(str(ws_name), str(layer_name)))
             if isinstance(e, RequestError):
                 logger.error(e.get_detailed_message())
+
+    def clear_resource_cache(self):
+        """
+        Clears the resource cache in Geoserver, required to clear ACL Rules cache when rule modifications are
+        applied.
+        """
+        self.rest_catalog.clear_resource_cache(self.user, self.password)

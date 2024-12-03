@@ -915,6 +915,21 @@ class Geoserver():
     def datastore_reload(self, workspace, store, user=None, password=None):
         self.datastore_enable(workspace, store, enabled=False, user=user, password=password)
         self.datastore_enable(workspace, store, enabled=True, user=user, password=password)
+
+    def clear_resource_cache(self, user=None, password=None):
+        """
+        Clears the resource cache in Geoserver, required to clear ACL Rules cache when rule modifications are
+        applied.
+        """
+        url = self.service_url + "/reset"
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        r = self.session.post(url, auth=auth)
+        if r.status_code==200:
+            return True
+        raise FailedRequestError(r.status_code, r.content)
     
 class RequestWarning(Exception):
     def __init__(self, message=None):
