@@ -1105,24 +1105,24 @@ class FeatureSerializer(serializers.Serializer):
             query_parts = []
             for q in filter_queries:
                 if q['type'] == 'query':
-                    if q.get('notop') == True:
-                        not_query = sqlbuilder.SQL(" NOT ")
-                    else:
-                        not_query = sqlbuilder.SQL("")
                     operator = q['operator'].strip()
                     if operator == 'IN':
-                        query = sqlbuilder.SQL("({not_query}{column} IN ({values}))").format(
+                        query = sqlbuilder.SQL("{column} IN ({values})").format(
                             column=sqlbuilder.Identifier(q['field']),
-                            values=sqlbuilder.SQL(str(q['value'])),
-                            not_query=not_query
+                            value=sqlbuilder.SQL(str(q['value']))
                             )
                     elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
-                        query = sqlbuilder.SQL("({not_query}{column} {operator} ({value}))").format(
+                        query = sqlbuilder.SQL("{column} {operator} {value}").format(
                             column=sqlbuilder.Identifier(q['field']),
                             operator=sqlbuilder.SQL(operator),
-                            values=sqlbuilder.Literal(str(q['value'])),
-                            not_query=not_query
+                            value=sqlbuilder.Literal(str(q['value']))
                             )
+                    else:
+                        raise HttpException(400, f"Invalid operator: {operator}")
+                    if q.get('notop'):
+                        query = sqlbuilder.SQL("(NOT {query})").format(query=query)
+                    else:
+                        query = sqlbuilder.SQL("({query})").format(query=query)
                     query_parts.append(query)
                 elif q['type'] == 'qGroup':
                     queries = q['querys']
@@ -1130,30 +1130,30 @@ class FeatureSerializer(serializers.Serializer):
                     qGroup_operator = q.get('op', 'AND').strip()
                     if qGroup_operator in ['AND', 'OR']:
                         for gq in queries:
-                            if gq.get('notop'):
-                                not_query = sqlbuilder.SQL(" NOT ")
-                            else:
-                                not_query = sqlbuilder.SQL("")
-                            operator = q['operator'].strip()
                             if operator == 'IN':
-                                query = sqlbuilder.SQL("({not_query}{column} IN ({values}))").format(
+                                query = sqlbuilder.SQL("{column} IN ({values})").format(
                                     column=sqlbuilder.Identifier(q['field']),
-                                    values=sqlbuilder.SQL(str(q['value'])),
-                                    not_query=not_query
+                                    value=sqlbuilder.SQL(str(q['value']))
                                     )
                             elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
-                                query = sqlbuilder.SQL("({not_query}{column} {operator} ({value}))").format(
+                                query = sqlbuilder.SQL("{column} {operator} {value}").format(
                                     column=sqlbuilder.Identifier(q['field']),
                                     operator=sqlbuilder.SQL(operator),
-                                    values=sqlbuilder.Literal(str(q['value'])),
-                                    not_query=not_query
+                                    value=sqlbuilder.Literal(str(q['value']))
                                     )
+                            else:
+                                raise HttpException(400, f"Invalid operator: {operator}")
+                            if gq.get('notop'):
+                                query = sqlbuilder.SQL("(NOT {query})").format(query=query)
+                            else:
+                                query = sqlbuilder.SQL("({query})").format(query=query)
                             query_group_parts.append(query)
-                        query = sqlbuilder.SQL(" {operator} ").format(operator=qGroup_operator).join(query_group_parts)
+                        query = sqlbuilder.SQL(f" {qGroup_operator} ").join(query_group_parts)
                         query_parts.append(query)
-            if len(query_parts>0):
+            if len(query_parts)>0:
+                conditions = sqlbuilder.SQL(f" {filter_operator} ").join(query_parts)
                 return sqlbuilder.SQL("({conditions})").format(
-                    conditions=sqlbuilder.SQL(" {operator} ").format(operator=filter_operator).join(query_parts)
+                    conditions=conditions
                     )
         return sqlbuilder.SQL('(1 = 1)')
   
