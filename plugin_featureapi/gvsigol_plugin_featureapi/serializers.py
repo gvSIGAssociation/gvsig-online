@@ -1084,7 +1084,7 @@ class FeatureSerializer(serializers.Serializer):
         
         text_sql=sqlbuilder.Literal("%" + text + "%")
         where_parts = [
-            sqlbuilder.SQL('(lower(unaccent(CAST({column} AS VARCHAR))) like lower(unaccent({text}))').format(
+            sqlbuilder.SQL('(lower(unaccent(CAST({column} AS VARCHAR))) like lower(unaccent({text})))').format(
                     column=sqlbuilder.Identifier(column),
                     text=text_sql
                 )
