@@ -74,6 +74,7 @@ class ProjectConfView(ListAPIView):
     serializer_class = InfoSerializer
     filter_backends = (CoordsFeatureFilter,)
     permission_classes = [AllowAny]
+    pagination_class = None
    
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_project_configuration', operation_summary='', 
@@ -136,6 +137,7 @@ class PublicProjectConfView(ListAPIView):
     serializer_class = PublicInfoSerializer
     permission_classes = [AllowAny]
     filter_backends = (CoordsFeatureFilter,)
+    pagination_class = None
    
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_public_project_configuration', operation_summary='', 
@@ -180,6 +182,7 @@ class PublicProjectConfView(ListAPIView):
 class ApplicationConfView(ListAPIView):
     serializer_class = AppInfoSerializer
     permission_classes = [AllowAny]
+    pagination_class = None
    
     #@swaggerdoc('test.yml')
     @swagger_auto_schema(operation_id='get_project_configuration', operation_summary='', 
