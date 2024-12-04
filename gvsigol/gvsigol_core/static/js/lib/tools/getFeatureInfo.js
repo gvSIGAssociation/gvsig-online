@@ -383,7 +383,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					async: true,
 				  	url: '/gvsigonline/services/get_feature_info/',
 					beforeSend: function(xhr){
-						if (self.conf.user && self.conf.user.token && !self.layer.external) {
+						if (self.conf.user && self.conf.user.token && !layers_info[k].external) {
 							xhr.setRequestHeader('Authorization', 'Bearer ' + self.conf.user.token);
 						};
 						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
