@@ -373,7 +373,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
             "url": "/gvsigonline/services/get_datatable_data/",
             "type": "POST",
 			"beforeSend" :function(xhr){
-				if (self.conf.user && this.conf.user.token && !self.layer.external) {
+				if (self.conf.user && self.conf.user.token && !self.layer.external) {
 					xhr.setRequestHeader('Authorization', 'Bearer ' + self.conf.user.token);
 				};
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
