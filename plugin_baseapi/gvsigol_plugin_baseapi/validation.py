@@ -407,8 +407,8 @@ class Validation():
     def check_get_group_list(self):
         self.check_get_layer_list()
         
-    def check_get_resource_list(self, lyr_id):
-        self.check_get_layer(lyr_id)
+    def check_get_resource_list(self, lyr_id, feat_id):
+        self.check_read_feature_permission(lyr_id, feat_id)
         
     def check_uploaded_image(self, request, lyr_id, feat_id):
         self.check_edit_feature_permission(lyr_id, feat_id)
