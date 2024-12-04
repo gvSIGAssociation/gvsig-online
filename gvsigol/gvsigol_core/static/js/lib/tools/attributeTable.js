@@ -372,7 +372,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
         "ajax": {
             "url": "/gvsigonline/services/get_datatable_data/",
             "type": "POST",
-			"beforeSend" :function(xhr){
+			"beforeSend": function(xhr){
 				if (self.conf.user && self.conf.user.token && !self.layer.external) {
 					xhr.setRequestHeader('Authorization', 'Bearer ' + self.conf.user.token);
 				};
