@@ -372,6 +372,12 @@ attributeTable.prototype.createTableUI = function(featureType) {
         "ajax": {
             "url": "/gvsigonline/services/get_datatable_data/",
             "type": "POST",
+			"beforeSend" :function(xhr){
+				if (self.conf.user && this.conf.user.token && !self.layer.external) {
+					xhr.setRequestHeader('Authorization', 'Bearer ' + self.conf.user.token);
+				};
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
             "data": function ( d ) {
                 d.wfs_url = self.layer.wfs_url;
                 d.layer_name = self.layer.layer_name;
@@ -1516,7 +1522,6 @@ attributeTable.prototype.getFeature = function(row) {
 	var typename = row.featureid.split('.')[0];
 	var headers = {};
 	if (this.conf.user && this.conf.user.token && !this.layer.external) {
-		// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
 		headers["Authorization"] = 'Bearer ' + this.conf.user.token;
 	};
 	$.ajax({
