@@ -12,6 +12,19 @@ to improve performance for the typical use case
 """
 AUTHZ_SERVER_CACHE = {}
 
+STRATEGY_FORCE_DOMAIN_PERMISSIONS = 'FORCE_DOMAIN'
+
+def get_default_rule_updating_strategy():
+    """
+    When we modify layer permissions from core or from external permission management
+    plugins, there are different options regarding how external rules should override
+    internal rules or vice versa.
+
+    For the moment we only implement STRATEGY_FORCE_DOMAIN_PERMISSIONS, in which
+    external set rules override all existing permissions for the modified layer.
+    """
+    return STRATEGY_FORCE_DOMAIN_PERMISSIONS
+
 def shortcut_authz_server():
     """
     Shorcut authz service instance when using PlainAuthorizationService which
