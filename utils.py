@@ -53,8 +53,6 @@ import re
 from gvsigol_services import apps as gvsigol_services_apps
 from gvsigol_services.authorization import _get_user, can_use_layergroup, get_authz_server_for_layer
 import requests
-from gvsigol_services.authorization import get_default_rule_updating_strategy, STRATEGY_FORCE_DOMAIN_PERMISSIONS
-
 
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None, creator_all=False):
     if layer:
@@ -874,66 +872,9 @@ def update_feat_version(layer, featid):
     return None, None
 
 def set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles):
-    layer.public = is_public
-    layer.save()
-    admin_role = auth_backend.get_admin_role()
-    assigned_read_roles.append(admin_role)
-    if layer.type.startswith('c_'):
-        assigned_write_roles = []
-    else:
-        assigned_write_roles.append(admin_role)
-
-    read_roles = []
-    write_roles = []
-
-    ## TODO: here we should consider get_default_rule_updating_strategy() and STRATEGY_FORCE_DOMAIN_PERMISSIONS
-    # clean existing groups and assign them again if necessary
-    LayerReadRole.objects.filter(layer=layer, external=False).delete()
-    all_roles = auth_backend.get_all_roles()
-    for role in assigned_read_roles:
-        try:
-            if role in all_roles:
-                try:
-                    lyr_read_role = LayerReadRole()
-                    lyr_read_role.layer = layer
-                    lyr_read_role.role = role
-                    lyr_read_role.save()
-                    read_roles.append(role)
-                except:
-                    logger.exception('Probably tried to create a LayerReadRole for a externally managed permission')
-        except:
-            logger.exception('Error creating layer read permissions')
-            pass
-
-    LayerWriteRole.objects.filter(layer=layer, external=False).delete()
-    for role in assigned_write_roles:
-        try:
-            if role in all_roles:
-                try:
-                    layer_write_role = LayerWriteRole()
-                    layer_write_role.layer = layer
-                    layer_write_role.role = role
-                    layer_write_role.save()
-                    write_roles.append(role)
-                except:
-                    logger.exception('Probably tried to create a LayerWriteRole for a externally managed permission')
-        except:
-            logger.exception('Error creating layer write permissions')
-            pass
-    LayerManageRole.objects.filter(layer=layer).delete()
-    for role in assigned_manage_roles:
-        try:
-            if role in all_roles:
-                layer_manage_role = LayerManageRole()
-                layer_manage_role.layer = layer
-                layer_manage_role.role = role
-                layer_manage_role.save()
-        except:
-            logger.exception('Error creating layer manage permissions')
-            pass
-            
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-    gs.setLayerDataRules(layer, read_roles, write_roles)
+    authz = gs.getAuthorizationService()
+    authz.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
 
 def set_layergroup_permissions(layergroup, assigned_includeinproject_roles, assigned_manage_roles):
     admin_role = auth_backend.get_admin_role()
