@@ -1843,8 +1843,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			}
 		}
 		featureProperties +=		'<div class="col-md-12 form-group" id="edition-error">';
-
-		featureProperties +=      '</div>';
+		featureProperties +=		'</div>';
 		featureProperties += 	'</div>';
 		featureProperties += '</div>';
 
@@ -2273,7 +2272,8 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		ui += 		'</div>';
 		ui += 		'<div class="box-body no-padding">';
 		ui += 			featureProperties
-
+		ui += 		   '<div class="col-md-12 form-group" id="edition-error">';
+		ui += 		   '</div>';
 		ui += 		'</div>';
 		ui += 		'<div class="box-footer text-right">';
 		ui += 			'<button id="remove-feature" class="btn btn-default margin-r-5">' + gettext('Remove') + '</button>';
@@ -2359,11 +2359,22 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 
 };
 
+EditionBar.prototype.showError = function(message) {
+	$('#edition-error').empty();
+	var ui = '';
+	ui += '<div class="alert alert-danger alert-dismissible">';
+	ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+	ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
+	ui +=   '<span id="edition-error-message"></span>';
+	ui += '</div>';
+	$('#edition-error').append(ui);
+	$('#edition-error-message').text(message);
+}
 
 /**
  * @param {Event} e Browser event.
  */
-EditionBar.prototype.transactWFS = function(p,f) {
+EditionBar.prototype.transactWFS = function(operationType,f) {
 	var self = this;
 	var success = false;
 	var fid = null;
@@ -2371,7 +2382,7 @@ EditionBar.prototype.transactWFS = function(p,f) {
 
 	var feat = this.verifyGeometryField(f);
 
-	switch(p) {
+	switch(operationType) {
 		case 'delete':
 			node = this.formatWFS.writeTransaction(null,null,[feat],this.formatGML);
 			break;
@@ -2408,6 +2419,28 @@ EditionBar.prototype.transactWFS = function(p,f) {
 			try {
 				var resp = self.formatWFS.readTransactionResponse(response);
 				//There was not geometry to insert
+				if (operationType == 'insert') {
+					if (resp.transactionSummary && (resp.transactionSummary.totalInserted == 0)) {
+						var message = gettext('Failed to save the record. Probable cause: incorrect record values provided');
+						var message = gettext('You are not allowed to delete this record');
+						self.showError(message);
+						return;
+					}
+				}
+				else if (operationType == 'update') {
+					if (resp.transactionSummary && (resp.transactionSummary.totalUpdated == 0)) {
+						var message = gettext('Failed to save the record. Probable cause: You are not allowed to modify this record or incorrect record values provided');
+						self.showError(message);
+						return;
+					}
+				}
+				else if (operationType == 'delete') {
+					if (resp.transactionSummary && (resp.transactionSummary.totalDeleted == 0)) {
+						var message = gettext('You are not allowed to delete this record');
+						self.showError(message);
+						return;
+					}
+				}
 				if(!resp.insertIds) {
 					return 
 				}
@@ -2417,31 +2450,23 @@ EditionBar.prototype.transactWFS = function(p,f) {
 					feat.setId(resp.insertIds[0]);
 					fid = resp.insertIds[0].split('.')[1];
 				}
+
 				success = true;
 			} catch (err) {
-				$('#edition-error').empty();
-				var ui = '';
-				ui += '<div class="alert alert-danger alert-dismissible">';
-				ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-				ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
+				var message = null;
 				if('responseXML' in request){
 					var errors = $(request.responseXML).find("ExceptionText");
-					var get_error = false;
 					if(errors.length > 0){
 						var error = errors[0].textContent;
 						if(error != null || error != ""){
-							ui +=   gettext(error);
-							get_error = true;
+							message = gettext(error);
 						}
 					}
-					if(!get_error){
-						ui +=   gettext('Failed to save the new record. Please check values');
-					}
-				}else{
-					ui +=   gettext('Failed to save the new record. Please check values');
 				}
-				ui += '</div>';
-				$('#edition-error').append(ui);
+				if (message == null) {
+					message = gettext('Failed to save the record. Please check values');
+				}
+				self.showError(message);
 				success = false;
 			}
 		}
