@@ -1,29 +1,19 @@
 from gvsigol_services.models import Layer, Server
 #from gvsigol_services.utils import _get_user
-from gvsigol_auth.auth_backend import get_roles, to_provider_rolename, get_admin_role
+from gvsigol_auth.auth_backend import get_roles, to_provider_rolename, get_admin_role, get_all_roles
 from django.contrib.auth.models import AnonymousUser, User
 from .models import LayerReadRole, LayerWriteRole, LayerManageRole, LayerGroupRole, LayerGroup
 from gvsigol_services import geographic_servers
 from gvsigol_services import apps as gvsigol_services_apps
+import logging
+
+LOGNAME = 'gvsigol'
 
 """
 Shortcut authorization server for classic deployments which use PlainAuthorizationService,
 to improve performance for the typical use case
 """
 AUTHZ_SERVER_CACHE = {}
-
-STRATEGY_FORCE_DOMAIN_PERMISSIONS = 'FORCE_DOMAIN'
-
-def get_default_rule_updating_strategy():
-    """
-    When we modify layer permissions from core or from external permission management
-    plugins, there are different options regarding how external rules should override
-    internal rules or vice versa.
-
-    For the moment we only implement STRATEGY_FORCE_DOMAIN_PERMISSIONS, in which
-    external set rules override all existing permissions for the modified layer.
-    """
-    return STRATEGY_FORCE_DOMAIN_PERMISSIONS
 
 def shortcut_authz_server():
     """
@@ -377,3 +367,61 @@ class PlainAuthorizationService():
         write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
         gs.rest_catalog.get_session().delete(url + write_rule_path, verify=False, auth=(gs.user, gs.password))
         self.setWfsTransactionRules()
+
+    def set_layer_permissions(self, layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles):
+        layer.public = is_public
+        layer.save()
+        admin_role = get_admin_role()
+        assigned_read_roles.append(admin_role)
+        if layer.type.startswith('c_'):
+            assigned_write_roles = []
+        else:
+            assigned_write_roles.append(admin_role)
+
+        read_roles = []
+        write_roles = []
+
+        LayerReadRole.objects.filter(layer=layer, external=False).delete()
+        all_roles = get_all_roles()
+        for role in assigned_read_roles:
+            try:
+                if role in all_roles:
+                    try:
+                        lyr_read_role = LayerReadRole()
+                        lyr_read_role.layer = layer
+                        lyr_read_role.role = role
+                        lyr_read_role.save()
+                        read_roles.append(role)
+                    except:
+                        logging.getLogger(LOGNAME).exception('Probably tried to create a LayerReadRole for a externally managed permission')
+            except:
+                logging.getLogger(LOGNAME).exception('Error creating layer read permissions')
+                pass
+
+        LayerWriteRole.objects.filter(layer=layer, external=False).delete()
+        for role in assigned_write_roles:
+            try:
+                if role in all_roles:
+                    try:
+                        layer_write_role = LayerWriteRole()
+                        layer_write_role.layer = layer
+                        layer_write_role.role = role
+                        layer_write_role.save()
+                        write_roles.append(role)
+                    except:
+                        logging.getLogger(LOGNAME).exception('Probably tried to create a LayerWriteRole for a externally managed permission')
+            except:
+                logging.getLogger(LOGNAME).exception('Error creating layer write permissions')
+                pass
+        LayerManageRole.objects.filter(layer=layer).delete()
+        for role in assigned_manage_roles:
+            try:
+                if role in all_roles:
+                    layer_manage_role = LayerManageRole()
+                    layer_manage_role.layer = layer
+                    layer_manage_role.role = role
+                    layer_manage_role.save()
+            except:
+                logging.getLogger(LOGNAME).exception('Error creating layer manage permissions')
+                pass
+        self.set_layer_data_rules(layer, read_roles, write_roles)
