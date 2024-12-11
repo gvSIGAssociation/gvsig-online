@@ -52,6 +52,7 @@ class GvsigolRM():
             return [True, relative_path]
          
         except Exception as e:
+            logger.exception("Error saving layer resource")
             return [False, '']
         
     def delete_resource(self, resource): 

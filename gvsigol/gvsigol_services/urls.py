@@ -56,6 +56,7 @@ urlpatterns = [
     path('upload_resources/', services_views.upload_resources, name='upload_resources'),
     path('delete_resource/', services_views.delete_resource, name='delete_resource'),
     path('delete_resources/', services_views.delete_resources, name='delete_resources'),
+    path('download_layer_resources/<workspace_name>/<layer_name>/', services_views.download_layer_resources, name='download_layer_resources'),
     path('describeFeatureType/', services_views.describeFeatureType, name='describeFeatureType'),
     path('describeFeatureTypeWithPk/', services_views.describeFeatureTypeWithPk, name='describeFeatureTypeWithPk'),
     path('external_layer_list/', services_views.external_layer_list, name='external_layer_list'),
