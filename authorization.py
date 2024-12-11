@@ -263,6 +263,17 @@ class PlainAuthorizationService():
             # TODO
             pass
 
+    def get_readable_feature_ids(self, request, layer):
+        """
+        Returns a list of the PK values (ids) for the readable features
+        of the layer for the authenticated user  (i.e. all the features
+        are readable for the user), or None if there are no
+        restrictions on the layer
+        """
+        if self.can_read_layer(request, layer):
+            return None
+        return []
+
     def _set_data_rules(self, server):
         """
         (Re)Sets data rules in Geoserver for all layers, based on gvSIG Online

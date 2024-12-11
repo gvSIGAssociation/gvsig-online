@@ -23,25 +23,19 @@
 
 import ast
 from datetime import datetime
-import hashlib
-from http.client import HTTPResponse
 import json
 import logging
-from math import floor
 import os
 import random
 import re
-import shutil
 import string
-import unicodedata
 import urllib.request, urllib.parse, urllib.error
-import zipfile
 import xmltodict
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden, HttpResponseServerError
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden, StreamingHttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -50,9 +44,8 @@ from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
 from django.utils.html import escape, strip_tags
-from future.moves.urllib.parse import urlparse, urlencode
-from builtins import str as text
-from geoserver import workspace
+from urllib.parse import urlparse
+import zipfly
 from owslib.util import Authentication
 from owslib.wms import WebMapService
 from owslib.wmts import WebMapTileService
@@ -105,6 +98,7 @@ import time
 from django.core import serializers as serial
 from django.db.models import Max
 from gvsigol_auth.signals import role_deleted
+from django.views.decorators.cache import never_cache
 
 logger = logging.getLogger("gvsigol")
 
@@ -5397,3 +5391,39 @@ def test_dnie_external(request):
     for header, value in request.headers.items():
         response += "{}: {}<br>".format(header, value)
     return HttpResponse(response)
+
+@never_cache
+def download_layer_resources(request, workspace_name, layer_name):
+    try:
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace_name)
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server_id)
+        authz = gs.getAuthorizationService()
+        if not utils.can_read_layer(request, layer):
+            return JsonResponse({"status": "error", "Error": "You are not allowed to read this layer"}, status=403)
+        readable_ids = authz.get_readable_feature_ids(request, layer)
+        if readable_ids is None:
+            layer_resources = LayerResource.objects.all()
+        else:
+            layer_resources = LayerResource.objects.filter(feature__in=readable_ids)
+        paths = []
+        for resource in layer_resources:
+            respath = f"{layer.id}_{layer.name}/{resource.feature}_{os.path.basename(resource.path)}"
+            paths.append({
+                "fs": resource.get_abspath(),
+                "n": respath
+            })
+
+        # using zipfly and StreamingHttpResponse to stream the zip on the fly instead of creating
+        # the file and then sending it
+        zfly = zipfly.ZipFly(paths=paths)
+        z = zfly.generator()
+
+        # django streaming
+        response = StreamingHttpResponse(z, content_type='application/octet-stream')
+        # response = StreamingHttpResponse(z, content_type='application/zip')
+        response['Content-Disposition'] = f"attachment; filename={layer.id}_{layer.name}.zip"
+        return response
+    except Layer.DoesNotExist:
+        return JsonResponse({"status": "error", "Error": 'Layer not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "Error": str(e)}, status=500)
