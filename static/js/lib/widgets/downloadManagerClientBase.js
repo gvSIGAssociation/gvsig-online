@@ -54,7 +54,7 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
 			var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
 			var geojsonLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=json&typeName=' + layer.layer_name;
-			var layerResourcesLink = '/gvsigonline/core/download_layer_resources/' + layer.workspace + '/' + layer.layer_name +'/';
+			var layerResourcesLink = '/gvsigonline/services/download_layer_resources/' + layer.workspace + '/' + layer.layer_name +'/';
 			
 			if (viewer.core.conf.user && viewer.core.conf.user.token){
 			    var tk = viewer.core.conf.user.token;
