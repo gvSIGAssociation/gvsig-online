@@ -1024,6 +1024,9 @@ msgstr "No s'han trobat resultats"
 msgid "You must fill in all fields"
 msgstr "Ha d'omplir tots els valors"
 
+msgid "Download Layer Resources"
+msgstr "Descarregar recursos de capa"
+
 #, fuzzy
 #~| msgid "Select all"
 #~ msgid "Select"

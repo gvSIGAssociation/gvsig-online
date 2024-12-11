@@ -1000,6 +1000,9 @@ msgstr "No se han encontrado resultados"
 msgid "You must fill in all fields"
 msgstr "Debe rellenar todos los campos"
 
+msgid "Download Layer Resources"
+msgstr "Descargar recursos de capa"
+
 #, fuzzy
 #~| msgid "Select all"
 #~ msgid "Select"
