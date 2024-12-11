@@ -5407,11 +5407,13 @@ def download_layer_resources(request, workspace_name, layer_name):
             layer_resources = LayerResource.objects.filter(feature__in=readable_ids)
         paths = []
         for resource in layer_resources:
-            respath = f"{layer.id}_{layer.name}/{resource.feature}_{os.path.basename(resource.path)}"
-            paths.append({
-                "fs": resource.get_abspath(),
-                "n": respath
-            })
+            localpath = resource.get_abspath()
+            if os.path.exists(localpath):
+                respath = f"{layer.id}_{layer.name}/{resource.feature}_{os.path.basename(resource.path)}"
+                paths.append({
+                    "fs": localpath,
+                    "n": respath
+                })
 
         # using zipfly and StreamingHttpResponse to stream the zip on the fly instead of creating
         # the file and then sending it
