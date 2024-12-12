@@ -797,6 +797,10 @@ def output_Postgis(dicc):
 
     esq = dicc['schema-name-option']
     tab = dicc['tablename']
+    try:
+        preservefid = dicc['preserve-fid']
+    except:
+        preservefid = False
 
     con_source = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = con_source.cursor()
@@ -993,7 +997,9 @@ def output_Postgis(dicc):
                 _ogr = gdaltools.ogr2ogr()
                 _ogr.set_input(_conn_source, table_name=table_name_source)
                 _ogr.set_output(_conn_target, table_name=tab)
-                #_ogr.set_preserve_fid(True)
+                
+                if preservefid == True or preservefid == "true":
+                    _ogr.set_preserve_fid(True)
 
                 if dicc['operation'] == 'OVERWRITE':
                     _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_OVERWRITE, data_source_mode=_ogr.MODE_DS_UPDATE)

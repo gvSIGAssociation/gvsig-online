@@ -15914,6 +15914,13 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label class="col-form-label">'+gettext('Order')+':&nbsp</label>'+
                                 '<input type="number" id="order-'+ID+'" value="0" size ="3"/>'+
                             '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Preserve FID:')+'</label>'+
+                                '<div class="form-check">'+
+                                    '<input type="checkbox" id="preserve-fid-'+ID+'" class="form-check-input" disabled>'+
+                                    '<label for="preserve-fid-'+ID+'" class="form-check-label">'+gettext('Preserve FID')+'</label>'+
+                                '</div>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -15940,6 +15947,14 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             }
             else{
                 $('#match-'+ID).attr('disabled', true)
+            }
+        });
+
+        $('input[name="operation-'+ID+'"]').change(function() {
+            if ($(this).val() === 'APPEND') {
+                $('#preserve-fid-'+ID).prop('disabled', false).prop('checked', false);
+            } else {
+                $('#preserve-fid-'+ID).prop('disabled', true).prop('checked', false);
             }
         });
         
@@ -16025,6 +16040,21 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 }
             };
 
+            if ($('input:radio[name="operation-'+ID+'"]:checked').val() === 'UPDATE' || 
+                $('input:radio[name="operation-'+ID+'"]:checked').val() === 'DELETE') {
+                $('#match-'+ID).attr('disabled', false);
+            } else {
+                $('#match-'+ID).attr('disabled', true);
+            }
+            
+            if ($('input:radio[name="operation-'+ID+'"]:checked').val() === 'APPEND') {
+                $('#preserve-fid-'+ID).prop('disabled', false)
+            } else {
+                $('#preserve-fid-'+ID).prop('disabled', true)
+            }
+        
+
+
             $('#dialog-output-postgis-'+ID).modal('show')
 
         });
@@ -16049,8 +16079,11 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 "tablename": $('#tablename-'+ID).val(),
                 "match": $('#match-'+ID).val(),
                 "operation": $('input:radio[name="operation-'+ID+'"]:checked').val(),
-                "order": $('#order-'+ID).val()}
+                "order": $('#order-'+ID).val(),
+                "preserve-fid": $('#preserve-fid-'+ID).is(':checked')}
             ]}
+
+            console.log(paramsPostgis)
             
             paramsPostgis['schema-old'] = schemaEdge
             paramsPostgis['schema'] = schema
