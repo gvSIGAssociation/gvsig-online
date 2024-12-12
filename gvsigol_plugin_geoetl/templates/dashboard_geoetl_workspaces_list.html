@@ -67,7 +67,8 @@
 												{{ workspace.last_run|date:"d/m/Y H:i:s" }}
 											{% endtimezone %}
 										</div>
-									</td>									<td>{{ workspace.name }}</td>
+									</td>									
+									<td>{{ workspace.name }}</td>
 									<td>{{ workspace.description }}</td>
 									{% if workspace.every %}
 										<td>{{ workspace.every }} {{ workspace.period }}</td>
