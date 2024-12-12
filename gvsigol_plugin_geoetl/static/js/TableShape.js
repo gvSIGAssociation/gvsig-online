@@ -15915,7 +15915,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<input type="number" id="order-'+ID+'" value="0" size ="3"/>'+
                             '</div>'+
                             '<div>'+
-                                '<label class="col-form-label">'+gettext('Preserve FID:')+'</label>'+
+                                '<label class="col-form-label">'+gettext('Preserve FID')+':</label>'+
                                 '<div class="form-check">'+
                                     '<input type="checkbox" id="preserve-fid-'+ID+'" class="form-check-input" disabled>'+
                                     '<label for="preserve-fid-'+ID+'" class="form-check-label">'+gettext('Preserve FID')+'</label>'+
