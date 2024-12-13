@@ -143,3 +143,9 @@ tables==3.8.0
 
 # geoserver-acl client
 certifi>=2024.8.30
+
+# model versions
+django-simple-history==3.0.0
+
+#plugin cementerio_albacete
+pyodbc==5.2.0
