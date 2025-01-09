@@ -5555,3 +5555,50 @@ def trans_Voronoi(dicc):
     cur.close()
 
     return [table_name_target]
+
+
+def trans_Stats(dicc):
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+
+    attr = dicc['attr']
+
+    conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    stats_queries = []
+    stats_queries.append(f"MAX({attr}) AS _max")
+    stats_queries.append(f"MIN({attr}) AS _min")
+    stats_queries.append(f"COUNT({attr}) AS _count")
+    stats_queries.append(f"SUM({attr}) AS _sum")
+    stats_queries.append(f"AVG({attr}) AS _mean")
+    stats_queries.append(f"PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY {attr}) AS _median")
+    stats_queries.append(f"MODE() WITHIN GROUP (ORDER BY {attr}) AS _mode")
+    stats_queries.append(f"STDDEV({attr}) AS _desv")
+
+    stats_sql = ", ".join(stats_queries)
+
+    sqlCreate = sql.SQL(
+        "CREATE TABLE {}.{} AS SELECT {} FROM {}.{}"
+    ).format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target),
+        sql.SQL(stats_sql),
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_source)
+    )
+
+    cur.execute(sqlCreate)
+    conn.commit()   
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-11 10:22+0200\n"
+"POT-Creation-Date: 2025-01-09 16:58+0100\n"
 "PO-Revision-Date: 2023-10-16 15:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -53,20 +53,20 @@ msgid "Last execution"
 msgstr "Última ejecución"
 
 #: templates/dashboard_geoetl_concat_workspaces.html:35
-#: templates/dashboard_geoetl_concat_workspaces.html:133
+#: templates/dashboard_geoetl_concat_workspaces.html:140
 #: templates/dashboard_geoetl_workspaces_list.html:37
-#: templates/dashboard_geoetl_workspaces_list.html:145
-#: templates/dashboard_geoetl_workspaces_list.html:278
-#: templates/dashboard_geoetl_workspaces_list.html:414 templates/etl.html:159
-#: templates/etl.html:370
+#: templates/dashboard_geoetl_workspaces_list.html:152
+#: templates/dashboard_geoetl_workspaces_list.html:285
+#: templates/dashboard_geoetl_workspaces_list.html:421 templates/etl.html:161
+#: templates/etl.html:372
 msgid "Name"
 msgstr "Nombre"
 
 #: templates/dashboard_geoetl_concat_workspaces.html:36
-#: templates/dashboard_geoetl_concat_workspaces.html:140
+#: templates/dashboard_geoetl_concat_workspaces.html:147
 #: templates/dashboard_geoetl_workspaces_list.html:38
-#: templates/dashboard_geoetl_workspaces_list.html:153
-#: templates/dashboard_geoetl_workspaces_list.html:285 templates/etl.html:166
+#: templates/dashboard_geoetl_workspaces_list.html:160
+#: templates/dashboard_geoetl_workspaces_list.html:292 templates/etl.html:168
 msgid "Description"
 msgstr "Descripción"
 
@@ -76,7 +76,7 @@ msgid "Periodicity"
 msgstr "Periodicidad"
 
 #: templates/dashboard_geoetl_concat_workspaces.html:38
-#: templates/dashboard_geoetl_workspaces_list.html:40 templates/etl.html:547
+#: templates/dashboard_geoetl_workspaces_list.html:40 templates/etl.html:549
 msgid "User"
 msgstr "Usuario"
 
@@ -89,266 +89,266 @@ msgstr "Concatenación"
 msgid "See status message"
 msgstr "Ver mensaje de estado"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:91
-#: templates/dashboard_geoetl_concat_workspaces.html:360
-#: templates/dashboard_geoetl_workspaces_list.html:97
-#: templates/dashboard_geoetl_workspaces_list.html:989
+#: templates/dashboard_geoetl_concat_workspaces.html:98
+#: templates/dashboard_geoetl_concat_workspaces.html:367
+#: templates/dashboard_geoetl_workspaces_list.html:104
+#: templates/dashboard_geoetl_workspaces_list.html:996
 msgid "Delete workspace"
 msgstr "Eliminar espacio de trabajo"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:96
-#: templates/dashboard_geoetl_workspaces_list.html:102
+#: templates/dashboard_geoetl_concat_workspaces.html:103
+#: templates/dashboard_geoetl_workspaces_list.html:109
 msgid "The ETL workspace and its parameters will be deleted"
 msgstr "El espacio de trabajo etl y sus parámetros serán eliminados"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:101
-#: templates/dashboard_geoetl_workspaces_list.html:107 templates/etl.html:258
-#: templates/etl.html:284
+#: templates/dashboard_geoetl_concat_workspaces.html:108
+#: templates/dashboard_geoetl_workspaces_list.html:114 templates/etl.html:260
+#: templates/etl.html:286
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:102
-#: templates/dashboard_geoetl_concat_workspaces.html:258
-#: templates/dashboard_geoetl_workspaces_list.html:108
-#: templates/dashboard_geoetl_workspaces_list.html:256 templates/etl.html:259
-#: templates/etl.html:285 templates/etl.html:310 templates/etl.html:603
+#: templates/dashboard_geoetl_concat_workspaces.html:109
+#: templates/dashboard_geoetl_concat_workspaces.html:265
+#: templates/dashboard_geoetl_workspaces_list.html:115
+#: templates/dashboard_geoetl_workspaces_list.html:263 templates/etl.html:261
+#: templates/etl.html:287 templates/etl.html:312 templates/etl.html:605
 msgid "Accept"
 msgstr "Aceptar"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:118
+#: templates/dashboard_geoetl_concat_workspaces.html:125
 msgid "Update or Save ETL Workspace"
 msgstr "Actualiza o Guarda el espacio de trabajo ETL"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:127
-#: templates/dashboard_geoetl_workspaces_list.html:138
-#: templates/dashboard_geoetl_workspaces_list.html:356 templates/etl.html:153
+#: templates/dashboard_geoetl_concat_workspaces.html:134
+#: templates/dashboard_geoetl_workspaces_list.html:145
+#: templates/dashboard_geoetl_workspaces_list.html:363 templates/etl.html:155
 msgid "ETL Workspace ID"
 msgstr "ID del Espacio de trabajo ETL"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:134
-#: templates/dashboard_geoetl_workspaces_list.html:146
-#: templates/dashboard_geoetl_workspaces_list.html:279 templates/etl.html:160
+#: templates/dashboard_geoetl_concat_workspaces.html:141
+#: templates/dashboard_geoetl_workspaces_list.html:153
+#: templates/dashboard_geoetl_workspaces_list.html:286 templates/etl.html:162
 msgid "ETL Workspace name"
 msgstr "Nombre Espacio de trabajo ETL"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:141
-#: templates/dashboard_geoetl_workspaces_list.html:154
-#: templates/dashboard_geoetl_workspaces_list.html:286 templates/etl.html:167
+#: templates/dashboard_geoetl_concat_workspaces.html:148
+#: templates/dashboard_geoetl_workspaces_list.html:161
+#: templates/dashboard_geoetl_workspaces_list.html:293 templates/etl.html:169
 msgid "ETL Workspace description"
 msgstr "Descripción Espacio de trabajo ETL"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:148
-#: templates/dashboard_geoetl_workspaces_list.html:162
+#: templates/dashboard_geoetl_concat_workspaces.html:155
+#: templates/dashboard_geoetl_workspaces_list.html:169
 msgid "Run periodically?"
 msgstr "¿Ejecutar periódicamente?"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:153
-#: templates/dashboard_geoetl_workspaces_list.html:168 templates/etl.html:178
+#: templates/dashboard_geoetl_concat_workspaces.html:160
+#: templates/dashboard_geoetl_workspaces_list.html:175 templates/etl.html:180
 msgid "All days"
 msgstr "Todos los días"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:154
-#: templates/dashboard_geoetl_workspaces_list.html:169 templates/etl.html:179
+#: templates/dashboard_geoetl_concat_workspaces.html:161
+#: templates/dashboard_geoetl_workspaces_list.html:176 templates/etl.html:181
 msgid "Monday"
 msgstr "Lunes"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:155
-#: templates/dashboard_geoetl_workspaces_list.html:170 templates/etl.html:180
+#: templates/dashboard_geoetl_concat_workspaces.html:162
+#: templates/dashboard_geoetl_workspaces_list.html:177 templates/etl.html:182
 msgid "Tuesday"
 msgstr "Martes"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:156
-#: templates/dashboard_geoetl_workspaces_list.html:171 templates/etl.html:181
+#: templates/dashboard_geoetl_concat_workspaces.html:163
+#: templates/dashboard_geoetl_workspaces_list.html:178 templates/etl.html:183
 msgid "Wednesday"
 msgstr "Miércoles"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:157
-#: templates/dashboard_geoetl_workspaces_list.html:172 templates/etl.html:182
+#: templates/dashboard_geoetl_concat_workspaces.html:164
+#: templates/dashboard_geoetl_workspaces_list.html:179 templates/etl.html:184
 msgid "Thursday"
 msgstr "Jueves"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:158
-#: templates/dashboard_geoetl_workspaces_list.html:173 templates/etl.html:183
+#: templates/dashboard_geoetl_concat_workspaces.html:165
+#: templates/dashboard_geoetl_workspaces_list.html:180 templates/etl.html:185
 msgid "Friday"
 msgstr "Viernes"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:159
-#: templates/dashboard_geoetl_workspaces_list.html:174 templates/etl.html:184
+#: templates/dashboard_geoetl_concat_workspaces.html:166
+#: templates/dashboard_geoetl_workspaces_list.html:181 templates/etl.html:186
 msgid "Saturday"
 msgstr "Sábado"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:160
-#: templates/dashboard_geoetl_workspaces_list.html:175 templates/etl.html:185
+#: templates/dashboard_geoetl_concat_workspaces.html:167
+#: templates/dashboard_geoetl_workspaces_list.html:182 templates/etl.html:187
 msgid "Sunday"
 msgstr "Domingo"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:161
-#: templates/dashboard_geoetl_workspaces_list.html:176 templates/etl.html:186
+#: templates/dashboard_geoetl_concat_workspaces.html:168
+#: templates/dashboard_geoetl_workspaces_list.html:183 templates/etl.html:188
 msgid "Every"
 msgstr "Cada"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:178
-#: templates/dashboard_geoetl_workspaces_list.html:194 templates/etl.html:174
-#: templates/etl.html:203
+#: templates/dashboard_geoetl_concat_workspaces.html:185
+#: templates/dashboard_geoetl_workspaces_list.html:201 templates/etl.html:176
+#: templates/etl.html:205
 msgid "Run workspace every..."
 msgstr "Ejecutar espacio de trabajo cada..."
 
-#: templates/dashboard_geoetl_concat_workspaces.html:182
-#: templates/dashboard_geoetl_workspaces_list.html:198
+#: templates/dashboard_geoetl_concat_workspaces.html:189
+#: templates/dashboard_geoetl_workspaces_list.html:205
 msgid "Select number of..."
 msgstr "Selecciona número de..."
 
-#: templates/dashboard_geoetl_concat_workspaces.html:187
-#: templates/dashboard_geoetl_workspaces_list.html:206 templates/etl.html:211
+#: templates/dashboard_geoetl_concat_workspaces.html:194
+#: templates/dashboard_geoetl_workspaces_list.html:213 templates/etl.html:213
 msgid "... time measure"
 msgstr "... medida de tiempo."
 
-#: templates/dashboard_geoetl_concat_workspaces.html:188
-#: templates/dashboard_geoetl_workspaces_list.html:207 templates/etl.html:212
+#: templates/dashboard_geoetl_concat_workspaces.html:195
+#: templates/dashboard_geoetl_workspaces_list.html:214 templates/etl.html:214
 msgid "minutes"
 msgstr "minutos"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:189
-#: templates/dashboard_geoetl_workspaces_list.html:208 templates/etl.html:213
+#: templates/dashboard_geoetl_concat_workspaces.html:196
+#: templates/dashboard_geoetl_workspaces_list.html:215 templates/etl.html:215
 msgid "hours"
 msgstr "horas"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:190
-#: templates/dashboard_geoetl_workspaces_list.html:209 templates/etl.html:214
+#: templates/dashboard_geoetl_concat_workspaces.html:197
+#: templates/dashboard_geoetl_workspaces_list.html:216 templates/etl.html:216
 msgid "days"
 msgstr "días"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:198
+#: templates/dashboard_geoetl_concat_workspaces.html:205
 #: templates/dashboard_geoetl_menu.html:30 templates/etl.html:11
 msgid "Workspaces"
 msgstr "Espacios de trabajo"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:203
+#: templates/dashboard_geoetl_concat_workspaces.html:210
 msgid "Get Workspaces"
 msgstr "Obtén esp. trabajo"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:204
+#: templates/dashboard_geoetl_concat_workspaces.html:211
 msgid "Get workspaces"
 msgstr "Obtén esp. de trabajo"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:225
-#: templates/dashboard_geoetl_workspaces_list.html:218 templates/etl.html:223
+#: templates/dashboard_geoetl_concat_workspaces.html:232
+#: templates/dashboard_geoetl_workspaces_list.html:225 templates/etl.html:225
 msgid "Change to superuser?"
 msgstr "¿Cambiar a superusuario?"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:232
-#: templates/dashboard_geoetl_workspaces_list.html:229
-#: templates/dashboard_geoetl_workspaces_list.html:304
-#: templates/dashboard_geoetl_workspaces_list.html:331
-#: templates/dashboard_geoetl_workspaces_list.html:595 templates/etl.html:235
-#: templates/etl.html:574
+#: templates/dashboard_geoetl_concat_workspaces.html:239
+#: templates/dashboard_geoetl_workspaces_list.html:236
+#: templates/dashboard_geoetl_workspaces_list.html:311
+#: templates/dashboard_geoetl_workspaces_list.html:338
+#: templates/dashboard_geoetl_workspaces_list.html:602 templates/etl.html:237
+#: templates/etl.html:576
 msgid "Close"
 msgstr "Cerrar"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:233 templates/etl.html:236
-#: templates/etl.html:576
+#: templates/dashboard_geoetl_concat_workspaces.html:240 templates/etl.html:238
+#: templates/etl.html:578
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:248
-#: templates/dashboard_geoetl_workspaces_list.html:246 templates/etl.html:300
-#: templates/etl.html:593
+#: templates/dashboard_geoetl_concat_workspaces.html:255
+#: templates/dashboard_geoetl_workspaces_list.html:253 templates/etl.html:302
+#: templates/etl.html:595
 msgid "Not allowed"
 msgstr "No permitido"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:253
-#: templates/dashboard_geoetl_workspaces_list.html:251 templates/etl.html:305
+#: templates/dashboard_geoetl_concat_workspaces.html:260
+#: templates/dashboard_geoetl_workspaces_list.html:258 templates/etl.html:307
 msgid ""
 "In database already exists a workspace with the same name and the same user"
 msgstr ""
 "En la base de datos ya existe un espacio de trabajo con el mismo nombre y el "
 "mismo usuario"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:332
-#: templates/dashboard_geoetl_workspaces_list.html:948
+#: templates/dashboard_geoetl_concat_workspaces.html:339
+#: templates/dashboard_geoetl_workspaces_list.html:955
 msgid "Processing request..."
 msgstr "Procesando petición..."
 
-#: templates/dashboard_geoetl_concat_workspaces.html:333
-#: templates/dashboard_geoetl_workspaces_list.html:949
+#: templates/dashboard_geoetl_concat_workspaces.html:340
+#: templates/dashboard_geoetl_workspaces_list.html:956
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Buscar%(sep)s"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:334
-#: templates/dashboard_geoetl_workspaces_list.html:950
+#: templates/dashboard_geoetl_concat_workspaces.html:341
+#: templates/dashboard_geoetl_workspaces_list.html:957
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:335
-#: templates/dashboard_geoetl_workspaces_list.html:951
+#: templates/dashboard_geoetl_concat_workspaces.html:342
+#: templates/dashboard_geoetl_workspaces_list.html:958
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:336
-#: templates/dashboard_geoetl_workspaces_list.html:952
+#: templates/dashboard_geoetl_concat_workspaces.html:343
+#: templates/dashboard_geoetl_workspaces_list.html:959
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando desde 0 a 0 de 0 registros"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:337
-#: templates/dashboard_geoetl_workspaces_list.html:953
+#: templates/dashboard_geoetl_concat_workspaces.html:344
+#: templates/dashboard_geoetl_workspaces_list.html:960
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrando %(max)s registros"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:339
-#: templates/dashboard_geoetl_workspaces_list.html:955
+#: templates/dashboard_geoetl_concat_workspaces.html:346
+#: templates/dashboard_geoetl_workspaces_list.html:962
 msgid "Loading..."
 msgstr "Cargando..."
 
-#: templates/dashboard_geoetl_concat_workspaces.html:340
-#: templates/dashboard_geoetl_concat_workspaces.html:341
-#: templates/dashboard_geoetl_workspaces_list.html:956
-#: templates/dashboard_geoetl_workspaces_list.html:957
+#: templates/dashboard_geoetl_concat_workspaces.html:347
+#: templates/dashboard_geoetl_concat_workspaces.html:348
+#: templates/dashboard_geoetl_workspaces_list.html:963
+#: templates/dashboard_geoetl_workspaces_list.html:964
 msgid "No records available"
 msgstr "Sin registros disponibles"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:343
-#: templates/dashboard_geoetl_workspaces_list.html:959
+#: templates/dashboard_geoetl_concat_workspaces.html:350
+#: templates/dashboard_geoetl_workspaces_list.html:966
 msgid "First"
 msgstr "Primero"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:344
-#: templates/dashboard_geoetl_workspaces_list.html:960
+#: templates/dashboard_geoetl_concat_workspaces.html:351
+#: templates/dashboard_geoetl_workspaces_list.html:967
 msgid "Previous"
 msgstr "Anterior"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:345
-#: templates/dashboard_geoetl_workspaces_list.html:961
+#: templates/dashboard_geoetl_concat_workspaces.html:352
+#: templates/dashboard_geoetl_workspaces_list.html:968
 msgid "Next"
 msgstr "Siguiente"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:346
-#: templates/dashboard_geoetl_workspaces_list.html:962
+#: templates/dashboard_geoetl_concat_workspaces.html:353
+#: templates/dashboard_geoetl_workspaces_list.html:969
 msgid "Last"
 msgstr "Último"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:349
-#: templates/dashboard_geoetl_workspaces_list.html:965
+#: templates/dashboard_geoetl_concat_workspaces.html:356
+#: templates/dashboard_geoetl_workspaces_list.html:972
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrden ascendente"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:350
-#: templates/dashboard_geoetl_workspaces_list.html:966
+#: templates/dashboard_geoetl_concat_workspaces.html:357
+#: templates/dashboard_geoetl_workspaces_list.html:973
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrden descendente"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:373
-#: templates/dashboard_geoetl_workspaces_list.html:1002
+#: templates/dashboard_geoetl_concat_workspaces.html:380
+#: templates/dashboard_geoetl_workspaces_list.html:1009
 msgid "Update workspace"
 msgstr "Actualizar espacio de trabajo"
 
-#: templates/dashboard_geoetl_concat_workspaces.html:382
-#: templates/dashboard_geoetl_workspaces_list.html:1037
+#: templates/dashboard_geoetl_concat_workspaces.html:389
+#: templates/dashboard_geoetl_workspaces_list.html:1044
 msgid "Run workspace"
 msgstr "Ejecuta espacio de trabajo"
 
@@ -367,17 +367,17 @@ msgid "Canvas"
 msgstr "Lienzo"
 
 #: templates/dashboard_geoetl_workspaces_list.html:15
-#: templates/dashboard_geoetl_workspaces_list.html:305
+#: templates/dashboard_geoetl_workspaces_list.html:312
 msgid "Upload"
 msgstr "Subir"
 
 #: templates/dashboard_geoetl_workspaces_list.html:18
-#: templates/dashboard_geoetl_workspaces_list.html:320
+#: templates/dashboard_geoetl_workspaces_list.html:327
 msgid "Clean temporal tables"
 msgstr "Limpia tablas temporales"
 
 #: templates/dashboard_geoetl_workspaces_list.html:18
-#: templates/dashboard_geoetl_workspaces_list.html:332
+#: templates/dashboard_geoetl_workspaces_list.html:339
 msgid "Clean"
 msgstr "Limpiar"
 
@@ -389,21 +389,21 @@ msgstr "Espacio de trabajo concat."
 msgid "Workspaces list"
 msgstr "Lista de espacios de trabajo"
 
-#: templates/dashboard_geoetl_workspaces_list.html:123
-#: templates/dashboard_geoetl_workspaces_list.html:270
+#: templates/dashboard_geoetl_workspaces_list.html:130
+#: templates/dashboard_geoetl_workspaces_list.html:277
 msgid "Upload ETL Workspace"
 msgstr "Actualiza espacio de trabajo ETL"
 
-#: templates/dashboard_geoetl_workspaces_list.html:230
+#: templates/dashboard_geoetl_workspaces_list.html:237
 msgid "Update"
 msgstr "Actualizar"
 
-#: templates/dashboard_geoetl_workspaces_list.html:292
-#: templates/dashboard_geoetl_workspaces_list.html:296
+#: templates/dashboard_geoetl_workspaces_list.html:299
+#: templates/dashboard_geoetl_workspaces_list.html:303
 msgid "ETL Workspace JSON"
 msgstr "JSON del espacio de trabajo ETL"
 
-#: templates/dashboard_geoetl_workspaces_list.html:326
+#: templates/dashboard_geoetl_workspaces_list.html:333
 msgid ""
 "Some ETL workspace is running. Are you sure you want to drop the temporary "
 "tables?"
@@ -411,163 +411,158 @@ msgstr ""
 "Algún espacio de trabajo ETL se está ejecutando. Estás seguro de que quieres "
 "eliminar las tablas temporales? "
 
-#: templates/dashboard_geoetl_workspaces_list.html:347
+#: templates/dashboard_geoetl_workspaces_list.html:354
 msgid "Set parameters for workspace"
 msgstr "Configura parámetros para el espacio de trabajo"
 
-#: templates/dashboard_geoetl_workspaces_list.html:362
+#: templates/dashboard_geoetl_workspaces_list.html:369
 msgid "DB Connection"
 msgstr "Conexión BBDD"
 
-#: templates/dashboard_geoetl_workspaces_list.html:368
-#: templates/dashboard_geoetl_workspaces_list.html:378
+#: templates/dashboard_geoetl_workspaces_list.html:375
+#: templates/dashboard_geoetl_workspaces_list.html:385
 msgid "SQL Parameters"
 msgstr "Parámetros SQL"
 
-#: templates/dashboard_geoetl_workspaces_list.html:369
-#: templates/dashboard_geoetl_workspaces_list.html:402
+#: templates/dashboard_geoetl_workspaces_list.html:376
+#: templates/dashboard_geoetl_workspaces_list.html:409
 msgid "User Parameters"
 msgstr "Parámetros de Usuario"
 
-#: templates/dashboard_geoetl_workspaces_list.html:370
-#: templates/dashboard_geoetl_workspaces_list.html:510
+#: templates/dashboard_geoetl_workspaces_list.html:377
+#: templates/dashboard_geoetl_workspaces_list.html:517
 msgid "Schedule e-mails"
 msgstr "Programa e-mails"
 
-#: templates/dashboard_geoetl_workspaces_list.html:371
-#: templates/dashboard_geoetl_workspaces_list.html:572
-#, fuzzy
-#| msgid "SQL Parameters"
+#: templates/dashboard_geoetl_workspaces_list.html:378
+#: templates/dashboard_geoetl_workspaces_list.html:579
 msgid "Endpoint Parameters"
 msgstr "Parámetros SQL"
 
-#: templates/dashboard_geoetl_workspaces_list.html:385
+#: templates/dashboard_geoetl_workspaces_list.html:392
 msgid "SQL before running workspace"
 msgstr "SQL antes de ejecutar el espacio de trabajo"
 
-#: templates/dashboard_geoetl_workspaces_list.html:392
+#: templates/dashboard_geoetl_workspaces_list.html:399
 msgid "SQL after running workspace"
 msgstr "SQL después de ejecutar el espacio de trabajo"
 
-#: templates/dashboard_geoetl_workspaces_list.html:408
+#: templates/dashboard_geoetl_workspaces_list.html:415
 msgid "Add user parameter"
 msgstr "Añade parámetro de usuario"
 
-#: templates/dashboard_geoetl_workspaces_list.html:418 templates/etl.html:343
-#: templates/etl.html:357
+#: templates/dashboard_geoetl_workspaces_list.html:425 templates/etl.html:345
+#: templates/etl.html:359
 msgid "Type"
 msgstr "Tipo"
 
-#: templates/dashboard_geoetl_workspaces_list.html:420
+#: templates/dashboard_geoetl_workspaces_list.html:427
 msgid "Varchar"
 msgstr "Cadena de Texto"
 
-#: templates/dashboard_geoetl_workspaces_list.html:421
+#: templates/dashboard_geoetl_workspaces_list.html:428
 msgid "Integer"
 msgstr "Entero"
 
-#: templates/dashboard_geoetl_workspaces_list.html:422
+#: templates/dashboard_geoetl_workspaces_list.html:429
 msgid "Float"
 msgstr "Decimal"
 
-#: templates/dashboard_geoetl_workspaces_list.html:427
+#: templates/dashboard_geoetl_workspaces_list.html:434
 msgid "Value"
 msgstr "Valor"
 
-#: templates/dashboard_geoetl_workspaces_list.html:447
+#: templates/dashboard_geoetl_workspaces_list.html:454
 msgid ""
 "There are variable parameters (The workspace will be executed in a loop)"
 msgstr "Hay parámetros variables (El espacio de trabajo se ejecutará en bucle)"
 
-#: templates/dashboard_geoetl_workspaces_list.html:453
+#: templates/dashboard_geoetl_workspaces_list.html:460
 msgid "Variable parameter"
 msgstr "Parámetro variable"
 
-#: templates/dashboard_geoetl_workspaces_list.html:464
+#: templates/dashboard_geoetl_workspaces_list.html:471
 msgid "Integer iterative value from"
 msgstr "Valor iterativo entero de"
 
-#: templates/dashboard_geoetl_workspaces_list.html:464
+#: templates/dashboard_geoetl_workspaces_list.html:471
 msgid " to "
 msgstr " a "
 
-#: templates/dashboard_geoetl_workspaces_list.html:468
+#: templates/dashboard_geoetl_workspaces_list.html:475
 msgid "Iterative value from a column of a PostgreSQL table"
 msgstr "Valor iterativo desde una columna de una tabla PostgreSQL"
 
-#: templates/dashboard_geoetl_workspaces_list.html:475
-#: templates/dashboard_geoetl_workspaces_list.html:476
+#: templates/dashboard_geoetl_workspaces_list.html:482
+#: templates/dashboard_geoetl_workspaces_list.html:483
 msgid "Get schemas"
 msgstr "Obtén esquemas"
 
-#: templates/dashboard_geoetl_workspaces_list.html:479
+#: templates/dashboard_geoetl_workspaces_list.html:486
 msgid "Schemas"
 msgstr "Esquemas"
 
-#: templates/dashboard_geoetl_workspaces_list.html:486
-#: templates/dashboard_geoetl_workspaces_list.html:487
+#: templates/dashboard_geoetl_workspaces_list.html:493
+#: templates/dashboard_geoetl_workspaces_list.html:494
 msgid "Get tables"
 msgstr "Obtén tablas"
 
-#: templates/dashboard_geoetl_workspaces_list.html:490
+#: templates/dashboard_geoetl_workspaces_list.html:497
 msgid "Tables"
 msgstr "Tablas"
 
-#: templates/dashboard_geoetl_workspaces_list.html:497
-#: templates/dashboard_geoetl_workspaces_list.html:498
+#: templates/dashboard_geoetl_workspaces_list.html:504
+#: templates/dashboard_geoetl_workspaces_list.html:505
 msgid "Get attributes"
 msgstr "Obtén atributos"
 
-#: templates/dashboard_geoetl_workspaces_list.html:501
+#: templates/dashboard_geoetl_workspaces_list.html:508
 msgid "Attributes"
 msgstr "Atributos"
 
-#: templates/dashboard_geoetl_workspaces_list.html:516
+#: templates/dashboard_geoetl_workspaces_list.html:523
 msgid "Get e-mails"
 msgstr "Obtén e-mails"
 
-#: templates/dashboard_geoetl_workspaces_list.html:539
+#: templates/dashboard_geoetl_workspaces_list.html:546
 msgid "Send e-mail after process finishes correctly"
 msgstr "Envía e-mail después de que el proceso finalice correctamente"
 
-#: templates/dashboard_geoetl_workspaces_list.html:546
+#: templates/dashboard_geoetl_workspaces_list.html:553
 msgid "Send e-mail if process fails"
 msgstr "Envía e-mail si el proceso falla"
 
-#: templates/dashboard_geoetl_workspaces_list.html:554
+#: templates/dashboard_geoetl_workspaces_list.html:561
 msgid "URL"
 msgstr ""
 
-#: templates/dashboard_geoetl_workspaces_list.html:560
+#: templates/dashboard_geoetl_workspaces_list.html:567
 msgid "Method"
 msgstr ""
 
-#: templates/dashboard_geoetl_workspaces_list.html:573
+#: templates/dashboard_geoetl_workspaces_list.html:580
 msgid "Write parameters as JSON (optional). Example:"
 msgstr ""
 
-#: templates/dashboard_geoetl_workspaces_list.html:580
-#, fuzzy
-#| msgid "Send e-mail after process finishes correctly"
+#: templates/dashboard_geoetl_workspaces_list.html:587
 msgid "Send to endpoint after process finishes correctly"
 msgstr "Envía e-mail después de que el proceso finalice correctamente"
 
-#: templates/dashboard_geoetl_workspaces_list.html:587
-#, fuzzy
+
 #| msgid "Send e-mail if process fails"
 msgid "Send to endpoint if process fails"
 msgstr "Envía e-mail si el proceso falla"
 
-#: templates/dashboard_geoetl_workspaces_list.html:596
-#: templates/dashboard_geoetl_workspaces_list.html:1028
+#: templates/dashboard_geoetl_workspaces_list.html:603
+#: templates/dashboard_geoetl_workspaces_list.html:1035
 msgid "Set parameters"
 msgstr "Establece parámetros"
 
-#: templates/dashboard_geoetl_workspaces_list.html:976
+#: templates/dashboard_geoetl_workspaces_list.html:983
 msgid "Download workspace"
 msgstr "Descargar espacio de trabajo"
 
-#: templates/dashboard_geoetl_workspaces_list.html:1015
+#: templates/dashboard_geoetl_workspaces_list.html:1022
 msgid "Open workspace"
 msgstr "Abrir espacio de trabajo"
 
@@ -659,140 +654,144 @@ msgstr "Elimina Atributo"
 msgid "Rename Attribute"
 msgstr "Renombra Atributo"
 
-#: templates/etl.html:68
+#: templates/etl.html:65
+msgid "Statistics"
+msgstr "Estadísticas"
+
+#: templates/etl.html:70
 msgid "Geometric Transformers"
 msgstr "Transformadores Geométricos"
 
-#: templates/etl.html:70
+#: templates/etl.html:72
 msgid "Buffer"
 msgstr "Área de influencia"
 
-#: templates/etl.html:71
+#: templates/etl.html:73
 msgid "Cadastral Geometry"
 msgstr "Geometría Catastral"
 
-#: templates/etl.html:72
+#: templates/etl.html:74
 msgid "Calculate Area"
 msgstr "Calcula Área"
 
-#: templates/etl.html:73
+#: templates/etl.html:75
 msgid "Difference"
 msgstr "Diferencia"
 
-#: templates/etl.html:74
+#: templates/etl.html:76
 msgid "Explode Geometry"
 msgstr "Explota Geometrías"
 
-#: templates/etl.html:75
+#: templates/etl.html:77
 msgid "Filter Geometry"
 msgstr "Filtra Geometrías"
 
-#: templates/etl.html:76
+#: templates/etl.html:78
 msgid "Geocoder"
 msgstr "Geocodificador"
 
-#: templates/etl.html:77
+#: templates/etl.html:79
 msgid "Intersection"
 msgstr "Intersección"
 
-#: templates/etl.html:79
+#: templates/etl.html:81
 msgid "Nearest Neighbor"
 msgstr "Vecino Más Próximo"
 
-#: templates/etl.html:80
+#: templates/etl.html:82
 msgid "Remove Geometry"
 msgstr "Elimina Geometría"
 
-#: templates/etl.html:81
+#: templates/etl.html:83
 msgid "Reproject"
 msgstr "Reproyectar"
 
-#: templates/etl.html:82
+#: templates/etl.html:84
 msgid "Simple Geometry"
 msgstr "Geometría Simple"
 
-#: templates/etl.html:83
+#: templates/etl.html:85
 msgid "Spatial Relation"
 msgstr "Relación Espacial"
 
-#: templates/etl.html:84
+#: templates/etl.html:86
 msgid "Text to Point"
 msgstr "Texto a Punto"
 
-#: templates/etl.html:85
+#: templates/etl.html:87
 msgid "Union"
 msgstr "Fusión"
 
-#: templates/etl.html:86
+#: templates/etl.html:88
 msgid "Validate Geometry"
 msgstr "Valida Geometría"
 
-#: templates/etl.html:87
+#: templates/etl.html:89
 msgid "Voronoi Diagram"
 msgstr "Diagrama de Voronoi"
 
-#: templates/etl.html:88
+#: templates/etl.html:90
 msgid "WKT to Geometry"
 msgstr "WKT a Geometría"
 
-#: templates/etl.html:92
+#: templates/etl.html:94
 msgid "Geostatistical Transformers"
 msgstr "Transformadores Geoestadísticos"
 
-#: templates/etl.html:94
+#: templates/etl.html:96
 msgid "Clustering"
 msgstr "Agrupamiento"
 
-#: templates/etl.html:98
+#: templates/etl.html:100
 msgid "List Transformers"
 msgstr "Transformadores de Listas"
 
-#: templates/etl.html:100
+#: templates/etl.html:102
 msgid "Explode List"
 msgstr "Explota Lista"
 
-#: templates/etl.html:101
+#: templates/etl.html:103
 msgid "Split Attribute"
 msgstr "Parte Atributo"
 
-#: templates/etl.html:105
+#: templates/etl.html:107
 msgid "Workflows Transformers"
 msgstr "Transformadores de Flujos de Trabajo"
 
-#: templates/etl.html:108
+#: templates/etl.html:110
 msgid "Execute SQL"
 msgstr "Ejecuta SQL"
 
-#: templates/etl.html:112
+#: templates/etl.html:114
 msgid "Outputs"
 msgstr "Salidas"
 
-#: templates/etl.html:137
+#: templates/etl.html:139
 msgid "Save ETL workspace"
 msgstr "Guarda Espacio de trabajo ETL"
 
-#: templates/etl.html:236
+#: templates/etl.html:238
 msgid "Set parameters of all tasks before save"
 msgstr "Configura los parámetros de todas las tareas antes de guardar"
 
-#: templates/etl.html:248
+#: templates/etl.html:250
 msgid "Overwrite workspace?"
 msgstr "¿Sobrescribir espacio de trabajo?"
 
-#: templates/etl.html:253
+#: templates/etl.html:255
 msgid "Workspace"
 msgstr "El espacio de trabajo"
 
-#: templates/etl.html:253
+#: templates/etl.html:255
 msgid ""
 "will be overwritten. If you do not want to overwrite it the ID must be empty"
 msgstr "será sobrescrito. Si no quieres sobrescribirlo deja el ID vacío"
 
-#: templates/etl.html:274
+#: templates/etl.html:276
 msgid "Are you sure?"
 msgstr "¿Estás seguro?"
 
-#: templates/etl.html:279
+#: templates/etl.html:281
 msgid ""
 "If you open a new empty canvas you will lost your current canvas if you have "
 "not saved it before"
@@ -800,95 +799,95 @@ msgstr ""
 "Si abres un nuevo canvas vacío perderás tu canvas actual si no lo has "
 "guardado antes"
 
-#: templates/etl.html:324 templates/etl.html:331
+#: templates/etl.html:326 templates/etl.html:333
 msgid "Add Connection"
 msgstr "Añade conexión"
 
-#: templates/etl.html:334
+#: templates/etl.html:336
 msgid "Add DB"
 msgstr "Añade base de datos"
 
-#: templates/etl.html:335
+#: templates/etl.html:337
 msgid "Add API"
 msgstr "Añade API"
 
-#: templates/etl.html:382
+#: templates/etl.html:384
 msgid "Host"
 msgstr "Servidor"
 
-#: templates/etl.html:389
+#: templates/etl.html:391
 msgid "Port:"
 msgstr "Puerto:"
 
-#: templates/etl.html:396
+#: templates/etl.html:398
 msgid "Database:"
 msgstr "Base de datos:"
 
-#: templates/etl.html:397
+#: templates/etl.html:399
 msgid "Name of your database"
 msgstr "Nombre de tu base de datos"
 
-#: templates/etl.html:403
+#: templates/etl.html:405
 msgid "User:"
 msgstr "Usuario:"
 
-#: templates/etl.html:410 templates/etl.html:426 templates/etl.html:453
+#: templates/etl.html:412 templates/etl.html:428 templates/etl.html:455
 msgid "Password:"
 msgstr "Contraseña:"
 
-#: templates/etl.html:420 templates/etl.html:447
+#: templates/etl.html:422 templates/etl.html:449
 msgid "User name:"
 msgstr "Nombre de usuario:"
 
-#: templates/etl.html:432
+#: templates/etl.html:434
 msgid "Data source name:"
 msgstr "Nombre de origen de datos:"
 
-#: templates/etl.html:441
+#: templates/etl.html:443
 msgid "Server"
 msgstr "Servidor"
 
-#: templates/etl.html:459
+#: templates/etl.html:461
 msgid "Database"
 msgstr "Base de datos:"
 
-#: templates/etl.html:465
+#: templates/etl.html:467
 msgid "TDS Version"
 msgstr "Versión TDS"
 
-#: templates/etl.html:488 templates/etl.html:521
+#: templates/etl.html:490 templates/etl.html:523
 msgid "Domain"
 msgstr "Dominio"
 
-#: templates/etl.html:495
+#: templates/etl.html:497
 msgid "API Key"
 msgstr ""
 
-#: templates/etl.html:502
+#: templates/etl.html:504
 msgid "Client ID"
 msgstr ""
 
-#: templates/etl.html:509
+#: templates/etl.html:511
 msgid "Secret"
 msgstr ""
 
-#: templates/etl.html:532
+#: templates/etl.html:534
 msgid "Entities with website in SEDIPUALB@"
 msgstr "Entidades con website en SEDIPUALB@"
 
-#: templates/etl.html:535
+#: templates/etl.html:537
 msgid "Get entities"
 msgstr "Obtén atributos"
 
-#: templates/etl.html:554
+#: templates/etl.html:556
 msgid "Password"
 msgstr "Contraseña:"
 
-#: templates/etl.html:575
+#: templates/etl.html:577
 msgid "Verify connection"
 msgstr "Verifica conexión"
 
-#: templates/etl.html:598
+#: templates/etl.html:600
 msgid "DataBase Connection not saved. Probably, database name already exists."
 msgstr ""
 "La conexión no se ha guardado. Probablemente, el nombre de la base de datos "

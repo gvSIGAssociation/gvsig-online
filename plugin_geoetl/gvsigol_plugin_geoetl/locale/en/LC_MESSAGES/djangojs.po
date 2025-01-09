@@ -1337,3 +1337,9 @@ msgstr ""
 
 msgid "Preserve FID"
 msgstr ""
+
+msgid "Statistics"
+msgstr ""
+
+msgid "Numeric attribute"
+msgstr ""
