@@ -1483,4 +1483,4 @@ def get_status_msg(request):
                 'message':statusModel.message
             }
             
-            return HttpResponse(json.dumps(response), content_type="application/json")
+            return HttpResponse(json.dumps(response), content_type="application/json")        

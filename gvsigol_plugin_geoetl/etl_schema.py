@@ -20,6 +20,7 @@ from hashlib import sha256
 import base64
 import pymssql
 import xmltodict
+from .settings import GEOETL_DB
 
 def get_sheets_excel(excel, r):
     import warnings
@@ -139,7 +140,7 @@ def test_postgres(dicc):
     except Exception as e:
         print ('Connection postgres: ' + str(e))
         return {"result": False}
-
+    
 def test_sqlserver(dicc):
     try:
         conn = pymssql.connect(dicc['server-sql-server'], dicc['username-sql-server'], dicc['password-sql-server'], dicc['db-sql-server'], tds_version = dicc["tds-version-sql-server"])

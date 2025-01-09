@@ -1336,3 +1336,9 @@ msgstr "Devuelve una colección de polígonos sin atributos. Si la geometría so
 
 msgid "Preserve FID"
 msgstr "Preservar FID"
+
+msgid "Statistics"
+msgstr "Estadísticas"
+
+msgid "Numeric attribute"
+msgstr "Atributo numérico"
