@@ -137,8 +137,8 @@ def check_version(request):
             
             if (use_versions and featid and version and operation != 1):
                 validation.check_feature_version(con, schema, table, featid, version)
-    except HttpException:
-        raise
+    except HttpException as exc:
+        return HttpResponse(exc.msg, content_type='text/plain', status=exc.code)
     except Exception:
         logger.exception("Error checking feature version")
         code = 400
