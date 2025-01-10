@@ -115,6 +115,9 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
 	var self = this;
 	var resourceList = $('#resources-list');
 	var resources = this.getFeatureResources(feature);
+	if (resources == null) {
+		return;
+	}
 	for (var i=0; i<resources.length; i++) {
 		var resource = '';
 		resource += '<div class="box box-default">';
