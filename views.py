@@ -1296,7 +1296,7 @@ def project_get_conf(request):
                 logger.debug(str(user_roles))
                 return JsonResponse({"status": "error", "message": "Token missing or expired"}, status=401)
     if is_shared_view:
-        view_name = request.POST.get('shared_view_name')
+        view_name = request.GET.get('shared_view_name')
         shared_view = SharedView.objects.get(name__exact=view_name)
         state = json.loads(shared_view.state)
 
