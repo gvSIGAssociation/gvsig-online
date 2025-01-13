@@ -4038,6 +4038,7 @@ def external_layer_add(request):
 
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
+                params['tilematrix'] = request.POST.get('tilematrix')
                 params['capabilities'] = request.POST.get('capabilities')
 
             if external_layer.type == 'Bing':
@@ -4167,6 +4168,7 @@ def external_layer_update(request, external_layer_id):
 
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
+                params['tilematrix'] = request.POST.get('tilematrix')
                 params['capabilities'] = request.POST.get('capabilities')
 
             if external_layer.type == 'Bing':
@@ -4284,6 +4286,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     title = ''
     crs_list = None
     get_map_url = url
+    matrix = {}
 
     auth = Authentication(verify=False)
     try:
@@ -4366,6 +4369,20 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 for matrixset in lyr.tilematrixsets:
                     if not matrixset in matrixsets:
                         matrixsets.append(matrixset)
+                        
+                    if hasattr(lyr, 'tilematrixsetlinks') and lyr.tilematrixsetlinks and lyr.tilematrixsetlinks[matrixset]:
+                        tilematrixsetlinks = lyr.tilematrixsetlinks[matrixset]
+                        if hasattr(tilematrixsetlinks, 'tilematrixlimits'):
+                            tilematrixlimits = tilematrixsetlinks.tilematrixlimits
+                            if tilematrixlimits and isinstance(tilematrixlimits, dict):
+                                matrix[matrixset] = get_json_tilematrix(tilematrixlimits)
+                    
+                    if len(matrix) == 0 and hasattr(wmts, 'tilematrixsets') and wmts.tilematrixsets and wmts.tilematrixsets[matrixset]:
+                        tilematrixset = wmts.tilematrixsets[matrixset]
+                        if hasattr(tilematrixset, 'tilematrix'):
+                            tilematrix = tilematrixset.tilematrix
+                            if tilematrix and isinstance(tilematrix, dict):
+                                matrix[matrixset] = get_json_tilematrix(tilematrix)
 
                 for style_name in lyr.styles:
                     style = lyr.styles[style_name]
@@ -4395,10 +4412,47 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         'matrixsets': matrixsets,
         'capabilities': capabilities,
         'crs_list': crs_list,
-        'get_map_url': get_map_url
+        'get_map_url': get_map_url,
+        'tilematrix' : matrix 
     }
 
     return data
+
+
+def get_json_tilematrix(matrix):
+    id = None
+    mincol = 0
+    minrow = 0
+    maxcol = None
+    maxrow = None
+    result = []
+    for i in matrix:
+        level = matrix[i]
+        if hasattr(level, 'identifier'):
+            id = level.identifier
+        elif hasattr(level, 'tilematrix'):
+            id = level.tilematrix
+        if hasattr(level, 'matrixheight') and hasattr(level, 'matrixwidth'):
+            maxcol = level.matrixheight - 1
+            maxrow = level.matrixwidth - 1
+        elif hasattr(level, 'mintilerow') and hasattr(level, 'mintilecol'):
+            mincol = level.mintilecol
+            minrow = level.mintilerow
+            maxcol = level.maxtilecol
+            maxrow = level.maxtilerow
+        
+        # result.append({
+        #     'id': id,
+        #     'mincol': mincol,
+        #     'minrow': minrow,
+        #     'maxcol': maxcol,
+        #     'maxrow': maxrow
+        # })
+        result.append(id)
+
+    return result
+
+
 
 @require_GET
 def get_capabilities(request):

@@ -107,11 +107,17 @@
 								</div>
 								<div class="row layers-control wmts-control">
 									<div class="col-md-12 form-group">
-										<label for="id_format">{% trans "MatrixSet" %}</label>
+										<label for="id_matrixset">{% trans "MatrixSet" %}</label>
 										{{ form.matrixset }}
 									</div>
 									<div class="col-md-9 form-group">
 										<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>
+									</div>
+								</div>
+								<div class="row layers-control wmts-control hidden">
+									<div class="col-md-12 form-group">
+										<label for="id_tilematrix">{% trans "Tilematrix" %}</label>
+										{{ form.tilematrix }}
 									</div>
 								</div>
 								<div class="row layers-control bing-control xyz-control osm-control">
@@ -295,7 +301,8 @@ $(document).ready(function(){
 		}
 	}
 
-	$("#id_matrixset").on('change', function(){
+	$("#id_matrixset").on('change', function(e) {
+		$('#id_tilematrix').find("option:contains(" + e.target.value + ")").attr('selected', 'selected');
 		showAlertMatrix();
 	})
 
@@ -370,7 +377,7 @@ $(document).ready(function(){
 					}).appendTo('form');
 				}
 
-				 if('layers' in data){
+				if('layers' in data){
 					$("#id_layers").empty();
 					$("#id_layers").append('<option value="empty" selected>' + gettext('You must select a layer') + '</option>');
 					var layers = data['layers'];
@@ -383,41 +390,56 @@ $(document).ready(function(){
 					}
 				}
 
-				 if('formats' in data){
-					 $("#id_format").empty();
-						var layers = data['formats'];
-						for(var i=0;i<layers.length; i++){
-		 					if(layers[i] == format_or){
-								$("#id_format").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
-							}else{
-		 						$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
-							}
+				if('formats' in data){
+					$("#id_format").empty();
+					var layers = data['formats'];
+					for(var i=0;i<layers.length; i++){
+						if(layers[i] == format_or){
+							$("#id_format").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+						}else{
+							$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 						}
 					}
+				}
 
-				 if('infoformats' in data){
-					 $("#id_infoformat").empty();
-						var layers = data['infoformats'];
-						for(var i=0;i<layers.length; i++){
-		 					if(layers[i] == infoformat_or){
-								$("#id_infoformat").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
-							}else{
-		 						$("#id_infoformat").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
-							}
+				if('infoformats' in data){
+					$("#id_infoformat").empty();
+					var layers = data['infoformats'];
+					for(var i=0;i<layers.length; i++){
+						if(layers[i] == infoformat_or){
+							$("#id_infoformat").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+						}else{
+							$("#id_infoformat").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 						}
 					}
+				}
 
-				 if(type == "WMTS" && 'matrixsets' in data){
-					 $("#id_matrixset").empty();
-						var layers = data['matrixsets'];
-						for(var i=0;i<layers.length; i++){
-		 					if(layers[i] == matrixset){
-								$("#id_matrixset").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
-							}else{
-		 						$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
-							}
+				let matrixsetSelected = null
+				if(type == "WMTS" && 'matrixsets' in data){
+					$("#id_matrixset").empty();
+					var layers = data['matrixsets'];
+					for(var i=0;i<layers.length; i++){
+						if(layers[i] == matrixset){
+							$("#id_matrixset").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+						}else{
+							$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 						}
 					}
+					matrixsetSelected = layers[0]
+				}
+
+				
+				if(type == "WMTS" && 'tilematrix' in data){
+					$("#id_tilematrix").empty();
+					var tilematrix = data['tilematrix'];
+					for(let i in tilematrix){
+						if(tilematrix[i] == matrixsetSelected){
+							$("#id_tilematrix").append('<option value="' + tilematrix[i] + '" select>' + i + '</option>');
+						}else{
+							$("#id_tilematrix").append('<option value="' + tilematrix[i] + '">' + i + '</option>');
+						}
+					}
+				}
 
 				 if(edit_version && 'version' in data){
 					 var version = data['version'];
@@ -444,6 +466,7 @@ $(document).ready(function(){
 							version = $("#id_version option:selected").val();
 							layer = $("#id_layers option:selected").val();
 							matrixset = $("#id_matrixset option:selected").val();
+							tilematrix = $("#id_tilematrix option:selected").val();
 							format_or = $("#id_format option:selected").val();
 
 							getNewLayersFromCapabilities(url, type, version, layer, false);
@@ -456,6 +479,7 @@ $(document).ready(function(){
 							version = $("#id_version option:selected").val();
 							layer = $( this ).val();
 							matrixset = $("#id_matrixset option:selected").val();
+							tilematrix = $("#id_tilematrix option:selected").val();
 							format_or = $("#id_format option:selected").val();
 
 							$('#id_layers option[value="'+layer+'"]').prop('selected', true);
