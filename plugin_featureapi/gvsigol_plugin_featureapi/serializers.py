@@ -1368,6 +1368,7 @@ class LayerSerializer(serializers.ModelSerializer):
     external_layers = serializers.SerializerMethodField('get_external_layers_')
     image_type = serializers.SerializerMethodField('get_image_type_')
     external_tilematrixset = serializers.SerializerMethodField('get_external_tilematrixset_')
+    external_tilematrix = serializers.SerializerMethodField('get_external_tilematrix_')
     workspace = serializers.SerializerMethodField('get_layer_workspace_')
     writable = serializers.SerializerMethodField('is_writable')
     service_version = serializers.SerializerMethodField('get_external_service_version')
@@ -1395,6 +1396,14 @@ class LayerSerializer(serializers.ModelSerializer):
             return params['matrixset']
         except Exception:
             pass
+
+    def get_external_tilematrix_(self, obj):
+        try:
+            params = json.loads(obj.external_params)
+            return params['tilematrix']
+        except Exception:
+            pass
+
     def get_external_service_version(self, obj):
         try:
             params = json.loads(obj.external_params)
@@ -1457,7 +1466,7 @@ class LayerSerializer(serializers.ModelSerializer):
         model = Layer
         fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'created_by', 
                   'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 
-                  'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'external', 'service_version', 
+                  'external_url', 'external_tilematrixset', 'external_tilematrix', 'workspace', 'image_type', 'writable', 'external', 'service_version', 
                   'native_srs', 'time_enabled']
 
 
