@@ -4376,13 +4376,15 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                             tilematrixlimits = tilematrixsetlinks.tilematrixlimits
                             if tilematrixlimits and isinstance(tilematrixlimits, dict):
                                 matrix[matrixset] = get_json_tilematrix(tilematrixlimits)
-                    
+                                #print("Tile matrix LINK: " + matrixset + " @ " + str(matrix[matrixset]))
+
                     if len(matrix) == 0 and hasattr(wmts, 'tilematrixsets') and wmts.tilematrixsets and wmts.tilematrixsets[matrixset]:
                         tilematrixset = wmts.tilematrixsets[matrixset]
                         if hasattr(tilematrixset, 'tilematrix'):
                             tilematrix = tilematrixset.tilematrix
                             if tilematrix and isinstance(tilematrix, dict):
                                 matrix[matrixset] = get_json_tilematrix(tilematrix)
+                                #print("Tile matrix:" + str(matrix[matrixset]))
 
                 for style_name in lyr.styles:
                     style = lyr.styles[style_name]
