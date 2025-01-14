@@ -526,7 +526,7 @@ $(document).ready(function(){
 					$("#id_tilematrix").empty();
 					var tilematrix = data['tilematrix'];
 					for(let i in tilematrix){
-						if(tilematrix[i] == matrixsetSelected) {
+						if(i == matrixsetSelected) {
 							$("#id_tilematrix").append('<option value="' + tilematrix[i] + '" select>' + i + '</option>');
 						} else {
 							$("#id_tilematrix").append('<option value="' + tilematrix[i] + '">' + i + '</option>');
