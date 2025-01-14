@@ -505,28 +505,30 @@ $(document).ready(function(){
 					}
 
 				let matrixsetSelected = null
-				if(type == "WMTS" && 'matrixsets' in data){
+				if(type == "WMTS" && 'matrixsets' in data) {
 					 $("#id_matrixset").empty();
-						var layers = data['matrixsets'];
-						for(var i=0;i<layers.length; i++){
-							if(layers[i] == matrixset){
-
-								$("#id_matrixset").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
-							}else{
-		 						$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
-							}
-						}
+					var layers = data['matrixsets'];
+					if(layers.length > 0) {
 						matrixsetSelected = layers[0]
-						showAlertMatrix();
+					}
+					for(var i=0;i<layers.length; i++) {
+						if(layers[i] == matrixset) {
+							matrixsetSelected = layers[i]
+							$("#id_matrixset").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
+						} else {
+							$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+						}
+					}
+					showAlertMatrix();
 				}
 
-				if(type == "WMTS" && 'tilematrix' in data){
+				if(type == "WMTS" && 'tilematrix' in data) {
 					$("#id_tilematrix").empty();
 					var tilematrix = data['tilematrix'];
 					for(let i in tilematrix){
-						if(tilematrix[i] == matrixsetSelected){
+						if(tilematrix[i] == matrixsetSelected) {
 							$("#id_tilematrix").append('<option value="' + tilematrix[i] + '" select>' + i + '</option>');
-						}else{
+						} else {
 							$("#id_tilematrix").append('<option value="' + tilematrix[i] + '">' + i + '</option>');
 						}
 					}
