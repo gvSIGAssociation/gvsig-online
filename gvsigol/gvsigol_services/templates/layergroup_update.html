@@ -124,7 +124,7 @@
 			<div class="box-body">
 				<div id="toc" class="toc">
 					{% for layer in layers %}
-					<div data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default collapsed-box toc-layergroup layer-item" style="border-top: none;">
+					<div data-layerid="{{layer.id}}" data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default collapsed-box toc-layergroup layer-item" style="border-top: none;">
 						<div class="box-header">
 							<div class="handle">
 								<span class="" style="margin-right: 20px;">
@@ -389,7 +389,7 @@
 			$('#toc').val("");
 			var isFirst = true;
 			$(".layer-item").each(function(){
-				var value = $(this).attr("data-name");
+				var value = $(this).attr("data-layerid");
 				if(!isFirst){
 					$('#toc').val($('#toc').val()+',');
 				}

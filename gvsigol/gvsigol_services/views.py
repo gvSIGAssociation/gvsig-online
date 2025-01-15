@@ -2237,15 +2237,14 @@ def layergroup_add_with_project(request, project_id):
 
 def layergroup_mapserver_toc(group, toc_string):
     if toc_string != None or toc_string != '':
-        toc_array = toc_string.split(',')
-        layers_array = {}
-        i=0
-        toc_array = toc_array[::-1]
+        layer_ids = toc_string.split(',')
+        layer_ids = layer_ids[::-1]
+        layers_dict = {}
         last = None
-        for toc_entry in toc_array:
-            layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id).order_by('order')
-            for layer in layers:
-                #if not layer.external:
+        i=0
+        for layer_id in layer_ids:
+            try:
+                layer = Layer.objects.get(id=int(layer_id))
                 layer_json = {
                     'name': layer.name,
                     'title': layer.title,
@@ -2254,22 +2253,24 @@ def layergroup_mapserver_toc(group, toc_string):
                 layer.order = i
                 layer.save()
                 i = i + 1
-                layers_array[layer.name] = layer_json
+                
                 if not layer.external:
+                    layers_dict[layer.name] = layer_json
                     last = layer
+            except:
+                logger.exception("Getting layer to update layer group order")
 
-        toc_object = {
-            'name': group.name,
-            'title': group.title,
-            'order': 1000,
-            'layers': layers_array
+        if len(layers_dict)> 0:
+            toc_object = {
+                'name': group.name,
+                'title': group.title,
+                'order': 1000,
+                'layers': layers_dict
 
-        }
+            }
 
-        toc={}
-        toc[group.name] = toc_object
-
-        if last:
+            toc={}
+            toc[group.name] = toc_object
             gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
             gs.createOrUpdateSortedGeoserverLayerGroup(toc)
             gs.set_gwclayer_dynamic_subsets(None, group.name)
@@ -2323,9 +2324,8 @@ def _layergroup_update(request, lgid, project_id):
         layergroup.visible = visible
         layergroup.save()
         utils.set_layergroup_permissions(layergroup, assigned_includeinprojects_roles, assigned_manage_roles)
-        core_utils.toc_update_layer_group(layergroup, old_name, name, title)
-
         layergroup_mapserver_toc(layergroup, toc)
+        core_utils.toc_update_layer_group(layergroup, old_name, name, title)
         layer_group_cache_clear(layergroup)
 
         if redirect_var == 'project-layergroup-list':

@@ -16,7 +16,7 @@ def get_json_toc(apps, project_layergroups, base_group=None, layergroup_order={}
     order_dict = {}
     for lg in layergroup_order.values():
         if lg.get('order') is not None:
-            order_dict[lg.get('id')] = lg.get('order')
+            order_dict[lg.get('name')] = lg.get('order')
 
 
     for lg in project_layergroups:
@@ -25,13 +25,13 @@ def get_json_toc(apps, project_layergroups, base_group=None, layergroup_order={}
         if base_group == layer_group.id:
             order = 500
         else:
-            order = order_dict.get(str(layer_group.id), group_count * 1000)
+            order = order_dict.get(layer_group.name, group_count * 1000)
         toc_layergroup['name'] = layer_group.name
         toc_layergroup['title'] = layer_group.title
         toc_layergroup['order'] = order
         
         toc_layers = {}
-        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id)
+        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id).order_by("order")
         layer_count = 1
         for l in layers_in_group: 
             toc_layers[l.name] = {
