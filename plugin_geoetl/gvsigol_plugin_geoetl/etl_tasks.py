@@ -922,6 +922,16 @@ def output_Postgis(dicc):
                             )
                     cur.execute(sqlTruncate)
                     con_source.commit()
+                    
+                elif dicc['operation'] == 'APPEND':
+                    sqlCreate = sql.SQL('create table IF NOT EXISTS {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
+                        sch_target = sql.Identifier(esq),
+                        tbl_target = sql.Identifier(tab),
+                        sch_source = sql.Identifier(GEOETL_DB["schema"]),
+                        tbl_source = sql.Identifier(table_name_source))
+                    
+                    cur.execute(sqlCreate)
+                    con_source.commit()      
 
                 sqlDatetype = 'SELECT column_name from information_schema.columns '
                 sqlDatetype += "where table_schema = %s and table_name = %s "
@@ -2020,6 +2030,8 @@ def trans_Union(dicc):
 
     st_multi_start = ''
     st_multi_end = ''
+    st_line_start = ''
+    st_line_end = ''
 
     if multi == 'true':
         st_multi_start = 'ST_Multi('
@@ -2040,6 +2052,12 @@ def trans_Union(dicc):
     
     cur.execute(sqlIndex)
     conn.commit()
+    
+    srid_prev, type_geom_prev = get_type_n_srid(table_name_source)
+    
+    if 'LINESTRING' in  type_geom_prev:
+        st_line_start = 'ST_LineMerge('
+        st_line_end = ')'
 
     if groupby == '-':
         sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select ST_Union(wkb_geometry) as wkb_geometry from {schema}.{tbl_source});').format(
@@ -2050,14 +2068,16 @@ def trans_Union(dicc):
         cur.execute(sqlDup)
         conn.commit()
     else:
-        sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select {groupby}, {start} ST_Union(wkb_geometry) {end} as wkb_geometry from {schema}.{tbl_source} GROUP BY {groupby});').format(
+        sqlDup = sql.SQL('create table {schema}.{tbl_target} as (select {groupby}, {start} {lstart} ST_Union(wkb_geometry) {lend} {end} as wkb_geometry from {schema}.{tbl_source} GROUP BY {groupby});').format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
             tbl_source = sql.Identifier(table_name_source),
             groupby = sql.Identifier(groupby),
             start = sql.SQL(st_multi_start),
-            end = sql.SQL(st_multi_end))
-
+            end = sql.SQL(st_multi_end),
+            lstart = sql.SQL(st_line_start),
+            lend = sql.SQL(st_line_end))
+        
         cur.execute(sqlDup)
         conn.commit()
         
@@ -5597,6 +5617,98 @@ def trans_Stats(dicc):
 
     cur.execute(sqlCreate)
     conn.commit()   
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+def trans_LineEndPoints(dicc):
+    import psycopg2
+    from psycopg2 import sql
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+    
+    conn = psycopg2.connect(
+        user=GEOETL_DB["user"],
+        password=GEOETL_DB["password"],
+        host=GEOETL_DB["host"],
+        port=GEOETL_DB["port"],
+        database=GEOETL_DB["database"]
+    )
+    cur = conn.cursor()
+
+    # Eliminar la tabla de destino si existe
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target)
+    )
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlCreate = sql.SQL("""
+        CREATE TABLE {}.{} AS
+        SELECT *,
+            ROUND(ST_X(ST_StartPoint("wkb_geometry"))::NUMERIC, 3) AS _xini,
+            ROUND(ST_Y(ST_StartPoint("wkb_geometry"))::NUMERIC, 3) AS _yini,
+            ROUND(ST_X(ST_EndPoint("wkb_geometry"))::NUMERIC, 3) AS _xend,
+            ROUND(ST_Y(ST_EndPoint("wkb_geometry"))::NUMERIC, 3) AS _yend
+        FROM {}.{};
+    """).format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target),
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_source)
+    )
+
+    cur.execute(sqlCreate)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+
+def trans_CalcLength(dicc):
+    import psycopg2
+    from psycopg2 import sql
+
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+    
+    conn = psycopg2.connect(
+        user=GEOETL_DB["user"],
+        password=GEOETL_DB["password"],
+        host=GEOETL_DB["host"],
+        port=GEOETL_DB["port"],
+        database=GEOETL_DB["database"]
+    )
+    cur = conn.cursor()
+
+    # Eliminar la tabla de destino si existe
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target)
+    )
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    sqlCreate = sql.SQL("""
+        CREATE TABLE {}.{} AS
+        SELECT *,
+            ROUND(ST_Length("wkb_geometry")::NUMERIC, 3) AS _length
+        FROM {}.{};
+    """).format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target),
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_source)
+    )
+
+    cur.execute(sqlCreate)
+    conn.commit()
 
     conn.close()
     cur.close()

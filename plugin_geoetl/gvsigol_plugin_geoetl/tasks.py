@@ -179,7 +179,7 @@ def run_canvas_background(**kwargs):
                                                     if '@@'+key+'@@' in parameters[key2][x]:
                                                         parameters[key2][x] = parameters[key2][x].replace('@@'+key+'@@', str(json_user_params[key]))
                                             else:
-                                                if '@@'+key+'@@' in parameters[key2]:
+                                                if '@@'+key+'@@' in str(parameters[key2]):
                                                     parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))
 
                             print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
