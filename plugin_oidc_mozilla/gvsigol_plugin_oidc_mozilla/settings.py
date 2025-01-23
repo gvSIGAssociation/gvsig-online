@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from xmlrpc.client import boolean
 import environ
-import os
 import logging
 
 
