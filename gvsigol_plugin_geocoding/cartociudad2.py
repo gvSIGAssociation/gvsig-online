@@ -29,18 +29,17 @@ class CartoCiudad2():
     
     def __init__(self, provider):
         self.urls = settings.GEOCODING_PROVIDER['new_cartociudad']
-
-        cartociudad_providers = Provider.objects.filter(type = 'new_cartociudad')
-
-        for cc_provider in cartociudad_providers:
-            cc_provider_params = json.loads(cc_provider.params)
-            postal_code = cc_provider_params['cod_postal_filter']
-            limit_ = cc_provider_params['max_results']
+        provider_params = json.loads(provider.params)
+        self.postal_codes = provider_params.get('cod_postal_filter', '')
+        self.poblacion_filter = provider_params.get('poblacion_filter')
+        self.municipio_filter = provider_params.get('municipio_filter')
+        self.provincia_filter = provider_params.get('provincia_filter')
+        self.comunidad_autonoma_filter = provider_params.get('comunidad_autonoma_filter')
         
-        self.postal_codes = postal_code
-        self.limit = limit_
-        self.providers=[]
-        self.append(provider)
+        self.limit = provider_params.get('max_results')
+        self.providers=[
+            provider
+        ]
         self.category = provider.category
         
     
@@ -65,6 +64,14 @@ class CartoCiudad2():
             'limit': self.limit,
             'cod_postal_filter': self.postal_codes
         }
+        if self.poblacion_filter:
+            params['poblacion_filter'] = self.poblacion_filter
+        if self.municipio_filter:
+            params['municipio_filter'] = self.municipio_filter
+        if self.provincia_filter:
+            params['provincia_filter'] = self.provincia_filter
+        if self.comunidad_autonoma_filter:
+            params['provincia_filter'] = self.comunidad_autonoma_filter
 
         if self.providers.__len__() > 0 :
             provider = self.providers[0]
