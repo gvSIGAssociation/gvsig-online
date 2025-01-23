@@ -46,10 +46,10 @@ class GeocoderPostgres():
 
     def __del__(self):
         for p in self.providers:
-            if p.conn is not None:
+            if p.connection is not None:
                 p.cursor.close()
-                p.conn.close()
-                p.conn = None
+                p.connection.close()
+                p.connection = None
 
     def get_type(self):
         return 'postgres'
