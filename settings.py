@@ -421,7 +421,7 @@ OIDC_VERIFY_SSL = env('OIDC_VERIFY_SSL')
 
 if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
     _insert_at = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1
-    MIDDLEWARE.insert(_insert_at, 'mozilla_django_oidc.middleware.SessionRefresh')
+    MIDDLEWARE.insert(_insert_at, 'gvsigol_plugin_oidc_mozilla.middleware.GvsigolSessionRefresh')
 
 # Internationalization
 LANGUAGE_CODE = 'es'

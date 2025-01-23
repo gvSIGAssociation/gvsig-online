@@ -249,7 +249,7 @@ AUTH_DASHBOARD_UI = ("##AUTH_DASHBOARD_UI##" != 'False')
 AUTH_READONLY_USERS = ("##AUTH_READONLY_USERS##" != 'False')
 if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
     _insert_at = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1
-    MIDDLEWARE.insert(_insert_at, 'mozilla_django_oidc.middleware.SessionRefresh')
+    MIDDLEWARE.insert(_insert_at, 'gvsigol_plugin_oidc_mozilla.middleware.GvsigolSessionRefresh')
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
