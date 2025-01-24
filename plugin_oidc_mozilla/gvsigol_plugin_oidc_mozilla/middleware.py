@@ -5,7 +5,7 @@ LOGGER = logging.getLogger(__name__)
 
 class GvsigolSessionRefresh(SessionRefresh):
     def __init__(self, *args, **kwargs):
-        super(SessionRefresh, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def process_request(self, request):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
