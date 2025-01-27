@@ -924,14 +924,14 @@ def output_Postgis(dicc):
                     con_source.commit()
                     
                 elif dicc['operation'] == 'APPEND':
-                    sqlCreate = sql.SQL('create table IF NOT EXISTS {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
+                    sqlCreate = sql.SQL('create table IF NOT EXISTS  {sch_target}.{tbl_target} as (select * from {sch_source}.{tbl_source})').format(
                         sch_target = sql.Identifier(esq),
                         tbl_target = sql.Identifier(tab),
                         sch_source = sql.Identifier(GEOETL_DB["schema"]),
                         tbl_source = sql.Identifier(table_name_source))
-                    
+
                     cur.execute(sqlCreate)
-                    con_source.commit()      
+                    con_source.commit()
 
                 sqlDatetype = 'SELECT column_name from information_schema.columns '
                 sqlDatetype += "where table_schema = %s and table_name = %s "
@@ -4298,7 +4298,10 @@ def crea_Grid(dicc):
 def trans_ExposeAttr(dicc):
 
     attr = dicc['attr']
-    schemaList = dicc['schema']
+    schemaListDups = dicc['schema']
+    
+    schemaList = []
+    [schemaList.append(x) for x in schemaListDups if x not in schemaList]
 
 
     table_name_source = dicc['data'][0]
