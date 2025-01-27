@@ -385,7 +385,6 @@ gvsigolETL.Toolbar = Class.extend({
 							if (parameters[0][key]){
 
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') && !key.includes('option') ){
-
 									if ( typeof schemaold !== 'undefined'){
 
 										if (Array.isArray(schemaold[multiIn])){

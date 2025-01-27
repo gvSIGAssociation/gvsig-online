@@ -177,7 +177,14 @@ def run_canvas_background(**kwargs):
                                             if isinstance(parameters[key2], list):
                                                 for x in range (0, len(parameters[key2])):
                                                     if '@@'+key+'@@' in parameters[key2][x]:
-                                                        parameters[key2][x] = parameters[key2][x].replace('@@'+key+'@@', str(json_user_params[key]))
+                                                        if isinstance(parameters[key2][x], list):
+                                                            parameters[key2][x] = [
+                                                                item.replace('@@' + key + '@@', str(json_user_params[key]))
+                                                                if isinstance(item, str) else item
+                                                                for item in parameters[key2][x]
+                                                            ]
+                                                        else:
+                                                            parameters[key2][x] = parameters[key2][x].replace('@@' + key + '@@', str(json_user_params[key]))
                                             else:
                                                 if '@@'+key+'@@' in str(parameters[key2]):
                                                     parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))

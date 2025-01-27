@@ -3695,7 +3695,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
                             '<div class="column80">'+
                                 '<label form="schema" class="col-form-label">'+gettext('Schema:')+'</label>'+
-                                '<select id="schema-name-'+ID+'" class="form-control"></select>'+
+                                '<select id="schema-name-'+ID+'" class="form-control" select2" multiple="false"></select>'+
                             '</div>'+
 
                             '<div class="column20">'+
@@ -3705,7 +3705,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
                             '<div class="column80">'+
                                 '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<select id="tablename-'+ID+'" class="form-control"></select>'+
+                                '<select id="tablename-'+ID+'" class="form-control select2" multiple="false"></select>'+
                             '</div>'+
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
@@ -3724,6 +3724,12 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+        $('#dialog-input-postgis-'+ID).on('shown.bs.modal', function () {
+
+
+
+        });
 
 
         for(i=0;i<dbc.length;i++){
@@ -3788,7 +3794,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             var paramsGetSchemas = {"id": ID,
             "parameters": [
                 {"db": $('#db-'+ID).val(),
-                "schema-name": $('#schema-name-'+ID).val()}
+                "schema-name": $('#schema-name-'+ID).val()[0]}
             ]}
 
             var formDataGetSchemas = new FormData();
@@ -3844,6 +3850,36 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 );
             }
 
+            $("#tablename-"+ID).select2({
+                tags: true,
+                placeholder: "Select or type a table name",
+                width: '100%',
+                allowClear: true
+            });
+
+            $("#tablename-"+ID).on("select2:selecting", function (e) {
+                $(this).val(null).trigger('change');
+                const selectedValue = e.params.args.data.id; // Valor seleccionado
+                if (!get_tbl.includes(selectedValue)) {
+                    get_tbl.push(selectedValue); // Añade el valor seleccionado a la lista si no está
+                }
+            });
+
+            $("#schema-name-"+ID).select2({
+                tags: true,
+                placeholder: "Select or type a schema name",
+                width: '100%',
+                allowClear: true
+            });
+
+            $("#schema-name-"+ID).on("select2:selecting", function (e) {
+                $(this).val(null).trigger('change');
+                const selectedValue = e.params.args.data.id; // Valor seleccionado
+                if (!get_sch.includes(selectedValue)) {
+                    get_sch.push(selectedValue); // Añade el valor seleccionado a la lista si no está
+                }
+            });
+
             optionList = []
             $('#db-'+ID+' option').each(function() {
                 optionList.push($(this).val())
@@ -3880,8 +3916,8 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 {"get_schema-name": get_sch,
                 "get_tablename": get_tbl,
                 "db": $('#db-'+ID).val(),
-                "schema-name": $('#schema-name-'+ID).val(),
-                "tablename": $('#tablename-'+ID).val(),
+                "schema-name": $('#schema-name-'+ID).val()[0],
+                "tablename": $('#tablename-'+ID).val()[0],
                 "checkbox": $("#checkbox-"+ID).val(),
                 "clause": $('#clause-'+ID).val()}
             ]}
@@ -11334,31 +11370,29 @@ trans_Difference = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (Array.isArray(schemaEdge[0])){
+                if (Array.isArray(schemaEdge)){
                     schemaMod = schemaEdge[0]
                 }
                 else{
                     schemaMod = [...schemaEdge]
                 }
 
+                var paramsDiff = {"id": ID,
+                    "parameters": [
+                    {"schema": schemaMod}
+                ]}
+    
+                paramsDiff['schema-old'] = schemaEdge
+                paramsDiff['schema'] = schemaMod
+    
+                passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+    
+                isAlreadyInCanvas(jsonParams, paramsDiff, ID)
+    
+                icon.setColor('#4682B4')
+
             },100);
             
-
-            var paramsDiff = {"id": ID,
-            "parameters": [
-            {"schema": schemaMod}
-            ]}
-
-            paramsDiff['schema-old'] = schemaEdge
-            paramsDiff['schema'] = schemaMod
-
-
-            passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
-
-            isAlreadyInCanvas(jsonParams, paramsDiff, ID)
-
-            icon.setColor('#4682B4')
-
         });
 
 
@@ -11784,8 +11818,8 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<label form="attr" class="col-form-label">'+gettext("Attribute to keep:")+'</label>'+
-                            '<select class="form-control" size = "8" multiple id="attr-'+ID+'"> </select>'+
+                            '<label for="attr" class="col-form-label">'+gettext("Attribute to keep:")+'</label>'+
+                            '<select class="form-control" size="8" multiple id="attr-'+ID+'"> </select>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -11794,7 +11828,9 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                 '</div>'+
             '</div>'+
-        '</div>')
+        '</div>');
+    
+        
 
       var context = this
 
@@ -11820,6 +11856,14 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                     for (i = 0; i < schema.length; i++){
                         $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
                     }
+
+                    // Inicializa Select2 con la funcionalidad de "tags"
+                    $('#attr-' + ID).select2({
+                        tags: true, // Permite agregar nuevas opciones
+                        tokenSeparators: [',', ' '], // Define cómo separar opciones (coma o espacio)
+                        placeholder: gettext("Select or type options"), // Placeholder
+                        width: '100%' // Asegura que se ajuste al ancho del contenedor
+                    });
 
                 }
 
