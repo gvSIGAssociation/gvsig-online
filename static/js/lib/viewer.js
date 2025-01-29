@@ -840,13 +840,22 @@ viewer.core = {
 							if (exception[0].getAttribute('code') == 'LayerNotDefined') {
 								messageBox.show("error", "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
 							}
+							else if (exception[0].getAttribute('code') == 'TileOutOfRange' || exception[0].getAttribute('code') == 'InvalidDimensionValue') {
+								image.ignoreTileError = true
+							}
+							else {
+								console.log(exception[0].getAttribute('code'));
+							}
 						}
 					});
 					reader.readAsText(this.response);
+					image.getImage().src = "";
 				}
-				var urlCreator = window.URL || window.webkitURL;
-				var imageUrl = urlCreator.createObjectURL(this.response);
-				image.getImage().src = imageUrl;
+				else {
+					var urlCreator = window.URL || window.webkitURL;
+					var imageUrl = urlCreator.createObjectURL(this.response);
+					image.getImage().src = imageUrl;
+				}
 			};
 			xhr.send();
 		};
@@ -1037,9 +1046,7 @@ viewer.core = {
 				
 				});
 				wmsLayer.getSource().on('tileloaderror', function(e){
-					console.log(e);
-					var aux = self._check_error_is_TileOutOfRange(e.tile);
-					if (aux){
+					if (self._shouldgnoreError(e.tile)) {
 						return;
 					}
 					var iLayer = null;
@@ -1048,11 +1055,11 @@ viewer.core = {
 							if (layer.layer_name === this.layer_name) {
 								iLayer = layer;
 							}
-						}						
-					}, this);								
+						}
+					}, this);
 					if (iLayer) {
 						self._setTileLoadError(true, iLayer);
-					}								
+					}
 				});	
 			}
 
@@ -1090,31 +1097,39 @@ viewer.core = {
 	},
 
 	//check if tile error is caused by a TileOutOfRange
-	_check_error_is_TileOutOfRange: function(tile){
-		var is_tileoutofrange;
+	_shouldgnoreError: function(tile){
+		if (tile.ignoreTileError) {
+			return true;
+		}
+		var ignore = false;
 		var tile_url = tile.getImage().src;
+		var headers;
+		if (self.conf.user && self.conf.user.token) {
+			headers = {
+				"Authorization": "Bearer " + self.conf.user.token
+			}
+		}
+		else {
+			headers = {};
+		}
 		$.ajax({
 			url: tile_url,
 			async: false,
 			timeout: 3000,
 			method: 'GET',
+			xhrFields: { withCredentials: true },
+			headers: headers,
 			//headers: {
 			//	"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
 			//},
 			error: function(error){
-				if (error.responseText && error.responseText.indexOf("TileOutOfRange") == -1){
-					is_tileoutofrange =  false;
-					//TileState.ERROR = 3
-					//tile.setState(3);
-				}else{
-					is_tileoutofrange = true;
+				if (error.responseText && (error.responseText.indexOf("TileOutOfRange") !== -1 || error.responseText.indexOf("InvalidDimensionValue") !== -1)) {
+					ignore = true;
 				}
 			},
-			success: function(resp){
-				is_tileoutofrange = false;
-			}
+			success: function(resp){}
 		});
-		return is_tileoutofrange;		
+		return ignore;		
 	},
 
 	_loadLayerGroups: function() {
