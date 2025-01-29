@@ -837,19 +837,25 @@ viewer.core = {
 						xmlDoc = parser.parseFromString(text, "text/xml");
 						var exception = xmlDoc.getElementsByTagName("ServiceException");
 						if (exception && exception.length>0) {
+							console.log(image.state);
 							if (exception[0].getAttribute('code') == 'LayerNotDefined') {
 								messageBox.show("error", "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
+								image.setStage(ol.Tile.ERROR);
 							}
 							else if (exception[0].getAttribute('code') == 'TileOutOfRange' || exception[0].getAttribute('code') == 'InvalidDimensionValue') {
-								image.ignoreTileError = true
+								image.ignoreTileError = true;
+								image.setStage(ol.Tile.EMPTY);
 							}
 							else {
+								image.setStage(ol.Tile.ERROR);
 								console.log(exception[0].getAttribute('code'));
 							}
+							console.log(image.state);
 						}
 					});
 					reader.readAsText(this.response);
 					image.getImage().src = "";
+					console.log(image.state);
 				}
 				else {
 					var urlCreator = window.URL || window.webkitURL;
