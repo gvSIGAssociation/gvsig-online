@@ -928,7 +928,7 @@ class FeatureSerializer(serializers.Serializer):
                     pass
                 raise HttpException(400, "Feature cannot be deleted. Unexpected error: " + format(e))
 
-    def update(self, validation, lyr_id, data, override, version_to_override):
+    def update(self, validation, lyr_id, data, override, version_to_override, username):
         """
         Update and return a new Feature instance, given the validated data.
         """
@@ -960,6 +960,8 @@ class FeatureSerializer(serializers.Serializer):
                         validation.check_feature_version_for_update(con, schema, table, idfield, feat_id, version_to_override)
                 else:
                     validation.check_feature_version_for_update(con, schema, table, idfield, feat_id, version)
+
+            data = self._add_user_to_props(username, table, schema, con, data)
 
             return_crs = 4326
             geom = data.get('geometry')
@@ -997,10 +999,11 @@ class FeatureSerializer(serializers.Serializer):
                     pass
                 raise HttpException(400, "Feature cannot be updated in database. Unexpected error: " + format(e))
         
-    def create(self, validation, lyr_id, data):
+    def create(self, validation, lyr_id, data, username):
         """
         Create and return a new Feature instance, given the validated data.
         """
+        
         i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
         with i as con: # connection will autoclose
             table_info = con.get_table_info(table, schema=schema)
@@ -1020,6 +1023,8 @@ class FeatureSerializer(serializers.Serializer):
                 data['properties'][settings.VERSION_FIELD] = 1
                 data['properties'][settings.DATE_FIELD] =  "now()"#time.strftime("%Y-%m-%d %H:%M:%S") #datetime.utcnow()
             
+            data = self._add_user_to_props(username, table, schema, con, data)
+
             return_crs = 4326
             try:
                 sql = self._get_sql_insert(table, schema, data['properties'], data['geometry'], table_info, idfield, pk_is_serial, return_crs, con, use_versions=use_versions)
@@ -1053,6 +1058,17 @@ class FeatureSerializer(serializers.Serializer):
                 raise
             except Exception as e:
                 raise HttpException(400, "Feature change cannot be inserted in database. Unexpected error: " + format(e))
+            
+
+    def _add_user_to_props(self, username, table, schema, con, data):
+        fields = con.get_fields(table, schema=schema)
+        #Si los datos tienen el campo modified_by pero este no viene en los datos de entrada se asigna el usuario
+
+        if 'properties' in data and 'modified_by' in fields:
+            data['properties']['modified_by'] = username
+        return data
+        
+
 
     def _check_geom(self, geomjson, con):
         """

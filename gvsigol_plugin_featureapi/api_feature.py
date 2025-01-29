@@ -226,7 +226,8 @@ class FeaturesView(CreateAPIView):
             content = util.get_content(request)
             validation = Validation(request)
             validation.check_create_feature(lyr_id, content)
-            feat = serializers.FeatureSerializer().create(validation, lyr_id, content)
+            username = request.user.username
+            feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -260,7 +261,8 @@ class FeaturesView(CreateAPIView):
                 data = content
             
             validation.check_update_feature(lyr_id, data)
-            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite)
+            username = request.user.username
+            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -437,7 +439,7 @@ class PublicFeaturesView(CreateAPIView):
             content = util.get_content(request)
             validation = Validation(request)
             validation.check_create_feature(lyr_id, content)
-            feat = serializers.FeatureSerializer().create(validation, lyr_id, content)
+            feat = serializers.FeatureSerializer().create(validation, lyr_id, content, None)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -469,7 +471,7 @@ class PublicFeaturesView(CreateAPIView):
                 data = content
             
             validation.check_update_feature(lyr_id, data)
-            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite)
+            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, None)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             return e.get_exception()
