@@ -840,14 +840,14 @@ viewer.core = {
 							console.log(image.state);
 							if (exception[0].getAttribute('code') == 'LayerNotDefined') {
 								messageBox.show("error", "The layer does not exists or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
-								image.setState(3); // ol.Tile.ERROR
+								image.stage = 3; // ol.Tile.ERROR
 							}
 							else if (exception[0].getAttribute('code') == 'TileOutOfRange' || exception[0].getAttribute('code') == 'InvalidDimensionValue') {
 								image.ignoreTileError = true;
-								image.setState(4); // ol.Tile.EMPTY
+								image.state = 4; // ol.Tile.EMPTY
 							}
 							else {
-								image.setState(3); // ol.Tile.ERROR
+								image.stage =3; // ol.Tile.ERROR
 								console.log(exception[0].getAttribute('code'));
 							}
 							console.log(image.state);
