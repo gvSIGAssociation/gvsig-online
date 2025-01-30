@@ -315,7 +315,7 @@ msgstr "Añadir simbolizador de texto"
 
 #: static/js/lib/symbology/Rule.js:126
 msgid "Import from library"
-msgstr "Importar desde lbrería"
+msgstr "Importar desde librería"
 
 #: static/js/lib/symbology/Rule.js:188
 msgid "Rule name"
@@ -391,7 +391,7 @@ msgstr "Es igual a"
 
 #: static/js/lib/symbology/SymbologyUtils.js:72
 msgid "Is null"
-msgstr "Es nul"
+msgstr "Es nulo"
 
 #: static/js/lib/symbology/SymbologyUtils.js:73
 msgid "Contains"
