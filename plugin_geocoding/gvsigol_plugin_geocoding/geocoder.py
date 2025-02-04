@@ -30,6 +30,7 @@ from .nominatim import Nominatim
 from .geocoder_postgres import GeocoderPostgres
 from .ide_uy import IdeUY
 from .icv import icv
+from .uy_sudir import UY_SuDIR
 from .generic import GenericAPI
 import json, ast
 from .models import Provider
@@ -78,9 +79,12 @@ class Geocoder():
             geocoder[provider.type] = GeocoderPostgres(provider)
             self.geocoders.append(geocoder)
             
-            
         if provider.type == 'cartociudad' or provider.type == 'user':
             geocoder['cartociudad'] = Cartociudad(provider, provider.type)
+            self.geocoders.append(geocoder)
+
+        if provider.type == 'uy_sudir':
+            geocoder[provider.type] = UY_SuDIR(provider)
             self.geocoders.append(geocoder)
         
           

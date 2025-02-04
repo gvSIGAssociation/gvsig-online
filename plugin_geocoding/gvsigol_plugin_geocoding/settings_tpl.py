@@ -37,6 +37,7 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('postgres', _('Simple Geocoder')),
                 ('generic', _('Generic API Service Geocoder')),
                 ('icv', _('ICV services')),
+                ('uy_sudir', _('Direcciones Uruguay Geocoder')),
             )
 
 GEOCODING_PROVIDER = {
@@ -86,6 +87,13 @@ GEOCODING_PROVIDER = {
         'candidates_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/candidates',
         'find_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/find',
         'reverse_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/reverse',  
+        'max_results': 10,
+        'filter': ''
+    },
+    'uy_sudir': {
+        'candidates_url': '##DIRECCIONES_IDEUY_URL##/direcciones/geocode/candidates',
+        'find_url': '##DIRECCIONES_IDEUY_URL##/direcciones/geocode/find',
+        'reverse_url': '##DIRECCIONES_IDEUY_URL##/direcciones/geocode/reverse',  
         'max_results': 10,
         'filter': ''
     },
