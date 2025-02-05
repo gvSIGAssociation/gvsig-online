@@ -94,10 +94,10 @@ def config_pk_params(pk_name, pk_field_dbftype, default_creation_options, defaul
 
     if pk_field_dbftype.type == 'N' and pk_field_dbftype.decimal_count == 0 and pk_field_dbftype.length > 9:
         default_creation_options["FID64"] = "TRUE"
-        if major >= 2 or (major == 2 and minor >= 4):
+        if major > 2 or (major == 2 and minor >= 4):
             default_column_types[pk_name] = __quote_identifier_ogr_column_types(pk_name) + "=bigint"
             return 'CAST(' + quote_identifier_ogr(pk_name) + ' AS bigint) as ' + quote_identifier_ogr(pk_name)
-        else:  # not working in v2.4.4 and not testend in versions < 3.4.x
+        else:  # not working in version 1.11 and not tested in versions < 2.4.x
             default_column_types[pk_name] = __quote_identifier_ogr_column_types(pk_name) + "=numeric(" + str(pk_field_dbftype.length) + "," + str(pk_field_dbftype.decimal_count) + ")"
             return 'CAST(' + quote_identifier_ogr(pk_name) + " AS numeric(" + str(pk_field_dbftype.length) + "," + str(pk_field_dbftype.decimal_count) + ") as " + quote_identifier_ogr(pk_name)
 
@@ -105,11 +105,12 @@ def config_geom_params(geom_cols, default_creation_options):
     if len(geom_cols)> 0 and (not 'wkb_geometry' in geom_cols):
         default_creation_options["GEOMETRY_NAME"] = geom_cols[0]
 
-def get_cast(shp_field_def, default_column_types):
+def get_cast(shp_field_def, default_column_types, ogr_version):
+    (major, minor, patch, prerelease) = ogr_version
     if shp_field_def.type == 'N' and shp_field_def.decimal_count == 0:
         if shp_field_def.length <= 9:
             return 'CAST({quoted_name} AS integer) AS {quoted_name}'.format(quoted_name=quote_identifier_ogr(shp_field_def.name))
-        elif shp_field_def.length > 9 and shp_field_def.length <= 19:
+        elif (shp_field_def.length > 9 and shp_field_def.length <= 19) and (major > 2 or (major == 2 and minor >= 4)):   # not working in version 1.11 and not tested in versions < 2.4.x
             return 'CAST({quoted_name} AS bigint) AS {quoted_name}'.format(quoted_name=quote_identifier_ogr(shp_field_def.name))
         else:
             default_column_types[shp_field_def.name] = __quote_identifier_ogr_column_types(shp_field_def.name) + "=numeric(" + str(shp_field_def.length) + "," + str(shp_field_def.decimal_count) + ")"
@@ -119,14 +120,15 @@ def get_cast(shp_field_def, default_column_types):
 
 def _creation_fieldmapping(shp_fields, default_creation_options, default_column_types, pk_column):
     fields = []
+    ogr_version = gdaltools.ogr2ogr().get_version_tuple()
     for shp_field_def in shp_fields:
         if shp_field_def.name == pk_column:
             cast = config_pk_params(pk_column, shp_field_def, default_creation_options, default_column_types)
             if not cast:
-                cast = get_cast(shp_field_def, default_column_types)
+                cast = get_cast(shp_field_def, default_column_types, ogr_version)
             fields.append(cast)
         else:
-            cast = get_cast(shp_field_def, default_column_types)
+            cast = get_cast(shp_field_def, default_column_types, ogr_version)
             fields.append(cast)
     return fields
 
