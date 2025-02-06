@@ -333,15 +333,29 @@ class Validation():
         raise HttpException(403,  "The layer is not allowed to this user")
                    
     def check_create_feature(self, lyr_id, content):
-        self.check_edit_permission(lyr_id)
+        con, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+        with con as c:
+            idfield = util.get_layer_pk_name(c, schema, table)
+            try:
+                feat_id = content['properties'][idfield]
+                self.check_edit_feature_permission(lyr_id, feat_id)
+            except:
+                logger.exception("Error checking feature permissions")
+                raise HttpException(403, "The user does not have permission to write this feature or layer")
+
         self.check_feature(content)
         
     def check_update_feature(self, lyr_id, content):
-        self.check_edit_permission(lyr_id)
         con, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
-        idfield = util.get_layer_pk_name(con, schema, table)
-        con.close()
-        self.check_version_feature(content, idfield)
+        with con as c:
+            idfield = util.get_layer_pk_name(c, schema, table)
+            try:
+                feat_id = content['properties'][idfield]
+                self.check_edit_feature_permission(lyr_id, feat_id)
+            except:
+                logger.exception("Error checking feature permissions")
+                raise HttpException(403, "The user does not have permission to write this feature or layer")
+            self.check_version_feature(content, idfield)
         
     def check_get_layer_features(self, lyr_id):
         layer = self.get_layer(lyr_id)
