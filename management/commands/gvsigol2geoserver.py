@@ -40,6 +40,7 @@ def process_layer_symbol(lyr, style):
         gs = geographic_servers.get_instance().get_server_by_id(lyr.datastore.workspace.server.id)
         sld_body = sld_builder.build_sld(lyr, style)
         try:
+            print(f'Creating style "{style.name}" for layer: {lyr.id} - {lyr.name}')
             gs.createStyle(style.name, sld_body)
         except:
             pass
