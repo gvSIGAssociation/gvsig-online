@@ -5388,6 +5388,33 @@ def list_datastore_tables(request):
                 return HttpResponse(json.dumps(tables))
     return HttpResponseBadRequest()
 
+@login_required()
+@staff_required
+def list_table_columns(request):
+    """
+    Lists the column names of a given table.
+
+    Parameters
+    ----------
+    id_datastore: str
+        The id of the datastore that contains the table
+    table : str
+        The table name
+    """
+    if 'id_datastore' in request.GET:
+        id_ds = request.GET['id_datastore']
+        table = request.GET['table']
+        ds = Datastore.objects.get(id=id_ds)
+        if not utils.can_manage_datastore(request.user, ds):
+            return HttpResponseForbidden(json.dumps([]))
+        if ds:
+            c, params = ds.get_db_connection()
+            i = utils.get_db_connect_from_datastore(ds)
+            with c as i:
+                schema = params.get('schema', 'public')
+                columns = sorted(i.get_fields(table, schema=schema))
+                return HttpResponse(json.dumps(columns))
+    return HttpResponseBadRequest()
 
 @login_required()
 @staff_required

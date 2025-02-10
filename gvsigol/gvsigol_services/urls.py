@@ -97,6 +97,7 @@ urlpatterns = [
     path('sqlview_delete/<int:view_id>/', services_views.sqlview_delete, name='sqlview_delete'),
     path('list_datastore_tables/', services_views.list_datastore_tables, name='list_datastore_tables'),
     path('list_datastores_in_db', services_views.list_datastores_in_db, name='list_datastores_in_db'),
+    path('list_table_columns/', services_views.list_table_columns, name='list_table_columns'),
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
     path('get_resource/<int:resource_id>/', services_views.get_resource, name='get_layer_resource'),
