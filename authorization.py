@@ -36,7 +36,7 @@ def get_authz_servers():
         shortcut_authz_server()
     instance = AUTHZ_SERVER_CACHE.get('instance')
     if instance:
-        return instance
+        return [instance]
     else:
         authz_servers = []
         for server in Server.objects.all():
