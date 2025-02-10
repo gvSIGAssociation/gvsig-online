@@ -40,31 +40,19 @@ def process_layer_symbol(lyr, style):
         gs = geographic_servers.get_instance().get_server_by_id(lyr.datastore.workspace.server.id)
         sld_body = sld_builder.build_sld(lyr, style)
         try:
-            if gs.updateStyle(lyr, style.name, sld_body): 
-                gs.setLayerStyle(lyr, style.name, style.is_default)
-                return style
+            gs.createStyle(style.name, sld_body)
         except:
-            if utils.reset_geoserver_style(gs, lyr, style):
-                gs.setLayerStyle(lyr, style.name, style.is_default)
-                return style
-
-    #    style = services_unique_symbol.update_style(request, json_data, layer, gs, style)
-
+            pass
+        gs.setLayerStyle(lyr, style.name, style.is_default)
 
 def create_symbology():
     for lyr in Layer.objects.filter(external=False):
         layerStyles = StyleLayer.objects.filter(layer=lyr)
-        styles = []
         for layerStyle in layerStyles:
             try:
                 process_layer_symbol(lyr, layerStyle.style)
             except:
                 logging.getLogger(LOGGER_NAME).exception(f"Error creating layer styles: {lyr.id} - {lyr.name}")
-
-       
-        #gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-        #style = services_unique_values.update_style(request, json_data, layer, gs, style)
-    
 
 def create_layer(l):
     server = geographic_servers.get_instance().get_server_by_id(l.datastore.workspace.server.id)
@@ -162,7 +150,6 @@ class Command(BaseCommand):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
 
     def handle(self, *args, **options):
