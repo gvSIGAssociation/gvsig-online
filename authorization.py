@@ -292,7 +292,7 @@ class PlainAuthorizationService():
         (Re)Sets data rules in Geoserver for all layers, based on gvSIG Online
         permissions
         """
-        for s in Server.object.all():
+        for s in Server.objects.all():
             self._set_data_rules(s)
 
     def set_layer_data_rules(self, layer, read_roles=None, write_roles=None, set_transaction_rules=True):
