@@ -606,11 +606,9 @@ class Geoserver():
         except Exception as e:
             logger.exception('Sobrescribiendo estilo: ' + name)
             error_message = str(e)
-            if (error_message.startswith("There is already a style named")):               
-                symbology_services.delete_style_name(name)
-                #prefix library.name_lib_name
+            if (error_message.startswith("There is already a style named")):
                 msg_name= name.split('_')[2]
-                error="There is already a style named " + msg_name                
+                error="There is already a style named " + msg_name
                 raise Exception(error)
             return False
     
