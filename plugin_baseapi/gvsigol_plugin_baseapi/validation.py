@@ -246,9 +246,9 @@ class Validation():
             raise HttpException(404, "User NOT found")
 
 
-    def check_edit_feature_permission(self, lyr, feat_id):
+    def check_edit_feature_permission(self, lyr, feat_id, content=None):
         try:
-            if not services_utils.can_write_feature(self.request, lyr, feat_id):
+            if not services_utils.can_write_feature(self.request, lyr, feat_id, content):
                 raise HttpException(403, "The user does not have permission to write this feature or layer")
         except Layer.DoesNotExist:
             raise HttpException(404, "Layer NOT found")
@@ -331,18 +331,15 @@ class Validation():
                 else:
                  return i.datastore.name, i.name
         raise HttpException(403,  "The layer is not allowed to this user")
-                   
-    def check_create_feature(self, lyr_id, content):
-        con, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
-        with con as c:
-            idfield = util.get_layer_pk_name(c, schema, table)
-            try:
-                feat_id = content['properties'][idfield]
-                self.check_edit_feature_permission(lyr_id, feat_id)
-            except:
-                logger.exception("Error checking feature permissions")
-                raise HttpException(403, "The user does not have permission to write this feature or layer")
 
+    def check_create_feature(self, lyr_id, content):
+        try:
+            if not services_utils.can_create_feature(self.request, lyr_id, content):
+                raise HttpException(403, "The user does not have permission to edit this layer")
+        except Layer.DoesNotExist:
+            raise HttpException(404, "Layer NOT found")
+        except User.DoesNotExist:
+            raise HttpException(404, "User NOT found")
         self.check_feature(content)
         
     def check_update_feature(self, lyr_id, content):
@@ -351,7 +348,7 @@ class Validation():
             idfield = util.get_layer_pk_name(c, schema, table)
             try:
                 feat_id = content['properties'][idfield]
-                self.check_edit_feature_permission(lyr_id, feat_id)
+                self.check_edit_feature_permission(lyr_id, feat_id, content)
             except:
                 logger.exception("Error checking feature permissions")
                 raise HttpException(403, "The user does not have permission to write this feature or layer")

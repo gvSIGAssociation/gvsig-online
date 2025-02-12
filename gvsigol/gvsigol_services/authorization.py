@@ -255,7 +255,14 @@ class PlainAuthorizationService():
             print(e)
         return False
 
-    def can_write_feature(self, request, layer, feature):
+    def can_write_feature(self, request, layer, feature_id, geojson_feature):
+        try:
+            return self.can_write_layer(request, layer)
+        except Layer.DoesNotExist:
+            # TODO
+            pass
+
+    def can_create_feature(self, request, layer, geojson_feature):
         try:
             return self.can_write_layer(request, layer)
         except Layer.DoesNotExist:
