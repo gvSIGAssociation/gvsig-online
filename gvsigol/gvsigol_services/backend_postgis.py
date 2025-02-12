@@ -653,7 +653,7 @@ class Introspect:
 
         This method queries pg_attribute to be able to query normal tables and
         materialized views. Primary keys declared in gt_pk_metadata table are
-        considered when the queried relationis a view and has no real primary
+        considered when the queried relation is a view and has no real primary
         keys.
 
         See also: TableInfo
