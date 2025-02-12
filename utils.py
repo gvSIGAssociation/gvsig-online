@@ -215,10 +215,18 @@ def can_read_feature(request_or_user, layer, feature):
         print(e)
     return False
 
-def can_write_feature(request_or_user, layer, feature, geojson_feature=None):
+def can_write_feature(request_or_user, layer, feature_id, geojson_feature=None):
     try:
         authz_service = get_authz_server_for_layer(layer)
-        return authz_service.can_write_feature(request_or_user, layer, feature, geojson_feature)
+        return authz_service.can_write_feature(request_or_user, layer, feature_id, geojson_feature)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_create_feature(request_or_user, layer, geojson_feature):
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_create_feature(request_or_user, layer, geojson_feature)
     except Exception as e:
         print(e)
     return False
