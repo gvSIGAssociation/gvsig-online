@@ -107,6 +107,8 @@ def config_geom_params(geom_cols, default_creation_options):
 
 def get_cast(shp_field_def, default_column_types, ogr_version):
     (major, minor, patch, prerelease) = ogr_version
+    major = int(major)
+    minor = int(minor)
     if shp_field_def.type == 'N' and shp_field_def.decimal_count == 0:
         if shp_field_def.length <= 9:
             return 'CAST({quoted_name} AS integer) AS {quoted_name}'.format(quoted_name=quote_identifier_ogr(shp_field_def.name))
