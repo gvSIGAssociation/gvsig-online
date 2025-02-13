@@ -907,22 +907,7 @@ class LoadSharedViewAPI(APIView):
         shared_view_serializer = SharedViewSerializer(shared_view)
 
         response_data = {
-            'shared_view': shared_view_serializer.data, 
-            'project': {
-                'id': project.id,
-                'is_public': project.is_public,
-                'logo_url': project.logo_url,
-                'image_url': project.image_url,
-                'viewer_default_crs': project.viewer_default_crs,
-            },
-            'plugins_config': core_utils.get_plugins_config(),
-            'enabled_plugins': core_utils.get_enabled_plugins(project),
-            'supported_crs': core_utils.get_supported_crs(),
-            'extra_params': request.query_params.dict(), 
-            'is_shared_view': True,
-            'shared_view_name': shared_view.name,
-            'main_page': settings.LOGOUT_REDIRECT_URL,
-            'is_viewer_template': True,
+            'shared_view': shared_view_serializer.data
         }
 
         response = Response(response_data, status=status.HTTP_200_OK)

@@ -45,9 +45,9 @@ urlpatterns = [
     path('api/v1/projects/<int:project_id>/layers/', api.ProjectLayersView.as_view(), name='get_layers_from_project'),
     path('api/v1/projects/<int:project_id>/groups/', api.ProjectGroupsView.as_view(), name='get_groups_from_project'),
     path('api/v1/projects/<int:project_id>/data/', api.ProjectBaseLayerData.as_view(), name='get_base_layer_data'),
-    path('api/v1/projects/<int:project_id>/shared_view/create/', api.CreateSharedViewAPI.as_view(), name='create_shared_view'),
-    path('api/v1/projects/<int:project_id>/shared_view/save/', api.SaveSharedViewAPI.as_view(), name='save_shared_view'),
-    path('api/v1/projects/<int:project_id>/shared_view/load/', api.LoadSharedViewAPI.as_view(), name='load_shared_view'),
+    path('api/v1/projects/shared_view/create/', api.CreateSharedViewAPI.as_view(), name='create_shared_view'),
+    path('api/v1/projects/shared_view/save/', api.SaveSharedViewAPI.as_view(), name='save_shared_view'),
+    path('api/v1/projects/shared_view/load/<str:view_name>/', api.LoadSharedViewAPI.as_view(), name='load_shared_view'),
     
 
     path('api/v1/groups/', api.LayerGroupsListView.as_view(), name='get_group_list'),
