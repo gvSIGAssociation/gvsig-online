@@ -19,8 +19,7 @@
 
 @author: Nacho Brodin <nbrodin@scolab.es>
 '''
-from datetime import datetime
-import datetime
+from datetime import datetime, timedelta
 import json
 import os
 from wsgiref.util import FileWrapper
@@ -811,7 +810,7 @@ class SharedViewManager:
             shared_url = url
             name = url.split('sharedView=')[-1]
         else:
-            name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+            name = datetime.today().strftime("%Y%m%d") + get_random_string(length=32)
             shared_url = '/spa/viewer/'+pid +'?sharedView=' + name
             #shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
 
@@ -842,7 +841,7 @@ class CreateSharedViewAPI(APIView):
     """
     def post(self, request, *args, **kwargs):
         pid = request.data.get('pid')
-        name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+        name = datetime.today().strftime("%Y%m%d") + get_random_string(length=32)
         shared_url = '/spa/viewer/'+pid +'?sharedView=' + name
         return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
 
@@ -865,9 +864,9 @@ class SaveSharedViewAPI(APIView):
         view_state = request.data.get('view_state')
         
         if request.data.get('checked') == 'false':
-            expiration_date = datetime.datetime.now() + datetime.timedelta(days=core_settings.SHARED_VIEW_EXPIRATION_TIME)
+            expiration_date = datetime.now() + timedelta(days=core_settings.SHARED_VIEW_EXPIRATION_TIME)
         else:
-            expiration_date = datetime.datetime.max
+            expiration_date = datetime.max
         
         if request.data.get('shared_url'):
             shared_url = request.data.get('shared_url')
@@ -928,7 +927,7 @@ class LoadSharedViewAPI(APIView):
 
         response = Response(response_data, status=status.HTTP_200_OK)
 
-        tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+        tomorrow = datetime.now() + timedelta(days=1)
         tomorrow = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
         expires = tomorrow.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
         response.set_cookie('key', expires=expires)
