@@ -907,7 +907,8 @@ class LoadSharedViewAPI(APIView):
         shared_view_serializer = SharedViewSerializer(shared_view)
 
         response_data = {
-            'shared_view': shared_view_serializer.data
+            'shared_view': shared_view_serializer.data, 
+            'project': project.id
         }
 
         response = Response(response_data, status=status.HTTP_200_OK)
