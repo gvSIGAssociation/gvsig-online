@@ -809,7 +809,7 @@ class SharedViewManager:
         """
         if url:
             shared_url = url
-            name = url.split('/')[-1]
+            name = url.split('sharedView=')[-1]
         else:
             name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
             shared_url = '/spa/viewer/'+pid +'?sharedView=' + name
@@ -858,14 +858,14 @@ class SaveSharedViewAPI(APIView):
             return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_400_BAD_REQUEST)
         
         # Verificar permisos o si el usuario puede leer el proyecto
-        if not core_utils.can_read_project(request, pid):
-            return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_403_FORBIDDEN)
+        # if not core_utils.can_read_project(request, pid):
+        #    return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_403_FORBIDDEN)
         
         description = request.data.get('description')
         view_state = request.data.get('view_state')
         
         if request.data.get('checked') == 'false':
-            expiration_date = datetime.datetime.now() + datetime.timedelta(days=settings.SHARED_VIEW_EXPIRATION_TIME)
+            expiration_date = datetime.datetime.now() + datetime.timedelta(days=core_settings.SHARED_VIEW_EXPIRATION_TIME)
         else:
             expiration_date = datetime.datetime.max
         
