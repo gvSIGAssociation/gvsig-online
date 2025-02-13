@@ -25,7 +25,7 @@ import math
 from rest_framework import serializers
 
 from django.contrib.auth.models import User
-from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers, Application
+from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers, Application, SharedView
 from gvsigol_plugin_projectapi import util
 from gvsigol_plugin_baseapi.validation import HttpException
 from gvsigol_services.models import LayerGroup, Layer, Server
@@ -192,5 +192,10 @@ class ApplicationsSerializer(serializers.ModelSerializer):
         model = Application
         fields = ['id', 'name', 'title', 'description', 'image', 'url', 'conf', 'created_by', 'is_public']
         #fields = '__all__'
+        
+class SharedViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SharedView
+        fields = '__all__'
 
 
