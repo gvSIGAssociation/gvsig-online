@@ -20,6 +20,7 @@
 @author: Nacho Brodin <nbrodin@scolab.es>
 '''
 from datetime import datetime
+import datetime
 import json
 import os
 from wsgiref.util import FileWrapper
@@ -811,7 +812,7 @@ class SharedViewManager:
             name = url.split('/')[-1]
         else:
             name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
-            shared_url = settings.BASE_URL + '/spa/viewer/'+pid +'?sharedView=' + name
+            shared_url = '/spa/viewer/'+pid +'?sharedView=' + name
             #shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
 
         try:
@@ -842,7 +843,7 @@ class CreateSharedViewAPI(APIView):
     def post(self, request, *args, **kwargs):
         pid = request.data.get('pid')
         name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
-        shared_url = settings.BASE_URL + '/spa/viewer/'+pid +'?sharedView=' + name
+        shared_url = '/spa/viewer/'+pid +'?sharedView=' + name
         return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
 
 class SaveSharedViewAPI(APIView):
