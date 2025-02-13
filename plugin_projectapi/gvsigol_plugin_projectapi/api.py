@@ -25,6 +25,7 @@ import os
 from wsgiref.util import FileWrapper
 import coreapi
 from django.http.response import HttpResponse, JsonResponse
+from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.filters import BaseFilterBackend
@@ -32,16 +33,25 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveDestroyA
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
+
 from gvsigol import settings as core_settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
 from django.contrib.auth.models import User
-from gvsigol_core.models import Project, ProjectLayerGroup, Application
+from gvsigol_core import utils as core_utils
+from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
 from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer, ApplicationsSerializer
 from gvsigol_plugin_featureapi.serializers import LayerSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services.models import Layer, LayerGroup, Server
-from .serializers import ProjectSerializer, UserSerializer
+from .serializers import ProjectSerializer, UserSerializer, SharedViewSerializer
 from . import serializers
 from . import util
 from gvsigol.urls import urlpatterns
@@ -781,6 +791,148 @@ class ApplicationListView(ListAPIView):
             ]
         }
         return JsonResponse(result, safe=False)
+    
+#--------------------------------------------------
+#                Shared View
+#--------------------------------------------------   
+
+class SharedViewManager:
+    """
+    Clase encargada de gestionar la creación y actualización de SharedView.
+    """
+
+    @staticmethod
+    def save_shared_view(pid, description, view_state, expiration, user, internal=False, url=False):
+        """
+        Crea o actualiza una vista compartida.
+        """
+        if url:
+            shared_url = url
+            name = url.split('/')[-1]
+        else:
+            name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+            shared_url = settings.BASE_URL + '/spa/viewer/'+pid +'?sharedView=' + name
+            #shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
+
+        try:
+            # Se intenta obtener una vista compartida existente con el mismo nombre.
+            shared_project = SharedView.objects.get(name=name)
+            shared_project.expiration_date = expiration
+        except SharedView.DoesNotExist:
+            # Si no existe, se crea una nueva instancia.
+            shared_project = SharedView(
+                name=name,
+                project_id=int(pid),
+                description=description,
+                url=shared_url,
+                state=view_state,
+                expiration_date=expiration,
+                created_by=user.username,
+                internal=internal
+            )
+        
+        shared_project.save()
+        return shared_project
+    
+class CreateSharedViewAPI(APIView):
+    """
+    API endpoint para crear una vista compartida.
+    Devuelve un JSON con el shared_url generado.
+    """
+    def post(self, request, *args, **kwargs):
+        pid = request.data.get('pid')
+        name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+        shared_url = settings.BASE_URL + '/spa/viewer/'+pid +'?sharedView=' + name
+        return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
+
+class SaveSharedViewAPI(APIView):
+    """
+    API endpoint para guardar una vista compartida.
+    Procesa los datos recibidos por POST y devuelve el shared_url generado.
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            pid = request.data.get('pid')
+        except (TypeError, ValueError):
+            return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verificar permisos o si el usuario puede leer el proyecto
+        if not core_utils.can_read_project(request, pid):
+            return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_403_FORBIDDEN)
+        
+        description = request.data.get('description')
+        view_state = request.data.get('view_state')
+        
+        if request.data.get('checked') == 'false':
+            expiration_date = datetime.datetime.now() + datetime.timedelta(days=settings.SHARED_VIEW_EXPIRATION_TIME)
+        else:
+            expiration_date = datetime.datetime.max
+        
+        if request.data.get('shared_url'):
+            shared_url = request.data.get('shared_url')
+            SharedViewManager.save_shared_view(pid, description, view_state, expiration_date, request.user, False, shared_url)
+        else:
+            shared_view = SharedViewManager.save_shared_view(pid, description, view_state, expiration_date, request.user)
+            shared_url = shared_view.shared_url
+        
+        return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
+    
+@method_decorator(cache_control(max_age=86400), name='dispatch')
+class LoadSharedViewAPI(APIView):
+    """
+    API endpoint para cargar una vista compartida por nombre (view_name).
+    """
+
+    def get(self, request, view_name, *args, **kwargs):
+        try:
+            shared_view = get_object_or_404(SharedView, name=view_name)
+        except SharedView.DoesNotExist:
+            return Response({'error': 'Shared view not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+
+            project = get_object_or_404(Project, id=shared_view.project_id)
+        except Project.DoesNotExist:
+            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if shared_view.internal and not request.user.is_superuser:
+            raise PermissionDenied("No tienes permiso para acceder a esta vista compartida.")
+
+        if not (project.is_public or request.user.is_authenticated):
+            return Response(
+                {'error': 'El proyecto no es público y se requiere autenticación.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        shared_view_serializer = SharedViewSerializer(shared_view)
+
+        response_data = {
+            'shared_view': shared_view_serializer.data, 
+            'project': {
+                'id': project.id,
+                'is_public': project.is_public,
+                'logo_url': project.logo_url,
+                'image_url': project.image_url,
+                'viewer_default_crs': project.viewer_default_crs,
+            },
+            'plugins_config': core_utils.get_plugins_config(),
+            'enabled_plugins': core_utils.get_enabled_plugins(project),
+            'supported_crs': core_utils.get_supported_crs(),
+            'extra_params': request.query_params.dict(), 
+            'is_shared_view': True,
+            'shared_view_name': shared_view.name,
+            'main_page': settings.LOGOUT_REDIRECT_URL,
+            'is_viewer_template': True,
+        }
+
+        response = Response(response_data, status=status.HTTP_200_OK)
+
+        tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+        tomorrow = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
+        expires = tomorrow.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
+        response.set_cookie('key', expires=expires)
+
+        return response
 
 
 
