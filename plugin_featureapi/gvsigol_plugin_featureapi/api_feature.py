@@ -809,7 +809,7 @@ class FeatureByPointView(ListAPIView):
         """
         validation = Validation(request)
         try:
-            validation.check_read_permission(lyr_id)
+            restrictions = validation.check_read_restrictions(lyr_id)
 
             lon = 0
             if 'lon' in self.request.GET:
@@ -881,9 +881,9 @@ class FeatureByPointView(ListAPIView):
             serializer = FeatureSerializer()
             result = None
             if simplify:
-                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
+                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions)
             else:
-                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer)
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions)
             result['infoFormat'] = 'application/geojson'
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
