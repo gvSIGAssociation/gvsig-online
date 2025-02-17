@@ -327,6 +327,7 @@ class PlainAuthorizationService():
                     who_can_read.append(geoserver_admin_role)
             else:
                 who_can_read = [ geoserver_admin_role ]
+        who_can_read = set(who_can_read)
         read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
         read_rule_roles = ",".join(who_can_read)
         data = { read_rule_path: read_rule_roles}
@@ -342,6 +343,10 @@ class PlainAuthorizationService():
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         url = gs.rest_catalog.get_service_url() + "/security/acl/layers.json"
         who_can_write = [ to_provider_rolename(g, provider="geoserver") for g in write_roles ]
+        admin_role = to_provider_rolename(get_admin_role(), provider='geoserver')
+        if admin_role not in who_can_write:
+            who_can_write.append(admin_role)
+        who_can_write = set(who_can_write)
         write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
         # now add the rule if necessary
         if len(who_can_write)>0:
