@@ -127,7 +127,10 @@ def get_read_restrictions(request_or_user, layer):
         return authz_service.get_read_restrictions(request_or_user, layer)
     except Exception as e:
         print(e)
-    return False
+    return {
+            "grant" : "DENY",
+            "catalogMode" : "CHALLENGE"
+        }
 
 def get_write_restrictions(request_or_user, layer):
     """
@@ -166,10 +169,13 @@ def get_write_restrictions(request_or_user, layer):
     """
     try:
         authz_service = get_authz_server_for_layer(layer)
-        return authz_service.get_read_restrictions(request_or_user, layer)
+        return authz_service.get_write_restrictions(request_or_user, layer)
     except Exception as e:
         print(e)
-    return False
+    return {
+            "grant" : "DENY",
+            "catalogMode" : "CHALLENGE"
+        }
 
 def can_write_layer(request_or_user, layer):
     """
