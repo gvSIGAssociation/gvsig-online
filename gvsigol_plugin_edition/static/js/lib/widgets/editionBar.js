@@ -2417,19 +2417,29 @@ EditionBar.prototype.transactWFS = function(operationType,f) {
 		},
 		success: function(response, status, request) {
 			try {
+				if (response instanceof XMLDocument && response.querySelector("ExceptionReport")!=null) {
+					var exception = response.querySelector("Exception");
+					try {
+						var errorCode = response.querySelector("Exception").getAttribute("exceptionCode")
+						if (errorCode=="InvalidParameterValue") {
+							var message = gettext('Failed to save the record because invalid values were provided: ');
+							message += exception.textContent.trim();
+							self.showError(message);
+							return;
+						}
+					}
+					catch (err) {}
+					var message = gettext('Failed to save the record. You are not allowed to insert or modify these values');
+					message += exception.textContent.trim();
+					self.showError(message);
+					return;
+				}
 				var resp = self.formatWFS.readTransactionResponse(response);
 				//There was not geometry to insert
 				if (operationType == 'insert') {
 					console.log(resp);
 					if (resp.transactionSummary && (resp.transactionSummary.totalInserted == 0)) {
 						var message = gettext('Failed to save the record. Probable cause: you are not allowed to insert this values or invalid values were provided');
-						self.showError(message);
-						return;
-					}
-					else if (response instanceof XMLDocument && response.querySelector("ExceptionReport")) {
-						var exception = response.querySelector("Exception");
-						var message = gettext('Failed to save the record. Probable cause: you are not allowed to insert this values or invalid values were provided');
-						message += exception.textContent;
 						self.showError(message);
 						return;
 					}
