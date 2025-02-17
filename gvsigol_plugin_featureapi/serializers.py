@@ -132,7 +132,7 @@ class FeatureSerializer(serializers.Serializer):
                 #if(getbuffer == True):
                 #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))"
                 if cqlFilterRead:
-                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(self._get_cql_permissions_filter(cqlFilterRead))
+                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cqlFilterRead))
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 params = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), {epsilon})), ST_NPoints({geom}) as props"
@@ -247,7 +247,7 @@ class FeatureSerializer(serializers.Serializer):
 
                 transformed_buffer = self.get_transformed_buffer_distance(con, source_epsg, native_epsg, buffer, lon, lat)
                 if cqlFilterRead:
-                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(self._get_cql_permissions_filter(cqlFilterRead))
+                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cqlFilterRead))
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 sql = sqlbuilder.SQL("""
@@ -1130,7 +1130,7 @@ class FeatureSerializer(serializers.Serializer):
         """
         Limits the rows available for the user according to the geoserver-acl config
         """
-        return sqlbuilder.SQL(" ( {cql_filter} )".format(sqlbuilder.SQL(cql_filter)))
+        return sqlbuilder.SQL(" ( {cql_filter} )".format(cql_filter=sqlbuilder.SQL(cql_filter)))
 
     def _get_filter_where(self, filter):
         filter_queries = filter['filterQueries']
