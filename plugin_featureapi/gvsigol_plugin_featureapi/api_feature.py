@@ -48,8 +48,9 @@ from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services import utils as services_utils
 from django_sendfile import sendfile
 import json
+import logging
 
-
+LOGGER_NAME='gvsigol'
 
 class CoordsFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
@@ -881,9 +882,9 @@ class FeatureByPointView(ListAPIView):
             serializer = FeatureSerializer()
             result = None
             if simplify:
-                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions)
+                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions.get('cqlFilterRead'))
             else:
-                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions)
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions.get('cqlFilterRead'))
             result['infoFormat'] = 'application/geojson'
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
@@ -908,6 +909,7 @@ class FeatureByPointView(ListAPIView):
             
             return JsonResponse(result, safe=False)
         except HttpException as e:
+            logging.getLogger(LOGGER_NAME).exception("Error getting features")
             return e.get_exception() 
 
 
