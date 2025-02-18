@@ -56,7 +56,7 @@ def get_authz_server_for_layer(layer):
                 layer = Layer.objects.select_related("datastore__workspace__server").get(id=layer)
             except:
                 # for external layers
-                layer = Layer.objects.get(id=layer)
+                return None
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         return gs.getAuthorizationService()
 

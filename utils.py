@@ -208,7 +208,9 @@ def can_read_layer(request_or_user, layer):
     """
     try:
         authz_service = get_authz_server_for_layer(layer)
-        return authz_service.can_read_layer(request_or_user, layer)
+        if authz_service:
+            return authz_service.can_read_layer(request_or_user, layer)
+        return True # for external layers
     except Exception as e:
         print(e)
     return False
