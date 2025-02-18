@@ -499,7 +499,7 @@ class Introspect:
                 datatype_sqls.append(sqlbuilder.SQL('data_type = {dt}').format(dt=sqlbuilder.Literal(i)))
             data_type_cond=sqlbuilder.SQL(" OR ").join(datatype_sqls)
         else:
-            data_type_cond = sqlbuilder.SQL('data_type = {dt}').format(dt=datatype)
+            data_type_cond = sqlbuilder.SQL('data_type = {dt}').format(dt=sqlbuilder.Literal(datatype))
         
         query = sqlbuilder.SQL("""SELECT column_name FROM information_schema.columns
                        WHERE table_schema = %s AND table_name = %s AND ({data_type_cond})""").format(
