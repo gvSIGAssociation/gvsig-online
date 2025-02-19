@@ -55,9 +55,9 @@ from gvsigol_services.authorization import _get_user, can_use_layergroup, get_au
 import requests
 
 def _get_layer_obj(layer_or_id):
-    if not isinstance(layer, Layer):
-        layer = Layer.objects.select_related("datastore__workspace__server").get(id=layer_or_id)
-    return layer
+    if isinstance(layer_or_id, Layer):
+        return layer_or_id
+    return Layer.objects.select_related("datastore__workspace__server").get(id=layer_or_id)
 
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None, creator_all=False):
     if layer:
