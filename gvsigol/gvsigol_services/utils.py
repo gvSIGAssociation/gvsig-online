@@ -54,6 +54,11 @@ from gvsigol_services import apps as gvsigol_services_apps
 from gvsigol_services.authorization import _get_user, can_use_layergroup, get_authz_server_for_layer
 import requests
 
+def _get_layer_obj(layer_or_id):
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.select_related("datastore__workspace__server").get(id=layer_or_id)
+    return layer
+
 def get_all_user_roles_checked_by_layer(layer, creator_user_role=None, creator_all=False):
     if layer:
         read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
@@ -207,10 +212,11 @@ def can_read_layer(request_or_user, layer):
         A Django Layer instance or a layer id
     """
     try:
+        layer = _get_layer_obj(layer)
+        if layer.public or layer.external:
+            return True
         authz_service = get_authz_server_for_layer(layer)
-        if authz_service:
-            return authz_service.can_read_layer(request_or_user, layer)
-        return True # for external layers
+        return authz_service.can_read_layer(request_or_user, layer)
     except Exception as e:
         print(e)
     return False
