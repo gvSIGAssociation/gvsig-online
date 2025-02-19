@@ -147,13 +147,14 @@ $(document).ready(function() {
 	
 });
 
-function save(layerId, codemirror) {
+function save(layerId, codemirror) {	
 	var self = this;
 	
 	var sld = codemirror.getValue();
 	var isDefault = $('#style-is-default').is(":checked");
 	var styleName = $("#style-name").val();
 	var styleTitle = $("#style-title").val();
+
 	
 	$.ajax({
 		type: "POST",

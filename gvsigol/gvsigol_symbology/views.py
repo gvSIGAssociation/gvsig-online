@@ -33,7 +33,7 @@ from .models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, C
 from gvsigol_auth import auth_backend
 from gvsigol_auth.utils import staff_required
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
-    services_unique_values, services_intervals, services_expressions, services_color_table, services_clustered_points, services_custom
+    services_unique_values, services_intervals, services_expressions, services_color_table, services_clustered_points, services_custom, services_map_heat
 from django.views.decorators.csrf import csrf_exempt
 from . import utils
 import json
@@ -126,6 +126,9 @@ def style_layer_update(request, layer_id, style_id):
     
     elif (style.type == 'CS'):
         return redirect('custom_update', layer_id=layer_id, style_id=style_id)
+    
+    elif (style.type == 'MC'):
+        return redirect('map_heat_update', layer_id=layer_id, style_id=style_id)
     
 @login_required()
 @staff_required
@@ -258,6 +261,68 @@ def custom_update(request, layer_id, style_id):
         response['style'] = style  
          
         return render(request, 'custom_update.html', response)
+    
+@login_required()
+@staff_required
+def map_heat_add(request, layer_id):
+    if request.method == 'POST':
+        style_name = request.POST.get('style_name')
+        style_title = request.POST.get('style_title')
+        sld = request.POST.get('sld')
+        
+        is_default = request.POST.get('is_default') == 'true'
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_map_heat.create_style(style_name, style_title, is_default, sld, layer, server)
+        if style:
+            delete_preview_style(request, style_name, server)
+            server.reload_nodes()
+            if style.is_default:
+                server.updateThumbnail(layer)
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:                 
+        response = services_map_heat.get_conf(request, layer_id)     
+        return render(request, 'map_heat_add.html', response)
+    
+@login_required()
+@staff_required
+def map_heat_update(request, layer_id, style_id):  
+    if request.method == 'POST':
+        style_name = request.POST.get('style_name')
+        style_title = request.POST.get('style_title')
+        sld = request.POST.get('sld')
+            
+        is_default = request.POST.get('is_default') == 'true'
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = layer.datastore
+        workspace = datastore.workspace
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        style = services_map_heat.update_style(style_title, is_default, sld, layer, gs, style)
+        if style:
+            delete_preview_style(request, style_name, gs)
+            gs.reload_nodes()
+            if style.is_default:
+                gs.updateThumbnail(layer)
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:
+        style = Style.objects.get(id=int(style_id))
+                         
+        response = services_map_heat.get_conf(request, layer_id)
+        response['style'] = style  
+         
+        return render(request, 'map_heat_update.html', response)
+    
 
 @login_required()
 @staff_required
@@ -540,7 +605,31 @@ def update_preview(request, layer_id):
                 if style:
                     gs.reload_nodes()
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+        elif style_type == 'MC':
+            style_name = request.POST.get('style_name')
+            style_title = request.POST.get('style_title')
+            sld = request.POST.get('sld')
             
+            is_default = request.POST.get('is_default') == 'true'
+            layer = Layer.objects.get(id=layer_id)
+            layer_styles = StyleLayer.objects.filter(layer_id=layer.id)
+            style = None
+            for layer_style in layer_styles:
+                stl = Style.objects.get(id=layer_style.style_id)
+                if stl.name == style_name + '__tmp':
+                    style = stl
+            
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            if not style:
+                style = services_map_heat.create_style(style_name, style_title, is_default, sld, layer, gs, True)
+                if style:
+                    gs.reload_nodes()
+                    return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            else:    
+                style = services_map_heat.update_style(style_title, is_default, sld, layer, gs, style, True)
+                if style:
+                    gs.reload_nodes()
+                    return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')    
         else:
             style_data = request.POST['style_data']
             json_data = json.loads(style_data)
@@ -559,6 +648,7 @@ def update_preview(request, layer_id):
                 services = services_color_table
             elif style_type == 'CP':
                 services = services_clustered_points
+
             
             if services:
                 layer = Layer.objects.get(id=layer_id)

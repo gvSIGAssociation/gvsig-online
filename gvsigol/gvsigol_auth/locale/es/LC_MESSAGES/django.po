@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-12 11:27+0000\n"
+"POT-Creation-Date: 2025-02-18 16:01+0100\n"
 "PO-Revision-Date: 2022-05-20 11:54+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -139,47 +139,46 @@ msgstr "Aceptar"
 
 #: gvsigol_auth/templates/group_list.html:76
 #: gvsigol_auth/templates/role_list.html:76
-#: gvsigol_auth/templates/user_list.html:89
+#: gvsigol_auth/templates/user_list.html:95
 msgid "Processing request..."
 msgstr "Procesando petición..."
 
 #: gvsigol_auth/templates/group_list.html:77
 #: gvsigol_auth/templates/role_list.html:77
-#: gvsigol_auth/templates/user_list.html:90
+#: gvsigol_auth/templates/user_list.html:96
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Buscar%(sep)s"
 
 #: gvsigol_auth/templates/group_list.html:78
 #: gvsigol_auth/templates/role_list.html:78
-#: gvsigol_auth/templates/user_list.html:91
+#: gvsigol_auth/templates/user_list.html:97
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
 
 #: gvsigol_auth/templates/group_list.html:79
 #: gvsigol_auth/templates/role_list.html:79
-#: gvsigol_auth/templates/user_list.html:92
+#: gvsigol_auth/templates/user_list.html:98
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
 
 #: gvsigol_auth/templates/group_list.html:80
 #: gvsigol_auth/templates/role_list.html:80
-#: gvsigol_auth/templates/user_list.html:93
+#: gvsigol_auth/templates/user_list.html:99
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando desde 0 a 0 de 0 registros"
 
 #: gvsigol_auth/templates/group_list.html:81
 #: gvsigol_auth/templates/role_list.html:81
-#: gvsigol_auth/templates/user_list.html:94
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrando %(max)s registros"
 
 #: gvsigol_auth/templates/group_list.html:83
 #: gvsigol_auth/templates/role_list.html:83
-#: gvsigol_auth/templates/user_list.html:96
+#: gvsigol_auth/templates/user_list.html:102
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -187,45 +186,45 @@ msgstr "Cargando..."
 #: gvsigol_auth/templates/group_list.html:85
 #: gvsigol_auth/templates/role_list.html:84
 #: gvsigol_auth/templates/role_list.html:85
-#: gvsigol_auth/templates/user_list.html:97
-#: gvsigol_auth/templates/user_list.html:98
+#: gvsigol_auth/templates/user_list.html:103
+#: gvsigol_auth/templates/user_list.html:104
 msgid "No records available"
 msgstr "No hay registros dispnibles"
 
 #: gvsigol_auth/templates/group_list.html:87
 #: gvsigol_auth/templates/role_list.html:87
-#: gvsigol_auth/templates/user_list.html:100
+#: gvsigol_auth/templates/user_list.html:106
 msgid "First"
 msgstr "Primero"
 
 #: gvsigol_auth/templates/group_list.html:88
 #: gvsigol_auth/templates/role_list.html:88
-#: gvsigol_auth/templates/user_list.html:101
+#: gvsigol_auth/templates/user_list.html:107
 msgid "Previous"
 msgstr "Anterior"
 
 #: gvsigol_auth/templates/group_list.html:89
 #: gvsigol_auth/templates/role_list.html:89
-#: gvsigol_auth/templates/user_list.html:102
+#: gvsigol_auth/templates/user_list.html:108
 msgid "Next"
 msgstr "Siguiente"
 
 #: gvsigol_auth/templates/group_list.html:90
 #: gvsigol_auth/templates/role_list.html:90
-#: gvsigol_auth/templates/user_list.html:103
+#: gvsigol_auth/templates/user_list.html:109
 msgid "Last"
 msgstr "Último"
 
 #: gvsigol_auth/templates/group_list.html:93
 #: gvsigol_auth/templates/role_list.html:93
-#: gvsigol_auth/templates/user_list.html:106
+#: gvsigol_auth/templates/user_list.html:112
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrdenar ascendentemente"
 
 #: gvsigol_auth/templates/group_list.html:94
 #: gvsigol_auth/templates/role_list.html:94
-#: gvsigol_auth/templates/user_list.html:107
+#: gvsigol_auth/templates/user_list.html:113
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrdenar descendentemente"
@@ -378,7 +377,7 @@ msgid "is staff"
 msgstr "Gestiona proyectos"
 
 #: gvsigol_auth/templates/user_list.html:65
-#: gvsigol_auth/templates/user_list.html:113
+#: gvsigol_auth/templates/user_list.html:159
 msgid "Delete user"
 msgstr "Eliminar usuario"
 
@@ -386,7 +385,7 @@ msgstr "Eliminar usuario"
 msgid "The user will be removed, Do you want continue?"
 msgstr "El usuario será eliminado, ¿Desea continuar?"
 
-#: gvsigol_auth/templates/user_list.html:117
+#: gvsigol_auth/templates/user_list.html:166
 msgid "Update user"
 msgstr "Actualizar usuario"
 
@@ -422,32 +421,32 @@ msgstr ""
 "Si no solicitaste un restablecimiento de contraseña, por favor ignora este "
 "email. Tu contraseña no cambiará."
 
-#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:172 gvsigol_auth/views.py:300
+#: gvsigol_auth/views.py:87 gvsigol_auth/views.py:173 gvsigol_auth/views.py:301
 msgid "Your account has been disabled"
 msgstr "Su cuenta ha sido deshabilitada"
 
-#: gvsigol_auth/views.py:88 gvsigol_auth/views.py:90 gvsigol_auth/views.py:174
-#: gvsigol_auth/views.py:176 gvsigol_auth/views.py:302
+#: gvsigol_auth/views.py:89 gvsigol_auth/views.py:91 gvsigol_auth/views.py:175
+#: gvsigol_auth/views.py:177 gvsigol_auth/views.py:303
 msgid "The username and password you have entered do not match our records"
 msgstr "El nombre de usuario y contraseña no coinciden"
 
-#: gvsigol_auth/views.py:251
+#: gvsigol_auth/views.py:252
 msgid "User account does not exist"
 msgstr "La cuenta de usuario no existe"
 
-#: gvsigol_auth/views.py:255
+#: gvsigol_auth/views.py:256
 msgid "That did not work"
 msgstr "Eso no funcionó"
 
-#: gvsigol_auth/views.py:306
+#: gvsigol_auth/views.py:307
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr "Token no válido. Su enlace ha caducado, debe solicitar otro."
 
-#: gvsigol_auth/views.py:395
+#: gvsigol_auth/views.py:441
 msgid "User creation failed"
 msgstr "La creación del usuario falló"
 
-#: gvsigol_auth/views.py:515
+#: gvsigol_auth/views.py:561
 msgid ""
 "The authentication server is not available. Try again later or contact "
 "system administrators."
@@ -455,7 +454,7 @@ msgstr ""
 "El servidor de autenticación no está disponible. Pruebe de nuevo más tarde o "
 "contacte a los administradores del sistema"
 
-#: gvsigol_auth/views.py:548
+#: gvsigol_auth/views.py:594
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
@@ -466,11 +465,11 @@ msgstr ""
 "comenzar con una letra o un guión bajo (_). Los caracteres subsiguientes "
 "pueden ser letras, guiones bajos o números"
 
-#: gvsigol_auth/views.py:592
+#: gvsigol_auth/views.py:638
 msgid "Admin is a reserved role"
 msgstr "Admin es un rol reservado"
 
-#: gvsigol_auth/views.py:596
+#: gvsigol_auth/views.py:642
 #, python-brace-format
 msgid ""
 "Invalid user role name: '{value}'. Identifiers must begin with a letter or "
@@ -481,7 +480,7 @@ msgstr ""
 "una letra o un guión bajo (_). Los caracteres subsiguientes pueden ser "
 "letras, guiones bajos o números"
 
-#: gvsigol_auth/views.py:621
+#: gvsigol_auth/views.py:667
 msgid "System roles can't be deleted"
 msgstr "Los roles de sistema no se pueden eliminar"
 
