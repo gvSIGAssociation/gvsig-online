@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-12 11:27+0000\n"
+"POT-Creation-Date: 2025-02-18 16:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,6 +79,7 @@ msgstr ""
 #: gvsigol_symbology/templates/custom_add.html:11
 #: gvsigol_symbology/templates/expressions_add.html:11
 #: gvsigol_symbology/templates/intervals_add.html:11
+#: gvsigol_symbology/templates/map_heat_add.html:11
 #: gvsigol_symbology/templates/unique_symbol_add.html:11
 #: gvsigol_symbology/templates/unique_values_add.html:11
 msgid "Add new style"
@@ -94,6 +95,8 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:13
 #: gvsigol_symbology/templates/intervals_add.html:13
 #: gvsigol_symbology/templates/intervals_update.html:13
+#: gvsigol_symbology/templates/map_heat_add.html:13
+#: gvsigol_symbology/templates/map_heat_update.html:13
 #: gvsigol_symbology/templates/unique_symbol_add.html:13
 #: gvsigol_symbology/templates/unique_symbol_update.html:13
 #: gvsigol_symbology/templates/unique_values_add.html:13
@@ -107,6 +110,7 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:14
 #: gvsigol_symbology/templates/intervals_add.html:14
 #: gvsigol_symbology/templates/intervals_update.html:14
+#: gvsigol_symbology/templates/map_heat_update.html:14
 #: gvsigol_symbology/templates/unique_symbol_add.html:14
 #: gvsigol_symbology/templates/unique_symbol_update.html:14
 #: gvsigol_symbology/templates/unique_values_add.html:14
@@ -134,6 +138,8 @@ msgstr ""
 #: gvsigol_symbology/templates/intervals_update.html:15
 #: gvsigol_symbology/templates/library_add.html:12
 #: gvsigol_symbology/templates/library_import.html:12
+#: gvsigol_symbology/templates/map_heat_add.html:14
+#: gvsigol_symbology/templates/map_heat_update.html:15
 #: gvsigol_symbology/templates/sld_import.html:14
 #: gvsigol_symbology/templates/symbol_add.html:11
 #: gvsigol_symbology/templates/symbol_update.html:12
@@ -174,6 +180,8 @@ msgstr ""
 #: gvsigol_symbology/templates/library_import.html:39
 #: gvsigol_symbology/templates/library_update.html:43
 #: gvsigol_symbology/templates/library_update.html:44
+#: gvsigol_symbology/templates/map_heat_add.html:24
+#: gvsigol_symbology/templates/map_heat_update.html:25
 #: gvsigol_symbology/templates/sld_import.html:40
 #: gvsigol_symbology/templates/symbol_add.html:23
 #: gvsigol_symbology/templates/symbol_update.html:23
@@ -196,6 +204,8 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:26
 #: gvsigol_symbology/templates/intervals_add.html:27
 #: gvsigol_symbology/templates/intervals_update.html:27
+#: gvsigol_symbology/templates/map_heat_add.html:25
+#: gvsigol_symbology/templates/map_heat_update.html:26
 #: gvsigol_symbology/templates/select_legend_type.html:17
 #: gvsigol_symbology/templates/unique_symbol_add.html:27
 #: gvsigol_symbology/templates/unique_symbol_update.html:26
@@ -216,6 +226,8 @@ msgstr ""
 #: gvsigol_symbology/templates/external_graphic_update.html:33
 #: gvsigol_symbology/templates/intervals_add.html:32
 #: gvsigol_symbology/templates/intervals_update.html:32
+#: gvsigol_symbology/templates/map_heat_add.html:30
+#: gvsigol_symbology/templates/map_heat_update.html:31
 #: gvsigol_symbology/templates/symbol_add.html:27
 #: gvsigol_symbology/templates/symbol_update.html:27
 #: gvsigol_symbology/templates/unique_symbol_add.html:32
@@ -235,6 +247,8 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:32
 #: gvsigol_symbology/templates/intervals_add.html:33
 #: gvsigol_symbology/templates/intervals_update.html:33
+#: gvsigol_symbology/templates/map_heat_add.html:31
+#: gvsigol_symbology/templates/map_heat_update.html:32
 #: gvsigol_symbology/templates/unique_symbol_add.html:33
 #: gvsigol_symbology/templates/unique_symbol_update.html:32
 #: gvsigol_symbology/templates/unique_values_add.html:33
@@ -250,6 +264,7 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:37
 #: gvsigol_symbology/templates/intervals_add.html:38
 #: gvsigol_symbology/templates/intervals_update.html:38
+#: gvsigol_symbology/templates/map_heat_update.html:37
 #: gvsigol_symbology/templates/unique_symbol_add.html:38
 #: gvsigol_symbology/templates/unique_symbol_update.html:37
 #: gvsigol_symbology/templates/unique_values_add.html:38
@@ -273,6 +288,8 @@ msgstr ""
 #: gvsigol_symbology/templates/intervals_add.html:43
 #: gvsigol_symbology/templates/intervals_update.html:39
 #: gvsigol_symbology/templates/intervals_update.html:43
+#: gvsigol_symbology/templates/map_heat_update.html:38
+#: gvsigol_symbology/templates/map_heat_update.html:42
 #: gvsigol_symbology/templates/unique_symbol_add.html:39
 #: gvsigol_symbology/templates/unique_symbol_add.html:43
 #: gvsigol_symbology/templates/unique_symbol_update.html:38
@@ -292,6 +309,7 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:41
 #: gvsigol_symbology/templates/intervals_add.html:42
 #: gvsigol_symbology/templates/intervals_update.html:42
+#: gvsigol_symbology/templates/map_heat_update.html:41
 #: gvsigol_symbology/templates/unique_symbol_add.html:42
 #: gvsigol_symbology/templates/unique_symbol_update.html:41
 #: gvsigol_symbology/templates/unique_values_add.html:42
@@ -307,6 +325,7 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:45
 #: gvsigol_symbology/templates/intervals_add.html:46
 #: gvsigol_symbology/templates/intervals_update.html:46
+#: gvsigol_symbology/templates/map_heat_update.html:45
 #: gvsigol_symbology/templates/unique_symbol_add.html:46
 #: gvsigol_symbology/templates/unique_symbol_update.html:45
 #: gvsigol_symbology/templates/unique_values_add.html:46
@@ -331,6 +350,9 @@ msgstr ""
 #: gvsigol_symbology/templates/intervals_add.html:52
 #: gvsigol_symbology/templates/intervals_update.html:53
 #: gvsigol_symbology/templates/intervals_update.html:55
+#: gvsigol_symbology/templates/map_heat_add.html:37
+#: gvsigol_symbology/templates/map_heat_update.html:52
+#: gvsigol_symbology/templates/map_heat_update.html:54
 #: gvsigol_symbology/templates/sld_import.html:55
 #: gvsigol_symbology/templates/unique_symbol_add.html:52
 #: gvsigol_symbology/templates/unique_symbol_update.html:52
@@ -358,6 +380,7 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:88
 #: gvsigol_symbology/templates/intervals_add.html:96
 #: gvsigol_symbology/templates/intervals_update.html:100
+#: gvsigol_symbology/templates/map_heat_update.html:96
 #: gvsigol_symbology/templates/unique_symbol_add.html:93
 #: gvsigol_symbology/templates/unique_symbol_update.html:96
 #: gvsigol_symbology/templates/unique_values_add.html:93
@@ -375,6 +398,7 @@ msgstr ""
 #: gvsigol_symbology/templates/intervals_add.html:197
 #: gvsigol_symbology/templates/intervals_update.html:105
 #: gvsigol_symbology/templates/intervals_update.html:201
+#: gvsigol_symbology/templates/map_heat_update.html:101
 #: gvsigol_symbology/templates/unique_symbol_add.html:98
 #: gvsigol_symbology/templates/unique_symbol_update.html:101
 #: gvsigol_symbology/templates/unique_values_add.html:98
@@ -390,6 +414,7 @@ msgstr ""
 #: gvsigol_symbology/templates/expressions_update.html:95
 #: gvsigol_symbology/templates/intervals_add.html:103
 #: gvsigol_symbology/templates/intervals_update.html:107
+#: gvsigol_symbology/templates/map_heat_update.html:103
 #: gvsigol_symbology/templates/unique_symbol_add.html:100
 #: gvsigol_symbology/templates/unique_symbol_update.html:103
 #: gvsigol_symbology/templates/unique_values_add.html:100
@@ -411,6 +436,7 @@ msgstr ""
 #: gvsigol_symbology/templates/intervals_update.html:126
 #: gvsigol_symbology/templates/intervals_update.html:180
 #: gvsigol_symbology/templates/intervals_update.html:238
+#: gvsigol_symbology/templates/map_heat_update.html:122
 #: gvsigol_symbology/templates/unique_symbol_add.html:119
 #: gvsigol_symbology/templates/unique_symbol_update.html:122
 #: gvsigol_symbology/templates/unique_values_add.html:119
@@ -437,6 +463,7 @@ msgstr ""
 #: gvsigol_symbology/templates/intervals_add.html:374
 #: gvsigol_symbology/templates/intervals_update.html:363
 #: gvsigol_symbology/templates/intervals_update.html:385
+#: gvsigol_symbology/templates/map_heat_add.html:303
 #: gvsigol_symbology/templates/symbol_add.html:130
 #: gvsigol_symbology/templates/symbol_update.html:118
 #: gvsigol_symbology/templates/unique_symbol_add.html:234
@@ -451,6 +478,7 @@ msgstr ""
 #: gvsigol_symbology/templates/custom_update.html:11
 #: gvsigol_symbology/templates/expressions_update.html:11
 #: gvsigol_symbology/templates/intervals_update.html:11
+#: gvsigol_symbology/templates/map_heat_update.html:11
 #: gvsigol_symbology/templates/style_layer_list.html:90
 #: gvsigol_symbology/templates/unique_symbol_update.html:11
 #: gvsigol_symbology/templates/unique_values_update.html:11
@@ -512,6 +540,7 @@ msgstr ""
 #: gvsigol_symbology/templates/library_list.html:23
 #: gvsigol_symbology/templates/library_update.html:50
 #: gvsigol_symbology/templates/library_update.html:51
+#: gvsigol_symbology/templates/map_heat_add.html:57
 msgid "Description"
 msgstr ""
 
@@ -952,8 +981,8 @@ msgstr ""
 
 #: gvsigol_symbology/templates/external_graphic_add.html:146
 #: gvsigol_symbology/templates/external_graphic_add.html:152
-#: gvsigol_symbology/views.py:986 gvsigol_symbology/views.py:1190
-#: gvsigol_symbology/views.py:1378
+#: gvsigol_symbology/views.py:1080 gvsigol_symbology/views.py:1284
+#: gvsigol_symbology/views.py:1472
 msgid "You must select a file"
 msgstr ""
 
@@ -974,6 +1003,7 @@ msgstr ""
 
 #: gvsigol_symbology/templates/intervals_add.html:66
 #: gvsigol_symbology/templates/intervals_update.html:70
+#: gvsigol_symbology/templates/map_heat_add.html:76
 #: gvsigol_symbology/templates/unique_values_add.html:66
 #: gvsigol_symbology/templates/unique_values_update.html:69
 msgid "Select field"
@@ -1003,6 +1033,39 @@ msgstr ""
 msgid "Add polygon"
 msgstr ""
 
+#: gvsigol_symbology/templates/map_heat_add.html:51
+msgid "Heatmap Name"
+msgstr "Heatmap Name"
+
+#: gvsigol_symbology/templates/map_heat_add.html:54
+msgid "Style Title"
+msgstr ""
+
+#: gvsigol_symbology/templates/map_heat_add.html:63
+msgid "Radius (pixels)"
+msgstr "Radius (pixels)"
+
+#: gvsigol_symbology/templates/map_heat_add.html:66
+msgid "Pixels per Cell"
+msgstr "Pixels per Cell"
+
+#: gvsigol_symbology/templates/map_heat_add.html:70
+#: gvsigol_symbology/templates/map_heat_add.html:87
+msgid "Use a field to weight the heatmap"
+msgstr "Use a field to weight the heatmap"
+
+#: gvsigol_symbology/templates/map_heat_add.html:89
+msgid "Number of colors"
+msgstr "Number of colors"
+
+#: gvsigol_symbology/templates/map_heat_add.html:97
+msgid "Warm Color"
+msgstr "Warm Color"
+
+#: gvsigol_symbology/templates/map_heat_add.html:110
+msgid "Cold Color"
+msgstr "Cold Color"
+
 #: gvsigol_symbology/templates/select_legend_type.html:11
 msgid "Create new style"
 msgstr ""
@@ -1020,60 +1083,68 @@ msgid "Creates a legend of unique symbol"
 msgstr ""
 
 #: gvsigol_symbology/templates/select_legend_type.html:41
+msgid "Heatmap"
+msgstr "Heatmap"
+
+#: gvsigol_symbology/templates/select_legend_type.html:42
+msgid "Create heatmap"
+msgstr "Create heatmap"
+
+#: gvsigol_symbology/templates/select_legend_type.html:50
 msgid "Unique values"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:42
+#: gvsigol_symbology/templates/select_legend_type.html:51
 msgid "Creates a legend of unique values"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:50
+#: gvsigol_symbology/templates/select_legend_type.html:59
 msgid "Intervals"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:51
+#: gvsigol_symbology/templates/select_legend_type.html:60
 msgid "Creates a legend defined by intervals"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:59
+#: gvsigol_symbology/templates/select_legend_type.html:68
 msgid "Expressions"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:60
+#: gvsigol_symbology/templates/select_legend_type.html:69
 msgid "Creates a legend defined by expressions"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:68
-#: gvsigol_symbology/templates/select_legend_type.html:99
+#: gvsigol_symbology/templates/select_legend_type.html:77
+#: gvsigol_symbology/templates/select_legend_type.html:108
 msgid "Custom"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:69
-#: gvsigol_symbology/templates/select_legend_type.html:100
+#: gvsigol_symbology/templates/select_legend_type.html:78
+#: gvsigol_symbology/templates/select_legend_type.html:109
 msgid "Creates a custom legend"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:78
+#: gvsigol_symbology/templates/select_legend_type.html:87
 msgid "Import from SLD"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:80
+#: gvsigol_symbology/templates/select_legend_type.html:89
 msgid "SLD legend description"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:90
+#: gvsigol_symbology/templates/select_legend_type.html:99
 msgid "Color table"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:91
+#: gvsigol_symbology/templates/select_legend_type.html:100
 msgid "Creates a legend for a raster layer defined by a color table"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:111
+#: gvsigol_symbology/templates/select_legend_type.html:120
 msgid "Clustered Points"
 msgstr ""
 
-#: gvsigol_symbology/templates/select_legend_type.html:112
+#: gvsigol_symbology/templates/select_legend_type.html:121
 msgid "Creates a legend for clustered points defined by expressions"
 msgstr ""
 
@@ -1123,32 +1194,35 @@ msgstr ""
 msgid "Can not delete a default style"
 msgstr ""
 
-#: gvsigol_symbology/views.py:978
+#: gvsigol_symbology/views.py:1072
 msgid "Error importing SLD"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1038 gvsigol_symbology/views.py:1063
+#: gvsigol_symbology/views.py:1132 gvsigol_symbology/views.py:1157
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1133 gvsigol_symbology/views.py:1180
-#: gvsigol_symbology/views.py:1228 gvsigol_symbology/views.py:1305
-#: gvsigol_symbology/views.py:1368 gvsigol_symbology/views.py:1508
+#: gvsigol_symbology/views.py:1227 gvsigol_symbology/views.py:1274
+#: gvsigol_symbology/views.py:1322 gvsigol_symbology/views.py:1399
+#: gvsigol_symbology/views.py:1462 gvsigol_symbology/views.py:1602
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1187 gvsigol_symbology/views.py:1375
+#: gvsigol_symbology/views.py:1281 gvsigol_symbology/views.py:1469
 msgid "You must enter a name for the library"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1193 gvsigol_symbology/views.py:1381
+#: gvsigol_symbology/views.py:1287 gvsigol_symbology/views.py:1475
 msgid "You must enter a name for the library and select a file"
 msgstr ""
 
-#: gvsigol_symbology/views.py:1388
+#: gvsigol_symbology/views.py:1482
 msgid "There is already a library with that name"
 msgstr ""
+
+#~ msgid "Use a color gradient"
+#~ msgstr "Use a color gradient"

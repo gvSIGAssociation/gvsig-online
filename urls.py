@@ -10,6 +10,9 @@ urlpatterns = [
     
     path('unique_symbol_add/<int:layer_id>/', symbology_views.unique_symbol_add, name='unique_symbol_add'),
     path('unique_symbol_update/<int:layer_id>/<int:style_id>/', symbology_views.unique_symbol_update, name='unique_symbol_update'),
+
+    path('map_heat_add/<int:layer_id>/', symbology_views.map_heat_add, name='map_heat_add'),
+    path('map_heat_update/<int:layer_id>/<int:style_id>/', symbology_views.map_heat_update, name='map_heat_update'),
     
     path('unique_values_add/<int:layer_id>/', symbology_views.unique_values_add, name='unique_values_add'),
     path('unique_values_update/<int:layer_id>/<int:style_id>/', symbology_views.unique_values_update, name='unique_values_update'),
