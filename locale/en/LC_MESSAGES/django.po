@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-11 16:52+0100\n"
+"POT-Creation-Date: 2025-02-18 16:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1265,19 +1265,19 @@ msgstr ""
 msgid "Link"
 msgstr ""
 
-#: gvsigol_core/views.py:1728 gvsigol_core/views.py:1752
+#: gvsigol_core/views.py:1726 gvsigol_core/views.py:1750
 msgid "Operation not allowed on project: "
 msgstr ""
 
-#: gvsigol_core/views.py:1747
+#: gvsigol_core/views.py:1745
 msgid "The project was successfully cloned."
 msgstr ""
 
-#: gvsigol_core/views.py:1889
+#: gvsigol_core/views.py:1887
 msgid "You must enter an application name"
 msgstr ""
 
-#: gvsigol_core/views.py:1893
+#: gvsigol_core/views.py:1891
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1285,6 +1285,6 @@ msgid ""
 "numbers"
 msgstr ""
 
-#: gvsigol_core/views.py:1897
+#: gvsigol_core/views.py:1895
 msgid "Application name already exists"
 msgstr ""

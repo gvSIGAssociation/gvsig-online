@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-11 16:52+0100\n"
+"POT-Creation-Date: 2025-02-18 16:01+0100\n"
 "PO-Revision-Date: 2023-10-16 12:57+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1289,19 +1289,19 @@ msgstr "Vista compartida"
 msgid "Link"
 msgstr "Enllaç"
 
-#: gvsigol_core/views.py:1728 gvsigol_core/views.py:1752
+#: gvsigol_core/views.py:1726 gvsigol_core/views.py:1750
 msgid "Operation not allowed on project: "
 msgstr "Operació no permesa en el projecte: "
 
-#: gvsigol_core/views.py:1747
+#: gvsigol_core/views.py:1745
 msgid "The project was successfully cloned."
 msgstr "El projecte s'ha clonat correctament."
 
-#: gvsigol_core/views.py:1889
+#: gvsigol_core/views.py:1887
 msgid "You must enter an application name"
 msgstr "Ha d'introduir un nom d'aplicació"
 
-#: gvsigol_core/views.py:1893
+#: gvsigol_core/views.py:1891
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1312,7 +1312,7 @@ msgstr ""
 "una lletra o guió baix (_). Els següents caràcters poden ser lletres, guió "
 "baix o nombres"
 
-#: gvsigol_core/views.py:1897
+#: gvsigol_core/views.py:1895
 msgid "Application name already exists"
 msgstr "El nom de l'aplicació ja existeix"
 
