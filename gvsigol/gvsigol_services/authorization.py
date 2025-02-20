@@ -116,7 +116,7 @@ class PlainAuthorizationService():
         {
             "grant" : "ALLOW",
             "catalogMode" : "CHALLENGE",
-            "cqlFilterRead" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "cql_filter_read" : "(tipo_estfc=5) OR (tipo_estfc=3)",
             "cqlFilterWrite" : "(tipo_estfc=5) OR (tipo_estfc=3)",
             "attributes" : [ {
                 "name" : "cod_est",
@@ -156,7 +156,7 @@ class PlainAuthorizationService():
         {
             "grant" : "ALLOW",
             "catalogMode" : "CHALLENGE",
-            "cqlFilterRead" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "cql_filter_read" : "(tipo_estfc=5) OR (tipo_estfc=3)",
             "attributes" : [ {
                 "name" : "cod_est",
                 "dataType" : "String",

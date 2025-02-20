@@ -100,7 +100,7 @@ def get_read_restrictions(request_or_user, layer):
         {
             "grant" : "ALLOW",
             "catalogMode" : "CHALLENGE",
-            "cqlFilterRead" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "cql_filter_read" : "(tipo_estfc=5) OR (tipo_estfc=3)",
             "attributes" : [ {
                 "name" : "cod_est",
                 "dataType" : "String",
@@ -144,7 +144,7 @@ def get_write_restrictions(request_or_user, layer):
         {
             "grant" : "ALLOW",
             "catalogMode" : "CHALLENGE",
-            "cqlFilterRead" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "cql_filter_read" : "(tipo_estfc=5) OR (tipo_estfc=3)",
             "cqlFilterWrite" : "(tipo_estfc=5) OR (tipo_estfc=3)",
             "attributes" : [ {
                 "name" : "cod_est",
