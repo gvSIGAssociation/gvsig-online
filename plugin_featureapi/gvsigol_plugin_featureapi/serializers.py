@@ -135,8 +135,6 @@ class FeatureSerializer(serializers.Serializer):
                     cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cqlFilterRead))
                 else:
                     cql_filter = sqlbuilder.SQL('')
-                params = "ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), {epsilon})), ST_NPoints({geom}) as props"
-                where = "ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {tbuffer}), {geom})"
                 sql = sqlbuilder.SQL("""
                     SELECT
                     ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), {epsilon})), ST_NPoints({geom}) as props
