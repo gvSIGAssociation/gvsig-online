@@ -102,7 +102,7 @@ class FeatureSerializer(serializers.Serializer):
     geometry = GeometrySerializer()
     properties = serializers.DictField(child=serializers.CharField())
     
-    def info_by_point(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer, cqlFilterRead=None):
+    def info_by_point(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None):
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
@@ -131,8 +131,8 @@ class FeatureSerializer(serializers.Serializer):
                 #get_buffer_params = " "
                 #if(getbuffer == True):
                 #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))"
-                if cqlFilterRead:
-                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cqlFilterRead))
+                if cql_filter_read:
+                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 sql = sqlbuilder.SQL("""
@@ -221,7 +221,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def info_by_point_without_simplify(self, validation, layer, lat, lon, source_epsg, buffer, return_geom, lang, blank, getbuffer, cqlFilterRead=None):
+    def info_by_point_without_simplify(self, validation, layer, lat, lon, source_epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None):
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
@@ -244,8 +244,8 @@ class FeatureSerializer(serializers.Serializer):
                     native_epsg = int(native_epsg)
 
                 transformed_buffer = self.get_transformed_buffer_distance(con, source_epsg, native_epsg, buffer, lon, lat)
-                if cqlFilterRead:
-                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cqlFilterRead))
+                if cql_filter_read:
+                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 sql = sqlbuilder.SQL("""
@@ -563,7 +563,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None, cqlFilterRead=None):
+    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None, cql_filter_read=None):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
@@ -573,9 +573,9 @@ class FeatureSerializer(serializers.Serializer):
             with i as con: # connection will autoclose
                 where_components = []
                 where_count_components = []
-                if cqlFilterRead:
-                    where_components.append(self._get_cql_permissions_filter(cqlFilterRead))
-                    where_count_components.append(self._get_cql_permissions_filter(cqlFilterRead))
+                if cql_filter_read:
+                    where_components.append(self._get_cql_permissions_filter(cql_filter_read))
+                    where_count_components.append(self._get_cql_permissions_filter(cql_filter_read))
                 if(date is not None):
                     #Es importante +00 para que considere que la fecha de entrada es UTC
                     date_val =  str(date) + "+00"

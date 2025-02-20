@@ -210,7 +210,7 @@ class FeaturesView(CreateAPIView):
                     raise HttpException(400, "Bad parameter filter. The value must be a string")
                     
             restrictions = validation.check_read_restrictions(lyr_id)
-            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter, restrictions.get('cqlFilterRead'))
+            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'))
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -882,9 +882,9 @@ class FeatureByPointView(ListAPIView):
             serializer = FeatureSerializer()
             result = None
             if simplify:
-                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions.get('cqlFilterRead'))
+                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
             else:
-                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cqlFilterRead=restrictions.get('cqlFilterRead'))
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
             result['infoFormat'] = 'application/geojson'
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
