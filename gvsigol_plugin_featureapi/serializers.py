@@ -1128,7 +1128,7 @@ class FeatureSerializer(serializers.Serializer):
         """
         Limits the rows available for the user according to the geoserver-acl config
         """
-        return sqlbuilder.SQL(" ( {cql_filter} )".format(cql_filter=sqlbuilder.SQL(cql_filter)))
+        return sqlbuilder.SQL(" ( {cql_filter} )").format(cql_filter=sqlbuilder.SQL(cql_filter))
 
     def _get_filter_where(self, filter):
         filter_queries = filter['filterQueries']
