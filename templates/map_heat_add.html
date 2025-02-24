@@ -45,20 +45,7 @@
 				</div>
 				<!-- Agregado el formulario para generar el SLD -->
                 <div class="row">
-						<div class="col-md-6">
-
-                        <form id="sldForm">
-                            <label for="nombre">{% trans "Heatmap Name" %}:</label>
-                            <input type="text" id="nombre" name="nombre" value="heatmap" class="form-control" required><br><br>
-
-                            <label for="titulo">{% trans "Style Title" %}:</label>
-                            <input type="text" id="titulo" name="titulo" value="Heatmap" class="form-control" required><br><br>
-
-                            <label for="abstract">{% trans "Description" %}:</label>
-                            <input type="text" id="abstract" name="abstract" value="A heatmap surface showing population density" class="form-control" required><br><br>
-
-                            
-						</div>
+						
 						<div class="col-md-6">
 							<label for="radius">{% trans "Radius (pixels)" %}:</label>
                             <input type="number" id="radius" name="radius" value="100" class="form-control" required><br><br>
@@ -77,14 +64,11 @@
 								</select>
 							</div>
 						</div>
-					</div>
 					
-						<div class="row" >
 							
-							<div class="col-md-3"></div>
 							<div class="col-md-6">
 							<!-- gradient color -->
-							<h3>{% trans "Use a field to weight the heatmap" %}</h3>
+							<h3>{% trans "Color range" %}</h3>
 							<div class="">
 								<label >{% trans "Number of colors" %}</label>
 								<input type="number" name="numCol" id="numCol"  value="0" class="form-control" required>
@@ -94,7 +78,7 @@
 								<div class="row">
 									<!-- First entry group -->
 									<div class="col-md-12">
-										<label for="color1">{% trans "Warm Color" %}</label>
+										<label for="color1">{% trans "Cold Color" %}</label>
 										<input type="color" id="color1" name="color1" value="#FFFFFF" class="form-control" required>
 									</div>
 									
@@ -107,7 +91,7 @@
 								<div class="row">
 									<!-- Second entry group -->
 									<div class="col-md-12">
-										<label for="color2">{% trans "Cold Color" %}</label>
+										<label for="color2">{% trans "Warm Color" %}</label>
 										<input type="color" id="color2" name="color2" value="#FFFFFF" class="form-control" required>
 									</div>
 									
@@ -119,7 +103,6 @@
 						</div>   
 						     
     
-                    </form>
 			</div>
 		</div>
 	</div>
@@ -208,11 +191,9 @@ $(document).ready(function() {
 
 
 	$("#save-legend").on('click', function(e){
-		if ($("#style-name").val() != '') {
 
-			const nombre = document.getElementById('nombre').value;
-        const titulo = document.getElementById('titulo').value;
-        const abstract = document.getElementById('abstract').value;
+		const nombre = document.getElementById('style-name').value;
+        const titulo = document.getElementById('style-title').value;
         const radius = document.getElementById('radius').value;
         const pixelsPerCell = document.getElementById('pixelsPerCell').value;
 
@@ -238,7 +219,7 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
         <Name>${nombre}</Name>
         <UserStyle>
           <Title>${titulo}</Title>
-          <Abstract>${abstract}</Abstract>
+          <Abstract>HeatMap</Abstract>
           <FeatureTypeStyle>
             <Transformation>
               <ogc:Function name="vec:Heatmap">
@@ -299,17 +280,13 @@ console.log(sld);
 	
 			save(layerId, sld);
 			
-		} else {
-			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
-			
-		}
+
 		
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		const nombre = document.getElementById('nombre').value;
-        const titulo = document.getElementById('titulo').value;
-        const abstract = document.getElementById('abstract').value;
+		const nombre = document.getElementById('style-name').value;
+        const titulo = document.getElementById('style-title').value;
         const radius = document.getElementById('radius').value;
         const pixelsPerCell = document.getElementById('pixelsPerCell').value;
 
@@ -335,7 +312,7 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
         <Name>${nombre}</Name>
         <UserStyle>
           <Title>${titulo}</Title>
-          <Abstract>${abstract}</Abstract>
+          <Abstract>HeatMap</Abstract>
           <FeatureTypeStyle>
             <Transformation>
               <ogc:Function name="vec:Heatmap">
