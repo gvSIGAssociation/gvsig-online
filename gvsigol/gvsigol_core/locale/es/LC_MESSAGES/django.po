@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-18 16:01+0100\n"
+"POT-Creation-Date: 2025-02-24 00:20+0100\n"
 "PO-Revision-Date: 2023-10-16 13:00+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -516,11 +516,11 @@ msgstr ""
 "Aprenda a administrar la información geográfica desde un dispositivo móvil o "
 "una tableta"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:465
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:475
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:468
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:478
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -544,7 +544,7 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:469
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
 msgid "Password"
 msgstr "Contraseña"
 
@@ -1171,91 +1171,91 @@ msgstr "Los cambios que no se hayan salvado se perdarán. ¿Continuar?"
 msgid "Error loading layers"
 msgstr "Error cargando capas"
 
-#: gvsigol_core/utils.py:448
+#: gvsigol_core/utils.py:458
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: gvsigol_core/utils.py:464
+#: gvsigol_core/utils.py:474
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: gvsigol_core/utils.py:466
+#: gvsigol_core/utils.py:476
 msgid "First name"
 msgstr "Nombre"
 
-#: gvsigol_core/utils.py:467
+#: gvsigol_core/utils.py:477
 msgid "Last name"
 msgstr "Apellidos"
 
-#: gvsigol_core/utils.py:753
+#: gvsigol_core/utils.py:763
 msgid "Navigation history"
 msgstr "Historial de navegación"
 
-#: gvsigol_core/utils.py:754
+#: gvsigol_core/utils.py:764
 msgid "Browse the view forward and backward"
 msgstr "Navega por la vista hacia adelante y hacia atrás"
 
-#: gvsigol_core/utils.py:758
+#: gvsigol_core/utils.py:768
 msgid "Zoom tools"
 msgstr "Herramientas de zoom"
 
-#: gvsigol_core/utils.py:759
+#: gvsigol_core/utils.py:769
 msgid "Zoom in, zoom out, ..."
 msgstr "Ampliar zoom, reduzir zoom, ..."
 
-#: gvsigol_core/utils.py:763
+#: gvsigol_core/utils.py:773
 msgid "Feature info"
 msgstr "Herramienta de información"
 
-#: gvsigol_core/utils.py:764
+#: gvsigol_core/utils.py:774
 msgid "Map information at point"
 msgstr "Información del mapa en el punto"
 
-#: gvsigol_core/utils.py:768
+#: gvsigol_core/utils.py:778
 msgid "Measure tools"
 msgstr "Herramientas de medida"
 
-#: gvsigol_core/utils.py:769
+#: gvsigol_core/utils.py:779
 msgid "It allows to measure areas and distances"
 msgstr "Permite medir áreas y distancias"
 
-#: gvsigol_core/utils.py:773
+#: gvsigol_core/utils.py:783
 msgid "Search coordinates"
 msgstr "Buscar coordenadas"
 
-#: gvsigol_core/utils.py:774
+#: gvsigol_core/utils.py:784
 msgid "Center the map at given coordinates"
 msgstr "Centra el mapa en unas coordenadas dadas"
 
-#: gvsigol_core/utils.py:778
+#: gvsigol_core/utils.py:788
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenadas"
 
-#: gvsigol_core/utils.py:779
+#: gvsigol_core/utils.py:789
 msgid "Transform coordinates between different systems"
 msgstr "Transforma las coordenadas entre diferentes sistemas"
 
-#: gvsigol_core/utils.py:783
+#: gvsigol_core/utils.py:793
 msgid "Geolocation"
 msgstr "Geolocalización"
 
-#: gvsigol_core/utils.py:784
+#: gvsigol_core/utils.py:794
 msgid "Center the map in the current position"
 msgstr "Centra el mapa en la posición actual"
 
-#: gvsigol_core/utils.py:788
+#: gvsigol_core/utils.py:798
 msgid "Share view"
 msgstr "Compartir vista"
 
-#: gvsigol_core/utils.py:789
+#: gvsigol_core/utils.py:799
 msgid "Allows you to share the view in its current state"
 msgstr "Permite compartir la vista en su estado actual"
 
-#: gvsigol_core/utils.py:793
+#: gvsigol_core/utils.py:803
 msgid "Select feature"
 msgstr "Seleccionar elemento"
 
-#: gvsigol_core/utils.py:794
+#: gvsigol_core/utils.py:804
 msgid "Select features from current layers"
 msgstr "Seleccionar elementos de las capas actuales"
 
@@ -1293,19 +1293,19 @@ msgstr "Vista compartida"
 msgid "Link"
 msgstr "Enlace"
 
-#: gvsigol_core/views.py:1726 gvsigol_core/views.py:1750
+#: gvsigol_core/views.py:1728 gvsigol_core/views.py:1752
 msgid "Operation not allowed on project: "
 msgstr "Operación no permitida sobre el proyecto: "
 
-#: gvsigol_core/views.py:1745
+#: gvsigol_core/views.py:1747
 msgid "The project was successfully cloned."
 msgstr "El proyecto se clonó con éxito."
 
-#: gvsigol_core/views.py:1887
+#: gvsigol_core/views.py:1889
 msgid "You must enter an application name"
 msgstr "Debe introducir un nombre de aplicación"
 
-#: gvsigol_core/views.py:1891
+#: gvsigol_core/views.py:1893
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1316,7 +1316,7 @@ msgstr ""
 "con una letra o guion bajo (_). Los siguientes caracteres pueden ser letras, "
 "guion bajo o números"
 
-#: gvsigol_core/views.py:1895
+#: gvsigol_core/views.py:1897
 msgid "Application name already exists"
 msgstr "El nombre de la aplicación ya existe"
 

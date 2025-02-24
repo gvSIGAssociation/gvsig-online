@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-18 16:01+0100\n"
+"POT-Creation-Date: 2025-02-24 00:20+0100\n"
 "PO-Revision-Date: 2023-10-16 13:15+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -25,14 +25,23 @@ msgid "Directory name"
 msgstr "Nom del directori"
 
 #: gvsigol_filemanager/templates/browser/export_to_database.html:14
+#: gvsigol_filemanager/templates/filemanager_exports_historical.html:13
+msgid "Back"
+msgstr "Enrere"
+
+#: gvsigol_filemanager/templates/browser/export_to_database.html:16
 msgid "Export"
 msgstr "Exportar"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:51
+#: gvsigol_filemanager/templates/browser/export_to_database.html:54
+msgid "Error!"
+msgstr ""
+
+#: gvsigol_filemanager/templates/browser/export_to_database.html:60
 msgid "Warning!"
 msgstr "Avís!"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:52
+#: gvsigol_filemanager/templates/browser/export_to_database.html:61
 msgid ""
 "Before exporting the shapefile check the name of the columns. Column names "
 "can not contain spaces or special characters."
@@ -40,62 +49,62 @@ msgstr ""
 "Abans d'exportar el shapefile revise el nom de les columnes. El nom de les "
 "columnes no pot contenir espais ni caràcters especials."
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:63
+#: gvsigol_filemanager/templates/browser/export_to_database.html:73
 msgid "Table creation mode"
 msgstr "Mode de creació de la taula"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:70
+#: gvsigol_filemanager/templates/browser/export_to_database.html:80
 msgid "Data store"
 msgstr "Magatzem de dades"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:77
+#: gvsigol_filemanager/templates/browser/export_to_database.html:87
 #: gvsigol_filemanager/templates/browser/filemanager_list.html:29
 msgid "Name"
 msgstr "Nom"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:81
+#: gvsigol_filemanager/templates/browser/export_to_database.html:91
 msgid "Layer will be uploaded to the selected data store"
 msgstr "La capa serà pujada al magatzem seleccionat"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:87
+#: gvsigol_filemanager/templates/browser/export_to_database.html:97
 msgid "Character encoding"
 msgstr "Codificació de caracters"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:91
+#: gvsigol_filemanager/templates/browser/export_to_database.html:101
 msgid "Coordinate reference system"
 msgstr "Sistema de referència de coordenades"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:97
+#: gvsigol_filemanager/templates/browser/export_to_database.html:107
 msgid "Preserve table structure"
 msgstr ""
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:101
+#: gvsigol_filemanager/templates/browser/export_to_database.html:111
 msgid "Primary key column"
 msgstr ""
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:105
+#: gvsigol_filemanager/templates/browser/export_to_database.html:115
 msgid "Primary key values"
 msgstr ""
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:145
+#: gvsigol_filemanager/templates/browser/export_to_database.html:155
 msgid "Default"
 msgstr "Per defecte"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:218
+#: gvsigol_filemanager/templates/browser/export_to_database.html:228
 #, fuzzy
 #| msgid "Data store"
 msgid "Data store is empty"
 msgstr "Magatzem de dades"
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:236
+#: gvsigol_filemanager/templates/browser/export_to_database.html:246
 msgid "Choose table"
 msgstr ""
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:245
+#: gvsigol_filemanager/templates/browser/export_to_database.html:255
 msgid "Service is unavailable"
 msgstr ""
 
-#: gvsigol_filemanager/templates/browser/export_to_database.html:252
+#: gvsigol_filemanager/templates/browser/export_to_database.html:262
 msgid "No valid data store selected"
 msgstr ""
 
@@ -160,10 +169,6 @@ msgstr "Històric d'exportacions"
 msgid "File manager"
 msgstr "Administrador d'arxius"
 
-#: gvsigol_filemanager/templates/filemanager_exports_historical.html:13
-msgid "Back"
-msgstr "Enrere"
-
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:23
 msgid "ID"
 msgstr ""
@@ -192,15 +197,34 @@ msgstr "Usuari"
 msgid "Try again"
 msgstr "Torna a provar"
 
-#: gvsigol_filemanager/views.py:322 gvsigol_filemanager/views.py:333
+#: gvsigol_filemanager/views.py:145
+msgid ""
+"Field '{}' contains non-ASCII characters in field name and is not suported. "
+"Rename this fields and try again. Allowed characters are a-z, A-Z, _ or "
+"numbers; the first character can't be a number."
+msgid_plural ""
+"Fields [{}] contain non-ASCII characters in field name and are not suported. "
+"Rename these fields and try again. Allowed characters are a-z, A-Z, _ or "
+"numbers; the first character can't be a number."
+msgstr[0] ""
+msgstr[1] ""
+
+#: gvsigol_filemanager/views.py:150
+msgid ""
+"The layer contains non-ASCII characters in field names and it is not "
+"suported. Rename the offending fields and try again. Allowed characters are "
+"a-z, A-Z, _ or numbers; the first character can't be a number."
+msgstr ""
+
+#: gvsigol_filemanager/views.py:341 gvsigol_filemanager/views.py:352
 msgid "Error deleting resource"
 msgstr "Error eliminant el recurs"
 
-#: gvsigol_filemanager/views.py:322
+#: gvsigol_filemanager/views.py:341
 msgid "exists in datastore"
 msgstr "Existeix en el magatzem de dades"
 
-#: gvsigol_filemanager/views.py:356
+#: gvsigol_filemanager/views.py:375
 msgid "Error unzipping resource"
 msgstr "Error descomprimint el recurs"
 

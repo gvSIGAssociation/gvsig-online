@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-18 16:01+0100\n"
+"POT-Creation-Date: 2025-02-24 00:20+0100\n"
 "PO-Revision-Date: 2023-10-16 12:57+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -512,11 +512,11 @@ msgstr ""
 "Aprenga a administrar la informació geogràfica des d'un dispositiu mòbil o "
 "una tablet"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:465
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:475
 msgid "Username"
 msgstr "Nom d'usuari"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:468
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:478
 msgid "Email"
 msgstr "Correu electrònic"
 
@@ -540,7 +540,7 @@ msgstr "Ha iniciat sessió com a usuari bàsic"
 msgid "Last login"
 msgstr "Última connexió"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:469
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:479
 msgid "Password"
 msgstr "Contrasenya"
 
@@ -1167,91 +1167,91 @@ msgstr "Els canvis no guardats es perdran. Continuar?"
 msgid "Error loading layers"
 msgstr "Error carregant capes"
 
-#: gvsigol_core/utils.py:448
+#: gvsigol_core/utils.py:458
 msgid "New user account"
 msgstr "Nou compte d'usuari"
 
-#: gvsigol_core/utils.py:464
+#: gvsigol_core/utils.py:474
 msgid "Account data"
 msgstr "Dades del compte"
 
-#: gvsigol_core/utils.py:466
+#: gvsigol_core/utils.py:476
 msgid "First name"
 msgstr "Nom"
 
-#: gvsigol_core/utils.py:467
+#: gvsigol_core/utils.py:477
 msgid "Last name"
 msgstr "Cognom"
 
-#: gvsigol_core/utils.py:753
+#: gvsigol_core/utils.py:763
 msgid "Navigation history"
 msgstr "Historial de navegació"
 
-#: gvsigol_core/utils.py:754
+#: gvsigol_core/utils.py:764
 msgid "Browse the view forward and backward"
 msgstr "Examineu la vista endavant i endarrere"
 
-#: gvsigol_core/utils.py:758
+#: gvsigol_core/utils.py:768
 msgid "Zoom tools"
 msgstr "Eines de zoom"
 
-#: gvsigol_core/utils.py:759
+#: gvsigol_core/utils.py:769
 msgid "Zoom in, zoom out, ..."
 msgstr "Zoom mès, zoom menys, ..."
 
-#: gvsigol_core/utils.py:763
+#: gvsigol_core/utils.py:773
 msgid "Feature info"
 msgstr "Eina d'informació"
 
-#: gvsigol_core/utils.py:764
+#: gvsigol_core/utils.py:774
 msgid "Map information at point"
 msgstr "Informació del mapa al punt"
 
-#: gvsigol_core/utils.py:768
+#: gvsigol_core/utils.py:778
 msgid "Measure tools"
 msgstr "Eines de mesura"
 
-#: gvsigol_core/utils.py:769
+#: gvsigol_core/utils.py:779
 msgid "It allows to measure areas and distances"
 msgstr "Permet mesurar àrees i distàncies"
 
-#: gvsigol_core/utils.py:773
+#: gvsigol_core/utils.py:783
 msgid "Search coordinates"
 msgstr "Buscar coordenades"
 
-#: gvsigol_core/utils.py:774
+#: gvsigol_core/utils.py:784
 msgid "Center the map at given coordinates"
 msgstr "Centra el mapa a les coordenades donades"
 
-#: gvsigol_core/utils.py:778
+#: gvsigol_core/utils.py:788
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenades"
 
-#: gvsigol_core/utils.py:779
+#: gvsigol_core/utils.py:789
 msgid "Transform coordinates between different systems"
 msgstr "Transformar les coordenades entre diferents sistemes"
 
-#: gvsigol_core/utils.py:783
+#: gvsigol_core/utils.py:793
 msgid "Geolocation"
 msgstr "Geolocalització"
 
-#: gvsigol_core/utils.py:784
+#: gvsigol_core/utils.py:794
 msgid "Center the map in the current position"
 msgstr "Centra el mapa a la posició actual"
 
-#: gvsigol_core/utils.py:788
+#: gvsigol_core/utils.py:798
 msgid "Share view"
 msgstr "Compartir vista"
 
-#: gvsigol_core/utils.py:789
+#: gvsigol_core/utils.py:799
 msgid "Allows you to share the view in its current state"
 msgstr "Permet compartir la vista en el seu estat actual"
 
-#: gvsigol_core/utils.py:793
+#: gvsigol_core/utils.py:803
 msgid "Select feature"
 msgstr "Seleccionar entitat"
 
-#: gvsigol_core/utils.py:794
+#: gvsigol_core/utils.py:804
 msgid "Select features from current layers"
 msgstr "Seleccioneu entitats de les capes actuals"
 
@@ -1289,19 +1289,19 @@ msgstr "Vista compartida"
 msgid "Link"
 msgstr "Enllaç"
 
-#: gvsigol_core/views.py:1726 gvsigol_core/views.py:1750
+#: gvsigol_core/views.py:1728 gvsigol_core/views.py:1752
 msgid "Operation not allowed on project: "
 msgstr "Operació no permesa en el projecte: "
 
-#: gvsigol_core/views.py:1745
+#: gvsigol_core/views.py:1747
 msgid "The project was successfully cloned."
 msgstr "El projecte s'ha clonat correctament."
 
-#: gvsigol_core/views.py:1887
+#: gvsigol_core/views.py:1889
 msgid "You must enter an application name"
 msgstr "Ha d'introduir un nom d'aplicació"
 
-#: gvsigol_core/views.py:1891
+#: gvsigol_core/views.py:1893
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1312,7 +1312,7 @@ msgstr ""
 "una lletra o guió baix (_). Els següents caràcters poden ser lletres, guió "
 "baix o nombres"
 
-#: gvsigol_core/views.py:1895
+#: gvsigol_core/views.py:1897
 msgid "Application name already exists"
 msgstr "El nom de l'aplicació ja existeix"
 
