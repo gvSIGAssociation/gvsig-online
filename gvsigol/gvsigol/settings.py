@@ -514,7 +514,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '3.9.1-dev'
+GVSIGOL_VERSION = '3.9.2-dev'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': env('DB_HOST'),
