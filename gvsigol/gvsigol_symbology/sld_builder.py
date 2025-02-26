@@ -329,8 +329,12 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                 labelplacement = LabelPlacement(symbolizer)
                 pointplacement = PointPlacement(labelplacement)
                 anchorpoint = AnchorPoint(pointplacement)
+                if geom_field['field_type'] == 'POINT' or geom_field['field_type'] == 'MULTIPOINT':
+                    anchorpoint.AnchorPointY = "-1.5"
+                else:
+                    anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
+
                 anchorpoint.AnchorPointX = str(s.textsymbolizer.anchor_point_x)
-                anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
             halo = Halo(symbolizer)
             halo.Radius = str(s.textsymbolizer.halo_radius)
             halo_fill = Fill(halo)
@@ -344,10 +348,11 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             symbolizer.create_vendoroption('autoWrap', '120')
             symbolizer.create_vendoroption('spaceAround', '0')
             symbolizer.create_vendoroption('polygonAlign', 'mbr')
+            symbolizer.create_vendoroption('partials', 'true')
             
             if geom_field['field_type'] == 'MULTILINESTRING' or geom_field['field_type'] == 'LINESTRING':
                 symbolizer.create_vendoroption('group', 'yes')
-                symbolizer.create_vendoroption('partials', 'true')
+                #symbolizer.create_vendoroption('partials', 'true')
                 symbolizer.create_vendoroption('forceLeftToRight', 'true')
                 
         elif hasattr(s, 'rastersymbolizer'):

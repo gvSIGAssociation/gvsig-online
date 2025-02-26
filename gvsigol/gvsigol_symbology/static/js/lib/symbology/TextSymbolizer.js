@@ -47,7 +47,7 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 	if(options && options.anchor_point_x != null && options.anchor_point_x != ""){
 		this.AnchorPointX = options.anchor_point_x;
 	}
-	this.AnchorPointY = -1.5;
+	this.AnchorPointY = 0.8;
 	if(options && options.anchor_point_y != null && options.anchor_point_y != ""){
 		this.AnchorPointY = options.anchor_point_y;
 	}
