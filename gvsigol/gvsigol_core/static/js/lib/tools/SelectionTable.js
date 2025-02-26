@@ -107,7 +107,7 @@ SelectionTable.prototype.removeTables = function() {
 /**
  * TODO
  */
-SelectionTable.prototype.addTable = function(features, layerName, workspace, url) {
+SelectionTable.prototype.addTable = function(features, layerName, workspace, url, layerConf) {
 	var self = this;
 	this.tabCount += 1;
 
@@ -139,14 +139,14 @@ SelectionTable.prototype.addTable = function(features, layerName, workspace, url
 	$('#selection-table-content').append(table);
 
 	var featureType = this.describeFeatureType(layerName, workspace);
-	this.createTableUI(featureType, features, layerName, workspace, url, this.tabCount);
+	this.createTableUI(featureType, features, layerName, workspace, url, this.tabCount, layerConf);
 	bottomPanel.maximizePanel();
 };
 
 /**
  * TODO
  */
-SelectionTable.prototype.createTableUI = function(featureType, features, layerName, workspace, url, tabCount) {
+SelectionTable.prototype.createTableUI = function(featureType, features, layerName, workspace, url, tabCount, layerConf) {
 
 	var self = this;
 
@@ -163,35 +163,46 @@ SelectionTable.prototype.createTableUI = function(featureType, features, layerNa
 	var table = $("<table>", {id: 'table-' + tabCount, class: 'stripe nowrap cell-border hover', style: "width: 100%;"});
 	var thead = $("<thead>", {style: "width: 100%;"});
 	var trow = $("<tr>");
+	var language = $("#select-language").val();
 	for (var i=0; i<featureType.length; i++) {
 		if (!this.isGeomType(featureType[i].type)) {
 			var featName = featureType[i].name;
-			var featType = featureType[i].type;
-
-			var visible = true;
-			if (featName == 'id' || featName == 'featureid') {
-				visible = false;
+			var columnShown = true;
+			var feat_name_trans = featName;
+			if(layerConf && layerConf["fields"] != undefined){
+				var fields = layerConf["fields"];
+				for(var ix=0; ix<fields.length; ix++){
+					if(fields[ix].name.toLowerCase() == featName){
+						if("visible" in fields[ix]){
+							columnShown = fields[ix].visible;
+						}
+						feat_name_trans = fields[ix]["title-"+language];
+					}
+				}
 			}
-			columns.push({
-				data: featName,
-				render: function ( data, type, full, meta ) {
-					var value = data;
-					if (data == "null" || data == null) {
-						value = "";
-					}
-					if(typeof data == 'boolean' && data == true){
-						value = "<input type='checkbox' checked onclick=\"return false;\">";
-					}
-					if(typeof data == 'boolean' && data == false){
-						value = "<input type='checkbox' onclick=\"return false;\">";
-					}
-					return value;
-				 },
-				 visible: visible
-			});
-
-			var th = $("<th>", {text: featName});
-			trow.append(th);
+			if (columnShown) {
+				columns.push({
+					data: featName,
+					render: function ( data, type, full, meta ) {
+						var value = data;
+						if (data == "null" || data == null) {
+							value = "";
+						}
+						if(typeof data == 'boolean' && data == true){
+							value = "<input type='checkbox' checked onclick=\"return false;\">";
+						}
+						if(typeof data == 'boolean' && data == false){
+							value = "<input type='checkbox' onclick=\"return false;\">";
+						}
+						return value;
+					},
+					visible: columnShown
+				});
+				var th = $("<th>", {text: feat_name_trans});
+					th.append($("<br>"));
+					th.append($("<span>", {text: featName, class: "subname"}));
+				trow.append(th);
+			}
 		}
 	}
 	thead.append(trow);
