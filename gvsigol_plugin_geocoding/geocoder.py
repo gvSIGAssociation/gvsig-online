@@ -1,6 +1,6 @@
 '''
     gvSIG Online.
-    Copyright (C) 2010-2017 SCOLAB.
+    Copyright (C) 2024-2030 SCOLAB.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,7 @@
 '''
 from sqlalchemy import null
 from gvsigol_plugin_geocoding.googlemaps import GoogleMaps
-'''
-@author: Javier Rodrigo <jrodrigo@scolab.es>
-'''
+
 
 from django.core.exceptions import ImproperlyConfigured
 from urllib.parse import urlparse
@@ -93,11 +91,14 @@ class Geocoder():
         for geocoder_types in self.geocoders:
             for geocoder_type in geocoder_types:
                 geocoder = geocoder_types[geocoder_type]
-                if suggestions == []:
-                    suggestions = geocoder.geocode(query, exactly_one=False)
-                else:
-                    aux = geocoder.geocode(query, exactly_one=False)
-                    suggestions = suggestions + aux
+                try:
+                    if suggestions == []:
+                        suggestions = geocoder.geocode(query, exactly_one=False)
+                    else:
+                        aux = geocoder.geocode(query, exactly_one=False)
+                        suggestions = suggestions + aux
+                except Exception as e:
+                    print(f'Error al buscar en el geocoder {geocoder_type}: {str(e)}')
                  
         response = {
             "query": query,
@@ -222,7 +223,10 @@ class Geocoder():
             for geocoder_type in geocoder_types:
                 geocoder = geocoder_types[geocoder_type]
                 if geocoder.get_type() == type:
-                    location = geocoder.find(address,exactly_one=True)
+                    try: 
+                        location = geocoder.find(address,exactly_one=True)
+                    except Exception as e:
+                        print(f'Error al obtener dirección {type}: {str(e)}')
                  
         response = {
             "address": location

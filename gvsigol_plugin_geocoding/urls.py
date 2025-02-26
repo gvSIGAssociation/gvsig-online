@@ -1,5 +1,7 @@
 from django.conf.urls import url
+from django.urls import path
 from . import views
+from . import api
 
 urlpatterns = [
     url(r'^geocoding/get_conf/$', views.get_conf, name='get_conf'),
@@ -21,6 +23,8 @@ urlpatterns = [
     
     url(r'^geocoding/get_geocoding_resource_list_available/$', views.get_geocoding_resource_list_available, name='get_geocoding_resource_list_available'),
     url(r'^geocoding/get_providers_activated/$', views.get_providers_activated, name='get_providers_activated'),
+
+    path('api/v1/etlconf/', api.LogstashView.as_view(), name='get_logstash_conf'),
 
 
 ]

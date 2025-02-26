@@ -18,7 +18,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 '''
-@author: José Badía <jbadia@scolab.es>
+Mejoras:
+Si un proveedor no responde no bloquea al resto
+Asignar proveedores por proyecto
+Creación de un proveedor que use de elastic search
+Provider genérico
 '''
 from django.utils.translation import ugettext_lazy as _
 import os
@@ -61,16 +65,15 @@ GEOCODING_PROVIDER = {
         'cod_postal_filter': ''
     },
     'nominatim': {
-        #'url': 'http://osm.gvsigonline.com/nominatim',
         'url': 'http://nominatim.openstreetmap.org',
         'country_codes': ''
     },
     'icv': {
-    'candidates_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
-    'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
-    'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?x=valorx&y=valor',
-    'country_codes': 'es'  
-},
+        'candidates_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
+        'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
+        'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?x=valorx&y=valor',
+        'country_codes': 'es'  
+    },
     'googlemaps': {
         "candidates_url": "https://maps.googleapis.com/maps/api/place/autocomplete/json?language=es&components=country:es",
         'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
@@ -84,17 +87,7 @@ GEOCODING_PROVIDER = {
         'country_codes': 'es',
         'autocancel': True,
         'max_results': 10
-    },
-
-    #     'ide_uy': {
-#         'candidates_url': 'https://callejerouy-direcciones.agesic.gub.uy//api/v1/geocode/candidates',
-#         'find_url': 'https://callejerouy-direcciones.agesic.gub.uy//api/v1/geocode/find',
-#         'reverse_url': 'https://callejerouy-direcciones.agesic.gub.uy//api/v1/geocode/reverse',  
-#         'max_results': 10,
-#         'filter': ''
-#     }
-
-    
+    }, 
     'ide_uy': {
         'candidates_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/candidates',
         'find_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/find',

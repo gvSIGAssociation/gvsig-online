@@ -32,6 +32,13 @@ def get_default_provider_icon():
     return settings.BASE_URL + '/static/img/geocoding/toponimo.png'
     #return '/gvsigonline/static/img/geocoding/toponimo.png'
 
+
+class Logstashetl(models.Model):
+    id = models.AutoField(primary_key=True)
+    type = models.CharField(max_length=150, null=False)
+    config = models.TextField(null=False)
+
+
 class Provider(models.Model):   
     type = models.CharField(max_length=100)
     category = models.CharField(max_length=100, null=True, blank=True)

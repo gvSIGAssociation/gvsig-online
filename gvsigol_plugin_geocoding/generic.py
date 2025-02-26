@@ -64,6 +64,7 @@ class GenericAPI():
                 if (json_result['address'] == None):
                     json_result['address'] = ''
                 json_result['category'] = provider.category
+                json_result['source'] = 'generic'
             
         return json_results
     
@@ -72,7 +73,9 @@ class GenericAPI():
         address = json.loads(address_str)
         print((str(address)))
         typeSearch = address['address[type]']
-        inmueble = address['address[inmueble]'] 
+
+        if('address[inmueble]' in address):
+            inmueble = address['address[inmueble]'] 
         if (inmueble != ''):
             typeSearch = "inmueble"
         
@@ -141,7 +144,9 @@ class GenericAPI():
     def get_json_from_url(url, params):
         response = requests.get(url=url, params=params, verify = True)
         if response.status_code == 200:
-            respuesta = response.content
+            respuesta = response.text
+            if respuesta.startswith('callback('):
+                respuesta = respuesta['callback('.__len__():-1]
             data = json.loads(respuesta)
             if data:
                 if 'address' in params:

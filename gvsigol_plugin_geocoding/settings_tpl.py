@@ -58,15 +58,14 @@ GEOCODING_PROVIDER = {
         'cod_postal_filter': ''
     },
     'nominatim': {
-        #'url': 'http://osm.gvsigonline.com/nominatim',
         'url': 'http://nominatim.openstreetmap.org',
         'country_codes': ''
     },
     'icv': {
-    'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10&&query=loriguilla',
-    'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php',
-    'country_codes': 'es'  
-},
+        'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10&&query=loriguilla',
+        'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php',
+        'country_codes': 'es'  
+    },
     'googlemaps': {        
         "candidates_url": "https://maps.googleapis.com/maps/api/place/autocomplete/json?language=es&components=country:es",
         'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
@@ -81,8 +80,6 @@ GEOCODING_PROVIDER = {
         'autocancel': True,
         'max_results': 10
     },
-    # http://callejerouy2-direcciones.paas.red.uy/api/v1/geocode/candidates?limit=10&q=general%20ordo%C3%B1ez%2C%20montevideo&soloLocalidad=false
-    # Direccion interna de OpenShift
     'ide_uy': {
         'candidates_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/candidates',
         'find_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/find',
@@ -101,17 +98,6 @@ GEOCODING_PROVIDER = {
         'autocancel': True,
         'max_results': 10
     },
-
-    
-    #'ide_uy': {
-    #    'candidates_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/candidates',
-    #    'find_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/find',
-    #    'reverse_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/reverse',  
-    #    'max_results': 10,
-    #    'filter': ''
-    #}
-    
-
 }
 
 # STATIC_URL = '/gvsigonline/static/'
