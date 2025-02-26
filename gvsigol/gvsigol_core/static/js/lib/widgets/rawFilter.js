@@ -164,28 +164,29 @@ RawFilter.prototype.registerEvents = function() {
 		var language = $("#select-language").val();
 		
 		var hasFields = false;
+		var feat_name, feat_name_trans;
 		for (var i=0; i < fields.length; i++) {
 			hasFields = true;
 			if (fields[i].type != 'date' && fields[i].type != 'timestamp' && fields[i].type != 'timestamp with time zone' && fields[i].name != 'wkb_geometry' && fields[i].name != 'geometry' && fields[i].name != 'geom' && fields[i].name != 'modified_by' && fields[i].name != 'last_modification' && fields[i].name != 'feat_version_gvol' && fields[i].name != 'id') {
 				
-				feat_name = fields[i].name
+				feat_name = fields[i].name;
+				feat_name_trans = feat_name;
 				
 				if(fields_trans != null && fields_trans["fields"] != undefined){
 					var fs = fields_trans["fields"];
 					for(var ix=0; ix<fs.length; ix++){
-						if(fields[ix].name.toLowerCase() == feat_name){
+						if(fs[ix].name.toLowerCase() == feat_name){
 							if("visible" in fs[ix]){
 								column_shown = fs[ix].visible;
 							}
-							var feat_name_trans = fs[ix]["title-"+language];
-							if(feat_name_trans){
-								feat_name = feat_name_trans
+							if (fs[ix]["title-"+language]) {
+								feat_name_trans = fs[ix]["title-"+language];
 							}
 						}
 					}
 				}
 				
-				$("#rawfilter-field").append('<option data-layer="' + layer  + '" data-workspace="' + workspace  + '" data-type="' + fields[i].type  + '" value="' + fields[i].name  + '">' + feat_name  + '</option>');
+				$("#rawfilter-field").append('<option data-layer="' + layer  + '" data-workspace="' + workspace  + '" data-type="' + fields[i].type  + '" value="' + feat_name  + '">' + feat_name_trans  + '</option>');
 			}
 		}
 		
