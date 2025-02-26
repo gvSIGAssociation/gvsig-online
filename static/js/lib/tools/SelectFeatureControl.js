@@ -182,7 +182,7 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 					if (!self.selectionTable) {
 						self.selectionTable = new SelectionTable(self.map);
 					}
-					self.selectionTable.addTable(tableFeatures, qLayer.layer_name, qLayer.workspace, qLayer.wfs_url);
+					self.selectionTable.addTable(tableFeatures, qLayer.layer_name, qLayer.workspace, qLayer.wfs_url, qLayer.conf);
 					self.selectionTable.show();
 					self.selectionTable.registerEvents();
 					
