@@ -5586,6 +5586,7 @@ def trans_Stats(dicc):
     table_name_target = dicc['id']
 
     attr = dicc['attr']
+    groupby = dicc['group-by-attr']
 
     conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
@@ -5606,17 +5607,26 @@ def trans_Stats(dicc):
     stats_queries.append(f"MODE() WITHIN GROUP (ORDER BY {attr}) AS _mode")
     stats_queries.append(f"STDDEV({attr}) AS _desv")
 
+    _sql = "CREATE TABLE {}.{} AS SELECT {} FROM {}.{}"
+    
+    if groupby != '-':
+        stats_queries.append(f"{groupby}")
+    
     stats_sql = ", ".join(stats_queries)
-
+    
     sqlCreate = sql.SQL(
-        "CREATE TABLE {}.{} AS SELECT {} FROM {}.{}"
+        _sql
     ).format(
         sql.Identifier(GEOETL_DB["schema"]),
         sql.Identifier(table_name_target),
         sql.SQL(stats_sql),
         sql.Identifier(GEOETL_DB["schema"]),
-        sql.Identifier(table_name_source)
+        sql.Identifier(table_name_source),
+        sql.Identifier(groupby)
     )
+    
+    if groupby != '-':
+        sqlCreate = sqlCreate + sql.SQL(" GROUP BY {}").format(sql.Identifier(groupby))
 
     cur.execute(sqlCreate)
     conn.commit()   

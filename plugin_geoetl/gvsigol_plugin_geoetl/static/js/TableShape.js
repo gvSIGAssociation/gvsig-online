@@ -8021,6 +8021,10 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div>'+
+                                '<label class="col-form-label">'+gettext('Group by:')+gettext('Optional')+'</label>'+
+                                '<select class="form-control" id="group-by-attr-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<div>'+
                                 '<label form="attr" class="col-form-label">'+gettext('Numeric attribute')+':</label>'+
                                 '<select class="form-control" id="attr-'+ID+'"> </select>'+
                             '</div>'+
@@ -8055,15 +8059,18 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
                 //get schema from the edge
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                //if edge schema and old schema is not the same is the first time you open parameters or
-                //something was changed in the edge so we hace to create a new schema option
+                schemaEdge = ['-'].concat(schemaEdge)
+
                 if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
                     schema = schemaEdge
                     $('#attr-'+ID).empty()
+                    $('#group-by-attr-'+ID).empty()
 
                     for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                        if(schema[i] != '-'){
+                            $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                        }
+                        $('#group-by-attr-'+ID).append('<option>'+schema[i]+'</option>')
                     }
                 }
 
@@ -8076,22 +8083,28 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
         $('#stats-accept-'+ID).click(function() {
 
             //parameters selected to json
-            var paramsWktGeom = {"id": ID,
+            var paramsStats = {"id": ID,
             "parameters": [
-            {"attr": $('#attr-'+ID).val()}
+            {"attr": $('#attr-'+ID).val(),
+            "group-by-attr":  $('#group-by-attr-'+ID).val()
+            }
             ]}
 
             schemaMod =['_max', '_min', '_count', '_sum', '_mean', '_median', '_mode', '_desv']
+            
+            if ($('#group-by-attr-'+ID).val() != '-'){
+                schemaMod = [$('#group-by-attr-'+ID).val()].concat(schemaMod)
+            }
 
             //updating schema-old and schema parameters in json
-            paramsWktGeom['schema-old'] = schemaEdge
-            paramsWktGeom['schema'] = schemaMod
+            paramsStats['schema-old'] = schemaEdge
+            paramsStats['schema'] = schemaMod
 
             //add the schema to a later edge if it exists
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             
             //check if parameters are already in json canvas
-            isAlreadyInCanvas(jsonParams, paramsWktGeom, ID)
+            isAlreadyInCanvas(jsonParams, paramsStats, ID)
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
