@@ -98,6 +98,10 @@ GEOCODING_PROVIDER = {
         'autocancel': True,
         'max_results': 10
     },
+    'user_data':{
+        'autocancel': True,
+        'max_results': 10
+    },
 }
 
 # STATIC_URL = '/gvsigonline/static/'

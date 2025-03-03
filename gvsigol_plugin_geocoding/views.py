@@ -43,6 +43,7 @@ from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
+from logstash_etl_intput import create_elt_input
 from time import time
 import logging
 logger = logging.getLogger("gvsigol")
@@ -112,7 +113,7 @@ def provider_add(request):
                         'filter' : ''
                     }
 
-            elif type=='cartociudad' or type=='user' or type=='postgres':
+            elif type=='cartociudad' or type=='user' or type=='postgres' or type=='user_data':
                 if 'params' in request.POST:
                     params = json.loads(request.POST.get('params'))
                 workspace = request.POST.get('workspace')
@@ -121,10 +122,11 @@ def provider_add(request):
                 ws = Workspace.objects.get(id=workspace)
                 ds = Datastore.objects.filter(workspace=ws, name=datastore).first()
 
-                if type=='user' or type=='postgres':
+                if type=='user' or type=='postgres' or type=='user_data':
                     resource = request.POST.get('resource')
                     id_field = request.POST.get('id_field')
                     text_field = request.POST.get('text_field')
+                    textalt_field = request.POST.get('textalt_field')
                     geom_field = request.POST.get('geom_field')
 
                     params = {
@@ -132,6 +134,7 @@ def provider_add(request):
                         'resource': str(resource),
                         'id_field': str(id_field),
                         'text_field': str(text_field),
+                        'textalt_field': str(textalt_field),
                         'geom_field': str(geom_field)
                     }
                 
@@ -173,6 +176,9 @@ def provider_add(request):
 
                 if newProvider.type == 'nominatim' or newProvider.type == 'googlemaps' or newProvider.type == 'icv' or newProvider.type == 'new_cartociudad':
                     return redirect('provider_list')
+                
+                if newProvider.type == 'user_data':
+                    create_elt_input(params)
 
                 return redirect('provider_update', provider_id=newProvider.pk)
             
@@ -339,25 +345,31 @@ def provider_update(request, provider_id):
             form.fields['reverse_url'].initial = params["reverse_url"]
             form.fields['max_results'].initial = params["max_results"]
         
-        if provider.type == 'user' or provider.type == 'cartociudad' or provider.type == 'postgres':
+        if provider.type == 'user' or provider.type == 'cartociudad' or provider.type == 'postgres' or provider.type == 'user_data':
             datastore_id = params["datastore_id"]
             datastore = Datastore.objects.get(id=datastore_id)
             
             form.fields['workspace'].initial = datastore.workspace.name
             form.fields['datastore'].initial = datastore.name
-            if provider.type == 'user' or provider.type == 'postgres':
+            if provider.type == 'user' or provider.type == 'postgres' or provider.type == 'user_data':
                 form.fields['resource'].initial = params["resource"]
                 form.fields['id_field'].initial = params["id_field"]
                 form.fields['text_field'].initial = params["text_field"]
                 form.fields['geom_field'].initial = params["geom_field"]
+
+            if provider.type == 'user_data':
+                form.fields['textalt_field'].initial = params["textalt_field"]
             
             if params and 'datastore_id' in params:
                 ds = Datastore.objects.get(id=params['datastore_id'])
                 workspace_id = ds.workspace.id
                 workspace = ds.workspace.name
                 datastore = ds.name
+                
             if params and 'resource' in params:
                 resource = params['resource']
+
+            
             
         form.fields['params'].initial = provider.params
     
@@ -556,6 +568,8 @@ def set_providers_to_geocoder():
     geocoder = Geocoder()
     for provider in providers:
         geocoder.add_provider(provider)
+
+
         
 def get_geocoder():
     global geocoder

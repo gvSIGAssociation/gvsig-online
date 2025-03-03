@@ -40,7 +40,9 @@ class ProviderForm(forms.ModelForm):
     resource = forms.ModelChoiceField(label=_('Resource'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
 
     id_field = forms.ModelChoiceField(label=_('Id'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    textalt_field = forms.ModelChoiceField(label=_('Textalt'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     text_field = forms.ModelChoiceField(label=_('Text'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+   
     geom_field = forms.ModelChoiceField(label=_('Geom'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
 
     category = forms.CharField(label=_('Category'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
@@ -66,6 +68,7 @@ class ProviderUpdateForm(forms.ModelForm):
 
     id_field = forms.ModelChoiceField(label=_('Id'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
     text_field = forms.ModelChoiceField(label=_('Text'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    textalt_field = forms.ModelChoiceField(label=_('Textalt'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
     geom_field = forms.ModelChoiceField(label=_('Geom'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
  
     category = forms.CharField(label=_('Category'),  required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))

@@ -30,6 +30,7 @@ from .ide_uy import IdeUY
 from .icv import icv
 from .uy_sudir import UY_SuDIR
 from .generic import GenericAPI
+from .geocoder_user_data import GeocoderUserData
 import json, ast
 from .models import Provider
 
@@ -83,6 +84,10 @@ class Geocoder():
 
         if provider.type == 'uy_sudir':
             geocoder[provider.type] = UY_SuDIR(provider)
+            self.geocoders.append(geocoder)
+
+        if provider.type == 'user_data':
+            geocoder[provider.type] = GeocoderUserData(provider)
             self.geocoders.append(geocoder)
         
           

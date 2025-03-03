@@ -84,7 +84,7 @@
 						</div>	
 
 						
-						<div class="row user-param cartociudad-param postgres-param hidden">
+						<div class="row user-param user_data-param cartociudad-param postgres-param hidden">
 							<div class="col-md-12 form-group">	
 								<label for="id_workspace">{% trans "Workspace" %}</label>
 								{{ form.workspace }}									
@@ -93,7 +93,7 @@
 							<input type="hidden" id="provider-workspace" name="provider-workspace" value="{{ workspace_name }}"/>
 						</div>
 						
-						<div class="row user-param cartociudad-param hidden">
+						<div class="row user-param user_data-param cartociudad-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_datastore">{% trans "Data Store" %}</label>
 								{{ form.datastore }}						
@@ -101,7 +101,7 @@
 							<input type="hidden" id="provider-datastore" name="provider-datastore" value="{{ datastore }}"/>
 						</div>
 										
-						<div class="row user-param postgres-param hidden">
+						<div class="row user-param user_data-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_resource">{% trans "Resource name" %}</label>
 								{{ form.resource }}						
@@ -117,15 +117,23 @@
 							<input type="hidden" id="provider-id_field" name="provider-id_field" value="{{ form.id_field.value|default_if_none:"" }}"/>
 						</div>	
 						
-						<div class="row user-param postgres-param hidden">
+						<div class="row user-param user_data-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_text_field">{% trans "Text Field" %}</label>
 								{{ form.text_field }}						
 							</div>
 							<input type="hidden" id="provider-text_field" name="provider-text_field" value="{{  form.text_field.value|default_if_none:"" }}"/>
 						</div>	
+
+						<div class="row user_data-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_textalt_field">{% trans "Text Field Alt" %}</label>
+								{{ form.textalt_field }}						
+							</div>
+							<input type="hidden" id="provider-textalt_field" name="provider-textalt_field" value="{{  form.textalt_field.value|default_if_none:"" }}"/>
+						</div>	
 						
-						<div class="row user-param postgres-param hidden">
+						<div class="row user-param postgres-param user_data-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_geom_field">{% trans "Geom Field" %}</label>
 								{{ form.geom_field }}						
@@ -171,7 +179,7 @@
 				</form>	
 				
 				
-				{% if type != "nominatim" and type != "googlemaps" and type != "icv" and type != "new_cartociudad" and type != "ide_uy" %}
+				{% if type != "nominatim" and type != "googlemaps" and type != "icv" and type != "new_cartociudad" and type != "ide_uy" and type != "user_data" %}
 					<div class="box-header process-title">
 								<h3 class="title">{% trans "Import process status" %}</h3>
 						</div>
@@ -613,15 +621,16 @@
 		var ws_id = $("#provider-workspace-id").val();
 		var ds_name = $("#provider-datastore").val();
 		
-		if(type=="user" || type == 'postgres'){
+		if(type=="user" || type == 'postgres' || type == 'user_data'){
 			var resource = $("#provider-resource").val();
 			updateResourceList(ws_id, ds_name, resource);
  			updateFieldsList(ws_id, ds_name, resource, "id_id_field", params["id_field"]);
  			updateFieldsList(ws_id, ds_name, resource, "id_text_field", params["text_field"]);
+			updateFieldsList(ws_id, ds_name, resource, "id_textalt_field", params["textalt_field"]);
  			updateFieldsList(ws_id, ds_name, resource, "id_geom_field", params["geom_field"]);
 		}
 		
-		if(type=="user" || type=="cartociudad" || type == 'postgres'){
+		if(type=="user" || type=="cartociudad" || type == 'postgres' || type == 'user_data'){
 			$("#id_category").prop("disabled", "disabled");
 		}
 		

@@ -45,6 +45,7 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('generic', _('Generic API Service Geocoder')),
                 ('icv', _('ICV services')),
                 ('uy_sudir', _('Direcciones Uruguay Geocoder')),
+                ('user_data', _('Datos de usuario (Elasticsearch)')),
             )
 
 GEOCODING_PROVIDER = {
@@ -106,7 +107,10 @@ GEOCODING_PROVIDER = {
         'autocancel': True,
         'max_results': 10
     },
-
+    'user_data':{
+        'autocancel': True,
+        'max_results': 10
+    },
     
 }
 
