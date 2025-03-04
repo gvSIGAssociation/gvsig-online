@@ -43,7 +43,7 @@ from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
-from logstash_etl_intput import create_elt_input
+from gvsigol_plugin_geocoding.logstash_etl_intput import create_user_data_elt_input
 from time import time
 import logging
 logger = logging.getLogger("gvsigol")
@@ -178,7 +178,8 @@ def provider_add(request):
                     return redirect('provider_list')
                 
                 if newProvider.type == 'user_data':
-                    create_elt_input(params)
+                    ds = Datastore.objects.get(id=params['datastore_id'])
+                    create_user_data_elt_input(params, ds.name, newProvider.id)
 
                 return redirect('provider_update', provider_id=newProvider.pk)
             

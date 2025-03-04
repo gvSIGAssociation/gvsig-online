@@ -37,6 +37,7 @@ class Logstashetl(models.Model):
     id = models.AutoField(primary_key=True)
     type = models.CharField(max_length=150, null=False)
     config = models.TextField(null=False)
+    provider_id = models.IntegerField()
 
 
 class Provider(models.Model):   
