@@ -173,7 +173,12 @@
 							</div>
 						</div>
 	
-						
+						<div class="row user_data-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="params">{% trans "Connection params" %} Elasticsearch</label>
+								{{ form.params }}						
+							</div>
+						</div>	
 							
 					</div>	
 				</form>	
@@ -303,11 +308,29 @@
 	window.GOL = window.GOL || {};
 	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
 	window.GOL.DS_ADD.dstypeChanged = function(type) {
-		codemirror.setValue('');		
-		var code = params;
-		$('#select-file-row').css('display', 'none');
-		$('#connection-params-row').css('display', 'block');
-		codemirror.setValue(JSON.stringify(code, null, "\t"));
+
+		if(type == 'user_data') {
+			let params = document.getElementById('id_params');
+			let mirror = CodeMirror.fromTextArea(params, {
+				value: "",
+				mode:  "javascript",
+				theme: "xq-dark",
+				lineNumbers: true
+			});
+			let code = '{ \n';
+			code += '\t "host": "gvsigol-elasticsearch", \n';
+			code += '\t "port": "9200", \n';
+			code += '\t "user": "elastic", \n';
+			code += '\t "passwd": "q_PTuapY=xO-ECb9YAP9", \n';
+			code += '}';
+			mirror.setValue(code);
+		} else {
+			codemirror.setValue('');		
+			var code = params;
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			codemirror.setValue(JSON.stringify(code, null, "\t"));
+		}
 	
 	}
 	
@@ -627,6 +650,7 @@
  			updateFieldsList(ws_id, ds_name, resource, "id_id_field", params["id_field"]);
  			updateFieldsList(ws_id, ds_name, resource, "id_text_field", params["text_field"]);
 			updateFieldsList(ws_id, ds_name, resource, "id_textalt_field", params["textalt_field"]);
+			updateFieldsList(ws_id, ds_name, resource, "id_params", params["elastic_params"]);
  			updateFieldsList(ws_id, ds_name, resource, "id_geom_field", params["geom_field"]);
 		}
 		
@@ -640,6 +664,7 @@
 			var id_resource = $('option:selected', $(this)).val();
 			updateFieldsList(ws_id, ds_name, id_resource, "id_id_field", "");
 			updateFieldsList(ws_id, ds_name, id_resource, "id_text_field", "");
+			updateFieldsList(ws_id, ds_name, id_resource, "id_params", "");
 			updateFieldsList(ws_id, ds_name, id_resource, "id_geom_field", "");
 		});
 		

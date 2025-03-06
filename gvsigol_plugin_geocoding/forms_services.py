@@ -51,6 +51,7 @@ class ProviderForm(forms.ModelForm):
     find_url = forms.CharField(label=_('Find URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     reverse_url = forms.CharField(label=_('Reverse URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     max_results = forms.CharField(label=_('Limit'), required=False, max_length=3, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    connection_params = forms.CharField(label=_('Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
 
 class ProviderUpdateForm(forms.ModelForm):
@@ -77,5 +78,6 @@ class ProviderUpdateForm(forms.ModelForm):
     find_url = forms.CharField(label=_('Find URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     reverse_url = forms.CharField(label=_('Reverse URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     max_results = forms.CharField(label=_('Limit'), required=False, max_length=3, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    connection_params = forms.CharField(label=_('Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
     

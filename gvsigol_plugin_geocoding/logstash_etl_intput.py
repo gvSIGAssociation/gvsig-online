@@ -63,4 +63,4 @@ def create_user_data_elt_input(params, schema, provider_id):
 
 
 def delete_user_data_elt_input(provider_id):
-    Logstashetl.objects.get(provider_id=provider_id).delete()
+    Logstashetl.objects.filter(provider_id=provider_id).delete()

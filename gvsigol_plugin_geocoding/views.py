@@ -132,6 +132,7 @@ def provider_add(request):
                         'id_field': str(id_field),
                         'text_field': str(text_field),
                         'textalt_field': str(textalt_field),
+                        'es_params': params,
                         'geom_field': str(geom_field)
                     }
                 
@@ -285,17 +286,19 @@ def provider_update(request, provider_id):
                 'filter' : ''
             }
 
-        if type=='cartociudad' or type=='user' or type=='postgres':
+        if type=='cartociudad' or type=='user' or type=='postgres' or type == 'user_data':
             workspace = request.POST.get('provider-workspace')
             datastore = request.POST.get('provider-datastore')
 
             ws = Workspace.objects.filter(name=workspace).first()
             ds = Datastore.objects.filter(workspace=ws, name=datastore).first()
 
-            if type=='user':
+            if type=='user' or type=='user_data':
                 resource = request.POST.get('provider-resource')
                 id_field = request.POST.get('provider-id_field')
                 text_field = request.POST.get('provider-text_field')
+                textalt_field = request.POST.get('provider-textalt_field')
+                es_params = request.POST.get('provider-params')
                 geom_field = request.POST.get('provider-geom_field')
 
                 params = {
@@ -303,6 +306,7 @@ def provider_update(request, provider_id):
                     'resource': str(resource),
                     'id_field': str(id_field),
                     'text_field': str(text_field),
+                    'es_params': str(es_params),
                     'geom_field': str(geom_field)
                 }
             
@@ -368,8 +372,10 @@ def provider_update(request, provider_id):
                 resource = params['resource']
 
             
-            
-        form.fields['params'].initial = provider.params
+        if provider.type == 'user_data':
+            form.fields['params'].initial = params["es_params"]
+        else:
+            form.fields['params'].initial = provider.params
     
     image_url = os.path.join(core_settings.BASE_URL + core_settings.STATIC_URL, 'img/geocoding/toponimo.png');
     #image_url = '../static/img/geocoding/toponimo.png'
@@ -382,7 +388,7 @@ def provider_update(request, provider_id):
         
     context = {
         'form': form, 
-        'params': provider.params, 
+        'params': provider.params if provider.type != 'user_data' else json.dumps(params["es_params"]), 
         'type': provider.type, 
         'provider_id': provider_id, 
         'image_photo_url': image_url,

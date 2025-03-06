@@ -154,6 +154,13 @@
 								</div>			
 							</div>
 						</div>
+
+						<div class="row user_data-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="params">{% trans "Connection params" %} Elasticsearch</label>
+								{{ form.params }}						
+							</div>
+						</div>	
 							
 					</div>	
 				</form>		
@@ -186,15 +193,29 @@
 	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
 	window.GOL.DS_ADD.dstypeChanged = function(type) {
 		
-		codemirror.setValue('');		
-		var code = '';
-		
-		$('#select-file-row').css('display', 'none');
-		$('#connection-params-row').css('display', 'block');
-		code += JSON.stringify(settings[type], null, "\t");
-			
-		codemirror.setValue(code);
-	
+		if(type == 'user_data') {
+			let params = document.getElementById('id_params');
+			let mirror = CodeMirror.fromTextArea(params, {
+				value: "",
+				mode:  "javascript",
+				theme: "xq-dark",
+				lineNumbers: true
+			});
+			let code = '{ \n';
+			code += '\t "host": "gvsigol-elasticsearch", \n';
+			code += '\t "port": "9200", \n';
+			code += '\t "user": "elastic", \n';
+			code += '\t "passwd": "mypassword" \n';
+			code += '}';
+			mirror.setValue(code);
+		} else {
+			codemirror.setValue('');		
+			var code = '';	
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			code += JSON.stringify(settings[type], null, "\t");
+			codemirror.setValue(code);
+		}
 	}
 	
 	$('.save-button').click( function() {
@@ -425,14 +446,16 @@
 		updateFieldsList(id_workspace, id_datastore, id_resource, "id_id_field");
 		updateFieldsList(id_workspace, id_datastore, id_resource, "id_text_field");
 		updateFieldsList(id_workspace, id_datastore, id_resource, "id_textalt_field");
+		updateFieldsList(id_workspace, id_datastore, id_resource, "id_params");
 		updateFieldsList(id_workspace, id_datastore, id_resource, "id_geom_field");
 		
 		var text = null;
 		rebuildSelect($("#id_datastore"), text, false);
 		rebuildSelect($("#id_resource"), text, false);
 		rebuildSelect($("#id_id_field"), text, false);
-		rebuildSelect($("#id_text_field"), text, false);
+		rebuildSelect($("#id_params"), text, false);
 		rebuildSelect($("#id_textalt_field"), text, false);
+		rebuildSelect($("#id_params"), text, false);
 		rebuildSelect($("#id_geom_field"), text, false);
 		
 		updateForm($('#id_type').val());
@@ -452,6 +475,7 @@
 			updateFieldsList(id_workspace, id_datastore, id_resource, "id_id_field");
 			updateFieldsList(id_workspace, id_datastore, id_resource, "id_text_field");
 			updateFieldsList(id_workspace, id_datastore, id_resource, "id_textalt_field");
+			updateFieldsList(id_workspace, id_datastore, id_resource, "id_params");
 			updateFieldsList(id_workspace, id_datastore, id_resource, "id_geom_field");
 		});
 		
