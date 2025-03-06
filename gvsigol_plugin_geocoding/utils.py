@@ -2,7 +2,7 @@
 
 '''
     gvSIG Online.
-    Copyright (C) 2010-2017 SCOLAB.
+    Copyright (C) SCOLAB.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 from geoserver.workspace import Workspace
 from .models import Provider
 from gvsigol_services.models import Datastore

@@ -2,7 +2,7 @@
 
 '''
     gvSIG Online.
-    Copyright (C) 2010-2017 Scolab Software Colaborativo S.L.
+    Copyright (C) Scolab Software Colaborativo S.L.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-'''
-@author: José Badía <jbadia@scolab.es>
-'''
+
 from django.utils.translation import ugettext_lazy as _
 import os
 

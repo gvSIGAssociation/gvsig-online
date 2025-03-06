@@ -1,6 +1,6 @@
 '''
     gvSIG Online.
-    Copyright (C) 2024-2030 SCOLAB.
+    Copyright (C) SCOLAB.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 from sqlalchemy import null
 from gvsigol_plugin_geocoding.googlemaps import GoogleMaps
 

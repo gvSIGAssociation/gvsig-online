@@ -2,7 +2,7 @@
 
 '''
     gvSIG Online.
-    Copyright (C) 2010-2017 SCOLAB.
+    Copyright (C) SCOLAB.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,13 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-'''
-Mejoras:
-Si un proveedor no responde no bloquea al resto
-Asignar proveedores por proyecto
-Creación de un proveedor que use de elastic search
-Provider genérico
-'''
+
 from django.utils.translation import ugettext_lazy as _
 import os
 
