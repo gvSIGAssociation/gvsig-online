@@ -38,6 +38,7 @@ from gvsigol_services.views import backend_resource_list_available,\
 from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from .logstash_etl_intput import delete_user_data_elt_input
 
 from gvsigol_plugin_geocoding.logstash_etl_intput import create_user_data_elt_input
 from time import time
@@ -414,6 +415,7 @@ def provider_update_order(request, provider_id, order):
 def provider_delete(request, provider_id):
     try:
         provider = Provider.objects.get(pk=provider_id)
+        delete_user_data_elt_input(provider_id)
         if delete_XML_config(provider):
             remove_solr_data(provider)
             remove_solr_config(provider)
