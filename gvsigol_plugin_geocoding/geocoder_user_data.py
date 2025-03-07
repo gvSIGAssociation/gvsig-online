@@ -40,6 +40,7 @@ class GeocoderUserData():
         self.providers=[]
         self.set_database_config(provider)
         self.providers.append(provider)
+        json.dumps(provider.params)
 
     def __del__(self):
         for p in self.providers:

@@ -57,7 +57,7 @@ class Provider(models.Model):
         values = dict(geocoding_setting.GEOCODING_SUPPORTED_TYPES).get(self.type)
         cadena = str(values)
         
-        if self.type == 'googlemaps' or self.type == 'nominatim' or self.type == 'new_cartociudad' or self.type == 'ide_uy' or self.type == 'uy_sudir':
+        if self.type == 'googlemaps' or self.type == 'nominatim' or self.type == 'new_cartociudad' or self.type == 'ide_uy' or self.type == 'uy_sudir' or self.type == 'user_data':
             return cadena
         
         params = json.loads(self.params)

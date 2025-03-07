@@ -112,7 +112,10 @@ def provider_add(request):
 
             elif type=='cartociudad' or type=='user' or type=='postgres' or type=='user_data':
                 if 'params' in request.POST:
-                    params = json.loads(request.POST.get('params'))
+                    try:
+                        params = json.loads(request.POST.get('params'))
+                    except Exception as e:
+                        pass
                 workspace = request.POST.get('workspace')
                 datastore = request.POST.get('datastore')
 
@@ -260,7 +263,7 @@ def provider_update(request, provider_id):
         form = ProviderUpdateForm(request.POST)
         
         type = request.POST.get('provider-type')
-        if type!='cartociudad' and type!='user' and type != 'postgres':
+        if type!='cartociudad' and type!='user' and type != 'postgres' and type != 'user_data': 
             provider.category = request.POST['category']
         if request.FILES.get('image'):
             provider.image = request.FILES.get('image')  
@@ -306,6 +309,7 @@ def provider_update(request, provider_id):
                     'resource': str(resource),
                     'id_field': str(id_field),
                     'text_field': str(text_field),
+                    'textalt_field': str(textalt_field),
                     'es_params': str(es_params),
                     'geom_field': str(geom_field)
                 }
@@ -388,7 +392,8 @@ def provider_update(request, provider_id):
         
     context = {
         'form': form, 
-        'params': provider.params if provider.type != 'user_data' else json.dumps(params["es_params"]), 
+        'params': provider.params, 
+        'es_params': json.dumps(params["es_params"]) if provider.type == 'user_data' else "{}", 
         'type': provider.type, 
         'provider_id': provider_id, 
         'image_photo_url': image_url,
