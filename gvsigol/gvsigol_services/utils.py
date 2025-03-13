@@ -721,6 +721,8 @@ def set_time_enabled(server, layer):
         server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
 
 def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
+    old_id = layer.pk
+    old_name = layer.name
     if not clone_conf:
         clone_conf = CloneConf()
     if layer.external:
@@ -731,6 +733,8 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
                 layer.layer_group = layer_group
             layer.save()
             new_layer_instance = Layer.objects.get(id=layer.pk)
+            new_layer_instance._cloned_from_name = old_name
+            new_layer_instance._cloned_from_instance = Layer.objects.get(id=old_id)
             return new_layer_instance
     elif layer.type == 'v_PostGIS':
         if clone_conf.vector_lyrs == CloneConf.LAYER_CLONE:
@@ -773,8 +777,6 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
                         salt = '_' + get_random_string(3)
             
             # clone layer
-            old_id = layer.pk
-            old_name = layer.name
             layer.pk = None
             layer.name = new_name
             layer.datastore = target_datastore
