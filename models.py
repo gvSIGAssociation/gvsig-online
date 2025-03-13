@@ -81,8 +81,8 @@ class Project(models.Model):
                     for lname, lorder in group_order["layers"].copy().items():
                         #lorder = group_order["layers"][lname]
                         try:
-                            del group_order["layers"][lname]
                             new_lyr_name = new_prj_lg.layer_group._cloned_lyr_name_map[lname]
+                            del group_order["layers"][lname]
                             lorder["name"] = new_lyr_name
                             group_order["layers"][new_lyr_name] = lorder
                         except:
