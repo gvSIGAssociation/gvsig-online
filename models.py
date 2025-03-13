@@ -1,5 +1,3 @@
-
-
 from django.db import models
 from gvsigol import settings
 from gvsigol_auth.models import UserGroup
@@ -9,7 +7,10 @@ from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.contrib.auth.models import User
 from urllib.parse import quote, urlparse, urljoin
+import json
+import logging
 
+LOG_NAME = 'gvsigol'
 
 def get_default_logo_image():
     return settings.STATIC_URL + 'img/logo_principal.png'
@@ -65,14 +66,41 @@ class Project(models.Model):
         self.save()
         new_project_instance = Project.objects.get(id=self.pk)
 
+        try:
+            new_toc = json.loads(new_project_instance.toc_order)
+        except:
+            new_toc = {}
         if clone_conf.recursive:
             old_project = Project.objects.get(id=old_pid)
             for prj_lg in old_project.projectlayergroup_set.all():
-                prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, clone_conf=clone_conf)
+                new_prj_lg = prj_lg.clone(project=new_project_instance, target_datastore=target_datastore, clone_conf=clone_conf)
+                try:
+                    group_order = new_toc[new_prj_lg.layer_group._cloned_from_name]
+                    group_order["name"] = new_prj_lg.layer_group._cloned_from_name
+                    #for lname in group_order["layers"]:
+                    for lname, lorder in group_order["layers"].copy().items():
+                        #lorder = group_order["layers"][lname]
+                        try:
+                            del group_order["layers"][lname]
+                            new_lyr_name = new_prj_lg.layer_group._cloned_lyr_name_map[lname]
+                            lorder["name"] = new_lyr_name
+                            group_order["layers"][new_lyr_name] = lorder
+                        except:
+                            logging.getLogger(LOG_NAME).exception("Error cloning layer order in toc")
+                    del new_toc[new_prj_lg.layer_group._cloned_from_name]
+                    new_toc[new_prj_lg.layer_group.name] = group_order
+                except AttributeError:
+                    #if not new_toc[new_prj_lg.layer_group.name]:
+                    #    del 
+                    pass
+                except:
+                    logging.getLogger(LOG_NAME).exception("Error cloning toc order")
             
             if clone_conf.permissions != CloneConf.PERMISSION_SKIP:
                 for prj_ur in old_project.projectrole_set.all():
                     prj_ur.clone(project=new_project_instance)
+        new_project_instance.toc_order = json.dumps(new_toc)
+        new_project_instance.save()
         return new_project_instance
     
     @property
@@ -214,7 +242,9 @@ class ProjectLayerGroup(models.Model):
         if project:
             self.project = project
         self.save()
-        return ProjectLayerGroup.objects.get(id=self.pk)
+        new_instance = ProjectLayerGroup.objects.get(id=self.pk)
+        new_instance.layer_group = self.layer_group # to include _cloned_from_name, _cloned_from_instance, _cloned_lyr_name_map, _cloned_lyr_instance_map
+        return new_instance
 
 class SharedView(models.Model):
     name = models.CharField(max_length=40, unique=True)
