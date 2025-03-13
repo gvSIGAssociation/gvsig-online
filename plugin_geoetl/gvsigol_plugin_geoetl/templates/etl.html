@@ -27,6 +27,7 @@
                                 <li><a data-shape="input_Kml" class="palette_node_element draw2d_droppable dropdown-item">KML/KMZ</a></li>
                                 <li><a data-shape="input_Oracle" class="palette_node_element draw2d_droppable dropdown-item">Oracle</a></li>
                                 <li><a data-shape="input_PadronAlbacete" class="palette_node_element draw2d_droppable dropdown-item">Padrón Albacete</a></li>
+                                <li><a data-shape="input_PadronAtm" class="palette_node_element draw2d_droppable dropdown-item">Padrón ATM</a></li>
                                 <li><a data-shape="input_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
                                 <li><a data-shape="input_Segex" class="palette_node_element draw2d_droppable dropdown-item">SEGEX</a></li>
                                 <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
@@ -562,7 +563,29 @@
 
                         </div>
 
+                        <div id="padron-atm-api" name = "api-form" style = "display:none;">
 
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label" > {% trans 'E-mail' %} </label>
+                                    <input type="text" id="email-atm" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Password' %}</label>
+                                    <input type="text" id="password-atm" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Id Acceso' %}</label>
+                                    <input type="text" id="idacceso-atm" class="form-control" pattern="[A-Za-z]{3}">
+                                </div>
+                            </div>
+                        </div>
 
                     </form>
                     <br>
@@ -843,6 +866,8 @@
             $("#indenova-api").slideDown();
         }else if ($("#type-api").val() == 'segex'){
             $("#segex-api").slideDown();
+        }else if ($("#type-api").val() == 'padron-atm'){
+            $("#padron-atm-api").slideDown();
         }
 
     });
@@ -981,6 +1006,18 @@
                         "entities-list": [$('#entities-list-segex').val(), $("#entities-list-segex option:selected" ).text()],
                         "user": $('#user-segex').val(),
                         "password": $('#password-segex').val()
+                        }
+                ]}
+            
+            } else if ($("#type-api").val() == 'padron-atm'){
+                var params = {
+                    "type-db": $("#type-api").val(),
+                    "name-db": $("#name-db").val(),
+                    "parameters": [
+                        {
+                        "idacceso": $('#idacceso-atm').val(),
+                        "email": $('#email-atm').val(),
+                        "password": $('#password-atm').val()
                         }
                 ]}
             

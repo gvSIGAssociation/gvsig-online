@@ -5727,3 +5727,85 @@ def trans_CalcLength(dicc):
     cur.close()
 
     return [table_name_target]
+
+
+def input_PadronAtm(dicc):
+    try:
+        api = database_connections.objects.get(name=dicc['api'])
+        credenciales = json.loads(api.connection_params)
+    except Exception as e:
+        print(f"Error al obtener credenciales de la API: {e}")
+        return None
+    
+    table_name = dicc['id']
+    url_auth = "https://pmcloudserver.atm-maggioli.es/api/auth/login" 
+    first = True
+
+    # Autenticación
+    try:
+        response = requests.post(url_auth, json=credenciales)
+        response.raise_for_status()  # Lanza una excepción si el código no es 200
+        data = response.json()
+        token = data.get("accesstoken", {}).get("token")
+
+        if not token:
+            print("Error: No se obtuvo el token de autenticación.")
+            return None
+    except requests.RequestException as e:
+        print(f"Error en la solicitud de autenticación: {e}")
+        return None
+
+    # Consulta de datos del habitante
+    try:
+        documento = "***"
+        url_modelos = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{documento}"
+        headers = {"Authorization": f"Bearer {token}"}
+        response_modelos = requests.get(url_modelos, headers=headers)
+        response_modelos.raise_for_status()
+
+        data = response_modelos.json()
+
+        habitante = data.get('habitante', {})
+        lastmovimiento = data.get('lastmovimiento', {})
+        vivienda = data.get('vivienda', {})
+        domicilio = data.get('domicilio', {})
+        
+        habitante.pop("tabla", None)
+        lastmovimiento.pop("tabla", None)
+        vivienda.pop("tabla", None)
+        domicilio.pop("tabla", None)
+
+        all_keys = list(habitante.keys()) + list(lastmovimiento.keys()) + list(vivienda.keys()) + list(domicilio.keys())
+        duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
+
+        def agregar_sufijo(diccionario, sufijo):
+            return {
+                (f"{k}{sufijo}" if k in duplicated_keys else k): v
+                for k, v in diccionario.items()
+            }
+
+        flat_data = {
+            **agregar_sufijo(habitante, "_habitante"),
+            **agregar_sufijo(lastmovimiento, "_lastmovimiento"),
+            **agregar_sufijo(vivienda, "_vivienda"),
+            **agregar_sufijo(domicilio, "_domicilio")
+        }
+
+        df = pd.DataFrame([flat_data])
+        
+        conn_str = f"postgresql://{GEOETL_DB['user']}:{GEOETL_DB['password']}@{GEOETL_DB['host']}:{GEOETL_DB['port']}/{GEOETL_DB['database']}"
+        engine = create_engine(conn_str)
+
+        if first:
+            df.to_sql(table_name, con=engine, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
+            first = False
+        else:
+            df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='append', index=False)
+
+        engine.dispose()
+        
+    except requests.RequestException as e:
+        print(f"Error al obtener datos del habitante: {e}")
+
+    return [table_name]
+
