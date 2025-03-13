@@ -1483,4 +1483,18 @@ def get_status_msg(request):
                 'message':statusModel.message
             }
             
-            return HttpResponse(json.dumps(response), content_type="application/json")        
+            return HttpResponse(json.dumps(response), content_type="application/json")
+        
+@login_required()
+@staff_required
+def etl_schema_padron_atm(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+
+            jsParams = json.loads(request.POST['jsonParams'])
+
+            listSchema = etl_schema.get_schema_padron_atm(jsParams['parameters'][0])
+            response = json.dumps(listSchema)
+
+            return HttpResponse(response, content_type="application/json")        

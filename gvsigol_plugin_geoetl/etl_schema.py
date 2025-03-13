@@ -652,3 +652,68 @@ def get_data_schemas_sqlserver(dicc):
 
     return columns
 
+
+def get_schema_padron_atm(dicc):
+    
+    try:
+        api = database_connections.objects.get(name=dicc['api'])
+        credenciales = json.loads(api.connection_params)
+    except Exception as e:
+        print(f"Error al obtener credenciales de la API: {e}")
+        return None
+    
+    url_auth = "https://pmcloudserver.atm-maggioli.es/api/auth/login" 
+    first = True
+
+    # Autenticación
+    try:
+        response = requests.post(url_auth, json=credenciales)
+        response.raise_for_status()  # Lanza una excepción si el código no es 200
+        data = response.json()
+        token = data.get("accesstoken", {}).get("token")
+
+        if not token:
+            print("Error: No se obtuvo el token de autenticación.")
+            return None
+    except requests.RequestException as e:
+        print(f"Error en la solicitud de autenticación: {e}")
+        return None
+
+    # Consulta de datos del habitante
+    try:
+        documento = "***"
+        url_modelos = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{documento}"
+        headers = {"Authorization": f"Bearer {token}"}
+        response_modelos = requests.get(url_modelos, headers=headers)
+        response_modelos.raise_for_status()
+
+        data = response_modelos.json()
+
+        habitante = data.get('habitante', {})
+        lastmovimiento = data.get('lastmovimiento', {})
+        vivienda = data.get('vivienda', {})
+        domicilio = data.get('domicilio', {})
+        
+        habitante.pop("tabla", None)
+        lastmovimiento.pop("tabla", None)
+        vivienda.pop("tabla", None)
+        domicilio.pop("tabla", None)
+
+        habitante_keys = list(habitante.keys()) 
+        lastmovimiento_keys = list(lastmovimiento.keys()) 
+        vivienda_keys = list(vivienda.keys()) 
+        domicilio_keys = list(domicilio.keys())
+        
+        all_keys = list(habitante.keys()) + list(lastmovimiento.keys()) + list(vivienda.keys()) + list(domicilio.keys())
+        duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
+
+        def agregar_sufijo_lista(keys, sufijo):
+            return [f"{k}{sufijo}" if k in duplicated_keys else k for k in keys]
+        
+        columns = agregar_sufijo_lista(habitante_keys, "_habitante") + agregar_sufijo_lista(lastmovimiento_keys, "_lastmovimiento") + agregar_sufijo_lista(vivienda_keys, "_vivienda") + agregar_sufijo_lista(domicilio_keys, "_domicilio")
+
+    except:
+        return None
+    
+    return columns
+
