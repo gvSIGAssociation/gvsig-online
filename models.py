@@ -210,6 +210,8 @@ class LayerGroup(models.Model):
                 try:
                     new_instance._cloned_lyr_instance_map[new_lyr._cloned_from_instance] = new_lyr
                     new_instance._cloned_lyr_name_map[new_lyr._cloned_from_name] = new_lyr.name
+                except AttributeError:
+                    pass # raster layers are not cloned and can be safely ignored
                 except:
                     logging.getLogger(LOG_NAME).exception(f"Error cloning layer: {new_lyr.id} - {new_lyr.name}")
         return new_instance
