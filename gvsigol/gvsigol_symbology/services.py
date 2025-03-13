@@ -398,12 +398,14 @@ def clone_layer_styles(mapservice, source_layer, target_layer):
         style = style_layer.style
         # TODO: decide the new style name
         source_layer.datastore.workspace.name
+        ws_base_name = target_layer.datastore.workspace.name
         base_name = style.name.replace(source_layer.datastore.workspace.name + "_", "")
         new_style_name = target_layer.datastore.workspace.name + "_" + base_name
         salt = ''
         i = 0
         while mapservice.getStyle(new_style_name) is not None:
-            new_style_name = target_layer.datastore.workspace.name + "_" + base_name + "_" + str(i) + salt
+            suffix = "_" + str(i) + salt
+            new_style_name = ws_base_name[:100] + "_" + base_name[:(210 - min(len(ws_base_name), 100) - len(suffix)) - 1] + suffix
             i = i + 1
             if (i%1000) == 0:
                 salt = '_' + get_random_string(3)

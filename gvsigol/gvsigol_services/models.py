@@ -183,6 +183,7 @@ class LayerGroup(models.Model):
         if not clone_conf:
             clone_conf = CloneConf()
         old_id = self.pk
+        old_name = self.name
         new_name = target_datastore.workspace.name + "_" + self.name
         i = 1
         salt = ''
@@ -196,9 +197,15 @@ class LayerGroup(models.Model):
         self.save()
         
         new_instance =  LayerGroup.objects.get(id=self.pk)
+        new_instance._cloned_from_name = old_name
+        new_instance._cloned_from_instance = LayerGroup.objects.get(id=old_id)
+        new_instance._cloned_lyr_instance_map = {}
+        new_instance._cloned_lyr_name_map = {}
         if clone_conf.recursive:
-            for lyr in LayerGroup.objects.get(id=old_id).layer_set.all():
-                lyr.clone(target_datastore=target_datastore, layer_group=new_instance, clone_conf=clone_conf)
+            for lyr in new_instance._cloned_from_instance.layer_set.all():
+                new_lyr = lyr.clone(target_datastore=target_datastore, layer_group=new_instance, clone_conf=clone_conf)
+                new_instance._cloned_lyr_instance_map[new_lyr._cloned_from_instance] = new_lyr
+                new_instance._cloned_lyr_name_map[new_lyr._cloned_from_name] = new_lyr.name
         return new_instance
 
 def get_default_layer_thumbnail():
