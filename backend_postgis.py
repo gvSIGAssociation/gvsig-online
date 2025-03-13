@@ -550,7 +550,10 @@ class Introspect:
         return self._parse_qualified_identifier(definition, "(", 'CREATE OR REPLACE FUNCTION ')
     
     def _parse_function_call(self, definition):
-        (schema, func_name, end_str) = self._parse_qualified_identifier(definition, '(', 'EXECUTE PROCEDURE ')
+        if definition.startswith('EXECUTE FUNCTION'):
+            (schema, func_name, end_str) = self._parse_qualified_identifier(definition, '(', 'EXECUTE FUNCTION ')
+        else:
+            (schema, func_name, end_str) = self._parse_qualified_identifier(definition, '(', 'EXECUTE PROCEDURE ')
         params = end_str[:-1]
         return (schema, func_name, params)
 
