@@ -695,9 +695,9 @@ class KeycloakAdminSession(OIDCSession):
             LOGGER.exception('requests error adding user to role')
         return []
 
-    def get_filtered_users_details(self, exclude_system=False, search=None, first=None, max=None):
+    def get_filtered_users_details(self, exclude_system=False, search=None, first=None, max=None, enabled=True):
         users = []
-        count = 0
+        matched_count = 0
         try:
             query_params = {}
             if search:
@@ -710,6 +710,8 @@ class KeycloakAdminSession(OIDCSession):
                 query_params['max'] = max
             else:
                 query_params['max'] = -1
+            if enabled is not None:
+                query_params['enabled'] = enabled
             query_params["briefRepresentation"] = True
             response = self.get(self.admin_url + '/users', params=query_params)
             excluded_sytem_users = 0
@@ -1406,10 +1408,15 @@ def get_filtered_users_details(exclude_system=False, search=None, first=None, ma
         Exclude system users, as defined by get_system_users()
     search: string (default: None)
         Search string to filter returned results
-    first: integer
+    first: integer (default: None)
         Pagination offset
     max:
-        Maximum number of results returned
+        Maximum number of results returned (default: None)
+    enabled: boolean|None (default: True)
+        When True, returns only enabled users (default).
+        When False, returns only disabled users.
+        When None, returns all users.
+    
     Returns
     -------
     dict()
