@@ -35,6 +35,9 @@ import json, ast
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import Group
 from gvsigol.basetypes import CloneConf
+import logging
+
+LOG_NAME = 'gvsigol'
 
 
 class Server(models.Model):
@@ -204,8 +207,11 @@ class LayerGroup(models.Model):
         if clone_conf.recursive:
             for lyr in new_instance._cloned_from_instance.layer_set.all():
                 new_lyr = lyr.clone(target_datastore=target_datastore, layer_group=new_instance, clone_conf=clone_conf)
-                new_instance._cloned_lyr_instance_map[new_lyr._cloned_from_instance] = new_lyr
-                new_instance._cloned_lyr_name_map[new_lyr._cloned_from_name] = new_lyr.name
+                try:
+                    new_instance._cloned_lyr_instance_map[new_lyr._cloned_from_instance] = new_lyr
+                    new_instance._cloned_lyr_name_map[new_lyr._cloned_from_name] = new_lyr.name
+                except:
+                    logging.getLogger(LOG_NAME).exception(f"Error cloning layer: {new_lyr.id} - {new_lyr.name}")
         return new_instance
 
 def get_default_layer_thumbnail():
