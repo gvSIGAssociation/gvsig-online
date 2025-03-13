@@ -774,6 +774,7 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
             
             # clone layer
             old_id = layer.pk
+            old_name = layer.name
             layer.pk = None
             layer.name = new_name
             layer.datastore = target_datastore
@@ -828,6 +829,8 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
         
             toc_add_layer(new_layer_instance)
             server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
+            new_layer_instance._cloned_from_name = old_name
+            new_layer_instance._cloned_from_instance = old_instance
             return new_layer_instance
     return layer
 
