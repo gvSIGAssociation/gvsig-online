@@ -702,6 +702,8 @@ class KeycloakAdminSession(OIDCSession):
             query_params = {}
             if search:
                 query_params['search'] = search
+            if enabled is not None:
+                query_params['enabled'] = enabled
             matched_response = self.get(self.admin_url + '/users/count', params=query_params)
             matched_count = int(matched_response.text)
             if first is not None:
@@ -710,8 +712,6 @@ class KeycloakAdminSession(OIDCSession):
                 query_params['max'] = max
             else:
                 query_params['max'] = -1
-            if enabled is not None:
-                query_params['enabled'] = enabled
             query_params["briefRepresentation"] = True
             response = self.get(self.admin_url + '/users', params=query_params)
             excluded_sytem_users = 0
