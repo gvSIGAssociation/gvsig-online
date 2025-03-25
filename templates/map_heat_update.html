@@ -317,7 +317,7 @@ document.getElementById("color2").value = colorCold;
     $("#op1").hide();
 	this.color_ramp = new ColorRamp("", null);
 	for (let i = 0; i < colorMapEntries.length; i++) {
-    	var quantity = colorMapEntries[i].getAttribute("quantity")
+    	var quantity = colorMapEntries[i].getAttribute("quantity") * 100
         var color = colorMapEntries[i].getAttribute("color")
         var alpha = colorMapEntries[i].getAttribute("opacity")
 
