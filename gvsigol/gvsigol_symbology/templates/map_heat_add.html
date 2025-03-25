@@ -432,8 +432,9 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
         </UserStyle>
       </NamedLayer>
 </sld:StyledLayerDescriptor>`	
+console.log(sld)
 
-		updatePreview(layerId, sld, map);
+		//updatePreview(layerId, sld, map);
 	});
 	
 	$(window).on("beforeunload", function(){
@@ -583,7 +584,7 @@ function GenerateColorRamp() {
         var rampColorArray = [];
         
         $(".color-ramp-data").each(function() {
-            var quantity = $(this).find(".percentaje-chooser").val();
+            var quantity = $(this).find(".percentaje-chooser").val()/ 100;
             var color = $(this).find(".color-chooser").val();
             var alpha = $(this).find(".alpha-chooser").val();
             
@@ -604,7 +605,7 @@ function GenerateColorRamp() {
         }
 
         let lastItem = rampColorArray[rampColorArray.length - 1];
-		res += `<ColorMapEntry color="${lastItem.color}" quantity="100" opacity="${lastItem.alpha}"/>\n`;
+		res += `<ColorMapEntry color="${lastItem.color}" quantity="1" opacity="${lastItem.alpha}"/>\n`;
 
 		var ramp_color = {
 						'definition' : rampColorArray
