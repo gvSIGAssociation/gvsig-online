@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-24 00:20+0100\n"
+"POT-Creation-Date: 2025-03-24 23:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -486,11 +486,15 @@ msgstr ""
 
 #: gvsigol_symbology/templates/color_ramp_add.html:40
 #: gvsigol_symbology/templates/color_ramp_update.html:40
+#: gvsigol_symbology/templates/map_heat_add.html:119
+#: gvsigol_symbology/templates/map_heat_update.html:130
 msgid "Steps"
 msgstr ""
 
 #: gvsigol_symbology/templates/color_ramp_add.html:41
 #: gvsigol_symbology/templates/color_ramp_update.html:41
+#: gvsigol_symbology/templates/map_heat_add.html:120
+#: gvsigol_symbology/templates/map_heat_update.html:131
 msgid "Add step"
 msgstr ""
 
@@ -503,6 +507,8 @@ msgstr ""
 #: gvsigol_symbology/templates/color_ramp_update.html:109
 #: gvsigol_symbology/templates/color_table_add.html:371
 #: gvsigol_symbology/templates/color_table_update.html:400
+#: gvsigol_symbology/templates/map_heat_add.html:581
+#: gvsigol_symbology/templates/map_heat_update.html:700
 msgid "Two or more color definitions are required"
 msgstr ""
 
@@ -1037,23 +1043,36 @@ msgstr "Pixels per Cell"
 msgid "Use a field to weight the heatmap"
 msgstr "Use a field to weight the heatmap"
 
-#: gvsigol_symbology/templates/map_heat_add.html:71
-#: gvsigol_symbology/templates/map_heat_update.html:82
-msgid "Color range"
+#: gvsigol_symbology/templates/map_heat_add.html:69
+#: gvsigol_symbology/templates/map_heat_update.html:80
+msgid "Select an option"
 msgstr ""
 
-#: gvsigol_symbology/templates/map_heat_add.html:73
-#: gvsigol_symbology/templates/map_heat_update.html:84
+#: gvsigol_symbology/templates/map_heat_add.html:72
+#: gvsigol_symbology/templates/map_heat_add.html:80
+#: gvsigol_symbology/templates/map_heat_update.html:83
+#: gvsigol_symbology/templates/map_heat_update.html:91
+msgid "Color gradient"
+msgstr ""
+
+#: gvsigol_symbology/templates/map_heat_add.html:76
+#: gvsigol_symbology/templates/map_heat_update.html:87
+#: gvsigol_symbology/templates/select_legend_type.html:99
+msgid "Color table"
+msgstr ""
+
+#: gvsigol_symbology/templates/map_heat_add.html:82
+#: gvsigol_symbology/templates/map_heat_update.html:93
 msgid "Number of colors"
 msgstr "Number of colors"
 
-#: gvsigol_symbology/templates/map_heat_add.html:81
-#: gvsigol_symbology/templates/map_heat_update.html:92
+#: gvsigol_symbology/templates/map_heat_add.html:90
+#: gvsigol_symbology/templates/map_heat_update.html:101
 msgid "Cold Color"
 msgstr "Cold Color"
 
-#: gvsigol_symbology/templates/map_heat_add.html:94
-#: gvsigol_symbology/templates/map_heat_update.html:105
+#: gvsigol_symbology/templates/map_heat_add.html:100
+#: gvsigol_symbology/templates/map_heat_update.html:111
 msgid "Warm Color"
 msgstr "Warm Color"
 
@@ -1121,10 +1140,6 @@ msgstr ""
 
 #: gvsigol_symbology/templates/select_legend_type.html:89
 msgid "SLD legend description"
-msgstr ""
-
-#: gvsigol_symbology/templates/select_legend_type.html:99
-msgid "Color table"
 msgstr ""
 
 #: gvsigol_symbology/templates/select_legend_type.html:100

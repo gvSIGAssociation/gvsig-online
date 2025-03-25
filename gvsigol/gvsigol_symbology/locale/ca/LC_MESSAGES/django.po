@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-24 00:20+0100\n"
+"POT-Creation-Date: 2025-03-24 23:59+0100\n"
 "PO-Revision-Date: 2023-10-16 13:44+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -502,11 +502,15 @@ msgstr "Afegir nova trampa de color"
 
 #: gvsigol_symbology/templates/color_ramp_add.html:40
 #: gvsigol_symbology/templates/color_ramp_update.html:40
+#: gvsigol_symbology/templates/map_heat_add.html:119
+#: gvsigol_symbology/templates/map_heat_update.html:130
 msgid "Steps"
 msgstr "Passos"
 
 #: gvsigol_symbology/templates/color_ramp_add.html:41
 #: gvsigol_symbology/templates/color_ramp_update.html:41
+#: gvsigol_symbology/templates/map_heat_add.html:120
+#: gvsigol_symbology/templates/map_heat_update.html:131
 msgid "Add step"
 msgstr "Afegir pas"
 
@@ -519,6 +523,8 @@ msgstr "Editar entrada de color"
 #: gvsigol_symbology/templates/color_ramp_update.html:109
 #: gvsigol_symbology/templates/color_table_add.html:371
 #: gvsigol_symbology/templates/color_table_update.html:400
+#: gvsigol_symbology/templates/map_heat_add.html:581
+#: gvsigol_symbology/templates/map_heat_update.html:700
 msgid "Two or more color definitions are required"
 msgstr "Dues o més definicions de color son requerides"
 
@@ -1055,25 +1061,38 @@ msgstr ""
 msgid "Use a field to weight the heatmap"
 msgstr ""
 
-#: gvsigol_symbology/templates/map_heat_add.html:71
-#: gvsigol_symbology/templates/map_heat_update.html:82
+#: gvsigol_symbology/templates/map_heat_add.html:69
+#: gvsigol_symbology/templates/map_heat_update.html:80
+msgid "Select an option"
+msgstr "Selecciona una opció"
+
+#: gvsigol_symbology/templates/map_heat_add.html:72
+#: gvsigol_symbology/templates/map_heat_add.html:80
+#: gvsigol_symbology/templates/map_heat_update.html:83
+#: gvsigol_symbology/templates/map_heat_update.html:91
 #, fuzzy
 #| msgid "Color ramps"
-msgid "Color range"
-msgstr "Rampes de color"
+msgid "Color gradient"
+msgstr "Gradient de color"
 
-#: gvsigol_symbology/templates/map_heat_add.html:73
-#: gvsigol_symbology/templates/map_heat_update.html:84
+#: gvsigol_symbology/templates/map_heat_add.html:76
+#: gvsigol_symbology/templates/map_heat_update.html:87
+#: gvsigol_symbology/templates/select_legend_type.html:99
+msgid "Color table"
+msgstr "Taula de color"
+
+#: gvsigol_symbology/templates/map_heat_add.html:82
+#: gvsigol_symbology/templates/map_heat_update.html:93
 msgid "Number of colors"
 msgstr ""
 
-#: gvsigol_symbology/templates/map_heat_add.html:81
-#: gvsigol_symbology/templates/map_heat_update.html:92
+#: gvsigol_symbology/templates/map_heat_add.html:90
+#: gvsigol_symbology/templates/map_heat_update.html:101
 msgid "Cold Color"
 msgstr ""
 
-#: gvsigol_symbology/templates/map_heat_add.html:94
-#: gvsigol_symbology/templates/map_heat_update.html:105
+#: gvsigol_symbology/templates/map_heat_add.html:100
+#: gvsigol_symbology/templates/map_heat_update.html:111
 msgid "Warm Color"
 msgstr ""
 
@@ -1144,10 +1163,6 @@ msgstr "Importar des de SLD"
 #: gvsigol_symbology/templates/select_legend_type.html:89
 msgid "SLD legend description"
 msgstr "SLD descripció de la llegenda"
-
-#: gvsigol_symbology/templates/select_legend_type.html:99
-msgid "Color table"
-msgstr "Taula de color"
 
 #: gvsigol_symbology/templates/select_legend_type.html:100
 msgid "Creates a legend for a raster layer defined by a color table"
