@@ -46,7 +46,7 @@
 				<!-- Agregado el formulario para generar el SLD -->
                 <div class="row">
 						
-						<div class="col-md-6">
+						<div class="col-md-4">
 							<label for="radius">{% trans "Radius (pixels)" %}:</label>
                             <input type="number" id="radius" name="radius" value="100" class="form-control" required><br><br>
 							
@@ -65,10 +65,19 @@
 							</div>
 						</div>
 					
-							
-							<div class="col-md-6">
+							<div class="col-md-8">
+								<label for="selector" style="font-size: 18px;">{% trans "Select an option" %}:</label>
+
+								<label style="margin-right: 20px; margin-left: 10px;">
+									<input type="radio" name="opcion" value="opcion1" checked> {% trans "Color gradient" %}
+								</label>
+								
+								<label >
+									<input type="radio" name="opcion" value="opcion2"> {% trans "Color table" %}
+								</label>
+							<div id="op1">
 							<!-- gradient color -->
-							<h3>{% trans "Color range" %}</h3>
+							<h3>{% trans "Color gradient" %}</h3>
 							<div class="">
 								<label >{% trans "Number of colors" %}</label>
 								<input type="number" name="numCol" id="numCol"  value="0" class="form-control" required>
@@ -81,9 +90,6 @@
 										<label for="color1">{% trans "Cold Color" %}</label>
 										<input type="color" id="color1" name="color1" value="#FFFFFF" class="form-control" required>
 									</div>
-									
-
-									
 								</div>
 							</div>
 						
@@ -100,7 +106,28 @@
 								</div>
 							</div>
 						</div>
-						</div>   
+						<div id="op2">
+							<div class="col-md-12">
+								<div id="map" class="preview-ramp-color"></div>
+							</div>	
+							<div id="steps" class="row">
+								<div class="col-md-12">
+									<div id="form-error" style="color:#ff0000;"></div>
+									<div class="row">
+										<input name="colorramp-definition" id="colorramp-definition" value="" type="hidden">
+										<div class="col-md-12 form-group">
+											<label>{% trans "Steps" %}</label>
+											<div id="add-step" class="btn btn-sm btn-default add-legend pull-right"><i class="fa fa-plus margin-r-5"></i> {% trans "Add step" %}</div>					
+										</div>
+									</div>
+								</div>
+								<div id="steps-body" class="col-md-12">
+								</div>
+							</div>
+							
+						</div>
+					</div>
+				</div>   
 						     
     
 			</div>
@@ -118,7 +145,33 @@
 <script>
 $(document).ready(function() {
 
+	$("#op1").show();
+    $("#op2").hide();
+	$("input[name='opcion']").change(function() {
+            if ($(this).val() === "opcion1") {
+                $("#op1").show();
+                $("#op2").hide();
+            } else {
+                $("#op1").hide();
+                $("#op2").show();
+            }
+        });
+
+
+	var self = this;
+	this.color_ramp = new ColorRamp("", null);
 	
+	$("#steps-body").append(this.color_ramp.getColorRampTableUI());
+	this.color_ramp.addDefaultEntries();
+	
+	
+	$("#add-step").on('click', function(e){
+		self.color_ramp.addColorRamp(100, "#000000", 1);
+		self.color_ramp.refreshPreview();
+	});
+
+
+
 
 	var language = $("#select-language").val();
 	$("#select-numeric-field").prop("disabled", true);
@@ -192,21 +245,26 @@ $(document).ready(function() {
 
 	$("#save-legend").on('click', function(e){
 
+
+		const selected = document.querySelector('input[name="opcion"]:checked');
+
+		
+
 		const nombre = document.getElementById('style-name').value;
-        const titulo = document.getElementById('style-title').value;
-        const radius = document.getElementById('radius').value;
-        const pixelsPerCell = document.getElementById('pixelsPerCell').value;
+		const titulo = document.getElementById('style-title').value;
+		const radius = document.getElementById('radius').value;
+		const pixelsPerCell = document.getElementById('pixelsPerCell').value;
+		let colorsRes = null
 
+		if(selected.value==='opcion1'){
+			const color1 = document.getElementById('color1').value;
+			const color2 = document.getElementById('color2').value;
+			const steps =document.getElementById('numCol').value;
+			colorsRes = generateColorGradient(steps, color1, color2)
+		}else{
+			colorsRes =GenerateColorRamp()
+		}
 
-		// Get ColorMap entries
-        const color1 = document.getElementById('color1').value;
-
-        const color2 = document.getElementById('color2').value;
-
-
-		const steps =document.getElementById('numCol').value;
-       
-		const colorsGrad =generateColorGradient(steps, color1,color2)
 		
 		
 
@@ -268,7 +326,7 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
 <ogc:PropertyName>wkb_geometry</ogc:PropertyName></Geometry>
                <Opacity>0.6</Opacity>
                <ColorMap type="ramp" >
-                 ${colorsGrad}
+                 ${colorsRes}
                </ColorMap>
              </RasterSymbolizer>
             </Rule>
@@ -276,7 +334,6 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
         </UserStyle>
       </NamedLayer>
 </sld:StyledLayerDescriptor>`		
-console.log(sld);
 	
 			save(layerId, sld);
 			
@@ -285,21 +342,27 @@ console.log(sld);
 	});
 	
 	$("#refresh-preview").on('click', function(e){
+		const selected = document.querySelector('input[name="opcion"]:checked');
+
+		
+
 		const nombre = document.getElementById('style-name').value;
         const titulo = document.getElementById('style-title').value;
         const radius = document.getElementById('radius').value;
         const pixelsPerCell = document.getElementById('pixelsPerCell').value;
+		let colorsRes = null
+
+		if(selected.value==='opcion1'){
+			const color1 = document.getElementById('color1').value;
+			const color2 = document.getElementById('color2').value;
+			const steps =document.getElementById('numCol').value;
+			colorsRes = generateColorGradient(steps, color1, color2)
+		}else{
+			colorsRes =GenerateColorRamp()
+		}
 
 
-		// Get ColorMap entries
-        const color1 = document.getElementById('color1').value;
-
-        const color2 = document.getElementById('color2').value;
-
-
-		const steps =document.getElementById('numCol').value;
-       
-		const colorsGrad =generateColorGradient(steps, color1, color2)
+	
 		
 		
 
@@ -361,7 +424,7 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
 <ogc:PropertyName>wkb_geometry</ogc:PropertyName></Geometry>
                <Opacity>0.6</Opacity>
                <ColorMap type="ramp" >
-                 ${colorsGrad}
+                 ${colorsRes}
                </ColorMap>
              </RasterSymbolizer>
             </Rule>
@@ -369,7 +432,6 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
         </UserStyle>
       </NamedLayer>
 </sld:StyledLayerDescriptor>`	
-console.log(sld);
 
 		updatePreview(layerId, sld, map);
 	});
@@ -504,6 +566,54 @@ function generateColorGradient(numColors, coldColor, hotColor) {
     }
 
     return gradient;
+}
+
+
+function GenerateColorRamp() {
+    
+    var styleName = $("#style-name").val();
+    var formError = $("#form-error");
+    formError.empty();
+
+    var colorTabs = $("#colorramp-table").find("tr");
+
+    if (colorTabs.length < 3) {
+        formError.append('<p>*{% trans "Two or more color definitions are required" %}</p>');
+    } else {
+        var rampColorArray = [];
+        
+        $(".color-ramp-data").each(function() {
+            var quantity = $(this).find(".percentaje-chooser").val();
+            var color = $(this).find(".color-chooser").val();
+            var alpha = $(this).find(".alpha-chooser").val();
+            
+            rampColorArray.push({
+                'quantity': quantity,
+                'color': color,
+                'alpha': alpha
+            });
+        });
+
+		let firstItem = rampColorArray[0];
+		let res = `<ColorMapEntry color="${firstItem.color}"  quantity="${firstItem.quantity}"  label="nodata" opacity="${firstItem.alpha}" />\n`;
+
+        // Iterate through rampColorArray and build the result string
+        for (let i = 1; i < rampColorArray.length-1; i++) {
+            let item = rampColorArray[i];
+            res += `<ColorMapEntry color="${item.color}" quantity="${item.quantity}" opacity="${item.alpha}"/>\n`;
+        }
+
+        let lastItem = rampColorArray[rampColorArray.length - 1];
+		res += `<ColorMapEntry color="${lastItem.color}" quantity="100" opacity="${lastItem.alpha}"/>\n`;
+
+		var ramp_color = {
+						'definition' : rampColorArray
+				};
+				
+		$("#colorramp-definition").val(JSON.stringify(ramp_color));
+
+        return res;
+    }
 }
 
 </script>
