@@ -432,9 +432,9 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
         </UserStyle>
       </NamedLayer>
 </sld:StyledLayerDescriptor>`	
-console.log(sld)
+updatePreview(layerId, sld, map);
 
-		//updatePreview(layerId, sld, map);
+		
 	});
 	
 	$(window).on("beforeunload", function(){
