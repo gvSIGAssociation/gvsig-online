@@ -679,41 +679,97 @@ def get_schema_padron_atm(dicc):
         print(f"Error en la solicitud de autenticación: {e}")
         return None
 
-    # Consulta de datos del habitante
-    try:
-        documento = "***"
-        url_modelos = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{documento}"
-        headers = {"Authorization": f"Bearer {token}"}
-        response_modelos = requests.get(url_modelos, headers=headers)
-        response_modelos.raise_for_status()
-
-        data = response_modelos.json()
-
-        habitante = data.get('habitante', {})
-        lastmovimiento = data.get('lastmovimiento', {})
-        vivienda = data.get('vivienda', {})
-        domicilio = data.get('domicilio', {})
-        
-        habitante.pop("tabla", None)
-        lastmovimiento.pop("tabla", None)
-        vivienda.pop("tabla", None)
-        domicilio.pop("tabla", None)
-
-        habitante_keys = list(habitante.keys()) 
-        lastmovimiento_keys = list(lastmovimiento.keys()) 
-        vivienda_keys = list(vivienda.keys()) 
-        domicilio_keys = list(domicilio.keys())
-        
-        all_keys = list(habitante.keys()) + list(lastmovimiento.keys()) + list(vivienda.keys()) + list(domicilio.keys())
-        duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
-
-        def agregar_sufijo_lista(keys, sufijo):
-            return [f"{k}{sufijo}" if k in duplicated_keys else k for k in keys]
-        
-        columns = agregar_sufijo_lista(habitante_keys, "_habitante") + agregar_sufijo_lista(lastmovimiento_keys, "_lastmovimiento") + agregar_sufijo_lista(vivienda_keys, "_vivienda") + agregar_sufijo_lista(domicilio_keys, "_domicilio")
-
-    except:
-        return None
     
-    return columns
+    start = 0
+    length = 20
+        
+    while length == 20:
+        params = {
+            "id": 1,
+            "start": start,
+            "length": 20,
+            "sort": None,
+            "order": None,
+            "gettotal": True,
+            "filtro": None,
+            "columns": [
+                {
+                "name": None,
+                "data": None
+                }
+            ]
+            }
+    
+        headers = {"Authorization": f"Bearer {token}"}
+        url_list = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetList/"
+        
+        
+        try:
+            response_list = requests.post(url_list, headers=headers, json=params)
+            response_list.raise_for_status()  
+            habitantes = response_list.json()
+
+            if "data" not in habitantes:
+                print("Advertencia: No se encontró 'data' en la respuesta.")
+                break
+
+        except requests.RequestException as e:
+            print(f"Error al obtener la lista de habitantes: {e}")
+            break 
+        
+        for hab in habitantes['data']:
+            
+            if hab["bfechabaja"] == False:
+                
+                if hab['tipodocu'] == '1':
+                    documento = hab.get('dni', '') + hab.get('nif', '')
+                    
+                elif hab['tipodocu'] == '2':
+                    documento = hab.get('pasaporte', '')
+                    
+                elif hab['tipodocu'] == '3':
+                    documento = hab.get('lextr', '') + hab.get('dni', '') + hab.get('nif', '')
+                else:
+                    documento = None
+
+                # Consulta de datos del habitante
+                try:
+                    
+                    if documento:
+                        url_modelos = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{documento}"
+                        response_modelos = requests.get(url_modelos, headers=headers)
+                        response_modelos.raise_for_status()
+
+                        data = response_modelos.json()
+
+                        habitante = data.get('habitante', {})
+                        lastmovimiento = data.get('lastmovimiento', {})
+                        vivienda = data.get('vivienda', {})
+                        domicilio = data.get('domicilio', {})
+                        
+                        habitante.pop("tabla", None)
+                        lastmovimiento.pop("tabla", None)
+                        vivienda.pop("tabla", None)
+                        domicilio.pop("tabla", None)
+
+                        habitante_keys = list(habitante.keys()) 
+                        lastmovimiento_keys = list(lastmovimiento.keys()) 
+                        vivienda_keys = list(vivienda.keys()) 
+                        domicilio_keys = list(domicilio.keys())
+                        
+                        all_keys = list(habitante.keys()) + list(lastmovimiento.keys()) + list(vivienda.keys()) + list(domicilio.keys())
+                        duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
+
+                        def agregar_sufijo_lista(keys, sufijo):
+                            return [f"{k}{sufijo}" if k in duplicated_keys else k for k in keys]
+                        
+                        columns = habitante_keys + agregar_sufijo_lista(lastmovimiento_keys, "_lastmovimiento") + agregar_sufijo_lista(vivienda_keys, "_vivienda") + agregar_sufijo_lista(domicilio_keys, "_domicilio")
+                        
+                        return columns
+                    
+                except requests.RequestException as e:
+                    print(f"Error al obtener datos del habitante: {e}")
+        
+        length = len(habitantes['data'])
+        start += 20
 

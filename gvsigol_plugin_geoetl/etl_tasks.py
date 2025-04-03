@@ -5754,58 +5754,120 @@ def input_PadronAtm(dicc):
     except requests.RequestException as e:
         print(f"Error en la solicitud de autenticación: {e}")
         return None
-
-    # Consulta de datos del habitante
-    try:
-        documento = "***"
-        url_modelos = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{documento}"
-        headers = {"Authorization": f"Bearer {token}"}
-        response_modelos = requests.get(url_modelos, headers=headers)
-        response_modelos.raise_for_status()
-
-        data = response_modelos.json()
-
-        habitante = data.get('habitante', {})
-        lastmovimiento = data.get('lastmovimiento', {})
-        vivienda = data.get('vivienda', {})
-        domicilio = data.get('domicilio', {})
+    
+    start = 0
+    length = 20
         
-        habitante.pop("tabla", None)
-        lastmovimiento.pop("tabla", None)
-        vivienda.pop("tabla", None)
-        domicilio.pop("tabla", None)
-
-        all_keys = list(habitante.keys()) + list(lastmovimiento.keys()) + list(vivienda.keys()) + list(domicilio.keys())
-        duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
-
-        def agregar_sufijo(diccionario, sufijo):
-            return {
-                (f"{k}{sufijo}" if k in duplicated_keys else k): v
-                for k, v in diccionario.items()
+    while length == 20:
+        params = {
+            "id": 1,
+            "start": start,
+            "length": 20,
+            "sort": None,
+            "order": None,
+            "gettotal": True,
+            "filtro": None,
+            "columns": [
+                {
+                "name": None,
+                "data": None
+                }
+            ]
             }
-
-        flat_data = {
-            **agregar_sufijo(habitante, "_habitante"),
-            **agregar_sufijo(lastmovimiento, "_lastmovimiento"),
-            **agregar_sufijo(vivienda, "_vivienda"),
-            **agregar_sufijo(domicilio, "_domicilio")
-        }
-
-        df = pd.DataFrame([flat_data])
+    
+        headers = {"Authorization": f"Bearer {token}"}
+        url_list = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetList/"
         
-        conn_str = f"postgresql://{GEOETL_DB['user']}:{GEOETL_DB['password']}@{GEOETL_DB['host']}:{GEOETL_DB['port']}/{GEOETL_DB['database']}"
-        engine = create_engine(conn_str)
-
-        if first:
-            df.to_sql(table_name, con=engine, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
-            first = False
-        else:
-            df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='append', index=False)
-
-        engine.dispose()
         
-    except requests.RequestException as e:
-        print(f"Error al obtener datos del habitante: {e}")
+        try:
+            response_list = requests.post(url_list, headers=headers, json=params)
+            response_list.raise_for_status()  
+            habitantes = response_list.json()
+
+            if "data" not in habitantes:
+                print("Advertencia: No se encontró 'data' en la respuesta.")
+                break
+
+        except requests.RequestException as e:
+            print(f"Error al obtener la lista de habitantes: {e}")
+            break 
+        
+        for hab in habitantes['data']:
+            
+            if hab["bfechabaja"] == False:
+                
+                if hab['tipodocu'] == '1':
+                    documento = hab.get('dni', '') + hab.get('nif', '')
+                    
+                elif hab['tipodocu'] == '2':
+                    documento = hab.get('pasaporte', '')
+                    
+                elif hab['tipodocu'] == '3':
+                    documento = hab.get('lextr', '') + hab.get('dni', '') + hab.get('nif', '')
+                else:
+                    documento = None
+
+                # Consulta de datos del habitante
+                try:
+                    
+                    if documento:
+                        print(documento)
+                        url_modelos = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{documento}"
+                        response_modelos = requests.get(url_modelos, headers=headers)
+                        response_modelos.raise_for_status()
+
+                        data = response_modelos.json()
+
+                        habitante = data.get('habitante', {})
+                        lastmovimiento = data.get('lastmovimiento', {})
+                        vivienda = data.get('vivienda', {})
+                        domicilio = data.get('domicilio', {})
+                        
+                    else:
+                        habitante = hab
+                        lastmovimiento = {}
+                        vivienda = {}
+                        domicilio = {}
+                    
+                    habitante.pop("tabla", None)
+                    lastmovimiento.pop("tabla", None)
+                    vivienda.pop("tabla", None)
+                    domicilio.pop("tabla", None)
+
+                    all_keys = list(habitante.keys()) + list(lastmovimiento.keys()) + list(vivienda.keys()) + list(domicilio.keys())
+                    duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
+
+                    def agregar_sufijo(diccionario, sufijo):
+                        return {
+                            (f"{k}{sufijo}" if k in duplicated_keys else k): v
+                            for k, v in diccionario.items()
+                        }
+
+                    flat_data = {
+                        **habitante,
+                        **agregar_sufijo(lastmovimiento, "_lastmovimiento"),
+                        **agregar_sufijo(vivienda, "_vivienda"),
+                        **agregar_sufijo(domicilio, "_domicilio")
+                    }
+
+                    df = pd.DataFrame([flat_data])
+                    
+                    conn_str = f"postgresql://{GEOETL_DB['user']}:{GEOETL_DB['password']}@{GEOETL_DB['host']}:{GEOETL_DB['port']}/{GEOETL_DB['database']}"
+                    engine = create_engine(conn_str)
+
+                    if first:
+                        df.to_sql(table_name, con=engine, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
+                        first = False
+                    else:
+                        df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='append', index=False)
+
+                    engine.dispose()
+                    
+                except requests.RequestException as e:
+                    print(f"Error al obtener datos del habitante: {e}")
+        
+        length = len(habitantes['data'])
+        start += 20
 
     return [table_name]
 
