@@ -78,10 +78,7 @@
 							<div id="op1">
 							<!-- gradient color -->
 							<h3>{% trans "Color gradient" %}</h3>
-							<div class="">
-								<label >{% trans "Number of colors" %}</label>
-								<input type="number" name="numCol" id="numCol"  value="5" class="form-control" required>
-							</div><br><br>
+							<br><br>
 							
 							<div class="form-group">
 								<div class="row">
@@ -259,8 +256,7 @@ $(document).ready(function() {
 		if(selected.value==='opcion1'){
 			const color1 = document.getElementById('color1').value;
 			const color2 = document.getElementById('color2').value;
-			const steps =document.getElementById('numCol').value;
-			colorsRes = generateColorGradient(steps, color1, color2)
+			colorsRes = generateColorGradient(5, color1, color2)
 		}else{
 			colorsRes =GenerateColorRamp()
 		}
@@ -355,8 +351,7 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
 		if(selected.value==='opcion1'){
 			const color1 = document.getElementById('color1').value;
 			const color2 = document.getElementById('color2').value;
-			const steps =document.getElementById('numCol').value;
-			colorsRes = generateColorGradient(steps, color1, color2)
+			colorsRes = generateColorGradient(5, color1, color2)
 		}else{
 			colorsRes =GenerateColorRamp()
 		}
@@ -561,7 +556,7 @@ function generateColorGradient(numColors, coldColor, hotColor) {
     let gradient = `<ColorMapEntry color="#FFFFFF" quantity="0" label="nodata" opacity="0"/>\n`;
     
     for (let i = 0; i < numColors; i++) {
-        let factor = (i + 1) / numColors; // Evita que el primer quantity sea 0
+        let factor = (i + 1) / numColors; 
         let color = interpolateColor(coldColor, hotColor, factor);
         gradient += `<ColorMapEntry color="${color}" quantity="${factor.toFixed(2)}" />\n`;
     }

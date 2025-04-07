@@ -89,10 +89,7 @@
 						<div id="op1">
 						<!-- gradient color -->
 						<h3>{% trans "Color gradient" %}</h3>
-						<div class="">
-							<label >{% trans "Number of colors" %}</label>
-							<input type="number" name="numCol" id="numCol"  value="0" class="form-control" required>
-						</div><br><br>
+						<br><br>
 						
 						<div class="form-group">
 							<div class="row">
@@ -304,10 +301,9 @@ if (colorMapEntries[1].getAttribute("opacity") === null) {
     $("#op2").hide();
 	this.color_ramp.addDefaultEntries();
 	// Extract required values
-const numberOfColors = validColors.length; // Count of valid colors
+const numberOfColors = 5
 const colorWarm = validColors[0] || "Not Found"; // First valid color
 const colorCold = validColors[validColors.length - 1] || "Not Found"; // Last valid color
-document.getElementById("numCol").value = numberOfColors;
 document.getElementById("color1").value = colorWarm;
 document.getElementById("color2").value = colorCold;
 } else {
@@ -386,8 +382,7 @@ document.getElementById("pixelsPerCell").value = pixelsPerCell;
 		if(selected.value==='opcion1'){
 			const color1 = document.getElementById('color1').value;
 			const color2 = document.getElementById('color2').value;
-			const steps =document.getElementById('numCol').value;
-			colorsRes = generateColorGradient(steps, color1, color2)
+			colorsRes = generateColorGradient(5, color1, color2)
 		}else{
 			colorsRes =GenerateColorRamp()
 		}
@@ -477,8 +472,7 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
 		if(selected.value==='opcion1'){
 			const color1 = document.getElementById('color1').value;
 			const color2 = document.getElementById('color2').value;
-			const steps =document.getElementById('numCol').value;
-			colorsRes = generateColorGradient(steps, color1, color2)
+			colorsRes = generateColorGradient(5, color1, color2)
 		}else{
 			colorsRes =GenerateColorRamp()
 		}
