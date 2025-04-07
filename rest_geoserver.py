@@ -763,22 +763,24 @@ class Geoserver():
             auth = self.session.auth
         headers = {'content-type': 'text/xml'}
         r = self.session.get(url, headers=headers, auth=auth)
-        root = ET.fromstring(r.content)
-        subsets = root.find('gridSubsets')
-        if subsets is not None:
-            for subset in subsets.findall('gridSubset'):
-                name_elem = subset.find('gridSetName')
-                if name_elem is not None:
-                    name = name_elem.text
-                    subset.clear()
-                    name_elem = ET.SubElement(subset, 'gridSetName')
-                    name_elem.text = name
-        xml = ET.tostring(root, encoding='utf-8')
-        r = self.session.post(url, data=xml, headers=headers, auth=auth)
-        if r.status_code==200:
-            return True
-        raise FailedRequestError(r.status_code, r.content)
-    
+        try:
+            root = ET.fromstring(r.content)
+            subsets = root.find('gridSubsets')
+            if subsets is not None:
+                for subset in subsets.findall('gridSubset'):
+                    name_elem = subset.find('gridSetName')
+                    if name_elem is not None:
+                        name = name_elem.text
+                        subset.clear()
+                        name_elem = ET.SubElement(subset, 'gridSetName')
+                        name_elem.text = name
+            xml = ET.tostring(root, encoding='utf-8')
+            r = self.session.post(url, data=xml, headers=headers, auth=auth)
+            if r.status_code==200:
+                return True
+            raise FailedRequestError(r.status_code, r.content)
+        except ET.XMLSyntaxError:
+            logger.warning(f"Invalid response XML. Probably the layer has no geometry - {ws_name}:{layer_name}")
     
     def add_style(self, layer, style_name, user=None, password=None):
         url = self.service_url + "/layers/" +  layer + "/styles/"
