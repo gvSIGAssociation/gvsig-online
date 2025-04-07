@@ -890,6 +890,10 @@ class FeatureByPointView(ListAPIView):
             result['layerTitle'] = lyr.title
 
             result['actions'] = [{
+                'componentName': 'OpenDetails',
+                'componentPath': 'common',
+                'componentProps': {}
+            },{
                 'componentName': 'CopyCoordinate',
                 'componentPath': 'common',
                 'componentProps': {}
