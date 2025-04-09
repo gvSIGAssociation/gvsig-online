@@ -571,5 +571,6 @@ try:
     ogr = gdaltools.ogr2ogr()
     (major, minor, patch, prerelease) = ogr.get_version_tuple()
     print(f"GDAL/OGR version: {major}.{minor}.{patch} {prerelease}")
+    print(f"GDAL_LIBRARY_PATH: {GDAL_LIBRARY_PATH}")
 except:
     pass
