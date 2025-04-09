@@ -246,7 +246,7 @@ try:
     __import__('django_extensions')
     INSTALLED_APPS.append('django_extensions')
 except ImportError:
-    print('ERROR: No ha instalado la libreria django_extensions')
+    print('WARNING: No ha instalado la libreria django_extensions')
 
 # oidc_mozilla
 if 'gvsigol_plugin_oidc_mozilla' in INSTALLED_APPS:
@@ -805,4 +805,11 @@ VIEWER_DEFAULT_CRS=env('VIEWER_DEFAULT_CRS')
 #CSP_SCRIPT_SRC = ("'self'","'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
 #CSP_FRAME_ANCESTORS = ("'self'", 'https://localhost/','https://gvsigol-keycloak:8443/','http://localhost:3000/')
 #CSP_FRAME_ANCESTORS = ('*')||||||| .r8141
-
+try:
+    import gdaltools
+    ogr = gdaltools.ogr2ogr()
+    (major, minor, patch, prerelease) = ogr.get_version_tuple()
+    print(f"GDAL/OGR version: {major}.{minor}.{patch} {prerelease}")
+    print(f"GDAL_LIBRARY_PATH: {GDAL_LIBRARY_PATH}")
+except:
+    pass
