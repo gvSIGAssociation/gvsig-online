@@ -29,7 +29,7 @@ pillow==10.3.0
 # *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
 
 ## gsconfig
-geoserver-restconfig==2.0.10
+geoserver-restconfig==2.0.12
 requests==2.31.0
 
 # async requests

@@ -110,6 +110,7 @@ zeep==3.4.0
 # Plugin PID 
 zeep[xmlsec]==3.4.0
 shortuuid==1.0.11
+xmlsec==1.3.14 # fix error with 1.3.15 in RH9.3/LIBRA
 
 # plugin_widget
 django_tinymce==3.4.0
