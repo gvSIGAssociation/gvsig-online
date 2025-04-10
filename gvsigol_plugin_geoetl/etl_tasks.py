@@ -5801,6 +5801,8 @@ def input_PadronAtm(dicc):
 
         if not habitantes:
             break
+        
+        print('Consultando los habitantes del ' +str(start) + ' al '+ str(length+start))
 
         for hab in habitantes:
             if hab.get('bfechabaja') == True:
