@@ -85,8 +85,10 @@ class Project(models.Model):
                             del group_order["layers"][lname]
                             lorder["name"] = new_lyr_name
                             group_order["layers"][new_lyr_name] = lorder
+                        except KeyError:
+                            pass
                         except:
-                            logging.getLogger(LOG_NAME).exception("Error cloning layer order in toc")
+                            logging.getLogger(LOG_NAME).exception(f"Error cloning layer order in toc: {lname}")
                     del new_toc[new_prj_lg.layer_group._cloned_from_name]
                     new_toc[new_prj_lg.layer_group.name] = group_order
                 except AttributeError:
