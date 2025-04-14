@@ -29,7 +29,7 @@ import math
 import numpy as np
 from . import etl_schema
 import xml.etree.ElementTree as ET
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
@@ -5742,7 +5742,6 @@ def input_PadronAtm(dicc):
     url_list = "https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetList/"
     url_detalle = "https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{}"
 
-    # Función para obtener un nuevo token
     def obtener_token():
         try:
             response = requests.post(url_auth, json=credenciales)
@@ -5757,28 +5756,38 @@ def input_PadronAtm(dicc):
             print(f"Error en la solicitud de autenticación: {e}")
             return None
 
-    # Obtener el primer token
     token = obtener_token()
     if not token:
         return None
 
     headers = {"Authorization": f"Bearer {token}"}
-    token_time = time.time()  # Guardamos el tiempo en que se obtuvo el token
+    token_time = time.time()
     start = 0
-    length = 200
-    first = True
+    length = 1000  # MÁS registros por página para menos llamadas
 
     conn_str = f"postgresql://{GEOETL_DB['user']}:{GEOETL_DB['password']}@{GEOETL_DB['host']}:{GEOETL_DB['port']}/{GEOETL_DB['database']}"
     engine = create_engine(conn_str)
 
+    buffer = []
+    first = True
+
+    def obtener_detalle(documento):
+        try:
+            response = requests.get(url_detalle.format(documento), headers=headers, timeout=15)
+            response.raise_for_status()
+            return documento, response.json()
+        except Exception as e:
+            print(f"Error con documento {documento}: {e}")
+            return documento, None
+
     while True:
-        if time.time() - token_time > 21600:  # 21600 segundos = 6 horas
+        if time.time() - token_time > 21600:
             print("Han pasado 6 horas, obteniendo un nuevo token...")
             token = obtener_token()
             if not token:
                 return None
             headers = {"Authorization": f"Bearer {token}"}
-            token_time = time.time()  # Actualizamos el tiempo del token
+            token_time = time.time()
 
         params = {
             "id": 1,
@@ -5801,12 +5810,13 @@ def input_PadronAtm(dicc):
 
         if not habitantes:
             break
-        
-        print('Consultando los habitantes del ' +str(start) + ' al '+ str(length+start))
+
+        print(f'Consultando los habitantes del {start} al {length + start}')
+        documentos = []
 
         for hab in habitantes:
-            if hab.get('bfechabaja') == True:
-                continue  # No continuar con este habitante
+            if hab.get('bfechabaja') is True:
+                continue
 
             tipodocu = hab.get('tipodocu')
             documento = None
@@ -5818,57 +5828,70 @@ def input_PadronAtm(dicc):
             elif tipodocu == '3':
                 documento = (hab.get('lextr') or '') + (hab.get('dni') or '') + (hab.get('nif') or '')
 
-            if not documento:
-                continue  # Si no tiene documento, no continuar
+            if documento:
+                documentos.append(documento)
 
-            try:
-                response_modelos = requests.get(url_detalle.format(documento), headers=headers)
-                response_modelos.raise_for_status()
-                data = response_modelos.json()
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(obtener_detalle, doc) for doc in documentos]
+
+            for future in as_completed(futures):
+                documento, data = future.result()
+                if not data:
+                    continue
 
                 habitante = data.get('habitante', {})
                 lastmov = data.get('lastmovimiento', {})
                 vivienda = data.get('vivienda', {})
                 domicilio = data.get('domicilio', {})
 
-            except requests.RequestException as e:
-                print(f"Error al obtener datos del habitante con documento {documento}: {e}")
-                continue
+                for dic in (habitante, lastmov, vivienda, domicilio):
+                    dic.pop("tabla", None)
 
-            for dic in (habitante, lastmov, vivienda, domicilio):
-                dic.pop("tabla", None)
+                all_keys = list(habitante.keys()) + list(lastmov.keys()) + list(vivienda.keys()) + list(domicilio.keys())
+                duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
 
-            # Manejo de claves duplicadas
-            all_keys = list(habitante.keys()) + list(lastmov.keys()) + list(vivienda.keys()) + list(domicilio.keys())
-            duplicated_keys = {k for k in all_keys if all_keys.count(k) > 1 and not k.startswith("id")}
+                def agregar_sufijo(diccionario, sufijo):
+                    return {
+                        (f"{k}{sufijo}" if k in duplicated_keys else k): v
+                        for k, v in diccionario.items()
+                    }
 
-            def agregar_sufijo(diccionario, sufijo):
-                return {
-                    (f"{k}{sufijo}" if k in duplicated_keys else k): v
-                    for k, v in diccionario.items()
+                flat_data = {
+                    **habitante,
+                    **agregar_sufijo(lastmov, "_lastmovimiento"),
+                    **agregar_sufijo(vivienda, "_vivienda"),
+                    **agregar_sufijo(domicilio, "_domicilio")
                 }
 
-            flat_data = {
-                **habitante,
-                **agregar_sufijo(lastmov, "_lastmovimiento"),
-                **agregar_sufijo(vivienda, "_vivienda"),
-                **agregar_sufijo(domicilio, "_domicilio")
-            }
+                buffer.append(flat_data)
 
-            df = pd.DataFrame([flat_data])
+                if len(buffer) >= 500:
+                    df = pd.DataFrame(buffer)
+                    try:
+                        if first:
+                            df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='replace', index=False)
+                            first = False
+                        else:
+                            df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='append', index=False)
+                    except Exception as e:
+                        print(f"Error al insertar en base de datos: {e}")
+                    buffer.clear()
 
-            try:
-                if first:
-                    df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='replace', index=False)
-                    first = False
-                else:
-                    df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='append', index=False)
-            except Exception as e:
-                print(f"Error al insertar en base de datos: {e}")
-
-        if len(habitantes) < 200:
+        if len(habitantes) < length:
             break
-        start += 200
+
+        start += length
+
+    if buffer:
+        df = pd.DataFrame(buffer)
+        try:
+            if first:
+                df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='replace', index=False)
+            else:
+                df.to_sql(table_name, con=engine, schema=GEOETL_DB['schema'], if_exists='append', index=False)
+        except Exception as e:
+            print(f"Error al insertar en base de datos (final): {e}")
 
     engine.dispose()
     return [table_name]
+
