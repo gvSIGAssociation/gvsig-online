@@ -4,7 +4,6 @@ import os
 import logging
 from django.conf import settings
 
-
 LOGGER = logging.getLogger('gvsigol')
 
 ETL_URL = '/etlurl'

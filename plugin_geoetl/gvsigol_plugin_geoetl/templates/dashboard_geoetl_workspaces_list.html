@@ -15,7 +15,7 @@
 						<button id="button-upload-workspace-etl" class="btn btn-block btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</button>
 					</div>
 					<div class="box-tools pull-right">
-						<button id="button-clean-tmp" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title='{% trans "Clean temporal tables" %}'><i class="fa fa-trash margin-r-5"></i> {% trans "Clean" %}</button>
+						<button id="button-clean" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title='{% trans "Clean temporal tables" %}'><i class="fa fa-trash margin-r-5"></i> {% trans "Clean" %}</button>
 					</div>
 					<div class="box-tools pull-right">
 						<button id="button-concat-workspaces" class="btn btn-block btn-default btn-sm" data-toggle="tooltip"  data-placement="top" title='{% trans "Concat. workspaces" %}'><i class="fa fa-th-list margin-r-5"></i> {% trans "Concat. workspaces" %}</button>
@@ -314,6 +314,44 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Modal para configurar TTL -->
+	<div id="ttlModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ttlModalLabel">
+		<div class="modal-dialog" role="document">
+		<div class="modal-content">
+	
+			<div class="modal-header">
+			<h4 class="modal-title" id="ttlModalLabel">{% trans "Set time (in hours)" %}</h4>
+			</div>
+	
+			<div class="modal-body">
+			<!-- Input de horas -->
+			<div class="form-group">
+				<label for="ttl-input">{% trans "Hours to keep temporary tables" %}</label>
+				<input type="number" id="ttl-input" class="form-control" min="1" value="24">
+			</div>
+	
+			<!-- Label y botón alineados a la derecha -->
+			<div class="form-group" style="margin-left: 60%;">
+				<label class="d-block">{% trans "Clean temporary tables now" %}</label>
+				<br>
+				<button id="button-clean-tmp" class="btn btn-default btn-sm mt-1" data-toggle="tooltip"
+				data-placement="top" title='{% trans "Clean temporary tables" %}'>
+				<i class="fa fa-trash margin-r-5"></i> {% trans "Clean" %}
+				</button>
+			</div>
+			</div>
+	
+			<div class="modal-footer">
+			<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+			<button type="button" class="btn btn-primary" id="save-ttl-btn">{% trans "Save time" %}</button>
+			</div>
+	
+		</div>
+		</div>
+	</div>
+  
+  
 
 	<!-- Modal clean temporal tables-->
 	<div id="modal-clean-tmp-tables" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
@@ -1049,6 +1087,41 @@
 
 
 		$('[data-toggle-second="tooltip"]').tooltip();
+
+
+			$('#button-clean').on('click', function () {
+			  $('#ttlModal').modal('show');
+			});
+		  
+			// Guardar TTL cuando se pulsa el botón de aceptar
+			$('#save-ttl-btn').on('click', function () {
+			  const ttlHours = parseInt($('#ttl-input').val(), 10);
+		  
+			  if (isNaN(ttlHours) || ttlHours < 1) {
+				alert('Por favor, introduce un número válido de horas.');
+				return;
+			  }
+		  
+			  // Enviar TTL al backend (ajusta la URL a la tuya real)
+			  $.ajax({
+				url: '/gvsigonline/etl/settings/update_ttl/',  // <- ajusta a tu endpoint real
+				method: 'POST',
+				data: {
+				  ttl_hours: ttlHours
+				},
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success: function (response) {
+				  console.log('TTL actualizado correctamente a ' + ttlHours + ' horas.');
+				  $('#ttlModal').modal('hide');
+				},
+				error: function () {
+				  console.log('Error al actualizar el TTL.');
+				}
+			  });
+			});
+		  
 
 		$('#button-clean-tmp').on('click', function (){
 

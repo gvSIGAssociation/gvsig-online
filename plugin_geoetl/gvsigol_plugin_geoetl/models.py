@@ -185,3 +185,24 @@ class SendEndpoint(models.Model):
         constraints = [
            models.UniqueConstraint(fields=['etl_ws'], name='unique_etlws_per_endpoint_row')
         ]
+
+class ETLPluginSettings(models.Model):
+    ttl_hours = models.PositiveIntegerField(default=24, help_text="Tiempo en horas tras el cual las tablas temporales se consideran obsoletas.")
+    
+    class Meta:
+        verbose_name = "Configuración del Plugin ETL"
+        verbose_name_plural = "Configuración del Plugin ETL"
+
+    def __str__(self):
+        return f"Configuración ETL (TTL: {self.ttl_hours}h)"
+
+class TempETLTable(models.Model):
+    table_name = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Tabla Temporal de ETL"
+        verbose_name_plural = "Tablas Temporales de ETL"
+
+    def __str__(self):
+        return f"{self.table_name} (creada: {self.created_at})"
