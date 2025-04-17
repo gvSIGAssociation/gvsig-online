@@ -50,6 +50,7 @@ urlpatterns = [
     path('etl/get_emails/', views.get_emails, name='get_emails'),
     path('etl/get_status_msg/', views.get_status_msg, name='get_status_msg'),
     path('etl/etl_schema_padron_atm/', views.etl_schema_padron_atm, name='etl_schema_padron_atm'),
+    path('etl/settings/update_ttl/', views.update_ttl, name='update_ttl'),
 
    
 ]

@@ -25,6 +25,7 @@
 from operator import concat
 from urllib import response
 from django.shortcuts import HttpResponse, render, redirect
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_auth import auth_backend
@@ -39,7 +40,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint
+from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings
 from gvsigol_services.models import Datastore
 from django.contrib.auth.models import User
 from . import settings as settings_geoetl
@@ -1498,3 +1499,36 @@ def etl_schema_padron_atm(request):
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")        
+        
+
+def update_clean_temp_tables_task(ttl_hours):
+    my_task_name = 'gvsigol_plugin_geoetl.clean_old_temp_tables'
+    half_ttl = max(1, int(ttl_hours / 2))  # Evitamos 0
+
+    interval, _ = IntervalSchedule.objects.get_or_create(
+        every=half_ttl,
+        period=IntervalSchedule.HOURS
+    )
+
+    task, created = PeriodicTask.objects.get_or_create(name=my_task_name)
+    task.interval = interval
+    task.task = 'gvsigol_plugin_geoetl.tasks.clean_old_temp_tables'
+    task.save()
+    
+
+@login_required()
+@staff_required
+def update_ttl(request):
+    if request.method == "POST":
+        try:
+            ttl_hours = int(request.POST.get("ttl_hours", 24))
+            settings, _ = ETLPluginSettings.objects.get_or_create(id=1)
+            settings.ttl_hours = ttl_hours
+            settings.save()
+            
+            update_clean_temp_tables_task(ttl_hours)
+            
+            return JsonResponse({"status": "ok", "ttl_hours": ttl_hours})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)

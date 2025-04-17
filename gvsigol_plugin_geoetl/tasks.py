@@ -4,8 +4,8 @@ from celery.schedules import crontab
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 from django.core.mail import send_mail
 from celery.utils.log import get_task_logger
-
-from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests, SendEmails, SendEndpoint
+from gvsigol_plugin_geoetl.utils import get_ttl_hours
+from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests, SendEmails, SendEndpoint, TempETLTable
 from gvsigol import settings
 
 from . import etl_tasks, views
@@ -250,6 +250,9 @@ def run_canvas_background(**kwargs):
                                 
                                 if not n[1]['type'].startswith('output'):
                                     n.append(result)
+                                    
+                                    for table_name in result:
+                                        TempETLTable.objects.create(table_name=table_name)
             
             if move:
                 for m in move:
@@ -578,3 +581,49 @@ def requestEndpoint(_id):
         response = requests.delete(send_endpoint.url, **kwargs)
         
     print('El estado de la petición del espacio de trabajo '+str(_id)+' request ha sido: '+ str(response.status_code))
+
+    
+@celery_app.on_after_finalize.connect
+def setup_clean_old_temp_tables(**kwargs):
+    ttl_hours = get_ttl_hours()
+    
+    my_task_name = 'gvsigol_plugin_geoetl.clean_old_temp_tables'
+
+    if not PeriodicTask.objects.filter(name=my_task_name).exists():
+        interval, _ = IntervalSchedule.objects.get_or_create(
+            every=ttl_hours/2,
+            period=IntervalSchedule.HOURS
+        )
+        PeriodicTask.objects.create(
+            interval=interval,
+            name=my_task_name,
+            task='gvsigol_plugin_geoetl.tasks.clean_old_temp_tables',
+        )
+
+@celery_app.task
+def clean_old_temp_tables():
+    try:
+        conn_ = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
+        conn_.autocommit = True
+        cursor = conn_.cursor()
+
+        ttl_hours = get_ttl_hours()
+        expiration_threshold = timezone.now() - timedelta(hours=ttl_hours)
+
+        old_tables = TempETLTable.objects.filter(created_at__lt=expiration_threshold)
+
+        for table in old_tables:
+            table_name = table.table_name
+            drop_sql = f'DROP TABLE IF EXISTS ds_plugin_geoetl."{table_name}" CASCADE;'
+            try:
+                cursor.execute(drop_sql)
+                print(f"Tabla eliminada: {table_name}")
+                table.delete()
+            except Exception as e:
+                print(f"Error al eliminar la tabla {table_name}: {e}")
+
+        cursor.close()
+        conn_.close()
+
+    except Exception as e:
+        print(f"Error en la tarea clean_old_temp_tables: {e}")
