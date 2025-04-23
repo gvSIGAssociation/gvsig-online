@@ -28,7 +28,7 @@ from django.contrib.auth.models import User
 from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers, Application, SharedView
 from gvsigol_plugin_projectapi import util
 from gvsigol_plugin_baseapi.validation import HttpException
-from gvsigol_services.models import LayerGroup, Layer, Server
+from gvsigol_services.models import LayerGroup, Layer, Server, Marker
 from gvsigol import settings
 from datetime import datetime
 import time
@@ -196,6 +196,11 @@ class ApplicationsSerializer(serializers.ModelSerializer):
 class SharedViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = SharedView
+        fields = '__all__'
+
+class MarkerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Marker
         fields = '__all__'
 
 

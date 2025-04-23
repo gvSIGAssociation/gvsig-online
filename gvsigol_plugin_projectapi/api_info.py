@@ -37,6 +37,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db.models import Q
+from rest_framework.views import APIView
+from django.db.models import Max
+
 
 
 from gvsigol import settings as core_settings
@@ -48,10 +51,11 @@ from gvsigol_services import geographic_servers
 from gvsigol_services import utils as servicesutils
 from gvsigol_services import views as serviceviews
 from gvsigol_services.models import Layer, LayerGroup, Datastore, Workspace, \
-    LayerResource
+    LayerResource,Marker
 from gvsigol_symbology.models import StyleLayer
 from .infoserializer import InfoSerializer, PublicInfoSerializer, AppInfoSerializer
 import gvsigol_plugin_projectapi.serializers
+from .serializers import MarkerSerializer
 import gvsigol_plugin_projectapi.util as util
 from os import path
 from django.utils import timezone
@@ -214,3 +218,56 @@ class ApplicationConfView(ListAPIView):
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
+        
+class MarkerView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
+
+    def get(self, request, idProj):
+        if idProj is not None:
+            markers = Marker.objects.filter(idProj=idProj).order_by('order')
+        else:
+            markers = Marker.objects.all().order_by('idProj', 'order')
+        serializer = MarkerSerializer(markers, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, idProj=None):
+        id_proj = request.data.get("idProj")
+
+        if id_proj is None:
+            return Response({'error': 'idProj is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Calcular el próximo 'order' dentro de ese idProj
+        max_order = Marker.objects.filter(idProj=id_proj).aggregate(Max('order'))['order__max']
+        next_order = 0 if max_order is None else max_order + 1
+
+        data = request.data.copy()
+        data['order'] = next_order
+
+        serializer = MarkerSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        try:
+            marker = Marker.objects.get(pk=pk)
+        except Marker.DoesNotExist:
+            return Response({'error': 'Marker not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = MarkerSerializer(marker, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        try:
+            marker = Marker.objects.get(pk=pk)
+            marker.delete()
+            return Response({'message': 'Marker deleted'}, status=status.HTTP_204_NO_CONTENT)
+        except Marker.DoesNotExist:
+            return Response({'error': 'Marker not found'}, status=status.HTTP_404_NOT_FOUND)
