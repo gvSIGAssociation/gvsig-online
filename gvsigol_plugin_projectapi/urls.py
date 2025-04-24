@@ -69,9 +69,9 @@ urlpatterns = [
     path('api/v1/applicationconf/<str:name>/', api_info.ApplicationConfView.as_view(), name='applicationconf'),
 
     #Markers
-    path('markers/', api_info.MarkerView.as_view(), name='create_marker'),  
-    path('markers/project/<int:idProj>/', api_info.MarkerView.as_view(), name='get_markers_list_by_idProj'),  
-    path('markers/<int:pk>/', api_info.MarkerView.as_view(), name='delete_marker'),
+    path('api/v1/markers/', api_info.MarkerView.as_view(), name='create_marker'),  
+    path('api/v1/markers/project/<int:idProj>/', api_info.MarkerView.as_view(), name='get_markers_list_by_idProj'),  
+    path('api/v1/markers/<int:pk>/', api_info.MarkerView.as_view(), name='delete_marker,update_marker'),
 
 
 ]
