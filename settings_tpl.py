@@ -566,11 +566,3 @@ IFRAME_MODE_UI = False
 MANAGE_PERMISSION_UI = True
 
 VIEWER_DEFAULT_CRS = '##VIEWER_DEFAULT_CRS##'
-try:
-    import gdaltools
-    ogr = gdaltools.ogr2ogr()
-    (major, minor, patch, prerelease) = ogr.get_version_tuple()
-    print(f"GDAL/OGR version: {major}.{minor}.{patch} {prerelease}")
-    print(f"GDAL_LIBRARY_PATH: {GDAL_LIBRARY_PATH}")
-except:
-    pass
