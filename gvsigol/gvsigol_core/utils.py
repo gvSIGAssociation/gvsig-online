@@ -632,6 +632,14 @@ def get_iso_language(request, default_lang='en'):
     except:
         return languages.get(part1=default_lang)
 
+def is_shell_process(exclude_runserver=False, exclude_testserver=False):
+    try:
+        if sys.argv[0].lower().endswith('manage') or sys.argv[0].lower().endswith('manage.py') and sys.argv[1] == 'shell':
+            return True
+    except:
+        pass
+    return False
+
 def is_manage_process(exclude_runserver=False, exclude_testserver=False):
     if sys.argv[0].lower().endswith('manage') or sys.argv[0].lower().endswith('manage.py'):
         if len(sys.argv) == 1:
