@@ -26,19 +26,19 @@ class GvsigolCoreConfig(AppConfig):
         self.output_gdal_version()
 
     def output_gdal_version(self):
-        from gvsigol_core.utils import is_manage_process, is_shell_process
-        from gvsigol.settings import GDAL_LIBRARY_PATH
-        if (is_manage_process and os.environ.get('RUN_MAIN') == 'true') or is_shell_process():
-            try:
+        try:
+            from gvsigol_core.utils import is_gvsigol_process, is_shell_process    
+            if (is_gvsigol_process() and os.environ.get('RUN_MAIN') == 'true') or is_shell_process():
                 import gdaltools
                 ogr = gdaltools.ogr2ogr()
                 (major, minor, patch, prerelease) = ogr.get_version_tuple()
                 print(f"GDAL/OGR version (gdaltools): {major}.{minor}.{patch} {prerelease}")
-                print(f"GDAL_LIBRARY_PATH: {GDAL_LIBRARY_PATH}")
+                from gvsigol import settings
+                print(f"GDAL_LIBRARY_PATH: {settings.GDAL_LIBRARY_PATH}")
                 from django.contrib.gis import gdal
                 print(f"GDAL version (django): {gdal.GDAL_VERSION}")
-            except:
-                pass
+        except:
+            pass
 
     def config_gdaltools(self):
         import gdaltools
