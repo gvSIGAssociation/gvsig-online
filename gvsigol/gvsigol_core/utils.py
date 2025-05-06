@@ -632,7 +632,7 @@ def get_iso_language(request, default_lang='en'):
     except:
         return languages.get(part1=default_lang)
 
-def is_shell_process(exclude_runserver=False, exclude_testserver=False):
+def is_shell_process():
     try:
         if sys.argv[0].lower().endswith('manage') or sys.argv[0].lower().endswith('manage.py') and sys.argv[1] == 'shell':
             return True
@@ -640,24 +640,31 @@ def is_shell_process(exclude_runserver=False, exclude_testserver=False):
         pass
     return False
 
-def is_manage_process(exclude_runserver=False, exclude_testserver=False):
-    if sys.argv[0].lower().endswith('manage') or sys.argv[0].lower().endswith('manage.py'):
-        if len(sys.argv) == 1:
+def is_manage_process():
+    return (sys.argv[0].lower().endswith('manage') or sys.argv[0].lower().endswith('manage.py'))
+
+def is_manage_runserver(only_main=True):
+    if is_manage_process():
+        if sys.argv[1] == 'runserver':
+            if only_main:
+                return os.environ.get('RUN_MAIN') == 'true'
             return True
-        elif len(sys.argv) > 1:
-            if exclude_runserver and exclude_testserver:
-                return (sys.argv[1] != 'runserver' and sys.argv[1] != 'testserver')
-            elif exclude_runserver:
-                return (sys.argv[1] != 'runserver')
-            elif exclude_testserver:
-                return (sys.argv[1] != 'testserver')
-            else:
-                return True
     return False
 
-def is_gvsigol_process():
+def is_manage_testserver():
+    if is_manage_process():
+        if sys.argv[1] == 'testserver':
+            return True
+    return False
+
+def is_gvsigol_process(include_runserver=True, include_testserver=False):
     from gvsigol.celery import is_celery_process
-    return (not is_celery_process() and not is_manage_process(exclude_runserver=True, exclude_testserver=True))
+    if not is_celery_process() and not is_manage_process():
+        return True
+    if include_runserver and  is_manage_runserver():
+        return True
+    if include_testserver and is_manage_testserver():
+        return True
 
 def get_canonical_epsg3857_extent(extent_str):
     """
