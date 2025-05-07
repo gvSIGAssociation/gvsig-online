@@ -252,7 +252,7 @@ def run_canvas_background(**kwargs):
                                     n.append(result)
                                     
                                     for table_name in result:
-                                        TempETLTable.objects.create(table_name=table_name)
+                                        TempETLTable.objects.update_or_create(table_name=table_name)
             
             if move:
                 for m in move:
