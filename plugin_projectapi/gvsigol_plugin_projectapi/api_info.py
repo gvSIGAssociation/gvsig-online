@@ -227,9 +227,9 @@ class MarkerView(APIView):
 
     def get(self, request, idProj):
         if idProj is not None:
-            markers = Marker.objects.filter(idProj=idProj).order_by('order')
+            markers = Marker.objects.filter(idProj=idProj)
         else:
-            markers = Marker.objects.all().order_by('idProj', 'order')
+            markers = Marker.objects.all()
         serializer = MarkerSerializer(markers, many=True)
         return Response(serializer.data)
 
@@ -239,14 +239,7 @@ class MarkerView(APIView):
         if id_proj is None:
             return Response({'error': 'idProj is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Calcular el próximo 'order' dentro de ese idProj
-        max_order = Marker.objects.filter(idProj=id_proj).aggregate(Max('order'))['order__max']
-        next_order = 0 if max_order is None else max_order + 1
-
-        data = request.data.copy()
-        data['order'] = next_order
-
-        serializer = MarkerSerializer(data=data)
+        serializer = MarkerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
