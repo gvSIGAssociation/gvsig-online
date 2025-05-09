@@ -835,8 +835,8 @@ class Marker(models.Model):
     position_lat = models.FloatField()
     position_lng = models.FloatField()
     zoom = models.FloatField()
-    order = models.PositiveIntegerField(default=0)  
     thumbnail = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Marker - {self.title} (Proj {self.idProj})"
