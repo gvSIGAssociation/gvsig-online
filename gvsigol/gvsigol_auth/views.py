@@ -727,10 +727,11 @@ def get_roles(request):
 def get_all_roles(request):
     """
     GET /gvsigonline/auth/get-all-roles/
-    returns ["role1", "role2"]
+    Returns all existing roles, e.g. ["role1", "role2"]
+    returns 403 si no lo invoca un superusuario
     returns 401 si no está autenticado
     """
-    wrapped_data = {"results": auth_backend.get_all_roles_details(request)}
+    wrapped_data = {"results": auth_backend.get_all_roles_details()}
     return JsonResponse(wrapped_data, safe=False)
 
 """
