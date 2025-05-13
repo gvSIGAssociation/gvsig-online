@@ -38,6 +38,8 @@ import json
 import sys
 
 print ("INFO: Ejecutando settings.py !!...........................................")
+GVSIGOL_VERSION = '3.9.4-dev'
+print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 if os.environ.get("DEBUG")=='True':
     print ("INFO: Current environment:")
     for name, value in os.environ.items():
@@ -513,8 +515,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     #'compressor.finders.CompressorFinder',
 )
-
-GVSIGOL_VERSION = '3.9.4-dev'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': env('DB_HOST'),
