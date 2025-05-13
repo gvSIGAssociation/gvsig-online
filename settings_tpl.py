@@ -38,6 +38,7 @@ debug.HIDDEN_SETTINGS = re.compile(
 )
 
 GVSIGOL_VERSION = '3.9.4-dev'
+print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
