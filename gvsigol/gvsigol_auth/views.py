@@ -722,6 +722,16 @@ def get_roles(request):
     """
     return JsonResponse(auth_backend.get_roles(request), safe=False)
 
+@login_required()
+@superuser_required
+def get_all_roles(request):
+    """
+    GET /gvsigonline/auth/get-all-roles/
+    returns ["role1", "role2"]
+    returns 401 si no está autenticado
+    """
+    wrapped_data = {"results": auth_backend.get_all_roles_details(request)}
+    return JsonResponse(wrapped_data, safe=False)
 
 """
 TODO:

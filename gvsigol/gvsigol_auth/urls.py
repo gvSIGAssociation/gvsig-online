@@ -26,7 +26,8 @@ urlpatterns = LOGIN_PATHS + [
     path('has-role/', auth_views.has_role, name='auth-has-role'),
     path('has-group/', auth_views.has_group, name='auth-has-group'),
     path('get-roles/', auth_views.get_roles, name='auth-get-roles'),
-    path('get-groups/', auth_views.get_groups, name='auth-get-groups')
+    path('get-groups/', auth_views.get_groups, name='auth-get-groups'),
+    path('get-all-roles/', auth_views.get_all_roles, name='auth-get-all-roles'),
 ]
 
 if settings.AUTH_DASHBOARD_UI:
