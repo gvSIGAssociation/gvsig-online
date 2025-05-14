@@ -151,7 +151,11 @@ env = environ.Env(
     DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 26214400), # The default size 2621440 (2.5M) is too small and prevents adding external layers from servers having large getcapabilites document
     FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774),
     #DRF
-    DRF_PAGE_SIZE=(int,100)
+    DRF_PAGE_SIZE=(int,100),
+    #Countries
+    COUNTRIES_ONLY = (list, []),
+    COUNTRIES_FIRST = (list, []),
+    COUNTRIES_FIRST_BREAK = (str,"----")    
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -805,3 +809,10 @@ VIEWER_DEFAULT_CRS=env('VIEWER_DEFAULT_CRS')
 #CSP_SCRIPT_SRC = ("'self'","'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
 #CSP_FRAME_ANCESTORS = ("'self'", 'https://localhost/','https://gvsigol-keycloak:8443/','http://localhost:3000/')
 #CSP_FRAME_ANCESTORS = ('*')||||||| .r8141
+
+
+
+# django-countries
+COUNTRIES_ONLY = env("COUNTRIES_ONLY")
+COUNTRIES_FIRST = env("COUNTRIES_FIRST")
+COUNTRIES_FIRST_BREAK = env("COUNTRIES_FIRST_BREAK")
