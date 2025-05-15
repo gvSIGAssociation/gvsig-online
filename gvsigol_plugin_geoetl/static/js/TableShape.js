@@ -16830,16 +16830,20 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                     '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="append-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="APPEND">'+
-                                    '<label for="append" class="form-check-label">'+gettext('APPEND')+'</label>'+
+                                    '<input type="radio" id="dropandcreate-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="DROP AND CREATE">'+
+                                    '<label for="dropandcreate" class="form-check-label">'+gettext('DROP AND CREATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="overwrite-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="OVERWRITE">'+
-                                    '<label for="overwrite" class="form-check-label">'+gettext('OVERWRITE')+'</label>'+
+                                    '<input type="radio" id="append-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="APPEND">'+
+                                    '<label for="append" class="form-check-label">'+gettext('APPEND')+'</label>'+
                                 '</div>'+
                             '</div>'+
                             '<div class="column25">'+
                             '<br><br>'+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="overwrite-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="OVERWRITE">'+
+                                    '<label for="overwrite" class="form-check-label">'+gettext('OVERWRITE')+'</label>'+
+                                '</div>'+
                                 '<div class="form-check">'+
                                     '<input type="radio" id="update-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
                                     '<label for="update" class="form-check-label">'+gettext('UPDATE')+'</label>'+
