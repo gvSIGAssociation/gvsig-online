@@ -909,6 +909,87 @@ def output_Postgis(dicc):
                 _ogr.geom_type = type_geom
 
                 _ogr.execute()
+                
+        elif dicc['operation'] == 'DROP AND CREATE':
+            if inSame:
+                sqlDrop = sql.SQL('DROP TABLE IF EXISTS {sch_target}.{tbl_target} CASCADE').format(
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab)
+                )
+                cur.execute(sqlDrop)
+                con_source.commit()
+
+                sqlCreate = sql.SQL('CREATE TABLE {sch_target}.{tbl_target} AS SELECT * FROM {sch_source}.{tbl_source}').format(
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab),
+                    sch_source = sql.Identifier(GEOETL_DB["schema"]),
+                    tbl_source = sql.Identifier(table_name_source)
+                )
+                cur.execute(sqlCreate)
+                con_source.commit()
+
+                sqlAlter = sql.SQL('ALTER TABLE {sch_target}.{tbl_target} ADD COLUMN IF NOT EXISTS ogc_fid SERIAL').format(
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab)
+                )
+                cur.execute(sqlAlter)
+                con_source.commit()
+
+                sqlPK = sql.SQL('ALTER TABLE {sch_target}.{tbl_target} ADD PRIMARY KEY (ogc_fid)').format(
+                    sch_target = sql.Identifier(esq),
+                    tbl_target = sql.Identifier(tab)
+                )
+                try:
+                    cur.execute(sqlPK)
+                    con_source.commit()
+                except:
+                    pass
+
+                try:
+                    sqlIndex = sql.SQL('CREATE INDEX "{tbl}_wkb_geometry_geom_idx" ON {sch_target}.{tbl_target} USING gist (wkb_geometry)').format(
+                        tbl = sql.SQL(tab),
+                        sch_target = sql.Identifier(esq),
+                        tbl_target = sql.Identifier(tab)
+                    )
+                    cur.execute(sqlIndex)
+                    con_source.commit()
+                except:
+                    print("No se ha podido crear el índice espacial.")
+
+                con_source.close()
+                cur.close()
+            else:
+                try:
+                    srid, type_geom = get_type_n_srid(table_name_source)
+                except:
+                    type_geom = ''
+
+                _conn_source = gdaltools.PgConnectionString(
+                    host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"],
+                    schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"]
+                )
+                _conn_target = gdaltools.PgConnectionString(
+                    user=params["user"], password=params["password"], host=params["host"],
+                    port=params["port"], dbname=params["database"], schema=esq
+                )
+
+                _ogr = gdaltools.ogr2ogr()
+                _ogr.set_input(_conn_source, table_name=table_name_source)
+                _ogr.set_output(_conn_target, table_name=tab)
+
+                _ogr.set_output_mode(layer_mode=_ogr.MODE_LAYER_OVERWRITE, data_source_mode=_ogr.MODE_DS_UPDATE)
+                _ogr.config_options = {
+                    "OGR_TRUNCATE": "NO"
+                }
+                _ogr.layer_creation_options = {
+                    "LAUNDER": "YES",
+                    "precision": "NO"
+                }
+                _ogr.set_dim("2")
+                _ogr.geom_type = type_geom
+
+                _ogr.execute()
+
 
         elif dicc['operation'] == 'APPEND' or dicc['operation'] == 'OVERWRITE':
 
