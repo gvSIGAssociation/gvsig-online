@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token, verify_jwt_token
 from gvsigol_auth import views as auth_views
+from gvsigol_auth import api
 
 from django.conf import settings
 from django.utils.module_loading import import_string
@@ -26,8 +27,11 @@ urlpatterns = LOGIN_PATHS + [
     path('has-role/', auth_views.has_role, name='auth-has-role'),
     path('has-group/', auth_views.has_group, name='auth-has-group'),
     path('get-roles/', auth_views.get_roles, name='auth-get-roles'),
-    path('get-groups/', auth_views.get_groups, name='auth-get-groups'),
-    path('get-all-roles/', auth_views.get_all_roles, name='auth-get-all-roles'),
+    path('get-groups/', auth_views.get_groups, name='auth-get-groups')
+]
+## REST API endpoints:
+urlpatterns = urlpatterns + [
+    path('get-all-roles/', api.get_all_roles, name='auth-get-all-roles')
 ]
 
 if settings.AUTH_DASHBOARD_UI:
