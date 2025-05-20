@@ -66,11 +66,11 @@ GEOCODING_PROVIDER = {
         'country_codes': ''
     },
     'icv': {
-    'candidates_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
-    'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
-    'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?x=valorx&y=valor',
-    'country_codes': 'es'  
-},
+        'candidates_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
+        'find_url': 'https://descargas.icv.gva.es/server_api/buscador/solrclient.php?start=0&limit=10',
+        'reverse_url': 'https://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?x=valorx&y=valor',
+        'country_codes': 'es'  
+    },
     'googlemaps': {
         "candidates_url": "https://maps.googleapis.com/maps/api/place/autocomplete/json?language=es&components=country:es",
         'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
