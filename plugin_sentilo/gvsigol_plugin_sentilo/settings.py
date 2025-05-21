@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
+import environ
 from gvsigol import settings
 
+env = environ.Env()
 
 LOGGER = logging.getLogger('gvsigol')
 
 SENTILO_URL = '/sentilo'
-
-
 
 env_plugin_sentilo = {
     'SENTILO_DB_HOST': settings.DATABASES['default']['HOST'],
@@ -16,6 +16,8 @@ env_plugin_sentilo = {
     'SENTILO_DB_USER': settings.DATABASES['default']['USER'],
     'SENTILO_DB_PASSWD': settings.DATABASES['default']['PASSWORD']
 }
+
+MUNICIPALITY = env('MUNICIPALITY', default='lapobladevallbona')
 
 SENTILO_DB = {
     'host': env_plugin_sentilo['SENTILO_DB_HOST'],
@@ -26,7 +28,10 @@ SENTILO_DB = {
     'schema': 'public'
 }
 
-LOGGER.info("SENTILO_DB_HOST= %s",SENTILO_DB['host'])
-LOGGER.info("SENTILO_DB_PORT= %s",SENTILO_DB['port'])
-LOGGER.info("SENTILO_DB_NAME= %s",SENTILO_DB['database'])
-LOGGER.info("SENTILO_DB_USER= %s",SENTILO_DB['user'])
+# Logging de valores
+LOGGER.info("SENTILO_DB_HOST= %s", SENTILO_DB['host'])
+LOGGER.info("SENTILO_DB_PORT= %s", SENTILO_DB['port'])
+LOGGER.info("SENTILO_DB_NAME= %s", SENTILO_DB['database'])
+LOGGER.info("SENTILO_DB_USER= %s", SENTILO_DB['user'])
+LOGGER.info("MUNICIPALITY= %s", MUNICIPALITY)
+

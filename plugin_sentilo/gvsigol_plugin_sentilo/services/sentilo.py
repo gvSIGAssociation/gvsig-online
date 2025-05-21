@@ -12,7 +12,7 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
 
-from gvsigol_plugin_sentilo.settings import SENTILO_DB
+from gvsigol_plugin_sentilo.settings import SENTILO_DB, MUNICIPALITY
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 import json
 
@@ -74,7 +74,7 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
 
 #etl_tasks
 def format_sentilo_data_etl(entities):
-    filteredEntities = filter(lambda entity: "council_data" in entity and "value" in entity["council_data"] and entity["council_data"]["value"]["municipality"] == "cullera", entities)
+    filteredEntities = filter(lambda entity: "council_data" in entity and "value" in entity["council_data"] and entity["council_data"]["value"]["municipality"] == MUNICIPALITY, entities)
     finalList = []
     list_tmp = {}
     for entity in filteredEntities:
@@ -167,7 +167,7 @@ def sentilo_http_request(baseUrl, sensors, apikey):
     return entities
 
 def process_sentilo_request(form):
-    #     domain = models.CharField(max_length=200)
+    # domain = models.CharField(max_length=200)
     # sentilo_identity_key = models.CharField(max_length=200)
     # tabla_de_datos = models.CharField(max_length=200)
     # sentilo_sensors = models.TextField()  # Assuming this can be a long list
@@ -191,8 +191,9 @@ def process_sentilo_request(form):
             task=task,
             args=json.dumps([urlEntities, identity_key, db_table_name, form.sentilo_sensors])
         )
-
-    fetch_sentilo_api(urlEntities, identity_key, db_table_name, form.sentilo_sensors)
+    sensors_string = form.sentilo_sensors
+    sensors = sensors_string.split(",")
+    fetch_sentilo_api(urlEntities, identity_key, db_table_name, sensors)
     return
 
 
