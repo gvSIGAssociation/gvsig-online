@@ -25,6 +25,12 @@ class GvsigolCoreConfig(AppConfig):
         if is_gvsigol_process() or is_shell_process() or is_celery_process():
             self.output_locale_conf()
             self.output_gdal_version()
+        try:
+            from gvsigol.celery import debug_loggers
+            # debug Celery loggers behaviour in gvsigol startup
+            debug_loggers.apply_async()
+        except:
+            logging.getLogger('gvsigol').exception("Error in debug_environment task")
 
     def output_gdal_version(self):
         try:
