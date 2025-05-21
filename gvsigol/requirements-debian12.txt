@@ -149,3 +149,6 @@ django-simple-history==3.0.0
 
 #plugin cementerio_albacete
 pyodbc==5.2.0
+
+# plugin chat
+openai==0.27.8

@@ -156,3 +156,5 @@ certifi>=2024.8.30
 
 # model versions
 django-simple-history==3.0.0
+
+openai==0.27.8
