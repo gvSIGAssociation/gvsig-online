@@ -172,12 +172,16 @@
 	function createModalContent(fid, mode){
 		$('#modal-new-node .modal-body').empty();
 		
-		var id = Math.random().toString(36).slice(2);
+		var id;
 		var ui = '';
 		
 		var node = null;
 		if (mode == 'update') {
-			node = getNodeById(fid);
+			id = fid;
+			node = getNodeById(id);
+		}
+		else {
+			id = Math.random().toString(36).slice(2);;
 		}
 		
 		ui += '<div id="node-errors" class="row">';
@@ -232,9 +236,9 @@
 			ui += 	'<div class="col-md-12 form-group">';
 			ui += 		'<label>' + gettext('Is master?') + '</label>';
 			if (node.is_master) {
-				ui += 	'<input type="checkbox" name="node-ismaster-input-'+node.id+'" id="node-ismaster-input-'+node.id+'" checked/>';
+				ui += 	'<input type="checkbox" name="node-ismaster-input-'+id+'" id="node-ismaster-input-'+id+'" checked/>';
 			} else {
-				ui += 	'<input type="checkbox" name="node-ismaster-input-'+node.id+'" id="node-ismaster-input-'+node.id+'"/>';
+				ui += 	'<input type="checkbox" name="node-ismaster-input-'+id+'" id="node-ismaster-input-'+id+'"/>';
 			}
 			
 			ui += 	'</div>';
