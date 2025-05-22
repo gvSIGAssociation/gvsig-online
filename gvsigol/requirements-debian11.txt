@@ -1,3 +1,8 @@
+##
+# requirements-debian11.txt
+# Python target: 3.9
+# Ensure all lib versions are compatible with the target Python version
+
 ## django
 django==2.2.28
 djangoajax==3.2
