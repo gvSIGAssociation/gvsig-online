@@ -282,13 +282,13 @@
 		});
 		
 		$('#update-node-accept').on('click', function () {
-			var status = $('#node-status-select-'+this.dataset.nodeid).val();
-			var url = $('#node-url-input-'+this.dataset.nodeid).val();
-			var ismaster = $('#node-ismaster-input-'+this.dataset.nodeid).prop('checked');
+			var status = $('#node-status-select-'+id).val();
+			var url = $('#node-url-input-'+id).val();
+			var ismaster = $('#node-ismaster-input-'+id).prop('checked');
 			
 			if (true) {
 				var node = {
-					id: this.dataset.nodeid,
+					id: id,
 					status: status,
 					url: url,
 					is_master: ismaster
