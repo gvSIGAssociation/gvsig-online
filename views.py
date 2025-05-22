@@ -161,13 +161,12 @@ def server_add(request):
             for n in nodes:
                 node = Node(
                     server = server,
-                    status = n['status'],
+                    status = n.get('status', 'active'),
                     url = n['url'],
                     is_master = n['is_master']
                 )
                 node.save()
 
-            has_master = False
             master_list = Node.objects.filter(server=server, is_master=True)
             if master_list.count() == 0:
                 node_list = Node.objects.filter(server=server)
