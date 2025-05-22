@@ -972,12 +972,18 @@ class RequestError(Exception):
         if isinstance(self.server_message, str):
             msg += '\nServer message: ' + self.server_message
         else:
-            msg += '\nServer message: ' + self.server_message.decode('utf-8', 'replace')
+            try:
+                msg += '\nServer message: ' + self.server_message.decode('utf-8', 'replace')
+            except:
+                msg += '\nServer message: ' + str(self.server_message)
         if self.message:
             if isinstance(self.message, str):
                 msg += '\nMessage: ' + self.message
             else:
-                msg += '\nMessage: ' + self.message.decode('utf-8', 'replace')
+                try:
+                    msg += '\nMessage: ' + self.message.decode('utf-8', 'replace')
+                except:
+                    msg += '\nMessage: ' + str(self.message)
         return msg
 
 class UploadError(RequestError):

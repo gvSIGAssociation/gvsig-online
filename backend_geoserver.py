@@ -729,6 +729,8 @@ class Geoserver():
             if store.type[0]=="v":
                 self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
             # not available/necessary for coverages
+        except RequestError as e:
+            logger.exception('Error updating layer bounding box. ' + e.get_detailed_message())
         except:
             logger.exception('Error updating layer bounding box')
 
