@@ -220,7 +220,7 @@ def server_delete(request, svid):
         return HttpResponseRedirect(reverse('server_list'))
 
     except Exception as e:
-        print(str(e))
+        logger.exception("Error deleting server: " + str(e))
         return HttpResponseNotFound(str(e) )
 
 

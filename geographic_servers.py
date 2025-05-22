@@ -40,7 +40,10 @@ class GeographicServers:
                 else:
                     slave_nodes.append(n.url)
             if not master_node:
-                master_node = Node.objects.filter(server=s).first().url
+                if len(slave_nodes) > 0:
+                    master_node = slave_nodes[0]
+                else:
+                    master_node = s.frontend_url
             gs = backend_geoserver.Geoserver(s.id, s.default, s.name, s.user, s.password, master_node, slave_nodes, authz_srv_conf=s.authz_service_conf)
             self.servers.append(gs)
         
@@ -58,7 +61,10 @@ class GeographicServers:
             else:
                 slave_nodes.append(n.url)
         if not master_node:
-            master_node = Node.objects.filter(server=sv_conf).first().url
+            if len(slave_nodes) > 0:
+                master_node = slave_nodes[0]
+            else:
+                master_node = sv_conf.frontend_url
         geoserver = backend_geoserver.Geoserver(sv_conf.id, sv_conf.default, sv_conf.name, sv_conf.user, sv_conf.password, master_node, slave_nodes)
         self.servers.append(geoserver)
     
