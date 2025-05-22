@@ -168,13 +168,21 @@ def server_add(request):
                 node.save()
 
             has_master = False
-            if len(Node.objects.all()) > 0:
-                for n in Node.objects.all():
-                    if n.is_master:
-                        has_master = True
-
-                if not has_master:
-                    Node.objects.all()[0].is_master = True
+            master_list = Node.objects.filter(server=server, is_master=True)
+            if master_list.count() == 0:
+                node_list = Node.objects.filter(server=server)
+                if node_list.count() > 0:
+                    node_list[0].is_master = True
+                    node_list[0].save()
+                else:
+                    # if no nodes are created, set the first one as master
+                    node = Node(
+                        server = server,
+                        status = 'active',
+                        url = server.frontend_url,
+                        is_master = True
+                    )
+                    node.save()
 
             geographic_servers.get_instance().add_server(server)
             return HttpResponseRedirect(reverse('server_list'))
