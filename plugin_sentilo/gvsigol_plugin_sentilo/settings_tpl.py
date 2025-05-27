@@ -17,7 +17,7 @@ env_plugin_sentilo = {
     'SENTILO_DB_PASSWD': settings.DATABASES['default']['PASSWORD']
 }
 
-MUNICIPALITY = 'lapobladevallbona'
+MUNICIPALITY = '##MUNICIPALITY##'
 
 SENTILO_DB = {
     'host': env_plugin_sentilo['SENTILO_DB_HOST'],
@@ -34,4 +34,5 @@ LOGGER.info("SENTILO_DB_PORT= %s", SENTILO_DB['port'])
 LOGGER.info("SENTILO_DB_NAME= %s", SENTILO_DB['database'])
 LOGGER.info("SENTILO_DB_USER= %s", SENTILO_DB['user'])
 LOGGER.info("MUNICIPALITY= %s", MUNICIPALITY)
+
 
