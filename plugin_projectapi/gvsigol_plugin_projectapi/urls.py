@@ -73,6 +73,10 @@ urlpatterns = [
     path('api/v1/markers/project/<int:idProj>/', api_info.MarkerView.as_view(), name='get_markers_list_by_idProj'),  
     path('api/v1/markers/<int:pk>/', api_info.MarkerView.as_view(), name='delete_marker,update_marker'),
 
+    #Categories
+    path('api/v1/categories/', api_info.CategoryView.as_view(), name='create_categories,get_all_categories'),  
+
+
 
 ]
 
