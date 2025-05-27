@@ -51,11 +51,11 @@ from gvsigol_services import geographic_servers
 from gvsigol_services import utils as servicesutils
 from gvsigol_services import views as serviceviews
 from gvsigol_services.models import Layer, LayerGroup, Datastore, Workspace, \
-    LayerResource,Marker
+    LayerResource,Marker,Category
 from gvsigol_symbology.models import StyleLayer
 from .infoserializer import InfoSerializer, PublicInfoSerializer, AppInfoSerializer
 import gvsigol_plugin_projectapi.serializers
-from .serializers import MarkerSerializer
+from .serializers import MarkerSerializer, CategorySerializer
 import gvsigol_plugin_projectapi.util as util
 from os import path
 from django.utils import timezone
@@ -264,3 +264,24 @@ class MarkerView(APIView):
             return Response({'message': 'Marker deleted'}, status=status.HTTP_204_NO_CONTENT)
         except Marker.DoesNotExist:
             return Response({'error': 'Marker not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+class CategoryView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
+
+    def get(self, request):
+        category = Category.objects.all()
+        serializer = CategorySerializer(category, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+
