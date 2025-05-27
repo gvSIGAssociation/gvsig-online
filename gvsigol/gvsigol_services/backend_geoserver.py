@@ -294,7 +294,22 @@ class Geoserver():
                 
             elif format_nature == "c": # coverage (raster)
                 if driver == "GeoTIFF":
-                    ds = catalog.create_coveragestore(name, workspace=workspace, path=params_dict.get('url'),create_layer=False)
+                    try:
+                        ds = catalog.create_coveragestore(name, workspace=workspace, path=params_dict.get('url'),create_layer=False)
+                    except IndexError as e:
+                        # avoid https://github.com/GeoNode/geoserver-restconfig/issues/20
+                        ds = None
+                        retries = 0
+                        max_retries = 6
+                        while retries < max_retries:
+                            ds = self.getGsconfig().get_store(name, workspace.name)
+                            if ds is not None:
+                                break
+                            time.sleep(1)
+                            retries += 1
+                        if ds is None:
+                            raise
+
                     #ds.url = params_dict.get('url')
                 if driver == "ImageMosaic":
                     ele_regex = params_dict.get('ele_regex', '')
@@ -730,7 +745,7 @@ class Geoserver():
                 self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
             # not available/necessary for coverages
         except RequestError as e:
-            logger.exception('Error updating layer bounding box. ' + e.get_detailed_message())
+            logger.exception('Updating bounding box for {layer}. Error: {msg}'.format(layer=layer.name, msg=e.get_detailed_message()))
         except:
             logger.exception('Error updating layer bounding box')
 
