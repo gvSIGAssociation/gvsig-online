@@ -829,6 +829,13 @@ class SqlView(models.Model):
                   for t in self.json_def.get('from', [])]
         return ", ".join(tables)
 
+
+class Category(models.Model):
+    title = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Category - {self.title} )"
+
 class Marker(models.Model):
     idProj = models.IntegerField()
     title = models.CharField(max_length=255)
@@ -837,6 +844,15 @@ class Marker(models.Model):
     zoom = models.FloatField()
     thumbnail = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='markers'
+    )
 
     def __str__(self):
         return f"Marker - {self.title} (Proj {self.idProj})"
+    
+
