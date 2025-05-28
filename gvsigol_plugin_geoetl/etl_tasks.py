@@ -1862,63 +1862,64 @@ def trans_TextToPoint(dicc):
 def input_Oracle(dicc):
 
     table_name = dicc['id']
-
-    db  = database_connections.objects.get(name = dicc['db'])
-
+    db = database_connections.objects.get(name=dicc['db'])
     params = json.loads(db.connection_params)
 
-    conn_string_source = 'oracle+cx_oracle://'+params['username']+':'+params['password']+'@'+params['dsn'].split('/')[0]+'/?service_name='+params['dsn'].split('/')[1]
+    dsn = params['dsn'].split('/')
+    conn_string_source = f"oracle+cx_oracle://{params['username']}:{params['password']}@{dsn[0]}/?service_name={dsn[1]}"
     db_source = create_engine(conn_string_source)
-    conn_source = db_source.connect()
-    
-    if dicc['checkbox'] == "true":
-        sql = dicc['sql']
-    else:
-        sql = "SELECT * FROM "+dicc['owner-name']+"."+dicc['table-name']
-    
-    df = pd.read_sql(sql + " WHERE rownum = 1" , con = conn_source)
 
-    conn_string_target= 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
+    # SQL query
+    sql = dicc['sql'] if dicc['checkbox'] == "true" else f"SELECT * FROM {dicc['owner-name']}.{dicc['table-name']}"
+
+    # Conexión PostgreSQL
+    conn_string_target = f"postgresql://{GEOETL_DB['user']}:{GEOETL_DB['password']}@{GEOETL_DB['host']}:{GEOETL_DB['port']}/{GEOETL_DB['database']}"
     db_target = create_engine(conn_string_target)
-    conn_target = db_target.connect()
 
-    df.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
-    
-    col = list(df.columns.values)
+    # Obtener columnas para el DataFrame
+    df_sample = pd.read_sql(f"SELECT * FROM ({sql}) WHERE ROWNUM = 1", con=db_source.connect())
+    columns = list(df_sample.columns)
 
-    conn_source.close()
-    db_source.dispose()
-    
-    conn_ORA = cx_Oracle.connect(
-        params['username'],
-        params['password'],
-        params['dsn']
-    )
+    # Conexión directa con Oracle
+    conn_ora = cx_Oracle.connect(params['username'], params['password'], params['dsn'])
+    cursor = conn_ora.cursor()
+    cursor.execute(sql)
 
-    c_ORA = conn_ORA.cursor()
-    c_ORA.execute(sql)
+    batch_size = 1000
+    first_batch = True
 
-    count = 1
+    while True:
+        rows = cursor.fetchmany(batch_size)
+        if not rows:
+            break
 
-    for r in c_ORA:
-        row = list(r)
-        for i in range (0, len(row)):
-            if type(row[i]) == cx_Oracle.LOB:
-                row[i] = row[i].read().replace("\x00", "\uFFFD")
+        # Convertir a DataFrame
+        df = pd.DataFrame(rows, columns=columns)
 
-        df_tar = pd.DataFrame([row], columns = col)
-        df_obj = df_tar.select_dtypes(['object'])
-        df_tar[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+        # Procesar LOBs
+        for col in df.select_dtypes(include=[object]).columns:
+            df[col] = df[col].apply(lambda x: x.read().replace("\x00", "\uFFFD") if isinstance(x, cx_Oracle.LOB) else x)
 
-        if count == 1:
-            df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
-            count +=1
-        else:
-            df_tar.to_sql(table_name, con=conn_target, schema= GEOETL_DB['schema'], if_exists='append', index=False)
+        # Limpiar espacios iniciales solo en columnas tipo object
+        df_obj = df.select_dtypes(['object'])
+
+        try:
+            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+        except Exception as e:
+            print("Error aplicando .str.lstrip(' ') a columnas tipo 'object'")
+            print(f"Detalle del error: {e}")
+            print("Columnas involucradas:", list(df_obj.columns))
+            print("Tipos de datos detectados por columna:")
+            print(df_obj.dtypes)
+            pass
 
 
-    conn_target.close()
-    db_target.dispose()
+        # Insertar en Postgres
+        df.to_sql(table_name, con=db_target, schema=GEOETL_DB['schema'], if_exists='replace' if first_batch else 'append', index=False, method='multi')
+        first_batch = False
+
+    cursor.close()
+    conn_ora.close()
 
     return [table_name]
 
