@@ -234,8 +234,27 @@ def get_schema_oracle(dicc):
         except:
             print ('Existe la función get_columns_name')
         
-        sql_w = dicc['sql'].replace("'", "''")
-        
+        raw_sql = dicc['sql']
+
+        # Divide la SQL en SELECT ... FROM ...
+        parts = re.split(r'\bFROM\b', raw_sql, maxsplit=1, flags=re.IGNORECASE)
+
+        if len(parts) == 2:
+            select_part, rest_of_query = parts
+            # Eliminar variables con arrobas del SELECT, junto con comas opcionales alrededor
+            select_cleaned = re.sub(r'(,\s*)?@@.*?@@(,\s*)?', lambda m: ',' if m.group(1) and m.group(2) else '', select_part)
+
+            # Reemplazar variables en la parte restante (FROM y más allá) por 1
+            rest_cleaned = re.sub(r"@@.*?@@", "1", rest_of_query)
+
+            sanitized_sql = f"{select_cleaned.strip()} FROM {rest_cleaned.strip()}"
+        else:
+            # Fallback: no hay FROM → solo reemplazo genérico por 1
+            sanitized_sql = re.sub(r"@@.*?@@", "1", raw_sql)
+
+        # Escapar comillas simples
+        sql_w = sanitized_sql.replace("'", "''")
+            
         sql = "select * from TABLE(GET_COLUMNS_NAME('"+sql_w+"'))"
         
     else:

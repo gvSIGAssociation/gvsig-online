@@ -1120,6 +1120,9 @@ msgstr "Operación:"
 msgid "CREATE"
 msgstr "CREAR"
 
+msgid "DROP AND CREATE"
+msgstr "BORRAR Y CREAR"
+
 #: static/js/TableShape.js:14004
 msgid "APPEND"
 msgstr "AÑADIR"

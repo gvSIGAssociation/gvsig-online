@@ -1116,6 +1116,9 @@ msgstr ""
 msgid "CREATE"
 msgstr ""
 
+msgid "DROP AND CREATE"
+msgstr ""
+
 #: static/js/TableShape.js:14004
 msgid "APPEND"
 msgstr ""
