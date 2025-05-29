@@ -133,6 +133,43 @@
 								</div>
 							</div>	
 						</div>	
+
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="id_project">{% trans "Projects" %}</label>
+								<div>
+									<label>
+										<input type="radio" name="project_mode" value="all" checked> {% trans "All projects" %} 
+									</label>
+									<label>
+										<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %} 
+									</label>
+								</div>
+								<div id="project-selector" style="display: flex; gap: 20px; margin: 10px 0;" class="hidden">
+									<div style="flex: 1;">
+										{{ form.projects }}
+										<!-- <div class="col-md-6" style="margin: 50px;">
+											<div id="add-project-button" class="btn btn-box-tool" title='{% trans "Add project" %}' style="float:right;position:relative;z-index:10;" data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus margin-r-5"></i></div>
+											<input type="text" class="search2 form-control" placeHolder="{% trans 'Search projects...' %}" style="padding-right: 30px;position: absolute;"  />
+										</div> -->
+										<div class="box box-default" style="margin-top: 20px;">
+											<div class="box-header with-border">
+												<span class="text" style="font-weight: bold;">{% trans "Project list" %}</span>
+											</div>
+											<div class="box-body" id="selected-projects-list" style="min-height: 100px; max-height: 300px; overflow-y: auto;">
+											</div>
+										</div>
+									</div>
+									<div style="display: flex; flex-direction: column; gap: 10px; width: 200px; justify-content: space-evenly;">
+										<button type="button" id="add-selected" class="btn btn-default"> {% trans "Add selected" %} </button>
+										<button type="button" id="add-all" class="btn btn-default"> {% trans "Add all" %} </button>
+										<!-- <button type="button" id="remove-selected" class="btn btn-default">{% trans "Eliminar Selección" %}</button> -->
+										<button type="button" id="clear-all" class="btn btn-default"> {% trans "Delete all" %} </button>
+										
+									</div>
+								</div>
+							</div>
+						</div>
 										
 						<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param" id="advanced-params-row">
 							<div class="col-md-12 form-group">
@@ -156,6 +193,33 @@
 {% endblock %}
 
 {% block extra-scripts %}
+
+<!--TODO:move styles to css file-->
+<style>
+    .selected-project {
+        padding: 5px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        background-color: #f9f9f9;
+    }
+    .project-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .project-name {
+        flex: 1;
+        margin-right: 10px;
+    }
+    .remove-project {
+        padding: 2px 5px;
+    }
+    #selected-projects-list {
+        padding: 10px;
+		border: 1px solid #ddd;
+    }
+</style>
 <script type="text/javascript">
 	$('#menu-manage-plugins').addClass("active");
 	$('#submenu-geocoding').addClass("active");
@@ -427,7 +491,82 @@
 		rebuildSelect($("#id_geom_field"), text, false);
 		
 		updateForm($('#id_type').val());
-		
+
+		$('input[name="project_mode"]').change(function() {
+			if ($(this).val() === 'by_project') {
+				$('#project-selector').removeClass('hidden');
+			} else {
+				$('#project-selector').addClass('hidden');
+			}
+		});
+
+		$('#provider-form').submit(function(e) {
+			var projectMode = $('input[name="project_mode"]:checked').val();
+			
+			if (projectMode === 'all') {
+				$('#id_projects option').prop('selected', true);
+			} else {
+				$('#id_projects option').prop('selected', false);
+				$('#selected-projects-list .selected-project').each(function() {
+					var projectId = $(this).data('id');
+					$('#id_projects option[value="' + projectId + '"]').prop('selected', true);
+				});
+			}
+		});
+
+		$('#add-selected').click(function() {
+			var selectedProject = $('#id_projects option:selected');
+			if (selectedProject.length > 0) {
+				var projectId = selectedProject.val();
+				var projectText = selectedProject.text();
+				if (!$('#selected-project-' + projectId).length) {
+					var projectHtml = '<div id="selected-project-' + projectId + '" class="selected-project" data-id="' + projectId + '">' +
+						'<div class="project-item">' +
+						'<span class="project-name">' + projectText + '</span>' +
+						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '">' +
+						'<i class="fa fa-times"></i>' +
+						'</button>' +
+						'</div>' +
+						'</div>';
+					$('#selected-projects-list').append(projectHtml);
+				}
+			}
+		});
+
+		$('#remove-selected').click(function() {
+			var selectedProject = $('#id_projects option:selected');
+			if (selectedProject.length > 0) {
+				var projectId = selectedProject.val();
+				$('#selected-project-' + projectId).remove();
+			}
+		});
+
+		$('#clear-all').click(function() {
+			$('#selected-projects-list').empty();
+		});
+
+		$('#add-all').click(function() {
+			$('#id_projects option').each(function() {
+				var projectId = $(this).val();
+				var projectText = $(this).text();
+				if (!$('#selected-project-' + projectId).length) {
+					var projectHtml = '<div id="selected-project-' + projectId + '" class="selected-project" data-id="' + projectId + '">' +
+						'<div class="project-item">' +
+						'<span class="project-name">' + projectText + '</span>' +
+						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '">' +
+						'<i class="fa fa-times"></i>' +
+						'</button>' +
+						'</div>' +
+						'</div>';
+					$('#selected-projects-list').append(projectHtml);
+				}
+			});
+		});
+
+		$(document).on('click', '.remove-project', function() {
+			$(this).closest('.selected-project').remove();
+		});
+
 		$("#id_workspace").change(function() {
 			id_workspace = $('option:selected', $(this)).val();
 			updateDataStoreList(id_workspace);
