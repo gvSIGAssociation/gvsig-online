@@ -138,10 +138,10 @@
 							<div class="col-md-12 form-group">
 								<label for="id_project">{% trans "Projects" %}</label>
 								<div>
-									<label>
+									<label class="radio-label">
 										<input type="radio" name="project_mode" value="all" checked> {% trans "All projects" %} 
 									</label>
-									<label>
+									<label class="radio-label">
 										<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %} 
 									</label>
 								</div>
@@ -193,33 +193,6 @@
 {% endblock %}
 
 {% block extra-scripts %}
-
-<!--TODO:move styles to css file-->
-<style>
-    .selected-project {
-        padding: 5px;
-        margin: 5px 0;
-        border: 1px solid #ddd;
-        border-radius: 3px;
-        background-color: #f9f9f9;
-    }
-    .project-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .project-name {
-        flex: 1;
-        margin-right: 10px;
-    }
-    .remove-project {
-        padding: 2px 5px;
-    }
-    #selected-projects-list {
-        padding: 10px;
-		border: 1px solid #ddd;
-    }
-</style>
 <script type="text/javascript">
 	$('#menu-manage-plugins').addClass("active");
 	$('#submenu-geocoding').addClass("active");

@@ -91,6 +91,32 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
 
 .inverse-geocoding-type:hover{background-color: #eee}
 
+.selected-project {
+	padding: 5px;
+	margin: 5px 0;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	background-color: #f9f9f9;
+}
+.project-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.project-name {
+	flex: 1;
+	margin-right: 10px;
+}
+.remove-project {
+	padding: 2px 5px;
+}
+.radio-label {display: inline-block;margin-right: 20px;}
+
+#selected-projects-list {
+	padding: 10px;
+	border: 1px solid #ddd;
+}
+
 #autocomplete {
 	width: 92%;
 }
