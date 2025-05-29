@@ -26,12 +26,13 @@ from django.utils.translation import ugettext as _
 from django import forms
 import json
 from . import settings
+from gvsigol_core.models import Project
 
 
 class ProviderForm(forms.ModelForm):
     class Meta:
         model = Provider
-        fields = ['type', 'workspace', 'datastore', 'resource', 'params']
+        fields = ['type', 'workspace', 'datastore', 'resource', 'params', 'projects']
     
     type = forms.ChoiceField(label=_('Type'), choices=settings.GEOCODING_SUPPORTED_TYPES, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
    
@@ -52,11 +53,18 @@ class ProviderForm(forms.ModelForm):
     reverse_url = forms.CharField(label=_('Reverse URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     max_results = forms.CharField(label=_('Limit'), required=False, max_length=3, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
+    projects = forms.ChoiceField(
+        label=_('Projects'),
+        choices=[(p.id, f"{p.name} - {p.description}") for p in Project.objects.all()],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
 
 class ProviderUpdateForm(forms.ModelForm):
     class Meta:
         model = Provider
-        fields = ['type', 'workspace', 'datastore', 'resource', 'params']
+        fields = ['type', 'workspace', 'datastore', 'resource', 'params', 'projects']
         
     type = forms.ChoiceField(label=_('Type'), choices=settings.GEOCODING_SUPPORTED_TYPES, disabled=True, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
        
@@ -77,4 +85,10 @@ class ProviderUpdateForm(forms.ModelForm):
     reverse_url = forms.CharField(label=_('Reverse URL'), required=False, max_length=1024, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     max_results = forms.CharField(label=_('Limit'), required=False, max_length=3, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
+    projects = forms.ChoiceField(
+        label=_('Projects'),
+        choices=[(p.id, f"{p.name} - {p.description}") for p in Project.objects.all()],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     
