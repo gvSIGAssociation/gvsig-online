@@ -877,6 +877,10 @@ msgstr "Fals"
 msgid "Intersection"
 msgstr "Intersecció"
 
+#: static/js/TableShape.js:9297 static/js/TableShape.js:9330
+msgid "Line EndPoints"
+msgstr "Extrems de la línea"
+
 #: static/js/TableShape.js:9335
 msgid "Self intersect layer (Use only data from main input)"
 msgstr "Autointersecta capa (Utilitza només les dades de l'entrada principal)"
@@ -1085,6 +1089,10 @@ msgstr "Explota Geometries"
 #: static/js/TableShape.js:13093 static/js/TableShape.js:13126
 msgid "Calculate Area"
 msgstr "Calcula Àrea"
+
+#: static/js/TableShape.js:13094 static/js/TableShape.js:13127
+msgid "Calculate length"
+msgstr "Calcula longitud"
 
 #: static/js/TableShape.js:13131
 msgid "New area attribute:"

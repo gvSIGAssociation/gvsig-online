@@ -703,10 +703,8 @@ msgid "Calculate Area"
 msgstr "Calcular àrea"
 
 #: templates/etl.html:76
-#, fuzzy
-#| msgid "Calculate Area"
 msgid "Calculate length"
-msgstr "Calcular àrea"
+msgstr "Calcular longitud"
 
 #: templates/etl.html:77
 msgid "Difference"
@@ -730,7 +728,7 @@ msgstr "Intersecció"
 
 #: templates/etl.html:82
 msgid "Line EndPoints"
-msgstr ""
+msgstr "Extrems de la línea"
 
 #: templates/etl.html:84
 msgid "Nearest Neighbor"
