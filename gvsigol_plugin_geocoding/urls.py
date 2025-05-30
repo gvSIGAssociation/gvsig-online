@@ -21,7 +21,7 @@ urlpatterns = [
     
     url(r'^geocoding/get_geocoding_resource_list_available/$', views.get_geocoding_resource_list_available, name='get_geocoding_resource_list_available'),
     url(r'^geocoding/get_providers_activated/$', views.get_providers_activated, name='get_providers_activated'),
-
+    url(r'^geocoding/get_providers_activated_by_project/(?P<project_id>[0-9]+)/$', views.get_providers_activated_by_project, name='get_providers_activated_by_project'),
 
 ]
 
