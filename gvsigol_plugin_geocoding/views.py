@@ -586,18 +586,22 @@ def get_geocoder():
 
 @csrf_exempt
 def get_providers_activated(request):
-    # project_id = request.POST.get('project_id')
-    providers = Provider.objects.all()
-    
-    # if project_id:
-    #     providers = providers.filter(projects__id=project_id)
-    
+    providers = Provider.objects.all()    
     types = []
     for provider in providers:
         types.append(provider.type)
        
     return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')
     
+@csrf_exempt
+def get_providers_activated_by_project(request, project_id):
+    providers = Provider.objects.filter(projects__id=project_id)        
+    types = []
+    for provider in providers:
+        types.append(provider.type)
+       
+    return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')
+   
     
 
 @login_required()
