@@ -780,3 +780,7 @@ msgstr "Permís per executar"
 
 #~ msgid "all"
 #~ msgstr "tots"
+
+#: templates/etl.html:99
+msgid "Calculate length"
+msgstr "Calcular longitud"

@@ -872,6 +872,10 @@ msgstr "Falso"
 msgid "Intersection"
 msgstr "Intersección"
 
+#: static/js/TableShape.js:9297 static/js/TableShape.js:9330
+msgid "Line EndPoints"
+msgstr "P. finales de la línea"
+
 #: static/js/TableShape.js:9335
 msgid "Self intersect layer (Use only data from main input)"
 msgstr "Autointersecta capa (Utiliza solo los datos de la entrada principal)"
@@ -1075,6 +1079,10 @@ msgstr "Explota Geometrías"
 #: static/js/TableShape.js:13093 static/js/TableShape.js:13126
 msgid "Calculate Area"
 msgstr "Calcula Área"
+
+#: static/js/TableShape.js:13094 static/js/TableShape.js:13127
+msgid "Calculate length"
+msgstr "Calcula longitud"
 
 #: static/js/TableShape.js:13131
 msgid "New area attribute:"
