@@ -933,7 +933,7 @@ class WFSClient():
             r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
             if r.status_code != 200:
                 resource_file.close()
-                os.remove(resource_file)
+                os.remove(resource_path)
                 raise PreparationError('Error retrieving link. HTTP status code: '+text(r.status_code) + ". Url: " + url)
             for chunk in r.iter_content(chunk_size=1024*1024):
                 resource_file.write(chunk)
