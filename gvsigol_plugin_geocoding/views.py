@@ -42,6 +42,7 @@ from gvsigol_services.views import backend_resource_list_available,\
 from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from gvsigol_core.models import Project
 
 from time import time
 import logging
@@ -167,6 +168,14 @@ def provider_add(request):
                     newProvider.image = request.FILES.get('image')  
 
                 newProvider.save()  
+
+                project_mode = request.POST.get('project_mode')
+                if project_mode == 'all':
+                    newProvider.projects.set(Project.objects.all())
+                else:
+                    selected_projects = request.POST.getlist('projects')
+                    if selected_projects and len(selected_projects) > 0:
+                        newProvider.projects.set(selected_projects)
                 
                 #set_providers_actives()
                 set_providers_to_geocoder()
@@ -566,12 +575,17 @@ def get_geocoder():
 
 @csrf_exempt
 def get_providers_activated(request):
+    # project_id = request.POST.get('project_id')
     providers = Provider.objects.all()
+    
+    # if project_id:
+    #     providers = providers.filter(projects__id=project_id)
+    
     types = []
     for provider in providers:
         types.append(provider.type)
        
-    return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')    
+    return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')
     
     
 
