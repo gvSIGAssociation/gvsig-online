@@ -145,27 +145,21 @@
 										<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %} 
 									</label>
 								</div>
-								<div id="project-selector" style="display: flex; gap: 20px; margin: 10px 0;" class="hidden">
+								<div id="project-selector" class="hidden">
 									<div style="flex: 1;">
 										{{ form.projects }}
-										<!-- <div class="col-md-6" style="margin: 50px;">
-											<div id="add-project-button" class="btn btn-box-tool" title='{% trans "Add project" %}' style="float:right;position:relative;z-index:10;" data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus margin-r-5"></i></div>
-											<input type="text" class="search2 form-control" placeHolder="{% trans 'Search projects...' %}" style="padding-right: 30px;position: absolute;"  />
-										</div> -->
 										<div class="box box-default" style="margin-top: 20px;">
 											<div class="box-header with-border">
 												<span class="text" style="font-weight: bold;">{% trans "Project list" %}</span>
 											</div>
-											<div class="box-body" id="selected-projects-list" style="min-height: 100px; max-height: 300px; overflow-y: auto;">
+											<div class="box-body" id="selected-projects-list">
 											</div>
 										</div>
 									</div>
-									<div style="display: flex; flex-direction: column; gap: 10px; width: 200px; justify-content: space-evenly;">
+									<div class="buttons-container">
 										<button type="button" id="add-selected" class="btn btn-default"> {% trans "Add selected" %} </button>
 										<button type="button" id="add-all" class="btn btn-default"> {% trans "Add all" %} </button>
-										<!-- <button type="button" id="remove-selected" class="btn btn-default">{% trans "Eliminar Selección" %}</button> -->
 										<button type="button" id="clear-all" class="btn btn-default"> {% trans "Delete all" %} </button>
-										
 									</div>
 								</div>
 							</div>
@@ -489,7 +483,7 @@
 
 		$('#add-selected').click(function() {
 			var selectedProject = $('#id_projects option:selected');
-			if (selectedProject.length > 0) {
+			if (selectedProject.length > 0 && selectedProject.val() && selectedProject.val() !== '__disabled__') {
 				var projectId = selectedProject.val();
 				var projectText = selectedProject.text();
 				if (!$('#selected-project-' + projectId).length) {
@@ -522,7 +516,7 @@
 			$('#id_projects option').each(function() {
 				var projectId = $(this).val();
 				var projectText = $(this).text();
-				if (!$('#selected-project-' + projectId).length) {
+				if (projectId && projectId !== '__disabled__' && !$('#selected-project-' + projectId).length) {
 					var projectHtml = '<div id="selected-project-' + projectId + '" class="selected-project" data-id="' + projectId + '">' +
 						'<div class="project-item">' +
 						'<span class="project-name">' + projectText + '</span>' +

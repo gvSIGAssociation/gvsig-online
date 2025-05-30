@@ -112,9 +112,26 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
 }
 .radio-label {display: inline-block;margin-right: 20px;}
 
+#project-selector {
+    display: flex;
+    gap: 20px;
+    margin: 10px 0;
+}
+
+#project-selector .buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 200px;
+    justify-content: space-evenly;
+}
+
 #selected-projects-list {
 	padding: 10px;
 	border: 1px solid #ddd;
+	min-height: 100px;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
 #autocomplete {
