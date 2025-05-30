@@ -17,6 +17,7 @@ import os, shutil, tempfile
 import cx_Oracle
 import pymssql
 from .models import database_connections, segex_FechaFinGarantizada, cadastral_requests
+from .utils import refresh_layers_by_params
 import requests
 import base64
 from datetime import date, datetime, timedelta
@@ -31,9 +32,9 @@ from . import etl_schema
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from celery.utils.log import get_task_logger
+from gvsigol_services.models import Layer, Datastore
 
 logger = get_task_logger(__name__)
-
 
 # Python class to print topological sorting of a DAG 
 class Graph: 
@@ -910,7 +911,7 @@ def output_Postgis(dicc):
 
                 _ogr.execute()
                 
-        elif dicc['operation'] == 'DROP AND CREATE':
+        elif dicc['operation'] == 'DROPANDCREATE':
             if inSame:
                 sqlDrop = sql.SQL('DROP TABLE IF EXISTS {sch_target}.{tbl_target} CASCADE').format(
                     sch_target = sql.Identifier(esq),
@@ -984,11 +985,13 @@ def output_Postgis(dicc):
                 _ogr.layer_creation_options = {
                     "LAUNDER": "YES",
                     "precision": "NO"
-                }
+                 }
                 _ogr.set_dim("2")
                 _ogr.geom_type = type_geom
 
                 _ogr.execute()
+                
+            refresh_layers_by_params(esq, tab, params)
 
 
         elif dicc['operation'] == 'APPEND' or dicc['operation'] == 'OVERWRITE':

@@ -1,5 +1,5 @@
-var jsonParams = [];
 
+var jsonParams = [];
 var formData = new FormData();
 
 var listLabel=[];
@@ -69,6 +69,8 @@ function isAlreadyInCanvas(jsonParams, jsonTask, ID){
         };
     };
 };
+
+
 
 function setColorIfIsOpened(jsonParams, type, ID, icon){
     
@@ -3200,6 +3202,9 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+
+
 
         var context = this
 
@@ -16830,7 +16835,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                     '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
-                                    '<input type="radio" id="dropandcreate-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="DROP AND CREATE">'+
+                                    '<input type="radio" id="dropandcreate-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="DROPANDCREATE">'+
                                     '<label for="dropandcreate" class="form-check-label">'+gettext('DROP AND CREATE')+'</label>'+
                                 '</div>'+
                                 '<div class="form-check">'+
@@ -17027,8 +17032,6 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 "order": $('#order-'+ID).val(),
                 "preserve-fid": $('#preserve-fid-'+ID).is(':checked')}
             ]}
-
-            console.log(paramsPostgis)
             
             paramsPostgis['schema-old'] = schemaEdge
             paramsPostgis['schema'] = schema
