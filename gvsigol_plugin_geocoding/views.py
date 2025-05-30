@@ -335,6 +335,15 @@ def provider_update(request, provider_id):
             provider.params = json.dumps(params)
                 
             provider.save()
+
+            project_mode = request.POST.get('project_mode')
+            if project_mode == 'all':
+                provider.projects.set(Project.objects.all())
+            else:
+                selected_projects = request.POST.getlist('projects')
+                if selected_projects and len(selected_projects) > 0:
+                    provider.projects.set(selected_projects)
+
             set_providers_to_geocoder()
             return redirect('provider_list')
     else:
@@ -388,7 +397,9 @@ def provider_update(request, provider_id):
         'workspace_id' : workspace_id,
         'workspace_name' : workspace,
         'datastore' : datastore,
-        'resource' : resource
+        'resource' : resource,
+        'provider_projects': json.dumps(list(provider.projects.values('id', 'name', 'description'))),
+        'all_projects': json.dumps(list(Project.objects.values('id', 'name', 'description')))
     }
         
     return render(request, 'provider_update.html', context)

@@ -655,6 +655,29 @@
 		if(type=="user" || type=="cartociudad" || type == 'postgres'){
 			$("#id_category").prop("disabled", "disabled");
 		}
+
+		var providerProjects = JSON.parse('{{ provider_projects|escapejs }}');
+		var allProjects = JSON.parse('{{ all_projects|escapejs }}');
+		
+		if (providerProjects.length === allProjects.length) {
+			$('input[name="project_mode"][value="all"]').prop('checked', true);
+			$('#project-selector').addClass('hidden');
+		} else {
+			$('input[name="project_mode"][value="by_project"]').prop('checked', true);
+			$('#project-selector').removeClass('hidden');
+			
+			providerProjects.forEach(function(project) {
+				var projectHtml = '<div id="selected-project-' + project.id + '" class="selected-project" data-id="' + project.id + '">' +
+					'<div class="project-item">' +
+					'<span class="project-name">' + project.name + ' - ' + project.description + '</span>' +
+					'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + project.id + '">' +
+					'<i class="fa fa-times"></i>' +
+					'</button>' +
+					'</div>' +
+					'</div>';
+				$('#selected-projects-list').append(projectHtml);
+			});
+		}
 		
 		$("#id_resource").change(function() {
 			var ws_id = $("#provider-workspace-id").val();
