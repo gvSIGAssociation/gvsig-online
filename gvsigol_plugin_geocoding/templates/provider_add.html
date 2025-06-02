@@ -474,9 +474,17 @@
 				$('#id_projects option').prop('selected', true);
 			} else {
 				$('#id_projects option').prop('selected', false);
+				var selectedProjectIds = [];
 				$('#selected-projects-list .selected-project').each(function() {
-					var projectId = $(this).data('id');
+					selectedProjectIds.push($(this).data('id'));
+				});
+				selectedProjectIds.forEach(function(projectId) {
 					$('#id_projects option[value="' + projectId + '"]').prop('selected', true);
+					$('<input>').attr({
+						type: 'hidden',
+						name: 'projects',
+						value: projectId
+					}).appendTo('#provider-form');
 				});
 			}
 		});
