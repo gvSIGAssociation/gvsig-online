@@ -711,7 +711,6 @@
 				});
 				selectedProjectIds.forEach(function(projectId) {
 					$('#id_projects option[value="' + projectId + '"]').prop('selected', true);
-					// Añadir un input hidden para cada proyecto seleccionado
 					$('<input>').attr({
 						type: 'hidden',
 						name: 'projects',
