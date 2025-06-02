@@ -121,9 +121,9 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
 #project-selector .buttons-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 30px;
     width: 200px;
-    justify-content: space-evenly;
+    justify-content: flex-start;
 }
 
 #selected-projects-list {
