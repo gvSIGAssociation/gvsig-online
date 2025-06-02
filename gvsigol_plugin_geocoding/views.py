@@ -175,6 +175,7 @@ def provider_add(request):
                 else:
                     selected_projects = request.POST.getlist('projects')
                     if selected_projects and len(selected_projects) > 0:
+                        selected_projects = list(dict.fromkeys(selected_projects))
                         newProvider.projects.set(selected_projects)
                 
                 #set_providers_actives()
@@ -342,6 +343,7 @@ def provider_update(request, provider_id):
             else:
                 selected_projects = request.POST.getlist('projects')
                 if selected_projects and len(selected_projects) > 0:
+                    selected_projects = list(dict.fromkeys(selected_projects))
                     provider.projects.set(selected_projects)
 
             set_providers_to_geocoder()
