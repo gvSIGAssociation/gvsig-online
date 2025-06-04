@@ -174,7 +174,35 @@ msgstr ""
 msgid "Select image"
 msgstr ""
 
-#: templates/provider_add.html:140 templates/provider_update.html:158
+#: templates/provider_add.html:139 templates/provider_update.html:157
+msgid "Projects"
+msgstr ""
+
+#: templates/provider_add.html:142 templates/provider_update.html:160
+msgid "All projects"
+msgstr ""
+
+#: templates/provider_add.html:145 templates/provider_update.html:163
+msgid "By project"
+msgstr ""
+
+#: templates/provider_add.html:153 templates/provider_update.html:171
+msgid "Project list"
+msgstr ""
+
+#: templates/provider_add.html:160 templates/provider_update.html:178
+msgid "Add selected"
+msgstr ""
+
+#: templates/provider_add.html:161 templates/provider_update.html:179
+msgid "Add all"
+msgstr ""
+
+#: templates/provider_add.html:162 templates/provider_update.html:180
+msgid "Delete all"
+msgstr ""
+
+#: templates/provider_add.html:171 templates/provider_update.html:189
 msgid "Advanced params"
 msgstr ""
 
