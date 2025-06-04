@@ -163,6 +163,13 @@ class Datastore(models.Model):
     def __str__(self):
         return self.workspace.name + ":" + self.name
 
+    def get_schema_name(self):
+        try:
+            params = json.loads(self.connection_params)
+            return params.get('schema', 'public')
+        except:
+            return 'public'
+
     def get_db_connection(self):
         params = json.loads(self.connection_params)
         host = params['host']
