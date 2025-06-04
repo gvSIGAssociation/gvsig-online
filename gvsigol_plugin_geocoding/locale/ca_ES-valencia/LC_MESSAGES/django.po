@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:53+0000\n"
-"PO-Revision-Date: 2023-10-23 22:27+0200\n"
+"PO-Revision-Date: 2025-06-04 13:50+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca_ES\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: cartociudad2.py:129 googlemaps.py:130 nominatim.py:124
 msgid "Not founded"
@@ -182,7 +182,35 @@ msgstr "Camp Geom"
 msgid "Select image"
 msgstr "Seleccionar imatge"
 
-#: templates/provider_add.html:140 templates/provider_update.html:158
+#: templates/provider_add.html:139 templates/provider_update.html:157
+msgid "Projects"
+msgstr "Projectes"
+
+#: templates/provider_add.html:142 templates/provider_update.html:160
+msgid "All projects"
+msgstr "Tots els projectes"
+
+#: templates/provider_add.html:145 templates/provider_update.html:163
+msgid "By project"
+msgstr "Per projecte"
+
+#: templates/provider_add.html:153 templates/provider_update.html:171
+msgid "Project list"
+msgstr "Llistat de projectes"
+
+#: templates/provider_add.html:160 templates/provider_update.html:178
+msgid "Add selected"
+msgstr "Afegir seleccionat"
+
+#: templates/provider_add.html:161 templates/provider_update.html:179
+msgid "Add all"
+msgstr "Afegir tots"
+
+#: templates/provider_add.html:162 templates/provider_update.html:180
+msgid "Delete all"
+msgstr "Esborrar tots"
+
+#: templates/provider_add.html:171 templates/provider_update.html:189
 msgid "Advanced params"
 msgstr "Parametres avançats"
 
