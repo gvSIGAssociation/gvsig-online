@@ -709,14 +709,21 @@
 				$('#selected-projects-list .selected-project').each(function() {
 					selectedProjectIds.push($(this).data('id'));
 				});
-				selectedProjectIds.forEach(function(projectId) {
-					$('#id_projects option[value="' + projectId + '"]').prop('selected', true);
-					$('<input>').attr({
-						type: 'hidden',
-						name: 'projects',
-						value: projectId
-					}).appendTo('#provider-form');
-				});
+				
+				if (selectedProjectIds.length > 0) {
+					selectedProjectIds.forEach(function(projectId) {
+						$('#id_projects option[value="' + projectId + '"]').prop('selected', true);
+						$('<input>').attr({
+							type: 'hidden',
+							name: 'projects',
+							value: projectId
+						}).appendTo('#provider-form');
+					});
+				} else {
+					e.preventDefault();
+					alert(gettext("Please select at least one project or choose 'All projects' mode"));
+					return false;
+				}
 			}
 		});
 
