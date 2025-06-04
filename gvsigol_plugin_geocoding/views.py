@@ -23,7 +23,7 @@
 '''
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, JsonResponse
 from .geocoder import Geocoder
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -540,18 +540,45 @@ def find_first_candidate(request):
     return HttpResponse(json.dumps(suggestion, indent=4), content_type='application/json')
 
     
+@require_http_methods(["GET"])
 def search_candidates(request):
-    if request.method == 'GET':
-        query = request.GET.get('q')  
-        t1 = time()
-        suggestions = get_geocoder().search_candidates(query)
-        t2 = time()
-        aux = json.dumps(suggestions, indent=4)
-        t3 = time()
+    try:
+        t1 = time()  
+        q = request.GET.get('q', '')
+        # limit = request.GET.get('limit', 10)
+        providers = request.GET.get('providers', '').split(',')
         
-        print('Tsuggestions: ', (t2-t1)*1000 , 'msecs Tjson=', (t3-t2)*1000) 
+        if not providers or not providers[0]:
+            geocoder = get_geocoder()
+            result = geocoder.search_candidates(q)
+        else:
+            providers_list = Provider.objects.filter(is_active=True)            
+            providers_list = providers_list.filter(type__in=providers)
+            
+            geocoder = Geocoder()
+            
+            for provider in providers_list:
+                geocoder.add_provider(provider)
+            
+            result = geocoder.search_candidates(q)
+
+        suggestions = result.get('suggestions', [])
+
+        t2 = time()  # Tiempo después de obtener todas las sugerencias
+        response = JsonResponse({
+            'suggestions': suggestions
+        })
+        t3 = time()  # Tiempo después de crear la respuesta JSON
+
+        logger.debug('Tsuggestions: %.2f msecs, Tjson= %.2f msecs', 
+                    (t2-t1)*1000, (t3-t2)*1000)
         
-        return HttpResponse(aux, content_type='application/json')
+        return response
+    except Exception as e:
+        logger.error("Error in search_candidates: %s", str(e))
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
     
 @csrf_exempt
 def find_candidate(request):
