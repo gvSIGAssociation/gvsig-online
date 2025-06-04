@@ -158,3 +158,4 @@ pyodbc==5.2.0
 
 # plugin chat
 openai==0.27.8
+sqlglot==26.21.0
