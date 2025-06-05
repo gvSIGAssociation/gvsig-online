@@ -372,6 +372,12 @@ function configure() {
 		SHP_DOWNLOAD_DEFAULT_ENCODING="ISO-8859-1"
 	fi
 	grep -rl "##SHP_DOWNLOAD_DEFAULT_ENCODING##"  | xargs sed -i "s/##SHP_DOWNLOAD_DEFAULT_ENCODING##/$SHP_DOWNLOAD_DEFAULT_ENCODING/g"
+	if [ -z $DATA_UPLOAD_MAX_MEMORY_SIZE ]; then
+		echo "WARNING: DATA_UPLOAD_MAX_MEMORY_SIZE is not defined, using '26214400'"
+		DATA_UPLOAD_MAX_MEMORY_SIZE="26214400"
+	fi
+	grep -rl "##DATA_UPLOAD_MAX_MEMORY_SIZE##"  | xargs sed -i "s/##DATA_UPLOAD_MAX_MEMORY_SIZE##/$DATA_UPLOAD_MAX_MEMORY_SIZE/g"
+
 
     ##################################
 	# SPA frontend related variables #
