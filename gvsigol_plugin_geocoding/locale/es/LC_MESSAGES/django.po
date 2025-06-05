@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:53+0000\n"
-"PO-Revision-Date: 2025-06-04 13:57+0200\n"
+"PO-Revision-Date: 2025-06-04 17:33+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_ES\n"
@@ -141,8 +141,7 @@ msgstr ""
 msgid "Generic API Service Geocoder"
 msgstr "Servicio de Geocodificador de API Genérica"
 
-#: templates/dashboard_geocoding_menu.html:10
-#: templates/dashboard_geocoding_menu.html:18
+#: templates/dashboard_geocoding_menu.html:10 templates/dashboard_geocoding_menu.html:18
 msgid "Geocoding"
 msgstr "Geocodificador"
 
@@ -434,6 +433,10 @@ msgstr "Proveedor de búsquedas no encontrado"
 #: views.py:456
 msgid "5 segs"
 msgstr "5 segundos"
+
+#: templates/provider_add.html:493 templates/provider_update.html:724
+msgid "Please select at least one project or choose 'All projects' mode"
+msgstr "Por favor, seleccione al menos un proyecto o elija el modo 'Todos los proyectos'"
 
 #~ msgid "Error: provider could not be published"
 #~ msgstr "Error: el proveedor no se pudo publicar"
