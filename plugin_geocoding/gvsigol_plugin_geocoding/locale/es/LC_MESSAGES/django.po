@@ -131,7 +131,7 @@ msgstr "Otros orígenes de datos"
 
 #: settings.py:39 settings_tpl.py:36
 msgid "IDE Uruguay Geocoder"
-msgstr "Geocodificador de la IDE d'Uruguai"
+msgstr "Geocodificador de la IDE de Uruguay"
 
 #: settings.py:40 settings_tpl.py:37
 msgid "Simple Geocoder"
