@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:53+0000\n"
-"PO-Revision-Date: 2021-06-16 16:30+0200\n"
+"PO-Revision-Date: 2025-06-04 14:01+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: cartociudad2.py:129 googlemaps.py:130 nominatim.py:124
 msgid "Not founded"
@@ -184,7 +184,35 @@ msgstr "Campo Geométrico"
 msgid "Select image"
 msgstr "Selecione a imagem"
 
-#: templates/provider_add.html:140 templates/provider_update.html:158
+#: templates/provider_add.html:139 templates/provider_update.html:157
+msgid "Projects"
+msgstr "Projetos"
+
+#: templates/provider_add.html:142 templates/provider_update.html:160
+msgid "All projects"
+msgstr "Todos os projetos"
+
+#: templates/provider_add.html:145 templates/provider_update.html:163
+msgid "By project"
+msgstr "Por projeto"
+
+#: templates/provider_add.html:153 templates/provider_update.html:171
+msgid "Project list"
+msgstr "Lista de projetos"
+
+#: templates/provider_add.html:160 templates/provider_update.html:178
+msgid "Add selected"
+msgstr "Adicionar selecionados"
+
+#: templates/provider_add.html:161 templates/provider_update.html:179
+msgid "Add all"
+msgstr "Adicionar todos"
+
+#: templates/provider_add.html:162 templates/provider_update.html:180
+msgid "Delete all"
+msgstr "Eliminar todos"
+
+#: templates/provider_add.html:171 templates/provider_update.html:189
 msgid "Advanced params"
 msgstr "Parâmetros avançados"
 
@@ -389,8 +417,7 @@ msgstr "Duração"
 
 #: views.py:142 views.py:309
 msgid "Error: DataStore has not a valid CartoCiudad schema (Needed , "
-msgstr ""
-"Erro: O armazém de dados não possui um esquema CartoCiudad válido (Needed , "
+msgstr "Erro: O armazém de dados não possui um esquema CartoCiudad válido (Needed , "
 
 #: views.py:154
 msgid "Error: this type of provider is already added to the project"

@@ -133,6 +133,37 @@
 								</div>
 							</div>	
 						</div>	
+
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="id_project">{% trans "Projects" %}</label>
+								<div>
+									<label class="radio-label">
+										<input type="radio" name="project_mode" value="all" checked> {% trans "All projects" %} 
+									</label>
+									<label class="radio-label">
+										<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %} 
+									</label>
+								</div>
+								<div id="project-selector" class="hidden">
+									<div style="flex: 1;">
+										{{ form.projects }}
+										<div class="box box-default" style="margin-top: 20px;">
+											<div class="box-header with-border">
+												<span class="text" style="font-weight: bold;">{% trans "Project list" %}</span>
+											</div>
+											<div class="box-body" id="selected-projects-list">
+											</div>
+										</div>
+									</div>
+									<div class="buttons-container">
+										<button type="button" id="add-selected" class="btn btn-default"> {% trans "Add selected" %} </button>
+										<button type="button" id="add-all" class="btn btn-default"> {% trans "Add all" %} </button>
+										<button type="button" id="clear-all" class="btn btn-default"> {% trans "Delete all" %} </button>
+									</div>
+								</div>
+							</div>
+						</div>
 										
 						<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param" id="advanced-params-row">
 							<div class="col-md-12 form-group">
@@ -427,7 +458,97 @@
 		rebuildSelect($("#id_geom_field"), text, false);
 		
 		updateForm($('#id_type').val());
-		
+
+		$('input[name="project_mode"]').change(function() {
+			if ($(this).val() === 'by_project') {
+				$('#project-selector').removeClass('hidden');
+			} else {
+				$('#project-selector').addClass('hidden');
+			}
+		});
+
+		$('#provider-form').submit(function(e) {
+			var projectMode = $('input[name="project_mode"]:checked').val();
+			
+			if (projectMode === 'all') {
+				$('#id_projects option').prop('selected', true);
+			} else {
+				$('#id_projects option').prop('selected', false);
+				var selectedProjectIds = [];
+				$('#selected-projects-list .selected-project').each(function() {
+					selectedProjectIds.push($(this).data('id'));
+				});
+				
+				if (selectedProjectIds.length > 0) {
+					selectedProjectIds.forEach(function(projectId) {
+						$('#id_projects option[value="' + projectId + '"]').prop('selected', true);
+						$('<input>').attr({
+							type: 'hidden',
+							name: 'projects',
+							value: projectId
+						}).appendTo('#provider-form');
+					});
+				} else {
+					e.preventDefault();
+					alert(gettext("Please select at least one project or choose 'All projects' mode"));
+					return false;
+				}
+			}
+		});
+
+		$('#add-selected').click(function() {
+			var selectedProject = $('#id_projects option:selected');
+			if (selectedProject.length > 0 && selectedProject.val() && selectedProject.val() !== '__disabled__') {
+				var projectId = selectedProject.val();
+				var projectText = selectedProject.text();
+				if (!$('#selected-project-' + projectId).length) {
+					var projectHtml = '<div id="selected-project-' + projectId + '" class="selected-project" data-id="' + projectId + '">' +
+						'<div class="project-item">' +
+						'<span class="project-name">' + projectText + '</span>' +
+						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '">' +
+						'<i class="fa fa-times"></i>' +
+						'</button>' +
+						'</div>' +
+						'</div>';
+					$('#selected-projects-list').append(projectHtml);
+				}
+			}
+		});
+
+		$('#remove-selected').click(function() {
+			var selectedProject = $('#id_projects option:selected');
+			if (selectedProject.length > 0) {
+				var projectId = selectedProject.val();
+				$('#selected-project-' + projectId).remove();
+			}
+		});
+
+		$('#clear-all').click(function() {
+			$('#selected-projects-list').empty();
+		});
+
+		$('#add-all').click(function() {
+			$('#id_projects option').each(function() {
+				var projectId = $(this).val();
+				var projectText = $(this).text();
+				if (projectId && projectId !== '__disabled__' && !$('#selected-project-' + projectId).length) {
+					var projectHtml = '<div id="selected-project-' + projectId + '" class="selected-project" data-id="' + projectId + '">' +
+						'<div class="project-item">' +
+						'<span class="project-name">' + projectText + '</span>' +
+						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '">' +
+						'<i class="fa fa-times"></i>' +
+						'</button>' +
+						'</div>' +
+						'</div>';
+					$('#selected-projects-list').append(projectHtml);
+				}
+			});
+		});
+
+		$(document).on('click', '.remove-project', function() {
+			$(this).closest('.selected-project').remove();
+		});
+
 		$("#id_workspace").change(function() {
 			id_workspace = $('option:selected', $(this)).val();
 			updateDataStoreList(id_workspace);

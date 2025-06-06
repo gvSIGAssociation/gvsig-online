@@ -27,6 +27,7 @@ from gvsigol_plugin_geocoding import settings as geocoding_setting
 from gvsigol_services.models import Datastore
 from django.utils.translation import ugettext as _
 import json
+from gvsigol_core.models import Project
 
 def get_default_provider_icon():
     return settings.BASE_URL + '/static/img/geocoding/toponimo.png'
@@ -46,6 +47,8 @@ class Provider(models.Model):
     image = models.ImageField(upload_to='images', default=get_default_provider_icon, null=True, blank=True)
     order = models.IntegerField(null=False, default=10)
     last_update = models.DateTimeField(auto_now_add=False, null=True, blank=True) 
+
+    projects = models.ManyToManyField(Project, related_name='providers', blank=True)
     
     def __str__(self):
         values = dict(geocoding_setting.GEOCODING_SUPPORTED_TYPES).get(self.type)

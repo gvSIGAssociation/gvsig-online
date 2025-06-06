@@ -23,7 +23,7 @@
 '''
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, JsonResponse
 from .geocoder import Geocoder
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -42,6 +42,7 @@ from gvsigol_services.views import backend_resource_list_available,\
 from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from gvsigol_core.models import Project
 
 from time import time
 import logging
@@ -167,6 +168,15 @@ def provider_add(request):
                     newProvider.image = request.FILES.get('image')  
 
                 newProvider.save()  
+
+                project_mode = request.POST.get('project_mode')
+                if project_mode == 'all':
+                    newProvider.projects.set(Project.objects.all())
+                else:
+                    selected_projects = request.POST.getlist('projects')
+                    if selected_projects and len(selected_projects) > 0:
+                        selected_projects = list(dict.fromkeys(selected_projects))
+                        newProvider.projects.set(selected_projects)
                 
                 #set_providers_actives()
                 set_providers_to_geocoder()
@@ -326,6 +336,16 @@ def provider_update(request, provider_id):
             provider.params = json.dumps(params)
                 
             provider.save()
+
+            project_mode = request.POST.get('project_mode')
+            if project_mode == 'all':
+                provider.projects.set(Project.objects.all())
+            else:
+                selected_projects = request.POST.getlist('projects')
+                if selected_projects and len(selected_projects) > 0:
+                    selected_projects = list(dict.fromkeys(selected_projects))
+                    provider.projects.set(selected_projects)
+
             set_providers_to_geocoder()
             return redirect('provider_list')
     else:
@@ -379,7 +399,9 @@ def provider_update(request, provider_id):
         'workspace_id' : workspace_id,
         'workspace_name' : workspace,
         'datastore' : datastore,
-        'resource' : resource
+        'resource' : resource,
+        'provider_projects': json.dumps(list(provider.projects.values('id', 'name', 'description'))),
+        'all_projects': json.dumps(list(Project.objects.values('id', 'name', 'description')))
     }
         
     return render(request, 'provider_update.html', context)
@@ -518,18 +540,45 @@ def find_first_candidate(request):
     return HttpResponse(json.dumps(suggestion, indent=4), content_type='application/json')
 
     
+@require_http_methods(["GET"])
 def search_candidates(request):
-    if request.method == 'GET':
-        query = request.GET.get('q')  
-        t1 = time()
-        suggestions = get_geocoder().search_candidates(query)
-        t2 = time()
-        aux = json.dumps(suggestions, indent=4)
-        t3 = time()
+    try:
+        t1 = time()  
+        q = request.GET.get('q', '')
+        # limit = request.GET.get('limit', 10)
+        providers = request.GET.get('providers', '').split(',')
         
-        print('Tsuggestions: ', (t2-t1)*1000 , 'msecs Tjson=', (t3-t2)*1000) 
+        if not providers or not providers[0]:
+            geocoder = get_geocoder()
+            result = geocoder.search_candidates(q)
+        else:
+            providers_list = Provider.objects.filter(is_active=True)            
+            providers_list = providers_list.filter(type__in=providers)
+            
+            geocoder = Geocoder()
+            
+            for provider in providers_list:
+                geocoder.add_provider(provider)
+            
+            result = geocoder.search_candidates(q)
+
+        suggestions = result.get('suggestions', [])
+
+        t2 = time()  # Tiempo después de obtener todas las sugerencias
+        response = JsonResponse({
+            'suggestions': suggestions
+        })
+        t3 = time()  # Tiempo después de crear la respuesta JSON
+
+        logger.debug('Tsuggestions: %.2f msecs, Tjson= %.2f msecs', 
+                    (t2-t1)*1000, (t3-t2)*1000)
         
-        return HttpResponse(aux, content_type='application/json')
+        return response
+    except Exception as e:
+        logger.error("Error in search_candidates: %s", str(e))
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
     
 @csrf_exempt
 def find_candidate(request):
@@ -566,13 +615,22 @@ def get_geocoder():
 
 @csrf_exempt
 def get_providers_activated(request):
-    providers = Provider.objects.all()
+    providers = Provider.objects.all()    
     types = []
     for provider in providers:
         types.append(provider.type)
        
-    return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')    
+    return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')
     
+@csrf_exempt
+def get_providers_activated_by_project(request, project_id):
+    providers = Provider.objects.filter(projects__id=project_id)        
+    types = []
+    for provider in providers:
+        types.append(provider.type)
+       
+    return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')
+   
     
 
 @login_required()

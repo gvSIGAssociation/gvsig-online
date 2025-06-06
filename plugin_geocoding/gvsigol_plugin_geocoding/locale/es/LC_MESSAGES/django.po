@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:53+0000\n"
-"PO-Revision-Date: 2023-10-24 16:29+0200\n"
+"PO-Revision-Date: 2025-06-04 17:33+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_ES\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: es_ES\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: cartociudad2.py:129 googlemaps.py:130 nominatim.py:124
 msgid "Not founded"
@@ -141,8 +141,7 @@ msgstr ""
 msgid "Generic API Service Geocoder"
 msgstr "Servicio de Geocodificador de API Genérica"
 
-#: templates/dashboard_geocoding_menu.html:10
-#: templates/dashboard_geocoding_menu.html:18
+#: templates/dashboard_geocoding_menu.html:10 templates/dashboard_geocoding_menu.html:18
 msgid "Geocoding"
 msgstr "Geocodificador"
 
@@ -182,7 +181,35 @@ msgstr "Campo con la geometría"
 msgid "Select image"
 msgstr "Selecciónar icono"
 
-#: templates/provider_add.html:140 templates/provider_update.html:158
+#: templates/provider_add.html:139 templates/provider_update.html:157
+msgid "Projects"
+msgstr "Proyectos"
+
+#: templates/provider_add.html:142 templates/provider_update.html:160
+msgid "All projects"
+msgstr "Todos los proyectos"
+
+#: templates/provider_add.html:145 templates/provider_update.html:163
+msgid "By project"
+msgstr "Por proyecto"
+
+#: templates/provider_add.html:153 templates/provider_update.html:171
+msgid "Project list"
+msgstr "Lista de proyectos"
+
+#: templates/provider_add.html:160 templates/provider_update.html:178
+msgid "Add selected"
+msgstr "Añadir seleccionado"
+
+#: templates/provider_add.html:161 templates/provider_update.html:179
+msgid "Add all"
+msgstr "Añadir todos"
+
+#: templates/provider_add.html:162 templates/provider_update.html:180
+msgid "Delete all"
+msgstr "Eliminar todos"
+
+#: templates/provider_add.html:171 templates/provider_update.html:189
 msgid "Advanced params"
 msgstr "Parámetros avanzados"
 
@@ -225,7 +252,7 @@ msgstr "Elige campo"
 
 #: templates/provider_list.html:17
 msgid "Providers list"
-msgstr "Lista de proveedores de busqueda"
+msgstr "Lista de proveedores de búsqueda"
 
 #: templates/provider_list.html:27
 msgid "Order"
@@ -406,6 +433,10 @@ msgstr "Proveedor de búsquedas no encontrado"
 #: views.py:456
 msgid "5 segs"
 msgstr "5 segundos"
+
+#: templates/provider_add.html:493 templates/provider_update.html:724
+msgid "Please select at least one project or choose 'All projects' mode"
+msgstr "Por favor, seleccione al menos un proyecto o elija el modo 'Todos los proyectos'"
 
 #~ msgid "Error: provider could not be published"
 #~ msgstr "Error: el proveedor no se pudo publicar"
