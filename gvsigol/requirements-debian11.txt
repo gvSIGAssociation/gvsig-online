@@ -157,5 +157,7 @@ django-simple-history==3.0.0
 pyodbc==5.2.0
 
 # plugin chat
-openai==0.27.8
 sqlglot==26.21.0
+
+# PLUGIN GEOCOPILOT
+# Instalar requirements desde el plugin_geocopilot/requirements.txt
