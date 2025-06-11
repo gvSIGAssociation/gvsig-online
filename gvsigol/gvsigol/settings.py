@@ -400,11 +400,12 @@ GVSIGOL_LDAP = {
 
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
-    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 #Load auth backends
+if env('LDAP_ENABLED'):
+    AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend', ) + AUTHENTICATION_BACKENDS
 AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + env('DJANGO_AUTHENTICATION_BACKENDS')
 print ("INFO: Additional AUTHENTICATION_BACKENDS = " + str(env('DJANGO_AUTHENTICATION_BACKENDS')))
 
