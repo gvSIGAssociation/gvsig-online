@@ -159,5 +159,30 @@ pyodbc==5.2.0
 # plugin chat
 sqlglot==26.21.0
 
-# PLUGIN GEOCOPILOT
-# Instalar requirements desde el plugin_geocopilot/requirements.txt
+# Dependencias específicas para plugin_geocopilot
+# LangChain core - Versiones compatibles actualizadas
+langchain>=0.2.0,<0.3.0
+langchain-openai>=0.1.0,<0.2.0
+langchain-community>=0.2.0,<0.3.0
+
+# Soporte para Google Gemini
+langchain-google-genai>=1.0.10,<2.0.0
+
+# Dependencias core actualizadas para compatibilidad
+langchain-core>=0.2.0,<0.3.0
+langsmith>=0.1.0,<0.2.0
+
+# Dependencias adicionales para LangChain
+tiktoken>=0.5.0  # Para conteo de tokens en summary memory
+pydantic>=2.0.0,<3.0.0  # Para validación de datos en LangChain
+
+# Compatibilidad
+openai>=1.0.0,<2.0.0  # Versión compatible con langchain-openai 
+google-generativeai>=0.3.0,<1.0.0  # Para integración directa con Gemini
+
+# Normalización semántica para caché inteligente
+unidecode>=1.3.0,<2.0.0  # Para remover acentos y normalizar texto 
+
+seaborn>=0.11.0
+
+sqlglot==26.21.0
