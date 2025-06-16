@@ -5682,15 +5682,38 @@ def trans_Stats(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
+    cur.execute("""
+        SELECT data_type
+        FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s AND column_name = %s
+    """, (GEOETL_DB["schema"], table_name_source, attr))
+    result = cur.fetchone()
+    if result:
+        data_type = result[0]
+    else:
+        raise ValueError(f"No se encontró el atributo {attr} en la tabla {table_name_source}")
+
+    is_timestamp = data_type in ('timestamp without time zone', 'timestamp with time zone')
+
     stats_queries = []
-    stats_queries.append(f"MAX({attr}) AS _max")
-    stats_queries.append(f"MIN({attr}) AS _min")
-    stats_queries.append(f"COUNT({attr}) AS _count")
-    stats_queries.append(f"SUM({attr}) AS _sum")
-    stats_queries.append(f"AVG({attr}) AS _mean")
-    stats_queries.append(f"PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY {attr}) AS _median")
-    stats_queries.append(f"MODE() WITHIN GROUP (ORDER BY {attr}) AS _mode")
-    stats_queries.append(f"STDDEV({attr}) AS _desv")
+    if is_timestamp:
+        stats_queries.append(f"MAX({attr}) AS _max")
+        stats_queries.append(f"MIN({attr}) AS _min")
+        stats_queries.append(f"COUNT({attr}) AS _count")
+        stats_queries.append(f"NULL::numeric AS _sum")
+        stats_queries.append(f"NULL::numeric AS _mean")
+        stats_queries.append(f"NULL::numeric AS _median")
+        stats_queries.append(f"NULL::numeric AS _mode")
+        stats_queries.append(f"NULL::numeric AS _desv")
+    else:
+        stats_queries.append(f"MAX({attr}) AS _max")
+        stats_queries.append(f"MIN({attr}) AS _min")
+        stats_queries.append(f"COUNT({attr}) AS _count")
+        stats_queries.append(f"SUM({attr}) AS _sum")
+        stats_queries.append(f"AVG({attr}) AS _mean")
+        stats_queries.append(f"PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY {attr}) AS _median")
+        stats_queries.append(f"MODE() WITHIN GROUP (ORDER BY {attr}) AS _mode")
+        stats_queries.append(f"STDDEV({attr}) AS _desv")
 
     _sql = "CREATE TABLE {}.{} AS SELECT {} FROM {}.{}"
     
