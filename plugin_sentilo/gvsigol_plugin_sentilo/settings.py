@@ -17,7 +17,7 @@ env_plugin_sentilo = {
     'SENTILO_DB_PASSWD': settings.DATABASES['default']['PASSWORD']
 }
 
-MUNICIPALITY = 'lapobladevallbona'
+MUNICIPALITY = 'cullera'
 
 SENTILO_DB = {
     'host': env_plugin_sentilo['SENTILO_DB_HOST'],

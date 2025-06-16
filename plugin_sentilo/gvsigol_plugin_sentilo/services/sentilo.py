@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 import pandas as pd
 import requests
 from gvsigol_plugin_sentilo.models import SentiloConfiguration
-from sqlalchemy import Column, String, Float
+from sqlalchemy import Column, String, Float, Integer, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import MetaData, Table
 
@@ -28,10 +28,12 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
     # Definir el modelo de la tabla
     class SentiloData(Base):
         __tablename__ = db_table
-        component = Column(String, primary_key=True)
-        lat = Column(Float, primary_key=True)
-        lng = Column(Float, primary_key=True)
-        observation_time = Column(String, primary_key=True)
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        component = Column(String)
+        lat = Column(Float)
+        lng = Column(Float)
+        observation_time = Column(TIMESTAMP)
+        end_observation_time = Column(TIMESTAMP)
         tipo = Column(String)
 
     # Crear la tabla si no existe
@@ -54,7 +56,23 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
             tabla.append_column(column)
             with db.connect() as alter_conn:
                 alter_conn.execute(f'ALTER TABLE {tabla.name} ADD COLUMN {col} {column.type.compile(db.dialect)}')
+                
+    conn.execute(f'ALTER TABLE {tabla.name} ADD COLUMN IF NOT EXISTS end_observation_time timestamp')
 
+    conn.execute(f"""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint
+                WHERE conname = '{db_table}_unique_constraint'
+            ) THEN
+                ALTER TABLE {db_table}
+                ADD CONSTRAINT {db_table}_unique_constraint
+                UNIQUE (component, lat, lng, observation_time);
+            END IF;
+        END$$;
+    """)
+    
     df = pd.json_normalize(output)
 
     df_obj = df.select_dtypes(['object'])
@@ -67,6 +85,29 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
 
     # Execute
     conn.execute(stmt)
+    
+    update_sql = f"""
+        WITH ranked AS (
+        SELECT 
+            id,
+            observation_time::timestamp AS obs_time,
+            component,
+            intensity_uom,
+            LEAD(observation_time::timestamp) OVER (
+            PARTITION BY component, intensity_uom
+            ORDER BY observation_time::timestamp
+            ) AS next_obs
+        FROM {db_table}
+        )
+        UPDATE {db_table} sp
+        SET end_observation_time = COALESCE(r.next_obs, r.obs_time + INTERVAL '1 day')
+        FROM ranked r
+        WHERE sp.id = r.id;
+        """
+    
+    with db.begin() as conn:
+        conn.execute(update_sql)
+
     conn.close()
     db.dispose()
     
@@ -99,8 +140,14 @@ def format_sentilo_data_etl(entities):
             observation_string = observation_string + " " + uom
         except Exception as e:
             print("Error getting observation_string", e)
-        lat = entity["location"]["value"]["lat"]
-        lng = entity["location"]["value"]["lng"]
+        try:
+            lat = entity["location"]["value"].get("lat") or entity["location"]["value"].get("latitude")
+            lng = entity["location"]["value"].get("lng") or entity["location"]["value"].get("longitude")
+        except Exception:
+            print(entity["location"]["value"])
+            lat = None
+            lng = None
+
         list_tmp = {
             "component": componentSensor,
             "observation_time": observation_time,
