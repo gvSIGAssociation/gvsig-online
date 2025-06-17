@@ -156,33 +156,27 @@ django-simple-history==3.0.0
 #plugin cementerio_albacete
 pyodbc==5.2.0
 
-# plugin chat
-sqlglot==26.21.0
-
 # Dependencias específicas para plugin_geocopilot
 # LangChain core - Versiones compatibles actualizadas
-langchain>=0.2.0,<0.3.0
-langchain-openai>=0.1.0,<0.2.0
-langchain-community>=0.2.0,<0.3.0
+langchain==0.2.17
+langchain-openai==0.1.25
+langchain-community==0.2.19
 
 # Soporte para Google Gemini
-langchain-google-genai>=1.0.10,<2.0.0
+langchain-google-genai==1.0.10
 
 # Dependencias core actualizadas para compatibilidad
-langchain-core>=0.2.0,<0.3.0
-langsmith>=0.1.0,<0.2.0
+langchain-core==0.2.43
+langsmith==0.1.147
 
 # Dependencias adicionales para LangChain
-tiktoken>=0.5.0  # Para conteo de tokens en summary memory
-pydantic>=2.0.0,<3.0.0  # Para validación de datos en LangChain
+tiktoken==0.9.0  # Para conteo de tokens en summary memory
+pydantic==2.11.5  # Para validación de datos en LangChain
 
 # Compatibilidad
-openai>=1.0.0,<2.0.0  # Versión compatible con langchain-openai 
-google-generativeai>=0.3.0,<1.0.0  # Para integración directa con Gemini
+openai==1.82.1  # Versión compatible con langchain-openai 
+google-generativeai==0.7.2  # Para integración directa con Gemini
 
-# Normalización semántica para caché inteligente
-unidecode>=1.3.0,<2.0.0  # Para remover acentos y normalizar texto 
-
-seaborn>=0.11.0
+seaborn==0.13.2
 
 sqlglot==26.21.0
