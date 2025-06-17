@@ -37,7 +37,7 @@ debug.HIDDEN_SETTINGS = re.compile(
     flags=re.IGNORECASE,
 )
 
-GVSIGOL_VERSION = '3.9.5-dev'
+GVSIGOL_VERSION = '3.10.0-dev'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
