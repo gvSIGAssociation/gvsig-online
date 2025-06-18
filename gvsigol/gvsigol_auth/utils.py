@@ -161,12 +161,35 @@ def ensure_admin_group():
     except BackendNotAvailable:
         logging.getLogger(LOGGER_NAME).warning("Authentication backend is not available. Check configuration and connectivity")
 
-def config_staff_user(username):
-    from gvsigol_services import utils
+def config_staff_user(username, force=True):
+    """
+    Configures a user as staff user, adding the primary role to the user
+    and creating the user workspace.
+    
+    Parameters
+    ----------
+        username: The username to configure.
+        force: If True, it will try to configure the user even if it appears to
+        be already configured. Defaults to True.
+
+    Returns
+    -------
+    tuple
+        Returns a tuple with the result of the role creation and the role name.
+    """
+    if not force:
+        from gvsigol_services.models import Workspace
+        from gvsigol_services.utils import get_workspace_name
+        if Workspace.objects.filter(name=get_workspace_name(username)).exists():
+            return (False, None)
+    from gvsigol_services.utils import create_user_workspace
     role = auth_backend.get_primary_role(username)
-    user_role_created = auth_backend.add_role(role)
-    auth_backend.add_to_role(username, role)
-    utils.create_user_workspace(username, role)
+    try:
+        user_role_created = auth_backend.add_role(role)
+        auth_backend.add_to_role(username, role)
+    except:
+        logging.getLogger(LOGGER_NAME).error("Error configuring user roles: {username}")
+    create_user_workspace(username, role)
     return (user_role_created, role)
 
 def ascii_norm_username(username):
