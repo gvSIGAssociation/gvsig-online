@@ -730,7 +730,7 @@ class KeycloakAdminSession(OIDCSession):
                             "first_name": user.get('firstName', ''),
                             "last_name": user.get('lastName', ''),
                             "is_superuser": MAIN_SUPERUSER_ROLE in roles,
-                            "is_staff": STAFF_ROLE in roles,
+                            "is_staff": STAFF_ROLE in roles or MAIN_SUPERUSER_ROLE in roles,
                             "email": user.get('email'),
                             "roles": roles
                         })
@@ -763,7 +763,7 @@ class KeycloakAdminSession(OIDCSession):
                             "first_name": user.get('firstName', ''),
                             "last_name": user.get('lastName', ''),
                             "is_superuser": MAIN_SUPERUSER_ROLE in roles,
-                            "is_staff": STAFF_ROLE in roles,
+                            "is_staff": STAFF_ROLE in roles or MAIN_SUPERUSER_ROLE in roles,
                             "email": user.get('email'),
                             "roles": roles
                         })
@@ -783,7 +783,7 @@ class KeycloakAdminSession(OIDCSession):
                 "first_name": user_repr.get('firstName', ''),
                 "last_name": user_repr.get('lastName', ''),
                 "is_superuser": MAIN_SUPERUSER_ROLE in roles,
-                "is_staff": STAFF_ROLE in roles,
+                "is_staff": STAFF_ROLE in roles or MAIN_SUPERUSER_ROLE in roles,
                 "email": user_repr.get('email'),
                 "roles": roles
             }
