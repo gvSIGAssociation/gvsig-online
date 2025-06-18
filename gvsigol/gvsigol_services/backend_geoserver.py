@@ -1097,7 +1097,7 @@ class Geoserver():
             content = r.content
             jsonData = json.loads(content)
             return [ds_type, jsonData]
-        
+        logger.warning(f"Error retrieving resource info - {url}. Status code: {r.status_code}. Message: {r.text}")
         return None, None
 
     def getLayerCreateTypes(self):
