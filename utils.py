@@ -1021,6 +1021,22 @@ def set_default_permissions(file_path):
     os.umask(umask) # restore system mask
     os.chmod(file_path, 0o640 & ~umask)
 
+def get_datastore_name(username):
+    """
+    Returns the datastore name for the provided username.
+    The datastore name is the ascii normalized username prefixed with 'ds_'.
+    """
+    ascii_username = ascii_norm_username(username)
+    return 'ds_' + ascii_username
+
+def get_workspace_name(username):
+    """
+    Returns the workspace name for the provided username.
+    The workspace name is the ascii normalized username prefixed with 'ws_'.
+    """
+    ascii_username = ascii_norm_username(username)
+    return 'ws_' + ascii_username
+
 def create_user_workspace(username, role):
     """
     Creates the user workspace and datastore if they don't exist
@@ -1030,8 +1046,7 @@ def create_user_workspace(username, role):
 
     auth_services.get_services().add_data_directory(role)
     url = server_object.frontend_url + '/'
-    ascii_username = ascii_norm_username(username)
-    ws_name = 'ws_' + ascii_username
+    ws_name = get_datastore_name(username)
     if gs.createWorkspace(ws_name, url + ws_name):
         try:          
             # save it on DB if successfully created
@@ -1051,7 +1066,7 @@ def create_user_workspace(username, role):
             newWs.save()
         except django.db.utils.IntegrityError:
             pass # ws exists
-        ds_name = 'ds_' + ascii_username
+        ds_name = get_datastore_name(username)
         create_datastore(username, ds_name, newWs)
         gs.reload_nodes()
 
