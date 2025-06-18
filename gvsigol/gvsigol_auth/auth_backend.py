@@ -2,16 +2,15 @@ import importlib
 import logging
 from gvsigol_auth.django_auth import get_primary_role
 
-
 try:
     from gvsigol import settings
-    if settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_auth':
+    if settings.GVSIGOL_ROLE_PROVIDER == 'gvsigol_auth':
         import gvsigol_auth
         auth_backend = gvsigol_auth.django_auth
     else:
-        auth_backend = importlib.import_module(settings.GVSIGOL_AUTH_BACKEND)
+        auth_backend = importlib.import_module(settings.GVSIGOL_ROLE_PROVIDER)
 except:
-    logging.getLogger('gvsigol').exception('Error importing GVSIGOL_AUTH_BACKEND. Falling back to gvsigol_auth.django_auth')
+    logging.getLogger('gvsigol').exception('Error importing GVSIGOL_ROLE_PROVIDER. Falling back to gvsigol_auth.django_auth')
     auth_backend = importlib.import_module('gvsigol_auth.django_auth')
 
 

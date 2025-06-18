@@ -97,7 +97,9 @@ env = environ.Env(
     SUPPORTED_CRS =(list,["3857", "4326"]),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
-    GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
+    GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'), # deprecated, use GVSIGOL_AUTH_PROVIDER
+    GVSIGOL_AUTH_PROVIDER=(str,None), # for the moment, default to GVSIGOL_AUTH_BACKEND
+    GVSIGOL_ROLE_PROVIDER= (str,None), # for the moment, default to GVSIGOL_AUTH_BACKEND
     GVSIGOL_AUTH_MIDDLEWARE=(str,''),
     OIDC_VERIFY_SSL=(bool, True),
     # Setup support for proxy headers
@@ -410,14 +412,17 @@ AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + env('DJANGO_AUTHENTICATION_B
 print ("INFO: Additional AUTHENTICATION_BACKENDS = " + str(env('DJANGO_AUTHENTICATION_BACKENDS')))
 
 LOGIN_URL = 'gvsigol_authenticate_user'
-#GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
 GVSIGOL_AUTH_BACKEND = env('GVSIGOL_AUTH_BACKEND')
+"""
+GVSIGOL_AUTH_BACKEND is deprecated, use GVSIGOL_AUTH_PROVIDER and GVSIGOL_ROLE_PROVIDER instead
+"""
+GVSIGOL_AUTH_PROVIDER = env('GVSIGOL_AUTH_PROVIDER', default=GVSIGOL_AUTH_BACKEND)
+GVSIGOL_ROLE_PROVIDER = env('GVSIGOL_ROLE_PROVIDER', default=GVSIGOL_AUTH_BACKEND)
 LOGIN_REDIRECT_URL = "home"
-#LOGIN_REDIRECT_URL = "https://localhost/gvsigonline"
 LOGOUT_REDIRECT_URL = "index"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
-    import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
+if GVSIGOL_AUTH_PROVIDER != 'gvsigol_auth':
+    import_settings(GVSIGOL_AUTH_PROVIDER+".settings", globals())
 GVSIGOL_AUTH_MIDDLEWARE = env('GVSIGOL_AUTH_MIDDLEWARE')
 AUTH_LDAP_SERVER_URI = "ldap://" + env('LDAP_HOST') + ":" + env('LDAP_PORT')
 AUTH_LDAP_ROOT_DN = env('LDAP_ROOT_DN')
@@ -426,7 +431,7 @@ AUTH_DASHBOARD_UI = env('AUTH_DASHBOARD_UI')
 AUTH_READONLY_USERS = env('AUTH_READONLY_USERS')
 OIDC_VERIFY_SSL = env('OIDC_VERIFY_SSL')
 
-if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
+if GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla' :
     _insert_at = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1
     MIDDLEWARE.insert(_insert_at, 'gvsigol_plugin_oidc_mozilla.middleware.GvsigolSessionRefresh')
 
@@ -481,16 +486,6 @@ EMAIL_PORT = int(env('EMAIL_PORT'))
 EMAIL_TIMEOUT = int(env('EMAIL_TIMEOUT'))
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SITE_ID=1
-
-#EMAIL_BACKEND_ACTIVE = True
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_USE_TLS = True
-#EMAIL_HOST = ''
-#EMAIL_HOST = env('EMAIL_HOST')
-#EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-#EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-#EMAIL_PORT = 587
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -632,7 +627,8 @@ default_auth_classes_list = [
     'rest_framework.authentication.SessionAuthentication',
     'rest_framework.authentication.BasicAuthentication'
 ]
-if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
+
+if GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla' :
     default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
 
 DRF_PAGE_SIZE = env('DRF_PAGE_SIZE')
