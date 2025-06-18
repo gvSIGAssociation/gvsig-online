@@ -58,7 +58,7 @@ from gvsigol.urls import urlpatterns
 import psycopg2
 from gvsigol_core.utils import get_user_projects
 
-if core_settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla':
+if core_settings.GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla':
     from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_RP_CLIENT_ID, \
         OIDC_MOBILE_CLIENT_ID, OIDC_OP_TOKEN_ENDPOINT, OIDC_OP_AUTHORIZATION_ENDPOINT, OIDC_OP_LOGOUT_ENDPOINT, \
         OIDC_OP_USER_ENDPOINT, OIDC_OP_JWKS_ENDPOINT
@@ -256,7 +256,7 @@ class PlatformView(ListAPIView):
             'type' : 'gvSIGOnline',
             'url' : core_settings.BASE_URL + "/" + core_settings.GVSIGOL_PATH + "/auth/api-token-auth/"
         }
-        if core_settings.GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla':
+        if core_settings.GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla':
             auth = {
                 'type': 'OAuth',
                 'url': OIDC_OP_BASE_URL,
