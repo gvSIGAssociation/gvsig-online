@@ -68,20 +68,34 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
             ) THEN
                 ALTER TABLE {db_table}
                 ADD CONSTRAINT {db_table}_unique_constraint
-                UNIQUE (component, lat, lng, observation_time);
+                UNIQUE (component, lat, lng, observation_time, tipo);
             END IF;
         END$$;
     """)
     
-    df = pd.json_normalize(output)
+    # DataFrame original
+    df_original = pd.json_normalize(output)
 
-    df_obj = df.select_dtypes(['object'])
-    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+    # Limpiar strings
+    df_obj = df_original.select_dtypes(['object'])
+    df_original[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
+    # Asegurar que 'tipo' sea string
+    if 'tipo' in df_original.columns:
+        df_original['tipo'] = df_original['tipo'].fillna('').astype(str)
+
+    # Guardar copia antes del split
+    df_multi_tipo = df_original[df_original['tipo'].str.contains(',')].copy()
+
+    # Explode
+    df = df_original.assign(tipo=df_original['tipo'].str.split(',')).explode('tipo')
+    df['tipo'] = df['tipo'].str.strip()
+
     # Prepare insert statement
     stmt = insert(tabla).values(df.to_dict(orient='records'))
 
     # Add on conflict do nothing
-    stmt = stmt.on_conflict_do_nothing(index_elements=['component', 'lat', 'lng', 'observation_time'])
+    stmt = stmt.on_conflict_do_nothing(index_elements=['component', 'lat', 'lng', 'observation_time', 'tipo'])
 
     # Execute
     conn.execute(stmt)
@@ -94,7 +108,7 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
             component,
             intensity_uom,
             LEAD(observation_time::timestamp) OVER (
-            PARTITION BY component, intensity_uom
+            PARTITION BY component, intensity_uom, tipo
             ORDER BY observation_time::timestamp
             ) AS next_obs
         FROM {db_table}
