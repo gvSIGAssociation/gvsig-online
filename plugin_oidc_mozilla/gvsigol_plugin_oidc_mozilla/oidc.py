@@ -115,7 +115,10 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         else:
             if user.is_staff:
                 from gvsigol_auth.utils import config_staff_user
-                config_staff_user(user.username)
+                try:
+                    config_staff_user(user.username)
+                except:
+                    LOGGER.exception("Error configuring staff user: {user.username}")
 
         return user
 
@@ -127,6 +130,13 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         user.is_superuser = (MAIN_SUPERUSER_ROLE in django_roles)
         user.is_staff = (STAFF_ROLE in django_roles or MAIN_SUPERUSER_ROLE in django_roles)
         user.save()
+        if user.is_staff:
+            from gvsigol_auth.utils import config_staff_user
+            try:
+                config_staff_user(user.username, False)
+            except Exception as e:
+                LOGGER.exception("Error configuring staff user: %s", user.username)
+                print(e)
         return user
 
 
