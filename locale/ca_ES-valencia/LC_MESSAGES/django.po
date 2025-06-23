@@ -2029,7 +2029,7 @@ msgstr "Límit de registres en peticions WFS"
 #: gvsigol_services/templates/layer_create.html:158
 #: gvsigol_services/templates/layer_update.html:165
 msgid "time_enabled"
-msgstr "temps_habilitat"
+msgstr "Paràmetre Temporal"
 
 #: gvsigol_services/templates/layer_add.html:134
 #: gvsigol_services/templates/layer_update.html:183
@@ -2050,7 +2050,7 @@ msgstr "Interval d'actualització (mil·lisegons)"
 #: gvsigol_services/templates/layer_create.html:168
 #: gvsigol_services/templates/layer_update.html:204
 msgid "time_enabled field"
-msgstr "Camp temps_habilitat"
+msgstr "Camp temporal"
 
 #: gvsigol_services/templates/layer_add.html:159
 msgid "End time enabled field"
@@ -2263,7 +2263,7 @@ msgstr "Llistat de camps"
 #: gvsigol_services/templates/layer_create.html:174
 #: gvsigol_services/templates/layer_update.html:210
 msgid "End time_enabled field"
-msgstr "Final del camp temps_habilitat"
+msgstr "Final del camp temporal"
 
 #: gvsigol_services/templates/layer_list.html:11
 #: gvsigol_services/templates/layergroup_add.html:92
