@@ -592,6 +592,10 @@ msgstr "Elimina Atribut"
 msgid "Rename Attribute"
 msgstr "Reanomena Atribut"
 
+#: templates/etl.html:61
+msgid "Statistics"
+msgstr "Estadístiques"
+
 #: templates/etl.html:64
 msgid "Geometric Transformers"
 msgstr "Transformadors geomètrics"
@@ -784,3 +788,12 @@ msgstr "Permís per executar"
 #: templates/etl.html:99
 msgid "Calculate length"
 msgstr "Calcular longitud"
+
+msgid "Preserve FID"
+msgstr "Preservar FID"
+
+msgid "Statistics"
+msgstr "Estadístiques"
+
+msgid "Numeric attribute"
+msgstr "Atribut numèric"
