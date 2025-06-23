@@ -496,7 +496,7 @@ msgstr "Netejar mapa"
 #, fuzzy
 #| msgid "Coordinates"
 msgid "Coordinate calculator"
-msgstr "Coordenades"
+msgstr "Calculadora de coordenades"
 
 #: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:94
 msgid "Origin coordinates"
@@ -933,7 +933,7 @@ msgstr "Advertiment"
 #, fuzzy
 #| msgid "Clear filter"
 msgid "Raw filter"
-msgstr "Netejar filtre"
+msgstr "Filtre Ràpid"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:61
 msgid "Layer group"
