@@ -576,6 +576,10 @@ msgstr "Atribut a eliminar:"
 msgid "Rename Attribute"
 msgstr "Reanomena Atribut"
 
+#: static/js/TableShape.js:5280
+msgid "Statistics:"
+msgstr "Estadístiques:"
+
 #: static/js/TableShape.js:5317
 msgid "Attribute to rename:"
 msgstr "Atribut a reanomenar:"
