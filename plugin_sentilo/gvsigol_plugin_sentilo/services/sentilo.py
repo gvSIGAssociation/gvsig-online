@@ -35,6 +35,7 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
         observation_time = Column(TIMESTAMP)
         end_observation_time = Column(TIMESTAMP)
         tipo = Column(String)
+        intensity_uom = Column(String)
 
     # Crear la tabla si no existe
     Base.metadata.create_all(db)
@@ -57,8 +58,6 @@ def fetch_sentilo_api(url, identity_key, db_table, sensors):
             with db.connect() as alter_conn:
                 alter_conn.execute(f'ALTER TABLE {tabla.name} ADD COLUMN {col} {column.type.compile(db.dialect)}')
                 
-    conn.execute(f'ALTER TABLE {tabla.name} ADD COLUMN IF NOT EXISTS end_observation_time timestamp')
-
     conn.execute(f"""
         DO $$
         BEGIN
