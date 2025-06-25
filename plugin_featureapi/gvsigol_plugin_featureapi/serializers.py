@@ -1499,7 +1499,7 @@ class LayerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'created_by', 
                   'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 
                   'external_url', 'external_tilematrixset', 'external_tilematrix', 'workspace', 'image_type', 'writable', 'external', 'service_version', 
-                  'native_srs', 'time_enabled']
+                  'native_srs', 'time_enabled', 'allow_download']
 
 
 class LayerTimeSerializer(serializers.ModelSerializer):
