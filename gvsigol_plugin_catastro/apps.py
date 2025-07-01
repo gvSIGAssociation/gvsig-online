@@ -35,7 +35,7 @@ class GvsigolCatastroConfig(AppConfig):
                     defaults={
                         'server_id': default_server.id,
                         'title': 'Catastro',
-                        'visible': True,
+                        'visible': False,
                         'cached': False,
                         'created_by': 'system'
                     }
