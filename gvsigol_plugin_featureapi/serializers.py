@@ -248,22 +248,24 @@ class FeatureSerializer(serializers.Serializer):
                     cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
                 else:
                     cql_filter = sqlbuilder.SQL('')
+                transformed_lon_lat = self.transform_lonlat_to_epsg(con, source_epsg, lon, lat)
                 sql = sqlbuilder.SQL("""
                     SELECT ST_AsGeoJSON(ST_Transform({geom}, 4326)), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))
                     FROM {schema}.{table}
                     WHERE
-                    {cql_filter} ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom})
-                    ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
+                    {cql_filter} ST_INTERSECTS(st_buffer(st_transform('SRID={source_epsg};POINT({lon} {lat})'::geometry, {native_epsg})::geography, {buffer}), {geom})
+                    ORDER BY st_distance(st_transform('SRID={source_epsg};POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
                 """)
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
                     native_epsg=sqlbuilder.Literal(native_epsg),
+                    source_epsg=sqlbuilder.Literal(source_epsg),
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
-                    buffer=sqlbuilder.Literal(transformed_buffer),
-                    lat=sqlbuilder.Literal(lat),
-                    lon=sqlbuilder.Literal(lon),
+                    buffer=sqlbuilder.Literal(buffer),
+                    lat=sqlbuilder.Literal(transformed_lon_lat[1]),
+                    lon=sqlbuilder.Literal(transformed_lon_lat[0]),
                     cql_filter=cql_filter
                 )
                 
@@ -388,6 +390,37 @@ class FeatureSerializer(serializers.Serializer):
         for feat in con.cursor.fetchall():
             perimeter = feat[0]
             return perimeter / div
+
+    def transform_lonlat_to_epsg(self, con, target_epsg, lon, lat):
+        """
+        Transforma coordenadas (lon, lat) desde EPSG:4326 al sistema de referencia target_epsg.
+
+        Args:
+            con: conexión psycopg2 a la base de datos.
+            target_epsg: EPSG de destino (int).
+            lon: longitud (float).
+            lat: latitud (float).
+
+        Returns:
+            (x, y): coordenadas transformadas como tuple de float.
+        """
+        sql = sqlbuilder.SQL("""
+            SELECT ST_X(transf_geom), ST_Y(transf_geom)
+            FROM (
+                SELECT ST_Transform(
+                    ST_SetSRID(ST_MakePoint({lon}, {lat}), 4326),
+                    {target_epsg}
+                ) AS transf_geom
+            ) AS sub
+        """).format(
+            lon=sqlbuilder.Literal(lon),
+            lat=sqlbuilder.Literal(lat),
+            target_epsg=sqlbuilder.Literal(target_epsg)
+        )
+
+        con.cursor.execute(sql)
+        for feat in con.cursor.fetchall():
+            return feat
         
     def get_transformed_buffer_distance(self, con, source_epsg, target_epsg, buffer, lon, lat):
         query_point = [lon, lat] # 0.39059, 39.48329 x, y
