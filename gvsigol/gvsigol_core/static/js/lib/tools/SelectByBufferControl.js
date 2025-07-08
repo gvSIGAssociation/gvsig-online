@@ -133,8 +133,9 @@ SelectByBufferControl.prototype.showPopup =function(evt) {
 	
 	self.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
 
-
-	var circle = new ol.geom.Circle(self.mapCoordinates, parseInt(self.distance));
+	// Apply latitude correction to radius
+	var correctedRadius = self.getCorrectedRadius(self.mapCoordinates, self.distance);
+	var circle = new ol.geom.Circle(self.mapCoordinates, correctedRadius);
     self.circleFeature = new ol.Feature(circle);
     self.source.clear();
     self.source.addFeature(self.circleFeature);
@@ -142,7 +143,9 @@ SelectByBufferControl.prototype.showPopup =function(evt) {
 	self.map.getView().setCenter(self.mapCoordinates);
 	$('#select-buffer-radius').change(function(){
 		self.distance = $(this).val();
-		var circle = new ol.geom.Circle(self.mapCoordinates, parseInt(self.distance));
+		// Apply latitude correction to radius
+		var correctedRadius = self.getCorrectedRadius(self.mapCoordinates, self.distance);
+		var circle = new ol.geom.Circle(self.mapCoordinates, correctedRadius);
         self.circleFeature = new ol.Feature(circle);
 
         self.source.clear();
@@ -158,6 +161,44 @@ SelectByBufferControl.prototype.showPopup =function(evt) {
 
 	$.overlayout();
 	$("#jqueryEasyOverlayDiv").css("display", "none");
+};
+
+/**
+ * Calculate corrected radius for a given point and distance in meters
+ * considering latitude distortion in Web Mercator projection
+ * @param {Array} mapCoordinates - Coordinates in EPSG:3857
+ * @param {Number} distanceInMeters - Distance in meters
+ * @returns {Number} Corrected radius for the circle
+ */
+SelectByBufferControl.prototype.getCorrectedRadius = function(mapCoordinates, distanceInMeters) {
+	// Convert to geographic coordinates to work with real distances
+	var geographicCoords = ol.proj.transform(mapCoordinates, 'EPSG:3857', 'EPSG:4326');
+	var longitude = geographicCoords[0];
+	var latitude = geographicCoords[1];
+	
+	// Earth's radius in meters
+	var earthRadius = 6378137;
+	
+	// Calculate the angular distance in radians
+	var angularDistance = distanceInMeters / earthRadius;
+	
+	// Calculate the radius in degrees for longitude at this latitude
+	var latRad = latitude * Math.PI / 180;
+	var radiusInDegreesLon = angularDistance * 180 / Math.PI / Math.cos(latRad);
+	
+	// Create a point at the specified distance to the east
+	var eastPoint = [longitude + radiusInDegreesLon, latitude];
+	
+	// Transform both points back to Web Mercator
+	var centerInWebMercator = ol.proj.transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857');
+	var eastPointInWebMercator = ol.proj.transform(eastPoint, 'EPSG:4326', 'EPSG:3857');
+	
+	// Calculate the distance between these two points in Web Mercator coordinates
+	var dx = eastPointInWebMercator[0] - centerInWebMercator[0];
+	var dy = eastPointInWebMercator[1] - centerInWebMercator[1];
+	var correctedRadius = Math.sqrt(dx * dx + dy * dy);
+	
+	return correctedRadius;
 };
 
 /**
