@@ -253,8 +253,8 @@ class FeatureSerializer(serializers.Serializer):
                     SELECT ST_AsGeoJSON(ST_Transform({geom}, 4326)), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))
                     FROM {schema}.{table}
                     WHERE
-                    {cql_filter} ST_INTERSECTS(st_buffer(st_transform('SRID={source_epsg};POINT({lon} {lat})'::geometry, {native_epsg})::geography, {buffer}), {geom})
-                    ORDER BY st_distance(st_transform('SRID={source_epsg};POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
+                    {cql_filter} ST_INTERSECTS(st_buffer('SRID=4326;POINT({lon} {lat})'::geography, {buffer}), ST_TRANSFORM({geom}, 4326))
+                    ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
                 """)
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
@@ -264,8 +264,8 @@ class FeatureSerializer(serializers.Serializer):
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
                     buffer=sqlbuilder.Literal(buffer),
-                    lat=sqlbuilder.Literal(transformed_lon_lat[1]),
-                    lon=sqlbuilder.Literal(transformed_lon_lat[0]),
+                    lat=sqlbuilder.Literal(lat),
+                    lon=sqlbuilder.Literal(lon),
                     cql_filter=cql_filter
                 )
                 
