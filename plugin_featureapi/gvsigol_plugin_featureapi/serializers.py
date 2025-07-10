@@ -248,7 +248,6 @@ class FeatureSerializer(serializers.Serializer):
                     cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
                 else:
                     cql_filter = sqlbuilder.SQL('')
-                transformed_lon_lat = self.transform_lonlat_to_epsg(con, source_epsg, lon, lat)
                 sql = sqlbuilder.SQL("""
                     SELECT ST_AsGeoJSON(ST_Transform({geom}, 4326)), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))
                     FROM {schema}.{table}
@@ -259,7 +258,6 @@ class FeatureSerializer(serializers.Serializer):
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
                     native_epsg=sqlbuilder.Literal(native_epsg),
-                    source_epsg=sqlbuilder.Literal(source_epsg),
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
