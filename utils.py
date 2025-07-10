@@ -125,7 +125,8 @@ def send_reset_password_email(email, pass_reset_url):
         body += _('If you did not request a password reset, please ignore this email. Your password will not change.') + '\n\n'
         
         toAddress = [email]           
-        fromAddress = gvsigol.settings.EMAIL_HOST_USER
+#        fromAddress = gvsigol.settings.EMAIL_HOST_USER
+        fromAddress = getattr(gvsigol.settings, 'DEFAULT_FROM_EMAIL', gvsigol.settings.EMAIL_HOST_USER)
         
         #print 'Restore message: ' + body
         send_mail(subject, body, fromAddress, toAddress, False, gvsigol.settings.EMAIL_HOST_USER, gvsigol.settings.EMAIL_HOST_PASSWORD)
