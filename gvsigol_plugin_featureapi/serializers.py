@@ -249,7 +249,7 @@ class FeatureSerializer(serializers.Serializer):
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 
-                # Consulta optimizada: evita transformaciones repetidas manteniendo la lógica original
+                # Consulta optimizada: mantiene lógica espacial original pero usa índices eficientemente  
                 sql = sqlbuilder.SQL("""
                     WITH 
                     query_point_4326 AS (
@@ -259,16 +259,26 @@ class FeatureSerializer(serializers.Serializer):
                         SELECT ST_Transform(geom_4326, {native_epsg}) as geom_native
                         FROM query_point_4326
                     ),
-                    query_buffer AS (
-                        SELECT ST_Buffer(geom_4326::geography, {buffer}) as buffer_geom
+                    query_buffer_4326 AS (
+                        SELECT ST_Buffer(geom_4326::geography, {buffer})::geometry as buffer_geom_4326
                         FROM query_point_4326
                     ),
-                    filtered_features AS (
+                    query_buffer_native AS (
+                        SELECT ST_Transform(buffer_geom_4326, {native_epsg}) as buffer_geom_native
+                        FROM query_buffer_4326
+                    ),
+                    bbox_candidates AS (
                         SELECT {geom} as geom_original, 
-                               ST_Transform({geom}, 4326) as geom_4326_transformed,
                                {col_names_values}
-                        FROM {schema}.{table}, query_buffer
-                        WHERE {cql_filter} ST_Intersects(query_buffer.buffer_geom, ST_Transform({geom}, 4326))
+                        FROM {schema}.{table}, query_buffer_native
+                        WHERE {cql_filter} query_buffer_native.buffer_geom_native && {geom}
+                    ),
+                    filtered_features AS (
+                        SELECT geom_original,
+                               ST_Transform(geom_original, 4326) as geom_4326_transformed,
+                               {col_names_values}
+                        FROM bbox_candidates, query_buffer_native
+                        WHERE ST_Intersects(query_buffer_native.buffer_geom_native, bbox_candidates.geom_original)
                     )
                     SELECT ST_AsGeoJSON(geom_4326_transformed), 
                            row_to_json((SELECT d FROM (SELECT {col_names_values}) d)),
