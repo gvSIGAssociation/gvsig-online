@@ -25,6 +25,11 @@ defined by the OGC Simple Feature specification.
 @author: Cesar Martinez Izquierdo, SCOLAB
 '''
 
+from gvsigol import settings
+from django.contrib.gis.geos import GEOSGeometry
+from gvsigol_core.settings import NEU_AXIS_ORDER_SRSS, DJANGO_BROKEN_GEOSGEOMETRY
+import os
+
 POINT = "Point"
 POINTM = "Point M"
 POINTZ = "Point Z"
@@ -133,3 +138,40 @@ def epsgToSrid(epsg_def):
             return int(epsg_def[5:])
     except:
         pass
+
+
+def is_neu_axis_order(srid):
+    if srid in NEU_AXIS_ORDER_SRSS:
+        return True
+    return False
+
+def xor(a, b):
+    return (a and not b) or (not a and b)
+
+def transform_point(x_or_lon, y_or_lat, source_crs, target_crs):
+    """
+    Experimental function to transform a point from source_crs to target_crs
+    circunventing the django GEOSGeometry bug in versions < 4.2 with GDAL >= 3.x.
+
+    Parameters:
+    ------------
+    lon: float
+        longitude of the point
+    lat: float
+        latitude of the point
+    source_crs: integer
+        EPSG code of the source coordinate reference system
+    target_crs: integer
+        EPSG code of the target coordinate reference system
+    Returns:
+        GEOSGeometry object with the transformed point in target_crs
+    """
+    if DJANGO_BROKEN_GEOSGEOMETRY and \
+        xor(is_neu_axis_order(source_crs), is_neu_axis_order(target_crs)):
+            p = f'POINT({y_or_lat} {x_or_lon})' # usamos lat, lon; orden incorrecto en wkt para sortear error de django
+    else:
+        p = f'POINT({x_or_lon} {y_or_lat})' # usamos lon, lat; orden correcto en wkt 
+    print(p)
+    geos_geom = GEOSGeometry(p, srid=source_crs)
+    transformed_geom = geos_geom.transform(target_crs, clone=True)
+    return transformed_geom
