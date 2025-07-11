@@ -243,17 +243,39 @@ class FeatureSerializer(serializers.Serializer):
                     native_epsg = layer.native_srs.split(':')[1]
                     native_epsg = int(native_epsg)
 
-                transformed_buffer = self.get_transformed_buffer_distance(con, source_epsg, native_epsg, buffer, lon, lat)
+                # Mantengo la lógica original pero con optimización mínima
                 if cql_filter_read:
                     cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
                 else:
                     cql_filter = sqlbuilder.SQL('')
+                
+                # Consulta optimizada: evita transformaciones repetidas manteniendo la lógica original
                 sql = sqlbuilder.SQL("""
-                    SELECT ST_AsGeoJSON(ST_Transform({geom}, 4326)), row_to_json((SELECT d FROM (SELECT {col_names_values}) d))
-                    FROM {schema}.{table}
-                    WHERE
-                    {cql_filter} ST_INTERSECTS(st_buffer('SRID=4326;POINT({lon} {lat})'::geography, {buffer}), ST_TRANSFORM({geom}, 4326))
-                    ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
+                    WITH 
+                    query_point_4326 AS (
+                        SELECT ST_SetSRID(ST_MakePoint({lon}, {lat}), 4326) as geom_4326
+                    ),
+                    query_point_native AS (
+                        SELECT ST_Transform(geom_4326, {native_epsg}) as geom_native
+                        FROM query_point_4326
+                    ),
+                    query_buffer AS (
+                        SELECT ST_Buffer(geom_4326::geography, {buffer}) as buffer_geom
+                        FROM query_point_4326
+                    ),
+                    filtered_features AS (
+                        SELECT {geom} as geom_original, 
+                               ST_Transform({geom}, 4326) as geom_4326_transformed,
+                               {col_names_values}
+                        FROM {schema}.{table}, query_buffer
+                        WHERE {cql_filter} ST_Intersects(query_buffer.buffer_geom, ST_Transform({geom}, 4326))
+                    )
+                    SELECT ST_AsGeoJSON(geom_4326_transformed), 
+                           row_to_json((SELECT d FROM (SELECT {col_names_values}) d)),
+                           ST_AsGeoJSON(geom_4326_transformed),
+                           ST_NPoints(geom_original) as numpoints
+                    FROM filtered_features, query_point_native
+                    ORDER BY ST_Distance(query_point_native.geom_native, filtered_features.geom_original)
                 """)
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
@@ -272,7 +294,6 @@ class FeatureSerializer(serializers.Serializer):
 
                 feat_list = []
                 for feat in con.cursor.fetchall():
-                    #self.showSimplification(epsilon, feat)
                     resourceset = LayerResource.objects.filter(layer_id=layer.id, feature=feat[1][idfield])
                     serializer = LayerResourceSerializer(resourceset, many=True)
                     properties = feat[1]
