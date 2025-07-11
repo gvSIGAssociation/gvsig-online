@@ -30,10 +30,10 @@ from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Applica
 from gvsigol_services.models import LayerGroup, Layer, LayerGroupRole
 from gvsigol_services.authorization import can_use_layergroup
 from gvsigol import settings
+from gvsigol_core.settings import NEU_AXIS_ORDER_SRSS
 import json
 import psycopg2
 import os
-from numpy import genfromtxt
 import importlib
 import gvsigol
 from iso639 import languages
@@ -557,7 +557,7 @@ def get_supported_crs(used_crs=None):
                     title = title.replace('"', '')
                         
                     axis_order = ''
-                    if row[2] in file_crs and row[4]:
+                    if row[2] in NEU_AXIS_ORDER_SRSS and row[4]:
                         axis_order = ' +axis=neu'
                     
                     if row[4]:
