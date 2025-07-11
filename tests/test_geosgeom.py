@@ -91,6 +91,7 @@ class GeosGeometryTestCase(unittest.TestCase):
 
         # Check the Geojson of transformed geometry
         json_geom_4258 = json.loads(geom_4258.geojson)
+        print(geom_4258.geojson)
         self.assertAlmostEqual(json_geom_4258['coordinates'][0], expected_lon, delta=delta, msg="transformed json x coordinate failed from 4326 to 4258")
         self.assertAlmostEqual(json_geom_4258['coordinates'][1], expected_lat, delta=delta, msg="transformed json y coordinate failed from 4326 to 4258")
 
