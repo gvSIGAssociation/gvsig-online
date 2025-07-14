@@ -26,7 +26,7 @@ defined by the OGC Simple Feature specification.
 '''
 
 from gvsigol import settings
-from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.geos import GEOSGeometry, Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon
 from gvsigol_core.settings import NEU_AXIS_ORDER_SRSS, DJANGO_BROKEN_GEOSGEOMETRY
 import os
 
@@ -146,6 +146,45 @@ def is_neu_axis_order(srid):
     return False
 
 
+def _invert_geos_coords(geom):
+    """
+    Recibe una instancia de GEOSGeometry y devuelve otra con los ejes invertidos.
+    """
+    if geom.geom_type == 'Point':
+        return Point(geom.y, geom.x, srid=geom.srid)
+
+    elif geom.geom_type == 'LineString':
+        return LineString([(y, x) for x, y in geom.coords], srid=geom.srid)
+
+    elif geom.geom_type == 'Polygon':
+        shell = [(y, x) for x, y in geom[0].coords]
+        holes = [[(y, x) for x, y in ring.coords] for ring in geom[1:]]
+        return Polygon(shell, *holes, srid=geom.srid)
+
+    elif geom.geom_type == 'MultiPoint':
+        return MultiPoint([Point(y, x) for x, y in geom.coords], srid=geom.srid)
+
+    elif geom.geom_type == 'MultiLineString':
+        return MultiLineString([LineString([(y, x) for x, y in line.coords]) for line in geom], srid=geom.srid)
+
+    elif geom.geom_type == 'MultiPolygon':
+        polygons = []
+        for poly in geom:
+            shell = [(y, x) for x, y in poly[0].coords]
+            holes = [[(y, x) for x, y in ring.coords] for ring in poly[1:]]
+            polygons.append(Polygon(shell, *holes, srid=geom.srid))
+        return MultiPolygon(polygons, srid=geom.srid)
+
+    else:
+        raise TypeError(f"Tipo de geometría no soportado: {geom.geom_type}")
+
+def _invert_wkt_coords(wkt, srid):
+    """
+    Recibe una instancia de GEOSGeometry y devuelve una GeosGeometry con los ejes invertidos.
+    """
+    geos_geom = GEOSGeometry(wkt, srid=srid)
+    return _invert_geos_coords(geos_geom)
+
 def transform_point(x_or_lon, y_or_lat, source_crs, target_crs):
     """
     Experimental function to transform a point from source_crs to target_crs
@@ -173,10 +212,50 @@ def transform_point(x_or_lon, y_or_lat, source_crs, target_crs):
     transformed_geom = geos_geom.transform(target_crs, clone=True)
     if DJANGO_BROKEN_GEOSGEOMETRY and \
         is_neu_axis_order(target_crs):
+        transformed_geom = GeosPointWrapper(transformed_geom)
+    return transformed_geom
+
+
+def transform_wkt(wkt, source_crs, target_crs):
+    """
+    Experimental function to transform a wkt geometry from source_crs to target_crs
+    circunventing the django GEOSGeometry bug in versions < 4.2 with GDAL >= 3.x.
+
+    Parameters:
+    ------------
+    lon: float
+        longitude of the point
+    lat: float
+        latitude of the point
+    source_crs: integer
+        EPSG code of the source coordinate reference system
+    target_crs: integer
+        EPSG code of the target coordinate reference system
+    Returns:
+        GEOSGeometry-like object with the transformed point in target_crs.
+        Only the following properties are supported:
+        - x
+        - y
+        - wkt
+        - geojson
+        - coords
+        - dims
+        - geom_type
+        - srid
+        - empty
+    """
+    if DJANGO_BROKEN_GEOSGEOMETRY and \
+        is_neu_axis_order(source_crs):
+        geos_geom = _invert_wkt_coords(wkt, srid=source_crs)
+    else:
+        geos_geom = GEOSGeometry(wkt, srid=source_crs)
+    transformed_geom = geos_geom.transform(target_crs, clone=True)
+    if DJANGO_BROKEN_GEOSGEOMETRY and \
+        is_neu_axis_order(target_crs):
         transformed_geom = GeosGeometryWrapper(transformed_geom)
     return transformed_geom
 
-class GeosGeometryWrapper():
+class GeosPointWrapper():
     def __init__(self, geos_geometry):
         self.geos_geometry = geos_geometry
         self.is_neu_axis_order = is_neu_axis_order(geos_geometry.srid)
@@ -206,3 +285,66 @@ class GeosGeometryWrapper():
         if self.is_neu_axis_order:
             return Point(self.geos_geometry.y, self.geos_geometry.x).geojson
         return self.geos_geometry.geojson
+
+class GeosGeometryWrapper():
+    def __init__(self, geos_geometry):
+        self.geos_geometry = geos_geometry
+        self.is_neu_axis_order = is_neu_axis_order(geos_geometry.srid)
+        if not DJANGO_BROKEN_GEOSGEOMETRY:
+            raise Exception("GeosGeometryWrapper shall only be used to fix broken Django/GDAL environments. Do not use it in other scenarios")
+    
+    @property
+    def x(self):
+        if self.dims > 0:
+            raise Exception("x is only supported for Points")
+        if self.is_neu_axis_order:
+            return self.geos_geometry.y
+        return self.geos_geometry.x
+    
+    @property
+    def y(self):
+        if self.dims > 0:
+            raise Exception("x is only supported for Points")
+        if self.is_neu_axis_order:
+            return self.geos_geometry.x
+        return self.geos_geometry.y
+    
+    @property
+    def wkt(self):
+        if self.is_neu_axis_order:
+            return _invert_geos_coords(self.geos_geometry).wkt
+        return self.geos_geometry.wkt
+    
+    @property
+    def geojson(self):
+        """
+        print(f"geojson: {self.geos_geometry.geojson}")
+        if self.is_neu_axis_order:
+            print(f"inverted geojson: {_invert_geos_coords(self.geos_geometry).geojson}")
+            return _invert_geos_coords(self.geos_geometry).geojson
+        """
+        #print(f"coords: {self.geos_geometry.coords}")
+        return self.geos_geometry.geojson
+
+    @property
+    def srid(self):
+        return self.geos_geometry.srid
+
+    @property
+    def dims(self):
+        return self.geos_geometry.dims
+    
+    @property
+    def geom_type(self):
+        return self.geos_geometry.geom_type
+    
+    @property
+    def empty(self):
+        return self.geos_geometry.empty
+    
+    @property
+    def coords(self):
+        if self.is_neu_axis_order:
+            return _invert_geos_coords(self.geos_geometry).coords
+        return self.geos_geometry.coords
+    
