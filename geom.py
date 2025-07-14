@@ -26,7 +26,7 @@ defined by the OGC Simple Feature specification.
 '''
 
 from gvsigol import settings
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, Point
 from gvsigol_core.settings import NEU_AXIS_ORDER_SRSS, DJANGO_BROKEN_GEOSGEOMETRY
 import os
 
@@ -145,36 +145,6 @@ def is_neu_axis_order(srid):
         return True
     return False
 
-def xor(a, b):
-    return (a and not b) or (not a and b)
-
-def transform_point_bak(x_or_lon, y_or_lat, source_crs, target_crs):
-    """
-    Experimental function to transform a point from source_crs to target_crs
-    circunventing the django GEOSGeometry bug in versions < 4.2 with GDAL >= 3.x.
-
-    Parameters:
-    ------------
-    lon: float
-        longitude of the point
-    lat: float
-        latitude of the point
-    source_crs: integer
-        EPSG code of the source coordinate reference system
-    target_crs: integer
-        EPSG code of the target coordinate reference system
-    Returns:
-        GEOSGeometry object with the transformed point in target_crs
-    """
-    if DJANGO_BROKEN_GEOSGEOMETRY and \
-        xor(is_neu_axis_order(source_crs), is_neu_axis_order(target_crs)):
-            p = f'POINT({y_or_lat} {x_or_lon})' # usamos lat, lon; orden incorrecto en wkt para sortear error de django
-    else:
-        p = f'POINT({x_or_lon} {y_or_lat})' # usamos lon, lat; orden correcto en wkt 
-    print(p)
-    geos_geom = GEOSGeometry(p, srid=source_crs)
-    transformed_geom = geos_geom.transform(target_crs, clone=True)
-    return transformed_geom
 
 def transform_point(x_or_lon, y_or_lat, source_crs, target_crs):
     """
@@ -196,24 +166,43 @@ def transform_point(x_or_lon, y_or_lat, source_crs, target_crs):
     """
     if DJANGO_BROKEN_GEOSGEOMETRY and \
         is_neu_axis_order(source_crs):
-            print("source is neu")
             p = f'POINT({y_or_lat} {x_or_lon})' # usamos lat, lon; orden incorrecto en wkt para sortear error de django
     else:
         p = f'POINT({x_or_lon} {y_or_lat})' # usamos lon, lat; orden correcto en wkt 
-    print(p)
     geos_geom = GEOSGeometry(p, srid=source_crs)
-    print(geos_geom.wkt)
-    print(geos_geom.x)
-    print(geos_geom.y)
-    print(geos_geom.geojson)
     transformed_geom = geos_geom.transform(target_crs, clone=True)
     if DJANGO_BROKEN_GEOSGEOMETRY and \
         is_neu_axis_order(target_crs):
-        print("target is neu")
-        #transformed_geom = GEOSGeometry(f'POINT({transformed_geom.y} {transformed_geom.x})', srid=target_crs)
-        transformed_geom = GEOSGeometry(f'POINT({transformed_geom.x} {transformed_geom.y})', srid=target_crs)
-    print(transformed_geom.wkt)
-    print(transformed_geom.x)
-    print(transformed_geom.y)
-    print(transformed_geom.geojson)
+        transformed_geom = GeosGeometryWrapper(transformed_geom)
     return transformed_geom
+
+class GeosGeometryWrapper():
+    def __init__(self, geos_geometry):
+        self.geos_geometry = geos_geometry
+        self.is_neu_axis_order = is_neu_axis_order(geos_geometry.srid)
+        if not DJANGO_BROKEN_GEOSGEOMETRY:
+            raise Exception("GeosGeometryWrapper shall only be used to fix broken Django/GDAL environments. Do not use it in other scenarios")
+    
+    @property
+    def x(self):
+        if self.is_neu_axis_order:
+            return self.geos_geometry.y
+        return self.geos_geometry.x
+    
+    @property
+    def y(self):
+        if self.is_neu_axis_order:
+            return self.geos_geometry.x
+        return self.geos_geometry.y
+    
+    @property
+    def wkt(self):
+        if self.is_neu_axis_order:
+            return Point(self.geos_geometry.y, self.geos_geometry.x).wkt
+        return self.geos_geometry.wkt
+    
+    @property
+    def geojson(self):
+        if self.is_neu_axis_order:
+            return Point(self.geos_geometry.y, self.geos_geometry.x).geojson
+        return self.geos_geometry.geojson
