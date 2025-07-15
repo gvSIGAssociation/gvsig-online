@@ -58,8 +58,8 @@
 										<i class="fa fa-globe"></i>
 									</div>
 									<div class="product-info">
-										<a href="{{viewer.url}}" class="product-title ">{% trans "Map viewer user manual" %} {% if viewer.lang %}[{{viewer.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "This manual provides a review of each of the features offered by the JQuery based map viewer" %}</span>
+										<a href="{{viewer.url}}" class="product-title ">{% trans "User Manual - Classic Map Viewer" %} {% if viewer.lang %}[{{viewer.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer." %}</span>
 									</div>
 								</li>
 								{% endif %}
@@ -69,21 +69,16 @@
 										<i class="fa fa-globe"></i>
 									</div>
 									<div class="product-info">
-										<a href="{{spaviewer.url}}" class="product-title ">{% trans "Map viewer user manual (ReactJS)" %} {% if spaviewer.lang %}[{{spaviewer.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "This manual provides a review of each of the features offered by the React based map viewer" %}</span>
+										<a href="{{spaviewer.url}}" class="product-title ">{% trans "User Manual - New Front Map Viewer" %} {% if spaviewer.lang %}[{{spaviewer.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "Learn to navigate and leverage all features of the new map viewer with a modern interface." %}</span>
 									</div>
 								</li>
 								{% endif %}
 								{% if user.is_active %}
 								{% if user.is_superuser or user.is_staff %}
-								{% if intro %}
 								<li class="item">
 									<div class="product-img">
 										<i class="fa fa-user"></i>
-									</div>
-									<div class="product-info">
-										<a href="{{intro.url}}" class="product-title ">{% trans "Introduction and concepts" %} {% if intro.lang %}[{{intro.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "Features of the platform and license. Definition of the objects and entities that are part of the environment." %}</span>
 									</div>
 								</li>
 								{% endif %}
@@ -94,7 +89,7 @@
 									</div>
 									<div class="product-info">
 										<a href="{{admin.url}}" class="product-title ">{% trans "Administration Guide" %} {% if admin.lang %}[{{admin.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "This guide is intended for platform admin users. It teaches the steps to carry out the management of users and groups, services, symbology, projects ... " %}</span>
+										<span class="product-description">{% trans "Manual for administrators: manage users, groups, services, symbology, and projects on the platform." %}</span>
 									</div>
 								</li>
 								{% endif %}
