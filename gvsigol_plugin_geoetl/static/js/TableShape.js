@@ -752,7 +752,6 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                 
                 $("#init-"+ID).prop('disabled', false)
                 $("#init-guaranteed-"+ID).prop('disabled', false)
-
                 
                 $("#checkbox-end-"+ID).prop('disabled', false)
                 
@@ -16871,6 +16870,13 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                     '<label for="preserve-fid-'+ID+'" class="form-check-label">'+gettext('Preserve FID')+'</label>'+
                                 '</div>'+
                             '</div>'+
+                            '<div id="gvsigol-fields-container-'+ID+'" style="display: block;">'+
+                                '<label class="col-form-label">'+gettext('Auto-create gvSIG Online fields')+':</label>'+
+                                '<div class="form-check">'+
+                                    '<input type="checkbox" id="create-gvsigol-fields-'+ID+'" class="form-check-input" checked>'+
+                                    '<label for="create-gvsigol-fields-'+ID+'" class="form-check-label">'+gettext('Create feat_date_gvol and feat_version_gvol fields')+'</label>'+
+                                '</div>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -16897,6 +16903,14 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             }
             else{
                 $('#match-'+ID).attr('disabled', true)
+            }
+            
+            // Mostrar/ocultar checkbox de campos gvSIG Online según la operación
+            if ($(this).val()=='CREATE' || $(this).val()=='DROPANDCREATE'){
+                $('#gvsigol-fields-container-'+ID).show()
+            }
+            else{
+                $('#gvsigol-fields-container-'+ID).hide()
             }
         });
 
@@ -17002,7 +17016,15 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             } else {
                 $('#preserve-fid-'+ID).prop('disabled', true)
             }
-        
+            
+            // Mostrar/ocultar checkbox de campos gvSIG Online según la operación inicial
+            var currentOperation = $('input:radio[name="operation-'+ID+'"]:checked').val();
+            if (currentOperation === 'CREATE' || currentOperation === 'DROPANDCREATE'){
+                $('#gvsigol-fields-container-'+ID).show()
+            }
+            else{
+                $('#gvsigol-fields-container-'+ID).hide()
+            }
 
 
             $('#dialog-output-postgis-'+ID).modal('show')
@@ -17030,7 +17052,8 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 "match": $('#match-'+ID).val(),
                 "operation": $('input:radio[name="operation-'+ID+'"]:checked').val(),
                 "order": $('#order-'+ID).val(),
-                "preserve-fid": $('#preserve-fid-'+ID).is(':checked')}
+                "preserve-fid": $('#preserve-fid-'+ID).is(':checked'),
+                "create-gvsigol-fields": $('#create-gvsigol-fields-'+ID).is(':checked')}
             ]}
             
             paramsPostgis['schema-old'] = schemaEdge

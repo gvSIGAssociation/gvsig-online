@@ -1348,6 +1348,12 @@ msgstr "Devuelve una colección de polígonos sin atributos. Si la geometría so
 msgid "Preserve FID"
 msgstr "Preservar FID"
 
+msgid "Auto-create gvSIG Online fields"
+msgstr "Crear automáticamente campos de gvSIG Online"
+
+msgid "Create feat_date_gvol and feat_version_gvol fields"
+msgstr "Crear campos feat_date_gvol y feat_version_gvol"
+
 msgid "Statistics"
 msgstr "Estadísticas"
 

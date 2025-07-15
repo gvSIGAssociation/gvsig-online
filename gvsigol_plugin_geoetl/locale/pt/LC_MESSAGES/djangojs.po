@@ -1223,3 +1223,9 @@ msgstr "Nota"
 
 msgid "Returns a collection of polygons without attributes. If the geometry only contains one vertex it will return an empty geometry. If you want a diagram of all the flow records, try to do a geometry union first."
 msgstr "Retorna uma coleção de polígonos sem atributos. Se a geometria contiver apenas um vértice, irá devolver uma geometria vazia. Se pretender um diagrama de todos os registos de fluxo, tente primeiro fazer uma fusão de geometria."
+
+msgid "Auto-create gvSIG Online fields"
+msgstr "Criar automaticamente campos do gvSIG Online"
+
+msgid "Create feat_date_gvol and feat_version_gvol fields"
+msgstr "Criar campos feat_date_gvol e feat_version_gvol"
