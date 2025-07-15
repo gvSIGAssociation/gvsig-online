@@ -1216,3 +1216,9 @@ msgstr "Els paràmetres de connexió son vàlids."
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "Connection parameters are not valid."
 msgstr "Els paràmetres de connexió no son vàlids."
+
+msgid "Auto-create gvSIG Online fields"
+msgstr "Crear automàticament camps de gvSIG Online"
+
+msgid "Create feat_date_gvol and feat_version_gvol fields"
+msgstr "Crear camps feat_date_gvol i feat_version_gvol"

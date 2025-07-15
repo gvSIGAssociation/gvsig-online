@@ -1341,6 +1341,12 @@ msgstr ""
 msgid "Preserve FID"
 msgstr ""
 
+msgid "Auto-create gvSIG Online fields"
+msgstr ""
+
+msgid "Create feat_date_gvol and feat_version_gvol fields"
+msgstr ""
+
 msgid "Statistics"
 msgstr ""
 

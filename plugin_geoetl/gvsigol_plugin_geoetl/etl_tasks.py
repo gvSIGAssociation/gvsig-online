@@ -783,6 +783,33 @@ def isInSamedb(params):
         return False
 
 
+def add_gvsigol_fields(cursor, schema, table_name):
+    """
+    Añade los campos estándar de gvSIG Online a una tabla:
+    - feat_date_gvol: timestamp with time zone para fecha de creación/modificación
+    - feat_version_gvol: integer para control de versiones
+    """
+    try:
+        # Agregar campo de fecha
+        sql_add_date = sql.SQL('ALTER TABLE {sch}.{tbl} ADD COLUMN IF NOT EXISTS feat_date_gvol TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP').format(
+            sch=sql.Identifier(schema),
+            tbl=sql.Identifier(table_name)
+        )
+        cursor.execute(sql_add_date)
+        
+        # Agregar campo de versión
+        sql_add_version = sql.SQL('ALTER TABLE {sch}.{tbl} ADD COLUMN IF NOT EXISTS feat_version_gvol INTEGER DEFAULT 1').format(
+            sch=sql.Identifier(schema),
+            tbl=sql.Identifier(table_name)
+        )
+        cursor.execute(sql_add_version)
+        
+        print(f"Se han añadido los campos gvSIG Online a la tabla {schema}.{table_name}")
+        
+    except Exception as e:
+        print(f"Error al agregar campos gvSIG Online: {str(e)}")
+
+
 def output_Postgis(dicc):
 
     table_name_source = dicc['data'][0]
@@ -802,6 +829,16 @@ def output_Postgis(dicc):
         preservefid = dicc['preserve-fid']
     except:
         preservefid = False
+    
+    # Verificar si se deben crear los campos de gvSIG Online
+    try:
+        create_gvsigol_fields = dicc['create-gvsigol-fields']
+        if isinstance(create_gvsigol_fields, bool):
+            create_gvsigol_fields = create_gvsigol_fields
+        else:
+            create_gvsigol_fields = create_gvsigol_fields == True or create_gvsigol_fields == 'true'
+    except:
+        create_gvsigol_fields = False
 
     con_source = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = con_source.cursor()
@@ -876,6 +913,11 @@ def output_Postgis(dicc):
                     
                     print("No se ha podido crear el índice espacial")
 
+                # Agregar campos de gvSIG Online si está marcada la opción
+                if create_gvsigol_fields:
+                    add_gvsigol_fields(cur, esq, tab)
+                    con_source.commit()
+
                 con_source.close()
                 cur.close()
 
@@ -910,6 +952,20 @@ def output_Postgis(dicc):
                 _ogr.geom_type = type_geom
 
                 _ogr.execute()
+                
+                # Agregar campos de gvSIG Online si está marcada la opción (servidor remoto)
+                if create_gvsigol_fields:
+                    try:
+                        con_target = psycopg2.connect(user=params["user"], password=params["password"], 
+                                                     host=params["host"], port=params["port"], 
+                                                     database=params["database"])
+                        cur_target = con_target.cursor()
+                        add_gvsigol_fields(cur_target, esq, tab)
+                        con_target.commit()
+                        con_target.close()
+                        cur_target.close()
+                    except Exception as e:
+                        print(f"Error al agregar campos gvSIG Online en servidor remoto: {str(e)}")
                 
         elif dicc['operation'] == 'DROPANDCREATE':
             if inSame:
@@ -957,6 +1013,11 @@ def output_Postgis(dicc):
                 except:
                     print("No se ha podido crear el índice espacial.")
 
+                # Agregar campos de gvSIG Online si está marcada la opción
+                if create_gvsigol_fields:
+                    add_gvsigol_fields(cur, esq, tab)
+                    con_source.commit()
+
                 con_source.close()
                 cur.close()
             else:
@@ -990,6 +1051,20 @@ def output_Postgis(dicc):
                 _ogr.geom_type = type_geom
 
                 _ogr.execute()
+                
+                # Agregar campos de gvSIG Online si está marcada la opción (servidor remoto)
+                if create_gvsigol_fields:
+                    try:
+                        con_target = psycopg2.connect(user=params["user"], password=params["password"], 
+                                                     host=params["host"], port=params["port"], 
+                                                     database=params["database"])
+                        cur_target = con_target.cursor()
+                        add_gvsigol_fields(cur_target, esq, tab)
+                        con_target.commit()
+                        con_target.close()
+                        cur_target.close()
+                    except Exception as e:
+                        print(f"Error al agregar campos gvSIG Online en servidor remoto: {str(e)}")
                 
             refresh_layers_by_params(esq, tab, params)
 
