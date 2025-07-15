@@ -452,32 +452,20 @@ msgid "Web application"
 msgstr "Aplicación web"
 
 #: gvsigol_core/templates/documentation.html:61
-msgid "Map viewer user manual"
-msgstr "Manual de usuario del visor de mapas"
+msgid "User Manual - Classic Map Viewer"
+msgstr "Manual de Usuario - Visor de Mapas Clásico"
 
 #: gvsigol_core/templates/documentation.html:62
-msgid ""
-"This manual provides a review of each of the features offered by the JQuery "
-"based map viewer"
-msgstr ""
-"Este manual proporciona una revisión de cada una de las características "
-"ofrecidas por el visor de mapas basado en JQuery"
+msgid "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer."
+msgstr "Guía completa para explorar y utilizar las funcionalidades del visor de mapas basado en JQuery."
 
 #: gvsigol_core/templates/documentation.html:72
-msgid "Map viewer user manual (ReactJS)"
-msgstr "Manual de usuario del visor de mapas (ReactJS)"
+msgid "User Manual - New Front Map Viewer"
+msgstr "Manual de Usuario - Visor de Mapas Nuevo Front"
 
 #: gvsigol_core/templates/documentation.html:73
-msgid ""
-"This manual provides a review of each of the features offered by the React "
-"based map viewer"
-msgstr ""
-"Este manual proporciona una revisión de cada una de las características "
-"ofrecidas por el visor de mapas basado en React"
-
-#: gvsigol_core/templates/documentation.html:85
-msgid "Introduction and concepts"
-msgstr "Introducción y conceptos"
+msgid "Learn to navigate and leverage all features of the new map viewer with a modern interface."
+msgstr "Aprende a navegar y aprovechar todas las características del nuevo visor de mapas con interfaz moderna."
 
 #: gvsigol_core/templates/documentation.html:86
 msgid ""
@@ -492,14 +480,8 @@ msgid "Administration Guide"
 msgstr "Guía de administración"
 
 #: gvsigol_core/templates/documentation.html:97
-msgid ""
-"This guide is intended for platform admin users. It teaches the steps to "
-"carry out the management of users and groups, services, symbology, "
-"projects ... "
-msgstr ""
-"Esta guía está destinada para los usuarios administradores de la plataforma. "
-"Muestra los pasos para llevar a cabo la gestión de usuarios y grupos, "
-"servicios, simbología, proyectos ... "
+msgid "Manual for administrators: manage users, groups, services, symbology, and projects on the platform."
+msgstr "Manual para administradores: gestiona usuarios, grupos, servicios, simbología y proyectos de la plataforma."
 
 #: gvsigol_core/templates/documentation.html:120
 msgid "Mobile application"

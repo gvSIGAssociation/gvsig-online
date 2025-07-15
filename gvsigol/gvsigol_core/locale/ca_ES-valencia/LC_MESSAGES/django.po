@@ -448,32 +448,20 @@ msgid "Web application"
 msgstr "Aplicació web"
 
 #: gvsigol_core/templates/documentation.html:61
-msgid "Map viewer user manual"
-msgstr "Manual d'usuari del visor de mapes"
+msgid "User Manual - Classic Map Viewer"
+msgstr "Manual d'Usuari - Visor de Mapes Clàssic"
 
 #: gvsigol_core/templates/documentation.html:62
-msgid ""
-"This manual provides a review of each of the features offered by the JQuery "
-"based map viewer"
-msgstr ""
-"Aquest manual proporciona una revisió de cadascuna de les característiques "
-"ofertes pel visor de mapes basat en JQuery"
+msgid "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer."
+msgstr "Guia completa per a explorar i utilitzar les funcionalitats del visor de mapes basat en JQuery."
 
 #: gvsigol_core/templates/documentation.html:72
-msgid "Map viewer user manual (ReactJS)"
-msgstr "Manual d'usuari del visor de mapes (ReactJS)"
+msgid "User Manual - New Front Map Viewer"
+msgstr "Manual d'Usuari - Visor de Mapes Nou Front"
 
 #: gvsigol_core/templates/documentation.html:73
-msgid ""
-"This manual provides a review of each of the features offered by the React "
-"based map viewer"
-msgstr ""
-"Aquest manual proporciona una revisió de cadascuna de les característiques "
-"ofertes pel visor de mapes basat en React"
-
-#: gvsigol_core/templates/documentation.html:85
-msgid "Introduction and concepts"
-msgstr "Introducció i conceptes"
+msgid "Learn to navigate and leverage all features of the new map viewer with a modern interface."
+msgstr "Aprén a navegar i aprofitar totes les característiques del nou visor de mapes amb interfície moderna."
 
 #: gvsigol_core/templates/documentation.html:86
 msgid ""
@@ -481,21 +469,15 @@ msgid ""
 "that are part of the environment."
 msgstr ""
 "Característiques de la plataforma i llicència. Definició d'objectes i "
-"entitats que són part de l'entorn."
+"entitats que formen part de l'entorn."
 
 #: gvsigol_core/templates/documentation.html:96
 msgid "Administration Guide"
 msgstr "Guia d'administració"
 
 #: gvsigol_core/templates/documentation.html:97
-msgid ""
-"This guide is intended for platform admin users. It teaches the steps to "
-"carry out the management of users and groups, services, symbology, "
-"projects ... "
-msgstr ""
-"Aquesta guia està destinada als usuaris administradors de la plataforma. "
-"Mostra els passos per portar a terme la gestió d'usuaris i grups, serveis, "
-"simbologia, projectes ... "
+msgid "Manual for administrators: manage users, groups, services, symbology, and projects on the platform."
+msgstr "Manual per a administradors: gestiona usuaris, grups, servicis, simbologia i projectes de la plataforma."
 
 #: gvsigol_core/templates/documentation.html:120
 msgid "Mobile application"
