@@ -1444,6 +1444,7 @@ def documentation(request):
     lang = request.LANGUAGE_CODE
     base_docs_url = getattr(settings, 'DOCS_PATH', os.path.join(settings.STATIC_ROOT, '../../docs'))
 
+    intro = get_manual(request, 'gvsigol_intro.pdf')
     admin = get_manual(request, 'gvsigol_admin_guide.pdf')
     viewer = get_manual(request, 'gvsigol_user_manual.pdf')
     spaviewer = get_manual(request, 'gvsigolfrontend_manual.pdf')
@@ -1476,6 +1477,8 @@ def documentation(request):
     response = {
         'plugin_manuals': plugin_manuals
     }
+    if intro:
+        response['intro'] = intro
     if admin:
         response['admin'] = admin
     if viewer:
