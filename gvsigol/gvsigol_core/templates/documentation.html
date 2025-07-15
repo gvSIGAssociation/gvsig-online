@@ -76,9 +76,14 @@
 								{% endif %}
 								{% if user.is_active %}
 								{% if user.is_superuser or user.is_staff %}
+								{% if intro %}
 								<li class="item">
 									<div class="product-img">
 										<i class="fa fa-user"></i>
+									</div>
+									<div class="product-info">
+										<a href="{{intro.url}}" class="product-title ">{% trans "Introduction and concepts" %} {% if intro.lang %}[{{intro.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "Features of the platform and license. Definition of the objects and entities that are part of the environment." %}</span>
 									</div>
 								</li>
 								{% endif %}
