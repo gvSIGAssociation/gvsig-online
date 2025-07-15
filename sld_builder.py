@@ -332,7 +332,8 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                 if geom_field['field_type'] == 'POINT' or geom_field['field_type'] == 'MULTIPOINT':
                     anchorpoint.AnchorPointY = "-1.5"
                 else:
-                    anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
+                    #anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
+                    anchorpoint.AnchorPointY = "0.8"
 
                 anchorpoint.AnchorPointX = str(s.textsymbolizer.anchor_point_x)
             halo = Halo(symbolizer)
