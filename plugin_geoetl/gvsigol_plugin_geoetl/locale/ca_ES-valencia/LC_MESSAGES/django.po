@@ -650,7 +650,7 @@ msgstr "Text a Punt"
 
 #: templates/etl.html:79
 msgid "Union"
-msgstr "Unió"
+msgstr "Fusió"
 
 #: templates/etl.html:80
 msgid "Validate Geometry"
@@ -802,3 +802,7 @@ msgstr "Plugin de Processament GeoETL"
 #: models.py:212
 msgid "gvsigol_plugin_geoetl manual desc"
 msgstr "Documentació sobre el plugin d'Extracció, Transformació i Càrrega (ETL) de dades geoespacials."
+
+#: templates/etl.html:54
+msgid "Correct Spelling"
+msgstr "Corregeix Ortografia"
