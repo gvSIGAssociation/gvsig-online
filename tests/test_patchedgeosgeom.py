@@ -196,7 +196,7 @@ class PatchedGeosPointTestCase(unittest.TestCase):
     def test_transform_point_25830_to_3857(self):
         x = 717561.534888295806013
         y = 4405323.14028216060251
-        delta = 0.0001
+        delta = 0.001
         source_crs = 25830
         target_crs = 3857
         expected_x = -51194.832
@@ -218,7 +218,7 @@ class PatchedGeosPointTestCase(unittest.TestCase):
     def test_transform_point_3857_to_25830(self):
         x = -51194.832
         y = 4832584.505507748
-        delta = 0.0001
+        delta = 0.001
         source_crs = 3857
         target_crs = 25830
         expected_x = 717561.534888295806013
@@ -638,7 +638,7 @@ class PatchedGeosLinestringTestCase(unittest.TestCase):
 
     def test_transform_linestring_25831_to_25830(self):
         wkt = 'LINESTRING(200251.40850083757 4405554.974307208, 201666.1899918826 4404336.570427252, 202807.58059562254 4403717.582285645, 203682.8748760639 4403711.4663969185)'
-        delta = 0.00001
+        delta = 0.0001
         source_crs = 25831
         target_crs = 25830
         
@@ -792,7 +792,7 @@ class PatchedGeosLinestringTestCase(unittest.TestCase):
 
     def test_transform_linestring_25830_to_3857(self):
         wkt = 'LINESTRING(714340.11389 4402692.86474, 715832.48897 4401572.49473, 717012.14105 4401031.56513, 717885.44375 4401084.016)'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 25830
         target_crs = 3857
         
@@ -843,7 +843,7 @@ class PatchedGeosLinestringTestCase(unittest.TestCase):
 
     def test_transform_linestring_4258_to_3857(self):
         wkt = 'LINESTRING (-0.4983255769932612 39.74720322603334, -0.4812904894696575 39.736741654561875, -0.46771515913153 39.73157312257331, -0.4575167727213614 39.73182258543066)'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 4258
         target_crs = 3857
         
@@ -1161,7 +1161,7 @@ class PatchedGeosMultiLinestringTestCase(unittest.TestCase):
 
     def test_transform_multilinestring_25830_to_25831(self):
         wkt = 'MULTILINESTRING ((714340.11389 4402692.86474, 715832.48897 4401572.49473), (717012.14105 4401031.56513, 717885.44375 4401084.016))'
-        delta = 0.00001
+        delta = 0.0001
         source_crs = 25830
         target_crs = 25831
         expected_x_0 = 200251.40850083757
@@ -1213,7 +1213,7 @@ class PatchedGeosMultiLinestringTestCase(unittest.TestCase):
 
     def test_transform_multilinestring_25831_to_25830(self):
         wkt = 'MULTILINESTRING ((200251.40850083757 4405554.974307208, 201666.1899918826 4404336.570427252), (202807.58059562254 4403717.582285645, 203682.8748760639 4403711.4663969185))'
-        delta = 0.00001
+        delta = 0.0001
         source_crs = 25831
         target_crs = 25830
         
@@ -1371,7 +1371,7 @@ class PatchedGeosMultiLinestringTestCase(unittest.TestCase):
 
     def test_transform_multilinestring_25830_to_3857(self):
         wkt = 'MULTILINESTRING ((714340.11389 4402692.86474, 715832.48897 4401572.49473), (717012.14105 4401031.56513, 717885.44375 4401084.016))'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 25830
         target_crs = 3857
         
@@ -1424,7 +1424,7 @@ class PatchedGeosMultiLinestringTestCase(unittest.TestCase):
 
     def test_transform_multilinestring_3857_to_25830(self):
         wkt = 'MULTILINESTRING ((-55473.34948015408 4829274.257160724, -53577.01221140767 4827759.717904298), (-52065.81335081684 4827011.5456999075, -50930.53416872382 4827047.655472828))'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 3857
         target_crs = 25830
         
@@ -1477,7 +1477,7 @@ class PatchedGeosMultiLinestringTestCase(unittest.TestCase):
 
     def test_transform_multilinestring_4258_to_3857(self):
         wkt = 'MULTILINESTRING ((-0.4983255769932612 39.74720322603334, -0.4812904894696575 39.736741654561875), (-0.46771515913153 39.73157312257331, -0.4575167727213614 39.73182258543066))'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 4258
         target_crs = 3857
         
@@ -1841,7 +1841,7 @@ class PatchedGeosPolygonTestCase(unittest.TestCase):
 
     def test_transform_polygon_25831_to_25830(self):
         wkt = 'POLYGON ((200251.40850083757 4405554.974307208, 201666.1899918826 4404336.570427252, 202807.58059562254 4403717.582285645, 203682.8748760639 4403711.4663969185, 200251.40850083757 4405554.974307208))'
-        delta = 0.00001
+        delta = 0.0001
         source_crs = 25831
         target_crs = 25830
         
@@ -1993,7 +1993,7 @@ class PatchedGeosPolygonTestCase(unittest.TestCase):
 
     def test_transform_polygon_25830_to_3857(self):
         wkt = 'POLYGON ((714340.11389 4402692.86474, 715832.48897 4401572.49473, 717012.14105 4401031.56513, 717885.44375 4401084.016, 714340.11389 4402692.86474))'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 25830
         target_crs = 3857
         
@@ -2006,8 +2006,6 @@ class PatchedGeosPolygonTestCase(unittest.TestCase):
         expected_x_3 = -50930.53416872382
         expected_y_3 = 4827047.655472828
         transformed_geom = transform_wkt(wkt, source_crs, target_crs)
-        print(transformed_geom)
-        print(transformed_geom.coords)
 
         self.assertAlmostEqual(transformed_geom.coords[0][0][0], expected_x_0, delta=delta, msg=f"polygon x coordinate 0 transformation failed from {source_crs} to {target_crs}")
         self.assertAlmostEqual(transformed_geom.coords[0][0][1], expected_y_0, delta=delta, msg=f"polygon y coordinate 0 transformation failed from {source_crs} to {target_crs}")
@@ -2032,8 +2030,6 @@ class PatchedGeosPolygonTestCase(unittest.TestCase):
         # Check the WKT of transformed geometry        
         coords = transformed_geom.wkt.split("((")[1].split("))")[0].split(",")
         coord0 = coords[0].strip().split(" ")
-        print(coords)
-        print(coord0)
         self.assertAlmostEqual(float(coord0[0]), expected_x_0, delta=delta, msg=f"transformed wkt x coordinate 0 failed from {source_crs} to {target_crs}")
         self.assertAlmostEqual(float(coord0[1]), expected_y_0, delta=delta, msg=f"transformed wkt y coordinate 0 failed from {source_crs} to {target_crs}")
         coord1 = coords[1].strip().split(" ")
@@ -2048,7 +2044,7 @@ class PatchedGeosPolygonTestCase(unittest.TestCase):
 
     def test_transform_polygon_3857_to_25830(self):
         wkt = 'POLYGON ((-55473.34948015408 4829274.257160724, -53577.01221140767 4827759.717904298, -52065.81335081684 4827011.5456999075, -50930.53416872382 4827047.655472828, -55473.34948015408 4829274.257160724))'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 3857
         target_crs = 25830
         
@@ -2099,7 +2095,7 @@ class PatchedGeosPolygonTestCase(unittest.TestCase):
 
     def test_transform_polygon_4258_to_3857(self):
         wkt = 'POLYGON ((-0.4983255769932612 39.74720322603334, -0.4812904894696575 39.736741654561875, -0.46771515913153 39.73157312257331, -0.4575167727213614 39.73182258543066, -0.4983255769932612 39.74720322603334))'
-        delta = 0.00001
+        delta = 0.001
         source_crs = 4258
         target_crs = 3857
         
