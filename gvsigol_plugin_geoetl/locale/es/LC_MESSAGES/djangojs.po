@@ -1359,3 +1359,6 @@ msgstr "Estadísticas"
 
 msgid "Numeric attribute"
 msgstr "Atributo numérico"
+
+msgid "Optional"
+msgstr "Opcional"

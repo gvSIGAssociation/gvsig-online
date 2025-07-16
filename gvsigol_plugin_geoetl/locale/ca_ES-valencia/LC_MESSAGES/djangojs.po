@@ -1004,6 +1004,11 @@ msgstr "Atribut de latitud"
 msgid "Text to Point"
 msgstr "Text a Punt"
 
+
+#: static/js/TableShape.js:11122 static/js/TableShape.js:11159
+msgid "Point to text"
+msgstr "Punt a Text"
+
 #: static/js/TableShape.js:11171 static/js/TableShape.js:11445
 msgid "Insert EPSG:"
 msgstr "Inserta EPSG:"
@@ -1024,7 +1029,7 @@ msgstr "Atribut text WKT:"
 
 #: static/js/TableShape.js:11669 static/js/TableShape.js:11705
 msgid "Split Attribute"
-msgstr "Parteix Atribut"
+msgstr "Divideix Atribut"
 
 #: static/js/TableShape.js:11710
 msgid "String Attribute:"
@@ -1036,7 +1041,7 @@ msgstr "Nom de la llista:"
 
 #: static/js/TableShape.js:11718
 msgid "Split by:"
-msgstr "Partir per:"
+msgstr "Dividir per:"
 
 #: static/js/TableShape.js:11935 static/js/TableShape.js:11971
 msgid "Explode List"
@@ -1222,3 +1227,156 @@ msgstr "Crear automàticament camps de gvSIG Online"
 
 msgid "Create feat_date_gvol and feat_version_gvol fields"
 msgstr "Crear camps feat_date_gvol i feat_version_gvol"
+
+msgid "Statistics"
+msgstr "Estadístiques"
+
+msgid "Buffer"
+msgstr "Àrea d'influència"
+
+msgid "Insert radius value"
+msgstr "Insereix el valor del radi"
+
+msgid "Make buffer to reach an area"
+msgstr "Fer l'àrea d'influència fins a arribar a una àrea"
+
+msgid "Radius"
+msgstr "Radi"
+
+msgid "Select attribute with the radius value"
+msgstr "Selecciona l'atribut amb el valor del radi"
+
+msgid "Radius value"
+msgstr "Valor del radi"
+
+msgid "Radius attribute"
+msgstr "Atribut de radi"
+
+msgid "Area attribute to reach"
+msgstr "Atribut de l'àrea a assolir"
+
+msgid "Radius increase"
+msgstr "Augment de radi"
+
+msgid "Buffer style parameters"
+msgstr "Paràmetres de l'estil de l'àrea d'influència"
+
+msgid "Quadrant segments"
+msgstr "Segments del quadrant"
+
+msgid "End cap style"
+msgstr "Estil en els extrems"
+
+msgid "Round"
+msgstr "Rodó"
+
+msgid "Flat"
+msgstr "Pla"
+
+msgid "Square"
+msgstr "Quadrat"
+
+msgid "Join style"
+msgstr "Estil en la unió"
+
+msgid "Mitre"
+msgstr "Cantó"
+
+msgid "Bevel"
+msgstr "Bisel"
+
+msgid "Mitre limit"
+msgstr "Límit del cantó"
+
+msgid "Side"
+msgstr "Costat"
+
+msgid "Both"
+msgstr "Ambdós"
+
+msgid "Nearest Neighbor"
+msgstr "Veí Més Pròxim"
+
+msgid "Tolerance"
+msgstr "Tolerància"
+
+msgid "Matched"
+msgstr "Emparellats"
+
+msgid "Correct Spelling"
+msgstr "Corregeix Ortografia"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Spanish"
+msgstr "Espanyol"
+
+msgid "Spain"
+msgstr "Espanya"
+
+msgid "English"
+msgstr "Anglés"
+
+msgid "British"
+msgstr "Britànic"
+
+msgid "String attribute to correct"
+msgstr "Atribut amb el text a corregir"
+
+msgid "Correct only the accent marks"
+msgstr "Corregeix únicament els accents"
+
+msgid "API Connection:"
+msgstr "Connexió API:"
+
+msgid "Add connection"
+msgstr "Afig connexió"
+
+msgid "Clustering"
+msgstr "Agrupament"
+
+msgid "Algorithm"
+msgstr "Algorisme"
+
+msgid "DBSCAN"
+msgstr "DBSCAN"
+
+msgid "K-means"
+msgstr "K-mitjanes"
+
+msgid "Desire distance"
+msgstr "Distància desitjada"
+
+msgid "Density (Minimum points)"
+msgstr "Densitat (Mínim de punts)"
+
+msgid "Number of clusters"
+msgstr "Nombre d'agrupaments"
+
+msgid "Maximum radius"
+msgstr "Radi màxim"
+
+msgid "Weight attribute"
+msgstr "Atribut de Pes"
+
+msgid "Voronoi Diagram"
+msgstr "Diagrama de Voronoi"
+
+msgid "Thiessen Polygons"
+msgstr "Polígons de Thiessen"
+
+msgid "Note"
+msgstr "Nota"
+
+msgid "Returns a collection of polygons without attributes. If the geometry only contains one vertex it will return an empty geometry. If you want a diagram of all the flow records, try to do a geometry union first."
+msgstr "Retorna una col·lecció de polígons sense atributs. Si la geometria només conté un vèrtex, retornarà una geometria buida. Si desitges un diagrama de tots els registres del flux, intenta fer una unió de geometries abans."
+
+msgid "Preserve FID"
+msgstr "Preservar FID"
+
+msgid "Numeric attribute"
+msgstr "Atribut numèric"
+
+msgid "Optional"
+msgstr "Opcional"
