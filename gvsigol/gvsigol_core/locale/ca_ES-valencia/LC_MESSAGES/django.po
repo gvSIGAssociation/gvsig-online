@@ -697,14 +697,12 @@ msgstr "Restringir extensió"
 
 #: gvsigol_core/templates/project_add.html:135
 #: gvsigol_core/templates/project_update.html:167
-#, fuzzy
 #| msgid "Transform coordinates between different systems"
 msgid "Coordinate reference system"
 msgstr "Transformar les coordenades entre diferents sistemes"
 
 #: gvsigol_core/templates/project_add.html:135
 #: gvsigol_core/templates/project_update.html:167
-#, fuzzy
 #| msgid "Mark as default"
 msgid "by default"
 msgstr "Marcar per defecte"
@@ -744,14 +742,12 @@ msgstr "Afegir"
 #: gvsigol_core/templates/project_add.html:223
 #: gvsigol_core/templates/project_update.html:271
 #: gvsigol_core/templates/project_update.html:273
-#, fuzzy
 #| msgid "Mark as default"
 msgid "Base by default"
 msgstr "Marcar per defecte"
 
 #: gvsigol_core/templates/project_add.html:224
 #: gvsigol_core/templates/project_update.html:276
-#, fuzzy
 #| msgid "Preview"
 msgid "Overview"
 msgstr "Previsualitzar"
@@ -1052,7 +1048,6 @@ msgstr "No hi ha projectes públics"
 
 #: gvsigol_core/templates/select_public_mobile_project.html:91
 #: gvsigol_core/templates/select_public_project.html:118
-#, fuzzy
 #| msgid "Applications list"
 msgid "Application list"
 msgstr "Llistat d'aplicacions"
@@ -1270,7 +1265,6 @@ msgid " manual title"
 msgstr ""
 
 #: gvsigol_core/views.py:1463 gvsigol_core/views.py:1473
-#, fuzzy
 #| msgid "User manual"
 msgid " manual desc"
 msgstr "Manual d'usuari"
@@ -1313,12 +1307,10 @@ msgstr "El nom de l'aplicació ja existeix"
 #~ msgid "Base layers"
 #~ msgstr "Capes base"
 
-#, fuzzy
 #~| msgid "Permissions"
 #~ msgid "Access permission"
 #~ msgstr "Permisos"
 
-#, fuzzy
 #~| msgid "Permissions"
 #~ msgid "Manage permission"
 #~ msgstr "Permisos"

@@ -73,7 +73,7 @@ msgstr "El servidor no existeix"
 
 #: gvsigol_core/forms.py:84
 msgid "SRS"
-msgstr ""
+msgstr "SRS"
 
 #: gvsigol_core/settings.py:30
 msgid "Project requests"
@@ -365,7 +365,7 @@ msgstr "Anterior"
 #: gvsigol_core/templates/project_list.html:164
 #: gvsigol_core/templates/shared_view_list.html:84
 msgid "Next"
-msgstr "Següent"
+msgstr "Pròxim"
 
 #: gvsigol_core/templates/application_list.html:102
 #: gvsigol_core/templates/project_list.html:165
@@ -1013,29 +1013,21 @@ msgstr "Descarregar"
 msgid "Project"
 msgstr "Projecte"
 
-#: gvsigol_core/templates/project_update.html:490
-msgid "Layer"
-msgstr "Capa"
-
 #: gvsigol_core/templates/project_update.html:500
 msgid "PNG"
-msgstr ""
+msgstr "PNG"
 
 #: gvsigol_core/templates/project_update.html:503
 msgid "JPG"
-msgstr ""
-
-#: gvsigol_core/templates/project_update.html:513
-msgid "Tiles per side"
-msgstr "Tiles per costat"
+msgstr "JPG"
 
 #: gvsigol_core/templates/project_update.html:520
 msgid "Tilematrixset (WMTS)"
-msgstr ""
+msgstr "Tilematrixset (WMTS)"
 
 #: gvsigol_core/templates/project_update.html:523
 msgid "Tilematrixset"
-msgstr ""
+msgstr "Tilematrixset"
 
 #: gvsigol_core/templates/project_update.html:529
 msgid "Create layer"
@@ -1339,6 +1331,9 @@ msgstr "El nom de l'aplicació ja existeix"
 
 #~ msgid "Added tags"
 #~ msgstr "Etiquetes afegides"
+
+#~ "Els plugins afegeixen funcionalitats que no estan presents inicialment a "
+#~ "la plataforma"
 
 #~ msgid "This is your new temporary password"
 #~ msgstr "Aquesta és la contrasenya provisionalment"
