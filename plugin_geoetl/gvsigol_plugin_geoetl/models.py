@@ -206,3 +206,7 @@ class TempETLTable(models.Model):
 
     def __str__(self):
         return f"{self.table_name} (creada: {self.created_at})"
+
+def translations_placeholder():
+    test = _("gvsigol_plugin_geoetl manual title")
+    test = _("gvsigol_plugin_geoetl manual desc")

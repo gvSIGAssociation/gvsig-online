@@ -938,3 +938,11 @@ msgstr ""
 #: templates/geoetl_workspaces_permissions.html:40
 msgid "Execute permission"
 msgstr ""
+
+#: models.py:211
+msgid "gvsigol_plugin_geoetl manual title"
+msgstr "GeoETL Processing Plugin"
+
+#: models.py:212
+msgid "gvsigol_plugin_geoetl manual desc"
+msgstr "Documentation on the Extraction, Transformation, and Loading (ETL) plugin for geospatial data."

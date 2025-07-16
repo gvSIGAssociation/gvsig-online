@@ -960,3 +960,11 @@ msgstr "Permiso para ejecutar"
 
 #~ msgid "Update ETL Workspace"
 #~ msgstr "Actualiza Espacio de trabajo ETL"
+
+#: models.py:211
+msgid "gvsigol_plugin_geoetl manual title"
+msgstr "Plugin de Procesamiento GeoETL"
+
+#: models.py:212
+msgid "gvsigol_plugin_geoetl manual desc"
+msgstr "Documentación sobre el plugin de Extracción, Transformación y Carga (ETL) de datos geoespaciales."
