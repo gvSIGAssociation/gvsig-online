@@ -792,8 +792,13 @@ msgstr "Calcular longitud"
 msgid "Preserve FID"
 msgstr "Preservar FID"
 
-msgid "Statistics"
-msgstr "Estadístiques"
-
 msgid "Numeric attribute"
 msgstr "Atribut numèric"
+
+#: models.py:211
+msgid "gvsigol_plugin_geoetl manual title"
+msgstr "Plugin de Processament GeoETL"
+
+#: models.py:212
+msgid "gvsigol_plugin_geoetl manual desc"
+msgstr "Documentació sobre el plugin d'Extracció, Transformació i Càrrega (ETL) de dades geoespacials."
