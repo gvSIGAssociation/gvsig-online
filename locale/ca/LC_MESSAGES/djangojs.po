@@ -23,11 +23,11 @@ msgstr "Nom"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:3
 msgid "Workspace"
-msgstr ""
+msgstr "Espai de treball"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:4
 msgid "Datastore"
-msgstr ""
+msgstr "Magatzem de dades"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:5
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:36
@@ -154,25 +154,25 @@ msgstr "Missatge d'impressió"
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:28
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:35
 msgid "Draw rectangle"
-msgstr "Dibuixa un rectangle"
+msgstr "Dibuixar rectangle"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:29
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:32
 msgid "Parar proceso"
-msgstr ""
+msgstr "Parar procés"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:30
 msgid "too_many_tiles"
-msgstr ""
+msgstr "massa_tiles"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:31
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:33
 msgid "tile process ended"
-msgstr ""
+msgstr "El procés de generació de tessel·les de la capa base ha finalitzat"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:34
 msgid "Parando"
-msgstr ""
+msgstr "Parant"
 
 #: gvsigol_core/static/js/lib/tools/CloseMeasureControl.js:35
 msgid "Close measure tools"
@@ -245,7 +245,6 @@ msgid "Show measure tools"
 msgstr "Mostrar eines de mesura"
 
 #: gvsigol_core/static/js/lib/tools/SelectBoxControl.js:88
-#, fuzzy
 #| msgid "Select value"
 msgid "Select features"
 msgstr "Valor seleccionat"
@@ -267,7 +266,6 @@ msgid "Search"
 msgstr "Cercar"
 
 #: gvsigol_core/static/js/lib/tools/SelectFeatureControl.js:42
-#, fuzzy
 #| msgid "Select value"
 msgid "Select feature"
 msgstr "Valor seleccionat"
@@ -314,7 +312,6 @@ msgstr "fins"
 
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:269
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:342
-#, fuzzy
 #| msgid "of"
 msgid " of"
 msgstr "de"
@@ -493,7 +490,6 @@ msgid "Clean map"
 msgstr "Netejar mapa"
 
 #: gvsigol_core/static/js/lib/tools/coordinateCalculator.js:38
-#, fuzzy
 #| msgid "Coordinates"
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenades"
@@ -650,7 +646,6 @@ msgid "Feature info"
 msgstr "Informació"
 
 #: gvsigol_core/static/js/lib/tools/measureArea.js:36
-#, fuzzy
 #| msgid "Measure angle"
 msgid "Measure area"
 msgstr "Mesurar angle"
@@ -681,20 +676,17 @@ msgid "Find"
 msgstr "Cercar"
 
 #: gvsigol_core/static/js/lib/tools/selectFeature.js:43
-#, fuzzy
 #| msgid "Select value"
 msgid "Select Feature"
 msgstr "Valor seleccionat"
 
 #: gvsigol_core/static/js/lib/tools/selectFeature.js:135
 #: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:159
-#, fuzzy
 #| msgid "No layers available"
 msgid "No layers available."
 msgstr "No hi ha capes disponibles"
 
 #: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:44
-#, fuzzy
 #| msgid "Select by buffer"
 msgid "Select Feature By Buffer"
 msgstr "Seleccionar per buffer"
@@ -705,15 +697,15 @@ msgstr "Compartir vista"
 
 #: gvsigol_core/static/js/lib/tools/shareView.js:108
 msgid "Marque para que la URL no expire"
-msgstr ""
+msgstr "Marca perquè la URL no expire"
 
 #: gvsigol_core/static/js/lib/tools/shareView.js:117
 msgid "Guardar URL"
-msgstr ""
+msgstr "Guardar URL"
 
 #: gvsigol_core/static/js/lib/tools/shareView.js:118
 msgid "Copiar URL"
-msgstr ""
+msgstr "Copiar URL"
 
 # viewer.js
 #: gvsigol_core/static/js/lib/viewer.js:154
@@ -726,7 +718,6 @@ msgid "Download links"
 msgstr "Enllaços de descarga"
 
 #: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:64
-#, fuzzy
 #| msgid "Download shapefile"
 msgid "Download ShapeFile"
 msgstr "Descargar shapefile"
@@ -740,7 +731,6 @@ msgid "Download GML"
 msgstr "Descargar GML"
 
 #: gvsigol_core/static/js/lib/widgets/downloadManagerClientBase.js:88
-#, fuzzy
 #| msgid "Downloads"
 msgid "Download raster data"
 msgstr "Descarregues"
@@ -930,7 +920,6 @@ msgid "Warning"
 msgstr "Advertiment"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:56
-#, fuzzy
 #| msgid "Clear filter"
 msgid "Raw filter"
 msgstr "Filtre Ràpid"
@@ -940,13 +929,11 @@ msgid "Layer group"
 msgstr "Grup de capes"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:63
-#, fuzzy
 #| msgid "Select value"
 msgid "Select layer group"
 msgstr "Valor seleccionat"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:71
-#, fuzzy
 #| msgid "Layers"
 msgid "Layer"
 msgstr "Capes"
@@ -954,7 +941,6 @@ msgstr "Capes"
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:73
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:125
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:281
-#, fuzzy
 #| msgid "Select value"
 msgid "Select layer"
 msgstr "Valor seleccionat"
@@ -970,7 +956,6 @@ msgstr "Operador"
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:87
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:177
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:283
-#, fuzzy
 #| msgid "Select format"
 msgid "Select operator"
 msgstr "Seleccionar format"
@@ -997,7 +982,6 @@ msgid "Value"
 msgstr "Valor"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:109
-#, fuzzy
 #| msgid "Clear filter"
 msgid "Clean filter"
 msgstr "Netejar filtre"
@@ -1019,7 +1003,6 @@ msgid "No results found"
 msgstr "No s'han trobat resultats"
 
 #: gvsigol_core/static/js/lib/widgets/rawFilter.js:266
-#, fuzzy
 #| msgid "You must fill in all the values"
 msgid "You must fill in all fields"
 msgstr "Ha d'omplir tots els valors"
@@ -1027,7 +1010,6 @@ msgstr "Ha d'omplir tots els valors"
 msgid "Download Layer Resources"
 msgstr "Descarregar recursos de capa"
 
-#, fuzzy
 #~| msgid "Select all"
 #~ msgid "Select"
 #~ msgstr "Seleccionar tot"
