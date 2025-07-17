@@ -708,9 +708,20 @@
 	}
 	var addFieldConfig = getAddFieldConfig();
 
-	$("#add-field-button").on('click', function(e){
-		createModalContent(null, 'create', gettext("New field"), addFieldConfig);
-	});
+	$("#add-field-button").on('click', function(e) {
+    var fieldNames = [];
+    var seenNames = {};  // Track seen names
+    
+    $('#field-list-table-body tr').each(function() {
+        var name = $(this).find('input[name^="field-name-"]').val();
+        if (name && !seenNames[name]) {
+            seenNames[name] = true;
+            fieldNames.push(name);
+        }
+    });
+    
+    createModalContent(null, 'create', gettext("New field"), addFieldConfig, fieldNames);
+});
 	var createFieldGroupTrans = function(groupId, groupName){
 		var clonedRow = $('.fieldgroup-trans-row').first().clone()[0];
 		clonedRow.dataset['groupid'] = groupId;
