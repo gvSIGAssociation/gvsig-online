@@ -1046,7 +1046,7 @@ def create_user_workspace(username, role):
 
     auth_services.get_services().add_data_directory(role)
     url = server_object.frontend_url + '/'
-    ws_name = get_datastore_name(username)
+    ws_name = get_workspace_name(username)
     if gs.createWorkspace(ws_name, url + ws_name):
         try:          
             # save it on DB if successfully created
