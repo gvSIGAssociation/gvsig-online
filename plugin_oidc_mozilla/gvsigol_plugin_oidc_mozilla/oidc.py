@@ -156,7 +156,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             access_token_bytes = force_bytes(access_token)
             key = self._get_key(access_token_bytes)
             access_token_payload = self.verify_token(access_token_bytes, key)
-            print(access_token_payload)
+            LOGGER.debug(access_token_payload)
             session['oidc_access_token'] = access_token
             session['oidc_access_token_payload'] = access_token_payload
 
