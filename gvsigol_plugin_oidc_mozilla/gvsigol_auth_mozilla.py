@@ -79,7 +79,7 @@ def provider_logout(request):
 
     })
     url = "{}?{}".format(OIDC_OP_LOGOUT_ENDPOINT, query_string)
-    print(url)
+    #print(url)
     return url
 
 def check_group_support():
