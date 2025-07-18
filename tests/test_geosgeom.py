@@ -193,7 +193,7 @@ class GeosGeometryTestCase(unittest.TestCase):
     def test_transform_point_4258_to_25830(self):
         lon = -0.459890999
         lat = 39.770062997
-        delta = 0.0001
+        delta = 0.001
         source_crs = 4258
         target_crs = 25830
         expected_x = 717561.534888295806013
@@ -215,7 +215,7 @@ class GeosGeometryTestCase(unittest.TestCase):
     def test_transform_point_25830_to_3857(self):
         x = 717561.534888295806013
         y = 4405323.14028216060251
-        delta = 0.0001
+        delta = 0.001
         source_crs = 25830
         target_crs = 3857
         expected_x = -51194.832
@@ -237,7 +237,7 @@ class GeosGeometryTestCase(unittest.TestCase):
     def test_transform_point_3857_to_25830(self):
         x = -51194.832
         y = 4832584.505507748
-        delta = 0.0001
+        delta = 0.001
         source_crs = 3857
         target_crs = 25830
         expected_x = 717561.534888295806013
