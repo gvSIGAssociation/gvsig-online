@@ -185,6 +185,7 @@ def _invert_wkt_coords(wkt, srid):
     geos_geom = GEOSGeometry(wkt, srid=srid)
     return _invert_geos_coords(geos_geom)
 
+
 def transform_point(x_or_lon, y_or_lat, source_crs, target_crs):
     """
     Experimental function to transform a point from source_crs to target_crs
@@ -193,28 +194,27 @@ def transform_point(x_or_lon, y_or_lat, source_crs, target_crs):
     Parameters:
     ------------
     lon: float
-        longitude of the point
+        coordinate x (for projected CRSs) or longitude (for geographic CRSs) of the point
     lat: float
-        latitude of the point
+        coordinate y (for projected CRSs) or latitude (for geographic CRSs) of the point
     source_crs: integer
         EPSG code of the source coordinate reference system
     target_crs: integer
         EPSG code of the target coordinate reference system
     Returns:
-        GEOSGeometry object with the transformed point in target_crs
+        GEOSGeometry-like object with the transformed point in target_crs.
+        Only the following properties are supported:
+        - x
+        - y
+        - wkt
+        - geojson
+        - coords
+        - dims
+        - geom_type
+        - srid
+        - empty
     """
-    if DJANGO_BROKEN_GEOSGEOMETRY and \
-        is_neu_axis_order(source_crs):
-            p = f'POINT({y_or_lat} {x_or_lon})' # usamos lat, lon; orden incorrecto en wkt para sortear error de django
-    else:
-        p = f'POINT({x_or_lon} {y_or_lat})' # usamos lon, lat; orden correcto en wkt 
-    geos_geom = GEOSGeometry(p, srid=source_crs)
-    transformed_geom = geos_geom.transform(target_crs, clone=True)
-    if DJANGO_BROKEN_GEOSGEOMETRY and \
-        is_neu_axis_order(target_crs):
-        transformed_geom = GeosPointWrapper(transformed_geom)
-    return transformed_geom
-
+    return transform_wkt(f'POINT({x_or_lon} {y_or_lat})', source_crs, target_crs) # usamos lon, lat; orden correcto en wkt 
 
 def transform_wkt(wkt, source_crs, target_crs):
     """
