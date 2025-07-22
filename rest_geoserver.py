@@ -279,16 +279,16 @@ class Geoserver():
         
         type = 'VECTOR'
         resource_class = 'featureType'
-        href = self.service_url + '/rest/workspaces/' + workspace + '/datastores/' + ds_name + '/featuretypes/' + name + '.json' 
+        href = self.service_url + '/workspaces/' + workspace + '/datastores/' + ds_name + '/featuretypes/' + name + '.json' 
         if 'c_GeoTIFF' in ds_type:
             type = 'RASTER'
             resource_class = 'coverage'
-            href = self.service_url + '/rest/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
+            href = self.service_url + '/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
         
         if 'c_ImageMosaic' in ds_type:
             type = 'RASTER'
             resource_class = 'coverage'
-            href = self.service_url + '/rest/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
+            href = self.service_url + '/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
         
             
         data = {
