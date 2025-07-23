@@ -1670,6 +1670,22 @@ def layer_autoconfig(layer, featuretype):
     (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
     utils.set_layer_extent(layer, ds_type, layer_info, server)
 
+    # Preservar configuración existente de campos especiales
+    existing_conf = layer.conf
+    existing_fields_config = {}
+    if existing_conf:
+        try:
+            if isinstance(existing_conf, str):
+                existing_conf = ast.literal_eval(existing_conf)
+            for field in existing_conf.get('fields', []):
+                if field.get('gvsigol_type') == 'link' or field.get('type_params'):
+                    existing_fields_config[field['name']] = {
+                        'gvsigol_type': field.get('gvsigol_type', ''),
+                        'type_params': field.get('type_params', {})
+                    }
+        except:
+            pass
+
     layer_conf = {
         'featuretype': featuretype,
         }
@@ -1678,6 +1694,39 @@ def layer_autoconfig(layer, featuretype):
         expose_pks = server.datastore_check_exposed_pks(datastore)
         lyr_conf = layer.get_config_manager()
         fields = lyr_conf.get_updated_field_conf(include_pks=expose_pks)
+        
+        # Agregar campos virtuales (como link) si no se recuperan de la base de datos
+        existing_field_names = {field.get('name') for field in fields}
+        for field_name, field_config in existing_fields_config.items():
+            if field_name not in existing_field_names:
+                # Crear campo virtual con configuración básica
+                virtual_field = {
+                    'name': field_name,
+                    'gvsigol_type': field_config['gvsigol_type'],
+                    'type_params': field_config['type_params'],
+                    'visible': True,
+                    'infovisible': True,
+                    'nullable': True,
+                    'mandatory': False,
+                    'editable': False,
+                    'editableactive': False
+                }
+            
+                for id, language in LANGUAGES:
+                    virtual_field['title-' + id] = field_name
+                
+                fields.append(virtual_field)
+        
+        # Restaurar configuración de campos especiales para campos existentes
+        for field in fields:
+            field_name = field.get('name')
+            if field_name in existing_fields_config:
+                field['gvsigol_type'] = existing_fields_config[field_name]['gvsigol_type']
+                field['type_params'] = existing_fields_config[field_name]['type_params']
+                if field['gvsigol_type'] == 'link':
+                    field['editable'] = False
+                    field['editableactive'] = False
+        
         layer_conf['fields'] = fields
         layer_conf['form_groups'] = _parse_form_groups([], fields)
     layer.conf = layer_conf
@@ -2602,6 +2651,21 @@ def layer_create_with_group(request, layergroup_id):
                     newRecord.detailed_info_enabled = detailed_info_enabled
                     newRecord.detailed_info_button_title = detailed_info_button_title
                     newRecord.detailed_info_html = detailed_info_html
+                    
+                    # Guardar configuración inicial con campos especiales antes de layer_autoconfig
+                    initial_conf = {
+                        'fields': []
+                    }
+                    
+                    for i in form.cleaned_data['fields']:
+                        field_conf = {
+                            'name': i['name'],
+                            'gvsigol_type': i.get('gvsigol_type', ''),
+                            'type_params': i.get('type_params', {})
+                        }
+                        initial_conf['fields'].append(field_conf)
+                    
+                    newRecord.conf = initial_conf
                     newRecord.save()
 
                     for i in form.cleaned_data['fields']:
@@ -5085,6 +5149,8 @@ def db_add_field(request):
             layer_id = request.POST.get('layer_id')
             enumkey = request.POST.get('enumkey')
             calculation = request.POST.get('calculation')
+            gvsigol_type = request.POST.get('gvsigol_type', '')
+            type_params = request.POST.get('type_params', '{}')
             layer = Layer.objects.get(id=layer_id)
 
             for ctrl_field in settings.CONTROL_FIELDS:
@@ -5133,6 +5199,101 @@ def db_add_field(request):
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
             gs.reload_nodes()
             layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
+            
+            # Guardar gvsigol_type y type_params en la configuración del campo
+            try:
+                if layer.conf:
+                    if isinstance(layer.conf, dict):
+                        current_conf = layer.conf
+                    elif isinstance(layer.conf, str):
+                        try:
+                            current_conf = ast.literal_eval(layer.conf)
+                        except (ValueError, SyntaxError):
+                            try:
+                                current_conf = json.loads(layer.conf)
+                            except json.JSONDecodeError:
+                                logger.warning(f"Could not parse layer.conf for field {field_name}: {layer.conf}")
+                                current_conf = {}
+                    else:
+                        current_conf = {}
+                else:
+                    current_conf = {}
+                
+                fields = current_conf.get('fields', [])
+                field_updated = False
+                
+                for i, field in enumerate(fields):
+                    if field.get('name') == field_name:
+                        field['gvsigol_type'] = gvsigol_type
+                        
+                        if type_params != '{}':
+                            try:
+                                type_params_dict = json.loads(type_params)
+                                field['type_params'] = type_params_dict
+                            except json.JSONDecodeError:
+                                logger.warning(f"Invalid JSON in type_params for field {field_name}: {type_params}")
+                                field['type_params'] = {}
+                        else:
+                            field['type_params'] = {}                        
+
+                        if gvsigol_type == 'link':
+                            field['editable'] = False
+                            field['editableactive'] = False
+                        
+                        fields[i] = field
+                        field_updated = True
+                        break
+                
+                # Si no se encontró el campo, añadirlo
+                if not field_updated:
+                    new_field = {
+                        'name': field_name,
+                        'gvsigol_type': gvsigol_type,
+                        'type_params': {}
+                    }
+                    
+                    if type_params != '{}':
+                        try:
+                            type_params_dict = json.loads(type_params)
+                            new_field['type_params'] = type_params_dict
+                        except json.JSONDecodeError:
+                            logger.warning(f"Invalid JSON in type_params for field {field_name}: {type_params}")
+                    
+                    if gvsigol_type == 'link':
+                        new_field['editable'] = False
+                        new_field['editableactive'] = False
+                    
+                    fields.append(new_field)
+                
+                # Actualizar solo la sección de campos en la configuración
+                current_conf['fields'] = fields
+                
+                try:
+                    layer.conf = current_conf
+                except:
+                    try:
+                        layer.conf = json.dumps(current_conf)
+                    except TypeError:
+                        def convert_for_json(obj):
+                            if isinstance(obj, bool):
+                                return obj
+                            elif isinstance(obj, dict):
+                                return {k: convert_for_json(v) for k, v in obj.items()}
+                            elif isinstance(obj, list):
+                                return [convert_for_json(item) for item in obj]
+                            else:
+                                return obj
+                        
+                        converted_conf = convert_for_json(current_conf)
+                        layer.conf = json.dumps(converted_conf)
+                
+                layer.save()
+                
+                logger.info(f"Saved gvsigol_type='{gvsigol_type}' and type_params='{type_params}' for field '{field_name}'")
+                
+            except Exception as e:
+                logger.warning(f"Error saving gvsigol_type/type_params for field {field_name}: {str(e)}")
+            
             layer.save()
             return HttpResponse('{"response": "ok"}', content_type='application/json')
         except Exception as e:
