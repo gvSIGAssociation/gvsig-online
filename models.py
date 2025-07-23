@@ -350,6 +350,9 @@ class LayerConfig:
             field_conf['mandatory'] = control_field.get(
                 'mandatory', field_conf['mandatory'])
 
+        field_conf['gvsigol_type'] = field_conf.get('gvsigol_type', '')  
+        field_conf['type_params'] = field_conf.get('type_params', {})    
+
         return field_conf
 
     def get_field_conf(self, include_pks=False):

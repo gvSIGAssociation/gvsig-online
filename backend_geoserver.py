@@ -1997,7 +1997,7 @@ class Geoserver():
         return False
 
     def gvsigol_to_sql_type(self, field_type):
-        if field_type in ['cd_json', 'enumeration', 'multiple_enumeration']:
+        if field_type in ['cd_json', 'enumeration', 'multiple_enumeration', 'link']:
             field_type = 'character varying'
         elif field_type == 'double':
             return 'double precision'

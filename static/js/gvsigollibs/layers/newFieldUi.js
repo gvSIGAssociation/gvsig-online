@@ -44,10 +44,10 @@ function getFieldTypes(enableEnums, enableForms) {
       key: "cd_json",
       value: "Complex type: JSON",
     },
-    /* {
+    {
       key: "link",
       value: "Link",
-    }, */
+    },
   ];
   if (enableEnums) {
     fieldTypes.push({
@@ -108,13 +108,12 @@ function getFieldTypeOptions(
       }
     }
     ui += "</select>";
-  } /* else if (field_type === "link") {
+  } else if (field_type === "link") {
     ui += "<div><label>Selecciona la carpeta</label></div>";
-    ui +=
-  "<div style='margin-top: 5px;'>"
-  ui+='<button id="select-file-button" type="button" class="btn btn-default">Carpeta</button>'
-  ui += '<span id="selected-folder-text" style="margin-left: 10px;">Ninguna carpeta seleccionada</span></div>';
-  ui += "<div style='margin-top: 10px;'><label>Selecciona el campo</label></div>";
+    ui += "<div style='margin-top: 5px;'>";
+    ui += '<button id="select-file-button" type="button" class="btn btn-default">Carpeta</button>';
+    ui += '<span id="selected-folder-text" style="margin-left: 10px;">Ninguna carpeta seleccionada</span></div>';
+    ui += "<div style='margin-top: 10px;'><label>Selecciona el campo</label></div>";
 
     ui += "<select  id='field-link-select' class='form-control'>";
 
@@ -124,7 +123,11 @@ function getFieldTypeOptions(
     }
 
     ui += "</select>";
-  } */ else if (field_type == "form") {
+    
+    if (typeof window.setLinkFieldConfig === 'function') {
+      window.setLinkFieldConfig();
+    }
+  } else if (field_type == "form") {
     ui += "<label>" + gettext("Select form") + "</label>";
     ui += '<select id="field-default-value-' + id + '" class="form-control">';
     var f;
@@ -142,14 +145,25 @@ function getFieldTypeOptions(
   ui += "</div>";
   ui += "</div>";
   
-  /* $(document).on('click', '#select-file-button', function(e) {
+  $(document).on('click', '#select-file-button', function(e) {
     window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+  });
+  
+  $(document).on('change', '#field-link-select', function(e) {
+    if (typeof window.updateLinkFieldParams === 'function') {
+      window.updateLinkFieldParams('related_field', $(this).val());
+    }
   });
   
   window.filemanagerCallback = function(url) {
     // Update the UI text
-    document.getElementById("selected-folder-text").textContent = "/data/"+ url;
-  }; */
+    var folderPath = "/data/" + url;
+    document.getElementById("selected-folder-text").textContent = folderPath;
+    
+    if (typeof window.updateLinkFieldParams === 'function') {
+      window.updateLinkFieldParams('base_folder', folderPath);
+    }
+  }; 
   return ui;
 }
 
@@ -175,6 +189,18 @@ function createModalContent(fid, mode, title, config, fieldNames) {
   var field = null;
   if (mode == "update") {
     field = getFieldById(fid);
+  }
+  
+  
+  window.currentFieldConfig = {
+    gvsigol_type: "",
+    type_params: {}
+  };
+  
+  // Si estamos editando un campo existente, preservar su configuración
+  if (mode == "update" && field) {
+    window.currentFieldConfig.gvsigol_type = field.gvsigol_type || "";
+    window.currentFieldConfig.type_params = field.type_params || {};
   }
 
   ui += '<div id="field-errors" class="row">';
@@ -335,6 +361,14 @@ function createModalContent(fid, mode, title, config, fieldNames) {
     }
 
     if (validateRegex(name)) {
+      var gvsigolType = "";
+      var typeParams = {};
+      
+      if (type === "link") {
+        gvsigolType = "link";
+        typeParams = window.currentFieldConfig ? window.currentFieldConfig.type_params || {} : {};
+      }
+      
       var field = {
         id: id,
         name: name,
@@ -342,6 +376,8 @@ function createModalContent(fid, mode, title, config, fieldNames) {
         enumkey: enumkey,
         calculation: calculation,
         calculationLabel: calculationLabel,
+        gvsigol_type: gvsigolType,
+        type_params: typeParams
       };
       addField(field);
 
@@ -372,6 +408,14 @@ function createModalContent(fid, mode, title, config, fieldNames) {
     }
 
     if (validateRegex(name)) {
+      var gvsigolType = "";
+      var typeParams = {};
+      
+      if (type === "link") {
+        gvsigolType = "link";
+        typeParams = window.currentFieldConfig ? window.currentFieldConfig.type_params || {} : {};
+      }
+      
       var field = {
         id: this.dataset.fieldid,
         name: name,
@@ -379,6 +423,8 @@ function createModalContent(fid, mode, title, config, fieldNames) {
         enumkey: enumkey,
         calculation: calculation,
         calculationLabel: calculationLabel,
+        gvsigol_type: gvsigolType,
+        type_params: typeParams
       };
 
       updateField(field);
@@ -406,3 +452,16 @@ function createModalContent(fid, mode, title, config, fieldNames) {
 
   $(modalSelector).modal("show");
 }
+
+window.setLinkFieldConfig = function() {
+  if (window.currentFieldConfig) {
+    window.currentFieldConfig.gvsigol_type = "link";
+    window.currentFieldConfig.type_params = window.currentFieldConfig.type_params || {};
+  }
+};
+
+window.updateLinkFieldParams = function(param, value) {
+  if (window.currentFieldConfig && window.currentFieldConfig.type_params) {
+    window.currentFieldConfig.type_params[param] = value;
+  }
+};
