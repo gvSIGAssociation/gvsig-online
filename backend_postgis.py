@@ -990,6 +990,8 @@ class Introspect:
             return 'smallint'
         elif data_type_def == 'cd_json':
             return 'character varying'
+        elif data_type_def == 'link':
+            return 'character varying'
         elif data_type_def == 'enumeration' or \
                 data_type_def == 'multiple_enumeration' or \
                 data_type_def == 'form':
