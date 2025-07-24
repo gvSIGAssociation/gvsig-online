@@ -1223,3 +1223,69 @@ class FileDeleteView(RetrieveDestroyAPIView):
             return HttpException(204, "OK").get_exception()
         except HttpException as e:
             return e.get_exception()    
+        
+#--------------------------------------------------
+#            FileAttachedFromLinkView
+#-------------------------------------------------- 
+class FileAttachedFromLinkView(ListAPIView):
+    parser_classes = (MultiPartParser,)
+    serializer_class = FileUploadSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_attached_file_from_link', operation_summary='Get the resource attached to the feature from a link',
+                          responses={
+                                    400: "The layer does not have this resource.<br>Resource NOT found",
+                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, layer_id, feat_id, field_name):
+        validation = Validation(request)
+    
+        try:
+            layer = Layer.objects.get(id=layer_id)
+            lyr_conf = layer.conf
+            try:
+                validation.check_read_feature_permission(layer, feat_id)
+            except HttpException as e:
+                return e.get_exception()
+        except Exception as e:
+            return HttpException(404, "Resource NOT found in database").get_exception()
+        
+        field_config = None
+        if lyr_conf and 'fields' in lyr_conf:
+            for field in lyr_conf['fields']:
+                if field.get('name') == field_name and field.get('gvsigol_type') == 'link':
+                    field_config = field
+                    break
+        
+        if not field_config:
+            return HttpException(404, "Field not found or is not a link type").get_exception()
+        
+        type_params = field_config.get('type_params', {})
+        base_folder = type_params.get('base_folder')
+        related_field = type_params.get('related_field')
+        
+        if not base_folder or not related_field:
+            return HttpException(400, "Missing base_folder or related_field in type_params").get_exception()
+        
+        try:
+            feature = serializers.FeatureSerializer().get(validation, layer_id, feat_id, 4326)
+            if not feature or 'properties' not in feature:
+                return HttpException(404, "Feature not found").get_exception()
+            
+            filename = feature['properties'].get(related_field)
+            if not filename:
+                return HttpException(404, f"Field {related_field} not found or is empty in feature").get_exception()
+            
+            file_path = os.path.join(base_folder, filename)
+            
+            if not os.path.exists(file_path):
+                return HttpException(404, "File not found on disk").get_exception()
+            
+            return sendfile(request, file_path, attachment=False)
+            
+        except HttpException as e:
+            return e.get_exception()
+        except Exception as e:
+            return HttpException(500, f"Error getting feature: {str(e)}").get_exception()
