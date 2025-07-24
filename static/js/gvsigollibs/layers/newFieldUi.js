@@ -157,7 +157,7 @@ function getFieldTypeOptions(
   
   window.filemanagerCallback = function(url) {
     // Update the UI text
-    var folderPath = "/data/" + url;
+    var folderPath = "/data/" + url + "/";
     document.getElementById("selected-folder-text").textContent = folderPath;
     
     if (typeof window.updateLinkFieldParams === 'function') {
