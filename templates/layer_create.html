@@ -360,7 +360,12 @@
 
 		$(".edit-field-" + field.id).on('click', function(e){
 			e.preventDefault();
-			createModalContent(field.id, 'update', '{% trans "New field" %}', config);
+			// Extraer nombres de campos ya añadidos (no guardados)
+			var fieldNames = [];
+			for (var i = 0; i < fields.length; i++) {
+				fieldNames.push(fields[i].name);
+			}
+			createModalContent(field.id, 'update', '{% trans "New field" %}', config, fieldNames);
 		});
 		$(".delete-field-" + field.id).on('click', function(e){
 			e.preventDefault();
