@@ -29,7 +29,7 @@ import ldap
 import django.conf.locale
 from django.conf import settings
 from django_auth_ldap.config import LDAPSearch
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 import datetime
 from gvsigol.utils import import_settings
@@ -90,6 +90,7 @@ env = environ.Env(
     DB_PASS=(str,'gvsigonline'),
     DB_NAME=(str,'gvsigonline'),
     DB_JNDI_NAME=(str, ''),
+    POSTGIS_VERSION=(tuple,(2,3,3)),
     LANGUAGES = (tuple, ('es','en')),
     EXTRA_MIDDLEWARE = (list,[]),
     GVSIGOL_CUSTOMER_NAME = (str,'gvsig'),
@@ -150,6 +151,7 @@ env = environ.Env(
     DEFAULT_FROM_EMAIL=(str,'noreply@gvsigonline.com'),
     #Bing
     BING_KEY=(str,''),
+    SENDFILE_BACKEND=(str,'django_sendfile.backends.simple'),
     DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 26214400), # The default size 2621440 (2.5M) is too small and prevents adding external layers from servers having large getcapabilites document
     FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774),
     #DRF
@@ -360,7 +362,7 @@ DATABASES = {
         }, 
     }
 }
-POSTGIS_VERSION = (2, 3, 3)
+POSTGIS_VERSION = env('POSTGIS_VERSION')
 
 #DATABASE_ROUTERS = ['gvsigol.routers.DatabaseRouter']
 
@@ -716,7 +718,7 @@ PROXIES = {
 # use development backend if not using Apache/xsendfile
 #SENDFILE_BACKEND = 'django_sendfile.backends.development'
 #SENDFILE_BACKEND = 'django_sendfile.backends.xsendfile'
-SENDFILE_BACKEND = 'django_sendfile.backends.simple'
+SENDFILE_BACKEND = env('SENDFILE_BACKEND')
 SENDFILE_ROOT = '/'
 SHARED_VIEW_EXPIRATION_TIME = 1
 
