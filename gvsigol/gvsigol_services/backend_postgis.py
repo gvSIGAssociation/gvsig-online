@@ -720,11 +720,11 @@ class Introspect:
                 pks.append(r[1])
         if len(pks) == 0 and self.is_view(schema, table):
             pk_info = self.get_geoserver_view_pk_columns(schema, table)
+            
             if len(pk_info) > 0:
-                for field_def in col_info:
-                    if field_def['name'] in pks:
-                        field_def['is_pk'] = True
-                        pks.append(field_def['is_pk'])
+                for pk in pk_info:
+                    pks.append(pk)
+
         return TableInfo(columns, col_info, pks)
 
     def get_fields_info(self, table, schema='public', pk_info=False):
