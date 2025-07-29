@@ -98,6 +98,9 @@ urlpatterns = [
     path('list_datastore_tables/', services_views.list_datastore_tables, name='list_datastore_tables'),
     path('list_datastores_in_db', services_views.list_datastores_in_db, name='list_datastores_in_db'),
     path('list_table_columns/', services_views.list_table_columns, name='list_table_columns'),
+    path('get_topology_available_layers/<int:layer_id>/', services_views.get_topology_available_layers, name='get_topology_available_layers'),
+    path('get_topology_rules/<int:layer_id>/', services_views.get_topology_rules, name='get_topology_rules'),
+    path('update_topology_rules/<int:layer_id>/', services_views.update_topology_rules, name='update_topology_rules'),
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
     path('get_resource/<int:resource_id>/', services_views.get_resource, name='get_layer_resource'),

@@ -2817,3 +2817,64 @@ msgstr ""
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
+
+# Topology rules translations
+msgid "Geometries within the same layer cannot overlap with each other"
+msgstr "Geruza bereko geometriak ezin dira elkarren gainean jarri"
+
+msgid "The layer coverage must be continuous without empty spaces between geometries"
+msgstr "Geruzaren estaldura etengabea izan behar da geometrien artean hutsune hutsik gabe"
+
+msgid "All geometries must be completely covered by geometries from another layer"
+msgstr "Geometria guztiak beste geruza bateko geometriek erabat estali behar dituzte"
+
+msgid "Geometries cannot overlap with geometries from specified layers"
+msgstr "Geometriak ezin dira zehaztutako geruzeetako geometriekin gainjarri"
+
+msgid "Geometries must be connected."
+msgstr "Geometriak konektatuta egon behar dira."
+
+msgid "Topological rules"
+msgstr "Arau topologikoak"
+
+msgid "Must not overlap"
+msgstr "Ez da gainjarri behar"
+
+msgid "Must not have gaps"
+msgstr "Ez du tartarik izan behar"
+
+msgid "Must be covered by"
+msgstr "Honek estali behar du"
+
+msgid "Must not overlap with"
+msgstr "Honekin ez da gainjarri behar"
+
+msgid "Must be contiguous"
+msgstr "Jarraian egon behar da"
+
+msgid "No additional configuration required"
+msgstr "Ez da konfigurazio gehigarririk behar"
+
+msgid "Select a layer"
+msgstr "Geruza bat hautatu"
+
+msgid "Select multiple layers"
+msgstr "Hainbat geruza hautatu"
+
+msgid "Tolerance"
+msgstr "Tolerantzia"
+
+msgid "Tolerance distance for contiguity check"
+msgstr "Tolerantzia distantzia jarraitutasun egiaztatzerako"
+
+msgid "Editing restrictions"
+msgstr "Edizio murrizketak"
+
+msgid "Rule"
+msgstr "Araua"
+
+msgid "Active"
+msgstr "Aktiboa"
+
+msgid "Configuration"
+msgstr "Konfigurazioa"
