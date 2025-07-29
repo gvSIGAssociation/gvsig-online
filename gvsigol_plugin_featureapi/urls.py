@@ -27,6 +27,7 @@ from rest_framework import routers
 
 from gvsigol_plugin_featureapi import api_layer
 from gvsigol_plugin_featureapi import api_feature
+from gvsigol_plugin_featureapi import api_topology
 from gvsigol import settings
 import gvsigol_plugin_featureapi.settings as settings_local
 from gvsigol_plugin_featureapi import views
@@ -71,6 +72,11 @@ urlpatterns = [
 
     path('edition/feature_version_management/', views.feature_version_management, name='layers_group'),
     path('edition/check_feat_version/', views.check_version, name='check_feature_version'),
+
+    # Topology API endpoints
+    path('api/v1/layers/<int:lyr_id>/topology/available-layers/', api_topology.TopologyAvailableLayersView.as_view(), name='get_topology_available_layers'),
+    path('api/v1/layers/<int:lyr_id>/topology/rules/', api_topology.TopologyRulesView.as_view(), name='get_topology_rules'),
+    path('api/v1/layers/<int:lyr_id>/topology/rules/save/', api_topology.TopologyRulesSaveView.as_view(), name='save_topology_rules'),
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py    
     path('get_historic_resource/<int:layer_id>/<int:feat_id>/<int:version>/', views.get_layer_historic_resource, name='get_layer_historic_resource'),
