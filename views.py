@@ -76,7 +76,7 @@ from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger, La
 import gvsigol_services.tiling_service as tiling_service
 from .models import LayerFieldEnumeration, SqlView
 from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
-    LayerLock, Server, Node, ServiceUrl, LayerGroupRole
+    LayerLock, Server, Node, ServiceUrl, LayerGroupRole, LayerTopologyConfiguration
 from .rest_geoserver import RequestError
 from . import rest_geoserver
 from . import rest_geowebcache as geowebcache
@@ -1708,6 +1708,803 @@ def _parse_form_groups(form_groups, fields):
     form_groups[0]["fields"] = group0_fields
     return form_groups
 
+
+def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
+    """
+    Genera el SQL para crear triggers topológicos dinámicamente
+    """
+    try:
+        # Obtener información de la capa
+        i, source_name, schema = layer.get_db_connection()
+        table_name = source_name if source_name else layer.name
+        full_table_name = f"{schema}.{table_name}"
+        
+        # Obtener la primary key y el campo de geometría dinámicamente
+        with i as conn:
+            pk_columns = conn.get_pk_columns(table_name, schema)
+            geom_columns = conn.get_geometry_columns(table_name, schema)
+        
+        # Validar que existan PK y geometría
+        if not pk_columns:
+            raise Exception(f"No se encontró primary key para la tabla {full_table_name}")
+        if not geom_columns:
+            raise Exception(f"No se encontró campo de geometría para la tabla {full_table_name}")
+        
+        # Usar la primera PK y primera columna de geometría (normalmente solo hay una de cada)
+        pk_field = pk_columns[0]
+        geom_field = geom_columns[0]
+        
+        logger.info(f"Generando trigger {rule_type} para tabla {full_table_name}: PK='{pk_field}', Geom='{geom_field}'")
+        
+        # Nombres únicos para funciones y triggers (con esquema para la función)
+        function_name_simple = f"{rule_type}_{table_name.lower()}"
+        function_name = f"{schema}.{function_name_simple}"
+        trigger_name = f"trigger_{rule_type}_{table_name.lower()}"
+        
+        if rule_type == "must_not_overlaps":
+            # SQL para función MUST NOT OVERLAPS
+            function_sql = f"""
+            CREATE OR REPLACE FUNCTION {function_name}()
+            RETURNS TRIGGER AS
+            $$
+            DECLARE
+                radio INTEGER := 1;
+                conflicting_id TEXT;
+                overlap_geom GEOMETRY;
+                overlap_area NUMERIC;
+                overlap_geojson TEXT;
+                error_message TEXT;
+            BEGIN
+                -- Buscar geometrías que se solapen y obtener información detallada
+                SELECT {pk_field}::TEXT, 
+                       ST_Intersection(NEW.{geom_field}, {geom_field}),
+                       ST_Area(ST_Intersection(NEW.{geom_field}, {geom_field}))
+                INTO conflicting_id, overlap_geom, overlap_area
+                FROM {full_table_name}
+                WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Para que no calcule el Overlaps a todas las geometrias
+                  AND ST_Overlaps(NEW.{geom_field}, {geom_field}) -- Comprobar solapamiento
+                  AND {pk_field} <> NEW.{pk_field} -- Excluir el registro actual en caso de actualización
+                LIMIT 1;
+
+                -- Si hay solapamiento, generar mensaje de error detallado
+                IF conflicting_id IS NOT NULL THEN
+                    -- Obtener la geometría completa del solape como GEOJSON en EPSG:4326
+                    SELECT ST_AsGeoJSON(ST_Transform(overlap_geom, 4326))
+                    INTO overlap_geojson;
+                    
+                    -- Construir mensaje de error estructurado con GEOJSON
+                    error_message := 'TOPOLOGY ERROR: Geometry overlaps with existing feature. ' ||
+                                    'Overlap geometry: ##' || COALESCE(overlap_geojson, 'NULL') || '##.';
+                    
+                    -- Lanzar excepción con información detallada
+                    RAISE EXCEPTION '%', error_message;
+                END IF;
+
+                -- Si no hay solapamiento, continuar con la inserción/actualización
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+            """
+            
+            # SQL para trigger
+            trigger_sql = f"""
+            CREATE TRIGGER {trigger_name}
+            BEFORE INSERT OR UPDATE ON {full_table_name}
+            FOR EACH ROW
+            EXECUTE FUNCTION {function_name}();
+            """
+            
+            return {
+                'function_sql': function_sql,
+                'trigger_sql': trigger_sql,
+                'function_name': function_name,
+                'function_name_simple': function_name_simple,
+                'trigger_name': trigger_name,
+                'table_name': full_table_name,
+                'schema': schema,
+                'pk_field': pk_field,
+                'geom_field': geom_field
+            }
+        
+        elif rule_type == "must_not_have_gaps":
+            # SQL para función MUST NOT HAVE GAPS
+            function_sql = f"""
+            CREATE OR REPLACE FUNCTION {function_name}()
+            RETURNS TRIGGER AS $$
+            DECLARE
+                bounding_geom geometry;
+                bounding_line geometry;
+                area_unida geometry;
+                area_resto geometry;
+                area_final geometry;
+                geometry_3857 geometry;
+                radio INTEGER := 500;
+                gap_geom geometry;
+                gap_geojson TEXT;
+                error_message TEXT;
+            BEGIN
+                -- Transformar la nueva geometría a 3857
+                geometry_3857 := ST_Transform(NEW.{geom_field}, 3857);
+
+                -- Paso 1: Generar el Convex Hull de los polígonos existentes dentro del radio (incluyendo el nuevo)
+                -- Trabajamos en el SRID original para evitar mezclas
+                SELECT ST_ConvexHull(ST_Union(geom_union)) INTO bounding_geom
+                FROM (
+                    SELECT {geom_field} as geom_union FROM {full_table_name} 
+                    WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                    AND {pk_field} <> NEW.{pk_field} -- se excluye por si es una actualizacion solo contar con la nueva modificación
+                    UNION ALL
+                    SELECT NEW.{geom_field} as geom_union
+                ) AS combined_geoms;
+
+                -- Paso 2: Generar el límite (línea) del Convex Hull
+                bounding_line := ST_Boundary(bounding_geom);
+                
+                -- Paso 3: Unir todas las geometrías existentes dentro del radio
+                SELECT ST_Union({geom_field}) INTO area_unida
+                FROM {full_table_name}
+                WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                AND {pk_field} <> NEW.{pk_field};
+
+                -- Restar del Bounding Box la geometría unida y la nueva geometría
+                -- Usar ST_GeomFromText con el mismo SRID que bounding_geom
+                area_resto := ST_Difference(bounding_geom, COALESCE(area_unida, ST_SetSRID(ST_GeomFromText('POLYGON EMPTY'), ST_SRID(bounding_geom))));
+                IF area_resto IS NOT NULL THEN
+                    area_resto := ST_Difference(area_resto, NEW.{geom_field});
+                END IF;
+
+                -- Paso 4: Descartar los polígonos que toquen el límite del Bounding Box
+                WITH desempacados AS (
+                    SELECT (ST_Dump(area_resto)).geom AS geometry
+                )
+                SELECT ST_Union(geometry) INTO area_final
+                FROM desempacados
+                WHERE NOT ST_Touches(geometry, bounding_line);
+
+                -- Paso 5: Comprobar si alguna de las geometrías restantes interseca con el nuevo polígono con un buffer de 1 mm
+                -- El buffer es necesario porque el Touches no detecta nada por cuestiones decimales.
+                -- Trabajamos todo en 3857 para las operaciones de buffer y distancia
+                SELECT ST_Transform(remaining_geom.geom, ST_SRID(NEW.{geom_field})) INTO gap_geom
+                FROM (
+                    SELECT (ST_Dump(area_final)).geom AS geom
+                ) AS remaining_geom
+                WHERE ST_Intersects(
+                    ST_Transform(remaining_geom.geom, 3857), -- Convertir las geometrías restantes a 3857
+                    ST_Buffer(geometry_3857, 0.001) -- Buffer de 1 mm en 3857
+                )
+                LIMIT 1;
+
+                -- Si se detecta un hueco, generar mensaje de error con GeoJSON
+                IF gap_geom IS NOT NULL THEN
+                    -- Obtener la geometría del hueco como GEOJSON en EPSG:4326
+                    SELECT ST_AsGeoJSON(ST_Transform(gap_geom, 4326))
+                    INTO gap_geojson;
+                    
+                    -- Construir mensaje de error estructurado con GEOJSON
+                    error_message := 'TOPOLOGY ERROR: New geometry creates a gap in the layer coverage. ' ||
+                                    'Gap geometry: ##' || COALESCE(gap_geojson, 'NULL') || '##.';
+                    
+                    -- Lanzar excepción con información detallada
+                    RAISE EXCEPTION '%', error_message;
+                END IF;
+
+                -- Si no hay huecos, continuar con la operación
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+            """
+            
+            # SQL para trigger
+            trigger_sql = f"""
+            CREATE TRIGGER {trigger_name}
+            BEFORE INSERT OR UPDATE ON {full_table_name}
+            FOR EACH ROW
+            EXECUTE FUNCTION {function_name}();
+            """
+            
+            return {
+                'function_sql': function_sql,
+                'trigger_sql': trigger_sql,
+                'function_name': function_name,
+                'function_name_simple': function_name_simple,
+                'trigger_name': trigger_name,
+                'table_name': full_table_name,
+                'schema': schema,
+                'pk_field': pk_field,
+                'geom_field': geom_field
+            }
+        
+        # Aquí se pueden añadir más tipos de reglas en el futuro
+        
+        elif rule_type == "must_be_covered_by":
+            # SQL para función MUST BE COVERED BY
+            covered_by_layer = kwargs.get('covered_by_layer')
+            covered_geom_field = kwargs.get('covered_geom_field')
+            
+            if not covered_by_layer:
+                logger.error(f"covered_by_layer es requerido para la regla must_be_covered_by")
+                return None
+            
+            if not covered_geom_field:
+                logger.error(f"covered_geom_field es requerido para la regla must_be_covered_by")
+                return None
+            
+            # Parsear schema.tabla de la capa de cobertura
+            if '.' not in covered_by_layer:
+                logger.error(f"covered_by_layer debe tener formato schema.tabla: {covered_by_layer}")
+                return None
+            
+            function_sql = f"""
+            CREATE OR REPLACE FUNCTION {function_name}()
+            RETURNS TRIGGER AS
+            $$
+            DECLARE
+                radio INTEGER := 1; -- Definir el radio como variable
+                error_message TEXT;
+                uncovered_geom GEOMETRY;
+                uncovered_geojson TEXT;
+                covering_union GEOMETRY;
+            BEGIN
+                -- Obtener la unión de todas las geometrías que podrían cubrir la nueva geometría
+                SELECT ST_Union({covered_geom_field})
+                INTO covering_union
+                FROM {covered_by_layer}
+                WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({covered_geom_field}, 3857), radio)
+                  AND ST_Intersects({covered_geom_field}, NEW.{geom_field});
+
+                -- Si hay geometrías que intersectan, calcular la parte no cubierta
+                IF covering_union IS NOT NULL THEN
+                    -- Calcular la diferencia: parte de la nueva geometría que NO está cubierta
+                    uncovered_geom := ST_Difference(NEW.{geom_field}, covering_union);
+                    
+                    -- Si queda alguna parte sin cubrir, es un error
+                    IF uncovered_geom IS NOT NULL AND NOT ST_IsEmpty(uncovered_geom) THEN
+                        -- Obtener la geometría no cubierta como GEOJSON en EPSG:4326
+                        SELECT ST_AsGeoJSON(ST_Transform(uncovered_geom, 4326))
+                        INTO uncovered_geojson;
+                        
+                        -- Construir mensaje de error estructurado con GEOJSON
+                        error_message := 'TOPOLOGY ERROR: Geometry is not covered by any feature in the reference layer. ' ||
+                                        'Uncovered geometry: ##' || COALESCE(uncovered_geojson, 'NULL') || '##.';
+                        
+                        -- Lanzar excepción con información detallada
+                        RAISE EXCEPTION '%', error_message;
+                    END IF;
+                ELSE
+                    -- No hay geometrías que intersecten, toda la nueva geometría está sin cubrir
+                    SELECT ST_AsGeoJSON(ST_Transform(NEW.{geom_field}, 4326))
+                    INTO uncovered_geojson;
+                    
+                    -- Construir mensaje de error estructurado con GEOJSON
+                    error_message := 'TOPOLOGY ERROR: Geometry is not covered by any feature in the reference layer. ' ||
+                                    'Uncovered geometry: ##' || COALESCE(uncovered_geojson, 'NULL') || '##.';
+                    
+                    -- Lanzar excepción con información detallada
+                    RAISE EXCEPTION '%', error_message;
+                END IF;
+
+                -- Si la geometría está completamente cubierta, continuar con la inserción/actualización
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+            """
+            
+            # SQL para trigger
+            trigger_sql = f"""
+            CREATE TRIGGER {trigger_name}
+            BEFORE INSERT OR UPDATE ON {full_table_name}
+            FOR EACH ROW
+            EXECUTE FUNCTION {function_name}();
+            """
+            
+            return {
+                'function_sql': function_sql,
+                'trigger_sql': trigger_sql,
+                'function_name': function_name,
+                'function_name_simple': function_name_simple,
+                'trigger_name': trigger_name,
+                'table_name': full_table_name,
+                'schema': schema,
+                'pk_field': pk_field,
+                'geom_field': geom_field,
+                'covered_by_layer': covered_by_layer,
+                'covered_geom_field': covered_geom_field
+            }
+        
+        elif rule_type == "must_be_contiguous":
+            # SQL para función MUST BE CONTIGUOUS - Tu lógica original exacta
+            contiguous_tolerance = kwargs.get('contiguous_tolerance', 1.0)  # Default del modelo
+            
+            function_sql = f"""
+            CREATE OR REPLACE FUNCTION {function_name}()
+            RETURNS TRIGGER AS
+            $$
+            DECLARE
+                tolerance NUMERIC := {contiguous_tolerance};
+                error_message TEXT;
+                problem_geojson TEXT;
+                valid_vertex_count INTEGER := 0;
+                vertex_3857 geometry;
+                min_distance NUMERIC;
+                vertex_counter INTEGER := 0;
+                total_points INTEGER;
+                closest_invalid_vertex geometry;
+                closest_invalid_distance NUMERIC := 999999;
+            BEGIN
+                -- PASO 1: ¿Toca por borde en SRID 3857? → VÁLIDO inmediatamente
+                IF EXISTS (
+                    SELECT 1
+                    FROM {full_table_name}
+                    WHERE ST_Relate(
+                        ST_Transform(NEW.{geom_field}, 3857),
+                        ST_Transform({geom_field}, 3857), 
+                        'F***1****') -- Toca por borde
+                    AND {pk_field} <> NEW.{pk_field}
+                ) THEN
+                    RETURN NEW;
+                END IF;
+
+                -- PASO 2: Contar vértices dentro de tolerancia (en metros) - SIN DUPLICADOS
+                -- Contar total de puntos
+                SELECT ST_NPoints(ST_Transform(NEW.{geom_field}, 3857)) INTO total_points;
+                
+                FOR vertex_3857 IN
+                    SELECT (ST_DumpPoints(ST_Transform(NEW.{geom_field}, 3857))).geom
+                LOOP
+                    vertex_counter := vertex_counter + 1;
+                    
+                    -- Saltar el último punto (que es igual al primero)
+                    IF vertex_counter >= total_points THEN
+                        EXIT;
+                    END IF;
+                    
+                    -- Calcular distancia mínima de este vértice a CUALQUIER geometría existente
+                    SELECT MIN(ST_Distance(vertex_3857, ST_Transform({geom_field}, 3857)))
+                    INTO min_distance
+                    FROM {full_table_name}
+                    WHERE {pk_field} <> NEW.{pk_field};
+                    
+                    -- Si está dentro de tolerancia, contarlo
+                    IF min_distance IS NOT NULL AND min_distance <= tolerance THEN
+                        valid_vertex_count := valid_vertex_count + 1;
+                        
+                        -- Optimización: si ya tenemos 2, no necesitamos más
+                        IF valid_vertex_count >= 2 THEN
+                            RETURN NEW;
+                        END IF;
+                    ELSE
+                        -- Este vértice NO cumple tolerancia, ¿es el más cercano a cumplirla?
+                        IF min_distance IS NOT NULL AND min_distance < closest_invalid_distance THEN
+                            closest_invalid_distance := min_distance;
+                            closest_invalid_vertex := vertex_3857;
+                        END IF;
+                    END IF;
+                END LOOP;
+                
+                -- PASO 3: No hay suficientes vértices cercanos → ERROR
+                -- Devolver el vértice que NO cumple tolerancia pero está más cerca de cumplirla
+                IF closest_invalid_vertex IS NOT NULL THEN
+                    SELECT ST_AsGeoJSON(ST_Transform(closest_invalid_vertex, 4326))
+                    INTO problem_geojson;
+                    
+                    error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
+                                    ' vertices within tolerance (' || tolerance || 'm), minimum required: 2. ' ||
+                                    'Closest vertex that violates tolerance (distance: ' || ROUND(closest_invalid_distance, 2) || 'm): ##' || 
+                                    COALESCE(problem_geojson, 'NULL') || '##.';
+                ELSE
+                    -- Fallback al centroide si no se encontró ningún vértice inválido
+                    SELECT ST_AsGeoJSON(ST_Transform(ST_Centroid(NEW.{geom_field}), 4326))
+                    INTO problem_geojson;
+                    
+                    error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
+                                    ' vertices within tolerance (' || tolerance || 'm), minimum required: 2. ' ||
+                                    'Geometry centroid: ##' || COALESCE(problem_geojson, 'NULL') || '##.';
+                END IF;
+                
+                RAISE EXCEPTION '%', error_message;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            """
+            
+            # SQL para trigger
+            trigger_sql = f"""
+            CREATE TRIGGER {trigger_name}
+            BEFORE INSERT OR UPDATE ON {full_table_name}
+            FOR EACH ROW
+            EXECUTE FUNCTION {function_name}();
+            """
+            
+            return {
+                'function_sql': function_sql,
+                'trigger_sql': trigger_sql,
+                'function_name': function_name,
+                'function_name_simple': function_name_simple,
+                'trigger_name': trigger_name,
+                'table_name': full_table_name,
+                'schema': schema,
+                'pk_field': pk_field,
+                'geom_field': geom_field,
+                'contiguous_tolerance': contiguous_tolerance
+            }
+        
+        else:
+            logger.warning(f"Tipo de regla topológica no implementada: {rule_type}")
+            return None
+            
+    except Exception as e:
+        logger.error(f"Error generando SQL para trigger {rule_type}: {str(e)}")
+        return None
+
+def _apply_topology_trigger(layer, rule_type, **kwargs):
+    """
+    Aplica un trigger topológico a una capa
+    """
+    try:
+        # Obtener conexión a la base de datos
+        i, source_name, schema = layer.get_db_connection()
+        
+        with i as conn:
+            # Para la regla must_be_covered_by, obtener el campo geometría de la tabla de cobertura
+            if rule_type == "must_be_covered_by":
+                covered_by_layer = kwargs.get('covered_by_layer')
+                
+                if covered_by_layer and '.' in covered_by_layer:
+                    covered_schema, covered_table = covered_by_layer.split('.', 1)
+                    
+                    covered_geom_columns = conn.get_geometry_columns(covered_table, covered_schema)
+                    
+                    if not covered_geom_columns:
+                        logger.error(f"No se encontró campo de geometría para la tabla de cobertura {covered_by_layer}")
+                        return False
+                    
+                    kwargs['covered_geom_field'] = covered_geom_columns[0]
+                    logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_columns[0]}'")
+            
+            # Para la regla must_not_overlap_with, obtener los campos geometría de las tablas objetivo
+            elif rule_type == "must_not_overlap_with":
+                overlap_layers = kwargs.get('overlap_layers', [])
+                logger.info(f"Processing must_not_overlap_with for layer {layer.id} with overlap_layers: {overlap_layers}")
+                overlap_geom_fields = {}
+                
+                for layer_name in overlap_layers:
+                    logger.info(f"Processing overlap layer: {layer_name}")
+                    if '.' in layer_name:
+                        overlap_schema, overlap_table = layer_name.split('.', 1)
+                        logger.info(f"Split layer {layer_name} into schema: {overlap_schema}, table: {overlap_table}")
+                        
+                        overlap_geom_columns = conn.get_geometry_columns(overlap_table, overlap_schema)
+                        logger.info(f"Found geometry columns for {layer_name}: {overlap_geom_columns}")
+                        
+                        if not overlap_geom_columns:
+                            logger.error(f"No se encontró campo de geometría para la tabla {layer_name}")
+                            return False
+                        
+                        overlap_geom_fields[layer_name] = overlap_geom_columns[0]
+                        logger.info(f"Campo geometría de tabla {layer_name}: '{overlap_geom_columns[0]}'")
+                    else:
+                        logger.error(f"overlap_layer debe tener formato schema.tabla: {layer_name}")
+                        return False
+                
+                logger.info(f"Final overlap_geom_fields: {overlap_geom_fields}")
+                kwargs['overlap_geom_fields'] = overlap_geom_fields
+            
+            trigger_info = _generate_topology_trigger_sql(rule_type, layer, **kwargs)
+            if not trigger_info:
+                return False
+            
+            # Establecer search_path para asegurar el esquema correcto
+            conn.cursor.execute(f"SET search_path TO {trigger_info['schema']}, public;")
+            
+            # Primero eliminar trigger y función si existen (para evitar conflictos)
+            _remove_topology_trigger_internal(conn, trigger_info)
+            
+            # Crear función
+            conn.cursor.execute(trigger_info['function_sql'])
+            logger.info(f"Función topológica creada: {trigger_info['function_name']}")
+            
+            # Crear trigger
+            conn.cursor.execute(trigger_info['trigger_sql'])
+            logger.info(f"Trigger topológico creado: {trigger_info['trigger_name']} en {trigger_info['table_name']}")
+            
+            return True
+            
+    except Exception as e:
+        logger.error(f"Error aplicando trigger {rule_type} para capa {layer.id}: {str(e)}")
+        return False
+
+def _remove_topology_trigger(layer, rule_type, **kwargs):
+    """
+    Elimina un trigger topológico de una capa
+    """
+    try:
+        # Para eliminación, solo necesitamos los nombres, no toda la generación de SQL
+        trigger_info = _get_topology_trigger_names(layer, rule_type)
+        if not trigger_info:
+            return False
+        
+        # Obtener conexión a la base de datos
+        i, source_name, schema = layer.get_db_connection()
+        
+        with i as conn:
+            # Establecer search_path para asegurar el esquema correcto
+            conn.cursor.execute(f"SET search_path TO {trigger_info['schema']}, public;")
+            return _remove_topology_trigger_internal(conn, trigger_info)
+            
+    except Exception as e:
+        logger.error(f"Error eliminando trigger {rule_type} para capa {layer.id}: {str(e)}")
+        return False
+
+def _remove_topology_trigger_internal(conn, trigger_info):
+    """
+    Función interna para eliminar trigger y función
+    """
+    try:
+        # Eliminar trigger si existe
+        drop_trigger_sql = f"DROP TRIGGER IF EXISTS {trigger_info['trigger_name']} ON {trigger_info['table_name']};"
+        conn.cursor.execute(drop_trigger_sql)
+        logger.info(f"Trigger eliminado: {trigger_info['trigger_name']}")
+        
+        # Eliminar función si existe
+        drop_function_sql = f"DROP FUNCTION IF EXISTS {trigger_info['function_name']}();"
+        conn.cursor.execute(drop_function_sql)
+        logger.info(f"Función eliminada: {trigger_info['function_name']}")
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error en _remove_topology_trigger_internal: {str(e)}")
+        return False
+
+def _apply_topology_triggers_for_layer(layer, topology_config):
+    """
+    Aplica o elimina triggers topológicos según la configuración de la capa
+    """
+    try:
+        # MUST NOT OVERLAPS
+        if topology_config.no_overlap:
+            success = _apply_topology_trigger(layer, "must_not_overlaps")
+            if not success:
+                logger.error(f"Fallo al aplicar trigger must_not_overlaps para capa {layer.id}")
+        else:
+            success = _remove_topology_trigger(layer, "must_not_overlaps")
+            if not success:
+                logger.warning(f"Fallo al eliminar trigger must_not_overlaps para capa {layer.id}")
+        
+        # MUST NOT HAVE GAPS
+        if topology_config.no_gaps:
+            success = _apply_topology_trigger(layer, "must_not_have_gaps")
+            if not success:
+                logger.error(f"Fallo al aplicar trigger must_not_have_gaps para capa {layer.id}")
+        else:
+            success = _remove_topology_trigger(layer, "must_not_have_gaps")
+            if not success:
+                logger.warning(f"Fallo al eliminar trigger must_not_have_gaps para capa {layer.id}")
+        
+        # Aquí se pueden añadir más reglas en el futuro:
+        
+        # MUST BE COVERED BY
+        if topology_config.must_be_covered_by:
+            if topology_config.covered_by_layer:
+                success = _apply_topology_trigger(layer, "must_be_covered_by", covered_by_layer=topology_config.covered_by_layer)
+                if not success:
+                    logger.error(f"Fallo al aplicar trigger must_be_covered_by para capa {layer.id}")
+            else:
+                logger.warning(f"No se puede aplicar trigger must_be_covered_by para capa {layer.id}: covered_by_layer no especificado")
+        else:
+            success = _remove_topology_trigger(layer, "must_be_covered_by")
+            if not success:
+                logger.warning(f"Fallo al eliminar trigger must_be_covered_by para capa {layer.id}")
+        
+        # MUST NOT OVERLAP WITH
+        if topology_config.must_not_overlap_with:
+            logger.info(f"Applying must_not_overlap_with rule for layer {layer.id}")
+            if topology_config.overlap_layers:
+                logger.info(f"Overlap layers configured: {topology_config.overlap_layers}")
+                success = _apply_topology_trigger(layer, "must_not_overlap_with", overlap_layers=topology_config.overlap_layers)
+                if not success:
+                    logger.error(f"Fallo al aplicar trigger must_not_overlap_with para capa {layer.id}")
+                else:
+                    logger.info(f"Successfully applied must_not_overlap_with trigger for layer {layer.id}")
+            else:
+                logger.warning(f"No se puede aplicar trigger must_not_overlap_with para capa {layer.id}: overlap_layers no especificado")
+        else:
+            logger.info(f"Removing must_not_overlap_with rule for layer {layer.id}")
+            success = _remove_topology_trigger(layer, "must_not_overlap_with")
+            if not success:
+                logger.warning(f"Fallo al eliminar trigger must_not_overlap_with para capa {layer.id}")
+            else:
+                logger.info(f"Successfully removed must_not_overlap_with trigger for layer {layer.id}")
+        
+        # MUST BE CONTIGUOUS
+        if topology_config.must_be_contiguous:
+            success = _apply_topology_trigger(layer, "must_be_contiguous", 
+                                            contiguous_tolerance=topology_config.contiguous_tolerance)
+            if not success:
+                logger.error(f"Fallo al aplicar trigger must_be_contiguous para capa {layer.id}")
+        else:
+            success = _remove_topology_trigger(layer, "must_be_contiguous")
+            if not success:
+                logger.warning(f"Fallo al eliminar trigger must_be_contiguous para capa {layer.id}")
+        
+        # etc... más reglas en el futuro
+        
+        logger.info(f"Triggers topológicos actualizados para capa {layer.id}")
+        
+    except Exception as e:
+        logger.error(f"Error aplicando triggers topológicos para capa {layer.id}: {str(e)}")
+
+def _save_layer_topology_rules(request, layer):
+    """
+    Guarda las reglas topológicas desde request.POST (formulario) o request.body (JSON API)
+    
+    Args:
+        request: HttpRequest
+        layer: La instancia de Layer
+    """
+    try:
+        # Detectar automáticamente si los datos vienen del formulario o de la API JSON
+        if 'topology_no_overlap' in request.POST:
+            # Datos vienen del formulario (layer_config.html)
+            data = {
+                'no_overlap': request.POST.get('topology_no_overlap', 'false').lower() == 'true',
+                'no_gaps': request.POST.get('topology_no_gaps', 'false').lower() == 'true',
+                'must_be_covered_by': request.POST.get('topology_must_be_covered_by', 'false').lower() == 'true',
+                'covered_by_layer': request.POST.get('topology_covered_by_layer', '').strip(),
+                'must_not_overlap_with': request.POST.get('topology_must_not_overlap_with', 'false').lower() == 'true',
+                'must_be_contiguous': request.POST.get('topology_must_be_contiguous', 'false').lower() == 'true',
+                'contiguous_tolerance': float(request.POST.get('topology_contiguous_tolerance', '1.0'))
+            }
+            
+            # Parsear overlap_layers de JSON
+            overlap_layers_json = request.POST.get('topology_overlap_layers', '[]')
+            logger.info(f"DEBUG Frontend overlap_layers_json: '{overlap_layers_json}'")
+            try:
+                data['overlap_layers'] = json.loads(overlap_layers_json)
+                logger.info(f"DEBUG Frontend parsed overlap_layers: {data['overlap_layers']}")
+            except json.JSONDecodeError:
+                logger.error(f"DEBUG Frontend JSON decode error for: '{overlap_layers_json}'")
+                data['overlap_layers'] = []
+                
+            # Para formularios, no lanzar excepción que interrumpa el guardado principal
+            raise_exceptions = False
+        else:
+            # Datos vienen de la API JSON (request.body)
+            try:
+                data = json.loads(request.body)
+                logger.info(f"DEBUG API JSON data: {data}")
+                logger.info(f"DEBUG API overlap_layers: {data.get('overlap_layers', [])}")
+            except json.JSONDecodeError:
+                if hasattr(request, 'body') and request.body:
+                    raise ValueError("Invalid JSON data in request body")
+                else:
+                    return  # No hay datos topológicos en el request
+            
+            # Para API, lanzar excepciones para dar feedback al frontend
+            raise_exceptions = True
+        
+        # Extraer datos (normalizados)
+        no_overlap = data.get('no_overlap', False)
+        no_gaps = data.get('no_gaps', False)
+        must_be_covered_by = data.get('must_be_covered_by', False)
+        covered_by_layer = data.get('covered_by_layer', '').strip()
+        must_not_overlap_with = data.get('must_not_overlap_with', False)
+        overlap_layers = data.get('overlap_layers', [])
+        must_be_contiguous = data.get('must_be_contiguous', False)
+        contiguous_tolerance = float(data.get('contiguous_tolerance', 1.0))
+        
+        # Función auxiliar para convertir formato datastore:tabla a schema.tabla
+        def convert_layer_format(layer_identifier):
+            """
+            Convierte de formato 'datastore:tabla' a 'schema.tabla'
+            """
+            logger.info(f"DEBUG convert_layer_format: Input = '{layer_identifier}'")
+            
+            if not layer_identifier or ':' not in layer_identifier:
+                logger.info(f"DEBUG convert_layer_format: No conversion needed, returning = '{layer_identifier}'")
+                return layer_identifier
+            
+            try:
+                datastore_name, table_name = layer_identifier.split(':', 1)
+                logger.info(f"DEBUG convert_layer_format: Split into datastore='{datastore_name}', table='{table_name}'")
+                
+                # Buscar el datastore para obtener el schema
+                target_datastore = Datastore.objects.filter(name=datastore_name).first()
+                logger.info(f"DEBUG convert_layer_format: Found datastore = {target_datastore}")
+                
+                if target_datastore:
+                    params = json.loads(target_datastore.connection_params)
+                    schema = params.get('schema', 'public')
+                    result = f"{schema}.{table_name}"
+                    logger.info(f"DEBUG convert_layer_format: Schema='{schema}', Final result = '{result}'")
+                    return result
+                else:
+                    # Si no se encuentra el datastore, devolver el original
+                    logger.warning(f"DEBUG convert_layer_format: Datastore '{datastore_name}' not found, returning original = '{layer_identifier}'")
+                    return layer_identifier
+            except Exception as e:
+                logger.error(f"DEBUG convert_layer_format: Error convirtiendo formato de capa {layer_identifier}: {str(e)}")
+                return layer_identifier
+        
+        # Preparar los datos limpios, convirtiendo a formato schema.tabla si es necesario
+        covered_by_layer_clean = ''
+        if must_be_covered_by and covered_by_layer:
+            if '.' in covered_by_layer:
+                # Ya está en formato schema.tabla
+                covered_by_layer_clean = covered_by_layer
+            elif ':' in covered_by_layer:
+                # Convertir de datastore:tabla a schema.tabla
+                covered_by_layer_clean = convert_layer_format(covered_by_layer)
+            else:
+                logger.warning(f"Invalid covered_by_layer format: {covered_by_layer}")
+        
+        # Convertir cada capa en la lista de overlap_layers
+        overlap_layers_clean = []
+        if must_not_overlap_with and overlap_layers:
+            logger.info(f"Processing overlap_layers for layer {layer.id}: {overlap_layers}")
+            for layer_ref in overlap_layers:
+                if isinstance(layer_ref, str):
+                    if '.' in layer_ref:
+                        # Ya está en formato schema.tabla
+                        overlap_layers_clean.append(layer_ref)
+                        logger.info(f"Added overlap layer (schema.tabla format): {layer_ref}")
+                    elif ':' in layer_ref:
+                        # Convertir de datastore:tabla a schema.tabla
+                        converted = convert_layer_format(layer_ref)
+                        if converted:
+                            overlap_layers_clean.append(converted)
+                            logger.info(f"Converted overlap layer from {layer_ref} to {converted}")
+                        else:
+                            logger.error(f"Failed to convert overlap layer format: {layer_ref}")
+                    else:
+                        logger.warning(f"Invalid overlap layer format: {layer_ref}")
+                else:
+                    logger.warning(f"Invalid overlap layer type: {type(layer_ref)}")
+            logger.info(f"Final overlap_layers_clean for layer {layer.id}: {overlap_layers_clean}")
+        
+        # Crear o actualizar la configuración de topología
+        topology_config, created = LayerTopologyConfiguration.objects.get_or_create(
+            layer=layer,
+            defaults={
+                'no_overlap': no_overlap,
+                'no_gaps': no_gaps,
+                'must_be_covered_by': must_be_covered_by,
+                'covered_by_layer': covered_by_layer_clean,
+                'must_not_overlap_with': must_not_overlap_with,
+                'overlap_layers': overlap_layers_clean,
+                'must_be_contiguous': must_be_contiguous,
+                'contiguous_tolerance': contiguous_tolerance
+            }
+        )
+        
+        if not created:
+            # Actualizar configuración existente
+            topology_config.no_overlap = no_overlap
+            topology_config.no_gaps = no_gaps
+            topology_config.must_be_covered_by = must_be_covered_by
+            topology_config.covered_by_layer = covered_by_layer_clean
+            topology_config.must_not_overlap_with = must_not_overlap_with
+            topology_config.overlap_layers = overlap_layers_clean
+            topology_config.must_be_contiguous = must_be_contiguous
+            topology_config.contiguous_tolerance = contiguous_tolerance
+            topology_config.save()
+        
+        logger.info(f"Topology rules saved for layer {layer.id}: {topology_config.get_active_rules_count()} active rules")
+        
+        # Aplicar o eliminar triggers topológicos según la configuración
+        _apply_topology_triggers_for_layer(layer, topology_config)
+        
+        return topology_config
+        
+    except Exception as e:
+        logger.error(f"Error saving topology rules for layer {layer.id}: {str(e)}")
+        if raise_exceptions:
+            raise
+        # Para formularios, no lanzar excepción para no interrumpir el guardado principal
+
+
+
+
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -1774,6 +2571,9 @@ def layer_config(request, layer_id):
         conf['form_groups'] = form_groups
         layer.conf = conf
         layer.save()
+
+        # Guardar reglas topológicas si se han enviado
+        _save_layer_topology_rules(request, layer)
 
         if from_redirect:
             query_string = '?redirect=' + from_redirect
@@ -5486,7 +6286,7 @@ def test_dnie_external(request):
 def download_layer_resources(request, workspace_name, layer_name):
     try:
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace_name)
-        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server_id)
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         authz = gs.getAuthorizationService()
         if not utils.can_read_layer(request, layer):
             return JsonResponse({"status": "error", "Error": "You are not allowed to read this layer"}, status=403)
@@ -5519,3 +6319,341 @@ def download_layer_resources(request, workspace_name, layer_name):
         return JsonResponse({"status": "error", "Error": 'Layer not found'}, status=404)
     except Exception as e:
         return JsonResponse({"status": "error", "Error": str(e)}, status=500)
+
+
+@login_required
+def get_topology_available_layers(request, layer_id):
+    """
+    Obtiene todas las capas disponibles de la misma base de datos que la capa actual.
+    Solo devuelve capas que tengan geometría, en formato datastore:nombretabla.
+    """
+    if request.method == 'GET':
+        try:
+            # Obtener la capa actual
+            current_layer = Layer.objects.get(pk=layer_id)
+            current_datastore = current_layer.datastore
+            
+            # Obtener parámetros de conexión de la capa actual
+            current_params = json.loads(current_datastore.connection_params)
+            current_host = current_params.get('host')
+            current_port = current_params.get('port')
+            current_database = current_params.get('database')
+            
+            # Buscar todos los datastores con los mismos parámetros de conexión
+            available_layers = []
+            
+            for datastore in Datastore.objects.all():
+                try:
+                    ds_params = json.loads(datastore.connection_params)
+                    # Comparar host, port y database (excluyendo schema)
+                    if (ds_params.get('host') == current_host and 
+                        ds_params.get('port') == current_port and 
+                        ds_params.get('database') == current_database):
+                        
+                        # Obtener conexión a la base de datos
+                        i, params = datastore.get_db_connection()
+                        schema = params.get('schema', 'public')
+                        
+                        # Obtener todas las tablas con geometría de este esquema
+                        with i:
+                            geom_tables_info = i.get_geometry_columns_info(schema=schema)
+                            
+                            for table_info in geom_tables_info:
+                                table_schema, table_name, geom_column, coord_dimension, srid, geom_type, key_column, fields = table_info
+                                
+                                # Crear identificador único: datastore:tabla
+                                layer_identifier = f"{datastore.name}:{table_name}"
+                                
+                                # Excluir la capa actual (comparar tanto por datastore:tabla como por nombre directo)
+                                if (layer_identifier == f"{current_datastore.name}:{current_layer.source_name}" or 
+                                    table_name == current_layer.source_name):
+                                    continue
+                                
+                                # Usar formato datastore:nametable para el display
+                                display_name = layer_identifier
+                                
+                                # Verificar si existe una capa Layer para esta tabla (para metadatos adicionales)
+                                layer_title = None
+                                try:
+                                    existing_layer = Layer.objects.filter(
+                                        datastore=datastore, 
+                                        source_name=table_name
+                                    ).first()
+                                    if existing_layer:
+                                        layer_title = existing_layer.title
+                                except:
+                                    pass
+                                
+                                available_layers.append({
+                                    'id': layer_identifier,
+                                    'name': display_name,  # datastore:nametable format
+                                    'table_name': table_name,
+                                    'schema': table_schema,
+                                    'datastore': datastore.name,
+                                    'geom_type': geom_type,
+                                    'workspace': datastore.workspace.name,
+                                    'layer_title': layer_title  # Título de la capa si existe
+                                })
+                                
+                except Exception as e:
+                    # Si hay error al procesar un datastore, continuar con el siguiente
+                    logger.warning(f"Error procesando datastore {datastore.name}: {str(e)}")
+                    continue
+            
+            # Ordenar por nombre para mejor experiencia de usuario
+            available_layers.sort(key=lambda x: x['name'])
+            
+            return JsonResponse({
+                'status': 'success',
+                'layers': available_layers,
+                'current_layer_id': layer_id,
+                'current_layer_name': f"{current_datastore.name}:{current_layer.source_name}",
+                'total': len(available_layers)
+            })
+            
+        except Layer.DoesNotExist:
+            return JsonResponse({
+                'status': 'error', 
+                'message': 'Layer not found'
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Error in get_topology_available_layers: {str(e)}")
+            return JsonResponse({
+                'status': 'error', 
+                'message': 'Internal server error'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error', 
+        'message': 'Method not allowed'
+    }, status=405)
+
+
+
+@login_required
+def get_topology_rules(request, layer_id):
+    """
+    Obtiene las reglas topológicas existentes para una capa específica
+    """
+    if request.method == 'GET':
+        try:
+            # Obtener la capa
+            layer = Layer.objects.get(pk=layer_id)
+            
+            # Valores por defecto
+            rules_data = {
+                'no_overlap': False,
+                'no_gaps': False,
+                'must_be_covered_by': False,
+                'covered_by_layer': '',
+                'must_not_overlap_with': False,
+                'overlap_layers': [],
+                'must_be_contiguous': False,
+                'contiguous_tolerance': 1.0
+            }
+            
+            active_rules_count = 0
+            
+            try:
+                # Obtener la configuración de topología para esta capa
+                topology_config = LayerTopologyConfiguration.objects.get(layer=layer)
+                
+                # Función auxiliar para convertir de schema.tabla a datastore:tabla
+                def convert_to_display_format(layer_name):
+                    """
+                    Convierte de formato 'schema.tabla' a 'datastore:tabla' para mostrar en el frontend
+                    """
+                    if not layer_name or '.' not in layer_name:
+                        return layer_name
+                    
+                    try:
+                        schema, table_name = layer_name.split('.', 1)
+                        # Buscar un datastore que use este schema
+                        for datastore in Datastore.objects.all():
+                            try:
+                                params = json.loads(datastore.connection_params)
+                                if params.get('schema', 'public') == schema:
+                                    return f"{datastore.name}:{table_name}"
+                            except:
+                                continue
+                        # Si no se encuentra, devolver el original
+                        return layer_name
+                    except Exception as e:
+                        logger.warning(f"Error convirtiendo formato de visualización {layer_name}: {str(e)}")
+                        return layer_name
+                
+                # Convertir covered_by_layer a formato de visualización
+                covered_by_layer_display = convert_to_display_format(topology_config.covered_by_layer or '')
+                
+                # Convertir overlap_layers a formato de visualización
+                overlap_layers_display = []
+                for layer_name in topology_config.overlap_layers:
+                    converted = convert_to_display_format(layer_name)
+                    if converted:
+                        overlap_layers_display.append(converted)
+                
+                # Actualizar con los datos guardados (convertidos para visualización)
+                rules_data = {
+                    'no_overlap': topology_config.no_overlap,
+                    'no_gaps': topology_config.no_gaps,
+                    'must_be_covered_by': topology_config.must_be_covered_by,
+                    'covered_by_layer': covered_by_layer_display,
+                    'must_not_overlap_with': topology_config.must_not_overlap_with,
+                    'overlap_layers': overlap_layers_display,
+                    'must_be_contiguous': topology_config.must_be_contiguous,
+                    'contiguous_tolerance': topology_config.contiguous_tolerance
+                }
+                active_rules_count = topology_config.get_active_rules_count()
+                
+            except LayerTopologyConfiguration.DoesNotExist:
+                # No hay configuración guardada, usar valores por defecto
+                pass
+            
+            return JsonResponse({
+                'status': 'success',
+                'rules': rules_data,
+                'layer_id': layer_id,
+                'total_rules': active_rules_count
+            })
+            
+        except Layer.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Layer not found'
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Error getting topology rules: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Internal server error'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed'
+    }, status=405)
+
+
+@login_required()
+@require_http_methods(["POST", "PUT"])
+@staff_required
+def update_topology_rules(request, layer_id):
+    """
+    Actualiza las reglas de topología para una capa específica
+    """
+    try:
+        layer = Layer.objects.get(id=layer_id)
+        if not utils.can_manage_layer(request, layer):
+            return JsonResponse({'error': 'Permission denied'}, status=403)
+        
+        # Validar que es una request JSON (no formulario)
+        if not request.body:
+            return JsonResponse({'error': 'Request body is required'}, status=400)
+        
+        # Parsear y validar JSON básico
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        
+        # Validar campos requeridos y tipos (solo para API JSON)
+        required_fields = ['no_overlap', 'no_gaps', 'must_be_covered_by', 'must_not_overlap_with', 'must_be_contiguous']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({'error': f'Missing required field: {field}'}, status=400)
+            if not isinstance(data[field], bool):
+                return JsonResponse({'error': f'Field {field} must be boolean'}, status=400)
+        
+        # Validar campos opcionales
+        if 'covered_by_layer' in data and not isinstance(data['covered_by_layer'], str):
+            return JsonResponse({'error': 'covered_by_layer must be string'}, status=400)
+        
+        if 'overlap_layers' in data and not isinstance(data['overlap_layers'], list):
+            return JsonResponse({'error': 'overlap_layers must be array'}, status=400)
+        
+        if 'contiguous_tolerance' in data:
+            try:
+                float(data['contiguous_tolerance'])
+            except (ValueError, TypeError):
+                return JsonResponse({'error': 'contiguous_tolerance must be numeric'}, status=400)
+        
+        # Guardar configuración de topología y aplicar triggers
+        topology_config = _save_layer_topology_rules(request, layer)
+        
+        # Devolver la configuración actualizada
+        response_data = {
+            'status': 'success',
+            'message': 'Topology rules updated successfully',
+            'layer_id': layer.id,
+            'configuration': {
+                'no_overlap': topology_config.no_overlap,
+                'no_gaps': topology_config.no_gaps,
+                'must_be_covered_by': topology_config.must_be_covered_by,
+                'covered_by_layer': topology_config.covered_by_layer,
+                'must_not_overlap_with': topology_config.must_not_overlap_with,
+                'overlap_layers': topology_config.overlap_layers,
+                'must_be_contiguous': topology_config.must_be_contiguous,
+                'contiguous_tolerance': topology_config.contiguous_tolerance,
+                'active_rules_count': topology_config.get_active_rules_count()
+            }
+        }
+        
+        return JsonResponse(response_data)
+        
+    except Layer.DoesNotExist:
+        return JsonResponse({'error': 'Layer not found'}, status=404)
+    except ValueError as e:
+        return JsonResponse({'error': f'Validation error: {str(e)}'}, status=400)
+    except Exception as e:
+        logger.error(f"Error updating topology rules for layer {layer_id}: {str(e)}")
+        return JsonResponse({'error': 'Internal server error'}, status=500)
+
+
+def _get_topology_trigger_names(layer, rule_type):
+    """
+    Obtiene los nombres de función y trigger para eliminación sin necesidad de validar parámetros completos
+    """
+    try:
+        # Obtener información básica de la capa
+        i, source_name, schema = layer.get_db_connection()
+        table_name = layer.name.replace(':', '_')
+        
+        # Nombres únicos para funciones y triggers
+        function_name_simple = f"{rule_type}_{table_name.lower()}"
+        function_name = f"{schema}.{function_name_simple}"
+        trigger_name = f"trigger_{rule_type}_{table_name.lower()}"
+        full_table_name = f"{schema}.{table_name}"
+        
+        return {
+            'function_name': function_name,
+            'function_name_simple': function_name_simple,
+            'trigger_name': trigger_name,
+            'table_name': full_table_name,
+            'schema': schema
+        }
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo nombres de trigger {rule_type}: {str(e)}")
+        return None
+
+def _remove_topology_trigger(layer, rule_type, **kwargs):
+    """
+    Elimina un trigger topológico de una capa
+    """
+    try:
+        # Para eliminación, solo necesitamos los nombres, no toda la generación de SQL
+        trigger_info = _get_topology_trigger_names(layer, rule_type)
+        if not trigger_info:
+            return False
+        
+        # Obtener conexión a la base de datos
+        i, source_name, schema = layer.get_db_connection()
+        
+        with i as conn:
+            # Establecer search_path para asegurar el esquema correcto
+            conn.cursor.execute(f"SET search_path TO {trigger_info['schema']}, public;")
+            return _remove_topology_trigger_internal(conn, trigger_info)
+            
+    except Exception as e:
+        logger.error(f"Error eliminando trigger {rule_type} para capa {layer.id}: {str(e)}")
+        return False

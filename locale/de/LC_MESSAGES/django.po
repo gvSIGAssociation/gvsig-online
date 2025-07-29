@@ -2905,3 +2905,64 @@ msgstr "Fehler beim Löschen der Ansicht: {0}"
 #~ msgstr ""
 #~ "Warnung: Die Umbenennung eines Feldes kann Nebenwirkungen haben, wie z. "
 #~ "B. die Zerstörung einer feldbasierten Legende."
+
+# Topology rules translations
+msgid "Geometries within the same layer cannot overlap with each other"
+msgstr "Geometrien innerhalb derselben Ebene können sich nicht überlappen"
+
+msgid "The layer coverage must be continuous without empty spaces between geometries"
+msgstr "Die Ebenenabdeckung muss kontinuierlich sein ohne leere Räume zwischen Geometrien"
+
+msgid "All geometries must be completely covered by geometries from another layer"
+msgstr "Alle Geometrien müssen vollständig von Geometrien einer anderen Ebene abgedeckt werden"
+
+msgid "Geometries cannot overlap with geometries from specified layers"
+msgstr "Geometrien können sich nicht mit Geometrien aus angegebenen Ebenen überlappen"
+
+msgid "Geometries must be connected."
+msgstr "Geometrien müssen verbunden sein."
+
+msgid "Topological rules"
+msgstr "Topologische Regeln"
+
+msgid "Must not overlap"
+msgstr "Darf sich nicht überlappen"
+
+msgid "Must not have gaps"
+msgstr "Darf keine Lücken haben"
+
+msgid "Must be covered by"
+msgstr "Muss abgedeckt werden von"
+
+msgid "Must not overlap with"
+msgstr "Darf sich nicht überlappen mit"
+
+msgid "Must be contiguous"
+msgstr "Muss zusammenhängend sein"
+
+msgid "No additional configuration required"
+msgstr "Keine zusätzliche Konfiguration erforderlich"
+
+msgid "Select a layer"
+msgstr "Eine Ebene auswählen"
+
+msgid "Select multiple layers"
+msgstr "Mehrere Ebenen auswählen"
+
+msgid "Tolerance"
+msgstr "Toleranz"
+
+msgid "Tolerance distance for contiguity check"
+msgstr "Toleranzdistanz für Zusammenhangsprüfung"
+
+msgid "Editing restrictions"
+msgstr "Bearbeitungsbeschränkungen"
+
+msgid "Rule"
+msgstr "Regel"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Configuration"
+msgstr "Konfiguration"
