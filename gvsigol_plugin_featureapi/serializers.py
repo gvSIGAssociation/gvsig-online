@@ -1010,6 +1010,8 @@ class FeatureSerializer(serializers.Serializer):
         """
         Update and return a new Feature instance, given the validated data.
         """
+        layer = Layer.objects.get(id=int(lyr_id))
+        
         #Hay que hacer inserciones en tabla con Introspect porque de las capas no hay modelo
         i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
         with i as con: # connection will autoclose
@@ -1019,6 +1021,8 @@ class FeatureSerializer(serializers.Serializer):
             except:
                 raise HttpException(400, "Feature cannot be updaed in database. Tables without primary key are not supported")
             feat_id = data['properties'][idfield]
+            
+            data = self._process_link_fields(layer, data, feat_id)
             pk_is_serial = table_info.get_column_info(idfield).get('is_serial')
             if pk_is_serial:
                 try:
@@ -1082,6 +1086,11 @@ class FeatureSerializer(serializers.Serializer):
         Create and return a new Feature instance, given the validated data.
         """
         
+        layer = Layer.objects.get(id=int(lyr_id))
+        
+        # Como no tenemos feat_id aún pasamos None
+        data = self._process_link_fields(layer, data, feat_id=None)
+        
         i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
         with i as con: # connection will autoclose
             table_info = con.get_table_info(table, schema=schema)
@@ -1128,6 +1137,30 @@ class FeatureSerializer(serializers.Serializer):
                                 operation=1)
                     except Exception as e:
                         raise HttpException(400, "Feature cannot be inserted in database history. Unexpected error: " + format(e))
+                # Después de insertar, actualizamos las URLs de los campos link con el feat_id real
+                if rows and len(rows) > 0:
+                    real_feat_id = rows[0][0]
+                    data = self._process_link_fields(layer, data, real_feat_id)
+                    if layer.conf:
+                        try:
+                            conf = ast.literal_eval(layer.conf)
+                            if 'fields' in conf:
+                                for field_conf in conf['fields']:
+                                    if field_conf.get('gvsigol_type') == 'link':
+                                        field_name = field_conf.get('name')
+                                        if field_name in data['properties']:
+                                            update_sql = sqlbuilder.SQL("UPDATE {schema}.{table} SET {field} = {value} WHERE {pk_field} = {feat_id}").format(
+                                                schema=sqlbuilder.Identifier(schema),
+                                                table=sqlbuilder.Identifier(table),
+                                                field=sqlbuilder.Identifier(field_name),
+                                                value=sqlbuilder.Literal(data['properties'][field_name]),
+                                                pk_field=sqlbuilder.Identifier(idfield),
+                                                feat_id=sqlbuilder.Literal(real_feat_id)
+                                            )
+                                            con.cursor.execute(update_sql)
+                        except Exception as e:
+                            logger.warning(f"Error actualizando URLs de campos link: {str(e)}")
+                
                 try:
                     return self._process_query_result_for_get_operation(rows, return_crs)
                 except Exception as e:
@@ -1144,6 +1177,55 @@ class FeatureSerializer(serializers.Serializer):
 
         if 'properties' in data and 'modified_by' in fields:
             data['properties']['modified_by'] = username
+        return data
+
+    def _process_link_fields(self, layer, data, feat_id=None):
+        """
+        Procesa los campos de tipo "link" en la configuración de la capa.
+        Si un campo de tipo link tiene un related_field con valor, construye
+        la URL del endpoint de la API para acceder al archivo.
+        """
+        try:
+            if not layer.conf:
+                return data
+            
+            conf = ast.literal_eval(layer.conf)
+            if 'fields' not in conf:
+                return data
+
+            link_fields = []
+            for field_conf in conf['fields']:
+                if field_conf.get('gvsigol_type') == 'link':
+                    link_fields.append(field_conf)
+            
+            for link_field in link_fields:
+                field_name = link_field.get('name')
+                type_params = link_field.get('type_params', {})
+                base_folder = type_params.get('base_folder', '')
+                related_field = type_params.get('related_field', '')
+                
+                if not field_name or not base_folder or not related_field:
+                    continue
+                
+                if related_field not in data.get('properties', {}):
+                    continue
+                
+                related_value = data['properties'][related_field]
+                
+                if related_value and str(related_value).strip():
+                    # Construir la URL para acceder al archivo a través del endpoint de la API
+                    if feat_id is not None:
+                        link_value = f"/fileserver/api/v1/layers/{layer.id}/{feat_id}/link/{field_name}/"
+                    else:
+                        # Para operaciones de creación, usar placeholder que se reemplazará después
+                        link_value = f"/fileserver/api/v1/layers/{layer.id}/{{feat_id}}/link/{field_name}/"
+                    data['properties'][field_name] = link_value
+                else:
+                    data['properties'][field_name] = ""
+        
+        except Exception as e:
+            logger.warning(f"Error procesando campos link: {str(e)}")
+        
         return data
         
 

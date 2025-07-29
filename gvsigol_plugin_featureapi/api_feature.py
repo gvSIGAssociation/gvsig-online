@@ -1245,15 +1245,23 @@ class FileAttachedFromLinkView(ListAPIView):
         try:
             layer = Layer.objects.get(id=layer_id)
             lyr_conf = layer.conf
+            
+            if isinstance(lyr_conf, str):
+                import ast
+                try:
+                    lyr_conf = ast.literal_eval(lyr_conf)
+                except:
+                    lyr_conf = None
+            
             try:
                 validation.check_read_feature_permission(layer, feat_id)
             except HttpException as e:
                 return e.get_exception()
         except Exception as e:
-            return HttpException(404, "Resource NOT found in database").get_exception()
+            return HttpException(404, "Layer not found or Resource not found in database").get_exception()
         
         field_config = None
-        if lyr_conf and 'fields' in lyr_conf:
+        if lyr_conf and isinstance(lyr_conf, dict) and 'fields' in lyr_conf:
             for field in lyr_conf['fields']:
                 if field.get('name') == field_name and field.get('gvsigol_type') == 'link':
                     field_config = field
@@ -1279,12 +1287,13 @@ class FileAttachedFromLinkView(ListAPIView):
                 return HttpException(404, f"Field {related_field} not found or is empty in feature").get_exception()
             
             file_path = os.path.join(base_folder, filename)
-            
-            if not os.path.exists(file_path):
-                return HttpException(404, "File not found on disk").get_exception()
-            
-            return sendfile(request, file_path, attachment=False)
-            
+
+            if not os.path.isabs(file_path):
+                file_path = os.path.join(core_settings.MEDIA_ROOT, file_path)
+            if(path.exists(file_path)):
+                return sendfile(request, file_path, attachment=False)
+            return HttpException(404, "File NOT found in disk").get_exception()
+         
         except HttpException as e:
             return e.get_exception()
         except Exception as e:
