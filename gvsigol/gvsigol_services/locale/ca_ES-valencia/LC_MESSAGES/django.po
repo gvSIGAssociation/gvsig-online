@@ -3056,3 +3056,64 @@ msgstr "Error suprimint la vista: {0}"
 #~ "\t\t\t\t\t\t\t\ta aquest formulari. \n"
 #~ "\t\t\t\t\t\t\t\tPer favor contacti amb l'administrador del sistema si \n"
 #~ "\t\t\t\t\t\t\t\tla creació de la metadada contínua fallant"
+
+# Topology rules translations
+msgid "Geometries within the same layer cannot overlap with each other"
+msgstr "Les geometries de la mateixa capa no poden superposar-se entre si"
+
+msgid "The layer coverage must be continuous without empty spaces between geometries"
+msgstr "La cobertura de la capa ha de ser contínua sense espais buits entre geometries"
+
+msgid "All geometries must be completely covered by geometries from another layer"
+msgstr "Totes les geometries han d'estar completament cobertes per geometries d'una altra capa"
+
+msgid "Geometries cannot overlap with geometries from specified layers"
+msgstr "Les geometries no poden superposar-se amb geometries de les capes especificades"
+
+msgid "Geometries must be connected."
+msgstr "Les geometries han d'estar connectades."
+
+msgid "Topological rules"
+msgstr "Regles topològiques"
+
+msgid "Must not overlap"
+msgstr "No ha de superposar-se"
+
+msgid "Must not have gaps"
+msgstr "No ha de tindre buits"
+
+msgid "Must be covered by"
+msgstr "Ha d'estar cobert per"
+
+msgid "Must not overlap with"
+msgstr "No ha de superposar-se amb"
+
+msgid "Must be contiguous"
+msgstr "Ha de ser contigu"
+
+msgid "No additional configuration required"
+msgstr "No es requereix configuració addicional"
+
+msgid "Select a layer"
+msgstr "Seleccionar una capa"
+
+msgid "Select multiple layers"
+msgstr "Seleccionar múltiples capes"
+
+msgid "Tolerance"
+msgstr "Tolerància"
+
+msgid "Tolerance distance for contiguity check"
+msgstr "Distància de tolerància per verificació de contigüitat"
+
+msgid "Editing restrictions"
+msgstr "Restriccions d'edició"
+
+msgid "Rule"
+msgstr "Regla"
+
+msgid "Active"
+msgstr "Actiu"
+
+msgid "Configuration"
+msgstr "Configuració"

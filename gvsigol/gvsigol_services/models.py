@@ -861,5 +861,86 @@ class Marker(models.Model):
 
     def __str__(self):
         return f"Marker - {self.title} (Proj {self.idProj})"
+
+class LayerTopologyConfiguration(models.Model):
+    """
+    Modelo para almacenar la configuración de reglas topológicas de una capa.
+    Una sola fila por capa con campos específicos para cada regla.
+    """
+    layer = models.OneToOneField(Layer, on_delete=models.CASCADE, related_name='topology_config')
     
+    # Regla: No debe solapar
+    no_overlap = models.BooleanField(default=False)
+    
+    # Regla: No debe haber huecos
+    no_gaps = models.BooleanField(default=False)
+    
+    # Regla: Debe estar cubierto por
+    must_be_covered_by = models.BooleanField(default=False)
+    covered_by_layer = models.CharField(max_length=255, blank=True, null=True, 
+                                      help_text="Capa que debe cubrir en formato schema.tabla")
+    
+    # Regla: No debe solapar con
+    must_not_overlap_with = models.BooleanField(default=False)
+    overlap_layers = JSONField(default=list, blank=True, 
+                              help_text="Lista de capas con las que no debe solapar en formato schema.tabla")
+    
+    # Regla: Debe ser contiguo
+    must_be_contiguous = models.BooleanField(default=False)
+    contiguous_tolerance = models.FloatField(default=1.0, 
+                                           help_text="Tolerancia en metros para la contigüidad")
+
+    class Meta:
+        verbose_name = 'Layer Topology Configuration'
+        verbose_name_plural = 'Layer Topology Configurations'
+
+    def __str__(self):
+        return f"Topology config for {self.layer.name}"
+
+    def get_active_rules_count(self):
+        """
+        Cuenta cuántas reglas están activas
+        """
+        active_count = 0
+        if self.no_overlap:
+            active_count += 1
+        if self.no_gaps:
+            active_count += 1
+        if self.must_be_covered_by:
+            active_count += 1
+        if self.must_not_overlap_with:
+            active_count += 1
+        if self.must_be_contiguous:
+            active_count += 1
+        
+        return active_count
+
+    def get_rules_summary(self):
+        """
+        Devuelve un resumen legible de las reglas activas
+        """
+        summary = []
+        
+        if self.no_overlap:
+            summary.append("No overlap")
+        
+        if self.no_gaps:
+            summary.append("No gaps")
+        
+        if self.must_be_covered_by:
+            if self.covered_by_layer:
+                summary.append(f"Covered by: {self.covered_by_layer}")
+            else:
+                summary.append("Covered by (not configured)")
+        
+        if self.must_not_overlap_with:
+            if self.overlap_layers:
+                summary.append(f"No overlap with: {', '.join(self.overlap_layers)}")
+            else:
+                summary.append("No overlap with (not configured)")
+        
+        if self.must_be_contiguous:
+            summary.append(f"Contiguous (tolerance: {self.contiguous_tolerance}m)")
+        
+        return '; '.join(summary) if summary else "No active rules"
 

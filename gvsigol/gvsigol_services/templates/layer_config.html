@@ -21,8 +21,19 @@
 			</div>
 		</div>
 		<div class="">
-			{% csrf_token %}
-			{% if form.errors %}
+					{% csrf_token %}
+		
+		<!-- Campos ocultos para reglas topológicas -->
+		<input type="hidden" name="topology_no_overlap" id="topology_no_overlap_hidden" value="false">
+		<input type="hidden" name="topology_no_gaps" id="topology_no_gaps_hidden" value="false">
+		<input type="hidden" name="topology_must_be_covered_by" id="topology_must_be_covered_by_hidden" value="false">
+		<input type="hidden" name="topology_covered_by_layer" id="topology_covered_by_layer_hidden" value="">
+		<input type="hidden" name="topology_must_not_overlap_with" id="topology_must_not_overlap_with_hidden" value="false">
+		<input type="hidden" name="topology_overlap_layers" id="topology_overlap_layers_hidden" value="">
+		<input type="hidden" name="topology_must_be_contiguous" id="topology_must_be_contiguous_hidden" value="false">
+		<input type="hidden" name="topology_contiguous_tolerance" id="topology_contiguous_tolerance_hidden" value="1.0">
+		
+		{% if form.errors %}
 			<div id="form-error" style="color:#ff0000;">
 				<ul>
 				{% for field in form %}
@@ -45,6 +56,7 @@
 			<li role="presentation"><a href="#tab-layer-field-trans" data-toggle="tab">{% trans "Field titles" %}</a></li>
 			<li role="presentation" class="tab-li-layer-fieldgroups"><a href="#tab-layer-fieldgroups" data-toggle="tab">{% trans "Field groups" %}</a></li>
 			<li role="presentation" class="tab-li-layer-fieldgroup-trans"><a href="#tab-layer-fieldgroup-trans" data-toggle="tab">{% trans "Group titles" %}</a></li>
+			<li role="presentation"><a href="#tab-editing-restrictions" data-toggle="tab">{% trans "Editing restrictions" %}</a></li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane active" id="tab-layer-config">
@@ -298,6 +310,151 @@
 					</div>
 				</div>
 			</div>
+			<div class="tab-pane" id="tab-editing-restrictions">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-header with-border">
+								<h3 class="box-title">{% trans "Topological rules" %}</h3>
+							</div>
+							<div class="box-body">
+								<div class="row">
+									<div class="col-md-12">
+										<div class="table-responsive">
+											<table id="topology-rules-table" class="table no-margin">
+												<thead>
+													<tr>
+														<th width="18%">{% trans "Rule" %}</th>
+														<th width="25%">{% trans "Description" %}</th>
+														<th width="20%">{% trans "Geometry Limitations" %}</th>
+														<th width="8%">{% trans "Active" %}</th>
+														<th width="29%">{% trans "Configuration" %}</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td>{% trans "Must not overlap" %}</td>
+														<td class="rule-description">
+															<small class="text-muted">{% trans "Geometries within the same layer cannot overlap with each other" %}</small>
+														</td>
+														<td class="geometry-limitations">
+															<small class="text-success">
+																<i class="fa fa-check"></i> {% trans "Compatible with all geometry types" %}
+															</small>
+														</td>
+														<td>
+															<input type="checkbox" name="no_overlap" id="no_overlap" value="1">
+														</td>
+														<td>
+															<span class="text-muted">{% trans "No additional configuration required" %}</span>
+														</td>
+													</tr>
+													<tr>
+														<td>{% trans "Must not have gaps" %}</td>
+														<td class="rule-description">
+															<small class="text-muted">{% trans "The layer coverage must be continuous without empty spaces between geometries" %}</small>
+														</td>
+														<td class="geometry-limitations">
+															<small class="text-success">
+																<i class="fa fa-check"></i> {% trans "Polygons" %}: {% trans "Recommended" %}<br>
+															</small>
+															<small class="text-warning">
+																<i class="fa fa-exclamation-triangle"></i> {% trans "Lines" %}: {% trans "Limited use" %}<br>
+															</small>
+															<small class="text-danger">
+																<i class="fa fa-times"></i> {% trans "Points" %}: {% trans "Not applicable" %}
+															</small>
+														</td>
+														<td>
+															<input type="checkbox" name="no_gaps" id="no_gaps" value="1">
+														</td>
+														<td>
+															<span class="text-muted">{% trans "No additional configuration required" %}</span>
+														</td>
+													</tr>
+													<tr>
+														<td>{% trans "Must be covered by" %}</td>
+														<td class="rule-description">
+															<small class="text-muted">{% trans "All geometries must be completely covered by geometries from another layer" %}</small>
+														</td>
+														<td class="geometry-limitations">
+															<small class="text-success">
+																<i class="fa fa-check"></i> {% trans "Compatible with all geometry types" %}
+															</small>
+														</td>
+														<td>
+															<input type="checkbox" name="must_be_covered_by" id="must_be_covered_by" value="1">
+														</td>
+														<td>
+															<div id="covered_by_layer_group" class="topology-control-group">
+																<select class="form-control" name="covered_by_layer" id="covered_by_layer">
+																	<option value="">{% trans "Select a layer" %}</option>
+																	<!-- Las capas se cargarán dinámicamente vía AJAX -->
+																</select>
+															</div>
+														</td>
+													</tr>
+													<tr>
+														<td>{% trans "Must not overlap with" %}</td>
+														<td class="rule-description">
+															<small class="text-muted">{% trans "Geometries cannot overlap with geometries from specified layers" %}</small>
+														</td>
+														<td class="geometry-limitations">
+															<small class="text-success">
+																<i class="fa fa-check"></i> {% trans "Compatible with all geometry types" %}
+															</small>
+														</td>
+														<td>
+															<input type="checkbox" name="must_not_overlap_with" id="must_not_overlap_with" value="1">
+														</td>
+														<td>
+															<div id="overlap_layers_group" class="topology-control-group">
+																<select class="form-control" name="overlap_layers" id="overlap_layers" multiple>
+																	<!-- Las capas se cargarán dinámicamente vía AJAX -->
+																</select>
+																<small class="form-text text-muted">{% trans "Select multiple layers" %}</small>
+															</div>
+														</td>
+													</tr>
+													<tr>
+														<td>{% trans "Must be contiguous" %}</td>
+														<td class="rule-description">
+															<small class="text-muted">{% trans "Geometries must be connected." %}</small>
+														</td>
+														<td class="geometry-limitations">
+															<small class="text-success">
+																<i class="fa fa-check"></i> {% trans "Polygons" %}: {% trans "Recommended" %}<br>
+															</small>
+															<small class="text-warning">
+																<i class="fa fa-exclamation-triangle"></i> {% trans "Lines" %}: {% trans "Suitable for networks" %}<br>
+															</small>
+															<small class="text-danger">
+																<i class="fa fa-times"></i> {% trans "Points" %}: {% trans "Not applicable" %}
+															</small>
+														</td>
+														<td>
+															<input type="checkbox" name="must_be_contiguous" id="must_be_contiguous" value="1">
+														</td>
+														<td>
+															<div id="tolerance_group" class="topology-control-group">
+																<div class="input-group" style="max-width: 200px;">
+																	<input type="number" class="form-control" name="contiguous_tolerance" id="contiguous_tolerance" value="1" step="1" min="0" placeholder="{% trans 'Tolerance' %}">
+																	<div class="input-group-addon">m</div>
+																</div>
+																<small class="form-text text-muted">{% trans "Tolerance distance for contiguity check" %}</small>
+															</div>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -324,6 +481,107 @@
 
 {% block extra-scripts %}
 <script type="text/javascript" src="{% static "js/gvsigollibs/layers/newFieldUi.js" %}"></script>
+<style>
+/* Estilos para la pestaña de restricciones de edición */
+#topology-rules-table {
+	margin-bottom: 0;
+}
+
+#topology-rules-table tbody tr td:first-child {
+	font-weight: 500;
+	vertical-align: middle;
+}
+
+#topology-rules-table tbody tr td:nth-child(2) {
+	vertical-align: middle;
+	padding-right: 15px;
+}
+
+#topology-rules-table tbody tr td:nth-child(3) {
+	vertical-align: middle;
+	padding-right: 10px;
+	line-height: 1.3;
+}
+
+#topology-rules-table tbody tr td:nth-child(4) {
+	text-align: left;
+	vertical-align: middle;
+	width: 60px;
+	padding-left: 15px;
+}
+
+#topology-rules-table tbody tr td:nth-child(5) {
+	vertical-align: middle;
+}
+
+.geometry-limitations {
+	font-size: 11px;
+	line-height: 1.4;
+}
+
+.geometry-limitations .text-success {
+	color: #5cb85c !important;
+}
+
+.geometry-limitations .text-warning {
+	color: #f0ad4e !important;
+}
+
+.geometry-limitations .text-danger {
+	color: #d9534f !important;
+}
+
+.topology-control-group {
+	margin-top: 5px;
+}
+
+.topology-control-group.hidden {
+	display: none;
+}
+
+.rule-description {
+	vertical-align: middle !important;
+	padding-right: 10px;
+}
+
+.rule-description small {
+	line-height: 1.3;
+	color: #666;
+}
+
+#topology-rules-table .select2-container {
+	width: 100% !important;
+}
+
+#topology-rules-table input[type="checkbox"] {
+	transform: scale(1.3);
+	margin: 0;
+}
+
+#tolerance_group .input-group {
+	max-width: 200px;
+}
+
+#topology-rules-table .form-text {
+	margin-top: 5px;
+	font-size: 12px;
+}
+
+/* Espaciado mejorado para la tabla */
+#topology-rules-table tbody tr {
+	border-bottom: 1px solid #f4f4f4;
+}
+
+#topology-rules-table tbody tr:last-child {
+	border-bottom: none;
+}
+
+/* Estilo para botón deshabilitado */
+.save-button.disabled {
+	opacity: 0.6;
+	cursor: not-allowed !important;
+}
+</style>
 <script type="text/javascript">
 
 	$('#menu-manage-services').addClass("active");
@@ -855,6 +1113,7 @@
 				$("body").overlayout();
 				return;
 			}
+			
 			var jsonGroups = [];
 			var lastGroup;
 			$('#field-groups-order').children().each(function(idx, elem) {
@@ -881,6 +1140,256 @@
 				}
 			});
 			$('#form_groups').val(JSON.stringify(jsonGroups));
+			
+			// Actualizar campos ocultos con valores de reglas topológicas antes de enviar
+			$('#topology_no_overlap_hidden').val($('#no_overlap').is(':checked') ? 'true' : 'false');
+			$('#topology_no_gaps_hidden').val($('#no_gaps').is(':checked') ? 'true' : 'false');
+			$('#topology_must_be_covered_by_hidden').val($('#must_be_covered_by').is(':checked') ? 'true' : 'false');
+			$('#topology_covered_by_layer_hidden').val($('#covered_by_layer').val() || '');
+			$('#topology_must_not_overlap_with_hidden').val($('#must_not_overlap_with').is(':checked') ? 'true' : 'false');
+			$('#topology_overlap_layers_hidden').val(JSON.stringify($('#overlap_layers').val() || []));
+			$('#topology_must_be_contiguous_hidden').val($('#must_be_contiguous').is(':checked') ? 'true' : 'false');
+			$('#topology_contiguous_tolerance_hidden').val($('#contiguous_tolerance').val() || '1.0');
+		});
+
+		// Funcionalidad para la pestaña de Restricciones de edición
+		$(document).ready(function() {
+			// Función para habilitar/deshabilitar controles (siempre visibles)
+			function toggleTopologyControls() {
+				console.log('Ejecutando toggleTopologyControls...');
+				var coveredByChecked = $('#must_be_covered_by').is(':checked');
+				var overlapWithChecked = $('#must_not_overlap_with').is(':checked');
+				var contiguousChecked = $('#must_be_contiguous').is(':checked');
+				console.log('Checkboxes:', { coveredByChecked, overlapWithChecked, contiguousChecked });
+
+				// Control de "Must be covered by" - solo habilitar/deshabilitar
+				if (coveredByChecked) {
+					$('#covered_by_layer').prop('disabled', false);
+				} else {
+					$('#covered_by_layer').val('').trigger('change');
+					$('#covered_by_layer').prop('disabled', true);
+				}
+
+				// Control de "Must not overlap with" - solo habilitar/deshabilitar
+				if (overlapWithChecked) {
+					$('#overlap_layers').prop('disabled', false);
+				} else {
+					$('#overlap_layers').val([]).trigger('change');
+					$('#overlap_layers').prop('disabled', true);
+				}
+
+				// Control de "Must be contiguous" - solo habilitar/deshabilitar
+				if (contiguousChecked) {
+					$('#contiguous_tolerance').prop('disabled', false);
+				} else {
+					$('#contiguous_tolerance').prop('disabled', true);
+				}
+			}
+
+			// Función para validar reglas topológicas
+			function validateTopologyRules() {
+				var errors = [];
+				
+				// Validar "Must be covered by"
+				if ($('#must_be_covered_by').is(':checked')) {
+					var coveredByLayer = $('#covered_by_layer').val();
+					if (!coveredByLayer || coveredByLayer.trim() === '') {
+						errors.push('Must select a layer for "Must be covered by" rule');
+					}
+				}
+				
+				// Validar "Must not overlap with"
+				if ($('#must_not_overlap_with').is(':checked')) {
+					var overlapLayers = $('#overlap_layers').val();
+					if (!overlapLayers || overlapLayers.length === 0) {
+						errors.push('Must select at least one layer for "Must not overlap with" rule');
+					}
+				}
+				
+				// Habilitar/deshabilitar botón de guardar
+				if (errors.length > 0) {
+					$('.save-button').prop('disabled', true).addClass('disabled');
+					$('.save-button').attr('title', 'Cannot save: ' + errors.join(', '));
+				} else {
+					$('.save-button').prop('disabled', false).removeClass('disabled');
+					$('.save-button').removeAttr('title');
+				}
+				
+				return errors.length === 0;
+			}
+
+			// Event handlers para los checkboxes
+			$('#must_be_covered_by').change(function() {
+				toggleTopologyControls();
+				setTimeout(validateTopologyRules, 100);
+			});
+			$('#must_not_overlap_with').change(function() {
+				toggleTopologyControls();
+				setTimeout(validateTopologyRules, 100);
+			});
+			$('#must_be_contiguous').change(function() {
+				toggleTopologyControls();
+				setTimeout(validateTopologyRules, 100);
+			});
+
+			// Función para cargar capas disponibles
+			function loadAvailableLayers() {
+				console.log('Cargando capas disponibles...');
+				
+				$.ajax({
+					type: 'GET',
+					url: '/gvsigonline/services/get_topology_available_layers/{{layer_id}}/',
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success: function(response) {
+						if (response.status === 'success') {
+							// Limpiar opciones existentes (mantener solo la opción vacía)
+							$('#covered_by_layer option:not([value=""])').remove();
+							$('#overlap_layers option').remove();
+							
+							// Agregar las capas reales
+							$.each(response.layers, function(index, layer) {
+								var tooltip = layer.geom_type + ' - ' + layer.workspace;
+								if (layer.layer_title) {
+									tooltip += ' (' + layer.layer_title + ')';
+								}
+								var option = '<option value="' + layer.id + '" title="' + tooltip + '">' + layer.name + '</option>';
+								$('#covered_by_layer').append(option);
+								$('#overlap_layers').append(option);
+							});
+							
+							console.log('Capas cargadas: ' + response.total + ' (excluyendo capa actual: ' + response.current_layer_name + ')');
+							initializeTopologySelect2();
+							// Cargar reglas existentes después de cargar las capas
+							loadExistingTopologyRules();
+						} else {
+							console.error('Error al cargar capas:', response.message);
+						}
+					},
+					error: function(xhr, status, error) {
+						console.error('Error AJAX al cargar capas:', error);
+					}
+				});
+			}
+
+			// Función para cargar reglas topológicas existentes
+			function loadExistingTopologyRules() {
+				console.log('Cargando reglas topológicas existentes...');
+				
+				$.ajax({
+					type: 'GET',
+					url: '/gvsigonline/services/get_topology_rules/{{layer_id}}/',
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success: function(response) {
+						if (response.status === 'success') {
+							var rules = response.rules;
+							
+							// Establecer checkboxes
+							$('#no_overlap').prop('checked', rules.no_overlap);
+							$('#no_gaps').prop('checked', rules.no_gaps);
+							$('#must_be_covered_by').prop('checked', rules.must_be_covered_by);
+							$('#must_not_overlap_with').prop('checked', rules.must_not_overlap_with);
+							$('#must_be_contiguous').prop('checked', rules.must_be_contiguous);
+							
+							// Establecer valores de configuración
+							if (rules.covered_by_layer) {
+								$('#covered_by_layer').val(rules.covered_by_layer).trigger('change');
+							}
+							if (rules.overlap_layers && rules.overlap_layers.length > 0) {
+								$('#overlap_layers').val(rules.overlap_layers).trigger('change');
+							}
+							if (rules.contiguous_tolerance) {
+								$('#contiguous_tolerance').val(rules.contiguous_tolerance);
+							}
+							
+							console.log('Reglas cargadas: ' + response.total_rules);
+							
+							// Actualizar controles después de cargar las reglas
+							setTimeout(function() {
+								toggleTopologyControls();
+								validateTopologyRules();
+							}, 200);
+						} else {
+							console.log('No hay reglas existentes para esta capa');
+							
+							// Actualizar controles aunque no haya reglas
+							setTimeout(function() {
+								toggleTopologyControls();
+								validateTopologyRules();
+							}, 200);
+						}
+					},
+					error: function(xhr, status, error) {
+						console.log('No se pudieron cargar las reglas existentes:', error);
+					}
+				});
+			}
+
+			// Función para inicializar Select2
+			function initializeTopologySelect2() {
+				console.log('Inicializando Select2...');
+				
+				// Destruir instancias existentes si las hay
+				if ($('#covered_by_layer').hasClass('select2-hidden-accessible')) {
+					$('#covered_by_layer').select2('destroy');
+				}
+				if ($('#overlap_layers').hasClass('select2-hidden-accessible')) {
+					$('#overlap_layers').select2('destroy');
+				}
+				
+				// Inicializar Select2 para selects simples
+				$('#covered_by_layer').select2({
+					placeholder: "{% trans 'Select a layer' %}",
+					allowClear: true,
+					width: '100%'
+				});
+
+				// Inicializar Select2 para selects múltiples
+				$('#overlap_layers').select2({
+					placeholder: "{% trans 'Select layers' %}",
+					allowClear: true,
+					width: '100%',
+					multiple: true
+				});
+				
+				// Event handlers para los selects
+				$('#covered_by_layer').on('change select2:select select2:unselect', function() {
+					setTimeout(validateTopologyRules, 100);
+				});
+				$('#overlap_layers').on('change select2:select select2:unselect', function() {
+					setTimeout(validateTopologyRules, 100);
+				});
+				
+				console.log('Select2 inicializado correctamente');
+			}
+
+			// Inicializar estado al cargar la página
+			setTimeout(function() {
+				console.log('Inicializando pestaña de topology...');
+				loadAvailableLayers();
+				setTimeout(function() {
+					toggleTopologyControls();
+					validateTopologyRules();
+				}, 500);
+			}, 300);
+
+			// Re-inicializar cuando se cambie a la pestaña de restricciones
+			$('a[href="#tab-editing-restrictions"]').on('shown.bs.tab', function() {
+				console.log('Cambiando a pestaña de restricciones...');
+				setTimeout(function() {
+					// Solo re-inicializar Select2 si las capas ya están cargadas
+					if ($('#covered_by_layer option').length > 1) {
+						initializeTopologySelect2();
+					} else {
+						loadAvailableLayers();
+					}
+					toggleTopologyControls();
+					validateTopologyRules();
+				}, 100);
+			});
 		});
 </script>
 {% endblock %}
