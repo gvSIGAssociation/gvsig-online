@@ -402,6 +402,12 @@ function configure() {
 	fi
 	grep -l "##LANGUAGE_CODE##" gvsigol/settings_tpl.py | xargs sed -i "s ##LANGUAGE_CODE## $LANGUAGE_CODE g"
 
+	if [ -z $GEOSERVER_USE_KEEPALIVE ]; then
+		echo "WARNING: GEOSERVER_USE_KEEPALIVE is not defined, using 'True'"
+		GEOSERVER_USE_KEEPALIVE="True"
+	fi
+	grep -rl "##GEOSERVER_USE_KEEPALIVE##"  | xargs sed -i "s/##GEOSERVER_USE_KEEPALIVE##/$GEOSERVER_USE_KEEPALIVE/g"
+
 }
 
 function move_template() {	
