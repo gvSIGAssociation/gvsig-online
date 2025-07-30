@@ -33,6 +33,7 @@ import logging
 logger = logging.getLogger("gvsigol")
 from .xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText, sanitizeXmlText
 from future.moves.urllib.parse import quote
+from gvsigol_plugin_catalog.settings import GEONETWORK_USE_KEEPALIVE
 
 DEFAULT_TIMEOUT = 10 #seconds
 
@@ -58,7 +59,7 @@ class Geonetwork():
         self.session = requests.Session()
         self.session.verify = False
         self.service_url = service_url
-        if not settings.GEONETWORK_USE_KEEPALIVE:
+        if not GEONETWORK_USE_KEEPALIVE:
             self._override_headers = {"Connection": "close"}
             self.session.headers.update(self._override_headers)
         else:
