@@ -159,7 +159,8 @@ env = environ.Env(
     #Countries
     COUNTRIES_ONLY = (list, []),
     COUNTRIES_FIRST = (list, []),
-    COUNTRIES_FIRST_BREAK = (str,"----")    
+    COUNTRIES_FIRST_BREAK = (str,"----"),
+    GEOSERVER_USE_KEEPALIVE = (bool,True),
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)

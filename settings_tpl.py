@@ -338,6 +338,7 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': '##DB_PASSWD##',
     'jndiname': '##DB_JNDI_NAME##'
 }
+GEOSERVER_USE_KEEPALIVE = '##GEOSERVER_USE_KEEPALIVE##'.lower() == 'true'
 
 # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
 MOSAIC_DB = {
