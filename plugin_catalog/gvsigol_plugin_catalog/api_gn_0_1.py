@@ -58,6 +58,18 @@ class Geonetwork():
         self.session = requests.Session()
         self.session.verify = False
         self.service_url = service_url
+        if not settings.GEONETWORK_USE_KEEPALIVE:
+            self._override_headers = {"Connection": "close"}
+            self.session.headers.update(self._override_headers)
+        else:
+            self._override_headers = {}
+
+    def _apply_override_headers(self, headers):
+        """Apply global override headers to the given headers"""
+        merged = headers.copy()
+        merged['X-XSRF-TOKEN'] = self.get_csrf_token()
+        merged.update(self._override_headers)
+        return merged
         
     def get_session(self):
         return self.session
@@ -76,9 +88,7 @@ class Geonetwork():
             r = self.session.post(URL, timeout=get_default_timeout(), proxies=settings.PROXIES)
             logger.debug("1- Status code: {}, Message: {}, URL: {}".format(r.status_code, r.text, URL))
             if r.status_code==403:
-                headers = {
-                    'X-XSRF-TOKEN': self.get_csrf_token()
-                }
+                headers = self._apply_override_headers({})
                 
                 r = self.session.post(URL, auth=(user, password), headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
                 if r.status_code==200:
@@ -105,11 +115,10 @@ class Geonetwork():
         #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'  
         # 'http://localhost:8080/geonetwork/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=generateUUID&transformWith=_none_'
         url = self.service_url + "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=GENERATEUUID&transformWith=_none_"
-        headers = {
+        headers = self._apply_override_headers({
             'Content-Type': 'application/xml',
-            'Accept': 'application/json',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+            'Accept': 'application/json'
+        })
         r = self.session.put(url, data=md_record.encode("UTF-8"), headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         
         if r.status_code==201:
@@ -147,11 +156,10 @@ class Geonetwork():
         metadata +=         '</csw:Constraint>'
         metadata +=     '</csw:Update>'
         metadata += '</csw:Transaction>'
-        headers = {
+        headers = self._apply_override_headers({
             'Accept': 'application/xml',
-            'Content-Type': 'application/xml',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+            'Content-Type': 'application/xml'
+        })
         csw_transaction_url = self.service_url + "/srv/eng/csw-publication"
         csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata.encode("UTF-8"), timeout=get_default_timeout(), proxies=settings.PROXIES)
         if csw_response.status_code==200:
@@ -187,9 +195,7 @@ class Geonetwork():
         Note this action does NOT add the thumnail to the metadata content (graphicOverview).
         """
         url = self.service_url + "/srv/api/0.1/records/"+uuid+"/attachments?url=" + thumbnail_url
-        headers = {
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+        headers = self._apply_override_headers({})
         r = self.session.put(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r.status_code==201:
             return True
@@ -200,11 +206,10 @@ class Geonetwork():
     
     def set_metadata_privileges(self, uuid):
         #url = self.service_url + "md.privileges.update?_content_type=json&_1_0=on&_1_1=on&_2_0=on&_2_3=on&uuid=" + uuid
-        headers = {
+        headers = self._apply_override_headers({
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+            'Content-Type': 'application/json'
+        })
         privileges = {
             "privileges": []
         }
@@ -261,11 +266,10 @@ class Geonetwork():
         
         #url3 = self.service_url + "srv/api/md.privileges.update?_content_type=json&_1_0=on&_1_1=on&_2_0=on&_2_3=on&uuid=" + uuid
         url3 = self.service_url + "/srv/api/0.1/records/"+ uuid +"/sharing"
-        headers = {
+        headers = self._apply_override_headers({
                 'Accept': '*/*',
-                'content-type': 'application/json',
-                'X-XSRF-TOKEN': self.get_csrf_token()
-            }
+                'content-type': 'application/json'
+            })
         r3 = self.session.put(url3, data=json.dumps(privileges), headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r3.status_code==204:
             return True
@@ -278,10 +282,9 @@ class Geonetwork():
         #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/159?withBackup=false'
         #NOTE: uuid is an id not in format 97769e85-2e7b-418b-a8c8-0163bfb97aac
         url = self.service_url + "/srv/api/0.1/records/"+str(lm.metadata_id)+"?withBackup=false"
-        headers = {
-            'Accept': 'application/json',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+        headers = self._apply_override_headers({
+            'Accept': 'application/json'
+        })
               
         r = self.session.delete(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r.status_code==204:
@@ -354,10 +357,9 @@ class Geonetwork():
 
     def gn_get_metadata_raw(self, metadata_id):
         url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)
-        headers = {
-            'Accept': 'application/xml',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+        headers = self._apply_override_headers({
+            'Accept': 'application/xml'
+        })
               
         r = self.session.get(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         logger.debug('gn_get_metadata_raw: ' + text(r.status_code))
@@ -369,10 +371,9 @@ class Geonetwork():
         #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/97769e85-2e7b-418b-a8c8-0163bfb97aac?withBackup=false'
         url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)+""
         print(("Getting metadata from uuid:" + str(metadata_id) + " -> " + url))
-        headers = {
-            'Accept': 'application/xml',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+        headers = self._apply_override_headers({
+            'Accept': 'application/xml'
+        })
               
         r = self.session.get(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r.status_code==200:
@@ -516,10 +517,9 @@ class Geonetwork():
     
     def get_query(self, query):
         url = self.service_url + "/srv/eng/q?" + query
-        headers = {
-            'Accept': 'application/json',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+        headers = self._apply_override_headers({
+            'Accept': 'application/json'
+        })
               
         r = self.session.get(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r.status_code==200:
@@ -530,11 +530,10 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
 
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
-        headers = {
+        headers = self._apply_override_headers({
             'Accept': 'application/xml',
-            'Content-Type': 'application/xml',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+            'Content-Type': 'application/xml'
+        })
         md_url = self.service_url + "/srv/api/0.1/records/" + uuid
         md_response = self.session.get(md_url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if md_response.status_code == 200:
@@ -570,11 +569,10 @@ class Geonetwork():
         encoded in the provided metadata_record_uuid
         """
         url = self.service_url + "/srv/api/0.1/records/" + record_uuid + "/related?type=onlines" # /related?type=onlines&start=1&rows=100
-        headers = {
-            'Accept': 'application/json',
-            #'Accept': 'application/xml',
-            'X-XSRF-TOKEN': self.get_csrf_token()
-        }
+        headers = self._apply_override_headers({
+            'Accept': 'application/json'
+            #'Accept': 'application/xml'
+        })
               
         r = self.session.get(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r.status_code==200:

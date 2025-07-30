@@ -62,6 +62,11 @@ if [ -z "$CATALOG_CUSTOM_FILTER_URL" ]; then
         echo "WARNING: CATALOG_CUSTOM_FILTER_URL is not defined, using default value ''."
         CATALOG_CUSTOM_FILTER_URL=""
 fi
+if [ -z $GEONETWORK_USE_KEEPALIVE ]; then
+        echo "WARNING: GEONETWORK_USE_KEEPALIVE is not defined, using 'True'"
+        GEONETWORK_USE_KEEPALIVE="True"
+fi
+grep -rl "##GEONETWORK_USE_KEEPALIVE##"  | xargs sed -i "s/##GEONETWORK_USE_KEEPALIVE##/$GEONETWORK_USE_KEEPALIVE/g"
 
 # debugging...
 echo "CATALOG_API_VERSION" $CATALOG_API_VERSION
