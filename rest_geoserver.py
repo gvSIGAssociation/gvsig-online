@@ -59,6 +59,17 @@ class Geoserver():
         self.service_url = service_url
         self.gwc_url =  gwc_url
         self.session.auth = (user, password)
+        if not settings.GEOSERVER_USE_KEEPALIVE:
+            self._override_headers = {"Connection": "close"}
+            self.session.headers.update(self._override_headers)
+        else:
+            self._override_headers = {}
+    
+    def _apply_override_headers(self, headers):
+        """Apply global override headers to the given headers"""
+        merged = headers.copy()
+        merged.update(self._override_headers)
+        return merged
         
     def get_session(self):
         return self.session
@@ -141,8 +152,10 @@ class Geoserver():
     
     def create_wmsstore(self, ws_name, store_name, capabilitiesURL, wmsuser=None, wmspassword=None, user=None, password=None):
         url = self.service_url + "/workspaces/" + ws_name + "/wmsstores"
-        headers = {"Content-type": "application/xml",
-                   "Accept": "application/xml"}
+        headers = self._apply_override_headers({
+            "Content-type": "application/xml",
+            "Accept": "application/xml"
+        })
         
         if user and password:
             auth = (user, password)
@@ -180,10 +193,10 @@ class Geoserver():
         data["wmsStore"]["user"] = wmsuser
         data["wmsStore"]["password"] = wmspassword
         
-        headers = {
+        headers = self._apply_override_headers({
             "Content-type": "application/json",
             "Accept": "application/json"
-        }
+        })
         
         if user and password:
             auth = (user, password)
@@ -196,7 +209,7 @@ class Geoserver():
     
     def create_coveragestore(self, workspace, store, filetype, file, coverage_name, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/file.imagemosaic"
-        headers = {'content-type': "text/xml"}
+        headers = self._apply_override_headers({'content-type': "text/xml"})
         
         if user and password:
             auth = (user, password)
@@ -224,7 +237,7 @@ class Geoserver():
 
     def create_coveragestore_layer(self, workspace, store, name, title, coverage_name, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/coverages/"
-        headers = {'content-type': "text/xml"}
+        headers = self._apply_override_headers({'content-type': "text/xml"})
         
         if user and password:
             auth = (user, password)
@@ -260,7 +273,7 @@ class Geoserver():
 
     def upload_feature_type(self, workspace, store, name, filetype, file, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/datastores/" + store + "/file."+filetype
-        headers = {'content-type': self.get_content_type(filetype)}
+        headers = self._apply_override_headers({'content-type': self.get_content_type(filetype)})
         if user and password:
             auth = (user, password)
         else:
@@ -325,7 +338,7 @@ class Geoserver():
         #from geoserver.support import DimensionInfo
         
         url =  self.service_url + '/workspaces/'+workspace+'/datastores/'+ds_name+'/featuretypes/'+name+'.xml'
-        headers = {'Content-Type': 'text/xml'}
+        headers = self._apply_override_headers({'Content-Type': 'text/xml'})
        
         data = ''
         data += '<featureType>'
@@ -725,7 +738,7 @@ class Geoserver():
     
     def clear_cache(self, ws, layer, user=None, password=None):
         url = self.gwc_url + "/masstruncate"
-        headers = {'content-type': 'text/xml'}
+        headers = self._apply_override_headers({'content-type': 'text/xml'})
         xml = "<truncateLayer><layerName>" + ws + ":" + layer.name + "</layerName></truncateLayer>"
         if user and password:
             auth = (user, password)
@@ -738,7 +751,7 @@ class Geoserver():
     
     def clear_layergroup_cache(self, name, user=None, password=None):
         url = self.gwc_url + "/masstruncate"
-        headers = {'content-type': 'text/xml'}
+        headers = self._apply_override_headers({'content-type': 'text/xml'})
         xml = "<truncateLayer><layerName>" + name + "</layerName></truncateLayer>"
         if user and password:
             auth = (user, password)
@@ -761,7 +774,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        headers = {'content-type': 'text/xml'}
+        headers = self._apply_override_headers({'content-type': 'text/xml'})
         r = self.session.get(url, headers=headers, auth=auth)
         try:
             root = ET.fromstring(r.content)
@@ -790,7 +803,7 @@ class Geoserver():
             auth = self.session.auth
             #auth = ('admin', 'geoserver')
         
-        headers = {'content-type': 'text/xml'}
+        headers = self._apply_override_headers({'content-type': 'text/xml'})
         data_xml = "<style><name>"+style_name+"</name></style>"
         
         r = self.session.post(url, data=data_xml, headers=headers, auth=auth)
@@ -825,7 +838,7 @@ class Geoserver():
             auth = self.session.auth
             #auth = ('admin', 'geoserver')
         
-        headers = {'content-type': 'text/xml'}
+        headers = self._apply_override_headers({'content-type': 'text/xml'})
         
         for parameterFiltersElem in tree.findall('./parameterFilters'):
             for styleParameterFilterElem in parameterFiltersElem.findall('./styleParameterFilter'):
@@ -856,7 +869,7 @@ class Geoserver():
         else:
             auth = self.session.auth
         
-        headers = { "content-type": "application/vnd.ogc.sld+xml" }
+        headers = self._apply_override_headers({"content-type": "application/vnd.ogc.sld+xml"})
         r = self.session.put(url, data=sld_body, headers=headers, auth=auth)
         if r.status_code==200:
             return True
