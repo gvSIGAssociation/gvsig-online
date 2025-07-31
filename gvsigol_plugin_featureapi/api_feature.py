@@ -1323,7 +1323,7 @@ class FileAttachedFromLinkView(ListAPIView):
             if not os.path.isabs(file_path):
                 file_path = os.path.join(core_settings.MEDIA_ROOT, file_path)
             if(path.exists(file_path)):
-                return sendfile(request, file_path, attachment=False)
+                return sendfile(request, file_path, attachment=False, attachment_filename=filename)
             return HttpException(404, "File NOT found in disk").get_exception()
          
         except HttpException as e:
