@@ -527,6 +527,7 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': env('DB_PASS'),
     'jndiname': env('DB_JNDI_NAME')
 }
+GEOSERVER_USE_KEEPALIVE = env('GEOSERVER_USE_KEEPALIVE')
 
 MOSAIC_DB = {
     'host': env('DB_HOST'),
