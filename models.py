@@ -354,7 +354,7 @@ class LayerConfig:
         field_conf['type_params'] = field_conf.get('type_params', {})    
 
         if field_conf.get('gvsigol_type') == 'link':
-            field_conf['editableactive'] = False
+            field_conf['editableactive'] = True
             field_conf['editable'] = False
 
         return field_conf

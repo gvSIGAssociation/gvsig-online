@@ -519,9 +519,15 @@ function createModalContent(fid, mode, title, config, fieldNames) {
 
   $("#field-name").on("change keyup", function () {
     if ($("#field-name").val()) {
-      document.getElementById("add-field-accept").disabled = false;
+      var acceptButton = document.getElementById("add-field-accept") || document.getElementById("update-field-accept");
+      if (acceptButton) {
+        acceptButton.disabled = false;
+      }
     } else {
-      document.getElementById("add-field-accept").disabled = true;
+      var acceptButton = document.getElementById("add-field-accept") || document.getElementById("update-field-accept");
+      if (acceptButton) {
+        acceptButton.disabled = true;
+      }
     }
   });
 

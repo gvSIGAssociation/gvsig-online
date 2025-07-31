@@ -78,7 +78,6 @@
 														<th>{% trans "Is visible?" %}</th>
 														<th>{% trans "Is editable?" %}</th>
 														<th>{% trans "Is shown in getFeatureInfo?" %}</th>
-														<th>{% trans "gvsigOL type" %}</th>
 														<th>{% trans "Actions" %}</th>
 													</tr>
 												</thead>
@@ -118,7 +117,6 @@
 																	{% else %}
 																	<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
 																	{% endif %}
-																	<td><input readonly type="text" name="field-gvsigol-type-{{counter}}" class="form-control" value="{{f.gvsigol_type|default:''}}" placeholder="{{f.gvsigol_type}}"></td>
 																	<td>
 																	{% if f.editableactive or f.calculationLabel %}
 																		{% if counter > 3 %}
@@ -1117,11 +1115,6 @@
 				$("body").overlayout();
 				return;
 			}
-						
-			$('#field-list-table-body tr').each(function() {
-				var counter = $(this).find('input[name^="field-name-"]').attr('name').split('-').pop();
-				var gvsigolTypeInput = $('input[name="field-gvsigol-type-' + counter + '"]');
-			});
 			
 			var jsonGroups = [];
 			var lastGroup;
