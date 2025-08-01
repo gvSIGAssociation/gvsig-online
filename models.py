@@ -350,6 +350,13 @@ class LayerConfig:
             field_conf['mandatory'] = control_field.get(
                 'mandatory', field_conf['mandatory'])
 
+        field_conf['gvsigol_type'] = field_conf.get('gvsigol_type', '')  
+        field_conf['type_params'] = field_conf.get('type_params', {})    
+
+        if field_conf.get('gvsigol_type') == 'link':
+            field_conf['editableactive'] = True
+            field_conf['editable'] = False
+
         return field_conf
 
     def get_field_conf(self, include_pks=False):
@@ -364,6 +371,31 @@ class LayerConfig:
                 the_field_conf = self.field_conf_dict.get(field_name, {})
                 field = self.init_field_conf(the_field_conf, the_field_info)
                 fields.append(field)
+        
+        # Agregar campos de tipo "link" que están en la configuración pero no en BBDD
+        # existing_field_names = {field.get('name') for field in fields}
+        # for field_conf in self.conf.get('fields', []):
+        #     field_name = field_conf.get('name')
+        #     if field_name not in existing_field_names and field_conf.get('gvsigol_type') == 'link':
+        #         # Crear campo de tipo link con configuración básica
+        #         link_field = {
+        #             'name': field_name,
+        #             'type': 'character varying', 
+        #             'visible': field_conf.get('visible', True),
+        #             'infovisible': field_conf.get('infovisible', True),
+        #             'nullable': field_conf.get('nullable', True),
+        #             'mandatory': field_conf.get('mandatory', False),
+        #             'editable': False,  
+        #             'editableactive': False,
+        #             'gvsigol_type': 'link',
+        #             'type_params': field_conf.get('type_params', {})
+        #         }
+                
+        #         for id, language in settings.LANGUAGES:
+        #             link_field['title-' + id] = field_conf.get('title-' + id, field_name)
+                
+        #         fields.append(link_field)
+        
         return fields
 
     def refresh_field_conf(self, include_pks=False):

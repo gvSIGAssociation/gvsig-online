@@ -86,7 +86,7 @@
 														{% with counter=forloop.counter %}
 																<tr data-fieldname="{{f.name}}">
 																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
-																	<td><input readonly name="field-type-{{counter}}" type="text" class="form-control" value="{{f.type}}"></td>
+																	<td><input readonly name="field-type-{{counter}}" type="text" class="form-control" value="{% if f.gvsigol_type == 'link' %}link{% else %}{{f.type}}{% endif %}"></td>
 																	<td><input readonly name="field-calculation-{{counter}}" type="text" class="form-control" value="{{f.calculationLabel}}"></td>
 																	{% if f.nullable %}
 																	<td><input title="{% trans 'Set at database level' %}" type="checkbox" data-counter="{{counter}}" name="field-nullable-{{counter}}" checked/></td>
@@ -919,7 +919,9 @@
 		  		'type': field.type,
 		  		'enumkey': field.enumkey,
 		  		'layer_id': "{{layer_id}}",
-		  		'calculation': field.calculation
+		  		'calculation': field.calculation,
+		  		'gvsigol_type': field.gvsigol_type || '',
+		  		'type_params': JSON.stringify(field.type_params || {})
 		  	},
 			success	:function(response) {
 				messageBox.show('Info', gettext('Field was added'));
