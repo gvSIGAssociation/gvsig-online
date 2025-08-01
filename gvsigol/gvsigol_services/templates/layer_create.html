@@ -342,8 +342,10 @@
 
 	function addField(field) {
 
+		field.gvsigol_type = field.gvsigol_type || '';
+		field.type_params = field.type_params || {};
+		
 		fields.push(field);
-		console.log(field);
 		var ui = '';
 		ui += '<tr data-rowid="' + field.id + '">';
 		ui += 	'<td id="field-name-' + field.id + '">' + field.name + '</td>';
@@ -357,7 +359,12 @@
 
 		$(".edit-field-" + field.id).on('click', function(e){
 			e.preventDefault();
-			createModalContent(field.id, 'update', '{% trans "New field" %}', config);
+			// Extraer nombres de campos ya añadidos (no guardados)
+			var fieldNames = [];
+			for (var i = 0; i < fields.length; i++) {
+				fieldNames.push(fields[i].name);
+			}
+			createModalContent(field.id, 'update', '{% trans "New field" %}', config, fieldNames);
 		});
 		$(".delete-field-" + field.id).on('click', function(e){
 			e.preventDefault();
@@ -656,7 +663,13 @@
 		});
 
 		$("#add-field-button").on('click', function(e){
-			createModalContent(null, 'create', '{% trans "New field" %}', config);
+			// Extraer nombres de campos ya añadidos (no guardados)
+			var fieldNames = [];
+			for (var i = 0; i < fields.length; i++) {
+				fieldNames.push(fields[i].name);
+			}
+			
+			createModalContent(null, 'create', '{% trans "New field" %}', config, fieldNames);
 		});
 
 		$("form").submit(function(event) {
