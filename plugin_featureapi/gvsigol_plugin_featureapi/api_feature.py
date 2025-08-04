@@ -52,6 +52,49 @@ import logging
 
 LOGGER_NAME='gvsigol'
 
+def handle_topology_error(e):
+    """
+    Maneja errores de topología extrayendo el GeoJSON y devolviendo una respuesta estructurada.
+    
+    Args:
+        e: HttpException con posible error de topología
+        
+    Returns:
+        JsonResponse con error estructurado si es error de topología, None en caso contrario
+    """
+    if hasattr(e, 'msg') and 'TOPOLOGY ERROR' in str(e.msg):
+        try:
+            import re
+            import json
+            error_msg = str(e.msg)
+            
+            # Extraer el mensaje desde después de los dos puntos hasta el primer punto
+            topology_pattern = r'TOPOLOGY ERROR: (.*?)\.'
+            topology_match = re.search(topology_pattern, error_msg)
+            topology_message = topology_match.group(1) if topology_match else 'Unknown topology violation'
+            
+            # Extraer GeoJSON entre ##
+            geojson_pattern = r'##(.*?)##'
+            geojson_match = re.search(geojson_pattern, error_msg)
+            if geojson_match:
+                geojson_str = geojson_match.group(1)
+                try:
+                    geojson_obj = json.loads(geojson_str)
+                    # Devolver error estructurado con GeoJSON
+                    return JsonResponse({
+                        'topology_error': topology_message,
+                        'geometry': geojson_obj
+                    }, status=400)
+                except json.JSONDecodeError:
+                    # Si el GeoJSON no es válido, devolver error normal
+                    pass
+        except Exception:
+            # Si hay algún error procesando, devolver error normal
+            pass
+    
+    # Para errores no topológicos o si falla el procesamiento
+    return None
+
 class CoordsFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
         fields = [
@@ -231,6 +274,12 @@ class FeaturesView(CreateAPIView):
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
+            # Intentar manejar como error de topología
+            topology_response = handle_topology_error(e)
+            if topology_response:
+                return topology_response
+            
+            # Para errores no topológicos o si falla el procesamiento
             return e.get_exception()
     
     
@@ -266,36 +315,10 @@ class FeaturesView(CreateAPIView):
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
-            # Interceptar errores de topología para extraer GeoJSON
-            if hasattr(e, 'msg') and 'TOPOLOGY ERROR' in str(e.msg):
-                try:
-                    import re
-                    import json
-                    error_msg = str(e.msg)
-                    
-                    # Extraer el mensaje desde después de los dos puntos hasta el primer punto
-                    topology_pattern = r'TOPOLOGY ERROR: (.*?)\.'
-                    topology_match = re.search(topology_pattern, error_msg)
-                    topology_message = topology_match.group(1) if topology_match else 'Unknown topology violation'
-                    
-                    # Extraer GeoJSON entre ##
-                    geojson_pattern = r'##(.*?)##'
-                    geojson_match = re.search(geojson_pattern, error_msg)
-                    if geojson_match:
-                        geojson_str = geojson_match.group(1)
-                        try:
-                            geojson_obj = json.loads(geojson_str)
-                            # Devolver error estructurado con GeoJSON
-                            return JsonResponse({
-                                'topology_error': topology_message,
-                                'geometry': geojson_obj
-                            }, status=400)
-                        except json.JSONDecodeError:
-                            # Si el GeoJSON no es válido, devolver error normal
-                            pass
-                except Exception:
-                    # Si hay algún error procesando, devolver error normal
-                    pass
+            # Intentar manejar como error de topología
+            topology_response = handle_topology_error(e)
+            if topology_response:
+                return topology_response
             
             # Para errores no topológicos o si falla el procesamiento
             return e.get_exception()
