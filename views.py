@@ -1965,6 +1965,87 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         
         # Aquí se pueden añadir más tipos de reglas en el futuro
         
+        elif rule_type == "must_not_overlap_with":
+            # SQL para función MUST NOT OVERLAP WITH
+            overlap_geom_fields = kwargs.get('overlap_geom_fields', {})
+            
+            if not overlap_geom_fields:
+                logger.error(f"overlap_geom_fields es requerido para la regla must_not_overlap_with")
+                return None
+            
+            # Construir la consulta dinámica para cada tabla en overlap_layers
+            overlap_checks = []
+            for layer_name, overlap_geom_field in overlap_geom_fields.items():
+                overlap_check = f"""
+                    -- Comprobar solapamiento con {layer_name}
+                    SELECT 1
+                    INTO result
+                    FROM {layer_name}
+                    WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
+                      AND ST_Overlaps(NEW.{geom_field}, {overlap_geom_field})
+                    LIMIT 1;
+
+                    -- Si encuentra un solapamiento, lanza una excepción
+                    IF result = 1 THEN
+                        -- Obtener geometría del solapamiento para el error
+                        SELECT ST_AsGeoJSON(ST_Transform(ST_Intersection(NEW.{geom_field}, {overlap_geom_field}), 4326))
+                        INTO overlap_geojson
+                        FROM {layer_name}
+                        WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
+                          AND ST_Overlaps(NEW.{geom_field}, {overlap_geom_field})
+                        LIMIT 1;
+                        
+                        error_message := 'TOPOLOGY ERROR: Geometry overlaps with layer ' || '{layer_name.replace(".", "-")}' || '. ' ||
+                                        'Overlap geometry: ##' || COALESCE(overlap_geojson, 'NULL') || '##.';
+                        RAISE EXCEPTION '%', error_message;
+                    END IF;
+                    
+                    -- Resetear result para la siguiente verificación
+                    result := NULL;"""
+                overlap_checks.append(overlap_check)
+            
+            # Unir todas las verificaciones
+            all_overlap_checks = ''.join(overlap_checks)
+            
+            function_sql = f"""
+            CREATE OR REPLACE FUNCTION {function_name}()
+            RETURNS TRIGGER AS
+            $$
+            DECLARE
+                result INTEGER;  -- Variable para almacenar el resultado de la consulta
+                radio INTEGER := 1; -- Definir el radio como variable
+                error_message TEXT;
+                overlap_geojson TEXT;
+            BEGIN
+                {all_overlap_checks}
+
+                -- Si no hay solapamiento, continuar con la inserción/actualización
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+            """
+            
+            # SQL para trigger
+            trigger_sql = f"""
+            CREATE TRIGGER {trigger_name}
+            BEFORE INSERT OR UPDATE ON {full_table_name}
+            FOR EACH ROW
+            EXECUTE FUNCTION {function_name}();
+            """
+            
+            return {
+                'function_sql': function_sql,
+                'trigger_sql': trigger_sql,
+                'function_name': function_name,
+                'function_name_simple': function_name_simple,
+                'trigger_name': trigger_name,
+                'table_name': full_table_name,
+                'schema': schema,
+                'pk_field': pk_field,
+                'geom_field': geom_field,
+                'overlap_geom_fields': overlap_geom_fields
+            }
+        
         elif rule_type == "must_be_covered_by":
             # SQL para función MUST BE COVERED BY
             covered_by_layer = kwargs.get('covered_by_layer')
