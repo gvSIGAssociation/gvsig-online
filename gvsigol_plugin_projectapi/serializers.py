@@ -28,7 +28,7 @@ from django.contrib.auth.models import User
 from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers, Application, SharedView
 from gvsigol_plugin_projectapi import util
 from gvsigol_plugin_baseapi.validation import HttpException
-from gvsigol_services.models import LayerGroup, Layer, Server, Marker, Category
+from gvsigol_services.models import LayerGroup, Layer, Server, Marker, Category, FavoriteFilter
 from gvsigol import settings
 from datetime import datetime
 import time
@@ -207,5 +207,11 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
+class FavoriteFilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoriteFilter
+        fields = ['id', 'name', 'description', 'share_filter', 'project', 'layer', 'filter_data', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
 
 

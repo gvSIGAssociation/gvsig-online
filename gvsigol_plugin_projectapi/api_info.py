@@ -51,11 +51,11 @@ from gvsigol_services import geographic_servers
 from gvsigol_services import utils as servicesutils
 from gvsigol_services import views as serviceviews
 from gvsigol_services.models import Layer, LayerGroup, Datastore, Workspace, \
-    LayerResource,Marker,Category
+    LayerResource,Marker,Category,FavoriteFilter
 from gvsigol_symbology.models import StyleLayer
 from .infoserializer import InfoSerializer, PublicInfoSerializer, AppInfoSerializer
 import gvsigol_plugin_projectapi.serializers
-from .serializers import MarkerSerializer, CategorySerializer
+from .serializers import MarkerSerializer, CategorySerializer, FavoriteFilterSerializer
 import gvsigol_plugin_projectapi.util as util
 from os import path
 from django.utils import timezone
@@ -283,5 +283,97 @@ class CategoryView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
+class FilterView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
+    def get(self, request, idProj=None, idLayer=None):
+        """
+        GET /api/v1/filters/ - Obtener todos los filtros favoritos
+        GET /api/v1/filters/project/<idProj>/layer/<idLayer>/ - Obtener filtros favoritos por proyecto y capa
+        """
+        try:
+            if idProj is not None and idLayer is not None:
+                filters = FavoriteFilter.objects.filter(project_id=idProj, layer_id=idLayer)
+                
+                if request.user.is_authenticated:
+                    user_filters = filters.filter(created_by=request.user.username)
+                    shared_filters = filters.filter(share_filter=True)
+                    filters = (user_filters | shared_filters).distinct()
+                else:
+                    filters = filters.filter(share_filter=True)
+            else:
+                if not request.user.is_authenticated:
+                    return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+                
+                filters = FavoriteFilter.objects.filter(created_by=request.user.username)
+            
+            serializer = FavoriteFilterSerializer(filters, many=True)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        """
+        POST /api/v1/filters/ - Crear nuevo filtro favorito
+        """
+        try:
+            data = request.data.copy()
+            data['created_by'] = request.user.username
+            
+            serializer = FavoriteFilterSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, pk):
+        """
+        PUT /api/v1/filters/<pk>/ - Actualizar filtro favorito
+        Solo el creador puede modificar name y description
+        """
+        try:
+            filter_obj = FavoriteFilter.objects.get(pk=pk)
+            
+            if filter_obj.created_by != request.user.username:
+                return Response({'error': 'Only the creator can modify this filter'}, status=status.HTTP_403_FORBIDDEN)
+            
+            data = request.data.copy()
+            allowed_fields = ['name', 'description']
+            filtered_data = {k: v for k, v in data.items() if k in allowed_fields}
+            
+            serializer = FavoriteFilterSerializer(filter_obj, data=filtered_data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except FavoriteFilter.DoesNotExist:
+            return Response({'error': 'Filter not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, pk):
+        """
+        DELETE /api/v1/filters/<pk>/ - Eliminar filtro favorito
+        Solo el creador puede eliminarlo
+        """
+        try:
+            filter_obj = FavoriteFilter.objects.get(pk=pk)
+            
+            if filter_obj.created_by != request.user.username:
+                return Response({'error': 'Only the creator can delete this filter'}, status=status.HTTP_403_FORBIDDEN)
+            
+            filter_obj.delete()
+            return Response({'message': 'Filter deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+            
+        except FavoriteFilter.DoesNotExist:
+            return Response({'error': 'Filter not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
