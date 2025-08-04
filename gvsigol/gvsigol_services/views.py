@@ -2578,9 +2578,22 @@ def layer_config(request, layer_id):
             }
         fields = []
         counter = int(request.POST.get('counter'))
+        
+        existing_fields = {}
+        if 'fields' in old_conf:
+            for old_field in old_conf['fields']:
+                existing_fields[old_field.get('name', '')] = old_field
+        
         for i in range(1, counter+1):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
+            
+            # Preservar gvsigol_type y type_params de la configuración anterior
+            if field['name'] in existing_fields:
+                existing_field = existing_fields[field['name']]
+                field['gvsigol_type'] = existing_field.get('gvsigol_type', '')
+                field['type_params'] = existing_field.get('type_params', {})
+            
             for id, language in LANGUAGES:
                 field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i), field['name']).strip()
             field['visible'] = False
