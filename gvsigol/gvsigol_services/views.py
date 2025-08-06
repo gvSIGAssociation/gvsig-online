@@ -1803,19 +1803,28 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 overlap_area NUMERIC;
                 overlap_geojson TEXT;
                 error_message TEXT;
+                intersection_dimension INTEGER;
             BEGIN
-                -- Buscar geometrías que se solapen y obtener información detallada
+                -- Buscar overlaps usando ST_Relate con patrones DE-9IM específicos
+                -- Aplicamos SnapToGrid al milímetro para evitar problemas de precisión
                 SELECT {pk_field}::TEXT, 
                        ST_Intersection(NEW.{geom_field}, {geom_field}),
-                       ST_Area(ST_Intersection(NEW.{geom_field}, {geom_field}))
-                INTO conflicting_id, overlap_geom, overlap_area
+                       ST_Area(ST_Intersection(NEW.{geom_field}, {geom_field})),
+                       ST_Dimension(ST_Intersection(NEW.{geom_field}, {geom_field}))
+                INTO conflicting_id, overlap_geom, overlap_area, intersection_dimension
                 FROM {full_table_name}
-                WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Para que no calcule el Overlaps a todas las geometrias
-                  AND ST_Overlaps(NEW.{geom_field}, {geom_field}) -- Comprobar solapamiento
+                WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Optimización espacial
+                  AND (
+                      -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
+                      ST_Relate(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({geom_field}, 0.001), 'T*T***T**')
+                      OR
+                      -- Patrón para geometrías idénticas: 'T*F**FFF*' (igualdad)
+                      ST_Relate(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({geom_field}, 0.001), 'T*F**FFF*')
+                  )
                   AND {pk_field} <> NEW.{pk_field} -- Excluir el registro actual en caso de actualización
                 LIMIT 1;
 
-                -- Si hay solapamiento, generar mensaje de error detallado
+                -- Si hay solapamiento real, generar mensaje de error detallado
                 IF conflicting_id IS NOT NULL THEN
                     -- Obtener la geometría completa del solape como GEOJSON en EPSG:4326
                     SELECT ST_AsGeoJSON(ST_Transform(overlap_geom, 4326))
@@ -1823,6 +1832,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     
                     -- Construir mensaje de error estructurado con GEOJSON
                     error_message := 'TOPOLOGY ERROR: Geometry overlaps with existing feature. ' ||
+                                    'Overlap area: ' || COALESCE(overlap_area::TEXT, 'NULL') || ' sq units. ' ||
                                     'Overlap geometry: ##' || COALESCE(overlap_geojson, 'NULL') || '##.';
                     
                     -- Lanzar excepción con información detallada
@@ -1982,7 +1992,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     INTO result
                     FROM {layer_name}
                     WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                      AND ST_Overlaps(NEW.{geom_field}, {overlap_geom_field})
+                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({overlap_geom_field}, 0.001))
                     LIMIT 1;
 
                     -- Si encuentra un solapamiento, lanza una excepción
@@ -1992,7 +2002,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                         INTO overlap_geojson
                         FROM {layer_name}
                         WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                          AND ST_Overlaps(NEW.{geom_field}, {overlap_geom_field})
+                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({overlap_geom_field}, 0.001))
                         LIMIT 1;
                         
                         error_message := 'TOPOLOGY ERROR: Geometry overlaps with layer ' || '{layer_name.replace(".", "-")}' || '. ' ||
@@ -2080,7 +2090,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 INTO covering_union
                 FROM {covered_by_layer}
                 WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({covered_geom_field}, 3857), radio)
-                  AND ST_Intersects({covered_geom_field}, NEW.{geom_field});
+                  AND ST_Intersects(ST_SnapToGrid({covered_geom_field}, 0.001), ST_SnapToGrid(NEW.{geom_field}, 0.001));
 
                 -- Si hay geometrías que intersectan, calcular la parte no cubierta
                 IF covering_union IS NOT NULL THEN
@@ -2166,8 +2176,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     SELECT 1
                     FROM {full_table_name}
                     WHERE ST_Relate(
-                        ST_Transform(NEW.{geom_field}, 3857),
-                        ST_Transform({geom_field}, 3857), 
+                        ST_SnapToGrid(ST_Transform(NEW.{geom_field}, 3857), 0.001),
+                        ST_SnapToGrid(ST_Transform({geom_field}, 3857), 0.001), 
                         'F***1****') -- Toca por borde
                     AND {pk_field} <> NEW.{pk_field}
                 ) THEN
@@ -2658,7 +2668,7 @@ def layer_config(request, layer_id):
             "featuretype": old_conf.get('featuretype', {})
             }
         fields = []
-        counter = int(request.POST.get('counter'))
+        counter = int(request.POST.get('counter', 0))
         
         existing_fields = {}
         if 'fields' in old_conf:
