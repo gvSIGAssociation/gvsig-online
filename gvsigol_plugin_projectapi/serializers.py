@@ -211,7 +211,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class FavoriteFilterSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteFilter
-        fields = ['id', 'name', 'description', 'share_filter', 'project', 'layer', 'filter_data', 'created_by', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
