@@ -1772,6 +1772,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         with i as conn:
             pk_columns = conn.get_pk_columns(table_name, schema)
             geom_columns = conn.get_geometry_columns(table_name, schema)
+            geom_columns_info = conn.get_geometry_columns_info(table_name, schema)
         
         # Validar que existan PK y geometría
         if not pk_columns:
@@ -1783,7 +1784,42 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         pk_field = pk_columns[0]
         geom_field = geom_columns[0]
         
-        logger.info(f"Generando trigger {rule_type} para tabla {full_table_name}: PK='{pk_field}', Geom='{geom_field}'")
+        # Obtener el SRID de la geometría para determinar la precisión del SnapToGrid
+        layer_srid = None
+        if geom_columns_info and len(geom_columns_info) > 0:
+            # geom_columns_info[0][4] es el SRID (posición 4 en la tupla)
+            layer_srid = geom_columns_info[0][4]
+        
+        # Determinar la precisión usando el archivo crs_definitions.json
+        snap_precision = 0.001  # Default para métrico
+        if layer_srid:
+            try:
+                import json
+                import os
+                crs_file_path = os.path.join(settings.BASE_DIR, 'gvsigol', 'crs_definitions.json')
+                with open(crs_file_path, 'r') as f:
+                    crs_definitions = json.load(f)
+                
+                srid_str = str(layer_srid)
+                if srid_str in crs_definitions:
+                    units = crs_definitions[srid_str].get('units', '')
+                    if units == 'degrees':
+                        # Sistema geográfico (grados decimales) - usar precisión muy alta
+                        snap_precision = 0.000000001
+                    elif units == 'meters':
+                        # Sistema métrico (metros) - usar precisión al milímetro
+                        snap_precision = 0.001
+                    else:
+                        # Default para unidades desconocidas
+                        snap_precision = 0.001
+                        logger.warning(f"Unidades desconocidas '{units}' para SRID {layer_srid}, usando precisión métrica por defecto")
+                else:
+                    logger.warning(f"SRID {layer_srid} no encontrado en crs_definitions.json, usando precisión métrica por defecto")
+            except Exception as e:
+                logger.error(f"Error leyendo crs_definitions.json para SRID {layer_srid}: {str(e)}")
+                snap_precision = 0.001  # Default seguro
+        
+        logger.info(f"Generando trigger {rule_type} para tabla {full_table_name}: PK='{pk_field}', Geom='{geom_field}', SRID={layer_srid}, SnapToGrid precision={snap_precision}")
         
         # Nombres únicos para funciones y triggers (con esquema para la función)
         function_name_simple = f"{rule_type}_{table_name.lower()}"
@@ -1798,6 +1834,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             $$
             DECLARE
                 radio INTEGER := 1;
+                snap_precision NUMERIC := {snap_precision};
                 conflicting_id TEXT;
                 overlap_geom GEOMETRY;
                 overlap_area NUMERIC;
@@ -1815,11 +1852,11 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 FROM {full_table_name}
                 WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Optimización espacial
                   AND (
-                      -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
-                      ST_Relate(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({geom_field}, 0.001), 'T*T***T**')
-                      OR
-                      -- Patrón para geometrías idénticas: 'T*F**FFF*' (igualdad)
-                      ST_Relate(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({geom_field}, 0.001), 'T*F**FFF*')
+                                              -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
+                       ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*T***T**')
+                        OR
+                        -- Patrón para geometrías idénticas: 'T*F**FFF*' (igualdad)
+                       ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*F**FFF*')
                   )
                   AND {pk_field} <> NEW.{pk_field} -- Excluir el registro actual en caso de actualización
                 LIMIT 1;
@@ -1992,7 +2029,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     INTO result
                     FROM {layer_name}
                     WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({overlap_geom_field}, 0.001))
+                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
                     LIMIT 1;
 
                     -- Si encuentra un solapamiento, lanza una excepción
@@ -2002,7 +2039,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                         INTO overlap_geojson
                         FROM {layer_name}
                         WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, 0.001), ST_SnapToGrid({overlap_geom_field}, 0.001))
+                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
                         LIMIT 1;
                         
                         error_message := 'TOPOLOGY ERROR: Geometry overlaps with layer ' || '{layer_name.replace(".", "-")}' || '. ' ||
@@ -2024,6 +2061,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             DECLARE
                 result INTEGER;  -- Variable para almacenar el resultado de la consulta
                 radio INTEGER := 1; -- Definir el radio como variable
+                snap_precision NUMERIC := {snap_precision};
                 error_message TEXT;
                 overlap_geojson TEXT;
             BEGIN
@@ -2080,6 +2118,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             $$
             DECLARE
                 radio INTEGER := 1; -- Definir el radio como variable
+                snap_precision NUMERIC := {snap_precision};
                 error_message TEXT;
                 uncovered_geom GEOMETRY;
                 uncovered_geojson TEXT;
@@ -2090,7 +2129,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 INTO covering_union
                 FROM {covered_by_layer}
                 WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({covered_geom_field}, 3857), radio)
-                  AND ST_Intersects(ST_SnapToGrid({covered_geom_field}, 0.001), ST_SnapToGrid(NEW.{geom_field}, 0.001));
+                  AND ST_Intersects(ST_SnapToGrid({covered_geom_field}, {snap_precision}), ST_SnapToGrid(NEW.{geom_field}, {snap_precision}));
 
                 -- Si hay geometrías que intersectan, calcular la parte no cubierta
                 IF covering_union IS NOT NULL THEN
@@ -2161,6 +2200,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             $$
             DECLARE
                 tolerance NUMERIC := {contiguous_tolerance};
+                snap_precision NUMERIC := {snap_precision};
                 error_message TEXT;
                 problem_geojson TEXT;
                 valid_vertex_count INTEGER := 0;
@@ -2176,8 +2216,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     SELECT 1
                     FROM {full_table_name}
                     WHERE ST_Relate(
-                        ST_SnapToGrid(ST_Transform(NEW.{geom_field}, 3857), 0.001),
-                        ST_SnapToGrid(ST_Transform({geom_field}, 3857), 0.001), 
+                        ST_SnapToGrid(ST_Transform(NEW.{geom_field}, 3857), {snap_precision}),
+                        ST_SnapToGrid(ST_Transform({geom_field}, 3857), {snap_precision}), 
                         'F***1****') -- Toca por borde
                     AND {pk_field} <> NEW.{pk_field}
                 ) THEN
