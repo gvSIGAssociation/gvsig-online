@@ -213,11 +213,13 @@ class PlainAuthorizationService():
             if layer.public:
                 return True
             user = _get_user(request_or_user)
+            logging.getLogger(LOGNAME).info(f"can_read_layer - request_or_user type: {type(request_or_user)}, user: {user}, user.is_authenticated: {getattr(user, 'is_authenticated', 'N/A')}, user.username: {getattr(user, 'username', 'N/A')}")
             if  user.is_superuser:
                 return True
             if isinstance(user, AnonymousUser):
                 return False
             roles = get_roles(request_or_user)
+            logging.getLogger(LOGNAME).info(f"can_read_layer - roles obtained: {roles}")
             return LayerReadRole.objects.filter(layer=layer, role__in=roles).exists()
         except Exception as e:
             print(e)
