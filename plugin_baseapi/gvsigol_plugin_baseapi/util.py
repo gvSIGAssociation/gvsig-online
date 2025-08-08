@@ -28,6 +28,9 @@ from django.utils import timezone
 from django.urls import reverse
 from django import apps
 from django.utils.translation import ugettext as _
+from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
+import base64
+import os
 import gvsigol
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_core.models import Project, ProjectLayerGroup
@@ -333,4 +336,32 @@ def get_order_in_project(project_id, layergroup_name):
             order = toc_order[key]['order']
     return order
 
+signer = TimestampSigner(salt="signed_url_download")
+SIGNED_URL_MAX_AGE = 10 # seconds
 
+def create_signed_url(path, url_tpl):
+    """
+    Crea una URL firmada para descargar un archivo de forma segura sin requerir autenticación.
+    Estas URLs se deben generar para un usuario en concreto después de verificar que tiene
+    permisos de acceso al fichero solicitado. ATENCIÓN: Este método no comprueba los permisos de acceso al fichero,
+    la comprobación es responsabilidad del código que utiliza este método.
+    Las URLs generadas tienen un tiempo de validez muy corto (10 segundos) para evitar usos indebidos.
+    La URL firmada se genera con un token que se incluye en la URL.
+    El token se genera con el signer y se incluye en la URL.
+    """
+    token = signer.sign(path)
+    return url_tpl.format(token=base64.urlsafe_b64encode(token.encode()).decode())
+    # p. ej:
+    #return f"/descarga-firmada/?token={base64.urlsafe_b64encode(token.encode()).decode()}"
+
+def signed_url_download(token):
+    """
+    Verifica si el token es válido y devuelve la ruta del archivo.
+    """
+    try:
+        decoded = base64.urlsafe_b64decode(token.encode()).decode()
+        path = signer.unsign(decoded, max_age=SIGNED_URL_MAX_AGE)
+        return path
+    except (BadSignature, SignatureExpired, Exception):
+        pass
+    return None
