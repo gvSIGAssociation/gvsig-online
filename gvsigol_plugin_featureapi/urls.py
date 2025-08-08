@@ -52,6 +52,7 @@ urlpatterns = [
     path('api/v1/layers/<int:lyr_id>/feature/', api_feature.FeatureByPointView.as_view(), name='get_feature_by_point'),
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.FileUploadView.as_view(), name='get_list_attached_files,uploaded_attached_file'),
     path('api/v1/layers/<int:lyr_id>/<int:feat_id>/resources/<int:resource_id>/', api_feature.FileDeleteView.as_view(), name='delete_attached_file'),
+    path('api/v1/layers/<int:layer_id>/<int:feat_id>/linkurl/<field_name>/', api_feature.GetSignedUrlFromLinkView.as_view(), name='get_signed_url_from_link'),
     path('api/v1/layers/<int:lyr_id>/fieldoptions/', api_layer.LayerFieldOptions.as_view(), name='get_layer_field_options'),
 
     path('api/v1/layers/<int:lyr_id>/deletedfeatures/', api_feature.FeatureVersionsDeleted.as_view(), name='get_deleted_features'),

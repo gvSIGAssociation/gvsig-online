@@ -33,6 +33,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveDestroyA
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from gvsigol import settings as core_settings
 from gvsigol_plugin_featureapi import settings
@@ -47,6 +48,7 @@ from django.utils import timezone
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services import utils as services_utils
 from django_sendfile import sendfile
+from pathlib import Path
 import json
 import logging
 
@@ -1353,3 +1355,110 @@ class FileAttachedFromLinkView(ListAPIView):
             return e.get_exception()
         except Exception as e:
             return HttpException(500, f"Error getting feature: {str(e)}").get_exception()
+
+
+        
+#--------------------------------------------------
+#            FileAttachedFromLinkView
+#-------------------------------------------------- 
+class GetSignedUrlFromLinkView(ListAPIView):
+    parser_classes = (MultiPartParser,)
+    serializer_class = FileUploadSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_attached_file_from_link', operation_summary='Get the resource attached to the feature from a link',
+                          responses={
+                                    400: "The layer does not have this resource.<br>Resource NOT found",
+                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The user has no permission to access the resource"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, layer_id, feat_id, field_name):
+        validation = Validation(request)
+    
+        try:
+            layer = Layer.objects.get(id=layer_id)
+            lyr_conf = layer.conf
+            
+            if isinstance(lyr_conf, str):
+                import ast
+                try:
+                    lyr_conf = ast.literal_eval(lyr_conf)
+                except:
+                    lyr_conf = None
+            
+            try:
+                validation.check_read_feature_permission(layer, feat_id)
+            except HttpException as e:
+                return e.get_exception()
+        except Exception as e:
+            return HttpException(404, "Layer not found or Resource not found in database").get_exception()
+        
+        field_config = None
+        if lyr_conf and isinstance(lyr_conf, dict) and 'fields' in lyr_conf:
+            for field in lyr_conf['fields']:
+                if field.get('name') == field_name and field.get('gvsigol_type') == 'link':
+                    field_config = field
+                    break
+        
+        if not field_config:
+            return HttpException(404, "Field not found or is not a link type").get_exception()
+        
+        type_params = field_config.get('type_params', {})
+        base_folder = type_params.get('base_folder')
+        related_field = type_params.get('related_field')
+        
+        if not base_folder or not related_field:
+            return HttpException(400, "Missing base_folder or related_field in type_params").get_exception()
+        
+        try:
+            feature = serializers.FeatureSerializer().get(validation, layer_id, feat_id, 4326)
+            if not feature or 'properties' not in feature:
+                return HttpException(404, "Feature not found").get_exception()
+            
+            filename = feature['properties'].get(related_field)
+            if not filename:
+                return HttpException(404, f"Field {related_field} not found or is empty in feature").get_exception()
+            
+            base_folder = os.path.join(core_settings.MEDIA_ROOT, base_folder)
+            file_path = os.path.join(base_folder, filename)
+            
+            if not Path(base_folder) in Path(file_path).parents or not Path(core_settings.MEDIA_ROOT) in Path(file_path).parents:
+                return HttpException(404, "File NOT found in disk").get_exception()
+            
+            if(path.exists(file_path)):
+                url_tpl = request.build_absolute_uri(reverse('get_signed_download', args=["{token}"]))
+                signed_url = util.create_signed_url(file_path, url_tpl)
+                return Response(
+                    status=status.HTTP_302_FOUND,
+                    headers={"Location": signed_url}
+                )
+            return HttpException(404, "File NOT found in disk").get_exception()
+         
+        except HttpException as e:
+            return e.get_exception()
+        except Exception as e:
+            return HttpException(500, f"Error getting feature: {str(e)}").get_exception()
+
+class GetSignedDownloadView(ListAPIView):
+    parser_classes = (MultiPartParser,)
+    serializer_class = None
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_attached_file_from_link', operation_summary='Downloads the file specified by token, if valid',
+                          responses={
+                                    404: "Token not found or expired<br>File NOT found in disk"})
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def get(self, request, token):
+        path = util.signed_url_download(token)
+        if not path:
+            return HttpException(404, "Token not found or expired").get_exception()
+        
+        if not Path(core_settings.MEDIA_ROOT) in Path(path).parents:
+            return HttpException(404, "File NOT found in disk").get_exception()
+
+        filename = Path(path).name
+        ext = os.path.splitext(filename)[1]
+        attachment = ext.lower() not in ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt']
+        return sendfile(request, path, attachment=attachment, attachment_filename=filename)
