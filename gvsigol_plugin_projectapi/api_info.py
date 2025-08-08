@@ -333,9 +333,9 @@ class FilterView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def put(self, request, pk):
+    def patch(self, request, pk):
         """
-        PUT /api/v1/filters/<pk>/ - Actualizar filtro favorito
+        PATCH /api/v1/filters/<pk>/ - Actualizar filtro favorito
         Solo el creador puede modificar name y description
         """
         try:
