@@ -976,3 +976,64 @@ class LayerTopologyConfiguration(models.Model):
         
         return '; '.join(summary) if summary else "No active rules"
 
+
+class FavoriteFilter(models.Model):
+    """
+    Modelo para almacenar filtros favoritos guardados por los usuarios.
+    Permite guardar y compartir filtros personalizados para capas específicas de proyectos específicos.
+    """
+    name = models.CharField(max_length=150, null=False)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    share_filter = models.BooleanField(default=False)
+    project = models.ForeignKey('gvsigol_core.Project', on_delete=models.CASCADE, null=False)
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE, null=False)
+    filter_data = JSONField(help_text="Estructura JSON con la configuración del filtro")
+    created_by = models.CharField(max_length=100, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Favorite Filter'
+        verbose_name_plural = 'Favorite Filters'
+        indexes = [
+            models.Index(fields=['project', 'layer']),
+            models.Index(fields=['created_by']),
+            models.Index(fields=['share_filter']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'project', 'layer', 'created_by'], 
+                name='unique_favorite_filter_per_user_layer'
+            )
+        ]
+
+    def __str__(self):
+        return f"Filter '{self.name}' for layer '{self.layer.name}' by {self.created_by}"
+
+    def get_filter_summary(self):
+        """
+        Devuelve un resumen legible del filtro
+        """
+        if self.filter_data:
+            filter_queries = self.filter_data.get('filterQueries', [])
+            operator = self.filter_data.get('filterOperator', 'AND')
+            
+            if filter_queries:
+                query_count = len(filter_queries)
+                return f"{query_count} query{'s' if query_count > 1 else ''} with {operator} operator"
+        
+        return "No filter data"
+
+    def is_accessible_by_user(self, user):
+        """
+        Verifica si un usuario puede acceder a este filtro
+        """
+        
+        if self.created_by == user.username:
+            return True
+        
+        # Si está compartido, cualquier usuario del proyecto puede acceder
+        if self.share_filter:
+            return self.project.userprojectrole_set.filter(user=user).exists()
+        
+        return False
