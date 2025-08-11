@@ -76,6 +76,10 @@ urlpatterns = [
     #Categories
     path('api/v1/categories/', api_info.CategoryView.as_view(), name='create_categories,get_all_categories'),  
 
+    path('api/v1/filters/', api_info.FilterView.as_view(), name='create_favorite_filter'),  
+    path('api/v1/filters/project/<int:idProj>/layer/<int:idLayer>/', api_info.FilterView.as_view(), name='get_favorite_filters_list_by_idProj_idLayer'),  
+    path('api/v1/filters/<int:pk>/', api_info.FilterView.as_view(), name='delete_favorite_filter,update_favorite_filter'),
+
 
 
 ]
