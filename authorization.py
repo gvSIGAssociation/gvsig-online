@@ -212,12 +212,12 @@ class PlainAuthorizationService():
                 layer = Layer.objects.get(id=layer)
             if layer.public:
                 return True
-            user = _get_user(request_or_user)
+            user = _get_user(request_or_user)        
             if  user.is_superuser:
                 return True
             if isinstance(user, AnonymousUser):
                 return False
-            roles = get_roles(request_or_user)
+            roles = get_roles(request_or_user)            
             return LayerReadRole.objects.filter(layer=layer, role__in=roles).exists()
         except Exception as e:
             print(e)
