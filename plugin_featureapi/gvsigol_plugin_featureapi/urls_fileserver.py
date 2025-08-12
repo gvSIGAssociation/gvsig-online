@@ -32,6 +32,5 @@ urlpatterns = [
 
     path('api/v1/layer_historic_resource/<int:layer_id>/<int:feat_id>/<int:version>/', views.get_layer_historic_resource, name='layer_historic_resource'),
 
-    path('api/v1/layers/<int:layer_id>/<int:feat_id>/link/<field_name>/', api_feature.FileAttachedFromLinkView.as_view(), name='get_attached_file_from_link'),
-    path('api/v1/signed_download/<token>/', api_feature.FileAttachedFromLinkView.as_view(), name='get_signed_download'),
+    path('api/v1/signed_download/<token>/', api_feature.GetSignedDownloadView.as_view(), name='get_signed_download'),
 ]

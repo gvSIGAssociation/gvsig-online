@@ -502,3 +502,76 @@ def get_content(request):
             return json.loads(body_unicode)
     except Exception as e:
         raise HttpException(400, "Feature malformed." + format(e))
+
+
+def create_signed_url(file_path, url_template):
+    """
+    Crea una URL firmada temporal para descargar un archivo.
+    
+    Args:
+        file_path: Ruta del archivo en el sistema
+        url_template: Plantilla de URL con {token} como placeholder
+        
+    Returns:
+        URL firmada completa
+    """
+    import hashlib
+    import time
+    import base64
+    
+    # Crear un token basado en la ruta del archivo y timestamp
+    timestamp = str(int(time.time()))
+    file_hash = hashlib.md5(file_path.encode()).hexdigest()[:8]
+    
+    token_data = f"{file_path}:{timestamp}:{file_hash}"
+    token = base64.urlsafe_b64encode(token_data.encode()).decode()
+    
+    # Reemplazar el placeholder en la plantilla de URL
+    # Buscar tanto {token} como "{token}" para mayor compatibilidad
+    if "{token}" in url_template:
+        signed_url = url_template.replace("{token}", token)
+    elif '"{token}"' in url_template:
+        signed_url = url_template.replace('"{token}"', token)
+    else:
+        signed_url = url_template + token
+    
+    return signed_url
+
+
+def signed_url_download(token):
+    """
+    Valida un token firmado y devuelve la ruta del archivo si es válido.
+    
+    Args:
+        token: Token firmado recibido en la URL
+        
+    Returns:
+        Ruta del archivo si el token es válido, None en caso contrario
+    """
+    import base64
+    import time
+    
+    try:
+        # Decodificar el token
+        token_data = base64.urlsafe_b64decode(token.encode()).decode()
+        
+        parts = token_data.split(":")
+        if len(parts) != 3:
+            return None
+            
+        file_path, timestamp, file_hash = parts
+        
+        # Verificar que el token no haya expirado (10 segundos)
+        current_time = int(time.time())
+        token_time = int(timestamp)
+        if current_time - token_time > 10:  
+            return None
+            
+        import os
+        if not os.path.exists(file_path):
+            return None
+            
+        return file_path
+        
+    except Exception:
+        return None

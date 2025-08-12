@@ -1215,10 +1215,10 @@ class FeatureSerializer(serializers.Serializer):
                 if related_value and str(related_value).strip():
                     # Construir la URL para acceder al archivo a través del endpoint de la API
                     if feat_id is not None:
-                        link_value = f"/fileserver/api/v1/layers/{layer.id}/{feat_id}/link/{field_name}/"
+                        link_value = f"/api/v1/layers/{layer.id}/{feat_id}/linkurl/{field_name}/"
                     else:
                         # Para operaciones de creación, usar placeholder que se reemplazará después
-                        link_value = f"/fileserver/api/v1/layers/{layer.id}/{{feat_id}}/link/{field_name}/"
+                        link_value = f"/api/v1/layers/{layer.id}/{{feat_id}}/linkurl/{field_name}/"
                     data['properties'][field_name] = link_value
                 else:
                     data['properties'][field_name] = ""
