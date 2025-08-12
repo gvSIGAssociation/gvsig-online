@@ -81,6 +81,9 @@ urlpatterns = [
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py    
     path('get_historic_resource/<int:layer_id>/<int:feat_id>/<int:version>/', views.get_layer_historic_resource, name='get_layer_historic_resource'),
+    
+    # Include fileserver URLs
+    path('', include('gvsigol_plugin_featureapi.urls_fileserver')),
 ]
 
 
