@@ -33,6 +33,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveDestroyA
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from gvsigol import settings as core_settings
 from gvsigol_plugin_featureapi import settings
@@ -47,6 +48,7 @@ from django.utils import timezone
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services import utils as services_utils
 from django_sendfile import sendfile
+from pathlib import Path
 import json
 import logging
 
