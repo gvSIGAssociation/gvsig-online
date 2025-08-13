@@ -6962,3 +6962,128 @@ def _remove_topology_trigger(layer, rule_type, **kwargs):
     except Exception as e:
         logger.error(f"Error eliminando trigger {rule_type} para capa {layer.id}: {str(e)}")
         return False
+    
+@login_required()
+@staff_required
+def db_fill_link_field(request):
+    if request.method == 'POST':
+        try:
+            layer_id = request.POST.get('layer_id')
+            new_field_name = request.POST.get('new_field_name')
+            related_field_name = request.POST.get('related_field_name')
+            
+            if not all([layer_id, new_field_name, related_field_name]):
+                return utils.get_exception(400, 'Missing required parameters: layer_id, new_field_name, related_field_name')
+            
+            layer = Layer.objects.get(id=layer_id)
+            
+            if not utils.can_manage_layer(request, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            
+            if not (layer.datastore.type == 'v_PostGIS'):
+                return utils.get_exception(400, 'Only PostGIS layers are supported')
+            
+            params = json.loads(layer.datastore.connection_params)
+            schema = params.get('schema', 'public')
+            
+            iconn = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+            
+            # Pequeño delay para asegurar que el campo recién creado esté disponible
+            time.sleep(1)
+            
+            updated_records = 0
+            with iconn as con:
+                try:
+                    fields_info = con.get_fields_info(layer.source_name, schema)
+                    
+                    related_field_exists = any(field['name'] == related_field_name for field in fields_info)
+                    new_field_exists = any(field['name'] == new_field_name for field in fields_info)
+                                  
+                    if not related_field_exists:
+                        return utils.get_exception(400, f'Related field "{related_field_name}" does not exist')
+                    
+                    if not new_field_exists:
+                        return utils.get_exception(400, f'New field "{new_field_name}" does not exist')
+                        
+                except Exception as e:
+                    logger.error(f'Error getting fields info: {str(e)}')
+                    return utils.get_exception(500, f'Error getting table fields info: {str(e)}')
+                
+                try:
+                    query = sql.SQL("""
+                        SELECT ogc_fid, {related_field}
+                        FROM {schema}.{table}
+                        WHERE {related_field} IS NOT NULL AND {related_field} != ''
+                    """).format(
+                        related_field=sql.Identifier(related_field_name),
+                        schema=sql.Identifier(schema),
+                        table=sql.Identifier(layer.source_name)
+                    )
+                    
+                    results = con.custom_query(query)
+                    
+                    if not results:
+                        return HttpResponse(json.dumps({
+                            'status': 'success',
+                            'message': 'No records found with non-null related field values',
+                            'updated_records': 0
+                        }), content_type='application/json')
+                        
+                except Exception as e:
+                    logger.error(f'Error executing query: {str(e)}')
+                    return utils.get_exception(500, f'Error executing query: {str(e)}')
+                
+                try:
+                    for row in results:
+                        ogc_fid = row[0]
+                        related_value = row[1]
+                        
+                        link_url = f'/api/v1/layers/{layer_id}/{ogc_fid}/linkurl/{new_field_name}/'
+                        
+                        update_query = sql.SQL("""
+                            UPDATE {schema}.{table}
+                            SET {new_field} = %s
+                            WHERE ogc_fid = %s
+                        """).format(
+                            schema=sql.Identifier(schema),
+                            table=sql.Identifier(layer.source_name),
+                            new_field=sql.Identifier(new_field_name)
+                        )
+                        
+                        try:
+                            con.custom_no_return_query(update_query, (link_url, ogc_fid))
+                            updated_records += 1
+                        except Exception as e:
+                            logger.warning(f'Error updating record {ogc_fid} for field {new_field_name}: {str(e)}')
+                            continue
+                            
+                except Exception as e:
+                    logger.error(f'Error in update loop: {str(e)}')
+                    return utils.get_exception(500, f'Error in update loop: {str(e)}')
+                
+                # Recargar la capa para reflejar los cambios
+                try:
+                    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+                    gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
+                    gs.reload_nodes()
+                except Exception as e:
+                    logger.warning(f'Warning: Could not reload layer in GeoServer: {str(e)}')
+            
+            try:
+                iconn.close()
+            except Exception as e:
+                logger.warning(f'Warning: Could not close database connection: {str(e)}')
+            
+            return HttpResponse(json.dumps({
+                'status': 'success',
+                'message': f'Successfully updated {updated_records} records',
+                'updated_records': updated_records
+            }), content_type='application/json')
+            
+        except Layer.DoesNotExist:
+            return utils.get_exception(404, f'Layer with id {layer_id} not found')
+        except Exception as e:
+            logger.exception(f'Error filling link field: {str(e)}')
+            return utils.get_exception(500, f'Error filling link field: {str(e)}')
+    
+    return utils.get_exception(400, 'Only POST method is allowed')
