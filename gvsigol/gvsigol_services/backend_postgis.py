@@ -1396,8 +1396,11 @@ class Introspect:
 
         return row
 
-    def custom_no_return_query(self, query):
-        self.cursor.execute(query)
+    def custom_no_return_query(self, query, params=None):
+        if params:
+            self.cursor.execute(query, params)
+        else:
+            self.cursor.execute(query)
 
 
     def set_transaction(self):
