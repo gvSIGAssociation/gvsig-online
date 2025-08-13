@@ -91,6 +91,7 @@ urlpatterns = [
     #path('db_field_changetype/', services_views.db_field_changetype, name='db_field_changetype'),
     path('db_field_rename/', services_views.db_field_rename, name='db_field_rename'),
     path('db_field_add/', services_views.db_add_field, name='db_field_add'),
+    path('db_fill_link_field/', services_views.db_fill_link_field, name='db_fill_link_field'),
     path('sqlview_list/', services_views.sqlview_list, name='sqlview_list'),
     path('sqlview_add/', services_views.sqlview_add, name='sqlview_add'),
     path('sqlview_update/<int:view_id>/', services_views.sqlview_update, name='sqlview_update'),

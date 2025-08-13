@@ -924,15 +924,68 @@
 		  		'type_params': JSON.stringify(field.type_params || {})
 		  	},
 			success	:function(response) {
-				messageBox.show('Info', gettext('Field was added'));
+				// Si es un campo de tipo link, rellenar con URLs los registros existentes
+				if (field.gvsigol_type === 'link' && field.type_params && field.type_params.related_field) {
+					fillLinkFieldWithUrls(field.name, field.type_params.related_field, "{{layer_id}}");
+				} else {
+					messageBox.show('Info', gettext('Field was added'));
+					$('#modal-error').on('hidden.bs.modal', function (e) {
+						// reload page to get the updated list of fields
+						window.location = window.location.toString().split("#", 1)[0];
+					});
+				}
+			},
+			error: function(jqXHR) {
+				messageBox.show('error', jqXHR.responseText);
+				$('#my-modal-dialog').modal('hide');
+			}
+		});
+	}
+
+	function fillLinkFieldWithUrls(newFieldName, relatedFieldName, layerId) {
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/db_fill_link_field/',
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			data: {
+				'layer_id': layerId,
+				'new_field_name': newFieldName,
+				'related_field_name': relatedFieldName
+			},
+			success: function(response) {
+				console.log('fillLinkFieldWithUrls success response:', response);
+				try {
+					var data = response;
+					if (typeof response === 'string') {
+						data = JSON.parse(response);
+					}
+					
+					if (data.status === 'success') {
+						messageBox.show('Info', gettext('Field was added and filled with ' + data.updated_records + ' URLs'));
+					} else {
+						messageBox.show('Info', gettext('Field was added but there was an error filling URLs: ' + (data.message || 'Unknown error')));
+					}
+				} catch (e) {
+					console.error('Error parsing response:', e, response);
+					messageBox.show('Info', gettext('Field was added but there was an error filling URLs'));
+				}
+				
 				$('#modal-error').on('hidden.bs.modal', function (e) {
 					// reload page to get the updated list of fields
 					window.location = window.location.toString().split("#", 1)[0];
 				});
 			},
 			error: function(jqXHR) {
-				messageBox.show('error', jqXHR.responseText);
-				$('#my-modal-dialog').modal('hide');
+				console.error('fillLinkFieldWithUrls error:', jqXHR);
+				messageBox.show('Info', gettext('Field was added but there was an error filling URLs'));
+				$('#modal-error').on('hidden.bs.modal', function (e) {
+					// reload page to get the updated list of fields
+					window.location = window.location.toString().split("#", 1)[0];
+				});
 			}
 		});
 	}
