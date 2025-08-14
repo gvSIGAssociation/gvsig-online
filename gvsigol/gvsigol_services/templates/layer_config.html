@@ -907,11 +907,6 @@
 	}
 
 	function addField(field) {
-		console.log('=== addField called ===');
-		console.log('Field data:', field);
-		console.log('Field gvsigol_type:', field.gvsigol_type);
-		console.log('Field type_params:', field.type_params);
-		
 		$.ajax({
 			type: 'POST',
 			async: false,
@@ -929,16 +924,10 @@
 		  		'type_params': JSON.stringify(field.type_params || {})
 		  	},
 			success	:function(response) {
-				console.log('=== addField SUCCESS ===');
-				console.log('Response:', response);
-				
 				// Si es un campo de tipo link, rellenar con URLs los registros existentes
 				if (field.gvsigol_type === 'link' && field.type_params && field.type_params.related_field) {
-					console.log('Field is link type, calling fillLinkFieldWithUrls...');
-					console.log('Parameters:', field.name, field.type_params.related_field, "{{layer_id}}");
 					fillLinkFieldWithUrls(field.name, field.type_params.related_field, "{{layer_id}}");
 				} else {
-					console.log('Field is not link type, showing success message');
 					messageBox.show('Info', gettext('Field was added'));
 					$('#modal-error').on('hidden.bs.modal', function (e) {
 						// reload page to get the updated list of fields
@@ -954,16 +943,12 @@
 	}
 
 	function fillLinkFieldWithUrls(newFieldName, relatedFieldName, layerId) {
-		console.log('=== fillLinkFieldWithUrls called ===');
-		console.log('Parameters:', { newFieldName, relatedFieldName, layerId });
-		console.log('Making AJAX request to /gvsigonline/services/db_fill_link_field/');
 		
 		$.ajax({
 			type: 'POST',
 			async: false,
 			url: '/gvsigonline/services/db_fill_link_field/',
 			beforeSend:function(xhr){
-				console.log('Setting CSRF token...');
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
@@ -976,16 +961,12 @@
 				try {
 					var data = response;
 					if (typeof response === 'string') {
-						console.log('Parsing string response as JSON...');
 						data = JSON.parse(response);
-						console.log('Parsed data:', data);
 					}
 					
 					if (data.status === 'success') {
-						console.log('Success status, showing message with', data.updated_records, 'updated records');
 						messageBox.show('Info', gettext('Field was added and filled with ' + data.updated_records + ' URLs'));
 					} else {
-						console.log('Non-success status:', data.message);
 						messageBox.show('Info', gettext('Field was added but there was an error filling URLs: ' + (data.message || 'Unknown error')));
 					}
 				} catch (e) {
@@ -993,9 +974,7 @@
 					messageBox.show('Info', gettext('Field was added but there was an error filling URLs'));
 				}
 				
-				console.log('Setting up page reload...');
 				$('#modal-error').on('hidden.bs.modal', function (e) {
-					console.log('Modal hidden, reloading page...');
 					// reload page to get the updated list of fields
 					window.location = window.location.toString().split("#", 1)[0];
 				});
@@ -1004,7 +983,6 @@
 				console.error('fillLinkFieldWithUrls error:', jqXHR);
 				messageBox.show('Info', gettext('Field was added but there was an error filling URLs'));
 				$('#modal-error').on('hidden.bs.modal', function (e) {
-					console.log('Modal hidden after error, reloading page...');
 					// reload page to get the updated list of fields
 					window.location = window.location.toString().split("#", 1)[0];
 				});
