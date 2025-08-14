@@ -6966,16 +6966,21 @@ def _remove_topology_trigger(layer, rule_type, **kwargs):
 @login_required()
 @staff_required
 def db_fill_link_field(request):
+    logger.info(f"=== db_fill_link_field called ===")    
     if request.method == 'POST':
         try:
             layer_id = request.POST.get('layer_id')
             new_field_name = request.POST.get('new_field_name')
             related_field_name = request.POST.get('related_field_name')
             
+            logger.info(f"Parameters received - layer_id: {layer_id}, new_field_name: {new_field_name}, related_field_name: {related_field_name}")
+            
             if not all([layer_id, new_field_name, related_field_name]):
+                logger.error(f"Missing required parameters: layer_id={layer_id}, new_field_name={new_field_name}, related_field_name={related_field_name}")
                 return utils.get_exception(400, 'Missing required parameters: layer_id, new_field_name, related_field_name')
             
             layer = Layer.objects.get(id=layer_id)
+            logger.info(f"Layer found: {layer.name} (id: {layer.id})")
             
             if not utils.can_manage_layer(request, layer):
                 return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
@@ -6985,6 +6990,7 @@ def db_fill_link_field(request):
             
             params = json.loads(layer.datastore.connection_params)
             schema = params.get('schema', 'public')
+            logger.info(f"Schema: {schema}, Database: {params.get('database')}, Host: {params.get('host')}")
             
             iconn = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
             
@@ -6994,10 +7000,14 @@ def db_fill_link_field(request):
             updated_records = 0
             with iconn as con:
                 try:
+                    logger.info(f"Getting fields info for table: {layer.source_name}, schema: {schema}")
                     fields_info = con.get_fields_info(layer.source_name, schema)
+                    logger.info(f"Fields found: {[f['name'] for f in fields_info]}")
                     
                     related_field_exists = any(field['name'] == related_field_name for field in fields_info)
                     new_field_exists = any(field['name'] == new_field_name for field in fields_info)
+                    
+                    logger.info(f"Field check - related_field_exists: {related_field_exists}, new_field_exists: {new_field_exists}")
                                   
                     if not related_field_exists:
                         return utils.get_exception(400, f'Related field "{related_field_name}" does not exist')
@@ -7020,9 +7030,12 @@ def db_fill_link_field(request):
                         table=sql.Identifier(layer.source_name)
                     )
                     
+                    logger.info(f"Executing query: {query.as_string(con.connection)}")
                     results = con.custom_query(query)
+                    logger.info(f"Query returned {len(results) if results else 0} records")
                     
                     if not results:
+                        logger.info(f"No records found with non-null {related_field_name} values")
                         return HttpResponse(json.dumps({
                             'status': 'success',
                             'message': 'No records found with non-null related field values',
@@ -7039,6 +7052,7 @@ def db_fill_link_field(request):
                         related_value = row[1]
                         
                         link_url = f'/api/v1/layers/{layer_id}/{ogc_fid}/linkurl/{new_field_name}/'
+                        logger.debug(f"Generated URL for ogc_fid {ogc_fid}: {link_url}")
                         
                         update_query = sql.SQL("""
                             UPDATE {schema}.{table}
@@ -7056,6 +7070,8 @@ def db_fill_link_field(request):
                         except Exception as e:
                             logger.warning(f'Error updating record {ogc_fid} for field {new_field_name}: {str(e)}')
                             continue
+                    
+                    logger.info(f"Update loop completed. Total records updated: {updated_records}")
                             
                 except Exception as e:
                     logger.error(f'Error in update loop: {str(e)}')
@@ -7066,14 +7082,18 @@ def db_fill_link_field(request):
                     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
                     gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
                     gs.reload_nodes()
+                    logger.info(f"Layer reloaded successfully in GeoServer")
                 except Exception as e:
                     logger.warning(f'Warning: Could not reload layer in GeoServer: {str(e)}')
             
             try:
                 iconn.close()
+                logger.info(f"Database connection closed successfully")
             except Exception as e:
                 logger.warning(f'Warning: Could not close database connection: {str(e)}')
             
+            logger.info(f"=== db_fill_link_field completed successfully ===")
+            logger.info(f"Returning response with {updated_records} updated records")
             return HttpResponse(json.dumps({
                 'status': 'success',
                 'message': f'Successfully updated {updated_records} records',
@@ -7081,9 +7101,11 @@ def db_fill_link_field(request):
             }), content_type='application/json')
             
         except Layer.DoesNotExist:
+            logger.error(f'Layer with id {layer_id} not found')
             return utils.get_exception(404, f'Layer with id {layer_id} not found')
         except Exception as e:
             logger.exception(f'Error filling link field: {str(e)}')
             return utils.get_exception(500, f'Error filling link field: {str(e)}')
     
+    logger.error(f'Invalid request method: {request.method}. Only POST is allowed.')
     return utils.get_exception(400, 'Only POST method is allowed')
