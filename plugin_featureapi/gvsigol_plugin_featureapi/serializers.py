@@ -707,7 +707,7 @@ class FeatureSerializer(serializers.Serializer):
                 if onlyprops == False:
                     sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where} {limit_offset}")
                 else:
-                    sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Transform(ST_Centroid({geom}), {epsg})) FROM {schema}.{table} {where} {limit_offset}")
+                    sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Centroid({geom})) FROM {schema}.{table} {where} {limit_offset}")
                 
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
@@ -1287,6 +1287,11 @@ class FeatureSerializer(serializers.Serializer):
                             column=sqlbuilder.Identifier(q['field']),
                             value=sqlbuilder.SQL(str(q['value']))
                             )
+                    elif operator in ['IS NULL', 'IS NOT NULL']:
+                        query = sqlbuilder.SQL("{column} {operator}").format(
+                            column=sqlbuilder.Identifier(q['field']),
+                            operator=sqlbuilder.SQL(operator)
+                            )
                     elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
                         query = sqlbuilder.SQL("{column} {operator} {value}").format(
                             column=sqlbuilder.Identifier(q['field']),
@@ -1306,16 +1311,22 @@ class FeatureSerializer(serializers.Serializer):
                     qGroup_operator = q.get('op', 'AND').strip()
                     if qGroup_operator in ['AND', 'OR']:
                         for gq in queries:
+                            operator = gq['operator'].strip()
                             if operator == 'IN':
                                 query = sqlbuilder.SQL("{column} IN ({values})").format(
-                                    column=sqlbuilder.Identifier(q['field']),
-                                    value=sqlbuilder.SQL(str(q['value']))
+                                    column=sqlbuilder.Identifier(gq['field']),
+                                    value=sqlbuilder.SQL(str(gq['value']))
+                                    )
+                            elif operator in ['IS NULL', 'IS NOT NULL']:
+                                query = sqlbuilder.SQL("{column} {operator}").format(
+                                    column=sqlbuilder.Identifier(gq['field']),
+                                    operator=sqlbuilder.SQL(operator)
                                     )
                             elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
                                 query = sqlbuilder.SQL("{column} {operator} {value}").format(
-                                    column=sqlbuilder.Identifier(q['field']),
+                                    column=sqlbuilder.Identifier(gq['field']),
                                     operator=sqlbuilder.SQL(operator),
-                                    value=sqlbuilder.Literal(str(q['value']))
+                                    value=sqlbuilder.Literal(str(gq['value']))
                                     )
                             else:
                                 raise HttpException(400, f"Invalid operator: {operator}")
