@@ -751,6 +751,10 @@ class FeatureSerializer(serializers.Serializer):
             
 
     def list_field_options(self, lyr_id, fieldSelected):
+        """
+        DEPRECATED: Use list_field_options_paginated for better performance with large datasets.
+        This method is maintained for backward compatibility.
+        """
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
@@ -771,6 +775,87 @@ class FeatureSerializer(serializers.Serializer):
                     feat_list.append(feat[0])
 
                 return feat_list
+
+        except Exception as e:
+            if isinstance(e, HttpException):
+                raise e
+            raise HttpException(400, "Field options cannot be queried. Unexpected error: " + format(e))
+
+    def list_field_options_paginated(self, lyr_id, fieldSelected, limit=100, offset=0, search=None):
+        """
+        Returns field options with pagination and search filtering.
+        
+        Args:
+            lyr_id: Layer ID
+            fieldSelected: Field name to get options from
+            limit: Maximum number of results to return (default: 100)
+            offset: Starting position for pagination (default: 0)
+            search: Search term to filter options (optional)
+        
+        Returns:
+            dict: Contains 'data', 'has_more', 'total', 'offset', and 'limit'
+        """
+        layer = Layer.objects.get(id = int(lyr_id))
+        if layer.type != 'v_PostGIS':
+            raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
+        con = None
+        try:
+            i, table, schema = services_utils.get_db_connect_from_layer(layer)
+            with i as con: # connection will autoclose
+                
+                # Construir la consulta base
+                base_sql = "SELECT DISTINCT {fieldSelected} FROM {schema}.{table}"
+                conditions = []
+                params = {}
+                
+                # Agregar filtro de búsqueda si se proporciona
+                if search and search.strip():
+                    conditions.append("{fieldSelected}::text ILIKE %(search)s")
+                    params['search'] = f"%{search.strip()}%"
+                
+                # Construir WHERE clause si hay condiciones
+                where_clause = ""
+                if conditions:
+                    where_clause = " WHERE " + " AND ".join(conditions)
+                
+                # Orden para consistencia
+                order_clause = " ORDER BY {fieldSelected}"
+                
+                # Obtener el total primero
+                count_sql = sqlbuilder.SQL("SELECT COUNT(DISTINCT {fieldSelected}) FROM {schema}.{table}" + where_clause)
+                count_query = count_sql.format(
+                    fieldSelected=sqlbuilder.Identifier(fieldSelected),
+                    schema=sqlbuilder.Identifier(schema),
+                    table=sqlbuilder.Identifier(table),
+                )
+                con.cursor.execute(count_query, params)
+                total_count = con.cursor.fetchone()[0]
+                
+                # Obtener los datos paginados
+                limit_clause = f" LIMIT {limit} OFFSET {offset}"
+                
+                sql = sqlbuilder.SQL(base_sql + where_clause + order_clause + limit_clause)
+                query = sql.format(
+                    fieldSelected=sqlbuilder.Identifier(fieldSelected),
+                    schema=sqlbuilder.Identifier(schema),
+                    table=sqlbuilder.Identifier(table),
+                )
+                con.cursor.execute(query, params)
+                
+                feat_list = []
+                for feat in con.cursor.fetchall():
+                    feat_list.append(feat[0])
+                
+                # Calcular si hay más resultados
+                has_more = (offset + len(feat_list)) < total_count
+                
+                return {
+                    'data': feat_list,
+                    'has_more': has_more,
+                    'total': total_count,
+                    'offset': offset,
+                    'limit': limit
+                }
 
         except Exception as e:
             if isinstance(e, HttpException):

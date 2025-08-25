@@ -118,6 +118,9 @@ class LayerFieldOptions(ListAPIView):
     def get(self, request, lyr_id):
         """
         This call returns a array with a options list of a selected layer field.
+        
+        DEPRECATED: Use LayerFieldOptionsPaginated for better performance with large datasets.
+        This endpoint is maintained for backward compatibility.
         """
         validation = Validation(request)
         validation.check_read_permission(lyr_id)
@@ -152,6 +155,9 @@ class PublicLayerFieldOptions(ListAPIView):
     def get(self, request, lyr_id):
         """
         This call returns a array with a options list of a selected layer field.
+        
+        DEPRECATED: Use PublicLayerFieldOptionsPaginated for better performance with large datasets.
+        This endpoint is maintained for backward compatibility.
         """
         validation = Validation(request)
         validation.is_public_layer(lyr_id)
@@ -164,6 +170,156 @@ class PublicLayerFieldOptions(ListAPIView):
                     raise HttpException(400, "Bad parameter fieldSelected. The value must be a layer field")
 
             result = serializers.FeatureSerializer().list_field_options(lyr_id, fieldSelected)
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+
+
+#--------------------------------------------------
+#            LayerFieldOptionsPaginated
+#--------------------------------------------------
+class LayerFieldOptionsPaginated(ListAPIView):
+    serializer_class = FeatureSerializer
+    filter_backends = (FieldOptionsFilter, )
+    permission_classes=[AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_layer_field_options_paginated', 
+                         operation_summary='Gets paginated options list of a layer field with search support',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
+                                    403: "The layer is not allowed to this user", 
+                                    400: "Field options list cannot be obtained. Unexpected error:..."})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        """
+        This call returns a paginated array with options list of a selected layer field.
+        Supports pagination and search parameters:
+        - fieldselected: field name to get options from (required)
+        - limit: number of results per page (optional, default: 100)
+        - offset: starting position (optional, default: 0) 
+        - search: filter text (optional)
+        
+        Returns JSON with format:
+        {
+            "data": [...],
+            "has_more": boolean,
+            "total": integer,
+            "offset": integer,
+            "limit": integer
+        }
+        """
+        validation = Validation(request)
+        validation.check_read_permission(lyr_id)
+          
+        try:
+            if 'fieldselected' in self.request.GET:
+                try:
+                    fieldSelected = self.request.GET['fieldselected']
+                except Exception:
+                    raise HttpException(400, "Bad parameter fieldSelected. The value must be a layer field")
+            else:
+                raise HttpException(400, "Missing required parameter fieldselected")
+
+            # Parámetros opcionales para paginación y búsqueda
+            limit = 100  # valor por defecto
+            offset = 0   # valor por defecto
+            search = None
+            
+            if 'limit' in self.request.GET:
+                try:
+                    limit = int(self.request.GET['limit'])
+                    if limit <= 0 or limit > 1000:  # máximo 1000 para evitar sobrecarga
+                        raise ValueError()
+                except (ValueError, TypeError):
+                    raise HttpException(400, "Bad parameter limit. Must be a positive integer between 1 and 1000")
+            
+            if 'offset' in self.request.GET:
+                try:
+                    offset = int(self.request.GET['offset'])
+                    if offset < 0:
+                        raise ValueError()
+                except (ValueError, TypeError):
+                    raise HttpException(400, "Bad parameter offset. Must be a non-negative integer")
+            
+            if 'search' in self.request.GET:
+                search = self.request.GET['search'].strip()
+
+            result = serializers.FeatureSerializer().list_field_options_paginated(lyr_id, fieldSelected, limit, offset, search)
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+
+
+#--------------------------------------------------
+#          PublicLayerFieldOptionsPaginated
+#--------------------------------------------------
+class PublicLayerFieldOptionsPaginated(ListAPIView):
+    serializer_class = FeatureSerializer
+    filter_backends = (FieldOptionsFilter, )
+    permission_classes=[AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_public_layer_field_options_paginated', 
+                         operation_summary='Gets paginated options list of a public layer field with search support',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
+                                    403: "The layer is not allowed to this user", 
+                                    400: "Field options list cannot be obtained. Unexpected error:..."})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        """
+        This call returns a paginated array with options list of a selected public layer field.
+        Supports pagination and search parameters:
+        - fieldselected: field name to get options from (required)
+        - limit: number of results per page (optional, default: 100)
+        - offset: starting position (optional, default: 0) 
+        - search: filter text (optional)
+        
+        Returns JSON with format:
+        {
+            "data": [...],
+            "has_more": boolean,
+            "total": integer,
+            "offset": integer,
+            "limit": integer
+        }
+        """
+        validation = Validation(request)
+        validation.is_public_layer(lyr_id)
+          
+        try:
+            if 'fieldselected' in self.request.GET:
+                try:
+                    fieldSelected = self.request.GET['fieldselected']
+                except Exception:
+                    raise HttpException(400, "Bad parameter fieldSelected. The value must be a layer field")
+            else:
+                raise HttpException(400, "Missing required parameter fieldselected")
+
+            # Parámetros opcionales para paginación y búsqueda
+            limit = 100  # valor por defecto
+            offset = 0   # valor por defecto
+            search = None
+            
+            if 'limit' in self.request.GET:
+                try:
+                    limit = int(self.request.GET['limit'])
+                    if limit <= 0 or limit > 1000:  # máximo 1000 para evitar sobrecarga
+                        raise ValueError()
+                except (ValueError, TypeError):
+                    raise HttpException(400, "Bad parameter limit. Must be a positive integer between 1 and 1000")
+            
+            if 'offset' in self.request.GET:
+                try:
+                    offset = int(self.request.GET['offset'])
+                    if offset < 0:
+                        raise ValueError()
+                except (ValueError, TypeError):
+                    raise HttpException(400, "Bad parameter offset. Must be a non-negative integer")
+            
+            if 'search' in self.request.GET:
+                search = self.request.GET['search'].strip()
+
+            result = serializers.FeatureSerializer().list_field_options_paginated(lyr_id, fieldSelected, limit, offset, search)
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
