@@ -808,15 +808,16 @@ class FeatureSerializer(serializers.Serializer):
                 conditions = []
                 params = {}
                 
+                # Siempre filtrar valores NULL
+                conditions.append("{fieldSelected} IS NOT NULL")
+                
                 # Agregar filtro de búsqueda si se proporciona
                 if search and search.strip():
                     conditions.append("{fieldSelected}::text ILIKE %(search)s")
                     params['search'] = f"%{search.strip()}%"
                 
-                # Construir WHERE clause si hay condiciones
-                where_clause = ""
-                if conditions:
-                    where_clause = " WHERE " + " AND ".join(conditions)
+                # Construir WHERE clause
+                where_clause = " WHERE " + " AND ".join(conditions)
                 
                 # Orden para consistencia
                 order_clause = " ORDER BY {fieldSelected}"
