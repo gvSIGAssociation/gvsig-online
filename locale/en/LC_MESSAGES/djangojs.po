@@ -15,16 +15,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-04-04 13:57+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2025-08-27 14:28+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:63
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:47
@@ -44,8 +45,7 @@ msgid "Select type"
 msgstr ""
 
 #: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:153
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:56
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:64
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:56 gvsigol_services/static/js/lib/_trans.gvsigol.js:64
 msgid "Field name"
 msgstr ""
 
@@ -54,10 +54,8 @@ msgid "Calculated"
 msgstr ""
 
 #: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:197
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:30
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:48
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:57
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:65
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:30 gvsigol_services/static/js/lib/_trans.gvsigol.js:48
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:57 gvsigol_services/static/js/lib/_trans.gvsigol.js:65
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:87
 msgid "Cancel"
 msgstr ""
@@ -72,45 +70,36 @@ msgstr ""
 
 #: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:249
 #: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:284
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:33
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:34
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:68
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:90
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:33 gvsigol_services/static/js/lib/_trans.gvsigol.js:34
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:68 gvsigol_services/static/js/lib/_trans.gvsigol.js:90
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:91
 msgid ""
-"Invalid name: Identifiers must begin with a letter or an underscore (_). "
-"Subsequent characters can be letters, underscores or numbers"
+"Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be "
+"letters, underscores or numbers"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:2
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:98
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:2 gvsigol_services/static/js/lib/_trans.gvsigol.js:98
 msgid "Tiles processed"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:3
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:99
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:3 gvsigol_services/static/js/lib/_trans.gvsigol.js:99
 msgid "Total of tiles to process"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:4
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:100
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:4 gvsigol_services/static/js/lib/_trans.gvsigol.js:100
 msgid "Total of remaining tiles"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:5
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:101
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:5 gvsigol_services/static/js/lib/_trans.gvsigol.js:101
 msgid "Task ID"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:6
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:102
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:6 gvsigol_services/static/js/lib/_trans.gvsigol.js:102
 msgid "Task status"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:7
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:8
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:103
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:104
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:7 gvsigol_services/static/js/lib/_trans.gvsigol.js:8
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:103 gvsigol_services/static/js/lib/_trans.gvsigol.js:104
 msgid "Error getting tasks"
 msgstr ""
 
@@ -122,8 +111,7 @@ msgstr ""
 msgid "URL to capabilities document"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:11
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:12
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:11 gvsigol_services/static/js/lib/_trans.gvsigol.js:12
 msgid "Only required if service is authenticated"
 msgstr ""
 
@@ -131,26 +119,21 @@ msgstr ""
 msgid "Connection has been successful"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:14
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:105
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:14 gvsigol_services/static/js/lib/_trans.gvsigol.js:105
 msgid "Enumeration cannot contain point-colon"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:15
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:106
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:15 gvsigol_services/static/js/lib/_trans.gvsigol.js:106
 msgid "Insert item name"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:16
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:58
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:16 gvsigol_services/static/js/lib/_trans.gvsigol.js:58
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:107
 msgid "Delete"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:17
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:35
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:43
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:94
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:17 gvsigol_services/static/js/lib/_trans.gvsigol.js:35
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:43 gvsigol_services/static/js/lib/_trans.gvsigol.js:94
 msgid "Error in GetCapabilities"
 msgstr ""
 
@@ -158,10 +141,8 @@ msgstr ""
 msgid "You must select a layer"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:19
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:36
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:44
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:95
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:19 gvsigol_services/static/js/lib/_trans.gvsigol.js:36
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:44 gvsigol_services/static/js/lib/_trans.gvsigol.js:95
 msgid "Error trying to connect"
 msgstr ""
 
@@ -173,18 +154,15 @@ msgstr ""
 msgid "Error reloading node"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:22
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:80
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:22 gvsigol_services/static/js/lib/_trans.gvsigol.js:80
 msgid "Status"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:23
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:81
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:23 gvsigol_services/static/js/lib/_trans.gvsigol.js:81
 msgid "active"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:24
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:82
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:24 gvsigol_services/static/js/lib/_trans.gvsigol.js:82
 msgid "inactive"
 msgstr ""
 
@@ -192,37 +170,29 @@ msgstr ""
 msgid "error"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:26
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:28
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:83
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:85
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:26 gvsigol_services/static/js/lib/_trans.gvsigol.js:28
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:83 gvsigol_services/static/js/lib/_trans.gvsigol.js:85
 msgid "URL"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:27
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:29
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:84
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:86
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:27 gvsigol_services/static/js/lib/_trans.gvsigol.js:29
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:84 gvsigol_services/static/js/lib/_trans.gvsigol.js:86
 msgid "Is master?"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:31
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:88
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:31 gvsigol_services/static/js/lib/_trans.gvsigol.js:88
 msgid "Save node"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:32
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:89
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:32 gvsigol_services/static/js/lib/_trans.gvsigol.js:89
 msgid "Edit node"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:37
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:108
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:37 gvsigol_services/static/js/lib/_trans.gvsigol.js:108
 msgid "Create new layer"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:38
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:109
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:38 gvsigol_services/static/js/lib/_trans.gvsigol.js:109
 msgid "Publish layer"
 msgstr ""
 
@@ -230,16 +200,15 @@ msgstr ""
 msgid "The action was successfully completed"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:40
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:41
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:40 gvsigol_services/static/js/lib/_trans.gvsigol.js:41
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:42
 msgid "The action failed"
 msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:45
 msgid ""
-"The field can not be set as mandatory at database level because some records "
-"contain NULL values in this column. Delete the NULL values and try again."
+"The field can not be set as mandatory at database level because some records contain NULL values in this "
+"column. Delete the NULL values and try again."
 msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:46
@@ -270,8 +239,8 @@ msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:54
 msgid ""
-"Warning: the field will be deleted from the database. This operation cannot "
-"be undone. Type the name of the field to confirm the deletion:"
+"Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the "
+"field to confirm the deletion:"
 msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:55
@@ -287,9 +256,7 @@ msgid "Rename field"
 msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:61
-msgid ""
-"Warning: renaming a field may have side effects, such as breaking a field-"
-"based legend."
+msgid "Warning: renaming a field may have side effects, such as breaking a field-based legend."
 msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:62
@@ -328,13 +295,11 @@ msgstr ""
 msgid "The layer cache clearing failed"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:74
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:96
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:74 gvsigol_services/static/js/lib/_trans.gvsigol.js:96
 msgid "The layergroup cache was cleared"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:75
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:97
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:75 gvsigol_services/static/js/lib/_trans.gvsigol.js:97
 msgid "The layergroup cache clearing failed"
 msgstr ""
 
@@ -359,11 +324,68 @@ msgid "Connection has been success"
 msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:93
-msgid ""
-"You can not update a data store type GeoTIFF. Delete it and create it again"
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:112
+msgid "Format field"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:113
+msgid "Configure the display format for numeric fields will affect how values are shown in forms and reports."
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:114
+msgid "Symbol"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:115
+msgid "e.g., €, $, m, kg, °"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:116
+msgid "Symbol position"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:117
+msgid "After number"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:118
+msgid "Before number"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:119
+msgid "Decimal places"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:120
+msgid "Decimal separator"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:121
+msgid "Comma (,)"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:122
+msgid "Point (.)"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:123
+msgid "Thousands separator"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:124
+msgid "No separator"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:125
+msgid "Save"
+msgstr ""
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:126
+msgid "Field format was saved successfully"
 msgstr ""
 
 #~ msgid "too_many_files"
-#~ msgstr ""
-#~ "Too many files to download. Reduce the number of zoom levels or make the "
-#~ "project size smaller"
+#~ msgstr "Too many files to download. Reduce the number of zoom levels or make the project size smaller"
