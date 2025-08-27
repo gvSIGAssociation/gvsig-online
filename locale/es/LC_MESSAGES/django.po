@@ -1830,6 +1830,10 @@ msgstr "Cambiar tipo"
 msgid "Convert to enumerate"
 msgstr "Convertir a enumerado"
 
+#: templates/layer_config.html:140
+msgid "Format field"
+msgstr "Dar formato"
+
 #: templates/layer_config.html:146
 msgid "Reserved field"
 msgstr "Campo reservado"

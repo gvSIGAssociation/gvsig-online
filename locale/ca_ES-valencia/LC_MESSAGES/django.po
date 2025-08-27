@@ -2225,6 +2225,10 @@ msgstr "Canviar tipus"
 msgid "Convert to enumerate"
 msgstr "Convertir a enumerat"
 
+#: templates/layer_config.html:140
+msgid "Format field"
+msgstr "Donar format"
+
 #: gvsigol_services/templates/layer_config.html:134
 msgid "Reserved field"
 msgstr "Camp reservat"

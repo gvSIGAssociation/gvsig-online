@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-07-28 12:36+0200\n"
-"PO-Revision-Date: 2024-08-08 18:43+0200\n"
+"PO-Revision-Date: 2025-08-27 12:04+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca_ES\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: backend_geoserver.py:96 backend_geoserver.py:147 forms_services.py:65
 msgid "PostGIS vector"
@@ -1833,6 +1833,10 @@ msgstr "Canvia tipus"
 msgid "Convert to enumerate"
 msgstr "Convertir a enumerat"
 
+#: templates/layer_config.html:140
+msgid "Format field"
+msgstr "Donar format"
+
 #: templates/layer_config.html:146
 msgid "Reserved field"
 msgstr "Camp reservat"
@@ -1975,10 +1979,8 @@ msgid "Must be contiguous"
 msgstr "Ha de ser contigu"
 
 #: templates/layer_config.html:422
-msgid ""
-"Geometries must be connected."
-msgstr ""
-"Les geometries han d'estar connectades."
+msgid "Geometries must be connected."
+msgstr "Les geometries han d'estar connectades."
 
 #: templates/layer_config.html:427
 msgid "Suitable for networks"

@@ -1796,6 +1796,10 @@ msgstr ""
 msgid "Convert to enumerate"
 msgstr ""
 
+#: templates/layer_config.html:140
+msgid "Format field"
+msgstr ""
+
 #: templates/layer_config.html:146
 msgid "Reserved field"
 msgstr ""

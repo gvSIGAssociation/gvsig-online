@@ -585,16 +585,16 @@
 	cursor: not-allowed !important;
 }
 
-/* Estilos para el modal de formato de campos */
-#currency-symbol {
+/* Estilos para el modal de dar formato a campos */
+#symbol {
 	max-width: 100px;
 }
 
-#currency-position {
+#symbol-position {
 	max-width: 200px;
 }
 
-#currency-position:disabled {
+#symbol-position:disabled {
 	background-color: #f5f5f5;
 	color: #999;
 	cursor: not-allowed;
@@ -605,7 +605,6 @@
 	max-width: 200px;
 }
 
-/* Estilos para los botones + y - de decimales */
 #decrease-decimals, #increase-decimals {
 	min-width: 40px;
 	height: 34px;
@@ -628,7 +627,6 @@
 	background-color: #f9f9f9;
 }
 
-/* Estilos para el checkbox de separador de millares */
 #thousands-separator {
 	margin-right: 8px;
 }
@@ -642,7 +640,6 @@
 	margin-top: 2px;
 }
 
-/* Estilos para el selector de separador decimal */
 #decimal-separator {
 	max-width: 100%;
 }
@@ -654,12 +651,10 @@
 	opacity: 0.6;
 }
 
-/* Controlar el ancho del separador de millares */
 #thousands-separator {
 	max-width: 45%;
 }
 
-/* Estilos para la fila de decimales */
 .decimal-row .col-md-6:first-child {
 	padding-right: 10px;
 }
@@ -677,7 +672,6 @@
 	margin-bottom: 5px;
 }
 
-/* Corregir alineación del input group de decimales */
 .decimal-row .input-group {
 	display: flex;
 	align-items: stretch;
@@ -722,25 +716,22 @@
 	margin-left: -1px;
 }
 
-/* Estilos para la fila de moneda */
-.currency-row .col-md-6:first-child {
+.symbol-row .col-md-6:first-child {
 	padding-right: 10px;
 }
 
-.currency-row .col-md-6:last-child {
+.symbol-row .col-md-6:last-child {
 	padding-left: 10px;
 }
 
-.currency-row label {
+.symbol-row label {
 	margin-bottom: 8px;
 	display: block;
 }
 
-.currency-row .form-control {
+.symbol-row .form-control {
 	margin-bottom: 5px;
 }
-
-
 
 .bg-info {
 	background-color: #d9edf7 !important;
@@ -1068,7 +1059,7 @@
 
 	function formatFieldModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text(gettext("Format numeric field"));
+		$('#my-modal-dialog .modal-title').text(gettext("Format field"));
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
 		ui += '<div id="field-errors" class="col-md-12 form-group">';
@@ -1083,19 +1074,17 @@
 		ui += 	'<input name="field-name" id="field-name" type="text" class="form-control" value="' + fieldName + '" disabled>';
 		ui += '</div>';
 		ui += '<div class="col-md-12 form-group">';
-		ui += 	'<div class="row currency-row">';
+		ui += 	'<div class="row symbol-row">';
 		ui += 		'<div class="col-md-6">';
-		ui += 			'<label for="currency-symbol">' + gettext('Currency symbol') + '</label>';
-		ui += 			'<input placeholder="' + gettext('e.g., €, $, £') + '" name="currency-symbol" id="currency-symbol" type="text" class="form-control" maxlength="5">';
-		//ui += 			'<small class="form-text text-muted">' + gettext('Leave empty for no currency symbol') + '</small>';
+		ui += 			'<label for="symbol">' + gettext('Symbol') + '</label>';
+		ui += 			'<input placeholder="' + gettext('e.g., €, $, m, kg, °') + '" name="symbol" id="symbol" type="text" class="form-control" maxlength="5">';
 		ui += 		'</div>';
 		ui += 		'<div class="col-md-6">';
-		ui += 			'<label for="currency-position">' + gettext('Currency position') + '</label>';
-		ui += 			'<select name="currency-position" id="currency-position" class="form-control">';
-		ui += 				'<option value="before">' + gettext('Before number (e.g., €100)') + '</option>';
-		ui += 				'<option value="after">' + gettext('After number (e.g., 100€)') + '</option>';
+		ui += 			'<label for="symbol-position">' + gettext('Symbol position') + '</label>';
+		ui += 			'<select name="symbol-position" id="symbol-position" class="form-control">';
+		ui += 				'<option value="after">' + gettext('After number') + '</option>';
+		ui += 				'<option value="before">' + gettext('Before number') + '</option>';		
 		ui += 			'</select>';
-		//ui += 			'<small class="form-text text-muted">' + gettext('Select where to place the currency symbol') + '</small>';
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
@@ -1116,7 +1105,6 @@
 		ui += 					'</button>';
 		ui += 				'</span>';
 		ui += 			'</div>';
-		//ui += 			'<small class="form-text text-muted">' + gettext('Use + and - buttons to adjust decimal places (0-4)') + '</small>';
 		ui += 		'</div>';
 		ui += 		'<div class="col-md-6">';
 		ui += 			'<label for="decimal-separator">' + gettext('Decimal separator') + '</label>';
@@ -1124,7 +1112,6 @@
 		ui += 				'<option value=",">' + gettext('Comma (,)') + '</option>';	
 		ui += 				'<option value=".">' + gettext('Point (.)') + '</option>';		
 		ui += 			'</select>';
-		//ui += 			'<small class="form-text text-muted">' + gettext('Choose the decimal separator for number formatting') + '</small>';
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
@@ -1135,7 +1122,6 @@
 		ui += 		'<option value=",">' + gettext('Comma (,)') + '</option>';
 		ui += 		'<option value=".">' + gettext('Point (.)') + '</option>';
 		ui += 	'</select>';
-		//ui += 	'<small class="form-text text-muted">' + gettext('Choose the thousands separator for better readability') + '</small>';
 		ui += '</div>';
 		$('#my-modal-dialog .modal-body').append(ui);
 		var buttons = '';
@@ -1144,12 +1130,11 @@
 		$('#my-modal-dialog .modal-footer').empty();
 		$('#my-modal-dialog .modal-footer').append(buttons);
 
-		// Event handlers para los botones + y - de decimales
 		$('#decrease-decimals').on('click', function() {
 			var currentValue = parseInt($('#decimal-places').val());
 			if (currentValue > 0) {
 				$('#decimal-places').val(currentValue - 1);
-				toggleDecimalSeparator(); // Actualizar estado del separador decimal
+				toggleDecimalSeparator(); 
 			}
 		});
 
@@ -1157,61 +1142,50 @@
 			var currentValue = parseInt($('#decimal-places').val());
 			if (currentValue < 4) {
 				$('#decimal-places').val(currentValue + 1);
-				toggleDecimalSeparator(); // Actualizar estado del separador decimal
+				toggleDecimalSeparator(); 
 			}
 		});
 
-		// Función para controlar el estado del dropdown de posición de moneda
-		function toggleCurrencyPosition() {
-			var currencySymbol = $('#currency-symbol').val().trim();
-			var currencyPosition = $('#currency-position');
+		function toggleSymbolPosition() {
+			var symbol = $('#symbol').val().trim();
+			var symbolPosition = $('#symbol-position');
 			
-			if (currencySymbol === '') {
-				currencyPosition.prop('disabled', true);
-				currencyPosition.val('before'); // Reset al valor por defecto
+			if (symbol === '') {
+				symbolPosition.prop('disabled', true);
+				symbolPosition.val('after'); 
 			} else {
-				currencyPosition.prop('disabled', false);
+				symbolPosition.prop('disabled', false);
 			}
 		}
 
-		// Función para controlar el estado del selector de separador decimal
 		function toggleDecimalSeparator() {
 			var decimalPlaces = parseInt($('#decimal-places').val());
 			var decimalSeparator = $('#decimal-separator');
 			
 			if (decimalPlaces === 0) {
 				decimalSeparator.prop('disabled', true);
-				decimalSeparator.val(','); // Reset al valor por defecto
+				decimalSeparator.val(','); 
 			} else {
 				decimalSeparator.prop('disabled', false);
 			}
 		}
 
-		// Event handler para el campo de símbolo de moneda
-		$('#currency-symbol').on('input change', function() {
-			toggleCurrencyPosition();
+		$('#symbol').on('input change', function() {
+			toggleSymbolPosition();
 		});
 
 
 
 		// Inicializar el estado al abrir el modal
-		toggleCurrencyPosition();
+		toggleSymbolPosition();
 		toggleDecimalSeparator();
 
 		$('#confirm-format').on('click', function () {
-			var currencySymbol = document.getElementById('currency-symbol').value;
-			var currencyPosition = document.getElementById('currency-position').value;
+			var symbol = document.getElementById('symbol').value;
+			var symbolPosition = document.getElementById('symbol-position').value;
 			var decimalPlaces = document.getElementById('decimal-places').value;
 			var thousandsSeparator = document.getElementById('thousands-separator').value;
 			var decimalSeparator = document.getElementById('decimal-separator').value;
-			
-			// Validar que los decimales sean un número válido
-			if (decimalPlaces < 0 || decimalPlaces > 4) {
-				var error = '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' + gettext('Invalid decimal places value') + '.</p>';
-				$('#field-errors').empty();
-				$('#field-errors').append(error);
-				return;
-			}
 			
 			// Aquí puedes hacer la llamada AJAX para guardar la configuración
 			$.ajax({
@@ -1223,8 +1197,8 @@
 				},
 			  				  	data:{
 			  		'field': fieldName,
-			  		'currency_symbol': currencySymbol,
-			  		'currency_position': currencyPosition,
+			  		'symbol': symbol,
+			  		'symbol_position': symbolPosition,
 			  		'decimal_places': decimalPlaces,
 				'thousands_separator': thousandsSeparator,
 				'decimal_separator': decimalSeparator,
