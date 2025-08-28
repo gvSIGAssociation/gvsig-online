@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-04-04 13:57+0000\n"
-"PO-Revision-Date: 2025-08-27 14:27+0200\n"
+"PO-Revision-Date: 2025-08-28 16:08+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca\n"
@@ -66,16 +66,14 @@ msgstr "Guardar camp"
 msgid "Edit field"
 msgstr "Editar camp"
 
-#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:249
-#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:284 gvsigol_services/static/js/lib/_trans.gvsigol.js:33
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:34 gvsigol_services/static/js/lib/_trans.gvsigol.js:68
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:90 gvsigol_services/static/js/lib/_trans.gvsigol.js:91
-msgid ""
-"Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or "
-"numbers"
+#: gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:249 gvsigol_services/static/js/gvsigollibs/layers/newFieldUi.js:284
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:33 gvsigol_services/static/js/lib/_trans.gvsigol.js:34
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:68 gvsigol_services/static/js/lib/_trans.gvsigol.js:90
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js:91
+msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nom no vàlid: els identificadors han de començar amb una lletra o un subratllat (_). Els caràcters posteriors poden ser "
-"lletres, guions baixos o números"
+"Nom no vàlid: els identificadors han de començar amb una lletra o un subratllat (_). Els caràcters posteriors poden ser lletres, guions "
+"baixos o números"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:2 gvsigol_services/static/js/lib/_trans.gvsigol.js:98
 msgid "Tiles processed"
@@ -206,8 +204,8 @@ msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:45
 msgid ""
-"The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the "
-"NULL values and try again."
+"The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and "
+"try again."
 msgstr ""
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:46
@@ -237,11 +235,8 @@ msgstr "Eliminar camp"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:54
 msgid ""
-"Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the field to confirm "
-"the deletion:"
-msgstr ""
-"Avís: el camp s'esborrarà de la base de dades. Esta operació no espot desfer. Escriu el nom del camp per confirmar la "
-"supressió:"
+"Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the field to confirm the deletion:"
+msgstr "Avís: el camp s'esborrarà de la base de dades. Esta operació no espot desfer. Escriu el nom del camp per confirmar la supressió:"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:55
 msgid "Field to delete"
@@ -338,65 +333,59 @@ msgstr ""
 msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
 msgstr "No podeu actualitzar un magatzem de dades tipus GeoTIFF. Suprimiu-la i torneu-la a crear"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:112
 msgid "Format field"
 msgstr "Donar format"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:113
 msgid "Configure the display format for numeric fields will affect how values are shown in forms and reports."
 msgstr "Configurar el format de visualització per a camps numèrics afectarà com es mostren els valors en formularis i informes."
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:114
 msgid "Symbol"
 msgstr "Símbol"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:115
 msgid "e.g., €, $, m, kg, °"
 msgstr "ex., €, $, m, kg, °"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:116
 msgid "Symbol position"
 msgstr "Posició del símbol"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:117
 msgid "After number"
 msgstr "Després del número"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:118
 msgid "Before number"
 msgstr "Abans del número"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:119
 msgid "Decimal places"
 msgstr "Nº Decimals"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:120
 msgid "Decimal separator"
 msgstr "Separador decimal"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:121
 msgid "Comma (,)"
 msgstr "Coma (,)"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:122
 msgid "Point (.)"
 msgstr "Punt (.)"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:123
 msgid "Thousands separator"
 msgstr "Separador de milers"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:124
 msgid "No separator"
 msgstr "Sense separador"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:125
 msgid "Save"
 msgstr "Guardar"
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:126
 msgid "Field format was saved successfully"
 msgstr "El format del camp s'ha guardat correctament"
+
+msgid "Delete field format"
+msgstr "Eliminar format del camp"
+
+msgid "Warning: the field format will be deleted. This operation cannot be undone. Type the field name to confirm format deletion:"
+msgstr "Avís: el format del camp s'eliminarà. Aquesta operació no es pot desfer. Escriu el nom del camp per confirmar l'eliminació del format:"
+
+msgid "Field to delete format from"
+msgstr "Camp al que es va a eliminar el format"
 
 #~ msgid "true"
 #~ msgstr "Veritable"

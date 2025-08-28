@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-04-04 13:57+0000\n"
-"PO-Revision-Date: 2025-08-27 14:28+0200\n"
+"PO-Revision-Date: 2025-08-28 15:47+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -327,64 +327,60 @@ msgstr ""
 msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:112
 msgid "Format field"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:113
 msgid "Configure the display format for numeric fields will affect how values are shown in forms and reports."
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:114
 msgid "Symbol"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:115
 msgid "e.g., €, $, m, kg, °"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:116
 msgid "Symbol position"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:117
 msgid "After number"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:118
 msgid "Before number"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:119
 msgid "Decimal places"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:120
 msgid "Decimal separator"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:121
 msgid "Comma (,)"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:122
 msgid "Point (.)"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:123
 msgid "Thousands separator"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:124
 msgid "No separator"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:125
 msgid "Save"
 msgstr ""
 
-#: gvsigol_services/static/js/lib/_trans.gvsigol.js:126
 msgid "Field format was saved successfully"
+msgstr ""
+
+msgid "Delete field format"
+msgstr ""
+
+msgid ""
+"Warning: the field format will be deleted. This operation cannot be undone. Type the field name to confirm "
+"format deletion:"
+msgstr ""
+
+msgid "Field to delete format from"
 msgstr ""
 
 #~ msgid "too_many_files"
