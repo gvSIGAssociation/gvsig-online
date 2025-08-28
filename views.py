@@ -1678,10 +1678,11 @@ def layer_autoconfig(layer, featuretype):
             if isinstance(existing_conf, str):
                 existing_conf = ast.literal_eval(existing_conf)
             for field in existing_conf.get('fields', []):
-                if field.get('gvsigol_type') == 'link' or field.get('type_params'):
+                if field.get('gvsigol_type') == 'link' or field.get('type_params') or field.get('field_format'):
                     existing_fields_config[field['name']] = {
                         'gvsigol_type': field.get('gvsigol_type', ''),
-                        'type_params': field.get('type_params', {})
+                        'type_params': field.get('type_params', {}),
+                        'field_format': field.get('field_format', {})
                     }
         except:
             pass
@@ -1704,6 +1705,7 @@ def layer_autoconfig(layer, featuretype):
                     'name': field_name,
                     'gvsigol_type': field_config['gvsigol_type'],
                     'type_params': field_config['type_params'],
+                    'field_format': field_config['field_format'],
                     'visible': True,
                     'infovisible': True,
                     'nullable': True,
@@ -1723,6 +1725,7 @@ def layer_autoconfig(layer, featuretype):
             if field_name in existing_fields_config:
                 field['gvsigol_type'] = existing_fields_config[field_name]['gvsigol_type']
                 field['type_params'] = existing_fields_config[field_name]['type_params']
+                field['field_format'] = existing_fields_config[field_name]['field_format']
                 if field['gvsigol_type'] == 'link':
                     field['editable'] = False
                     field['editableactive'] = False
@@ -2719,11 +2722,12 @@ def layer_config(request, layer_id):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
             
-            # Preservar gvsigol_type y type_params de la configuración anterior
+            # Preservar gvsigol_type, type_params y field_format de la configuración anterior
             if field['name'] in existing_fields:
                 existing_field = existing_fields[field['name']]
                 field['gvsigol_type'] = existing_field.get('gvsigol_type', '')
                 field['type_params'] = existing_field.get('type_params', {})
+                field['field_format'] = existing_field.get('field_format', {})
             
             for id, language in LANGUAGES:
                 field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i), field['name']).strip()
@@ -6095,6 +6099,7 @@ def db_add_field(request):
             calculation = request.POST.get('calculation')
             gvsigol_type = request.POST.get('gvsigol_type', '')
             type_params = request.POST.get('type_params', '{}')
+            field_format = request.POST.get('field_format', '{}')
             layer = Layer.objects.get(id=layer_id)
 
             for ctrl_field in settings.CONTROL_FIELDS:
@@ -6180,6 +6185,17 @@ def db_add_field(request):
                         else:
                             field['type_params'] = {}                        
 
+                        # Guardar field_format
+                        if field_format != '{}':
+                            try:
+                                field_format_dict = json.loads(field_format)
+                                field['field_format'] = field_format_dict
+                            except json.JSONDecodeError:
+                                logger.warning(f"Invalid JSON in field_format for field {field_name}: {field_format}")
+                                field['field_format'] = {}
+                        else:
+                            field['field_format'] = {}
+
                         if gvsigol_type == 'link':
                             field['editable'] = False
                             field['editableactive'] = False
@@ -6193,7 +6209,8 @@ def db_add_field(request):
                     new_field = {
                         'name': field_name,
                         'gvsigol_type': gvsigol_type,
-                        'type_params': {}
+                        'type_params': {},
+                        'field_format': {}
                     }
                     
                     if type_params != '{}':
@@ -6202,6 +6219,14 @@ def db_add_field(request):
                             new_field['type_params'] = type_params_dict
                         except json.JSONDecodeError:
                             logger.warning(f"Invalid JSON in type_params for field {field_name}: {type_params}")
+                    
+                    # Guardar field_format
+                    if field_format != '{}':
+                        try:
+                            field_format_dict = json.loads(field_format)
+                            new_field['field_format'] = field_format_dict
+                        except json.JSONDecodeError:
+                            logger.warning(f"Invalid JSON in field_format for field {field_name}: {field_format}")
                     
                     if gvsigol_type == 'link':
                         new_field['editable'] = False

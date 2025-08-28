@@ -136,7 +136,9 @@
 																				<li><a href="#" class="actions-menu-entry rename-field"><i class="fa fa-edit" style="color: #3c8dbc;"></i> {% trans "Rename" %}</a></li>
 																				<!--  <li><a href="#" class="actions-menu-entry change-field-type"><i class="fa fa-tag" style="color: #3c8dbc;"></i> {% trans "Change type" %}</a></li> -->
 																				{% if f.type == 'integer' or f.type == 'bigint' or f.type == 'smallint' or f.type == 'bigserial' or f.type == 'serial' or f.type == 'smallserial' or f.type == 'double precision' or f.type == 'float' or f.type == 'real' or f.type == 'decimal' or f.type == 'double' or f.type == 'numeric' %}
+																				{% if f.name != 'ogc_fid' %}
 																				<li><a href="#" class="actions-menu-entry format-field"><i class="fa fa-cog" style="color: #3c8dbc;"></i> {% trans "Format field" %}</a></li>
+																				{% endif %}
 																				{% endif %}
 																				{% if not f.calculationLabel %}
 																				<li id="li-convert-to-enumerate"><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
@@ -1200,8 +1202,8 @@
 			  		'symbol': symbol,
 			  		'symbol_position': symbolPosition,
 			  		'decimal_places': decimalPlaces,
-				'thousands_separator': thousandsSeparator,
-				'decimal_separator': decimalSeparator,
+					'thousands_separator': thousandsSeparator,
+					'decimal_separator': decimalSeparator,
 			  		'layer_id': "{{layer_id}}"
 			  	},
 				success	:function(response) {
@@ -1248,7 +1250,8 @@
 		  		'layer_id': "{{layer_id}}",
 		  		'calculation': field.calculation,
 		  		'gvsigol_type': field.gvsigol_type || '',
-		  		'type_params': JSON.stringify(field.type_params || {})
+		  		'type_params': JSON.stringify(field.type_params || {}),
+				'field_format': JSON.stringify(field.field_format || {})
 		  	},
 			success	:function(response) {
 				// Si es un campo de tipo link, rellenar con URLs los registros existentes
