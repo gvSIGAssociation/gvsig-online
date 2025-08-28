@@ -1189,11 +1189,10 @@
 			var thousandsSeparator = document.getElementById('thousands-separator').value;
 			var decimalSeparator = document.getElementById('decimal-separator').value;
 			
-			// Aquí puedes hacer la llamada AJAX para guardar la configuración
 			$.ajax({
 				type: 'POST',
 				async: false,
-				url: '/gvsigonline/services/save_field_format/',
+				url: '/gvsigonline/services/db_save_field_format/',
 				beforeSend:function(xhr){
 					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
