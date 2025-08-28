@@ -138,6 +138,7 @@
 																				{% if f.type == 'integer' or f.type == 'bigint' or f.type == 'smallint' or f.type == 'bigserial' or f.type == 'serial' or f.type == 'smallserial' or f.type == 'double precision' or f.type == 'float' or f.type == 'real' or f.type == 'decimal' or f.type == 'double' or f.type == 'numeric' %}
 																				{% if f.name != 'ogc_fid' %}
 																				<li><a href="#" class="actions-menu-entry format-field"><i class="fa fa-cog" style="color: #3c8dbc;"></i> {% trans "Format field" %}</a></li>
+																				<li><a href="#" class="actions-menu-entry delete-format"><i class="fa fa-eraser" style="color: #f39c12;"></i> {% trans "Delete format" %}</a></li>
 																				{% endif %}
 																				{% endif %}
 																				{% if not f.calculationLabel %}
@@ -838,6 +839,10 @@
 		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
 		formatFieldModal(fieldName);
 	});
+	$('.delete-format').on('click', function (evt){
+		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
+		deleteFormatModal(fieldName);
+	});
 
 	function converToEnumModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
@@ -1208,6 +1213,70 @@
 				success	:function(response) {
 					$('#my-modal-dialog').modal('hide');
 					messageBox.show('Info', gettext('Field format was saved successfully'));
+				},
+				error: function(jqXHR) {
+					messageBox.show('error', jqXHR.responseText);
+					$('#my-modal-dialog').modal('hide');
+				}
+			});
+		});
+		$('#my-modal-dialog').modal('show');
+	}
+
+	function deleteFormatModal(fieldName){
+		$('#my-modal-dialog .modal-body').empty();
+		$('#my-modal-dialog .modal-title').text(gettext("Delete field format"));
+		var ui = '';
+		ui += '<div id="div-name" class="row">';
+		ui += '<div class="col-md-12 form-group">';
+		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
+		ui += gettext("Warning: the field format will be deleted. This operation cannot be undone. Type the name of the field to confirm the deletion:");
+		ui += '<code>' + fieldName + '</code>';
+		ui += '</div>';
+		ui += '</div>';
+		ui += '<div class="col-md-12 form-group">';
+		ui += 	'<label for="deleted-format-field-name">' + gettext('Field to delete format') + '</label>';
+		ui += 	'<input placeholder="' + gettext('Field name') + '" name="deleted-format-field-name" id="deleted-format-field-name" type="text" class="form-control">';
+		ui += '</div>';
+		ui += '</div>';
+		$('#my-modal-dialog .modal-body').append(ui);
+		var buttons = '';
+		buttons += '<button id="cancel-delete-format" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		buttons += '<button id="confirm-delete-format" type="button" class="btn btn-warning" disabled>' + gettext('Delete') + '</button>';
+		$('#my-modal-dialog .modal-footer').empty();
+		$('#my-modal-dialog .modal-footer').append(buttons);
+		$('#deleted-format-field-name').change(function(evt) {
+			if ($(this).val() == fieldName) {
+				document.getElementById('confirm-delete-format').disabled = false;
+			}
+			else {
+				document.getElementById('confirm-delete-format').disabled = true;
+			}
+		});
+		$('#deleted-format-field-name').keyup(function(evt) {
+			if ($(this).val() == fieldName) {
+				document.getElementById('confirm-delete-format').disabled = false;
+			}
+			else {
+				document.getElementById('confirm-delete-format').disabled = true;
+			}
+		});
+
+		$('#confirm-delete-format').on('click', function () {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/db_delete_field_format/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+			  	data:{
+			  		'field': fieldName,
+			  		'layer_id': "{{layer_id}}"
+			  	},
+				success	:function(response) {
+					$('#my-modal-dialog').modal('hide');
+					messageBox.show('Info', gettext('Field format was deleted'));
 				},
 				error: function(jqXHR) {
 					messageBox.show('error', jqXHR.responseText);

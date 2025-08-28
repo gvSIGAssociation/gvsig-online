@@ -6181,6 +6181,84 @@ def db_save_field_format(request):
 
 @login_required()
 @staff_required
+def db_delete_field_format(request):
+    if request.method == 'POST':
+        try:
+            field_name = request.POST.get('field')
+            layer_id = request.POST.get('layer_id')
+            
+            layer = Layer.objects.get(id=layer_id)
+            
+            if not utils.can_manage_layer(request, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            
+            try:
+                if layer.conf:
+                    if isinstance(layer.conf, dict):
+                        current_conf = layer.conf
+                    elif isinstance(layer.conf, str):
+                        try:
+                            current_conf = ast.literal_eval(layer.conf)
+                        except (ValueError, SyntaxError):
+                            try:
+                                current_conf = json.loads(layer.conf)
+                            except json.JSONDecodeError:
+                                logger.warning(f"Could not parse layer.conf for field {field_name}: {layer.conf}")
+                                current_conf = {}
+                    else:
+                        current_conf = {}
+                else:
+                    current_conf = {}
+                
+                fields = current_conf.get('fields', [])
+                field_updated = False
+                
+                for i, field in enumerate(fields):
+                    if field.get('name') == field_name:
+                        field['field_format'] = {}
+                        field_updated = True
+                        break
+                
+                # Solo actualizar si se encontró y modificó el campo
+                if field_updated:
+                    current_conf['fields'] = fields
+                    
+                    try:
+                        layer.conf = current_conf
+                    except:
+                        try:
+                            layer.conf = json.dumps(current_conf)
+                        except TypeError:
+                            def convert_for_json(obj):
+                                if isinstance(obj, bool):
+                                    return obj
+                                elif isinstance(obj, dict):
+                                    return {k: convert_for_json(v) for k, v in obj.items()}
+                                elif isinstance(obj, list):
+                                    return [convert_for_json(item) for item in obj]
+                                else:
+                                    return obj
+                            
+                            converted_conf = convert_for_json(current_conf)
+                            layer.conf = json.dumps(converted_conf)
+                    
+                    layer.save()
+                    return HttpResponse('{"response": "ok"}', content_type='application/json')
+                else:
+                    return HttpResponse('{"response": "ok"}', content_type='application/json')
+                    
+            except Exception as e:
+                logger.warning(f"Error deleting field_format for field {field_name}: {str(e)}")
+                return utils.get_exception(400, f'Error deleting field format: {str(e)}')
+                
+        except Exception as e:
+            logger.exception(_('Error deleting field format. Cause: {0}').format(str(e)))
+            return utils.get_exception(400, f'Error deleting field format: {str(e)}')
+    
+    return utils.get_exception(400, 'Error in the input params')
+
+@login_required()
+@staff_required
 def db_add_field(request):
     if request.method == 'POST':
         layer = None
