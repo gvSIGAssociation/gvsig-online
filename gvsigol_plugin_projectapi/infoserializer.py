@@ -560,4 +560,40 @@ class AppInfoSerializer(serializers.ModelSerializer):
         fields = ['conf', 'image', 'relative_image']
         
 
+class LayerFieldFormatSerializer(serializers.ModelSerializer):
+    """
+    Serializer específico para devolver solo la información de formato de los campos de las capas
+    """
+    fields = serializers.SerializerMethodField('get_field_formats_')
+
+    def get_field_formats_(self, obj):
+        """
+        Extrae solo la información de formatos de los campos desde el campo conf
+        Solo incluye campos que tengan formato definido (no vacío)
+        """
+        fields_info = []
+        try:
+            if obj.conf:
+                conf = ast.literal_eval(obj.conf)
+                fields = conf.get('fields', [])
+                
+                for field in fields:
+                    field_format = field.get('field_format', {})
+                    if field_format and isinstance(field_format, dict) and field_format:
+                        field_info = {
+                            'name': field.get('name', ''),
+                            'field_format': field_format
+                        }
+                        fields_info.append(field_info)
+        except Exception:
+            # Si hay error parseando conf, devolver lista vacía
+            pass
+        
+        return fields_info
+
+    class Meta:
+        model = Layer
+        fields = ['id', 'name', 'title', 'fields']
+        
+
 
