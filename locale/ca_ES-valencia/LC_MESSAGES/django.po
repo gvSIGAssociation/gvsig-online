@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-24 23:59+0100\n"
-"PO-Revision-Date: 2024-09-12 12:15+0200\n"
+"POT-Creation-Date: 2025-08-29 08:45+0200\n"
+"PO-Revision-Date: 2025-08-29 08:48+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca_ES\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: gvsigol_services/backend_geoserver.py:96
 #: gvsigol_services/backend_geoserver.py:147
@@ -49,56 +49,56 @@ msgstr "Capa vectorial"
 msgid "SQL View"
 msgstr "Vista SQL"
 
-#: gvsigol_services/backend_geoserver.py:841
-#: gvsigol_services/backend_geoserver.py:856
-#: gvsigol_services/backend_geoserver.py:868
-#: gvsigol_services/backend_geoserver.py:878
-#: gvsigol_services/backend_geoserver.py:888
-#: gvsigol_services/backend_geoserver.py:897
-#: gvsigol_services/backend_geoserver.py:910
+#: gvsigol_services/backend_geoserver.py:858
+#: gvsigol_services/backend_geoserver.py:873
+#: gvsigol_services/backend_geoserver.py:885
+#: gvsigol_services/backend_geoserver.py:895
+#: gvsigol_services/backend_geoserver.py:905
+#: gvsigol_services/backend_geoserver.py:914
+#: gvsigol_services/backend_geoserver.py:927
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicant la capa. Error: {msg}"
 
-#: gvsigol_services/backend_geoserver.py:844
-#: gvsigol_services/backend_geoserver.py:859
-#: gvsigol_services/backend_geoserver.py:871
-#: gvsigol_services/backend_geoserver.py:881
-#: gvsigol_services/backend_geoserver.py:890
-#: gvsigol_services/backend_geoserver.py:900
-#: gvsigol_services/backend_geoserver.py:912 gvsigol_services/views.py:1269
-#: gvsigol_services/views.py:2650
+#: gvsigol_services/backend_geoserver.py:861
+#: gvsigol_services/backend_geoserver.py:876
+#: gvsigol_services/backend_geoserver.py:888
+#: gvsigol_services/backend_geoserver.py:898
+#: gvsigol_services/backend_geoserver.py:907
+#: gvsigol_services/backend_geoserver.py:917
+#: gvsigol_services/backend_geoserver.py:929 gvsigol_services/views.py:1276
+#: gvsigol_services/views.py:3669
 msgid "Error: layer could not be published"
 msgstr "Error: La capa no pot ser publicada"
 
-#: gvsigol_services/backend_geoserver.py:924
-#: gvsigol_services/backend_geoserver.py:935
-#: gvsigol_services/backend_geoserver.py:945 gvsigol_services/views.py:760
+#: gvsigol_services/backend_geoserver.py:941
+#: gvsigol_services/backend_geoserver.py:952
+#: gvsigol_services/backend_geoserver.py:962 gvsigol_services/views.py:767
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicant el grup de capes. Error: {msg}"
 
-#: gvsigol_services/backend_geoserver.py:927
-#: gvsigol_services/backend_geoserver.py:948
+#: gvsigol_services/backend_geoserver.py:944
+#: gvsigol_services/backend_geoserver.py:965
 msgid "Error: layer group could not be published"
 msgstr "Error: El grup de capes no pot ser publicat"
 
-#: gvsigol_services/backend_geoserver.py:938
+#: gvsigol_services/backend_geoserver.py:955
 msgid "Error: layer group could not be published. Error: "
 msgstr "Error: El grup de capes no pot ser publicat. Error: "
 
-#: gvsigol_services/backend_geoserver.py:991
-#: gvsigol_services/backend_geoserver.py:1001
+#: gvsigol_services/backend_geoserver.py:1008
+#: gvsigol_services/backend_geoserver.py:1018
 #, python-brace-format
 msgid "Error changing property. Backend error: {msg}"
 msgstr "Error canviant propietat. Error del servidor: {msg}"
 
-#: gvsigol_services/backend_geoserver.py:994
-#: gvsigol_services/backend_geoserver.py:1004
+#: gvsigol_services/backend_geoserver.py:1011
+#: gvsigol_services/backend_geoserver.py:1021
 msgid "Error: layer could not be updated"
 msgstr "Error: La capa no pot ser actualitzada"
 
-#: gvsigol_services/backend_geoserver.py:1201
+#: gvsigol_services/backend_geoserver.py:1218
 #: gvsigol_services/shp2postgis.py:337
 #, python-brace-format
 msgid ""
@@ -110,7 +110,7 @@ msgstr ""
 "{value}. Els Identificadors han de començar amb una lletra o un guió baix "
 "(_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: gvsigol_services/backend_geoserver.py:1203
+#: gvsigol_services/backend_geoserver.py:1220
 #: gvsigol_services/shp2postgis.py:339
 #, python-brace-format
 msgid ""
@@ -122,7 +122,7 @@ msgstr ""
 "vàlid: {value}. Els Identificadors han de començar amb una lletra o un guió "
 "baix (_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: gvsigol_services/backend_geoserver.py:1205
+#: gvsigol_services/backend_geoserver.py:1222
 #: gvsigol_services/shp2postgis.py:341
 #, python-brace-format
 msgid ""
@@ -134,11 +134,11 @@ msgstr ""
 "{value}. Els Identificadors han de començar amb una lletra o un guió baix "
 "(_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: gvsigol_services/backend_geoserver.py:1384
+#: gvsigol_services/backend_geoserver.py:1401
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creant la capa. Revisar el format del fitxer."
 
-#: gvsigol_services/backend_geoserver.py:1397 gvsigol_services/views.py:1200
+#: gvsigol_services/backend_geoserver.py:1414 gvsigol_services/views.py:1207
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -146,8 +146,8 @@ msgstr ""
 "Camps de capa no vàlids: '{value}'. La capa no pot tenir camps amb espais en "
 "blanc"
 
-#: gvsigol_services/backend_geoserver.py:1401
-#: gvsigol_services/backend_geoserver.py:1509
+#: gvsigol_services/backend_geoserver.py:1418
+#: gvsigol_services/backend_geoserver.py:1526
 #: gvsigol_services/shp2postgis.py:335
 #, python-brace-format
 msgid ""
@@ -158,56 +158,56 @@ msgstr ""
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o nombres"
 
-#: gvsigol_services/backend_geoserver.py:1409
-#: gvsigol_services/backend_geoserver.py:1413
+#: gvsigol_services/backend_geoserver.py:1426
+#: gvsigol_services/backend_geoserver.py:1430
 #: gvsigol_services/shp2postgis.py:442
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr "Error publicant la capa. Revisar el format del fitxer. Causa: "
 
-#: gvsigol_services/backend_geoserver.py:1440
+#: gvsigol_services/backend_geoserver.py:1457
 msgid "Invalid geometry type"
 msgstr "Tipus de geometria no vàlid"
 
-#: gvsigol_services/backend_geoserver.py:1444
+#: gvsigol_services/backend_geoserver.py:1461
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nom del camp duplicat: {0}"
 
-#: gvsigol_services/backend_geoserver.py:1446
+#: gvsigol_services/backend_geoserver.py:1463
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nom del camp no vàlid. '{0}' és una paraula reservada"
 
-#: gvsigol_services/backend_geoserver.py:1456
-#: gvsigol_services/backend_geoserver.py:1491
-#: gvsigol_services/backend_geoserver.py:1492
-#: gvsigol_services/backend_geoserver.py:1493
+#: gvsigol_services/backend_geoserver.py:1473
+#: gvsigol_services/backend_geoserver.py:1508
+#: gvsigol_services/backend_geoserver.py:1509
+#: gvsigol_services/backend_geoserver.py:1510
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipus de camp no suportat: {0}"
 
-#: gvsigol_services/backend_geoserver.py:1461
+#: gvsigol_services/backend_geoserver.py:1478
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:297
-#: gvsigol_services/templates/layer_create.html:668
+#: gvsigol_services/templates/layer_create.html:682
 msgid "At least one field must be defined"
 msgstr "Heu de definir almenys un camp"
 
-#: gvsigol_services/backend_geoserver.py:1464
+#: gvsigol_services/backend_geoserver.py:1481
 #: gvsigol_services/forms_services.py:308
 msgid "Invalid field definition"
 msgstr "Definició de camp no vàlida"
 
-#: gvsigol_services/backend_geoserver.py:1515
+#: gvsigol_services/backend_geoserver.py:1532
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Ja existeis una capa amb aquest nom: '{value}'"
 
-#: gvsigol_services/backend_geoserver.py:1535
-#: gvsigol_services/backend_geoserver.py:1544
+#: gvsigol_services/backend_geoserver.py:1552
+#: gvsigol_services/backend_geoserver.py:1561
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Hi ha hagut un error construint la vista. Revisar la sentència SQL"
 
-#: gvsigol_services/backend_geoserver.py:1571
+#: gvsigol_services/backend_geoserver.py:1588
 #: gvsigol_services/shp2postgis.py:77
 #, python-brace-format
 msgid ""
@@ -218,7 +218,7 @@ msgstr ""
 "lletra o un guió baix (_). Els següents caràcters poden ser lletres, guions "
 "o nombres"
 
-#: gvsigol_services/backend_geoserver.py:1900
+#: gvsigol_services/backend_geoserver.py:1917
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
@@ -276,6 +276,8 @@ msgid "Do not preserve primary key values"
 msgstr ""
 
 #: gvsigol_services/forms_geoserver.py:52
+#: gvsigol_services/templates/layer_config.html:371
+#: gvsigol_services/templates/layer_config.html:438
 #, fuzzy
 #| msgid "Not allowed"
 msgid "Not applicable"
@@ -710,6 +712,7 @@ msgstr "anys"
 #: gvsigol_services/templates/datastore_add.html:62
 #: gvsigol_services/templates/datastore_list.html:23
 #: gvsigol_services/templates/datastore_update.html:63
+#: gvsigol_services/templates/layer_config.html:334
 #: gvsigol_services/templates/server_update.html:49
 #: gvsigol_services/templates/server_update.html:50
 #: gvsigol_services/templates/workspace_list.html:23
@@ -729,7 +732,7 @@ msgstr "Descripció"
 #: gvsigol_services/templates/external_layer_list.html:23
 #: gvsigol_services/templates/external_layer_update.html:62
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:75
-#: gvsigol_services/templates/layer_config.html:62
+#: gvsigol_services/templates/layer_config.html:74
 #: gvsigol_services/templates/lock_list.html:17
 #: gvsigol_services/templates/server_list.html:25
 #: gvsigol_services/templates/service_url_list.html:24
@@ -758,9 +761,9 @@ msgstr "Usuari"
 #: gvsigol_services/templates/geoserver/layer_upload_raster.html:132
 #: gvsigol_services/templates/geoserver/layer_upload_vector.html:142
 #: gvsigol_services/templates/layer_add.html:630
-#: gvsigol_services/templates/layer_create.html:635
-#: gvsigol_services/templates/layer_create.html:647
-#: gvsigol_services/templates/layer_create.html:654
+#: gvsigol_services/templates/layer_create.html:643
+#: gvsigol_services/templates/layer_create.html:655
+#: gvsigol_services/templates/layer_create.html:662
 #: gvsigol_services/templates/layer_update.html:561
 #: gvsigol_services/templates/layergroup_list.html:40
 #: gvsigol_services/templates/server_update.html:73
@@ -926,7 +929,7 @@ msgstr "Geocodificació inversa ICV"
 msgid "Area (m2)"
 msgstr ""
 
-#: gvsigol_services/models.py:335
+#: gvsigol_services/models.py:390
 #, python-brace-format
 msgid "enumerated ({0})"
 msgstr "enumerat ({0})"
@@ -1608,7 +1611,7 @@ msgstr "HTML"
 #: gvsigol_services/templates/external_layer_add.html:256
 #: gvsigol_services/templates/external_layer_update.html:314
 #: gvsigol_services/templates/layer_add.html:564
-#: gvsigol_services/templates/layer_create.html:604
+#: gvsigol_services/templates/layer_create.html:612
 #: gvsigol_services/templates/layer_update.html:510
 msgid "Layer title"
 msgstr "Títol de la capa"
@@ -1616,7 +1619,7 @@ msgstr "Títol de la capa"
 #: gvsigol_services/templates/external_layer_add.html:257
 #: gvsigol_services/templates/external_layer_update.html:315
 #: gvsigol_services/templates/layer_add.html:565
-#: gvsigol_services/templates/layer_create.html:605
+#: gvsigol_services/templates/layer_create.html:613
 #: gvsigol_services/templates/layer_update.html:511
 msgid "Layer description"
 msgstr "Descripció de la capa"
@@ -1721,8 +1724,8 @@ msgstr "Imatge simple (Sense tiles)"
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:141
 #: gvsigol_services/templates/layer_create.html:290
-#: gvsigol_services/templates/layer_create.html:360
-#: gvsigol_services/templates/layer_create.html:659
+#: gvsigol_services/templates/layer_create.html:368
+#: gvsigol_services/templates/layer_create.html:673
 msgid "New field"
 msgstr "Nou camp"
 
@@ -1763,7 +1766,7 @@ msgstr "No s'ha definit cap camp"
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:199
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:205
-#: gvsigol_services/templates/layer_config.html:129
+#: gvsigol_services/templates/layer_config.html:147
 msgid "Delete field"
 msgstr "Eliminar camp"
 
@@ -2089,13 +2092,13 @@ msgid "Enable detailed information"
 msgstr "Activar informació detallada"
 
 #: gvsigol_services/templates/layer_add.html:327
-#: gvsigol_services/templates/layer_create.html:477
+#: gvsigol_services/templates/layer_create.html:485
 #: gvsigol_services/templates/layer_update.html:427
 msgid "Resource contains no fields"
 msgstr "El recurs no conté cap camp"
 
 #: gvsigol_services/templates/layer_add.html:345
-#: gvsigol_services/templates/layer_create.html:497
+#: gvsigol_services/templates/layer_create.html:505
 #: gvsigol_services/templates/layer_update.html:453
 #: gvsigol_services/templates/sqlview_add.html:299
 msgid "Choose field"
@@ -2119,7 +2122,7 @@ msgstr "El servei no està disponible"
 #: gvsigol_services/templates/layer_add.html:402
 #: gvsigol_services/templates/layer_add.html:447
 #: gvsigol_services/templates/layer_add.html:513
-#: gvsigol_services/templates/layer_create.html:555
+#: gvsigol_services/templates/layer_create.html:563
 #: gvsigol_services/templates/sqlview_add.html:219
 #: gvsigol_services/templates/sqlview_add.html:268
 msgid "No valid data store selected"
@@ -2127,13 +2130,13 @@ msgstr "Magatzem no vàlid"
 
 #: gvsigol_services/templates/layer_add.html:417
 #: gvsigol_services/templates/layer_add.html:440
-#: gvsigol_services/templates/layer_create.html:525
-#: gvsigol_services/templates/layer_create.html:548
+#: gvsigol_services/templates/layer_create.html:533
+#: gvsigol_services/templates/layer_create.html:556
 msgid "No layer groups available"
 msgstr "No hi ha grups de capes disponibles"
 
 #: gvsigol_services/templates/layer_add.html:434
-#: gvsigol_services/templates/layer_create.html:542
+#: gvsigol_services/templates/layer_create.html:550
 msgid "Choose layer group"
 msgstr "Trieu grup de capes"
 
@@ -2146,119 +2149,268 @@ msgstr "-----------"
 msgid "Choose date field"
 msgstr "Trieu data"
 
-#: gvsigol_services/templates/layer_config.html:44
+#: gvsigol_services/templates/layer_config.html:55
 msgid "Field management"
 msgstr "Gestió de camps"
 
-#: gvsigol_services/templates/layer_config.html:45
+#: gvsigol_services/templates/layer_config.html:56
 msgid "Field titles"
 msgstr "Títols dels camps"
 
-#: gvsigol_services/templates/layer_config.html:46
+#: gvsigol_services/templates/layer_config.html:57
 msgid "Field groups"
 msgstr "Grups de camps"
 
-#: gvsigol_services/templates/layer_config.html:47
+#: gvsigol_services/templates/layer_config.html:58
 msgid "Group titles"
 msgstr "Títols dels grups"
 
-#: gvsigol_services/templates/layer_config.html:61
-#: gvsigol_services/templates/layer_config.html:177
+#: gvsigol_services/templates/layer_config.html:59
+msgid "Editing restrictions"
+msgstr "Restriccions d'edició"
+
+#: gvsigol_services/templates/layer_config.html:73
+#: gvsigol_services/templates/layer_config.html:195
 #: gvsigol_services/templates/layer_create.html:111
 msgid "Field name"
 msgstr "Nom del camp"
 
-#: gvsigol_services/templates/layer_config.html:63
+#: gvsigol_services/templates/layer_config.html:75
 #: gvsigol_services/templates/layer_create.html:113
 msgid "Calculated"
 msgstr "Calculat"
 
-#: gvsigol_services/templates/layer_config.html:64
+#: gvsigol_services/templates/layer_config.html:76
 msgid "Nullable"
 msgstr "Pot prendre valor nul"
 
-#: gvsigol_services/templates/layer_config.html:65
+#: gvsigol_services/templates/layer_config.html:77
 msgid "mandatory"
 msgstr "Obligatori"
 
-#: gvsigol_services/templates/layer_config.html:66
+#: gvsigol_services/templates/layer_config.html:78
 msgid "Is visible?"
 msgstr "És visible?"
 
-#: gvsigol_services/templates/layer_config.html:67
+#: gvsigol_services/templates/layer_config.html:79
 msgid "Is editable?"
 msgstr "És editable?"
 
-#: gvsigol_services/templates/layer_config.html:68
+#: gvsigol_services/templates/layer_config.html:80
 msgid "Is shown in getFeatureInfo?"
 msgstr "Es mostra a getFeatureInfo?"
 
-#: gvsigol_services/templates/layer_config.html:69
+#: gvsigol_services/templates/layer_config.html:81
 msgid "Actions"
 msgstr "Accions"
 
-#: gvsigol_services/templates/layer_config.html:80
-#: gvsigol_services/templates/layer_config.html:82
+#: gvsigol_services/templates/layer_config.html:92
+#: gvsigol_services/templates/layer_config.html:94
 msgid "Set at database level"
 msgstr "Establir a nivell de base de dades"
 
-#: gvsigol_services/templates/layer_config.html:85
-#: gvsigol_services/templates/layer_config.html:87
+#: gvsigol_services/templates/layer_config.html:97
+#: gvsigol_services/templates/layer_config.html:99
 msgid "Required in editing forms"
 msgstr "Requerit als formularis d'edició"
 
-#: gvsigol_services/templates/layer_config.html:116
-#: gvsigol_services/templates/layer_config.html:153
+#: gvsigol_services/templates/layer_config.html:128
+#: gvsigol_services/templates/layer_config.html:171
 #: gvsigol_services/templates/select_layer_permissions.html:39
 msgid "SQL views can\\"
 msgstr "Vistes SQL"
 
-#: gvsigol_services/templates/layer_config.html:124
+#: gvsigol_services/templates/layer_config.html:136
 msgid "Rename"
 msgstr "Canviar de nom"
 
-#: gvsigol_services/templates/layer_config.html:125
+#: gvsigol_services/templates/layer_config.html:137
 msgid "Change type"
 msgstr "Canviar tipus"
 
-#: gvsigol_services/templates/layer_config.html:127
-msgid "Convert to enumerate"
-msgstr "Convertir a enumerat"
-
-#: templates/layer_config.html:140
+#: gvsigol_services/templates/layer_config.html:140
 msgid "Format field"
 msgstr "Donar format"
 
-#: gvsigol_services/templates/layer_config.html:134
+#: gvsigol_services/templates/layer_config.html:141
+msgid "Delete format"
+msgstr "Esborrar format"
+
+#: gvsigol_services/templates/layer_config.html:145
+msgid "Convert to enumerate"
+msgstr "Convertir a enumerat"
+
+#: gvsigol_services/templates/layer_config.html:152
 msgid "Reserved field"
 msgstr "Camp reservat"
 
-#: gvsigol_services/templates/layer_config.html:154
-#: gvsigol_services/templates/layer_config.html:158
+#: gvsigol_services/templates/layer_config.html:172
+#: gvsigol_services/templates/layer_config.html:176
 #: gvsigol_services/templates/layer_create.html:123
 msgid "Add field"
 msgstr "Afegir camp"
 
-#: gvsigol_services/templates/layer_config.html:179
+#: gvsigol_services/templates/layer_config.html:197
 msgid "Field title"
 msgstr "Títol del camp"
 
-#: gvsigol_services/templates/layer_config.html:226
-#: gvsigol_services/templates/layer_config.html:756
+#: gvsigol_services/templates/layer_config.html:244
+#: gvsigol_services/templates/layer_config.html:1478
 msgid "Delete group"
 msgstr "Suprimeix el grup"
 
-#: gvsigol_services/templates/layer_config.html:252
+#: gvsigol_services/templates/layer_config.html:270
 msgid "Add field group"
 msgstr "Afegir grup de camps"
 
-#: gvsigol_services/templates/layer_config.html:272
+#: gvsigol_services/templates/layer_config.html:290
 msgid "Group name"
 msgstr "Nom del grup"
 
-#: gvsigol_services/templates/layer_config.html:274
+#: gvsigol_services/templates/layer_config.html:292
 msgid "Group title"
 msgstr "Títol del grup"
+
+#: gvsigol_services/templates/layer_config.html:324
+msgid "Topological rules"
+msgstr "Regles topològiques"
+
+#: gvsigol_services/templates/layer_config.html:333
+msgid "Rule"
+msgstr "Regla"
+
+#: gvsigol_services/templates/layer_config.html:335
+#, fuzzy
+#| msgid "Geometry column"
+msgid "Geometry Limitations"
+msgstr "Columna de geometria"
+
+#: gvsigol_services/templates/layer_config.html:336
+msgid "Active"
+msgstr "Actiu"
+
+#: gvsigol_services/templates/layer_config.html:337
+msgid "Configuration"
+msgstr "Configuració"
+
+#: gvsigol_services/templates/layer_config.html:342
+msgid "Must not overlap"
+msgstr "No ha de superposar-se"
+
+# Topology rules translations
+#: gvsigol_services/templates/layer_config.html:344
+msgid "Geometries within the same layer cannot overlap with each other"
+msgstr "Les geometries de la mateixa capa no poden superposar-se entre si"
+
+#: gvsigol_services/templates/layer_config.html:348
+#: gvsigol_services/templates/layer_config.html:388
+#: gvsigol_services/templates/layer_config.html:410
+#, fuzzy
+#| msgid "Invalid geometry type"
+msgid "Compatible with all geometry types"
+msgstr "Tipus de geometria no vàlid"
+
+#: gvsigol_services/templates/layer_config.html:355
+#: gvsigol_services/templates/layer_config.html:378
+msgid "No additional configuration required"
+msgstr "No es requereix configuració addicional"
+
+#: gvsigol_services/templates/layer_config.html:359
+msgid "Must not have gaps"
+msgstr "No ha de tindre buits"
+
+#: gvsigol_services/templates/layer_config.html:361
+msgid ""
+"The layer coverage must be continuous without empty spaces between geometries"
+msgstr ""
+"La cobertura de la capa ha de ser contínua sense espais buits entre "
+"geometries"
+
+#: gvsigol_services/templates/layer_config.html:365
+#: gvsigol_services/templates/layer_config.html:432
+#, fuzzy
+#| msgid "Polygon"
+msgid "Polygons"
+msgstr "Polígon"
+
+#: gvsigol_services/templates/layer_config.html:365
+#: gvsigol_services/templates/layer_config.html:432
+msgid "Recommended"
+msgstr ""
+
+#: gvsigol_services/templates/layer_config.html:368
+#: gvsigol_services/templates/layer_config.html:435
+#, fuzzy
+#| msgid "Line"
+msgid "Lines"
+msgstr "Línia"
+
+#: gvsigol_services/templates/layer_config.html:368
+msgid "Limited use"
+msgstr ""
+
+#: gvsigol_services/templates/layer_config.html:371
+#: gvsigol_services/templates/layer_config.html:438
+#, fuzzy
+#| msgid "Point"
+msgid "Points"
+msgstr "Punt"
+
+#: gvsigol_services/templates/layer_config.html:382
+msgid "Must be covered by"
+msgstr "Ha d'estar cobert per"
+
+#: gvsigol_services/templates/layer_config.html:384
+msgid ""
+"All geometries must be completely covered by geometries from another layer"
+msgstr ""
+"Totes les geometries han d'estar completament cobertes per geometries d'una "
+"altra capa"
+
+#: gvsigol_services/templates/layer_config.html:397
+#: gvsigol_services/templates/layer_config.html:1798
+msgid "Select a layer"
+msgstr "Seleccionar una capa"
+
+#: gvsigol_services/templates/layer_config.html:404
+msgid "Must not overlap with"
+msgstr "No ha de superposar-se amb"
+
+#: gvsigol_services/templates/layer_config.html:406
+msgid "Geometries cannot overlap with geometries from specified layers"
+msgstr ""
+"Les geometries no poden superposar-se amb geometries de les capes "
+"especificades"
+
+#: gvsigol_services/templates/layer_config.html:421
+msgid "Select multiple layers"
+msgstr "Seleccionar múltiples capes"
+
+#: gvsigol_services/templates/layer_config.html:426
+msgid "Must be contiguous"
+msgstr "Ha de ser contigu"
+
+#: gvsigol_services/templates/layer_config.html:428
+msgid "Geometries must be connected."
+msgstr "Les geometries han d'estar connectades."
+
+#: gvsigol_services/templates/layer_config.html:435
+msgid "Suitable for networks"
+msgstr ""
+
+#: gvsigol_services/templates/layer_config.html:447
+msgid "Tolerance"
+msgstr "Tolerància"
+
+#: gvsigol_services/templates/layer_config.html:450
+msgid "Tolerance distance for contiguity check"
+msgstr "Distància de tolerància per verificació de contigüitat"
+
+#: gvsigol_services/templates/layer_config.html:1805
+#, fuzzy
+#| msgid "Select a layer"
+msgid "Select layers"
+msgstr "Seleccionar una capa"
 
 #: gvsigol_services/templates/layer_create.html:104
 msgid "Field list"
@@ -2515,17 +2667,17 @@ msgstr "Afegir node"
 msgid "New node"
 msgstr "Nou node"
 
-#: gvsigol_services/templates/server_add.html:324
+#: gvsigol_services/templates/server_add.html:328
 #: gvsigol_services/templates/server_update.html:430
 msgid "At least one node must be defined"
 msgstr "Heu de definir almenys un node"
 
-#: gvsigol_services/templates/server_add.html:335
+#: gvsigol_services/templates/server_add.html:339
 #: gvsigol_services/templates/server_update.html:441
 msgid "One of the nodes must be a master node"
 msgstr "Un dels nodes deu ser mestre"
 
-#: gvsigol_services/templates/server_add.html:339
+#: gvsigol_services/templates/server_add.html:343
 #: gvsigol_services/templates/server_update.html:445
 msgid "Only one master node can exist"
 msgstr "Només pot existir un node mestre"
@@ -2684,7 +2836,7 @@ msgstr "Uri"
 msgid "Workspace description"
 msgstr "Descripció de l'espai de treball"
 
-#: gvsigol_services/views.py:354
+#: gvsigol_services/views.py:361
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -2695,11 +2847,11 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: gvsigol_services/views.py:365
+#: gvsigol_services/views.py:372
 msgid "Error: workspace could not be created"
 msgstr "Error: L'espai de treball no pot ser creat"
 
-#: gvsigol_services/views.py:521 gvsigol_services/views.py:2543
+#: gvsigol_services/views.py:528 gvsigol_services/views.py:3547
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -2710,59 +2862,59 @@ msgstr ""
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o números"
 
-#: gvsigol_services/views.py:523
+#: gvsigol_services/views.py:530
 #, python-brace-format
 msgid "Invalid datastore name: '{value}'. Identifiers must be in lowercase."
 msgstr ""
 
-#: gvsigol_services/views.py:544
+#: gvsigol_services/views.py:551
 msgid "Error: Data store could not be created"
 msgstr "Error: El magatzem no pot ser creat"
 
-#: gvsigol_services/views.py:547
+#: gvsigol_services/views.py:554
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Error: GeoTIFF no està georreferenciat"
 
-#: gvsigol_services/views.py:603
+#: gvsigol_services/views.py:610
 msgid "Error updating datastore"
 msgstr "Error actualitzant magatzem"
 
-#: gvsigol_services/views.py:737
+#: gvsigol_services/views.py:744
 msgid "ERROR can't connect with GeoServer"
 msgstr "ERROR no es pot connectar amb GeoServer"
 
-#: gvsigol_services/views.py:745
+#: gvsigol_services/views.py:752
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 "ERROR no es pot eliminar les dades de GeoServer. Forçant l'eliminació de la "
 "base de dades"
 
-#: gvsigol_services/views.py:770
+#: gvsigol_services/views.py:777
 msgid "ERROR User is not authorized to perform this operation"
 msgstr "ERROR L'usuari no està autoritzat a realitzar esta operació"
 
-#: gvsigol_services/views.py:1160 gvsigol_services/views.py:2546
+#: gvsigol_services/views.py:1167 gvsigol_services/views.py:3550
 msgid "You are not allowed to manage the selected datastore"
 msgstr "No tens permisos per gestionar el magatzem seleccionat"
 
-#: gvsigol_services/views.py:1162 gvsigol_services/views.py:2549
+#: gvsigol_services/views.py:1169 gvsigol_services/views.py:3553
 msgid "You are not allowed to manage the selected layergroup"
 msgstr "No tens permisos per gestionar el grup de capes seleccionat"
 
-#: gvsigol_services/views.py:2044 gvsigol_services/views.py:2060
+#: gvsigol_services/views.py:3048 gvsigol_services/views.py:3064
 #, python-brace-format
 msgid "Error clearing cache. Cause: {cause}."
 msgstr "Error netejant la memòria cau. Causa: {cause}"
 
-#: gvsigol_services/views.py:2046
+#: gvsigol_services/views.py:3050
 msgid "Not supported."
 msgstr "No compatible."
 
-#: gvsigol_services/views.py:2155
+#: gvsigol_services/views.py:3159
 msgid "You must enter a name for layer group"
 msgstr "Ha d'introduir un nom per al grup de capes"
 
-#: gvsigol_services/views.py:2165 gvsigol_services/views.py:2317
+#: gvsigol_services/views.py:3169 gvsigol_services/views.py:3321
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -2773,71 +2925,71 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: gvsigol_services/views.py:2174 gvsigol_services/views.py:2313
+#: gvsigol_services/views.py:3178 gvsigol_services/views.py:3317
 msgid "Layer group name already exists"
 msgstr "El nom del grup de capes ja existeix"
 
-#: gvsigol_services/views.py:2643
+#: gvsigol_services/views.py:3662
 msgid ""
 "Error: table already exists. Try to publish the layer instead of creating an "
 "empty one."
 msgstr ""
 
-#: gvsigol_services/views.py:2806
+#: gvsigol_services/views.py:3825
 msgid "You must enter a title for enumeration"
 msgstr "Ha d'introduir un títol per l'enumeració"
 
-#: gvsigol_services/views.py:2811
+#: gvsigol_services/views.py:3830
 msgid "Name already taken"
 msgstr "Nom ja utilitzat"
 
-#: gvsigol_services/views.py:4074
+#: gvsigol_services/views.py:5093
 msgid "Error: ExternalLayer could not be published"
 msgstr "Error: La capa externa no pot ser publicada"
 
-#: gvsigol_services/views.py:4200
+#: gvsigol_services/views.py:5219
 msgid "Error: externallayer could not be published"
 msgstr "Error: La capa externa no pot ser publicada"
 
-#: gvsigol_services/views.py:4573
+#: gvsigol_services/views.py:5592
 #, python-brace-format
 msgid "Error configuring layer. Cause: {cause}."
 msgstr "Error configurant la capa. Causa: {cause}."
 
-#: gvsigol_services/views.py:4638
+#: gvsigol_services/views.py:5657
 #, python-brace-format
 msgid "Error accessing layer. Cause: {cause}."
 msgstr "Error accedint a la capa. Causa: {cause}."
 
-#: gvsigol_services/views.py:4734
+#: gvsigol_services/views.py:5753
 #, python-brace-format
 msgid "Error accessing layer group. Cause: {cause}."
 msgstr "Error accedint al grupo de capes. Causa: {cause}."
 
-#: gvsigol_services/views.py:4921 gvsigol_services/views.py:4927
+#: gvsigol_services/views.py:5940 gvsigol_services/views.py:5946
 msgid "Connection failed"
 msgstr "La connexió ha fallat"
 
-#: gvsigol_services/views.py:4921
+#: gvsigol_services/views.py:5940
 msgid "Status code: "
 msgstr "Codi d'estat: "
 
-#: gvsigol_services/views.py:4932
+#: gvsigol_services/views.py:5951
 msgid "Connection error"
 msgstr "Error de connexió"
 
-#: gvsigol_services/views.py:4972
+#: gvsigol_services/views.py:5991
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
 msgstr "No es pot suprimir el camp de control \"{0}\""
 
-#: gvsigol_services/views.py:4997 gvsigol_services/views.py:5059
-#: gvsigol_services/views.py:5063 gvsigol_services/views.py:5065
+#: gvsigol_services/views.py:6016 gvsigol_services/views.py:6078
+#: gvsigol_services/views.py:6082 gvsigol_services/views.py:6084
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
 msgstr "Error canviant el nom del camp. Causa: {0}"
 
-#: gvsigol_services/views.py:4999 gvsigol_services/views.py:5061
+#: gvsigol_services/views.py:6018 gvsigol_services/views.py:6080
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
@@ -2845,26 +2997,38 @@ msgstr ""
 "El camp no existeix. Probablement, un altre usuari l'ha suprimit o ha "
 "canviat el nom simultàniament"
 
-#: gvsigol_services/views.py:5001
+#: gvsigol_services/views.py:6020
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
 msgstr "Error suprimint el camp. Causa: {0}"
 
-#: gvsigol_services/views.py:5028
+#: gvsigol_services/views.py:6047
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr "No es pot canviar el nom del camp de control \"{0}\""
 
-#: gvsigol_services/views.py:5030 gvsigol_services/views.py:5085
+#: gvsigol_services/views.py:6049 gvsigol_services/views.py:6280
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr "Nom del camp no vàlid. '{0}' és una paraula reservada"
 
-#: gvsigol_services/views.py:5098
+#: gvsigol_services/views.py:6177
+#, fuzzy, python-brace-format
+#| msgid "Error renaming field. Cause: {0}"
+msgid "Error saving field format. Cause: {0}"
+msgstr "Error canviant el nom del camp. Causa: {0}"
+
+#: gvsigol_services/views.py:6255
+#, fuzzy, python-brace-format
+#| msgid "Error deleting field. Cause: {0}"
+msgid "Error deleting field format. Cause: {0}"
+msgstr "Error suprimint el camp. Causa: {0}"
+
+#: gvsigol_services/views.py:6293
 msgid "Field type not supported"
 msgstr "Tipus de camp no admès"
 
-#: gvsigol_services/views.py:5103
+#: gvsigol_services/views.py:6298
 #, python-brace-format
 msgid ""
 "Error adding field. Probably the field \"{0}\" already exists. Database "
@@ -2873,12 +3037,12 @@ msgstr ""
 "Error afegint el camp. Probabement el camp \"{0}\" ja existeix. Missatge de "
 "la base de dades {1}"
 
-#: gvsigol_services/views.py:5132
+#: gvsigol_services/views.py:6441
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr "Error al crear el camp. Causa: {0}"
 
-#: gvsigol_services/views.py:5199
+#: gvsigol_services/views.py:6508
 #, python-brace-format
 msgid ""
 "Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
@@ -2886,42 +3050,42 @@ msgstr ""
 "Els camps del JOIN han de ser del mateix tipus: {field1}({type1}) - {field2}"
 "({type2})"
 
-#: gvsigol_services/views.py:5213
+#: gvsigol_services/views.py:6522
 msgid "The user can't manage this SQL view"
 msgstr "La taula principal ha de tenir una clau primària"
 
-#: gvsigol_services/views.py:5241
+#: gvsigol_services/views.py:6550
 msgid "The main table must have a primary key"
 msgstr "La taula principal ha de tenir una clau primària"
 
-#: gvsigol_services/views.py:5271
+#: gvsigol_services/views.py:6580
 #, python-brace-format
 msgid "Field does not exist: {field}"
 msgstr "El camp no existeix {field}"
 
-#: gvsigol_services/views.py:5281
+#: gvsigol_services/views.py:6590
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
 "El camp {field} és la clau primària de la taula principal i ha de ser inclós"
 
-#: gvsigol_services/views.py:5301
+#: gvsigol_services/views.py:6610
 msgid "An object already exists with name: {}"
 msgstr "Ja existeix un objecte amb el nom: {}"
 
-#: gvsigol_services/views.py:5308
+#: gvsigol_services/views.py:6617
 msgid "The view could not be created"
 msgstr "No s'ha pogut crear la vista"
 
-#: gvsigol_services/views.py:5313
+#: gvsigol_services/views.py:6622
 msgid "Pk columns could not be inserted"
 msgstr "Les columnes que són clau primària no s'han pogut afegir"
 
-#: gvsigol_services/views.py:5359
+#: gvsigol_services/views.py:6668
 msgid "Not allowed"
 msgstr "No permés"
 
-#: gvsigol_services/views.py:5369
+#: gvsigol_services/views.py:6678
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr "Error suprimint la vista: {0}"
@@ -3060,64 +3224,3 @@ msgstr "Error suprimint la vista: {0}"
 #~ "\t\t\t\t\t\t\t\ta aquest formulari. \n"
 #~ "\t\t\t\t\t\t\t\tPer favor contacti amb l'administrador del sistema si \n"
 #~ "\t\t\t\t\t\t\t\tla creació de la metadada contínua fallant"
-
-# Topology rules translations
-msgid "Geometries within the same layer cannot overlap with each other"
-msgstr "Les geometries de la mateixa capa no poden superposar-se entre si"
-
-msgid "The layer coverage must be continuous without empty spaces between geometries"
-msgstr "La cobertura de la capa ha de ser contínua sense espais buits entre geometries"
-
-msgid "All geometries must be completely covered by geometries from another layer"
-msgstr "Totes les geometries han d'estar completament cobertes per geometries d'una altra capa"
-
-msgid "Geometries cannot overlap with geometries from specified layers"
-msgstr "Les geometries no poden superposar-se amb geometries de les capes especificades"
-
-msgid "Geometries must be connected."
-msgstr "Les geometries han d'estar connectades."
-
-msgid "Topological rules"
-msgstr "Regles topològiques"
-
-msgid "Must not overlap"
-msgstr "No ha de superposar-se"
-
-msgid "Must not have gaps"
-msgstr "No ha de tindre buits"
-
-msgid "Must be covered by"
-msgstr "Ha d'estar cobert per"
-
-msgid "Must not overlap with"
-msgstr "No ha de superposar-se amb"
-
-msgid "Must be contiguous"
-msgstr "Ha de ser contigu"
-
-msgid "No additional configuration required"
-msgstr "No es requereix configuració addicional"
-
-msgid "Select a layer"
-msgstr "Seleccionar una capa"
-
-msgid "Select multiple layers"
-msgstr "Seleccionar múltiples capes"
-
-msgid "Tolerance"
-msgstr "Tolerància"
-
-msgid "Tolerance distance for contiguity check"
-msgstr "Distància de tolerància per verificació de contigüitat"
-
-msgid "Editing restrictions"
-msgstr "Restriccions d'edició"
-
-msgid "Rule"
-msgstr "Regla"
-
-msgid "Active"
-msgstr "Actiu"
-
-msgid "Configuration"
-msgstr "Configuració"
