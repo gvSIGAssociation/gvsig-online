@@ -267,13 +267,15 @@ function createModalContent(fid, mode, title, config, fieldNames) {
   
   window.currentFieldConfig = {
     gvsigol_type: "",
-    type_params: {}
+    type_params: {},
+    field_format: {}
   };
   
   // Si estamos editando un campo existente, preservar su configuración
   if (mode == "update" && field) {
     window.currentFieldConfig.gvsigol_type = field.gvsigol_type || "";
     window.currentFieldConfig.type_params = field.type_params || {};
+    window.currentFieldConfig.field_format = field.field_format || {};
   }
 
   ui += '<div id="field-errors" class="row">';
