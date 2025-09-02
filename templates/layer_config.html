@@ -137,7 +137,7 @@
 																				<!--  <li><a href="#" class="actions-menu-entry change-field-type"><i class="fa fa-tag" style="color: #3c8dbc;"></i> {% trans "Change type" %}</a></li> -->
 																				{% if f.type == 'integer' or f.type == 'bigint' or f.type == 'smallint' or f.type == 'bigserial' or f.type == 'serial' or f.type == 'smallserial' or f.type == 'double precision' or f.type == 'float' or f.type == 'real' or f.type == 'decimal' or f.type == 'double' or f.type == 'numeric' %}
 																				{% if f.name != 'ogc_fid' %}
-																				<li><a href="#" class="actions-menu-entry format-field"><i class="fa fa-cog" style="color: #3c8dbc;"></i> {% trans "Format field" %}</a></li>
+																				<li><a href="#" class="actions-menu-entry format-field"><i class="fa fa-cog" style="color: #3c8dbc;"></i> {% trans "Manage format" %}</a></li>
 																				{% endif %}
 																				{% endif %}
 																				{% if not f.calculationLabel %}
@@ -1061,7 +1061,7 @@
 
 	function formatFieldModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text(gettext("Format field"));
+		$('#my-modal-dialog .modal-title').text(gettext("Manage format"));
 
 		$.ajax({
 			type: 'GET',
