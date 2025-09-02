@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/v1/projects/', api.ProjectListView.as_view(), name='project_list'),
     path('api/v1/projects/<int:project_id>/', api.ProjectView.as_view(), name='get_project'),
     path('api/v1/projects/<int:project_id>/layers/', api.ProjectLayersView.as_view(), name='get_layers_from_project'),
+    path('api/v1/projects/<int:project_id>/layers/field-format/', api.ProjectLayersFieldFormatsView.as_view(), name='get_layers_field_format_from_project'),
     path('api/v1/projects/<int:project_id>/groups/', api.ProjectGroupsView.as_view(), name='get_groups_from_project'),
     path('api/v1/projects/<int:project_id>/data/', api.ProjectBaseLayerData.as_view(), name='get_base_layer_data'),
     path('api/v1/projects/shared_view/create/', api.CreateSharedViewAPI.as_view(), name='create_shared_view'),
