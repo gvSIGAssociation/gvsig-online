@@ -53,6 +53,7 @@ from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services.models import Layer, LayerGroup, Server
 from .serializers import ProjectSerializer, UserSerializer, SharedViewSerializer
 from . import serializers
+from . import infoserializer
 from . import util
 from gvsigol.urls import urlpatterns
 import psycopg2
@@ -521,6 +522,53 @@ class ProjectLayersView(ListAPIView):
                 }
             ]
         }
+        util.destroy_pool_connection(queryset.connections)
+        return JsonResponse(result, safe=False) 
+
+
+class ProjectLayersFieldFormatsView(ListAPIView):
+    serializer_class = infoserializer.LayerFieldFormatSerializer
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_layers_field_format_from_project', 
+                         operation_summary='Gets the field format information for all layers in a specific project',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Project NOT found", 
+                                    403: "The project is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated]) 
+    def get(self, request, project_id):
+        """
+        This endpoint returns only the field format information for all layers in a project.
+        Useful for frontend applications that need to know how to display field values.
+        """
+        v = Validation(request)    
+        try:
+            v.check_get_project_layers(project_id)
+        except HttpException as e:
+            return e.get_exception()
+        
+        base_layer_id = None
+        try:
+            base_group = ProjectLayerGroup.objects.get(project_id = project_id, baselayer_group=True)
+            base_layer_id = base_group.default_baselayer
+        except Exception:
+            pass #No hay capa base
+            
+        queryset = util.get_layerread_by_user_and_project(request, project_id)
+        queryset.connections = util.get_pool_connection(queryset)
+        
+        serializer = infoserializer.LayerFieldFormatSerializer(queryset, many=True, context={'request': request, 'user': request.user.username})
+        
+        result = {
+            "content" : serializer.data,
+            "baselayerid" : base_layer_id,
+            "links" : [
+                {
+                    "rel" : "self",
+                    "href": request.get_full_path()
+                }
+            ]
+        }
+        
         util.destroy_pool_connection(queryset.connections)
         return JsonResponse(result, safe=False) 
     
