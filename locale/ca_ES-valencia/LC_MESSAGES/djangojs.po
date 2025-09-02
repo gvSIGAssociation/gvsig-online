@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-04-04 13:57+0000\n"
-"PO-Revision-Date: 2025-08-28 16:08+0200\n"
+"PO-Revision-Date: 2025-09-02 16:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca\n"
@@ -333,8 +333,11 @@ msgstr ""
 msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
 msgstr "No podeu actualitzar un magatzem de dades tipus GeoTIFF. Suprimiu-la i torneu-la a crear"
 
-msgid "Format field"
-msgstr "Donar format"
+msgid "Manage format"
+msgstr "Gestionar format"
+
+msgid "Delete format"
+msgstr "Esborrar format"
 
 msgid "Configure the display format for numeric fields will affect how values are shown in forms and reports."
 msgstr "Configurar el format de visualització per a camps numèrics afectarà com es mostren els valors en formularis i informes."
@@ -377,15 +380,6 @@ msgstr "Guardar"
 
 msgid "Field format was saved successfully"
 msgstr "El format del camp s'ha guardat correctament"
-
-msgid "Delete field format"
-msgstr "Eliminar format del camp"
-
-msgid "Warning: the field format will be deleted. This operation cannot be undone. Type the field name to confirm format deletion:"
-msgstr "Avís: el format del camp s'eliminarà. Aquesta operació no es pot desfer. Escriu el nom del camp per confirmar l'eliminació del format:"
-
-msgid "Field to delete format from"
-msgstr "Camp al que es va a eliminar el format"
 
 #~ msgid "true"
 #~ msgstr "Veritable"

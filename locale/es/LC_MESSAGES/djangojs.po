@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-28 13:28+0200\n"
-"PO-Revision-Date: 2025-08-28 15:46+0200\n"
+"PO-Revision-Date: 2025-09-02 16:08+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -372,8 +372,11 @@ msgid ""
 msgstr ""
 "No puede actualizar un almacén de tipo GeoTIFF. Borrelo y creelo de nuevo."
 
-msgid "Format field"
-msgstr "Dar formato"
+msgid "Manage format"
+msgstr "Gestionar formato"
+
+msgid "Delete format"
+msgstr "Borrar formato"
 
 msgid ""
 "Configure the display format for numeric fields will affect how values are "
@@ -420,20 +423,6 @@ msgstr "Guardar"
 
 msgid "Field format was saved successfully"
 msgstr "El formato del campo se guardó correctamente"
-
-msgid "Delete field format"
-msgstr "Eliminar formato del campo"
-
-msgid ""
-"Warning: the field format will be deleted. This operation cannot be undone. "
-"Type the field name to confirm format deletion:"
-msgstr ""
-"Aviso: el formato del campo se eliminará. Esta operación no se puede "
-"deshacer. Escriba el nombre del campo para confirmar la eliminación de su "
-"formato:"
-
-msgid "Field to delete format from"
-msgstr "Campo al que se le va a eliminar el formato"
 
 #~ msgid "true"
 #~ msgstr "Verdadero"
