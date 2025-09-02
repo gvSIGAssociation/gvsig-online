@@ -1678,10 +1678,11 @@ def layer_autoconfig(layer, featuretype):
             if isinstance(existing_conf, str):
                 existing_conf = ast.literal_eval(existing_conf)
             for field in existing_conf.get('fields', []):
-                if field.get('gvsigol_type') == 'link' or field.get('type_params'):
+                if field.get('gvsigol_type') == 'link' or field.get('type_params') or field.get('field_format'):
                     existing_fields_config[field['name']] = {
                         'gvsigol_type': field.get('gvsigol_type', ''),
-                        'type_params': field.get('type_params', {})
+                        'type_params': field.get('type_params', {}),
+                        'field_format': field.get('field_format', {})
                     }
         except:
             pass
@@ -1704,6 +1705,7 @@ def layer_autoconfig(layer, featuretype):
                     'name': field_name,
                     'gvsigol_type': field_config['gvsigol_type'],
                     'type_params': field_config['type_params'],
+                    'field_format': field_config['field_format'],
                     'visible': True,
                     'infovisible': True,
                     'nullable': True,
@@ -1723,6 +1725,7 @@ def layer_autoconfig(layer, featuretype):
             if field_name in existing_fields_config:
                 field['gvsigol_type'] = existing_fields_config[field_name]['gvsigol_type']
                 field['type_params'] = existing_fields_config[field_name]['type_params']
+                field['field_format'] = existing_fields_config[field_name]['field_format']
                 if field['gvsigol_type'] == 'link':
                     field['editable'] = False
                     field['editableactive'] = False
@@ -2719,11 +2722,12 @@ def layer_config(request, layer_id):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
             
-            # Preservar gvsigol_type y type_params de la configuración anterior
+            # Preservar gvsigol_type, type_params y field_format de la configuración anterior
             if field['name'] in existing_fields:
                 existing_field = existing_fields[field['name']]
                 field['gvsigol_type'] = existing_field.get('gvsigol_type', '')
                 field['type_params'] = existing_field.get('type_params', {})
+                field['field_format'] = existing_field.get('field_format', {})
             
             for id, language in LANGUAGES:
                 field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i), field['name']).strip()
@@ -6082,6 +6086,179 @@ def db_field_rename(request):
 
 @login_required()
 @staff_required
+def db_save_field_format(request):
+    if request.method == 'POST':
+        try:
+            field_name = request.POST.get('field')
+            layer_id = request.POST.get('layer_id')
+            symbol = request.POST.get('symbol', '')
+            symbol_position = request.POST.get('symbol_position', 'after')
+            decimal_places = request.POST.get('decimal_places', '2')
+            thousands_separator = request.POST.get('thousands_separator', '')
+            decimal_separator = request.POST.get('decimal_separator', ',')
+            
+            layer = Layer.objects.get(id=layer_id)
+            
+            if not utils.can_manage_layer(request, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            
+            field_format = {
+                'symbol': symbol,
+                'symbol_position': symbol_position,
+                'decimal_places': int(decimal_places),
+                'thousands_separator': thousands_separator,
+                'decimal_separator': decimal_separator
+            }
+            
+            try:
+                if layer.conf:
+                    if isinstance(layer.conf, dict):
+                        current_conf = layer.conf
+                    elif isinstance(layer.conf, str):
+                        try:
+                            current_conf = ast.literal_eval(layer.conf)
+                        except (ValueError, SyntaxError):
+                            try:
+                                current_conf = json.loads(layer.conf)
+                            except json.JSONDecodeError:
+                                logger.warning(f"Could not parse layer.conf for field {field_name}: {layer.conf}")
+                                current_conf = {}
+                    else:
+                        current_conf = {}
+                else:
+                    current_conf = {}
+                
+                fields = current_conf.get('fields', [])
+                field_updated = False
+                
+                for i, field in enumerate(fields):
+                    if field.get('name') == field_name:
+                        field['field_format'] = field_format
+                        fields[i] = field
+                        field_updated = True
+                        break
+                
+                if not field_updated:
+                    new_field = {
+                        'name': field_name,
+                        'field_format': field_format
+                    }
+                    fields.append(new_field)
+                
+                current_conf['fields'] = fields
+                
+                try:
+                    layer.conf = current_conf
+                except:
+                    try:
+                        layer.conf = json.dumps(current_conf)
+                    except TypeError:
+                        def convert_for_json(obj):
+                            if isinstance(obj, bool):
+                                return obj
+                            elif isinstance(obj, dict):
+                                return {k: convert_for_json(v) for k, v in obj.items()}
+                            elif isinstance(obj, list):
+                                return [convert_for_json(item) for item in obj]
+                            else:
+                                return obj
+                        
+                        converted_conf = convert_for_json(current_conf)
+                        layer.conf = json.dumps(converted_conf)
+                
+                layer.save()
+                return HttpResponse('{"response": "ok"}', content_type='application/json')
+                
+            except Exception as e:
+                logger.warning(f"Error saving field_format for field {field_name}: {str(e)}")
+                return utils.get_exception(400, f'Error saving field format: {str(e)}')
+                
+        except Exception as e:
+            logger.exception(_('Error saving field format. Cause: {0}').format(str(e)))
+            return utils.get_exception(400, f'Error saving field format: {str(e)}')
+    
+    return utils.get_exception(400, 'Error in the input params')
+
+@login_required()
+@staff_required
+def db_delete_field_format(request):
+    if request.method == 'POST':
+        try:
+            field_name = request.POST.get('field')
+            layer_id = request.POST.get('layer_id')
+            
+            layer = Layer.objects.get(id=layer_id)
+            
+            if not utils.can_manage_layer(request, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            
+            try:
+                if layer.conf:
+                    if isinstance(layer.conf, dict):
+                        current_conf = layer.conf
+                    elif isinstance(layer.conf, str):
+                        try:
+                            current_conf = ast.literal_eval(layer.conf)
+                        except (ValueError, SyntaxError):
+                            try:
+                                current_conf = json.loads(layer.conf)
+                            except json.JSONDecodeError:
+                                logger.warning(f"Could not parse layer.conf for field {field_name}: {layer.conf}")
+                                current_conf = {}
+                    else:
+                        current_conf = {}
+                else:
+                    current_conf = {}
+                
+                fields = current_conf.get('fields', [])
+                field_updated = False
+                
+                for i, field in enumerate(fields):
+                    if field.get('name') == field_name:
+                        field['field_format'] = {}
+                        field_updated = True
+                        break
+                
+                # Solo actualizar si se encontró y modificó el campo
+                if field_updated:
+                    current_conf['fields'] = fields
+                    
+                    try:
+                        layer.conf = current_conf
+                    except:
+                        try:
+                            layer.conf = json.dumps(current_conf)
+                        except TypeError:
+                            def convert_for_json(obj):
+                                if isinstance(obj, bool):
+                                    return obj
+                                elif isinstance(obj, dict):
+                                    return {k: convert_for_json(v) for k, v in obj.items()}
+                                elif isinstance(obj, list):
+                                    return [convert_for_json(item) for item in obj]
+                                else:
+                                    return obj
+                            
+                            converted_conf = convert_for_json(current_conf)
+                            layer.conf = json.dumps(converted_conf)
+                    
+                    layer.save()
+                    return HttpResponse('{"response": "ok"}', content_type='application/json')
+                else:
+                    return HttpResponse('{"response": "ok"}', content_type='application/json')
+                    
+            except Exception as e:
+                logger.warning(f"Error deleting field_format for field {field_name}: {str(e)}")
+                return utils.get_exception(400, f'Error deleting field format: {str(e)}')
+                
+        except Exception as e:
+            logger.exception(_('Error deleting field format. Cause: {0}').format(str(e)))
+            return utils.get_exception(400, f'Error deleting field format: {str(e)}')
+    
+    return utils.get_exception(400, 'Error in the input params')
+
+@login_required()
+@staff_required
 def db_add_field(request):
     if request.method == 'POST':
         layer = None
@@ -6095,6 +6272,7 @@ def db_add_field(request):
             calculation = request.POST.get('calculation')
             gvsigol_type = request.POST.get('gvsigol_type', '')
             type_params = request.POST.get('type_params', '{}')
+            field_format = request.POST.get('field_format', '{}')
             layer = Layer.objects.get(id=layer_id)
 
             for ctrl_field in settings.CONTROL_FIELDS:
@@ -6180,6 +6358,17 @@ def db_add_field(request):
                         else:
                             field['type_params'] = {}                        
 
+                        # Guardar field_format
+                        if field_format != '{}':
+                            try:
+                                field_format_dict = json.loads(field_format)
+                                field['field_format'] = field_format_dict
+                            except json.JSONDecodeError:
+                                logger.warning(f"Invalid JSON in field_format for field {field_name}: {field_format}")
+                                field['field_format'] = {}
+                        else:
+                            field['field_format'] = {}
+
                         if gvsigol_type == 'link':
                             field['editable'] = False
                             field['editableactive'] = False
@@ -6193,7 +6382,8 @@ def db_add_field(request):
                     new_field = {
                         'name': field_name,
                         'gvsigol_type': gvsigol_type,
-                        'type_params': {}
+                        'type_params': {},
+                        'field_format': {}
                     }
                     
                     if type_params != '{}':
@@ -6202,6 +6392,14 @@ def db_add_field(request):
                             new_field['type_params'] = type_params_dict
                         except json.JSONDecodeError:
                             logger.warning(f"Invalid JSON in type_params for field {field_name}: {type_params}")
+                    
+                    # Guardar field_format
+                    if field_format != '{}':
+                        try:
+                            field_format_dict = json.loads(field_format)
+                            new_field['field_format'] = field_format_dict
+                        except json.JSONDecodeError:
+                            logger.warning(f"Invalid JSON in field_format for field {field_name}: {field_format}")
                     
                     if gvsigol_type == 'link':
                         new_field['editable'] = False
