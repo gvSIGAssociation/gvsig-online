@@ -6259,6 +6259,63 @@ def db_delete_field_format(request):
 
 @login_required()
 @staff_required
+def get_field_format(request):
+    if request.method == 'GET':
+        try:
+            field_name = request.GET.get('field')
+            layer_id = request.GET.get('layer_id')
+            
+            layer = Layer.objects.get(id=layer_id)
+            
+            if not utils.can_manage_layer(request, layer):
+                return HttpResponseForbidden('{"response": "Not authorized"}', content_type='application/json')
+            
+            try:
+                if layer.conf:
+                    if isinstance(layer.conf, dict):
+                        current_conf = layer.conf
+                    elif isinstance(layer.conf, str):
+                        try:
+                            current_conf = ast.literal_eval(layer.conf)
+                        except (ValueError, SyntaxError):
+                            try:
+                                current_conf = json.loads(layer.conf)
+                            except json.JSONDecodeError:
+                                logger.warning(f"Could not parse layer.conf for field {field_name}: {layer.conf}")
+                                current_conf = {}
+                    else:
+                        current_conf = {}
+                else:
+                    current_conf = {}
+                
+                fields = current_conf.get('fields', [])
+                field_format = {}
+                
+                for field in fields:
+                    if field.get('name') == field_name:
+                        field_format = field.get('field_format', {})
+                        break
+                
+                response_data = {
+                    'status': 'success',
+                    'field_format': field_format,
+                    'has_format': bool(field_format)
+                }
+                
+                return HttpResponse(json.dumps(response_data), content_type='application/json')
+                    
+            except Exception as e:
+                logger.warning(f"Error getting field_format for field {field_name}: {str(e)}")
+                return utils.get_exception(400, f'Error getting field format: {str(e)}')
+                
+        except Exception as e:
+            logger.exception(_('Error getting field format. Cause: {0}').format(str(e)))
+            return utils.get_exception(400, f'Error getting field format: {str(e)}')
+    
+    return utils.get_exception(400, 'Error in the input params')
+
+@login_required()
+@staff_required
 def db_add_field(request):
     if request.method == 'POST':
         layer = None
