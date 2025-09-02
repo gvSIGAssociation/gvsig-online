@@ -1131,7 +1131,7 @@
 		ui += 						'<i class="fa fa-minus"></i>';
 		ui += 				'</button>';
 		ui += 			'</span>';
-		ui += 				'<input type="number" name="decimal-places" id="decimal-places" class="form-control" value="' + (existingFormat.decimal_places || 2) + '" min="0" max="4" readonly style="text-align: center; border-radius: 0;">';
+		ui += 				'<input type="number" name="decimal-places" id="decimal-places" class="form-control" value="' + (existingFormat.decimal_places !== undefined ? existingFormat.decimal_places : 2) + '" min="0" max="4" readonly style="text-align: center; border-radius: 0;">';
 		ui += 				'<span class="input-group-btn">';
 		ui += 					'<button type="button" class="btn btn-default" id="increase-decimals" style="border-radius: 0 4px 4px 0;">';
 		ui += 					'<i class="fa fa-plus"></i>';
@@ -1141,8 +1141,8 @@
 		ui += 		'</div>';
 		ui += 		'<div class="col-md-6">';
 		ui += 			'<label for="decimal-separator">' + gettext('Decimal separator') + '</label>';
-		ui += 			'<select name="decimal-separator" id="decimal-separator" class="form-control">';
-		ui += 				'<option value=","' + (existingFormat.decimal_separator === ',' || !existingFormat.decimal_separator ? ' selected' : '') + '>' + gettext('Comma (,)') + '</option>';	
+		ui += 			'<select name="decimal-separator" id="decimal-separator" class="form-control">';			
+		ui += 				'<option value=","' + (existingFormat.decimal_separator === ',' ? ' selected' : '') + '>' + gettext('Comma (,)') + '</option>';
 		ui += 				'<option value="."' + (existingFormat.decimal_separator === '.' ? ' selected' : '') + '>' + gettext('Point (.)') + '</option>';		
 		ui += 			'</select>';
 		ui += 		'</div>';
@@ -1202,10 +1202,18 @@
 			var decimalSeparator = $('#decimal-separator');
 			
 			if (decimalPlaces === 0) {
+				if (decimalSeparator.find('option[value=""]').length === 0) {
+					decimalSeparator.prepend('<option value="">' + gettext('No separator') + '</option>');
+				}
 				decimalSeparator.prop('disabled', true);
-				decimalSeparator.val(','); 
+				decimalSeparator.val(''); 
 			} else {
+				// Cuando decimal-places > 0, quitar opción "No separator" y habilitar
+				decimalSeparator.find('option[value=""]').remove();
 				decimalSeparator.prop('disabled', false);
+				if (!decimalSeparator.val()) {
+					decimalSeparator.val(',');
+				}
 			}
 		}
 
