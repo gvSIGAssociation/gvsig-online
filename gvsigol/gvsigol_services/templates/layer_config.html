@@ -137,8 +137,7 @@
 																				<!--  <li><a href="#" class="actions-menu-entry change-field-type"><i class="fa fa-tag" style="color: #3c8dbc;"></i> {% trans "Change type" %}</a></li> -->
 																				{% if f.type == 'integer' or f.type == 'bigint' or f.type == 'smallint' or f.type == 'bigserial' or f.type == 'serial' or f.type == 'smallserial' or f.type == 'double precision' or f.type == 'float' or f.type == 'real' or f.type == 'decimal' or f.type == 'double' or f.type == 'numeric' %}
 																				{% if f.name != 'ogc_fid' %}
-																				<li><a href="#" class="actions-menu-entry format-field"><i class="fa fa-cog" style="color: #3c8dbc;"></i> {% trans "Format field" %}</a></li>
-																				<li><a href="#" class="actions-menu-entry delete-format"><i class="fa fa-eraser" style="color: #f39c12;"></i> {% trans "Delete format" %}</a></li>
+																				<li><a href="#" class="actions-menu-entry format-field"><i class="fa fa-cog" style="color: #3c8dbc;"></i> {% trans "Manage format" %}</a></li>
 																				{% endif %}
 																				{% endif %}
 																				{% if not f.calculationLabel %}
@@ -839,10 +838,6 @@
 		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
 		formatFieldModal(fieldName);
 	});
-	$('.delete-format').on('click', function (evt){
-		var fieldName = $(this).closest('tr')[0].getAttribute('data-fieldname');
-		deleteFormatModal(fieldName);
-	});
 
 	function converToEnumModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
@@ -1066,7 +1061,38 @@
 
 	function formatFieldModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text(gettext("Format field"));
+		$('#my-modal-dialog .modal-title').text(gettext("Manage format"));
+
+		$.ajax({
+			type: 'GET',
+			async: false,
+			url: '/gvsigonline/services/get_field_format/',
+			data: {
+				'field': fieldName,
+				'layer_id': "{{layer_id}}"
+			},
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function(response) {
+				var data = response;
+				if (typeof response === 'string') {
+					data = JSON.parse(response);
+				}
+				
+				var existingFormat = data.field_format || {};
+				var hasFormat = data.has_format || false;
+				
+				buildFormatModal(fieldName, existingFormat, hasFormat);
+			},
+			error: function(jqXHR) {
+				console.error('Error loading field format:', jqXHR);
+				// Build modal with default values
+				buildFormatModal(fieldName, {}, false);
+			}
+		});
+	}
+	function buildFormatModal(fieldName, existingFormat, hasFormat) {
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
 		ui += '<div id="field-errors" class="col-md-12 form-group">';
@@ -1084,13 +1110,13 @@
 		ui += 	'<div class="row symbol-row">';
 		ui += 		'<div class="col-md-6">';
 		ui += 			'<label for="symbol">' + gettext('Symbol') + '</label>';
-		ui += 			'<input placeholder="' + gettext('e.g., €, $, m, kg, °') + '" name="symbol" id="symbol" type="text" class="form-control" maxlength="5">';
+		ui += 			'<input placeholder="' + gettext('e.g., €, $, m, kg, °') + '" name="symbol" id="symbol" type="text" class="form-control" maxlength="5" value="' + (existingFormat.symbol || '') + '">';
 		ui += 		'</div>';
 		ui += 		'<div class="col-md-6">';
 		ui += 			'<label for="symbol-position">' + gettext('Symbol position') + '</label>';
 		ui += 			'<select name="symbol-position" id="symbol-position" class="form-control">';
-		ui += 				'<option value="after">' + gettext('After number') + '</option>';
-		ui += 				'<option value="before">' + gettext('Before number') + '</option>';		
+		ui += 				'<option value="after"' + (existingFormat.symbol_position === 'after' || !existingFormat.symbol_position ? ' selected' : '') + '>' + gettext('After number') + '</option>';
+		ui += 				'<option value="before"' + (existingFormat.symbol_position === 'before' ? ' selected' : '') + '>' + gettext('Before number') + '</option>';		
 		ui += 			'</select>';
 		ui += 		'</div>';
 		ui += 	'</div>';
@@ -1105,7 +1131,7 @@
 		ui += 						'<i class="fa fa-minus"></i>';
 		ui += 				'</button>';
 		ui += 			'</span>';
-		ui += 				'<input type="number" name="decimal-places" id="decimal-places" class="form-control" value="2" min="0" max="4" readonly style="text-align: center; border-radius: 0;">';
+		ui += 				'<input type="number" name="decimal-places" id="decimal-places" class="form-control" value="' + (existingFormat.decimal_places !== undefined ? existingFormat.decimal_places : 2) + '" min="0" max="4" readonly style="text-align: center; border-radius: 0;">';
 		ui += 				'<span class="input-group-btn">';
 		ui += 					'<button type="button" class="btn btn-default" id="increase-decimals" style="border-radius: 0 4px 4px 0;">';
 		ui += 					'<i class="fa fa-plus"></i>';
@@ -1115,9 +1141,9 @@
 		ui += 		'</div>';
 		ui += 		'<div class="col-md-6">';
 		ui += 			'<label for="decimal-separator">' + gettext('Decimal separator') + '</label>';
-		ui += 			'<select name="decimal-separator" id="decimal-separator" class="form-control">';
-		ui += 				'<option value=",">' + gettext('Comma (,)') + '</option>';	
-		ui += 				'<option value=".">' + gettext('Point (.)') + '</option>';		
+		ui += 			'<select name="decimal-separator" id="decimal-separator" class="form-control">';			
+		ui += 				'<option value=","' + (existingFormat.decimal_separator === ',' ? ' selected' : '') + '>' + gettext('Comma (,)') + '</option>';
+		ui += 				'<option value="."' + (existingFormat.decimal_separator === '.' ? ' selected' : '') + '>' + gettext('Point (.)') + '</option>';		
 		ui += 			'</select>';
 		ui += 		'</div>';
 		ui += 	'</div>';
@@ -1125,14 +1151,20 @@
 		ui += '<div class="col-md-12 form-group">';
 		ui += 	'<label for="thousands-separator">' + gettext('Thousands separator') + '</label>';
 		ui += 	'<select name="thousands-separator" id="thousands-separator" class="form-control">';
-		ui += 		'<option value="">' + gettext('No separator') + '</option>';
-		ui += 		'<option value=",">' + gettext('Comma (,)') + '</option>';
-		ui += 		'<option value=".">' + gettext('Point (.)') + '</option>';
+		ui += 		'<option value=""' + (!existingFormat.thousands_separator ? ' selected' : '') + '>' + gettext('No separator') + '</option>';
+		ui += 		'<option value=","' + (existingFormat.thousands_separator === ',' ? ' selected' : '') + '>' + gettext('Comma (,)') + '</option>';
+		ui += 		'<option value="."' + (existingFormat.thousands_separator === '.' ? ' selected' : '') + '>' + gettext('Point (.)') + '</option>';
 		ui += 	'</select>';
 		ui += '</div>';
 		$('#my-modal-dialog .modal-body').append(ui);
+		
 		var buttons = '';
 		buttons += '<button id="cancel-format" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		
+		if (hasFormat) {
+			buttons += '<button id="delete-format" type="button" class="btn btn-warning" style="float: left;">' + gettext('Delete format') + '</button>';
+		}
+		
 		buttons += '<button id="confirm-format" type="button" class="btn btn-primary">' + gettext('Save') + '</button>';
 		$('#my-modal-dialog .modal-footer').empty();
 		$('#my-modal-dialog .modal-footer').append(buttons);
@@ -1170,17 +1202,24 @@
 			var decimalSeparator = $('#decimal-separator');
 			
 			if (decimalPlaces === 0) {
+				if (decimalSeparator.find('option[value=""]').length === 0) {
+					decimalSeparator.prepend('<option value="">' + gettext('No separator') + '</option>');
+				}
 				decimalSeparator.prop('disabled', true);
-				decimalSeparator.val(','); 
+				decimalSeparator.val(''); 
 			} else {
+				// Cuando decimal-places > 0, quitar opción "No separator" y habilitar
+				decimalSeparator.find('option[value=""]').remove();
 				decimalSeparator.prop('disabled', false);
+				if (!decimalSeparator.val()) {
+					decimalSeparator.val(',');
+				}
 			}
 		}
 
 		$('#symbol').on('input change', function() {
 			toggleSymbolPosition();
 		});
-
 
 
 		// Inicializar el estado al abrir el modal
@@ -1201,15 +1240,15 @@
 				beforeSend:function(xhr){
 					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
-			  				  	data:{
-			  		'field': fieldName,
-			  		'symbol': symbol,
-			  		'symbol_position': symbolPosition,
-			  		'decimal_places': decimalPlaces,
+				data:{
+					'field': fieldName,
+					'symbol': symbol,
+					'symbol_position': symbolPosition,
+					'decimal_places': decimalPlaces,
 					'thousands_separator': thousandsSeparator,
 					'decimal_separator': decimalSeparator,
-			  		'layer_id': "{{layer_id}}"
-			  	},
+					'layer_id': "{{layer_id}}"
+				},
 				success	:function(response) {
 					$('#my-modal-dialog').modal('hide');
 					messageBox.show('Info', gettext('Field format was saved successfully'));
@@ -1220,69 +1259,28 @@
 				}
 			});
 		});
-		$('#my-modal-dialog').modal('show');
-	}
 
-	function deleteFormatModal(fieldName){
-		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text(gettext("Delete field format"));
-		var ui = '';
-		ui += '<div id="div-name" class="row">';
-		ui += '<div class="col-md-12 form-group">';
-		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
-		ui += gettext("Warning: the field format will be deleted. This operation cannot be undone. Type the field name to confirm format deletion:");
-		ui += '<code>' + fieldName + '</code>';
-		ui += '</div>';
-		ui += '</div>';
-		ui += '<div class="col-md-12 form-group">';
-		ui += 	'<label for="deleted-format-field-name">' + gettext('Field to delete format from') + '</label>';
-		ui += 	'<input placeholder="' + gettext('Field name') + '" name="deleted-format-field-name" id="deleted-format-field-name" type="text" class="form-control">';
-		ui += '</div>';
-		ui += '</div>';
-		$('#my-modal-dialog .modal-body').append(ui);
-		var buttons = '';
-		buttons += '<button id="cancel-delete-format" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-		buttons += '<button id="confirm-delete-format" type="button" class="btn btn-warning" disabled>' + gettext('Delete') + '</button>';
-		$('#my-modal-dialog .modal-footer').empty();
-		$('#my-modal-dialog .modal-footer').append(buttons);
-		$('#deleted-format-field-name').change(function(evt) {
-			if ($(this).val() == fieldName) {
-				document.getElementById('confirm-delete-format').disabled = false;
-			}
-			else {
-				document.getElementById('confirm-delete-format').disabled = true;
-			}
-		});
-		$('#deleted-format-field-name').keyup(function(evt) {
-			if ($(this).val() == fieldName) {
-				document.getElementById('confirm-delete-format').disabled = false;
-			}
-			else {
-				document.getElementById('confirm-delete-format').disabled = true;
-			}
-		});
-
-		$('#confirm-delete-format').on('click', function () {
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: '/gvsigonline/services/db_delete_field_format/',
-				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-			  	data:{
-			  		'field': fieldName,
-			  		'layer_id': "{{layer_id}}"
-			  	},
-				success	:function(response) {
-					$('#my-modal-dialog').modal('hide');
-					messageBox.show('Info', gettext('Field format was deleted'));
-				},
-				error: function(jqXHR) {
-					messageBox.show('error', jqXHR.responseText);
-					$('#my-modal-dialog').modal('hide');
-				}
-			});
+		$('#delete-format').on('click', function () {        
+				$.ajax({
+					type: 'POST',
+					async: false,
+					url: '/gvsigonline/services/db_delete_field_format/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					data:{
+						'field': fieldName,
+						'layer_id': "{{layer_id}}"
+					},
+					success	:function(response) {
+						$('#my-modal-dialog').modal('hide');
+						messageBox.show('Info', gettext('Field format was deleted'));
+					},
+					error: function(jqXHR) {
+						messageBox.show('error', jqXHR.responseText);
+						$('#my-modal-dialog').modal('hide');
+					}
+				});
 		});
 		$('#my-modal-dialog').modal('show');
 	}

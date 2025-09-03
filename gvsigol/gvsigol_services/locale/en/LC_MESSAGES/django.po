@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-29 08:42+0200\n"
-"PO-Revision-Date: 2025-08-29 08:45+0200\n"
+"POT-Creation-Date: 2025-09-02 14:40+0200\n"
+"PO-Revision-Date: 2025-09-03 09:17+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -253,8 +253,8 @@ msgid "Do not preserve primary key values"
 msgstr ""
 
 #: gvsigol_services/forms_geoserver.py:52
-#: gvsigol_services/templates/layer_config.html:371
-#: gvsigol_services/templates/layer_config.html:438
+#: gvsigol_services/templates/layer_config.html:370
+#: gvsigol_services/templates/layer_config.html:437
 msgid "Not applicable"
 msgstr ""
 
@@ -685,7 +685,7 @@ msgstr ""
 #: gvsigol_services/templates/datastore_add.html:62
 #: gvsigol_services/templates/datastore_list.html:23
 #: gvsigol_services/templates/datastore_update.html:63
-#: gvsigol_services/templates/layer_config.html:334
+#: gvsigol_services/templates/layer_config.html:333
 #: gvsigol_services/templates/server_update.html:49
 #: gvsigol_services/templates/server_update.html:50
 #: gvsigol_services/templates/workspace_list.html:23
@@ -1733,7 +1733,7 @@ msgstr ""
 
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:199
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:205
-#: gvsigol_services/templates/layer_config.html:147
+#: gvsigol_services/templates/layer_config.html:146
 msgid "Delete field"
 msgstr ""
 
@@ -2132,7 +2132,7 @@ msgid "Editing restrictions"
 msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:73
-#: gvsigol_services/templates/layer_config.html:195
+#: gvsigol_services/templates/layer_config.html:194
 #: gvsigol_services/templates/layer_create.html:111
 msgid "Field name"
 msgstr ""
@@ -2177,7 +2177,7 @@ msgid "Required in editing forms"
 msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:128
-#: gvsigol_services/templates/layer_config.html:171
+#: gvsigol_services/templates/layer_config.html:170
 #: gvsigol_services/templates/select_layer_permissions.html:39
 msgid "SQL views can\\"
 msgstr ""
@@ -2191,169 +2191,165 @@ msgid "Change type"
 msgstr ""
 
 #: gvsigol_services/templates/layer_config.html:140
-msgid "Format field"
+msgid "Manage format"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:141
-msgid "Delete format"
-msgstr ""
-
-#: gvsigol_services/templates/layer_config.html:145
+#: gvsigol_services/templates/layer_config.html:144
 msgid "Convert to enumerate"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:152
+#: gvsigol_services/templates/layer_config.html:151
 msgid "Reserved field"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:172
-#: gvsigol_services/templates/layer_config.html:176
+#: gvsigol_services/templates/layer_config.html:171
+#: gvsigol_services/templates/layer_config.html:175
 #: gvsigol_services/templates/layer_create.html:123
 msgid "Add field"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:197
+#: gvsigol_services/templates/layer_config.html:196
 msgid "Field title"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:244
-#: gvsigol_services/templates/layer_config.html:1478
+#: gvsigol_services/templates/layer_config.html:243
+#: gvsigol_services/templates/layer_config.html:1468
 msgid "Delete group"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:270
+#: gvsigol_services/templates/layer_config.html:269
 msgid "Add field group"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:290
+#: gvsigol_services/templates/layer_config.html:289
 msgid "Group name"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:292
+#: gvsigol_services/templates/layer_config.html:291
 msgid "Group title"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:324
+#: gvsigol_services/templates/layer_config.html:323
 msgid "Topological rules"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:333
+#: gvsigol_services/templates/layer_config.html:332
 msgid "Rule"
 msgstr ""
 
 # Topology rules translations - Only new entries not already existing
-#: gvsigol_services/templates/layer_config.html:335
+#: gvsigol_services/templates/layer_config.html:334
 msgid "Geometry Limitations"
 msgstr "Geometry Limitations"
 
-#: gvsigol_services/templates/layer_config.html:336
+#: gvsigol_services/templates/layer_config.html:335
 msgid "Active"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:337
+#: gvsigol_services/templates/layer_config.html:336
 msgid "Configuration"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:342
+#: gvsigol_services/templates/layer_config.html:341
 msgid "Must not overlap"
 msgstr ""
 
 # Topology rules translations
-#: gvsigol_services/templates/layer_config.html:344
+#: gvsigol_services/templates/layer_config.html:343
 msgid "Geometries within the same layer cannot overlap with each other"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:348
-#: gvsigol_services/templates/layer_config.html:388
-#: gvsigol_services/templates/layer_config.html:410
+#: gvsigol_services/templates/layer_config.html:347
+#: gvsigol_services/templates/layer_config.html:387
+#: gvsigol_services/templates/layer_config.html:409
 msgid "Compatible with all geometry types"
 msgstr "Compatible with all geometry types"
 
-#: gvsigol_services/templates/layer_config.html:355
-#: gvsigol_services/templates/layer_config.html:378
+#: gvsigol_services/templates/layer_config.html:354
+#: gvsigol_services/templates/layer_config.html:377
 msgid "No additional configuration required"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:359
+#: gvsigol_services/templates/layer_config.html:358
 msgid "Must not have gaps"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:361
+#: gvsigol_services/templates/layer_config.html:360
 msgid ""
 "The layer coverage must be continuous without empty spaces between geometries"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:365
-#: gvsigol_services/templates/layer_config.html:432
+#: gvsigol_services/templates/layer_config.html:364
+#: gvsigol_services/templates/layer_config.html:431
 msgid "Polygons"
 msgstr "Polygons"
 
-#: gvsigol_services/templates/layer_config.html:365
-#: gvsigol_services/templates/layer_config.html:432
+#: gvsigol_services/templates/layer_config.html:364
+#: gvsigol_services/templates/layer_config.html:431
 msgid "Recommended"
 msgstr "Recommended"
 
-#: gvsigol_services/templates/layer_config.html:368
-#: gvsigol_services/templates/layer_config.html:435
+#: gvsigol_services/templates/layer_config.html:367
+#: gvsigol_services/templates/layer_config.html:434
 msgid "Lines"
 msgstr "Lines"
 
-#: gvsigol_services/templates/layer_config.html:368
+#: gvsigol_services/templates/layer_config.html:367
 msgid "Limited use"
 msgstr "Limited use"
 
-#: gvsigol_services/templates/layer_config.html:371
-#: gvsigol_services/templates/layer_config.html:438
+#: gvsigol_services/templates/layer_config.html:370
+#: gvsigol_services/templates/layer_config.html:437
 msgid "Points"
 msgstr "Points"
 
-#: gvsigol_services/templates/layer_config.html:382
+#: gvsigol_services/templates/layer_config.html:381
 msgid "Must be covered by"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:384
+#: gvsigol_services/templates/layer_config.html:383
 msgid ""
 "All geometries must be completely covered by geometries from another layer"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:397
-#: gvsigol_services/templates/layer_config.html:1798
+#: gvsigol_services/templates/layer_config.html:396
+#: gvsigol_services/templates/layer_config.html:1788
 msgid "Select a layer"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:404
+#: gvsigol_services/templates/layer_config.html:403
 msgid "Must not overlap with"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:406
+#: gvsigol_services/templates/layer_config.html:405
 msgid "Geometries cannot overlap with geometries from specified layers"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:421
+#: gvsigol_services/templates/layer_config.html:420
 msgid "Select multiple layers"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:426
+#: gvsigol_services/templates/layer_config.html:425
 msgid "Must be contiguous"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:428
+#: gvsigol_services/templates/layer_config.html:427
 msgid "Geometries must be connected."
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:435
+#: gvsigol_services/templates/layer_config.html:434
 msgid "Suitable for networks"
 msgstr "Suitable for networks"
 
-#: gvsigol_services/templates/layer_config.html:447
+#: gvsigol_services/templates/layer_config.html:446
 msgid "Tolerance"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:450
+#: gvsigol_services/templates/layer_config.html:449
 msgid "Tolerance distance for contiguity check"
 msgstr "Tolerance distance for contiguity check"
 
-#: gvsigol_services/templates/layer_config.html:1805
+#: gvsigol_services/templates/layer_config.html:1795
 msgid "Select layers"
 msgstr ""
 
@@ -2933,7 +2929,7 @@ msgstr ""
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr ""
 
-#: gvsigol_services/views.py:6049 gvsigol_services/views.py:6280
+#: gvsigol_services/views.py:6049 gvsigol_services/views.py:6337
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr ""
@@ -2948,63 +2944,68 @@ msgstr ""
 msgid "Error deleting field format. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6293
+#: gvsigol_services/views.py:6312
+#, python-brace-format
+msgid "Error getting field format. Cause: {0}"
+msgstr ""
+
+#: gvsigol_services/views.py:6350
 msgid "Field type not supported"
 msgstr ""
 
-#: gvsigol_services/views.py:6298
+#: gvsigol_services/views.py:6355
 #, python-brace-format
 msgid ""
 "Error adding field. Probably the field \"{0}\" already exists. Database "
 "message: {1}"
 msgstr ""
 
-#: gvsigol_services/views.py:6441
+#: gvsigol_services/views.py:6498
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6508
+#: gvsigol_services/views.py:6565
 #, python-brace-format
 msgid ""
 "Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
 msgstr ""
 
-#: gvsigol_services/views.py:6522
+#: gvsigol_services/views.py:6579
 msgid "The user can't manage this SQL view"
 msgstr ""
 
-#: gvsigol_services/views.py:6550
+#: gvsigol_services/views.py:6607
 msgid "The main table must have a primary key"
 msgstr ""
 
-#: gvsigol_services/views.py:6580
+#: gvsigol_services/views.py:6637
 #, python-brace-format
 msgid "Field does not exist: {field}"
 msgstr ""
 
-#: gvsigol_services/views.py:6590
+#: gvsigol_services/views.py:6647
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
 
-#: gvsigol_services/views.py:6610
+#: gvsigol_services/views.py:6667
 msgid "An object already exists with name: {}"
 msgstr ""
 
-#: gvsigol_services/views.py:6617
+#: gvsigol_services/views.py:6674
 msgid "The view could not be created"
 msgstr ""
 
-#: gvsigol_services/views.py:6622
+#: gvsigol_services/views.py:6679
 msgid "Pk columns could not be inserted"
 msgstr ""
 
-#: gvsigol_services/views.py:6668
+#: gvsigol_services/views.py:6725
 msgid "Not allowed"
 msgstr ""
 
-#: gvsigol_services/views.py:6678
+#: gvsigol_services/views.py:6735
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
