@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-04-04 13:57+0000\n"
-"PO-Revision-Date: 2025-08-28 15:47+0200\n"
+"PO-Revision-Date: 2025-09-03 09:17+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -327,7 +327,10 @@ msgstr ""
 msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
 msgstr ""
 
-msgid "Format field"
+msgid "Manage format"
+msgstr ""
+
+msgid "Delete format"
 msgstr ""
 
 msgid "Configure the display format for numeric fields will affect how values are shown in forms and reports."
@@ -370,17 +373,6 @@ msgid "Save"
 msgstr ""
 
 msgid "Field format was saved successfully"
-msgstr ""
-
-msgid "Delete field format"
-msgstr ""
-
-msgid ""
-"Warning: the field format will be deleted. This operation cannot be undone. Type the field name to confirm "
-"format deletion:"
-msgstr ""
-
-msgid "Field to delete format from"
 msgstr ""
 
 #~ msgid "too_many_files"
