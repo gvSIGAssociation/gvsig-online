@@ -1380,3 +1380,24 @@ msgstr "Atribut numèric"
 
 msgid "Optional"
 msgstr "Opcional"
+
+msgid "IDW Interpolation"
+msgstr "Interpolació IDW"
+
+msgid "Kriging Interpolation"
+msgstr "Interpolació Kriging"
+
+msgid "Value field"
+msgstr "Camp de valors"
+
+msgid "Power"
+msgstr "Potència"
+
+msgid "Cell size"
+msgstr "Grandària de cel·la"
+
+msgid "Search radius"
+msgstr "Radi de cerca"
+
+msgid "Minimum points"
+msgstr "Punts mínims"

@@ -1175,3 +1175,24 @@ msgstr ""
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "Connection parameters are not valid."
 msgstr ""
+
+msgid "IDW Interpolation"
+msgstr "Interpolação IDW"
+
+msgid "Kriging Interpolation"
+msgstr "Interpolação Kriging"
+
+msgid "Value field"
+msgstr "Campo de valores"
+
+msgid "Power"
+msgstr "Potência"
+
+msgid "Cell size"
+msgstr "Tamanho da célula"
+
+msgid "Search radius"
+msgstr "Raio de busca"
+
+msgid "Minimum points"
+msgstr "Pontos mínimos"
