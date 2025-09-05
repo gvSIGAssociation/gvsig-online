@@ -8,6 +8,9 @@
     <div class="row">
         <div class="col-md-12 form-group">
             <div class="box-tools pull-right">
+                <button id="button-manual-cleanup" class="btn btn-sm btn-warning" title="Ejecutar limpieza inmediata de todas las tablas Sentilo">
+                    <i class="fa fa-cog"></i> Ejecutar Limpieza Manual
+                </button>
                 <a id="button-create-sentilo" class="btn btn-sm btn-default" href="/gvsigonline/sentilo/sentilo_conf"> Create new sentilo integration</a>
             </div>
         </div>
@@ -96,6 +99,48 @@
             location.href = '/gvsigonline/sentilo/sentilo_conf/';
         });
         
+        $('#button-manual-cleanup').on('click', function() {
+            executeManualCleanup();
+        });
+        
+        function executeManualCleanup() {
+            // Confirm dialog
+            if (!confirm('¿Estás seguro de que quieres ejecutar la limpieza manual de todas las tablas Sentilo? Esta operación puede tardar varios minutos.')) {
+                return;
+            }
+            
+            // Disable button and show loading
+            $('#button-manual-cleanup').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Ejecutando...');
+            
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/sentilo/manual-cleanup/',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('✅ ' + response.message);
+                    } else {
+                        alert('❌ Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    var errorMsg = 'Error de conexión';
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        errorMsg = response.message || errorMsg;
+                    } catch(e) {
+                        errorMsg = 'Error del servidor: ' + error;
+                    }
+                    alert('❌ ' + errorMsg);
+                },
+                complete: function() {
+                    // Re-enable button
+                    $('#button-manual-cleanup').prop('disabled', false).html('<i class="fa fa-cog"></i> Ejecutar Limpieza Manual');
+                }
+            });
+        }
             
         function deletesentilo(data){
             console.log('deletesentilo', data);

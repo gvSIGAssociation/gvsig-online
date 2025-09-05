@@ -28,10 +28,17 @@ SENTILO_DB = {
     'schema': 'public'
 }
 
+# Cleanup output behavior: 'suffix' creates <table>_clean; 'overwrite' writes back into source
+CLEAN_OUTPUT_MODE = getattr(settings, 'SENTILO_CLEAN_OUTPUT_MODE', 'overwrite')  # 'suffix' | 'overwrite'
+CLEAN_OUTPUT_SUFFIX = getattr(settings, 'SENTILO_CLEAN_OUTPUT_SUFFIX', '_clean')
+SENTILO_SCHEMA = SENTILO_DB.get('schema', 'public')
+
 # Logging de valores
 LOGGER.info("SENTILO_DB_HOST= %s", SENTILO_DB['host'])
 LOGGER.info("SENTILO_DB_PORT= %s", SENTILO_DB['port'])
 LOGGER.info("SENTILO_DB_NAME= %s", SENTILO_DB['database'])
 LOGGER.info("SENTILO_DB_USER= %s", SENTILO_DB['user'])
 LOGGER.info("MUNICIPALITY= %s", MUNICIPALITY)
+LOGGER.info("SENTILO CLEAN OUTPUT MODE= %s", CLEAN_OUTPUT_MODE)
+LOGGER.info("SENTILO CLEAN OUTPUT SUFFIX= %s", CLEAN_OUTPUT_SUFFIX)
 
