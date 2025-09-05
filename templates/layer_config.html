@@ -125,9 +125,24 @@
 																		<div class="btn-group">
 																		{% endif %}
 																			{% if is_view %}
+																			{% if f.type == 'integer' or f.type == 'bigint' or f.type == 'smallint' or f.type == 'bigserial' or f.type == 'serial' or f.type == 'smallserial' or f.type == 'double precision' or f.type == 'float' or f.type == 'real' or f.type == 'decimal' or f.type == 'double' or f.type == 'numeric' %}
+																			{% if f.name != 'ogc_fid' and f.name != 'feat_version_gvol' %}
+																			<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+																				<i class="fa fa-wrench"></i>
+																			</button>
+																			<ul class="dropdown-menu dropdown-menu-right" role="menu">
+																				<li><a href="#" class="actions-menu-entry format-field"><i class="fa fa-cog" style="color: #3c8dbc;"></i> {% trans "Manage format" %}</a></li>
+																			</ul>
+																			{% else %}
 																			<button type="button" class="btn btn-box-tool dropdown-toggle" title="{% trans 'SQL views can\'t be edited.' %}" disabled>
 																				<i class="fa fa-wrench"></i>
 																			</button>
+																			{% endif %}
+																			{% else %}
+																			<button type="button" class="btn btn-box-tool dropdown-toggle" title="{% trans 'SQL views can\'t be edited.' %}" disabled>
+																				<i class="fa fa-wrench"></i>
+																			</button>
+																			{% endif %}
 																			{% else %}
 																			<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 																				<i class="fa fa-wrench"></i>
