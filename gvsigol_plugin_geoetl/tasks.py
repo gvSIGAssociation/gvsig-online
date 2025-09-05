@@ -85,7 +85,7 @@ def run_canvas_background(**kwargs):
         edges =[]
 
         count = 0
-        for i in jsonCanvas:
+        for i in jsonCanvas:            
             if i['type'] != 'draw2d.Connection':
                 nodes.append([count,i])
                 count+=1

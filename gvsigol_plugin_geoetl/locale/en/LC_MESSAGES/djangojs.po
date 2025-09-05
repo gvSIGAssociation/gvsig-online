@@ -1352,3 +1352,27 @@ msgstr ""
 
 msgid "Numeric attribute"
 msgstr ""
+
+msgid "IDW Interpolation"
+msgstr "IDW Interpolation"
+
+msgid "Kriging Interpolation"
+msgstr "Kriging Interpolation"
+
+msgid "Value field"
+msgstr "Value field"
+
+msgid "Power"
+msgstr "Power"
+
+msgid "Cell size"
+msgstr "Cell size"
+
+msgid "Search radius"
+msgstr "Search radius"
+
+msgid "Minimum points"
+msgstr "Minimum points"
+
+msgid "Variogram model"
+msgstr "Variogram model"

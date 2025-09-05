@@ -968,3 +968,11 @@ msgstr "Plugin de Procesamiento GeoETL"
 #: models.py:212
 msgid "gvsigol_plugin_geoetl manual desc"
 msgstr "Documentación sobre el plugin de Extracción, Transformación y Carga (ETL) de datos geoespaciales."
+
+#: templates/etl.html:99
+msgid "IDW Interpolation"
+msgstr "Interpolación IDW"
+
+#: templates/etl.html:100
+msgid "Kriging Interpolation"
+msgstr "Interpolación Kriging"

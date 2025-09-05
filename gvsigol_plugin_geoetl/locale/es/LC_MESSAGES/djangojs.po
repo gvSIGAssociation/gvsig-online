@@ -1362,3 +1362,27 @@ msgstr "Atributo numérico"
 
 msgid "Optional"
 msgstr "Opcional"
+
+msgid "IDW Interpolation"
+msgstr "Interpolación IDW"
+
+msgid "Kriging Interpolation"
+msgstr "Interpolación Kriging"
+
+msgid "Value field"
+msgstr "Campo de valores"
+
+msgid "Power"
+msgstr "Potencia"
+
+msgid "Cell size"
+msgstr "Tamaño de celda"
+
+msgid "Search radius"
+msgstr "Radio de búsqueda"
+
+msgid "Minimum points"
+msgstr "Puntos mínimos"
+
+msgid "Variogram model"
+msgstr "Modelo de variograma"

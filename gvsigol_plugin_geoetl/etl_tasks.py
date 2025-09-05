@@ -5886,8 +5886,7 @@ def trans_CalcLength(dicc):
     # Eliminar la tabla de destino si existe
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
         sql.Identifier(GEOETL_DB["schema"]),
-        sql.Identifier(table_name_target)
-    )
+        sql.Identifier(table_name_target))
     cur.execute(sqlDrop)
     conn.commit()
 
@@ -6077,4 +6076,411 @@ def input_PadronAtm(dicc):
 
     engine.dispose()
     return [table_name]
+
+def trans_IDW(dicc):
+    """
+    Transformador de Interpolación IDW (Inverse Distance Weighting)
+    Crea una superficie interpolada usando el método de distancia inversa ponderada
+    """
+    import numpy as np
+    
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+    
+    # Debug: Logging de parámetros recibidos
+    print(f"[IDW DEBUG] Parámetros recibidos: {dicc}")
+    
+    value_field = dicc.get('value-field')
+    if not value_field:
+        raise ValueError("ERROR: El parámetro 'value-field' es requerido pero no fue proporcionado")
+    
+    power = float(dicc.get('power', 2.0))  # Exponente de la distancia (por defecto 2)
+    cell_size = float(dicc.get('cell-size', 100.0))  # Tamaño de celda en unidades del SRS
+    search_radius = float(dicc.get('search-radius', 1000.0))  # Radio de búsqueda
+    min_points = int(dicc.get('min-points', 3))  # Mínimo número de puntos para interpolación
+    
+    print(f"[IDW DEBUG] value_field='{value_field}', power={power}, cell_size={cell_size}, search_radius={search_radius}, min_points={min_points}")
+
+    conn = psycopg2.connect(user=GEOETL_DB["user"], password=GEOETL_DB["password"], 
+                           host=GEOETL_DB["host"], port=GEOETL_DB["port"], 
+                           database=GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    # Eliminar tabla destino si existe
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    # Obtener SRID y extent de los datos fuente
+    try:
+        srid, type_geom = get_type_n_srid(table_name_source)
+    except:
+        srid = 4326
+
+    # Detectar el nombre del campo de geometría
+    sqlGeomField = sql.SQL("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = %s AND table_name = %s 
+        AND udt_name = 'geometry'
+        LIMIT 1
+    """)
+    cur.execute(sqlGeomField, [GEOETL_DB["schema"], table_name_source])
+    geom_field_result = cur.fetchone()
+    geom_field = geom_field_result[0] if geom_field_result else 'wkb_geometry'
+    
+    # Validar que el campo de valores existe en la tabla fuente
+    sqlCheckField = sql.SQL("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = %s AND table_name = %s 
+        AND column_name = %s
+    """)
+    cur.execute(sqlCheckField, [GEOETL_DB["schema"], table_name_source, value_field])
+    field_exists = cur.fetchone()
+    
+    if not field_exists:
+        # Listar campos numéricos disponibles
+        sqlNumericFields = sql.SQL("""
+            SELECT column_name, data_type
+            FROM information_schema.columns 
+            WHERE table_schema = %s AND table_name = %s 
+            AND data_type IN ('integer', 'bigint', 'decimal', 'numeric', 'real', 'double precision')
+            ORDER BY column_name
+        """)
+        cur.execute(sqlNumericFields, [GEOETL_DB["schema"], table_name_source])
+        numeric_fields = cur.fetchall()
+        
+        available_fields = [f[0] for f in numeric_fields]
+        raise ValueError(f"ERROR: El campo '{value_field}' no existe en la tabla fuente. Campos numéricos disponibles: {available_fields}")
+    
+    print(f"[IDW DEBUG] Campo de geometría detectado: '{geom_field}', Campo de valores validado: '{value_field}'")
+    
+    # Obtener extent de los datos
+    sqlExtent = sql.SQL("""
+        SELECT ST_XMin(extent) as xmin, ST_YMin(extent) as ymin,
+               ST_XMax(extent) as xmax, ST_YMax(extent) as ymax
+        FROM (SELECT ST_Extent({geom_field}) as extent FROM {schema}.{table}) as subq
+    """).format(
+        geom_field=sql.Identifier(geom_field),
+        schema=sql.Identifier(GEOETL_DB["schema"]),
+        table=sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlExtent)
+    extent = cur.fetchone()
+    
+    if not extent or any(x is None for x in extent):
+        raise ValueError("No se pudo obtener el extent de los datos fuente")
+    
+    xmin, ymin, xmax, ymax = extent
+    
+    # Debug: Logging del extent obtenido
+    print(f"[IDW DEBUG] Extent original: xmin={xmin}, ymin={ymin}, xmax={xmax}, ymax={ymax}")
+
+    # Crear grid de puntos para interpolación usando PostGIS
+    # Expandir el extent para asegurar cobertura completa con un buffer más generoso
+    buffer_size = cell_size * 2.0  # Dos veces el tamaño de celda como buffer
+    xmin_expanded = xmin - buffer_size
+    xmax_expanded = xmax + buffer_size
+    ymin_expanded = ymin - buffer_size
+    ymax_expanded = ymax + buffer_size
+    
+    # Debug: Logging del extent expandido
+    print(f"[IDW DEBUG] Extent expandido: xmin_expanded={xmin_expanded}, ymin_expanded={ymin_expanded}, xmax_expanded={xmax_expanded}, ymax_expanded={ymax_expanded}")
+    print(f"[IDW DEBUG] Buffer aplicado: {buffer_size}, Tamaño de celda: {cell_size}")
+    
+    # Debug: Calcular bounds del grid
+    x_start = int(xmin_expanded // cell_size) * cell_size
+    x_end = int(xmax_expanded // cell_size + 1) * cell_size
+    y_start = int(ymin_expanded // cell_size) * cell_size  
+    y_end = int(ymax_expanded // cell_size + 1) * cell_size
+    
+    print(f"[IDW DEBUG] Grid bounds: x_start={x_start}, x_end={x_end}, y_start={y_start}, y_end={y_end}")
+    
+    sqlCreateGrid = sql.SQL("""
+        CREATE TABLE {schema}.{table_target} AS
+        WITH grid AS (
+            SELECT 
+                generate_series(
+                    FLOOR({xmin_expanded} / {cell_size}) * {cell_size},
+                    CEIL({xmax_expanded} / {cell_size}) * {cell_size},
+                    {cell_size}
+                ) as x
+        ),
+        grid_points AS (
+            SELECT 
+                x, 
+                generate_series(
+                    FLOOR({ymin_expanded} / {cell_size}) * {cell_size},
+                    CEIL({ymax_expanded} / {cell_size}) * {cell_size},
+                    {cell_size}
+                ) as y
+            FROM grid
+        ),
+        idw_calc AS (
+            SELECT 
+                gp.x, gp.y,
+                -- Crear polígono cuadrado centrado en el punto del grid
+                ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY[
+                    ST_MakePoint(gp.x - {cell_size}/2.0, gp.y - {cell_size}/2.0),
+                    ST_MakePoint(gp.x + {cell_size}/2.0, gp.y - {cell_size}/2.0),
+                    ST_MakePoint(gp.x + {cell_size}/2.0, gp.y + {cell_size}/2.0),
+                    ST_MakePoint(gp.x - {cell_size}/2.0, gp.y + {cell_size}/2.0),
+                    ST_MakePoint(gp.x - {cell_size}/2.0, gp.y - {cell_size}/2.0)
+                ])), {srid}) as {geom_field},
+                CASE 
+                    WHEN COUNT(src.*) >= {min_points} THEN
+                        ROUND(
+                            (SUM(src.{value_field} / POWER(GREATEST(ST_Distance(
+                                ST_SetSRID(ST_MakePoint(gp.x, gp.y), {srid}), 
+                                src.{geom_field}
+                            ), 0.001), {power})) / 
+                            SUM(1.0 / POWER(GREATEST(ST_Distance(
+                                ST_SetSRID(ST_MakePoint(gp.x, gp.y), {srid}), 
+                                src.{geom_field}
+                            ), 0.001), {power})))::numeric, 5
+                        )
+                    ELSE NULL
+                END as interpolated_value
+            FROM grid_points gp
+            LEFT JOIN {schema}.{table_source} src ON 
+                ST_DWithin(
+                    ST_SetSRID(ST_MakePoint(gp.x, gp.y), {srid}), 
+                    src.{geom_field}, 
+                    {search_radius}
+                )
+                AND src.{value_field} IS NOT NULL
+            GROUP BY gp.x, gp.y
+        )
+        SELECT 
+            row_number() OVER () as id,
+            x, y, {geom_field}, interpolated_value
+        FROM idw_calc
+        WHERE interpolated_value IS NOT NULL
+    """).format(
+        schema=sql.Identifier(GEOETL_DB["schema"]),
+        table_target=sql.Identifier(table_name_target),
+        table_source=sql.Identifier(table_name_source),
+        geom_field=sql.Identifier(geom_field),
+        value_field=sql.Identifier(value_field),
+        xmin_expanded=sql.Literal(xmin_expanded),
+        ymin_expanded=sql.Literal(ymin_expanded),
+        xmax_expanded=sql.Literal(xmax_expanded),
+        ymax_expanded=sql.Literal(ymax_expanded),
+        cell_size=sql.Literal(cell_size),
+        srid=sql.Literal(srid),
+        power=sql.Literal(power),
+        search_radius=sql.Literal(search_radius),
+        min_points=sql.Literal(min_points)
+    )
+    
+    cur.execute(sqlCreateGrid)
+    conn.commit()
+
+    # Establecer geometría correcta como polígono
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN {geom_field} TYPE Geometry(Polygon, {srid})').format(
+        schema=sql.Identifier(GEOETL_DB["schema"]),
+        table_name=sql.Identifier(table_name_target),
+        geom_field=sql.Identifier(geom_field),
+        srid=sql.Literal(srid)
+    )
+    cur.execute(sqlAlter)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
+
+def trans_Kriging(dicc):
+    """
+    Transformador de Interpolación Kriging
+    Crea una superficie interpolada usando kriging ordinario
+    """
+    table_name_source = dicc['data'][0]
+    table_name_target = dicc['id']
+    value_field = dicc['value-field']
+    cell_size = float(dicc.get('cell-size', 100.0))
+    search_radius = float(dicc.get('search-radius', 1000.0))
+    min_points = int(dicc.get('min-points', 5))
+    variogram_model = dicc.get('variogram-model', 'spherical')  # spherical, exponential, gaussian
+
+    conn = psycopg2.connect(user=GEOETL_DB["user"], password=GEOETL_DB["password"], 
+                           host=GEOETL_DB["host"], port=GEOETL_DB["port"], 
+                           database=GEOETL_DB["database"])
+    cur = conn.cursor()
+
+    # Eliminar tabla destino si existe
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name_target))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    try:
+        srid, type_geom = get_type_n_srid(table_name_source)
+    except:
+        srid = 4326
+
+    # Detectar el nombre del campo de geometría
+    sqlGeomField = sql.SQL("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = %s AND table_name = %s 
+        AND udt_name = 'geometry'
+        LIMIT 1
+    """)
+    cur.execute(sqlGeomField, [GEOETL_DB["schema"], table_name_source])
+    geom_field_result = cur.fetchone()
+    geom_field = geom_field_result[0] if geom_field_result else 'wkb_geometry'
+
+    # Obtener datos fuente para kriging
+    sqlData = sql.SQL("""
+        SELECT ST_X({geom_field}) as x, ST_Y({geom_field}) as y, {value_field} as value
+        FROM {schema}.{table_source}
+        WHERE {value_field} IS NOT NULL AND {geom_field} IS NOT NULL
+    """).format(
+        schema=sql.Identifier(GEOETL_DB["schema"]),
+        table_source=sql.Identifier(table_name_source),
+        geom_field=sql.Identifier(geom_field),
+        value_field=sql.Identifier(value_field)
+    )
+    cur.execute(sqlData)
+    source_data = cur.fetchall()
+    
+    if len(source_data) < min_points:
+        raise ValueError(f"Datos insuficientes para kriging. Se necesitan al menos {min_points} puntos.")
+
+    # Obtener extent para crear grid
+    sqlExtent = sql.SQL("""
+        SELECT ST_XMin(extent) as xmin, ST_YMin(extent) as ymin,
+               ST_XMax(extent) as xmax, ST_YMax(extent) as ymax
+        FROM (SELECT ST_Extent({geom_field}) as extent FROM {schema}.{table}) as subq
+    """).format(
+        geom_field=sql.Identifier(geom_field),
+        schema=sql.Identifier(GEOETL_DB["schema"]),
+        table=sql.Identifier(table_name_source)
+    )
+    cur.execute(sqlExtent)
+    extent = cur.fetchone()
+    xmin, ymin, xmax, ymax = extent
+
+    # Para simplificar, usaremos un kriging simple basado en la correlación espacial
+    # En una implementación completa se usaría una librería como PyKrige
+    # Expandir el extent para asegurar cobertura completa con un buffer más generoso
+    buffer_size = cell_size * 2.0  # Dos veces el tamaño de celda como buffer
+    xmin_expanded = xmin - buffer_size
+    xmax_expanded = xmax + buffer_size
+    ymin_expanded = ymin - buffer_size
+    ymax_expanded = ymax + buffer_size
+    
+    sqlCreateKriging = sql.SQL("""
+        CREATE TABLE {schema}.{table_target} AS
+                 WITH grid AS (
+             SELECT 
+                 generate_series(
+                     FLOOR({xmin_expanded} / {cell_size}) * {cell_size},
+                     CEIL({xmax_expanded} / {cell_size}) * {cell_size},
+                     {cell_size}
+                 ) as x
+         ),
+         grid_points AS (
+             SELECT 
+                 x, 
+                 generate_series(
+                     FLOOR({ymin_expanded} / {cell_size}) * {cell_size},
+                     CEIL({ymax_expanded} / {cell_size}) * {cell_size},
+                     {cell_size}
+                 ) as y
+             FROM grid
+         ),
+        kriging_calc AS (
+            SELECT 
+                gp.x, gp.y,
+                -- Crear polígono cuadrado centrado en el punto del grid
+                ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY[
+                    ST_MakePoint(gp.x - {cell_size}/2.0, gp.y - {cell_size}/2.0),
+                    ST_MakePoint(gp.x + {cell_size}/2.0, gp.y - {cell_size}/2.0),
+                    ST_MakePoint(gp.x + {cell_size}/2.0, gp.y + {cell_size}/2.0),
+                    ST_MakePoint(gp.x - {cell_size}/2.0, gp.y + {cell_size}/2.0),
+                    ST_MakePoint(gp.x - {cell_size}/2.0, gp.y - {cell_size}/2.0)
+                ])), {srid}) as {geom_field},
+                CASE 
+                    WHEN COUNT(src.*) >= {min_points} THEN
+                        -- Kriging simple usando correlación exponencial
+                        ROUND(
+                            (SUM(src.{value_field} * EXP(-ST_Distance(
+                                ST_SetSRID(ST_MakePoint(gp.x, gp.y), {srid}), 
+                                src.{geom_field}
+                            ) / {search_radius})) / 
+                            SUM(EXP(-ST_Distance(
+                                ST_SetSRID(ST_MakePoint(gp.x, gp.y), {srid}), 
+                                src.{geom_field}
+                            ) / {search_radius})))::numeric, 5
+                        )
+                    ELSE NULL
+                END as kriging_value,
+                CASE 
+                    WHEN COUNT(src.*) >= {min_points} THEN
+                        -- Estimación de la varianza kriging (simplificada)
+                        ROUND(
+                            (STDDEV(src.{value_field}) * (1.0 - 
+                                SUM(EXP(-2 * ST_Distance(
+                                    ST_SetSRID(ST_MakePoint(gp.x, gp.y), {srid}), 
+                                    src.{geom_field}
+                                ) / {search_radius})) / COUNT(src.*)
+                            ))::numeric, 5
+                        )
+                    ELSE NULL
+                END as kriging_variance
+            FROM grid_points gp
+            LEFT JOIN {schema}.{table_source} src ON 
+                ST_DWithin(
+                    ST_SetSRID(ST_MakePoint(gp.x, gp.y), {srid}), 
+                    src.{geom_field}, 
+                    {search_radius}
+                )
+                AND src.{value_field} IS NOT NULL
+            GROUP BY gp.x, gp.y
+        )
+        SELECT 
+            row_number() OVER () as id,
+            x, y, {geom_field}, kriging_value, kriging_variance
+        FROM kriging_calc
+        WHERE kriging_value IS NOT NULL
+    """).format(
+        schema=sql.Identifier(GEOETL_DB["schema"]),
+        table_target=sql.Identifier(table_name_target),
+        table_source=sql.Identifier(table_name_source),
+        geom_field=sql.Identifier(geom_field),
+        value_field=sql.Identifier(value_field),
+        xmin_expanded=sql.Literal(xmin_expanded),
+        ymin_expanded=sql.Literal(ymin_expanded),
+        xmax_expanded=sql.Literal(xmax_expanded),
+        ymax_expanded=sql.Literal(ymax_expanded),
+        cell_size=sql.Literal(cell_size),
+        srid=sql.Literal(srid),
+        search_radius=sql.Literal(search_radius),
+        min_points=sql.Literal(min_points)
+    )
+    
+    cur.execute(sqlCreateKriging)
+    conn.commit()
+
+    # Establecer geometría correcta como polígono
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_name} ALTER COLUMN {geom_field} TYPE Geometry(Polygon, {srid})').format(
+        schema=sql.Identifier(GEOETL_DB["schema"]),
+        table_name=sql.Identifier(table_name_target),
+        geom_field=sql.Identifier(geom_field),
+        srid=sql.Literal(srid)
+    )
+    cur.execute(sqlAlter)
+    conn.commit()
+
+    conn.close()
+    cur.close()
+
+    return [table_name_target]
 

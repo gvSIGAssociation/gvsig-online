@@ -766,3 +766,11 @@ msgstr ""
 #: templates/geoetl_workspaces_permissions.html:32
 msgid "Execute permission"
 msgstr ""
+
+#: templates/etl.html:99
+msgid "IDW Interpolation"
+msgstr "IDW Interpolation"
+
+#: templates/etl.html:100
+msgid "Kriging Interpolation"
+msgstr "Kriging Interpolation"

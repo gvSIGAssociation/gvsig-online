@@ -17172,7 +17172,599 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
              },this));
          }
 
-         return this;
-     }  
+                 return this;
+    }  
 
+});
+
+//// IDW INTERPOLATION ////
+
+trans_IDW = draw2d.shape.layout.VerticalLayout.extend({
+
+    NAME: "trans_IDW",
+    
+    init : function(attr)
+    {
+        this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("IDW Interpolation"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var context = this
+        
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-idw-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('IDW Interpolation'))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<label class="col-form-label">'+gettext('Value field')+':</label>'+
+                            '<select id="value-field-'+ID+'" class="form-control"></select>'+
+                            '<label class="col-form-label">'+gettext('Power')+':</label>'+
+                            '<input id="power-'+ID+'" type="number" value="2.0" min="1" step="0.1" class="form-control" >'+
+                            '<label class="col-form-label">'+gettext('Cell size')+':</label>'+
+                            '<input id="cell-size-'+ID+'" type="number" value="100.0" min="1" step="1" class="form-control" >'+
+                            '<label class="col-form-label">'+gettext('Search radius')+':</label>'+
+                            '<input id="search-radius-'+ID+'" type="number" value="1000.0" min="1" step="1" class="form-control" >'+
+                            '<label class="col-form-label">'+gettext('Minimum points')+':</label>'+
+                            '<input id="min-points-'+ID+'" type="number" value="3" min="1" step="1" class="form-control" >'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="idw-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+        
+        var context = this
+        var schemaEdge = [];
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                try{
+                    schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+                }catch{
+                    schemaEdge = []
+                }
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+
+                    $('#value-field-'+ID).empty();
+                    for (var i = 0; i < schema.length; i++) {
+                        $('#value-field-'+ID).append('<option value="' + schema[i] + '">' + schema[i] + '</option>');
+                    }
+                }
+
+            },100);
+
+            $('#dialog-idw-'+ID).modal('show')
+
+        });
+
+        $('#idw-accept-'+ID).click(function() {
+
+            var paramsIDW = {"id": ID,
+            "parameters": [
+                {
+                    "value-field": $('#value-field-'+ID).val(),
+                    "power": $('#power-'+ID).val(),
+                    "cell-size": $('#cell-size-'+ID).val(),
+                    "search-radius": $('#search-radius-'+ID).val(),
+                    "min-points": $('#min-points-'+ID).val()
+                }
+            ]}
+
+            schemaMod = ['id', 'x', 'y', 'interpolated_value']
+
+            paramsIDW['schema'] = schemaMod
+            paramsIDW['schema-old'] = schemaEdge
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsIDW, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-idw-'+ID).modal('hide')
+
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+        var label1 = new draw2d.shape.basic.Label({
+            text: gettext("Input"),
+            stroke: 0.2,
+            radius: 0,
+            bgColor: "#ffffff",
+            padding: {left: 10, top: 3, right: 10, bottom: 5},
+            fontColor: "#107dac",
+            resizeable: true
+        });
+
+        var label2 = new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke: 0.2,
+            radius: 0,
+            bgColor: "#ffffff",
+            padding: {left: 40, top: 3, right: 10, bottom: 5},
+            fontColor: "#107dac",
+            resizeable: true
+        });
+
+        var input = label1.createPort("input");
+        input.setName("input_" + label1.id);
+
+        var output = label2.createPort("output");
+        output.setName("output_" + label2.id);
+
+        if ($.isNumeric(optionalIndex)) {
+            this.add(label1, null, optionalIndex + 1);
+            this.add(label2, null, optionalIndex + 1);
+        } else {
+            this.add(label1);
+            this.add(label2);
+        }
+
+        listLabel.push([this.id, [input.name], [output.name]]);
+
+        return label1, label2;
+    },
+
+    /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+
+    /**
+     * @method
+     * Return all model entities of the shape
+     * 
+     * @returns {draw2d.util.ArrayList}
+     */
+    getEntities : function()
+    {
+        var entities = new draw2d.util.ArrayList();
+        
+        // start with index=1 to ignore the header of the shape
+        for(var i=1; i<this.children.getSize();i++){
+            entities.add(this.children.get(i));
+        }
+        
+        return entities;
+    },
+    
+    /**
+     * @method
+     * Set the name of the DB table. Visually it is the header of the shape
+     * 
+     * @param {String} name
+     */
+    setTableName : function(name)
+    {
+        this.classLabel.setText(name);
+    },
+    
+    /**
+     * @method
+     * Get the name of the DB table. Visually it is the header of the shape
+     * 
+     * @returns {String}
+     */
+    getTableName : function()
+    {
+        return this.classLabel.getText();
+    },
+
+    /**
+     * @method
+     * Set the name of a column 
+     * 
+     * @param {Number} index the index of the column to rename
+     * @param {String} name the new name of the column
+     */
+    setEntityName : function(index, name)
+    {
+        this.children.get(index+1).setText(name);
+    },
+    
+    /**
+     * @method 
+     * Return an objects with all important attributes for XML or JSON serialization
+     * 
+     * @returns {Object}
+     */
+    getPersistentAttributes : getPerAttr,
+    
+    /**
+     * @method 
+     * Read all attributes from the serialized properties and transfer them into the shape.
+     *
+     * @param {Object} memento
+     * @return
+     */
+    setPersistentAttributes : function(memento)
+    {
+        this._super(memento);
+        
+        this.setName(memento.name);
+
+        if(typeof memento.entities !== "undefined"){
+            $.each(memento.entities, $.proxy(function(i,e){
+                var entity = this.addEntity(e.text);
+                entity.id = e.id;
+                entity.getInputPort(0).setName("input_"+e.id);
+                entity.getOutputPort(0).setName("output_"+e.id);
+            },this));
+        }
+
+        return this;
+    }
+
+});
+
+//// KRIGING INTERPOLATION ////
+
+trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
+
+    NAME: "trans_Kriging",
+    
+    init : function(attr)
+    {
+        this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+        
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Kriging Interpolation"), 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#71c7ec", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+        
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var context = this
+        
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-kriging-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Kriging Interpolation'))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<label class="col-form-label">'+gettext('Value field')+':</label>'+
+                            '<select id="value-field-kriging-'+ID+'" class="form-control"></select>'+
+                            '<label class="col-form-label">'+gettext('Cell size')+':</label>'+
+                            '<input id="cell-size-kriging-'+ID+'" type="number" value="100.0" min="1" step="1" class="form-control" >'+
+                            '<label class="col-form-label">'+gettext('Search radius')+':</label>'+
+                            '<input id="search-radius-kriging-'+ID+'" type="number" value="1000.0" min="1" step="1" class="form-control" >'+
+                            '<label class="col-form-label">'+gettext('Minimum points')+':</label>'+
+                            '<input id="min-points-kriging-'+ID+'" type="number" value="5" min="1" step="1" class="form-control" >'+
+                            '<label class="col-form-label">'+gettext('Variogram model')+':</label>'+
+                            '<select id="variogram-model-'+ID+'" class="form-control">'+
+                                '<option value="spherical">Spherical</option>'+
+                                '<option value="exponential">Exponential</option>'+
+                                '<option value="gaussian">Gaussian</option>'+
+                            '</select>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="kriging-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+        
+        var context = this
+        var schemaEdge = [];
+
+        icon.on("click", function(){
+            
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{ 
+                    schema=[]
+                    schemaOld =[]
+                }
+                
+                try{
+                    schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+                }catch{
+                    schemaEdge = []
+                }
+
+                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                    schema = schemaEdge
+
+                    $('#value-field-kriging-'+ID).empty();
+                    for (var i = 0; i < schema.length; i++) {
+                        $('#value-field-kriging-'+ID).append('<option value="' + schema[i] + '">' + schema[i] + '</option>');
+                    }
+                }
+
+
+
+            },100);
+
+            $('#dialog-kriging-'+ID).modal('show')
+
+        });
+
+        $('#kriging-accept-'+ID).click(function() {
+
+            var paramsKriging = {"id": ID,
+            "parameters": [
+                {
+                    "value-field": $('#value-field-kriging-'+ID).val(),
+                    "cell-size": $('#cell-size-kriging-'+ID).val(),
+                    "search-radius": $('#search-radius-kriging-'+ID).val(),
+                    "min-points": $('#min-points-kriging-'+ID).val(),
+                    "variogram-model": $('#variogram-model-'+ID).val()
+                }
+            ]}
+
+            schemaMod = ['id', 'x', 'y', 'kriging_value', 'kriging_variance']
+
+            paramsKriging['schema'] = schemaMod
+            paramsKriging['schema-old'] = schemaEdge
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsKriging, ID)
+
+            icon.setColor('#4682B4')
+            
+            $('#dialog-kriging-'+ID).modal('hide')
+
+        });
+    },
+     
+    /**
+     * @method
+     * Add an entity to the db shape
+     * 
+     * @param {String} txt the label to show
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function(optionalIndex)
+    {
+        var label1 = new draw2d.shape.basic.Label({
+            text: gettext("Input"),
+            stroke: 0.2,
+            radius: 0,
+            bgColor: "#ffffff",
+            padding: {left: 10, top: 3, right: 10, bottom: 5},
+            fontColor: "#107dac",
+            resizeable: true
+        });
+
+        var label2 = new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke: 0.2,
+            radius: 0,
+            bgColor: "#ffffff",
+            padding: {left: 40, top: 3, right: 10, bottom: 5},
+            fontColor: "#107dac",
+            resizeable: true
+        });
+
+        var input = label1.createPort("input");
+        input.setName("input_" + label1.id);
+
+        var output = label2.createPort("output");
+        output.setName("output_" + label2.id);
+
+        if ($.isNumeric(optionalIndex)) {
+            this.add(label1, null, optionalIndex + 1);
+            this.add(label2, null, optionalIndex + 1);
+        } else {
+            this.add(label1);
+            this.add(label2);
+        }
+
+        listLabel.push([this.id, [input.name], [output.name]]);
+
+        return label1, label2;
+    },
+
+    /**
+     * @method
+     * Remove the entity with the given index from the DB table shape.<br>
+     * This method removes the entity without care of existing connections. Use
+     * a draw2d.command.CommandDelete command if you want to delete the connections to this entity too
+     * 
+     * @param {Number} index the index of the entity to remove
+     */
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    /**
+     * @method
+     * Returns the entity figure with the given index
+     * 
+     * @param {Number} index the index of the entity to return
+     */
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+
+    /**
+     * @method
+     * Return all model entities of the shape
+     * 
+     * @returns {draw2d.util.ArrayList}
+     */
+    getEntities : function()
+    {
+        var entities = new draw2d.util.ArrayList();
+        
+        // start with index=1 to ignore the header of the shape
+        for(var i=1; i<this.children.getSize();i++){
+            entities.add(this.children.get(i));
+        }
+        
+        return entities;
+    },
+    
+    /**
+     * @method
+     * Set the name of the DB table. Visually it is the header of the shape
+     * 
+     * @param {String} name
+     */
+    setTableName : function(name)
+    {
+        this.classLabel.setText(name);
+    },
+    
+    /**
+     * @method
+     * Get the name of the DB table. Visually it is the header of the shape
+     * 
+     * @returns {String}
+     */
+    getTableName : function()
+    {
+        return this.classLabel.getText();
+    },
+
+    /**
+     * @method
+     * Set the name of a column 
+     * 
+     * @param {Number} index the index of the column to rename
+     * @param {String} name the new name of the column
+     */
+    setEntityName : function(index, name)
+    {
+        this.children.get(index+1).setText(name);
+    },
+    
+    /**
+     * @method 
+     * Return an objects with all important attributes for XML or JSON serialization
+     * 
+     * @returns {Object}
+     */
+    getPersistentAttributes : getPerAttr,
+    
+    /**
+     * @method 
+     * Read all attributes from the serialized properties and transfer them into the shape.
+     *
+     * @param {Object} memento
+     * @return
+     */
+    setPersistentAttributes : function(memento)
+    {
+        this._super(memento);
+        
+        this.setName(memento.name);
+
+        if(typeof memento.entities !== "undefined"){
+            $.each(memento.entities, $.proxy(function(i,e){
+                var entity = this.addEntity(e.text);
+                entity.id = e.id;
+                entity.getInputPort(0).setName("input_"+e.id);
+                entity.getOutputPort(0).setName("output_"+e.id);
+            },this));
+        }
+
+        return this;
+    }
+    
 });

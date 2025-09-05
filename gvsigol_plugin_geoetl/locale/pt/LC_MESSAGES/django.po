@@ -972,5 +972,13 @@ msgstr ""
 msgid "Execute permission"
 msgstr ""
 
+#: templates/etl.html:99
+msgid "IDW Interpolation"
+msgstr "Interpolação IDW"
+
+#: templates/etl.html:100
+msgid "Kriging Interpolation"
+msgstr "Interpolação Kriging"
+
 #~ msgid "Back"
 #~ msgstr "Atrás"
