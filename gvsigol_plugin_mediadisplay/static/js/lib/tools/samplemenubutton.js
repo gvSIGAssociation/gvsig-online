@@ -17,7 +17,7 @@
  */
 
 /**
- * @author: Javier Rodrigo <jrodrigo@scolab.es>
+ * @author: lsanjaime <lsanjaime@scolab.es>
  */
 
 /**

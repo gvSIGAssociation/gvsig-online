@@ -19,7 +19,7 @@
 '''
 
 '''
-@author: jrodrigo <jrodrigo@scolab.es>
+@author: lsanjaime <lsanjaime@scolab.es>
 '''
 
 from django.shortcuts import HttpResponse
