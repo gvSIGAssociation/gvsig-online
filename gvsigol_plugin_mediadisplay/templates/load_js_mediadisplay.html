@@ -1,0 +1,34 @@
+{% load staticfiles %}
+<script>
+	var IMG_PATH = '{% static "img/" %}';
+</script>
+<script type="text/javascript" src="{% static "js/mediadisplay.js" %}"></script>
+<script type="text/javascript">
+	var map = viewer.core.getMap();
+	var conf = viewer.core.getConf();
+	
+	if (viewer.core.ifToolInConf('gvsigol_plugin_mediadisplay')) {
+		
+		var button = '<li role="presentation"><a id="mediadisplay" role="menuitem" tabindex="-1" href="#"><i class="fa fa-camera m-r-5"></i>'+gettext("Modo Multimedia")+'</a></li>';
+		$('#gvsigol-navbar-file-menu').append(button);
+		
+		$.ajax({
+			type : 'POST',
+			async : false,
+			url : '/gvsigonline/mediadisplay/layers/',
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success : function(response) {
+				var config = response;
+				
+				var tool = new MediaDisplay(config, conf, map);
+				viewer.core.loadTool(tool);
+				
+			},
+			error : function() {
+				messageBox.show('error', gettext('Error loading mediadisplay plugin'));
+			}
+		});
+	}
+</script>
