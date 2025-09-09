@@ -5599,7 +5599,8 @@ def trans_Cluster(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
-    sqlAlter = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN IF NOT EXISTS _cluster INTEGER, ADD COLUMN IF NOT EXISTS _id_temp SERIAL;').format(
+    # Agregar columnas para cluster, distancia individual al centroide, RMSE del cluster y ID temporal
+    sqlAlter = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN IF NOT EXISTS _cluster INTEGER, ADD COLUMN IF NOT EXISTS _distance_to_centroid NUMERIC(15,3), ADD COLUMN IF NOT EXISTS _cluster_rmse NUMERIC(15,3), ADD COLUMN IF NOT EXISTS _id_temp SERIAL;').format(
         schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target))
     
@@ -5665,6 +5666,115 @@ def trans_Cluster(dicc):
 
     cur.execute(sqlUpdate)
     conn.commit()
+    
+    # Calcular la distancia individual de cada punto al centroide Y el RMSE del cluster
+    # Considera tanto la distancia espacial como el valor del atributo si se usó mvalue
+    if option == 'ST_ClusterKMeans' and attr != '-':
+        # Para K-Means con atributo (mvalue), calcular ambos valores combinando espacial + atributo
+        sqlDistances = sql.SQL(""" 
+            UPDATE {schema}.{tbl_target} 
+            SET _distance_to_centroid = ROUND(cluster_stats.individual_distance::numeric, 3),
+                _cluster_rmse = ROUND(cluster_stats.cluster_rmse::numeric, 3)
+            FROM (
+                WITH cluster_centroids AS (
+                    SELECT 
+                        _cluster,
+                        ST_Centroid(ST_Union(wkb_geometry)) AS geom_centroid,
+                        AVG({attr}::DOUBLE PRECISION) AS attr_centroid,
+                        MIN({attr}::DOUBLE PRECISION) as attr_min,
+                        MAX({attr}::DOUBLE PRECISION) as attr_max
+                    FROM {schema}.{tbl_target}
+                    WHERE _cluster IS NOT NULL
+                    GROUP BY _cluster
+                ),
+                cluster_distances AS (
+                    SELECT 
+                        t._cluster,
+                        t._id_temp,
+
+                        -- Calcular distancia multidimensional normalizada
+                        SQRT(
+                            POWER(ST_Distance(t.wkb_geometry, cc.geom_centroid), 2) + 
+                            POWER(
+                                (t.{attr}::DOUBLE PRECISION - cc.attr_centroid) * 
+                                CASE 
+                                    WHEN (cc.attr_max - cc.attr_min) > 0 
+                                    THEN 100.0 / (cc.attr_max - cc.attr_min)  -- Normalizar a escala ~100
+                                    ELSE 1.0 
+                                END, 
+                                2
+                            )
+                        ) AS individual_distance
+                    FROM {schema}.{tbl_target} t
+                    JOIN cluster_centroids cc ON t._cluster = cc._cluster
+                    WHERE t._cluster IS NOT NULL
+                ),
+                cluster_rmse AS (
+                    SELECT 
+                        _cluster,
+                        SQRT(AVG(POWER(individual_distance, 2))) AS cluster_rmse
+                    FROM cluster_distances
+                    GROUP BY _cluster
+                )
+                SELECT 
+                    cd._id_temp,
+                    cd.individual_distance,
+                    cr.cluster_rmse
+                FROM cluster_distances cd
+                JOIN cluster_rmse cr ON cd._cluster = cr._cluster
+            ) AS cluster_stats
+            WHERE {schema}.{tbl_target}._id_temp = cluster_stats._id_temp;
+        """).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target),
+            attr = sql.SQL(str(attr)))
+    else:
+        # Para DBSCAN o K-Means sin atributo, calcular ambos valores solo espaciales
+        sqlDistances = sql.SQL(""" 
+            UPDATE {schema}.{tbl_target} 
+            SET _distance_to_centroid = ROUND(cluster_stats.individual_distance::numeric, 3),
+                _cluster_rmse = ROUND(cluster_stats.cluster_rmse::numeric, 3)
+            FROM (
+                WITH cluster_centroids AS (
+                    SELECT 
+                        _cluster,
+                        ST_Centroid(ST_Union(wkb_geometry)) AS centroid
+                    FROM {schema}.{tbl_target}
+                    WHERE _cluster IS NOT NULL
+                    GROUP BY _cluster
+                ),
+                cluster_distances AS (
+                    SELECT 
+                        t._cluster,
+                        t._id_temp,
+                        ST_Distance(t.wkb_geometry, cc.centroid) AS individual_distance
+                    FROM {schema}.{tbl_target} t
+                    JOIN cluster_centroids cc ON t._cluster = cc._cluster
+                    WHERE t._cluster IS NOT NULL
+                ),
+                cluster_rmse AS (
+                    SELECT 
+                        _cluster,
+                        SQRT(AVG(POWER(individual_distance, 2))) AS cluster_rmse
+                    FROM cluster_distances
+                    GROUP BY _cluster
+                )
+                SELECT 
+                    cd._id_temp,
+                    cd.individual_distance,
+                    cr.cluster_rmse
+                FROM cluster_distances cd
+                JOIN cluster_rmse cr ON cd._cluster = cr._cluster
+            ) AS cluster_stats
+            WHERE {schema}.{tbl_target}._id_temp = cluster_stats._id_temp;
+        """).format(
+            schema = sql.Identifier(GEOETL_DB["schema"]),
+            tbl_target = sql.Identifier(table_name_target))
+    
+    cur.execute(sqlDistances)
+    conn.commit()
+    
+
     
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
         schema = sql.Identifier(GEOETL_DB["schema"]),
