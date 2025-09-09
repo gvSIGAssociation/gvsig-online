@@ -11424,6 +11424,8 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
             schemaMod =[...schemaEdge]
 
             schemaMod.push('_cluster');
+            schemaMod.push('_cluster_rmse');
+            schemaMod.push('_distance_to_centroid');
             schemaMod.shift();
             paramsSpatialRel['schema-old'] = schemaEdge
             paramsSpatialRel['schema'] = schemaMod
