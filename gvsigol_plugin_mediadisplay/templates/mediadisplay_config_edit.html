@@ -71,7 +71,6 @@
                         </div>
                     </div>
                     
-                    <!-- Selector de capa (oculto inicialmente) -->
                     <div class="row" id="layer-selector" style="display: none;">
                         <div class="col-md-12 form-group">
                             <label for="layer_id">{% trans "Select Layer:" %}</label>
@@ -86,7 +85,6 @@
                         </div>
                     </div>
                     
-                    <!-- Botón de configuración de campos (oculto inicialmente) -->
                     <div class="row" id="configure-fields-row" style="display: none;">
                         <div class="col-md-12 form-group">
                             <button type="button" id="configure-layer-btn" class="btn btn-primary" disabled>
@@ -100,7 +98,6 @@
     </div>
 </div>
 
-<!-- Modal para configurar campos de la capa -->
 <div class="modal fade" id="layer-config-modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -180,7 +177,6 @@ waitForJQuery(function() {
             $('#configure-fields-row').toggle();
         });
         
-        // Habilitar botón de configuración cuando se selecciona una capa
         $('#layer_id').change(function() {
             var layerId = $(this).val();
             if (layerId) {
@@ -192,7 +188,6 @@ waitForJQuery(function() {
             }
         });
         
-        // Abrir modal de configuración
         $('#configure-layer-btn').click(function() {
             if (currentLayerId) {
                 loadLayerFields(currentLayerId);
@@ -200,7 +195,6 @@ waitForJQuery(function() {
             }
         });
         
-        // Guardar configuración de la capa
         $('#save-layer-config').click(function() {
             var orderField = $('#order-field').val();
             var mediaFields = $('#media-fields').val();
@@ -215,7 +209,6 @@ waitForJQuery(function() {
                 return;
             }
             
-            // Guardar configuración
             configuredLayers[currentLayerId] = {
                 layerId: currentLayerId,
                 layerName: $('#layer_id option:selected').text(),
@@ -223,17 +216,14 @@ waitForJQuery(function() {
                 mediaFields: mediaFields
             };
             
-            // Actualizar lista de capas configuradas
             updateConfiguredLayersList();
             
-            // Cerrar modal y limpiar selector
             $('#layer-config-modal').modal('hide');
             $('#layer_id').val('').trigger('change');
             $('#layer-selector').hide();
             $('#configure-fields-row').hide();
         });
         
-        // Editar capa configurada
         $(document).on('click', '.edit-configured-layer', function() {
             var layerId = $(this).data('layer-id');
             currentLayerId = layerId;
@@ -243,7 +233,6 @@ waitForJQuery(function() {
             $('#layer-config-modal').modal('show');
         });
         
-        // Eliminar capa configurada
         $(document).on('click', '.remove-configured-layer', function() {
             var layerId = $(this).data('layer-id');
             if (confirm('{% trans "Are you sure you want to delete this layer configuration?" %}')) {
@@ -252,7 +241,6 @@ waitForJQuery(function() {
             }
         });
         
-        // Validación del formulario
         $('#config-form').submit(function(e) {
             if (Object.keys(configuredLayers).length === 0) {
                 e.preventDefault();
@@ -260,10 +248,8 @@ waitForJQuery(function() {
                 return false;
             }
             
-            // Limpiar inputs ocultos anteriores
             $('input[name="layer_configs[]"]').remove();
             
-            // Añadir inputs ocultos para cada capa configurada
             Object.values(configuredLayers).forEach(function(layerConfig) {
                 $('<input>').attr({
                     type: 'hidden',
@@ -283,7 +269,6 @@ waitForJQuery(function() {
                 success: function(response) {
                     console.log('Campos de la capa:', response);
                     
-                    // Limpiar selects
                     $('#order-field').empty().html('<option value="">{% trans "Select order field..." %}</option>');
                     $('#media-fields').empty().html('<option value="">{% trans "Select media fields..." %}</option>');
                     
@@ -294,12 +279,13 @@ waitForJQuery(function() {
                             $('#media-fields').append(option);
                         });
                         
-                        // Si ya hay configuración para esta capa, cargarla
                         if (configuredLayers[layerId]) {
                             $('#order-field').val(configuredLayers[layerId].orderField);
                             $('#media-fields').val(configuredLayers[layerId].mediaFields);
                         }
                     } else {
+                        $('#order-field').html('<option value="" disabled>{% trans "No fields available" %}</option>');
+                        $('#media-fields').html('<option value="" disabled>{% trans "No fields available" %}</option>');
                         console.log('No se encontraron campos');
                     }
                 },

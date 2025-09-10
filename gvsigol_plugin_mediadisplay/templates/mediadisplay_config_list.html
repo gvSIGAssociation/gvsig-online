@@ -28,7 +28,6 @@
                             <tr>
                                 <th>{% trans "ID" %}</th>
                                 <th>{% trans "Project" %}</th>
-                                <th>{% trans "Layers Count" %}</th>
                                 <th>{% trans "Created" %}</th>
                                 <th>{% trans "Updated" %}</th>
                                 <th></th>
@@ -40,7 +39,6 @@
                             <tr>
                                 <td class="row-id">{{ config.id }}</td>
                                 <td>{{ config.project.name }}</td>
-                                <td>{{ config.enabled_layers.count }}</td>
                                 <td>{{ config.created_at|date:"d/m/Y H:i" }}</td>
                                 <td>{{ config.updated_at|date:"d/m/Y H:i" }}</td>
                                 <td></td>
@@ -51,7 +49,6 @@
                     </table>
                 </div>
                 
-                <!-- Paginación -->
                 {% if page_obj.has_other_pages %}
                 <div class="text-center">
                     <ul class="pagination">
@@ -85,7 +82,6 @@
     </div>
 </div>
 
-<!-- Modal -->
 <div class="modal fade" id="modal-delete-config" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
