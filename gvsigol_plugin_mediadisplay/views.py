@@ -282,10 +282,7 @@ def get_config(request):
         project_id = request.GET.get('project_id')
         
         if not project_id:
-            return JsonResponse({
-                'enabled': False,
-                'error': 'project_id is required'
-            }, status=400)
+            return JsonResponse({'error': 'project_id is required'}, status=400)
         
         try:
             project = Project.objects.get(id=project_id)
@@ -293,30 +290,18 @@ def get_config(request):
             try:
                 config = MediaDisplayConfig.objects.get(project=project)
                 layer_configs = config.layer_configs
-                enabled = True
             except MediaDisplayConfig.DoesNotExist:
                 layer_configs = {}
-                enabled = False
             
             return JsonResponse({
-                'enabled': enabled,
-                'project_id': project_id,
-                'project_name': project.name,
-                'layer_configs': layer_configs,
-                'media_types': ['image']
+                'layer_configs': layer_configs
             })
             
         except Project.DoesNotExist:
-            return JsonResponse({
-                'enabled': False,
-                'error': 'Project not found'
-            }, status=404)
+            return JsonResponse({'error': 'Project not found'}, status=404)
             
     except Exception as e:
-        return JsonResponse({
-            'enabled': False,
-            'error': str(e)
-        }, status=500)      
+        return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
 def get_layer_fields(request):
