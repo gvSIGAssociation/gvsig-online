@@ -137,11 +137,11 @@ $(document).ready(function() {
         "columnDefs": [{
             "targets": -1,
             "data": null,
-            "defaultContent": '<button type="button" name="button-delete-config" data-toggle="modal" data-target="#modal-delete-config" data-placement="bottom" title="' + '{% trans "Delete configuration" %}' + '" class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>'
+            "defaultContent": '<button type="button" name="button-delete-config" data-toggle="modal" data-target="#modal-delete-config" data-placement="bottom" title="' + gettext('Delete configuration') + '" class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>'
         },{
             "targets": -2,
             "data": null,
-            "defaultContent": '<button type="button" name="button-update-config" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update configuration" %}' + '" class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button>'
+            "defaultContent": '<button type="button" name="button-update-config" data-toggle="tooltip" data-placement="bottom" title="' + gettext('Update configuration') + '" class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button>'
         }],
         "dom": 'T<"clear">lfrtip',
         "lengthMenu": [[10, -1], [10, "Todos"]],
@@ -180,7 +180,7 @@ $(document).ready(function() {
                     location.reload();
                 },
                 error: function(){
-                    alert('{% trans "Error deleting configuration" %}');
+                    alert(gettext('Error deleting configuration'));
                 }
             });
         });

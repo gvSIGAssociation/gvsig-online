@@ -135,7 +135,7 @@ waitForJQuery(function() {
             if (projectId) {
                 loadProjectLayers(projectId);
             } else {
-                $('#layer_id').empty().html('<option value="">{% trans "Select a layer..." %}</option>');
+                $('#layer_id').empty().html('<option value="">' + gettext('Select a layer...') + '</option>');
                 $('#configure-layer-btn').prop('disabled', true);
             }
         });
@@ -163,12 +163,12 @@ waitForJQuery(function() {
             var mediaFields = $('#media-fields').val();
             
             if (!orderField) {
-                alert('{% trans "Please select an order field" %}');
+                alert(gettext('Please select an order field'));
                 return;
             }
             
             if (!mediaFields || mediaFields.length === 0) {
-                alert('{% trans "Please select at least one media field" %}');
+                alert(gettext('Please select at least one media field'));
                 return;
             }
             
@@ -190,19 +190,19 @@ waitForJQuery(function() {
             
             if (!projectId) {
                 e.preventDefault();
-                alert('{% trans "Please select a project" %}');
+                alert(gettext('Please select a project'));
                 return false;
             }
             
             if (!layerId) {
                 e.preventDefault();
-                alert('{% trans "Please select a layer" %}');
+                alert(gettext('Please select a layer'));
                 return false;
             }
             
             if (Object.keys(configuredLayers).length === 0) {
                 e.preventDefault();
-                alert('{% trans "Please configure at least one layer" %}');
+                alert(gettext('Please configure at least one layer'));
                 return false;
             }
             
@@ -226,12 +226,12 @@ waitForJQuery(function() {
                     var select = $('#layer_id');
 
                     if (response.layers && response.layers.length > 0) {
-                        select.empty().html('<option value="">{% trans "Select a layer..." %}</option>');
+                        select.empty().html('<option value="">' + gettext('Select a layer...') + '</option>');
                         response.layers.forEach(function(layer) {
                             select.append('<option value="' + layer.id + '">' + (layer.title || layer.name) + '</option>');
                         });
                     } else {
-                        select.empty().html('<option value="" disabled>{% trans "No layers available for multimedia configuration" %}</option>');
+                        select.empty().html('<option value="" disabled>' + gettext('No layers available for multimedia configuration') + '</option>');
                     }
                 },
                 error: function(xhr) {
@@ -246,8 +246,8 @@ waitForJQuery(function() {
                 data: { 'layer_id': layerId },
                 success: function(response) {
                     
-                    $('#order-field').empty().html('<option value="">{% trans "Select order field..." %}</option>');
-                    $('#media-fields').empty().html('<option value="">{% trans "Select media fields..." %}</option>');
+                    $('#order-field').empty().html('<option value="">' + gettext('Select order field...') + '</option>');
+                    $('#media-fields').empty().html('<option value="">' + gettext('Select media fields...') + '</option>');
                     
                     if (response.fields && response.fields.length > 0) {
                         response.fields.forEach(function(field) {
@@ -275,7 +275,7 @@ waitForJQuery(function() {
             container.empty();
             
             if (Object.keys(configuredLayers).length === 0) {
-                container.html('<p class="text-muted">{% trans "No layers configured yet" %}</p>');
+                container.html('<p class="text-muted">' + gettext('No layers configured yet') + '</p>');
                 return;
             }
             
@@ -284,8 +284,8 @@ waitForJQuery(function() {
                     '<div class="layer-item">' +
                     '<div class="layer-info">' +
                     '<strong>' + layerConfig.layerName + '</strong><br>' +
-                    '<small>{% trans "Order:" %} ' + layerConfig.orderField + '</small><br>' +
-                    '<small>{% trans "Media fields:" %} ' + layerConfig.mediaFields.join(', ') + '</small>' +
+                    '<small>' + gettext('Order') + ': ' + layerConfig.orderField + '</small><br>' +
+                    '<small>'    + gettext('Media fields') + ': ' + layerConfig.mediaFields.join(', ') + '</small>' +
                     '</div>' +
                     '<button type="button" class="btn btn-xs btn-danger remove-configured-layer" data-layer-id="' + layerConfig.layerId + '">' +
                     '<i class="fa fa-times"></i>' +
