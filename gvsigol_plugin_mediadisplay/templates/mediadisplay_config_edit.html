@@ -154,6 +154,7 @@ waitForJQuery(function() {
     var currentLayerId = null;
     var configuredLayers = {};
     var isEditing = false;
+    var currentLayerName = ''; 
     
     // Cargar configuraciones existentes
     {% for layer in layers %}
@@ -208,10 +209,12 @@ waitForJQuery(function() {
                 alert('{% trans "Please select at least one media field" %}');
                 return;
             }
+        
+            var layerName = isEditing ? currentLayerName : $('#layer_id option:selected').text();
             
             configuredLayers[currentLayerId] = {
                 layerId: currentLayerId,
-                layerName: $('#layer_id option:selected').text(),
+                layerName: layerName,
                 orderField: orderField,
                 mediaFields: mediaFields
             };
@@ -222,12 +225,20 @@ waitForJQuery(function() {
             $('#layer_id').val('').trigger('change');
             $('#layer-selector').hide();
             $('#configure-fields-row').hide();
+            
+            isEditing = false;
         });
         
         $(document).on('click', '.edit-configured-layer', function() {
             var layerId = $(this).data('layer-id');
             currentLayerId = layerId;
             isEditing = true;
+            
+            // Preservar el nombre de la capa existente
+            var existingConfig = configuredLayers[layerId];
+            if (existingConfig) {
+                currentLayerName = existingConfig.layerName;
+            }
             
             loadLayerFields(layerId);
             $('#layer-config-modal').modal('show');
