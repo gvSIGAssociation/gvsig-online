@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Add Media Display Configuration" %}{% endblock %}
+
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <form id="config-form" role="form" method="post" action="{% url 'mediadisplay_config_add' %}">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{% trans "Add Media Display Configuration" %}</h3>
+                    <div class="box-tools pull-right">
+                        <button id="submit-button" type="submit" class="btn btn-default btn-sm">
+                            <i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="box-body">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label for="project_id">{% trans "Select Project:" %}</label>
+                            <select name="project_id" id="project_id" class="form-control" required>
+                                <option value="">{% trans "Select a project..." %}</option>
+                                {% for project in projects %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label for="layer_id">{% trans "Select Layer:" %}</label>
+                            <select name="layer_id" id="layer_id" class="form-control" required>
+                                <option value="">{% trans "Select a layer..." %}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <button type="button" id="configure-layer-btn" class="btn btn-primary" disabled>
+                                <i class="fa fa-cog"></i> {% trans "Configure Layer Fields" %}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <div class="box box-default">
+                                <div class="box-header with-border">
+                                    <span class="text" style="font-weight: bold;">{% trans "Configured Layers" %}</span>
+                                </div>
+                                <div class="box-body" id="configured-layers-list" style="min-height: 100px;">
+                                    <p class="text-muted">{% trans "No layers configured yet" %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para configurar campos de la capa -->
+<div class="modal fade" id="layer-config-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{% trans "Configure Layer Fields" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="order-field">{% trans "Order Field:" %}</label>
+                    <select id="order-field" class="form-control">
+                        <option value="">{% trans "Select order field..." %}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="media-fields">{% trans "Media Fields:" %}</label>
+                    <select id="media-fields" class="form-control" multiple style="height: 150px;">
+                        <option value="">{% trans "Select media fields..." %}</option>
+                    </select>
+                    <small class="help-block">{% trans "Hold Ctrl to select multiple fields" %}</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" id="save-layer-config">{% trans "Save Configuration" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Cargar jQuery si no está disponible -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% block extra-scripts %}
+<script>
+
+// Esperar a que jQuery esté disponible
+function waitForJQuery(callback) {
+    if (typeof $ !== 'undefined') {
+        callback();
+    } else {
+        setTimeout(function() {
+            waitForJQuery(callback);
+        }, 100);
+    }
+}
+
+waitForJQuery(function() {
+    
+    var currentLayerId = null;
+    var configuredLayers = {};
+    
+    $(document).ready(function() {
+        
+        $('#project_id').change(function() {
+            var projectId = $(this).val();
+            if (projectId) {
+                loadProjectLayers(projectId);
+            } else {
+                $('#layer_id').empty().html('<option value="">{% trans "Select a layer..." %}</option>');
+                $('#configure-layer-btn').prop('disabled', true);
+            }
+        });
+        
+        $('#layer_id').change(function() {
+            var layerId = $(this).val();
+            if (layerId) {
+                $('#configure-layer-btn').prop('disabled', false);
+                currentLayerId = layerId;
+            } else {
+                $('#configure-layer-btn').prop('disabled', true);
+                currentLayerId = null;
+            }
+        });
+        
+        $('#configure-layer-btn').click(function() {
+            if (currentLayerId) {
+                loadLayerFields(currentLayerId);
+                $('#layer-config-modal').modal('show');
+            }
+        });
+        
+        $('#save-layer-config').click(function() {
+            var orderField = $('#order-field').val();
+            var mediaFields = $('#media-fields').val();
+            
+            if (!orderField) {
+                alert('{% trans "Please select an order field" %}');
+                return;
+            }
+            
+            if (!mediaFields || mediaFields.length === 0) {
+                alert('{% trans "Please select at least one media field" %}');
+                return;
+            }
+            
+            configuredLayers[currentLayerId] = {
+                layerId: currentLayerId,
+                layerName: $('#layer_id option:selected').text(),
+                orderField: orderField,
+                mediaFields: mediaFields
+            };
+            
+            updateConfiguredLayersList();
+            
+            $('#layer-config-modal').modal('hide');
+        });
+        
+        $('#config-form').submit(function(e) {
+            var projectId = $('#project_id').val();
+            var layerId = $('#layer_id').val();
+            
+            if (!projectId) {
+                e.preventDefault();
+                alert('{% trans "Please select a project" %}');
+                return false;
+            }
+            
+            if (!layerId) {
+                e.preventDefault();
+                alert('{% trans "Please select a layer" %}');
+                return false;
+            }
+            
+            if (Object.keys(configuredLayers).length === 0) {
+                e.preventDefault();
+                alert('{% trans "Please configure at least one layer" %}');
+                return false;
+            }
+            
+            $('input[name="layer_configs[]"]').remove();
+            
+            Object.values(configuredLayers).forEach(function(layerConfig) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'layer_configs[]',
+                    value: JSON.stringify(layerConfig)
+                }).appendTo('#config-form');
+            });
+            
+        });
+        
+        function loadProjectLayers(projectId) {
+            $.ajax({
+                url: '/gvsigonline/mediadisplay/api/project-layers/',
+                data: { 'project_id': projectId },
+                success: function(response) {
+                    var select = $('#layer_id');
+
+                    if (response.layers && response.layers.length > 0) {
+                        select.empty().html('<option value="">{% trans "Select a layer..." %}</option>');
+                        response.layers.forEach(function(layer) {
+                            select.append('<option value="' + layer.id + '">' + (layer.title || layer.name) + '</option>');
+                        });
+                    } else {
+                        select.empty().html('<option value="" disabled>{% trans "No layers available for multimedia configuration" %}</option>');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error cargando capas: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText));
+                }
+            });
+        }
+        
+        function loadLayerFields(layerId) {
+            $.ajax({
+                url: '/gvsigonline/mediadisplay/api/layer-fields/',
+                data: { 'layer_id': layerId },
+                success: function(response) {
+                    
+                    $('#order-field').empty().html('<option value="">{% trans "Select order field..." %}</option>');
+                    $('#media-fields').empty().html('<option value="">{% trans "Select media fields..." %}</option>');
+                    
+                    if (response.fields && response.fields.length > 0) {
+                        response.fields.forEach(function(field) {
+                            var option = '<option value="' + field.name + '">' + field.title + '</option>';
+                            $('#order-field').append(option);
+                            $('#media-fields').append(option);
+                        });
+                        
+                        if (configuredLayers[layerId]) {
+                            $('#order-field').val(configuredLayers[layerId].orderField);
+                            $('#media-fields').val(configuredLayers[layerId].mediaFields);
+                        }
+                    } else {
+                        console.log('No se encontraron campos');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error cargando campos: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText));
+                }
+            });
+        }
+        
+        function updateConfiguredLayersList() {
+            var container = $('#configured-layers-list');
+            container.empty();
+            
+            if (Object.keys(configuredLayers).length === 0) {
+                container.html('<p class="text-muted">{% trans "No layers configured yet" %}</p>');
+                return;
+            }
+            
+            Object.values(configuredLayers).forEach(function(layerConfig) {
+                var layerHtml = '<div class="configured-layer" data-layer-id="' + layerConfig.layerId + '">' +
+                    '<div class="layer-item">' +
+                    '<div class="layer-info">' +
+                    '<strong>' + layerConfig.layerName + '</strong><br>' +
+                    '<small>{% trans "Order:" %} ' + layerConfig.orderField + '</small><br>' +
+                    '<small>{% trans "Media fields:" %} ' + layerConfig.mediaFields.join(', ') + '</small>' +
+                    '</div>' +
+                    '<button type="button" class="btn btn-xs btn-danger remove-configured-layer" data-layer-id="' + layerConfig.layerId + '">' +
+                    '<i class="fa fa-times"></i>' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>';
+                container.append(layerHtml);
+            });
+        }
+        
+        $(document).on('click', '.remove-configured-layer', function() {
+            var layerId = $(this).data('layer-id');
+            delete configuredLayers[layerId];
+            updateConfiguredLayersList();
+        });
+    });
+});
+</script>
+
+<style>
+.radio-label {
+    margin-right: 20px;
+    font-weight: normal;
+}
+
+.configured-layer {
+    margin-bottom: 10px;
+}
+
+.layer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    background: #f9f9f9;
+}
+
+.layer-info {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.remove-configured-layer {
+    flex-shrink: 0;
+}
+
+#configured-layers-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Media Display Configurations" %}{% endblock %}
+
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">{% trans "Media Display Configurations" %}</h3>
+                <div class="box-tools pull-right">
+                    <button id="button-add-config" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add Configuration" %}</button>
+                </div>
+            </div>
+            <div class="box-body">
+                {% if configs %}
+                <div class="table-responsive">
+                    <table class="table table-striped" id="configs-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "ID" %}</th>
+                                <th>{% trans "Project" %}</th>
+                                <th>{% trans "Created" %}</th>
+                                <th>{% trans "Updated" %}</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for config in configs %}
+                            <tr>
+                                <td class="row-id">{{ config.id }}</td>
+                                <td>{{ config.project.name }}</td>
+                                <td>{{ config.created_at|date:"d/m/Y H:i" }}</td>
+                                <td>{{ config.updated_at|date:"d/m/Y H:i" }}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if page_obj.has_other_pages %}
+                <div class="text-center">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="active"><span>{{ num }}</span></li>
+                        {% else %}
+                        <li><a href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i>
+                    {% trans "No configurations found. Click 'Add Configuration' to create one." %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-delete-config" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">{% trans "Delete Configuration" %}</h4>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "The configuration will be removed. Do you want to continue?" %}</p>
+            </div>
+            <div class="modal-footer">
+                <button id="button-delete-config-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="button-delete-config-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+$('#menu-manage-plugins').addClass("active");
+$('#submenu-mediadisplay').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+    var table = $('#configs-table').DataTable({
+        responsive: true,
+        language: {
+            processing: '{% trans "Processing request..." %}',
+            search: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+            lengthMenu: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+            info: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+            infoEmpty: '{% trans "Showing from 0 to 0 of 0 records" %}',
+            infoFiltered: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+            infoPostFix: "",
+            loadingRecords: '{% trans "Loading..." %}',
+            zeroRecords: '{% trans "No records available" %}',
+            emptyTable: '{% trans "No records available" %}',
+            paginate: {
+                first: '{% trans "First" %}',
+                previous: '{% trans "Previous" %}',
+                next: '{% trans "Next" %}',
+                last: '{% trans "Last" %}'
+            },
+            aria: {
+                sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+                sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+            }
+        },
+        "columnDefs": [{
+            "targets": -1,
+            "data": null,
+            "defaultContent": '<button type="button" name="button-delete-config" data-toggle="modal" data-target="#modal-delete-config" data-placement="bottom" title="' + '{% trans "Delete configuration" %}' + '" class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>'
+        },{
+            "targets": -2,
+            "data": null,
+            "defaultContent": '<button type="button" name="button-update-config" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update configuration" %}' + '" class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button>'
+        }],
+        "dom": 'T<"clear">lfrtip',
+        "lengthMenu": [[10, -1], [10, "Todos"]],
+        "bLengthChange": true
+    });
+     
+    $('#configs-table tbody').on('click', 'button', function (){
+        var row = table.row($(this).parents('tr'));
+        var data = row.data();     
+        if (this.name == "button-update-config") {
+            updateConfig(data);
+        } else if (this.name == "button-delete-config"){
+            deleteConfig(data, row);   
+        }
+    });
+    
+    $('#button-add-config').click( function() {
+        location.href = '{% url "mediadisplay_config_add" %}';
+    });
+
+    function updateConfig(data){			
+        location.href = '{% url "mediadisplay_config_edit" 0 %}'.replace('0', data[0]);
+    }
+
+    function deleteConfig(data, row){
+        $('#button-delete-config-accept').click( function() {
+            $.ajax({
+                type: 'POST',
+                async: false,
+                url: '{% url "mediadisplay_config_delete" 0 %}'.replace('0', data[0]),
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                success:function(response){
+                    $('#modal-delete-config').modal('hide');
+                    location.reload();
+                },
+                error: function(){
+                    alert('{% trans "Error deleting configuration" %}');
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

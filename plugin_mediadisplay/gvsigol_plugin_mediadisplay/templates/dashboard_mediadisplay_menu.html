@@ -1,0 +1,22 @@
+{% load staticfiles %}
+{% load i18n %}
+{% if user.is_superuser %}
+<script>
+if ($("#menu-manage-plugins" ).length){
+	$("#menu-manage-plugins ul.treeview-menu").append(
+	'<li id="submenu-mediadisplay">'+
+	'	<a href="/gvsigonline/mediadisplay/config/">'+
+	'		<i class="fa fa-camera"></i>{% trans "Media Display" %}'+
+	'	</a>'+
+	'</li>');
+}else{
+	$(".sidebar-menu").append(
+	'<li id="menu-manage-plugins" class="treeview"><a href="#">'+ 
+	'	<i class="fa fa-puzzle-piece" aria-hidden="true"></i><span>{% trans "Plugins" %}</span> <i class="fa fa-angle-left pull-right"></i></a>'+
+	'	<ul class="treeview-menu">'+
+	'		<li id="submenu-mediadisplay"><a href="/gvsigonline/mediadisplay/config/"><i class="fa fa-camera"></i>{% trans "Media Display" %}</a></li>'+
+	'	</ul>'+
+	'</li>');
+}
+</script>
+{% endif %}
