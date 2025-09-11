@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% trans "Media Display Configurations" %}{% endblock %}
+{% block title %}{% trans "Media display configurations" %}{% endblock %}
 
 {% block content %}
 {% if messages %}
@@ -15,9 +15,9 @@
     <div class="col-md-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">{% trans "Media Display Configurations" %}</h3>
+                <h3 class="box-title">{% trans "Media display configurations" %}</h3>
                 <div class="box-tools pull-right">
-                    <button id="button-add-config" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add Configuration" %}</button>
+                    <button id="button-add-config" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add configuration" %}</button>
                 </div>
             </div>
             <div class="box-body">
@@ -74,7 +74,7 @@
                 {% else %}
                 <div class="alert alert-info">
                     <i class="fa fa-info-circle"></i>
-                    {% trans "No configurations found. Click 'Add Configuration' to create one." %}
+                    {% trans "No configurations found. Click 'Add configuration' to create one." %}
                 </div>
                 {% endif %}
             </div>
@@ -89,7 +89,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">{% trans "Delete Configuration" %}</h4>
+                <h4 class="modal-title" id="myModalLabel">{% trans "Delete configuration" %}</h4>
             </div>
             <div class="modal-body">
                 <p>{% trans "The configuration will be removed. Do you want to continue?" %}</p>
@@ -137,11 +137,11 @@ $(document).ready(function() {
         "columnDefs": [{
             "targets": -1,
             "data": null,
-            "defaultContent": '<button type="button" name="button-delete-config" data-toggle="modal" data-target="#modal-delete-config" data-placement="bottom" title="' + '{% trans "Delete configuration" %}' + '" class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>'
+            "defaultContent": '<button type="button" name="button-delete-config" data-toggle="modal" data-target="#modal-delete-config" data-placement="bottom" title="' + gettext('Delete configuration') + '" class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>'
         },{
             "targets": -2,
             "data": null,
-            "defaultContent": '<button type="button" name="button-update-config" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update configuration" %}' + '" class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button>'
+            "defaultContent": '<button type="button" name="button-update-config" data-toggle="tooltip" data-placement="bottom" title="' + gettext('Update configuration') + '" class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button>'
         }],
         "dom": 'T<"clear">lfrtip',
         "lengthMenu": [[10, -1], [10, "Todos"]],
@@ -180,7 +180,7 @@ $(document).ready(function() {
                     location.reload();
                 },
                 error: function(){
-                    alert('{% trans "Error deleting configuration" %}');
+                    alert(gettext('Error deleting configuration'));
                 }
             });
         });

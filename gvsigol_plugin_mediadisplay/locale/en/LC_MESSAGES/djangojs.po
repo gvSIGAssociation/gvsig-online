@@ -15,38 +15,68 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
 
-#: static/js/lib/_trans.gvsigol.js:2
-msgid "Ficha espectáculo piroténico"
+msgid "Select a layer..."
 msgstr ""
 
-#: static/js/lib/_trans.gvsigol.js:3
-msgid "Error loading samplemenubutton plugin"
+msgid "Please select an order field"
 msgstr ""
 
-#~ msgid "AutoScale"
-#~ msgstr "Auto Scale"
+msgid "Please select at least one media field"
+msgstr ""
 
-#~ msgid "legalwarning"
-#~ msgstr ""
-#~ "All the cartographic contents of this web and of the services that it "
-#~ "provides are property of this institution.The institution is not "
-#~ "responsible for the information that can be obtained through links to "
-#~ "external systems."
+msgid "Please select a project"
+msgstr ""
 
-#~ msgid "Format"
-#~ msgstr "Format"
+msgid "Please select a layer"
+msgstr ""
 
-#~ msgid "Resolution"
-#~ msgstr "Resolution"
+msgid "Please configure at least one layer"
+msgstr ""
 
-#~ msgid "Rotation"
-#~ msgstr "Rotación"
+msgid "No layers available for multimedia configuration"
+msgstr ""
 
-#~ msgid "Cancel"
-#~ msgstr "Cancel"
+msgid "Select order field..."
+msgstr ""
+
+msgid "Select media fields..."
+msgstr ""
+
+msgid "No layers configured yet"
+msgstr ""
+
+msgid "Order"
+msgstr ""
+
+msgid "Media fields"
+msgstr ""
+
+msgid "Are you sure you want to delete this layer configuration?"
+msgstr ""
+
+msgid "No fields available"
+msgstr ""
+
+msgid "Delete configuration"
+msgstr ""
+
+msgid "Update configuration"
+msgstr ""
+
+msgid "Error deleting configuration"
+msgstr ""
+
+msgid "No more layers available to configure"
+msgstr ""

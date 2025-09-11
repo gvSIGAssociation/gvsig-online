@@ -2,19 +2,19 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% trans "Delete Media Display Configuration" %}{% endblock %}
+{% block title %}{% trans "Delete configuration" %}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">{% trans "Delete Configuration" %}</h3>
+                <h3 class="box-title">{% trans "Delete configuration" %}</h3>
             </div>
             <div class="box-body">
                 <div class="alert alert-danger">
                     <i class="fa fa-warning"></i>
-                    {% trans "Are you sure you want to delete the Media Display configuration for project" %} 
+                    {% trans "Are you sure you want to delete the media display configuration for project" %} 
                     <strong>{{ config.project.name }}</strong>?
                 </div>
                 
@@ -22,7 +22,7 @@
                     <form method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger">
-                            <i class="fa fa-trash"></i> {% trans "Delete Configuration" %}
+                            <i class="fa fa-trash"></i> {% trans "Delete" %}
                         </button>
                         <a href="{% url 'mediadisplay_config_list' %}" class="btn btn-default">
                             <i class="fa fa-arrow-left"></i> {% trans "Cancel" %}
