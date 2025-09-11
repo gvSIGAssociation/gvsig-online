@@ -17,11 +17,3 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: static/js/lib/_trans.gvsigol.js:2
-msgid "Ficha espectáculo piroténico"
-msgstr ""
-
-#: static/js/lib/_trans.gvsigol.js:3
-msgid "Error loading samplemenubutton plugin"
-msgstr ""
