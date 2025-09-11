@@ -111,8 +111,6 @@
 
 {% block extra-scripts %}
 <script>
-console.log('Script ejecutándose...');
-console.log('jQuery disponible:', typeof $, typeof jQuery);
 
 // Esperar a que jQuery esté disponible
 function waitForJQuery(callback) {
@@ -126,17 +124,14 @@ function waitForJQuery(callback) {
 }
 
 waitForJQuery(function() {
-    console.log('jQuery cargado correctamente');
     
     var currentLayerId = null;
     var configuredLayers = {};
     
     $(document).ready(function() {
-        console.log('Documento listo');
         
         $('#project_id').change(function() {
             var projectId = $(this).val();
-            console.log('Proyecto seleccionado:', projectId);
             if (projectId) {
                 loadProjectLayers(projectId);
             } else {
@@ -221,16 +216,13 @@ waitForJQuery(function() {
                 }).appendTo('#config-form');
             });
             
-            console.log('Enviando configuraciones de capas:', configuredLayers);
         });
         
         function loadProjectLayers(projectId) {
-            console.log('Cargando capas para proyecto:', projectId);
             $.ajax({
                 url: '/gvsigonline/mediadisplay/api/project-layers/',
                 data: { 'project_id': projectId },
                 success: function(response) {
-                    console.log('Respuesta del servidor:', response);
                     var select = $('#layer_id');
 
                     if (response.layers && response.layers.length > 0) {
@@ -238,26 +230,21 @@ waitForJQuery(function() {
                         response.layers.forEach(function(layer) {
                             select.append('<option value="' + layer.id + '">' + (layer.title || layer.name) + '</option>');
                         });
-                        console.log('Capas cargadas:', response.layers.length);
                     } else {
                         select.empty().html('<option value="" disabled>{% trans "No layers available for multimedia configuration" %}</option>');
-                        console.log('No se encontraron capas');
                     }
                 },
                 error: function(xhr) {
-                    console.log('Error en AJAX:', xhr);
                     alert('Error cargando capas: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText));
                 }
             });
         }
         
         function loadLayerFields(layerId) {
-            console.log('Cargando campos para capa:', layerId);
             $.ajax({
                 url: '/gvsigonline/mediadisplay/api/layer-fields/',
                 data: { 'layer_id': layerId },
                 success: function(response) {
-                    console.log('Campos de la capa:', response);
                     
                     $('#order-field').empty().html('<option value="">{% trans "Select order field..." %}</option>');
                     $('#media-fields').empty().html('<option value="">{% trans "Select media fields..." %}</option>');
@@ -278,7 +265,6 @@ waitForJQuery(function() {
                     }
                 },
                 error: function(xhr) {
-                    console.log('Error en AJAX:', xhr);
                     alert('Error cargando campos: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText));
                 }
             });

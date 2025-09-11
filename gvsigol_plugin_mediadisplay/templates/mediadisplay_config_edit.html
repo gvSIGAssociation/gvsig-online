@@ -134,8 +134,6 @@
 
 {% block extra-scripts %}
 <script>
-console.log('Script ejecutándose...');
-console.log('jQuery disponible:', typeof $, typeof jQuery);
 
 // Esperar a que jQuery esté disponible
 function waitForJQuery(callback) {
@@ -149,7 +147,6 @@ function waitForJQuery(callback) {
 }
 
 waitForJQuery(function() {
-    console.log('jQuery cargado correctamente');
     
     var currentLayerId = null;
     var configuredLayers = {};
@@ -169,8 +166,6 @@ waitForJQuery(function() {
     {% endfor %}
     
     $(document).ready(function() {
-        console.log('Documento listo');
-        console.log('Configuraciones cargadas:', configuredLayers);
         
         // Mostrar/ocultar selector de capas
         $('#add-more-layers-btn').click(function() {
@@ -269,16 +264,13 @@ waitForJQuery(function() {
                 }).appendTo('#config-form');
             });
             
-            console.log('Enviando configuraciones de capas:', configuredLayers);
         });
         
         function loadLayerFields(layerId) {
-            console.log('Cargando campos para capa:', layerId);
             $.ajax({
                 url: '/gvsigonline/mediadisplay/api/layer-fields/',
                 data: { 'layer_id': layerId },
                 success: function(response) {
-                    console.log('Campos de la capa:', response);
                     
                     $('#order-field').empty().html('<option value="">{% trans "Select order field..." %}</option>');
                     $('#media-fields').empty().html('<option value="">{% trans "Select media fields..." %}</option>');
@@ -297,11 +289,9 @@ waitForJQuery(function() {
                     } else {
                         $('#order-field').html('<option value="" disabled>{% trans "No fields available" %}</option>');
                         $('#media-fields').html('<option value="" disabled>{% trans "No fields available" %}</option>');
-                        console.log('No se encontraron campos');
                     }
                 },
                 error: function(xhr) {
-                    console.log('Error en AJAX:', xhr);
                     alert('Error cargando campos: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText));
                 }
             });
