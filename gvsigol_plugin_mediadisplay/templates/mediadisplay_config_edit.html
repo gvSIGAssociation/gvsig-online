@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% trans "Edit Media Display Configuration" %}{% endblock %}
+{% block title %}{% trans "Update configuration" %}{% endblock %}
 
 {% block content %}
 {% if messages %}
@@ -16,7 +16,7 @@
         <div class="box">
             <form id="config-form" role="form" method="post" action="{% url 'mediadisplay_config_edit' config.id %}">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{% trans "Edit Configuration" %} - {{ config.project.name }}</h3>
+                    <h3 class="box-title">{% trans "Update configuration" %} - {{ config.project.name }}</h3>
                     <div class="box-tools pull-right">
                         <button id="submit-button" type="submit" class="btn btn-default btn-sm">
                             <i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}
@@ -31,7 +31,7 @@
                         <div class="col-md-12 form-group">
                             <div class="box box-default">
                                 <div class="box-header with-border">
-                                    <span class="text" style="font-weight: bold;">{% trans "Configured Layers" %}</span>
+                                    <span class="text" style="font-weight: bold;">{% trans "Configured layers" %}</span>
                                 </div>
                                 <div class="box-body" id="configured-layers-list" style="min-height: 100px;">
                                     {% if layers %}
@@ -41,8 +41,8 @@
                                                 <div class="layer-item">
                                                     <div class="layer-info">
                                                         <strong>{{ layer.title|default:layer.name }}</strong><br>
-                                                        <small>{% trans "Order:" %} {{ layer.config.order_field|default:"Not configured" }}</small><br>
-                                                        <small>{% trans "Media fields:" %} {{ layer.config.media_fields|join:", "|default:"Not configured" }}</small>
+                                                        <small>{% trans "Order field" %} : {{ layer.config.order_field|default:"Not configured" }}</small><br>
+                                                        <small>{% trans "Media fields" %} : {{ layer.config.media_fields|join:", "|default:"Not configured" }}</small>
                                                     </div>
                                                     <div class="layer-actions">
                                                         <button type="button" class="btn btn-success edit-configured-layer" data-layer-id="{{ layer.id }}">
@@ -66,14 +66,14 @@
                     <div class="row">
                         <div class="col-md-12 form-group">
                             <button type="button" id="add-more-layers-btn" class="btn btn-default btn-sm">
-                                <i class="fa fa-plus margin-r-5"></i> {% trans "Configure More Layers" %}
+                                <i class="fa fa-plus margin-r-5"></i> {% trans "Configure more layers" %}
                             </button>
                         </div>
                     </div>
                     
                     <div class="row" id="layer-selector" style="display: none;">
                         <div class="col-md-12 form-group">
-                            <label for="layer_id">{% trans "Select Layer:" %}</label>
+                            <label for="layer_id">{% trans "Layer" %}</label>
                             <select name="layer_id" id="layer_id" class="form-control">
                                 <option value="">{% trans "Select a layer..." %}</option>
                                 {% for layer in layers %}
@@ -88,7 +88,7 @@
                     <div class="row" id="configure-fields-row" style="display: none;">
                         <div class="col-md-12 form-group">
                             <button type="button" id="configure-layer-btn" class="btn btn-primary" disabled>
-                                <i class="fa fa-cog"></i> {% trans "Configure Layer Fields" %}
+                                <i class="fa fa-cog"></i> {% trans "Configure layer fields" %}
                             </button>
                         </div>
                     </div>
@@ -102,18 +102,18 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">{% trans "Configure Layer Fields" %}</h4>
+                <h4 class="modal-title">{% trans "Configure layer fields" %}</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="order-field">{% trans "Order Field:" %}</label>
+                    <label for="order-field">{% trans "Order field" %}</label>
                     <select id="order-field" class="form-control">
                         <option value="">{% trans "Select order field..." %}</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="media-fields">{% trans "Media Fields:" %}</label>
+                    <label for="media-fields">{% trans "Media fields" %}</label>
                     <select id="media-fields" class="form-control" multiple style="height: 150px;">
                         <option value="">{% trans "Select media fields..." %}</option>
                     </select>
@@ -122,7 +122,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button type="button" class="btn btn-primary" id="save-layer-config">{% trans "Save Configuration" %}</button>
+                <button type="button" class="btn btn-primary" id="save-layer-config">{% trans "Save" %}</button>
             </div>
         </div>
     </div>
