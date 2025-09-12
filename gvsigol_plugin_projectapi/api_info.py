@@ -282,6 +282,30 @@ class CategoryView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, pk):
+        try:
+            category = Category.objects.get(pk=pk)
+            
+            if 'title' in request.data:
+                category.title = request.data['title']
+                category.save()
+                
+                serializer = CategorySerializer(category)
+                return Response(serializer.data)
+            else:
+                return Response({'error': 'No fields to update'}, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Category.DoesNotExist:
+            return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, pk):
+        try:
+            category = Category.objects.get(pk=pk)
+            category.delete()
+            return Response({'message': 'Category deleted'}, status=status.HTTP_204_NO_CONTENT)
+        except Category.DoesNotExist:
+            return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class FilterView(APIView):
     def get_permissions(self):
