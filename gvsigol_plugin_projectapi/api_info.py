@@ -302,8 +302,24 @@ class CategoryView(APIView):
     def delete(self, request, pk):
         try:
             category = Category.objects.get(pk=pk)
+            
+            markers_to_delete = Marker.objects.filter(category=category)
+            markers_count = markers_to_delete.count()
+            
+            if markers_count > 0:
+                markers_to_delete.delete()
+            
             category.delete()
-            return Response({'message': 'Category deleted'}, status=status.HTTP_204_NO_CONTENT)
+            
+            if markers_count > 0:
+                message = f'Category and {markers_count} associated markers deleted successfully'
+            else:
+                message = 'Category deleted successfully (no associated markers)'
+            
+            return Response({
+                'message': message
+            }, status=status.HTTP_204_NO_CONTENT)
+            
         except Category.DoesNotExist:
             return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
 
