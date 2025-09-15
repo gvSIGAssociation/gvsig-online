@@ -45,7 +45,7 @@
 							<td><input disabled type="checkbox"/></td>
 							{% endif %}
 							<td>
-								{% if USE_SPA_PROJECT_LINKS %}
+								{% if SHOW_SPA_PROJECT_LINKS %}
 								<a title="SPA" target="_blank" href="{{frontend_base_url}}/viewer/{{project.id}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: green"></i></a>
 								{% endif %}
 								<a id="load_project_jquery" title="JQuery" target="_blank" href="/gvsigonline/core/load/{{project.name}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: brown"></i></a>
