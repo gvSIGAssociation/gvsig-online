@@ -92,7 +92,8 @@ function configure() {
 		CRS_FROM_SETTINGS="False"
 	fi
 	grep -rl "##CRS_FROM_SETTINGS##"  | xargs sed -i "s/##CRS_FROM_SETTINGS##/$CRS_FROM_SETTINGS/g"
-	grep -rl "##SUPPORTED_CRS##"  | xargs sed -i "s/##SUPPORTED_CRS##/$SUPPORTED_CRS/g" 		
+	echo "INFO: SUPPORTED_CRS: " $SUPPORTED_CRS
+	grep -rl "##SUPPORTED_CRS##"  | xargs sed -i "s/##SUPPORTED_CRS##/$SUPPORTED_CRS/g"
 																
 	echo "INFO: AUTH_WITH_REMOTE_USER"																
 	if [ -z $AUTH_WITH_REMOTE_USER ]; then
@@ -378,7 +379,24 @@ function configure() {
 	fi
 	grep -rl "##DATA_UPLOAD_MAX_MEMORY_SIZE##"  | xargs sed -i "s/##DATA_UPLOAD_MAX_MEMORY_SIZE##/$DATA_UPLOAD_MAX_MEMORY_SIZE/g"
 
-
+	if [ -z $GEOSERVER_USE_KEEPALIVE ]; then
+		echo "WARNING: GEOSERVER_USE_KEEPALIVE is not defined, using 'True'"
+		GEOSERVER_USE_KEEPALIVE="True"
+	fi
+	grep -rl "##GEOSERVER_USE_KEEPALIVE##"  | xargs sed -i "s/##GEOSERVER_USE_KEEPALIVE##/$GEOSERVER_USE_KEEPALIVE/g"
+	echo "INFO: FALLBACK_VIEWER_UI"
+	if [ -z $FALLBACK_VIEWER_UI ]; then
+		echo "WARNING: FALLBACK_VIEWER_UI is not defined, using default value 'bootstrap_ui'"					
+		FALLBACK_VIEWER_UI="bootstrap_ui"
+	fi
+	grep -rl "##FALLBACK_VIEWER_UI##"  | xargs sed -i "s/##FALLBACK_VIEWER_UI##/$FALLBACK_VIEWER_UI/g"
+	echo "INFO: DEFAULT_VIEWER_UI"
+	if [ -z $DEFAULT_VIEWER_UI ]; then
+		echo "WARNING: DEFAULT_VIEWER_UI is not defined, using default value 'react_spa_ui'"					
+		DEFAULT_VIEWER_UI="react_spa_ui"
+	fi
+	grep -rl "##DEFAULT_VIEWER_UI##"  | xargs sed -i "s/##DEFAULT_VIEWER_UI##/$DEFAULT_VIEWER_UI/g"
+	
     ##################################
 	# SPA frontend related variables #
 	if [ -z $FRONTEND_BASE_URL ]; then
@@ -401,12 +419,6 @@ function configure() {
 		LANGUAGE_CODE="es"
 	fi
 	grep -l "##LANGUAGE_CODE##" gvsigol/settings_tpl.py | xargs sed -i "s ##LANGUAGE_CODE## $LANGUAGE_CODE g"
-
-	if [ -z $GEOSERVER_USE_KEEPALIVE ]; then
-		echo "WARNING: GEOSERVER_USE_KEEPALIVE is not defined, using 'True'"
-		GEOSERVER_USE_KEEPALIVE="True"
-	fi
-	grep -rl "##GEOSERVER_USE_KEEPALIVE##"  | xargs sed -i "s/##GEOSERVER_USE_KEEPALIVE##/$GEOSERVER_USE_KEEPALIVE/g"
 
 }
 
