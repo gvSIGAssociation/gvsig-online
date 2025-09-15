@@ -2,7 +2,7 @@ from django.db import models
 from gvsigol import settings
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup, Layer
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext_noop as _
 from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.contrib.auth.models import User
@@ -22,6 +22,14 @@ def get_default_application_image():
     return settings.STATIC_URL + 'img/no_project.png'
 
 class Project(models.Model):
+    REACT_SPA_UI='react_spa_ui'
+    REACT_SPA_UI_TITLE=_('Actual (React)')
+    BOOTSTRAP_UI = 'bootstrap_ui'
+    BOOTSTRAP_UI_TITLE=_('Classic - (Bootstrap)')
+    VIEWER_UI_CHOICES = [
+        (REACT_SPA_UI, REACT_SPA_UI_TITLE),
+        (BOOTSTRAP_UI, BOOTSTRAP_UI_TITLE),
+    ]
     name = models.CharField(max_length=100, unique=True)
     title = models.CharField(max_length=100, null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
@@ -52,6 +60,7 @@ class Project(models.Model):
     custom_overview = models.BooleanField(default=False)
     layer_overview = models.CharField(max_length=250, null=True, blank=True, default=None)
     viewer_default_crs = models.CharField(max_length=250, null=True, blank=True, default='EPSG:3857')
+    viewer_preferred_ui = models.TextField(choices=VIEWER_UI_CHOICES, blank=True, default="")
     
     def __str__(self):
         return self.name + ' - ' + self.description
