@@ -95,6 +95,8 @@ env = environ.Env(
     EXTRA_MIDDLEWARE = (list,[]),
     GVSIGOL_CUSTOMER_NAME = (str,'gvsig'),
     VIEWER_DEFAULT_CRS=(str,'EPSG:4326'),
+    FALLBACK_VIEWER_UI=(str,'bootstrap_ui'), # fallback for existing projects
+    DEFAULT_VIEWER_UI=(str,'react_spa_ui'), # default for new projects
     SUPPORTED_CRS =(list,["3857", "4326"]),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
@@ -279,7 +281,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 try:
