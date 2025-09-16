@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-24 23:59+0100\n"
-"PO-Revision-Date: 2023-10-16 13:00+0200\n"
+"POT-Creation-Date: 2025-09-15 15:40+0200\n"
+"PO-Revision-Date: 2025-09-15 16:15+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_ES\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: es_ES\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: gvsigol_core/forms.py:17
 msgid "Clone project and layer permissions"
@@ -76,21 +76,29 @@ msgstr "El servidor no existe"
 msgid "SRS"
 msgstr ""
 
-#: gvsigol_core/settings.py:30
+#: gvsigol_core/models.py:26
+msgid "Current (React)"
+msgstr "Actual (React)"
+
+#: gvsigol_core/models.py:28
+msgid "Classic (Bootstrap)"
+msgstr "Clásica (Bootstrap)"
+
+#: gvsigol_core/settings.py:32
 msgid "Project requests"
 msgstr "Peticiones de proyecto"
 
-#: gvsigol_core/settings.py:31
+#: gvsigol_core/settings.py:33
 #: gvsigol_core/templates/dashboard_core_menu.html:5
 #: gvsigol_core/templates/dashboard_core_menu.html:8
 msgid "Projects"
 msgstr "Proyectos"
 
-#: gvsigol_core/settings.py:39
+#: gvsigol_core/settings.py:41
 msgid "Project requests by user"
 msgstr "Peticiones de proyecto por usuario"
 
-#: gvsigol_core/settings.py:40
+#: gvsigol_core/settings.py:42
 msgid "Users"
 msgstr "Usuarios"
 
@@ -272,8 +280,8 @@ msgid "Application will be removed, Do you want continue?"
 msgstr "La aplicación será eliminada, ¿Desea continuar?"
 
 #: gvsigol_core/templates/application_list.html:71
-#: gvsigol_core/templates/project_add.html:386
-#: gvsigol_core/templates/project_add.html:412
+#: gvsigol_core/templates/project_add.html:396
+#: gvsigol_core/templates/project_add.html:422
 #: gvsigol_core/templates/project_list.html:82
 #: gvsigol_core/templates/project_list.html:133
 #: gvsigol_core/templates/project_update.html:565
@@ -285,8 +293,8 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #: gvsigol_core/templates/application_list.html:72
-#: gvsigol_core/templates/project_add.html:387
-#: gvsigol_core/templates/project_add.html:413
+#: gvsigol_core/templates/project_add.html:397
+#: gvsigol_core/templates/project_add.html:423
 #: gvsigol_core/templates/project_list.html:83
 #: gvsigol_core/templates/project_update.html:566
 #: gvsigol_core/templates/project_update.html:592
@@ -401,7 +409,7 @@ msgid "Update"
 msgstr "Actualizar"
 
 #: gvsigol_core/templates/application_update.html:113
-#: gvsigol_core/templates/project_add.html:323
+#: gvsigol_core/templates/project_add.html:333
 #: gvsigol_core/templates/project_update.html:376
 msgid "Extend to layers"
 msgstr "Extender a las capas"
@@ -456,16 +464,28 @@ msgid "User Manual - Classic Map Viewer"
 msgstr "Manual de Usuario - Visor de Mapas Clásico"
 
 #: gvsigol_core/templates/documentation.html:62
-msgid "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer."
-msgstr "Guía completa para explorar y utilizar las funcionalidades del visor de mapas basado en JQuery."
+msgid ""
+"Comprehensive guide to explore and use the functionalities of the JQuery-"
+"based map viewer."
+msgstr ""
+"Guía completa para explorar y utilizar las funcionalidades del visor de "
+"mapas basado en JQuery."
 
 #: gvsigol_core/templates/documentation.html:72
 msgid "User Manual - New Front Map Viewer"
 msgstr "Manual de Usuario - Visor de Mapas Nuevo Front"
 
 #: gvsigol_core/templates/documentation.html:73
-msgid "Learn to navigate and leverage all features of the new map viewer with a modern interface."
-msgstr "Aprende a navegar y aprovechar todas las características del nuevo visor de mapas con interfaz moderna."
+msgid ""
+"Learn to navigate and leverage all features of the new map viewer with a "
+"modern interface."
+msgstr ""
+"Aprende a navegar y aprovechar todas las características del nuevo visor de "
+"mapas con interfaz moderna."
+
+#: gvsigol_core/templates/documentation.html:85
+msgid "Introduction and concepts"
+msgstr ""
 
 #: gvsigol_core/templates/documentation.html:86
 msgid ""
@@ -480,8 +500,12 @@ msgid "Administration Guide"
 msgstr "Guía de administración"
 
 #: gvsigol_core/templates/documentation.html:97
-msgid "Manual for administrators: manage users, groups, services, symbology, and projects on the platform."
-msgstr "Manual para administradores: gestiona usuarios, grupos, servicios, simbología y proyectos de la plataforma."
+msgid ""
+"Manual for administrators: manage users, groups, services, symbology, and "
+"projects on the platform."
+msgstr ""
+"Manual para administradores: gestiona usuarios, grupos, servicios, "
+"simbología y proyectos de la plataforma."
 
 #: gvsigol_core/templates/documentation.html:120
 msgid "Mobile application"
@@ -714,105 +738,109 @@ msgstr "por defecto"
 msgid "Show project icon in TOC"
 msgstr "Mostrar icono del proyecto en el TOC"
 
-#: gvsigol_core/templates/project_add.html:162
+#: gvsigol_core/templates/project_add.html:159
+msgid "Viewer technology"
+msgstr "Tecnología del visor"
+
+#: gvsigol_core/templates/project_add.html:172
 #: gvsigol_core/templates/project_update.html:198
 msgid "Project tags"
 msgstr "Etiquetas de proyecto"
 
-#: gvsigol_core/templates/project_add.html:186
+#: gvsigol_core/templates/project_add.html:196
 #: gvsigol_core/templates/project_update.html:221
 msgid "Add layer group"
 msgstr "Añadir grupo de capas"
 
-#: gvsigol_core/templates/project_add.html:187
+#: gvsigol_core/templates/project_add.html:197
 #: gvsigol_core/templates/project_update.html:222
 msgid "Search layer group..."
 msgstr "Buscar grupo de capas..."
 
-#: gvsigol_core/templates/project_add.html:201
+#: gvsigol_core/templates/project_add.html:211
 #: gvsigol_core/templates/project_update.html:237
 #: gvsigol_core/templates/project_update.html:239
 msgid "Base group"
 msgstr "Grupos base"
 
-#: gvsigol_core/templates/project_add.html:206
+#: gvsigol_core/templates/project_add.html:216
 #: gvsigol_core/templates/project_update.html:246
 #: gvsigol_core/templates/project_update.html:248
 msgid "Add"
 msgstr "Añadir"
 
-#: gvsigol_core/templates/project_add.html:223
+#: gvsigol_core/templates/project_add.html:233
 #: gvsigol_core/templates/project_update.html:271
 #: gvsigol_core/templates/project_update.html:273
 msgid "Base by default"
 msgstr "Base por defecto"
 
-#: gvsigol_core/templates/project_add.html:224
+#: gvsigol_core/templates/project_add.html:234
 #: gvsigol_core/templates/project_update.html:276
 msgid "Overview"
 msgstr "Localizador"
 
-#: gvsigol_core/templates/project_add.html:271
+#: gvsigol_core/templates/project_add.html:281
 #: gvsigol_core/templates/project_update.html:324
 msgid "Search tool..."
 msgstr "Herramienta de búsqueda..."
 
-#: gvsigol_core/templates/project_add.html:285
-#: gvsigol_core/templates/project_add.html:287
+#: gvsigol_core/templates/project_add.html:295
+#: gvsigol_core/templates/project_add.html:297
 #: gvsigol_core/templates/project_update.html:338
 #: gvsigol_core/templates/project_update.html:340
 msgid "Assign tool"
 msgstr "Asignar herramienta"
 
-#: gvsigol_core/templates/project_add.html:309
+#: gvsigol_core/templates/project_add.html:319
 #: gvsigol_core/templates/project_update.html:362
 msgid "Project will be readable by everyone if public"
 msgstr "El proyecto será accesible a todo el mundo si es público"
 
-#: gvsigol_core/templates/project_add.html:310
+#: gvsigol_core/templates/project_add.html:320
 #: gvsigol_core/templates/project_list.html:27
 #: gvsigol_core/templates/project_update.html:363
 msgid "Is public?"
 msgstr "¿Es público?"
 
-#: gvsigol_core/templates/project_add.html:316
+#: gvsigol_core/templates/project_add.html:326
 #: gvsigol_core/templates/project_update.html:369
 msgid "Set project permissions:"
 msgstr "Establecer permisos de proyecto:"
 
-#: gvsigol_core/templates/project_add.html:320
-#: gvsigol_core/templates/project_add.html:327
+#: gvsigol_core/templates/project_add.html:330
+#: gvsigol_core/templates/project_add.html:337
 #: gvsigol_core/templates/project_update.html:373
 #: gvsigol_core/templates/project_update.html:380
 msgid "Search role..."
 msgstr "Buscar rol..."
 
-#: gvsigol_core/templates/project_add.html:345
+#: gvsigol_core/templates/project_add.html:355
 #: gvsigol_core/templates/project_update.html:398
 msgid "Permission to access"
 msgstr "Permiso para acceder"
 
-#: gvsigol_core/templates/project_add.html:349
+#: gvsigol_core/templates/project_add.html:359
 #: gvsigol_core/templates/project_update.html:402
 msgid "Permission to manage"
 msgstr "Permiso para gestionar"
 
-#: gvsigol_core/templates/project_add.html:380
+#: gvsigol_core/templates/project_add.html:390
 #: gvsigol_core/templates/project_update.html:559
 msgid "Create new layer group"
 msgstr "Crear nuevo grupo de capas"
 
-#: gvsigol_core/templates/project_add.html:383
+#: gvsigol_core/templates/project_add.html:393
 #: gvsigol_core/templates/project_update.html:562
 msgid "The project has to be saved first, Do you want continue?"
 msgstr "Es necesario guardar el proyecto primero, ¿Desea continuar?"
 
-#: gvsigol_core/templates/project_add.html:400
+#: gvsigol_core/templates/project_add.html:410
 #: gvsigol_core/templates/project_update.html:579
 msgid "Extend project permissions to layers"
 msgstr "Extender los permisos de proyecto a las capas"
 
-#: gvsigol_core/templates/project_add.html:403
+#: gvsigol_core/templates/project_add.html:413
 #: gvsigol_core/templates/project_update.html:582
 msgid ""
 "This action will give the selected user groups permission to read all the "
@@ -821,7 +849,7 @@ msgstr ""
 "Esta acción dará a los grupos de usuarios seleccionados permisos para leer "
 "todas las capas incluidas en este proyecto. Notas:"
 
-#: gvsigol_core/templates/project_add.html:405
+#: gvsigol_core/templates/project_add.html:415
 #: gvsigol_core/templates/project_update.html:584
 msgid ""
 "If the project is public, all the layers assigned to the project will become "
@@ -830,7 +858,7 @@ msgstr ""
 "Si el proyecto es público, todas las capas asignadas al proyecto pasarán a "
 "ser públicas."
 
-#: gvsigol_core/templates/project_add.html:406
+#: gvsigol_core/templates/project_add.html:416
 #: gvsigol_core/templates/project_update.html:585
 msgid ""
 "This action will operate on layers, layer groups and user groups currently "
@@ -839,23 +867,23 @@ msgstr ""
 "Esta acción operará en las capas, grupos de capas y grupos de usuarios "
 "seleccionados actualmente, incluso si no se han guardado."
 
-#: gvsigol_core/templates/project_add.html:407
+#: gvsigol_core/templates/project_add.html:417
 #: gvsigol_core/templates/project_update.html:586
 msgid "Additional permissions existing on the layer will not be removed."
 msgstr "Los permisos adicionales que existan en la capa no se eliminarán."
 
-#: gvsigol_core/templates/project_add.html:408
+#: gvsigol_core/templates/project_add.html:418
 #: gvsigol_core/templates/project_update.html:587
 msgid "Public layers will remain public."
 msgstr "Las capas públicas seguirán siendo públicas."
 
-#: gvsigol_core/templates/project_add.html:1039
+#: gvsigol_core/templates/project_add.html:1049
 #: gvsigol_core/templates/project_update.html:1384
 msgid "Success: Project permissions were applied to layers."
 msgstr "Éxito: Los permisos de proyecto se aplicaron a las capas."
 
-#: gvsigol_core/templates/project_add.html:1043
-#: gvsigol_core/templates/project_add.html:1049
+#: gvsigol_core/templates/project_add.html:1053
+#: gvsigol_core/templates/project_add.html:1059
 #: gvsigol_core/templates/project_update.html:1388
 #: gvsigol_core/templates/project_update.html:1394
 msgid "Error: Permissions could not be extended to layers."
@@ -1169,75 +1197,75 @@ msgstr "Nombre"
 msgid "Last name"
 msgstr "Apellidos"
 
-#: gvsigol_core/utils.py:763
+#: gvsigol_core/utils.py:778
 msgid "Navigation history"
 msgstr "Historial de navegación"
 
-#: gvsigol_core/utils.py:764
+#: gvsigol_core/utils.py:779
 msgid "Browse the view forward and backward"
 msgstr "Navega por la vista hacia adelante y hacia atrás"
 
-#: gvsigol_core/utils.py:768
+#: gvsigol_core/utils.py:783
 msgid "Zoom tools"
 msgstr "Herramientas de zoom"
 
-#: gvsigol_core/utils.py:769
+#: gvsigol_core/utils.py:784
 msgid "Zoom in, zoom out, ..."
 msgstr "Ampliar zoom, reduzir zoom, ..."
 
-#: gvsigol_core/utils.py:773
+#: gvsigol_core/utils.py:788
 msgid "Feature info"
 msgstr "Herramienta de información"
 
-#: gvsigol_core/utils.py:774
+#: gvsigol_core/utils.py:789
 msgid "Map information at point"
 msgstr "Información del mapa en el punto"
 
-#: gvsigol_core/utils.py:778
+#: gvsigol_core/utils.py:793
 msgid "Measure tools"
 msgstr "Herramientas de medida"
 
-#: gvsigol_core/utils.py:779
+#: gvsigol_core/utils.py:794
 msgid "It allows to measure areas and distances"
 msgstr "Permite medir áreas y distancias"
 
-#: gvsigol_core/utils.py:783
+#: gvsigol_core/utils.py:798
 msgid "Search coordinates"
 msgstr "Buscar coordenadas"
 
-#: gvsigol_core/utils.py:784
+#: gvsigol_core/utils.py:799
 msgid "Center the map at given coordinates"
 msgstr "Centra el mapa en unas coordenadas dadas"
 
-#: gvsigol_core/utils.py:788
+#: gvsigol_core/utils.py:803
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenadas"
 
-#: gvsigol_core/utils.py:789
+#: gvsigol_core/utils.py:804
 msgid "Transform coordinates between different systems"
 msgstr "Transforma las coordenadas entre diferentes sistemas"
 
-#: gvsigol_core/utils.py:793
+#: gvsigol_core/utils.py:808
 msgid "Geolocation"
 msgstr "Geolocalización"
 
-#: gvsigol_core/utils.py:794
+#: gvsigol_core/utils.py:809
 msgid "Center the map in the current position"
 msgstr "Centra el mapa en la posición actual"
 
-#: gvsigol_core/utils.py:798
+#: gvsigol_core/utils.py:813
 msgid "Share view"
 msgstr "Compartir vista"
 
-#: gvsigol_core/utils.py:799
+#: gvsigol_core/utils.py:814
 msgid "Allows you to share the view in its current state"
 msgstr "Permite compartir la vista en su estado actual"
 
-#: gvsigol_core/utils.py:803
+#: gvsigol_core/utils.py:818
 msgid "Select feature"
 msgstr "Seleccionar elemento"
 
-#: gvsigol_core/utils.py:804
+#: gvsigol_core/utils.py:819
 msgid "Select features from current layers"
 msgstr "Seleccionar elementos de las capas actuales"
 
@@ -1259,35 +1287,35 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
-#: gvsigol_core/views.py:1462 gvsigol_core/views.py:1472
+#: gvsigol_core/views.py:1465 gvsigol_core/views.py:1475
 msgid " manual title"
 msgstr "título del manual"
 
-#: gvsigol_core/views.py:1463 gvsigol_core/views.py:1473
+#: gvsigol_core/views.py:1466 gvsigol_core/views.py:1476
 msgid " manual desc"
 msgstr "descripción del manual"
 
-#: gvsigol_core/views.py:1562 gvsigol_core/views.py:1564
+#: gvsigol_core/views.py:1565 gvsigol_core/views.py:1567
 msgid "Shared view"
 msgstr "Vista compartida"
 
-#: gvsigol_core/views.py:1565
+#: gvsigol_core/views.py:1568
 msgid "Link"
 msgstr "Enlace"
 
-#: gvsigol_core/views.py:1728 gvsigol_core/views.py:1752
+#: gvsigol_core/views.py:1731 gvsigol_core/views.py:1755
 msgid "Operation not allowed on project: "
 msgstr "Operación no permitida sobre el proyecto: "
 
-#: gvsigol_core/views.py:1747
+#: gvsigol_core/views.py:1750
 msgid "The project was successfully cloned."
 msgstr "El proyecto se clonó con éxito."
 
-#: gvsigol_core/views.py:1889
+#: gvsigol_core/views.py:1892
 msgid "You must enter an application name"
 msgstr "Debe introducir un nombre de aplicación"
 
-#: gvsigol_core/views.py:1893
+#: gvsigol_core/views.py:1896
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1298,7 +1326,7 @@ msgstr ""
 "con una letra o guion bajo (_). Los siguientes caracteres pueden ser letras, "
 "guion bajo o números"
 
-#: gvsigol_core/views.py:1897
+#: gvsigol_core/views.py:1900
 msgid "Application name already exists"
 msgstr "El nombre de la aplicación ya existe"
 

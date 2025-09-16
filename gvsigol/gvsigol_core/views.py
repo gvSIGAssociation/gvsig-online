@@ -233,7 +233,7 @@ def project_add(request):
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
-        
+        viewer_preferred_ui = request.POST.get('viewer_preferred_ui')
 
 
         is_public = False
@@ -358,7 +358,8 @@ def project_add(request):
             labels = labels_added,
             custom_overview = custom_overview,
             layer_overview = layer_overview,
-            viewer_default_crs = viewer_default_crs
+            viewer_default_crs = viewer_default_crs,
+            viewer_preferred_ui = viewer_preferred_ui
         )
         if expiration_date_utc is not None and expiration_date_utc != '':
             try:
@@ -434,7 +435,7 @@ def project_add(request):
         for l in settings.PRJ_LABELS:
             labels.append({'label': l, 'checked': ''})
 
-        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin, 'label_list': labels, 'form': form})
+        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin, 'label_list': labels, 'form': form, 'REACT_SPA_UI': Project.REACT_SPA_UI, 'BOOTSTRAP_UI': Project.BOOTSTRAP_UI})
 
 
 @login_required()
@@ -466,6 +467,7 @@ def project_update(request, pid):
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
+        viewer_preferred_ui = request.POST.get('viewer_preferred_ui')
 
         is_public = False
         if 'is_public' in request.POST:
@@ -558,6 +560,7 @@ def project_update(request, pid):
         project.custom_overview = custom_overview
         project.layer_overview = layer_overview
         project.viewer_default_crs = viewer_default_crs
+        project.viewer_preferred_ui = viewer_preferred_ui
 
         if expiration_date_utc is not None and expiration_date_utc != '':
             try:
@@ -731,7 +734,9 @@ def project_update(request, pid):
                                                        'processing_icon' : icon,
                                                        'url_base_lyr' : url_base_lyr,
                                                        'label_list': labels,
-                                                       'form': form
+                                                       'form': form,
+                                                       'REACT_SPA_UI': Project.REACT_SPA_UI,
+                                                       'BOOTSTRAP_UI': Project.BOOTSTRAP_UI
                                                        })
 
 
