@@ -190,6 +190,23 @@
 										{% endif %}															
 									</div>
 								</div>
+								<div class="row">
+									<div class="col-md-6 form-group">
+										<label for="viewer_preferred_ui">{% trans "Viewer technology" %}</label>
+										<select class="form-control" id="viewer_preferred_ui" name="viewer_preferred_ui" tabindex="-1" aria-hidden="true">
+											{% if project.viewer_preferred_ui == REACT_SPA_UI %}
+												<option value="{{ REACT_SPA_UI }}" selected>{% trans "Current (React)" %}</option>
+											{% else %}
+												<option value="{{ REACT_SPA_UI }}">{% trans "Current (React)" %}</option>
+											{% endif %}
+											{% if project.viewer_preferred_ui == BOOTSTRAP_UI %}
+												<option value="{{ BOOTSTRAP_UI }}" selected>{% trans "Classic (Bootstrap)" %}</option>
+											{% else %}
+												<option value="{{ BOOTSTRAP_UI }}">{% trans "Classic (Bootstrap)" %}</option>
+											{% endif %}
+										</select>
+									</div>
+								</div>
 
 								<!-- TAGS DE PROYECTO -->
 

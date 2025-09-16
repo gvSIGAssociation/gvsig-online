@@ -23,9 +23,9 @@ def get_default_application_image():
 
 class Project(models.Model):
     REACT_SPA_UI='react_spa_ui'
-    REACT_SPA_UI_TITLE=_('Actual (React)')
+    REACT_SPA_UI_TITLE=_('Current (React)')
     BOOTSTRAP_UI = 'bootstrap_ui'
-    BOOTSTRAP_UI_TITLE=_('Classic - (Bootstrap)')
+    BOOTSTRAP_UI_TITLE=_('Classic (Bootstrap)')
     VIEWER_UI_CHOICES = [
         (REACT_SPA_UI, REACT_SPA_UI_TITLE),
         (BOOTSTRAP_UI, BOOTSTRAP_UI_TITLE),
