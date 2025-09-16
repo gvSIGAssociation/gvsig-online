@@ -33,16 +33,33 @@
 				</div>
 				{% endif %}
 				<div class="box-body">				
-					<div class="row">
+					<div class="row form-group">
 						<div class="col-md-12">
 							<label for="enumeration_name">{% trans "Name" %}</label>
 							<input readonly name="enumeration_name" id="enumeration_name" type="text" class="form-control" value="{{enumeration.name}}">									
 						</div>
 					</div>
-					<div class="row">
+					<div class="row form-group">
 						<div class="col-md-12">
 							<label for="enumeration_title">{% trans "Title" %}</label>
 							<input name="enumeration_title" id="enumeration_title" type="text" class="form-control"  value="{{enumeration.title}}">								
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-md-6">
+							<label for="order_type">{% trans "Order type" %}</label>
+							<select class="form-control" id="order_type" name="order_type" tabindex="-1" aria-hidden="true">
+								{% if enumeration.order_type == MANUAL %}
+									<option value="{{ MANUAL }}" selected>{% trans "Manual" %}</option>
+								{% else %}
+									<option value="{{ MANUAL }}">{% trans "Manual" %}</option>
+								{% endif %}
+								{% if enumeration.order_type == ALPHABETICAL %}
+									<option value="{{ ALPHABETICAL }}" selected>{% trans "Alphabetical" %}</option>
+								{% else %}
+									<option value="{{ ALPHABETICAL }}">{% trans "Alphabetical" %}</option>
+								{% endif %}
+							</select>
 						</div>
 					</div>
 					<br>

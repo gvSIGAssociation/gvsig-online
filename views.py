@@ -3783,6 +3783,7 @@ def enumeration_add(request):
     if request.method == 'POST':
         name = request.POST.get('enumeration_name')
         title = request.POST.get('enumeration_title')
+        order_type = request.POST.get('order_type')
 
         aux_title = b"".join(title.encode('ASCII', 'ignore').split())[:4]
         aux_title = aux_title.lower()
@@ -3800,7 +3801,8 @@ def enumeration_add(request):
                 enum = Enumeration(
                     name = name,
                     title = title,
-                    created_by = request.user.username
+                    created_by = request.user.username,
+                    order_type = order_type
                 )
                 enum.save()
 
@@ -3823,19 +3825,33 @@ def enumeration_add(request):
                 index = len(Enumeration.objects.all())
                 enum_name = 'enm_' + str(index)
                 message = _('You must enter a title for enumeration')
-                return render(request, 'enumeration_add.html', {'message': message, 'enum_name': enum_name})
+                return render(request, 'enumeration_add.html', {
+                    'message': message, 
+                    'enum_name': enum_name,
+                    'MANUAL': Enumeration.MANUAL,
+                    'ALPHABETICAL': Enumeration.ALPHABETICAL
+                })
         else:
             index = len(Enumeration.objects.all())
             enum_name = 'enm_' + str(index)
             message = _('Name already taken')
-            return render(request, 'enumeration_add.html', {'message': message, 'enum_name': enum_name})
+            return render(request, 'enumeration_add.html', {
+                'message': message, 
+                'enum_name': enum_name,
+                'MANUAL': Enumeration.MANUAL,
+                'ALPHABETICAL': Enumeration.ALPHABETICAL
+            })
 
         return redirect('enumeration_list')
 
     else:
         index = len(Enumeration.objects.all())
         enum_name = 'enm_' + str(index)
-        return render(request, 'enumeration_add.html', {'enum_name': enum_name})
+        return render(request, 'enumeration_add.html', {
+            'enum_name': enum_name,
+            'MANUAL': Enumeration.MANUAL,
+            'ALPHABETICAL': Enumeration.ALPHABETICAL
+        })
 
 
 @login_required()
@@ -3844,11 +3860,13 @@ def enumeration_update(request, eid):
     if request.method == 'POST':
         name = request.POST.get('enumeration_name')
         title = request.POST.get('enumeration_title')
+        order_type = request.POST.get('order_type')
 
         enum = Enumeration.objects.get(id=int(eid))
 
         enum.name = name
         enum.title = title
+        enum.order_type = order_type
         enum.save()
 
         items = EnumerationItem.objects.filter(enumeration_id=enum.id)
@@ -3876,7 +3894,14 @@ def enumeration_update(request, eid):
         enum = Enumeration.objects.get(id=int(eid))
         items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
 
-        return render(request, 'enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1})
+        return render(request, 'enumeration_update.html', {
+            'eid': eid,
+            'enumeration': enum,
+            'items': items,
+            'count': len(items) + 1,
+            'MANUAL': Enumeration.MANUAL,
+            'ALPHABETICAL': Enumeration.ALPHABETICAL
+        })
 
 #***************************************************
 # TILEADO CAPAS BASE
