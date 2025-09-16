@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-24 23:59+0100\n"
-"PO-Revision-Date: 2023-10-16 12:57+0200\n"
+"POT-Creation-Date: 2025-09-16 09:12+0200\n"
+"PO-Revision-Date: 2025-09-16 09:20+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca_ES\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: gvsigol_core/forms.py:17
 msgid "Clone project and layer permissions"
@@ -75,21 +75,33 @@ msgstr "El servidor no existeix"
 msgid "SRS"
 msgstr "SRS"
 
-#: gvsigol_core/settings.py:30
+#: gvsigol_core/models.py:26 gvsigol_core/templates/project_add.html:161
+#: gvsigol_core/templates/project_update.html:198
+#: gvsigol_core/templates/project_update.html:200
+msgid "Current (React)"
+msgstr "Actual (React)"
+
+#: gvsigol_core/models.py:28 gvsigol_core/templates/project_add.html:162
+#: gvsigol_core/templates/project_update.html:203
+#: gvsigol_core/templates/project_update.html:205
+msgid "Classic (Bootstrap)"
+msgstr "Clàssic (Bootstrap)"
+
+#: gvsigol_core/settings.py:32
 msgid "Project requests"
 msgstr "Sol·licituds de projecte"
 
-#: gvsigol_core/settings.py:31
+#: gvsigol_core/settings.py:33
 #: gvsigol_core/templates/dashboard_core_menu.html:5
 #: gvsigol_core/templates/dashboard_core_menu.html:8
 msgid "Projects"
 msgstr "Projectes"
 
-#: gvsigol_core/settings.py:39
+#: gvsigol_core/settings.py:41
 msgid "Project requests by user"
 msgstr "Peticions de projecte per usuari"
 
-#: gvsigol_core/settings.py:40
+#: gvsigol_core/settings.py:42
 msgid "Users"
 msgstr "Usuaris"
 
@@ -268,12 +280,12 @@ msgid "Application will be removed, Do you want continue?"
 msgstr "L'aplicació serà eliminada, Voleu continuar?"
 
 #: gvsigol_core/templates/application_list.html:71
-#: gvsigol_core/templates/project_add.html:386
-#: gvsigol_core/templates/project_add.html:412
+#: gvsigol_core/templates/project_add.html:395
+#: gvsigol_core/templates/project_add.html:421
 #: gvsigol_core/templates/project_list.html:82
 #: gvsigol_core/templates/project_list.html:133
-#: gvsigol_core/templates/project_update.html:565
-#: gvsigol_core/templates/project_update.html:591
+#: gvsigol_core/templates/project_update.html:582
+#: gvsigol_core/templates/project_update.html:608
 #: gvsigol_core/templates/shared_view_list.html:53
 #: gvsigol_core/templates/viewer.html:291
 #: gvsigol_core/templates/viewer_compress.html:294
@@ -281,11 +293,11 @@ msgid "Cancel"
 msgstr "Cancel·lar"
 
 #: gvsigol_core/templates/application_list.html:72
-#: gvsigol_core/templates/project_add.html:387
-#: gvsigol_core/templates/project_add.html:413
+#: gvsigol_core/templates/project_add.html:396
+#: gvsigol_core/templates/project_add.html:422
 #: gvsigol_core/templates/project_list.html:83
-#: gvsigol_core/templates/project_update.html:566
-#: gvsigol_core/templates/project_update.html:592
+#: gvsigol_core/templates/project_update.html:583
+#: gvsigol_core/templates/project_update.html:609
 #: gvsigol_core/templates/shared_view_list.html:54
 #: gvsigol_core/templates/viewer.html:292
 #: gvsigol_core/templates/viewer.html:314
@@ -397,8 +409,8 @@ msgid "Update"
 msgstr "Actualitzar"
 
 #: gvsigol_core/templates/application_update.html:113
-#: gvsigol_core/templates/project_add.html:323
-#: gvsigol_core/templates/project_update.html:376
+#: gvsigol_core/templates/project_add.html:332
+#: gvsigol_core/templates/project_update.html:393
 msgid "Extend to layers"
 msgstr "Amplia a les capes"
 
@@ -448,28 +460,24 @@ msgid "Web application"
 msgstr "Aplicació web"
 
 #: gvsigol_core/templates/documentation.html:61
-msgid "Map viewer user manual"
-msgstr "Manual d'usuari del visor de mapes"
+msgid "User Manual - Classic Map Viewer"
+msgstr ""
 
 #: gvsigol_core/templates/documentation.html:62
 msgid ""
-"This manual provides a review of each of the features offered by the JQuery "
-"based map viewer"
+"Comprehensive guide to explore and use the functionalities of the JQuery-"
+"based map viewer."
 msgstr ""
-"Aquest manual proporciona una revisió de cadascuna de les característiques "
-"ofertes pel visor de mapes basat en JQuery"
 
 #: gvsigol_core/templates/documentation.html:72
-msgid "Map viewer user manual (ReactJS)"
-msgstr "Manual d'usuari del visor de mapes (ReactJS)"
+msgid "User Manual - New Front Map Viewer"
+msgstr ""
 
 #: gvsigol_core/templates/documentation.html:73
 msgid ""
-"This manual provides a review of each of the features offered by the React "
-"based map viewer"
+"Learn to navigate and leverage all features of the new map viewer with a "
+"modern interface."
 msgstr ""
-"Aquest manual proporciona una revisió de cadascuna de les característiques "
-"ofertes pel visor de mapes basat en React"
 
 #: gvsigol_core/templates/documentation.html:85
 msgid "Introduction and concepts"
@@ -489,13 +497,9 @@ msgstr "Guia d'administració"
 
 #: gvsigol_core/templates/documentation.html:97
 msgid ""
-"This guide is intended for platform admin users. It teaches the steps to "
-"carry out the management of users and groups, services, symbology, "
-"projects ... "
+"Manual for administrators: manage users, groups, services, symbology, and "
+"projects on the platform."
 msgstr ""
-"Aquesta guia està destinada als usuaris administradors de la plataforma. "
-"Mostra els passos per portar a terme la gestió d'usuaris i grups, serveis, "
-"simbologia, projectes ... "
 
 #: gvsigol_core/templates/documentation.html:120
 msgid "Mobile application"
@@ -728,106 +732,111 @@ msgstr "per defecte"
 msgid "Show project icon in TOC"
 msgstr "Mostra la icona del projecte al TOC"
 
-#: gvsigol_core/templates/project_add.html:162
-#: gvsigol_core/templates/project_update.html:198
+#: gvsigol_core/templates/project_add.html:159
+#: gvsigol_core/templates/project_update.html:195
+msgid "Viewer technology"
+msgstr "Tecnologia del visor"
+
+#: gvsigol_core/templates/project_add.html:171
+#: gvsigol_core/templates/project_update.html:215
 msgid "Project tags"
 msgstr "Etiquetes de projecte"
 
-#: gvsigol_core/templates/project_add.html:186
-#: gvsigol_core/templates/project_update.html:221
+#: gvsigol_core/templates/project_add.html:195
+#: gvsigol_core/templates/project_update.html:238
 msgid "Add layer group"
 msgstr "Afegir grup de capes"
 
-#: gvsigol_core/templates/project_add.html:187
-#: gvsigol_core/templates/project_update.html:222
+#: gvsigol_core/templates/project_add.html:196
+#: gvsigol_core/templates/project_update.html:239
 msgid "Search layer group..."
 msgstr "Cercar grup de capes..."
 
-#: gvsigol_core/templates/project_add.html:201
-#: gvsigol_core/templates/project_update.html:237
-#: gvsigol_core/templates/project_update.html:239
+#: gvsigol_core/templates/project_add.html:210
+#: gvsigol_core/templates/project_update.html:254
+#: gvsigol_core/templates/project_update.html:256
 msgid "Base group"
 msgstr "Grup base"
 
-#: gvsigol_core/templates/project_add.html:206
-#: gvsigol_core/templates/project_update.html:246
-#: gvsigol_core/templates/project_update.html:248
+#: gvsigol_core/templates/project_add.html:215
+#: gvsigol_core/templates/project_update.html:263
+#: gvsigol_core/templates/project_update.html:265
 msgid "Add"
 msgstr "Afegir"
 
-#: gvsigol_core/templates/project_add.html:223
-#: gvsigol_core/templates/project_update.html:271
-#: gvsigol_core/templates/project_update.html:273
+#: gvsigol_core/templates/project_add.html:232
+#: gvsigol_core/templates/project_update.html:288
+#: gvsigol_core/templates/project_update.html:290
 msgid "Base by default"
 msgstr "Base per defecte"
 
-#: gvsigol_core/templates/project_add.html:224
-#: gvsigol_core/templates/project_update.html:276
+#: gvsigol_core/templates/project_add.html:233
+#: gvsigol_core/templates/project_update.html:293
 msgid "Overview"
 msgstr "Localitzador"
 
-#: gvsigol_core/templates/project_add.html:271
-#: gvsigol_core/templates/project_update.html:324
+#: gvsigol_core/templates/project_add.html:280
+#: gvsigol_core/templates/project_update.html:341
 msgid "Search tool..."
 msgstr "Eina de recerca..."
 
-#: gvsigol_core/templates/project_add.html:285
-#: gvsigol_core/templates/project_add.html:287
-#: gvsigol_core/templates/project_update.html:338
-#: gvsigol_core/templates/project_update.html:340
+#: gvsigol_core/templates/project_add.html:294
+#: gvsigol_core/templates/project_add.html:296
+#: gvsigol_core/templates/project_update.html:355
+#: gvsigol_core/templates/project_update.html:357
 msgid "Assign tool"
 msgstr "Assignar eina"
 
-#: gvsigol_core/templates/project_add.html:309
-#: gvsigol_core/templates/project_update.html:362
+#: gvsigol_core/templates/project_add.html:318
+#: gvsigol_core/templates/project_update.html:379
 msgid "Project will be readable by everyone if public"
 msgstr "Tothom podrà llegir el projecte si és públic"
 
-#: gvsigol_core/templates/project_add.html:310
+#: gvsigol_core/templates/project_add.html:319
 #: gvsigol_core/templates/project_list.html:27
-#: gvsigol_core/templates/project_update.html:363
+#: gvsigol_core/templates/project_update.html:380
 msgid "Is public?"
 msgstr "És públic?"
 
-#: gvsigol_core/templates/project_add.html:316
-#: gvsigol_core/templates/project_update.html:369
+#: gvsigol_core/templates/project_add.html:325
+#: gvsigol_core/templates/project_update.html:386
 msgid "Set project permissions:"
 msgstr "Establir permisos del projecte:"
 
-#: gvsigol_core/templates/project_add.html:320
-#: gvsigol_core/templates/project_add.html:327
-#: gvsigol_core/templates/project_update.html:373
-#: gvsigol_core/templates/project_update.html:380
+#: gvsigol_core/templates/project_add.html:329
+#: gvsigol_core/templates/project_add.html:336
+#: gvsigol_core/templates/project_update.html:390
+#: gvsigol_core/templates/project_update.html:397
 msgid "Search role..."
 msgstr "Cercar rol..."
 
-#: gvsigol_core/templates/project_add.html:345
-#: gvsigol_core/templates/project_update.html:398
+#: gvsigol_core/templates/project_add.html:354
+#: gvsigol_core/templates/project_update.html:415
 msgid "Permission to access"
 msgstr "Permís per accedir"
 
-#: gvsigol_core/templates/project_add.html:349
-#: gvsigol_core/templates/project_update.html:402
+#: gvsigol_core/templates/project_add.html:358
+#: gvsigol_core/templates/project_update.html:419
 msgid "Permission to manage"
 msgstr "Permís per gestionar"
 
-#: gvsigol_core/templates/project_add.html:380
-#: gvsigol_core/templates/project_update.html:559
+#: gvsigol_core/templates/project_add.html:389
+#: gvsigol_core/templates/project_update.html:576
 msgid "Create new layer group"
 msgstr "Crear nou grup de capes"
 
-#: gvsigol_core/templates/project_add.html:383
-#: gvsigol_core/templates/project_update.html:562
+#: gvsigol_core/templates/project_add.html:392
+#: gvsigol_core/templates/project_update.html:579
 msgid "The project has to be saved first, Do you want continue?"
 msgstr "Cal guardar el projecte primer, Voleu continuar?"
 
-#: gvsigol_core/templates/project_add.html:400
-#: gvsigol_core/templates/project_update.html:579
+#: gvsigol_core/templates/project_add.html:409
+#: gvsigol_core/templates/project_update.html:596
 msgid "Extend project permissions to layers"
 msgstr "Amplia els permisos del projecte a les capes"
 
-#: gvsigol_core/templates/project_add.html:403
-#: gvsigol_core/templates/project_update.html:582
+#: gvsigol_core/templates/project_add.html:412
+#: gvsigol_core/templates/project_update.html:599
 msgid ""
 "This action will give the selected user groups permission to read all the "
 "layers included in this project. Notes:"
@@ -835,8 +844,8 @@ msgstr ""
 "Aquesta acció donarà permís als grups d'usuaris seleccionats per llegir "
 "totes les capes incloses en aquest projecte. Notes:"
 
-#: gvsigol_core/templates/project_add.html:405
-#: gvsigol_core/templates/project_update.html:584
+#: gvsigol_core/templates/project_add.html:414
+#: gvsigol_core/templates/project_update.html:601
 msgid ""
 "If the project is public, all the layers assigned to the project will become "
 "public."
@@ -844,8 +853,8 @@ msgstr ""
 "Si el projecte és públic, totes les capes assignades al projecte seran "
 "públiques."
 
-#: gvsigol_core/templates/project_add.html:406
-#: gvsigol_core/templates/project_update.html:585
+#: gvsigol_core/templates/project_add.html:415
+#: gvsigol_core/templates/project_update.html:602
 msgid ""
 "This action will operate on layers, layer groups and user groups currently "
 "selected, even if they have been not saved."
@@ -853,25 +862,25 @@ msgstr ""
 "Aquesta acció operarà sobre capes, grups de capes i grups d'usuaris "
 "seleccionats actualment, encara que no s'hagin guardat."
 
-#: gvsigol_core/templates/project_add.html:407
-#: gvsigol_core/templates/project_update.html:586
+#: gvsigol_core/templates/project_add.html:416
+#: gvsigol_core/templates/project_update.html:603
 msgid "Additional permissions existing on the layer will not be removed."
 msgstr "No se suprimiran els permisos addicionals existents a la capa."
 
-#: gvsigol_core/templates/project_add.html:408
-#: gvsigol_core/templates/project_update.html:587
+#: gvsigol_core/templates/project_add.html:417
+#: gvsigol_core/templates/project_update.html:604
 msgid "Public layers will remain public."
 msgstr "Les capes públiques continuaran sent públiques."
 
-#: gvsigol_core/templates/project_add.html:1039
-#: gvsigol_core/templates/project_update.html:1384
+#: gvsigol_core/templates/project_add.html:1048
+#: gvsigol_core/templates/project_update.html:1401
 msgid "Success: Project permissions were applied to layers."
 msgstr "Èxit: Els permisos del projecte s'han aplicat a les capes."
 
-#: gvsigol_core/templates/project_add.html:1043
-#: gvsigol_core/templates/project_add.html:1049
-#: gvsigol_core/templates/project_update.html:1388
-#: gvsigol_core/templates/project_update.html:1394
+#: gvsigol_core/templates/project_add.html:1052
+#: gvsigol_core/templates/project_add.html:1058
+#: gvsigol_core/templates/project_update.html:1405
+#: gvsigol_core/templates/project_update.html:1411
 msgid "Error: Permissions could not be extended to layers."
 msgstr "Error: els permisos no s'han pogut estendre a les capes."
 
@@ -970,74 +979,84 @@ msgstr "Actualitzar projecte"
 msgid "Package the base layer"
 msgstr "Empaquetar la capa base"
 
-#: gvsigol_core/templates/project_update.html:429
+#: gvsigol_core/templates/project_update.html:446
 msgid "Process running"
 msgstr "Procés en execució"
 
-#: gvsigol_core/templates/project_update.html:434
+#: gvsigol_core/templates/project_update.html:451
 msgid "Processed"
 msgstr "Processat"
 
-#: gvsigol_core/templates/project_update.html:436
+#: gvsigol_core/templates/project_update.html:453
 msgid "of"
 msgstr "de"
 
-#: gvsigol_core/templates/project_update.html:443
+#: gvsigol_core/templates/project_update.html:460
 msgid "Estimated Time"
 msgstr "Temps estimat"
 
-#: gvsigol_core/templates/project_update.html:449
-#: gvsigol_core/templates/project_update.html:497
+#: gvsigol_core/templates/project_update.html:466
+#: gvsigol_core/templates/project_update.html:514
 msgid "Format"
 msgstr "Format"
 
-#: gvsigol_core/templates/project_update.html:455
-#: gvsigol_core/templates/project_update.html:484
+#: gvsigol_core/templates/project_update.html:472
+#: gvsigol_core/templates/project_update.html:501
 msgid "Extent"
 msgstr "Extensió"
 
-#: gvsigol_core/templates/project_update.html:461
-#: gvsigol_core/templates/project_update.html:510
+#: gvsigol_core/templates/project_update.html:478
+#: gvsigol_core/templates/project_update.html:527
 msgid "Niveles de zoom"
 msgstr "Nivells de zoom"
 
-#: gvsigol_core/templates/project_update.html:471
+#: gvsigol_core/templates/project_update.html:488
 msgid "Download version"
 msgstr "Descarregar versió"
 
-#: gvsigol_core/templates/project_update.html:476
+#: gvsigol_core/templates/project_update.html:493
 msgid "Download"
 msgstr "Descarregar"
 
-#: gvsigol_core/templates/project_update.html:487
+#: gvsigol_core/templates/project_update.html:504
 msgid "Project"
 msgstr "Projecte"
 
-#: gvsigol_core/templates/project_update.html:500
+#: gvsigol_core/templates/project_update.html:507
+#, fuzzy
+#| msgid "Layer tree"
+msgid "Layer"
+msgstr "Arbre de capes"
+
+#: gvsigol_core/templates/project_update.html:517
 msgid "PNG"
 msgstr "PNG"
 
-#: gvsigol_core/templates/project_update.html:503
+#: gvsigol_core/templates/project_update.html:520
 msgid "JPG"
 msgstr "JPG"
 
-#: gvsigol_core/templates/project_update.html:520
+#: gvsigol_core/templates/project_update.html:530
+msgid "Tiles per side"
+msgstr ""
+
+#: gvsigol_core/templates/project_update.html:537
 msgid "Tilematrixset (WMTS)"
 msgstr "Tilematrixset (WMTS)"
 
-#: gvsigol_core/templates/project_update.html:523
+#: gvsigol_core/templates/project_update.html:540
 msgid "Tilematrixset"
 msgstr "Tilematrixset"
 
-#: gvsigol_core/templates/project_update.html:529
+#: gvsigol_core/templates/project_update.html:546
 msgid "Create layer"
 msgstr "Crear capa"
 
-#: gvsigol_core/templates/project_update.html:530
+#: gvsigol_core/templates/project_update.html:547
 msgid "Continue download"
 msgstr "Continua la baixada"
 
-#: gvsigol_core/templates/project_update.html:531
+#: gvsigol_core/templates/project_update.html:548
 msgid "Stop Process"
 msgstr "Aturar procés"
 
@@ -1175,75 +1194,75 @@ msgstr "Nom"
 msgid "Last name"
 msgstr "Cognom"
 
-#: gvsigol_core/utils.py:763
+#: gvsigol_core/utils.py:778
 msgid "Navigation history"
 msgstr "Historial de navegació"
 
-#: gvsigol_core/utils.py:764
+#: gvsigol_core/utils.py:779
 msgid "Browse the view forward and backward"
 msgstr "Examineu la vista endavant i endarrere"
 
-#: gvsigol_core/utils.py:768
+#: gvsigol_core/utils.py:783
 msgid "Zoom tools"
 msgstr "Eines de zoom"
 
-#: gvsigol_core/utils.py:769
+#: gvsigol_core/utils.py:784
 msgid "Zoom in, zoom out, ..."
 msgstr "Zoom mès, zoom menys, ..."
 
-#: gvsigol_core/utils.py:773
+#: gvsigol_core/utils.py:788
 msgid "Feature info"
 msgstr "Eina d'informació"
 
-#: gvsigol_core/utils.py:774
+#: gvsigol_core/utils.py:789
 msgid "Map information at point"
 msgstr "Informació del mapa al punt"
 
-#: gvsigol_core/utils.py:778
+#: gvsigol_core/utils.py:793
 msgid "Measure tools"
 msgstr "Eines de mesura"
 
-#: gvsigol_core/utils.py:779
+#: gvsigol_core/utils.py:794
 msgid "It allows to measure areas and distances"
 msgstr "Permet mesurar àrees i distàncies"
 
-#: gvsigol_core/utils.py:783
+#: gvsigol_core/utils.py:798
 msgid "Search coordinates"
 msgstr "Buscar coordenades"
 
-#: gvsigol_core/utils.py:784
+#: gvsigol_core/utils.py:799
 msgid "Center the map at given coordinates"
 msgstr "Centra el mapa a les coordenades donades"
 
-#: gvsigol_core/utils.py:788
+#: gvsigol_core/utils.py:803
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenades"
 
-#: gvsigol_core/utils.py:789
+#: gvsigol_core/utils.py:804
 msgid "Transform coordinates between different systems"
 msgstr "Transformar les coordenades entre diferents sistemes"
 
-#: gvsigol_core/utils.py:793
+#: gvsigol_core/utils.py:808
 msgid "Geolocation"
 msgstr "Geolocalització"
 
-#: gvsigol_core/utils.py:794
+#: gvsigol_core/utils.py:809
 msgid "Center the map in the current position"
 msgstr "Centra el mapa a la posició actual"
 
-#: gvsigol_core/utils.py:798
+#: gvsigol_core/utils.py:813
 msgid "Share view"
 msgstr "Compartir vista"
 
-#: gvsigol_core/utils.py:799
+#: gvsigol_core/utils.py:814
 msgid "Allows you to share the view in its current state"
 msgstr "Permet compartir la vista en el seu estat actual"
 
-#: gvsigol_core/utils.py:803
+#: gvsigol_core/utils.py:818
 msgid "Select feature"
 msgstr "Seleccionar entitat"
 
-#: gvsigol_core/utils.py:804
+#: gvsigol_core/utils.py:819
 msgid "Select features from current layers"
 msgstr "Seleccioneu entitats de les capes actuals"
 
@@ -1265,35 +1284,35 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "El nom del projecte ja existeix"
 
-#: gvsigol_core/views.py:1462 gvsigol_core/views.py:1472
+#: gvsigol_core/views.py:1469 gvsigol_core/views.py:1479
 msgid " manual title"
 msgstr ""
 
-#: gvsigol_core/views.py:1463 gvsigol_core/views.py:1473
+#: gvsigol_core/views.py:1470 gvsigol_core/views.py:1480
 msgid " manual desc"
 msgstr ""
 
-#: gvsigol_core/views.py:1562 gvsigol_core/views.py:1564
+#: gvsigol_core/views.py:1569 gvsigol_core/views.py:1571
 msgid "Shared view"
 msgstr "Vista compartida"
 
-#: gvsigol_core/views.py:1565
+#: gvsigol_core/views.py:1572
 msgid "Link"
 msgstr "Enllaç"
 
-#: gvsigol_core/views.py:1728 gvsigol_core/views.py:1752
+#: gvsigol_core/views.py:1735 gvsigol_core/views.py:1759
 msgid "Operation not allowed on project: "
 msgstr "Operació no permesa en el projecte: "
 
-#: gvsigol_core/views.py:1747
+#: gvsigol_core/views.py:1754
 msgid "The project was successfully cloned."
 msgstr "El projecte s'ha clonat correctament."
 
-#: gvsigol_core/views.py:1889
+#: gvsigol_core/views.py:1896
 msgid "You must enter an application name"
 msgstr "Ha d'introduir un nom d'aplicació"
 
-#: gvsigol_core/views.py:1893
+#: gvsigol_core/views.py:1900
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1304,9 +1323,38 @@ msgstr ""
 "una lletra o guió baix (_). Els següents caràcters poden ser lletres, guió "
 "baix o nombres"
 
-#: gvsigol_core/views.py:1897
+#: gvsigol_core/views.py:1904
 msgid "Application name already exists"
 msgstr "El nom de l'aplicació ja existeix"
+
+#~ msgid "Map viewer user manual"
+#~ msgstr "Manual d'usuari del visor de mapes"
+
+#~ msgid ""
+#~ "This manual provides a review of each of the features offered by the "
+#~ "JQuery based map viewer"
+#~ msgstr ""
+#~ "Aquest manual proporciona una revisió de cadascuna de les "
+#~ "característiques ofertes pel visor de mapes basat en JQuery"
+
+#~ msgid "Map viewer user manual (ReactJS)"
+#~ msgstr "Manual d'usuari del visor de mapes (ReactJS)"
+
+#~ msgid ""
+#~ "This manual provides a review of each of the features offered by the "
+#~ "React based map viewer"
+#~ msgstr ""
+#~ "Aquest manual proporciona una revisió de cadascuna de les "
+#~ "característiques ofertes pel visor de mapes basat en React"
+
+#~ msgid ""
+#~ "This guide is intended for platform admin users. It teaches the steps to "
+#~ "carry out the management of users and groups, services, symbology, "
+#~ "projects ... "
+#~ msgstr ""
+#~ "Aquesta guia està destinada als usuaris administradors de la plataforma. "
+#~ "Mostra els passos per portar a terme la gestió d'usuaris i grups, "
+#~ "serveis, simbologia, projectes ... "
 
 #~ msgid "Base layers"
 #~ msgstr "Capes base"
@@ -1330,10 +1378,9 @@ msgstr "El nom de l'aplicació ja existeix"
 #~ "la plataforma"
 
 #~ msgid "Added tags"
-#~ msgstr "Etiquetes afegides"
-
-#~ "Els plugins afegeixen funcionalitats que no estan presents inicialment a "
-#~ "la plataforma"
+#~ msgstr ""
+#~ "Etiquetes afegidesEls plugins afegeixen funcionalitats que no estan "
+#~ "presents inicialment a la plataforma"
 
 #~ msgid "This is your new temporary password"
 #~ msgstr "Aquesta és la contrasenya provisionalment"
