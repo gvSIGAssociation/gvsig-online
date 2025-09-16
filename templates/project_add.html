@@ -154,6 +154,15 @@
 										<input checked type="checkbox" name="show_project_icon" id="show_project_icon"/>														
 									</div>
 								</div>
+								<div class="row">
+									<div class="col-md-6 form-group">
+										<label for="viewer_preferred_ui">{% trans "Viewer technology" %}</label>
+										<select class="form-control" id="viewer_preferred_ui" name="viewer_preferred_ui" tabindex="-1" aria-hidden="true">
+											<option value="{{ REACT_SPA_UI }}">{% trans "Current (React)" %}</option>
+											<option value="{{ BOOTSTRAP_UI }}">{% trans "Classic (Bootstrap)" %}</option>
+										</select>
+									</div>
+								</div>
 
 								<!-- TAGS DE PROYECTO -->
 
