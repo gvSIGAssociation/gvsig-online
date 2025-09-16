@@ -707,7 +707,7 @@ class FeatureSerializer(serializers.Serializer):
                 if onlyprops == False:
                     sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where} {limit_offset}")
                 else:
-                    sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Centroid({geom})) FROM {schema}.{table} {where} {limit_offset}")
+                    sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Transform(ST_Centroid({geom}), {epsg})) FROM {schema}.{table} {where} {limit_offset}")
                 
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
