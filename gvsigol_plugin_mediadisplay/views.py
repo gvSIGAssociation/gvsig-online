@@ -31,6 +31,8 @@ from gvsigol_core.models import Project, Layer
 from .models import MediaDisplayConfig
 from . import settings
 import json
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 @login_required
 def config_list(request):
@@ -275,9 +277,13 @@ def get_project_layers(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-@login_required
+@csrf_exempt
+@require_http_methods(['GET'])
 def get_config(request):
     """Obtener configuración para el frontend"""
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
     try:
         project_id = request.GET.get('project_id')
         
