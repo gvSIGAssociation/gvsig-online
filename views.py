@@ -31,6 +31,7 @@ import re
 import string
 import urllib.request, urllib.parse, urllib.error
 import xmltodict
+from django.db import transaction
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -3868,39 +3869,112 @@ def enumeration_update(request, eid):
         name = request.POST.get('enumeration_name')
         title = request.POST.get('enumeration_title')
         order_type = request.POST.get('order_type')
+        toc_value = request.POST.get('toc_value', '{}')
 
-        enum = Enumeration.objects.get(id=int(eid))
+        if not name or not title:
+            enum = Enumeration.objects.get(id=int(eid))
+            if enum.order_type == Enumeration.ALPHABETICAL:
+                items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
+            else:
+                items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
+            return render(request, 'enumeration_update.html', {
+                'eid': eid,
+                'enumeration': enum,
+                'items': items,
+                'count': len(items) + 1,
+                'MANUAL': Enumeration.MANUAL,
+                'ALPHABETICAL': Enumeration.ALPHABETICAL,
+                'message': _('Name and title are required')
+            })
 
-        enum.name = name
-        enum.title = title
-        enum.order_type = order_type
-        enum.save()
+        try:
+            with transaction.atomic():
+                enum = Enumeration.objects.get(id=int(eid))
 
-        items = EnumerationItem.objects.filter(enumeration_id=enum.id)
-        for i in items:
-            i.delete()
+                enum.name = name
+                enum.title = title
+                enum.order_type = order_type
+                enum.save()
 
-        items_data = []
-        for key in request.POST:
-            if 'item-content' in key:
-                aux_name = request.POST.get(key).strip()
-                while '  ' in aux_name:
-                    aux_name = aux_name.replace('  ', ' ')
+                items = EnumerationItem.objects.filter(enumeration_id=enum.id)
+                for i in items:
+                    i.delete()
 
-                if aux_name.__len__() > 0:
-                    items_data.append(aux_name)
+                if order_type == Enumeration.ALPHABETICAL:
+                    items_data = []
+                    for key in request.POST:
+                        if 'item-content' in key:
+                            aux_name = request.POST.get(key).strip()
+                            while '  ' in aux_name:
+                                aux_name = aux_name.replace('  ', ' ')
+                            if aux_name.__len__() > 0:
+                                items_data.append(aux_name)
+                    
+                    items_data.sort(key=lambda x: x.lower())
+                    
+                    for index, item_name in enumerate(items_data):
+                        item = EnumerationItem(
+                            enumeration = enum,
+                            name = item_name,
+                            selected = False,
+                            order = index 
+                        )
+                        item.save()
+                else:
+                    # Orden manual: usar el orden del drag & drop
+                    try:
+                        toc_data = json.loads(toc_value)
+                        
+                        sorted_items = sorted(toc_data.items(), key=lambda x: x[1].get('order', 0))
+                        
+                        for item_id, item_data in sorted_items:
+                            item_name = item_data.get('name', '')
+                            if item_name:
+                                item = EnumerationItem(
+                                    enumeration = enum,
+                                    name = item_name,
+                                    selected = False,
+                                    order = item_data.get('order', 0)
+                                )
+                                item.save()
+                                print(f"Saved item: {item_name} with order: {item_data.get('order', 0)}")
+                    except (json.JSONDecodeError, KeyError) as e:
+                        print(f"Error parsing toc_value: {e}")
+                        # Fallback: recopilar items del formulario
+                        items_data = []
+                        for key in request.POST:
+                            if 'item-content' in key:
+                                aux_name = request.POST.get(key).strip()
+                                while '  ' in aux_name:
+                                    aux_name = aux_name.replace('  ', ' ')
+                                if aux_name.__len__() > 0:
+                                    items_data.append(aux_name)
+                        
+                        for index, item_name in enumerate(items_data):
+                            item = EnumerationItem(
+                                enumeration = enum,
+                                name = item_name,
+                                selected = False,
+                                order = index 
+                            )
+                            item.save()
 
-        if order_type == Enumeration.ALPHABETICAL:
-            items_data.sort(key=lambda x: x.lower())
-
-        for index, item_name in enumerate(items_data):
-            item = EnumerationItem(
-                enumeration = enum,
-                name = item_name,
-                selected = False,
-                order = index 
-            )
-            item.save()
+        except Exception as e:
+            print(f"Error in enumeration_update: {e}")
+            enum = Enumeration.objects.get(id=int(eid))
+            if enum.order_type == Enumeration.ALPHABETICAL:
+                items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
+            else:
+                items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
+            return render(request, 'enumeration_update.html', {
+                'eid': eid,
+                'enumeration': enum,
+                'items': items,
+                'count': len(items) + 1,
+                'MANUAL': Enumeration.MANUAL,
+                'ALPHABETICAL': Enumeration.ALPHABETICAL,
+                'message': _('Error updating enumeration: ') + str(e)
+            })
 
         return redirect('enumeration_list')
 
@@ -6969,7 +7043,6 @@ def get_topology_available_layers(request, layer_id):
                                 if (layer_identifier == f"{current_datastore.name}:{current_layer.source_name}" or 
                                     table_name == current_layer.source_name):
                                     continue
-                                
                                 # Usar formato datastore:nametable para el display
                                 display_name = layer_identifier
                                 

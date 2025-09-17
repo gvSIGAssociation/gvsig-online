@@ -70,18 +70,32 @@
 									<h3 class="box-title">{% trans "Enumeration items" %}</h3>
 								</div>
 								<div id="enumeration-items-list" class="box-body">
-									{% for item in items %}
-										{% with counter=forloop.counter %} 
-										<div id="item-{{counter}}" class="row" style="margin-bottom: 15px;">
-											<div class="col-md-10">
-												<input pattern="^[^;]+$" title="{% trans "Enumeration cannot contain point-colon" %}" name="item-content-{{counter}}" id="item-content-{{counter}}" type="text" class="form-control" value="{{item.name}}">								
+									<div id="toc" class="toc">
+										{% for item in items %}
+											{% with counter=forloop.counter %} 
+											<div id="item-{{counter}}" data-itemid="{{item.id}}" data-name="{{item.name}}" data-order="{{item.order}}" class="box box-default collapsed-box toc-enumeration-item enumeration-item" style="border-top: none;">
+												<div class="box-header">
+													<div class="handle">
+														<span class="" style="margin-right: 20px;">
+															<i class="fa fa-ellipsis-v"></i>
+															<i class="fa fa-ellipsis-v"></i>
+														</span>
+														<span class="text">
+															{% if enumeration.order_type == ALPHABETICAL %}
+																<input pattern="^[^;]+$" title="{% trans "Enumeration cannot contain point-colon" %}" placeholder="{% trans 'Insert item name' %}" name="item-content-{{item.id}}" id="item-content-{{item.id}}" type="text" class="form-control" style="display: inline-block; width: auto;" value="{{item.name}}">
+															{% else %}
+																{{item.name}}
+															{% endif %}
+														</span>
+													</div>
+													<div class="box-tools box-tools-buttons pull-right">
+														<button type="button" data-itemid="{{item.id}}" name="button-delete-item" data-toggle="tooltip" data-placement="bottom" title="{% trans "Delete" %}" class="btn btn-danger btn-sm delete-item"><i class="fa fa-times"></i></button>
+													</div>
+												</div>
 											</div>
-											<div class="col-md-2">
-												<button type="button" data-itemid="{{counter}}" id="delete-item-{{counter}}" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>							
-											</div>
-										</div>
-										{% endwith %}
-									{% endfor %}
+											{% endwith %}
+										{% endfor %}
+									</div>
 								</div>
 								<div class="box-footer clearfix">
 									<a id="add-item-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
@@ -95,43 +109,136 @@
 			</div>
 		</div>				
 	</div>
+	<input type="hidden" id="toc_value" name="toc_value" value=""/>
 </form>
 {% endblock %}
+
 {% block extra-scripts %}
 <script>
 $('#menu-manage-datatypes').addClass("active");
 $('#submenu-enumerations').addClass("active");
 
 $(document).ready(function() {
-	var itemCount = "{{count}}";
+	var itemCount = parseInt("{{count}}");
+	var isManualOrder = "{{enumeration.order_type}}" === "{{MANUAL}}";
 	
-	$(".delete-item").on('click', function(e){
-		$('#item-' + this.dataset.itemid).remove();
+	if (isManualOrder) {
+		$(".toc").sortable({
+			placeholder: "sort-highlight",
+			handle: ".handle",
+			forcePlaceholderSize: true,
+			zIndex: 999999
+		});
+	}
+	
+	$('#order_type').change(function() {
+		var selectedOrderType = $(this).val();
+		var isManual = selectedOrderType === "{{MANUAL}}";
+		
+		if (isManual) {
+        // Convertir inputs a texto estático
+        $('.toc-enumeration-item .text input').each(function() {
+            var input = $(this);
+            var value = input.val();
+            input.replaceWith('<span class="text">' + value + '</span>');
+        });
+        
+        $(".toc").sortable({
+            placeholder: "sort-highlight",
+            handle: ".handle",
+            forcePlaceholderSize: true,
+            zIndex: 999999
+        });
+    } else {
+        // Convertir texto estático a inputs
+        $('.toc-enumeration-item .text').each(function() {
+            var textSpan = $(this);
+            var value = textSpan.text().trim();
+            var itemId = textSpan.closest('.toc-enumeration-item').data('itemid');
+            
+            textSpan.html('<input pattern="^[^;]+$" title="' + gettext("Enumeration cannot contain point-colon") + '" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemId + '" id="item-content-' + itemId + '" type="text" class="form-control" style="display: inline-block; width: auto;" value="' + value + '">');
+        });
+        
+        $(".toc").sortable("destroy");
+    }
 	});
 	
+	$(document).on('click', '.delete-item', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    var itemId = $(this).data('itemid');
+    
+    var itemElement = $(this).closest('.toc-enumeration-item');
+    
+    if (itemElement.length > 0) {
+        itemElement.remove();
+    } else {
+        console.log("Element not found for ID:", itemId);
+    }
+});
+	
 	$("#add-item-button").on('click', function(e){
+		e.preventDefault();
+		e.stopPropagation();
 		
 		var ui = '';
-		
-		ui += '<div id="item-' + itemCount + '" class="row" style="margin-bottom: 15px;">';
-		ui += 	'<div class="col-md-10">';
-		ui += 		'<input  pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';								
-		ui += 	'</div>';
-		ui += 	'<div class="col-md-2">';
-		ui += 		'<button type="button" data-itemid="' + itemCount + '" id="delete-item-' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> ' + gettext('Delete') + '</button>';								
+		ui += '<div id="item-' + itemCount + '" data-itemid="' + itemCount + '" class="box box-default collapsed-box toc-enumeration-item enumeration-item" style="border-top: none;">';
+		ui += 	'<div class="box-header">';
+		ui += 		'<div class="handle">';
+		ui += 			'<span class="" style="margin-right: 20px;">';
+		ui += 				'<i class="fa fa-ellipsis-v"></i>';
+		ui += 				'<i class="fa fa-ellipsis-v"></i>';
+		ui += 			'</span>';
+		ui += 			'<span class="text">';
+		ui += 				'<input pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control" style="display: inline-block; width: auto;">';
+		ui += 			'</span>';
+		ui += 		'</div>';
+		ui += 		'<div class="box-tools box-tools-buttons pull-right">';
+		ui += 			'<button type="button" data-itemid="' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times"></i></button>';
+		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
 		
-		$('#enumeration-items-list').append(ui);
-		
-		$(".delete-item").on('click', function(e){
-			$('#item-' + this.dataset.itemid).remove();
-		});
-		
+		$('#toc').append(ui);
 		itemCount++;
-		
 	});
+	
+	$('form').submit(function(e) {
+		var selectedOrderType = $('#order_type').val();
+		var isManual = selectedOrderType === "{{MANUAL}}";
 		
+		if (isManual) {
+			// Para orden manual: usar el JSON del drag & drop
+			var toc = {};
+			var root = $('#toc');
+			var itemList = root.children();
+			
+			for (var i = 0; i < itemList.length; i++) {
+				var item = $(itemList[i]);
+				var itemId = item.data('itemid');
+				var itemOrder = i;
+				var itemName;
+				
+				if (item.data('name')) {
+					itemName = item.data('name');
+				} else {
+					itemName = item.find('input[name^="item-content-"]').val() || '';
+				}				
+								
+				var itemData = {
+					'id': itemId,
+					'name': itemName,
+					'order': itemOrder
+				};
+				toc[itemId] = itemData;
+			}
+			
+			$("#toc_value").val(JSON.stringify(toc));
+		} else {
+			// Para orden alfabético: limpiar el toc_value y usar item-content-*
+			$("#toc_value").val('{}');
+		}
+	});
 });
 </script>
 {% endblock %}
