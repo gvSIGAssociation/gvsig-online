@@ -3880,6 +3880,7 @@ def enumeration_update(request, eid):
         for i in items:
             i.delete()
 
+        items_data = []
         for key in request.POST:
             if 'item-content' in key:
                 aux_name = request.POST.get(key).strip()
@@ -3887,19 +3888,28 @@ def enumeration_update(request, eid):
                     aux_name = aux_name.replace('  ', ' ')
 
                 if aux_name.__len__() > 0:
-                    item = EnumerationItem(
-                        enumeration = enum,
-                        name = aux_name,
-                        selected = False,
-                        order = len(EnumerationItem.objects.filter(enumeration=enum))
-                    )
-                    item.save()
+                    items_data.append(aux_name)
+
+        if order_type == Enumeration.ALPHABETICAL:
+            items_data.sort(key=lambda x: x.lower())
+
+        for index, item_name in enumerate(items_data):
+            item = EnumerationItem(
+                enumeration = enum,
+                name = item_name,
+                selected = False,
+                order = index 
+            )
+            item.save()
 
         return redirect('enumeration_list')
 
     else:
         enum = Enumeration.objects.get(id=int(eid))
-        items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
+        if enum.order_type == Enumeration.ALPHABETICAL:
+            items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
+        else:
+            items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
 
         return render(request, 'enumeration_update.html', {
             'eid': eid,
