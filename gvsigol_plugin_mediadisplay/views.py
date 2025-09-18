@@ -282,8 +282,6 @@ def get_project_layers(request):
 def get_config(request):
     """Obtener configuración para el frontend"""
 
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
     try:
         project_id = request.GET.get('project_id')
         
