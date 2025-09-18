@@ -1459,53 +1459,53 @@ def input_Csv(dicc):
         # Handle single CSV file (original logic)
         skiprows = 0
         first = True
-    counter = 10000
+        counter = 10000
 
-    while counter == 10000:
+        while counter == 10000:
 
-        # Calculate actual skiprows for this chunk
-        actual_skiprows = skiprows + base_skiprows
+            # Calculate actual skiprows for this chunk
+            actual_skiprows = skiprows + base_skiprows
 
-        df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
-                        skiprows=actual_skiprows, nrows=10000, 
-                        header=header_param)
+            df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                            skiprows=actual_skiprows, nrows=10000, 
+                            header=header_param)
 
-        counter = df.shape[0]
+            counter = df.shape[0]
 
-        conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
-    
-        db = create_engine(conn_string)
-        conn = db.connect()
+            conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
+        
+            db = create_engine(conn_string)
+            conn = db.connect()
 
-        if first:
+            if first:
+                    
+                # Generate automatic column names if no schema
+                if dicc.get('schema-option') == 'no-schema':
+                    import string
+                    num_cols = len(df.columns)
+                    df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
+
+                column_names = df.columns
+
+                df_obj = df.select_dtypes(['object'])
+                df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+
+                df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
+                first = False
                 
-            # Generate automatic column names if no schema
-            if dicc.get('schema-option') == 'no-schema':
-                import string
-                num_cols = len(df.columns)
-                df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
+            else:
 
-            column_names = df.columns
+                df.columns = column_names
 
-            df_obj = df.select_dtypes(['object'])
-            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+                df_obj = df.select_dtypes(['object'])
+                df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
-            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
-            first = False
-            
-        else:
+                df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
-            df.columns = column_names
+            skiprows += 10000
 
-            df_obj = df.select_dtypes(['object'])
-            df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-
-            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
-
-        skiprows += 10000
-
-        conn.close()
-        db.dispose()
+            conn.close()
+            db.dispose()
         
     return [table_name]
 
