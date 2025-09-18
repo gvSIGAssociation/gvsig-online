@@ -151,7 +151,41 @@ def test_sqlserver(dicc):
         return {"result": False}
 
 def get_schema_csv(dicc):
-    csvdata = pd.read_csv(dicc["csv-file"], sep=dicc["separator"])
+    # Determine header parameter for pandas
+    skiprows = int(dicc.get("header", 0))  # Always respect skip header value
+    if dicc.get('schema-option') == 'no-schema':
+        header_param = None  # No schema row - pandas will use integer indices
+    else:
+        header_param = 0  # First row after skipped rows contains schema
+    
+    if dicc.get('reading') == 'multiple':
+        column_array = []
+        for file in os.listdir(dicc["csv-file"]):
+            if file.endswith((".csv", ".txt")):
+                csvdata = pd.read_csv(dicc["csv-file"]+'/'+file, sep=dicc["separator"], 
+                                    header=header_param, skiprows=skiprows)
+                
+                # Generate automatic column names if no schema
+                if dicc.get('schema-option') == 'no-schema':
+                    import string
+                    num_cols = len(csvdata.columns)
+                    csvdata.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
+                
+                for col in list(csvdata.columns):
+                    if col not in column_array:
+                        column_array.append(col)
+        column_array.append('_filename')
+        return column_array
+    else:
+        csvdata = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], 
+                            header=header_param, skiprows=skiprows)
+        
+        # Generate automatic column names if no schema
+        if dicc.get('schema-option') == 'no-schema':
+            import string
+            num_cols = len(csvdata.columns)
+            csvdata.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
+        
     return list(csvdata.columns)
 
 def get_owners_oracle(dicc):
