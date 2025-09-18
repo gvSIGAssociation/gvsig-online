@@ -76,10 +76,12 @@
 											<div id="item-{{counter}}" data-itemid="{{item.id}}" data-name="{{item.name}}" data-order="{{item.order}}" class="box box-default collapsed-box toc-enumeration-item enumeration-item" style="border-top: none;">
 												<div class="box-header">
 													<div class="handle">
-														<span class="" style="margin-right: 20px;">
-															<i class="fa fa-ellipsis-v"></i>
-															<i class="fa fa-ellipsis-v"></i>
-														</span>
+														{% if enumeration.order_type == MANUAL %}
+															<span class="" style="margin-right: 20px;">
+																<i class="fa fa-ellipsis-v"></i>
+																<i class="fa fa-ellipsis-v"></i>
+															</span>
+														{% endif %}
 														<span class="text">
 															<input pattern="^[^;]+$" title="{% trans "Enumeration cannot contain point-colon" %}" placeholder="{% trans 'Insert item name' %}" name="item-content-{{item.id}}" id="item-content-{{item.id}}" type="text" class="form-control" style="display: inline-block; width: auto;" value="{{item.name}}">
 														</span>
@@ -119,11 +121,27 @@ $(document).ready(function() {
 	var isManualOrder = "{{enumeration.order_type}}" === "{{MANUAL}}";
 	
 	if (isManualOrder) {
+		$('.toc-enumeration-item .handle').each(function() {
+			if ($(this).find('span').filter(function() {
+				return $(this).find('.fa-ellipsis-v').length > 0;
+			}).length === 0) {
+				$(this).prepend('<span class="" style="margin-right: 20px;"><i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i></span>');
+			}
+		});
+		
 		$(".toc").sortable({
 			placeholder: "sort-highlight",
 			handle: ".handle",
 			forcePlaceholderSize: true,
 			zIndex: 999999
+		});
+	} else {
+		$('.toc-enumeration-item .handle').each(function() {
+			var handle = $(this);
+			var ellipsisSpan = handle.find('span').filter(function() {
+				return $(this).find('.fa-ellipsis-v').length > 0;
+			});
+			ellipsisSpan.remove();
 		});
 	}
 	
@@ -132,6 +150,12 @@ $(document).ready(function() {
 		var isManual = selectedOrderType === "{{MANUAL}}";
 		
 		if (isManual) {
+			$('.toc-enumeration-item .handle').each(function() {
+				if ($(this).find('.fa-ellipsis-v').length === 0) {
+					$(this).prepend('<span class="" style="margin-right: 20px;"><i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i></span>');
+				}
+			});
+			
 			$(".toc").sortable({
 				placeholder: "sort-highlight",
 				handle: ".handle",
@@ -139,6 +163,14 @@ $(document).ready(function() {
 				zIndex: 999999
 			});
 		} else {
+			$('.toc-enumeration-item .handle').each(function() {
+				var handle = $(this);
+				var ellipsisSpan = handle.find('span').filter(function() {
+					return $(this).find('.fa-ellipsis-v').length > 0;
+				});
+				ellipsisSpan.remove();
+			});
+			
 			$(".toc").sortable("destroy");
 		}
 	});
@@ -161,14 +193,22 @@ $(document).ready(function() {
 		e.preventDefault();
 		e.stopPropagation();
 		
+		var selectedOrderType = $('#order_type').val();
+		var isManual = selectedOrderType === "{{MANUAL}}";
+		
 		var ui = '';
 		ui += '<div id="item-' + itemCount + '" data-itemid="' + itemCount + '" class="box box-default collapsed-box toc-enumeration-item enumeration-item" style="border-top: none;">';
 		ui += 	'<div class="box-header">';
 		ui += 		'<div class="handle">';
-		ui += 			'<span class="" style="margin-right: 20px;">';
-		ui += 				'<i class="fa fa-ellipsis-v"></i> ';
-		ui += 				'<i class="fa fa-ellipsis-v"></i>';
-		ui += 			'</span>';
+		
+		if (isManual) {
+			ui += 			'<span class="" style="margin-right: 20px;">';
+			ui += 				'<i class="fa fa-ellipsis-v"></i> ';
+			ui += 				'<i class="fa fa-ellipsis-v"></i>';
+			ui += 			'</span>';
+		}
+		// Si es alphabetical, no añadir elipsis
+		
 		ui += 			'<span class="text">';
 		ui += 				'<input pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control" style="display: inline-block; width: auto;">';
 		ui += 			'</span>';
