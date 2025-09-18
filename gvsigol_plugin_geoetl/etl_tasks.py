@@ -1385,19 +1385,92 @@ def output_Postgis(dicc):
 
 def input_Csv(dicc):
 
-    skiprows = 0
+    table_name = dicc['id']
+    
+    # Determine header parameter for pandas
+    base_skiprows = int(dicc.get("header", 0))  # Always respect skip header value
+    if dicc.get('schema-option') == 'no-schema':
+        header_param = None  # No schema row - pandas will use integer indices
+    else:
+        header_param = 0  # First row after skipped rows contains schema
 
-    first = True
+    if dicc.get('reading') == 'multiple':
+        # Handle multiple CSV files from folder
+        x = 0
+        if not os.listdir(dicc["csv-file"]):
+            raise Exception("No CSV/TXT files in folder "+dicc["csv-file"])
+        
+        global_column_names = None
+        
+        for file in os.listdir(dicc["csv-file"]):
+            if file.endswith((".csv", ".txt")):
+                file_path = dicc["csv-file"]+'/'+file
+                
+                # Process this file in chunks
+                skiprows = 0
+                first_file_first_chunk = (x == 0)
+                chunk_counter = 10000
+                file_first_chunk = True
 
+                while chunk_counter == 10000:
+                    # Calculate actual skiprows for this chunk
+                    actual_skiprows = skiprows + base_skiprows
+                    
+                    df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
+                                   skiprows=actual_skiprows, nrows=10000, 
+                                   header=header_param)
+                    chunk_counter = df.shape[0]
+                    
+                    if chunk_counter > 0:
+                        # Generate automatic column names if no schema (only for first chunk of first file)
+                        if dicc.get('schema-option') == 'no-schema' and file_first_chunk:
+                            import string
+                            num_cols = len(df.columns)
+                            df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
+                            if global_column_names is None:
+                                global_column_names = list(df.columns)
+                        elif global_column_names is not None:
+                            # Use established column names for consistency
+                            df.columns = global_column_names
+                        
+                        df['_filename'] = file
+                        df_obj = df.select_dtypes(['object'])
+                        df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+                        
+                        conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
+                        db = create_engine(conn_string)
+                        conn = db.connect()
+                        
+                        if first_file_first_chunk:
+                            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
+                            first_file_first_chunk = False
+                        else:
+                            df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
+                        
+                        conn.close()
+                        db.dispose()
+                        
+                        file_first_chunk = False
+                    
+                    skiprows += 10000
+                
+                x += 1
+    else:
+        # Handle single CSV file (original logic)
+        skiprows = 0
+        first = True
     counter = 10000
 
     while counter == 10000:
 
-        df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', skiprows=skiprows, nrows=10000)
+        # Calculate actual skiprows for this chunk
+        actual_skiprows = skiprows + base_skiprows
+
+        df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                        skiprows=actual_skiprows, nrows=10000, 
+                        header=header_param)
 
         counter = df.shape[0]
-
-        table_name = dicc['id']
 
         conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     
@@ -1405,6 +1478,12 @@ def input_Csv(dicc):
         conn = db.connect()
 
         if first:
+                
+            # Generate automatic column names if no schema
+            if dicc.get('schema-option') == 'no-schema':
+                import string
+                num_cols = len(df.columns)
+                df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
 
             column_names = df.columns
 
@@ -1424,7 +1503,6 @@ def input_Csv(dicc):
             df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
         skiprows += 10000
-
 
         conn.close()
         db.dispose()
@@ -3632,6 +3710,11 @@ def move(name, dicc):
         source = dicc["excel-file"]
         target = dicc["folder"]
         suffixes = (".xls", ".xlsx")
+
+    elif name == 'input_Csv':
+        source = dicc["csv-file"]
+        target = dicc["folder"]
+        suffixes = (".csv", ".txt")
 
     elif name == 'input_Kml':
         source= dicc['kml-kmz-file'][7:]

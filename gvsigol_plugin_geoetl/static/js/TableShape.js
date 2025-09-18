@@ -106,7 +106,7 @@ function getPathFile(fileType, ID){
 
     window.filemanagerCallback = function(url) {
 
-        if(fileType == 'csv' && url.endsWith('.csv')){
+        if(fileType == 'csv' && (url.endsWith('.csv') || url.endsWith('.txt'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         }else if(fileType == 'json' && url.endsWith('.json') && ID != '0'){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
@@ -1117,7 +1117,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                     '<div class="modal-body">'+
                         '<form>'+
                             '<div class="column20">'+
-                                '<label class="col-form-label" >'+gettext('Choose csv file:')+'</label><br>'+
+                                '<label class="col-form-label" >'+gettext('Choose csv/txt file:')+'</label><br>'+
                                 '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
                             '</div>'+ 
                             '<div class="column60">'+
@@ -1131,7 +1131,51 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value=","> , </option>'+
                                 '</select>'+
                             '</div>'+ 
+                            '<div class="column40">'+
+                                '<label form="header" class="col-form-label">'+gettext('Skip header:')+'</label>'+
+                                '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                            '</div>'+
+                                                        '<div class="column40">'+
+                                '<label class="col-form-label">'+gettext('Schema options:')+'</label>'+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="has-schema-'+ID+'" name="schema-option-'+ID+'" class="form-check-input" value="has-schema" checked="checked">'+
+                                    '<label for="has-schema" class="form-check-label">'+gettext('File has schema')+'</label>'+
+                                '</div>'+
+                                '<div class="form-check">'+
+                                    '<input type="radio" id="no-schema-'+ID+'" name="schema-option-'+ID+'" class="form-check-input" value="no-schema">'+
+                                    '<label for="no-schema" class="form-check-label">'+gettext('File has not schema')+'</label>'+
+                                '</div>'+
+                            '</div>'+ 
                             '<br><br><br>'+ 
+                            '<div>'+
+                                '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
+                            '</div>'+
+                            '<div id ="more-options-'+ID+'">'+
+                                '<div class="column30">'+
+                                    '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
+                                        '<label for="single" class="form-check-label">'+gettext('Single csv/txt file')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
+                                        '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="column70">'+
+                                    '<input type="checkbox" name="checkbox-csv" id="move-'+ID+'"/>'+
+                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                '</div>'+
+                                '<div class="column20">'+
+                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
+                                '</div>'+
+                                '<div class="column50">'+
+                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
+                                '</div>'+
+                                '<br><br><br>'+
+                            '</div>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -1142,11 +1186,77 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        getPathFile('csv', ID)
+        $("#advanced-param-"+ID).click(function(){
+            $("#more-options-"+ID).slideToggle("slow");
+        });
 
         var context = this
 
+        $("#move-"+ID).change(function() {
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
+            }
+        });
+
+        $('input:radio[name="reading-'+ID+'"]').change(function() {
+
+            if($(this).val()=='single'){
+                $("#move-"+ID).prop('checked', false)
+                $("#move-"+ID).attr('disabled', true)
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+            }else{
+                $("#move-"+ID).attr('disabled', false)
+
+            }
+
+        })
+
+        getPathFile('csv', ID)
+
         icon.on("click", function(){
+
+            $('#select-file-button-'+ID).click(function (e) {
+                if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
+                    window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                    getPathFile('csv', ID)
+                }else{
+                    window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                    getPathFile('csv/', ID)
+                }
+            });
+
+            $('#select-folder-button-'+ID).click(function (e) {
+                window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
+
+                getPathFile('folder', ID)
+            });
+
+            if ($('input:radio[name="reading-'+ID+'"]:checked').val()=='single'){
+                $("#move-"+ID).prop('checked', false)
+                $("#move-"+ID).attr('disabled', true)
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#more-options-"+ID).slideUp("slow");
+            }
+
+            if($("#move-"+ID).is(':checked')){
+                $("#select-folder-button-"+ID).attr('disabled', false)
+                $("#folder-"+ID).attr('disabled', false)
+                $("#move-"+ID).val('true')
+            }else{
+                $("#select-folder-button-"+ID).attr('disabled', true)
+                $("#folder-"+ID).attr('disabled', true)
+                $("#move-"+ID).val('')
+            }
 
             $('#dialog-input-csv-'+ID).modal('show')
 
@@ -1157,7 +1267,12 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
             var paramsCSV = {"id": ID,
             "parameters": [
                 {"csv-file": $('#csv-file-'+ID).val(),
-                "separator": $('#separator-'+ID).val()}
+                "separator": $('#separator-'+ID).val(),
+                "header": $('#header-'+ID).val(),
+                "schema-option": $('input:radio[name="schema-option-'+ID+'"]:checked').val(),
+                "reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
+                "move": $('#move-'+ID).val(),
+                "folder": $('#folder-'+ID).val()}
             ]}
 
             var formDataSchemaCSV = new FormData();
@@ -2221,7 +2336,9 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                 $("#move-"+ID).val('')
             }
 
-            $('#dialog-input-excel-'+ID).modal('show')
+
+
+            $('#dialog-input-csv-'+ID).modal('show')
 
         });
 
