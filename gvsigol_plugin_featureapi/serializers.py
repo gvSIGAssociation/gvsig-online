@@ -1378,6 +1378,48 @@ class FeatureSerializer(serializers.Serializer):
                             column=sqlbuilder.Identifier(q['field']),
                             operator=sqlbuilder.SQL(operator)
                             )
+                    elif operator == 'CONTAINS':
+                        # Handle single or multiple values for CONTAINS
+                        if isinstance(q['value'], list):
+                            # Multiple values: create OR conditions
+                            like_conditions = []
+                            for val in q['value']:
+                                like_conditions.append(
+                                    sqlbuilder.SQL("{column} LIKE {value}").format(
+                                        column=sqlbuilder.Identifier(q['field']),
+                                        value=sqlbuilder.Literal(f"%{val}%")
+                                    )
+                                )
+                            query = sqlbuilder.SQL("({conditions})").format(
+                                conditions=sqlbuilder.SQL(" OR ").join(like_conditions)
+                            )
+                        else:
+                            # Single value
+                            query = sqlbuilder.SQL("{column} LIKE {value}").format(
+                                column=sqlbuilder.Identifier(q['field']),
+                                value=sqlbuilder.Literal(f"%{q['value']}%")
+                            )
+                    elif operator == 'NOT CONTAINS':
+                        # Handle single or multiple values for NOT CONTAINS
+                        if isinstance(q['value'], list):
+                            # Multiple values: create AND conditions with NOT LIKE
+                            like_conditions = []
+                            for val in q['value']:
+                                like_conditions.append(
+                                    sqlbuilder.SQL("{column} NOT LIKE {value}").format(
+                                        column=sqlbuilder.Identifier(q['field']),
+                                        value=sqlbuilder.Literal(f"%{val}%")
+                                    )
+                                )
+                            query = sqlbuilder.SQL("({conditions})").format(
+                                conditions=sqlbuilder.SQL(" AND ").join(like_conditions)
+                            )
+                        else:
+                            # Single value
+                            query = sqlbuilder.SQL("{column} NOT LIKE {value}").format(
+                                column=sqlbuilder.Identifier(q['field']),
+                                value=sqlbuilder.Literal(f"%{q['value']}%")
+                            )
                     elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
                         query = sqlbuilder.SQL("{column} {operator} {value}").format(
                             column=sqlbuilder.Identifier(q['field']),
@@ -1407,6 +1449,48 @@ class FeatureSerializer(serializers.Serializer):
                                 query = sqlbuilder.SQL("{column} {operator}").format(
                                     column=sqlbuilder.Identifier(gq['field']),
                                     operator=sqlbuilder.SQL(operator)
+                                    )
+                            elif operator == 'CONTAINS':
+                                # Handle single or multiple values for CONTAINS
+                                if isinstance(gq['value'], list):
+                                    # Multiple values: create OR conditions
+                                    like_conditions = []
+                                    for val in gq['value']:
+                                        like_conditions.append(
+                                            sqlbuilder.SQL("{column} LIKE {value}").format(
+                                                column=sqlbuilder.Identifier(gq['field']),
+                                                value=sqlbuilder.Literal(f"%{val}%")
+                                            )
+                                        )
+                                    query = sqlbuilder.SQL("({conditions})").format(
+                                        conditions=sqlbuilder.SQL(" OR ").join(like_conditions)
+                                    )
+                                else:
+                                    # Single value
+                                    query = sqlbuilder.SQL("{column} LIKE {value}").format(
+                                        column=sqlbuilder.Identifier(gq['field']),
+                                        value=sqlbuilder.Literal(f"%{gq['value']}%")
+                                    )
+                            elif operator == 'NOT CONTAINS':
+                                # Handle single or multiple values for NOT CONTAINS
+                                if isinstance(gq['value'], list):
+                                    # Multiple values: create AND conditions with NOT LIKE
+                                    like_conditions = []
+                                    for val in gq['value']:
+                                        like_conditions.append(
+                                            sqlbuilder.SQL("{column} NOT LIKE {value}").format(
+                                                column=sqlbuilder.Identifier(gq['field']),
+                                                value=sqlbuilder.Literal(f"%{val}%")
+                                            )
+                                        )
+                                    query = sqlbuilder.SQL("({conditions})").format(
+                                        conditions=sqlbuilder.SQL(" AND ").join(like_conditions)
+                                    )
+                                else:
+                                    # Single value
+                                    query = sqlbuilder.SQL("{column} NOT LIKE {value}").format(
+                                        column=sqlbuilder.Identifier(gq['field']),
+                                        value=sqlbuilder.Literal(f"%{gq['value']}%")
                                     )
                             elif operator in ['=', '<>', 'LIKE', 'ILIKE', '<', '>', '<=', '>=', '']:
                                 query = sqlbuilder.SQL("{column} {operator} {value}").format(
