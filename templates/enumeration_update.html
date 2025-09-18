@@ -76,18 +76,22 @@
 											<div id="item-{{counter}}" data-itemid="{{item.id}}" data-name="{{item.name}}" data-order="{{item.order}}" class="box box-default collapsed-box toc-enumeration-item enumeration-item" style="border-top: none;">
 												<div class="box-header">
 													<div class="handle">
-														{% if enumeration.order_type == MANUAL %}
-															<span class="" style="margin-right: 20px;">
-																<i class="fa fa-ellipsis-v"></i>
-																<i class="fa fa-ellipsis-v"></i>
-															</span>
-														{% endif %}
-														<span class="text">
-															<input pattern="^[^;]+$" title="{% trans "Enumeration cannot contain point-colon" %}" placeholder="{% trans 'Insert item name' %}" name="item-content-{{item.id}}" id="item-content-{{item.id}}" type="text" class="form-control" style="display: inline-block; width: auto;" value="{{item.name}}">
-														</span>
-													</div>
-													<div class="box-tools box-tools-buttons pull-right">
-														<button type="button" data-itemid="{{item.id}}" name="button-delete-item" data-toggle="tooltip" data-placement="bottom" title="{% trans "Delete" %}" class="btn btn-danger btn-sm delete-item"><i class="fa fa-times"></i></button>
+														<div class="row" style="margin: 0; width: 100%;">
+															{% if enumeration.order_type == MANUAL %}
+																<div class="col-md-1" style="padding-right: 5px;">
+																	<span class="" style="margin-right: 20px;">
+																		<i class="fa fa-ellipsis-v"></i>
+																		<i class="fa fa-ellipsis-v"></i>
+																	</span>
+																</div>
+															{% endif %}
+															<div class="col-md-9">
+																<input pattern="^[^;]+$" title="{% trans "Enumeration cannot contain point-colon" %}" placeholder="{% trans 'Insert item name' %}" name="item-content-{{item.id}}" id="item-content-{{item.id}}" type="text" class="form-control" value="{{item.name}}">
+															</div>
+															<div class="col-md-2">
+																<button type="button" data-itemid="{{item.id}}" name="button-delete-item" data-toggle="tooltip" data-placement="bottom" title="{% trans "Delete" %}" class="btn btn-danger btn-sm delete-item"><i class="fa fa-times"></i></button>
+															</div>
+														</div>
 													</div>
 												</div>
 											</div>
@@ -150,9 +154,9 @@ $(document).ready(function() {
 		var isManual = selectedOrderType === "{{MANUAL}}";
 		
 		if (isManual) {
-			$('.toc-enumeration-item .handle').each(function() {
+			$('.toc-enumeration-item .handle .row').each(function() {
 				if ($(this).find('.fa-ellipsis-v').length === 0) {
-					$(this).prepend('<span class="" style="margin-right: 20px;"><i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i></span>');
+					$(this).prepend('<div class="col-md-1" style="padding-right: 5px;"><span class="" style="margin-right: 20px;"><i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i></span></div>');
 				}
 			});
 			
@@ -163,12 +167,8 @@ $(document).ready(function() {
 				zIndex: 999999
 			});
 		} else {
-			$('.toc-enumeration-item .handle').each(function() {
-				var handle = $(this);
-				var ellipsisSpan = handle.find('span').filter(function() {
-					return $(this).find('.fa-ellipsis-v').length > 0;
-				});
-				ellipsisSpan.remove();
+			$('.toc-enumeration-item .handle .row').each(function() {
+				$(this).find('.col-md-1').remove();
 			});
 			
 			$(".toc").sortable("destroy");
@@ -200,21 +200,23 @@ $(document).ready(function() {
 		ui += '<div id="item-' + itemCount + '" data-itemid="' + itemCount + '" class="box box-default collapsed-box toc-enumeration-item enumeration-item" style="border-top: none;">';
 		ui += 	'<div class="box-header">';
 		ui += 		'<div class="handle">';
+		ui += 			'<div class="row" style="margin: 0; width: 100%;">';
 		
 		if (isManual) {
-			ui += 			'<span class="" style="margin-right: 20px;">';
-			ui += 				'<i class="fa fa-ellipsis-v"></i> ';
-			ui += 				'<i class="fa fa-ellipsis-v"></i>';
-			ui += 			'</span>';
+			ui += 				'<div class="col-md-1" style="padding-right: 5px;">';
+			ui += 					'<span class="" style="margin-right: 20px;">';
+			ui += 						'<i class="fa fa-ellipsis-v"></i> ';
+			ui += 						'<i class="fa fa-ellipsis-v"></i>';
+			ui += 					'</span>';
+			ui += 				'</div>';
 		}
-		// Si es alphabetical, no añadir elipsis
-		
-		ui += 			'<span class="text">';
-		ui += 				'<input pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control" style="display: inline-block; width: auto;">';
-		ui += 			'</span>';
-		ui += 		'</div>';
-		ui += 		'<div class="box-tools box-tools-buttons pull-right">';
-		ui += 			'<button type="button" data-itemid="' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times"></i></button>';
+		ui += 				'<div class="col-md-9">';
+		ui += 					'<input pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';
+		ui += 				'</div>';
+		ui += 				'<div class="col-md-2">';
+		ui += 					'<button type="button" data-itemid="' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times"></i></button>';
+		ui += 				'</div>';
+		ui += 			'</div>';
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
