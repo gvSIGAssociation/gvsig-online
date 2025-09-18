@@ -7043,6 +7043,7 @@ def get_topology_available_layers(request, layer_id):
                                 if (layer_identifier == f"{current_datastore.name}:{current_layer.source_name}" or 
                                     table_name == current_layer.source_name):
                                     continue
+                                
                                 # Usar formato datastore:nametable para el display
                                 display_name = layer_identifier
                                 
