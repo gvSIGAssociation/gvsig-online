@@ -1673,9 +1673,30 @@ def trans_Calculator(dicc):
 
     return [table_name_target]
 
+def check_and_reset_cadastral_requests():
+    """
+    Verifica y resetea el contador de peticiones cadastrales si ha pasado 1 hora
+    """
+    try:
+        cr_model = cadastral_requests.objects.get(name='cadastral_requests')
+        date_saved = (cr_model.lastRequest).replace(tzinfo=None)
+        
+        # Si han pasado más de 3600 segundos (1 hora), resetear contador
+        if (datetime.now() - date_saved).total_seconds() >= 3600:
+            cr_model.requests = 0
+            cr_model.lastRequest = datetime.now()
+            cr_model.save()
+            
+    except cadastral_requests.DoesNotExist:
+        # Si no existe el registro, no hacer nada (se creará cuando sea necesario)
+        pass
+
 def trans_CadastralGeom(dicc):
 
     from gvsigol_plugin_catastro.views import get_rc_polygon
+    
+    # Verificar y resetear contador de peticiones cadastrales si es necesario
+    check_and_reset_cadastral_requests()
     
     attr = dicc['attr']
 
