@@ -1466,7 +1466,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="column80">'+
                                 '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
                                 '<input type="text" id="json-file-'+ID+'" name="file" class="form-control"></input>'+
-                            '</div>'+ 
+                            '</div>'+
                             '<div>'+
                                 '<input type="checkbox" name="checkbox-json" id="api-rest-'+ID+'"/>'+
                                 '<label for="checkbox">'+gettext('Do you want to load JSON data from an API REST?')+'</label>'+											
@@ -1474,18 +1474,6 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                             '<div class="more-options-'+ID+'">'+
                                 '<label class="col-form-label" >'+gettext('URL:')+'</label>'+
                                 '<input type="text" id="url-'+ID+'" name="url" class="form-control"></input>'+
-                                /*'<div>'+
-                                    '<input type="checkbox" name="checkbox-json" id="is-pag-'+ID+'"/>'+
-                                    '<label for="checkbox">'+gettext('Is paginated?')+'</label>'+										
-                                '</div>'+
-                                '<div class="column30">'+
-                                    '<label class="col-form-label" >'+gettext('Pagination parameter:')+'</label>'+
-                                    '<input type="text" id="pag-par-'+ID+'" name="pag-par" class="form-control"></input>'+
-                                '</div>'+
-                                '<div class="column30">'+
-                                    '<label form="init" class="col-form-label">'+gettext('Starts in:')+'</label>'+
-                                    '<input type="number" id="init-pag-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
-                                '</div>'+*/
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -1513,18 +1501,6 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
             }
         });
 
-        /*$("#is-pag-"+ID).change(function() {
-            if($("#is-pag-"+ID).is(':checked')){
-                $("#is-pag-"+ID).val("true")
-                $("#pag-par-"+ID).prop( "disabled", false );
-                $("#init-pag-"+ID).prop( "disabled", false );
-            }else{
-                $("#is-pag-"+ID).val("")
-                $("#pag-par-"+ID ).prop( "disabled", true );
-                $("#init-pag-"+ID ).prop( "disabled", true );
-            }
-        });*/
-
         getPathFile('json', ID)
 
         var context = this
@@ -1543,16 +1519,6 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 $( "#select-file-button-"+ID ).prop( "disabled", false );
             };
 
-            /*if($("#is-pag-"+ID).is(':checked')){
-                $("#is-pag-"+ID).val("true")
-                $("#pag-par-"+ID).prop( "disabled", false );
-                $("#init-pag-"+ID).prop( "disabled", false );
-            }else{
-                $("#is-pag-"+ID).val("")
-                $("#pag-par-"+ID ).prop( "disabled", true );
-                $("#init-pag-"+ID ).prop( "disabled", true );
-            }*/
-
             $('#dialog-input-json-'+ID).modal('show')
 
         });
@@ -1564,9 +1530,6 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 {"json-file": $('#json-file-'+ID).val(),
                 "api-rest": $("#api-rest-"+ID).val(),
                 "url": $('#url-'+ID).val(),
-                /*"is-pag": $("#is-pag-"+ID).val(),
-                "pag-par": $("#pag-par-"+ID ).val(),
-                "init-pag": $("#init-pag-"+ID ).val()*/
                 }
             ]}
 
@@ -9539,8 +9502,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
                             '<div class="right">'+
                                 '<button type="button" class="btn btn-default btn-sm" id="get-schema-'+ID+'">'+gettext('Get attributes')+'</button>'+
-                            '</div>'+
-                            
+                            '</div>'+    
                             '<div class="column50">'+
                                 '<label class="col-form-label">'+gettext('Attributes from input:')+'</label>'+
                                 '<div id ="attrs-values">'+
@@ -11449,7 +11411,7 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
                                 '<div class="column33">'+
                                     '<label class="col-form-label">'+gettext('Maximum radius')+':</label>'+
-                                    '<input id="max-radius-'+ID+'" type="number" value="0.0" min="0" step="0.01" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                    '<input id="max-radius-'+ID+'" type="text" value="0.0" size="40" class="form-control">'+
                                 '</div>'+
                                 '<div class="column33">'+
                                     '<label class="col-form-label">'+gettext('Weight attribute')+':</label>'+
@@ -12206,7 +12168,6 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                     schemas = getOwnSchemas(context.canvas, ID)
                     schema = schemas[0]
                     schemaOld = schemas[1]
-                
                 }catch{ 
                     schema=[]
                     schemaOld =[]
@@ -14527,7 +14488,6 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
         return this.children.get(index+1).figure;
     },
      
-
      /**
       * @method
       * Set the name of the DB table. Visually it is the header of the shape
