@@ -34,6 +34,7 @@ from gvsigol_auth.django_auth import get_user_details
 from django.core import serializers
 from django.utils.translation import ugettext as _
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
+from django.db import transaction
 
 from gvsigol import settings
 from gvsigol_core import utils as core_utils
@@ -169,7 +170,7 @@ def etl_canvas(request):
 
             try:
                 periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+instance.name+'.'+str(lgid))
-            except:
+            except PeriodicTask.DoesNotExist:
                 periodicTask = None
 
             if periodicTask:
@@ -250,7 +251,7 @@ def get_list(request, concat = False, datetime_string = False):
 
         try:
             periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+w.name+'.'+str(w.id))
-        except:
+        except PeriodicTask.DoesNotExist:
             periodicTask = None
 
         if periodicTask:
@@ -385,6 +386,7 @@ def etl_concat_workspaces(request):
 
     return render(request, 'dashboard_geoetl_concat_workspaces.html', response)
 
+@transaction.atomic
 def save_periodic_workspace(request, workspace):
 
     day = request.POST.get('day')
@@ -462,11 +464,86 @@ def save_periodic_workspace(request, workspace):
     statusModel.save()
 
 
+@transaction.atomic
+def cleanup_orphan_canvas_tasks():
+    """
+    Limpia tareas huérfanas del tipo run_canvas_background que no corresponden
+    a ningún workspace existente. Solo toca tareas con task='gvsigol_plugin_geoetl.tasks.run_canvas_background'
+    """
+    print("=== EJECUTANDO CLEANUP DE TAREAS HUÉRFANAS ===")
+    # Obtener solo las tareas de canvas background del plugin geoetl
+    canvas_tasks = PeriodicTask.objects.filter(
+        task='gvsigol_plugin_geoetl.tasks.run_canvas_background'
+    )
+    
+    # Obtener todos los IDs de workspaces existentes
+    existing_workspace_ids = set(ETLworkspaces.objects.values_list('id', flat=True))
+    
+    orphaned_schedules_to_cleanup = {
+        'interval_ids': set(),
+        'crontab_ids': set()
+    }
+    
+    tasks_cleaned = 0
+    
+    for task in canvas_tasks:
+        # Extraer el ID del workspace del nombre de la tarea
+        # Formato esperado: 'gvsigol_plugin_geoetl.{nombre}.{id}'
+        try:
+            task_name_parts = task.name.split('.')
+            if len(task_name_parts) >= 3 and task_name_parts[0] == 'gvsigol_plugin_geoetl':
+                workspace_id = int(task_name_parts[-1])  # El último elemento debería ser el ID
+                
+                # Si el workspace no existe, esta tarea es huérfana
+                if workspace_id not in existing_workspace_ids:
+                    print(f"Limpiando tarea huérfana: {task.name} (workspace_id: {workspace_id})")
+                    
+                    # Guardar los IDs de schedules para limpiar después
+                    if task.interval_id:
+                        orphaned_schedules_to_cleanup['interval_ids'].add(task.interval_id)
+                    if task.crontab_id:
+                        orphaned_schedules_to_cleanup['crontab_ids'].add(task.crontab_id)
+                    
+                    # Eliminar la tarea huérfana
+                    task.delete()
+                    tasks_cleaned += 1
+                    
+        except (ValueError, IndexError) as e:
+            # Si no se puede extraer el ID o hay error de formato, continuar
+            print(f"Advertencia: No se pudo procesar el nombre de tarea {task.name}: {e}")
+            continue
+    
+    # Limpiar schedules huérfanos solo si no están siendo usados por otras tareas
+    intervals_cleaned = 0
+    crontabs_cleaned = 0
+    
+    for interval_id in orphaned_schedules_to_cleanup['interval_ids']:
+        # Verificar que no hay otras tareas usando este interval
+        if not PeriodicTask.objects.filter(interval_id=interval_id).exists():
+            try:
+                IntervalSchedule.objects.get(id=interval_id).delete()
+                intervals_cleaned += 1
+            except IntervalSchedule.DoesNotExist:
+                pass
+    
+    for crontab_id in orphaned_schedules_to_cleanup['crontab_ids']:
+        # Verificar que no hay otras tareas usando este crontab
+        if not PeriodicTask.objects.filter(crontab_id=crontab_id).exists():
+            try:
+                CrontabSchedule.objects.get(id=crontab_id).delete()
+                crontabs_cleaned += 1
+            except CrontabSchedule.DoesNotExist:
+                pass
+    
+    if tasks_cleaned > 0 or intervals_cleaned > 0 or crontabs_cleaned > 0:
+        print(f"Cleanup completado: {tasks_cleaned} tareas, {intervals_cleaned} intervalos, {crontabs_cleaned} crontabs eliminados")
+
+@transaction.atomic
 def delete_periodic_workspace(workspace):
 
     try:
         periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id))
-    except:
+    except PeriodicTask.DoesNotExist:
         periodicTask = None
 
     if periodicTask:
@@ -478,8 +555,9 @@ def delete_periodic_workspace(workspace):
         if interid:
 
             try:
-                intervalTasks = PeriodicTask.objects.get(crontab_id =interid)
-            except:
+                intervalTasks = PeriodicTask.objects.filter(interval_id=interid).first()
+            except Exception as e:
+                print(f"Error checking interval tasks: {e}")
                 intervalTasks = None
 
             if not intervalTasks:
@@ -488,8 +566,9 @@ def delete_periodic_workspace(workspace):
                 intervalSchedule.delete()
         else:
             try:
-                cronTasks = PeriodicTask.objects.get(crontab_id =cronid)
-            except:
+                cronTasks = PeriodicTask.objects.filter(crontab_id=cronid).first()
+            except Exception as e:
+                print(f"Error checking crontab tasks: {e}")
                 cronTasks = None
 
             if not cronTasks:
@@ -500,13 +579,13 @@ def delete_periodic_workspace(workspace):
     try:
         statusModel  = ETLstatus.objects.get(id_ws = workspace.id)
         statusModel.delete()
-    except:
+    except ETLstatus.DoesNotExist:
         pass
     
     try:
-        send_email  = SendEmail.objects.get(etl_ws = workspace.id)
+        send_email  = SendEmails.objects.get(etl_ws = workspace.id)
         send_email.delete()
-    except:
+    except SendEmails.DoesNotExist:
         pass
     
     try:
@@ -523,6 +602,7 @@ def name_user_exists(id, name, user):
     return False
 
 
+@transaction.atomic
 def _etl_workspace_update(instance, request, name, description, workspace, params, concat, periodic_task, set_superuser=False):
     if request.user.is_superuser and set_superuser:
         username = request.user.username
@@ -666,6 +746,8 @@ def etl_workspace_update(request):
             else:
                 workspace = ws.workspace
             _etl_workspace_update(ws, request, name, description, workspace, params, False, periodic_task, set_superuser)
+            # Ejecutar cleanup de tareas huérfanas después de la actualización
+            cleanup_orphan_canvas_tasks()
         except EtlWorkspaceExists:
             response = {
                 'exists': 'true',
@@ -691,6 +773,7 @@ def etl_workspaces_roles(request):
 
 @login_required()
 @staff_required
+@transaction.atomic
 def etl_workspace_delete(request):
 
     if request.method == 'POST':
@@ -699,6 +782,8 @@ def etl_workspace_delete(request):
         if instance.can_edit(request):
             delete_periodic_workspace(instance)
             instance.delete()
+            # Ejecutar cleanup de tareas huérfanas después de la eliminación
+            cleanup_orphan_canvas_tasks()
 
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
@@ -1399,6 +1484,8 @@ def etl_concatenate_workspace_update(request):
             params = None
         try:
             _etl_workspace_update(ws, request, name, description, workspace, params, True, periodic_task, set_superuser)
+            # Ejecutar cleanup de tareas huérfanas después de la actualización
+            cleanup_orphan_canvas_tasks()
         except EtlWorkspaceExists:
             response = {
                 'exists': 'true',
