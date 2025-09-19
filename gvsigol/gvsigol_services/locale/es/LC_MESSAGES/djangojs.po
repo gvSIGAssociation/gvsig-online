@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-28 13:28+0200\n"
-"PO-Revision-Date: 2025-09-03 09:25+0200\n"
+"PO-Revision-Date: 2025-09-18 18:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -142,7 +142,7 @@ msgstr "los valores no pueden contener valores (;)"
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:15
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:106
 msgid "Insert item name"
-msgstr "Inserte nombre del item"
+msgstr "Inserte el nombre del elemento"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:16
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:58
