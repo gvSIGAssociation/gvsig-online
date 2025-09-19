@@ -668,9 +668,18 @@ class LayerResource(models.Model):
 
 
 class Enumeration(models.Model):
+    ALPHABETICAL='alphabetical'
+    ALPHABETICAL_TITLE=_('Alphabetical')
+    MANUAL ='manual'
+    MANUAL_TITLE=_('Manual')
+    ORDER_TYPE_CHOICES = [
+        (ALPHABETICAL, ALPHABETICAL_TITLE),
+        (MANUAL, MANUAL_TITLE),
+    ]
     name = models.CharField(max_length=150)
     title = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.CharField(max_length=100)
+    order_type = models.TextField(choices=ORDER_TYPE_CHOICES, blank=True, default=MANUAL)
 
     def __str__(self):
         return self.name
