@@ -1451,9 +1451,10 @@ def documentation(request):
 
     intro = get_manual(request, 'gvsigol_intro.pdf')
     admin = get_manual(request, 'gvsigol_admin_guide.pdf')
-    viewer = get_manual(request, 'gvsigol_user_manual.pdf')
-    spaviewer = get_manual(request, 'gvsigolfrontend_manual.pdf')
     mobile = get_manual(request, 'gvsigmapps_manual.pdf')
+    
+    viewer = get_manual(request, 'gvsigol_user_manual.pdf') if 'bootstrap_ui' in settings.AVAILABLE_VIEWER_UIS else None
+    spaviewer = get_manual(request, 'gvsigolfrontend_manual.pdf') if 'react_spa_ui' in settings.AVAILABLE_VIEWER_UIS else None
 
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
