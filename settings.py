@@ -97,6 +97,7 @@ env = environ.Env(
     VIEWER_DEFAULT_CRS=(str,'EPSG:4326'),
     FALLBACK_VIEWER_UI=(str,'bootstrap_ui'), # fallback for existing projects
     DEFAULT_VIEWER_UI=(str,'react_spa_ui'), # default for new projects
+    AVAILABLE_VIEWER_UIS=(list,['react_spa_ui', 'bootstrap_ui']), # available viewer UIs
     SUPPORTED_CRS =(list,["3857", "4326"]),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
@@ -795,7 +796,9 @@ IFRAME_MODE_UI=env('IFRAME_MODE_UI')
 MANAGE_PERMISSION_UI=env('MANAGE_PERMISSION_UI')
 
 VIEWER_DEFAULT_CRS=env('VIEWER_DEFAULT_CRS')
-
+FALLBACK_VIEWER_UI=env('FALLBACK_VIEWER_UI')
+DEFAULT_VIEWER_UI=env('DEFAULT_VIEWER_UI')
+AVAILABLE_VIEWER_UIS=env('AVAILABLE_VIEWER_UIS')
 
 
 #CSP_DEFAULT_SRC = ("'self'", '*')
