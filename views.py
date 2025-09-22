@@ -1454,42 +1454,24 @@ def documentation(request):
     mobile = get_manual(request, 'gvsigmapps_manual.pdf')
     
     # Obtener viewers disponibles, por defecto ambos si no está definido
-    print(f"DEBUG: Verificando settings.AVAILABLE_VIEWER_UIS...")
-    print(f"DEBUG: hasattr(settings, 'AVAILABLE_VIEWER_UIS'): {hasattr(settings, 'AVAILABLE_VIEWER_UIS')}")
-    if hasattr(settings, 'AVAILABLE_VIEWER_UIS'):
-        print(f"DEBUG: settings.AVAILABLE_VIEWER_UIS RAW: {settings.AVAILABLE_VIEWER_UIS}")
-    
     available_viewers = getattr(settings, 'AVAILABLE_VIEWER_UIS', ['react_spa_ui', 'bootstrap_ui'])
     
-    # Procesar la variable si viene como string desde el entorno (Kubernetes/Docker)
     if isinstance(available_viewers, str):
-        # Convertir string como "['react_spa_ui']" a lista real
         import ast
         try:
             available_viewers = ast.literal_eval(available_viewers)
-            print(f"DEBUG: Convertido de string a lista: {available_viewers}")
-        except Exception as e:
-            # Si falla, usar valor por defecto
-            print(f"DEBUG: Error al convertir string: {e}")
+        except:
+            available_viewers = ['react_spa_ui', 'bootstrap_ui']
+    elif isinstance(available_viewers, list) and len(available_viewers) == 1 and isinstance(available_viewers[0], str):
+        import ast
+        try:
+            available_viewers = ast.literal_eval(available_viewers[0])
+        except:
             available_viewers = ['react_spa_ui', 'bootstrap_ui']
     
-    # DEBUG: Ver qué valor tiene la variable
-    print(f"DEBUG: AVAILABLE_VIEWER_UIS FINAL = {available_viewers}, tipo: {type(available_viewers)}")
-    
     # Solo cargar los manuales de viewers que están en AVAILABLE_VIEWER_UIS
-    print(f"DEBUG: Buscando manual clásico: {'bootstrap_ui' in available_viewers}")
-    print(f"DEBUG: Buscando manual SPA: {'react_spa_ui' in available_viewers}")
-    
     viewer = get_manual(request, 'gvsigol_user_manual.pdf') if 'bootstrap_ui' in available_viewers else None
     spaviewer = get_manual(request, 'gvsigolfrontend_manual.pdf') if 'react_spa_ui' in available_viewers else None
-    
-    print(f"DEBUG: Manual clásico encontrado: {viewer is not None}")
-    print(f"DEBUG: Manual SPA encontrado: {spaviewer is not None}")
-    if spaviewer:
-        print(f"DEBUG: URL del manual SPA: {spaviewer.get('url', 'Sin URL')}")
-    
-    print(f"DEBUG: DOCS_PATH usado: {getattr(settings, 'DOCS_PATH', 'NO DEFINIDO')}")
-    
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
     for app_name in settings.INSTALLED_APPS:
@@ -1517,6 +1499,7 @@ def documentation(request):
     response = {
         'plugin_manuals': plugin_manuals
     }
+    
     if intro:
         response['intro'] = intro
     if admin:
@@ -1527,6 +1510,7 @@ def documentation(request):
         response['spaviewer'] = spaviewer
     if mobile:
         response['mobile'] = mobile
+        
     return render(request, 'documentation.html', response)
 
 def do_save_shared_view(pid, description, view_state, expiration, user, internal = False, url = False):
