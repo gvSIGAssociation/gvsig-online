@@ -1454,24 +1454,49 @@ def documentation(request):
     mobile = get_manual(request, 'gvsigmapps_manual.pdf')
     
     # Obtener viewers disponibles, por defecto ambos si no está definido
+    debug_info = []
+    debug_info.append(f"Verificando settings.AVAILABLE_VIEWER_UIS...")
+    debug_info.append(f"hasattr(settings, 'AVAILABLE_VIEWER_UIS'): {hasattr(settings, 'AVAILABLE_VIEWER_UIS')}")
+    if hasattr(settings, 'AVAILABLE_VIEWER_UIS'):
+        debug_info.append(f"settings.AVAILABLE_VIEWER_UIS RAW: {settings.AVAILABLE_VIEWER_UIS}")
+    
     available_viewers = getattr(settings, 'AVAILABLE_VIEWER_UIS', ['react_spa_ui', 'bootstrap_ui'])
     
     if isinstance(available_viewers, str):
         import ast
         try:
             available_viewers = ast.literal_eval(available_viewers)
-        except:
+            debug_info.append(f"Convertido de string a lista: {available_viewers}")
+        except Exception as e:
+            debug_info.append(f"Error al convertir string: {e}")
             available_viewers = ['react_spa_ui', 'bootstrap_ui']
     elif isinstance(available_viewers, list) and len(available_viewers) == 1 and isinstance(available_viewers[0], str):
         import ast
         try:
             available_viewers = ast.literal_eval(available_viewers[0])
-        except:
+            debug_info.append(f"Convertido de lista-con-string a lista: {available_viewers}")
+        except Exception as e:
+            debug_info.append(f"Error al convertir lista-con-string: {e}")
             available_viewers = ['react_spa_ui', 'bootstrap_ui']
+    
+    debug_info.append(f"AVAILABLE_VIEWER_UIS FINAL = {available_viewers}, tipo: {type(available_viewers)}")
+    debug_info.append(f"Buscando manual clásico: {'bootstrap_ui' in available_viewers}")
+    debug_info.append(f"Buscando manual SPA: {'react_spa_ui' in available_viewers}")
     
     # Solo cargar los manuales de viewers que están en AVAILABLE_VIEWER_UIS
     viewer = get_manual(request, 'gvsigol_user_manual.pdf') if 'bootstrap_ui' in available_viewers else None
     spaviewer = get_manual(request, 'gvsigolfrontend_manual.pdf') if 'react_spa_ui' in available_viewers else None
+    
+    debug_info.append(f"Manual clásico encontrado: {viewer is not None}")
+    debug_info.append(f"Manual SPA encontrado: {spaviewer is not None}")
+    if spaviewer:
+        debug_info.append(f"URL del manual SPA: {spaviewer.get('url', 'Sin URL')}")
+    if viewer:
+        debug_info.append(f"URL del manual clásico: {viewer.get('url', 'Sin URL')}")
+    
+    debug_info.append(f"DOCS_PATH usado: {getattr(settings, 'DOCS_PATH', 'NO DEFINIDO')}")
+    debug_info.append(f"base_docs_url: {base_docs_url}")
+    
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
     for app_name in settings.INSTALLED_APPS:
@@ -1497,7 +1522,8 @@ def documentation(request):
                     })
         
     response = {
-        'plugin_manuals': plugin_manuals
+        'plugin_manuals': plugin_manuals,
+        'debug_info': debug_info  # Debug para mostrar en la página
     }
     
     if intro:
