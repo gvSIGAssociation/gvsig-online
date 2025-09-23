@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import logging
-from gvsigol_plugin_sentilo.services.sentilo import populate_sentilo_configs, process_sentilo_request, delete_sentilo_request
+from gvsigol_plugin_sentilo.services.sentilo import populate_sentilo_configs, process_sentilo_request, delete_sentilo_request, cleanup_orphaned_sentilo_tasks
 from gvsigol_plugin_sentilo.services.cleanup import clean_all_configured_tables
 from gvsigol_plugin_sentilo.forms import SentiloConfigurationForm
 from gvsigol_plugin_sentilo.models import SentiloConfiguration
@@ -33,10 +33,21 @@ def list_sentilo_configs(request):
 
 def delete_sentilo_config(request, config_id):
     if request.method == 'DELETE':
-        # Get the SentiloConfiguration object by ID or return a 404 error if it doesn't exist
-        delete_sentilo_request(config_id)
-        return HttpResponse('Config deleted successfully')
-    return HttpResponse('Method not allowed')
+        try:
+            # Get the SentiloConfiguration object by ID or return a 404 error if it doesn't exist
+            delete_sentilo_request(config_id)
+            LOGGER.info(f"[Sentilo] Vista: Configuración {config_id} eliminada exitosamente")
+            return JsonResponse({
+                'success': True,
+                'message': 'Configuración eliminada correctamente'
+            })
+        except Exception as e:
+            LOGGER.error(f"[Sentilo] Vista: Error eliminando configuración {config_id}: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error eliminando configuración: {str(e)}'
+            }, status=500)
+    return HttpResponse('Method not allowed', status=405)
 
 @require_http_methods(["POST"])
 def manual_cleanup(request):
@@ -56,4 +67,26 @@ def manual_cleanup(request):
         return JsonResponse({
             'success': False,
             'message': f'Error durante la limpieza: {str(e)}'
+        }, status=500)
+
+
+@require_http_methods(["POST"])
+def cleanup_orphaned_tasks(request):
+    """
+    Ejecuta la limpieza de tareas de Celery huérfanas.
+    Endpoint para ser llamado desde el frontend o manualmente por administradores.
+    """
+    try:
+        LOGGER.info("[Sentilo] Manual orphaned tasks cleanup triggered by user")
+        orphaned_count = cleanup_orphaned_sentilo_tasks()
+        return JsonResponse({
+            'success': True,
+            'message': f'Limpieza de tareas completada. Eliminadas {orphaned_count} tareas huérfanas.',
+            'orphaned_count': orphaned_count
+        })
+    except Exception as e:
+        LOGGER.error("[Sentilo] Orphaned tasks cleanup failed: %s", str(e))
+        return JsonResponse({
+            'success': False,
+            'message': f'Error durante la limpieza de tareas: {str(e)}'
         }, status=500)

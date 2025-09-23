@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 import pandas as pd
 import requests
 from gvsigol_plugin_sentilo.models import SentiloConfiguration
@@ -15,6 +16,9 @@ from sqlalchemy.dialects.postgresql import insert
 from gvsigol_plugin_sentilo.settings import SENTILO_DB, MUNICIPALITY
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 import json
+import logging
+
+LOGGER = logging.getLogger('gvsigol')
 
 def fetch_sentilo_api(url, identity_key, db_table, sensors):
     conn_string = 'postgresql://'+SENTILO_DB['user']+':'+SENTILO_DB['password']+'@'+SENTILO_DB['host']+':'+SENTILO_DB['port']+'/'+SENTILO_DB['database']
@@ -227,11 +231,10 @@ def sentilo_http_request(baseUrl, sensors, apikey):
     return entities
 
 def process_sentilo_request(form):
-    # domain = models.CharField(max_length=200)
-    # sentilo_identity_key = models.CharField(max_length=200)
-    # tabla_de_datos = models.CharField(max_length=200)
-    # sentilo_sensors = models.TextField()  # Assuming this can be a long list
-    # intervalo_de_actualizacion = models.IntegerField()
+    """
+    Procesa una nueva configuración de Sentilo creando la tarea periódica
+    y ejecutando la primera descarga de datos.
+    """
     id = form.id
     db_table_name = form.tabla_de_datos
     urlEntities = form.domain
@@ -239,35 +242,93 @@ def process_sentilo_request(form):
     interval = form.intervalo_de_actualizacion
     task = 'gvsigol_plugin_sentilo.tasks.fetch_sentilo_api_task'
     my_task_name = task + "." + str(id)
-    if not PeriodicTask.objects.filter(name=my_task_name).exists():
+    
+    LOGGER.info(f"[Sentilo] Procesando nueva configuración ID: {id}, tabla: {db_table_name}")
+    
+    try:
+        if not PeriodicTask.objects.filter(name=my_task_name).exists():
+            schedule, created = IntervalSchedule.objects.get_or_create(
+                every=interval,
+                period=IntervalSchedule.MINUTES,
+            )
+            
+            PeriodicTask.objects.create(
+                interval=schedule,
+                name=my_task_name,
+                task=task,
+                args=json.dumps([urlEntities, identity_key, db_table_name, form.sentilo_sensors])
+            )
+            LOGGER.info(f"[Sentilo] Tarea periódica creada: {my_task_name} cada {interval} minutos")
+        else:
+            LOGGER.warning(f"[Sentilo] Tarea periódica ya existe: {my_task_name}")
         
-        schedule, _ = IntervalSchedule.objects.get_or_create(
-            every = interval,
-            period = IntervalSchedule.MINUTES,
-        )
-        PeriodicTask.objects.create(
-            interval=schedule,
-            name=my_task_name,
-            task=task,
-            args=json.dumps([urlEntities, identity_key, db_table_name, form.sentilo_sensors])
-        )
-    sensors_string = form.sentilo_sensors
-    sensors = sensors_string.split(",")
-    fetch_sentilo_api(urlEntities, identity_key, db_table_name, sensors)
+        # Ejecutar descarga inicial
+        sensors_string = form.sentilo_sensors
+        sensors = sensors_string.split(",")
+        LOGGER.info(f"[Sentilo] Iniciando descarga inicial para {len(sensors)} sensores")
+        fetch_sentilo_api(urlEntities, identity_key, db_table_name, sensors)
+        LOGGER.info(f"[Sentilo] Descarga inicial completada para configuración ID: {id}")
+        
+    except Exception as e:
+        LOGGER.error(f"[Sentilo] Error procesando configuración ID {id}: {str(e)}")
+        raise
+    
     return
 
 
+@transaction.atomic
 def delete_sentilo_request(config_id):
+    """
+    Elimina una configuración de Sentilo y su tarea periódica de Celery asociada.
+    Usa transacciones atómicas para garantizar consistencia.
+    """
     task = 'gvsigol_plugin_sentilo.tasks.fetch_sentilo_api_task'
     my_task_name = task + "." + str(config_id)
-    config = get_object_or_404(SentiloConfiguration, id=config_id)
-    config.delete()
-    # remove any pending celery task 
-    tasks_to_delete = PeriodicTask.objects.filter(name=my_task_name)
-
-    if tasks_to_delete.exists():
-        tasks_to_delete.delete()
-    return
+    
+    LOGGER.info(f"[Sentilo] Iniciando eliminación de configuración ID: {config_id}")
+    
+    try:
+        # Verificar que la configuración existe
+        config = get_object_or_404(SentiloConfiguration, id=config_id)
+        LOGGER.info(f"[Sentilo] Configuración encontrada: {config.tabla_de_datos}")
+        
+        # Primero eliminar las tareas de Celery para evitar tareas huérfanas
+        tasks_to_delete = PeriodicTask.objects.filter(name=my_task_name)
+        
+        if tasks_to_delete.exists():
+            task_count = tasks_to_delete.count()
+            tasks_to_delete.delete()
+            LOGGER.info(f"[Sentilo] Eliminadas {task_count} tareas periódicas de Celery con nombre: {my_task_name}")
+        else:
+            LOGGER.warning(f"[Sentilo] No se encontraron tareas periódicas con nombre: {my_task_name}")
+        
+        # Después eliminar la configuración
+        config_name = config.tabla_de_datos  # Guardar para logging antes de borrar
+        config.delete()
+        LOGGER.info(f"[Sentilo] Configuración '{config_name}' eliminada exitosamente")
+        
+        # Ejecutar limpieza de tareas huérfanas tras el borrado
+        try:
+            LOGGER.info("[Sentilo] Ejecutando limpieza automática de tareas huérfanas tras borrado")
+            orphaned_count = cleanup_orphaned_sentilo_tasks()
+            if orphaned_count > 0:
+                LOGGER.info(f"[Sentilo] Limpieza automática completada: {orphaned_count} tareas huérfanas adicionales eliminadas")
+            else:
+                LOGGER.info("[Sentilo] Limpieza automática completada: no se encontraron tareas huérfanas adicionales")
+        except Exception as cleanup_error:
+            # No fallar el borrado principal si falla la limpieza automática
+            LOGGER.warning(f"[Sentilo] Error en limpieza automática de tareas huérfanas: {str(cleanup_error)}")
+        
+        return True
+        
+    except SentiloConfiguration.DoesNotExist:
+        LOGGER.error(f"[Sentilo] Configuración con ID {config_id} no existe")
+        raise
+        
+    except Exception as e:
+        LOGGER.error(f"[Sentilo] Error eliminando configuración ID {config_id}: {str(e)}")
+        # La transacción atómica hará rollback automáticamente
+        raise
 
 def populate_sentilo_configs(configs):
     configs_to_return = []
@@ -282,3 +343,48 @@ def populate_sentilo_configs(configs):
             config.last_run = "Never"
         configs_to_return.append(config)
     return configs_to_return
+
+
+def cleanup_orphaned_sentilo_tasks():
+    """
+    Limpia tareas de Celery huérfanas que no tienen configuración asociada.
+    Útil para limpiar tareas que quedaron de configuraciones eliminadas con errores.
+    """
+    task_prefix = 'gvsigol_plugin_sentilo.tasks.fetch_sentilo_api_task'
+    
+    LOGGER.info("[Sentilo] Iniciando limpieza de tareas huérfanas")
+    
+    try:
+        # Obtener todas las tareas de Sentilo
+        sentilo_tasks = PeriodicTask.objects.filter(
+            name__startswith=task_prefix + "."
+        )
+        
+        orphaned_count = 0
+        valid_config_ids = set(SentiloConfiguration.objects.values_list('id', flat=True))
+        
+        for task in sentilo_tasks:
+            try:
+                # Extraer el ID de la configuración del nombre de la tarea
+                # Formato: 'gvsigol_plugin_sentilo.tasks.fetch_sentilo_api_task.{config_id}'
+                config_id_str = task.name.replace(task_prefix + ".", "")
+                config_id = int(config_id_str)
+                
+                # Verificar si la configuración existe
+                if config_id not in valid_config_ids:
+                    LOGGER.warning(f"[Sentilo] Tarea huérfana encontrada: {task.name} (config_id: {config_id})")
+                    task.delete()
+                    orphaned_count += 1
+                    
+            except (ValueError, IndexError) as e:
+                # Si no se puede extraer el ID, es una tarea con formato incorrecto
+                LOGGER.warning(f"[Sentilo] Tarea con formato incorrecto encontrada: {task.name}")
+                task.delete()
+                orphaned_count += 1
+        
+        LOGGER.info(f"[Sentilo] Limpieza completada. Eliminadas {orphaned_count} tareas huérfanas")
+        return orphaned_count
+        
+    except Exception as e:
+        LOGGER.error(f"[Sentilo] Error durante limpieza de tareas huérfanas: {str(e)}")
+        raise

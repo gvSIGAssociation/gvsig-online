@@ -7,4 +7,5 @@ urlpatterns = [
     path('sentilo/list/', views.list_sentilo_configs, name='list_sentilo_configs'),
     path('sentilo/delete/<int:config_id>/', views.delete_sentilo_config, name='delete_sentilo_config'),
     path('sentilo/manual-cleanup/', views.manual_cleanup, name='manual_cleanup'),
+    path('sentilo/cleanup-orphaned-tasks/', views.cleanup_orphaned_tasks, name='cleanup_orphaned_tasks'),
 ]
