@@ -467,6 +467,14 @@ $(document).ready(function(){
 					    value: JSON.stringify(data.capabilities)
 					}).appendTo('form');
 				}
+				if (data.wmts_options) {
+					$('<input>').attr({
+					    type: 'hidden',
+					    id: 'wmts_options',
+					    name: 'wmts_options',
+					    value: JSON.stringify(data.wmts_options)
+					}).appendTo('form');
+				}
 
 				 if('layers' in data){
 					$("#id_layers").empty();
