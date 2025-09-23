@@ -102,6 +102,8 @@ class LayerSerializer(serializers.ModelSerializer):
                 field_group = self.get_field_group(form_groups, lang)
 
                 fields_dict = {field['name']: field for field in result['fields']}
+                fields_conf_dict = {field_conf['name']: field_conf for field_conf in fields} if fields else {}
+                pks_set = set(pks) if pks else set()
                 
                 ordered_field_names = []
                 if form_groups:
@@ -114,62 +116,40 @@ class LayerSerializer(serializers.ModelSerializer):
                 
                 ordered_fields = []
                 for index, field_name in enumerate(ordered_field_names):
-                    if field_name in fields_dict:
-                        field = fields_dict[field_name]
+                    if field_name not in fields_dict:
+                        continue
                         
-                        field['order'] = index
-                        
-                        if fields is not None:
-                            for field_conf in fields:
-                                if field_conf['name'] == field_name:
-                                    try:
-                                        field['mandatory'] = field_conf['mandatory']
-                                    except Exception:
-                                        field['mandatory'] = False
-                                    try:
-                                        field['editable'] = field_conf['editable']
-                                    except Exception:
-                                        field['editable'] = True
-                                    try:
-                                        field['visible'] = field_conf['visible']
-                                    except Exception:
-                                        field['visible'] = True
-                                    try:
-                                        field['editableactive'] = field_conf['editableactive']
-                                    except Exception:
-                                        field['editableactive'] = True
-                                    try:
-                                        field['infovisible'] = field_conf['infovisible']
-                                    except Exception:
-                                        field['infovisible'] = True
-
-
-                        if pks is not None and len(pks) > 0:
-                            for pk in pks:
-                                if field_name == pk:
-                                    field['pk'] = 'YES'
-                                    break
-                                else:
-                                    field['pk'] = 'NO'
-                        
-                        if field['type'].endswith('enumeration'):
-                            items = services_utils.get_enum_item_list(layer, field_name)
-                            list_ = []
-                            for j in items:
-                                list_.append(j.name)
-                            field['values'] = list_
-                        
-                        field['translate'] = self.translate(layer.conf, field_name, lang)
-                        if field_name in field_group:
-                            field['groupname'] = field_group[field_name]['groupname']
-                            field['grouporder'] = field_group[field_name]['grouporder']
-                            field['fieldorder'] = field_group[field_name]['fieldorder']  
-                        
-                        ordered_fields.append(field)
+                    field = fields_dict[field_name].copy() 
+                    field['order'] = index
+                    
+                    if field_name in fields_conf_dict:
+                        field_conf = fields_conf_dict[field_name]
+                        field.update({
+                            'mandatory': field_conf.get('mandatory', False),
+                            'editable': field_conf.get('editable', True),
+                            'visible': field_conf.get('visible', True),
+                            'editableactive': field_conf.get('editableactive', True),
+                            'infovisible': field_conf.get('infovisible', True)
+                        })
+                    
+                    field['pk'] = 'YES' if field_name in pks_set else 'NO'
+                    
+                    if field['type'].endswith('enumeration'):
+                        items = services_utils.get_enum_item_list(layer, field_name)
+                        field['values'] = [item.name for item in items]
+                    
+                    field['translate'] = self.translate(layer.conf, field_name, lang)
+                    if field_name in field_group:
+                        field.update({
+                            'groupname': field_group[field_name]['groupname'],
+                            'grouporder': field_group[field_name]['grouporder'],
+                            'fieldorder': field_group[field_name]['fieldorder']
+                        })
+                    
+                    ordered_fields.append(field)
                 
                 result['fields'] = ordered_fields
-
-            return result
+                return result
 
         except Exception:
             return
