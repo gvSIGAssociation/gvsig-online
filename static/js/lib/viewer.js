@@ -22,6 +22,8 @@
 
 var viewer = viewer || {};
 
+
+
 /**
  * TODO
  */
@@ -565,32 +567,41 @@ viewer.core = {
 		}
     	
     	if (externalLayer['type'] == 'WMTS') {
-    		
-    		var xmlDoc = null;
-    		try {
-    			xmlDoc = jQuery.parseXML(JSON.parse(externalLayer['capabilities']));
-    		} catch(err){
-    			xmlDoc = jQuery.parseXML(externalLayer['capabilities']);
-    			
-    		}
-    		
-    		try {
-    			var parser = new ol.format.WMTSCapabilities();
-	    		var result = parser.read(xmlDoc);
-	    		
-	    		var options = ol.source.WMTS.optionsFromCapabilities(result, {
-					matrixSet: externalLayer['matrixset'],
-			        layer: externalLayer['layers']
-			    });
-				var is_baselayer = false;
-				for(var k=0; k<options.urls.length; k++){
-					if(externalLayer['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
-						is_baselayer = true;
-					}
+
+			if (externalLayer.wmts_options) {
+				var wmtsSource = this._createWMTSTileSourceFromOptions(externalLayer.wmts_options);
+			}
+			else {
+				var xmlDoc = null;
+				try {
+					xmlDoc = jQuery.parseXML(JSON.parse(externalLayer['capabilities']));
+				} catch(err){
+					xmlDoc = jQuery.parseXML(externalLayer['capabilities']);
+					
 				}
-				options.crossOrigin = 'anonymous';
-	    		
-				var wmtsSource = new ol.source.WMTS((options));
+				try {
+					var parser = new ol.format.WMTSCapabilities();
+					var result = parser.read(xmlDoc);
+					
+					var wmts_options = ol.source.WMTS.optionsFromCapabilities(result, {
+						matrixSet: externalLayer['matrixset'],
+						layer: externalLayer['layers']
+					});
+				} catch(err){
+					console.log(err);
+					
+				}		
+			
+    		
+				try {
+					wmts_options.crossOrigin = 'anonymous';
+					var wmtsSource = new ol.source.WMTS(wmts_options);
+				} catch(err){
+					console.log(err);
+					
+				}
+			}
+			try {
 				wmtsSource.layer_name = externalLayer['name'];
 				if (checkTileLoadError) {
 					wmtsSource.loadend = false;
@@ -642,36 +653,34 @@ viewer.core = {
 						
 					});
 				}
-	    		var wmtsLayer = new ol.layer.Tile({
-	    			id: layerId,
+				var wmtsLayer = new ol.layer.Tile({
+					id: layerId,
 					source: wmtsSource,
 					visible: visible
-	    		});
-	    		wmtsLayer.id = layerId;
-	    		wmtsLayer.baselayer = externalLayer['baselayer'];
-	    		wmtsLayer.external = true;
-	    		wmtsLayer.queryable = false;
-	    		wmtsLayer.imported = false;
+				});
+				wmtsLayer.id = layerId;
+				wmtsLayer.baselayer = externalLayer['baselayer'];
+				wmtsLayer.external = true;
+				wmtsLayer.queryable = false;
+				wmtsLayer.imported = false;
 				wmtsLayer.layer_name = externalLayer['name'];
 				wmtsLayer.title = externalLayer['title'];
-	    		wmtsLayer.infoFormat = externalLayer['infoformat'];
-	    		wmtsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
-	    		wmtsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
-	    		wmtsLayer.detailed_info_html = externalLayer['detailed_info_html'];
-	    		wmtsLayer.setZIndex(parseInt(externalLayer.order));				
+				wmtsLayer.infoFormat = externalLayer['infoformat'];
+				wmtsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
+				wmtsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
+				wmtsLayer.detailed_info_html = externalLayer['detailed_info_html'];
+				wmtsLayer.setZIndex(parseInt(externalLayer.order));				
 				self.map.addLayer(wmtsLayer);
 
 				if (externalLayer['layer_id'] == layer_overview_id){
 					overviewSource.push(wmtsSource)
 				}
 
-    		} catch(err){
-    			console.log(err);
-    			
-    		}
+			} catch(err){
+				console.log(err);
+			}	
 		}
-
-    	if (externalLayer['type'] == 'Bing') {
+    	else if (externalLayer['type'] == 'Bing') {
     		bingSource = new ol.source.BingMaps({
 				key: externalLayer['key'],
 				imagerySet: externalLayer['layers']
@@ -760,7 +769,41 @@ viewer.core = {
 		}
 
 	},
-
+	_createWMTSTileSourceFromOptions: function(wmtsOptions) {
+		var origins = externalLayer.wmts_options.tileGrid.origins;
+		var tileGrid = new ol.tilegrid.WMTS({
+			extent: externalLayer.wmts_options.tileGrid.extent,
+			origins: origins,
+			//sizes: sizes,
+			resolutions: externalLayer.wmts_options.tileGrid.resolutions,
+			matrixIds: externalLayer.wmts_options.tileGrid.matrixIds,
+			tileSizes: externalLayer.wmts_options.tileGrid.tileSizes
+		});
+		if (externalLayer.wmts_options.tileGrid.fullTileRanges) {
+			var fullTileRanges = [];
+			for (var i=0; i<externalLayer.wmts_options.tileGrid.fullTileRanges.length; i++) {
+				fullTileRanges.push(new viewer.olcustom.TileRange(
+					externalLayer.wmts_options.tileGrid.fullTileRanges[i].minX,
+					externalLayer.wmts_options.tileGrid.fullTileRanges[i].maxX,
+					externalLayer.wmts_options.tileGrid.fullTileRanges[i].minY,
+					externalLayer.wmts_options.tileGrid.fullTileRanges[i].maxY
+				));
+			}
+			tileGrid.a = fullTileRanges; // nasty hack: minimized name for fullTileRanges
+		}
+		return new ol.source.WMTS({
+			urls: externalLayer.wmts_options.urls,
+			layer: externalLayer['layers'],
+			matrixSet: externalLayer['matrixset'],
+			format: externalLayer.wmts_options.format,
+			projection: ol.proj.get(externalLayer.wmts_options.projection),
+			requestEncoding: externalLayer.wmts_options.requestEncoding,
+			tileGrid: tileGrid,
+			style: externalLayer.wmts_options.style,
+			dimensions: externalLayer.wmts_options.dimensions,
+			wrapX: true
+		});
+	},
 	_loadInternalLayer: function(layerConf, group, checkTileLoadError, layer_overview_id) {
 		var self = this;
 
@@ -888,34 +931,38 @@ viewer.core = {
 		} else {
 			if(url.endsWith('/gwc/service/wmts')){
 				var default_srs = 'EPSG:3857';
-				var projection = new ol.proj.get(default_srs);
-				var projectionExtent = projection.getExtent();
-				var size = ol.extent.getWidth(projectionExtent) / 256;
-				var resolutions = new Array(21);
-				var matrixIds = new Array(21);
-				for (var z = 0; z < 21; ++z) {
-				    resolutions[z] = size / Math.pow(2, z);
-				    matrixIds[z] = default_srs+':'+z;
+				if (layerConf.wmts_options) {
+					var wmtsSource = this._createWMTSTileSourceFromOptions(layerConf.wmts_options);
+				} else {
+					var projection = new ol.proj.get(default_srs);
+					var projectionExtent = projection.getExtent();
+					var size = ol.extent.getWidth(projectionExtent) / 256;
+					var resolutions = new Array(21);
+					var matrixIds = new Array(21);
+					for (var z = 0; z < 21; ++z) {
+						resolutions[z] = size / Math.pow(2, z);
+						matrixIds[z] = default_srs+':'+z;
+					}
+
+					var tileGrid = new ol.tilegrid.WMTS(
+							{
+								origin: ol.extent.getTopLeft(projectionExtent),
+								resolutions: resolutions,
+								matrixIds: matrixIds
+							}
+					);
+
+
+					var wmtsSource = new ol.source.WMTS({
+						layer: layerConf.workspace + ':' + layerConf.name,
+						url: url,
+						projection: projection,
+						matrixSet: default_srs,
+						format:format,
+						tileGrid: tileGrid,
+						wrapX: true
+					});
 				}
-
-				var tileGrid = new ol.tilegrid.WMTS(
-				        {
-				            origin: ol.extent.getTopLeft(projectionExtent),
-				            resolutions: resolutions,
-				            matrixIds: matrixIds
-				        }
-				);
-
-
-				var wmtsSource = new ol.source.WMTS({
-					layer: layerConf.workspace + ':' + layerConf.name,
-					url: url,
-					projection: projection,
-					matrixSet: default_srs,
-					format:format,
-					tileGrid: tileGrid,
-					wrapX: true
-				});
 				if (self.conf.user && self.conf.user.token) {
 					wmtsSource.setTileLoadFunction(customLoadFunction);
 				};
@@ -1432,3 +1479,27 @@ viewer.core = {
 		}
 	}
 }
+
+/**
+ * Necessary since TileRange is internal in OL.
+ */
+viewer.olcustom = viewer.olcustom || {};
+viewer.olcustom.TileRange = function(minX, maxX, minY, maxY) {
+	this.minX = minX;
+	this.maxX = maxX;
+	this.minY = minY;
+	this.maxY = maxY;
+	// nasty hack: minimized names
+	this.da = minX;
+	this.ba = maxX;
+	this.fa = minY;
+	this.ja = maxY;
+  };
+  
+viewer.olcustom.TileRange.prototype.contains = function(tileCoord) {
+return this.containsXY(tileCoord[1], tileCoord[2]);
+};
+
+viewer.olcustom.TileRange.prototype.containsXY = function(x, y) {
+return this.minX <= x && x <= this.maxX && this.minY <= y && y <= this.maxY;
+};

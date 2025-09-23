@@ -1087,6 +1087,9 @@ def project_get_conf(request):
                         layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
                         if l.cached:
                             layer['cache_url'] = core_utils.get_cache_url(workspace)
+                            wmts_options = params['wmts_options']
+                            if layer['conf'].get('wmts_options'):
+                                layer['conf']['wmts_options'] = services_utils.wmts_options_for_openlayers(layer['conf'].get('wmts_options'), layer.get('format'), styles=layer['styles'], projection=project.viewer_default_crs)
                         else:
                             layer['cache_url'] = core_utils.get_wms_url(workspace)
 
@@ -1166,23 +1169,24 @@ def project_get_conf(request):
                 layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
                 layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
                 
-                if l.cached:
-                    if l.external_params:
-                        params = json.loads(l.external_params)
-                        layer['cache_url'] = params.get('cache_url')
-                        layer['format'] = params.get('format')
-                    
                 if l.external_params:
                     params = json.loads(l.external_params)
-                    if l.type == 'WMTS' and not 'capabilities' in params:
-                        version = settings.WMTS_MAX_VERSION
-                        if 'version' in params:
-                            version = params['version']
-                        wmts = WebMapTileService(params['url'], version=version)
-                        capabilities = wmts.getServiceXML()
-                        params['capabilities'] = capabilities.decode('utf-8')
-                        l.external_params = json.dumps(params)
-                        l.save()
+                    if l.type == 'WMTS':
+                        if 'wmts_options' in params:
+                            wmts_options = params['wmts_options']
+                            services_utils.wmts_options_for_openlayers(wmts_options, params['format'], projection=project.viewer_default_crs)
+                            if 'capabilities' in params:
+                                del params['capabilities']
+                                
+                        elif not 'capabilities' in params:
+                            version = settings.WMTS_MAX_VERSION
+                            if 'version' in params:
+                                version = params['version']
+                            wmts = WebMapTileService(params['url'], version=version)
+                            capabilities = wmts.getServiceXML()
+                            params['capabilities'] = capabilities.decode('utf-8')
+                            l.external_params = json.dumps(params)
+                            l.save()
                     layer.update(params)
                     if params.get('get_map_url'):
                         layer['url'] = params.get('get_map_url')
