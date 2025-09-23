@@ -1259,6 +1259,8 @@ def layer_add_with_group(request, layergroup_id):
 
                 utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
                 do_config_layer(server, newRecord, featuretype)
+                if newRecord.cached:
+                    tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
 
                 if redirect_to_layergroup and (layergroup_id != newRecord.layer_group.id):
                     new_layergroup_id = newRecord.layer_group.id
@@ -1497,9 +1499,12 @@ def layer_update(request, layer_id):
 
             params = {}
             params['format'] = request.POST.get('format')
+
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
             layer.save()
+            if layer.cached:
+                tasks.update_wmts_layer_info.apply_async(args=[layer.id])
 
             if 'layer-image' in request.FILES:
                 up_file = request.FILES['layer-image']
@@ -3614,8 +3619,10 @@ def layer_create_with_group(request, layergroup_id):
                         }
                         initial_conf['fields'].append(field_conf)
                     
-                    newRecord.conf = initial_conf
+                    newRecord.conf = initial_conf                    
                     newRecord.save()
+                    if newRecord.cached:
+                        tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
 
                     for i in form.cleaned_data['fields']:
                         if 'enumkey' in i:
@@ -5174,7 +5181,10 @@ def external_layer_add(request):
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['tilematrix'] = request.POST.get('tilematrix')
-                params['capabilities'] = request.POST.get('capabilities')
+                params['capabilities'] = request.POST.get('capabilities') ## TODO remove this
+                wmts_options = json.loads(request.POST.get('wmts_options'))
+                wmts_options = utils.wmts_options_for_openlayers(wmts_options, params['format'])
+                params['wmts_options'] = wmts_options
 
             if external_layer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -5304,7 +5314,14 @@ def external_layer_update(request, external_layer_id):
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['tilematrix'] = request.POST.get('tilematrix')
-                params['capabilities'] = request.POST.get('capabilities')
+                params['capabilities'] = request.POST.get('capabilities') ## TODO remove this
+                try:
+                    wmts_options = json.loads(request.POST.get('wmts_options'))
+                    wmts_options = utils.wmts_options_for_openlayers(wmts_options, params['format'])
+                    params['wmts_options'] = wmts_options
+                except Exception as e:
+                    logger.exception("Error updating wmts options")
+                    pass
 
             if external_layer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -5405,7 +5422,6 @@ def external_layer_delete(request, external_layer_id):
         return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
 
 
-
 def ows_get_capabilities(url, service, version, layer, remove_extra_params=True):
     if remove_extra_params:
         # remove any param in the query string
@@ -5418,6 +5434,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     styles = []
     matrixsets = []
     capabilities = None
+    wmts_options = None
     title = ''
     crs_list = None
     get_map_url = url
@@ -5487,7 +5504,11 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 capabilities = capabilities.decode('utf-8')
 
             layers = list(wmts.contents)
-            if (not layer) and layers.__len__() > 0:
+
+            if layer:
+                wmts_options = utils.get_wmts_options(wmts, layer)
+           
+            if (not layer) and len(layers) > 0:
                 layer = layers[0]
             else:
                 lyr = wmts.contents.get(layer)
@@ -5532,6 +5553,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     styles.append(style_def)
                 for lyr_style in wmts.contents.get(layer).styles:
                     styles.append(lyr_style)
+
     except Exception as e:
         logger.exception(str(e))
         data = {'response': '500',
@@ -5550,8 +5572,10 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         'capabilities': capabilities,
         'crs_list': crs_list,
         'get_map_url': get_map_url,
-        'tilematrix' : matrix 
+        'tilematrix' : matrix
     }
+    if wmts_options:
+        data['wmts_options'] = wmts_options
 
     return data
 

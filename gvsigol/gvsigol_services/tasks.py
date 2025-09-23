@@ -13,9 +13,9 @@ from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessSt
 #from gvsigol_services.decorators import start_new_thread
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, LayerGroup
-from gvsigol_services.utils import set_layer_extent
-
+from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer
 import logging
+
 logger = logging.getLogger('gvsigol')
 
 """
@@ -485,4 +485,18 @@ def update_layer_info(self):
         server.reload_nodes()
 
 
+
+
+@celery_app.task(bind=True)
+def update_wmts_layer_info(self, layer_id):
+    layer = Layer.objects.get(id=layer_id)
+    if layer.external:
+        pass
+    else:
+        wmts_options = get_wmts_options_from_layer(layer)
+        if wmts_options:
+            external_params = json.loads(layer.external_params) if layer.external_params else {}
+            external_params['wmts_options'] = wmts_options
+            layer.external_params = json.dumps(external_params)
+            layer.save()
 
