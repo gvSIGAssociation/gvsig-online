@@ -96,59 +96,78 @@ class LayerSerializer(serializers.ModelSerializer):
 
         try:
             i, table, schema = services_utils.get_db_connect_from_layer(layer)
-            with i as con: # connection will auoclose
+            with i as con:
                 pks = con.get_pk_columns(table, schema=schema)
 
                 field_group = self.get_field_group(form_groups, lang)
 
-                for i in result['fields']:
-                    #Se añade el check de "Obligatorio" de los campos de una capa
-                    if fields is not None:
-                        for field in fields:
-                            if field['name'] == i['name']:
-                                try:
-                                    i['mandatory'] = field['mandatory']
-                                except Exception:
-                                    i['mandatory'] = False
-                                try:
-                                    i['editable'] = field['editable']
-                                except Exception:
-                                    i['editable'] = True
-                                try:
-                                    i['visible'] = field['visible']
-                                except Exception:
-                                    i['visible'] = True
-                                try:
-                                    i['editableactive'] = field['editableactive']
-                                except Exception:
-                                    i['editableactive'] = True
-                                try:
-                                    i['infovisible'] = field['infovisible']
-                                except Exception:
-                                    i['infovisible'] = True
+                fields_dict = {field['name']: field for field in result['fields']}
+                
+                ordered_field_names = []
+                if form_groups:
+                    for group in form_groups:
+                        if 'fields' in group:
+                            ordered_field_names.extend(group['fields'])
+                
+                if not ordered_field_names:
+                    ordered_field_names = list(fields_dict.keys())
+                
+                ordered_fields = []
+                for index, field_name in enumerate(ordered_field_names):
+                    if field_name in fields_dict:
+                        field = fields_dict[field_name]
+                        
+                        field['order'] = index
+                        
+                        if fields is not None:
+                            for field_conf in fields:
+                                if field_conf['name'] == field_name:
+                                    try:
+                                        field['mandatory'] = field_conf['mandatory']
+                                    except Exception:
+                                        field['mandatory'] = False
+                                    try:
+                                        field['editable'] = field_conf['editable']
+                                    except Exception:
+                                        field['editable'] = True
+                                    try:
+                                        field['visible'] = field_conf['visible']
+                                    except Exception:
+                                        field['visible'] = True
+                                    try:
+                                        field['editableactive'] = field_conf['editableactive']
+                                    except Exception:
+                                        field['editableactive'] = True
+                                    try:
+                                        field['infovisible'] = field_conf['infovisible']
+                                    except Exception:
+                                        field['infovisible'] = True
 
-                    #Se añade si el campo es PK o no
-                    if pks is not None and len(pks) > 0:
-                        for pk in pks:
-                            if i['name'] == pk:
-                                i['pk'] = 'YES'
-                                break
-                            else:
-                                i['pk'] = 'NO'
-                    
-                    #Se añade la lista de valores que puede tomar el campo si este es enumerado
-                    if i['type'].endswith('enumeration'):
-                        items = services_utils.get_enum_item_list(layer, i['name'])
-                        list_ = []
-                        for j in items:
-                            list_.append(j.name)
-                        i['values'] = list_
-                    
-                    i['translate'] = self.translate(layer.conf, i['name'], lang)
-                    if i['name'] in field_group:
-                        i['groupname'] = field_group[i['name']]['groupname']
-                        i['grouporder'] = field_group[i['name']]['grouporder']
-                        i['fieldorder'] = field_group[i['name']]['fieldorder']  
+
+                        if pks is not None and len(pks) > 0:
+                            for pk in pks:
+                                if field_name == pk:
+                                    field['pk'] = 'YES'
+                                    break
+                                else:
+                                    field['pk'] = 'NO'
+                        
+                        if field['type'].endswith('enumeration'):
+                            items = services_utils.get_enum_item_list(layer, field_name)
+                            list_ = []
+                            for j in items:
+                                list_.append(j.name)
+                            field['values'] = list_
+                        
+                        field['translate'] = self.translate(layer.conf, field_name, lang)
+                        if field_name in field_group:
+                            field['groupname'] = field_group[field_name]['groupname']
+                            field['grouporder'] = field_group[field_name]['grouporder']
+                            field['fieldorder'] = field_group[field_name]['fieldorder']  
+                        
+                        ordered_fields.append(field)
+                
+                result['fields'] = ordered_fields
 
             return result
 
