@@ -118,6 +118,14 @@ class LayerSerializer(serializers.ModelSerializer):
                 fields_conf_dict = {field_conf['name']: field_conf for field_conf in fields} if fields else {}
                 pks_set = set(pks) if pks else set()
                 
+                conf_field_names = set()
+                if fields:
+                    conf_field_names = {field_conf['name'] for field_conf in fields}
+                
+                db_field_names = set(fields_dict.keys())
+                
+                missing_fields = db_field_names - conf_field_names
+                
                 ordered_field_names = []
                 if form_groups:
                     for group in form_groups:
@@ -126,6 +134,9 @@ class LayerSerializer(serializers.ModelSerializer):
                 
                 if not ordered_field_names:
                     ordered_field_names = list(fields_dict.keys())
+                
+                # añade campos que están en la BD pero no en conf (como wkb_geometry)
+                ordered_field_names.extend(list(missing_fields))
                 
                 ordered_fields = []
                 for index, field_name in enumerate(ordered_field_names):
@@ -146,12 +157,12 @@ class LayerSerializer(serializers.ModelSerializer):
                         })
                     
                     field['pk'] = 'YES' if field_name in pks_set else 'NO'
+                    field['translate'] = translations_dict.get(field_name, field_name)
                     
                     if field['type'].endswith('enumeration'):
                         items = services_utils.get_enum_item_list(layer, field_name)
                         field['values'] = [item.name for item in items]
                 
-                    field['translate'] = translations_dict.get(field_name, field_name)
                     if field_name in field_group:
                         field.update({
                             'groupname': field_group[field_name]['groupname'],
