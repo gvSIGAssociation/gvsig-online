@@ -94,6 +94,19 @@ class LayerSerializer(serializers.ModelSerializer):
         except Exception:
             return
 
+        translations_dict = {}
+        if layer.conf:
+            try:
+                conf_dict = ast.literal_eval(layer.conf)
+                fields_conf = conf_dict.get('fields', [])
+                for field_conf in fields_conf:
+                    field_name = field_conf.get('name')
+                    if field_name:
+                        translation_key = f'title-{lang}'
+                        translations_dict[field_name] = field_conf.get(translation_key, field_name)
+            except Exception:
+                pass
+
         try:
             i, table, schema = services_utils.get_db_connect_from_layer(layer)
             with i as con:
@@ -137,8 +150,8 @@ class LayerSerializer(serializers.ModelSerializer):
                     if field['type'].endswith('enumeration'):
                         items = services_utils.get_enum_item_list(layer, field_name)
                         field['values'] = [item.name for item in items]
-                    
-                    field['translate'] = self.translate(layer.conf, field_name, lang)
+                
+                    field['translate'] = translations_dict.get(field_name, field_name)
                     if field_name in field_group:
                         field.update({
                             'groupname': field_group[field_name]['groupname'],
@@ -153,21 +166,6 @@ class LayerSerializer(serializers.ModelSerializer):
 
         except Exception:
             return
-    
-    def translate(self, conf, fieldName, lang):
-        try:
-            result = fieldName
-            conf = ast.literal_eval(conf)
-            for j in conf['fields']:
-                if fieldName == j['name']:
-                    try:
-                        result = j['title-' + lang]
-                        break
-                    except Exception:
-                        result = fieldName
-            return result
-        except Exception:
-            return result
 
     def get_description_(self, obj):
         if obj.datastore:
