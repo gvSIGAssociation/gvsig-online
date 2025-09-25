@@ -1087,7 +1087,7 @@ def project_get_conf(request):
                         if l.cached:
                             layer['cache_url'] = core_utils.get_cache_url(workspace)
                             if params.get('wmts_options'):
-                                layer['conf']['wmts_options'] = services_utils.wmts_options_for_openlayers(params.get('wmts_options'), layer.get('format'), styles=layer['styles'], projection=project.viewer_default_crs)
+                                layer['conf']['wmts_options'] = services_utils.wmts_options_for_openlayers(params.get('wmts_options'), layer.get('format'), layer_styles=layer['styles'], projection=project.viewer_default_crs)
                         else:
                             layer['cache_url'] = core_utils.get_wms_url(workspace)
 
