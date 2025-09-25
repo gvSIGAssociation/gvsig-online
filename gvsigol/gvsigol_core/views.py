@@ -1087,9 +1087,8 @@ def project_get_conf(request):
                         layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
                         if l.cached:
                             layer['cache_url'] = core_utils.get_cache_url(workspace)
-                            wmts_options = params['wmts_options']
-                            if layer['conf'].get('wmts_options'):
-                                layer['conf']['wmts_options'] = services_utils.wmts_options_for_openlayers(layer['conf'].get('wmts_options'), layer.get('format'), styles=layer['styles'], projection=project.viewer_default_crs)
+                            if params.get('wmts_options'):
+                                layer['conf']['wmts_options'] = services_utils.wmts_options_for_openlayers(params.get('wmts_options'), layer.get('format'), styles=layer['styles'], projection=project.viewer_default_crs)
                         else:
                             layer['cache_url'] = core_utils.get_wms_url(workspace)
 
@@ -1174,7 +1173,7 @@ def project_get_conf(request):
                     if l.type == 'WMTS':
                         if 'wmts_options' in params:
                             wmts_options = params['wmts_options']
-                            services_utils.wmts_options_for_openlayers(wmts_options, params['format'], projection=project.viewer_default_crs)
+                            params['wmts_options'] = services_utils.wmts_options_for_openlayers(wmts_options, params['format'], projection=project.viewer_default_crs)
                             if 'capabilities' in params:
                                 del params['capabilities']
                                 

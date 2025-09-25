@@ -930,7 +930,7 @@ viewer.core = {
 		} else {
 			if(url.endsWith('/gwc/service/wmts')){
 				var default_srs = 'EPSG:3857';
-				if (layerConf.wmts_options) {
+				if (layerConf.wmts_options && layerConf.wmts_options.tileGrid) {
 					var wmtsSource = this._createWMTSTileSourceFromOptions(layerConf.wmts_options);
 				} else {
 					var projection = new ol.proj.get(default_srs);
