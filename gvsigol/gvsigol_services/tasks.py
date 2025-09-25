@@ -525,4 +525,4 @@ def update_wmts_layer_info(self, layer_id):
     if layer.external:
         pass
     else:
-        update_internal_wmts_layer_info(layer)
+        update_internal_wmts_layer_options(layer)
