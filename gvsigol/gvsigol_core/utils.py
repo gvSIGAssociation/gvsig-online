@@ -320,7 +320,7 @@ def toc_remove_layer(layer):
             #Si json.loads da error en el parseo no se hace nada, se pasa al siguiente e impedimos que pete y se corte la ejecucíón
             pass
 
-def get_absolute_url(url, headers):
+def get_absolute_url(url, headers={}):
     """
     Converts a relative URL to an absolute URL. Usage examples:
     get_absolute_url('/relative/url/', request.META)
@@ -353,7 +353,7 @@ def get_absolute_url(url, headers):
     base_url = settings.BASE_URL
     try:
         origin = headers.get('HTTP_ORIGIN')
-        if origin != base_url:
+        if origin and origin != base_url:
             if origin in settings.ALLOWED_HOST_NAMES:
                 base_url = origin
             else:
