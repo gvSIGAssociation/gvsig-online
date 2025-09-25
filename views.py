@@ -47,7 +47,6 @@ from django.conf import settings as django_settings
 import gvsigol_services.utils as services_utils
 from operator import itemgetter
 from django.core.mail import send_mail
-from owslib.util import Authentication
 from owslib.wmts import WebMapTileService
 from django.utils import timezone
 import gvsigol
