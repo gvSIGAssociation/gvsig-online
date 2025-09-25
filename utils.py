@@ -1417,9 +1417,17 @@ def get_wmts_options_from_layer(layer # gvsigol_services.models.Layer object
 ):
     try:
         url = layer.datastore.workspace.server.getWmtsEndpoint()
-        auth = Authentication(username=layer.datastore.workspace.server.user, password=layer.datastore.workspace.server.password, verify=False)
+        auth = AuthPatch(username=layer.datastore.workspace.server.user, password=layer.datastore.workspace.server.password, verify=False)
         wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
         return get_wmts_options(wmts, layer.get_qualified_name())
     except Exception as e:
         logger.exception("Error getting wmts options")
     return None
+
+class AuthPatch(Authentication):
+    """
+    Patch owslib.util.Authentication to circumvent _auth_delegate bug in older versions of owslib (<= 0.23.0)
+    """
+    def __init__(self, *args, **kwargs):
+        self._auth_delegate = kwargs.get('auth_delegate')
+        super().__init__(*args, **kwargs)
