@@ -770,37 +770,36 @@ viewer.core = {
 
 	},
 	_createWMTSTileSourceFromOptions: function(wmtsOptions) {
-		var origins = externalLayer.wmts_options.tileGrid.origins;
+		var origins = wmtsOptions.tileGrid.origins;
 		var tileGrid = new ol.tilegrid.WMTS({
-			extent: externalLayer.wmts_options.tileGrid.extent,
+			extent: wmtsOptions.tileGrid.extent,
 			origins: origins,
-			//sizes: sizes,
-			resolutions: externalLayer.wmts_options.tileGrid.resolutions,
-			matrixIds: externalLayer.wmts_options.tileGrid.matrixIds,
-			tileSizes: externalLayer.wmts_options.tileGrid.tileSizes
+			resolutions: wmtsOptions.tileGrid.resolutions,
+			matrixIds: wmtsOptions.tileGrid.matrixIds,
+			tileSizes: wmtsOptions.tileGrid.tileSizes
 		});
-		if (externalLayer.wmts_options.tileGrid.fullTileRanges) {
+		if (wmtsOptions.tileGrid.fullTileRanges) {
 			var fullTileRanges = [];
-			for (var i=0; i<externalLayer.wmts_options.tileGrid.fullTileRanges.length; i++) {
+			for (var i=0; i<wmtsOptions.tileGrid.fullTileRanges.length; i++) {
 				fullTileRanges.push(new viewer.olcustom.TileRange(
-					externalLayer.wmts_options.tileGrid.fullTileRanges[i].minX,
-					externalLayer.wmts_options.tileGrid.fullTileRanges[i].maxX,
-					externalLayer.wmts_options.tileGrid.fullTileRanges[i].minY,
-					externalLayer.wmts_options.tileGrid.fullTileRanges[i].maxY
+					wmtsOptions.tileGrid.fullTileRanges[i].minX,
+					wmtsOptions.tileGrid.fullTileRanges[i].maxX,
+					wmtsOptions.tileGrid.fullTileRanges[i].minY,
+					wmtsOptions.tileGrid.fullTileRanges[i].maxY
 				));
 			}
 			tileGrid.a = fullTileRanges; // nasty hack: minimized name for fullTileRanges
 		}
 		return new ol.source.WMTS({
-			urls: externalLayer.wmts_options.urls,
-			layer: externalLayer['layers'],
-			matrixSet: externalLayer['matrixset'],
-			format: externalLayer.wmts_options.format,
-			projection: ol.proj.get(externalLayer.wmts_options.projection),
-			requestEncoding: externalLayer.wmts_options.requestEncoding,
+			urls: wmtsOptions.urls,
+			layer: wmtsOptions.layer,
+			matrixSet: wmtsOptions.matrixSet,
+			format: wmtsOptions.format,
+			projection: ol.proj.get(wmtsOptions.projection),
+			requestEncoding: wmtsOptions.requestEncoding,
 			tileGrid: tileGrid,
-			style: externalLayer.wmts_options.style,
-			dimensions: externalLayer.wmts_options.dimensions,
+			style: wmtsOptions.style,
+			dimensions: wmtsOptions.dimensions,
 			wrapX: true
 		});
 	},
