@@ -1230,6 +1230,7 @@ def get_wmts_options(
 
             tilematrixlimits_obj = layer.tilematrixsetlinks.get(current_matrix_set_id).tilematrixlimits
             full_tile_ranges = []
+            full_tile_ranges_ol4 = []
             ol_sizes = []
             ol_origins = []
 
@@ -1247,6 +1248,12 @@ def get_wmts_options(
                             "minY": mintilerow,
                             "maxY": maxtilerow
                         })
+                    full_tile_ranges_ol4.append({
+                        "minX": mintilecol,
+                        "maxX": maxtilecol,
+                        "minY": mintilerow-matrices[idx].matrixheight,
+                        "maxY": maxtilerow-matrices[idx].matrixheight
+                    })
                     scale_denominator = tms.tilematrix[m.identifier].scaledenominator
                     res = scale_denominator * PIXEL_SIZE_M
                     origin = _parse_tlc(matrices[idx].topleftcorner)
@@ -1338,6 +1345,7 @@ def get_wmts_options(
             tile_grid['extent'] = extent
         else:
             tile_grid['fullTileRanges'] = full_tile_ranges
+            tile_grid['fullTileRanges_ol4'] = full_tile_ranges_ol4
             #tile_grid['extent'] = None
             tile_grid['extent'] = extent
         
