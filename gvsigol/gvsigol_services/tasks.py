@@ -16,7 +16,6 @@ from gvsigol_services.models import Layer, LayerGroup
 from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options
 import logging
 from owslib.wmts import WebMapTileService
-from owslib.util import Authentication
 
 logger = logging.getLogger('gvsigol')
 
@@ -505,11 +504,11 @@ def update_internal_wmts_layer_options(layer):
 def update_external_wmts_layer_options(layer):
     try:
         if layer.type == 'WMTS':
-            from gvsigol_core.utils import get_absolute_url
+            from gvsigol_core.utils import get_absolute_url, AuthPatch
             params = json.loads(layer.external_params)
             if params.get('url') and params.get('layers'):
                 url = get_absolute_url(params.get('url'))
-                auth = Authentication(verify=False)
+                auth = AuthPatch(verify=False)
                 wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
                 wmts_options = get_wmts_options(wmts, params['layers'])
                 if wmts_options:
