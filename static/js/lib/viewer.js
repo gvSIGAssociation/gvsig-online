@@ -778,14 +778,14 @@ viewer.core = {
 			matrixIds: wmtsOptions.tileGrid.matrixIds,
 			tileSizes: wmtsOptions.tileGrid.tileSizes
 		});
-		if (wmtsOptions.tileGrid.fullTileRanges) {
+		if (wmtsOptions.tileGrid.fullTileRanges_ol4) {
 			var fullTileRanges = [];
-			for (var i=0; i<wmtsOptions.tileGrid.fullTileRanges.length; i++) {
+			for (var i=0; i<wmtsOptions.tileGrid.fullTileRanges_ol4.length; i++) {
 				fullTileRanges.push(new viewer.olcustom.TileRange(
-					wmtsOptions.tileGrid.fullTileRanges[i].minX,
-					wmtsOptions.tileGrid.fullTileRanges[i].maxX,
-					wmtsOptions.tileGrid.fullTileRanges[i].minY,
-					wmtsOptions.tileGrid.fullTileRanges[i].maxY
+					wmtsOptions.tileGrid.fullTileRanges_ol4[i].minX,
+					wmtsOptions.tileGrid.fullTileRanges_ol4[i].maxX,
+					wmtsOptions.tileGrid.fullTileRanges_ol4[i].minY,
+					wmtsOptions.tileGrid.fullTileRanges_ol4[i].maxY
 				));
 			}
 			tileGrid.a = fullTileRanges; // nasty hack: minimized name for fullTileRanges
