@@ -568,7 +568,7 @@ viewer.core = {
     	
     	if (externalLayer['type'] == 'WMTS') {
 
-			if (externalLayer.wmts_options) {
+			if (externalLayer.wmts_options && externalLayer.wmts_options.tileGrid) {
 				var wmtsSource = this._createWMTSTileSourceFromOptions(externalLayer.wmts_options);
 			}
 			else {
