@@ -1174,7 +1174,7 @@ def project_get_conf(request):
                         if 'wmts_options' in params:
                             wmts_options = params['wmts_options']
                             params['wmts_options'] = services_utils.wmts_options_for_openlayers(wmts_options, params['format'], projection=project.viewer_default_crs)
-                            if 'capabilities' in params:
+                            if 'capabilities' in params and 'tileGrid' in params['wmts_options']:
                                 del params['capabilities']
                                 
                         elif not 'capabilities' in params:
