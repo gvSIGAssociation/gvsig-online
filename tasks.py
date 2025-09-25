@@ -13,7 +13,7 @@ from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessSt
 #from gvsigol_services.decorators import start_new_thread
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, LayerGroup
-from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options
+from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options, AuthPatch
 import logging
 from owslib.wmts import WebMapTileService
 
@@ -504,7 +504,7 @@ def update_internal_wmts_layer_options(layer):
 def update_external_wmts_layer_options(layer):
     try:
         if layer.type == 'WMTS':
-            from gvsigol_core.utils import get_absolute_url, AuthPatch
+            from gvsigol_core.utils import get_absolute_url
             params = json.loads(layer.external_params)
             if params.get('url') and params.get('layers'):
                 url = get_absolute_url(params.get('url'))
