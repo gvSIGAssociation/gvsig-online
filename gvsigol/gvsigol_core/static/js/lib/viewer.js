@@ -808,12 +808,12 @@ viewer.core = {
 			var x = tileCoord[1];
 			var y = -tileCoord[2] - 1; // convertir OL → WMTS
 			var tileGrid = this.getTileGrid();
-			var limits = tileGrid.fullTileRanges[z];
-			if (limits) {
-			  if (x < limits.minX || x > limits.maxX ||
-				  y < limits.minY || y > limits.maxY) {
-				return undefined; // fuera de rango → no carga
-			  }
+			if (tileGrid.fullTileRanges) {
+				var limits = tileGrid.fullTileRanges[z];
+				if (x < limits.minX || x > limits.maxX ||
+					y < limits.minY || y > limits.maxY) {
+					return undefined; // fuera de rango → no carga
+				}
 			}
 			var baseUrl = this.getUrls()[0];
 			if (!baseUrl.endsWith('?')) {
