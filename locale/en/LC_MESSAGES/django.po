@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-26 09:50+0200\n"
-"PO-Revision-Date: 2025-09-26 09:52+0200\n"
+"PO-Revision-Date: 2025-09-26 11:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -1414,7 +1414,7 @@ msgstr "Element order"
 #: gvsigol_services/templates/enumeration_add.html:60
 #: gvsigol_services/templates/enumeration_update.html:72
 msgid "Show first value by default"
-msgstr ""
+msgstr "Show first item by default"
 
 #: gvsigol_services/templates/enumeration_add.html:68
 #: gvsigol_services/templates/enumeration_update.html:80
