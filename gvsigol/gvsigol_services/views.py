@@ -3792,6 +3792,9 @@ def enumeration_add(request):
         name = request.POST.get('enumeration_name')
         title = request.POST.get('enumeration_title')
         order_type = request.POST.get('order_type')
+        show_first_value = False
+        if 'show_first_value' in request.POST:
+            show_first_value = True
 
         aux_title = b"".join(title.encode('ASCII', 'ignore').split())[:4]
         aux_title = aux_title.lower()
@@ -3810,7 +3813,8 @@ def enumeration_add(request):
                     name = name,
                     title = title,
                     created_by = request.user.username,
-                    order_type = order_type
+                    order_type = order_type,
+                    show_first_value = show_first_value
                 )
                 enum.save()
 
@@ -3877,6 +3881,9 @@ def enumeration_update(request, eid):
         title = request.POST.get('enumeration_title')
         order_type = request.POST.get('order_type')
         toc_value = request.POST.get('toc_value', '{}')
+        show_first_value = False
+        if 'show_first_value' in request.POST:
+            show_first_value = True
 
         if not name or not title:
             enum = Enumeration.objects.get(id=int(eid))
@@ -3901,6 +3908,7 @@ def enumeration_update(request, eid):
                 enum.name = name
                 enum.title = title
                 enum.order_type = order_type
+                enum.show_first_value = show_first_value
                 enum.save()
 
                 items = EnumerationItem.objects.filter(enumeration_id=enum.id)
