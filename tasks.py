@@ -482,8 +482,8 @@ def update_layer_info(self):
                 servers.append(server)
             except Exception as e:
                 logger.exception('error refreshing layer info - {0}'.format(str(layer)))
-                if layer.cached:
-                    update_internal_wmts_layer_options(layer)
+            if layer.cached:
+                update_internal_wmts_layer_options(layer)
     
     for server in set(servers):
         server.reload_nodes()
