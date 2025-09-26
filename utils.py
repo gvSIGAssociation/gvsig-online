@@ -1230,6 +1230,7 @@ def get_wmts_options(
 
             tilematrixlimits_obj = layer.tilematrixsetlinks.get(current_matrix_set_id).tilematrixlimits
             full_tile_ranges = []
+            full_tile_ranges_ol4 = []
             ol_sizes = []
             ol_origins = []
 
@@ -1247,6 +1248,12 @@ def get_wmts_options(
                             "minY": mintilerow,
                             "maxY": maxtilerow
                         })
+                    full_tile_ranges_ol4.append({
+                        "minX": mintilecol,
+                        "maxX": maxtilecol,
+                        "minY": mintilerow-matrices[idx].matrixheight,
+                        "maxY": maxtilerow-matrices[idx].matrixheight
+                    })
                     scale_denominator = tms.tilematrix[m.identifier].scaledenominator
                     res = scale_denominator * PIXEL_SIZE_M
                     origin = _parse_tlc(matrices[idx].topleftcorner)
@@ -1338,6 +1345,7 @@ def get_wmts_options(
             tile_grid['extent'] = extent
         else:
             tile_grid['fullTileRanges'] = full_tile_ranges
+            tile_grid['fullTileRanges_ol4'] = full_tile_ranges_ol4
             #tile_grid['extent'] = None
             tile_grid['extent'] = extent
         
@@ -1417,9 +1425,17 @@ def get_wmts_options_from_layer(layer # gvsigol_services.models.Layer object
 ):
     try:
         url = layer.datastore.workspace.server.getWmtsEndpoint()
-        auth = Authentication(username=layer.datastore.workspace.server.user, password=layer.datastore.workspace.server.password, verify=False)
+        auth = AuthPatch(username=layer.datastore.workspace.server.user, password=layer.datastore.workspace.server.password, verify=False)
         wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
         return get_wmts_options(wmts, layer.get_qualified_name())
     except Exception as e:
         logger.exception("Error getting wmts options")
     return None
+
+class AuthPatch(Authentication):
+    """
+    Patch owslib.util.Authentication to circumvent _auth_delegate bug in older versions of owslib (<= 0.23.0)
+    """
+    def __init__(self, *args, **kwargs):
+        self._auth_delegate = kwargs.get('auth_delegate')
+        super().__init__(*args, **kwargs)

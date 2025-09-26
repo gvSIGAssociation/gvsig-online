@@ -13,8 +13,9 @@ from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessSt
 #from gvsigol_services.decorators import start_new_thread
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, LayerGroup
-from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer
+from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options, AuthPatch
 import logging
+from owslib.wmts import WebMapTileService
 
 logger = logging.getLogger('gvsigol')
 
@@ -470,22 +471,52 @@ def refresh_layer_info(self, layer_id):
 
 @celery_app.task(bind=True)
 def update_layer_info(self):
-    layer_list = Layer.objects.filter(external=False).select_related("datastore__workspace")
-
     servers = []
-    for layer in layer_list:
-        try:
-            server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-            do_refresh_layer_extent(layer, server)
-            servers.append(server)
-        except Exception as e:
-            logger.exception('error refreshing layer info - {0}'.format(str(layer)))
+    for layer in Layer.objects.all().select_related("datastore__workspace"):
+        if layer.external:
+            update_external_wmts_layer_options(layer)
+        else:
+            try:
+                server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+                do_refresh_layer_extent(layer, server)
+                servers.append(server)
+            except Exception as e:
+                logger.exception('error refreshing layer info - {0}'.format(str(layer)))
+                if layer.cached:
+                    update_internal_wmts_layer_options(layer)
     
     for server in set(servers):
         server.reload_nodes()
 
 
+def update_internal_wmts_layer_options(layer):
+    try:
+        logger.info(f"Updating wmts options for internal layer {0} - {1}".format(layer.id, layer.name))
+        wmts_options = get_wmts_options_from_layer(layer)
+        if wmts_options:
+            external_params = json.loads(layer.external_params) if layer.external_params else {}
+            external_params['wmts_options'] = wmts_options
+            layer.external_params = json.dumps(external_params)
+            layer.save()
+    except Exception as e:
+        logger.exception("Error getting wmts options")
 
+def update_external_wmts_layer_options(layer):
+    try:
+        if layer.type == 'WMTS':
+            from gvsigol_core.utils import get_absolute_url
+            params = json.loads(layer.external_params)
+            if params.get('url') and params.get('layers'):
+                url = get_absolute_url(params.get('url'))
+                auth = AuthPatch(verify=False)
+                wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
+                wmts_options = get_wmts_options(wmts, params['layers'])
+                if wmts_options:
+                    params['wmts_options'] = wmts_options
+                    layer.external_params = json.dumps(params)
+                    layer.save()
+    except Exception as e:
+        logger.exception("Error getting wmts options")
 
 @celery_app.task(bind=True)
 def update_wmts_layer_info(self, layer_id):
@@ -493,10 +524,4 @@ def update_wmts_layer_info(self, layer_id):
     if layer.external:
         pass
     else:
-        wmts_options = get_wmts_options_from_layer(layer)
-        if wmts_options:
-            external_params = json.loads(layer.external_params) if layer.external_params else {}
-            external_params['wmts_options'] = wmts_options
-            layer.external_params = json.dumps(external_params)
-            layer.save()
-
+        update_internal_wmts_layer_options(layer)
