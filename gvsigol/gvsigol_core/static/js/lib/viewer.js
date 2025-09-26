@@ -778,7 +778,7 @@ viewer.core = {
 			matrixIds: wmtsOptions.tileGrid.matrixIds,
 			tileSizes: wmtsOptions.tileGrid.tileSizes
 		});
-		if (wmtsOptions.tileGrid.fullTileRanges_ol4) {
+		if (wmtsOptions.tileGrid.fullTileRanges) {
 			var fullTileRanges = [];
 			for (var i=0; i<wmtsOptions.tileGrid.fullTileRanges_ol4.length; i++) {
 				fullTileRanges.push(new viewer.olcustom.TileRange(
@@ -789,8 +789,9 @@ viewer.core = {
 				));
 			}
 			tileGrid.a = fullTileRanges; // nasty hack: minimized name for fullTileRanges
+			tileGrid.fullTileRanges = wmtsOptions.tileGrid.fullTileRanges;
 		}
-		return new ol.source.WMTS({
+		var source = new ol.source.WMTS({
 			urls: wmtsOptions.urls,
 			layer: wmtsOptions.layer,
 			matrixSet: wmtsOptions.matrixSet,
@@ -802,6 +803,38 @@ viewer.core = {
 			dimensions: wmtsOptions.dimensions,
 			wrapX: true
 		});
+		source.setTileUrlFunction(function(tileCoord, pixelRatio, projection) {
+			var z = tileCoord[0];
+			var x = tileCoord[1];
+			var y = -tileCoord[2] - 1; // convertir OL → WMTS
+			var tileGrid = this.getTileGrid();
+			var limits = tileGrid.fullTileRanges[z];
+			if (limits) {
+			  if (x < limits.minX || x > limits.maxX ||
+				  y < limits.minY || y > limits.maxY) {
+				return undefined; // fuera de rango → no carga
+			  }
+			}
+			var baseUrl = this.getUrls()[0];
+			if (!baseUrl.endsWith('?')) {
+				baseUrl += '?';
+			}
+			var layer = this.getLayer();
+			var matrixSet = this.getMatrixSet();
+			var tileMatrixId = this.getTileGrid().getMatrixIds()[z];
+			var format = this.getFormat();
+			var style = this.getStyle();
+			return baseUrl +
+			"service=WMTS&request=GetTile&version=1.0.0" +
+			"&layer=" + layer +
+			"&style=" + style +
+			"&tilematrixset=" + matrixSet +
+			"&tilematrix=" + tileMatrixId +
+			"&tilerow=" + y +
+			"&tilecol=" + x +
+			"&format=" + format;
+		});
+		return source;
 	},
 	_loadInternalLayer: function(layerConf, group, checkTileLoadError, layer_overview_id) {
 		var self = this;

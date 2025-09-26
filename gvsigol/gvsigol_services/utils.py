@@ -1251,9 +1251,10 @@ def get_wmts_options(
                     full_tile_ranges_ol4.append({
                         "minX": mintilecol,
                         "maxX": maxtilecol,
-                        "minY": mintilerow-matrices[idx].matrixheight,
-                        "maxY": maxtilerow-matrices[idx].matrixheight
+                        "minY": -(mintilerow+1),
+                        "maxY": -(maxtilerow+1)
                     })
+                    """
                     scale_denominator = tms.tilematrix[m.identifier].scaledenominator
                     res = scale_denominator * PIXEL_SIZE_M
                     origin = _parse_tlc(matrices[idx].topleftcorner)
@@ -1280,7 +1281,7 @@ def get_wmts_options(
                         miny = origin[1] - (maxtilerow + 1) * tile_h * res
                         maxy = origin[1] - mintilerow * tile_h * res
                         extent = [minx, miny, maxx, maxy]
-                    """
+                    
                 else:
                     # when no limits are defined, calculate limits and extent from the matrix grid
                     full_tile_ranges.append( {
@@ -1314,6 +1315,7 @@ def get_wmts_options(
             miny = origin[1] - mh * tile_h * res0
             extent = [origin[0], miny, maxx, origin[1]]
         # tmp cesar prueba
+        """
         origin = _parse_tlc(matrices[0].topleftcorner)
         tile_w = int(matrices[0].tilewidth)
         tile_h = int(matrices[0].tileheight)
@@ -1323,6 +1325,7 @@ def get_wmts_options(
         maxx = origin[0] + mw * tile_w * res0
         miny = origin[1] - mh * tile_h * res0
         extent = [origin[0], miny, maxx, origin[1]]
+        """
         # end tmp cesar prueba
 
         # Normalizar proyección
@@ -1337,10 +1340,12 @@ def get_wmts_options(
                 "tileSizes": tile_sizes,
                 "matrixIds": matrix_ids,
             }
+        """    
         if ol_origins is not None:
             tile_grid['olOrigins'] = ol_origins
         if ol_sizes is not None:
             tile_grid['olSizes'] = ol_sizes
+        """
         if full_tile_ranges is None:
             tile_grid['extent'] = extent
         else:
