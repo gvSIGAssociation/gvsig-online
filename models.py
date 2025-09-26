@@ -680,6 +680,7 @@ class Enumeration(models.Model):
     title = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.CharField(max_length=100)
     order_type = models.TextField(choices=ORDER_TYPE_CHOICES, blank=True, default=MANUAL)
+    show_first_value = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
