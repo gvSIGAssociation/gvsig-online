@@ -491,7 +491,7 @@ def update_layer_info(self):
 
 def update_internal_wmts_layer_options(layer):
     try:
-        logger.info(f"Updating wmts options for internal layer {0} - {1}".format(layer.id, layer.name))
+        # logger.info(f"Updating wmts options for internal layer {layer.id} - {layer.name}")
         wmts_options = get_wmts_options_from_layer(layer)
         if wmts_options:
             external_params = json.loads(layer.external_params) if layer.external_params else {}
@@ -499,7 +499,7 @@ def update_internal_wmts_layer_options(layer):
             layer.external_params = json.dumps(external_params)
             layer.save()
     except Exception as e:
-        logger.exception("Error getting wmts options")
+        logger.exception(f"Error getting wmts options for layer {layer.id} - {layer.name}")
 
 def update_external_wmts_layer_options(layer):
     try:
@@ -516,7 +516,7 @@ def update_external_wmts_layer_options(layer):
                     layer.external_params = json.dumps(params)
                     layer.save()
     except Exception as e:
-        logger.exception("Error getting wmts options")
+        logger.exception(f"Error getting wmts options for layer {layer.id} - {layer.name}")
 
 @celery_app.task(bind=True)
 def update_wmts_layer_info(self, layer_id):
