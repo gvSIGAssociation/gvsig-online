@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-18 17:44+0200\n"
-"PO-Revision-Date: 2025-09-18 17:53+0200\n"
+"POT-Creation-Date: 2025-09-26 09:50+0200\n"
+"PO-Revision-Date: 2025-09-26 11:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -64,8 +64,8 @@ msgstr ""
 #: gvsigol_services/backend_geoserver.py:898
 #: gvsigol_services/backend_geoserver.py:907
 #: gvsigol_services/backend_geoserver.py:917
-#: gvsigol_services/backend_geoserver.py:929 gvsigol_services/views.py:1277
-#: gvsigol_services/views.py:3670
+#: gvsigol_services/backend_geoserver.py:929 gvsigol_services/views.py:1279
+#: gvsigol_services/views.py:3677
 msgid "Error: layer could not be published"
 msgstr ""
 
@@ -1411,13 +1411,18 @@ msgstr ""
 msgid "Order type"
 msgstr "Element order"
 
-#: gvsigol_services/templates/enumeration_add.html:62
-#: gvsigol_services/templates/enumeration_update.html:70
+#: gvsigol_services/templates/enumeration_add.html:60
+#: gvsigol_services/templates/enumeration_update.html:72
+msgid "Show first value by default"
+msgstr "Show first item by default"
+
+#: gvsigol_services/templates/enumeration_add.html:68
+#: gvsigol_services/templates/enumeration_update.html:80
 msgid "Enumeration items"
 msgstr ""
 
-#: gvsigol_services/templates/enumeration_add.html:68
-#: gvsigol_services/templates/enumeration_update.html:104
+#: gvsigol_services/templates/enumeration_add.html:74
+#: gvsigol_services/templates/enumeration_update.html:114
 msgid "Add item"
 msgstr ""
 
@@ -1438,15 +1443,15 @@ msgstr ""
 msgid "Update enumeration"
 msgstr ""
 
-#: gvsigol_services/templates/enumeration_update.html:89
+#: gvsigol_services/templates/enumeration_update.html:99
 msgid "Enumeration cannot contain point-colon"
 msgstr ""
 
-#: gvsigol_services/templates/enumeration_update.html:89
+#: gvsigol_services/templates/enumeration_update.html:99
 msgid "Insert item name"
 msgstr ""
 
-#: gvsigol_services/templates/enumeration_update.html:92
+#: gvsigol_services/templates/enumeration_update.html:102
 msgid "Delete"
 msgstr ""
 
@@ -2808,7 +2813,7 @@ msgstr ""
 msgid "Error: workspace could not be created"
 msgstr ""
 
-#: gvsigol_services/views.py:529 gvsigol_services/views.py:3548
+#: gvsigol_services/views.py:529 gvsigol_services/views.py:3553
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -2845,28 +2850,28 @@ msgstr ""
 msgid "ERROR User is not authorized to perform this operation"
 msgstr ""
 
-#: gvsigol_services/views.py:1168 gvsigol_services/views.py:3551
+#: gvsigol_services/views.py:1168 gvsigol_services/views.py:3556
 msgid "You are not allowed to manage the selected datastore"
 msgstr ""
 
-#: gvsigol_services/views.py:1170 gvsigol_services/views.py:3554
+#: gvsigol_services/views.py:1170 gvsigol_services/views.py:3559
 msgid "You are not allowed to manage the selected layergroup"
 msgstr ""
 
-#: gvsigol_services/views.py:3049 gvsigol_services/views.py:3065
+#: gvsigol_services/views.py:3054 gvsigol_services/views.py:3070
 #, python-brace-format
 msgid "Error clearing cache. Cause: {cause}."
 msgstr ""
 
-#: gvsigol_services/views.py:3051
+#: gvsigol_services/views.py:3056
 msgid "Not supported."
 msgstr ""
 
-#: gvsigol_services/views.py:3160
+#: gvsigol_services/views.py:3165
 msgid "You must enter a name for layer group"
 msgstr ""
 
-#: gvsigol_services/views.py:3170 gvsigol_services/views.py:3322
+#: gvsigol_services/views.py:3175 gvsigol_services/views.py:3327
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -2874,171 +2879,171 @@ msgid ""
 "numbers"
 msgstr ""
 
-#: gvsigol_services/views.py:3179 gvsigol_services/views.py:3318
+#: gvsigol_services/views.py:3184 gvsigol_services/views.py:3323
 msgid "Layer group name already exists"
 msgstr ""
 
-#: gvsigol_services/views.py:3663
+#: gvsigol_services/views.py:3670
 msgid ""
 "Error: table already exists. Try to publish the layer instead of creating an "
 "empty one."
 msgstr ""
 
-#: gvsigol_services/views.py:3835
+#: gvsigol_services/views.py:3846
 msgid "You must enter a title for enumeration"
 msgstr ""
 
-#: gvsigol_services/views.py:3845
+#: gvsigol_services/views.py:3856
 msgid "Name already taken"
 msgstr ""
 
-#: gvsigol_services/views.py:3887
+#: gvsigol_services/views.py:3901
 msgid "Name and title are required"
 msgstr ""
 
-#: gvsigol_services/views.py:3976
+#: gvsigol_services/views.py:3991
 msgid "Error updating enumeration: "
 msgstr ""
 
-#: gvsigol_services/views.py:5209
+#: gvsigol_services/views.py:5227
 msgid "Error: ExternalLayer could not be published"
 msgstr ""
 
-#: gvsigol_services/views.py:5335
+#: gvsigol_services/views.py:5360
 msgid "Error: externallayer could not be published"
 msgstr ""
 
-#: gvsigol_services/views.py:5708
+#: gvsigol_services/views.py:5740
 #, python-brace-format
 msgid "Error configuring layer. Cause: {cause}."
 msgstr ""
 
-#: gvsigol_services/views.py:5773
+#: gvsigol_services/views.py:5805
 #, python-brace-format
 msgid "Error accessing layer. Cause: {cause}."
 msgstr ""
 
-#: gvsigol_services/views.py:5869
+#: gvsigol_services/views.py:5901
 #, python-brace-format
 msgid "Error accessing layer group. Cause: {cause}."
 msgstr ""
 
-#: gvsigol_services/views.py:6056 gvsigol_services/views.py:6062
+#: gvsigol_services/views.py:6088 gvsigol_services/views.py:6094
 msgid "Connection failed"
 msgstr ""
 
-#: gvsigol_services/views.py:6056
+#: gvsigol_services/views.py:6088
 msgid "Status code: "
 msgstr ""
 
-#: gvsigol_services/views.py:6067
+#: gvsigol_services/views.py:6099
 msgid "Connection error"
 msgstr ""
 
-#: gvsigol_services/views.py:6107
+#: gvsigol_services/views.py:6139
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
 msgstr ""
 
-#: gvsigol_services/views.py:6132 gvsigol_services/views.py:6194
-#: gvsigol_services/views.py:6198 gvsigol_services/views.py:6200
+#: gvsigol_services/views.py:6164 gvsigol_services/views.py:6226
+#: gvsigol_services/views.py:6230 gvsigol_services/views.py:6232
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6134 gvsigol_services/views.py:6196
+#: gvsigol_services/views.py:6166 gvsigol_services/views.py:6228
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
 msgstr ""
 
-#: gvsigol_services/views.py:6136
+#: gvsigol_services/views.py:6168
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6163
+#: gvsigol_services/views.py:6195
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr ""
 
-#: gvsigol_services/views.py:6165 gvsigol_services/views.py:6453
+#: gvsigol_services/views.py:6197 gvsigol_services/views.py:6485
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr ""
 
-#: gvsigol_services/views.py:6293
+#: gvsigol_services/views.py:6325
 #, python-brace-format
 msgid "Error saving field format. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6371
+#: gvsigol_services/views.py:6403
 #, python-brace-format
 msgid "Error deleting field format. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6428
+#: gvsigol_services/views.py:6460
 #, python-brace-format
 msgid "Error getting field format. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6466
+#: gvsigol_services/views.py:6498
 msgid "Field type not supported"
 msgstr ""
 
-#: gvsigol_services/views.py:6471
+#: gvsigol_services/views.py:6503
 #, python-brace-format
 msgid ""
 "Error adding field. Probably the field \"{0}\" already exists. Database "
 "message: {1}"
 msgstr ""
 
-#: gvsigol_services/views.py:6614
+#: gvsigol_services/views.py:6646
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr ""
 
-#: gvsigol_services/views.py:6681
+#: gvsigol_services/views.py:6713
 #, python-brace-format
 msgid ""
 "Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
 msgstr ""
 
-#: gvsigol_services/views.py:6695
+#: gvsigol_services/views.py:6727
 msgid "The user can't manage this SQL view"
 msgstr ""
 
-#: gvsigol_services/views.py:6723
+#: gvsigol_services/views.py:6755
 msgid "The main table must have a primary key"
 msgstr ""
 
-#: gvsigol_services/views.py:6753
+#: gvsigol_services/views.py:6785
 #, python-brace-format
 msgid "Field does not exist: {field}"
 msgstr ""
 
-#: gvsigol_services/views.py:6763
+#: gvsigol_services/views.py:6795
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
 
-#: gvsigol_services/views.py:6783
+#: gvsigol_services/views.py:6815
 msgid "An object already exists with name: {}"
 msgstr ""
 
-#: gvsigol_services/views.py:6790
+#: gvsigol_services/views.py:6822
 msgid "The view could not be created"
 msgstr ""
 
-#: gvsigol_services/views.py:6795
+#: gvsigol_services/views.py:6827
 msgid "Pk columns could not be inserted"
 msgstr ""
 
-#: gvsigol_services/views.py:6841
+#: gvsigol_services/views.py:6873
 msgid "Not allowed"
 msgstr ""
 
-#: gvsigol_services/views.py:6851
+#: gvsigol_services/views.py:6883
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
