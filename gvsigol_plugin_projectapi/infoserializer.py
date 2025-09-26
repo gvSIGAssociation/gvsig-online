@@ -137,6 +137,25 @@ class LayerSerializer(serializers.ModelSerializer):
                 
                 # añade campos que están en la BD pero no en conf (como wkb_geometry)
                 ordered_field_names.extend(list(missing_fields))
+
+                enumeration_fields = []
+                for field_name in ordered_field_names:
+                    if field_name in fields_dict and fields_dict[field_name]['type'].endswith('enumeration'):
+                        enumeration_fields.append(field_name)         
+
+                enumeration_data = {}
+                if enumeration_fields:
+                    try:
+                        from gvsigol_services.models import LayerFieldEnumeration
+                        layer_field_enums = LayerFieldEnumeration.objects.filter(
+                            layer=layer, 
+                            field__in=enumeration_fields
+                        ).select_related('enumeration').only('field', 'enumeration__show_first_value')
+                        
+                        for lfe in layer_field_enums:
+                            enumeration_data[lfe.field] = lfe.enumeration.show_first_value
+                    except Exception:
+                        pass
                 
                 ordered_fields = []
                 for index, field_name in enumerate(ordered_field_names):
@@ -162,6 +181,7 @@ class LayerSerializer(serializers.ModelSerializer):
                     if field['type'].endswith('enumeration'):
                         items = services_utils.get_enum_item_list(layer, field_name)
                         field['values'] = [item.name for item in items]
+                        field['show_first_value'] = enumeration_data.get(field_name, False)
                 
                     if field_name in field_group:
                         field.update({
