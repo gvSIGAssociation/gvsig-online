@@ -1287,7 +1287,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
-			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
+			if (!this.isGeomType(this.featureType[i].type) && !(this.featureType[i].name == 'id' && this.isNumericType(this.featureType[i].type))) {
 				var name = '<span class="edit-feature-field">' + this.featureType[i].name + '</span>';
 				var visible = false;
 				if(fields){
@@ -1760,7 +1760,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
-			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
+			if (!this.isGeomType(this.featureType[i].type) && !(this.featureType[i].name == 'id' && this.isNumericType(this.featureType[i].type))) {
 				var name = '<span class="edit-feature-field">' + this.featureType[i].name+'</span>';
 				var visible = false;
 				if(fields){
@@ -2180,7 +2180,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
-			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
+			if (!this.isGeomType(this.featureType[i].type) && !(this.featureType[i].name == 'id' && this.isNumericType(this.featureType[i].type))) {
 				var name = '<span class="edit-feature-field">' + this.featureType[i].name+'</span>';
 				var visible = false;
 				if(fields){
