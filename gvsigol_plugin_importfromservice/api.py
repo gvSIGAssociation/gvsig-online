@@ -261,10 +261,6 @@ def separar_urls_servicios(urls):
         # Limpiar también posibles espacios o caracteres extra
         clean_url = clean_url.strip()
         
-        # Convertir HTTPS a HTTP para evitar problemas de CORS
-        if clean_url.startswith('https://'):
-            clean_url = clean_url.replace('https://', 'http://')
-        
         # Detectar WMS
         if ('wms' in url_lower and 'service=wms' in url_lower) or 'wmsserver' in url_lower or 'mapserver' in url_lower:
             if clean_url not in urls_wms:
