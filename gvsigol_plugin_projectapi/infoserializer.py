@@ -94,81 +94,109 @@ class LayerSerializer(serializers.ModelSerializer):
         except Exception:
             return
 
+        translations_dict = {}
+        if layer.conf:
+            try:
+                conf_dict = ast.literal_eval(layer.conf)
+                fields_conf = conf_dict.get('fields', [])
+                for field_conf in fields_conf:
+                    field_name = field_conf.get('name')
+                    if field_name:
+                        translation_key = f'title-{lang}'
+                        translations_dict[field_name] = field_conf.get(translation_key, field_name)
+            except Exception:
+                pass
+
         try:
             i, table, schema = services_utils.get_db_connect_from_layer(layer)
-            with i as con: # connection will auoclose
+            with i as con:
                 pks = con.get_pk_columns(table, schema=schema)
 
                 field_group = self.get_field_group(form_groups, lang)
 
-                for i in result['fields']:
-                    #Se añade el check de "Obligatorio" de los campos de una capa
-                    if fields is not None:
-                        for field in fields:
-                            if field['name'] == i['name']:
-                                try:
-                                    i['mandatory'] = field['mandatory']
-                                except Exception:
-                                    i['mandatory'] = False
-                                try:
-                                    i['editable'] = field['editable']
-                                except Exception:
-                                    i['editable'] = True
-                                try:
-                                    i['visible'] = field['visible']
-                                except Exception:
-                                    i['visible'] = True
-                                try:
-                                    i['editableactive'] = field['editableactive']
-                                except Exception:
-                                    i['editableactive'] = True
-                                try:
-                                    i['infovisible'] = field['infovisible']
-                                except Exception:
-                                    i['infovisible'] = True
+                fields_dict = {field['name']: field for field in result['fields']}
+                fields_conf_dict = {field_conf['name']: field_conf for field_conf in fields} if fields else {}
+                pks_set = set(pks) if pks else set()
+                
+                conf_field_names = set()
+                if fields:
+                    conf_field_names = {field_conf['name'] for field_conf in fields}
+                
+                db_field_names = set(fields_dict.keys())
+                
+                missing_fields = db_field_names - conf_field_names
+                
+                ordered_field_names = []
+                if form_groups:
+                    for group in form_groups:
+                        if 'fields' in group:
+                            ordered_field_names.extend(group['fields'])
+                
+                if not ordered_field_names:
+                    ordered_field_names = list(fields_dict.keys())
+                
+                # añade campos que están en la BD pero no en conf (como wkb_geometry)
+                ordered_field_names.extend(list(missing_fields))
 
-                    #Se añade si el campo es PK o no
-                    if pks is not None and len(pks) > 0:
-                        for pk in pks:
-                            if i['name'] == pk:
-                                i['pk'] = 'YES'
-                                break
-                            else:
-                                i['pk'] = 'NO'
-                    
-                    #Se añade la lista de valores que puede tomar el campo si este es enumerado
-                    if i['type'].endswith('enumeration'):
-                        items = services_utils.get_enum_item_list(layer, i['name'])
-                        list_ = []
-                        for j in items:
-                            list_.append(j.name)
-                        i['values'] = list_
-                    
-                    i['translate'] = self.translate(layer.conf, i['name'], lang)
-                    if i['name'] in field_group:
-                        i['groupname'] = field_group[i['name']]['groupname']
-                        i['grouporder'] = field_group[i['name']]['grouporder']
-                        i['fieldorder'] = field_group[i['name']]['fieldorder']  
+                enumeration_fields = []
+                for field_name in ordered_field_names:
+                    if field_name in fields_dict and fields_dict[field_name]['type'].endswith('enumeration'):
+                        enumeration_fields.append(field_name)         
 
-            return result
+                enumeration_data = {}
+                if enumeration_fields:
+                    try:
+                        from gvsigol_services.models import LayerFieldEnumeration
+                        layer_field_enums = LayerFieldEnumeration.objects.filter(
+                            layer=layer, 
+                            field__in=enumeration_fields
+                        ).select_related('enumeration').only('field', 'enumeration__show_first_value')
+                        
+                        for lfe in layer_field_enums:
+                            enumeration_data[lfe.field] = lfe.enumeration.show_first_value
+                    except Exception:
+                        pass
+                
+                ordered_fields = []
+                for index, field_name in enumerate(ordered_field_names):
+                    if field_name not in fields_dict:
+                        continue
+                        
+                    field = fields_dict[field_name].copy() 
+                    field['order'] = index
+                    
+                    if field_name in fields_conf_dict:
+                        field_conf = fields_conf_dict[field_name]
+                        field.update({
+                            'mandatory': field_conf.get('mandatory', False),
+                            'editable': field_conf.get('editable', True),
+                            'visible': field_conf.get('visible', True),
+                            'editableactive': field_conf.get('editableactive', True),
+                            'infovisible': field_conf.get('infovisible', True)
+                        })
+                    
+                    field['pk'] = 'YES' if field_name in pks_set else 'NO'
+                    field['translate'] = translations_dict.get(field_name, field_name)
+                    
+                    if field['type'].endswith('enumeration'):
+                        items = services_utils.get_enum_item_list(layer, field_name)
+                        field['values'] = [item.name for item in items]
+                        field['show_first_value'] = enumeration_data.get(field_name, False)
+                
+                    if field_name in field_group:
+                        field.update({
+                            'groupname': field_group[field_name]['groupname'],
+                            'grouporder': field_group[field_name]['grouporder'],
+                            'fieldorder': field_group[field_name]['fieldorder']
+                        })
+                    
+                    ordered_fields.append(field)
+                
+                result['fields'] = ordered_fields
+                return result
 
         except Exception:
             return
-    
-    def translate(self, conf, fieldName, lang):
-        try:
-            result = fieldName
-            conf = ast.literal_eval(conf)
-            for j in conf['fields']:
-                if fieldName == j['name']:
-                    try:
-                        result = j['title-' + lang]
-                        break
-                    except Exception:
-                        result = fieldName
-            return result
-        except Exception:
-            return result
 
     def get_description_(self, obj):
         if obj.datastore:
