@@ -242,10 +242,15 @@ def extraer_informacion_servicios(datasets, urls_wms_unicas, urls_wfs_unicas):
     
     return service_info
 
-def separar_urls_servicios(urls):
-    """Separa las URLs en listas de WMS y WFS"""
+def separar_urls_servicios(urls, request=None):
+    """Separa las URLs en listas de WMS y WFS, normalizando el protocolo según la petición"""
     urls_wms = []
     urls_wfs = []
+    
+    # Detectar si la petición es segura (HTTPS)
+    is_secure = False
+    if request:
+        is_secure = request.is_secure() or request.META.get('HTTP_X_FORWARDED_PROTO') == 'https'
     
     for url in urls:
         if not url:
@@ -260,6 +265,16 @@ def separar_urls_servicios(urls):
         
         # Limpiar también posibles espacios o caracteres extra
         clean_url = clean_url.strip()
+        
+        # Normalizar protocolo según la conexión
+        if is_secure:
+            # Conexión segura (HTTPS) - Convertir HTTP a HTTPS
+            if clean_url.startswith('http://'):
+                clean_url = clean_url.replace('http://', 'https://', 1)
+        else:
+            # Conexión no segura (HTTP) - Convertir HTTPS a HTTP
+            if clean_url.startswith('https://'):
+                clean_url = clean_url.replace('https://', 'http://', 1)
         
         # Detectar WMS
         if ('wms' in url_lower and 'service=wms' in url_lower) or 'wmsserver' in url_lower or 'mapserver' in url_lower:
@@ -587,7 +602,7 @@ def procesar_capabilities_servicios(urls_wms_unicas, urls_wfs_unicas):
     return capas_finales
 
 
-def procesar_respuesta_csw(root, ns, idioma_preferido='spa'):
+def procesar_respuesta_csw(root, ns, idioma_preferido='spa', request=None):
     """Procesa la respuesta XML y extrae la información de los datasets"""
     datasets = []
     
@@ -630,7 +645,7 @@ def procesar_respuesta_csw(root, ns, idioma_preferido='spa'):
                 keywords.append(keyword.text)
 
         # Separar URLs de servicios web en WMS y WFS
-        urls_wms, urls_wfs = separar_urls_servicios(urls)
+        urls_wms, urls_wfs = separar_urls_servicios(urls, request)
 
         datasets.append({
             'identificador': identifier,
@@ -760,7 +775,7 @@ class CSWSearchView(APIView):
             
             
             # Procesar los datasets
-            datasets = procesar_respuesta_csw(root, ns, idioma_endpoint)
+            datasets = procesar_respuesta_csw(root, ns, idioma_endpoint, request)
             
             # Eliminar URLs duplicadas
             resumen = eliminar_duplicados_urls(datasets)
