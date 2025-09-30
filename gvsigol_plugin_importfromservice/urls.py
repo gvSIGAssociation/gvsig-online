@@ -5,5 +5,6 @@ from . import api
 urlpatterns = [
     path('importfromservice/get_conf/', views.get_conf, name='plugin_importfromservice_get_conf'),
     path('importfromservice/services/', api.ServicesView.as_view(), name='get_services'),
+    path('importfromservice/search/', api.CSWSearchView.as_view(), name='csw_search'),
 
 ]
