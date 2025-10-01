@@ -1064,6 +1064,15 @@ def create_symbology(server, layer):
 def layer_add(request):
     return layer_add_with_group(request, None)
 
+def _get_default_abstract(layer_type, title):
+    if layer_type:
+        if layer_type.startswith('v_'):
+            return _('Vector layer containing information on {}').format(title)
+        elif layer_type.startswith('c_'):
+            return _('Raster layer containing information on {}').format(title)
+        elif layer_type.startswith('e_'):
+            return _('External layer providing information on {}').format(title)
+    return _('Layer containing information on {}').format(title)
 
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -1088,9 +1097,7 @@ def layer_add_with_group(request, layergroup_id):
     roles = []
     if request.method == 'POST':
         form = LayerForm(request.POST)
-        abstract = request.POST.get('md-abstract')
         is_visible = False
-
         if 'visible' in request.POST:
             is_visible = True
 
@@ -1170,6 +1177,10 @@ def layer_add_with_group(request, layergroup_id):
                     raise ValueError(_("You are not allowed to manage the selected layergroup"))
                 workspace = datastore.workspace
                 extraParams = {}
+                
+                abstract = request.POST.get('md-abstract')
+                if not abstract:
+                    abstract =_get_default_abstract(datastore.type, form.cleaned_data['title'])
 
                 assigned_read_roles = []
                 assigned_write_roles = []
@@ -1334,6 +1345,8 @@ def layer_update(request, layer_id):
         name = request.POST.get('name')
         title = request.POST.get('title')
         abstract = request.POST.get('md-abstract')
+        if not abstract:
+            abstract =_get_default_abstract(layer.type, title)
         updatedParams['title'] = title
         if not layergroup_id:
             layergroup_id = request.POST.get('layer_group', None)
@@ -3464,8 +3477,6 @@ def layer_create_with_group(request, layergroup_id):
 
 
     if request.method == 'POST':
-
-        abstract = request.POST.get('md-abstract')
         is_visible = False
         if 'visible' in request.POST:
             is_visible = True
@@ -3549,6 +3560,9 @@ def layer_create_with_group(request, layergroup_id):
                 datastore = form.cleaned_data['datastore']
                 server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 layergroup = form.cleaned_data['layer_group']
+                abstract = request.POST.get('md-abstract')
+                if not abstract:
+                    abstract =_get_default_abstract(datastore.type, form.cleaned_data['title'])
                 if _valid_name_regex.search(form.cleaned_data['name']) == None:
                     msg = _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.cleaned_data['name'])
                     form.add_error(None, msg)
@@ -5157,10 +5171,14 @@ def external_layer_add(request):
             layer_group = LayerGroup.objects.get(id=int(request.POST.get('layer_group')))
             server = Server.objects.get(id=layer_group.server_id)
 
+            abstract = request.POST.get('md-abstract')
+            if not abstract:
+                abstract =_get_default_abstract("e_", request.POST.get('title'))
             external_layer = Layer()
             external_layer.external = True
             external_layer.public = True
             external_layer.title = request.POST.get('title')
+            external_layer.abstract = abstract
             external_layer.layer_group = layer_group
             max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
             external_layer.order = max_order + 1 if max_order is not None else external_layer.order
