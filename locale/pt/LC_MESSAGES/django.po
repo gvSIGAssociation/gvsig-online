@@ -2696,6 +2696,18 @@ msgstr ""
 msgid "Error deleting view: {0}"
 msgstr "Campo de eliminação de erros. Causa: {0}"
 
+msgid "Vector layer containing information on {}"
+msgstr "Camada vetorial contendo informações sobre {}"
+
+msgid "Raster layer containing information on {}"
+msgstr "Camada raster contendo informações sobre {}"
+
+msgid "External layer providing information on {}"
+msgstr "Camada externa fornecendo informações sobre {}"
+
+msgid "Layer containing information on {}"
+msgstr "Camada contendo informações sobre {}"
+
 #~ msgid "Locks"
 #~ msgstr "Bloqueios"
 
