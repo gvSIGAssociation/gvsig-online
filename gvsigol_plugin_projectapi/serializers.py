@@ -106,7 +106,7 @@ class ProjectsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'title', 'description', 'image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'project_zone', 'extent4326_minx', 'extent4326_miny', 'extent4326_maxx', 'extent4326_maxy', 'expiration_date']
+        fields = ['id', 'name', 'title', 'description', 'image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'project_zone', 'extent4326_minx', 'extent4326_miny', 'extent4326_maxx', 'extent4326_maxy', 'expiration_date', 'url']
         #fields = '__all__'
         
 class ProjectSerializer(serializers.ModelSerializer):
