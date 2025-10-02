@@ -85,11 +85,7 @@
 							<img src={{project.image}} alt="Project Image">
 						</div>
 						<div class="product-info">
-							{% if use_classic_viewer %}
-							<a href="/gvsigonline/core/load/{{project.name}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
-							{% else %}
-							<a href="{{frontend_base_url}}/viewer/{{project.id}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
-							{% endif %}
+							<a href="{{project.url}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
 							<span class="product-description"> {{project.description}}</span>
 						</div>
 					</li>
@@ -114,11 +110,7 @@
 							<img src={{project.image}} alt="Project Image">
 						</div>
 						<div class="product-info">
-							{% if use_classic_viewer %}
-							<a href="/gvsigonline/core/load/{{project.name}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
-							{% else %}
-							<a href="{{frontend_base_url}}/viewer/{{project.id}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
-							{% endif %}
+							<a href="{{project.url}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a>
 							<span class="product-description"> {{project.description}}</span>
 						</div>
 					</li>
