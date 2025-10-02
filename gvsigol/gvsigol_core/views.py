@@ -97,17 +97,6 @@ def forbidden_view(request):
 
 @login_required()
 def home(request):
-    """
-    # Not used. Remove?
-
-    from_login = False
-    if 'HTTP_REFERER' in request.META:
-        if 'auth/login_user' in request.META['HTTP_REFERER']:
-            from_login = True
-    if settings.AUTH_WITH_REMOTE_USER == True:
-            from_login = True
-    """
-    print(request.LANGUAGE_CODE)
     projects = []
     public_projects = []
     if request.user.is_superuser:
@@ -122,7 +111,11 @@ def home(request):
         project['title'] = p.title
         project['description'] = p.description
         project['image'] = unquote(image)
-
+        if p.viewer_preferred_ui:
+            preferred_ui = p.viewer_preferred_ui
+        else:
+            preferred_ui = settings.FALLBACK_VIEWER_UI
+        project['url'] = p.url
 
         if p.is_public:
             public_projects.append(project)
@@ -166,11 +159,15 @@ def project_list(request):
         project['can_manage'] = can_manage
         projects.append(project)
 
+    show_bootstrap_project_links = Project.BOOTSTRAP_UI in settings.VIEWER_UI_CHOICES
+    show_spa_project_links = Project.REACT_SPA_UI in settings.VIEWER_UI_CHOICES
+    
     response = {
         'projects': projects,
         'servers': Server.objects.all().order_by('-default'),
         'frontend_base_url': settings.FRONTEND_BASE_URL,
-        'SHOW_SPA_PROJECT_LINKS': settings.USE_SPA_PROJECT_LINKS or settings.FRONTEND_BASE_URL
+        'SHOW_SPA_PROJECT_LINKS': show_spa_project_links,
+        'SHOW_BOOTSTRAP_PROJECT_LINKS': show_bootstrap_project_links
     }
     return render(request, 'project_list.html', response)
 
@@ -232,7 +229,7 @@ def project_add(request):
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
-        viewer_preferred_ui = request.POST.get('viewer_preferred_ui')
+        viewer_preferred_ui = request.POST.get('viewer_preferred_ui', settings.DEFAULT_VIEWER_UI)
 
 
         is_public = False
@@ -434,7 +431,22 @@ def project_add(request):
         for l in settings.PRJ_LABELS:
             labels.append({'label': l, 'checked': ''})
 
-        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': roles, 'has_geocoding_plugin': has_geocoding_plugin, 'label_list': labels, 'form': form, 'REACT_SPA_UI': Project.REACT_SPA_UI, 'BOOTSTRAP_UI': Project.BOOTSTRAP_UI})
+        print(settings.DEFAULT_VIEWER_UI)
+
+        return render(request,
+            'project_add.html',
+            {
+                'layergroups': prepared_layer_groups,
+                'tools': project_tools,
+                'groups': roles,
+                'has_geocoding_plugin': has_geocoding_plugin,
+                'label_list': labels,
+                'form': form,
+                'REACT_SPA_UI': Project.REACT_SPA_UI,
+                'BOOTSTRAP_UI': Project.BOOTSTRAP_UI,
+                'DEFAULT_VIEWER_UI': settings.DEFAULT_VIEWER_UI
+            }
+        )
 
 
 @login_required()
@@ -466,7 +478,7 @@ def project_update(request, pid):
         expiration_date_utc = request.POST.get('expiration_date_utc')
         layer_overview = request.POST.get('selected_overview_layer')
         viewer_default_crs = request.POST.get('srs')
-        viewer_preferred_ui = request.POST.get('viewer_preferred_ui')
+        viewer_preferred_ui = request.POST.get('viewer_preferred_ui', settings.FALLBACK_VIEWER_UI)
 
         is_public = False
         if 'is_public' in request.POST:
@@ -720,6 +732,8 @@ def project_update(request, pid):
         if project.expiration_date is not None:
             project.expiration_date = int(project.expiration_date.timestamp() * 1000)
         
+        if not project.viewer_preferred_ui:
+            project.viewer_preferred_ui = settings.FALLBACK_VIEWER_UI
         
         form = forms.getSupportedSRS()
         return render(request, 'project_update.html', {'tools': projectTools,
@@ -1352,12 +1366,6 @@ def ogc_services(request):
     csw = ServiceUrl.objects.filter(type='CSW')
     return render(request, 'services_view.html', {'wms': wms, 'wmts': wmts, 'wfs': wfs, 'csw': csw})
 
-def _get_spa_project_url(projectid):
-    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/", quote(str(projectid) + "/"))
-
-def _get_spa_mobileproject_url(projectid):
-    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/mobile/", quote(str(projectid) + "/"))
-
 def select_public_project(request):
     public_projects = Project.objects.filter(is_public=True)
     public_apps = Application.objects.filter(is_public=True)
@@ -1377,10 +1385,7 @@ def select_public_project(request):
         project['title'] = p.title
         project['description'] = p.description
         project['image'] = unquote(image)
-        if settings.USE_SPA_PROJECT_LINKS:
-            project['absurl'] = _get_spa_project_url(p.id)
-        else:
-            project['absurl'] = reverse('load', args=(p.name,))
+        project['absurl'] = p.url
         projects.append(project)
     for pa in public_apps:
         image = pa.image_url
@@ -1399,7 +1404,7 @@ def select_public_mobile_project(request):
     public_apps = Application.objects.filter(is_public=True)
 
     if len (public_projects) == 1 and len(public_apps) == 0:
-        return redirect(_get_spa_project_url(public_projects[0]))
+        return redirect(public_projects[0].url)
     elif len (public_projects) == 0 and len(public_apps) == 1:
         return redirect(public_apps[0].absurl)
 
@@ -1413,7 +1418,7 @@ def select_public_mobile_project(request):
         project['title'] = p.title
         project['description'] = p.description
         project['image'] = unquote(image)
-        project['absurl'] = _get_spa_mobileproject_url(p.id)
+        project['absurl'] = p.mobile_url
         projects.append(project)
     for pa in public_apps:
         image = pa.image_url
@@ -1458,7 +1463,7 @@ def documentation(request):
     # Obtener viewers disponibles, por defecto ambos si no está definido
     
     
-    available_viewers = getattr(settings, 'AVAILABLE_VIEWER_UIS', ['react_spa_ui', 'bootstrap_ui'])
+    available_viewers = getattr(settings, 'VIEWER_UI_CHOICES', [Project.REACT_SPA_UI, Project.BOOTSTRAP_UI])
     
     if isinstance(available_viewers, str):
         import ast
@@ -1474,7 +1479,7 @@ def documentation(request):
             available_viewers = ['react_spa_ui', 'bootstrap_ui']
     
     
-    # Solo cargar los manuales de viewers que están en AVAILABLE_VIEWER_UIS
+    # Solo cargar los manuales de viewers que están en VIEWER_UI_CHOICES
     viewer = get_manual(request, 'gvsigol_user_manual.pdf') if 'bootstrap_ui' in available_viewers else None
     spaviewer = get_manual(request, 'gvsigolfrontend_manual.pdf') if 'react_spa_ui' in available_viewers else None
     

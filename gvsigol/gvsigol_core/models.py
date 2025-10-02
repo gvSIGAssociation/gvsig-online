@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from gvsigol import settings
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup, Layer
@@ -20,6 +21,13 @@ def get_default_project_image():
 
 def get_default_application_image():
     return settings.STATIC_URL + 'img/no_project.png'
+
+def _get_spa_project_url(projectid):
+    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/", quote(str(projectid) + "/"))
+
+def _get_spa_mobileproject_url(projectid):
+    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/mobile/", quote(str(projectid) + "/"))
+
 
 class Project(models.Model):
     REACT_SPA_UI='react_spa_ui'
@@ -199,6 +207,20 @@ class Project(models.Model):
                 return True
             user_roles = auth_backend.get_roles(request_or_user)
             return self.projectrole_set.filter(permission=ProjectRole.PERM_MANAGE, role__in=user_roles).exists()
+
+    @property
+    def url(self):
+        if self.viewer_preferred_ui == Project.REACT_SPA_UI:
+            return _get_spa_project_url(self.id)
+        else:
+            return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
+    
+    @property
+    def mobile_url(self):
+        if self.viewer_preferred_ui == Project.REACT_SPA_UI:
+            return _get_spa_mobileproject_url(self.id)
+        else:
+            return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
 
 class ProjectRole(models.Model):
     PERM_READ='read'
