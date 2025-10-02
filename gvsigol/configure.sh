@@ -397,12 +397,12 @@ function configure() {
 	fi
 	grep -rl "##DEFAULT_VIEWER_UI##"  | xargs sed -i "s/##DEFAULT_VIEWER_UI##/$DEFAULT_VIEWER_UI/g"
 	
-	echo "INFO: AVAILABLE_VIEWER_UIS"
-	if [ -z $AVAILABLE_VIEWER_UIS ]; then
-		echo "INFO: AVAILABLE_VIEWER_UIS is not defined, using default value (both viewers enabled)"					
-		AVAILABLE_VIEWER_UIS="['react_spa_ui', 'bootstrap_ui']"
+	echo "INFO: VIEWER_UI_CHOICES"
+	if [ -z $VIEWER_UI_CHOICES ]; then
+		echo "INFO: VIEWER_UI_CHOICES is not defined, using default value (both viewers enabled)"					
+		VIEWER_UI_CHOICES="['react_spa_ui', 'bootstrap_ui']"
 	fi
-	grep -rl "##AVAILABLE_VIEWER_UIS##"  | xargs sed -i "s/##AVAILABLE_VIEWER_UIS##/$AVAILABLE_VIEWER_UIS/g"
+	grep -rl "##VIEWER_UI_CHOICES##"  | xargs sed -i "s/##VIEWER_UI_CHOICES##/$VIEWER_UI_CHOICES/g"
 	
     ##################################
 	# SPA frontend related variables #
