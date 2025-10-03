@@ -386,7 +386,6 @@ class Validation():
         self.check_project_allowed(prj_id)
     
     def check_get_project_layers(self, prj_id):
-        self.user_exists()
         self.project_exists(prj_id)
         self.check_project_allowed(prj_id)
         
