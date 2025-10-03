@@ -73,7 +73,8 @@ urlpatterns = [
     path('api/v1/markers/project/<int:idProj>/', api_info.MarkerView.as_view(), name='get_markers_list_by_idProj'),  
     path('api/v1/markers/<int:pk>/', api_info.MarkerView.as_view(), name='delete_marker,update_marker'),
 
-    path('api/v1/categories/', api_info.CategoryView.as_view(), name='create_categories,get_all_categories'), 
+    path('api/v1/categories/', api_info.CategoryView.as_view(), name='create_category'), 
+    path('api/v1/categories/project/<int:projectId>/', api_info.CategoryView.as_view(), name='get_category_list_by_project'), 
     path('api/v1/categories/<int:pk>/', api_info.CategoryView.as_view(), name='delete_category,update_category'),
 
     path('api/v1/filters/', api_info.FilterView.as_view(), name='create_favorite_filter'),  
