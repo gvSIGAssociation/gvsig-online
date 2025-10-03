@@ -858,9 +858,23 @@ class SqlView(models.Model):
 
 class Category(models.Model):
     title = models.CharField(max_length=255)
+    project = models.ForeignKey('gvsigol_core.Project', on_delete=models.CASCADE, related_name='categories')
+
+    class Meta:
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+        indexes = [
+            models.Index(fields=['project']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'project'], 
+                name='unique_category_title_per_project'
+            )
+        ]
 
     def __str__(self):
-        return f"Category - {self.title} )"
+        return f"{self.title} (Project: {self.project.name})"
 
 class Marker(models.Model):
     idProj = models.IntegerField()
