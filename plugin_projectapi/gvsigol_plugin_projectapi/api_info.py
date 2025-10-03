@@ -271,12 +271,31 @@ class CategoryView(APIView):
             return [ AllowAny() ]
         return [ IsAuthenticated() ]
 
-    def get(self, request):
-        category = Category.objects.all()
+    def get(self, request, projectId):
+        if projectId is None:
+            return Response({'error': 'Project ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        category = Category.objects.filter(project=projectId)
         serializer = CategorySerializer(category, many=True)
         return Response(serializer.data)
 
+
     def post(self, request):
+        project_id = request.data.get("project")
+
+        if project_id is None:
+            return Response({'error': 'Project is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            from gvsigol_core.models import Project
+            project = Project.objects.get(id=project_id)
+            
+            if not project.can_manage(request):
+                return Response({'error': 'You do not have manage permissions for this project'}, 
+                              status=status.HTTP_403_FORBIDDEN)
+        except Project.DoesNotExist:
+            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -286,6 +305,10 @@ class CategoryView(APIView):
     def patch(self, request, pk):
         try:
             category = Category.objects.get(pk=pk)
+            
+            if not category.project.can_manage(request):
+                return Response({'error': 'You do not have manage permissions for this project'}, 
+                              status=status.HTTP_403_FORBIDDEN)
             
             if 'title' in request.data:
                 category.title = request.data['title']
@@ -301,7 +324,11 @@ class CategoryView(APIView):
 
     def delete(self, request, pk):
         try:
-            category = Category.objects.get(pk=pk)
+            category = Category.objects.get(pk=pk)            
+
+            if not category.project.can_manage(request):
+                return Response({'error': 'You do not have manage permissions for this project'}, 
+                              status=status.HTTP_403_FORBIDDEN)
             
             markers_to_delete = Marker.objects.filter(category=category)
             markers_count = markers_to_delete.count()
