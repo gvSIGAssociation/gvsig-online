@@ -1053,6 +1053,39 @@ class LayerCapabilities(ListAPIView):
         return HttpException(404, "Data NOT exists for this layer").get_exception()
 
 
+class WmtsLayerOptions(ListAPIView):
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_layer_wmts_options', operation_summary='Gets WMTS load options of a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        try:
+            layer = Layer.objects.get(id = lyr_id)
+            if layer.external:
+                external_params = json.loads(layer.external_params)
+                crs = self.request.query_params.get('crs')
+                result = {
+                    "content" : services_utils.wmts_options_for_openlayers(external_params['wmts_options'], projection=crs),
+                    "links" : [
+                        {
+                            "rel" : "self",
+                            "href": request.get_full_path()
+                        }
+                    ]
+                }
+                return JsonResponse(result, safe=False)
+        except:
+            pass
+        return HttpException(404, "Data DOEST NOT exist for this layer").get_exception()
+
+
+
+
+
+
 @swagger_auto_schema(operation_id='refresh_layer',
                     operation_summary='Refresh layer extent and thumbnail',
                     method='PUT',
