@@ -371,6 +371,14 @@ class LayerSerializer(serializers.ModelSerializer):
         
         if 'capabilities' in external_params:
             external_params.pop('capabilities')
+        
+        if obj.external:
+            if 'wmts_options' in external_params: # wmts_options are retrieved asynchronously for external layers, no need to inlcude here
+                external_params.pop('wmts_options')
+        else:
+            if 'wmts_options' in external_params:
+                project_crs = Project.objects.get(id=self.context['projectid']).viewer_default_crs
+                external_params['wmts_options'] = services_utils.wmts_options_for_openlayers(external_params['wmts_options'], projection=project_crs)
         return external_params
     
     def get_featureapi_endpoint_(self, obj):
