@@ -1117,7 +1117,7 @@ class FeatureSerializer(serializers.Serializer):
                     pass
                 raise HttpException(400, "Feature cannot be deleted. Unexpected error: " + format(e))
 
-    def update(self, validation, lyr_id, data, override, version_to_override, username):
+    def update(self, validation, lyr_id, data, override, version_to_override, username, epsg=4326):
         """
         Update and return a new Feature instance, given the validated data.
         """
@@ -1156,7 +1156,12 @@ class FeatureSerializer(serializers.Serializer):
 
             data = self._add_user_to_props(username, table, schema, con, data)
 
-            return_crs = 4326
+            # Establecer el CRS de la geometría de entrada basado en el parámetro epsg
+            if 'geometry' in data and data['geometry'] is not None:
+                if 'crs' not in data['geometry']:
+                    data['geometry']['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{epsg}"}}}}')
+
+            return_crs = epsg
             geom = data.get('geometry')
             try:
                 sql, values = self._get_sql_update(con, table, schema, data['properties'], feat_id, geom, table_info, idfield, return_crs, use_versions=use_versions)
@@ -1192,7 +1197,7 @@ class FeatureSerializer(serializers.Serializer):
                     pass
                 raise HttpException(400, "Feature cannot be updated in database. Unexpected error: " + format(e))
         
-    def create(self, validation, lyr_id, data, username):
+    def create(self, validation, lyr_id, data, username, epsg=4326):
         """
         Create and return a new Feature instance, given the validated data.
         """
@@ -1223,7 +1228,12 @@ class FeatureSerializer(serializers.Serializer):
             
             data = self._add_user_to_props(username, table, schema, con, data)
 
-            return_crs = 4326
+            # Establecer el CRS de la geometría de entrada basado en el parámetro epsg
+            if 'geometry' in data and data['geometry'] is not None:
+                if 'crs' not in data['geometry']:
+                    data['geometry']['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{epsg}"}}}}')
+
+            return_crs = epsg
             try:
                 sql = self._get_sql_insert(table, schema, data['properties'], data['geometry'], table_info, idfield, pk_is_serial, return_crs, con, use_versions=use_versions)
             except Exception as e:

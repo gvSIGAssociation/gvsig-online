@@ -273,7 +273,16 @@ class FeaturesView(CreateAPIView):
             validation = Validation(request)
             validation.check_create_feature(lyr_id, content)
             username = request.user.username
-            feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username)
+            
+            # Manejar el parámetro epsg de la query
+            epsg = 4326
+            if 'epsg' in request.GET:
+                try:
+                    epsg = int(request.GET['epsg'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+            
+            feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Intentar manejar como error de topología
@@ -314,7 +323,16 @@ class FeaturesView(CreateAPIView):
             
             validation.check_update_feature(lyr_id, data)
             username = request.user.username
-            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username)
+            
+            # Manejar el parámetro epsg de la query
+            epsg = 4326
+            if 'epsg' in request.GET:
+                try:
+                    epsg = int(request.GET['epsg'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+            
+            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Intentar manejar como error de topología
