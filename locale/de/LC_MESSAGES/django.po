@@ -2966,3 +2966,16 @@ msgstr "Aktiv"
 
 msgid "Configuration"
 msgstr "Konfiguration"
+
+msgid "Vector layer containing information on {}"
+msgstr "Vektorebene mit Informationen zu {}."
+
+msgid "Raster layer containing information on {}"
+msgstr "Rasterebene mit Informationen zu {}."
+
+msgid "External layer providing information on {}"
+msgstr "Externe Ebene mit Informationen zu {}."
+
+msgid "Layer containing information on {}"
+msgstr "Ebene mit Informationen zu {}"
+
