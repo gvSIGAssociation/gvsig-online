@@ -808,21 +808,46 @@ class FeatureSerializer(serializers.Serializer):
                 conditions = []
                 params = {}
                 
-                # Siempre filtrar valores NULL
+                # Always filter out NULL values
                 conditions.append("{fieldSelected} IS NOT NULL")
                 
-                # Agregar filtro de búsqueda si se proporciona
+                # Add search filter if provided
                 if search and search.strip():
-                    conditions.append("{fieldSelected}::text ILIKE %(search)s")
+                    # Use multiple search strategies to handle accents and case sensitivity
+                    # 1. Exact search (case-insensitive)
+                    # 2. Search without accents if unaccent is available
+                    search_conditions = []
+                    
+                    # Always include basic case-insensitive search
+                    search_conditions.append("{fieldSelected}::text ILIKE %(search)s")
+                    
+                    # Try to add search without accents if available
+                    try:
+                        # Test if unaccent is available
+                        test_cursor = con.cursor
+                        test_cursor.execute("SELECT unaccent('test')")
+                        test_cursor.fetchone()  # Consume the result
+                        # If it works, add normalized search
+                        search_conditions.append("upper(unaccent({fieldSelected}::text)) LIKE upper(unaccent(%(search)s))")
+                    except Exception:
+                        # unaccent not available, continue with only ILIKE
+                        pass
+                    
+                    # Combine search conditions with OR
+                    if len(search_conditions) > 1:
+                        conditions.append("(" + " OR ".join(search_conditions) + ")")
+                    else:
+                        conditions.append(search_conditions[0])
+                    
                     params['search'] = f"%{search.strip()}%"
                 
-                # Construir WHERE clause
+                # Build WHERE clause
                 where_clause = " WHERE " + " AND ".join(conditions)
                 
-                # Orden para consistencia
+                # Order for consistency
                 order_clause = " ORDER BY {fieldSelected}"
                 
-                # Obtener el total primero
+                # Get the total first
                 count_sql = sqlbuilder.SQL("SELECT COUNT(DISTINCT {fieldSelected}) FROM {schema}.{table}" + where_clause)
                 count_query = count_sql.format(
                     fieldSelected=sqlbuilder.Identifier(fieldSelected),
@@ -832,7 +857,7 @@ class FeatureSerializer(serializers.Serializer):
                 con.cursor.execute(count_query, params)
                 total_count = con.cursor.fetchone()[0]
                 
-                # Obtener los datos paginados
+                # Get the paginated data
                 limit_clause = f" LIMIT {limit} OFFSET {offset}"
                 
                 sql = sqlbuilder.SQL(base_sql + where_clause + order_clause + limit_clause)
@@ -847,7 +872,7 @@ class FeatureSerializer(serializers.Serializer):
                 for feat in con.cursor.fetchall():
                     feat_list.append(feat[0])
                 
-                # Calcular si hay más resultados
+                # Calculate if there are more results
                 has_more = (offset + len(feat_list)) < total_count
                 
                 return {
