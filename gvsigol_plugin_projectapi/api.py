@@ -529,12 +529,13 @@ class ProjectLayersView(ListAPIView):
 class ProjectLayersFieldFormatsView(ListAPIView):
     serializer_class = infoserializer.LayerFieldFormatSerializer
     pagination_class = None
+    permission_classes = [AllowAny]
     
     @swagger_auto_schema(operation_id='get_layers_field_format_from_project', 
                          operation_summary='Gets the field format information for all layers in a specific project',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Project NOT found", 
                                     403: "The project is not allowed to this user"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated]) 
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny]) 
     def get(self, request, project_id):
         """
         This endpoint returns only the field format information for all layers in a project.
