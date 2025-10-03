@@ -161,8 +161,8 @@ def extraer_informacion_servicios(datasets, urls_wms_unicas, urls_wfs_unicas):
     url_to_datasets = {}
     
     for dataset in datasets:
-        wms_urls = dataset.get('urls_wms', [])  # Corregido: usar 'urls_wms' en lugar de 'wms_urls'
-        wfs_urls = dataset.get('urls_wfs', [])  # Corregido: usar 'urls_wfs' en lugar de 'wfs_urls'
+        wms_urls = dataset.get('urls_wms', [])
+        wfs_urls = dataset.get('urls_wfs', [])
         
         # Asociar cada URL con TODOS los datasets que la usan
         for url in wms_urls + wfs_urls:
@@ -224,8 +224,8 @@ def extraer_informacion_servicios(datasets, urls_wms_unicas, urls_wfs_unicas):
                 'title': combined_title,
                 'description': best_description,
                 'keywords': all_keywords,
-                'identifier': datasets_info[0]['identifier'],  # Usar el primero como identificador principal
-                'dataset_count': len(datasets_info)  # Número de datasets que usan este servicio
+                'identifier': datasets_info[0]['identifier'],
+                'dataset_count': len(datasets_info)
             }
             
         else:
@@ -237,8 +237,6 @@ def extraer_informacion_servicios(datasets, urls_wms_unicas, urls_wfs_unicas):
                 'identifier': '',
                 'dataset_count': 0
             }
-    
-    #for url, info in service_info.items():
     
     return service_info
 
