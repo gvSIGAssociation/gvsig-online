@@ -2859,7 +2859,8 @@ def _set_field_nullable(layer_id, field_name, nullable):
     try:
         with i as con: # autoclose connection
             con.set_field_nullable(dsname, layername, field_name, nullable)
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error setting field {field_name} nullable to {nullable}: {str(e)}")
         return False
     return True
 
