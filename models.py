@@ -210,15 +210,25 @@ class Project(models.Model):
 
     @property
     def url(self):
-        if self.viewer_preferred_ui == Project.REACT_SPA_UI:
+        if self.viewer_preferred_ui:
+            if self.viewer_preferred_ui == Project.REACT_SPA_UI:
+                return _get_spa_project_url(self.id)
+            else:
+                return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
+        elif settings.FALLBACK_VIEWER_UI == Project.REACT_SPA_UI:
             return _get_spa_project_url(self.id)
         else:
             return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
     
     @property
     def mobile_url(self):
-        if self.viewer_preferred_ui == Project.REACT_SPA_UI:
-            return _get_spa_mobileproject_url(self.id)
+        if self.viewer_preferred_ui:
+            if self.viewer_preferred_ui == Project.REACT_SPA_UI:
+                return _get_spa_mobileproject_url(self.id)
+            else:
+                return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
+        elif settings.FALLBACK_VIEWER_UI == Project.REACT_SPA_UI:
+            return _get_spa_project_url(self.id)
         else:
             return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
 
