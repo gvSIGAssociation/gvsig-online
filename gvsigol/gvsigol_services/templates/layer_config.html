@@ -89,7 +89,7 @@
 																	<td><input readonly name="field-type-{{counter}}" type="text" class="form-control" value="{% if f.gvsigol_type == 'link' %}link{% else %}{{f.type}}{% endif %}"></td>
 																	<td><input readonly name="field-calculation-{{counter}}" type="text" class="form-control" value="{{f.calculationLabel}}"></td>
 																	{% if f.nullable %}
-																	<td><input title="{% trans 'Set at database level' %}" type="checkbox" data-counter="{{counter}}" name="field-nullable-{{counter}}" checked/></td>
+																	<td><input title="{% trans 'Set at database level' %}" id="nullable-check-{{counter}}" data-counter="{{counter}}" data-type="nullable" data-fieldname="{{f.name}}" type="checkbox" name="field-nullable-{{counter}}" checked/></td>
 																	{% else %}
 																	<td><input title="{% trans 'Set at database level' %}" id="nullable-check-{{counter}}"  data-counter="{{counter}}" data-type="nullable" data-fieldname="{{f.name}}" type="checkbox" name="field-nullable-{{counter}}"/></td>
 																	{% endif %}
