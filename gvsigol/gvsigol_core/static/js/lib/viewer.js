@@ -778,7 +778,7 @@ viewer.core = {
 			matrixIds: wmtsOptions.tileGrid.matrixIds,
 			tileSizes: wmtsOptions.tileGrid.tileSizes
 		});
-		if (wmtsOptions.tileGrid.fullTileRanges) {
+		if (wmtsOptions.tileGrid.fullTileRanges && wmtsOptions.tileGrid.fullTileRanges_ol4) {
 			var fullTileRanges = [];
 			for (var i=0; i<wmtsOptions.tileGrid.fullTileRanges_ol4.length; i++) {
 				fullTileRanges.push(new viewer.olcustom.TileRange(
