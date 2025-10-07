@@ -23,10 +23,10 @@ def get_default_application_image():
     return settings.STATIC_URL + 'img/no_project.png'
 
 def _get_spa_project_url(projectid):
-    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/", quote(str(projectid) + "/"))
+    return urljoin(settings.FRONTEND_BASE_URL, "/viewer/", quote(str(projectid) + "/"))
 
 def _get_spa_mobileproject_url(projectid):
-    return urljoin(settings.FRONTEND_BASE_URL + "/viewer/mobile/", quote(str(projectid) + "/"))
+    return urljoin(settings.FRONTEND_BASE_URL, "/viewer/mobile/", quote(str(projectid) + "/"))
 
 
 class Project(models.Model):
