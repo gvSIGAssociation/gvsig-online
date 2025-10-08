@@ -158,8 +158,12 @@
 									<div class="col-md-6 form-group">
 										<label for="viewer_preferred_ui">{% trans "Viewer technology" %}</label>
 										<select class="form-control" id="viewer_preferred_ui" name="viewer_preferred_ui" tabindex="-1" aria-hidden="true">
+											{% if REACT_SPA_UI is not None %}
 											<option value="{{ REACT_SPA_UI }}" {% if DEFAULT_VIEWER_UI == REACT_SPA_UI %}selected{% endif %}>{% trans "Current (React)" %}</option>
+											{% endif %}
+											{% if BOOTSTRAP_UI is not None %}
 											<option value="{{ BOOTSTRAP_UI }}" {% if DEFAULT_VIEWER_UI == BOOTSTRAP_UI %}selected{% endif %}>{% trans "Classic (Bootstrap)" %}</option>
+											{% endif %}
 										</select>
 									</div>
 								</div>
