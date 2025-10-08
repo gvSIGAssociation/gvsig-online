@@ -5217,10 +5217,33 @@ def external_layer_add(request):
                 params['key'] = request.POST.get('key')
                 params['layers'] = request.POST.get('layers')
 
-            if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
+            if external_layer.type == 'XYZ' or external_layer.type == 'OSM' or external_layer.type == 'MVT':
                 params['url'] = request.POST.get('url')
                 params['key'] = request.POST.get('key')
 
+            if external_layer.type == 'MVT':
+                style_url = request.POST.get('style_url')
+                style_file = request.FILES.get('style_file')
+                
+                if style_url:
+                    params['style_url'] = style_url
+                elif style_file:
+                    style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
+                    if not os.path.exists(style_dir):
+                        os.makedirs(style_dir, exist_ok=True)
+                    
+                    style_filename = f'style_{external_layer.id}_{style_file.name}'
+                    style_path = os.path.join(style_dir, style_filename)
+                    
+                    # Guardar el archivo
+                    with open(style_path, 'wb+') as destination:
+                        for chunk in style_file.chunks():
+                            destination.write(chunk)
+                    
+                    # Guardar la ruta relativa
+                    params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                    params['style_url'] = settings.MEDIA_URL + params['style_file']
+                
             external_layer.external_params = json.dumps(params)
 
             external_layer.save()
@@ -5354,9 +5377,45 @@ def external_layer_update(request, external_layer_id):
                 params['key'] = request.POST.get('key')
                 params['layers'] = request.POST.get('layers')
 
-            if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
+            if external_layer.type == 'XYZ' or external_layer.type == 'OSM' or external_layer.type == 'MVT':
                 params['url'] = request.POST.get('url')
                 params['key'] = request.POST.get('key')
+
+            if external_layer.type == 'MVT':          
+                style_url = request.POST.get('style_url')
+                style_file = request.FILES.get('style_file')
+                
+                if style_url:
+                    params['style_url'] = style_url
+                    # Elimina archivo anterior si existe
+                    if 'style_file' in params:
+                        old_file_path = os.path.join(settings.MEDIA_ROOT, params['style_file'])
+                        if os.path.exists(old_file_path):
+                            os.remove(old_file_path)
+                        del params['style_file']
+                elif style_file:
+                    style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
+                    if not os.path.exists(style_dir):
+                        os.makedirs(style_dir, exist_ok=True)
+                    
+                    # Elimina archivo anterior si existe
+                    if 'style_file' in params:
+                        old_file_path = os.path.join(settings.MEDIA_ROOT, params['style_file'])
+                        if os.path.exists(old_file_path):
+                            os.remove(old_file_path)
+                    
+                    style_filename = f'style_{external_layer.id}_{style_file.name}'
+                    style_path = os.path.join(style_dir, style_filename)
+                    
+                    with open(style_path, 'wb+') as destination:
+                        for chunk in style_file.chunks():
+                            destination.write(chunk)
+                    
+                    params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                    params['style_url'] = settings.MEDIA_URL + params['style_file']
+                    if 'style_url' in params and params['style_url'].startswith('http'):
+                        # Mantener la URL original si ya existía
+                        pass
 
             #geographic_servers.get_instance().get_server_by_id(server.id).updateThumbnail(external_layer)
             external_layer.external_params = json.dumps(params)

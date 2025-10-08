@@ -250,6 +250,9 @@ class ExternalLayerForm(forms.ModelForm):
     matrixset = forms.ChoiceField(label=_('Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     tilematrix = forms.ChoiceField(label=_('Tilematrix'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     key = forms.CharField(label=_('Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    
+    style_url = forms.CharField(label=_('Style JSON URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/style.json'}))
+    style_file = forms.FileField(label=_('Style JSON file'), required=False, widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.json'}))
 
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)

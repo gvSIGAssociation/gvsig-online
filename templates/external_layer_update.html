@@ -4,9 +4,9 @@
 
 {% block content %}
 {% if redirect_to_layergroup %}
-<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
+<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}" enctype="multipart/form-data">
 {% else %}
-<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/">
+<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/" enctype="multipart/form-data">
 {% endif %}
 
 <div class="row">
@@ -63,7 +63,7 @@
 										{{ form.type }}
 									</div>
 								</div>
-								<div class="row layers-control xyz-control wms-control wmts-control osm-control">
+								<div class="row layers-control xyz-control wms-control wmts-control osm-control mvt-control">
 									<div class="col-md-12 form-group">
 										<label for="id_url">{% trans "Url" %}</label>
 										{{ form.url }}
@@ -135,12 +135,33 @@
 										{{ form.tilematrix }}
 									</div>
 								</div>
-								<div class="row layers-control bing-control xyz-control osm-control">
+								<div class="row layers-control bing-control xyz-control osm-control mvt-control">
 									<div class="col-md-12 form-group">
 										<label for="id_apikey">{% trans "Api-key" %}</label>
 										{{ form.key }}
 									</div>
 								</div>
+							<div class="row layers-control mvt-control">
+								<div class="col-md-12 form-group">
+									<label for="id_style_url">{% trans "Style JSON URL" %}</label>
+									{{ form.style_url }}
+									<small class="form-text text-muted">{% trans "Provide URL to Mapbox Style JSON. If you provide a URL, the file upload will be disabled." %}</small>
+								</div>
+							</div>
+							<div class="row layers-control mvt-control">
+								<div class="col-md-12 form-group">
+									<label for="id_style_file">{% trans "Or upload Style JSON file" %}</label>
+									<div class="input-group">
+										{{ form.style_file }}
+										<span class="input-group-btn" style="vertical-align: top;">
+											<button type="button" id="clear_style_file" class="btn btn-danger" style="display:none; height: 34px; border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{% trans 'Clear file' %}">
+												<i class="fa fa-times"></i>
+											</button>
+										</span>
+									</div>
+									<small class="form-text text-muted">{% trans "Upload a local JSON file. If you upload a file, the URL field will be disabled." %}</small>
+								</div>
+							</div>
 							</div>
 						</div>
 					</div>
@@ -623,6 +644,39 @@ $(document).ready(function(){
 		$('#id_format option[value="'+format_or+'"]').prop('selected', true);
 		$('#id_infoformat option[value="'+infoformat_or+'"]').prop('selected', true);
 	}
+
+	$('#id_style_url').on('input', function() {
+		if ($(this).val().trim() !== '') {
+			$('#id_style_file').prop('disabled', true);
+			$('#id_style_file').closest('.form-group').find('label').css('opacity', '0.5');
+			$('#clear_style_file').hide();
+		} else {
+			$('#id_style_file').prop('disabled', false);
+			$('#id_style_file').closest('.form-group').find('label').css('opacity', '1');
+		}
+	});
+
+	$('#id_style_file').on('change', function() {
+		if ($(this).val() !== '') {
+			$('#id_style_url').prop('disabled', true);
+			$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '0.5');
+			$('#clear_style_file').show();
+			$('#id_style_file').css('border-right', '0');
+		} else {
+			$('#id_style_url').prop('disabled', false);
+			$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '1');
+			$('#clear_style_file').hide();
+			$('#id_style_file').css('border-right', '');
+		}
+	});
+
+	$('#clear_style_file').on('click', function() {
+		$('#id_style_file').val('');
+		$(this).hide();
+		$('#id_style_file').css('border-right', '');
+		$('#id_style_url').prop('disabled', false);
+		$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '1');
+	});
 
 });
 </script>
