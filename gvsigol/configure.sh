@@ -400,7 +400,7 @@ function configure() {
 	echo "INFO: VIEWER_UI_CHOICES"
 	if [ -z $VIEWER_UI_CHOICES ]; then
 		echo "INFO: VIEWER_UI_CHOICES is not defined, using default value (both viewers enabled)"					
-		VIEWER_UI_CHOICES="['react_spa_ui', 'bootstrap_ui']"
+		VIEWER_UI_CHOICES="react_spa_ui,bootstrap_ui"
 	fi
 	grep -rl "##VIEWER_UI_CHOICES##"  | xargs sed -i "s/##VIEWER_UI_CHOICES##/$VIEWER_UI_CHOICES/g"
 	
