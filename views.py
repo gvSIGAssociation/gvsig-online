@@ -155,8 +155,11 @@ def project_list(request):
         project['can_manage'] = can_manage
         projects.append(project)
 
-    show_bootstrap_project_links = Project.BOOTSTRAP_UI in settings.VIEWER_UI_CHOICES
-    show_spa_project_links = Project.REACT_SPA_UI in settings.VIEWER_UI_CHOICES
+    # temporalmente mostramos todos los proyectos ignorando VIEWER_UI_CHOICES para poder comparar
+    #show_bootstrap_project_links = Project.BOOTSTRAP_UI in settings.VIEWER_UI_CHOICES
+    #show_spa_project_links = Project.REACT_SPA_UI in settings.VIEWER_UI_CHOICES
+    show_bootstrap_project_links = True
+    show_spa_project_links = True
     
     response = {
         'projects': projects,
@@ -438,9 +441,9 @@ def project_add(request):
                 'has_geocoding_plugin': has_geocoding_plugin,
                 'label_list': labels,
                 'form': form,
-                'REACT_SPA_UI': Project.REACT_SPA_UI,
-                'BOOTSTRAP_UI': Project.BOOTSTRAP_UI,
-                'DEFAULT_VIEWER_UI': settings.DEFAULT_VIEWER_UI
+                'REACT_SPA_UI': Project.REACT_SPA_UI if Project.REACT_SPA_UI in settings.VIEWER_UI_CHOICES else None,
+                'BOOTSTRAP_UI': Project.BOOTSTRAP_UI if Project.BOOTSTRAP_UI in settings.VIEWER_UI_CHOICES else None,
+                'DEFAULT_VIEWER_UI': settings.DEFAULT_VIEWER_UI if settings.DEFAULT_VIEWER_UI in settings.VIEWER_UI_CHOICES else settings.VIEWER_UI_CHOICES[0]
             }
         )
 
@@ -729,7 +732,7 @@ def project_update(request, pid):
             project.expiration_date = int(project.expiration_date.timestamp() * 1000)
         
         if not project.viewer_preferred_ui:
-            project.viewer_preferred_ui = settings.FALLBACK_VIEWER_UI
+            project.viewer_preferred_ui = settings.FALLBACK_VIEWER_UI if settings.FALLBACK_VIEWER_UI in settings.VIEWER_UI_CHOICES else settings.VIEWER_UI_CHOICES[0]
         
         form = forms.getSupportedSRS()
         return render(request, 'project_update.html', {'tools': projectTools,
@@ -744,8 +747,8 @@ def project_update(request, pid):
                                                        'url_base_lyr' : url_base_lyr,
                                                        'label_list': labels,
                                                        'form': form,
-                                                       'REACT_SPA_UI': Project.REACT_SPA_UI,
-                                                       'BOOTSTRAP_UI': Project.BOOTSTRAP_UI
+                                                       'REACT_SPA_UI': Project.REACT_SPA_UI if Project.REACT_SPA_UI in settings.VIEWER_UI_CHOICES else None,
+                                                       'BOOTSTRAP_UI': Project.BOOTSTRAP_UI if Project.BOOTSTRAP_UI in settings.VIEWER_UI_CHOICES else None
                                                        })
 
 
