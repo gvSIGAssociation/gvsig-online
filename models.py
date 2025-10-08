@@ -863,9 +863,6 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
-        indexes = [
-            models.Index(fields=['project']),
-        ]
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'project'], 
