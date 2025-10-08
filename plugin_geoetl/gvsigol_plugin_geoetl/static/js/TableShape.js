@@ -2301,7 +2301,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 
 
 
-            $('#dialog-input-csv-'+ID).modal('show')
+            $('#dialog-input-excel-'+ID).modal('show')
 
         });
 
