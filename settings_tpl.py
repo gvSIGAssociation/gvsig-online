@@ -575,4 +575,4 @@ MANAGE_PERMISSION_UI = True
 VIEWER_DEFAULT_CRS = '##VIEWER_DEFAULT_CRS##'
 FALLBACK_VIEWER_UI = '##FALLBACK_VIEWER_UI##' # fallback for existing projects
 DEFAULT_VIEWER_UI = '##DEFAULT_VIEWER_UI##' # default for new projects
-VIEWER_UI_CHOICES = ##VIEWER_UI_CHOICES## # available viewer UIs
+VIEWER_UI_CHOICES = '##VIEWER_UI_CHOICES##'.split(',') # available viewer UIs
