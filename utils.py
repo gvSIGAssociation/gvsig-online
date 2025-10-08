@@ -1375,7 +1375,7 @@ def get_wmts_options(
     options = {k: v for k, v in options.items() if v is not None}
     return options
 
-def wmts_options_for_openlayers(wmts_options, format, style=None, layer_styles=None, tilematrixsetname=None, projection=None):
+def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_styles=None, tilematrixsetname=None, projection=None):
     if len(wmts_options['styles']) > 0:
         print(wmts_options['styles'])
         if style and wmts_options['styles'].get(style):
@@ -1394,11 +1394,12 @@ def wmts_options_for_openlayers(wmts_options, format, style=None, layer_styles=N
             wmts_options['style'] = list(wmts_options['styles'].keys())[0]
     else:
         wmts_options['style'] = None
-    wmts_options['format'] = format
-    try:
-        del wmts_options['formats']
-    except:
-        pass
+    if format:
+        wmts_options['format'] = format
+        try:
+            del wmts_options['formats']
+        except:
+            pass
 
     tilematrixset = None
     if tilematrixsetname and wmts_options.get('tileGrids', {}).get(tilematrixsetname):
