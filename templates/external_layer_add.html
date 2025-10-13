@@ -147,6 +147,18 @@
 									<small class="form-text text-muted">{% trans "Upload a Mapbox style file in JSON format. If you upload a file, the URL field will be disabled." %}</small>
 								</div>
 							</div>
+							<div class="row layers-control mvt-control">
+								<div class="col-md-12 form-group pull-right">
+									<label for="id_srs">{% trans "Coordinate reference system" %} {% trans "by default" %}</label>
+									{{ form.srs }}
+								</div>
+							</div>
+							<div class="row" id="custom-srs-row" style="display: none;">
+								<div class="col-md-12 form-group pull-right">
+									<label for="id_custom_srs">{% trans "Specify custom SRS" %}</label>
+									{{ form.custom_srs }}
+								</div>
+							</div>
 							</div>
 						</div>
 					</div>
@@ -251,6 +263,19 @@ function fileExists(url) {
 };
 
 $(document).ready(function(){
+	$('#id_srs').val('EPSG:3857');
+	
+	$('#id_srs').on('change', function() {
+		if ($(this).val() === '__other__') {
+			$('#custom-srs-row').show();
+			$('#id_custom_srs').prop('required', true);
+		} else {
+			$('#custom-srs-row').hide();
+			$('#id_custom_srs').prop('required', false);
+			$('#id_custom_srs').val('');
+		}
+	});
+	
 	var url = "";
 	var format_or = "";
 	var infoformat_or = "";

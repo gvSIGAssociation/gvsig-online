@@ -5194,6 +5194,14 @@ def external_layer_add(request):
             external_layer.detailed_info_html = detailed_info_html
             external_layer.created_by = request.user.username
             external_layer.timeout = request.POST.get('timeout')
+            
+            srs = request.POST.get('srs')
+            if srs == '__other__':
+                custom_srs = request.POST.get('custom_srs')
+                if custom_srs:
+                    external_layer.native_srs = custom_srs
+            elif srs:
+                external_layer.native_srs = srs
 
             params = {}
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
@@ -5275,6 +5283,7 @@ def external_layer_add(request):
 
     else:
         form = ExternalLayerForm(request)
+        form.initial['srs'] = 'EPSG:3857'
 
     return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS, 'back_url': back_url})
 
@@ -5354,6 +5363,15 @@ def external_layer_update(request, external_layer_id):
             external_layer.detailed_info_button_title = detailed_info_button_title
             external_layer.detailed_info_html = detailed_info_html
             external_layer.timeout = request.POST.get('timeout')
+            
+            srs = request.POST.get('srs')
+            if srs == '__other__':
+                custom_srs = request.POST.get('custom_srs')
+                if custom_srs:
+                    external_layer.native_srs = custom_srs
+            elif srs:
+                external_layer.native_srs = srs
+            
             params = {}
 
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
@@ -5463,6 +5481,15 @@ def external_layer_update(request, external_layer_id):
             params = json.loads(external_layer.external_params)
             for key in params:
                 form.initial[key] = params[key]
+    
+        if external_layer.native_srs:
+            from gvsigol_services.forms_services import supported_srs
+            srs_codes = [srs[0] for srs in supported_srs]
+            if external_layer.native_srs in srs_codes:
+                form.initial['srs'] = external_layer.native_srs
+            else:
+                form.initial['srs'] = '__other__'
+                form.initial['custom_srs'] = external_layer.native_srs
 
         html = True
         if external_layer.detailed_info_html == None or external_layer.detailed_info_html == '' or external_layer.detailed_info_html == 'null':

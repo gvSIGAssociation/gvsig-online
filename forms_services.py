@@ -31,6 +31,7 @@ import json
 from gvsigol.settings import EXTERNAL_LAYER_SUPPORTED_TYPES
 from django.core.exceptions import ValidationError
 from gvsigol_services.utils import get_user_layergroups, can_manage_layergroup
+from gvsigol_core import utils as core_utils
 
 
 EXTERNAL_LAYER_LABELS = {
@@ -44,6 +45,9 @@ layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1
 version = (('1.1.1', _('1.1.1')), ('1.3.0', _('1.3.0')), ('1.0.0', _('1.0.0')))
 blank = (('', '---------'),)
 servers = (('geoserver', 'geoserver'),)
+
+supported_srs = tuple((x['code'],x['code']+' - '+x['title']) for x in core_utils.get_supported_crs_array())
+supported_srs_with_other = supported_srs + (('__other__', ugettext_lazy('Other')),)
 
 img_formats = (('image/png', 'image/png'), ('image/jpeg', 'image/jpeg'))
 
@@ -259,6 +263,9 @@ class ExternalLayerForm(forms.ModelForm):
     
     style_url = forms.CharField(label=_('Mapbox style URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/style.json'}))
     style_file = forms.FileField(label=_('Or upload your Mapbox style (.json)'), required=False, widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.json'}))
+    
+    srs = forms.ChoiceField(label=_('SRS'), required=True, choices=supported_srs_with_other, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    custom_srs = forms.CharField(label=_('Custom SRS'), required=False, max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'EPSG:XXXX'}))
 
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
