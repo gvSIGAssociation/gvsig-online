@@ -5222,6 +5222,8 @@ def external_layer_add(request):
                 params['key'] = request.POST.get('key')
 
             if external_layer.type == 'MVT':
+                external_layer.vector_tile = True
+                
                 style_url = request.POST.get('style_url')
                 style_file = request.FILES.get('style_file')
                 
@@ -5243,6 +5245,8 @@ def external_layer_add(request):
                     # Guardar la ruta relativa
                     params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
                     params['style_url'] = settings.MEDIA_URL + params['style_file']
+            else:
+                external_layer.vector_tile = False
                 
             external_layer.external_params = json.dumps(params)
 
@@ -5381,7 +5385,9 @@ def external_layer_update(request, external_layer_id):
                 params['url'] = request.POST.get('url')
                 params['key'] = request.POST.get('key')
 
-            if external_layer.type == 'MVT':          
+            if external_layer.type == 'MVT':
+                external_layer.vector_tile = True
+                
                 style_url = request.POST.get('style_url')
                 style_file = request.FILES.get('style_file')
                 
@@ -5413,9 +5419,8 @@ def external_layer_update(request, external_layer_id):
                     
                     params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
                     params['style_url'] = settings.MEDIA_URL + params['style_file']
-                    if 'style_url' in params and params['style_url'].startswith('http'):
-                        # Mantener la URL original si ya existía
-                        pass
+            else:
+                external_layer.vector_tile = False
 
             #geographic_servers.get_instance().get_server_by_id(server.id).updateThumbnail(external_layer)
             external_layer.external_params = json.dumps(params)

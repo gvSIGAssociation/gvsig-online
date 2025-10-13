@@ -128,14 +128,14 @@
 								</div>
 							<div class="row layers-control mvt-control">
 								<div class="col-md-12 form-group">
-									<label for="id_style_url">{% trans "Style JSON URL" %}</label>
+									<label for="id_style_url">{% trans "Mapbox style URL" %}</label>
 									{{ form.style_url }}
-									<small class="form-text text-muted">{% trans "Provide URL to Mapbox Style JSON. If you provide a URL, the file upload will be disabled." %}</small>
+									<small class="form-text text-muted">{% trans "Enter the URL of your Mapbox style (.json) file. If you provide a URL, the file upload will be disabled." %}</small>
 								</div>
 							</div>
 							<div class="row layers-control mvt-control">
 								<div class="col-md-12 form-group">
-									<label for="id_style_file">{% trans "Or upload Style JSON file" %}</label>
+									<label for="id_style_file">{% trans "Or upload your Mapbox style (.json)" %}</label>
 									<div class="input-group">
 										{{ form.style_file }}
 										<span class="input-group-btn" style="vertical-align: top;">
@@ -144,7 +144,7 @@
 											</button>
 										</span>
 									</div>
-									<small class="form-text text-muted">{% trans "Upload a local JSON file. If you upload a file, the URL field will be disabled." %}</small>
+									<small class="form-text text-muted">{% trans "Upload a Mapbox style file in JSON format. If you upload a file, the URL field will be disabled." %}</small>
 								</div>
 							</div>
 							</div>

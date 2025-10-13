@@ -33,7 +33,13 @@ from django.core.exceptions import ValidationError
 from gvsigol_services.utils import get_user_layergroups, can_manage_layergroup
 
 
-external_layer_supported_types = tuple((x,x) for x in EXTERNAL_LAYER_SUPPORTED_TYPES)
+EXTERNAL_LAYER_LABELS = {
+    'MVT': 'Vector tiles (MVT)'
+}
+
+external_layer_supported_types = tuple(
+    (x, EXTERNAL_LAYER_LABELS.get(x, x)) for x in EXTERNAL_LAYER_SUPPORTED_TYPES
+)
 layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1.3.0'))
 version = (('1.1.1', _('1.1.1')), ('1.3.0', _('1.3.0')), ('1.0.0', _('1.0.0')))
 blank = (('', '---------'),)
@@ -251,8 +257,8 @@ class ExternalLayerForm(forms.ModelForm):
     tilematrix = forms.ChoiceField(label=_('Tilematrix'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     key = forms.CharField(label=_('Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     
-    style_url = forms.CharField(label=_('Style JSON URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/style.json'}))
-    style_file = forms.FileField(label=_('Style JSON file'), required=False, widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.json'}))
+    style_url = forms.CharField(label=_('Mapbox style URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/style.json'}))
+    style_file = forms.FileField(label=_('Or upload your Mapbox style (.json)'), required=False, widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.json'}))
 
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
