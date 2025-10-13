@@ -5,6 +5,7 @@ from django.db import migrations
 import json
 from owslib.wmts import WebMapTileService
 
+
 PIXEL_SIZE_M = 0.00028  # 0.28 mm
 def get_wmts_options(
     wmts, # owslib.wmts.WebMapTileService
@@ -193,7 +194,6 @@ def get_wmts_options(
     options = {k: v for k, v in options.items() if v is not None}
     return options
 
-
 def fill_wmts_options(apps, schema_editor):
     try:
         Layer = apps.get_model("gvsigol_services", "Layer")
@@ -222,7 +222,7 @@ def fill_wmts_options(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gvsigol_services', '0076_enumeration_order_type'),
+        ('gvsigol_services', '0082_add_unique_constraint'),
     ]
 
     operations = [
