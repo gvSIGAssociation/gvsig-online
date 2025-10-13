@@ -5253,6 +5253,7 @@ def external_layer_add(request):
                     # Guardar la ruta relativa
                     params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
                     params['style_url'] = settings.MEDIA_URL + params['style_file']
+                    params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
                 
@@ -5437,6 +5438,7 @@ def external_layer_update(request, external_layer_id):
                     
                     params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
                     params['style_url'] = settings.MEDIA_URL + params['style_file']
+                    params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
 
