@@ -324,8 +324,8 @@ function configure() {
 	grep -rl "##GVSIGOL_AUTH_BACKEND##"  | xargs sed -i "s/##GVSIGOL_AUTH_BACKEND##/$GVSIGOL_AUTH_BACKEND/g"
 	if [ $GVSIGOL_AUTH_BACKEND = "gvsigol_plugin_oidc_mozilla" ]; then
 		if [ -z $DRF_DEFAULT_AUTHENTICATION_CLASSES ]; then
-			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is 'gvsigol_plugin_oidc_mozilla' , using 'mozilla_django_oidc.contrib.drf.OIDCAuthentication','rest_framework.authentication.SessionAuthentication'"
-			DRF_DEFAULT_AUTHENTICATION_CLASSES="'mozilla_django_oidc.contrib.drf.OIDCAuthentication','rest_framework.authentication.SessionAuthentication'"
+			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is 'gvsigol_plugin_oidc_mozilla' , using 'mozilla_django_oidc.contrib.drf.OIDCAuthentication'"
+			DRF_DEFAULT_AUTHENTICATION_CLASSES="'mozilla_django_oidc.contrib.drf.OIDCAuthentication'"
 		fi
 		if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
 			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend',\n    'django.contrib.auth.backends.ModelBackend'"
@@ -333,8 +333,8 @@ function configure() {
 		fi
 	else
 		if [ -z $DRF_DEFAULT_AUTHENTICATION_CLASSES ]; then
-			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is $GVSIGOL_AUTH_BACKEND , using 'rest_framework_jwt.authentication.JSONWebTokenAuthentication'"
-			DRF_DEFAULT_AUTHENTICATION_CLASSES="'rest_framework_jwt.authentication.JSONWebTokenAuthentication',\n        'rest_framework.authentication.SessionAuthentication',\n        'rest_framework.authentication.BasicAuthentication'"
+			echo "WARNING: DRF_DEFAULT_AUTHENTICATION_CLASSES is not defined and GVSIGOL_AUTH_BACKEND is $GVSIGOL_AUTH_BACKEND , using 'rest_framework_jwt.authentication.JSONWebTokenAuthentication','rest_framework.authentication.BasicAuthentication'"
+			DRF_DEFAULT_AUTHENTICATION_CLASSES="'rest_framework_jwt.authentication.JSONWebTokenAuthentication',\n        'rest_framework.authentication.BasicAuthentication'"
 		fi
 		if [ -z $DJANGO_AUTHENTICATION_BACKENDS ]; then
 			echo "WARNING: DJANGO_AUTHENTICATION_BACKENDS is not defined, using 'django.contrib.auth.backends.RemoteUserBackend',\n    'django_auth_ldap.backend.LDAPBackend'"
