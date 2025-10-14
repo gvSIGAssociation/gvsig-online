@@ -5254,7 +5254,7 @@ def external_layer_add(request):
                     
                     style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
                     params['style_url'] = settings.MEDIA_URL + style_file_path
-                    params['srs'] = external_layer.native_srs
+                params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
                 
@@ -5408,11 +5408,11 @@ def external_layer_update(request, external_layer_id):
                 if style_url:
                     params['style_url'] = style_url
                     # Elimina archivo anterior si existe
-                    if 'style_file' in params:
-                        old_file_path = os.path.join(settings.MEDIA_ROOT, params['style_file'])
-                        if os.path.exists(old_file_path):
-                            os.remove(old_file_path)
-                        del params['style_file']
+                    # if 'style_file' in params:
+                    #     old_file_path = os.path.join(settings.MEDIA_ROOT, params['style_file'])
+                    #     if os.path.exists(old_file_path):
+                    #         os.remove(old_file_path)
+                    #     del params['style_file']
                 elif style_file:
                     style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
                     if not os.path.exists(style_dir):
@@ -5431,9 +5431,9 @@ def external_layer_update(request, external_layer_id):
                         for chunk in style_file.chunks():
                             destination.write(chunk)
                     
-                    params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_url'] = settings.MEDIA_URL + params['style_file']
-                    params['srs'] = external_layer.native_srs
+                    style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                    params['style_url'] = settings.MEDIA_URL + style_file_path
+                params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
 
