@@ -1622,9 +1622,9 @@ class FeatureSerializer(serializers.Serializer):
         else:
             colnames = [sqlbuilder.Identifier(pk_field)]
             colvalues = [sqlbuilder.SQL(
-                    "SELECT COALESCE(MAX({pk_field}), 0) + 1 FROM {schema}.{table}"
+                    "(SELECT COALESCE(MAX({pk_field}), 0) + 1 FROM {schema}.{table})"
                 ).format(
-                    idfield=sqlbuilder.Identifier(pk_field),
+                    pk_field=sqlbuilder.Identifier(pk_field),
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table)
                 )
