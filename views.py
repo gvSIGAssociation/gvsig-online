@@ -5557,24 +5557,24 @@ def external_layer_update(request, external_layer_id):
                 style_url = request.POST.get('style_url')
                 style_file = request.FILES.get('style_file')
                 
+                old_params = {}
+                if external_layer.external_params:
+                    old_params = json.loads(external_layer.external_params)
+                old_style_url = old_params.get('style_url', '')
+                
                 if style_url:
                     params['style_url'] = style_url
-                    # Elimina archivo anterior si existe
-                    # if 'style_file' in params:
-                    #     old_file_path = os.path.join(settings.MEDIA_ROOT, params['style_file'])
-                    #     if os.path.exists(old_file_path):
-                    #         os.remove(old_file_path)
-                    #     del params['style_file']
+                    is_external_url = not (style_url.startswith('/media/') or style_url.startswith(settings.MEDIA_URL))
+                    if is_external_url and old_style_url and (old_style_url.startswith('/media/') or old_style_url.startswith(settings.MEDIA_URL)):
+                        _delete_local_style_files_for_layer(external_layer.id)
+                
                 elif style_file:
+                    if old_style_url and (old_style_url.startswith('/media/') or old_style_url.startswith(settings.MEDIA_URL)):
+                        _delete_local_style_files_for_layer(external_layer.id)
+                    
                     style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
                     if not os.path.exists(style_dir):
                         os.makedirs(style_dir, exist_ok=True)
-                    
-                    # Elimina archivo anterior si existe
-                    if 'style_file' in params:
-                        old_file_path = os.path.join(settings.MEDIA_ROOT, params['style_file'])
-                        if os.path.exists(old_file_path):
-                            os.remove(old_file_path)
                     
                     style_filename = f'style_{external_layer.id}_{style_file.name}'
                     style_path = os.path.join(style_dir, style_filename)
@@ -5689,6 +5689,26 @@ def _delete_external_layer_style_file(external_layer, external_layer_id):
                 logger.info(f"Deleted style file: {style_file_path}")
     except Exception as e:
         logger.warning(f"Error deleting style file for layer {external_layer_id}: {str(e)}")
+
+def _delete_local_style_files_for_layer(layer_id):
+    """
+    Elimina todos los archivos de estilo locales asociados a una capa específica.
+    Busca archivos que empiecen por style_{layer_id}_ en el directorio layer_styles.
+    
+    Args:
+        layer_id: ID de la capa cuyos archivos de estilo se eliminarán
+    """
+    try:
+        style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
+        if os.path.exists(style_dir):
+            prefix = f'style_{layer_id}_'
+            for filename in os.listdir(style_dir):
+                if filename.startswith(prefix):
+                    file_path = os.path.join(style_dir, filename)
+                    os.remove(file_path)
+                    logger.info(f"Deleted old style file: {file_path}")
+    except Exception as e:
+        logger.warning(f"Error deleting old style files for layer {layer_id}: {str(e)}")
 
 @login_required()
 @require_POST
